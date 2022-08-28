@@ -66,6 +66,12 @@ class StructureSource(DatabaseTable):
                 "to fail. Please report this error if you think it's a bug "
                 "with Simmate.\n "
             )
+            print(
+                "Note, ~0-1% of calculations failing can be normal during an "
+                "evolutionary search because generated structures can be "
+                "unreasonable (and cause programs like VASP to crash). "
+                "However, >1% can indicate a serious problem."
+            )
             print("------------------------------------------------------------\n")
 
         # check which ids are still running. Note, this is a separate

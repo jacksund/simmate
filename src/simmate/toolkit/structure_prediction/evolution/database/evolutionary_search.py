@@ -10,14 +10,14 @@ from rich.progress import track
 
 from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.toolkit import Composition
-from simmate.toolkit.structure_prediction.evolution.database import StructureSource
-from simmate.utilities import get_directory
-from simmate.workflow_engine.execution import WorkItem
 from simmate.toolkit.structure_prediction import (
     get_known_structures,
     get_structures_from_prototypes,
     get_structures_from_substitution_of_known,
 )
+from simmate.toolkit.structure_prediction.evolution.database import StructureSource
+from simmate.utilities import get_directory
+from simmate.workflow_engine.execution import WorkItem
 
 
 class FixedCompositionSearch(DatabaseTable):
@@ -153,9 +153,7 @@ class FixedCompositionSearch(DatabaseTable):
             composition,
             strict_nsites=True,
         )
-        logging.info(
-            f"Generated {len(structures_sub)} structures from substitutions"
-        )
+        logging.info(f"Generated {len(structures_sub)} structures from substitutions")
         directory_sub = get_directory(directory / "from_substitutions")
         for i, s in enumerate(structures_sub):
             s.to("cif", directory_sub / f"{i}.cif")
@@ -327,7 +325,13 @@ class FixedCompositionSearch(DatabaseTable):
             )
 
             if nflows_to_submit > 0:
-                logging.info(f"Submitting new individuals from {source_db.name}")
+                logging.info(
+                    f"Submitting {nflows_to_submit} new individuals for {source_db.name}"
+                )
+
+            # disable the logs while we submit
+            logger = logging.getLogger()
+            logger.disabled = True
 
             for n in range(nflows_to_submit):
 
@@ -345,6 +349,9 @@ class FixedCompositionSearch(DatabaseTable):
                 # NOTE: this is the WorkItem id and NOT the run_id!!!
                 source_db.workitem_ids.append(state.pk)
                 source_db.save()
+
+            # reactivate logging
+            logger.disabled = False
 
     # -------------------------------------------------------------------------
     # Core methods that help grab key information about the search

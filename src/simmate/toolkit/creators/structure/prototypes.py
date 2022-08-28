@@ -134,9 +134,7 @@ class FromAflowPrototypes:
             reduced = self.composition.reduced_composition
             target_nsites_list = [
                 int(reduced.num_atoms * n)
-                for n in range(
-                    1, (self.max_sites // int(reduced.num_atoms)) + 1
-                )
+                for n in range(1, (self.max_sites // int(reduced.num_atoms)) + 1)
             ]
             # Now filter off the prototypes that have the proper number of sites
             prototype_entries = AflowPrototype.objects.filter(

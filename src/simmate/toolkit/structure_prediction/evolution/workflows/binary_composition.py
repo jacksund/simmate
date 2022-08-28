@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*-
 
+import itertools
 import logging
 from pathlib import Path
-import itertools
 
 from rich.progress import track
 
 from simmate.toolkit import Composition
-from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (
-    StructurePrediction__Python__FixedComposition,
-)
-from simmate.workflow_engine import Workflow
 from simmate.toolkit.structure_prediction import (
     get_known_structures,
     get_structures_from_prototypes,
 )
+from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (
+    StructurePrediction__Python__FixedComposition,
+)
 from simmate.utilities import get_directory
+from simmate.workflow_engine import Workflow
+from simmate.workflows.utilities import get_workflow
 
 # TODO
 # StructurePrediction__Python__VariableTernaryComposition
@@ -33,20 +34,20 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
     def run_config(
         cls,
         chemical_system: str,
-        max_sites: int = 20,
+        max_atoms: int = 10,
+        subworkflow_name: str = "relaxation.vasp.staged",
+        subworkflow_kwargs: dict = {},
         # max_stoich_factor: int = 4,
         directory: Path = None,
         singleshot_sources: list[str] = [],
         **kwargs,  # passed to fixed_comp_workflow
     ):
 
-        print("REMOVE ME!")
-        chemical_system = "Ca-N"
-        max_atoms = 20
-
         # ---------------------------------------------------------------------
         # Setting up
         # ---------------------------------------------------------------------
+
+        subworkflow = get_workflow(subworkflow_name)
 
         # Grab the two elements that we are working with. Also if this raises
         # an error, we want to provide useful feedback to the user
@@ -74,9 +75,7 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
                 )
 
                 compositions.append(composition)
-        logging.info(
-            f"{len(compositions)} unique compositions will be explored"
-        )
+        logging.info(f"{len(compositions)} unique compositions will be explored")
 
         # now condense this list down to just the reduced formulas
         compositions_reduced = []
@@ -107,26 +106,37 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
         # ---------------------------------------------------------------------
 
         logging.info("Generating input structures from third-party databases")
-        structures = []
+        structures_known = []
         for composition in track(compositions_maxed):
-
-            structures_known = get_known_structures(
+            new_structures = get_known_structures(
                 composition,
                 allow_multiples=True,
                 nsites__lte=max_atoms,
             )
-            logging.info(
-                f"Generated {len(structures_known)} structures from other databases"
-            )
-            structures += structures_known
+            structures_known += new_structures
+        logging.info(
+            f"Generated {len(structures_known)} structures from other databases"
+        )
 
         # sort the structures from fewest nsites to most so that we can submit
         # them in this order.
         structures_known.sort(key=lambda s: s.num_sites)
 
+        # write cif files
         directory_known = get_directory(directory / "known_structures")
         for i, s in enumerate(structures_known):
             s.to("cif", directory_known / f"{i}.cif")
+
+        # and submit them and disable the logs while we submit
+        logging.info("Submitting known structures")
+        logger = logging.getLogger()
+        logger.disabled = True
+        for structure in track(structures_known):
+            subworkflow.run_cloud(
+                structure=structure,
+                **subworkflow_kwargs,
+            )
+        logger.disabled = False
 
         # ---------------------------------------------------------------------
         # Submitting structures from prototypes
@@ -134,60 +144,99 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
 
         # Start by generating the singleshot sources for each factor size.
         logging.info("Generating input structures from prototypes")
-        structures = []
+        structures_prototype = []
         # for singleshot_source in singleshot_sources: ## TODO
         for composition in track(compositions_maxed):
 
             # generate all prototypes
-            structures_prototype = get_structures_from_prototypes(
+            new_structures = get_structures_from_prototypes(
                 composition,
                 max_sites=max_atoms,
             )
-            structures += structures_prototype
-        logging.info(f"Generated {len(structures)} structures from prototypes")
+            structures_prototype += new_structures
+        logging.info(
+            f"Generated {len(structures_prototype)} structures from prototypes"
+        )
 
         # sort the structures from fewest nsites to most so that we can submit
         # them in this order.
-        structures.sort(key=lambda s: s.num_sites)
+        structures_prototype.sort(key=lambda s: s.num_sites)
 
         directory_sub = get_directory(directory / "from_prototypes")
         for i, s in enumerate(structures_prototype):
             s.to("cif", directory_sub / f"{i}.cif")
 
+        # and submit them and disable the logs while we submit
+        logging.info("Submitting prototype structures")
+        logger = logging.getLogger()
+        logger.disabled = True
+        for structure in track(structures_prototype):
+            subworkflow.run_cloud(
+                structure=structure,
+                **subworkflow_kwargs,
+            )
+        logger.disabled = False
+
         # ---------------------------------------------------------------------
         # Starting search
         # ---------------------------------------------------------------------
 
-        # # Now we are going to cycle through factor sizes, starting at the lowest
-        # # and working our way up. We do this because:
-        # #   1. smaller unitcells run much faster (for DFT-calculation)
-        # #   2. smaller compositions converge much faster (for number of
-        # #       calcs required)
-        # #   3. results from smaller unitcells can help to speed up the larger
-        # #       compositional searches.
+        # Now we are going to cycle through factor sizes, starting at the lowest
+        # and working our way up. We do this because:
+        #   1. smaller unitcells run much faster (for DFT-calculation)
+        #   2. smaller compositions converge much faster (for number of
+        #       calcs required)
+        #   3. results from smaller unitcells can help to speed up the larger
+        #       compositional searches.
 
-        # # The search with involve N steps based on the reduced composition.
-        # # For example, Ca6N3 would have a reduced comp of Ca2N and max factor
-        # # of 3.
-        # composition_reduced = composition.reduced_composition
-        # max_factor = int(composition.num_atoms / composition_reduced.num_atoms)
+        for natoms in range(1, max_atoms + 1):
 
-        # # Starting at 1, go through each composition step and run a individual
-        # # fixed_comp_workflow for that composition.
-        # for factor in range(1, max_factor + 1):
+            logging.info(f"Beginning compositional searches with natoms = {natoms}")
+            current_compositions = [c for c in compositions if c.num_atoms == natoms]
 
-        #     composition_current = composition_reduced * factor
+            for composition in current_compositions:
 
-        #     # logging.info(f"Beginning composition {composition_current}")
-        #     cls.fixed_comp_workflow.run(
-        #         composition=composition_current,
-        #         # we keep the same base directory as we don't mind files overwriting
-        #         # eachother as the search progresses through each factor
-        #         directory=directory,
-        #         # Because we submitted all steady states above, we don't
-        #         # need the other workflows to do these anymore.
-        #         singleshot_sources=[],
-        #         **kwargs,
-        #     )
+                # OPTIMIZE: Should I just skip single-element compositions?
+                # BUG: I do skip these for now because compositions like "N1"
+                # are failing in vasp for me.
+                if len(composition.elements) == 1:
+                    logging.warn(f"Skipping single-element composition {composition}")
+                    continue
 
-        #     # logging.info(f"Completed composition {composition_current}")
+                # OPTIMIZE: Setting stop conditions for each search will be
+                # essential in ensure we don't waste too much calculation time
+                # on one composition -- while simultaniously making sure we
+                # searched a compositon enough.
+                n = composition.num_atoms
+                min_structures_exact = int(10 * n)
+                limit_best_survival = int(20 * n)
+                max_structures = int(30 * n)
+
+                # NOTES: This code below is for printing out the cutoff limits
+                # I keep this here for early development as we figure out ideal
+                # stopping conditions.
+                # for n in range(1, 10):
+                #     min_structures_exact = int(10 * n)
+                #     limit_best_survival = int(10 * n)
+                #     max_structures = int(30 * n)
+                #     print(
+                #         f"{n}\t{min_structures_exact}\t"
+                #         f"{limit_best_survival}\t{max_structures}"
+                #     )
+
+                cls.fixed_comp_workflow.run(
+                    composition=composition,
+                    subworkflow_name=subworkflow_name,
+                    subworkflow_kwargs=subworkflow_kwargs,
+                    min_structures_exact=min_structures_exact,
+                    limit_best_survival=limit_best_survival,
+                    max_structures=max_structures,
+                    directory=directory / "fixed-compositon-logs",
+                    # Because we submitted all steady states above, we don't
+                    # need the other workflows to do these anymore.
+                    singleshot_sources=[],
+                    # If set to True, then the current fixed composition will be
+                    # written to fixed-compositon-logs
+                    ###### OPTIMIZE --- set this to false in the future...?
+                    # write_summary_files=False,
+                )

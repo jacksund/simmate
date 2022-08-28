@@ -65,6 +65,7 @@ def test_list_of_all_workflows():
         "static-energy.vasp.mit",
         "static-energy.vasp.mvl-neb-endpoint",
         "static-energy.vasp.quality04",
+        "structure-prediction.python.binary-composition",
         "structure-prediction.python.fixed-composition",
         "structure-prediction.python.new-individual",
         "structure-prediction.python.variable-composition",
@@ -125,6 +126,7 @@ def test_get_custom_workflow(tmp_path):
 def test_get_unique_paramters():
     assert get_unique_parameters() == [
         "angle_tolerance",
+        "chemical_system",
         "command",
         "composition",
         "compress_output",
@@ -175,6 +177,7 @@ def test_get_unique_paramters():
         "validator_kwargs",
         "validator_name",
         "workflow_base",
+        "write_summary_files",
     ]
 
 

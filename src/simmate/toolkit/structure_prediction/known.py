@@ -40,11 +40,13 @@ def get_known_structures(
         # exactly. Otherwise we can match the reduced formula.
         if not allow_multiples:
             search_results = database_table.objects.filter(
-                formula_full=composition.formula, **kwargs,
+                formula_full=composition.formula,
+                **kwargs,
             )
         else:
             search_results = database_table.objects.filter(
-                formula_reduced=composition.reduced_formula, **kwargs,
+                formula_reduced=composition.reduced_formula,
+                **kwargs,
             )
 
         # Convert to toolkit structures so that users can run analyses

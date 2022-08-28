@@ -36,9 +36,9 @@ class StructurePrediction__Python__VariableComposition(Workflow):
         #   3. results from smaller unitcells can help to speed up the larger
         #       compositional searches.
 
-        # The search with involve N steps based on the reduced composition.
-        # For example, Ca6N3 would have a reduced comp of Ca2N and max factor
-        # of 3.
+        # The search will involve N steps, where N is based on the reduced
+        # composition. For example, Ca6N3 would have a reduced comp of Ca2N
+        # and max factor of 3.
         composition_reduced = composition.reduced_composition
         max_factor = int(composition.num_atoms / composition_reduced.num_atoms)
 

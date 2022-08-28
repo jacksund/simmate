@@ -45,6 +45,7 @@ def test_workflow_detail_view(client, workflow_name):
         "structure-prediction.python.fixed-composition",
         "structure-prediction.python.new-individual",
         "structure-prediction.python.variable-composition",
+        "structure-prediction.python.binary-composition",
     ]:
         return
 
