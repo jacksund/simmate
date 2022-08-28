@@ -22,30 +22,15 @@ class AtomicPermutation(Transformation):
     # use creation.vector objects?
     # USPEX states that they do this - and select from a normal distribution
 
-    def __init__(self, min_exchanges=1, max_exchanges=5):
-
-        # save inputs for reference
-        self.min_exchanges = min_exchanges
-        self.max_exchanges = max_exchanges
-
-        #!!! when doing multiple exchanges, I do not check to see if an exchange
-        # has been done before - I can change this though
-        # Therefore one exchange could undo another and we could be back where
-        # we started. There are also scenarios where all sites are equivalent
-        # and atomic permutation cannot create a new structure. An example of
-        # this is NaCl, where an exchange still yields an identical structure
-        # This leaves a chance that we end up with an identical structure to
-        # what we started with. Therefore, I must hava a structurematcher object
-        # that I use to ensure we have a new structure. We try making a new
-        # structure X number of times (see max_attempts above) and if we
-        # can't, we failed to mutate the structure.
-        self.structure_matcher = StructureMatcher()
-        # !!! I should lower the tolerances here!
-
-    def apply_transformation(self, structure, max_attempts=100):
+    @staticmethod
+    def apply_transformation(
+        structure,
+        min_exchanges=1,
+        max_exchanges=5,
+        max_attempts=100,
+    ):
 
         # grab a list of the elements
-        #!!! consider moving this to init to save time
         elements = structure.composition.elements
 
         # This mutation is not possible for structures that have only one element
@@ -58,6 +43,19 @@ class AtomicPermutation(Transformation):
         #!!! add another elif for when all sites are equivalent and atomic
         # permutation cannot create a new structure
 
+        #!!! when doing multiple exchanges, I do not check to see if an exchange
+        # has been done before - I can change this though
+        # Therefore one exchange could undo another and we could be back where
+        # we started. There are also scenarios where all sites are equivalent
+        # and atomic permutation cannot create a new structure. An example of
+        # this is NaCl, where an exchange still yields an identical structure
+        # This leaves a chance that we end up with an identical structure to
+        # what we started with. Therefore, I must hava a structurematcher object
+        # that I use to ensure we have a new structure. We try making a new
+        # structure X number of times (see max_attempts above) and if we
+        # can't, we failed to mutate the structure.
+        structure_matcher = StructureMatcher()
+
         for attempt in range(max_attempts):
 
             # Make a deepcopy of the structure so that we aren't modifying
@@ -67,7 +65,7 @@ class AtomicPermutation(Transformation):
             new_structure = structure.copy()
 
             # grab a random integer within the exchange min/max defined above
-            nexchanges = randint(low=self.min_exchanges, high=self.max_exchanges)
+            nexchanges = randint(low=min_exchanges, high=max_exchanges)
 
             # perform an exchange of two random atom types X number of times
             for n in range(nexchanges):
@@ -84,7 +82,7 @@ class AtomicPermutation(Transformation):
 
             # see if the new structure is different from the original!
             # check will be True if the new structure is the same as the original
-            check = self.structure_matcher.fit(structure, new_structure)
+            check = structure_matcher.fit(structure, new_structure)
             if not check:
                 # we successfully make a new structure!
                 return new_structure

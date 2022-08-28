@@ -15,6 +15,21 @@ import warnings
 import numpy
 from pymatgen.core import Composition as PymatgenComposition
 
+# BUG-FIX: Pymatgen has "special formulas" to control printing chemically
+# reasonable formulas for compositions. For example, Hydrogen gas would show as
+# H2 even if Composition("H1") was provided. This makes sense when PRINTING
+# the formula; however, pymatgen uses this when returning the reduced formula.
+# This causes issues in different places. For example, the assumption that
+# composition.num_atoms >= composition_reduced.num_atoms fails to hold true.
+# One place this showed up was the RandomSymStructure, which is unable to
+# create structures with the "H1" or any other composition in the special
+# formulas. I therefore disable special formulas. I would open a PR for
+# pymatgen and limit the special formula use to the __str__ method, but I
+# doubt it would be accepted... So I just patch it here.
+PymatgenComposition.special_formulas = {}
+# See affected formulas here:
+# https://github.com/materialsproject/pymatgen/blob/v2022.8.23/pymatgen/core/composition.py#L78-L90
+
 
 class Composition(PymatgenComposition):
     # Leave docstring blank and just inherit from pymatgen

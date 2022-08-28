@@ -4,7 +4,7 @@ from ase.ga.standardmutations import PermutationMutation
 from ase.ga.utilities import closest_distances_generator
 from pymatgen.io.ase import AseAtomsAdaptor
 
-from simmate.toolkit import Composition, Structure
+from simmate.toolkit import Structure
 from simmate.toolkit.transformations.base import Transformation
 
 
@@ -14,38 +14,36 @@ class AtomicPermutation(Transformation):
     https://gitlab.com/ase/ase/-/blob/master/ase/ga/standardmutations.py
     """
 
+    name = "from_ase.AtomicPermutation"
     io_scale = "one_to_one"
     ninput = 1
     allow_parallel = False
 
-    def __init__(
-        self,
-        composition: Composition,
+    @staticmethod
+    def apply_transformation(
+        structure: Structure,
         ratio_of_covalent_radii: float = 0.1,
-    ):
-
-        # The closest_distances_generator is exactly the same as an
-        # element-dependent distance matrix, except ASE puts this in dictionary
-        # form. The function requires a list of element integers
-        element_ints = [element.number for element in composition]
-        # the default of the ratio of covalent radii (0.1) is based on the ASE
-        # tutorial of this function
-        self.element_distance_matrix = closest_distances_generator(
-            element_ints, ratio_of_covalent_radii
-        )
-
-        # we also need to convert pymatgen Structures to ase Atoms below
-        #!!! is it faster and more memory efficient to import below?
-
-    def apply_transformation(self, structure: Structure) -> Structure:
+    ) -> Structure:
 
         # This mutation is not possible for structures that have only one element
         if len(structure.composition.elements) == 1:
             print(
-                "You cannot perform an atomic permutation on structure that"
+                "You cannot perform an atomic permutation on a structure that"
                 " only has one element type!!"
             )
             return False
+
+        # ----------- SETUP (consider caching as class attribute) -------------
+        # The closest_distances_generator is exactly the same as an
+        # element-dependent distance matrix, except ASE puts this in dictionary
+        # form. The function requires a list of element integers
+        element_ints = [element.number for element in structure.composition]
+        # the default of the ratio of covalent radii (0.1) is based on the ASE
+        # tutorial of this function
+        element_distance_matrix = closest_distances_generator(
+            element_ints, ratio_of_covalent_radii
+        )
+        # ---------------------------------------------------------------------
 
         # first I need to convert the structures to an ASE atoms object
         structure_ase = AseAtomsAdaptor.get_atoms(structure)
@@ -57,7 +55,7 @@ class AtomicPermutation(Transformation):
             probability=0.33,  # probability an atom is permutated
             # test_dist_to_slab=True,
             # use_tags=False,
-            blmin=self.element_distance_matrix,  # distance cutoff matrix
+            blmin=element_distance_matrix,  # distance cutoff matrix
             # rng=np.random,
             # verbose=False
         )

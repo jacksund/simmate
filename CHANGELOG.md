@@ -43,6 +43,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - switch from pdoc to mkdocs for documentation and remove `get_doc_from_readme`. Code and doc organization are now decoupled.
 - rename run commands based on user preference. the `run` is now `run-quick`. `run-yaml` is now `run`. `run-cloud` now assumes a yaml input.
 - remove `tqdm` dependency in favor of `rich.progress`
+- refactor transformations to static methods
 
 **Fixes**
 - fix `module not found` error by adding ASE to dependencies

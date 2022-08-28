@@ -78,7 +78,8 @@ def start_singleflow_worker():
 
 @workflow_engine_app.command()
 def start_cluster(
-    nworkers: int, worker_command: str = "simmate workflow-engine start-worker"
+    nworkers: int,
+    worker_command: str = "simmate workflow-engine start-worker",
 ):
     """
     This starts many Simmate Workers that each run in a local subprocess
@@ -96,3 +97,13 @@ def start_cluster(
         nworkers=nworkers,
         worker_command=worker_command,
     )
+
+
+@workflow_engine_app.command()
+def show_error_summary():
+    """
+    Prints the shorthand error for all failed jobs
+    """
+    from simmate.workflow_engine.execution import SimmateExecutor
+
+    SimmateExecutor.show_error_summary()

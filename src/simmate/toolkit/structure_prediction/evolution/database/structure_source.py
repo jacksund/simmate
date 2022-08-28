@@ -2,8 +2,11 @@
 
 import logging
 
+from rich import print
+
 import simmate.toolkit.creators as creation_module
 import simmate.toolkit.transformations as transform_module
+import simmate.toolkit.transformations.from_ase as ase_transform_module
 from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.toolkit import Composition
 from simmate.workflow_engine.execution import WorkItem
@@ -53,11 +56,10 @@ class StructureSource(DatabaseTable):
             )
 
             print("\n------------------------------------------------------------\n")
-            print(
-                "Make sure you check your worker logs for more info. "
-                "Alternatively, you can run the following in python to get "
-                "the error traceback locally:\n"
-            )
+            print("Make sure you check your worker logs for more info.\n")
+            print("You can preview ALL failed jobs in the command line:")
+            print("simmate workflow-engine show-error-summary\n")
+            print("Or view a specific error (w. full trackback) in python:")
             print("from simmate.workflow_engine.execution import WorkItem")
             print(f"item = WorkItem.objects.get(id={failed_ids[0]})")
             print("item.result()\n")
@@ -65,6 +67,12 @@ class StructureSource(DatabaseTable):
                 "The call to `result()` will raise the error that caused your job "
                 "to fail. Please report this error if you think it's a bug "
                 "with Simmate.\n "
+            )
+            print(
+                "Note, ~0-1% of calculations failing can be normal during an "
+                "evolutionary search because generated structures may be "
+                "unreasonable (and cause programs like VASP to crash). "
+                "However, >1% can indicate a serious problem.\n"
             )
             print("------------------------------------------------------------\n")
 
@@ -116,28 +124,18 @@ class StructureSource(DatabaseTable):
         if not self.is_transformation:
             raise Exception("This should not be called on non-transformations")
 
-        composition = Composition(self.search.composition)
-
         # Consider moving to _deserialize_parameters. Only issue is that
         # I can't serialize these classes yet.
-        if self.name in [
-            "from_ase.Heredity",
-            "from_ase.SoftMutation",
-            "from_ase.MirrorMutation",
-            "from_ase.LatticeStrain",
-            "from_ase.RotationalMutation",
-            "from_ase.AtomicPermutation",
-            "from_ase.CoordinatePerturbation",
-        ]:
+        if self.name.startswith("from_ase."):
             # all start with "from_ase" so I assume that import for now
             ase_class_str = self.name.split(".")[-1]
-            transformation_class = getattr(transform_module.from_ase, ase_class_str)
-            return transformation_class(composition, **self.kwargs)
+            transformation_class = getattr(ase_transform_module, ase_class_str)
+            transformer = transformation_class(**self.kwargs)
         # !!! There aren't any common transformations that don't accept composition
         # as an input, but I expect this to change in the future.
         elif self.name in ["ExtremeSymmetry"]:
             transformation_class = getattr(transform_module, self.name)
-            transformer = transformation_class(composition)
+            transformer = transformation_class(**self.kwargs)
         else:
             raise Exception(f"Transformation class {self.name} could not be found.")
         return transformer

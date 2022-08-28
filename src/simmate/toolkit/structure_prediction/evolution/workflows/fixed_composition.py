@@ -26,7 +26,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         min_structures_exact: int = None,
         limit_best_survival: int = None,
         convergence_limit: float = 0.001,
-        nfirst_generation: int = 20,
+        nfirst_generation: int = 15,
         nsteadystate: int = 40,
         singleshot_sources: list[str] = [],
         steadystate_sources: list[tuple[float, str]] = [
@@ -47,55 +47,11 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         tags: list[str] = None,
         sleep_step: int = 60,
         directory: Path = None,
+        write_summary_files: bool = True,
         **kwargs,
     ):
         """
-        Sets up the search engine and its settings.
-
-        #### Parameters
-
-        - `composition`:
-            The composition to run the evolutionary search for. Note that the
-            number of sites is fixed to what is set here. (Ca2N vs Ca4N2)
-
-        - `workflow`:
-            The workflow to run all individuals through. Note, the result_database
-            of this workflow will be treated as the individuals in this search.
-            The default is "relaxation.vasp.staged"
-
-        - `workflow_command`:
-            The command that will be passed to the workflow.run() method.
-
-        - `max_structures`:
-            The maximum number of individuals that will be calculated before
-            stopping the search. The default is 3000.
-
-        - `limit_best_survival`:
-            The search is stopped when the best individual remains unbeaten for
-            this number of new individuals. The default is 250.
-
-        - `singleshot_sources`:
-            TODO: This is not implemented yet
-
-        - `nfirst_generation`:
-            No mutations or "child" individuals will be carried out until this
-            number of individuals have been calculated. The default is 20.
-
-        - `nsteadystate`:
-            The total number of individuals from steady-state sources that will
-            be running/submitted at any given time. The default is 40.
-
-        - `steadystate_sources`:
-            A list of tuples where each tuple is (percent, source). The percent
-            determines the number of steady stage calculations that will be
-            running for this at any given time. For example, 0.25 means
-            0.25*40=10 individuals will be running/submitted at all times. The
-            source can be from either the toolkit.creator or toolkit.transformations
-            modules. Don't change this default unless you know what you're doing!
-
-        - `selector`:
-            The defualt method to use for choosing the parent individual(s). The
-            default is TruncatedSelection.
+        Sets up the search engine and its settings
         """
 
         #######################################################################
@@ -178,10 +134,11 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         while True:
 
             # Write the output summary if there is at least one structure completed
-            if search_datatable.individuals_completed.count() >= 1:
-                search_datatable.write_summary(directory)
-            else:
-                search_datatable.write_individuals_incomplete(directory)
+            if write_summary_files:
+                if search_datatable.individuals_completed.count() >= 1:
+                    search_datatable.write_summary(directory)
+                else:
+                    search_datatable.write_individuals_incomplete(directory)
 
             # TODO: maybe write summary files to csv...? This may be a mute
             # point because I expect we can follow along in the web UI in the future

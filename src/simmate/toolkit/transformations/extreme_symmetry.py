@@ -22,8 +22,8 @@ class ExtremeSymmetry(Transformation):
     io_scale = "one_to_one"
     allow_parallel = True
 
-    @classmethod
-    def apply_transformation(cls, structure: Structure):
+    @staticmethod
+    def apply_transformation(structure: Structure):
 
         # To establish the original structure symmetry, we begin with strict
         # tolerances of 0.01Angstrom and 0.5 Deg cutoffs

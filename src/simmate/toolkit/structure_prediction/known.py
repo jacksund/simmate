@@ -13,7 +13,8 @@ from simmate.toolkit import Composition, Structure
 
 def get_known_structures(
     composition: Composition,
-    strict_nsites: bool = False,
+    allow_multiples: bool = False,
+    **kwargs,  # Extra filtering criteria
 ) -> list[Structure]:
     """
     Goes through all database tables in the `simmate.database.third_parties`
@@ -37,13 +38,15 @@ def get_known_structures(
 
         # If there is a limit to nsites, we want to match the composition formula
         # exactly. Otherwise we can match the reduced formula.
-        if strict_nsites:
+        if not allow_multiples:
             search_results = database_table.objects.filter(
                 formula_full=composition.formula,
+                **kwargs,
             )
         else:
             search_results = database_table.objects.filter(
                 formula_reduced=composition.reduced_formula,
+                **kwargs,
             )
 
         # Convert to toolkit structures so that users can run analyses

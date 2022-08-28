@@ -4,6 +4,7 @@ from pymatgen.transformations.standard_transformations import (
     PerturbStructureTransformation,
 )
 
+from simmate.toolkit import Structure
 from simmate.toolkit.transformations.base import Transformation
 
 
@@ -28,12 +29,15 @@ class CoordinatePerturbation(Transformation):
     ninput = 1
     allow_parallel = False
 
-    def __init__(self, min_displace=0, max_displace=1):  #!!! whats a good displacement?
+    @staticmethod
+    def apply_transformation(
+        structure: Structure,
+        min_displace: float = 0,
+        max_displace: float = 1,
+    ):
 
-        self.perturb_object = PerturbStructureTransformation(min_displace, max_displace)
+        perturb_object = PerturbStructureTransformation(min_displace, max_displace)
 
-    def apply_transformation(self, structure):
-
-        new_structure = self.perturb_object.apply_transformation(structure)
+        new_structure = perturb_object.apply_transformation(structure)
 
         return new_structure
