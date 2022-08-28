@@ -4,7 +4,7 @@ from ase.ga.standardmutations import RattleMutation
 from ase.ga.utilities import closest_distances_generator
 from pymatgen.io.ase import AseAtomsAdaptor
 
-from simmate.toolkit import Composition, Structure
+from simmate.toolkit import Structure
 from simmate.toolkit.transformations.base import Transformation
 
 
@@ -14,34 +14,35 @@ class CoordinatePerturbation(Transformation):
     https://gitlab.com/ase/ase/-/blob/master/ase/ga/standardmutations.py
     """
 
+    name = "from_ase.CoordinatePerturbation"
     io_scale = "one_to_one"
     ninput = 1
     allow_parallel = False
 
-    def __init__(
-        self,
-        composition: Composition,
+    @staticmethod
+    def apply_transformation(
+        structure: Structure,
         ratio_of_covalent_radii: float = 0.1,
-    ):
+    ) -> Structure:
 
-        # the closest_distances_generator is exactly the same as an
-        # element-dependent distance matrix expect ASE puts this in dictionary
-        # form the function requires a list of element integers
-        element_ints = [element.number for element in composition]
+        # ----------- SETUP (consider caching as class attribute) -------------
+        # The closest_distances_generator is exactly the same as an
+        # element-dependent distance matrix, except ASE puts this in dictionary
+        # form. The function requires a list of element integers
+        element_ints = [element.number for element in structure.composition]
         # the default of the ratio of covalent radii (0.1) is based on the ASE
         # tutorial of this function
-        self.element_distance_matrix = closest_distances_generator(
+        element_distance_matrix = closest_distances_generator(
             element_ints, ratio_of_covalent_radii
         )
-
-    def apply_transformation(self, structure: Structure) -> Structure:
+        # ---------------------------------------------------------------------
 
         # first I need to convert the structures to an ASE atoms object
         structure_ase = AseAtomsAdaptor.get_atoms(structure)
 
         # now we can make the generator
-        self.rattle = RattleMutation(
-            blmin=self.element_distance_matrix,  # distance cutoff matrix
+        rattle = RattleMutation(
+            blmin=element_distance_matrix,  # distance cutoff matrix
             n_top=int(
                 structure.composition.num_atoms
             ),  # number of atoms to optimize. I set this to all,
@@ -55,7 +56,7 @@ class CoordinatePerturbation(Transformation):
 
         #!!! Their code suggests the use of .get_new_individual() but I think
         # .mutate() is what we'd like
-        new_structure_ase = self.rattle.mutate(structure_ase)
+        new_structure_ase = rattle.mutate(structure_ase)
 
         # if the mutation fails, None is return
         if not new_structure_ase:

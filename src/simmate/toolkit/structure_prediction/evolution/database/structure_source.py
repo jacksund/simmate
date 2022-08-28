@@ -122,28 +122,18 @@ class StructureSource(DatabaseTable):
         if not self.is_transformation:
             raise Exception("This should not be called on non-transformations")
 
-        composition = Composition(self.search.composition)
-
         # Consider moving to _deserialize_parameters. Only issue is that
         # I can't serialize these classes yet.
-        if self.name in [
-            "from_ase.Heredity",
-            "from_ase.SoftMutation",
-            "from_ase.MirrorMutation",
-            "from_ase.LatticeStrain",
-            "from_ase.RotationalMutation",
-            "from_ase.AtomicPermutation",
-            "from_ase.CoordinatePerturbation",
-        ]:
+        if self.name.startswith("from_ase."):
             # all start with "from_ase" so I assume that import for now
             ase_class_str = self.name.split(".")[-1]
             transformation_class = getattr(transform_module.from_ase, ase_class_str)
-            return transformation_class(composition, **self.kwargs)
+            transformer = transformation_class(**self.kwargs)
         # !!! There aren't any common transformations that don't accept composition
         # as an input, but I expect this to change in the future.
         elif self.name in ["ExtremeSymmetry"]:
-            transformation_class = getattr(transform_module, self.name)
-            transformer = transformation_class(composition)
+            transformer = getattr(transform_module, self.name)
+            transformer = transformation_class(**self.kwargs)
         else:
             raise Exception(f"Transformation class {self.name} could not be found.")
         return transformer

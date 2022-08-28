@@ -3,6 +3,7 @@
 import logging
 
 import cloudpickle  # needed to serialize Prefect workflow runs and tasks
+from rich import print
 
 from simmate.workflow_engine.execution.database import WorkItem
 
@@ -118,7 +119,7 @@ class SimmateExecutor:
             WorkItem.objects.all().delete()
 
     @staticmethod
-    def clear_finished(self, are_you_sure: bool = False):
+    def clear_finished(are_you_sure: bool = False):
         """
         Empties the WorkItem database table and delete everything. This will
         not stop the workers if they are in the middle of a job though.
@@ -128,6 +129,17 @@ class SimmateExecutor:
             raise Exception
         else:
             WorkItem.objects.filter(status="F").delete()
+
+    @staticmethod
+    def show_error_summary():
+
+        errored_jobs = WorkItem.objects.filter(status="E").all()
+
+        for job in errored_jobs:
+            try:
+                job.result()
+            except Exception as error:
+                print(f"{job.id} {error}")
 
     # -------------------------------------------------------------------------
     # Extra methods to add if I want to be consistent with other Executor classes

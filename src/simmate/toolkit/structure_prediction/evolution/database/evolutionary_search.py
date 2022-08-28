@@ -151,7 +151,7 @@ class FixedCompositionSearch(DatabaseTable):
 
         structures_sub = get_structures_from_substitution_of_known(
             composition,
-            strict_nsites=True,
+            allow_multiples=False,
         )
         logging.info(f"Generated {len(structures_sub)} structures from substitutions")
         directory_sub = get_directory(directory / "from_substitutions")

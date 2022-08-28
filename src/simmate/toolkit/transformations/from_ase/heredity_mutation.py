@@ -3,10 +3,10 @@
 import numpy
 from ase import Atoms
 from ase.ga.cutandsplicepairing import CutAndSplicePairing
-from ase.ga.utilities import closest_distances_generator
+from ase.ga.utilities import CellBounds, closest_distances_generator
 from pymatgen.io.ase import AseAtomsAdaptor
 
-from simmate.toolkit import Composition, Structure
+from simmate.toolkit import Structure
 from simmate.toolkit.transformations.base import Transformation
 
 
@@ -20,35 +20,36 @@ class Heredity(Transformation):
     # might be useful for a pymatgen rewrite:
     # pymatgen.transformations.advanced_transformations.SlabTransformation
 
+    name = "from_ase.Heredity"
     io_scale = "many_to_one"
     ninput = 2
     allow_parallel = False
 
-    def __init__(
-        self,
-        composition: Composition,
+    @staticmethod
+    def apply_transformation(
+        structures: list[Structure],
         ratio_of_covalent_radii: float = 0.1,
-    ):
+    ) -> Structure:
+        #!!! takes two structures!
 
+        # ----------- SETUP (consider caching as class attribute) -------------
         #!!! I assume 3D structure for now. I could do things like
         # pbc=[1,1,0] for 2D in the future though
-        self.slab = Atoms(pbc=True)
+        slab = Atoms(pbc=True)
 
         # the closest_distances_generator is exactly the same as an
         # element-dependent distance matrix expect ASE puts this in dictionary
         # form the function requires a list of element integers
-        element_ints = [element.number for element in composition]
+        element_ints = [element.number for element in structures[0].composition]
         # the default of the ratio of covalent radii (0.1) is based on the
         # ASE tutorial of this function
-        self.element_distance_matrix = closest_distances_generator(
+        element_distance_matrix = closest_distances_generator(
             element_ints, ratio_of_covalent_radii
         )
 
         # boundry limits on the lattice. I only do angle limits for now but
         # I should introduce vector length limits
-        from ase.ga.utilities import CellBounds
-
-        self.cellbounds = CellBounds(
+        cellbounds = CellBounds(
             bounds={
                 "phi": [35, 145],
                 "chi": [35, 145],
@@ -56,9 +57,7 @@ class Heredity(Transformation):
             }
         )
         #'a': [3, 50], 'b': [3, 50], 'c': [3, 50]})
-
-    def apply_transformation(self, structures: list[Structure]) -> Structure:
-        #!!! takes two structures!
+        # ---------------------------------------------------------------------
 
         # split the structures into independent variables
         # copy because we may edit these into supercells below
@@ -88,13 +87,13 @@ class Heredity(Transformation):
         # TODO: should I should make the supercell for them?
 
         # now we can make the generator
-        self.casp = CutAndSplicePairing(
+        casp = CutAndSplicePairing(
             # indicated dimensionality
-            slab=self.slab,
+            slab=slab,
             # number of atoms to optimize. I set this to all
             n_top=int(structure1.composition.num_atoms),
             # distance cutoff matrix
-            blmin=self.element_distance_matrix,
+            blmin=element_distance_matrix,
             #!!! I understand this as number of unique vectors. Is that right?
             number_of_variable_cell_vectors=3,
             # p1=1, # probablitiy of shifting
@@ -102,7 +101,7 @@ class Heredity(Transformation):
             # minimum fraction of atoms that a parent must contribute.
             # None is one atom.
             # minfrac=None,
-            cellbounds=self.cellbounds,
+            cellbounds=cellbounds,
             # test_dist_to_slab=True,
             # use_tags=False,
             # rng=np.random,verbose=False
@@ -114,7 +113,7 @@ class Heredity(Transformation):
 
         #!!! Their code suggests the use of .get_new_individual() but I think
         # .cross() is what we'd like
-        new_structure_ase = self.casp.cross(structure1_ase, structure2_ase)
+        new_structure_ase = casp.cross(structure1_ase, structure2_ase)
 
         # if the mutation fails, None is returned
         if not new_structure_ase:

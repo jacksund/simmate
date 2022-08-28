@@ -2,6 +2,7 @@
 
 from pymatgen.analysis.elasticity.strain import Strain, convert_strain_to_deformation
 
+from simmate.toolkit import Structure
 from simmate.toolkit.creators.vector import UniformlyDistributedVectors
 from simmate.toolkit.transformations.base import Transformation
 
@@ -33,26 +34,28 @@ class LatticeStrain(Transformation):
     ninput = 1
     allow_parallel = False
 
-    def __init__(self, fixed_volume):
+    @staticmethod
+    def apply_transformation(
+        structure: Structure,
+        fixed_volume: float,
+        max_attempts=100,
+    ):
 
         # after straining the lattice, we need to scale it to a fixed volume
-        self.fixed_volume = fixed_volume
+        fixed_volume = fixed_volume
 
         # following along with USPEX paper, we need to first establish boundries
         # for the symmetric strain matrix
         # when generating components for this matrix, they randomly select
         # values between -1 and 1 in a guassian distribution
-        self.component_generator = UniformlyDistributedVectors(
-            min_value=-1, max_value=1
-        )
-
-    def apply_transformation(self, structure, max_attempts=100):
+        component_generator = UniformlyDistributedVectors(min_value=-1, max_value=1)
 
         # first we need 6 strain matrix components
-        components = self.component_generator.new_vector(size=6)
+        components = component_generator.new_vector(size=6)
 
         # next we need to assemble the strain matrix using these components
-        #!!! is there a better way to do this? I'm just using equation (3) in the USPEX paper
+        #!!! is there a better way to do this? I'm just using equation (3) in
+        # the USPEX paper
         strain_matrix = [
             [1 + components[0], components[5] / 2, components[4] / 2],
             [components[5] / 2, 1 + components[1], components[3] / 2],
@@ -72,6 +75,6 @@ class LatticeStrain(Transformation):
         new_structure = deformation.apply_to_structure(structure)
 
         # scale the lattice volume back to a fixed value
-        new_structure.scale_lattice(self.fixed_volume)
+        new_structure.scale_lattice(fixed_volume)
 
         return new_structure
