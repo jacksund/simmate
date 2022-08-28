@@ -22,6 +22,12 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 -->
 
+- no new changes have been merged into the `main` branch yet
+
+
+
+# v0.10.0 (2022.08.29)
+
 **Enhancements**
 - add NEB base classes to inherit from for making new subflows
 - improve formatting of logging and cli using `typer` and `rich`

@@ -41,6 +41,7 @@ def load_remote_archives(**kwargs):
 
     logging.info("Loading MatProj data")
     MatprojStructure.load_remote_archive(**kwargs)
+    MatprojStructure.update_all_stabilities()
 
     logging.info("Loading OQMD data")
     OqmdStructure.load_remote_archive(**kwargs)
