@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from django_filters import rest_framework as api_filters
+from django_filters import rest_framework as django_api_filters
 from scipy.constants import Avogadro
 
 from simmate.database.base_data_types import DatabaseTable, Spacegroup, table_column
@@ -14,7 +14,7 @@ class Structure(DatabaseTable):
 
     base_info = ["structure_string"]
 
-    api_filter_fields = dict(
+    api_filters = dict(
         nsites=["range"],
         nelements=["range"],
         # elements=["contains"],
@@ -31,7 +31,7 @@ class Structure(DatabaseTable):
         spacegroup__point_group=["exact"],
         # Whether to include subsystems of the given `chemical_system`. For
         # example, the subsystems of Y-C-F would be Y, C, F, Y-C, Y-F, etc..
-        include_subsystems=api_filters.BooleanFilter(
+        include_subsystems=django_api_filters.BooleanFilter(
             field_name="include_subsystems",
             label="Include chemical subsystems in results?",
             method="skip_filter",
@@ -40,7 +40,9 @@ class Structure(DatabaseTable):
         # searching Y-C-F would also return Y-C-F-Br, Y-Sc-C-F, etc.
         # include_suprasystems = forms.BooleanField(label="Include Subsytems", required=False)
         # The chemical system of the structure (e.g. "Y-C-F" or "Na-Cl")
-        chemical_system=api_filters.CharFilter(method="filter_chemical_system"),
+        chemical_system=django_api_filters.CharFilter(
+            method="filter_chemical_system",
+        ),
     )
 
     def filter_chemical_system(self, queryset, name, value):

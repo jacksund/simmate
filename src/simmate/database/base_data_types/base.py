@@ -29,7 +29,7 @@ import yaml
 from django.db import models  # , transaction
 from django.db import models as table_column
 from django.utils.timezone import datetime
-from django_filters import rest_framework as api_filters
+from django_filters import rest_framework as django_api_filters
 from django_pandas.io import read_frame
 from rich.progress import track
 
@@ -368,7 +368,7 @@ class DatabaseTable(models.Model):
     data from this table.
     """
 
-    api_filter_fields: dict = {}
+    api_filters: dict = {}
     """
     Configuration of fields that can be filtered in the REST API and website 
     interface. This follows the format used by django-filters.
@@ -378,6 +378,7 @@ class DatabaseTable(models.Model):
     filter_fields = {
         column1=["exact"],
         column2=["range"],
+        column3=BooleanFilter(...),
     }
     ```
     """
@@ -889,7 +890,7 @@ class DatabaseTable(models.Model):
     @classmethod
     @property
     @cache
-    def api_filter(cls):
+    def api_filterset(cls) -> django_api_filters.FilterSet:
         """
         Dynamically creates a Django Filter from a Simmate database table.
 
@@ -924,7 +925,8 @@ class DatabaseTable(models.Model):
         # ---------------------------------------------------------------------
         # This is the filter mix-in for the base DatabaseTable class, which
         # ALL other filters will use. We set this up manually.
-        class ApiFilter(api_filters.FilterSet):
+        # TODO: Consider moving this outside of this method.
+        class ApiFilter(django_api_filters.FilterSet):
             class Meta:
                 table = DatabaseTable
                 fields = dict(
@@ -957,7 +959,7 @@ class DatabaseTable(models.Model):
         # all mixins available. We therefore grab all these filters into a list.
         # We also add the standard ModelForm class from django-filters.
         filter_mixins = [ApiFilter]
-        filter_mixins += [mixin.api_filter for mixin in table_mixins]
+        filter_mixins += [mixin.api_filterset for mixin in table_mixins]
 
         # "Declared Filters" are ones normally set as an attribute when creating
         # a Django filter, whereas normal filters are provided in a meta. For
@@ -983,8 +985,8 @@ class DatabaseTable(models.Model):
         field_filters = {}
         declared_filters = {}
         filter_methods = {}
-        for field, conditions in cls.api_filter_fields.items():
-            if isinstance(conditions, api_filters.Filter):
+        for field, conditions in cls.api_filters.items():
+            if isinstance(conditions, django_api_filters.Filter):
                 declared_filters.update({field: conditions})
                 # For the declared filters, there is sometimes a method that
                 # needs to be called. This will be attached to the original
@@ -1035,7 +1037,9 @@ class DatabaseTable(models.Model):
         return NewClass
 
     @classmethod
-    def get_extra_api_filters(cls):
+    @property
+    @cache
+    def api_filters_extra(cls):
         """
         Finds all columns that aren't covered by the supported Form mix-ins.
 
@@ -1060,11 +1064,11 @@ class DatabaseTable(models.Model):
         ```
         """
 
-        all_columns = cls.api_filter.base_filters.keys()
+        all_columns = cls.api_filterset.base_filters.keys()
         columns_w_mixin = [
             column
             for mixin in cls.get_mixins()
-            for column in mixin.api_filter.base_filters.keys()
+            for column in mixin.api_filterset.base_filters.keys()
         ]
         extra_columns = [
             column

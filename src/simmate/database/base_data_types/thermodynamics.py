@@ -20,7 +20,7 @@ class Thermodynamics(DatabaseTable):
 
     base_info = ["energy"]
 
-    api_filter_fields = dict(
+    api_filters = dict(
         energy=["range"],
         energy_per_atom=["range"],
         energy_above_hull=["range"],

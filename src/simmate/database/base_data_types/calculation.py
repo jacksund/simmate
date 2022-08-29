@@ -24,7 +24,7 @@ class Calculation(DatabaseTable):
         "corrections",
     ]
 
-    api_filter_fields = dict(
+    api_filters = dict(
         directory=["exact"],
         run_id=["exact"],
     )

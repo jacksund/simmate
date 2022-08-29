@@ -20,13 +20,13 @@ class DiffusionAnalysis(Structure):
     class Meta:
         app_label = "workflows"
 
-    api_filter_fields = dict(
+    api_filters = dict(
         migrating_specie=["exact"],
         vacancy_mode=["exact"],
         atomic_fraction=["range"],
         barrier_cell=["range"],
         npaths_involved=["range"],
-        **Structure.api_filter_fields,
+        **Structure.api_filters,
     )
 
     migrating_specie = table_column.CharField(max_length=4, blank=True, null=True)
@@ -156,7 +156,7 @@ class MigrationHop(DatabaseTable):
         "number",
     ]
 
-    api_filter_fields = dict(
+    api_filters = dict(
         site_start=["exact"],
         site_end=["exact"],
         number=["range"],
@@ -416,12 +416,12 @@ class MigrationImage(Structure):
         "energy",
     ]
 
-    api_filter_fields = dict(
+    api_filters = dict(
         number=["exact"],
         force_tangent=["range"],
         energy=["range"],
         structure_distance=["range"],
-        **Structure.api_filter_fields,
+        **Structure.api_filters,
     )
 
     number = table_column.IntegerField()

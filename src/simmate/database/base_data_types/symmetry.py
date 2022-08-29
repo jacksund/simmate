@@ -17,7 +17,7 @@ class Spacegroup(DatabaseTable):
     class Meta:
         app_label = "core_components"
 
-    api_filter_fields = dict(
+    api_filters = dict(
         number=["exact", "range"],
         symbol=["exact"],
         crystal_system=["exact"],

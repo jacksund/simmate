@@ -30,13 +30,13 @@ class DynamicsRun(Structure, Calculation):
     class Meta:
         app_label = "workflows"
 
-    api_filter_fields = dict(
+    api_filters = dict(
         temperature_start=["range"],
         temperature_end=["range"],
         time_step=["range"],
         nsteps=["range"],
-        **Structure.api_filter_fields,
-        **Calculation.api_filter_fields,
+        **Structure.api_filters,
+        **Calculation.api_filters,
     )
 
     temperature_start = table_column.IntegerField(blank=True, null=True)
@@ -138,12 +138,12 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
         ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info
     )
 
-    api_filter_fields = dict(
+    api_filters = dict(
         number=["range"],
         temperature=["range"],
-        **Structure.api_filter_fields,
-        **Thermodynamics.api_filter_fields,
-        **Forces.api_filter_fields,
+        **Structure.api_filters,
+        **Thermodynamics.api_filters,
+        **Forces.api_filters,
     )
 
     number = table_column.IntegerField()

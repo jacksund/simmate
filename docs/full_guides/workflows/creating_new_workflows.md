@@ -1,6 +1,8 @@
 
 # Creating new workflows
 
+----------------------------------------------------------------------
+
 ## Create a workflow name
 
 Build your workflow name using the Simmate conventions and run some checks to
@@ -28,6 +30,7 @@ assert my_workflow.name_preset == "my-favorite-settings"
 !!! tip
     make sure you have read of "Workflow Names" documentation.
 
+----------------------------------------------------------------------
 
 ## A basic workflow
 
@@ -56,6 +59,8 @@ class Example__Python__MyFavoriteSettings(Workflow):
     Note that we added `**kwargs` to our function input. This is required for
     your workflow to run. Make sure you read the "Default parameters" section
     below to understand why.
+
+----------------------------------------------------------------------
 
 ## A pythonic workflow
 
@@ -101,6 +106,8 @@ class Example__Python__MyFavoriteSettings(Workflow):
     The `**kwargs` is still important here. Make sure we are adding it at the 
     end of our input parameters. (see the next section for why)
 
+----------------------------------------------------------------------
+
 ## Default parameters and using kwargs
 
 You'll notice in the workflows above that we used `**kwargs` in each of our
@@ -119,6 +126,7 @@ These parameters are:
 You can use any of these inputs to help with your workflow. Or alternatively,
 just add `**kwargs` to your function and ignore them.
 
+----------------------------------------------------------------------
 
 ## Common input parameters
 
@@ -153,6 +161,7 @@ class Example__Python__MyFavoriteSettings(Workflow):
     if you see a parameter in our documentation that has similar use to yours,
     make sure you use the same name. It can help with adding extra functionality.
 
+----------------------------------------------------------------------
 
 ## Writing output files
 
@@ -189,6 +198,8 @@ class Example__Python__MyFavoriteSettings(Workflow):
         
         return "Done!"
 ```
+
+----------------------------------------------------------------------
 
 ## Building from existing workflows
 
@@ -333,6 +344,7 @@ assert original_workflow.incar != StaticEnergy__Vasp__MyCustomPreset
     the "Creating S3 Workflows" and "Third-party Software" sections for more 
     information.
 
+----------------------------------------------------------------------
 
 ## Linking a database table
 
@@ -372,6 +384,7 @@ class Example__Python__MyFavoriteSettings(Workflow):
     Make sure your table uses the `Calculation` mix-in so that the run 
     information can be stored properly
 
+----------------------------------------------------------------------
 
 ## Workflows that call a command
 
@@ -381,6 +394,7 @@ this would be an energy calculation using VASP. If your workflow involves
 calling another program, you should read about the `S3Workflow` which helps
 with writing input files, calling other programs, and handling errors.
 
+----------------------------------------------------------------------
 
 ## Registering your workflow
 
@@ -391,6 +405,7 @@ build a "simmate project". This is covered in the getting-started tutorials.
     For now, you can treat this step as optional if you do **not** have any 
     custom database tables.
 
+----------------------------------------------------------------------
 
 ## Running our custom workflow
 
@@ -460,6 +475,82 @@ us really take advantage of how we provide our input. For example, a
     result = state.result()
     ```
 
+
+!!! warning 
+    When switching from python to yaml, make sure you adjust the input format
+    of your parameters. This is especially important if you use python a `list` or
+    `dict` for one of your input parameters:
+
+    === "lists"
+        ``` python
+        # in python
+        my_parameter = [1,2,3]
+        ```
+        ``` yaml
+        # in yaml
+        my_parameter:
+            - 1
+            - 2
+            - 3
+        ```
+    
+    === "dictionaries"
+        ``` python
+        # in python
+        my_parameter = {"a": 123, "b": 456, "c": ["apple", "orange", "grape"]}
+        ```
+        ``` yaml
+        # in yaml
+        my_parameter:
+            a: 123
+            b: 456
+            c:
+                - apple
+                - orange
+                - grape
+        ```
+    
+    === "nested lists"
+        ``` python
+        # in python
+        my_parameter = [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+        ]
+        ```
+        ``` yaml
+        # in yaml (avoid if possible)
+        my_parameter:
+            - - 1
+              - 2
+              - 3
+            - - 4
+              - 5
+              - 6
+            - - 7
+              - 8
+              - 9
+        ```
+
+    === "tuple"
+        ``` python
+        # in python
+        my_parameter = (1,2,3)
+        ```
+        ``` yaml
+        # in yaml
+        my_parameter:
+            - 1
+            - 2
+            - 3
+        # WARNING: This will return a list! Make sure you call 
+        #   `tuple(my_parameter)`
+        # at the start of your workflow's `run_config` if you need a tuple.
+        ```
+
+----------------------------------------------------------------------
+
 ## Creating nested workflows
 
 Because workflows can contain any python code, they can also make calls to
@@ -498,7 +589,8 @@ class Example__Python__MyFavoriteSettings(Workflow):
 
 !!! warning
     when using `run_cloud` you should **NOT** share a working directory. This
-    causes problems when you have computational resource scatter accross 
+    causes problems when you have computational resource scattered accross 
     different computers & file systems.
     See github [#237](https://github.com/jacksund/simmate/issues/237).
 
+----------------------------------------------------------------------
