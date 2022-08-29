@@ -29,14 +29,14 @@ class DynamicsRun(Structure, Calculation):
 
     class Meta:
         app_label = "workflows"
-        
+
     api_filter_fields = dict(
         temperature_start=["range"],
         temperature_end=["range"],
         time_step=["range"],
         nsteps=["range"],
-        **Structure.get_fields(),
-        **Calculation.get_fields(),
+        **Structure.api_filter_fields,
+        **Calculation.api_filter_fields,
     )
 
     temperature_start = table_column.IntegerField(blank=True, null=True)
@@ -137,15 +137,15 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
     base_info = (
         ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info
     )
-    
+
     api_filter_fields = dict(
         number=["range"],
         temperature=["range"],
-        **Structure.get_fields(),
-        **Thermodynamics.get_fields(),
-        **Forces.get_fields(),
+        **Structure.api_filter_fields,
+        **Thermodynamics.api_filter_fields,
+        **Forces.api_filter_fields,
     )
-    
+
     number = table_column.IntegerField()
     """
     This is ionic step number for the given relaxation. This starts counting from 0.

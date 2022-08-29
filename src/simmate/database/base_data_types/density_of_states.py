@@ -24,7 +24,7 @@ class DensityofStates(DatabaseTable):
         abstract = True
 
     base_info = ["density_of_states_data"]
-    
+
     api_filter_fields = dict(
         band_gap=["range"],
         energy_fermi=["range"],
@@ -142,11 +142,11 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
         app_label = "workflows"
 
     base_info = Structure.base_info + DensityofStates.base_info + Calculation.base_info
-    
+
     api_filter_fields = {
-        **Structure.get_fields(),
-        **DensityofStates.get_fields(),
-        **Calculation.get_fields(),
+        **Structure.api_filter_fields,
+        **DensityofStates.api_filter_fields,
+        **Calculation.api_filter_fields,
     }
 
     def update_from_vasp_run(

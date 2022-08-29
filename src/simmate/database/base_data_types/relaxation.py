@@ -105,7 +105,7 @@ class Relaxation(Structure, Thermodynamics, Calculation):
         + Structure.base_info
         + Calculation.base_info
     )
-    
+
     api_filter_fields = dict(
         volume_change=["range"],
         band_gap=["exact", "range"],
@@ -397,11 +397,11 @@ class IonicStep(Structure, Thermodynamics, Forces):
     base_info = (
         ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info
     )
-    
+
     api_filter_fields = dict(
-        **Structure.get_fields(),
-        **Thermodynamics.get_fields(),
-        **Forces.get_fields(),
+        **Structure.api_filter_fields,
+        **Thermodynamics.api_filter_fields,
+        **Forces.api_filter_fields,
     )
 
     number = table_column.IntegerField()

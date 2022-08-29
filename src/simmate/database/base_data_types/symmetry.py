@@ -16,7 +16,7 @@ from simmate.database.base_data_types import DatabaseTable, table_column
 class Spacegroup(DatabaseTable):
     class Meta:
         app_label = "core_components"
-    
+
     api_filter_fields = dict(
         number=["exact", "range"],
         symbol=["exact"],

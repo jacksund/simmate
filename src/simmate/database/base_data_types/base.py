@@ -15,6 +15,7 @@ import shutil
 import urllib
 import warnings
 from pathlib import Path
+from functools import cache
 
 import pandas
 import yaml
@@ -29,7 +30,7 @@ from django.db import models  # , transaction
 from django.db import models as table_column
 from django.utils.timezone import datetime
 from django_pandas.io import read_frame
-from django_filters import rest_framework as filters
+from django_filters import rest_framework as api_filters
 from rich.progress import track
 
 
@@ -366,7 +367,7 @@ class DatabaseTable(models.Model):
     object. Using this, you can perform complex filtering and conversions on
     data from this table.
     """
-    
+
     api_filter_fields: dict = {}
     """
     Configuration of fields that can be filtered in the REST API and website 
@@ -885,9 +886,10 @@ class DatabaseTable(models.Model):
         ]
         return extra_columns
 
-    # @cache
+    @cache
+    @property
     @classmethod
-    def to_api_filter(cls):
+    def api_filter(cls):
         """
         Dynamically creates a Django Filter from a Simmate database table.
 
@@ -912,15 +914,12 @@ class DatabaseTable(models.Model):
                 model = MatprojStructure  # this is database table
                 fields = {...} # this combines the fields from Structure/Thermo mixins
 
-            # These attributes are set using the declared filters from Structure/Thermo mixins
+            # These attributes are set using the declared filters from 
+            # the Structure/Thermo mixins
             declared_filter1 = ...
             declared_filter1 = ...
         ```
         """
-
-        # this must be imported locally because it depends on all other classes
-        # from this module -- and will create circular import issues if outside
-        from simmate.website.core_components import filters as simmate_filters
 
         # First we need to grab the parent mixin classes of the table. For example,
         # the MatprojStructure uses the database mixins ['Structure', 'Thermodynamics']
@@ -931,7 +930,7 @@ class DatabaseTable(models.Model):
         # simmate.database.base_data_types, we can simply use these mixin names to
         # load a Form mixin from the simmate.website.workflows.form module. We add
         # these mixins onto the standard ModelForm class from django.
-        filter_mixins = [filters.FilterSet]
+        filter_mixins = [api_filters.FilterSet]
         filter_mixins += [
             getattr(simmate_filters, name)
             for name in table_mixin_names
@@ -969,20 +968,6 @@ class DatabaseTable(models.Model):
         NewClass = type(cls.table_name, tuple(filter_mixins), extra_attributes)
 
         return NewClass
-    
-    @classmethod
-    def get_api_mixins(cls):
-        """
-        Grabs the mix-in Forms that were used to make this class. This will
-        be mix-ins like Structure, Forces, etc. from the
-        `simmate.website.workflows.forms` module.
-        """
-        # We skip the first entry because it is always DatabaseTableForm
-        return [parent_class for parent_class in cls.__bases__[1:]]
-
-    @classmethod
-    def get_api_mixin_names(cls):
-        return [mixin.__name__ for mixin in cls.get_mixins()]
 
     @classmethod
     def get_extra_api_filters(cls):
@@ -1020,3 +1005,12 @@ class DatabaseTable(models.Model):
             if column not in columns_w_mixin and column != "id"
         ]
         return extra_columns
+
+    def skip_filter(self, queryset, name, value):
+        """
+        For filter fields that use this method, nothing is done to queryset. This
+        is because the filter is typically used within another field. For example,
+        the `include_subsystems` field is not applied to the queryset, but it
+        is used within the `filter_chemical_system` method.
+        """
+        return queryset

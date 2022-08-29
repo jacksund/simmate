@@ -26,7 +26,7 @@ class BandStructure(DatabaseTable):
         abstract = True
 
     base_info = ["band_structure_data"]
-    
+
     api_filter_fields = dict(
         nbands=["range"],
         band_gap=["range"],
@@ -157,13 +157,13 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
         app_label = "workflows"
 
     base_info = Structure.base_info + BandStructure.base_info + Calculation.base_info
-    
+
     api_filter_fields = {
-        **Structure.get_fields(),
-        **BandStructure.get_fields(),
-        **Calculation.get_fields(),
+        **Structure.api_filter_fields,
+        **BandStructure.api_filter_fields,
+        **Calculation.api_filter_fields,
     }
-    
+
     def update_from_vasp_run(
         self,
         vasprun: Vasprun,

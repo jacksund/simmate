@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from django_filters import rest_framework as api_filters
 from scipy.constants import Avogadro
 
 from simmate.database.base_data_types import DatabaseTable, Spacegroup, table_column
 from simmate.toolkit import Structure as ToolkitStructure
+from simmate.utilities import get_chemical_subsystems
 
 
 class Structure(DatabaseTable):
@@ -11,7 +13,7 @@ class Structure(DatabaseTable):
         abstract = True
 
     base_info = ["structure_string"]
-    
+
     api_filter_fields = dict(
         nsites=["range"],
         nelements=["range"],
@@ -27,37 +29,19 @@ class Structure(DatabaseTable):
         spacegroup__symbol=["exact"],
         spacegroup__crystal_system=["exact"],
         spacegroup__point_group=["exact"],
+        # Whether to include subsystems of the given `chemical_system`. For
+        # example, the subsystems of Y-C-F would be Y, C, F, Y-C, Y-F, etc..
+        include_subsystems=api_filters.BooleanFilter(
+            field_name="include_subsystems",
+            label="Include chemical subsystems in results?",
+            method="skip_filter",
+        ),
+        # TODO: Supra-systems would include all the elements listed AND more. For example,
+        # searching Y-C-F would also return Y-C-F-Br, Y-Sc-C-F, etc.
+        # include_suprasystems = forms.BooleanField(label="Include Subsytems", required=False)
+        # The chemical system of the structure (e.g. "Y-C-F" or "Na-Cl")
+        chemical_system=api_filters.CharFilter(method="filter_chemical_system"),
     )
-    
-    # ----------------------------
-    from simmate.utilities import get_chemical_subsystems
-    include_subsystems = filters.BooleanFilter(
-        field_name="include_subsystems",
-        label="Include chemical subsystems in results?",
-        method="skip_filter",
-    )
-    """
-    Whether to include subsystems of the given `chemical_system`. For example,
-    the subsystems of Y-C-F would be Y, C, F, Y-C, Y-F, etc..
-    """
-
-    # include_suprasystems = forms.BooleanField(label="Include Subsytems", required=False)
-    # TODO: Supra-systems would include all the elements listed AND more. For example,
-    # searching Y-C-F would also return Y-C-F-Br, Y-Sc-C-F, etc.
-
-    chemical_system = filters.CharFilter(method="filter_chemical_system")
-    """
-    The chemical system of the structure (e.g. "Y-C-F" or "Na-Cl")
-    """
-
-    def skip_filter(self, queryset, name, value):
-        """
-        For filter fields that use this method, nothing is done to queryset. This
-        is because the filter is typically used within another field. For example,
-        the `include_subsystems` field is not applied to the queryset, but it
-        is used within the `filter_chemical_system` method.
-        """
-        return queryset
 
     def filter_chemical_system(self, queryset, name, value):
         # name/value here are the key/value pair for chemical system

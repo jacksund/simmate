@@ -14,7 +14,7 @@ class Forces(DatabaseTable):
         "site_forces",
         "lattice_stress",
     ]
-    
+
     api_filter_fields = dict(
         site_force_norm_max=["range"],
         site_forces_norm_per_atom=["range"],
