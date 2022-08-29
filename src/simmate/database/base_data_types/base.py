@@ -14,23 +14,23 @@ import logging
 import shutil
 import urllib
 import warnings
-from pathlib import Path
 from functools import cache
+from pathlib import Path
 
 import pandas
 import yaml
 
-# This line does NOTHING but rename a module. I have this because I want to use
-# "table_column.CharField(...)" instead of "models.CharField(...)" in my Models.
-# This let's beginners read my higher level classes and instantly understand what
-# each thing represents -- without them needing to understand
-# that Django Model == Database Table. Experts may find this annoying, so I'm
-# sorry :(
+# The "as table_column" line does NOTHING but rename a module.
+# I have this because I want to use "table_column.CharField(...)" instead
+# of "models.CharField(...)" in my Models. This let's beginners read my
+# higher level classes and instantly understand what each thing represents
+# -- without them needing to understand that Django Model == Database Table.
+# Experts may find this annoying, so I'm sorry :(
 from django.db import models  # , transaction
 from django.db import models as table_column
 from django.utils.timezone import datetime
-from django_pandas.io import read_frame
 from django_filters import rest_framework as api_filters
+from django_pandas.io import read_frame
 from rich.progress import track
 
 
@@ -886,9 +886,9 @@ class DatabaseTable(models.Model):
         ]
         return extra_columns
 
-    @cache
-    @property
     @classmethod
+    @property
+    @cache
     def api_filter(cls):
         """
         Dynamically creates a Django Filter from a Simmate database table.
@@ -914,43 +914,108 @@ class DatabaseTable(models.Model):
                 model = MatprojStructure  # this is database table
                 fields = {...} # this combines the fields from Structure/Thermo mixins
 
-            # These attributes are set using the declared filters from 
+            # These attributes are set using the declared filters from
             # the Structure/Thermo mixins
             declared_filter1 = ...
             declared_filter1 = ...
         ```
         """
 
+        # ---------------------------------------------------------------------
+        # This is the filter mix-in for the base DatabaseTable class, which
+        # ALL other filters will use. We set this up manually.
+        class ApiFilter(api_filters.FilterSet):
+            class Meta:
+                table = DatabaseTable
+                fields = dict(
+                    # id=["exact"],  --> automatically added...?
+                    created_at=["range"],
+                    updated_at=["range"],
+                )
+
+            def skip_filter(self, queryset, name, value):
+                """
+                For filter fields that use this method, nothing is done to queryset. This
+                is because the filter is typically used within another field. For example,
+                the `include_subsystems` field is not applied to the queryset, but it
+                is used within the `filter_chemical_system` method.
+                """
+                return queryset
+
+        # ---------------------------------------------------------------------
+
+        # If calling this method on the base class, just return the sole mix-in.
+        if cls == DatabaseTable:
+            return ApiFilter
+
         # First we need to grab the parent mixin classes of the table. For example,
         # the MatprojStructure uses the database mixins ['Structure', 'Thermodynamics']
         # while MatprojStaticEnergy uses ["StaticEnergy"].
-        table_mixin_names = cls.get_mixin_names()
+        table_mixins = cls.get_mixins()
 
-        # Because our Forms follow the same naming conventions as
-        # simmate.database.base_data_types, we can simply use these mixin names to
-        # load a Form mixin from the simmate.website.workflows.form module. We add
-        # these mixins onto the standard ModelForm class from django.
-        filter_mixins = [api_filters.FilterSet]
-        filter_mixins += [
-            getattr(simmate_filters, name)
-            for name in table_mixin_names
-            if hasattr(simmate_filters, name)
-        ]
+        # When we make this filter, we want it to inherit from the filters of
+        # all mixins available. We therefore grab all these filters into a list.
+        # We also add the standard ModelForm class from django-filters.
+        filter_mixins = [ApiFilter]
+        filter_mixins += [mixin.api_filter for mixin in table_mixins]
+
+        # "Declared Filters" are ones normally set as an attribute when creating
+        # a Django filter, whereas normal filters are provided in a meta. For
+        # example...
+        #
+        # class Structure(filters.FilterSet):
+        #     class Meta:
+        #         model = StructureTable
+        #         fields = dict(
+        #             nsites=["range"],  <-------------- field filter
+        #             nelements=["range"],  <----------- field filter
+        #         )
+        #     include_subsystems = filters.BooleanFilter(
+        #         field_name="include_subsystems",
+        #         label="Include chemical subsystems in results?",
+        #         method="skip_filter",
+        #     ) <-------------------------------------- declared filter
+        #     chemical_system = filters.CharFilter(
+        #         method="filter_chemical_system"
+        #     ) <-------------------------------------- declared filter
+        #
+        # I need to separate these out in order to create our class properly
+        field_filters = {}
+        declared_filters = {}
+        filter_methods = {}
+        for field, conditions in cls.api_filter_fields.items():
+            if isinstance(conditions, api_filters.Filter):
+                declared_filters.update({field: conditions})
+                # For the declared filters, there is sometimes a method that
+                # needs to be called. This will be attached to the original
+                # mixin as a method of the same name. Here we check if there
+                # is a method and attach it. For an example of this, see the
+                # "filter_chemical_system" method of the Structure class.
+                if conditions.method and conditions.method != "skip_filter":
+                    filter_methods.update(
+                        {conditions.method: getattr(cls, conditions.method)}
+                    )
+            else:
+                field_filters.update({field: conditions})
 
         # combine the fields of each filter mixin. Note we use .get_fields instead
         # of .fields to ensure we get a dictionary back
-        filter_fields = {
-            field: conditions
-            for mixin in filter_mixins
-            for field, conditions in mixin.get_fields().items()
-        }
+        field_filters.update(
+            {
+                field: conditions
+                for mixin in filter_mixins
+                for field, conditions in mixin.get_fields().items()
+            }
+        )
 
         # Also combine all declared filters from each mixin
-        filters_declared = {
-            name: filter_obj
-            for mixin in filter_mixins
-            for name, filter_obj in mixin.declared_filters.items()
-        }
+        declared_filters.update(
+            {
+                name: filter_obj
+                for mixin in filter_mixins
+                for name, filter_obj in mixin.declared_filters.items()
+            }
+        )
 
         # The FilterSet class requires that we set extra fields in the Meta class.
         # We define those here. Note, we accept all fields by default and the
@@ -958,9 +1023,9 @@ class DatabaseTable(models.Model):
         # and we skip the first mixin (which is always DatabaseTableFilter)
         class Meta:
             model = cls
-            fields = filter_fields
+            fields = field_filters
 
-        extra_attributes = {"Meta": Meta, **filters_declared}
+        extra_attributes = {"Meta": Meta, **declared_filters, **filter_methods}
         # BUG: __module__ may need to be set in the future, but we never import
         # these forms elsewhere, so there's no need to set it now.
 
@@ -995,9 +1060,11 @@ class DatabaseTable(models.Model):
         ```
         """
 
-        all_columns = cls.base_filters.keys()
+        all_columns = cls.api_filter.base_filters.keys()
         columns_w_mixin = [
-            column for mixin in cls.get_mixins() for column in mixin.base_filters.keys()
+            column
+            for mixin in cls.get_mixins()
+            for column in mixin.api_filter.base_filters.keys()
         ]
         extra_columns = [
             column
@@ -1005,12 +1072,3 @@ class DatabaseTable(models.Model):
             if column not in columns_w_mixin and column != "id"
         ]
         return extra_columns
-
-    def skip_filter(self, queryset, name, value):
-        """
-        For filter fields that use this method, nothing is done to queryset. This
-        is because the filter is typically used within another field. For example,
-        the `include_subsystems` field is not applied to the queryset, but it
-        is used within the `filter_chemical_system` method.
-        """
-        return queryset
