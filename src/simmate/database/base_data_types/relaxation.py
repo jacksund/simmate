@@ -105,6 +105,17 @@ class Relaxation(Structure, Thermodynamics, Calculation):
         + Structure.base_info
         + Calculation.base_info
     )
+    
+    api_filter_fields = dict(
+        volume_change=["range"],
+        band_gap=["exact", "range"],
+        is_gap_direct=["exact"],
+        energy_fermi=["range"],
+        conduction_band_minimum=["range"],
+        valence_band_maximum=["range"],
+        **Structure.api_filter_fields,
+        **Calculation.api_filter_fields,
+    )
 
     # OPTIMIZE: should I include this electronic data?
     # This data here is something we only get for the final structure, so it
@@ -385,6 +396,12 @@ class IonicStep(Structure, Thermodynamics, Forces):
 
     base_info = (
         ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info
+    )
+    
+    api_filter_fields = dict(
+        **Structure.get_fields(),
+        **Thermodynamics.get_fields(),
+        **Forces.get_fields(),
     )
 
     number = table_column.IntegerField()

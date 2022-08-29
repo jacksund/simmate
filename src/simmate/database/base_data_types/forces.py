@@ -14,6 +14,13 @@ class Forces(DatabaseTable):
         "site_forces",
         "lattice_stress",
     ]
+    
+    api_filter_fields = dict(
+        site_force_norm_max=["range"],
+        site_forces_norm_per_atom=["range"],
+        lattice_stress_norm=["range"],
+        lattice_stress_norm_per_atom=["range"],
+    )
 
     site_forces = table_column.JSONField(blank=True, null=True)
     """

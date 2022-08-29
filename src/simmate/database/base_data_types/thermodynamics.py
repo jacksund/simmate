@@ -19,6 +19,15 @@ class Thermodynamics(DatabaseTable):
         abstract = True
 
     base_info = ["energy"]
+    
+    api_filter_fields = dict(
+        energy=["range"],
+        energy_per_atom=["range"],
+        energy_above_hull=["range"],
+        is_stable=["exact"],
+        formation_energy=["range"],
+        formation_energy_per_atom=["range"],
+    )
 
     energy = table_column.FloatField(blank=True, null=True)
     """

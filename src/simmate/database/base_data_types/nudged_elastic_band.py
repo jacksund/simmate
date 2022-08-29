@@ -19,6 +19,15 @@ from simmate.toolkit.diffusion import MigrationHop as ToolkitMigrationHop
 class DiffusionAnalysis(Structure):
     class Meta:
         app_label = "workflows"
+    
+    api_filter_fields = dict(
+        migrating_specie=["exact"],
+        vacancy_mode=["exact"],
+        atomic_fraction=["range"],
+        barrier_cell=["range"],
+        npaths_involved=["range"],
+        **Structure.get_fields()
+    )
 
     migrating_specie = table_column.CharField(max_length=4, blank=True, null=True)
     """
@@ -146,6 +155,16 @@ class MigrationHop(DatabaseTable):
         "index_end",
         "number",
     ]
+    
+    api_filter_fields = dict(
+        site_start=["exact"],
+        site_end=["exact"],
+        number=["range"],
+        length=["range"],
+        dimension_path=["range"],
+        dimension_host_lattice=["range"],
+        energy_barrier=["range"],
+    )
 
     # OPTIMIZE: site_start and site_end
     # Really, this is a list of float values, but I save it as a string.
@@ -396,6 +415,14 @@ class MigrationImage(Structure):
         "structure_distance",
         "energy",
     ]
+    
+    api_filter_fields = dict(
+        number=["exact"],
+        force_tangent=["range"],
+        energy=["range"],
+        structure_distance=["range"],
+        **Structure.get_fields()
+    )
 
     number = table_column.IntegerField()
     """
