@@ -221,7 +221,7 @@ class Structure(DatabaseTable):
         # from pymatgen.analysis.prototypes import AflowPrototypeMatcher
         # prototype = AflowPrototypeMatcher().get_prototypes(structure)
         # prototype_name = prototype[0]["tags"]["mineral"] if prototype else None
-        # Alternatively, add as a method to the table, similar to 
+        # Alternatively, add as a method to the table, similar to
         # the "update_all_stabilities" for thermodynamics
 
         # Given a pymatgen structure object, this will return a database structure
