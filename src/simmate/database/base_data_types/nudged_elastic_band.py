@@ -26,7 +26,6 @@ class DiffusionAnalysis(Structure):
         atomic_fraction=["range"],
         barrier_cell=["range"],
         npaths_involved=["range"],
-        **Structure.api_filters,
     )
 
     migrating_specie = table_column.CharField(max_length=4, blank=True, null=True)
@@ -421,7 +420,6 @@ class MigrationImage(Structure):
         force_tangent=["range"],
         energy=["range"],
         structure_distance=["range"],
-        **Structure.api_filters,
     )
 
     number = table_column.IntegerField()

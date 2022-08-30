@@ -45,40 +45,6 @@ class Structure(DatabaseTable):
         ),
     )
 
-    def filter_chemical_system(self, queryset, name, value):
-        # name/value here are the key/value pair for chemical system
-
-        # Grab the "include_subsystems" field from the filter form. Note, this
-        # value will be given as a string which we convert to a python boolean
-        include_subsystems = self.data.dict().get("include_subsystems", "false")
-        include_subsystems = True if include_subsystems == "true" else False
-
-        # TODO:
-        # Make sure that the chemical system is made of valid elements and
-        # separated by hyphens
-
-        # check if the user wants subsystems included (This will be True or False)
-        if include_subsystems:
-            systems_cleaned = get_chemical_subsystems(value)
-
-        # otherwise just clean the single system
-        else:
-            # Convert the system to a list of elements
-            systems_cleaned = value.split("-")
-            # now recombine the list back into alphabetical order
-            systems_cleaned = ["-".join(sorted(systems_cleaned))]
-            # NOTE: we call this "systems_cleaned" and put it in a list so
-            # that our other methods don't have to deal with multiple cases
-            # when running a django filter.
-
-        filtered_queryset = queryset.filter(chemical_system__in=systems_cleaned)
-
-        # now return the cleaned value. Note that this is now a list of
-        # chemical systems, where all elements are in alphabetical order.
-        return filtered_queryset
-
-    # ----------------------------
-
     structure_string = table_column.TextField(blank=True, null=True)
     """
     The core structure information, which is written to a string and in a 
@@ -194,6 +160,38 @@ class Structure(DatabaseTable):
     # criteria, you can still do this in python and pandas! Just not at the
     # SQL level
 
+    def filter_chemical_system(self, queryset, name, value):
+        # name/value here are the key/value pair for chemical system
+
+        # Grab the "include_subsystems" field from the filter form. Note, this
+        # value will be given as a string which we convert to a python boolean
+        include_subsystems = self.data.dict().get("include_subsystems", "false")
+        include_subsystems = True if include_subsystems == "true" else False
+
+        # TODO:
+        # Make sure that the chemical system is made of valid elements and
+        # separated by hyphens
+
+        # check if the user wants subsystems included (This will be True or False)
+        if include_subsystems:
+            systems_cleaned = get_chemical_subsystems(value)
+
+        # otherwise just clean the single system
+        else:
+            # Convert the system to a list of elements
+            systems_cleaned = value.split("-")
+            # now recombine the list back into alphabetical order
+            systems_cleaned = ["-".join(sorted(systems_cleaned))]
+            # NOTE: we call this "systems_cleaned" and put it in a list so
+            # that our other methods don't have to deal with multiple cases
+            # when running a django filter.
+
+        filtered_queryset = queryset.filter(chemical_system__in=systems_cleaned)
+
+        # now return the cleaned value. Note that this is now a list of
+        # chemical systems, where all elements are in alphabetical order.
+        return filtered_queryset
+
     @classmethod
     def _from_toolkit(
         cls,
@@ -223,6 +221,8 @@ class Structure(DatabaseTable):
         # from pymatgen.analysis.prototypes import AflowPrototypeMatcher
         # prototype = AflowPrototypeMatcher().get_prototypes(structure)
         # prototype_name = prototype[0]["tags"]["mineral"] if prototype else None
+        # Alternatively, add as a method to the table, similar to 
+        # the "update_all_stabilities" for thermodynamics
 
         # Given a pymatgen structure object, this will return a database structure
         # object, but will NOT save it to the database yet. The kwargs input

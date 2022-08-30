@@ -36,10 +36,6 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         energy_fermi=["range"],
         conduction_band_minimum=["range"],
         valence_band_maximum=["range"],
-        **Structure.api_filters,
-        **Forces.api_filters,
-        **Thermodynamics.api_filters,
-        **Calculation.api_filters,
     )
 
     # OPTIMIZE: should I include this electronic data?

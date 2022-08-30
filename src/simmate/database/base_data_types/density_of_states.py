@@ -143,12 +143,6 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
 
     base_info = Structure.base_info + DensityofStates.base_info + Calculation.base_info
 
-    api_filters = {
-        **Structure.api_filters,
-        **DensityofStates.api_filters,
-        **Calculation.api_filters,
-    }
-
     def update_from_vasp_run(
         self, vasprun: Vasprun, corrections: list, directory: Path
     ):

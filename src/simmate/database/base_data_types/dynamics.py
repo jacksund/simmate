@@ -35,8 +35,6 @@ class DynamicsRun(Structure, Calculation):
         temperature_end=["range"],
         time_step=["range"],
         nsteps=["range"],
-        **Structure.api_filters,
-        **Calculation.api_filters,
     )
 
     temperature_start = table_column.IntegerField(blank=True, null=True)
@@ -141,9 +139,6 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
     api_filters = dict(
         number=["range"],
         temperature=["range"],
-        **Structure.api_filters,
-        **Thermodynamics.api_filters,
-        **Forces.api_filters,
     )
 
     number = table_column.IntegerField()
