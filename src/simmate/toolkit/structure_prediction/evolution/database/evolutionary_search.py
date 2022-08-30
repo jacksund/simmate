@@ -35,7 +35,7 @@ class FixedCompositionSearch(DatabaseTable):
 
     # Import path for the workflow and the database table of results
     subworkflow_name = table_column.CharField(max_length=200)
-    subworkflow_kwargs = table_column.JSONField(default={})
+    subworkflow_kwargs = table_column.JSONField(default=dict)
     fitness_field = table_column.CharField(max_length=200)
 
     # Other settings for the search
@@ -48,9 +48,9 @@ class FixedCompositionSearch(DatabaseTable):
 
     # Key classes to use during the search
     selector_name = table_column.CharField(max_length=200)
-    selector_kwargs = table_column.JSONField(default={})
+    selector_kwargs = table_column.JSONField(default=dict)
     validator_name = table_column.CharField(max_length=200)
-    validator_kwargs = table_column.JSONField(default={})
+    validator_kwargs = table_column.JSONField(default=dict)
     # stop_condition_name ---> assumed for now
     # information about the singleshot_sources and steadystate_sources
     # are stored within the IndividualSources datatable

@@ -27,7 +27,7 @@ class WorkItem(DatabaseTable):
     class Meta:
         app_label = "workflow_engine"
 
-    tags = table_column.JSONField(default=[])
+    tags = table_column.JSONField(default=list)
     """
     List of tags to submit the task with, which helps with submitting workers
     for a specific type of task/workflow. (e.g. ["simmate", "custom"])
