@@ -17,18 +17,12 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     class Meta:
         app_label = "workflows"
 
-    base_info = (
-        [
-            "valence_band_maximum",
-            "conduction_band_minimum",
-            "energy_fermi",
-            "is_gap_direct",
-        ]
-        + Structure.base_info
-        + Thermodynamics.base_info
-        + Forces.base_info
-        + Calculation.base_info
-    )
+    archive_fields = [
+        "valence_band_maximum",
+        "conduction_band_minimum",
+        "energy_fermi",
+        "is_gap_direct",
+    ]
 
     api_filters = dict(
         band_gap=["range"],

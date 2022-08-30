@@ -12,7 +12,7 @@ class Structure(DatabaseTable):
     class Meta:
         abstract = True
 
-    base_info = ["structure_string"]
+    archive_fields = ["structure_string"]
 
     api_filters = dict(
         nsites=["range"],

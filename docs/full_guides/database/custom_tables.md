@@ -53,25 +53,10 @@ from simmate.database.base_data_types import (
 # Inherit from all the types you'd like to store data on. All of the columns
 # define in each of these types will be incorporated into your table.
 class MyCustomTable(Structure, Thermodynamics):
-
-    # If you are not using the `Calculation` mix-in, you'll have to specify
-    # which app this table is associated with. To determine what you set here,
-    # you should have completed the advanced simmate tutorials (08-09).
-    class Meta:
-        app_label = "my_custom_app"
     
-    # Define the "raw data" for your table. This is required if you'd like to
-    # use the `to_archive` method.
-    base_info = (
-        [
-            "custom_column_01",
-            "custom_column_02",
-        ]
-        + Structure.base_info
-        + Thermodynamics.base_info
-    )
+    # ----- Table columns -----
     
-    # Add any custom columns you'd like
+    # Add any custom columns you'd like.
     # These follow the types supported by Django.
     
     # This custom field will be required and must be supplied at creation
@@ -81,6 +66,29 @@ class MyCustomTable(Structure, Thermodynamics):
     # create an entry to start a calculation and then fill in data after a
     # it completes.
     custom_column_02 = table_column.FloatField(null=True, blank=True)
+
+    # ----- Extra features -----
+
+    # If you are not using the `Calculation` mix-in, you'll have to specify
+    # which app this table is associated with. To determine what you set here,
+    # you should have completed the advanced simmate tutorials (08-09).
+    class Meta:
+        app_label = "my_custom_app"
+    
+    # (OPTIONAL) Define the "raw data" for your table. This is required if 
+    # you'd like to use the `to_archive` method. Fields from the mix-in 
+    # will automatically be added.
+    archive_fields = [
+        "custom_column_01",
+        "custom_column_02",
+    ]
+    
+    # (OPTIONAL) Define how you would like data to be accessible in the REST 
+    # API from the website server.
+    api_filters = {
+        "custom_column_01": ["range"],
+        "custom_column_02": ["range"],
+    }
 
 ```
 

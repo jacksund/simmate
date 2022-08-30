@@ -22,14 +22,20 @@ class AflowPrototype(Structure):
     class Meta:
         app_label = "third_parties"
 
-    base_info = [
-        "structure_string",
+    archive_fields = [
         "mineral_name",
         "aflow_id",
         "pearson_symbol",
         "strukturbericht_symbol",
         "nsites_wyckoff",
     ]
+    api_filters = dict(
+        mineral_name=["exact"],
+        aflow_id=["exact"],
+        pearson_symbol=["exact"],
+        strukturbericht_symbol=["exact"],
+        nsites_wyckoff=["range"],
+    )
     source = "AFLOW Encyclopedia of Crystallographic Prototypes"
     source_doi = "https://doi.org/10.1016/j.commatsci.2017.01.017"
     remote_archive_link = "https://archives.simmate.org/AflowPrototype-2022-06-23.zip"

@@ -23,7 +23,8 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 -->
 
 **Enhancements**
-- REST API fields can now be specified directly with `api_filters` attribute of any `DatabaseTable` class & fields from mix-ins are automatically added
+- REST API fields can now be specified directly with the `api_filters` attribute of any `DatabaseTable` class & fields from mix-ins are automatically added
+- add `archive_fields` attribute that sets the "raw data" for the database table & fields from mix-ins are automatically added
 
 **Refactors**
 - the `website.core_components.filters` module has been absorbed into the `DatabaseTable` class/module

@@ -16,7 +16,6 @@ class AflowStructure(Structure, Thermodynamics):
     class Meta:
         app_label = "third_parties"
 
-    base_info = ["id", "structure_string", "energy"]
     source = "AFLOW"
     source_doi = "https://doi.org/10.1016/j.commatsci.2012.02.005"
 

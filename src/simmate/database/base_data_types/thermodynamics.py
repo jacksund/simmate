@@ -18,7 +18,7 @@ class Thermodynamics(DatabaseTable):
     class Meta:
         abstract = True
 
-    base_info = ["energy"]
+    archive_fields = ["energy"]
 
     api_filters = dict(
         energy=["range"],

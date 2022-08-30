@@ -14,7 +14,10 @@ class JarvisStructure(Structure):
     class Meta:
         app_label = "third_parties"
 
-    base_info = ["id", "structure_string", "energy_above_hull"]
+    archive_fields = ["energy_above_hull"]
+    api_filters = dict(
+        energy_above_hull=["range"],
+    )
     source = "JARVIS"
     source_doi = "https://doi.org/10.1038/s41524-020-00440-1"
     remote_archive_link = "https://archives.simmate.org/JarvisStructure-2022-01-26.zip"

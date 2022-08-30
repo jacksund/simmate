@@ -16,18 +16,22 @@ class MatprojStructure(Structure, Thermodynamics):
     class Meta:
         app_label = "third_parties"
 
-    base_info = [
-        "id",
-        "structure_string",
-        "energy",
+    archive_fields = [
         "energy_uncorrected",
         "band_gap",
         "is_gap_direct",
         "is_magnetic",
         "total_magnetization",
         "is_theoretical",
-        "updated_at",
     ]
+    api_filters = dict(
+        energy_uncorrected=["range"],
+        band_gap=["range"],
+        is_gap_direct=["exact"],
+        is_magnetic=["exact"],
+        total_magnetization=["range"],
+        is_theoretical=["exact"],
+    )
     source = "Materials Project"
     source_doi = "https://doi.org/10.1063/1.4812323"
     remote_archive_link = "https://archives.simmate.org/MatprojStructure-2022-08-27.zip"

@@ -120,20 +120,12 @@ from simmate.database.base_data_types import (
 
 class ExampleProviderData(Structure, Thermodynamics):
     
+    # ----- Table columns + Required settings -----
+    
     # This Meta class tells Simmate where to store the table within our database.
     # All providers with have the exact same thing here. 
     class Meta:
         app_label = "third_parties"
-
-    # This attribute tells Simmate what the "raw data" is. All table columns
-    # can be recreated using the data here.
-    base_info = [
-        "id", # required
-        "structure_string", # required for Structure mix-in
-        "energy",  # required for Thermodynamics mix-in
-        "custom_column_01",
-        "custom_column_02",
-    ]
 
     # By default, the ID column is an IntegerField, but if your data uses a string
     # like "mp-1234" to denote structures, you can update this column to
@@ -156,6 +148,24 @@ class ExampleProviderData(Structure, Thermodynamics):
     
     # Leave this as None for now. We will update this attribute in a later step.
     remote_archive_link = None
+    
+    
+    # ----- Extra optionalfeatures -----
+        
+    # (OPTIONAL) Define the "raw data" for your table. This is required if 
+    # you'd like to use the `to_archive` method. Fields from the mix-in 
+    # will automatically be added.
+    archive_fields = [
+        "custom_column_01",
+        "custom_column_02",
+    ]
+    
+    # (OPTIONAL) Define how you would like data to be accessible in the REST 
+    # API from the website server.
+    api_filters = {
+        "custom_column_01": ["range"],
+        "custom_column_02": ["range"],
+    }
     
     # (OPTIONAL) if you host your data on a separate website, you can specify 
     # how to access that structure here. This is important if you want users
