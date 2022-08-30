@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import logging
 import shutil
 from pathlib import Path
 
-import yaml
 from pymatgen.analysis.structure_matcher import StructureMatcher
-from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 from simmate.calculators.vasp.inputs import Incar, Kpoints, Poscar, Potcar
@@ -292,66 +289,21 @@ class VaspWorkflow(S3Workflow):
         final energy, and (if requested) confirm convergence. I will likely make
         this a common function for this vasp module down the road.
         """
-
-        # load the xml file and all of the vasprun data
-        try:
-            vasprun = Vasprun(
-                filename=directory / "vasprun.xml",
-                exception_on_bad_xml=True,
-            )
-        except:
-            logging.warning(
-                "XML is malformed. This typically means there's an error with your"
-                " calculation that wasn't caught by your ErrorHandlers. We try"
-                " salvaging data here though."
-            )
-            vasprun = Vasprun(
-                filename=directory / "vasprun.xml",
-                exception_on_bad_xml=False,
-            )
-            vasprun.final_structure = vasprun.structures[-1]
-        # BUG: This try/except is 100% just for my really rough calculations
-        # where I don't use any ErrorHandlers and still want the final structure
-        # regarless of what when wrong. In the future, I should consider writing
-        # a separate method for those that loads the CONTCAR and moves on.
+        
+        # use the databsae to load the results into a database object
+        database_entry = cls.database_table.from_directry(directory)
 
         # write output files/plots for the user to quickly reference
-        cls._write_output_summary(directory, vasprun)
+        database_entry.write_summary(directory)
 
         # confirm that the calculation converged (ionicly and electronically)
         if cls.confirm_convergence:
             assert vasprun.converged
+            # vasprun.converged_electronic
+            # vasprun.converged_ionic
 
         # return vasprun object
-        return vasprun
-
-    @staticmethod
-    def _write_output_summary(directory: Path, vasprun: Vasprun):
-        """
-        This prints a "simmate_summary.yaml" file with key output information.
-
-        This method should not be called directly as it used within workup().
-        """
-        # OPTIMIZE: Ideally, I could take the vasprun object and run to_json,
-        # but this output is extremely difficult to read.
-
-        results = vasprun.as_dict()["output"]
-
-        summary = {
-            "structure_final": "The final structure is located in the CONTCAR file",
-            "energy_final": float(results.get("final_energy", None)),
-            "energy_final_per_atom": float(results.get("final_energy_per_atom", None)),
-            "converged_electroinc": vasprun.converged_electronic,
-            "converged_ionic": vasprun.converged_ionic,
-            "fermi_energy": results.get("efermi", None),
-            "valence_band_maximum": results.get("vbm", None),
-            "conduction_band_minimum": results.get("vbm", None),
-        }
-
-        summary_filename = directory / "simmate_summary.yaml"
-        with summary_filename.open("w") as file:
-            content = yaml.dump(summary)
-            file.write(content)
+        return database_entry
 
     @classmethod
     def get_config(cls):

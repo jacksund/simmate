@@ -20,6 +20,7 @@ def test_static_energy_table(structure):
     structure_db = DynamicsRun.from_run_context(
         run_id="example-id-123",
         workflow_name="example.test.workflow",
+        workflow_version="1.2.3",
         structure=structure,
     )
     structure_db.save()
@@ -29,6 +30,7 @@ def test_static_energy_table(structure):
     structure_db2 = DynamicsRun.from_run_context(
         run_id="example-id-123",
         workflow_name="example.test.workflow",
+        workflow_version="1.2.3",
     )
     assert structure_db.id == structure_db.id
 

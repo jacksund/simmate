@@ -151,9 +151,14 @@ class Workflow:
             source=source,
             **kwargs,
         )
+        
+        # Finally run the core part of the workflow. This should return a 
+        # database object if we have "use_database=True"
         result = cls.run_config(**kwargs_cleaned)
+        
+        # save the result to the database
         if cls.use_database:
-            result["calculation_id"] = cls._save_to_database(
+            database_entry = cls._save_to_database(
                 result,
                 run_id=kwargs_cleaned["run_id"],
             )
@@ -164,8 +169,12 @@ class Workflow:
             logging.info("Compressing result to a ZIP file.")
             make_archive(kwargs_cleaned["directory"])
 
+        # If we made it this far, we successfully completed the workflow run
         logging.info(f"Completed {cls.name_full}")
-        return result
+        
+        # If we are using the database, then we return the database object.
+        # Otherwise, we want to return the original result from run_config
+        return database_entry if cls.use_databsae else result
 
     @classmethod
     def run_cloud(
@@ -327,11 +336,9 @@ class Workflow:
         """
         The database table where calculation information (such as the run_id)
         is stored. The table should use `simmate.database.base_data_types.Calculation`
-
-        In many cases, this table will contain all of the results you need. However,
-        pay special attention to NestedWorkflows, where your results are often tied
-        to a final task.
+        as one of its mix-ins.
         """
+
         flow_type = cls.name_type
         flow_preset = cls.name_preset
 
@@ -374,37 +381,40 @@ class Workflow:
 
             return CustomizedCalculation
         else:
-            raise NotImplementedError("Unable to detect proper database table")
+            raise NotImplementedError(
+                "Unable to detect proper database table. Are you sure your workflow "
+                "should be using a table? If not, set `use_database=False` on your "
+                "workflow as shown in the 'basic' example workflow from the guides."
+            )
 
     @classmethod
     @property
     def all_results(cls):  # -> SearchResults
-        # BUG: pdoc raises an error because name_full fails.
-        try:
-            return cls.database_table.objects.filter(workflow_name=cls.name_full).all()
-        except:
-            return
+        """
+        Filters results from the database table down to the results from this
+        workflow (i.e. matching workflow_name)
+        """
+        return cls.database_table.objects.filter(workflow_name=cls.name_full).all()
 
     @classmethod
-    def _save_to_database(cls, result: any, run_id: str):
-
-        # split our results and corrections (which are given as a dict) into
-        # separate variables
-        vasprun = result["result"]
-        corrections = result["corrections"]
-        directory = result["directory"]
+    def _save_to_database(cls, result: any, run_id: str, directory: Path, **kwargs):
+        """
+        Take the output of the `run_config` and any extra information and 
+        saves it to the database.
+        """
 
         # load the calculation entry for this workflow run. This should already
         # exist thanks to the load_input_and_register task.
         calculation = cls.database_table.from_run_context(
             run_id=run_id,
             workflow_name=cls.name_full,
+            workflow_version=cls.version,
         )
 
         # now update the calculation entry with our results
-        calculation.update_from_vasp_run(vasprun, corrections, directory)
+        calculation.update_from_vasp_run(directory, **kwargs)
 
-        return calculation.id
+        return calculation
 
     # -------------------------------------------------------------------------
     # Properties that enforce the naming convention for workflows
@@ -875,12 +885,14 @@ class Workflow:
             parameters_serialized = cls._serialize_parameters(**register_kwargs_cleaned)
             calculation = database_table.from_run_context(
                 workflow_name=cls.name_full,
+                workflow_version=cls.version,
                 **parameters_serialized,
             )
         else:
             # load/create the calculation for this workflow run
             calculation = database_table.from_run_context(
                 workflow_name=cls.name_full,
+                workflow_version=cls.version,
                 **register_kwargs_cleaned,
             )
 

@@ -61,6 +61,7 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
         calculation = cls.database_table.from_run_context(
             run_id=run_id,
             workflow_name=cls.name_full,
+            workflow_version=cls.version,
         )
         # BUG: can't use context to grab the id because workflow tasks generate a
         # different id than the main workflow

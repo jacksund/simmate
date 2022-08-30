@@ -15,6 +15,7 @@ def test_calculation_table():
     calc_db = TestCalculation.from_run_context(
         run_id="example-id-123",
         workflow_name="example.test.workflow",
+        workflow_version="1.2.3",
     )
     calc_db.save()
 
@@ -23,6 +24,7 @@ def test_calculation_table():
     calc_db2 = TestCalculation.from_run_context(
         run_id="example-id-123",
         workflow_name="example.test.workflow",
+        workflow_version="1.2.3",
     )
     assert calc_db.id == calc_db2.id
 
@@ -46,11 +48,13 @@ def test_calculation_archives():
     calc_db = TestCalculation.from_run_context(
         run_id="example-id-123",
         workflow_name="example.test.workflow",
+        workflow_version="1.2.3",
     )
     calc_db.save()
     calc_db2 = TestCalculation.from_run_context(
         run_id="example-id-123",
         workflow_name="example.test.workflow",
+        workflow_version="1.2.3",
     )
     calc_db2.save()
 

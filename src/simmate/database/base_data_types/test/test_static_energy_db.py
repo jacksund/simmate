@@ -18,6 +18,7 @@ def test_static_energy_table(structure, tmp_path):
         run_id="example-id-123",
         workflow_name="example.test.workflow",
         structure=structure,
+        workflow_version="1.2.3",
     )
     structure_db.save()
 
@@ -26,6 +27,7 @@ def test_static_energy_table(structure, tmp_path):
     structure_db2 = StaticEnergy.from_run_context(
         run_id="example-id-123",
         workflow_name="example.test.workflow",
+        workflow_version="1.2.3",
     )
     assert structure_db.id == structure_db2.id
 

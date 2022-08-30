@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import logging
 from pathlib import Path
 
+import yaml
 from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.database.base_data_types import (
@@ -59,12 +61,51 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     The valence band maximum in eV.
     """
 
+    def write_output_summary(self, directory: Path):
+        """
+        This writes a "simmate_summary.yaml" file with key output information.
+        """
+        # OPTIMIZE: Ideally, I could take the vasprun object and run to_json,
+        # but this output is extremely difficult to read.
+
+        summary_filename = directory / "simmate_summary.yaml"
+        with summary_filename.open("w") as file:
+            content = yaml.dump(self.__dict__)  # OPTIMIZE ---> write a summary property...?
+            file.write(content)
+
     @classmethod
     def from_directory(cls, directory: Path):
         # I assume the directory is from a vasp calculation, but I need to update
         # this when I begin adding new calculators.
+        return cls.from_vasp_directory(directory)
+
+    @classmethod
+    def from_vasp_directory(cls, directory: Path):
+       
         vasprun_filename = directory / "vasprun.xml"
-        vasprun = Vasprun(vasprun_filename)
+        
+        # load the xml file and all of the vasprun data
+        try:
+            vasprun = Vasprun(
+                filename=vasprun_filename,
+                exception_on_bad_xml=True,
+            )
+        except:
+            logging.warning(
+                "XML is malformed. This typically means there's an error with your"
+                " calculation that wasn't caught by your ErrorHandlers. We try"
+                " salvaging data here though."
+            )
+            vasprun = Vasprun(
+                filename=vasprun_filename,
+                exception_on_bad_xml=False,
+            )
+            vasprun.final_structure = vasprun.structures[-1]
+        # BUG: This try/except is just for my really rough calculations
+        # where I don't use any ErrorHandlers and still want the final structure
+        # regarless of what went wrong. In the future, I should consider writing
+        # a separate method for those that loads the CONTCAR and moves on.
+
         return cls.from_vasp_run(vasprun)
 
     @classmethod
