@@ -33,6 +33,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 **Fixes**
 - fix bug in windows dev env where `simmate run-server` fails to find python path
+- fix bug in `workflows explore` command where 'vasp' is the assumed calculator name
 
 
 # v0.10.0 (2022.08.29)

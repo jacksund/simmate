@@ -25,6 +25,10 @@ from simmate.workflows.utilities import get_workflow
 
 
 class StructurePrediction__Python__BinaryComposition(Workflow):
+    """
+    Runs an evolutionary search algorithm to predict the most stable structures
+    of a binary phase system (e.g Na-Cl or Y-C)
+    """
 
     use_database = False
 

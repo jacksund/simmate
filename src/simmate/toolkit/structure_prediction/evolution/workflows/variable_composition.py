@@ -11,6 +11,12 @@ from simmate.workflow_engine import Workflow
 
 
 class StructurePrediction__Python__VariableComposition(Workflow):
+    """
+    Runs an evolutionary search algorithm to predict the most stable structure
+    of a specific composition but with variable number of sites in the unitcell.
+
+    For example, this would be Ca2N and up to 12 atoms (Ca8N4).
+    """
 
     use_database = False
 

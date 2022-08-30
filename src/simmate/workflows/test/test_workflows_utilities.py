@@ -6,6 +6,7 @@ from simmate.conftest import copy_test_files
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import (
     get_list_of_all_workflows,
+    get_list_of_calculators_by_type,
     get_list_of_workflows_by_type,
     get_unique_parameters,
     get_workflow,
@@ -72,6 +73,14 @@ def test_list_of_all_workflows():
     ]
 
 
+def test_list_of_calculators_by_type():
+
+    assert get_list_of_calculators_by_type("static-energy") == ["vasp"]
+
+    with pytest.raises(TypeError):
+        get_list_of_calculators_by_type("non-existant-type")
+
+
 def test_list_of_workflows_by_type():
 
     assert get_list_of_workflows_by_type("static-energy") == [
@@ -82,6 +91,14 @@ def test_list_of_workflows_by_type():
         "static-energy.vasp.mvl-neb-endpoint",
         "static-energy.vasp.quality04",
     ]
+
+    assert (
+        get_list_of_workflows_by_type(
+            "static-energy",
+            calculator_name="non-existant",
+        )
+        == []
+    )
 
     with pytest.raises(TypeError):
         get_list_of_workflows_by_type("non-existant-type")

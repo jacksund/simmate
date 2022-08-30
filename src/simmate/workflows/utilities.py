@@ -41,8 +41,51 @@ def get_workflow_types():
     return workflow_types
 
 
+def get_list_of_calculators_by_type(
+    flow_type: str,
+    full_name: bool = True,
+) -> list[str]:
+    """
+    Returns a list of all the available calculators for a given workflow type.
+    """
+    # !!! This is largely a copy/paste of code from get_list_of_workflows_by_type.
+    # Consider merging during refactor.
+
+    # Make sure the type is supported
+    workflow_types = get_workflow_types()
+    if flow_type not in workflow_types:
+        raise TypeError(
+            f"{flow_type} is not allowed. Please use a workflow type from this"
+            f" list: {workflow_types}"
+        )
+
+    # switch the naming convention from "flow-name" to "flow_name".
+    flow_type_u = flow_type.replace("-", "_")
+
+    # grab the relevent module
+    flow_module = importlib.import_module(f"simmate.workflows.{flow_type_u}")
+
+    # This loop goes through all attributes (as strings) of the workflow module
+    # and select only those that are workflow or s3tasks.
+    calculator_names = []
+    for attr_name in dir(flow_module):
+        attr = getattr(flow_module, attr_name)
+        # OPTIMIZE: line below --> issubclass(attr, Workflow) --> raises error
+        if hasattr(attr, "run_config") and attr.__name__ != "Workflow":
+            # attr is now a workflow object (such as Relaxation__Vasp__Matproj)
+            # and we can grab whichever name we'd like from it and
+            # add the name to our list
+            if attr.name_calculator not in calculator_names:
+                calculator_names.append(attr.name_calculator)
+    # OPTIMIZE: is there a more efficient way to do this?
+
+    calculator_names.sort()
+    return calculator_names
+
+
 def get_list_of_workflows_by_type(
     flow_type: str,
+    calculator_name: str = None,
     full_name: bool = True,
 ) -> list[str]:
     """
@@ -72,10 +115,17 @@ def get_list_of_workflows_by_type(
         if hasattr(attr, "run_config") and attr.__name__ != "Workflow":
             # attr is now a workflow object (such as Relaxation__Vasp__Matproj)
             # and we can grab whichever name we'd like from it.
+
+            # if a calculator_name was given, then we need to limit the results
+            # to that specific calculator.
+            if calculator_name and attr.name_calculator != calculator_name:
+                continue  # Skip those that don't match
+
             if full_name:
                 workflow_name = attr.name_full
             else:
                 workflow_name = attr.name_preset
+
             # and add the name to our list
             workflow_names.append(workflow_name)
     # OPTIMIZE: is there a more efficient way to do this?
