@@ -30,7 +30,7 @@ class Calculation(DatabaseTable):
         workflow_name=["exact"],
         location=["exact"],
         directory=["exact"],
-        run_id=["range"],
+        run_id=["exact"],
     )
 
     workflow_name = table_column.CharField(

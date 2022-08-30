@@ -900,7 +900,9 @@ class DatabaseTable(models.Model):
 
         # Otherwise we need to go through the mix-ins and add their fields to
         # the list
-        all_fields += [mixin.archive_fields for mixin in cls.get_mixins()]
+        all_fields += [
+            field for mixin in cls.get_mixins() for field in mixin.archive_fields
+        ]
 
         # Sometimes a column will be disabled by adding "--" in front of the
         # column name. For example, "--band_gap" would exclude storing the band
