@@ -42,6 +42,12 @@ def list_options(options: list) -> int:
 
     """
 
+    # if only only option is given, we want to save the user time and just move to
+    # the next step
+    if len(options) == 1:
+        print(f"Automatically selected `{options[0]}` as it is the only option.")
+        return 0
+
     for i, item in enumerate(options):
         number = str(i + 1).zfill(2)
         print(f"\t({number}) {item}")
@@ -117,6 +123,7 @@ def explore():
     prefix = "\n\n[bold green]"
 
     from simmate.workflows.utilities import (
+        get_list_of_calculators_by_type,
         get_list_of_workflows_by_type,
         get_workflow,
         get_workflow_types,
@@ -127,17 +134,22 @@ def explore():
     type_index = list_options(workflow_types)
     selected_type = workflow_types[type_index]
 
-    # TODO: have the user select a calculator for this analysis. For now,
-    # we are assuming VASP because those are our only workflows
+    print(f"{prefix}Which calculator do you want to use?")
+    calculator_names = get_list_of_calculators_by_type(selected_type)
+    calc_index = list_options(calculator_names)
+    selected_calculator = calculator_names[calc_index]
 
     print(f"{prefix}What settings preset do you want to see the description for?")
-    presets = get_list_of_workflows_by_type(selected_type, full_name=False)
+    presets = get_list_of_workflows_by_type(
+        selected_type,
+        calculator_name=selected_calculator,
+        full_name=False,
+    )
     present_index = list_options(presets)
     selected_preset = presets[present_index]
 
-    final_workflow_name = selected_type + ".vasp." + selected_preset
-    # BUG: I assume vasp for now, but this should change when I add workflows
-    # from new calculators.
+    # combine selections into our final workflow name
+    final_workflow_name = f"{selected_type}.{selected_calculator}.{selected_preset}"
 
     print(f"{prefix}===================== {final_workflow_name} =====================")
 
@@ -160,7 +172,8 @@ def explore():
     console = Console()
 
     print(f"{prefix}Description:\n")
-    description = Markdown(dedent(workflow.__doc__))
+    doc = workflow.__doc__ or "No description provided"
+    description = Markdown(dedent(doc))
     console.print(description)
 
     print(f"{prefix}Parameters:\n")

@@ -8,6 +8,12 @@ from simmate.workflow_engine import Workflow
 
 
 class StructurePrediction__Python__NewIndividual(Workflow):
+    """
+    Generates a new individual for an evolutionary search algorithm.
+
+    Note, this workflow should not be called directly, but instead used within
+    higher level workflows (such as `fixed-composition`)
+    """
 
     use_database = False
 
