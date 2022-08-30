@@ -123,8 +123,8 @@ def explore():
     prefix = "\n\n[bold green]"
 
     from simmate.workflows.utilities import (
-        get_list_of_workflows_by_type,
         get_list_of_calculators_by_type,
+        get_list_of_workflows_by_type,
         get_workflow,
         get_workflow_types,
     )
@@ -141,7 +141,9 @@ def explore():
 
     print(f"{prefix}What settings preset do you want to see the description for?")
     presets = get_list_of_workflows_by_type(
-        selected_type, calculator_name=selected_calculator, full_name=False,
+        selected_type,
+        calculator_name=selected_calculator,
+        full_name=False,
     )
     present_index = list_options(presets)
     selected_preset = presets[present_index]
