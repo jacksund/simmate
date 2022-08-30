@@ -49,18 +49,20 @@ Using the "customized" workflow for a calculator (e.g. `customized.vasp.user-con
 workflow_name: customized.vasp.user-config
 workflow_base: static-energy.vasp.mit
 
-# The parameters starting with "custom__" indicates we are updating some class 
-# attribute. These fundamentally change the settings of a workflow.
+# "Updated settings" indicated that we are updating some class attribute. 
+# These fundamentally change the settings of a workflow. 
 # Currently, only updating dictionary-based attributes are supported
-custom__incar: 
-    ENCUT: 600
-    KPOINTS: 0.25
-custom__potcar_mappings:
-    Y: Y_sv
+updated_settings:
+    incar: 
+        ENCUT: 600
+        KPOINTS: 0.25
+    potcar_mappings:
+        Y: Y_sv
 
 # Then the remaining inputs are the same as the base workflow
-structure: POSCAR
-command: mpirun -n 5 vasp_std > vasp.out
+input_parameters:
+    structure: POSCAR
+    command: mpirun -n 5 vasp_std > vasp.out
 ```
 
 ``` bash

@@ -121,6 +121,17 @@ All of the most common material properties have workflows ready to go. These ran
     command: mpirun -n 8 vasp_std > vasp.out
     ```
 
+=== "toml"
+    ``` toml
+    # Workflows can also be ran from TOML-based configuration
+    # files, such as the one shown here (named `example.toml`).
+    # This would be submitted with the command:
+    #   `simmate workflows run example.toml`
+    workflow_name = "relaxation.vasp.matproj"
+    structure = "NaCl.cif"
+    command = "mpirun -n 8 vasp_std > vasp.out"
+    ```
+
 === "python"
     ``` python
     # Python let's you run workflows within scripts

@@ -291,57 +291,13 @@ def run_quick(context: Context, workflow_name: str):
 
 @workflows_app.command()
 def run(filename: Path):
-    """Runs a workflow locally where parameters are loaded from a yaml file"""
+    """
+    Runs a workflow locally where parameters are loaded from a yaml or toml file
+    """
 
-    import yaml
+    from simmate.workflow_engine import Workflow
 
-    with filename.open() as file:
-        parameters = yaml.full_load(file)  # this is updated below
-
-    from simmate.workflows.utilities import get_workflow
-
-    workflow = get_workflow(
-        # we pop the workflow name so that it is also removed from the rest of kwargs
-        workflow_name=parameters.pop("workflow_name"),
-        precheck_flow_exists=True,
-        print_equivalent_import=True,
-    )
-
-    # -------------------------------------------------------------------------
-
-    # SPECIAL CASE -- Running customized workflows from yaml.
-    # !!! When prefect 2.0 is available, I will be able to use **kwargs as an
-    # input for workflow parameters -- in which case, I can move this functionality
-    # to load_input_and_register.
-
-    # For customized workflows, we need to completely change the format
-    # that we provide the parameters. Customized workflows expect parameters
-    # broken into a dictionary of
-    #   {"workflow_base": ..., "input_parameters":..., "updated_settings": ...}
-    if "workflow_base" in parameters.keys():
-
-        parameters["input_parameters"] = {}
-        parameters["updated_settings"] = {}
-
-        for key, update_values in list(parameters.items()):
-            # Skip the base keys
-            if key in [
-                "workflow_base",
-                "input_parameters",
-                "updated_settings",
-            ]:
-                continue
-            # if there is no prefix, then we have a normal input parameter
-            elif not key.startswith("custom__"):
-                parameters["input_parameters"][key] = parameters.pop(key)
-            # Otherwise remove the prefix and add it to the custom settings.
-            else:
-                key_cleaned = key.removeprefix("custom__")
-                parameters["updated_settings"][key_cleaned] = parameters.pop(key)
-
-    # -------------------------------------------------------------------------
-
-    workflow.run(**parameters).result()
+    Workflow.run_from_file(filename).result()
 
 
 @workflows_app.command()
@@ -350,55 +306,7 @@ def run_cloud(filename: Path):
     Submits a workflow to cloud for remote running where parameters are loaded
     from a yaml file
     """
-    # !!! DEV NOTE: This is a copy/paste of the run() command. Condense these
-    # when refactoring
 
-    import yaml
+    from simmate.workflow_engine import Workflow
 
-    with filename.open() as file:
-        parameters = yaml.full_load(file)  # this is updated below
-
-    from simmate.workflows.utilities import get_workflow
-
-    workflow = get_workflow(
-        # we pop the workflow name so that it is also removed from the rest of kwargs
-        workflow_name=parameters.pop("workflow_name"),
-        precheck_flow_exists=True,
-        print_equivalent_import=True,
-    )
-
-    # -------------------------------------------------------------------------
-
-    # SPECIAL CASE -- Running customized workflows from yaml.
-    # !!! When prefect 2.0 is available, I will be able to use **kwargs as an
-    # input for workflow parameters -- in which case, I can move this functionality
-    # to load_input_and_register.
-
-    # For customized workflows, we need to completely change the format
-    # that we provide the parameters. Customized workflows expect parameters
-    # broken into a dictionary of
-    #   {"workflow_base": ..., "input_parameters":..., "updated_settings": ...}
-    if "workflow_base" in parameters.keys():
-
-        parameters["input_parameters"] = {}
-        parameters["updated_settings"] = {}
-
-        for key, update_values in list(parameters.items()):
-            # Skip the base keys
-            if key in [
-                "workflow_base",
-                "input_parameters",
-                "updated_settings",
-            ]:
-                continue
-            # if there is no prefix, then we have a normal input parameter
-            elif not key.startswith("custom__"):
-                parameters["input_parameters"][key] = parameters.pop(key)
-            # Otherwise remove the prefix and add it to the custom settings.
-            else:
-                key_cleaned = key.removeprefix("custom__")
-                parameters["updated_settings"][key_cleaned] = parameters.pop(key)
-
-    # -------------------------------------------------------------------------
-
-    workflow.run_cloud(**parameters)
+    Workflow.run_cloud_from_file(filename).result()
