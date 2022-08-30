@@ -12,7 +12,7 @@ from simmate.database.base_data_types import (
 
 class TestDatabaseTable(DatabaseTable):
 
-    base_info = ["column1", "column2"]
+    archive_fields = ["column1", "column2"]
 
     column1 = table_column.BooleanField()
     column2 = table_column.FloatField()

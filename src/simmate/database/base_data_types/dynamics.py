@@ -132,9 +132,7 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
     class Meta:
         app_label = "workflows"
 
-    base_info = (
-        ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info
-    )
+    archive_fields = ["number"]
 
     api_filters = dict(
         number=["range"],

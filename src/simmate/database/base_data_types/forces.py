@@ -10,7 +10,7 @@ class Forces(DatabaseTable):
     class Meta:
         abstract = True
 
-    base_info = [
+    archive_fields = [
         "site_forces",
         "lattice_stress",
     ]

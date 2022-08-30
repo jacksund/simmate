@@ -15,7 +15,8 @@ class OqmdStructure(Structure):
     class Meta:
         app_label = "third_parties"
 
-    base_info = ["id", "structure_string", "formation_energy"]
+    archive_fields = ["formation_energy"]
+    api_filters = dict(formation_energy=["range"])
     source = "The Open Quantum Materials Database"
     source_doi = "https://doi.org/10.1007/s11837-013-0755-4"
     remote_archive_link = "https://archives.simmate.org/OqmdStructure-2022-02-22.zip"

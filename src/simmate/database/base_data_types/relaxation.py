@@ -94,17 +94,13 @@ class Relaxation(Structure, Thermodynamics, Calculation):
     class Meta:
         app_label = "workflows"
 
-    base_info = (
-        [
-            "band_gap",
-            "is_gap_direct",
-            "energy_fermi",
-            "conduction_band_minimum",
-            "valence_band_maximum",
-        ]
-        + Structure.base_info
-        + Calculation.base_info
-    )
+    archive_fields = [
+        "band_gap",
+        "is_gap_direct",
+        "energy_fermi",
+        "conduction_band_minimum",
+        "valence_band_maximum",
+    ]
 
     api_filters = dict(
         volume_change=["range"],
@@ -113,8 +109,6 @@ class Relaxation(Structure, Thermodynamics, Calculation):
         energy_fermi=["range"],
         conduction_band_minimum=["range"],
         valence_band_maximum=["range"],
-        **Structure.api_filters,
-        **Calculation.api_filters,
     )
 
     # OPTIMIZE: should I include this electronic data?
@@ -394,14 +388,10 @@ class IonicStep(Structure, Thermodynamics, Forces):
     class Meta:
         app_label = "workflows"
 
-    base_info = (
-        ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info
-    )
+    archive_fields = ["number"]
 
     api_filters = dict(
-        **Structure.api_filters,
-        **Thermodynamics.api_filters,
-        **Forces.api_filters,
+        numer=["range"],
     )
 
     number = table_column.IntegerField()

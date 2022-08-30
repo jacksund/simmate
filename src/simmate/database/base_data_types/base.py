@@ -123,8 +123,8 @@ class SearchResults(models.QuerySet):
 
     def to_archive(self, filename: Path | str = None):
         """
-        Writes a compressed zip file using the table's base_info attribute.
-        Underneath, the file is written in a csv format.
+        Writes a compressed zip file using the table's `archive_fieldset`
+        attribute. Underneath, the file is written in a csv format.
 
         This is useful for small making archive files and reloading fixtures
         to a separate database.
@@ -162,22 +162,16 @@ class SearchResults(models.QuerySet):
         # convert to path obj
         filename = Path(filename)
 
-        # grab the base_information, and if ID is not present, add it
-        base_info = self.model.base_info
-        if "id" not in base_info:
-            base_info.append("id")
-        # if "created_at" not in base_info:
-        #     base_info.append("created_at")
-        # if "updated_at" not in base_info:
-        #     base_info.append("updated_at")
+        # grab the list of fields that we want to store
+        fieldset = self.model.archive_fieldset
 
         # We want to load the entire table, but only grab the fields that
-        # are in base_info.
-        base_objs = self.only(*base_info)
+        # we will be storing in the archive.
+        base_objs = self.only(*fieldset)
 
         # now convert these objects to a pandas dataframe, again using just
-        # the base_info columns
-        df = base_objs.to_dataframe(fieldnames=base_info)
+        # the archive columns
+        df = base_objs.to_dataframe(fieldnames=fieldset)
 
         # Write the data to a csv file
         # OPTIMIZE: is there a better format that pandas can write to?
@@ -230,17 +224,6 @@ class DatabaseTable(models.Model):
 
     class Meta:
         abstract = True
-
-    base_info: list[str] = []
-    """
-    The base information for this database table and only these fields are stored
-    when the `to_archive` method is used. Using the columns in this list, all 
-    other columns for this table can be calculated, so the columns in this list 
-    are effectively the "raw data".
-    """
-    # TODO: setting base_info is becoming boilerplate. Consider making this
-    # into a method like to_toolkit that automatically looks at all mix-ins
-    # and creates this list (i.e. involves _base_info properties)
 
     created_at = table_column.DateTimeField(
         auto_now_add=True,
@@ -368,6 +351,20 @@ class DatabaseTable(models.Model):
     data from this table.
     """
 
+    archive_fields: list[str] = []
+    """
+    The base information for this database table and only these fields are stored
+    when the `to_archive` method is used. Columns excluded from this list can 
+    be calculated quickly and will therefore not be stored. Therefore, this list
+    can be thought of as the "raw data".
+    
+    The columns from mix-ins will automatically be added. If you would like to
+    remove one of these columns, you can add "--" to the start of the column
+    name (e.g. "--energy" will not store the energy).
+    
+    To see all archive fields, see the `archive_fieldset` property.
+    """
+
     api_filters: dict = {}
     """
     Configuration of fields that can be filtered in the REST API and website 
@@ -381,6 +378,8 @@ class DatabaseTable(models.Model):
         column3=BooleanFilter(...),
     }
     ```
+    
+    See the `api_filterset` property for the final filter object.
     """
 
     @classmethod
@@ -399,8 +398,8 @@ class DatabaseTable(models.Model):
     @classmethod
     def from_toolkit(cls, as_dict: bool = False, **kwargs):
         """
-        Given fundamental "base_info" and toolkit objects, this method will populate
-        all relevant columns.
+        Given fundamental "raw data" and toolkit objects, this method
+        will populate all relevant columns.
 
         If the table is made up of multiple mix-ins, this method iterates through
         each of the `_from_toolkit` methods of those mixins and combines the results.
@@ -480,8 +479,11 @@ class DatabaseTable(models.Model):
 
     def update_from_toolkit(self, **kwargs):
         """
-        Given fundamental "base_info" and toolkit objects, this method will populate
-        all relevant columns.
+        Given fundamental "base info" and toolkit objects, this method will
+        populate all relevant columns.
+
+        Note, base info also corresponds to the `archive_fieldset`, which
+        represents raw data.
 
         This method is meant for updating existing database entries with new
         data. If your creating a brand-new database entry, use the
@@ -674,8 +676,7 @@ class DatabaseTable(models.Model):
                 structure = ToolkitStructure.from_database_string(structure_str)
                 entry["structure"] = structure
             # OPTIMIZE: is there a better way to do decide which entries need to be
-            # converted to toolkit objects? This code may be better placed in
-            # base_data_type methods (e.g. a `from_base_info` method for each)
+            # converted to toolkit objects?
 
             # BUG: some columns don't properly convert to python objects, but
             # it seems inconsistent when this is done... For now I just manually
@@ -886,6 +887,33 @@ class DatabaseTable(models.Model):
             if column not in columns_w_mixin and column != "id"
         ]
         return extra_columns
+
+    @classmethod
+    @property
+    def archive_fieldset(cls) -> list[str]:
+
+        all_fields = ["id", "updated_at", "created_at", "source"]
+
+        # If calling this method on the base class, just return the sole mix-in.
+        if cls == DatabaseTable:
+            return all_fields
+
+        # Otherwise we need to go through the mix-ins and add their fields to
+        # the list
+        all_fields += [
+            field for mixin in cls.get_mixins() for field in mixin.archive_fields
+        ]
+
+        # Sometimes a column will be disabled by adding "--" in front of the
+        # column name. For example, "--band_gap" would exclude storing the band
+        # gap in the archive. We look for any columns that start with this
+        # and then remove them
+        for field in cls.archive_fields:
+            if field.startswith("--"):
+                all_fields.remove(field.removeprefix("--"))
+            else:
+                all_fields.append(field)
+        return all_fields
 
     @classmethod
     @property

@@ -147,7 +147,7 @@ class MigrationHop(DatabaseTable):
     class Meta:
         app_label = "workflows"
 
-    base_info = [
+    archive_fields = [
         "site_start",
         "site_end",
         "index_start",
@@ -407,9 +407,8 @@ class MigrationImage(Structure):
     class Meta:
         app_label = "workflows"
 
-    base_info = [
+    archive_fields = [
         "number",
-        "structure_string",
         "force_tangent",
         "structure_distance",
         "energy",

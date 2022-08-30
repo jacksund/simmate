@@ -14,7 +14,11 @@ class CodStructure(Structure):
     class Meta:
         app_label = "third_parties"
 
-    base_info = ["id", "structure_string", "is_ordered", "has_implicit_hydrogens"]
+    archive_fields = ["is_ordered", "has_implicit_hydrogens"]
+    api_filters = dict(
+        is_ordered=["exact"],
+        has_implicit_hydrogens=["exact"],
+    )
     source = "The Crystallography Open Database"
     source_doi = "https://doi.org/10.1107/S0021889809016690"
     remote_archive_link = "https://archives.simmate.org/CodStructure-2022-02-20.zip"

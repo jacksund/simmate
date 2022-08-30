@@ -18,13 +18,17 @@ class Calculation(DatabaseTable):
         abstract = True
         app_label = "workflows"
 
-    base_info = [
+    archive_fields = [
+        "workflow_name",
+        "location",
         "directory",
         "run_id",
         "corrections",
     ]
 
     api_filters = dict(
+        workflow_name=["exact"],
+        location=["exact"],
         directory=["exact"],
         run_id=["exact"],
     )
