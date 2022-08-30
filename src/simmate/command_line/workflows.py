@@ -172,7 +172,8 @@ def explore():
     console = Console()
 
     print(f"{prefix}Description:\n")
-    description = Markdown(dedent(workflow.__doc__))
+    doc = workflow.__doc__ or "No description provided"
+    description = Markdown(dedent(doc))
     console.print(description)
 
     print(f"{prefix}Parameters:\n")

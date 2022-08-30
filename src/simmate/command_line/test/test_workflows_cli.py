@@ -46,7 +46,7 @@ def test_workflows_explore(command_line_runner):
     result = command_line_runner.invoke(
         workflows_app,
         ["explore"],
-        input="1\n99\n",  # gives 1 and then 99 for prompts
+        input="99\n99\n",  # gives 99 and then 99 for prompts
     )
     assert result.exit_code == 2
 
