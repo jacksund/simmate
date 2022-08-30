@@ -8,8 +8,8 @@ import uuid
 from pathlib import Path
 
 import cloudpickle
-import yaml
 import toml
+import yaml
 
 import simmate
 from simmate.database.base_data_types import Calculation
@@ -239,7 +239,7 @@ class Workflow:
     # -------------------------------------------------------------------------
     # Methods for running/submitting workflows from input files (e.g. YAML/TOML)
     # -------------------------------------------------------------------------
-    
+
     @classmethod
     def run_from_file(cls, filename: Path) -> DummyState:
         """
@@ -248,7 +248,7 @@ class Workflow:
         workflow, parameters = cls._load_settings_file(filename)
         state = workflow.run(**parameters)
         return state
-    
+
     @classmethod
     def run_cloud_from_file(cls, filename: Path):
         """
@@ -258,27 +258,35 @@ class Workflow:
         workflow, parameters = cls._load_settings_file(filename)
         state = workflow.run_cloud(**parameters)
         return state
-    
+
     @classmethod
     def _load_settings_file(cls, filename: Path):  # -> tuple[Workflow, dict]
-        
+
+        filename = Path(filename)
+
+        # Load the settings to a dictionary using whichever format is given
         with filename.open() as file:
-            if filename.suffix == "yaml":
+            if filename.suffix == ".yaml":
                 parameters = yaml.full_load(file)
-            elif filename.suffix == "toml":
+            elif filename.suffix == ".toml":
                 parameters = toml.load(file)
             # elif filename.suffix == "json":  TODO consider allowing json
             #     parameters = json.load(file)
+            else:
+                raise Exception(
+                    "Unknown input file format provided. Please make sure your "
+                    "filename ends in either `.yaml` or `.toml`"
+                )
 
         # If a workflow name is given, then we are actually calling this method
         # from the base workflow class -- and need to grab the proper workflow
         # object.
         if "workflow_name" in parameters.keys():
-            
+
             # we are loading an external workflow, which will depend on this base
             # class. We need a local import to prevent circular-import bug.
             from simmate.workflows.utilities import get_workflow
-    
+
             workflow = get_workflow(
                 # we pop the workflow name so that it is also removed from the rest of kwargs
                 workflow_name=parameters.pop("workflow_name"),
@@ -286,7 +294,7 @@ class Workflow:
                 print_equivalent_import=True,
             )
             return workflow, parameters
-        
+
         # Otherwise we should be calling the proper workflow subclass already
         # and just return the workflow class itself.
         else:

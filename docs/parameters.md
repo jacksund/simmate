@@ -46,6 +46,10 @@ if the angles between sites are symmetrically equivalent. (in Degrees)
     ``` yaml
     angle_tolerance: 10.0
     ```
+=== "toml"
+    ``` toml
+    angle_tolerance = 10.0
+    ```
 === "python"
     ``` python
     angle_tolerance = 10.0
@@ -61,6 +65,10 @@ and `Y-C-F` are valid chemical systems.
 === "yaml"
     ``` yaml
     chemical_system: Na-Cl
+    ```
+=== "toml"
+    ``` yaml
+    chemical_system = "Na-Cl"
     ```
 === "python"
     ``` python
@@ -81,9 +89,13 @@ The command that will be called during execution of a program. There is typicall
     ``` yaml
     command: mpirun -n 8 vasp_std > vasp.out
     ```
+=== "toml"
+    ``` toml
+    command = "mpirun -n 8 vasp_std > vasp.out"
+    ```
 === "python"
     ``` python
-    command="mpirun -n 8 vasp_std > vasp.out"
+    command = "mpirun -n 8 vasp_std > vasp.out"
     ```
 
 --------------------------
@@ -97,9 +109,13 @@ The composition input can be anything compatible with the `Composition` toolkit 
     ``` yaml
     composition: Ca2NF
     ```
+=== "toml"
+    ``` toml
+    composition = "Ca2NF"
+    ```
 === "python"
     ``` python
-    composition="Ca2NF"
+    composition = "Ca2NF"
     ```
 
 **a dictionary that gives the composition**
@@ -111,9 +127,20 @@ The composition input can be anything compatible with the `Composition` toolkit 
         N: 1
         F: 1
     ```
+=== "toml"
+    ``` yaml
+    [composition]
+    Ca = 2
+    N = 1
+    F = 1
+    ```
 === "python"
     ``` python
-    composition={"Ca": 2, "N": 1, "F": 1}
+    composition={
+        "Ca": 2, 
+        "N": 1, 
+        "F": 1,
+    }
     ```
 
 **a `Composition` object (best for advanced logic)**
@@ -137,9 +164,13 @@ Whether to compress the `directory` to a zip file at the end of the run. After c
     ``` yaml
     compress_output: true
     ```
+=== "toml"
+    ``` toml
+    compress_output = true
+    ```
 === "python"
     ``` python
-    compress_output=True
+    compress_output = True
     ```
 
 --------------------------
@@ -150,6 +181,10 @@ For evolutionary searches, the search will be considered converged when the best
 === "yaml"
     ``` yaml
     convergence_limit: 0.005
+    ```
+=== "toml"
+    ``` toml
+    convergence_limit = 0.005
     ```
 === "python"
     ``` python
@@ -167,6 +202,14 @@ Whether to copy the directory from the previous calculation (if there is one) an
         database_table: Relaxation
         database_id: 123
     copy_previous_directory: true
+    ```
+=== "toml"
+    ``` toml
+    copy_previous_directory: true
+
+    [structure]
+    database_table = "Relaxation"
+    database_id = 123
     ```
 === "python"
     ``` python
@@ -194,6 +237,10 @@ The directory to run everything in -- either as a relative or full path. This is
 === "yaml"
     ``` yaml
     directory: my-new-folder-00
+    ```
+=== "toml"
+    ``` toml
+    directory = "my-new-folder-00"
     ```
 === "python"
     ``` python
@@ -243,6 +290,11 @@ Whether the calculation is a restarted workflow run. Default is False. If set to
     directory: my-old-calc-folder
     is_restart: true
     ```
+=== "toml"
+    ``` toml
+    directory = "my-old-calc-folder"
+    is_restart = true
+    ```
 === "python"
     ``` python
     directory = "my-old-calc-folder"
@@ -258,6 +310,10 @@ For evolutionary searches, fixed compositions will be stopped when the best indi
     ``` yaml
     limit_best_survival: 100
     ```
+=== "toml"
+    ``` toml
+    limit_best_survival = 100
+    ```
 === "python"
     ``` python
     limit_best_survival = 100
@@ -271,6 +327,10 @@ For workflows that involve generating a supercell or random structure, this will
 === "yaml"
     ``` yaml
     max_atoms: 100
+    ```
+=== "toml"
+    ``` toml
+    max_atoms = 100
     ```
 === "python"
     ``` python
@@ -286,6 +346,10 @@ For workflows that generate new structures (and potentially run calculations on 
     ``` yaml
     max_structures: 100
     ```
+=== "toml"
+    ``` toml
+    max_structures = 100
+    ```
 === "python"
     ``` python
     max_structures = 100
@@ -299,6 +363,10 @@ This is the atomic species/element that will be moving in the analysis (typicall
 === "yaml"
     ``` yaml
     migrating_specie: Li
+    ```
+=== "toml"
+    ``` toml
+    migrating_specie = "Li"
     ```
 === "python"
     ``` python
@@ -341,6 +409,16 @@ The full set of images (including endpoint images) that should be analyzed. Inpu
         - image_04.cif
         - image_05.cif
     ```
+=== "toml"
+    ``` toml
+    migration_images = [
+        "image_01.cif",
+        "image_02.cif",
+        "image_03.cif",
+        "image_04.cif",
+        "image_05.cif",
+    ]
+    ```
 === "python"
     ``` python
     migration_images = [
@@ -366,6 +444,10 @@ When generating a supercell, this is the minimum length for each lattice vector 
     ``` yaml
     min_length: 7.5
     ```
+=== "toml"
+    ``` toml
+    min_length = 7.5
+    ```
 === "python"
     ``` python
     min_length = 7.5
@@ -381,6 +463,10 @@ number of individuals have been calculated. This ensures we have a good pool of 
     ``` yaml
     nfirst_generation: 15
     ```
+=== "toml"
+    ``` toml
+    nfirst_generation = 15
+    ```
 === "python"
     ``` python
     nfirst_generation = 15
@@ -394,6 +480,10 @@ The number of images (or structures) to use in the analysis. This does NOT inclu
 === "yaml"
     ``` yaml
     nimages: 5
+    ```
+=== "toml"
+    ``` toml
+    nimages = 5
     ```
 === "python"
     ``` python
@@ -412,6 +502,10 @@ The number of individual workflows to have scheduled at once. This therefore set
     ``` yaml
     nsteadystate: 50
     ```
+=== "toml"
+    ``` toml
+    nsteadystate = 50
+    ```
 === "python"
     ``` python
     nsteadystate = 50
@@ -426,6 +520,10 @@ The total number of steps to run the calculation on. For example, in molecular d
     ``` yaml
     nsteps: 10000
     ```
+=== "toml"
+    ``` toml
+    nsteps = 10000
+    ```
 === "python"
     ``` python
     nsteps = 10000
@@ -439,6 +537,10 @@ The id assigned to a specific workflow run / calculation. If not provided this w
 === "yaml"
     ``` yaml
     run_id: my-unique-id-123
+    ```
+=== "toml"
+    ``` toml
+    run_id = "my-unique-id-123"
     ```
 === "python"
     ``` python
@@ -482,6 +584,10 @@ When there is a cycle within a workflow (such as iteratively checking the number
 === "yaml"
     ``` yaml
     run_id: 180
+    ```
+=== "toml"
+    ``` toml
+    run_id = 180
     ```
 === "python"
     ``` python
@@ -553,6 +659,10 @@ By default, no standardization is applied.
     ``` yaml
     standardize_structure: primitive-LLL
     ```
+=== "toml"
+    ``` toml
+    standardize_structure = "primitive-LLL"
+    ```
 === "python"
     ``` python
     standardize_structure = "primitive-LLL"
@@ -576,6 +686,18 @@ The sources that will be scheduled at a "steady-state", meaning there will alway
         from_ase.AtomicPermutation: 0.05
         from_ase.CoordinatePerturbation: 0.05
     ```
+=== "yaml"
+    ``` yaml
+    [singleshot_sources]
+    "RandomSymStructure": 0.30
+    "from_ase.Heredity": 0.30
+    "from_ase.SoftMutation": 0.10
+    "from_ase.MirrorMutation": 0.10
+    "from_ase.LatticeStrain": 0.05
+    "from_ase.RotationalMutation": 0.05
+    "from_ase.AtomicPermutation": 0.05
+    "from_ase.CoordinatePerturbation": 0.05
+    ```
 === "python"
     ``` python
     singleshot_sources = {
@@ -592,18 +714,14 @@ The sources that will be scheduled at a "steady-state", meaning there will alway
 
 Note: if your percent values do not sum to 1, they will be rescaled. When calculating `percent*nsteadystate`, the value will be rounded to the nearest integer.
 
-We are moving towards allowing kwargs or class objects as well, but this is not yet allowed. For example, anything other than `percent` would be treated as a kwarg:
+We are moving towards accepting kwargs or class objects as well, but this is not yet allowed. For example, anything other than `percent` would be treated as a kwarg:
 
-=== "yaml"
-    ``` yaml
-    singleshot_sources:
-        RandomSymStructure:
-            percent: 0.30
-            spacegroups_exclude:
-                - 1
-                - 2
-                - 3
-            site_generation_method: MyCustomMethod
+=== "toml"
+    ``` toml
+    [singleshot_sources.RandomSymStructure]
+    percent: 0.30
+    spacegroups_exclude: [1, 2, 3]
+    site_generation_method: "MyCustomMethod"
     ```
 
 --------------------------
@@ -616,6 +734,10 @@ The crystal structure to be used for the analysis. The input can be anything com
 === "yaml"
     ``` yaml
     structure: NaCl.cif
+    ```
+=== "toml"
+    ``` toml
+    structure = NaCl.cif
     ```
 === "python"
     ``` python
@@ -641,6 +763,24 @@ The crystal structure to be used for the analysis. The input can be anything com
         database_table: Relaxation
         database_id: 50
         structure_field: structure_final
+    ```
+=== "toml"
+    ``` toml
+    # example 1
+    [structure]
+    database_table: MatprojStructure
+    database_id: mp-123
+        
+    # example 2
+    [structure]
+    database_table: StaticEnergy
+    database_id: 50
+    
+    # example 3
+    [structure]
+    database_table: Relaxation
+    database_id: 50
+    structure_field: structure_final
     ```
 === "python"
     ``` python
@@ -705,7 +845,13 @@ Make sure you read about `subworkflow_name` parameter first. This is a dictionar
     ``` yaml
     subworkflow_kwargs:
         command: mpirun -n 4 vasp_std > vasp.out
-        compress_output: True
+        compress_output: true
+    ```
+=== "toml"
+    ``` toml
+    [subworkflow_kwargs]
+    command = "mpirun -n 4 vasp_std > vasp.out"
+    compress_output = true
     ```
 === "python"
     ``` python
@@ -723,6 +869,10 @@ The name of workflow that used to evaluate structures generated. For example, in
 === "yaml"
     ``` yaml
     subworkflow_name: relaxation.vasp.staged
+    ```
+=== "toml"
+    ``` toml
+    subworkflow_name = "relaxation.vasp.staged"
     ```
 === "python"
     ``` python
@@ -765,6 +915,10 @@ When submitting workflows via the `run_cloud` command, tags are 'labels' that he
         - my-tag-01
         - my-tag-02
     ```
+=== "toml"
+    ``` toml
+    tags = ["my-tag-01", "my-tag-02"]
+    ```
 === "python"
     ``` python
     tags = ["my-tag-01", "my-tag-02"]
@@ -778,6 +932,10 @@ For molecular dynamics simulations, this is the temperature to end the simulatio
 === "yaml"
     ``` yaml
     temperature_end: 1000
+    ```
+=== "toml"
+    ``` python
+    temperature_end = 1000
     ```
 === "python"
     ``` python
@@ -793,6 +951,10 @@ For molecular dynamics simulations, this is the temperature to begin the simulat
     ``` yaml
     temperature_start: 250
     ```
+=== "toml"
+    ``` toml
+    temperature_start = 250
+    ```
 === "python"
     ``` python
     temperature_start = 250
@@ -806,6 +968,10 @@ For molecular dynamics simulations, this is time time between each ionic step (i
 === "yaml"
     ``` yaml
     time_step: 1.5
+    ```
+=== "toml"
+    ``` toml
+    time_step = 1.5
     ```
 === "python"
     ``` python
@@ -848,6 +1014,10 @@ Whether or not to write output files. For some workflows, writing output files c
 === "yaml"
     ``` yaml
     write_summary_files: false
+    ```
+=== "toml"
+    ``` toml
+    write_summary_files = false
     ```
 === "python"
     ``` python

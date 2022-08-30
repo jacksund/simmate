@@ -477,9 +477,11 @@ us really take advantage of how we provide our input. For example, a
 
 
 !!! warning 
-    When switching from python to yaml, make sure you adjust the input format
+    When switching from Python to YAML, make sure you adjust the input format
     of your parameters. This is especially important if you use python a `list` or
-    `dict` for one of your input parameters:
+    `dict` for one of your input parameters. Further, if you have complex input
+    parameters (e.g. nested lists, matricies, etc.), we recommend using a TOML
+    input file instead.
 
     === "lists"
         ``` python
@@ -509,6 +511,13 @@ us really take advantage of how we provide our input. For example, a
                 - orange
                 - grape
         ```
+        ``` toml
+        # in toml
+        [my_parameter]
+        a = 123
+        b = 456
+        c = ["apple", "orange", "grape"]
+        ```
     
     === "nested lists"
         ``` python
@@ -520,7 +529,7 @@ us really take advantage of how we provide our input. For example, a
         ]
         ```
         ``` yaml
-        # in yaml (avoid if possible)
+        # in yaml (we recommend switching to TOML!)
         my_parameter:
             - - 1
               - 2
@@ -531,6 +540,14 @@ us really take advantage of how we provide our input. For example, a
             - - 7
               - 8
               - 9
+        ```
+        ``` toml
+        # in toml
+        my_parameter = [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+        ]
         ```
 
     === "tuple"
@@ -544,6 +561,13 @@ us really take advantage of how we provide our input. For example, a
             - 1
             - 2
             - 3
+        # WARNING: This will return a list! Make sure you call 
+        #   `tuple(my_parameter)`
+        # at the start of your workflow's `run_config` if you need a tuple.
+        ```
+        ``` toml
+        # in toml
+        my_parameter = [1, 2, 3]
         # WARNING: This will return a list! Make sure you call 
         #   `tuple(my_parameter)`
         # at the start of your workflow's `run_config` if you need a tuple.

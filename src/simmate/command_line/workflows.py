@@ -294,11 +294,10 @@ def run(filename: Path):
     """
     Runs a workflow locally where parameters are loaded from a yaml or toml file
     """
-    
-    from simmate.workflow_engine import Workflow
-    
-    Workflow.run_from_file(filename).result()
 
+    from simmate.workflow_engine import Workflow
+
+    Workflow.run_from_file(filename).result()
 
 
 @workflows_app.command()
@@ -307,6 +306,7 @@ def run_cloud(filename: Path):
     Submits a workflow to cloud for remote running where parameters are loaded
     from a yaml file
     """
+
     from simmate.workflow_engine import Workflow
-    
+
     Workflow.run_cloud_from_file(filename).result()

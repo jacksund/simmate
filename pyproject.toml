@@ -81,7 +81,7 @@ dependencies=[
     "scikit-learn >=1.1.1, <=1.1.1",  # machine-learning methods (may become core dep)
     "cloudpickle >=2.1.0, <=2.1.0",  # for serializing complex python objects
     "rich >=11.0, <=12.5.1",  # for coloring and styling the CLI outputs
-    "toml >=0.10.2, <=0.10.2"  # for toml configuration files
+    "toml >=0.10.2, <=0.10.2",  # for toml configuration files
     #
     # These are from the MP stack and I want to phase them out over time
     "pymatgen >=2022.1.9, <=2022.7.25",
