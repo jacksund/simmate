@@ -22,8 +22,14 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 -->
 
-- no new changes have been merged into the `main` branch yet
+**Enhancements**
+- REST API fields can now be specified directly with `api_filters` attribute of any `DatabaseTable` class & fields from mix-ins are automatically added
 
+**Refactors**
+- the `website.core_components.filters` module has been absorbed into the `DatabaseTable` class/module
+
+**Fixes**
+- fix bug in windows dev env where `simmate run-server` fails to find python path
 
 
 # v0.10.0 (2022.08.29)

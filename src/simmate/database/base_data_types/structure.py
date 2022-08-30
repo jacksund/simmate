@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from django_filters import rest_framework as django_api_filters
 from scipy.constants import Avogadro
 
 from simmate.database.base_data_types import DatabaseTable, Spacegroup, table_column
 from simmate.toolkit import Structure as ToolkitStructure
+from simmate.utilities import get_chemical_subsystems
 
 
 class Structure(DatabaseTable):
@@ -11,6 +13,37 @@ class Structure(DatabaseTable):
         abstract = True
 
     base_info = ["structure_string"]
+
+    api_filters = dict(
+        nsites=["range"],
+        nelements=["range"],
+        # elements=["contains"],
+        density=["range"],
+        density_atomic=["range"],
+        volume=["range"],
+        volume_molar=["range"],
+        formula_full=["exact"],
+        formula_reduced=["exact"],
+        formula_anonymous=["exact"],
+        spacegroup__number=["exact"],
+        spacegroup__symbol=["exact"],
+        spacegroup__crystal_system=["exact"],
+        spacegroup__point_group=["exact"],
+        # Whether to include subsystems of the given `chemical_system`. For
+        # example, the subsystems of Y-C-F would be Y, C, F, Y-C, Y-F, etc..
+        include_subsystems=django_api_filters.BooleanFilter(
+            field_name="include_subsystems",
+            label="Include chemical subsystems in results?",
+            method="skip_filter",
+        ),
+        # TODO: Supra-systems would include all the elements listed AND more. For example,
+        # searching Y-C-F would also return Y-C-F-Br, Y-Sc-C-F, etc.
+        # include_suprasystems = forms.BooleanField(label="Include Subsytems", required=False)
+        # The chemical system of the structure (e.g. "Y-C-F" or "Na-Cl")
+        chemical_system=django_api_filters.CharFilter(
+            method="filter_chemical_system",
+        ),
+    )
 
     structure_string = table_column.TextField(blank=True, null=True)
     """
@@ -127,6 +160,38 @@ class Structure(DatabaseTable):
     # criteria, you can still do this in python and pandas! Just not at the
     # SQL level
 
+    def filter_chemical_system(self, queryset, name, value):
+        # name/value here are the key/value pair for chemical system
+
+        # Grab the "include_subsystems" field from the filter form. Note, this
+        # value will be given as a string which we convert to a python boolean
+        include_subsystems = self.data.dict().get("include_subsystems", "false")
+        include_subsystems = True if include_subsystems == "true" else False
+
+        # TODO:
+        # Make sure that the chemical system is made of valid elements and
+        # separated by hyphens
+
+        # check if the user wants subsystems included (This will be True or False)
+        if include_subsystems:
+            systems_cleaned = get_chemical_subsystems(value)
+
+        # otherwise just clean the single system
+        else:
+            # Convert the system to a list of elements
+            systems_cleaned = value.split("-")
+            # now recombine the list back into alphabetical order
+            systems_cleaned = ["-".join(sorted(systems_cleaned))]
+            # NOTE: we call this "systems_cleaned" and put it in a list so
+            # that our other methods don't have to deal with multiple cases
+            # when running a django filter.
+
+        filtered_queryset = queryset.filter(chemical_system__in=systems_cleaned)
+
+        # now return the cleaned value. Note that this is now a list of
+        # chemical systems, where all elements are in alphabetical order.
+        return filtered_queryset
+
     @classmethod
     def _from_toolkit(
         cls,
@@ -156,6 +221,8 @@ class Structure(DatabaseTable):
         # from pymatgen.analysis.prototypes import AflowPrototypeMatcher
         # prototype = AflowPrototypeMatcher().get_prototypes(structure)
         # prototype_name = prototype[0]["tags"]["mineral"] if prototype else None
+        # Alternatively, add as a method to the table, similar to
+        # the "update_all_stabilities" for thermodynamics
 
         # Given a pymatgen structure object, this will return a database structure
         # object, but will NOT save it to the database yet. The kwargs input

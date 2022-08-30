@@ -15,6 +15,13 @@ class Forces(DatabaseTable):
         "lattice_stress",
     ]
 
+    api_filters = dict(
+        site_force_norm_max=["range"],
+        site_forces_norm_per_atom=["range"],
+        lattice_stress_norm=["range"],
+        lattice_stress_norm_per_atom=["range"],
+    )
+
     site_forces = table_column.JSONField(blank=True, null=True)
     """
     A list of forces for each atomic site (eV/AA). So this is a list like...

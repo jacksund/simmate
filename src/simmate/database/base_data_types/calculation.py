@@ -21,10 +21,13 @@ class Calculation(DatabaseTable):
     base_info = [
         "directory",
         "run_id",
-        "created_at",
-        "updated_at",
         "corrections",
     ]
+
+    api_filters = dict(
+        directory=["exact"],
+        run_id=["exact"],
+    )
 
     workflow_name = table_column.CharField(
         max_length=75,

@@ -30,6 +30,13 @@ class DynamicsRun(Structure, Calculation):
     class Meta:
         app_label = "workflows"
 
+    api_filters = dict(
+        temperature_start=["range"],
+        temperature_end=["range"],
+        time_step=["range"],
+        nsteps=["range"],
+    )
+
     temperature_start = table_column.IntegerField(blank=True, null=True)
     """
     The starting tempertature of the simulation in Kelvin.
@@ -127,6 +134,11 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
 
     base_info = (
         ["number"] + Structure.base_info + Thermodynamics.base_info + Forces.base_info
+    )
+
+    api_filters = dict(
+        number=["range"],
+        temperature=["range"],
     )
 
     number = table_column.IntegerField()

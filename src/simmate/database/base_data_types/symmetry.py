@@ -17,6 +17,13 @@ class Spacegroup(DatabaseTable):
     class Meta:
         app_label = "core_components"
 
+    api_filters = dict(
+        number=["exact", "range"],
+        symbol=["exact"],
+        crystal_system=["exact"],
+        point_group=["exact"],
+    )
+
     source = None
     """
     The source column is disabled for this table because this is common

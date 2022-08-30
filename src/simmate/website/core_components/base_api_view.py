@@ -8,7 +8,6 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import GenericViewSet
 
 from simmate.database.base_data_types import DatabaseTable
-from simmate.website.core_components.filters import DatabaseTableFilter
 
 
 class SimmateAPIViewSet(GenericViewSet):
@@ -75,9 +74,9 @@ class SimmateAPIViewSet(GenericViewSet):
             filterset = self.filterset_class(request.GET)
             data = {
                 # "filterset": filterset, # not used at the momemnt
-                "filterset_mixins": filterset.get_mixin_names(),
+                "filterset_mixins": filterset._meta.model.get_mixin_names(),
                 "form": filterset.form,
-                "extra_filters": filterset.get_extra_filters(),
+                "extra_filters": filterset._meta.model.api_filters_extra,
                 "calculations": serializer.instance,  # return python objs, not dict
                 "ncalculations_matching": queryset.count(),
                 "ncalculations_possible": self.get_queryset().count(),
@@ -129,9 +128,6 @@ class SimmateAPIViewSet(GenericViewSet):
                 model = table
                 fields = "__all__"
 
-        # Build the filter from our base class using default settings
-        NewFilterSet = DatabaseTableFilter.from_table(table)
-
         # For the source dataset, not all tables have a "created_at" column, but
         # when they do, we want to return results with the most recent additions first
         # by default. Ordering can also be overwritten by passing "ordering=..."
@@ -151,7 +147,7 @@ class SimmateAPIViewSet(GenericViewSet):
             dict(
                 queryset=intial_queryset,
                 serializer_class=NewSerializer,
-                filterset_class=NewFilterSet,
+                filterset_class=table.api_filterset,
                 ordering_fields="__all__",  # allowed to order by any field
                 ordering=[default_ordering_field],  # set default order
                 **kwargs,

@@ -27,6 +27,17 @@ class BandStructure(DatabaseTable):
 
     base_info = ["band_structure_data"]
 
+    api_filters = dict(
+        nbands=["range"],
+        band_gap=["range"],
+        band_gap_direct=["range"],
+        is_gap_direct=["exact"],
+        energy_fermi=["range"],
+        conduction_band_minimum=["range"],
+        valence_band_maximum=["range"],
+        is_metal=["exact"],
+    )
+
     # kpt_path_type (setyawan_curtarolo, hinuma, latimer_munro)
     # Maybe set as an abstract property?
 
@@ -146,6 +157,12 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
         app_label = "workflows"
 
     base_info = Structure.base_info + BandStructure.base_info + Calculation.base_info
+
+    api_filters = {
+        **Structure.api_filters,
+        **BandStructure.api_filters,
+        **Calculation.api_filters,
+    }
 
     def update_from_vasp_run(
         self,

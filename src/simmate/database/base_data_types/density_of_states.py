@@ -25,6 +25,13 @@ class DensityofStates(DatabaseTable):
 
     base_info = ["density_of_states_data"]
 
+    api_filters = dict(
+        band_gap=["range"],
+        energy_fermi=["range"],
+        conduction_band_minimum=["range"],
+        valence_band_maximum=["range"],
+    )
+
     # !!! Consider breaking down data into...
     #   total
     #   elemental -- dict of ["total", "s", "p", "d", "f"], ["1", "-1"]

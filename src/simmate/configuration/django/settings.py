@@ -308,8 +308,8 @@ STATICFILES_DIRS = [DJANGO_DIRECTORY / "static_files"]
 # For the dynamically-created structure files, we need to include the static
 # directory this to work during local testing. This is NOT allowed in a
 # production server, so we don't include it when DEBUG is set to False.
-if DEBUG:
-    STATICFILES_DIRS += [STATIC_ROOT]
+# if DEBUG:
+#     STATICFILES_DIRS += [STATIC_ROOT]
 
 # This sets the django-crispy formating style
 CRISPY_TEMPLATE_PACK = "bootstrap4"
