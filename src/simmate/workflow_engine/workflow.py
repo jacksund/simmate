@@ -161,8 +161,9 @@ class Workflow:
         if cls.use_database:
 
             # make sure the workflow is returning a dictionary that be used
-            # to update the database columns
-            if not isinstance(results, dict):
+            # to update the database columns. None is also allowed as it 
+            # represents an empty dictionary
+            if not isinstance(results, dict) and results != None:
                 raise Exception(
                     "When using a database table, your `run_config` method must "
                     "return a dictionary object. The dictionary is used to "
@@ -170,9 +171,9 @@ class Workflow:
                     "required format. If you do not want to save to the database "
                     "(and avoid this message), set `use_database=False`"
                 )
-
+            logging.info("Saving to database and writing outputs")
             database_entry = cls._save_to_database(
-                results=results,
+                results=results if results != None else {},
                 directory=kwargs_cleaned["directory"],
                 run_id=kwargs_cleaned["run_id"],
             )

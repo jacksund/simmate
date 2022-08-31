@@ -90,7 +90,7 @@ class Thermodynamics(DatabaseTable):
     @classmethod
     def _from_toolkit(
         cls,
-        structure: ToolkitStructure,
+        structure: ToolkitStructure = None,
         energy: float = None,
         as_dict: bool = False,
     ):
@@ -102,7 +102,7 @@ class Thermodynamics(DatabaseTable):
         data = (
             dict(
                 energy=energy,
-                energy_per_atom=energy / structure.num_sites,
+                energy_per_atom=energy / structure.num_sites if structure else None,
                 energy_above_hull=None,
                 is_stable=None,
                 decomposes_to=None,

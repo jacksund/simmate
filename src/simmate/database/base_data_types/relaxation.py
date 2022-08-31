@@ -132,8 +132,12 @@ class Relaxation(Structure, Thermodynamics, Calculation):
         null=True,
     )
 
+    def write_output_summary(self, directory: Path):
+        super().write_output_summary(directory)
+        self.write_convergence_plot(directory)
+
     @classmethod
-    def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):
+    def from_vasp_run(cls, vasprun: Vasprun):
 
         # Make the relaxation entry. Note we need to save this to the database
         # in order to link/save the ionic steps below. We save the structure
@@ -145,41 +149,25 @@ class Relaxation(Structure, Thermodynamics, Calculation):
         # Now we have the relaxation data all loaded and can save it to the database
         relaxation.save()
 
-        # The data is actually easier to access as a dictionary and everything
-        # we need is stored under the "output" key.
-        data = vasprun.as_dict()["output"]
-        # In a static energy calculation, there is only one ionic step so we
-        # grab that up front.
-        ionic_step = data["ionic_steps"][0]
+        # and we can populate the rest of the tables as if its the workup
+        relaxation.update_from_vasprun(vasprun)
 
-        # Take our structure, energy, and forces to build all of our other
-        # fields for this datatable
-        static_energy = cls.from_toolkit(
-            structure=vasprun.final_structure,
-            energy=ionic_step["e_wo_entrp"],
-            site_forces=ionic_step["forces"],
-            lattice_stress=ionic_step["stress"],
-            band_gap=data.get("bandgap"),
-            is_gap_direct=data.get("is_gap_direct"),
-            energy_fermi=data.get("efermi"),
-            conduction_band_minimum=data.get("cbm"),
-            valence_band_maximum=data.get("vbm"),
-            as_dict=as_dict,
-        )
+    def update_from_directory(self, directory: Path):
 
-        # If we don't want the data as a dictionary, then we are saving a new
-        # object and can go ahead and do that here.
-        if not as_dict:
-            static_energy.save()
+        # check if we have a VASP directory
+        vasprun_filename = directory / "vasprun.xml"
+        if not vasprun_filename.exists():
+            # raise Exception(
+            #     "Only VASP output directories are supported at the moment"
+            # )
+            return  # just exit
 
-        return static_energy
+        from simmate.calculators.vasp.outputs import Vasprun
 
-    def update_from_vasp_run(
-        self,
-        vasprun: Vasprun,
-        corrections: list,
-        directory: Path,
-    ):
+        vasprun = Vasprun.from_directory(directory)
+        self.update_from_vasp_run(vasprun)
+
+    def update_from_vasp_run(self, vasprun: Vasprun):
         """
         Given a Vasprun object from a finished relaxation, this will update the
         Relaxation table entry and the corresponding IonicStep entries.
@@ -244,9 +232,6 @@ class Relaxation(Structure, Thermodynamics, Calculation):
             energy_fermi=data.get("efermi"),
             conduction_band_minimum=data.get("cbm"),
             valence_band_maximum=data.get("vbm"),
-            # lastly, we also want to save the corrections made and directory it ran in
-            corrections=corrections,
-            directory=directory,
         )
 
     def get_convergence_plot(self):
@@ -305,6 +290,13 @@ class Relaxation(Structure, Thermodynamics, Calculation):
 
         # we return the figure object for the user
         return figure
+
+    def write_convergence_plot(self, directory: Path):
+        figure = self.get_convergence_plot()
+        figure.write_html(
+            directory / "simmate_convergence.html",
+            include_plotlyjs="cdn",
+        )
 
     def view_convergence_plot(self):
         figure = self.get_convergence_plot()

@@ -549,39 +549,16 @@ class DatabaseTable(models.Model):
     @classmethod
     def from_vasp_directory(cls, directory: Path, as_dict: bool = False):
 
-        from pymatgen.io.vasp.outputs import Vasprun
+        from simmate.calculators.vasp.outputs import Vasprun
 
-        vasprun_filename = directory / "vasprun.xml"
-
-        # load the xml file and all of the vasprun data
-        try:
-            vasprun = Vasprun(
-                filename=vasprun_filename,
-                exception_on_bad_xml=True,
-            )
-        except:
-            logging.warning(
-                "XML is malformed. This typically means there's an error with your"
-                " calculation that wasn't caught by your ErrorHandlers. We try"
-                " salvaging data here though."
-            )
-            vasprun = Vasprun(
-                filename=vasprun_filename,
-                exception_on_bad_xml=False,
-            )
-            vasprun.final_structure = vasprun.structures[-1]
-        # This try/except is just for my really rough calculations
-        # where I don't use any ErrorHandlers and still want the final structure
-        # regarless of what went wrong. In the future, I should consider writing
-        # a separate method for those that loads the CONTCAR and moves on.
-
+        vasprun = Vasprun.from_directory(directory)
         return cls.from_vasp_run(vasprun, as_dict=as_dict)
 
     # -------------------------------------------------------------------------
     # Methods that handle updating a database entry and its related entries
     # -------------------------------------------------------------------------
 
-    def update_from_dict(self, fields_to_update: dict):
+    def update_from_fields(self, **fields_to_update):
         # go through each key in the dictionary and attach the value to the
         # attribute of this entry
         for key, value in fields_to_update.items():
@@ -591,30 +568,7 @@ class DatabaseTable(models.Model):
         # can call save() to actually update the database
         self.save()
 
-    def update_from_results(self, results: dict, directory: Path):
-        """
-        Updates a database from the results of a workflow run.
-
-        Typically this method is not called directly, as it is used within
-        `Workflow._save_to_database` automatically.
-        """
-
-        # First update using the results dictionary
-        self.update_from_dict(results)
-
-        # Many calculations and datatables will have a "from_directory" method
-        # that loads data from files. We use this to grab extra fields and
-        # add them to our results.
-        if directory and hasattr(self, "from_directory"):
-            self.update_from_directory(directory)
-
-    def update_from_directory(self, directory: Path):
-        # This is for simple tables. If there are related table entries that
-        # need to be created/updated, then this method should be overwritten.
-        data_from_dir = self.from_directory(directory, as_dict=True)
-        self.update_from_dict(data_from_dir)
-
-    def update_from_toolkit(self, **kwargs):
+    def update_from_toolkit(self, **fields_to_update):
         """
         Given fundamental "base info" and toolkit objects, this method will
         populate all relevant columns.
@@ -626,10 +580,30 @@ class DatabaseTable(models.Model):
         data. If your creating a brand-new database entry, use the
         `from_toolkit` method instead.
         """
-        new_kwargs = self.from_toolkit(as_dict=True, **kwargs)
-        for new_kwarg, new_value in new_kwargs.items():
-            setattr(self, new_kwarg, new_value)
-        self.save()
+        fields_expanded = self.from_toolkit(as_dict=True, **fields_to_update)
+        self.update_from_fields(**fields_expanded)
+
+    def update_from_directory(self, directory: Path):
+        # This is for simple tables. If there are related table entries that
+        # need to be created/updated, then this method should be overwritten.
+        data_from_dir = self.from_directory(directory, as_dict=True)
+        self.update_from_toolkit(**data_from_dir)
+
+    def update_from_results(self, results: dict, directory: Path):
+        """
+        Updates a database from the results of a workflow run.
+
+        Typically this method is not called directly, as it is used within
+        `Workflow._save_to_database` automatically.
+        """
+
+        # First update using the results dictionary
+        self.update_from_toolkit(**results)
+
+        # Many calculations and datatables will have a "from_directory" method
+        # that loads data from files. We use this to grab extra fields and
+        # add them to our results.
+        self.update_from_directory(directory)
 
     # -------------------------------------------------------------------------
     # Methods that handle updating a database entry and its related entries

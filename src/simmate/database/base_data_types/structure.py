@@ -197,10 +197,13 @@ class Structure(DatabaseTable):
     @classmethod
     def _from_toolkit(
         cls,
-        structure: ToolkitStructure,
+        structure: ToolkitStructure = None,
         as_dict: bool = False,
         **kwargs,
     ):
+        # if there isn't a structure, nothing is to be done.
+        if not structure:
+            return kwargs if as_dict else cls(**kwargs)
 
         # BUG: This is an old line and I can't remember why I have it. Once I
         # have implemented more unittests, consider deleting. This method is

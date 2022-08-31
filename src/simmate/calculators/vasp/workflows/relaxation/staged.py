@@ -86,7 +86,7 @@ class Relaxation__Vasp__Staged(Workflow):
             state = current_task.run(
                 structure={
                     "database_table": preceding_task.database_table.table_name,
-                    "directory": result["directory"],  # uses preceding result
+                    "database_id": result.id,  # uses preceding result
                     "structure_field": "structure_final",
                 },
                 command=command,
@@ -94,9 +94,18 @@ class Relaxation__Vasp__Staged(Workflow):
             )
             result = state.result()
 
-        # we return the final step but update the directory to the parent one
-        result["directory"] = directory
-        return result
+        # when updating the original entry, we want to use the data from the
+        # final result.
+        final_result = {
+            "structure": result.to_toolkit(),
+            "energy": result.energy,
+            "band_gap": result.band_gap,
+            "is_gap_direct": result.is_gap_direct,
+            "energy_fermi": result.energy_fermi,
+            "conduction_band_minimum": result.conduction_band_minimum,
+            "valence_band_maximum": result.valence_band_maximum,
+        }
+        return final_result
 
     @classmethod
     def _get_final_energy_series(cls, df, directory: str):
