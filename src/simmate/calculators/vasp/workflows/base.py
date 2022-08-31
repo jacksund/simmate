@@ -289,7 +289,7 @@ class VaspWorkflow(S3Workflow):
         final energy, and (if requested) confirm convergence. I will likely make
         this a common function for this vasp module down the road.
         """
-        
+
         # use the databsae to load the results into a database object
         database_entry = cls.database_table.from_directry(directory)
 

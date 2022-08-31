@@ -12,6 +12,8 @@ class Structure(DatabaseTable):
     class Meta:
         abstract = True
 
+    exclude_from_summary = ["structure_string", "elements"]
+
     archive_fields = ["structure_string"]
 
     api_filters = dict(
@@ -233,7 +235,7 @@ class Structure(DatabaseTable):
             nelements=len(structure.composition),
             elements=[str(e) for e in structure.composition.elements],
             chemical_system=structure.composition.chemical_system,
-            density=structure.density,
+            density=float(structure.density),
             density_atomic=structure.num_sites / structure.volume,
             volume=structure.volume,
             # 1e-27 is to convert from cubic angstroms to Liter and then 1e3 to

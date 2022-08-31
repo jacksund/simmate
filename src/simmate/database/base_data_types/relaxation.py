@@ -94,6 +94,8 @@ class Relaxation(Structure, Thermodynamics, Calculation):
     class Meta:
         app_label = "workflows"
 
+    exclude_from_summary = ["structure_start", "structure_final"]
+
     archive_fields = [
         "band_gap",
         "is_gap_direct",

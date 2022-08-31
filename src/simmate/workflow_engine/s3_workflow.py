@@ -180,13 +180,12 @@ class S3Workflow(Workflow):
 
         # run the workup stage of the task. This is where the data/info is pulled
         # out from the calculation and is thus our "result".
-        result = cls.workup(directory=directory)
+        extra_results = cls.workup(directory=directory) or {}
 
         # Return our final information as a dictionary
         result = {
-            "result": result,
             "corrections": corrections,
-            "directory": directory,
+            **extra_results,
         }
 
         return result

@@ -382,6 +382,37 @@ class DatabaseTable(models.Model):
     See the `api_filterset` property for the final filter object.
     """
 
+    exclude_from_summary: list[str] = []
+    """
+    When writing output summaries, these columns will be ignored. This is useful
+    if you have a column for storing raw data that isn't friendly to read in
+    the yaml format. 'structure_string' is an example of a field we'd want to
+    exclude.
+    """
+
+    def write_output_summary(self, directory: Path):
+        """
+        This writes a "simmate_summary.yaml" file with key output information.
+        """
+
+        fields_to_exclude = self.exclude_from_summary + [
+            field for mixin in self.get_mixins() for field in mixin.exclude_from_summary
+        ]
+
+        all_data = {}
+        for column, value in self.__dict__.items():
+            if value and not column.startswith("_") and column not in fields_to_exclude:
+                all_data[column] = value
+
+        # also add the table name and entry id
+        all_data["database_table"] = self.table_name
+        all_data["database_id"] = self.id
+
+        summary_filename = directory / "simmate_summary.yaml"
+        with summary_filename.open("w") as file:
+            content = yaml.dump(all_data)
+            file.write(content)
+
     @classmethod
     @property
     def table_name(cls) -> str:

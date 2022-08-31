@@ -61,29 +61,26 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     The valence band maximum in eV.
     """
 
-    def write_output_summary(self, directory: Path):
-        """
-        This writes a "simmate_summary.yaml" file with key output information.
-        """
-        # OPTIMIZE: Ideally, I could take the vasprun object and run to_json,
-        # but this output is extremely difficult to read.
-
-        summary_filename = directory / "simmate_summary.yaml"
-        with summary_filename.open("w") as file:
-            content = yaml.dump(self.__dict__)  # OPTIMIZE ---> write a summary property...?
-            file.write(content)
-
     @classmethod
-    def from_directory(cls, directory: Path):
-        # I assume the directory is from a vasp calculation, but I need to update
-        # this when I begin adding new calculators.
-        return cls.from_vasp_directory(directory)
+    def from_directory(cls, directory: Path, as_dict: bool = False):
 
-    @classmethod
-    def from_vasp_directory(cls, directory: Path):
-       
+        # check if we have a VASP directory
         vasprun_filename = directory / "vasprun.xml"
-        
+        if vasprun_filename.exists():
+            return cls.from_vasp_directory(directory, as_dict=as_dict)
+
+        # TODO: add new elif statements when I begin adding new calculators.
+
+        # If we don't detect any directory, we return an empty dictionary.
+        # We don't print a warning or error for now because users may want
+        # to populate data entirely in python.
+        return {} if as_dict else None
+
+    @classmethod
+    def from_vasp_directory(cls, directory: Path, as_dict: bool = False):
+
+        vasprun_filename = directory / "vasprun.xml"
+
         # load the xml file and all of the vasprun data
         try:
             vasprun = Vasprun(
@@ -106,10 +103,10 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         # regarless of what went wrong. In the future, I should consider writing
         # a separate method for those that loads the CONTCAR and moves on.
 
-        return cls.from_vasp_run(vasprun)
+        return cls.from_vasp_run(vasprun, as_dict=as_dict)
 
     @classmethod
-    def from_vasp_run(cls, vasprun: Vasprun):
+    def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):
         # Takes a pymatgen VaspRun object, which is what's typically returned
         # from a simmate VaspWorkflow.run() call.
 
@@ -132,51 +129,12 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
             energy_fermi=data.get("efermi"),
             conduction_band_minimum=data.get("cbm"),
             valence_band_maximum=data.get("vbm"),
+            as_dict=as_dict,
         )
-        static_energy.save()
+
+        # If we don't want the data as a dictionary, then we are saving a new
+        # object and can go ahead and do that here.
+        if not as_dict:
+            static_energy.save()
+
         return static_energy
-
-    def update_from_vasp_run(
-        self,
-        vasprun: Vasprun,
-        corrections: list,
-        directory: Path,
-    ):
-        # Takes a pymatgen VaspRun object, which is what's typically returned
-        # from a simmate VaspWorkflow.run() call.
-
-        # The data is actually easier to access as a dictionary and everything
-        # we need is stored under the "output" key.
-        data = vasprun.as_dict()["output"]
-        # In a static energy calculation, there is only one ionic step so we
-        # grab that up front.
-        ionic_step = data["ionic_steps"][0]
-
-        # Take our structure, energy, and forces to build all of our other
-        # fields for this datatable
-        # OPTIMIZE: this overwrites structure data, which should already be there.
-        # Is there a faster way to grab this data and update attributes?
-        new_kwargs = self.from_toolkit(
-            structure=vasprun.final_structure,
-            energy=ionic_step["e_wo_entrp"],
-            site_forces=ionic_step["forces"],
-            lattice_stress=ionic_step["stress"],
-            as_dict=True,
-        )
-        for key, value in new_kwargs.items():
-            setattr(self, key, value)
-
-        # There is also extra data for the final structure that we save directly
-        # in the relaxation table. We use .get() in case the key isn't provided
-        self.band_gap = data.get("bandgap")
-        self.is_gap_direct = data.get("is_gap_direct")
-        self.energy_fermi = data.get("efermi")
-        self.conduction_band_minimum = data.get("cbm")
-        self.valence_band_maximum = data.get("vbm")
-
-        # lastly, we also want to save the corrections made and directory it ran in
-        self.corrections = corrections
-        self.directory = directory
-
-        # Now we have the relaxation data all loaded and can save it to the database
-        self.save()

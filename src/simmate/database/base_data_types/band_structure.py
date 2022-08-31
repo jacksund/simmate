@@ -25,6 +25,8 @@ class BandStructure(DatabaseTable):
     class Meta:
         abstract = True
 
+    exclude_from_summary = ["band_structure_data"]
+
     archive_fields = ["band_structure_data"]
 
     api_filters = dict(

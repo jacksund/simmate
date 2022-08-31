@@ -10,6 +10,11 @@ class Forces(DatabaseTable):
     class Meta:
         abstract = True
 
+    exclude_from_summary = [
+        "site_forces",
+        "lattice_stress",
+    ]
+
     archive_fields = [
         "site_forces",
         "lattice_stress",

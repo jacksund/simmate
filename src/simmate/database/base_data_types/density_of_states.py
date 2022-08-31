@@ -23,6 +23,8 @@ class DensityofStates(DatabaseTable):
     class Meta:
         abstract = True
 
+    exclude_from_summary = ["density_of_states_data"]
+
     archive_fields = ["density_of_states_data"]
 
     api_filters = dict(

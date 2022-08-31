@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import platform
+from pathlib import Path
+
+import yaml
 
 from simmate.database.base_data_types import DatabaseTable, table_column
 
@@ -135,11 +138,35 @@ class Calculation(DatabaseTable):
 
         return calculation
 
+    def update_with_results(self, results: dict, directory: Path):
+        """
+        Updates a database from the results of a workflow run.
+
+        Typically this method is not called directly, as it is used within
+        `Workflow._save_to_database` automatically.
+        """
+
+        # Many calculations and datatables will have a "from_directory" method
+        # that loads data from files. We use this to grab extra fields and
+        # add them to our results.
+        if directory and hasattr(self, "from_directory"):
+            data_from_dir = self.from_directory(directory, as_dict=True)
+            results.update(data_from_dir)
+
+        # go through each key in the dictionary and attach the value to the
+        # attribute of this entry
+        for key, value in results.items():
+            setattr(self, key, value)
+
+        # Now we have all data loaded and attached to the database entry, we
+        # can call save() to actually update the database
+        self.save()
+
     # -------------------------------------------------------------------------
     # All methods below are for prefect, but because of the prefect 2.0 migration,
     # these are disabled for the time being.
     # -------------------------------------------------------------------------
-    
+
     # @classmethod
     # def from_run_context(
     #     cls,

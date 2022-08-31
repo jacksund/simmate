@@ -151,15 +151,29 @@ class Workflow:
             source=source,
             **kwargs,
         )
-        
-        # Finally run the core part of the workflow. This should return a 
-        # database object if we have "use_database=True"
-        result = cls.run_config(**kwargs_cleaned)
-        
+
+        # Finally run the core part of the workflow. This should return a
+        # dictionary object if we have "use_database=True", but can be
+        # any python object if "use_database=False"
+        results = cls.run_config(**kwargs_cleaned)
+
         # save the result to the database
         if cls.use_database:
+
+            # make sure the workflow is returning a dictionary that be used
+            # to update the database columns
+            if not isinstance(results, dict):
+                raise Exception(
+                    "When using a database table, your `run_config` method must "
+                    "return a dictionary object. The dictionary is used to "
+                    "update columns in your table entry and is therefore a "
+                    "required format. If you do not want to save to the database "
+                    "(and avoid this message), set `use_database=False`"
+                )
+
             database_entry = cls._save_to_database(
-                result,
+                results=results,
+                directory=kwargs_cleaned["directory"],
                 run_id=kwargs_cleaned["run_id"],
             )
 
@@ -171,10 +185,10 @@ class Workflow:
 
         # If we made it this far, we successfully completed the workflow run
         logging.info(f"Completed {cls.name_full}")
-        
+
         # If we are using the database, then we return the database object.
         # Otherwise, we want to return the original result from run_config
-        return database_entry if cls.use_databsae else result
+        return database_entry if cls.use_databsae else results
 
     @classmethod
     def run_cloud(
@@ -225,15 +239,12 @@ class Workflow:
             tags=tags or cls.tags,
             **parameters_serialized,
         )
+        state.run_id = run_id  # attach the run id as an extra
 
         logging.info(f"Successfully submitted (workitem_id={state.pk})")
 
         # If the user wants the future, return that instead of the run_id
-        if return_state:
-            state.run_id = run_id  # attach the run id as an extra
-            return state
-
-        return run_id
+        return state if return_state else run_id
 
     @classmethod
     def run_config(cls, **kwargs) -> any:
@@ -397,10 +408,17 @@ class Workflow:
         return cls.database_table.objects.filter(workflow_name=cls.name_full).all()
 
     @classmethod
-    def _save_to_database(cls, result: any, run_id: str, directory: Path, **kwargs):
+    def _save_to_database(
+        cls,
+        results: dict,
+        run_id: str,
+        directory: Path,
+    ) -> Calculation:
         """
-        Take the output of the `run_config` and any extra information and 
+        Take the output of the `run_config` and any extra information and
         saves it to the database.
+
+        An output summary is also written to file for quick viewing.
         """
 
         # load the calculation entry for this workflow run. This should already
@@ -412,7 +430,10 @@ class Workflow:
         )
 
         # now update the calculation entry with our results
-        calculation.update_from_vasp_run(directory, **kwargs)
+        calculation.update_with_results(results=results, directory=directory)
+
+        # write the output summary to file
+        calculation.write_output_summary(directory)
 
         return calculation
 
@@ -1017,41 +1038,26 @@ class Workflow:
         # potentially grab the from_dynamic method on the fly -- rather than
         # doing these repeated steps here.
 
-        structure = parameters.get("structure", None)
-        if structure:
-            parameters_cleaned["structure"] = Structure.from_dynamic(structure)
-        else:
-            parameters_cleaned.pop("structure", None)
+        parameter_mappings = {
+            "structure": Structure,
+            "composition": Composition,
+            "migration_hop": MigrationHop,
+            "migration_images": MigrationImages,
+            "supercell_start": Structure,
+            "supercell_end": Structure,
+        }
 
-        if "composition" in parameters.keys():
-            migration_hop = Composition.from_dynamic(parameters["composition"])
-            parameters_cleaned["composition"] = migration_hop
+        for parameter, target_class in parameter_mappings.items():
+            if parameter in parameters.keys():
+                parameter_orig = parameters.get(parameter, None)
+                parameters_cleaned[parameter] = target_class.from_dynamic(
+                    parameter_orig
+                )
 
-        if "structures" in parameters.keys():
-            structure_filenames = parameters["structures"].split(";")
-            parameters_cleaned["structures"] = [
-                Structure.from_dynamic(file) for file in structure_filenames
-            ]
-
-        if "migration_hop" in parameters.keys():
-            migration_hop = MigrationHop.from_dynamic(parameters["migration_hop"])
-            parameters_cleaned["migration_hop"] = migration_hop
-
-        if "migration_images" in parameters.keys():
-            migration_images = MigrationImages.from_dynamic(
-                parameters["migration_images"]
-            )
-            parameters_cleaned["migration_images"] = migration_images
-
-        if "supercell_start" in parameters.keys():
-            parameters_cleaned["supercell_start"] = Structure.from_dynamic(
-                parameters["supercell_start"]
-            )
-
-        if "supercell_end" in parameters.keys():
-            parameters_cleaned["supercell_end"] = Structure.from_dynamic(
-                parameters["supercell_end"]
-            )
+        # directory and source are two extra parameters that cant be used in the
+        # mapping above because they don't have a `from_dynamic` method.
+        # Note these also pull from 'parameters_cleaned' as they might have been
+        # populated during registration.
 
         if parameters.get("directory", None):
             parameters_cleaned["directory"] = Path(parameters_cleaned["directory"])
