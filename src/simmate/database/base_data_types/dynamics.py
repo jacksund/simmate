@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""
-This module is experimental and subject to change.
-"""
-
 from pathlib import Path
 
+import plotly.graph_objects as plotly_go
+from plotly.subplots import make_subplots
 from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.database.base_data_types import (
@@ -59,12 +57,35 @@ class DynamicsRun(Structure, Calculation):
     stopped early.
     """
 
-    def update_from_vasp_run(
-        self,
-        vasprun: Vasprun,
-        corrections: list[tuple[str]],
-        directory: Path,
-    ):
+    def write_output_summary(self, directory: Path):
+        super().write_output_summary(directory)
+        self.write_convergence_plot(directory)
+
+    @classmethod
+    def from_vasp_run(cls, vasprun: Vasprun):
+        raise NotImplementedError(
+            "Dynamics runs cannot currently be loaded from a dir/vasprun, so"
+            "input parameters such as temperature and nsteps are not loaded. "
+            "This feature is still under development"
+        )
+        # See Relaxation.from_vasp_run as a starting point
+
+    def update_from_directory(self, directory: Path):
+
+        # check if we have a VASP directory
+        vasprun_filename = directory / "vasprun.xml"
+        if not vasprun_filename.exists():
+            # raise Exception(
+            #     "Only VASP output directories are supported at the moment"
+            # )
+            return  # just exit
+
+        from simmate.calculators.vasp.outputs import Vasprun
+
+        vasprun = Vasprun.from_directory(directory)
+        self.update_from_vasp_run(vasprun)
+
+    def update_from_vasp_run(self, vasprun: Vasprun):
         """
         Given a Vasprun object from a finished dynamics run, this will update the
         DynamicsRun table entry and the corresponding DynamicsIonicStep entries.
@@ -102,13 +123,10 @@ class DynamicsRun(Structure, Calculation):
                 site_forces=ionic_step.get("forces", None),
                 lattice_stress=ionic_step.get("stress", None),
                 temperature=self._get_temperature_at_step(number),
+                # simulation_time=number*self.time_step,
                 dynamics_run=self,  # this links the structure to this dynamics run
             )
             structure.save()
-
-        # lastly, we also want to save the corrections made and directory it ran in
-        self.corrections = corrections
-        self.directory = directory
 
         # Now we have the relaxation data all loaded and can save it to the database
         self.save()
@@ -118,6 +136,94 @@ class DynamicsRun(Structure, Calculation):
 
     def _get_temperature_step_size(self):
         return (self.temperature_end - self.temperature_start) / self.nsteps
+
+    def get_convergence_plot(self):
+
+        # Grab the calculation's structure and convert it to a dataframe
+        structures_dataframe = self.structures.order_by("number").to_dataframe()
+
+        # We will be making a figure that consists of 3 stacked subplots that
+        # all share the x-axis of ionic_step_number
+        figure = make_subplots(
+            rows=4,
+            cols=1,
+            shared_xaxes=True,
+        )
+
+        # Generate a plot for Energy (per atom)
+        figure.add_trace(
+            plotly_go.Scatter(
+                x=structures_dataframe["number"],
+                y=structures_dataframe["energy_per_atom"],
+            ),
+            row=1,
+            col=1,
+        )
+
+        # Generate a plot for Forces (norm per atom)
+        figure.add_trace(
+            plotly_go.Scatter(
+                x=structures_dataframe["number"],
+                y=structures_dataframe["site_forces_norm_per_atom"],
+            ),
+            row=2,
+            col=1,
+        )
+
+        # Generate a plot for Stress (norm per atom)
+        figure.add_trace(
+            plotly_go.Scatter(
+                x=structures_dataframe["number"],
+                y=structures_dataframe["lattice_stress_norm_per_atom"],
+            ),
+            row=3,
+            col=1,
+        )
+
+        # Generate a plot for Stress (norm per atom)
+        figure.add_trace(
+            plotly_go.Scatter(
+                x=structures_dataframe["number"],
+                y=structures_dataframe["temperature"],
+            ),
+            row=4,
+            col=1,
+        )
+
+        # Now let's clean up some formatting and add the axes titles
+        figure.update_layout(
+            width=600,
+            height=600,
+            showlegend=False,
+            xaxis3_title="Ionic Step (#)",
+            yaxis_title="Energy (eV/atom)",
+            yaxis2_title="Site Forces",
+            yaxis3_title="Lattice Stress",
+            yaxis4_title="Temperature (K)",
+        )
+
+        # we return the figure object for the user
+        return figure
+
+    def write_convergence_plot(self, directory: Path):
+        figure = self.get_convergence_plot()
+        figure.write_html(
+            directory / "simmate_convergence.html",
+            include_plotlyjs="cdn",
+        )
+
+    def view_convergence_plot(self):
+        figure = self.get_convergence_plot()
+        figure.show(renderer="browser")
+
+    def get_convergence_plot_html(self):
+        # Make the convergence figure and convert it to an html div
+        figure_convergence = self.get_convergence_plot()
+        figure_convergence_html = figure_convergence.to_html(
+            full_html=False,
+            include_plotlyjs=False,
+        )
+        return figure_convergence_html
 
 
 class DynamicsIonicStep(Structure, Thermodynamics, Forces):
@@ -152,6 +258,27 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
     is off-temperature.
     """
 
+    dynamics_run = table_column.ForeignKey(
+        DynamicsRun,
+        on_delete=table_column.CASCADE,
+        related_name="structures",
+    )
+    """
+    All structures in this table come from dynamics run calculations, where
+    there can be many structures (one for each ionic step) linked to a
+    single run. This means the start structure, end structure, and
+    those structure in-between are stored together here.
+    Therefore, there's just a simple column stating which relaxation it
+    belongs to.
+    """
+
+    # TODO:
+    # simulation_time = table_column.FloatField(blank=True, null=True)
+    # """
+    # The total simulation time up to this ionic step (in picoseconds). This is
+    # just "number*time_step", but we store this in the database for easy access.
+    # """
+
     # TODO: Additional options from Vasprun.as_dict to consider adding
     # e_0_energy
     # e_fr_energy
@@ -159,15 +286,3 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
     # lattice kinetic
     # nosekinetic
     # nosepot
-
-    # All structures in this table come from dynamics run calculations, where
-    # there can be many structures (one for each ionic step) linked to a
-    # single run. This means the start structure, end structure, and
-    # those structure in-between are stored together here.
-    # Therefore, there's just a simple column stating which relaxation it
-    # belongs to.
-    dynamics_run = table_column.ForeignKey(
-        DynamicsRun,
-        on_delete=table_column.CASCADE,
-        related_name="structures",
-    )

@@ -598,7 +598,7 @@ class DatabaseTable(models.Model):
         """
 
         # First update using the results dictionary
-        self.update_from_toolkit(**results)
+        self.update_from_toolkit(directory=str(directory), **results)
 
         # Many calculations and datatables will have a "from_directory" method
         # that loads data from files. We use this to grab extra fields and

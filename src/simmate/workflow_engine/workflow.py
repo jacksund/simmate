@@ -161,7 +161,7 @@ class Workflow:
         if cls.use_database:
 
             # make sure the workflow is returning a dictionary that be used
-            # to update the database columns. None is also allowed as it 
+            # to update the database columns. None is also allowed as it
             # represents an empty dictionary
             if not isinstance(results, dict) and results != None:
                 raise Exception(
