@@ -203,3 +203,34 @@ class Thermodynamics(DatabaseTable):
         #     args_list=chemical_systems,
         #     batch_size=1000,
         # )
+
+    @classmethod
+    def get_hull_diagram(cls, chemical_system: str):
+
+        # BUG: This prints a tqdm error so we silence it here.
+        with warnings.catch_warnings(record=True):
+            from pymatgen.analysis.phase_diagram import PDEntry, PhaseDiagram, PDPlotter
+
+        # if we have a multi-element system, we need to include subsystems as
+        # well. ex: Na --> Na, Cl, Na-Cl
+        subsystems = get_chemical_subsystems(chemical_system)
+
+        # grab all entries for this chemical system
+        entries = (
+            cls.objects.filter(
+                # workflow_name="relaxation.vasp.staged",
+                chemical_system__in=subsystems,
+                energy__isnull=False,  # only completed calculations
+            )
+            .only("energy", "formula_full")
+            .all()
+        )
+
+        # convert to pymatgen PDEntries and build into PhaseDiagram object
+        entries_pmg = [PDEntry(entry.formula_full, entry.energy) for entry in entries]
+        phase_diagram = PhaseDiagram(entries_pmg)
+
+        plotter = PDPlotter(phase_diagram)  # alternatively use backend="matplotlib"
+
+        plotter.get_plot(label_unstable=False).show(renderer="browser")
+        # plotter.show() --> doesn't allow passing of kwargs

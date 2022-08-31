@@ -20,5 +20,5 @@ class ElectronicStructure__Vasp__MatprojFull(ElectronicStructureWorkflow):
     """
 
     static_energy_workflow = StaticEnergy__Vasp__Matproj
-    band_structure_workflow = ElectronicStructure__Vasp__MatprojDensityOfStates
-    density_of_states_workflow = ElectronicStructure__Vasp__MatprojBandStructure
+    band_structure_workflow = ElectronicStructure__Vasp__MatprojBandStructure
+    density_of_states_workflow = ElectronicStructure__Vasp__MatprojDensityOfStates

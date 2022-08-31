@@ -597,12 +597,16 @@ class FixedCompositionSearch(DatabaseTable):
         df["updated_at"] = df.updated_at.apply(format_date)
 
         def format_parents(source):
-            return source.get("parent_ids", None)
+            return source.get("parent_ids", None) if source else None
 
         df["parent_ids"] = df.source.apply(format_parents)
 
         def format_source(source):
-            return source.get("creator", None) or source.get("transformation", None)
+            return (
+                None
+                if not source
+                else source.get("creator", None) or source.get("transformation", None)
+            )
 
         df["source"] = df.source.apply(format_source)
 
