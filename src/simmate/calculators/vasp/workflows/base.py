@@ -102,18 +102,6 @@ class VaspWorkflow(S3Workflow):
     Read more on this inside the Potcar class and be careful with updating!
     """
 
-    confirm_convergence: bool = True
-    """
-    This flag controls whether or not we raise an error when the calculation 
-    failed to converge. In somecases we still want results from calculations 
-    that did NOT converge successfully.
-    """
-    # OPTIMIZE: What if I updated the ErrorHandler class to allow for "warnings"
-    # instead of raising the error and applying the correction...? This functionality
-    # could then be moved to the UnconvergedErrorHandler. I'd have a fix_error=True
-    # attribute that is used in the .check() method. and If fix_error=False, I
-    # simply print a warning & also add that warning to simmate_corrections.csv
-
     standardize_structure: str | bool = False
     """
     In some cases, we may want to standardize the structure during our setup().
@@ -283,29 +271,6 @@ class VaspWorkflow(S3Workflow):
         shutil.move(contcar_filename, poscar_filename)
 
     @classmethod
-    def workup(cls, directory: Path):
-        """
-        This is the most basic VASP workup where I simply load the final structure,
-        final energy, and (if requested) confirm convergence. I will likely make
-        this a common function for this vasp module down the road.
-        """
-
-        # use the databsae to load the results into a database object
-        database_entry = cls.database_table.from_directry(directory)
-
-        # write output files/plots for the user to quickly reference
-        database_entry.write_summary(directory)
-
-        # confirm that the calculation converged (ionicly and electronically)
-        if cls.confirm_convergence:
-            assert vasprun.converged
-            # vasprun.converged_electronic
-            # vasprun.converged_ionic
-
-        # return vasprun object
-        return database_entry
-
-    @classmethod
     def get_config(cls):
         """
         Grabs the overall settings from the class. This is useful for printing out
@@ -315,7 +280,6 @@ class VaspWorkflow(S3Workflow):
             key: getattr(cls, key)
             for key in [
                 "__module__",
-                "confirm_convergence",
                 "functional",
                 "incar",
                 "potcar_mappings",

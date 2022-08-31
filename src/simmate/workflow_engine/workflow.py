@@ -188,7 +188,7 @@ class Workflow:
 
         # If we are using the database, then we return the database object.
         # Otherwise, we want to return the original result from run_config
-        return database_entry if cls.use_databsae else results
+        return database_entry if cls.use_database else results
 
     @classmethod
     def run_cloud(
@@ -430,7 +430,7 @@ class Workflow:
         )
 
         # now update the calculation entry with our results
-        calculation.update_with_results(results=results, directory=directory)
+        calculation.update_from_results(results=results, directory=directory)
 
         # write the output summary to file
         calculation.write_output_summary(directory)

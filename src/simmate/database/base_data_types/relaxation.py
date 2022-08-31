@@ -13,54 +13,8 @@ This module helps you create tables to results from structure relaxations
 (aka geometry optimizations). This will store all ionic steps and the forces/stress
 associated with each step.
 
-When creating new tables for Relaxations, you should use the `Relaxation.create_subclasses` method, which helps remove all the 
-boilerplate code needed. For Django users, it may be tricky to understand what's
-happening behind the scenes, so here's an example:
-    
-These two lines...
-
-``` python 
-from simmate.database.base_data_types import Relaxation
-
-ExampleRelaxation, ExampleIonicStep = Relaxation.create_subclasses(
-    "Example",
-    module=__name__,
-)
-```
-
-... do exactly the same thing as all of these lines...
-
-``` python
-from simmate.database.base_data_types import table_column
-from simmate.database.base_data_types import IonicStep, Relaxation
-
-class ExampleIonicStep(IonicStep):
-    relaxation = table_column.ForeignKey(
-        "ExampleRelaxation",  # in quotes becuase this is defined below
-        on_delete=table_column.CASCADE,
-        related_name="structures",
-    )
-
-class ExampleRelaxation(Relaxation):
-    structure_start = table_column.OneToOneField(
-        ExampleIonicStep,
-        on_delete=table_column.CASCADE,
-        related_name="relaxations_as_start",
-        blank=True,
-        null=True,
-    )
-    structure_final = table_column.OneToOneField(
-        ExampleIonicStep,
-        on_delete=table_column.CASCADE,
-        related_name="relaxations_as_final",
-        blank=True,
-        null=True,
-    )
-```
-
 Note there are two tables involved. One stores all of the ionic steps, and the
 other connects all ionic steps to a specific calculation and result.
-
 """
 
 from pathlib import Path
@@ -179,15 +133,7 @@ class Relaxation(Structure, Thermodynamics, Calculation):
     )
 
     @classmethod
-    def from_directory(cls, directory: Path):
-        # I assume the directory is from a vasp calculation, but I need to update
-        # this when I begin adding new calculators.
-        vasprun_filename = directory / "vasprun.xml"
-        vasprun = Vasprun(vasprun_filename)
-        return cls.from_vasp_run(vasprun)
-
-    @classmethod
-    def from_vasp_run(cls, vasprun: Vasprun):
+    def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):
 
         # Make the relaxation entry. Note we need to save this to the database
         # in order to link/save the ionic steps below. We save the structure
@@ -195,20 +141,38 @@ class Relaxation(Structure, Thermodynamics, Calculation):
         # Note, the information does not matter at this point because it will be
         # populated below
         relaxation = cls.from_toolkit(structure=vasprun.structures[-1])
-        # TODO: need to pull run_id from metadata file.
 
         # Now we have the relaxation data all loaded and can save it to the database
         relaxation.save()
 
-        # Save the rest of the results using the update method from this class
-        relaxation.update_from_vasp_run(
-            vasprun=vasprun,
-            corrections=[],
-            directory=None,
-        )
-        # TODO: load corrections/directory from the metadata and corrections files.
+        # The data is actually easier to access as a dictionary and everything
+        # we need is stored under the "output" key.
+        data = vasprun.as_dict()["output"]
+        # In a static energy calculation, there is only one ionic step so we
+        # grab that up front.
+        ionic_step = data["ionic_steps"][0]
 
-        return relaxation
+        # Take our structure, energy, and forces to build all of our other
+        # fields for this datatable
+        static_energy = cls.from_toolkit(
+            structure=vasprun.final_structure,
+            energy=ionic_step["e_wo_entrp"],
+            site_forces=ionic_step["forces"],
+            lattice_stress=ionic_step["stress"],
+            band_gap=data.get("bandgap"),
+            is_gap_direct=data.get("is_gap_direct"),
+            energy_fermi=data.get("efermi"),
+            conduction_band_minimum=data.get("cbm"),
+            valence_band_maximum=data.get("vbm"),
+            as_dict=as_dict,
+        )
+
+        # If we don't want the data as a dictionary, then we are saving a new
+        # object and can go ahead and do that here.
+        if not as_dict:
+            static_energy.save()
+
+        return static_energy
 
     def update_from_vasp_run(
         self,

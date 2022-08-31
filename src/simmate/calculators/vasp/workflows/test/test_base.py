@@ -17,7 +17,6 @@ class Testing__Vasp__Dummy(VaspWorkflow):
 
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS
-    confirm_convergence = True
     standardize_structure = "primitive-LLL"
     symmetry_tolerance = 0.1
     angle_tolerance = 10.0

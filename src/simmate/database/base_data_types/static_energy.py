@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import logging
-from pathlib import Path
-
-import yaml
 from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.database.base_data_types import (
@@ -60,50 +56,6 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
     """
     The valence band maximum in eV.
     """
-
-    @classmethod
-    def from_directory(cls, directory: Path, as_dict: bool = False):
-
-        # check if we have a VASP directory
-        vasprun_filename = directory / "vasprun.xml"
-        if vasprun_filename.exists():
-            return cls.from_vasp_directory(directory, as_dict=as_dict)
-
-        # TODO: add new elif statements when I begin adding new calculators.
-
-        # If we don't detect any directory, we return an empty dictionary.
-        # We don't print a warning or error for now because users may want
-        # to populate data entirely in python.
-        return {} if as_dict else None
-
-    @classmethod
-    def from_vasp_directory(cls, directory: Path, as_dict: bool = False):
-
-        vasprun_filename = directory / "vasprun.xml"
-
-        # load the xml file and all of the vasprun data
-        try:
-            vasprun = Vasprun(
-                filename=vasprun_filename,
-                exception_on_bad_xml=True,
-            )
-        except:
-            logging.warning(
-                "XML is malformed. This typically means there's an error with your"
-                " calculation that wasn't caught by your ErrorHandlers. We try"
-                " salvaging data here though."
-            )
-            vasprun = Vasprun(
-                filename=vasprun_filename,
-                exception_on_bad_xml=False,
-            )
-            vasprun.final_structure = vasprun.structures[-1]
-        # BUG: This try/except is just for my really rough calculations
-        # where I don't use any ErrorHandlers and still want the final structure
-        # regarless of what went wrong. In the future, I should consider writing
-        # a separate method for those that loads the CONTCAR and moves on.
-
-        return cls.from_vasp_run(vasprun, as_dict=as_dict)
 
     @classmethod
     def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):

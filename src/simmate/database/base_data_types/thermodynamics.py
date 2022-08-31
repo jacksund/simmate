@@ -11,7 +11,7 @@ from simmate.utilities import get_chemical_subsystems
 
 # BUG: This prints a tqdm error so we silence it here.
 with warnings.catch_warnings(record=True):
-    from pymatgen.analysis.phase_diagram import PDEntry, PhaseDiagram
+    from pymatgen.analysis.phase_diagram import PDEntry, PDPlotter, PhaseDiagram
 
 
 class Thermodynamics(DatabaseTable):
@@ -119,24 +119,26 @@ class Thermodynamics(DatabaseTable):
     def update_chemical_system_stabilities(cls, chemical_system: str):
 
         # NOTE: I assume we are using a Child(Structure, Thermodynamics)
+        # Maybe check for the Structure mix-in as well.
 
+        # ------- This is a copy/paste of the get_phase_diagram method -------
         # if we have a multi-element system, we need to include subsystems as
         # well. ex: Na --> Na, Cl, Na-Cl
         subsystems = get_chemical_subsystems(chemical_system)
-
         # grab all entries for this chemical system
         entries = (
             cls.objects.filter(
+                # workflow_name="relaxation.vasp.staged",
                 chemical_system__in=subsystems,
                 energy__isnull=False,  # only completed calculations
             )
             .only("energy", "formula_full")
             .all()
         )
-
         # convert to pymatgen PDEntries and build into PhaseDiagram object
         entries_pmg = [PDEntry(entry.formula_full, entry.energy) for entry in entries]
         phase_diagram = PhaseDiagram(entries_pmg)
+        # ---------------------------------------------------------------------
 
         # now go through the entries and update stability values
         for entry, entry_pmg in zip(entries, entries_pmg):
@@ -205,11 +207,7 @@ class Thermodynamics(DatabaseTable):
         # )
 
     @classmethod
-    def get_hull_diagram(cls, chemical_system: str):
-
-        # BUG: This prints a tqdm error so we silence it here.
-        with warnings.catch_warnings(record=True):
-            from pymatgen.analysis.phase_diagram import PDEntry, PhaseDiagram, PDPlotter
+    def get_phase_diagram(cls, chemical_system: str):
 
         # if we have a multi-element system, we need to include subsystems as
         # well. ex: Na --> Na, Cl, Na-Cl
@@ -229,6 +227,12 @@ class Thermodynamics(DatabaseTable):
         # convert to pymatgen PDEntries and build into PhaseDiagram object
         entries_pmg = [PDEntry(entry.formula_full, entry.energy) for entry in entries]
         phase_diagram = PhaseDiagram(entries_pmg)
+
+        return phase_diagram
+
+    def show_hull_diagram(cls, chemical_system: str):
+
+        phase_diagram = cls.get_phase_diagram(chemical_system)
 
         plotter = PDPlotter(phase_diagram)  # alternatively use backend="matplotlib"
 

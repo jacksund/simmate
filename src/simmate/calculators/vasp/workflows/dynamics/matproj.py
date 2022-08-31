@@ -25,8 +25,6 @@ class Dynamics__Vasp__Matproj(DynamicsWorkflow, Relaxation__Vasp__Matproj):
     calculation does not modify your input structure.
     """
 
-    confirm_convergence = False
-
     incar = Relaxation__Vasp__Matproj.incar.copy()
     incar.update(
         dict(

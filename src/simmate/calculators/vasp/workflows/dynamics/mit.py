@@ -23,8 +23,6 @@ class Dynamics__Vasp__Mit(DynamicsWorkflow, Relaxation__Vasp__Mit):
     calculation does not modify your input structure.
     """
 
-    confirm_convergence = False
-
     incar = Relaxation__Vasp__Mit.incar.copy()
     incar.update(
         dict(

@@ -38,10 +38,6 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
     # into folders.
     required_files = ["INCAR", "POTCAR"]
 
-    # Pymatgen's NEB parser does not read from the vasprun.xml so it can't
-    # confirm convergence here. I'll have to write my own output class to do this.
-    confirm_convergence = False
-
     use_database = False
     description_doc_short = "runs NEB using a series of structures images as input"
     # register_run=False,  # temporary fix bc no calc table exists yet
