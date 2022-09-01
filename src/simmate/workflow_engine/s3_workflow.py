@@ -182,6 +182,16 @@ class S3Workflow(Workflow):
         # out from the calculation and is thus our "result".
         extra_results = cls.workup(directory=directory) or {}
 
+        # Make sure the user is returning a compatible result from the workup
+        # method.
+        if not isinstance(extra_results, dict):
+            raise Exception(
+                "When defining a custom `workup` method, you must return a dictionary "
+                "(or None). This is so `corrections` can be added to your dictionary "
+                "and also the dictionary is used to update database columns when "
+                " `use_database=True`"
+            )
+
         # Return our final information as a dictionary
         result = {
             "corrections": corrections,

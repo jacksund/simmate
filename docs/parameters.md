@@ -1,5 +1,43 @@
 # Parameters
 
+<!--
+structure: Input structure that contains all sites.
+migrating_specie (Specie-like): The specie that migrates. E.g.,
+    "Li".
+max_path_length (float): Maximum length of NEB path in the unit
+    of Angstrom. Defaults to None, which means you are setting the
+    value to the min cutoff until finding 1D or >1D percolating paths.
+symprec (float): Symmetry precision to determine equivalence.
+perc_mode(str): The percolating type. Default to ">1d", because usually
+    it is used to find possible NEB paths to form percolating networks.
+    If you just want to check the min 1D percolation, set it to "1d".
+vac_mode
+
+
+command list expects three subcommands:
+  command_bulk, command_supercell, and command_neb
+
+I separate these out because each calculation is a very different scale.
+For example, you may want to run the bulk relaxation on 10 cores, the
+supercell on 50, and the NEB on 200. Even though more cores are available,
+running smaller calculation on more cores could slow down the calc.
+["command_bulk", "command_supercell", "command_neb"]
+
+
+If you are running this workflow via the command-line, you can run this
+with...
+
+``` bash
+simmate workflows run diffusion/all-paths -s example.cif -c "cmd1; cmd2; cmd3"
+```
+Note, the `-c` here is very important! Here we are passing three commands
+separated by semicolons. Each command is passed to a specific workflow call:
+    - cmd1 --> used for bulk crystal relaxation and static energy
+    - cmd2 --> used for endpoint supercell relaxations
+    - cmd3 --> used for NEB
+Thus, you can scale your resources for each step. Here's a full -c option:
+-c "vasp_std > vasp.out; mpirun -n 12 vasp_std > vasp.out; mpirun -n 70 vasp_std > vasp.out"
+-->
 
 ## Overview
 

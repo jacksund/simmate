@@ -233,6 +233,8 @@ class MigrationHop(Calculation):
         DiffusionAnalysis,
         on_delete=table_column.CASCADE,
         related_name="migration_hops",
+        blank=True,
+        null=True,
     )
 
     def write_output_summary(self, directory: Path):

@@ -93,12 +93,12 @@ class NebFromEndpointWorkflow(Workflow):
         images = get_migration_images_from_endpoints(
             supercell_start={
                 "database_table": cls.endpoint_relaxation_workflow.database_table.table_name,
-                "directory": endpoint_start_result["directory"],
+                "database_id": endpoint_start_result.id,
                 "structure_field": "structure_final",
             },
             supercell_end={
                 "database_table": cls.endpoint_relaxation_workflow.database_table.table_name,
-                "directory": endpoint_end_result["directory"],
+                "database_id": endpoint_end_result.id,
                 "structure_field": "structure_final",
             },
             nimages=nimages,

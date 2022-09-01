@@ -350,6 +350,8 @@ class Workflow:
         is stored. The table should use `simmate.database.base_data_types.Calculation`
         as one of its mix-ins.
         """
+        # OPTIMIZE: a mapping dictionary or some standardized way to name
+        # database tables would simplify this.
 
         flow_type = cls.name_type
         flow_preset = cls.name_preset
@@ -380,11 +382,11 @@ class Workflow:
 
             return DynamicsRun
         elif flow_type == "diffusion":
-            if "from-images" in flow_preset:
-                from simmate.database.base_data_types import MigrationImage
+            if "from-images" in flow_preset or "single-path" in flow_preset:
+                from simmate.database.base_data_types import MigrationHop
 
-                return MigrationImage
-            else:
+                return MigrationHop
+            elif "all-paths" in flow_preset:
                 from simmate.database.base_data_types import DiffusionAnalysis
 
                 return DiffusionAnalysis
@@ -392,12 +394,12 @@ class Workflow:
             from simmate.database.base_data_types import CustomizedCalculation
 
             return CustomizedCalculation
-        else:
-            raise NotImplementedError(
-                "Unable to detect proper database table. Are you sure your workflow "
-                "should be using a table? If not, set `use_database=False` on your "
-                "workflow as shown in the 'basic' example workflow from the guides."
-            )
+
+        raise NotImplementedError(
+            "Unable to detect proper database table. Are you sure your workflow "
+            "should be using a table? If not, set `use_database=False` on your "
+            "workflow as shown in the 'basic' example workflow from the guides."
+        )
 
     @classmethod
     @property

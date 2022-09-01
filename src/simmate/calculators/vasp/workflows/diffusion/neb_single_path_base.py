@@ -32,8 +32,6 @@ class SinglePathWorkflow(Workflow):
     have not implemented a file format for MigrationHop's yet.
     """
 
-    use_database = False
-
     endpoint_relaxation_workflow: Workflow = None
 
     from_images_workflow: Workflow = None
@@ -114,3 +112,4 @@ class SinglePathWorkflow(Workflow):
             migration_hop_id=migration_hop_id,
             is_restart=is_restart,
         )
+        neb_images = neb_state.result()

@@ -33,7 +33,6 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
     # into folders.
     required_files = ["INCAR", "POTCAR"]
 
-    use_database = False
     description_doc_short = "runs NEB using a series of structures images as input"
 
     @classmethod
