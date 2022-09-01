@@ -83,7 +83,7 @@ class AlwaysFailsSpecialMonitorNoRetry(AlwaysFailsMonitor):
 
 
 # @pytest.mark.prefect_db
-def test_s3workflow_methods():
+def test_s3workflow_methods(tmp_path):
     class Customized__Testing__DummyWorkflow(S3Workflow):
         command = "echo dummy"
         use_database = False
@@ -96,14 +96,13 @@ def test_s3workflow_methods():
     workflow.show_config()  # a print statment w. nothing else to check
 
     # Test basic run
-    state = workflow.run()
+    state = workflow.run(directory=tmp_path)
     result = state.result()
     assert state.is_completed()
-    assert result["directory"].exists()
-    shutil.rmtree(result["directory"])
+    assert result == {"corrections": []}
 
 
-def test_s3workflow_1():
+def test_s3workflow_1(tmp_path):
     # run a basic task w.o. any handlers or monitoring
 
     class Customized__Testing__DummyWorkflow(S3Workflow):
@@ -111,16 +110,9 @@ def test_s3workflow_1():
         use_database = False
         monitor = False
 
-    output = Customized__Testing__DummyWorkflow.run_config()
+    output = Customized__Testing__DummyWorkflow.run_config(directory=tmp_path)
 
-    assert output["result"] is None
-    assert output["corrections"] == []
-
-    # make sure that a "simmate-task-*" directory was created
-    assert output["directory"].exists()
-
-    # and delete that directory
-    output["directory"].rmdir()
+    assert output == {"corrections": []}
 
 
 def test_s3workflow_2(tmp_path):
@@ -138,11 +130,8 @@ def test_s3workflow_2(tmp_path):
         ]
 
     # use the temporary directory
-    assert Customized__Testing__DummyWorkflow.run_config(directory=tmp_path) == {
-        "result": None,
-        "corrections": [],
-        "directory": tmp_path,
-    }
+    output = Customized__Testing__DummyWorkflow.run_config(directory=tmp_path)
+    assert output == {"corrections": []}
 
 
 def test_s3workflow_3(tmp_path):

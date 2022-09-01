@@ -91,7 +91,7 @@ class S3Workflow(Workflow):
         command: str = None,
         is_restart: bool = False,
         **kwargs,
-    ):
+    ) -> dict:
         """
          Runs the entire staged task (setup, execution, workup), which includes
          supervising during execution.

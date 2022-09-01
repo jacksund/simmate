@@ -37,15 +37,15 @@ def test_neb_all_paths(sample_structures, tmp_path, mocker):
     assert state.is_completed()
 
     # estabilish filenames that we make and commonly reference
-    # summary_filename = tmp_path / "simmate_summary.yaml"
-    # plot_filename = tmp_path / "NEB_plot.jpeg"
-    # cif_filename = tmp_path / "path_relaxed_neb.cif"
+    path_dir = "diffusion.vasp.neb-single-path-mit.00"
+    summary_filename = tmp_path / "simmate_summary.yaml"
+    plot_filename = tmp_path / path_dir / "NEB_plot.jpeg"
+    cif_filename = tmp_path / path_dir / "path_relaxed_neb.cif"
 
-    # # run the full workup
-    # Diffusion__Vasp__NebFromImagesMit.workup(tmp_path)
-    # assert summary_filename.exists()
-    # assert plot_filename.exists()
-    # assert cif_filename.exists()
+    # run the full workup
+    assert summary_filename.exists()
+    assert plot_filename.exists()
+    assert cif_filename.exists()
 
 
 def test_neb_from_images_setup(sample_structures, tmp_path, mocker):
