@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
 
-"""
-WARNING: This module is experimental and subject to change.
-"""
-
 from pathlib import Path
 
 from pymatgen.analysis.transition_state import NEBAnalysis
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-from simmate.database.base_data_types import DatabaseTable, Structure, table_column
+from simmate.calculators.vasp.outputs import Vasprun
+from simmate.database.base_data_types import Calculation, Structure, table_column
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.toolkit.diffusion import MigrationHop as ToolkitMigrationHop
+from simmate.toolkit.diffusion import MigrationImages
 
 
-# TODO: consider making a NestedCalculation
-class DiffusionAnalysis(Structure):
+class DiffusionAnalysis(Structure, Calculation):
     class Meta:
         app_label = "workflows"
 
@@ -141,9 +138,7 @@ class DiffusionAnalysis(Structure):
         return analysis_db
 
 
-# TODO: consider making a Calculation bc this is what the corrections/directory
-# information should be attached to.
-class MigrationHop(DatabaseTable):
+class MigrationHop(Calculation):
     class Meta:
         app_label = "workflows"
 
@@ -240,6 +235,31 @@ class MigrationHop(DatabaseTable):
         related_name="migration_hops",
     )
 
+    def write_output_summary(self, directory: Path):
+        super().write_output_summary(directory)
+        self.write_neb_plot(directory)
+        self.write_images(directory)
+
+    def get_neb_plot(self):
+        neb_results = self.to_neb_toolkit()
+        plot = neb_results.get_plot()
+        return plot
+
+    def write_neb_plot(self, directory: Path):
+        plot = self.get_neb_plot()
+        filename = directory / "simmate_neb_plot.jpeg"
+        plot.savefig(filename)
+
+    def get_migration_images(self) -> MigrationImages:
+        structures = self.migration_images.order_by("number").to_toolkit()
+        migration_images = MigrationImages(structures)
+        return migration_images
+
+    def write_migration_images(self, directory: Path):
+        migration_images = self.get_migration_images()
+        structure_sum = migration_images.get_sum_structure()
+        structure_sum.to("cif", directory / "simmate_path_relaxed_neb.cif")
+
     # TODO:
     # image_start --> OneToOneField for specific MigrationHop
     # image_end --> OneToOneField for specific MigrationHop
@@ -247,35 +267,11 @@ class MigrationHop(DatabaseTable):
 
     # Just like Relaxation points to IonicSteps, NEB will point to MigrationImages
 
-    @classmethod
-    def _from_toolkit(
-        cls,
-        migration_hop: ToolkitMigrationHop,
-        as_dict: bool = False,
-        number: int = None,
-        **kwargs,
-    ):
-
-        # convert the pathway object into the database table format
-        hop_dict = dict(
-            site_start=" ".join(str(c) for c in migration_hop.isite.frac_coords),
-            site_end=" ".join(str(c) for c in migration_hop.esite.frac_coords),
-            index_start=migration_hop.iindex,
-            index_end=migration_hop.eindex,
-            length=migration_hop.length,
-            # diffusion_analysis_id=diffusion_analysis_id,
-            **kwargs,
-        )
-
-        # If as_dict is false, we build this into an Object. Otherwise, just
-        # return the dictionary
-        return hop_dict if as_dict else cls(**hop_dict)
-
     # BUG: because of rounding in the from_toolkit method, the get_sc_structures
     # is unable to identify equivalent sites. I opened an issue for this
     # with their team:
     #   https://github.com/materialsvirtuallab/pymatgen-analysis-diffusion/issues/296
-    def to_toolkit(self) -> ToolkitMigrationHop:
+    def to_migration_hop_toolkit(self) -> ToolkitMigrationHop:
         """
         converts the database MigrationHop to a toolkit MigrationHop
         """
@@ -315,6 +311,14 @@ class MigrationHop(DatabaseTable):
     #######
 
     @classmethod
+    def from_vasp_run(cls, vasprun: Vasprun):
+        """
+        Works up data from a NEB run, including confirming convergence and
+        writing summary output files (structures, data, and plots).
+        """
+        return cls.from_toolkit(neb_results=vasprun.neb_results)
+
+    @classmethod
     def from_directory(cls, directory: Path, **kwargs):
         # I assume the directory is from a vasp calculation, but I need to update
         # this when I begin adding new calculators.
@@ -325,7 +329,7 @@ class MigrationHop(DatabaseTable):
         return cls.from_pymatgen(analysis=analysis, **kwargs)
 
     @classmethod
-    def from_pymatgen(
+    def from_neb_toolkit(
         cls,
         analysis: NEBAnalysis,
         diffusion_analysis_id: int = None,  # only used if updating
@@ -401,6 +405,30 @@ class MigrationHop(DatabaseTable):
             image_db.save()
 
         return hop_db
+
+    @classmethod
+    def from_migration_hop_toolkit(
+        cls,
+        migration_hop: ToolkitMigrationHop,
+        as_dict: bool = False,
+        number: int = None,
+        **kwargs,
+    ):
+
+        # convert the pathway object into the database table format
+        hop_dict = dict(
+            site_start=" ".join(str(c) for c in migration_hop.isite.frac_coords),
+            site_end=" ".join(str(c) for c in migration_hop.esite.frac_coords),
+            index_start=migration_hop.iindex,
+            index_end=migration_hop.eindex,
+            length=migration_hop.length,
+            # diffusion_analysis_id=diffusion_analysis_id,
+            **kwargs,
+        )
+
+        # If as_dict is false, we build this into an Object. Otherwise, just
+        # return the dictionary
+        return hop_dict if as_dict else cls(**hop_dict)
 
 
 class MigrationImage(Structure):

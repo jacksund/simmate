@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import Calculation, table_column
+"""
+WARNING: This module is still at the planning stage and the code below serve as
+placeholder notes.
+
+In the future, it will be a table that helps link together results from
+multi-stage workflows.
+"""
+
+from simmate.database.base_data_types import Calculation  # , table_column
 
 
 class NestedCalculation(Calculation):
@@ -29,96 +37,6 @@ class NestedCalculation(Calculation):
     # Or maybe a method that just lists the corrections of each subcalc?
     corrections = None
     # For now I delete this column. This line removes the field.
-
-    @classmethod
-    def create_subclass_from_calcs(
-        cls,
-        name: str,
-        child_database_tables: list[Calculation],
-        module: str,
-        **extra_columns,
-    ):
-        """
-        Dynamically creates a subclass of NestedCalculation -- and handles linking
-        together all child calculation tables.
-
-        `simmate.calculators.vasp.database.relaxation` shows an example of creating
-        a table from this class:
-
-        ``` python
-        StagedRelaxation = NestedCalculation.create_subclass_from_calcs(
-            "StagedRelaxation",
-            [
-                Quality00Relaxation,
-                Quality01Relaxation,
-                Quality02Relaxation,
-                Quality03Relaxation,
-                Quality04Relaxation,
-            ],
-            module=__name__,
-        )
-        ```
-
-        To add custom columns, you can do the following:
-
-        ``` python
-        from simmate.database.base_data_types import table_column
-
-        StagedRelaxation = NestedCalculation.create_subclass_from_calcs(
-            ... # everything is the same as above
-            custom_column_01=table_column.FloatField()
-        )
-        ```
-
-        #### Parameters
-
-        - `name` :
-            Name of the subclass that is output.
-        - `child_database_tables` :
-            list of database tables for the nested workflows. This table links
-            these sub-tables together so results can be viewed from each step.
-        - `module` :
-            name of the module this subclass should be associated with. Typically,
-            you should pass __name__ to this.
-        **extra_columns : TYPE
-            Additional columns to add to the table. The keyword will be the
-            column name and the value should match django options
-            (e.g. table_column.FloatField())
-
-        #### Returns
-
-        NewClass :
-            A subclass of NestedCalculation.
-
-        """
-
-        # BUG: I assume a workflow won't point to the save calculation table
-        # more than once... What's a scenario where this isn't true?
-        # I can only think of multi-structure workflows (like EvolutionarySearch)
-        # which I don't give their own table for now.
-        new_columns = {}
-        for child_calc in child_database_tables:
-            new_column = table_column.OneToOneField(
-                child_calc,
-                on_delete=table_column.CASCADE,
-                # related_name=...,
-                blank=True,
-                null=True,
-            )
-            new_columns[f"{child_calc._meta.model_name}"] = new_column
-
-        # Now put all the fields together to make the new class
-        NewClass = cls.create_subclass(
-            name,
-            **new_columns,
-            **extra_columns,
-            # also have child calcs list as an attribute
-            child_database_tables=child_database_tables,
-            module=module,
-        )
-
-        # we now have a new child class and avoided writing some boilerplate code!
-        return NewClass
 
     # def update_calculation(self):
     #     """
