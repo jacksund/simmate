@@ -79,7 +79,7 @@ class Walltime(ErrorHandler):
         remaining_time = self._get_remaining_time(directory)
 
         # None means we ignore this error handler
-        if remaining_time == None:
+        if remaining_time is None:
             return False
 
         # If the remaining time is less than our buffer time or time for 2

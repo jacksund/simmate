@@ -46,7 +46,7 @@ def reset(confirm_delete: bool = False, use_prebuilt: bool = None):
     from simmate.configuration.django.settings import DATABASES
 
     using_sqlite = DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
-    if using_sqlite and use_prebuilt == None:
+    if using_sqlite and use_prebuilt is None:
         use_prebuilt = typer.confirm(
             "\nIt looks like you are using the default database backend (sqlite3). \n"
             "Would you like to use a prebuilt-database with all third-party data "

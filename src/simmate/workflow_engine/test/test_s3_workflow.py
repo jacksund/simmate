@@ -113,7 +113,7 @@ def test_s3workflow_1():
 
     output = Customized__Testing__DummyWorkflow.run_config()
 
-    assert output["result"] == None
+    assert output["result"] is None
     assert output["corrections"] == []
 
     # make sure that a "simmate-task-*" directory was created

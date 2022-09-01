@@ -1030,7 +1030,7 @@ class Workflow:
         # the class attribute.
         if add_defaults_from_attr:
             for parameter in cls.parameter_names:
-                if parameters.get(parameter, None) == None and hasattr(cls, parameter):
+                if parameters.get(parameter, None) is None and hasattr(cls, parameter):
                     parameters_cleaned[parameter] = getattr(cls, parameter)
 
         # The remaining checks look to intialize input to toolkit objects using

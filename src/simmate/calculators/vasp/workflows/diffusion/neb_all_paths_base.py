@@ -108,7 +108,7 @@ class NebAllPathsWorkflow(Workflow):
         bulk_static_energy_result = cls.bulk_static_energy_workflow.run(
             structure={
                 "database_table": cls.bulk_relaxation_workflow.database_table.table_name,
-                "directory": bulk_relax_result["directory"],
+                "database_id": bulk_relax_result.id,
                 "structure_field": "structure_final",
             },
             command=command,  # subcommands["command_bulk"]
@@ -118,10 +118,10 @@ class NebAllPathsWorkflow(Workflow):
 
         # This step does NOT run any calculation, but instead, identifies all
         # diffusion pathways and builds the necessary database entries.
-        migration_hop_ids = cls._build_diffusion_analysis(
+        analysis_db, migration_hops = cls._build_diffusion_analysis(
             structure={
                 "database_table": cls.bulk_static_energy_workflow.database_table.table_name,
-                "directory": bulk_static_energy_result["directory"],
+                "database_id": bulk_static_energy_result.id,
             },
             migrating_specie=migrating_specie,
             directory=directory,
@@ -129,16 +129,13 @@ class NebAllPathsWorkflow(Workflow):
         )
 
         # Run NEB single_path workflow for all these.
-        for i, hop_id in enumerate(migration_hop_ids):
+        for i, hop in enumerate(migration_hops):
             state = cls.single_path_workflow.run(
-                migration_hop={
-                    "migration_hop_table": "MigrationHop",
-                    "migration_hop_id": hop_id,
-                },
+                migration_hop=hop,
                 directory=directory
                 / f"{cls.single_path_workflow.name_full}.{str(i).zfill(2)}",
-                diffusion_analysis_id=None,
-                migration_hop_id=None,
+                diffusion_analysis_id=analysis_db.id,
+                migration_hop_id=hop.database_object.id,
                 command=command,
                 # subcommands["command_supercell"]
                 # + ";"
@@ -148,7 +145,10 @@ class NebAllPathsWorkflow(Workflow):
                 max_atoms=max_atoms,
                 min_length=min_length,
                 nimages=nimages,
-            )  # we don't want to wait on results to in order to allow parallel runs
+            )
+            state.result()  # wait until the job finishes
+
+        return analysis_db
 
     @classmethod
     def _build_diffusion_analysis(
@@ -209,31 +209,26 @@ class NebAllPathsWorkflow(Workflow):
         ###### STEP 2: creating the database objects and saving them to the db
 
         # Create the main DiffusionAnalysis object that others will link to.
-        da_obj = cls.database_table.from_toolkit(
+        analysis_db = cls.database_table.from_toolkit(
             structure=structure_cleaned,
             migrating_specie=migrating_specie,
             vacancy_mode=vacancy_mode,
         )
-        da_obj.save()
+        analysis_db.save()
         # TODO: should I search for a matching bulk structure before deciding
         # to create a new DiffusionAnalysis entry?
 
         # grab the linked MigrationHop class
-        hop_class = da_obj.migration_hops.model
+        hop_class = analysis_db.migration_hops.model
 
         # Now iterate through the hops and add them to the database
-        hop_ids = []
         for i, hop in enumerate(migration_hops):
             hop_db = hop_class.from_toolkit(
                 migration_hop=hop,
                 number=i,
-                diffusion_analysis_id=da_obj.id,
+                diffusion_analysis_id=analysis_db.id,
             )
             hop_db.save()
-            hop_ids.append(hop_db.id)
+            hop.database_object = hop_db  # set entry for access later
 
-        # TODO: still figuring out if toolkit vs. db objects should be returned.
-        # Maybe add ids to the toolkit objects? Or dynamic DB dictionaries?
-        # For now I return the MigrationHop ids -- because this let's me
-        # indicate which MigrationHops should be updated later on.
-        return hop_ids
+        return analysis_db, migration_hops
