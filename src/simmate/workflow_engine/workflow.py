@@ -438,6 +438,11 @@ class Workflow:
 
         return calculation
 
+    @classmethod
+    def load_completed_calc(cls, directory: Path):
+        # TODO: maybe load the yaml file to get extra kwargs, run_id, etc.
+        return cls.database_table.from_directory(directory)
+
     # -------------------------------------------------------------------------
     # Properties that enforce the naming convention for workflows
     # -------------------------------------------------------------------------

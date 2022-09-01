@@ -21,10 +21,12 @@ import pytest
 from django.contrib.auth.models import User
 from typer.testing import CliRunner
 
+from simmate.calculators.vasp.inputs import Potcar
 from simmate.database.base_data_types import Spacegroup
 from simmate.toolkit import Composition, Structure, base_data_types
 from simmate.utilities import get_directory
 from simmate.website.test_app.models import TestStructure
+from simmate.workflow_engine import S3Workflow
 
 COMPOSITIONS_STRS = [
     "Fe1",
@@ -181,6 +183,31 @@ def django_db_setup(
             structure_db.save()
 
 
+@pytest.fixture(scope="session")
+def command_line_runner():
+    """
+    Allows us to call the command line in a controlled manner, rather than
+    through subprocess.
+    """
+    return CliRunner()
+
+
+# !!! Disable harness until prefect is reimplemented
+# from prefect.testing.utilities import prefect_test_harness
+# @pytest.fixture(autouse=True, scope="session")
+# def prefect_test_fixture():
+#     """
+#     For all prefect flows and tasks, this will automatically use a dummy-database
+#     """
+#     with prefect_test_harness():
+#         yield
+
+# -----------------------------------------------------------------------------
+# The remaining functions are utilities that help us manage test files and/or
+# pretending to call fuctions
+# -----------------------------------------------------------------------------
+
+
 def copy_test_files(tmp_path, test_directory, test_folder):
     """
     This is a test utility that takes a given directory and copies it's content
@@ -253,17 +280,30 @@ def make_dummy_files(*filenames: str):
             file.write("This is a dummy file for testing.")
 
 
-@pytest.fixture(scope="session")
-def command_line_runner():
-    return CliRunner()
+class SimmateMockHelper:
+    @staticmethod
+    def get_mocked_potcar(mocker, directory: Path):
 
+        # Because we won't have POTCARs accessible, we need to cover this function
+        # call -- specifically have it pretend to make a file
+        mocker.patch.object(
+            Potcar,
+            "to_file_from_type",
+            return_value=make_dummy_files(directory / "POTCAR"),
+        )
 
-# !!! Disable harness until prefect is reimplemented
-# from prefect.testing.utilities import prefect_test_harness
-# @pytest.fixture(autouse=True, scope="session")
-# def prefect_test_fixture():
-#     """
-#     For all prefect flows and tasks, this will automatically use a dummy-database
-#     """
-#     with prefect_test_harness():
-#         yield
+        return Potcar  # in case we need to "assert_called_with"
+
+    def mock_vasp(mocker):
+
+        # Because we won't have POTCARs accessible, we need to skip this function
+        # call -- specifically have it pretend to make a file
+        mocker.patch.object(Potcar, "to_file_from_type", return_value=None)
+
+        # We also don't want to run any commands -- for any task. We skip these
+        # by having the base S3task.execute just return an empty list (meaning
+        # no corrections were made).
+        mocker.patch.object(S3Workflow, "execute", return_value=[])
+
+        # Don't check for proper input files because POTCARs will be missing
+        mocker.patch.object(S3Workflow, "_check_input_files", return_value=None)

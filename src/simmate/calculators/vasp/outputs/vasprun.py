@@ -10,7 +10,10 @@ from pymatgen.io.vasp.outputs import Vasprun as VasprunPymatgen
 
 class Vasprun(VasprunPymatgen):
     @classmethod
-    def from_directory(cls, directory: Path):
+    def from_directory(cls, directory: Path = None):
+
+        if not directory:
+            directory = Path.cwd()
 
         vasprun_filename = directory / "vasprun.xml"
 
