@@ -44,13 +44,13 @@ class ElectronicStructureWorkflow(Workflow):
             directory=directory / cls.static_energy_workflow.name_full,
             source=source,
             # For band-structures, unit cells should be in the standardized format
-            pre_standardize_structure=True,
+            standardize_structure="primitive",
         ).result()  # block until complete
 
         dos_state = cls.density_of_states_workflow.run(
             structure={
                 "database_table": cls.static_energy_workflow.database_table.table_name,
-                "directory": static_result["directory"],
+                "database_id": static_result.id,
             },
             command=command,
             directory=directory / cls.density_of_states_workflow.name_full,
@@ -60,7 +60,7 @@ class ElectronicStructureWorkflow(Workflow):
         bs_state = cls.band_structure_workflow.run(
             structure={
                 "database_table": cls.static_energy_workflow.database_table.table_name,
-                "directory": static_result["directory"],
+                "database_id": static_result.id,
             },
             command=command,
             directory=directory / cls.band_structure_workflow.name_full,

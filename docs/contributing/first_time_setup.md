@@ -25,16 +25,21 @@ conda activate simmate_dev
 pip install -e .
 ```
 
-6. Make sure everything works properly by running our tests
+6. When resetting your database, make sure you do **NOT** use the prebuilt database. Pre-builts are only made for new releases and the dev database may differ from the most recent release.
+``` bash
+simmate database reset --confirm-delete --use-prebuilt false
+```
+
+7. Make sure everything works properly by running our tests
 ``` shell
 # you can optionally run tests in parallel 
 # with a command such as "pytest -n 4"
 pytest
 ```
 
-7. In GitKraken, make sure you have the `main` branch of your repo (`yourname/simmate`) checked out.
+8. In GitKraken, make sure you have the `main` branch of your repo (`yourname/simmate`) checked out.
 
-8. In Spyder, go `Projects` > `New Project...`. Check `existing directory`, select your `~/Documents/github/simmate` directory, and then `create` your Project!
+9. In Spyder, go `Projects` > `New Project...`. Check `existing directory`, select your `~/Documents/github/simmate` directory, and then `create` your Project!
 
-9. You can now explore the source code and add/edit files! Move to the next section on how to format, test, and submit these changes to our team.
+10. You can now explore the source code and add/edit files! Move to the next section on how to format, test, and submit these changes to our team.
 

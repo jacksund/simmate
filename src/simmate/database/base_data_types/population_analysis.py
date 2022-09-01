@@ -3,8 +3,6 @@
 from pathlib import Path
 
 from pandas import DataFrame
-from pymatgen.io.vasp import Potcar
-from pymatgen.io.vasp.outputs import Chgcar
 
 from simmate.calculators.bader.outputs import ACF
 from simmate.database.base_data_types import StaticEnergy, table_column
@@ -29,24 +27,68 @@ class PopulationAnalysis(StaticEnergy):
 
     oxidation_states = table_column.JSONField(blank=True, null=True)
     """
-    A list of calculated oxidation states based on some analysis. This is 
-    given back as a list of float values in the same order as sites in the
-    source structure.
+    A list of calculated oxidation states for each site.
     """
 
     charges = table_column.JSONField(blank=True, null=True)
+    """
+    A list of total "valence" electron counts for each site.
+    
+    WARNING: this count is dependent on the potentials used. For example, 
+    Yttrium could have used a potential where 2 or even 10 electrons are used 
+    as the basis for the calculation. Use 'oxidation_states' for a more 
+    consistent and accurate count of valence electrons
+    """
 
     min_dists = table_column.JSONField(blank=True, null=True)
+    """
+    A list of minimum radii distance for bader volumes. i.e. the minimum
+    distance from the origin of the site to the bader surface. This can be used
+    as a minimum radius for the site.
+    """
 
     atomic_volumes = table_column.JSONField(blank=True, null=True)
+    """
+    A list of site volumes from the oxidation analysis (i.e. the bader volume)
+    """
 
     element_list = table_column.JSONField(blank=True, null=True)
+    """
+    A list of all element species in order that appear in the structure.
+    
+    This information is stored in the structure_string as well, but it is stored
+    here as an extra for convenience.
+    """
 
     vacuum_charge = table_column.FloatField(blank=True, null=True)
+    """
+    Total electron count that was NOT assigned to ANY site -- and therefore
+    assigned to 'vacuum'.
+    
+    In most cases, this value should be zero.
+    """
 
     vacuum_volume = table_column.FloatField(blank=True, null=True)
+    """
+    Total volume from electron density that was NOT assigned to ANY site -- 
+    and therefore assigned to 'vacuum'.
+    
+    In most cases, this value should be zero.
+    """
 
     nelectrons = table_column.FloatField(blank=True, null=True)
+    """
+    The total number of electrons involved in the charge density partitioning.
+    
+    WARNING: this count is dependent on the potentials used. For example, 
+    Yttrium could have used a potential where 2 or even 10 electrons are used 
+    as the basis for the calculation. Use 'oxidation_states' for a more 
+    consistent and accurate count of valence electrons
+    """
+
+    def write_output_summary(self, directory: Path):
+        super().write_output_summary(directory)
+        self.write_summary_dataframe(directory)
 
     @classmethod
     def from_vasp_directory(cls, directory: Path, as_dict: bool = False):
@@ -63,61 +105,7 @@ class PopulationAnalysis(StaticEnergy):
         # We must then look for the bader analysis data
 
         # load the ACF.dat file
-        acf_filename = directory / "ACF.dat"
-        dataframe, extra_data = ACF(filename=acf_filename)
-
-        # !!! Consider moving this code to the Acf class
-
-        # load the electron counts used by VASP from the POTCAR files
-        # OPTIMIZE: this can be much faster if I have a reference file
-        potcar_filename = directory / "POTCAR"
-        potcars = Potcar.from_file(potcar_filename)
-        nelectron_data = {}
-        # the result is a list because there can be multiple element potcars
-        # in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)
-        for potcar in potcars:
-            nelectron_data.update({potcar.element: potcar.nelectrons})
-
-        # SPECIAL CASE: in scenarios where empty atoms are added to the structure,
-        # we should grab that modified structure instead of the one from the POSCAR.
-        chgcar_filename = directory / "CHGCAR"
-        chgcar_empty_filename = directory / "CHGCAR_empty"
-
-        # the empty file will always take preference
-        if chgcar_empty_filename.exists():
-            chgcar = Chgcar.from_file(chgcar_empty_filename)
-            structure = chgcar.structure
-            # We typically use hydrogen ("H") as the empty atom, so we will
-            # need to add this to our element list for oxidation analysis.
-            # We use 0 for electron count because this is an 'empty' atom, and
-            # not actually Hydrogen
-            nelectron_data.update({"H": 0})
-
-        # otherwise, grab the structure from the CHGCAR
-        # OPTIMIZE: consider grabbing from the POSCAR or CONTCAR for speed
-        else:
-            chgcar = Chgcar.from_file(chgcar_filename)
-            structure = chgcar.structure
-
-        # Calculate the oxidation state of each site where it is simply the
-        # change in number of electrons associated with it from vasp potcar vs
-        # the bader charge I also add the element strings for filtering functionality
-        elements = []
-        oxi_state_data = []
-        for site, site_charge in zip(structure, dataframe.charge.values):
-            element_str = site.specie.name
-            elements.append(element_str)
-            oxi_state = nelectron_data[element_str] - site_charge
-            oxi_state_data.append(oxi_state)
-
-        # add the new column to the dataframe
-        dataframe = dataframe.assign(
-            oxidation_state=oxi_state_data,
-            element=elements,
-        )
-        # !!! There are multiple ways to do this, but I don't know which is best
-        # dataframe["oxidation_state"] = pandas.Series(
-        #     oxi_state_data, index=dataframe.index)
+        dataframe, extra_data = ACF(directory)
 
         all_data = {
             # OPTIMIZE: consider a related table for Sites
@@ -133,5 +121,18 @@ class PopulationAnalysis(StaticEnergy):
         return all_data if as_dict else cls(**all_data)
 
     def get_summary_dataframe(self):
-        # TODO
-        pass
+        df = DataFrame(
+            {
+                "element": self.element_list,
+                "oxidation_state": self.oxidation_states,
+                "charge": self.charges,
+                "min_dist": self.min_dists,
+                "atomic_volume": self.atomic_volumes,
+            }
+        )
+        return df
+
+    def write_summary_dataframe(self, directory: Path):
+        df = self.get_summary_dataframe()
+        filename = directory / "simmate_population_summary.csv"
+        df.to_csv(filename)
