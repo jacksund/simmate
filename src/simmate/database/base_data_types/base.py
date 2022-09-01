@@ -651,6 +651,7 @@ class DatabaseTable(models.Model):
         # a database column.
         all_data.pop("structure", None)
         all_data.pop("migration_hop", None)
+        all_data.pop("migration_images", None)
         all_data.pop("band_structure", None)
         all_data.pop("density_of_states", None)
 

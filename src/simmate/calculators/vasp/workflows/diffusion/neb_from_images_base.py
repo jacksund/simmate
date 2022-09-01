@@ -27,7 +27,8 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
     may be useful if you'd like to make your own variation of this class.
     """
 
-    _parameter_methods = ["run_config", "setup"]
+    _parameter_methods = VaspWorkflow._parameter_methods.copy()
+    _parameter_methods.remove("_get_clean_structure")
 
     # NEB does not require a POSCAR file because input structures are organized
     # into folders.

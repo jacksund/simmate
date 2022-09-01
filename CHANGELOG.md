@@ -28,11 +28,13 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - accept `TOML` input files in addition to `YAML`
 - convergence plots and extras are now written for many workflow types (such as relaxations)
 - when `use_database=True`, output files are automatically written and the workup method is directly paired with the database table.
+- NEB workflow now accepts parameters to tune how distinct pathways are determined, including the max pathway length and cutoffs at 1D percolation.
 
 **Refactors**
 - the `website.core_components.filters` module has been absorbed into the `DatabaseTable` class/module
 - yaml input for custom workflows now matches the python input format
 - workup methods are largely depreciated and now database entries are returned when a workflow has `use_database=True`
+- several NEB input parameters have been renamed to accurate depict their meaning.
 
 **Fixes**
 - fix bug in windows dev env where `simmate run-server` fails to find python path

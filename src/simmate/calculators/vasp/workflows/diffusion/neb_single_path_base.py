@@ -36,9 +36,6 @@ class SinglePathWorkflow(Workflow):
 
     from_images_workflow: Workflow = None
 
-    # TODO:
-    # commands_out=["command_supercell", "command_neb"]
-
     @classmethod
     def run_config(
         cls,

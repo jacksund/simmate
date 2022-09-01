@@ -98,17 +98,11 @@ class DiffusionAnalysis(Structure, Calculation):
         # I assume the directory is from a vasp calculation, but I need to update
         # this when I begin adding new calculators.
 
-        # TODO: It there a way I can figure out which tables the other calculations
-        # are linked to? Specifically, the bulk relaxation, bulk static energy,
-        # and the supercell relaxations. They are all in these directories too
-        # but I can't save those results until I know where they belong.
-        # Consider adding an attribute that points to those tables...? Or
-        # maybe a relationship (which I'd rather avoid bc it makes things very
-        # messy for users)
         # For now, I only grab the structure from the static-energy and store
         # it in the DiffusionAnalysis table.
         bulk_filename = directory / "static-energy.vasp.matproj" / "POSCAR"
         bulk_structure = ToolkitStructure.from_file(bulk_filename)
+        # BUG: I assume the directory location but this will fail if changed.
 
         # Save a diffusion analysis object so we can connect all other data
         # to it.
@@ -238,9 +232,10 @@ class MigrationHop(Calculation):
     )
 
     def write_output_summary(self, directory: Path):
-        super().write_output_summary(directory)
-        self.write_neb_plot(directory)
-        self.write_images(directory)
+        # super().write_output_summary(directory)
+        # self.write_neb_plot(directory)
+        # self.write_migration_images(directory)
+        pass
 
     def get_neb_plot(self):
         neb_results = self.to_neb_toolkit()
@@ -319,16 +314,6 @@ class MigrationHop(Calculation):
         writing summary output files (structures, data, and plots).
         """
         return cls.from_toolkit(neb_results=vasprun.neb_results)
-
-    @classmethod
-    def from_directory(cls, directory: Path, **kwargs):
-        # I assume the directory is from a vasp calculation, but I need to update
-        # this when I begin adding new calculators.
-
-        # BUG: A fix is make during the workup() method that may be relevant here.
-        # simmate.calculators.vasp.tasks.nudged_elastic_band.MITNudgedElasticBand.workup
-        analysis = NEBAnalysis.from_dir(directory)
-        return cls.from_pymatgen(analysis=analysis, **kwargs)
 
     @classmethod
     def from_neb_toolkit(
