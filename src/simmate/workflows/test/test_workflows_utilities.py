@@ -164,7 +164,6 @@ def test_get_unique_paramters():
         "max_supercell_atoms",
         "migrating_specie",
         "migration_hop",
-        "migration_hop_id",
         "migration_images",
         "min_atoms",
         "min_length",

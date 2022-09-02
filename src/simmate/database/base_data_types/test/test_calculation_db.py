@@ -34,13 +34,6 @@ def test_calculation_table():
     #     == "https://cloud.prefect.io/simmate/flow-run/example-id-123"
     # )
 
-    # and test incorrect passing
-    with pytest.raises(Exception):
-        calc_db2 = TestCalculation.from_run_context(
-            run_id="example-id-123",
-            # workflow_name --> missing but required
-        )
-
 
 @pytest.mark.django_db
 def test_calculation_archives():

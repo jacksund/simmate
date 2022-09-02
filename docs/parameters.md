@@ -430,11 +430,6 @@ The atomic path that should be analyzed. Inputs are anything compatible with the
 
 --------------------------
 
-## migration_hop_id
-(advanced users only) The entry id from the `MigrationHop` table to link the results to. This is set automatically by higher-level workflows and rarely (if ever) set by the user. If used, you'll likely need to set `diffusion_analysis_id` as well.
-
---------------------------
-
 ## migration_images
 The full set of images (including endpoint images) that should be analyzed. Inputs are anything compatible with the `MigrationImages` class of the `simmate.toolkit.diffusion` module, which is effectively a list of `structure` inputs. This includes:
 
