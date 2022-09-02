@@ -25,6 +25,8 @@ class BandStructure(DatabaseTable):
     class Meta:
         abstract = True
 
+    exclude_from_summary = ["band_structure_data"]
+
     archive_fields = ["band_structure_data"]
 
     api_filters = dict(
@@ -93,6 +95,14 @@ class BandStructure(DatabaseTable):
     # magnetic_ordering (Magnetic ordering of the calculation.)
     # equivalent_labels (Equivalent k-point labels in other k-path conventions)
 
+    def write_output_summary(self, directory: Path):
+        """
+        In addition to writing the normal VASP output summary, this also plots
+        the bandstructure to "band_structure.png"
+        """
+        super().write_output_summary(directory)
+        self.write_bandstructure_plot(directory)
+
     @classmethod
     def _from_toolkit(
         cls,
@@ -145,6 +155,11 @@ class BandStructure(DatabaseTable):
         plot = bs_plotter.get_plot()
         return plot
 
+    def write_bandstructure_plot(self, directory: Path):
+        plot = self.get_bandstructure_plot()
+        plot_filename = directory / "simmate_band_structure.png"
+        plot.savefig(plot_filename)
+
 
 class BandStructureCalc(Structure, BandStructure, Calculation):
     """
@@ -156,52 +171,15 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
     class Meta:
         app_label = "workflows"
 
-    def update_from_vasp_run(
-        self,
-        vasprun: Vasprun,
-        corrections: list,
-        directory: Path,
-    ):
-        """
-        Given a pymatgen VaspRun object, which is what's typically returned
-        from a simmate VaspWorkflow.run() call, this will update the database entry
-        with the results.
-        """
-
-        # All data analysis is done via a BandStructure object, so we convert
-        # the vasprun object to that first.
-        band_structure = vasprun.get_band_structure(line_mode=True)
-
-        # Take our band_structure and expand its data for the rest of the columns.
-        new_kwargs = BandStructure.from_toolkit(
-            band_structure=band_structure,
-            as_dict=True,
-        )
-        for key, value in new_kwargs.items():
-            setattr(self, key, value)
-
-        # lastly, we also want to save the corrections made and directory it ran in
-        self.corrections = corrections
-        self.directory = directory
-
-        # Now we have the relaxation data all loaded and can save it to the database
-        self.save()
-
     @classmethod
-    def from_directory(cls, directory: Path):
-        """
-        Creates a new database entry from a directory that holds band-structure
-        results. For now, this assumes the directory holds vasp output files.
-        """
+    def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):
 
-        # I assume the directory is from a vasp calculation, but I need to update
-        # this when I begin adding new calculators.
-        vasprun_filename = directory / "vasprun.xml"
-        vasprun = Vasprun(vasprun_filename)
         band_structure = vasprun.get_band_structure(line_mode=True)
         band_structure_db = cls.from_toolkit(
             structure=vasprun.structures[0],
             band_structure=band_structure,
+            as_dict=as_dict,
         )
-        band_structure_db.save()
+        if not as_dict:
+            band_structure_db.save()
         return band_structure_db

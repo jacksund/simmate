@@ -20,18 +20,20 @@ class Calculation(DatabaseTable):
 
     archive_fields = [
         "workflow_name",
-        "location",
+        "workflow_version",
+        "computer_system",
         "directory",
         "run_id",
         "corrections",
     ]
 
-    api_filters = dict(
-        workflow_name=["exact"],
-        location=["exact"],
-        directory=["exact"],
-        run_id=["exact"],
-    )
+    api_filters = {
+        "workflow_name": ["exact"],
+        "workflow_version": ["exact"],
+        "computer_system": ["exact"],
+        "directory": ["exact"],
+        "run_id": ["exact"],
+    }
 
     workflow_name = table_column.CharField(
         max_length=75,
@@ -42,7 +44,16 @@ class Calculation(DatabaseTable):
     The full name of the workflow used, such as "relaxation.vasp.matproj".
     """
 
-    location = table_column.CharField(
+    workflow_version = table_column.CharField(
+        max_length=75,
+        blank=True,
+        null=True,
+    )
+    """
+    The version of the workflow being used, such as "0.7.0".
+    """
+
+    computer_system = table_column.CharField(
         max_length=75,
         blank=True,
         null=True,
@@ -79,74 +90,18 @@ class Calculation(DatabaseTable):
 
     corrections = table_column.JSONField(blank=True, null=True)
     """
-    Simmate workflows often have ErrorHandlers that fix any issues while the
+    S3 workflows often have ErrorHandlers that fix any issues while the
     calaculation ran. This often involves changing settings, so we store
     any of those changes here.
     """
 
-    @property
-    def prefect_cloud_link(self) -> str:
-        """
-        URL to this calculation (flow-run) in the Prefect Cloud website.
-
-        This assumes that the calculation was registered with prefect cloud and
-        doesn't check to confirm it's been registered. To actually confirm that,
-        use the `flow_run_view` attribute instead.
-        """
-        return f"https://cloud.prefect.io/simmate/flow-run/{self.run_id}"
-
-    @property
-    def flow_run_view(self):  # -> FlowRunView
-        """
-        Checks if the run_id was registered with Prefect Cloud, and
-        if so, returns a
-        [FlowRunView](https://docs.prefect.io/orchestration/flow-runs/inspection.html)
-        that hold metadata such as the status. This metadata includes...
-            - agent_id
-            - auto_scheduled
-            - context
-            - created_by_user_id
-            - end_time
-            - flow_id
-            - labels
-            - name
-            - parameters
-            - scheduled_start_time
-            - start_time
-            - state
-            - tenant_id
-            - times_resurrected
-            - version
-
-        If Prefect Cloud is not configured or if the calculation was ran
-        locally, the None is returned.
-        """
-        raise NotImplementedError("This feature has no been migrated to Prefect 2.0")
-
-    @property
-    def prefect_flow_run_name(self) -> str:
-        """
-        Gives the user-friendly name of this run if the run_id
-        was registered with Prefect Cloud. (an example name is "friendly-bumblebee").
-        """
-        flowrunview = self.flow_run_view
-        return flowrunview.name if flowrunview else None
-
-    @property
-    def prefect_state(self) -> str:
-        """
-        Gives the current state of this run if the run_id
-        was registered with Prefect Cloud. (ex: "Scheduled" or "Successful")
-        """
-        flowrunview = self.flow_run_view
-        return flowrunview.state.__class__.__name__ if flowrunview else None
-
     @classmethod
     def from_run_context(
         cls,
-        run_id: str = None,
+        run_id: str,
         workflow_name: str = None,
-        **kwargs,
+        workflow_version: str = None,
+        **kwargs,  # other parameters you'd normally pass to 'from_toolkit'
     ):
         """
         Given a prefect id, this method will do one of the following...
@@ -157,25 +112,9 @@ class Calculation(DatabaseTable):
         It will then return the corresponding Calculation instance.
         """
 
-        if not run_id or not workflow_name:
-            # Grab the database_table that we want to save the results in
-            from prefect.context import FlowRunContext
-
-            run_context = FlowRunContext.get()
-            if run_context:
-                workflow = run_context.flow.simmate_workflow
-                workflow_name = workflow.name_full
-                run_id = str(run_context.flow_run.id)
-                assert workflow.database_table == cls
-            else:
-                raise Exception(
-                    "No Prefect FlowRunContext was detected, so you must provide "
-                    "flow_id and workflow_name to the from_run_context method."
-                )
-
         # Depending on how a workflow was submitted, there may be a calculation
         # extry existing already -- which we need to grab and then update. If it's
-        # not there, we create a new one!
+        # not there, we create a new one
 
         # check if the calculation already exists in our database, and if so,
         # grab it and return it.
@@ -187,30 +126,93 @@ class Calculation(DatabaseTable):
         # information to the from_toolkit method rather than directly to cls.
         calculation = cls.from_toolkit(
             run_id=run_id,
-            location=platform.node(),
+            computer_system=platform.node(),
             workflow_name=workflow_name,
+            workflow_version=workflow_version,
             **kwargs,
         )
         calculation.save()
 
         return calculation
 
-    # TODO: Consider adding resource use metadata (e.g. from VASP)
-    # I may want to add these fields because Prefect doesn't store run stats
-    # indefinitely AND it doesn't give detail memory use, number of cores, etc.
-    # If all of these are too much, I could do a json field of "run_stats" instead
-    #   - average_memory (The average memory used in kb)
-    #   - max_memory (The maximum memory used in kb)
-    #   - elapsed_time (The real time elapsed in seconds)
-    #   - system_time(The system CPU time in seconds)
-    #   - user_time(The user CPU time spent by VASP in seconds)
-    #   - total_time (The total CPU time for this calculation)
-    #   - cores (The number of cores used by VASP (some clusters print `mpi-ranks` here))
+    # -------------------------------------------------------------------------
+    # All methods below are for prefect, but because of the prefect 2.0 migration,
+    # these are disabled for the time being.
+    # -------------------------------------------------------------------------
 
-    # TODO: Consider linking to parent calculations for nested workflow runs
-    # Where this calculation plays a role within a "nested" workflow calculation.
-    # Becuase this structure can be reused by multiple workflows, we make this
-    # a list of source-like objects. For example, a relaxation could be part of
-    # a series of relaxations (like in StagedRelaxation) or it can be an initial
-    # step of a BandStructure calculation.
-    # parent_nested_calculations = table_column.JSONField(blank=True, null=True)
+    # @classmethod
+    # def from_run_context(
+    #     cls,
+    #     run_id: str = None,  # inputs are optional when using prefect
+    #     workflow_name: str = None,
+    #     **kwargs,  # other parameters you'd normally pass to 'from_toolkit'
+    # ):
+    #     if not run_id or not workflow_name:
+    #         # Grab the database_table that we want to save the results in
+    #         from prefect.context import FlowRunContext
+    #         run_context = FlowRunContext.get()
+    #         if run_context:
+    #             workflow = run_context.flow.simmate_workflow
+    #             workflow_name = workflow.name_full
+    #             run_id = str(run_context.flow_run.id)
+    #             assert workflow.database_table == cls
+    #         else:
+    #             raise Exception(
+    #                 "No Prefect FlowRunContext was detected, so you must provide "
+    #                 "flow_id and workflow_name to the from_run_context method."
+    #             )
+
+    # @property
+    # def prefect_cloud_link(self) -> str:
+    #     """
+    #     URL to this calculation (flow-run) in the Prefect Cloud website.
+    #     This assumes that the calculation was registered with prefect cloud and
+    #     doesn't check to confirm it's been registered. To actually confirm that,
+    #     use the `flow_run_view` attribute instead.
+    #     """
+    #     return f"https://cloud.prefect.io/simmate/flow-run/{self.run_id}"
+
+    # @property
+    # def flow_run_view(self):  # -> FlowRunView
+    #     """
+    #     Checks if the run_id was registered with Prefect Cloud, and
+    #     if so, returns a
+    #     [FlowRunView](https://docs.prefect.io/orchestration/flow-runs/inspection.html)
+    #     that hold metadata such as the status. This metadata includes...
+    #         - agent_id
+    #         - auto_scheduled
+    #         - context
+    #         - created_by_user_id
+    #         - end_time
+    #         - flow_id
+    #         - labels
+    #         - name
+    #         - parameters
+    #         - scheduled_start_time
+    #         - start_time
+    #         - state
+    #         - tenant_id
+    #         - times_resurrected
+    #         - version
+    #     If Prefect Cloud is not configured or if the calculation was ran
+    #     locally, the None is returned.
+    #     """
+    #     raise NotImplementedError("This feature has no been migrated to Prefect 2.0")
+
+    # @property
+    # def prefect_flow_run_name(self) -> str:
+    #     """
+    #     Gives the user-friendly name of this run if the run_id
+    #     was registered with Prefect Cloud. (an example name is "friendly-bumblebee").
+    #     """
+    #     flowrunview = self.flow_run_view
+    #     return flowrunview.name if flowrunview else None
+
+    # @property
+    # def prefect_state(self) -> str:
+    #     """
+    #     Gives the current state of this run if the run_id
+    #     was registered with Prefect Cloud. (ex: "Scheduled" or "Successful")
+    #     """
+    #     flowrunview = self.flow_run_view
+    #     return flowrunview.state.__class__.__name__ if flowrunview else None

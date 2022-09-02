@@ -50,14 +50,14 @@ def test_brmix(tmp_path):
     fix = error_handler.correct(tmp_path)
     assert fix == "removed any IMIX tag and switched KGAMMA to False"
     incar = Incar.from_file(incar_filename)
-    assert incar.get("IMIX", None) == None
+    assert incar.get("IMIX", None) is None
     assert incar["KGAMMA"] == False
 
     # Make third attempt at fixing the error
     fix = error_handler.correct(tmp_path)
     assert fix == "removed any IMIX tag and switched KGAMMA to True"
     incar = Incar.from_file(incar_filename)
-    assert incar.get("IMIX", None) == None
+    assert incar.get("IMIX", None) is None
     assert incar["KGAMMA"] == True
 
     # Make final attempt at fixing the error

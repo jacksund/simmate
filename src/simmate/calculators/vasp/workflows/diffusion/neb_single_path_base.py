@@ -32,13 +32,14 @@ class SinglePathWorkflow(Workflow):
     have not implemented a file format for MigrationHop's yet.
     """
 
-    use_database = False
-
     endpoint_relaxation_workflow: Workflow = None
+
     from_images_workflow: Workflow = None
 
-    # TODO:
-    # commands_out=["command_supercell", "command_neb"]
+    # Oddly enough, the from_images_workflow and this workflow share a table
+    # entry, so nothing needs to be done for working up results. See
+    # how we pass run_id=run_id below.
+    update_database_from_results = False
 
     @classmethod
     def run_config(
@@ -47,21 +48,16 @@ class SinglePathWorkflow(Workflow):
         directory: Path = None,
         source: dict = None,
         command: str = None,
-        # These help link results to a higher-level table.
         diffusion_analysis_id: int = None,
-        migration_hop_id: int = None,
-        # TODO: Can the hop id be inferred from the migration_hop or somewhere
-        # else in this context? Maybe even load_input_and_register will use
-        # prefect id once it's a Calculation?
         is_restart: bool = False,
         # parameters for supercell and image generation
         nimages: int = 5,
         min_atoms: int = 80,
         max_atoms: int = 240,
         min_length: float = 10,
+        run_id: str = None,
         **kwargs,
     ):
-
         # get the supercell endpoint structures
         supercell_start, supercell_end, _ = migration_hop.get_sc_structures(
             min_atoms=min_atoms,
@@ -93,12 +89,12 @@ class SinglePathWorkflow(Workflow):
         images = get_migration_images_from_endpoints(
             supercell_start={
                 "database_table": cls.endpoint_relaxation_workflow.database_table.table_name,
-                "directory": endpoint_start_result["directory"],
+                "database_id": endpoint_start_result.id,
                 "structure_field": "structure_final",
             },
             supercell_end={
                 "database_table": cls.endpoint_relaxation_workflow.database_table.table_name,
-                "directory": endpoint_end_result["directory"],
+                "database_id": endpoint_end_result.id,
                 "structure_field": "structure_final",
             },
             nimages=nimages,
@@ -111,6 +107,12 @@ class SinglePathWorkflow(Workflow):
             source=source,
             directory=directory,
             diffusion_analysis_id=diffusion_analysis_id,
-            migration_hop_id=migration_hop_id,
             is_restart=is_restart,
+            # Run id is very important here as it tells the underlying
+            # workflow that it doesn't need to create a new database object
+            # during registration -- as it will use the one that was registered
+            # when this workflow started. This is also why we have a dummy
+            # `update_database_from_results` method below
+            run_id=run_id,
         )
+        neb_images = neb_state.result()

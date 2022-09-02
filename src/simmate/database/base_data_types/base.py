@@ -382,6 +382,18 @@ class DatabaseTable(models.Model):
     See the `api_filterset` property for the final filter object.
     """
 
+    exclude_from_summary: list[str] = []
+    """
+    When writing output summaries, these columns will be ignored. This is useful
+    if you have a column for storing raw data that isn't friendly to read in
+    the yaml format. 'structure_string' is an example of a field we'd want to
+    exclude.
+    """
+
+    # -------------------------------------------------------------------------
+    # Core methods accessing key information and writing summary files
+    # -------------------------------------------------------------------------
+
     @classmethod
     @property
     def table_name(cls) -> str:
@@ -394,6 +406,208 @@ class DatabaseTable(models.Model):
         occurance of of this issue, we use "table_name" instead.
         """
         return cls.__name__
+
+    @classmethod
+    def get_column_names(cls) -> list[str]:
+        """
+        Returns a list of all the column names for this table and indicates which
+        columns are related to other tables. This is primarily used to help
+        view what data is available.
+        """
+        return [column.name for column in cls._meta.get_fields()]
+
+    @classmethod
+    def show_columns(cls):
+        """
+        Prints a list of all the column names for this table and indicates which
+        columns are related to other tables. This is primarily used to help users
+        interactively view what data is available.
+        """
+        # Iterate through and grab the columns. Note we don't use get_column_names
+        # here because we are attaching relation data as well.
+        column_names = [
+            column.name + f" (relation to {column.related_model.table_name})"
+            if column.is_relation
+            else column.name
+            for column in cls._meta.get_fields()
+        ]
+
+        # Then use yaml to make the printout pretty (no quotes and separate lines)
+        print(yaml.dump(column_names))
+
+    @classmethod
+    def get_mixins(cls) -> list:  # -> List[DatabaseTable]
+        """
+        Grabs the mix-in Tables that were used to make this class. This will
+        be mix-ins like Structure, Forces, etc. from the
+        `simmate.database.base_data_types` module.
+        """
+        # this must be imported locally because it depends on all other classes
+        # from this module -- and will create circular import issues if outside
+        from simmate.database import base_data_types as simmate_mixins
+
+        return [
+            parent
+            for parent in cls.__bases__
+            if hasattr(simmate_mixins, parent.table_name)
+            and parent.table_name != "DatabaseTable"
+        ]
+
+    @classmethod
+    def get_mixin_names(cls) -> list[str]:
+        """
+        Grabs the mix-in Tables that were used to make this class and returns
+        a list of their names.
+        """
+        return [mixin.table_name for mixin in cls.get_mixins()]
+
+    @classmethod
+    def get_extra_columns(cls) -> list[str]:
+        """
+        Finds all columns that aren't covered by the supported Table mix-ins.
+
+        For example, a table made from...
+
+        ``` python
+        from simmate.database.base_data_types import (
+            table_column,
+            Structure,
+            Forces,
+        )
+
+        class ExampleTable(Structure, Forces):
+            custom_column1 = table_column.FloatField()
+            custom_column2 = table_column.FloatField()
+        ```
+
+        ... would return ...
+
+        ``` python
+        ["custom_column1", "custom_column2"]
+        ```
+        """
+
+        all_columns = cls.get_column_names()
+        columns_w_mixin = [
+            column for mixin in cls.get_mixins() for column in mixin.get_column_names()
+        ]
+        extra_columns = [
+            column
+            for column in all_columns
+            if column not in columns_w_mixin and column != "id"
+        ]
+        return extra_columns
+
+    def write_output_summary(self, directory: Path):
+        """
+        This writes a "simmate_summary.yaml" file with key output information.
+        """
+
+        fields_to_exclude = self.exclude_from_summary + [
+            field for mixin in self.get_mixins() for field in mixin.exclude_from_summary
+        ]
+
+        all_data = {}
+        for column, value in self.__dict__.items():
+            if (
+                value != None
+                and not column.startswith("_")
+                and column not in fields_to_exclude
+            ):
+                all_data[column] = value
+
+        # also add the table name and entry id
+        all_data["database_table"] = self.table_name
+
+        summary_filename = directory / "simmate_summary.yaml"
+        with summary_filename.open("w") as file:
+            content = yaml.dump(all_data)
+            file.write(content)
+
+    # -------------------------------------------------------------------------
+    # Methods for loading results from files
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def from_directory(cls, directory: Path, as_dict: bool = False):
+        """
+        Loads data from a directory of files
+        """
+
+        # check if we have a VASP directory
+        vasprun_filename = directory / "vasprun.xml"
+        if vasprun_filename.exists():
+            return cls.from_vasp_directory(directory, as_dict=as_dict)
+
+        # TODO: add new elif statements when I begin adding new calculators.
+
+        # If we don't detect any directory, we return an empty dictionary.
+        # We don't print a warning or error for now because users may want
+        # to populate data entirely in python.
+        return {} if as_dict else None
+
+    @classmethod
+    def from_vasp_directory(cls, directory: Path, as_dict: bool = False):
+
+        from simmate.calculators.vasp.outputs import Vasprun
+
+        vasprun = Vasprun.from_directory(directory)
+        return cls.from_vasp_run(vasprun, as_dict=as_dict)
+
+    # -------------------------------------------------------------------------
+    # Methods that handle updating a database entry and its related entries
+    # -------------------------------------------------------------------------
+
+    def update_from_fields(self, **fields_to_update):
+        # go through each key in the dictionary and attach the value to the
+        # attribute of this entry
+        for key, value in fields_to_update.items():
+            setattr(self, key, value)
+
+        # Now we have all data loaded and attached to the database entry, we
+        # can call save() to actually update the database
+        self.save()
+
+    def update_from_toolkit(self, **fields_to_update):
+        """
+        Given fundamental "base info" and toolkit objects, this method will
+        populate all relevant columns.
+
+        Note, base info also corresponds to the `archive_fieldset`, which
+        represents raw data.
+
+        This method is meant for updating existing database entries with new
+        data. If your creating a brand-new database entry, use the
+        `from_toolkit` method instead.
+        """
+        fields_expanded = self.from_toolkit(as_dict=True, **fields_to_update)
+        self.update_from_fields(**fields_expanded)
+
+    def update_from_directory(self, directory: Path):
+        # This is for simple tables. If there are related table entries that
+        # need to be created/updated, then this method should be overwritten.
+        data_from_dir = self.from_directory(directory, as_dict=True)
+        self.update_from_toolkit(**data_from_dir)
+
+    def update_from_results(self, results: dict, directory: Path):
+        """
+        Updates a database from the results of a workflow run.
+
+        Typically this method is not called directly, as it is used within
+        `Workflow._save_to_database` automatically.
+        """
+
+        # First update using the results dictionary
+        self.update_from_toolkit(directory=str(directory), **results)
+
+        # Many calculations and datatables will have a "from_directory" method
+        # that loads data from files. We use this to grab extra fields and
+        # add them to our results.
+        self.update_from_directory(directory)
+
+    # -------------------------------------------------------------------------
+    # Methods that handle updating a database entry and its related entries
+    # -------------------------------------------------------------------------
 
     @classmethod
     def from_toolkit(cls, as_dict: bool = False, **kwargs):
@@ -437,6 +651,7 @@ class DatabaseTable(models.Model):
         # a database column.
         all_data.pop("structure", None)
         all_data.pop("migration_hop", None)
+        all_data.pop("migration_images", None)
         all_data.pop("band_structure", None)
         all_data.pop("density_of_states", None)
 
@@ -477,86 +692,49 @@ class DatabaseTable(models.Model):
         # return the dictionary
         return all_data if as_dict else cls(**all_data)
 
-    def update_from_toolkit(self, **kwargs):
-        """
-        Given fundamental "base info" and toolkit objects, this method will
-        populate all relevant columns.
-
-        Note, base info also corresponds to the `archive_fieldset`, which
-        represents raw data.
-
-        This method is meant for updating existing database entries with new
-        data. If your creating a brand-new database entry, use the
-        `from_toolkit` method instead.
-        """
-        new_kwargs = self.from_toolkit(as_dict=True, **kwargs)
-        for new_kwarg, new_value in new_kwargs.items():
-            setattr(self, new_kwarg, new_value)
-        self.save()
+    # -------------------------------------------------------------------------
+    # Methods creating new archives
+    # -------------------------------------------------------------------------
 
     @classmethod
-    def _confirm_override(
-        cls,
-        confirm_override: bool,
-        parallel: bool,
-        confirm_sqlite_parallel: bool,
-    ):
+    def to_archive(cls, filename: Path | str = None):
         """
-        A utility to make sure the user wants to load new data into their table
-        and (if they are using sqlite) that they are aware of the risks of
-        parallelizing their loading.
-
-        This utility should not be called directly, as it is used within
-        load_archive and load_remote_archive.
+        Writes the entire database table to an archive file. If you prefer
+        a subset of entries for the archive, use the to_archive method
+        on your SearchResults instead (e.g. MyTable.objects.filter(...).to_archive())
         """
-        # first check if the table has data in it already. We raise errors
-        # to stop the user from doing unneccessary and potentiall destructive
-        # downloads
-        if cls.objects.exists() and not confirm_override:
-            # if the user has a third-party app, we can be more specific with
-            # our error message.
-            if cls._meta.app_label == "third_parties":
-                raise Exception(
-                    "It looks like you're using a third-party database table and "
-                    "that the table already has data in it! This means you already "
-                    "called load_remote_archive and don't need to do it again. "
-                    "If you are trying reload a newer version of this data, make "
-                    "sure you empty this table first. This can be done by "
-                    "reseting your database or manually deleting all objects "
-                    "with `ExampleTable.objects.all().delete()`"
-                )
+        cls.objects.all().to_archive(filename)
 
-            # otherwise warning the user of overwriting data with matching
-            # primary keys -- and ask them to use confirm_override.
-            raise Exception(
-                "It looks like this table already has data in it! By loading an "
-                "archive, you could potentially overwrite this data. The most "
-                "common mistake is non-unique primary keys between your current "
-                "data and the archive -- if there is a duplicate primary key, it "
-                "will overwrite your data. If you are confident the data is safe "
-                "to load into your database, run this command again with "
-                "confirm_override=True."
-            )
+    @classmethod
+    @property
+    def archive_fieldset(cls) -> list[str]:
 
-        # Django and Dask can only handle so much for the parallelization
-        # of database writing with SQLite. So if the user has SQLite as their
-        # backend, we need to stop them from using this feature.
-        from simmate.configuration.django.settings import DATABASES
+        all_fields = ["id", "updated_at", "created_at", "source"]
 
-        if parallel and not confirm_sqlite_parallel and "sqlite3" in str(DATABASES):
-            raise Exception(
-                "It looks like you are trying to run things in parallel but are "
-                "using the default database backend (sqlite3), which is not "
-                "always stable for massively parallel methods. You can still "
-                "do this, but this message serves as a word of caution. "
-                "You If you see error messages pop up saying 'database is "
-                "locked', then your database is not stable at the rate you're "
-                "trying to write data. This is a sign that you should either "
-                "(1) switch to a different database backend such as Postgres "
-                "or (2) reduce the parallelization of your tasks. If you are "
-                "comfortable with these warnings and know what you're doing, "
-                "set confirm_sqlite_parallel=True."
-            )
+        # If calling this method on the base class, just return the sole mix-in.
+        if cls == DatabaseTable:
+            return all_fields
+
+        # Otherwise we need to go through the mix-ins and add their fields to
+        # the list
+        all_fields += [
+            field for mixin in cls.get_mixins() for field in mixin.archive_fields
+        ]
+
+        # Sometimes a column will be disabled by adding "--" in front of the
+        # column name. For example, "--band_gap" would exclude storing the band
+        # gap in the archive. We look for any columns that start with this
+        # and then remove them
+        for field in cls.archive_fields:
+            if field.startswith("--"):
+                all_fields.remove(field.removeprefix("--"))
+            else:
+                all_fields.append(field)
+        return all_fields
+
+    # -------------------------------------------------------------------------
+    # Methods that handle loading results from archives
+    # -------------------------------------------------------------------------
 
     # @transaction.atomic  # We can't have an atomic transaction if we use Dask
     @classmethod
@@ -798,122 +976,72 @@ class DatabaseTable(models.Model):
         logging.info("Done.")
 
     @classmethod
-    def get_column_names(cls) -> list[str]:
+    def _confirm_override(
+        cls,
+        confirm_override: bool,
+        parallel: bool,
+        confirm_sqlite_parallel: bool,
+    ):
         """
-        Returns a list of all the column names for this table and indicates which
-        columns are related to other tables. This is primarily used to help
-        view what data is available.
+        A utility to make sure the user wants to load new data into their table
+        and (if they are using sqlite) that they are aware of the risks of
+        parallelizing their loading.
+
+        This utility should not be called directly, as it is used within
+        load_archive and load_remote_archive.
         """
-        return [column.name for column in cls._meta.get_fields()]
+        # first check if the table has data in it already. We raise errors
+        # to stop the user from doing unneccessary and potentiall destructive
+        # downloads
+        if cls.objects.exists() and not confirm_override:
+            # if the user has a third-party app, we can be more specific with
+            # our error message.
+            if cls._meta.app_label == "third_parties":
+                raise Exception(
+                    "It looks like you're using a third-party database table and "
+                    "that the table already has data in it! This means you already "
+                    "called load_remote_archive and don't need to do it again. "
+                    "If you are trying reload a newer version of this data, make "
+                    "sure you empty this table first. This can be done by "
+                    "reseting your database or manually deleting all objects "
+                    "with `ExampleTable.objects.all().delete()`"
+                )
 
-    @classmethod
-    def show_columns(cls):
-        """
-        Prints a list of all the column names for this table and indicates which
-        columns are related to other tables. This is primarily used to help users
-        interactively view what data is available.
-        """
-        # Iterate through and grab the columns. Note we don't use get_column_names
-        # here because we are attaching relation data as well.
-        column_names = [
-            column.name + f" (relation to {column.related_model.table_name})"
-            if column.is_relation
-            else column.name
-            for column in cls._meta.get_fields()
-        ]
+            # otherwise warning the user of overwriting data with matching
+            # primary keys -- and ask them to use confirm_override.
+            raise Exception(
+                "It looks like this table already has data in it! By loading an "
+                "archive, you could potentially overwrite this data. The most "
+                "common mistake is non-unique primary keys between your current "
+                "data and the archive -- if there is a duplicate primary key, it "
+                "will overwrite your data. If you are confident the data is safe "
+                "to load into your database, run this command again with "
+                "confirm_override=True."
+            )
 
-        # Then use yaml to make the printout pretty (no quotes and separate lines)
-        print(yaml.dump(column_names))
+        # Django and Dask can only handle so much for the parallelization
+        # of database writing with SQLite. So if the user has SQLite as their
+        # backend, we need to stop them from using this feature.
+        from simmate.configuration.django.settings import DATABASES
 
-    @classmethod
-    def get_mixins(cls) -> list:  # -> List[DatabaseTable]
-        """
-        Grabs the mix-in Tables that were used to make this class. This will
-        be mix-ins like Structure, Forces, etc. from the
-        `simmate.database.base_data_types` module.
-        """
-        # this must be imported locally because it depends on all other classes
-        # from this module -- and will create circular import issues if outside
-        from simmate.database import base_data_types as simmate_mixins
+        if parallel and not confirm_sqlite_parallel and "sqlite3" in str(DATABASES):
+            raise Exception(
+                "It looks like you are trying to run things in parallel but are "
+                "using the default database backend (sqlite3), which is not "
+                "always stable for massively parallel methods. You can still "
+                "do this, but this message serves as a word of caution. "
+                "You If you see error messages pop up saying 'database is "
+                "locked', then your database is not stable at the rate you're "
+                "trying to write data. This is a sign that you should either "
+                "(1) switch to a different database backend such as Postgres "
+                "or (2) reduce the parallelization of your tasks. If you are "
+                "comfortable with these warnings and know what you're doing, "
+                "set confirm_sqlite_parallel=True."
+            )
 
-        return [
-            parent
-            for parent in cls.__bases__
-            if hasattr(simmate_mixins, parent.table_name)
-            and parent.table_name != "DatabaseTable"
-        ]
-
-    @classmethod
-    def get_mixin_names(cls) -> list[str]:
-        """
-        Grabs the mix-in Tables that were used to make this class and returns
-        a list of their names.
-        """
-        return [mixin.table_name for mixin in cls.get_mixins()]
-
-    @classmethod
-    def get_extra_columns(cls) -> list[str]:
-        """
-        Finds all columns that aren't covered by the supported Table mix-ins.
-
-        For example, a table made from...
-
-        ``` python
-        from simmate.database.base_data_types import (
-            table_column,
-            Structure,
-            Forces,
-        )
-
-        class ExampleTable(Structure, Forces):
-            custom_column1 = table_column.FloatField()
-            custom_column2 = table_column.FloatField()
-        ```
-
-        ... would return ...
-
-        ``` python
-        ["custom_column1", "custom_column2"]
-        ```
-        """
-
-        all_columns = cls.get_column_names()
-        columns_w_mixin = [
-            column for mixin in cls.get_mixins() for column in mixin.get_column_names()
-        ]
-        extra_columns = [
-            column
-            for column in all_columns
-            if column not in columns_w_mixin and column != "id"
-        ]
-        return extra_columns
-
-    @classmethod
-    @property
-    def archive_fieldset(cls) -> list[str]:
-
-        all_fields = ["id", "updated_at", "created_at", "source"]
-
-        # If calling this method on the base class, just return the sole mix-in.
-        if cls == DatabaseTable:
-            return all_fields
-
-        # Otherwise we need to go through the mix-ins and add their fields to
-        # the list
-        all_fields += [
-            field for mixin in cls.get_mixins() for field in mixin.archive_fields
-        ]
-
-        # Sometimes a column will be disabled by adding "--" in front of the
-        # column name. For example, "--band_gap" would exclude storing the band
-        # gap in the archive. We look for any columns that start with this
-        # and then remove them
-        for field in cls.archive_fields:
-            if field.startswith("--"):
-                all_fields.remove(field.removeprefix("--"))
-            else:
-                all_fields.append(field)
-        return all_fields
+    # -------------------------------------------------------------------------
+    # Methods that set up the REST API and filters that can be queried with
+    # -------------------------------------------------------------------------
 
     @classmethod
     @property

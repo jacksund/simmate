@@ -1,27 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-Runs a NEB on all unique pathways within a structure. 
-
-The folder tree looks like...
-```
-simmate-task-12345/  # determined by simmate.utilities.get_directory
-    ├── bulk_relaxation
-    ├── bulk_static_energy
-    ├── migration_hop_00
-    ├── migration_hop_01
-    ...
-    └── migration_hop_N  # all migration_hop folders have the same structure
-        ├── endpoint_relaxation_start
-        ├── endpoint_relaxation_end
-        ├── 01
-        ├── 02
-        ├── 03
-        ...
-        └── N  # corresponds to image number
-```
-"""
-
 from pathlib import Path
 
 from simmate.toolkit import Structure
@@ -45,37 +23,34 @@ class NebAllPathsWorkflow(Workflow):
         - static-energy/mit
         - a mini task that identifies unique migration hops
         - (for each hop) diffusion/single-path
+
+
+    The folder tree looks like...
+
+    ```
+    # note, folder names will match the workflow used
+    simmate-task-12345
+        ├── bulk relaxation
+        ├── bulk static-energy
+        ├── migration hop 00
+        ├── migration hop 01
+        ...
+        └── migration_hop_N  # all migration_hop folders have the same structure
+            ├── endpoint relaxation start
+            ├── endpoint relaxation end
+            ├── 01
+            ├── 02
+            ├── 03
+            ...
+            └── N  # corresponds to image number
+    ```
     """
 
-    use_database = False
+    update_database_from_results = False
 
     bulk_relaxation_workflow: Workflow = None
     bulk_static_energy_workflow: Workflow = None
     single_path_workflow: Workflow = None
-
-    # command list expects three subcommands:
-    #   command_bulk, command_supercell, and command_neb
-    #
-    # I separate these out because each calculation is a very different scale.
-    # For example, you may want to run the bulk relaxation on 10 cores, the
-    # supercell on 50, and the NEB on 200. Even though more cores are available,
-    # running smaller calculation on more cores could slow down the calc.
-    # ["command_bulk", "command_supercell", "command_neb"]
-    #
-    #
-    # If you are running this workflow via the command-line, you can run this
-    # with...
-
-    # ``` bash
-    # simmate workflows run diffusion/all-paths -s example.cif -c "cmd1; cmd2; cmd3"
-    # ```
-    # Note, the `-c` here is very important! Here we are passing three commands
-    # separated by semicolons. Each command is passed to a specific workflow call:
-    #     - cmd1 --> used for bulk crystal relaxation and static energy
-    #     - cmd2 --> used for endpoint supercell relaxations
-    #     - cmd3 --> used for NEB
-    # Thus, you can scale your resources for each step. Here's a full -c option:
-    # -c "vasp_std > vasp.out; mpirun -n 12 vasp_std > vasp.out; mpirun -n 70 vasp_std > vasp.out"
 
     @classmethod
     def run_config(
@@ -88,14 +63,18 @@ class NebAllPathsWorkflow(Workflow):
         is_restart: bool = False,
         # parameters for supercell and image generation
         nimages: int = 5,
-        min_atoms: int = 80,
-        max_atoms: int = 240,
-        min_length: float = 10,
+        min_supercell_atoms: int = 80,
+        max_supercell_atoms: int = 240,
+        min_supercell_vector_lengths: float = 10,
+        # extra parameters for distinct path finding
+        max_path_length: float = None,
+        percolation_mode: str = ">1d",
+        vacancy_mode: bool = True,
+        run_id: str = None,
         **kwargs,
     ):
 
-        # Our step is to run a relaxation on the bulk structure and it uses our inputs
-        # directly. The remaining one tasks pass on results.
+        # run a relaxation on the bulk structure
         bulk_relax_result = cls.bulk_relaxation_workflow.run(
             structure=structure,
             command=command,  # subcommands["command_bulk"]
@@ -103,12 +82,11 @@ class NebAllPathsWorkflow(Workflow):
             is_restart=is_restart,
         ).result()
 
-        # A static energy calculation on the relaxed structure. This isn't necessarily
-        # required for NEB, but it takes very little time.
+        # run static energy calculation on the relaxed structure
         bulk_static_energy_result = cls.bulk_static_energy_workflow.run(
             structure={
                 "database_table": cls.bulk_relaxation_workflow.database_table.table_name,
-                "directory": bulk_relax_result["directory"],
+                "database_id": bulk_relax_result.id,
                 "structure_field": "structure_final",
             },
             command=command,  # subcommands["command_bulk"]
@@ -116,124 +94,40 @@ class NebAllPathsWorkflow(Workflow):
             is_restart=is_restart,
         ).result()
 
-        # This step does NOT run any calculation, but instead, identifies all
-        # diffusion pathways and builds the necessary database entries.
-        migration_hop_ids = cls._build_diffusion_analysis(
-            structure={
-                "database_table": cls.bulk_static_energy_workflow.database_table.table_name,
-                "directory": bulk_static_energy_result["directory"],
-            },
+        # Using the relaxed structure, detect all symmetrically unique paths
+        pathfinder = DistinctPathFinder(
+            structure=bulk_static_energy_result.to_toolkit(),
             migrating_specie=migrating_specie,
-            directory=directory,
-            vacancy_mode=True,  # assumed for now
+            max_path_length=max_path_length,
+            perc_mode=percolation_mode,
         )
+        migration_hops = pathfinder.get_paths()
+
+        # Write the paths found so user can preview what's analyzed below
+        pathfinder.write_all_migration_hops(directory)
+
+        # load the current database entry so we can link the other runs
+        # to it up front
+        current_calc = cls.database_table.from_run_context(run_id=run_id)
 
         # Run NEB single_path workflow for all these.
-        for i, hop_id in enumerate(migration_hop_ids):
+        for i, hop in enumerate(migration_hops):
             state = cls.single_path_workflow.run(
-                migration_hop={
-                    "migration_hop_table": "MigrationHop",
-                    "migration_hop_id": hop_id,
-                },
+                # !!! The hop object gives an ugly output. Should I use the
+                # database dictionary instead?
+                migration_hop=hop,
                 directory=directory
                 / f"{cls.single_path_workflow.name_full}.{str(i).zfill(2)}",
-                diffusion_analysis_id=None,
-                migration_hop_id=None,
                 command=command,
                 # subcommands["command_supercell"]
                 # + ";"
                 # + subcommands["command_neb"],
                 is_restart=is_restart,
-                min_atoms=min_atoms,
-                max_atoms=max_atoms,
-                min_length=min_length,
+                min_atoms=min_supercell_atoms,
+                max_atoms=max_supercell_atoms,
+                min_length=min_supercell_vector_lengths,
                 nimages=nimages,
-            )  # we don't want to wait on results to in order to allow parallel runs
-
-    @classmethod
-    def _build_diffusion_analysis(
-        cls,
-        structure: Structure,
-        migrating_specie: str,
-        vacancy_mode: bool,
-        directory: Path = None,
-        **kwargs,
-    ) -> list[str]:
-        """
-        Given a bulk crystal structure, returns all symmetrically unique pathways
-        for the migrating specie (up until the path is percolating). This
-        also create all relevent database entries for this struture and its
-        migration hops.
-
-        #### Parameters
-
-        - `structure`:
-            bulk crystal structure to be analyzed. Can be in any format supported
-            by Structure.from_dynamic method.
-
-        - `migrating_specie`:
-            Element or ion symbol of the diffusion specie (e.g. "Li")
-
-        - `directory`:
-            where to write the CIF file visualizing all migration hops. If no
-            directory is provided, it will be written in the working directory.
-
-        - `**kwargs`:
-            Any parameter normally accepted by DistinctPathFinder
-        """
-        if not directory:
-            directory = Path("")
-
-        ###### STEP 1: creating the toolkit objects and writing them to file
-
-        structure_cleaned = Structure.from_dynamic(structure)
-
-        pathfinder = DistinctPathFinder(
-            structure_cleaned,
-            migrating_specie,
-            **kwargs,
-        )
-        migration_hops = pathfinder.get_paths()
-
-        # We write all the path files so users can visualized them if needed
-        filename = directory / "migration_hop_all.cif"
-        pathfinder.write_all_paths(filename, nimages=10)
-        for i, migration_hop in enumerate(migration_hops):
-            number = str(i).zfill(2)  # converts numbers like 2 to "02"
-            # the files names here will be like "migration_hop_02.cif"
-            migration_hop.write_path(
-                directory / f"migration_hop_{number}.cif",
-                nimages=10,  # this is just for visualization
+                vacancy_mode=vacancy_mode,
+                diffusion_analysis_id=current_calc.id,
             )
-
-        ###### STEP 2: creating the database objects and saving them to the db
-
-        # Create the main DiffusionAnalysis object that others will link to.
-        da_obj = cls.database_table.from_toolkit(
-            structure=structure_cleaned,
-            migrating_specie=migrating_specie,
-            vacancy_mode=vacancy_mode,
-        )
-        da_obj.save()
-        # TODO: should I search for a matching bulk structure before deciding
-        # to create a new DiffusionAnalysis entry?
-
-        # grab the linked MigrationHop class
-        hop_class = da_obj.migration_hops.model
-
-        # Now iterate through the hops and add them to the database
-        hop_ids = []
-        for i, hop in enumerate(migration_hops):
-            hop_db = hop_class.from_toolkit(
-                migration_hop=hop,
-                number=i,
-                diffusion_analysis_id=da_obj.id,
-            )
-            hop_db.save()
-            hop_ids.append(hop_db.id)
-
-        # TODO: still figuring out if toolkit vs. db objects should be returned.
-        # Maybe add ids to the toolkit objects? Or dynamic DB dictionaries?
-        # For now I return the MigrationHop ids -- because this let's me
-        # indicate which MigrationHops should be updated later on.
-        return hop_ids
+            state.result()  # wait until the job finishes

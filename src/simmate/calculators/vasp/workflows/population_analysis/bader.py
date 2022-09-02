@@ -29,7 +29,7 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
         **kwargs,
     ):
 
-        prebader_result = PopulationAnalysis__Vasp__PrebaderMatproj.run(
+        prebader_result = StaticEnergy__Vasp__PrebaderMatproj.run(
             structure=structure,
             command=command,
             source=source,
@@ -38,39 +38,18 @@ class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
 
         # Setup chargecars for the bader analysis and wait until complete
         PopulationAnalysis__Bader__CombineChgcars.run(
-            directory=prebader_result["directory"],
+            directory=prebader_result.directory,
         ).result()
 
         # Bader only adds files and doesn't overwrite any, so I just run it
         # in the original directory. I may switch to copying over to a new
         # directory in the future though.
-        bader_result = PopulationAnalysis__Bader__Bader.run(
-            directory=prebader_result["directory"]
+        PopulationAnalysis__Bader__Bader.run(
+            directory=prebader_result.directory,
         ).result()
 
-        return bader_result
 
-    @classmethod
-    def _save_to_database(cls, bader_result, run_id):
-        # load the results. We are particullary after the first result with
-        # is a pandas dataframe of oxidation states.
-        oxidation_data, extra_data = bader_result["result"]
-
-        # load the calculation entry for this workflow run. This should already
-        # exist thanks to the load_input_and_register task of the prebader workflow
-        calculation = cls.database_table.from_run_context(
-            run_id=run_id,
-            workflow_name=cls.name_full,
-        )
-        # BUG: can't use context to grab the id because workflow tasks generate a
-        # different id than the main workflow
-
-        # now update the calculation entry with our results
-        calculation.oxidation_states = list(oxidation_data.oxidation_state.values)
-        calculation.save()
-
-
-class PopulationAnalysis__Vasp__PrebaderMatproj(StaticEnergy__Vasp__Matproj):
+class StaticEnergy__Vasp__PrebaderMatproj(StaticEnergy__Vasp__Matproj):
     """
     Runs a static energy calculation with a high-density FFT grid under settings
     from the Materials Project. Results can be used for Bader analysis.

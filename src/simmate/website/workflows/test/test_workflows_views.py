@@ -42,10 +42,15 @@ def test_workflow_detail_view(client, workflow_name):
     if workflow_name in [
         "restart.simmate.automatic",
         "electronic-structure.vasp.matproj-full",
+        "electronic-structure.vasp.matproj-hse-full",
         "structure-prediction.python.fixed-composition",
         "structure-prediction.python.new-individual",
         "structure-prediction.python.variable-composition",
         "structure-prediction.python.binary-composition",
+        "diffusion.vasp.neb-all-paths-mit",
+        "diffusion.vasp.neb-from-endpoints-mit",
+        "diffusion.vasp.neb-from-images-mit",
+        "diffusion.vasp.neb-single-path-mit",
     ]:
         return
 

@@ -141,6 +141,7 @@ def test_get_custom_workflow(tmp_path):
 
 
 def test_get_unique_paramters():
+
     assert get_unique_parameters() == [
         "angle_tolerance",
         "chemical_system",
@@ -158,18 +159,22 @@ def test_get_unique_paramters():
         "is_restart",
         "limit_best_survival",
         "max_atoms",
+        "max_path_length",
         "max_structures",
+        "max_supercell_atoms",
         "migrating_specie",
         "migration_hop",
-        "migration_hop_id",
         "migration_images",
         "min_atoms",
         "min_length",
         "min_structures_exact",
+        "min_supercell_atoms",
+        "min_supercell_vector_lengths",
         "nfirst_generation",
         "nimages",
         "nsteadystate",
         "nsteps",
+        "percolation_mode",
         "run_id",
         "search_id",
         "selector_kwargs",
@@ -191,6 +196,7 @@ def test_get_unique_paramters():
         "temperature_start",
         "time_step",
         "updated_settings",
+        "vacancy_mode",
         "validator_kwargs",
         "validator_name",
         "workflow_base",

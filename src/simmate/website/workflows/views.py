@@ -47,11 +47,11 @@ def workflows_all(request):
             "often involves iteratively evaluating the energy/forces of structure at "
             "specific temperature (or temperature ramp)."
         ),
-        "diffusion": (
-            "These workflows evaluate the diffusion of an atom through a material. "
-            "At this time, these workflows are entirely Nudged-Elastic-Band (NEB) "
-            "calculations."
-        ),
+        # "diffusion": (
+        #     "These workflows evaluate the diffusion of an atom through a material. "
+        #     "At this time, these workflows are entirely Nudged-Elastic-Band (NEB) "
+        #     "calculations."
+        # ),
     }
 
     # now let's put the data and template together to send the user

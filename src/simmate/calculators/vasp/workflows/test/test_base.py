@@ -2,10 +2,9 @@
 
 import pytest
 
-from simmate.calculators.vasp.inputs import Potcar
 from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
 from simmate.calculators.vasp.workflows.base import VaspWorkflow
-from simmate.conftest import copy_test_files, make_dummy_files
+from simmate.conftest import SimmateMockHelper, copy_test_files
 
 
 class Testing__Vasp__Dummy(VaspWorkflow):
@@ -17,7 +16,6 @@ class Testing__Vasp__Dummy(VaspWorkflow):
 
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS
-    confirm_convergence = True
     standardize_structure = "primitive-LLL"
     symmetry_tolerance = 0.1
     angle_tolerance = 10.0
@@ -35,18 +33,12 @@ DummyWorkflow = Testing__Vasp__Dummy
 
 def test_base_setup(structure, tmp_path, mocker):
 
+    Potcar = SimmateMockHelper.get_mocked_potcar(mocker, tmp_path)
+
     # estabilish filenames that we make and commonly reference
     incar_filename = tmp_path / "INCAR"
     poscar_filename = tmp_path / "POSCAR"
     potcar_filename = tmp_path / "POTCAR"
-
-    # Because we won't have POTCARs accessible, we need to cover this function
-    # call -- specifically have it pretend to make a file
-    mocker.patch.object(
-        Potcar,
-        "to_file_from_type",
-        return_value=make_dummy_files(potcar_filename),
-    )
 
     # try to make input files in the tmp_path
     DummyWorkflow.setup(directory=tmp_path, structure=structure)
@@ -61,20 +53,20 @@ def test_base_setup(structure, tmp_path, mocker):
     )
 
 
-def test_base_workup(tmp_path):
+def test_base_vasp_run(structure, tmp_path, mocker):
     copy_test_files(
         tmp_path,
         test_directory=__file__,
         test_folder="base.zip",
     )
 
+    SimmateMockHelper.mock_vasp(mocker)
+
     # estabilish filenames that we make and commonly reference
-    summary_filename = tmp_path / "simmate_summary.yaml"
     vasprun_filename = tmp_path / "vasprun.xml"
 
-    # run the full workup
-    DummyWorkflow.workup(tmp_path)
-    assert summary_filename.exists()
+    # run the full workflow
+    DummyWorkflow.run(structure=structure, directory=tmp_path)
 
     # run the workup again with a malformed xml
     with vasprun_filename.open("r") as file:
@@ -82,4 +74,4 @@ def test_base_workup(tmp_path):
     with vasprun_filename.open("w") as file:
         file.writelines(contents[50])
     with pytest.raises(Exception):
-        DummyWorkflow.workup(tmp_path)
+        DummyWorkflow.run(tmp_path)

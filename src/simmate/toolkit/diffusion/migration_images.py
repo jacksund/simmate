@@ -29,7 +29,26 @@ class MigrationImages(list):
     def __init__(self, structures: list[Structure]):
         # This init function does nothing except apply typing -- specifically,
         # it says that it expects a list of structures.
-        super().__init__(structures)
+        structures_cleaned = self._process_structures(structures)
+        super().__init__(structures_cleaned)
+
+    @staticmethod
+    def _process_structures(structures: list[Structure]) -> list[Structure]:
+        """
+        Remove any atom jumps across the cell.
+        """
+        # This method is copied directly from pymatgen's MITNEBset and has not
+        # been refactored/reviewed yet.
+        input_structures = structures
+        structures = [input_structures[0]]
+        for s in input_structures[1:]:
+            prev = structures[-1]
+            for i, site in enumerate(s):
+                t = numpy.round(prev[i].frac_coords - site.frac_coords)
+                if numpy.any(numpy.abs(t) > 0.5):
+                    s.translate_sites([i], t, to_unit_cell=False)
+            structures.append(s)
+        return structures
 
     def get_sum_structure(self, tolerance: float = 1e-3):
         """

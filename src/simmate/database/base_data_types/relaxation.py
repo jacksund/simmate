@@ -13,54 +13,8 @@ This module helps you create tables to results from structure relaxations
 (aka geometry optimizations). This will store all ionic steps and the forces/stress
 associated with each step.
 
-When creating new tables for Relaxations, you should use the `Relaxation.create_subclasses` method, which helps remove all the 
-boilerplate code needed. For Django users, it may be tricky to understand what's
-happening behind the scenes, so here's an example:
-    
-These two lines...
-
-``` python 
-from simmate.database.base_data_types import Relaxation
-
-ExampleRelaxation, ExampleIonicStep = Relaxation.create_subclasses(
-    "Example",
-    module=__name__,
-)
-```
-
-... do exactly the same thing as all of these lines...
-
-``` python
-from simmate.database.base_data_types import table_column
-from simmate.database.base_data_types import IonicStep, Relaxation
-
-class ExampleIonicStep(IonicStep):
-    relaxation = table_column.ForeignKey(
-        "ExampleRelaxation",  # in quotes becuase this is defined below
-        on_delete=table_column.CASCADE,
-        related_name="structures",
-    )
-
-class ExampleRelaxation(Relaxation):
-    structure_start = table_column.OneToOneField(
-        ExampleIonicStep,
-        on_delete=table_column.CASCADE,
-        related_name="relaxations_as_start",
-        blank=True,
-        null=True,
-    )
-    structure_final = table_column.OneToOneField(
-        ExampleIonicStep,
-        on_delete=table_column.CASCADE,
-        related_name="relaxations_as_final",
-        blank=True,
-        null=True,
-    )
-```
-
 Note there are two tables involved. One stores all of the ionic steps, and the
 other connects all ionic steps to a specific calculation and result.
-
 """
 
 from pathlib import Path
@@ -93,6 +47,8 @@ class Relaxation(Structure, Thermodynamics, Calculation):
 
     class Meta:
         app_label = "workflows"
+
+    exclude_from_summary = ["structure_start", "structure_final"]
 
     archive_fields = [
         "band_gap",
@@ -176,13 +132,9 @@ class Relaxation(Structure, Thermodynamics, Calculation):
         null=True,
     )
 
-    @classmethod
-    def from_directory(cls, directory: Path):
-        # I assume the directory is from a vasp calculation, but I need to update
-        # this when I begin adding new calculators.
-        vasprun_filename = directory / "vasprun.xml"
-        vasprun = Vasprun(vasprun_filename)
-        return cls.from_vasp_run(vasprun)
+    def write_output_summary(self, directory: Path):
+        super().write_output_summary(directory)
+        self.write_convergence_plot(directory)
 
     @classmethod
     def from_vasp_run(cls, vasprun: Vasprun):
@@ -193,27 +145,29 @@ class Relaxation(Structure, Thermodynamics, Calculation):
         # Note, the information does not matter at this point because it will be
         # populated below
         relaxation = cls.from_toolkit(structure=vasprun.structures[-1])
-        # TODO: need to pull run_id from metadata file.
 
         # Now we have the relaxation data all loaded and can save it to the database
         relaxation.save()
 
-        # Save the rest of the results using the update method from this class
-        relaxation.update_from_vasp_run(
-            vasprun=vasprun,
-            corrections=[],
-            directory=None,
-        )
-        # TODO: load corrections/directory from the metadata and corrections files.
+        # and we can populate the rest of the tables as if its the workup
+        relaxation.update_from_vasprun(vasprun)
 
-        return relaxation
+    def update_from_directory(self, directory: Path):
 
-    def update_from_vasp_run(
-        self,
-        vasprun: Vasprun,
-        corrections: list,
-        directory: Path,
-    ):
+        # check if we have a VASP directory
+        vasprun_filename = directory / "vasprun.xml"
+        if not vasprun_filename.exists():
+            # raise Exception(
+            #     "Only VASP output directories are supported at the moment"
+            # )
+            return  # just exit
+
+        from simmate.calculators.vasp.outputs import Vasprun
+
+        vasprun = Vasprun.from_directory(directory)
+        self.update_from_vasp_run(vasprun)
+
+    def update_from_vasp_run(self, vasprun: Vasprun):
         """
         Given a Vasprun object from a finished relaxation, this will update the
         Relaxation table entry and the corresponding IonicStep entries.
@@ -278,9 +232,6 @@ class Relaxation(Structure, Thermodynamics, Calculation):
             energy_fermi=data.get("efermi"),
             conduction_band_minimum=data.get("cbm"),
             valence_band_maximum=data.get("vbm"),
-            # lastly, we also want to save the corrections made and directory it ran in
-            corrections=corrections,
-            directory=directory,
         )
 
     def get_convergence_plot(self):
@@ -339,6 +290,13 @@ class Relaxation(Structure, Thermodynamics, Calculation):
 
         # we return the figure object for the user
         return figure
+
+    def write_convergence_plot(self, directory: Path):
+        figure = self.get_convergence_plot()
+        figure.write_html(
+            directory / "simmate_convergence.html",
+            include_plotlyjs="cdn",
+        )
 
     def view_convergence_plot(self):
         figure = self.get_convergence_plot()

@@ -3,6 +3,7 @@
 from simmate.calculators.vasp.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
+from simmate.database.workflow_results import StaticEnergy
 
 
 class PopulationAnalysis__Vasp__ElfMatproj(StaticEnergy__Vasp__Matproj):
@@ -18,6 +19,11 @@ class PopulationAnalysis__Vasp__ElfMatproj(StaticEnergy__Vasp__Matproj):
         # BUG: if NPAR conflicts with INCAR_parallel_settings config this
         # fails and tells the user to specify a setting
     )
+
+    # even though the category is "population-analysis", we only store
+    # static energy data. So we manually set that table here.
+    database_table = StaticEnergy
+    # NOTE: the code below, once implemented, could change this.
 
 
 # -----------------------------------------------------------------------------

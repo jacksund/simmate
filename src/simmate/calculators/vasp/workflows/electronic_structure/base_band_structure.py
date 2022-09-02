@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pymatgen.electronic_structure.plotter import BSPlotter
 from pymatgen.io.vasp.inputs import Kpoints
 from pymatgen.symmetry.bandstructure import HighSymmKpath
 
@@ -84,18 +83,3 @@ class VaspBandStructure(StaticEnergy__Vasp__Matproj):
             directory / "POTCAR",
             cls.potcar_mappings,
         )
-
-    @staticmethod
-    def _write_output_summary(directory, vasprun):
-        """
-        In addition to writing the normal VASP output summary, this also plots
-        the bandstructure to "band_structure.png"
-        """
-
-        # run the normal output
-        StaticEnergy__Vasp__Matproj._write_output_summary(directory, vasprun)
-
-        bs_plotter = BSPlotter(vasprun.get_band_structure(line_mode=True))
-        plot = bs_plotter.get_plot()
-        plot_filename = directory / "band_structure.png"
-        plot.savefig(plot_filename)

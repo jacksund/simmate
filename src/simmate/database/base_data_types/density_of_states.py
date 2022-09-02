@@ -23,6 +23,8 @@ class DensityofStates(DatabaseTable):
     class Meta:
         abstract = True
 
+    exclude_from_summary = ["density_of_states_data"]
+
     archive_fields = ["density_of_states_data"]
 
     api_filters = dict(
@@ -67,6 +69,15 @@ class DensityofStates(DatabaseTable):
     # spin_polarization (float "Spin polarization at the fermi level.")
     # magnetic_ordering (Magnetic ordering of the calculation.)
 
+    def write_output_summary(self, directory: Path):
+        """
+        In addition to writing the normal VASP output summary, this also plots
+        the DOS to "density_of_states.png"
+        """
+
+        super().write_output_summary(directory)
+        self.write_densityofstates_plot(directory)
+
     @classmethod
     def _from_toolkit(
         cls,
@@ -78,10 +89,10 @@ class DensityofStates(DatabaseTable):
         data = (
             dict(
                 density_of_states_data=density_of_states.as_dict(),
-                band_gap=density_of_states.get_gap(),
+                band_gap=float(density_of_states.get_gap()),
                 energy_fermi=density_of_states.efermi,
-                conduction_band_minimum=density_of_states.get_cbm_vbm()[0],
-                valence_band_maximum=density_of_states.get_cbm_vbm()[1],
+                conduction_band_minimum=float(density_of_states.get_cbm_vbm()[0]),
+                valence_band_maximum=float(density_of_states.get_cbm_vbm()[1]),
             )
             if density_of_states
             else {}
@@ -130,6 +141,11 @@ class DensityofStates(DatabaseTable):
         plot = plotter.get_plot()
         return plot
 
+    def write_densityofstates_plot(self, directory: Path):
+        plot = self.get_densityofstates_plot()
+        plot_filename = directory / "simmate_density_of_states.png"
+        plot.savefig(plot_filename)
+
 
 class DensityofStatesCalc(Structure, DensityofStates, Calculation):
     """
@@ -141,51 +157,14 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
     class Meta:
         app_label = "workflows"
 
-    def update_from_vasp_run(
-        self, vasprun: Vasprun, corrections: list, directory: Path
-    ):
-        """
-        Given a pymatgen VaspRun object, which is what's typically returned
-        from a simmate VaspWorkflow.run() call, this will update the database entry
-        with the results.
-        """
-
-        # Takes a pymatgen VaspRun object, which is what's typically returned
-        # from a simmate VaspWorkflow.run() call.
-
-        # All data analysis is done via a CompleteDOS object, so we convert
-        # the vasprun object to that first.
-        density_of_states = vasprun.complete_dos
-
-        # Take our dos and expand its data for the rest of the columns.
-        new_kwargs = DensityofStates.from_toolkit(
-            density_of_states=density_of_states,
-            as_dict=True,
-        )
-        for key, value in new_kwargs.items():
-            setattr(self, key, value)
-
-        # lastly, we also want to save the corrections made and directory it ran in
-        self.corrections = corrections
-        self.directory = directory
-
-        # Now we have the relaxation data all loaded and can save it to the database
-        self.save()
-
     @classmethod
-    def from_directory(cls, directory: Path):
-        """
-        Creates a new database entry from a directory that holds band-structure
-        results. For now, this assumes the directory holds vasp output files.
-        """
+    def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):
 
-        # I assume the directory is from a vasp calculation, but I need to update
-        # this when I begin adding new calculators.
-        vasprun_filename = directory / "vasprun.xml"
-        vasprun = Vasprun(vasprun_filename)
         density_of_states_db = cls.from_toolkit(
             structure=vasprun.structures[0],
             density_of_states=vasprun.complete_dos,
+            as_dict=as_dict,
         )
-        density_of_states_db.save()
+        if not as_dict:
+            density_of_states_db.save()
         return density_of_states_db

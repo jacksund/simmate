@@ -59,14 +59,16 @@ class Workflow:
     """
     Whether to use Simmate database features or not.
     
-    This includes calling the `_register_calculation` and `_save_to_database`
-    methods attached to this workflow.
+    This includes calling the `_register_calculation` and 
+    `_update_database_with_results` methods attached to this workflow.
     
     `_register_calculation` will save a database entry before the workflow
     starts. This is useful to keep track of workflows that have been
     submitted/started but haven't finished yet.
     
-    `_save_to_database` saves the output of the `workup` method to the database.
+    `_update_database_with_results` saves the output of the `workup` method
+    to the database entry -- and this the same entry that was created by 
+    `_register_calculation`.
     """
 
     _parameter_methods = ["run_config", "_run_full"]
@@ -151,10 +153,30 @@ class Workflow:
             source=source,
             **kwargs,
         )
-        result = cls.run_config(**kwargs_cleaned)
+
+        # Finally run the core part of the workflow. This should return a
+        # dictionary object if we have "use_database=True", but can be
+        # any python object if "use_database=False"
+        results = cls.run_config(**kwargs_cleaned)
+
+        # save the result to the database
         if cls.use_database:
-            result["calculation_id"] = cls._save_to_database(
-                result,
+
+            # make sure the workflow is returning a dictionary that be used
+            # to update the database columns. None is also allowed as it
+            # represents an empty dictionary
+            if not isinstance(results, dict) and results != None:
+                raise Exception(
+                    "When using a database table, your `run_config` method must "
+                    "return a dictionary object. The dictionary is used to "
+                    "update columns in your table entry and is therefore a "
+                    "required format. If you do not want to save to the database "
+                    "(and avoid this message), set `use_database=False`"
+                )
+            logging.info("Saving to database and writing outputs")
+            database_entry = cls._update_database_with_results(
+                results=results if results != None else {},
+                directory=kwargs_cleaned["directory"],
                 run_id=kwargs_cleaned["run_id"],
             )
 
@@ -164,8 +186,12 @@ class Workflow:
             logging.info("Compressing result to a ZIP file.")
             make_archive(kwargs_cleaned["directory"])
 
+        # If we made it this far, we successfully completed the workflow run
         logging.info(f"Completed {cls.name_full}")
-        return result
+
+        # If we are using the database, then we return the database object.
+        # Otherwise, we want to return the original result from run_config
+        return database_entry if cls.use_database else results
 
     @classmethod
     def run_cloud(
@@ -193,7 +219,7 @@ class Workflow:
         logging.info(f"Submitting new run of `{cls.name_full}` to cloud")
 
         # To help with tracking the flow in cloud, we create the flow_id up front.
-        kwargs["run_id"] = kwargs.get("run_id", None) or cls._get_run_id()
+        kwargs["run_id"] = kwargs.get("run_id", None) or cls._get_new_run_id()
         run_id = kwargs["run_id"]  # just for easy reference below
 
         # If we are submitting using a filename, we don't want to
@@ -216,15 +242,12 @@ class Workflow:
             tags=tags or cls.tags,
             **parameters_serialized,
         )
+        state.run_id = run_id  # attach the run id as an extra
 
         logging.info(f"Successfully submitted (workitem_id={state.pk})")
 
         # If the user wants the future, return that instead of the run_id
-        if return_state:
-            state.run_id = run_id  # attach the run id as an extra
-            return state
-
-        return run_id
+        return state if return_state else run_id
 
     @classmethod
     def run_config(cls, **kwargs) -> any:
@@ -327,11 +350,11 @@ class Workflow:
         """
         The database table where calculation information (such as the run_id)
         is stored. The table should use `simmate.database.base_data_types.Calculation`
-
-        In many cases, this table will contain all of the results you need. However,
-        pay special attention to NestedWorkflows, where your results are often tied
-        to a final task.
+        as one of its mix-ins.
         """
+        # OPTIMIZE: a mapping dictionary or some standardized way to name
+        # database tables would simplify this.
+
         flow_type = cls.name_type
         flow_preset = cls.name_preset
 
@@ -361,11 +384,11 @@ class Workflow:
 
             return DynamicsRun
         elif flow_type == "diffusion":
-            if "from-images" in flow_preset:
-                from simmate.database.base_data_types import MigrationImage
+            if "from-images" in flow_preset or "single-path" in flow_preset:
+                from simmate.database.base_data_types import MigrationHop
 
-                return MigrationImage
-            else:
+                return MigrationHop
+            elif "all-paths" in flow_preset:
                 from simmate.database.base_data_types import DiffusionAnalysis
 
                 return DiffusionAnalysis
@@ -373,38 +396,76 @@ class Workflow:
             from simmate.database.base_data_types import CustomizedCalculation
 
             return CustomizedCalculation
-        else:
-            raise NotImplementedError("Unable to detect proper database table")
+
+        raise NotImplementedError(
+            "Unable to detect proper database table. Are you sure your workflow "
+            "should be using a table? If not, set `use_database=False` on your "
+            "workflow as shown in the 'basic' example workflow from the guides."
+        )
 
     @classmethod
     @property
     def all_results(cls):  # -> SearchResults
-        # BUG: pdoc raises an error because name_full fails.
-        try:
-            return cls.database_table.objects.filter(workflow_name=cls.name_full).all()
-        except:
-            return
+        """
+        Filters results from the database table down to the results from this
+        workflow (i.e. matching workflow_name)
+        """
+        return cls.database_table.objects.filter(workflow_name=cls.name_full).all()
 
     @classmethod
-    def _save_to_database(cls, result: any, run_id: str):
+    def _update_database_with_results(
+        cls,
+        results: dict,
+        run_id: str,
+        directory: Path,
+    ) -> Calculation:
+        """
+        Take the output of the `run_config` and any extra information and
+        saves it to the database.
 
-        # split our results and corrections (which are given as a dict) into
-        # separate variables
-        vasprun = result["result"]
-        corrections = result["corrections"]
-        directory = result["directory"]
+        An output summary is also written to file for quick viewing.
+        """
 
         # load the calculation entry for this workflow run. This should already
         # exist thanks to the load_input_and_register task.
         calculation = cls.database_table.from_run_context(
             run_id=run_id,
             workflow_name=cls.name_full,
+            workflow_version=cls.version,
         )
 
-        # now update the calculation entry with our results
-        calculation.update_from_vasp_run(vasprun, corrections, directory)
+        # Now update the calculation entry with our results. Typically, all of this
+        # is handled by the calculation table's "update_from" methods, but in
+        # rare cares, we may want to attach an update method directly to the
+        # workflow class. I can only imagine this is used when...
+        #   (1) workflow attributes are important during the update
+        #   (2) when several workflows share a table and need to isolate
+        #       their workup method (e.g. the MigrationHop table for NEB)
+        if hasattr(cls, "update_database_from_results"):
+            # The attribute can also be set to false to disable updates
+            if cls.update_database_from_results:
+                cls.update_database_from_results(
+                    calculation=calculation,
+                    results=results,
+                    directory=directory,
+                )
+        # Otherwise we hand this off to the database object
+        else:
+            calculation.update_from_results(
+                results=results,
+                directory=directory,
+            )
 
-        return calculation.id
+        # write the output summary to file
+        calculation.write_output_summary(directory)
+        # TODO: consider making this optional to improve speedup
+
+        return calculation
+
+    @classmethod
+    def load_completed_calc(cls, directory: Path):
+        # TODO: maybe load the yaml file to get extra kwargs, run_id, etc.
+        return cls.database_table.from_directory(directory)
 
     # -------------------------------------------------------------------------
     # Properties that enforce the naming convention for workflows
@@ -715,7 +776,7 @@ class Workflow:
         # and also see which structures/runs have been submitted aready.
 
         parameters_cleaned["run_id"] = (
-            parameters_cleaned.get("run_id", None) or cls._get_run_id()
+            parameters_cleaned.get("run_id", None) or cls._get_new_run_id()
         )
 
         if cls.use_database:
@@ -771,7 +832,7 @@ class Workflow:
         return parameters_cleaned
 
     @staticmethod
-    def _get_run_id():
+    def _get_new_run_id():
         """
         Generates a random id to use as a workflow run id.
 
@@ -795,6 +856,14 @@ class Workflow:
         # the _register_calculation method
 
         table_columns = cls.database_table.get_column_names()
+
+        # as an extra, we need to check for relations and add also check for
+        # "_id" added on to the name in case we want to register the new entry
+        # with this relation. An example of this is "diffusion_analysis_id"
+        # which is a related object and column.
+        for field in cls.database_table._meta.get_fields():
+            if field.is_relation:  # and isinstance(ForeignKey)
+                table_columns.append(f"{field.name}_id")
 
         for parameter in cls.parameter_names:
             if parameter in table_columns:
@@ -821,41 +890,10 @@ class Workflow:
         `run_prefect_cloud` method and `load_input_and_register` task.
         """
 
-        # We first need to grab the database table where we want to register
-        # the calculation run to. We can grab the table from either...
-        #   1. the database_table attribute
-        #   2. flow_context --> flow_name --> flow --> then grab its database_table
-
-        # If this method is being called on the base Workflow class, that
-        # means we are trying to register a calculation from within a flow
-        # context -- where the context has information such as the workflow
-        # we are using (and the database table linked to that workflow).
-        if cls == Workflow:
-            raise Exception("Checking if this method is ever used")
-
-            from prefect.context import FlowRunContext
-
-            run_context = FlowRunContext.get()
-            workflow = run_context.flow.simmate_workflow
-            database_table = workflow.database_table
-
-        # Otherwise we should be using the subclass Workflow that has the
-        # database_table property set.
-        else:
-            workflow = cls  # we have the workflow class already
-            database_table = cls.database_table
-
-        # Registration is only possible if a table is provided. Some
-        # special-case workflows don't store calculation information bc the flow
-        # is just a quick python analysis.
-        if not database_table:
-            logging.warning("No database table found. Skipping registration.")
-            return
-
         # grab the registration kwargs from the parameters provided and then
         # convert them to a python object format for the database method
         register_kwargs = {
-            key: kwargs.get(key, None) for key in workflow._parameters_to_register
+            key: kwargs.get(key, None) for key in cls._parameters_to_register
         }
         register_kwargs_cleaned = cls._deserialize_parameters(
             add_defaults_from_attr=False, **register_kwargs
@@ -873,14 +911,16 @@ class Workflow:
         # back to json before saving to the database.
         if "workflow_base" in register_kwargs_cleaned:
             parameters_serialized = cls._serialize_parameters(**register_kwargs_cleaned)
-            calculation = database_table.from_run_context(
+            calculation = cls.database_table.from_run_context(
                 workflow_name=cls.name_full,
+                workflow_version=cls.version,
                 **parameters_serialized,
             )
         else:
             # load/create the calculation for this workflow run
-            calculation = database_table.from_run_context(
+            calculation = cls.database_table.from_run_context(
                 workflow_name=cls.name_full,
+                workflow_version=cls.version,
                 **register_kwargs_cleaned,
             )
 
@@ -996,7 +1036,7 @@ class Workflow:
         # the class attribute.
         if add_defaults_from_attr:
             for parameter in cls.parameter_names:
-                if parameters.get(parameter, None) == None and hasattr(cls, parameter):
+                if parameters.get(parameter, None) is None and hasattr(cls, parameter):
                     parameters_cleaned[parameter] = getattr(cls, parameter)
 
         # The remaining checks look to intialize input to toolkit objects using
@@ -1005,41 +1045,26 @@ class Workflow:
         # potentially grab the from_dynamic method on the fly -- rather than
         # doing these repeated steps here.
 
-        structure = parameters.get("structure", None)
-        if structure:
-            parameters_cleaned["structure"] = Structure.from_dynamic(structure)
-        else:
-            parameters_cleaned.pop("structure", None)
+        parameter_mappings = {
+            "structure": Structure,
+            "composition": Composition,
+            "migration_hop": MigrationHop,
+            "migration_images": MigrationImages,
+            "supercell_start": Structure,
+            "supercell_end": Structure,
+        }
 
-        if "composition" in parameters.keys():
-            migration_hop = Composition.from_dynamic(parameters["composition"])
-            parameters_cleaned["composition"] = migration_hop
+        for parameter, target_class in parameter_mappings.items():
+            if parameter in parameters.keys():
+                parameter_orig = parameters.get(parameter, None)
+                parameters_cleaned[parameter] = target_class.from_dynamic(
+                    parameter_orig
+                )
 
-        if "structures" in parameters.keys():
-            structure_filenames = parameters["structures"].split(";")
-            parameters_cleaned["structures"] = [
-                Structure.from_dynamic(file) for file in structure_filenames
-            ]
-
-        if "migration_hop" in parameters.keys():
-            migration_hop = MigrationHop.from_dynamic(parameters["migration_hop"])
-            parameters_cleaned["migration_hop"] = migration_hop
-
-        if "migration_images" in parameters.keys():
-            migration_images = MigrationImages.from_dynamic(
-                parameters["migration_images"]
-            )
-            parameters_cleaned["migration_images"] = migration_images
-
-        if "supercell_start" in parameters.keys():
-            parameters_cleaned["supercell_start"] = Structure.from_dynamic(
-                parameters["supercell_start"]
-            )
-
-        if "supercell_end" in parameters.keys():
-            parameters_cleaned["supercell_end"] = Structure.from_dynamic(
-                parameters["supercell_end"]
-            )
+        # directory and source are two extra parameters that cant be used in the
+        # mapping above because they don't have a `from_dynamic` method.
+        # Note these also pull from 'parameters_cleaned' as they might have been
+        # populated during registration.
 
         if parameters.get("directory", None):
             parameters_cleaned["directory"] = Path(parameters_cleaned["directory"])

@@ -163,8 +163,9 @@ def save_badelf_results(bader_result, run_id):
     # load the calculation entry for this workflow run. This should already
     # exist thanks to the load_input_and_register task of the prebader workflow
     calculation = PopulationAnalysis__Bader__Badelf.database_table.from_run_context(
-        run_id,
-        PopulationAnalysis__Vasp__PrebadelfMatproj.name_full,
+        run_id=run_id,
+        workflow_name=PopulationAnalysis__Vasp__PrebadelfMatproj.name_full,
+        workflow_version=PopulationAnalysis__Vasp__PrebadelfMatproj.version,
     )
     # BUG: can't use context to grab the id because workflow tasks generate a
     # different id than the main workflow

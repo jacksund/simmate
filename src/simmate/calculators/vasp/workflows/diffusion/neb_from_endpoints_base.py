@@ -45,6 +45,11 @@ class NebFromEndpointWorkflow(Workflow):
 
     description_doc_short = "runs NEB using two endpoint structures as input"
 
+    # Oddly enough, the from_images_workflow and this workflow share a table
+    # entry, so nothing needs to be done for working up results. See
+    # how we pass run_id=run_id below.
+    update_database_from_results = False
+
     endpoint_relaxation_workflow: Workflow = None
     from_images_workflow: Workflow = None
 
@@ -57,9 +62,9 @@ class NebFromEndpointWorkflow(Workflow):
         source: dict = None,
         command: str = None,
         nimages: int = 5,
-        # This helps link results to a higher-level table.
         diffusion_analysis_id: int = None,
         is_restart: bool = False,
+        run_id: str = None,
         **kwargs,
     ):
         # command list expects three subcommands:
@@ -93,12 +98,12 @@ class NebFromEndpointWorkflow(Workflow):
         images = get_migration_images_from_endpoints(
             supercell_start={
                 "database_table": cls.endpoint_relaxation_workflow.database_table.table_name,
-                "directory": endpoint_start_result["directory"],
+                "database_id": endpoint_start_result.id,
                 "structure_field": "structure_final",
             },
             supercell_end={
                 "database_table": cls.endpoint_relaxation_workflow.database_table.table_name,
-                "directory": endpoint_end_result["directory"],
+                "database_id": endpoint_end_result.id,
                 "structure_field": "structure_final",
             },
             nimages=nimages,
@@ -111,4 +116,10 @@ class NebFromEndpointWorkflow(Workflow):
             directory=directory,
             diffusion_analysis_id=diffusion_analysis_id,
             is_restart=is_restart,
+            # Run id is very important here as it tells the underlying
+            # workflow that it doesn't need to create a new database object
+            # during registration -- as it will use the one that was registered
+            # when this workflow started. This is also why we have a dummy
+            # `update_database_from_results` method below
+            run_id=run_id,
         )

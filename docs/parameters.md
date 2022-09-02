@@ -1,6 +1,5 @@
 # Parameters
 
-
 ## Overview
 
 Knowing which parameters are available and how to use them is essential. We therefore outline **all** unique parameters for **all** workflows here.
@@ -97,6 +96,33 @@ The command that will be called during execution of a program. There is typicall
     ``` python
     command = "mpirun -n 8 vasp_std > vasp.out"
     ```
+
+<!-- NOTES ON SUBCOMMANDS (feature is currently disabled)
+
+command list expects three subcommands:
+  command_bulk, command_supercell, and command_neb
+
+I separate these out because each calculation is a very different scale.
+For example, you may want to run the bulk relaxation on 10 cores, the
+supercell on 50, and the NEB on 200. Even though more cores are available,
+running smaller calculation on more cores could slow down the calc.
+["command_bulk", "command_supercell", "command_neb"]
+
+
+If you are running this workflow via the command-line, you can run this
+with...
+
+``` bash
+simmate workflows run diffusion/all-paths -s example.cif -c "cmd1; cmd2; cmd3"
+```
+Note, the `-c` here is very important! Here we are passing three commands
+separated by semicolons. Each command is passed to a specific workflow call:
+    - cmd1 --> used for bulk crystal relaxation and static energy
+    - cmd2 --> used for endpoint supercell relaxations
+    - cmd3 --> used for NEB
+Thus, you can scale your resources for each step. Here's a full -c option:
+-c "vasp_std > vasp.out; mpirun -n 12 vasp_std > vasp.out; mpirun -n 70 vasp_std > vasp.out"
+-->
 
 --------------------------
 
@@ -322,19 +348,19 @@ For evolutionary searches, fixed compositions will be stopped when the best indi
 --------------------------
 
 ## max_atoms
-For workflows that involve generating a supercell or random structure, this will be the maximum number of sites to allow in the generate structure(s). For example, NEB workflows would set this value to something like 100 atoms to limit their supercell image sizes. Alternatively, a evolutionary search may set this to 10 atoms to limit the compositions & stoichiometries that are explored.
+For workflows that involve generating a supercell or random structure, this will be the maximum number of sites to allow in the generated structure(s). For example, an evolutionary search may set this to 10 atoms to limit the compositions & stoichiometries that are explored.
 
 === "yaml"
     ``` yaml
-    max_atoms: 100
+    max_atoms: 10
     ```
 === "toml"
     ``` toml
-    max_atoms = 100
+    max_atoms = 10
     ```
 === "python"
     ``` python
-    max_atoms = 100
+    max_atoms = 10
     ```
 
 --------------------------
@@ -353,6 +379,24 @@ For workflows that generate new structures (and potentially run calculations on 
 === "python"
     ``` python
     max_structures = 100
+    ```
+
+--------------------------
+
+## max_supercell_atoms
+For workflows that involve generating a supercell, this will be the maximum number of sites to allow in the generated structure(s). For example, NEB workflows would set this value to something like 100 atoms to limit their supercell image sizes.
+
+=== "yaml"
+    ``` yaml
+    max_supercell_atoms: 100
+    ```
+=== "toml"
+    ``` toml
+    max_supercell_atoms = 100
+    ```
+=== "python"
+    ``` python
+    max_supercell_atoms = 100
     ```
 
 --------------------------
@@ -383,11 +427,6 @@ The atomic path that should be analyzed. Inputs are anything compatible with the
 - a database entry in the `MigrationHop` table
 
 (TODO: if you'd like full examples, please ask our team to add them)
-
---------------------------
-
-## migration_hop_id
-(advanced users only) The entry id from the `MigrationHop` table to link the results to. This is set automatically by higher-level workflows and rarely (if ever) set by the user. If used, you'll likely need to set `diffusion_analysis_id` as well.
 
 --------------------------
 
@@ -433,24 +472,38 @@ The full set of images (including endpoint images) that should be analyzed. Inpu
 --------------------------
 
 ## min_atoms
-This is the opposite of `max_atoms` as this will be the minimum number of sites to allow in the generate structure(s). See `max_atoms` for details.
+This is the opposite of `max_atoms` as this will be the minimum number of sites allowed in the generate structure(s). See `max_atoms` for details.
 
 --------------------------
 
-## min_length
-When generating a supercell, this is the minimum length for each lattice vector of the generate cell (in Angstroms).
+## min_structures_exact
+
+(experimental) The minimum number of structures that must be calculated with exactly
+matching nsites as specified in the fixed-composition.
+
+--------------------------
+
+## min_supercell_atoms
+
+This is the opposite of `max_supercell_atoms` as this will be the minimum number of sites allowed in the generated supercell structure.
+
+--------------------------
+
+## min_supercell_vector_lengths
+
+When generating a supercell, this is the minimum length for each lattice vector of the generated cell (in Angstroms). For workflows such as NEB, larger is better but more computationally expensive.
 
 === "yaml"
     ``` yaml
-    min_length: 7.5
+    min_supercell_vector_lengths: 7.5
     ```
 === "toml"
     ``` toml
-    min_length = 7.5
+    min_supercell_vector_lengths = 7.5
     ```
 === "python"
     ``` python
-    min_length = 7.5
+    min_supercell_vector_lengths = 7.5
     ```
 
 --------------------------
@@ -527,6 +580,26 @@ The total number of steps to run the calculation on. For example, in molecular d
 === "python"
     ``` python
     nsteps = 10000
+    ```
+
+--------------------------
+
+## percolation_mode
+The percolating type to detect. The default is ">1d", which search for percolating
+paths up to the `max_path_length`. Alternatively, this can be set to "1d" in order
+to stop unique pathway finding when 1D percolation is achieved.
+
+=== "yaml"
+    ``` yaml
+    percolation_mode: 1d
+    ```
+=== "toml"
+    ``` toml
+    percolation_mode = "1d"
+    ```
+=== "python"
+    ``` python
+    percolation_mode = "1d"
     ```
 
 --------------------------
@@ -983,6 +1056,25 @@ For molecular dynamics simulations, this is time time between each ionic step (i
 ## updated_settings
 (experimental feature)
 Unique to `customized.vasp.user-config`. This is a list of parameters to update the `workflow_base` with. This often involves updating the base class attributes.
+
+--------------------------
+
+## vacancy_mode
+For NEB and diffusion workfows, this determines whether vacancy or interstitial
+diffusion is analyzed. Default of True corresponds to vacancy-based diffusion.
+
+=== "yaml"
+    ``` yaml
+    vacancy_mode: false
+    ```
+=== "toml"
+    ``` toml
+    vacancy_mode = false
+    ```
+=== "python"
+    ``` python
+    vacancy_mode = False
+    ```
 
 --------------------------
 

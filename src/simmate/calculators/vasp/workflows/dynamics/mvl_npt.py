@@ -11,8 +11,6 @@ class Dynamics__Vasp__MvlNpt(Dynamics__Vasp__Mit):
     [MVLNPTMDSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MVLNPTMDSet).
     """
 
-    confirm_convergence = False
-
     incar = Dynamics__Vasp__Mit.incar.copy()
     incar.update(
         dict(

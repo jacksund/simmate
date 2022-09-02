@@ -48,7 +48,7 @@ class Example__Python__MyFavoriteSettings(Workflow):
     @staticmethod
     def run_config(**kwargs):
         print("This workflow doesn't do much")
-        return 42
+        return 12345
 ```
 
 !!! note
@@ -602,13 +602,11 @@ class Example__Python__MyFavoriteSettings(Workflow):
         # just running the workflow 10 times in row on different
         # perturbations or "rattling" of the original structure
         for n in range(10):
+            structure.perturb(0.05)  # modifies in-place
             another_workflow.run(
-                structure=structure.perturb(0.05)
+                structure=structure,
                 directory= directory / f"perturb_number_{n}",
-                # **kwargs, <-- you may want to pass kwargs too.
             )
-
-        return 42
 ```
 
 !!! warning
