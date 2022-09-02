@@ -29,7 +29,6 @@ These mixins are frequently combined in for types of calculations. We define som
 - `nudged_elastic_band` : holds all results from trajectory calculations
 - `dynamics` : holds all steps of a molecular dynamics simmulation
 - `calculation_nested` : a special type of calculation that involves running a workflow made of smaller workflows
-- `calculation_customized` : calculation that involves running a workflow with user-customized settings
 
 
 ## Building an example table

@@ -35,6 +35,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - yaml input for custom workflows now matches the python input format
 - workup methods are largely depreciated and now database entries are returned when a workflow has `use_database=True`
 - several NEB input parameters have been renamed to accurate depict their meaning.
+- customized workflow runs now save in the original database table under the "-custom" workflow name
 
 **Fixes**
 - fix bug in windows dev env where `simmate run-server` fails to find python path

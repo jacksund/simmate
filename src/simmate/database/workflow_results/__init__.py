@@ -2,7 +2,6 @@
 
 from simmate.database.base_data_types import (
     BandStructureCalc,
-    CustomizedCalculation,
     DensityofStatesCalc,
     DiffusionAnalysis,
     DynamicsIonicStep,
