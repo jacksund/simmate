@@ -41,6 +41,7 @@ def test_workflow_detail_view(client, workflow_name):
     # BUG: I assume .vasp. in the view for now and also some views are broken
     if workflow_name in [
         "restart.simmate.automatic",
+        "customized.vasp.user-config",
         "electronic-structure.vasp.matproj-full",
         "electronic-structure.vasp.matproj-hse-full",
         "structure-prediction.python.fixed-composition",
