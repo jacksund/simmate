@@ -442,11 +442,13 @@ class Workflow:
         #   (2) when several workflows share a table and need to isolate
         #       their workup method (e.g. the MigrationHop table for NEB)
         if hasattr(cls, "update_database_from_results"):
-            cls.update_database_from_results(
-                calculation=calculation,
-                results=results,
-                directory=directory,
-            )
+            # The attribute can also be set to false to disable updates
+            if cls.update_database_from_results:
+                cls.update_database_from_results(
+                    calculation=calculation,
+                    results=results,
+                    directory=directory,
+                )
         # Otherwise we hand this off to the database object
         else:
             calculation.update_from_results(
@@ -854,6 +856,14 @@ class Workflow:
         # the _register_calculation method
 
         table_columns = cls.database_table.get_column_names()
+
+        # as an extra, we need to check for relations and add also check for
+        # "_id" added on to the name in case we want to register the new entry
+        # with this relation. An example of this is "diffusion_analysis_id"
+        # which is a related object and column.
+        for field in cls.database_table._meta.get_fields():
+            if field.is_relation:  # and isinstance(ForeignKey)
+                table_columns.append(f"{field.name}_id")
 
         for parameter in cls.parameter_names:
             if parameter in table_columns:

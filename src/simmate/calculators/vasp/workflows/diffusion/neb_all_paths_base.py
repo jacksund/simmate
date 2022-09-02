@@ -46,6 +46,8 @@ class NebAllPathsWorkflow(Workflow):
     ```
     """
 
+    update_database_from_results = False
+
     bulk_relaxation_workflow: Workflow = None
     bulk_static_energy_workflow: Workflow = None
     single_path_workflow: Workflow = None
@@ -68,6 +70,7 @@ class NebAllPathsWorkflow(Workflow):
         max_path_length: float = None,
         percolation_mode: str = ">1d",
         vacancy_mode: bool = True,
+        run_id: str = None,
         **kwargs,
     ):
 
@@ -104,6 +107,10 @@ class NebAllPathsWorkflow(Workflow):
         # Write the paths found so user can preview what's analyzed below
         pathfinder.write_all_migration_hops(directory)
 
+        # load the current database entry so we can link the other runs
+        # to it up front
+        current_calc = cls.database_table.from_run_context(run_id=run_id)
+
         # Run NEB single_path workflow for all these.
         for i, hop in enumerate(migration_hops):
             state = cls.single_path_workflow.run(
@@ -122,5 +129,6 @@ class NebAllPathsWorkflow(Workflow):
                 min_length=min_supercell_vector_lengths,
                 nimages=nimages,
                 vacancy_mode=vacancy_mode,
+                diffusion_analysis_id=current_calc.id,
             )
             state.result()  # wait until the job finishes

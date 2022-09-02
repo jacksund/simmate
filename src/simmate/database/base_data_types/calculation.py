@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import platform
-from pathlib import Path
 
 from simmate.database.base_data_types import DatabaseTable, table_column
 
@@ -100,8 +99,8 @@ class Calculation(DatabaseTable):
     def from_run_context(
         cls,
         run_id: str,
-        workflow_name: str,
-        workflow_version: str,
+        workflow_name: str = None,
+        workflow_version: str = None,
         **kwargs,  # other parameters you'd normally pass to 'from_toolkit'
     ):
         """

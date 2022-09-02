@@ -151,20 +151,6 @@ class DiffusionAnalysis(Structure, Calculation):
             hop.diffusion_analysis_id = self.id
             hop.save()
 
-    def update_from_results(self, results: dict, directory: Path):
-
-        # remove the migration hops from our results and link them to this entry
-        migration_hops = results.pop("migration_hops")
-        for hop in migration_hops:
-            hop.diffusion_analysis_id = self.id
-            hop.save()
-
-        # then update using the results dictionary as normal
-        self.update_from_toolkit(directory=str(directory), **results)
-
-        # update_from_directory isn't necessary bc subworkflows should have
-        # already populated data for those entries.
-
 
 class MigrationHop(Calculation):
     class Meta:
@@ -270,8 +256,8 @@ class MigrationHop(Calculation):
 
     def write_output_summary(self, directory: Path):
         super().write_output_summary(directory)
-        # self.write_neb_plot(directory)
-        # self.write_migration_images(directory)
+        self.write_neb_plot(directory)
+        self.write_migration_images(directory)
 
     def get_neb_plot(self):
         neb_results = self.to_neb_toolkit()
@@ -336,29 +322,52 @@ class MigrationHop(Calculation):
         # if the pathways match, then we can return the pathway object!
         return path
 
-    @classmethod
-    def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):
-        """
-        Works up data from a NEB run, including confirming convergence and
-        writing summary output files (structures, data, and plots).
-        """
-        if as_dict:
-            raise Exception("as_dict=True not supported")
+    def to_neb_toolkit(self) -> NEBAnalysis:
 
+        images = self.migration_images.all()
+        structures = self.migration_images.to_toolkit()
+
+        neb_toolkit = NEBAnalysis(
+            r=[i.structure_distance for i in images],
+            energies=[i.energy for i in images],
+            forces=[i.force_tangent for i in images],
+            structures=structures,
+        )
+        return neb_toolkit
+
+    def update_from_directory(self, directory: Path):
+
+        # check if we have a VASP directory
+        vasprun_filename = directory / "vasprun.xml"
+        if not vasprun_filename.exists():
+            raise Exception("Only VASP outputs are supported for NEB")
+
+        from simmate.calculators.vasp.outputs import Vasprun
+
+        vasprun = Vasprun.from_directory(directory)
+        self.update_from_neb_toolkit(vasprun.neb_results)
+
+    @classmethod
+    def from_vasp_run(cls, vasprun: Vasprun):
         return cls.from_neb_toolkit(neb_results=vasprun.neb_results)
 
     @classmethod
-    def from_neb_toolkit(cls, neb_results: NEBAnalysis, as_dict: bool = False):
+    def from_neb_toolkit(cls, neb_results: NEBAnalysis):
 
         # This table entry will actually be completely empty... It only
         # serves to link the MigrationImages together. We only create this
         # if we are updating
-        if not as_dict:
-            hop_db = cls()
-            hop_db.save()
-            migration_hop_id = hop_db.id
+        hop_db = cls()
+        hop_db.save()
 
-        # Now same migration images and link them to this parent object.
+        # build out the images in the related table
+        hop_db.update_from_neb_toolkit(neb_results)
+
+        return hop_db
+
+    def update_from_neb_toolkit(self, neb_results: NEBAnalysis):
+
+        # build migration images and link them to this parent object.
         # Note, the start/end Migration images will exist already in the
         # relaxation database table. We still want to save them again here for
         # easy access.
@@ -371,41 +380,48 @@ class MigrationHop(Calculation):
             )
         ):
             image, energy, force, distance = image_data
-            image_db = cls.migration_images.field.model.from_toolkit(
+            image_db = self.migration_images.field.model.from_toolkit(
                 structure=image,
                 number=image_number,
                 force_tangent=force,
                 energy=energy,
                 structure_distance=distance,
-                migration_hop_id=migration_hop_id if not as_dict else None,
+                migration_hop_id=self.id,
             )
             image_db.save()
 
-        return hop_db if not as_dict else {}
-
     @classmethod
-    def from_migration_hop_toolkit(
+    def from_toolkit(  # from_migration_hop_toolkit -- registration uses this
         cls,
-        migration_hop: ToolkitMigrationHop,
+        migration_hop: ToolkitMigrationHop = None,
         as_dict: bool = False,
         number: int = None,
         **kwargs,
     ):
+        # the algorithm doesn't change for this method, but we do want to add
+        # a few extra columns. Therefore we make the dictionary as normal and
+        # then add those extra columns here.
+        structure_dict = super().from_toolkit(as_dict=True, **kwargs)
 
-        # convert the pathway object into the database table format
-        hop_dict = dict(
-            site_start=" ".join(str(c) for c in migration_hop.isite.frac_coords),
-            site_end=" ".join(str(c) for c in migration_hop.esite.frac_coords),
-            index_start=migration_hop.iindex,
-            index_end=migration_hop.eindex,
-            length=migration_hop.length,
-            # diffusion_analysis_id=diffusion_analysis_id,
-            **kwargs,
-        )
+        if migration_hop:
+            # convert the pathway object into the database table format
+            hop_dict = dict(
+                site_start=" ".join(str(c) for c in migration_hop.isite.frac_coords),
+                site_end=" ".join(str(c) for c in migration_hop.esite.frac_coords),
+                index_start=migration_hop.iindex,
+                index_end=migration_hop.eindex,
+                length=migration_hop.length,
+                # diffusion_analysis_id=diffusion_analysis_id,
+                **kwargs,
+            )
+        else:
+            hop_dict = {}
+
+        all_data = {**structure_dict, **hop_dict}
 
         # If as_dict is false, we build this into an Object. Otherwise, just
         # return the dictionary
-        return hop_dict if as_dict else cls(**hop_dict)
+        return all_data if as_dict else cls(**all_data)
 
 
 class MigrationImage(Structure):
@@ -458,7 +474,7 @@ class MigrationImage(Structure):
     # deletes the source column from our Structure mix-in.
     source = None
 
-    migration_images = table_column.ForeignKey(
+    migration_hop = table_column.ForeignKey(
         MigrationHop,
         on_delete=table_column.CASCADE,
         related_name="migration_images",

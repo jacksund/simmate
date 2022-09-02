@@ -132,7 +132,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         # starting path to a cif file. This can be slow for large structures
         # (>1s), but it is very little time compared to a full NEB run.
         path_vis = migration_images.get_sum_structure()
-        path_vis.to("cif", directory / "path_relaxed_idpp.cif")
+        path_vis.to("cif", directory / "simmate_path_relaxed_idpp.cif")
 
     @classmethod
     def setup_restart(cls, directory: Path, **kwargs):

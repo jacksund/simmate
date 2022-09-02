@@ -36,6 +36,11 @@ class SinglePathWorkflow(Workflow):
 
     from_images_workflow: Workflow = None
 
+    # Oddly enough, the from_images_workflow and this workflow share a table
+    # entry, so nothing needs to be done for working up results. See
+    # how we pass run_id=run_id below.
+    update_database_from_results = False
+
     @classmethod
     def run_config(
         cls,
@@ -43,11 +48,7 @@ class SinglePathWorkflow(Workflow):
         directory: Path = None,
         source: dict = None,
         command: str = None,
-        # These help link results to a higher-level table.
         diffusion_analysis_id: int = None,
-        # TODO: Can the hop id be inferred from the migration_hop or somewhere
-        # else in this context? Maybe even load_input_and_register will use
-        # prefect id once it's a Calculation?
         is_restart: bool = False,
         # parameters for supercell and image generation
         nimages: int = 5,
@@ -117,15 +118,3 @@ class SinglePathWorkflow(Workflow):
             run_id=run_id,
         )
         neb_images = neb_state.result()
-
-    @classmethod
-    def update_database_from_results(
-        cls,
-        calculation,  # will be of type: from_images_workflow.database_table
-        results: dict,
-        directory: Path,
-    ):
-        # Oddly enough, the from_images_workflow and this workflow share a table
-        # entry, so nothing needs to be done for working up results. See
-        # how we see run_id=run_id above.
-        pass
