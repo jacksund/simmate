@@ -45,7 +45,6 @@ class SinglePathWorkflow(Workflow):
         command: str = None,
         # These help link results to a higher-level table.
         diffusion_analysis_id: int = None,
-        migration_hop_id: int = None,
         # TODO: Can the hop id be inferred from the migration_hop or somewhere
         # else in this context? Maybe even load_input_and_register will use
         # prefect id once it's a Calculation?
@@ -55,6 +54,7 @@ class SinglePathWorkflow(Workflow):
         min_atoms: int = 80,
         max_atoms: int = 240,
         min_length: float = 10,
+        run_id: str = None,
         **kwargs,
     ):
         # get the supercell endpoint structures
@@ -65,37 +65,39 @@ class SinglePathWorkflow(Workflow):
             vac_mode=True,
         )
 
-        # Relax the starting supercell structure
-        endpoint_start_state = cls.endpoint_relaxation_workflow.run(
-            structure=supercell_start,
-            command=command,  # subcommands["command_supercell"]
-            directory=directory / f"{cls.endpoint_relaxation_workflow.name_full}.start",
-            is_restart=is_restart,
-        )
+        # # Relax the starting supercell structure
+        # endpoint_start_state = cls.endpoint_relaxation_workflow.run(
+        #     structure=supercell_start,
+        #     command=command,  # subcommands["command_supercell"]
+        #     directory=directory / f"{cls.endpoint_relaxation_workflow.name_full}.start",
+        #     is_restart=is_restart,
+        # )
 
-        # Relax the ending supercell structure
-        endpoint_end_state = cls.endpoint_relaxation_workflow.run(
-            structure=supercell_end,
-            command=command,  # subcommands["command_supercell"]
-            directory=directory / f"{cls.endpoint_relaxation_workflow.name_full}.end",
-            is_restart=is_restart,
-        )
+        # # Relax the ending supercell structure
+        # endpoint_end_state = cls.endpoint_relaxation_workflow.run(
+        #     structure=supercell_end,
+        #     command=command,  # subcommands["command_supercell"]
+        #     directory=directory / f"{cls.endpoint_relaxation_workflow.name_full}.end",
+        #     is_restart=is_restart,
+        # )
 
-        # wait for the endpoint relaxations to finish
-        endpoint_start_result = endpoint_start_state.result()
-        endpoint_end_result = endpoint_end_state.result()
+        # # wait for the endpoint relaxations to finish
+        # endpoint_start_result = endpoint_start_state.result()
+        # endpoint_end_result = endpoint_end_state.result()
 
         images = get_migration_images_from_endpoints(
-            supercell_start={
-                "database_table": cls.endpoint_relaxation_workflow.database_table.table_name,
-                "database_id": endpoint_start_result.id,
-                "structure_field": "structure_final",
-            },
-            supercell_end={
-                "database_table": cls.endpoint_relaxation_workflow.database_table.table_name,
-                "database_id": endpoint_end_result.id,
-                "structure_field": "structure_final",
-            },
+            supercell_start=supercell_start,
+            supercell_end=supercell_end,
+            # supercell_start={
+            #     "database_table": cls.endpoint_relaxation_workflow.database_table.table_name,
+            #     "database_id": endpoint_start_result.id,
+            #     "structure_field": "structure_final",
+            # },
+            # supercell_end={
+            #     "database_table": cls.endpoint_relaxation_workflow.database_table.table_name,
+            #     "database_id": endpoint_end_result.id,
+            #     "structure_field": "structure_final",
+            # },
             nimages=nimages,
         )
 
@@ -106,7 +108,24 @@ class SinglePathWorkflow(Workflow):
             source=source,
             directory=directory,
             diffusion_analysis_id=diffusion_analysis_id,
-            migration_hop_id=migration_hop_id,
             is_restart=is_restart,
+            # Run id is very important here as it tells the underlying
+            # workflow that it doesn't need to create a new database object
+            # during registration -- as it will use the one that was registered
+            # when this workflow started. This is also why we have a dummy
+            # `update_database_from_results` method below
+            run_id=run_id,
         )
         neb_images = neb_state.result()
+
+    @classmethod
+    def update_database_from_results(
+        cls,
+        calculation,  # will be of type: from_images_workflow.database_table
+        results: dict,
+        directory: Path,
+    ):
+        # Oddly enough, the from_images_workflow and this workflow share a table
+        # entry, so nothing needs to be done for working up results. See
+        # how we see run_id=run_id above.
+        pass

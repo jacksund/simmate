@@ -59,14 +59,16 @@ class Workflow:
     """
     Whether to use Simmate database features or not.
     
-    This includes calling the `_register_calculation` and `_save_to_database`
-    methods attached to this workflow.
+    This includes calling the `_register_calculation` and 
+    `_update_database_with_results` methods attached to this workflow.
     
     `_register_calculation` will save a database entry before the workflow
     starts. This is useful to keep track of workflows that have been
     submitted/started but haven't finished yet.
     
-    `_save_to_database` saves the output of the `workup` method to the database.
+    `_update_database_with_results` saves the output of the `workup` method
+    to the database entry -- and this the same entry that was created by 
+    `_register_calculation`.
     """
 
     _parameter_methods = ["run_config", "_run_full"]
@@ -172,7 +174,7 @@ class Workflow:
                     "(and avoid this message), set `use_database=False`"
                 )
             logging.info("Saving to database and writing outputs")
-            database_entry = cls._save_to_database(
+            database_entry = cls._update_database_with_results(
                 results=results if results != None else {},
                 directory=kwargs_cleaned["directory"],
                 run_id=kwargs_cleaned["run_id"],
@@ -217,7 +219,7 @@ class Workflow:
         logging.info(f"Submitting new run of `{cls.name_full}` to cloud")
 
         # To help with tracking the flow in cloud, we create the flow_id up front.
-        kwargs["run_id"] = kwargs.get("run_id", None) or cls._get_run_id()
+        kwargs["run_id"] = kwargs.get("run_id", None) or cls._get_new_run_id()
         run_id = kwargs["run_id"]  # just for easy reference below
 
         # If we are submitting using a filename, we don't want to
@@ -411,7 +413,7 @@ class Workflow:
         return cls.database_table.objects.filter(workflow_name=cls.name_full).all()
 
     @classmethod
-    def _save_to_database(
+    def _update_database_with_results(
         cls,
         results: dict,
         run_id: str,
@@ -432,11 +434,29 @@ class Workflow:
             workflow_version=cls.version,
         )
 
-        # now update the calculation entry with our results
-        calculation.update_from_results(results=results, directory=directory)
+        # Now update the calculation entry with our results. Typically, all of this
+        # is handled by the calculation table's "update_from" methods, but in
+        # rare cares, we may want to attach an update method directly to the
+        # workflow class. I can only imagine this is used when...
+        #   (1) workflow attributes are important during the update
+        #   (2) when several workflows share a table and need to isolate
+        #       their workup method (e.g. the MigrationHop table for NEB)
+        if hasattr(cls, "update_database_from_results"):
+            cls.update_database_from_results(
+                calculation=calculation,
+                results=results,
+                directory=directory,
+            )
+        # Otherwise we hand this off to the database object
+        else:
+            calculation.update_from_results(
+                results=results,
+                directory=directory,
+            )
 
         # write the output summary to file
         calculation.write_output_summary(directory)
+        # TODO: consider making this optional to improve speedup
 
         return calculation
 
@@ -754,7 +774,7 @@ class Workflow:
         # and also see which structures/runs have been submitted aready.
 
         parameters_cleaned["run_id"] = (
-            parameters_cleaned.get("run_id", None) or cls._get_run_id()
+            parameters_cleaned.get("run_id", None) or cls._get_new_run_id()
         )
 
         if cls.use_database:
@@ -810,7 +830,7 @@ class Workflow:
         return parameters_cleaned
 
     @staticmethod
-    def _get_run_id():
+    def _get_new_run_id():
         """
         Generates a random id to use as a workflow run id.
 
@@ -860,41 +880,10 @@ class Workflow:
         `run_prefect_cloud` method and `load_input_and_register` task.
         """
 
-        # We first need to grab the database table where we want to register
-        # the calculation run to. We can grab the table from either...
-        #   1. the database_table attribute
-        #   2. flow_context --> flow_name --> flow --> then grab its database_table
-
-        # If this method is being called on the base Workflow class, that
-        # means we are trying to register a calculation from within a flow
-        # context -- where the context has information such as the workflow
-        # we are using (and the database table linked to that workflow).
-        if cls == Workflow:
-            raise Exception("Checking if this method is ever used")
-
-            from prefect.context import FlowRunContext
-
-            run_context = FlowRunContext.get()
-            workflow = run_context.flow.simmate_workflow
-            database_table = workflow.database_table
-
-        # Otherwise we should be using the subclass Workflow that has the
-        # database_table property set.
-        else:
-            workflow = cls  # we have the workflow class already
-            database_table = cls.database_table
-
-        # Registration is only possible if a table is provided. Some
-        # special-case workflows don't store calculation information bc the flow
-        # is just a quick python analysis.
-        if not database_table:
-            logging.warning("No database table found. Skipping registration.")
-            return
-
         # grab the registration kwargs from the parameters provided and then
         # convert them to a python object format for the database method
         register_kwargs = {
-            key: kwargs.get(key, None) for key in workflow._parameters_to_register
+            key: kwargs.get(key, None) for key in cls._parameters_to_register
         }
         register_kwargs_cleaned = cls._deserialize_parameters(
             add_defaults_from_attr=False, **register_kwargs
@@ -912,14 +901,14 @@ class Workflow:
         # back to json before saving to the database.
         if "workflow_base" in register_kwargs_cleaned:
             parameters_serialized = cls._serialize_parameters(**register_kwargs_cleaned)
-            calculation = database_table.from_run_context(
+            calculation = cls.database_table.from_run_context(
                 workflow_name=cls.name_full,
                 workflow_version=cls.version,
                 **parameters_serialized,
             )
         else:
             # load/create the calculation for this workflow run
-            calculation = database_table.from_run_context(
+            calculation = cls.database_table.from_run_context(
                 workflow_name=cls.name_full,
                 workflow_version=cls.version,
                 **register_kwargs_cleaned,

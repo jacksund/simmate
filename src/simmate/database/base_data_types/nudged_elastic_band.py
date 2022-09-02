@@ -89,7 +89,7 @@ class DiffusionAnalysis(Structure, Calculation):
         return structure_dict if as_dict else cls(**structure_dict)
 
     @classmethod
-    def from_directory(cls, directory: Path, **kwargs):
+    def from_directory(cls, directory: Path):
         """
         Creates a new database entry from a directory that holds diffusion analysis
         results. For now, this assumes the directory holds vasp output files.
@@ -100,7 +100,19 @@ class DiffusionAnalysis(Structure, Calculation):
 
         # For now, I only grab the structure from the static-energy and store
         # it in the DiffusionAnalysis table.
-        bulk_filename = directory / "static-energy.vasp.matproj" / "POSCAR"
+        found_dir = False
+        for name in directory.iterdir():
+            if name.is_dir() and name.stem.startswith("static-energy"):
+                static_energy_dir = name
+                found_dir = True
+                break
+        if not found_dir:
+            raise Exception(
+                "Unable to detect 'static-energy' directory and therefore unable "
+                "to determine the bulk structure used for this analysis."
+            )
+
+        bulk_filename = static_energy_dir / "POSCAR"
         bulk_structure = ToolkitStructure.from_file(bulk_filename)
         # BUG: I assume the directory location but this will fail if changed.
 
@@ -112,6 +124,15 @@ class DiffusionAnalysis(Structure, Calculation):
         )
         analysis_db.save()
 
+        # load the remaining data - such as migration hops
+        analysis_db.update_from_directory(directory)
+
+        return analysis_db
+
+    def update_from_directory(self, directory: Path):
+        # NOTE: This method is not called at the end of the workflow as
+        # subflows often created the data already.
+
         # Iterate through all the subdirectories that start with "migration_hop*".
         # We also need to make sure we only grab directories because there are
         # also cifs present that match this naming convention.
@@ -119,17 +140,30 @@ class DiffusionAnalysis(Structure, Calculation):
         migration_directories = [
             f.absolute()
             for f in directory.iterdir()
-            if f.absolute().is_dir() and f.startswith("migration_hop_")
+            if f.is_dir() and "single-path" in f.stem
         ]
 
         # now save each migration hop present
         for migration_dir in migration_directories:
-            cls.migration_hops.field.model.from_directory(
+            hop = self.migration_hops.field.model.from_directory(
                 directory=migration_dir,
-                diffusion_analysis_id=analysis_db.id,
             )
+            hop.diffusion_analysis_id = self.id
+            hop.save()
 
-        return analysis_db
+    def update_from_results(self, results: dict, directory: Path):
+
+        # remove the migration hops from our results and link them to this entry
+        migration_hops = results.pop("migration_hops")
+        for hop in migration_hops:
+            hop.diffusion_analysis_id = self.id
+            hop.save()
+
+        # then update using the results dictionary as normal
+        self.update_from_toolkit(directory=str(directory), **results)
+
+        # update_from_directory isn't necessary bc subworkflows should have
+        # already populated data for those entries.
 
 
 class MigrationHop(Calculation):
@@ -153,6 +187,9 @@ class MigrationHop(Calculation):
         dimension_host_lattice=["range"],
         energy_barrier=["range"],
     )
+
+    # is_from_hop_obj = table_column.BooleanField(blank=True, null=True)
+    # source = hop_obj / endpoints / images
 
     # OPTIMIZE: site_start and site_end
     # Really, this is a list of float values, but I save it as a string.
@@ -232,10 +269,9 @@ class MigrationHop(Calculation):
     )
 
     def write_output_summary(self, directory: Path):
-        # super().write_output_summary(directory)
+        super().write_output_summary(directory)
         # self.write_neb_plot(directory)
         # self.write_migration_images(directory)
-        pass
 
     def get_neb_plot(self):
         neb_results = self.to_neb_toolkit()
@@ -300,73 +336,27 @@ class MigrationHop(Calculation):
         # if the pathways match, then we can return the pathway object!
         return path
 
-    #######
-    # BUG: I need to distinguish between the from_toolkit/to_toolkit methods
-    # above that just load a MigrationImages object vs. the from_directory and
-    # from_pymatgen methods below that include results. As-is these similar
-    # names but very different use cases makes things confusing for users.
-    #######
-
     @classmethod
-    def from_vasp_run(cls, vasprun: Vasprun):
+    def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):
         """
         Works up data from a NEB run, including confirming convergence and
         writing summary output files (structures, data, and plots).
         """
-        return cls.from_toolkit(neb_results=vasprun.neb_results)
+        if as_dict:
+            raise Exception("as_dict=True not supported")
+
+        return cls.from_neb_toolkit(neb_results=vasprun.neb_results)
 
     @classmethod
-    def from_neb_toolkit(
-        cls,
-        analysis: NEBAnalysis,
-        diffusion_analysis_id: int = None,  # only used if updating
-        migration_hop_id: int = None,  # only used if updating
-    ):
-        # We reference these related tables frequently below so it easier to
-        # grab them up front.
-        diffusion_analysis_table = cls.diffusion_analysis.field.related_model
-        migration_image_table = cls.migration_images.field.model
+    def from_neb_toolkit(cls, neb_results: NEBAnalysis, as_dict: bool = False):
 
-        # First, we need a migration_hop database object.
-        # All of hops should link to a diffusion_analysis entry, so we check
-        # for that here too. The key thing of these statements is that we
-        # have a migration_hop_id at the end.
-
-        # If no ids were given, then we make a new entries for each.
-        if not diffusion_analysis_id and not migration_hop_id:
-            # Note, we have minimal information if this is the case, so these
-            # table entries will have a bunch of empty columns.
-
-            # We don't have a bulk structure to use for this class, so we use
-            # the first image
-            analysis_db = diffusion_analysis_table.from_toolkit(
-                structure=analysis.structures[0],
-                vacancy_mode=True,  # assume this for now
-            )
-            analysis_db.save()
-
-            # This table entry will actually be completely empty... It only
-            # serves to link the MigrationImages together
-            hop_db = cls(
-                diffusion_analysis_id=analysis_db.id,
-            )
+        # This table entry will actually be completely empty... It only
+        # serves to link the MigrationImages together. We only create this
+        # if we are updating
+        if not as_dict:
+            hop_db = cls()
             hop_db.save()
             migration_hop_id = hop_db.id
-
-        elif diffusion_analysis_id and not migration_hop_id:
-            # This table entry will actually be completely empty... It only
-            # serves to link the MigrationImages together
-            hop_db = cls(diffusion_analysis_id=diffusion_analysis_id)
-            hop_db.save()
-            migration_hop_id = hop_db.id
-
-        elif migration_hop_id:
-            # We don't use the hop_id, but making this query ensures it exists.
-            hop_db = cls.objects.get(id=migration_hop_id)
-            # Even though it's not required, we make sure the id given for the
-            # diffusion analysis table matches this existing hop id.
-            if diffusion_analysis_id:
-                assert hop_db.diffusion_analysis.id == diffusion_analysis_id
 
         # Now same migration images and link them to this parent object.
         # Note, the start/end Migration images will exist already in the
@@ -374,24 +364,24 @@ class MigrationHop(Calculation):
         # easy access.
         for image_number, image_data in enumerate(
             zip(
-                analysis.structures,
-                analysis.energies,
-                analysis.forces,
-                analysis.r,
+                neb_results.structures,
+                neb_results.energies,
+                neb_results.forces,
+                neb_results.r,
             )
         ):
             image, energy, force, distance = image_data
-            image_db = migration_image_table.from_toolkit(
+            image_db = cls.migration_images.field.model.from_toolkit(
                 structure=image,
                 number=image_number,
                 force_tangent=force,
                 energy=energy,
                 structure_distance=distance,
-                migration_hop_id=migration_hop_id,
+                migration_hop_id=migration_hop_id if not as_dict else None,
             )
             image_db.save()
 
-        return hop_db
+        return hop_db if not as_dict else {}
 
     @classmethod
     def from_migration_hop_toolkit(
@@ -468,7 +458,7 @@ class MigrationImage(Structure):
     # deletes the source column from our Structure mix-in.
     source = None
 
-    migration_hop = table_column.ForeignKey(
+    migration_images = table_column.ForeignKey(
         MigrationHop,
         on_delete=table_column.CASCADE,
         related_name="migration_images",

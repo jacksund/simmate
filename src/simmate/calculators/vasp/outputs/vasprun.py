@@ -105,3 +105,4 @@ class Vasprun(VasprunPymatgen):
             #     "endpoint_relaxation_end",
             # ],
         )
+        return neb_results

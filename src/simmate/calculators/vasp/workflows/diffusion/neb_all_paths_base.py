@@ -71,29 +71,30 @@ class NebAllPathsWorkflow(Workflow):
         **kwargs,
     ):
 
-        # run a relaxation on the bulk structure
-        bulk_relax_result = cls.bulk_relaxation_workflow.run(
-            structure=structure,
-            command=command,  # subcommands["command_bulk"]
-            directory=directory / cls.bulk_relaxation_workflow.name_full,
-            is_restart=is_restart,
-        ).result()
+        # # run a relaxation on the bulk structure
+        # bulk_relax_result = cls.bulk_relaxation_workflow.run(
+        #     structure=structure,
+        #     command=command,  # subcommands["command_bulk"]
+        #     directory=directory / cls.bulk_relaxation_workflow.name_full,
+        #     is_restart=is_restart,
+        # ).result()
 
-        # run static energy calculation on the relaxed structure
-        bulk_static_energy_result = cls.bulk_static_energy_workflow.run(
-            structure={
-                "database_table": cls.bulk_relaxation_workflow.database_table.table_name,
-                "database_id": bulk_relax_result.id,
-                "structure_field": "structure_final",
-            },
-            command=command,  # subcommands["command_bulk"]
-            directory=directory / cls.bulk_static_energy_workflow.name_full,
-            is_restart=is_restart,
-        ).result()
+        # # run static energy calculation on the relaxed structure
+        # bulk_static_energy_result = cls.bulk_static_energy_workflow.run(
+        #     structure={
+        #         "database_table": cls.bulk_relaxation_workflow.database_table.table_name,
+        #         "database_id": bulk_relax_result.id,
+        #         "structure_field": "structure_final",
+        #     },
+        #     command=command,  # subcommands["command_bulk"]
+        #     directory=directory / cls.bulk_static_energy_workflow.name_full,
+        #     is_restart=is_restart,
+        # ).result()
 
         # Using the relaxed structure, detect all symmetrically unique paths
         pathfinder = DistinctPathFinder(
-            structure=bulk_static_energy_result.to_toolkit(),
+            structure=structure,
+            # structure=bulk_static_energy_result.to_toolkit(),
             migrating_specie=migrating_specie,
             max_path_length=max_path_length,
             perc_mode=percolation_mode,
