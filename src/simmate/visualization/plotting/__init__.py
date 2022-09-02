@@ -6,5 +6,5 @@
 
 from .figure import Figure
 
-from .matplotlib import MatPlotLibFigure
+from .matplotlib import MatplotlibFigure
 from .plotly import PlotlyFigure

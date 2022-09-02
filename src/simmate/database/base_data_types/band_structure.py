@@ -14,6 +14,7 @@ from simmate.database.base_data_types import (
     Structure,
     table_column,
 )
+from simmate.visualization.plotting import MatplotlibFigure
 
 
 class BandStructure(DatabaseTable):
@@ -101,7 +102,7 @@ class BandStructure(DatabaseTable):
         the bandstructure to "band_structure.png"
         """
         super().write_output_summary(directory)
-        self.write_bandstructure_plot(directory)
+        self.write_band_diagram_plot(directory=directory)
 
     @classmethod
     def _from_toolkit(
@@ -138,28 +139,6 @@ class BandStructure(DatabaseTable):
         """
         return ToolkitBandStructure.from_dict(self.band_structure_data)
 
-    def get_bandstructure_plot(self):  # -> matplotlib figure
-        """
-        Plots the band structure using matplotlib
-        """
-
-        # NOTE: This method should be moved to a toolkit object
-
-        # DEV NOTE: Pymatgen only implements matplotlib for their band-structures
-        # at the moment, but there are two scripts location elsewhere that can
-        # outline how this can be done with Plotly:
-        # https://plotly.com/python/v3/ipython-notebooks/density-of-states/
-        # https://github.com/materialsproject/crystaltoolkit/blob/main/crystal_toolkit/components/bandstructure.py
-
-        bs_plotter = BSPlotter(self.to_toolkit_band_structure())
-        plot = bs_plotter.get_plot()
-        return plot
-
-    def write_bandstructure_plot(self, directory: Path):
-        plot = self.get_bandstructure_plot()
-        plot_filename = directory / "simmate_band_structure.png"
-        plot.savefig(plot_filename)
-
 
 class BandStructureCalc(Structure, BandStructure, Calculation):
     """
@@ -183,3 +162,24 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
         if not as_dict:
             band_structure_db.save()
         return band_structure_db
+
+
+class BandDiagram(MatplotlibFigure):
+    def get_plot(result: BandStructure):
+
+        # NOTE: This method should be moved to a toolkit object
+
+        # DEV NOTE: Pymatgen only implements matplotlib for their band-structures
+        # at the moment, but there are two scripts location elsewhere that can
+        # outline how this can be done with Plotly:
+        # https://plotly.com/python/v3/ipython-notebooks/density-of-states/
+        # https://github.com/materialsproject/crystaltoolkit/blob/main/crystal_toolkit/components/bandstructure.py
+
+        bs_plotter = BSPlotter(result.to_toolkit_band_structure())
+        plot = bs_plotter.get_plot()
+        return plot
+
+
+# register all plotting methods to the database table
+for _plot in [BandDiagram]:
+    _plot.register_to_class(BandStructure)

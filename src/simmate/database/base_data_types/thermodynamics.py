@@ -216,7 +216,15 @@ class Thermodynamics(DatabaseTable):
         entries_pmg = [PDEntry(entry.formula_full, entry.energy) for entry in entries]
         phase_diagram = PhaseDiagram(entries_pmg)
 
-        return phase_diagram
+        return (
+            phase_diagram
+            if not return_entries
+            else (
+                phase_diagram,
+                entries,
+                entries_pmg,
+            )
+        )
 
 
 class HullDiagram(PlotlyFigure):

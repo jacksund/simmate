@@ -29,13 +29,13 @@ class Figure:
             return cls.get_plot(input_obj, **kwargs)
 
         def view_plot(input_obj=None, **kwargs):
-            cls.view_plot(input_obj, **kwargs)
+            return cls.view_plot(input_obj, **kwargs)
 
         def write_plot(input_obj=None, **kwargs):
-            cls.write_plot(input_obj, **kwargs)
+            return cls.write_plot(input_obj, **kwargs)
 
         def get_html_div(input_obj=None, **kwargs):
-            cls.get_html_div(input_obj, **kwargs)
+            return cls.get_html_div(input_obj, **kwargs)
 
         # OPTIMIZE: is there better way to determine method type?
         # # https://stackoverflow.com/questions/19227724/

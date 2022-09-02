@@ -23,6 +23,10 @@ class PlotlyFigure(Figure):
 
     @classmethod
     def get_html_div(cls, parent_class, **kwargs):
-        raise NotImplementedError(
-            "Matplotlib figures cannot make a standalone html div."
+        # Make the convergence figure and convert it to an html div
+        figure = cls.get_plot(parent_class, **kwargs)
+        html_div = figure.to_html(
+            full_html=False,
+            include_plotlyjs=False,
         )
+        return html_div

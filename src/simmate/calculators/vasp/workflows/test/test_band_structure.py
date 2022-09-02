@@ -53,6 +53,6 @@ def test_band_structure_run(sample_structures, tmp_path, mocker):
 
     # check output files
     summary_filename = tmp_path / "simmate_summary.yaml"
-    plot_filename = tmp_path / "simmate_band_structure.png"
+    plot_filename = tmp_path / "band_diagram.png"
     assert summary_filename.exists()
     assert plot_filename.exists()
