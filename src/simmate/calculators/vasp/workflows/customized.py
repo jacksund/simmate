@@ -24,15 +24,17 @@ base_workflow: static-energy/mit
 
 # These would update the class attributes for the single workflow run
 # The "custom_" start indicates we are updating some attribute
-custom_incar: 
-    - ENCUT: 600
-    - KPOINTS: 0.25
-custom_potcar_mappings:
-    - Y: Y_sv
+updated_settings:
+    incar: 
+        - ENCUT: 600
+        - KPOINTS: 0.25
+    potcar_mappings:
+        - Y: Y_sv
 
 # Then the remaining inputs are the same as the base_workflow
-structure: POSCAR
-command: mpirun -n 5 vasp_std > vasp.out
+input_parameters:
+    structure: POSCAR
+    command: mpirun -n 5 vasp_std > vasp.out
 ```
 """
 
@@ -46,6 +48,8 @@ class Customized__Vasp__UserConfig(Workflow):
     "VASP calculation with updated INCAR/POTCAR settings
     """
 
+    use_database = False
+
     @staticmethod
     def run_config(
         workflow_base: Workflow,
@@ -53,11 +57,12 @@ class Customized__Vasp__UserConfig(Workflow):
         input_parameters: dict,
         **kwargs,
     ):
+
         logging.warning(
             "WARNING: customized workflows are meant only for quick testing. "
             "If you are using custom settings regularly, we highly recommend "
             "making a new workflow inside a Simmate project instead. "
-            "Read through tutorial 06 for more information."
+            "Read through the tutorials for more information."
         )
 
         # ensure this workflow has a S3Task class attribute
@@ -100,18 +105,24 @@ class Customized__Vasp__UserConfig(Workflow):
 
             final_attributes[update_attribute] = new_config
 
-        # As an extra, we disable any registration & saving of results to the database
-        final_attributes["use_database"] = False
-
         # Dynamically create a subclass of the original s3task
         NewWorkflow = type(
             f"{workflow_base.__name__}Custom", (workflow_base,), final_attributes
         )
 
+        # remove the source set
+        input_parameters.pop("source")
+
         # now run the task with the remaining parameters
         # Note, we are using run_config instead of run because we do not want this
         # registered as a task run of the original class
-        state = NewWorkflow.run(**input_parameters)
+        state = NewWorkflow.run(
+            source={
+                "customized": True,
+                "updated_settings": updated_settings,
+            },
+            **input_parameters,
+        )
         result = state.result()
 
         return result
