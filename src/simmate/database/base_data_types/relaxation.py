@@ -30,6 +30,7 @@ from simmate.database.base_data_types import (
     Thermodynamics,
     table_column,
 )
+from simmate.visualization.plotting import PlotlyFigure
 
 
 class Relaxation(Structure, Thermodynamics, Calculation):
@@ -134,7 +135,7 @@ class Relaxation(Structure, Thermodynamics, Calculation):
 
     def write_output_summary(self, directory: Path):
         super().write_output_summary(directory)
-        self.write_convergence_plot(directory)
+        self.write_relaxation_convergence_plot(directory=directory)
 
     @classmethod
     def from_vasp_run(cls, vasprun: Vasprun):
@@ -234,83 +235,6 @@ class Relaxation(Structure, Thermodynamics, Calculation):
             valence_band_maximum=data.get("vbm"),
         )
 
-    def get_convergence_plot(self):
-
-        # Grab the calculation's structure and convert it to a dataframe
-        structures_dataframe = self.structures.order_by("number").to_dataframe()
-
-        # We will be making a figure that consists of 3 stacked subplots that
-        # all share the x-axis of ionic_step_number
-        figure = make_subplots(
-            rows=3,
-            cols=1,
-            shared_xaxes=True,
-        )
-
-        # Generate a plot for Energy (per atom)
-        figure.add_trace(
-            plotly_go.Scatter(
-                x=structures_dataframe["number"],
-                y=structures_dataframe["energy_per_atom"],
-            ),
-            row=1,
-            col=1,
-        )
-
-        # Generate a plot for Forces (norm per atom)
-        figure.add_trace(
-            plotly_go.Scatter(
-                x=structures_dataframe["number"],
-                y=structures_dataframe["site_forces_norm_per_atom"],
-            ),
-            row=2,
-            col=1,
-        )
-
-        # Generate a plot for Stress (norm per atom)
-        figure.add_trace(
-            plotly_go.Scatter(
-                x=structures_dataframe["number"],
-                y=structures_dataframe["lattice_stress_norm_per_atom"],
-            ),
-            row=3,
-            col=1,
-        )
-
-        # Now let's clean up some formatting and add the axes titles
-        figure.update_layout(
-            width=600,
-            height=600,
-            showlegend=False,
-            xaxis3_title="Ionic Step (#)",
-            yaxis_title="Energy (eV/atom)",
-            yaxis2_title="Site Forces",
-            yaxis3_title="Lattice Stress",
-        )
-
-        # we return the figure object for the user
-        return figure
-
-    def write_convergence_plot(self, directory: Path):
-        figure = self.get_convergence_plot()
-        figure.write_html(
-            directory / "simmate_convergence.html",
-            include_plotlyjs="cdn",
-        )
-
-    def view_convergence_plot(self):
-        figure = self.get_convergence_plot()
-        figure.show(renderer="browser")
-
-    def get_convergence_plot_html(self):
-        # Make the convergence figure and convert it to an html div
-        figure_convergence = self.get_convergence_plot()
-        figure_convergence_html = figure_convergence.to_html(
-            full_html=False,
-            include_plotlyjs=False,
-        )
-        return figure_convergence_html
-
 
 class IonicStep(Structure, Thermodynamics, Forces):
     """
@@ -377,3 +301,66 @@ class IonicStep(Structure, Thermodynamics, Forces):
         on_delete=table_column.CASCADE,
         related_name="structures",
     )
+
+
+class RelaxationConvergence(PlotlyFigure):
+    def get_plot(relaxation: Relaxation):
+
+        # Grab the calculation's structure and convert it to a dataframe
+        structures_dataframe = relaxation.structures.order_by("number").to_dataframe()
+
+        # We will be making a figure that consists of 3 stacked subplots that
+        # all share the x-axis of ionic_step_number
+        figure = make_subplots(
+            rows=3,
+            cols=1,
+            shared_xaxes=True,
+        )
+
+        # Generate a plot for Energy (per atom)
+        figure.add_trace(
+            plotly_go.Scatter(
+                x=structures_dataframe["number"],
+                y=structures_dataframe["energy_per_atom"],
+            ),
+            row=1,
+            col=1,
+        )
+
+        # Generate a plot for Forces (norm per atom)
+        figure.add_trace(
+            plotly_go.Scatter(
+                x=structures_dataframe["number"],
+                y=structures_dataframe["site_forces_norm_per_atom"],
+            ),
+            row=2,
+            col=1,
+        )
+
+        # Generate a plot for Stress (norm per atom)
+        figure.add_trace(
+            plotly_go.Scatter(
+                x=structures_dataframe["number"],
+                y=structures_dataframe["lattice_stress_norm_per_atom"],
+            ),
+            row=3,
+            col=1,
+        )
+
+        # Now let's clean up some formatting and add the axes titles
+        figure.update_layout(
+            width=600,
+            height=600,
+            showlegend=False,
+            xaxis3_title="Ionic Step (#)",
+            yaxis_title="Energy (eV/atom)",
+            yaxis2_title="Site Forces",
+            yaxis3_title="Lattice Stress",
+        )
+
+        return figure
+
+
+# register all plotting methods to the database table
+for _plot in [RelaxationConvergence]:
+    _plot.register_to_class(Relaxation)

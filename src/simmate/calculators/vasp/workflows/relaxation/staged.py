@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import math
-from pathlib import Path
 
 import plotly.graph_objects as plotly_go
 from plotly.subplots import make_subplots
@@ -24,6 +23,7 @@ from simmate.calculators.vasp.workflows.relaxation.quality04 import (
 from simmate.calculators.vasp.workflows.static_energy.quality04 import (
     StaticEnergy__Vasp__Quality04,
 )
+from simmate.visualization.plotting import PlotlyFigure
 from simmate.workflow_engine import Workflow
 
 # from simmate.calculators.vasp.database.relaxation import StagedRelaxation
@@ -107,21 +107,18 @@ class Relaxation__Vasp__Staged(Workflow):
         }
         return final_result
 
-    @classmethod
-    def _get_final_energy_series(cls, df, directory: str):
-        """
-        A utility that grabs the final energies from each stage. Useful for
-        grabbing convergence information.
-        """
-        for subflow in cls.subworkflows:
-            pass
 
-    @classmethod
-    def get_series_convergence_plot(cls, **filter_kwargs):
+class StagedSeriesConvergence(PlotlyFigure):
+    method_type = "classmethod"
+
+    def get_plot(
+        workflow,  # Relaxation__Vasp__Staged
+        **filter_kwargs,
+    ):
 
         directories = (
-            cls.database_table.objects.filter(
-                workflow_name=cls.name_full,
+            workflow.database_table.objects.filter(
+                workflow_name=workflow.name_full,
                 **filter_kwargs,
             )
             .values_list("directory", flat=True)
@@ -131,7 +128,7 @@ class Relaxation__Vasp__Staged(Workflow):
         all_energy_series = []
         for directory in directories:
             energy_series = []
-            for subflow in cls.subworkflows:
+            for subflow in workflow.subworkflows:
                 query = subflow.database_table.objects.filter(
                     workflow_name=subflow.name_full,
                     directory__startswith=directory,
@@ -147,11 +144,11 @@ class Relaxation__Vasp__Staged(Workflow):
         # -------
 
         figure = make_subplots(
-            rows=math.ceil((len(cls.subworkflows) - 1) / 3),
+            rows=math.ceil((len(workflow.subworkflows) - 1) / 3),
             cols=3,
         )
 
-        for i in range(len(cls.subworkflows) - 1):
+        for i in range(len(workflow.subworkflows) - 1):
 
             xs = []
             ys = []
@@ -175,27 +172,19 @@ class Relaxation__Vasp__Staged(Workflow):
 
             # Update xaxis properties
             figure.update_xaxes(
-                title_text=cls.subworkflows[i + 1].name_full,
+                title_text=workflow.subworkflows[i + 1].name_full,
                 row=row,
                 col=col,
             )
             figure.update_yaxes(
-                title_text=cls.subworkflows[i].name_full,
+                title_text=workflow.subworkflows[i].name_full,
                 row=row,
                 col=col,
             )
 
         return figure
 
-    @classmethod
-    def view_series_convergence_plot(cls, **kwargs):
-        figure = cls.get_series_convergence_plot(**kwargs)
-        figure.show(renderer="browser")
 
-    @classmethod
-    def write_series_convergence_plot(cls, directory: Path, **kwargs):
-        figure = cls.get_series_convergence_plot(**kwargs)
-        figure.write_html(
-            directory / "convergence__staged_relaxations.html",
-            include_plotlyjs="cdn",
-        )
+# register all plotting methods to the database table
+for _plot in [StagedSeriesConvergence]:
+    _plot.register_to_class(Relaxation__Vasp__Staged)
