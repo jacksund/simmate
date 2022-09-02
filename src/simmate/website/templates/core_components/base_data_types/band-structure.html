@@ -13,7 +13,6 @@
         <li><b>Is metal:</b> {{ calculation.is_metal }}</li>
     </ul>
 
-    {% load matplotlib_filter %}
-    {{ calculation.get_bandstructure_plot | matplotlib_figure }}
+    {{ calculation.get_band_diagram_html_div }}
 
 </div>

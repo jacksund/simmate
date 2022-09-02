@@ -39,7 +39,7 @@ def test_neb_all_paths(sample_structures, tmp_path, mocker):
     # estabilish filenames that we make and commonly reference
     path_dir = "diffusion.vasp.neb-single-path-mit.00"
     summary_filename = tmp_path / "simmate_summary.yaml"
-    plot_filename = tmp_path / path_dir / "simmate_neb_plot.jpeg"
+    plot_filename = tmp_path / path_dir / "neb_diagram.png"
     cif_filename = tmp_path / path_dir / "simmate_path_relaxed_neb.cif"
 
     # run the full workup

@@ -10,7 +10,7 @@ import plotly.graph_objects as plotly_go
 from rich.progress import track
 
 from simmate.database.base_data_types import DatabaseTable, table_column
-from simmate.toolkit import Composition
+from simmate.toolkit import Composition, Structure
 from simmate.toolkit.structure_prediction import (
     get_known_structures,
     get_structures_from_prototypes,
@@ -18,6 +18,7 @@ from simmate.toolkit.structure_prediction import (
 )
 from simmate.toolkit.structure_prediction.evolution.database import StructureSource
 from simmate.utilities import get_directory
+from simmate.visualization.plotting import PlotlyFigure
 from simmate.workflow_engine.execution import WorkItem
 
 
@@ -466,8 +467,8 @@ class FixedCompositionSearch(DatabaseTable):
             self.write_individuals_completed_full(directory)
             self.write_best_individuals_history(directory)
             self.write_individuals_incomplete(directory)
-            self.write_convergence_plot(directory)
-            self.write_final_fitness_plot(directory)
+            self.write_fitness_convergence_plot(directory)
+            self.write_fitness_distribution_plot(directory)
             self.write_subworkflow_times_plot(directory)
 
             # BUG: This is only for "relaxation.vasp.staged", which the assumed
@@ -662,15 +663,13 @@ class FixedCompositionSearch(DatabaseTable):
         md_filename = directory / "individuals_still_running.md"
         df.to_markdown(md_filename)
 
-    # -------------------------------------------------------------------------
-    # Generating plots
-    # -------------------------------------------------------------------------
 
-    def get_convergence_plot(self):
+class FitnessConvergence(PlotlyFigure):
+    def get_plot(search: FixedCompositionSearch):
 
         # Grab the calculation's structure and convert it to a dataframe
-        columns = ["updated_at", self.fitness_field]
-        structures_dataframe = self.individuals_completed.only(*columns).to_dataframe(
+        columns = ["updated_at", search.fitness_field]
+        structures_dataframe = search.individuals_completed.only(*columns).to_dataframe(
             columns
         )
 
@@ -678,7 +677,7 @@ class FixedCompositionSearch(DatabaseTable):
         # object and just pass it directly to a Figure object
         scatter = plotly_go.Scatter(
             x=structures_dataframe["updated_at"],
-            y=structures_dataframe[self.fitness_field],
+            y=structures_dataframe[search.fitness_field],
             mode="markers",
         )
         figure = plotly_go.Figure(data=scatter)
@@ -686,25 +685,18 @@ class FixedCompositionSearch(DatabaseTable):
         figure.update_layout(
             xaxis_title="Date Completed",
             yaxis_title="Energy (eV/atom)"
-            if self.fitness_field == "energy_per_atom"
-            else self.fitness_field,
+            if search.fitness_field == "energy_per_atom"
+            else search.fitness_field,
         )
 
-        # we return the figure object for the user
         return figure
 
-    def view_convergence_plot(self):
-        figure = self.get_convergence_plot()
-        figure.show(renderer="browser")
 
-    def write_convergence_plot(self, directory: Path):
-        figure = self.get_convergence_plot()
-        figure.write_html(
-            directory / f"convergence__time_vs_{self.fitness_field}.html",
-            include_plotlyjs="cdn",
-        )
-
-    def get_correctness_plot(self, structure_known):
+class Correctness(PlotlyFigure):
+    def get_plot(
+        search: FixedCompositionSearch,
+        structure_known: Structure,
+    ):
 
         # --------------------------------------------------------
         # This code is from simmate.toolkit.validators.fingerprint.pcrystalnn
@@ -726,12 +718,12 @@ class FixedCompositionSearch(DatabaseTable):
             stats=["mean", "std_dev", "minimum", "maximum"],
         )
         featurizer.elements_ = numpy.array(
-            [element.symbol for element in Composition(self.composition).elements]
+            [element.symbol for element in Composition(search.composition).elements]
         )
         # --------------------------------------------------------
 
         # Grab the calculation's structure and convert it to a dataframe
-        structures_dataframe = self.individuals_completed.to_dataframe()
+        structures_dataframe = search.individuals_completed.to_dataframe()
 
         # because we are using the database model, we first want to convert to
         # pymatgen structures objects and add a column to the dataframe for these
@@ -779,65 +771,15 @@ class FixedCompositionSearch(DatabaseTable):
             yaxis_title="Distance from Known Structure",
         )
 
-        # we return the figure object for the user
         return figure
 
-    def view_correctness_plot(self, structure_known):
-        figure = self.get_correctness_plot(structure_known)
-        figure.show(renderer="browser")
 
-    def write_correctness_plot(self, structure_known, directory: Path):
-        figure = self.get_convergence_plot()
-        figure.write_html(
-            directory / "convergence__time_vs_fingerprint_distance.html",
-            include_plotlyjs="cdn",
-        )
-
-    # -------------------------------------------------------------------------
-    # This plot is specifically for "relaxation.vasp.staged" and should be moved
-    # to that class when this search allows new workflows
-    # -------------------------------------------------------------------------
-
-    def get_final_fitness_plot(self):
-
-        # Grab the calculation's structure and convert it to a dataframe
-        structures_dataframe = self.individuals_completed.only(
-            self.fitness_field
-        ).to_dataframe(self.fitness_field)
-
-        # There's only one plot here, no subplot. So we make the scatter
-        # object and just pass it directly to a Figure object
-        histogram = plotly_go.Histogram(
-            x=structures_dataframe[self.fitness_field],
-        )
-        figure = plotly_go.Figure(data=histogram)
-
-        figure.update_layout(
-            xaxis_title="Energy (eV/atom)"
-            if self.fitness_field == "energy_per_atom"
-            else self.fitness_field,
-            yaxis_title="Individuals (#)",
-        )
-
-        # we return the figure object for the user
-        return figure
-
-    def view_final_fitness_plot(self):
-        figure = self.get_final_fitness_plot()
-        figure.show(renderer="browser")
-
-    def write_final_fitness_plot(self, directory: Path):
-        figure = self.get_final_fitness_plot()
-        figure.write_html(
-            directory / f"distribution_of_{self.fitness_field}.html",
-            include_plotlyjs="cdn",
-        )
-
-    def get_subworkflow_times_plot(self):
+class SubworkflowTimes(PlotlyFigure):
+    def get_plot(search: FixedCompositionSearch):
 
         # Grab the calculation's structure and convert it to a dataframe
         columns = ["created_at", "updated_at"]
-        df = self.individuals_completed.only(*columns).to_dataframe(columns)
+        df = search.individuals_completed.only(*columns).to_dataframe(columns)
         df["total_time"] = df.updated_at - df.created_at
 
         def convert_to_min(time):
@@ -853,13 +795,32 @@ class FixedCompositionSearch(DatabaseTable):
         )
         return figure
 
-    def view_subworkflow_times_plot(self):
-        figure = self.get_subworkflow_times_plot()
-        figure.show(renderer="browser")
 
-    def write_subworkflow_times_plot(self, directory: Path):
-        figure = self.get_subworkflow_times_plot()
-        figure.write_html(
-            directory / "distribution_of_subworkflow_times.html",
-            include_plotlyjs="cdn",
+class FitnessDistribution(PlotlyFigure):
+    def get_plot(search: FixedCompositionSearch):
+
+        # Grab the calculation's structure and convert it to a dataframe
+        structures_dataframe = search.individuals_completed.only(
+            search.fitness_field
+        ).to_dataframe(search.fitness_field)
+
+        # There's only one plot here, no subplot. So we make the scatter
+        # object and just pass it directly to a Figure object
+        histogram = plotly_go.Histogram(
+            x=structures_dataframe[search.fitness_field],
         )
+        figure = plotly_go.Figure(data=histogram)
+
+        figure.update_layout(
+            xaxis_title="Energy (eV/atom)"
+            if search.fitness_field == "energy_per_atom"
+            else search.fitness_field,
+            yaxis_title="Individuals (#)",
+        )
+
+        return figure
+
+
+# register all plotting methods to the database table
+for _plot in [FitnessConvergence, Correctness, FitnessDistribution]:
+    _plot.register_to_class(FixedCompositionSearch)

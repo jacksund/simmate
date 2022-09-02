@@ -11,6 +11,7 @@ from simmate.database.base_data_types import Calculation, Structure, table_colum
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.toolkit.diffusion import MigrationHop as ToolkitMigrationHop
 from simmate.toolkit.diffusion import MigrationImages
+from simmate.visualization.plotting import MatplotlibFigure
 
 
 class DiffusionAnalysis(Structure, Calculation):
@@ -256,18 +257,8 @@ class MigrationHop(Calculation):
 
     def write_output_summary(self, directory: Path):
         super().write_output_summary(directory)
-        self.write_neb_plot(directory)
-        self.write_migration_images(directory)
-
-    def get_neb_plot(self):
-        neb_results = self.to_neb_toolkit()
-        plot = neb_results.get_plot()
-        return plot
-
-    def write_neb_plot(self, directory: Path):
-        plot = self.get_neb_plot()
-        filename = directory / "simmate_neb_plot.jpeg"
-        plot.savefig(filename)
+        self.write_neb_diagram_plot(directory=directory)
+        self.write_migration_images(directory=directory)
 
     def get_migration_images(self) -> MigrationImages:
         structures = self.migration_images.order_by("number").to_toolkit()
@@ -479,3 +470,15 @@ class MigrationImage(Structure):
         on_delete=table_column.CASCADE,
         related_name="migration_images",
     )
+
+
+class NebDiagram(MatplotlibFigure):
+    def get_plot(results: MigrationHop):
+        neb_results = results.to_neb_toolkit()
+        plot = neb_results.get_plot()
+        return plot
+
+
+# register all plotting methods to the database table
+for _plot in [NebDiagram]:
+    _plot.register_to_class(MigrationHop)

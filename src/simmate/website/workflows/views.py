@@ -36,12 +36,12 @@ def workflows_all(request):
             "they are often assigned to a specific site/atom. As a result of assigning "
             "electrons, these workflows give predicted oxidation states for each site."
         ),
-        "band-structure": (
-            "These workflows calculate the electronic band structure for a material."
-        ),
-        "density-of-states": (
-            "These workflows calculate the electronic density of states for a material."
-        ),
+        # "band-structure": (
+        #     "These workflows calculate the electronic band structure for a material."
+        # ),
+        # "density-of-states": (
+        #     "These workflows calculate the electronic density of states for a material."
+        # ),
         "dynamics": (
             "These workflows run a molecular dynamics simulation for a material. This "
             "often involves iteratively evaluating the energy/forces of structure at "

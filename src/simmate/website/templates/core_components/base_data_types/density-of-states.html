@@ -9,7 +9,6 @@
         <li><b>Valence band maximum:</b> {{ calculation.valence_band_maximum }}</li>
     </ul>
 
-    {% load matplotlib_filter %}
-    {{ calculation.get_densityofstates_plot | matplotlib_figure }}
+    {{ calculation.get_dos_diagram_html_div }}
 
 </div>
