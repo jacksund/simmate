@@ -3,7 +3,7 @@
 import pytest
 from pandas import DataFrame
 
-from simmate.database.base_data_types import DynamicsIonicStep, DynamicsRun
+from simmate.database.base_data_types import Dynamics, DynamicsIonicStep
 from simmate.toolkit import Structure
 
 # from pymatgen.io.vasp.outputs import Vasprun
@@ -13,11 +13,11 @@ from simmate.toolkit import Structure
 def test_static_energy_table(structure):
 
     # test writing columns
-    DynamicsRun.show_columns()
+    Dynamics.show_columns()
     DynamicsIonicStep.show_columns()
 
     # test writing to database
-    structure_db = DynamicsRun.from_run_context(
+    structure_db = Dynamics.from_run_context(
         run_id="example-id-123",
         workflow_name="example.test.workflow",
         workflow_version="1.2.3",
@@ -27,7 +27,7 @@ def test_static_energy_table(structure):
 
     # try grabbing the calculation again and make sure it loaded from the
     # database rather than creating a new entry
-    structure_db2 = DynamicsRun.from_run_context(
+    structure_db2 = Dynamics.from_run_context(
         run_id="example-id-123",
         workflow_name="example.test.workflow",
         workflow_version="1.2.3",
@@ -40,8 +40,8 @@ def test_static_energy_table(structure):
     assert structure == structure_new
 
     # test converting search results to dataframe and to toolkit
-    df = DynamicsRun.objects.to_dataframe()
+    df = Dynamics.objects.to_dataframe()
     assert isinstance(df, DataFrame)
-    structures = DynamicsRun.objects.to_toolkit()
+    structures = Dynamics.objects.to_toolkit()
     assert isinstance(structures, list)
     assert isinstance(structures[0], Structure)

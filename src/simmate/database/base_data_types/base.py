@@ -516,8 +516,24 @@ class DatabaseTable(models.Model):
             ):
                 all_data[column] = value
 
-        # also add the table name and entry id
-        all_data["database_table"] = self.table_name
+        # also add the table name and entry id and website URL
+        all_data["_DATABASE_TABLE_"] = self.table_name
+        all_data["_TABLE_ID_"] = self.id
+
+        # EXPERIMNETAL: adding workflow URL
+        try:
+            from simmate.database.base_data_types import Calculation
+            from simmate.workflows.utilities import get_workflow
+
+            if isinstance(self, Calculation):
+                workflow = get_workflow(self.workflow_name)
+                all_data["_WEBSITE_URL_"] = (
+                    "http://127.0.0.1:8000/workflows/"  # I assume local host for now
+                    f"{workflow.name_type}/{workflow.name_calculator}/"
+                    f"{workflow.name_preset}/{self.id}"
+                )
+        except:
+            pass
 
         summary_filename = directory / "simmate_summary.yaml"
         with summary_filename.open("w") as file:
@@ -1189,6 +1205,9 @@ class DatabaseTable(models.Model):
 
         # Now we dynamically create a new form class that we can return.
         NewClass = type(cls.table_name, tuple(filter_mixins), extra_attributes)
+
+        # Match the filter name to the table name
+        NewClass.filter_name = cls.table_name
 
         return NewClass
 

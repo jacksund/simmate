@@ -34,7 +34,7 @@
     <div class="container p-4">
         <h3>Relaxation detail:</h3>
         <p>Volume change: {{ calculation.volume_change }}</p>
-        {{ calculation.get_convergence_plot_html | safe }}
+        {{ calculation.get_relaxation_convergence_html_div | safe }}
     </div>
 
 </div>

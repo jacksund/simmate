@@ -73,7 +73,7 @@ class SimmateAPIViewSet(GenericViewSet):
         else:
             filterset = self.filterset_class(request.GET)
             data = {
-                # "filterset": filterset, # not used at the momemnt
+                "filterset": filterset,
                 "filterset_mixins": filterset._meta.model.get_mixin_names(),
                 "form": filterset.form,
                 "extra_filters": filterset._meta.model.api_filters_extra,

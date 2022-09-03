@@ -14,52 +14,51 @@
 
 </div>
 
-<!-- Iterate throuhg the possible mixins and pull the proper components. Is there a better way to do this as a django for-loop? -->
-{% if "Calculation" in table_mixins %}
-{% include "core_components/base_data_types/calculation.html" %}
-{% endif %}
+<!-- Iterate through the main tables that we've prebuilt pages for -->
+{% if calculation.table_name == "StaticEnergy" %}
+    {% include "core_components/base_data_types/static-energy.html" %}
 
-{% if "Structure" in table_mixins %}
-{% include "core_components/base_data_types/structure.html" %}
-{% endif %}
+{% elif calculation.table_name == "DiffusionAnalysis" %}
+    {% include "core_components/base_data_types/diffusion-analysis.html" %}
 
-{% if "StaticEnergy" in table_mixins %}
-{% include "core_components/base_data_types/static-energy.html" %}
-{% endif %}
+{% elif calculation.table_name == "DensityofStatesCalc" %}
+    {% include "core_components/base_data_types/density-of-states-calc.html" %}
 
-{% if "DiffusionAnalysis" in table_mixins %}
-{% include "core_components/base_data_types/diffusion-analysis.html" %}
-{% endif %}
+{% elif calculation.table_name == "BandStructureCalc" %}
+    {% include "core_components/base_data_types/band-structure-calc.html" %}
 
-{% if "DensityofStatesCalc" in table_mixins %}
-{% include "core_components/base_data_types/density-of-states-calc.html" %}
-{% endif %}
+{% elif calculation.table_name == "Dynamics" %}
+    {% include "core_components/base_data_types/dynamics-run.html" %}
 
-{% if "DensityofStates" in table_mixins %}
-{% include "core_components/base_data_types/density-of-states.html" %}
-{% endif %}
+{% elif calculation.table_name == "Relaxation" %}
+    {% include "core_components/base_data_types/relaxation.html" %}
+<!-- End prebuilt pages -->
 
-{% if "BandStructureCalc" in table_mixins %}
-{% include "core_components/base_data_types/band-structure-calc.html" %}
-{% endif %}
 
-{% if "BandStructure" in table_mixins %}
-{% include "core_components/base_data_types/band-structure.html" %}
-{% endif %}
+<!-- If none of the pages above were used, then we iterate through the fundamental 
+    mixins and pull the proper components. Is there a better way to do this as a django for-loop? -->
+{% else %}
+    {% if "Calculation" in table_mixins %}
+    {% include "core_components/base_data_types/calculation.html" %}
+    {% endif %}
 
-{% if "DynamicsRun" in table_mixins %}
-{% include "core_components/base_data_types/dynamics-run.html" %}
-{% endif %}
+    {% if "Structure" in table_mixins %}
+    {% include "core_components/base_data_types/structure.html" %}
+    {% endif %}
 
-{% if "Relaxation" in table_mixins %}
-{% include "core_components/base_data_types/relaxation.html" %}
-{% endif %}
+    {% if "Thermodynamics" in table_mixins %}
+    {% include "core_components/base_data_types/thermodynamics.html" %}
+    {% endif %}
 
-{% if "Thermodynamics" in table_mixins %}
-{% include "core_components/base_data_types/thermodynamics.html" %}
-{% endif %}
+    {% if "Forces" in table_mixins %}
+    {% include "core_components/base_data_types/forces.html" %}
+    {% endif %}
+    {% if "BandStructure" in table_mixins %}
+    {% include "core_components/base_data_types/band-structure.html" %}
+    {% endif %}
 
-{% if "Forces" in table_mixins %}
-{% include "core_components/base_data_types/forces.html" %}
-{% endif %}
+    {% if "DensityofStates" in table_mixins %}
+    {% include "core_components/base_data_types/density-of-states.html" %}
+    {% endif %}
 <!-- end of mix-ins -->
+{% endif %}

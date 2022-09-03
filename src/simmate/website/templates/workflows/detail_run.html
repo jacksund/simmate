@@ -19,7 +19,7 @@ Simmate
         <ol class="breadcrumb m-0">
           <li class="breadcrumb-item"><a href="{% url 'workflows' %}">workflows</a></li>
           <li class="breadcrumb-item"><a href="{% url 'workflows_by_type' workflow.name_type %}">{{ workflow.name_type }}</a></li>
-          <li class="breadcrumb-item"><a href="{% url 'workflow_detail' workflow.name_type workflow.name_preset %}">
+          <li class="breadcrumb-item"><a href="{% url 'workflow_detail' workflow.name_type workflow.name_calculator workflow.name_preset %}">
               {{ workflow.name_preset }}</a></li>
           <li class="breadcrumb-item active">{{ calculation.id }}</li>
         </ol>
