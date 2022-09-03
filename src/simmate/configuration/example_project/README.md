@@ -29,7 +29,7 @@ import example_app
 from example_app.apps import ExampleAppConfig
 ```
 
-3. Make sure this `example_app` is listed in your `~/simmate/applications.yaml`.
+3. Make sure this `example_app` is listed in your `~/simmate/my_env-apps.yaml`.
 If this is your first project, the file contents should be...
 ``` yaml
 example_app.apps.ExampleAppConfig
@@ -64,7 +64,7 @@ Now we can start editting our app and even adding new apps if we'd like.
 to keep it short and use underscores if you need multiple words.
 
 2. Use this updated name to replace `example_app` listed in your
- `~/simmate/applications.yaml` and `example_app/apps.py` files. Also change the 
+ `~/simmate/my_env-apps.yaml` and `example_app/apps.py` files. Also change the 
  Config class name `ExampleAppConfig` to match your app name. For example if 
  your new app name was `crazy_research`, you can change the class name 
  to `CrazyResearchConfig`

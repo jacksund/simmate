@@ -111,21 +111,12 @@ def start_project(project_name: Path):
     # grab the full path to the new project for the user to see
     new_project_directory = Path.cwd() / project_name
 
-    # also navigate to the user's ~/simmate/applications.yaml file and we
-    # want to add a new line at the end of it (or create the file if it isn't
-    # there yet)
-    apps_yaml = Path.home() / "simmate" / "applications.yaml"
-    new_line = "\nexample_app.apps.ExampleAppConfig"  # \n ensures a new line
-
-    # If the file exists, we append this line to the end of the file. Otherwise,
-    # we create a new file and add the line!
-    with apps_yaml.open("a+") as file:
-        file.write(new_line)
     # Let the user know what we did and how to continue.
     logging.info(
-        "\n\tSuccessfully made a new project! \n\t"
+        "Successfully made a new project! \n\n"
         f"You'll find it at {new_project_directory}\n\n"
-        "\tBe sure to go through the README file in your new project.\n"
+        "Note, this project's app has not yet been named, installed, or "
+        "registered yet. Follow along with our tutorial to complete these steps."
     )
 
 

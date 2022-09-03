@@ -166,6 +166,7 @@ simmate = [
     "**/*.yaml",
     "**/*.html",
     "**/*.svg",
+    "**/*.toml",
 ]
 # Note, the default is to include everything, but I don't want to ship test 
 # files. I could switch this to use exclude-package-data in the future.
