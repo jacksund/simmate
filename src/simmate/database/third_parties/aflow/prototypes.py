@@ -36,7 +36,12 @@ class AflowPrototype(Structure):
         strukturbericht_symbol=["exact"],
         nsites_wyckoff=["range"],
     )
-    source = "AFLOW Encyclopedia of Crystallographic Prototypes"
+    source = "AFLOW Prototypes"
+    source_long = (
+        "Encyclopedia of Crystallographic Prototypes from the Automatic-FLOW"
+        " for Materials Discovery"
+    )
+    homepage = "http://www.aflowlib.org/prototype-encyclopedia/"
     source_doi = "https://doi.org/10.1016/j.commatsci.2017.01.017"
     remote_archive_link = "https://archives.simmate.org/AflowPrototype-2022-06-23.zip"
 

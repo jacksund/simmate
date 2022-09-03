@@ -15,6 +15,8 @@ class Relaxation__Vasp__MatprojMetal(Relaxation__Vasp__Matproj):
     and proper smearing.
     """
 
+    description_doc_short = "based on pymatgen's MPMetalRelaxSet"
+
     incar = Relaxation__Vasp__Matproj.incar.copy()
     incar.update(
         dict(

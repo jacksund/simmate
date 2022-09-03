@@ -8,6 +8,7 @@ from simmate.database.base_data_types import DatabaseTable
 from simmate.website.core_components.base_api_view import SimmateAPIViewSet
 from simmate.website.workflows.forms import SubmitWorkflow
 from simmate.workflows.utilities import (  # WORKFLOW_TYPES,
+    get_list_of_calculators_by_type,
     get_list_of_workflows_by_type,
     get_workflow,
 )
@@ -24,17 +25,16 @@ def workflows_all(request):
 
     workflows_metadata = {
         "static-energy": (
-            "These workflows calculate the energy for a structure. In many cases, "
-            "this also involves calculating the lattice strain and forces for each site."
+            "Calculate the energy for a structure. In many cases, this also "
+            "involves calculating the lattice strain and forces for each site."
         ),
         "relaxation": (
-            "These workflows geometry-optimize a structure's the lattice and sites "
-            "until specified covergence criteria are met."
+            "Geometry-optimize a structure's the lattice and sites "
+            "to their lowest-energy positions until convergence criteria are met."
         ),
         "population-analysis": (
-            "These workflows evaluate where electrons exist in a structure -- and "
-            "they are often assigned to a specific site/atom. As a result of assigning "
-            "electrons, these workflows give predicted oxidation states for each site."
+            "Evaluate where electrons exist in a structure and assign them to a "
+            "specific site/atom. Used to predicted oxidation states."
         ),
         # "band-structure": (
         #     "These workflows calculate the electronic band structure for a material."
@@ -43,8 +43,8 @@ def workflows_all(request):
         #     "These workflows calculate the electronic density of states for a material."
         # ),
         "dynamics": (
-            "These workflows run a molecular dynamics simulation for a material. This "
-            "often involves iteratively evaluating the energy/forces of structure at "
+            "Run a molecular dynamics simulation for a material. Involves "
+            "iteratively evaluating the energy/forces at "
             "specific temperature (or temperature ramp)."
         ),
         # "diffusion": (
@@ -62,18 +62,24 @@ def workflows_all(request):
 
 def workflows_by_type(request, workflow_type):
 
-    workflow_names = get_list_of_workflows_by_type(workflow_type)
+    calculators = get_list_of_calculators_by_type(workflow_type)
 
+    # pull the information together for each individual flow and organize by
+    # workflow calculator.
+    workflow_dict = {}
+    for calculator in calculators:
+        workflow_names = get_list_of_workflows_by_type(workflow_type, calculator)
+        workflow_dict[calculator] = [get_workflow(n) for n in workflow_names]
+
+    # for loading the docstring of the workflows.type module
     workflow_type_module = getattr(workflow_module, workflow_type.replace("-", "_"))
-
-    # pull the information together for each individual flow
-    workflows = [get_workflow(n) for n in workflow_names]
+    # BUG: this must be AFTER the code above in order to have the module loaded
 
     # now let's put the data and template together to send the user
     context = {
         "workflow_type": workflow_type,
         "workflow_type_description_short": workflow_type_module.__doc__,
-        "workflows": workflows,
+        "workflow_dict": workflow_dict,
     }
     template = "workflows/by_type.html"
     return render(request, template, context)
@@ -84,30 +90,43 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
     template_list = "workflows/detail.html"
     template_retrieve = "workflows/detail_run.html"
 
-    @classmethod
+    @staticmethod
     def get_table(
-        cls,
         request,
         workflow_type,
-        workflow_name,
-        pk=None,
+        workflow_calculator,
+        workflow_preset,
+        pk=None,  # this is passed for 'retrieve' views but we don't use it
     ) -> DatabaseTable:
         """
         grabs the relevant database table using the URL request
         """
-        workflow_name_full = workflow_type + ".vasp." + workflow_name
-        workflow = get_workflow(workflow_name_full)
+        name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+        workflow = get_workflow(name_full)
         return workflow.database_table
+
+    @staticmethod
+    def get_initial_queryset(
+        request,
+        workflow_type,
+        workflow_calculator,
+        workflow_preset,
+        pk=None,  # this is passed for 'retrieve' views but we don't use it
+    ):
+        name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+        workflow = get_workflow(name_full)
+        return workflow.all_results
 
     def get_list_context(
         self,
         request,
         workflow_type,
-        workflow_name,
+        workflow_calculator,
+        workflow_preset,
     ) -> dict:
 
-        workflow_name_full = workflow_type + ".vasp." + workflow_name
-        workflow = get_workflow(workflow_name_full)
+        name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+        workflow = get_workflow(name_full)
 
         # TODO: grab some metadata about this calc. For example...
         # ncalculations = MITRelaxation.objects.count()
@@ -123,12 +142,13 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
         self,
         request,
         workflow_type,
-        workflow_name,
+        workflow_calculator,
+        workflow_preset,
         pk,
     ) -> dict:
 
-        workflow_name_full = workflow_type + ".vasp." + workflow_name
-        workflow = get_workflow(workflow_name_full)
+        name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+        workflow = get_workflow(name_full)
 
         return {"workflow": workflow}
 
@@ -137,11 +157,12 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
 def workflow_submit(
     request,
     workflow_type: str,
-    workflow_name: str,
+    workflow_calculator: str,
+    workflow_preset: str,
 ):
 
-    workflow_name_full = workflow_type + ".vasp." + workflow_name
-    workflow = get_workflow(workflow_name_full)
+    name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+    workflow = get_workflow(name_full)
 
     # dynamically create the form for this workflow
     FormClass = SubmitWorkflow.from_workflow(workflow)

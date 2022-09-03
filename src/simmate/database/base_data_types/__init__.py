@@ -4,7 +4,7 @@
 # circular imports errors, so we prevent isort from changing this file.
 # isort: skip_file
 
-from .base import DatabaseTable, table_column
+from .base import DatabaseTable, table_column, SearchResults
 
 from .symmetry import Spacegroup
 from .structure import Structure
@@ -14,7 +14,7 @@ from .thermodynamics import Thermodynamics
 
 from .static_energy import StaticEnergy
 from .relaxation import Relaxation, IonicStep
-from .dynamics import DynamicsRun, DynamicsIonicStep
+from .dynamics import Dynamics, DynamicsIonicStep
 from .calculation_nested import NestedCalculation
 from .band_structure import BandStructure, BandStructureCalc
 from .density_of_states import DensityofStates, DensityofStatesCalc

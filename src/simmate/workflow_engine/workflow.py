@@ -380,9 +380,9 @@ class Workflow:
 
             return PopulationAnalysis
         elif flow_type == "dynamics":
-            from simmate.database.base_data_types import DynamicsRun
+            from simmate.database.base_data_types import Dynamics
 
-            return DynamicsRun
+            return Dynamics
         elif flow_type == "diffusion":
             if "from-images" in flow_preset or "single-path" in flow_preset:
                 from simmate.database.base_data_types import MigrationHop

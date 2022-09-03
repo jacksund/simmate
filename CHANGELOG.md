@@ -29,6 +29,8 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - convergence plots and extras are now written for many workflow types (such as relaxations)
 - when `use_database=True`, output files are automatically written and the workup method is directly paired with the database table.
 - NEB workflow now accepts parameters to tune how distinct pathways are determined, including the max pathway length and cutoffs at 1D percolation.
+- add `MatplotlibFigure` and `PlotlyFigure` classes to help with writing output files and also implementing these figures in the website UI
+- update website to include workflow calculator types and add API links
 
 **Refactors**
 - the `website.core_components.filters` module has been absorbed into the `DatabaseTable` class/module
@@ -41,6 +43,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - fix bug in windows dev env where `simmate run-server` fails to find python path
 - fix bug in `workflows explore` command where 'vasp' is the assumed calculator name
 - fix broken example code in custom workflow docs
+- fix broken website links and workflow views
 
 
 # v0.10.0 (2022.08.29)

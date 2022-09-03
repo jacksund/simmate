@@ -49,7 +49,6 @@ class Relaxation__Vasp__Staged(Workflow):
     """
 
     description_doc_short = "runs a series of relaxations (00-04 quality)"
-    # database_table = StagedRelaxation
 
     subworkflows = [
         Relaxation__Vasp__Quality00,

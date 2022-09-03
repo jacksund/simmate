@@ -12,6 +12,8 @@ class Relaxation__Vasp__MvlSlab(Relaxation__Vasp__MvlGrainboundary):
     with slab_mode=True.
     """
 
+    description_doc_short = "based on pymatgen's MVLGBSet(slab=True)"
+
     # The settings used for this calculation are based on the MITRelaxation, but
     # we are updating/adding new settings here.
     incar = Relaxation__Vasp__MvlGrainboundary.incar.copy()

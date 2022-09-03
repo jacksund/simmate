@@ -14,13 +14,16 @@ Simmate
 {% load markdown_filter %}
 
 <!-- start page title -->
-<div class="row">
+<div class="row pt-3">
   <div class="col-12">
     <div class="page-title-box">
       <div class="page-title-right">
         <ol class="breadcrumb m-0">
           <li class="breadcrumb-item"><a href="{% url 'workflows' %}">workflows</a></li>
-          <li class="breadcrumb-item"><a href="{% url 'workflows_by_type' workflow.name_type %}">{{ workflow.name_type }}</a></li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'workflows_by_type' workflow.name_type %}">
+              {{ workflow.name_type}}</a>
+          </li>
           <li class="breadcrumb-item active">{{ workflow.name_preset }}</li>
         </ol>
       </div>
@@ -31,34 +34,49 @@ Simmate
 <!-- end page title -->
 
 <!-- Workflow name and descriptoin header -->
-<section class="pt-5 jumbotron text-center">
+<section class="pt-4 jumbotron text-center">
   <div class="container">
-    <h1 class="jumbotron-heading">{{ workflow.name }}</h1>
-    <p class="lead text-muted">{{ workflow.description_doc_short }}</p>
+    <h1 class="jumbotron-heading">{{ workflow.name_full }}</h1>
+    <a role="button" class="btn btn-primary btn-sm"
+    href="{% url 'workflow_submit' workflow.name_type workflow.name_calculator workflow.name_preset %}">Submit New Run</a>
+    <a href="?format=api" target="_blank" class="btn btn-secondary btn-sm">API</a>
+    <a href="?format=json" target="_blank" class="btn btn-secondary btn-sm">JSON</a>
+    <a href="https://jacksund.github.io/simmate/getting_started/access_the_database/quick_start/" target="_blank"
+      class="btn btn-secondary btn-sm">Python-client</a>
   </div>
 </section>
 
 <div class="container px-4">
-  <h2>Description:</h2>
+  <h3>Description:</h3>
   {{ workflow.description_doc | markdown }}
 </div>
 
 <div class="container px-4">
-  <h2>Parameters:</h2>
+  <h3>Required Parameters:</h3>
   <ul>
-    {% for parameter in workflow.parameter_names %}
+    {% for parameter in workflow.parameter_names_required %}
     <li>{{ parameter }}</li>
-
     {% endfor %}
   </ul>
 </div>
 
+<div class="container px-4">
+  <h3>All Parameters:</h3>
+  <ul>
+    {% for parameter in workflow.parameter_names %}
+    <li>{{ parameter }}</li>
+    {% endfor %}
+  </ul>
+  <p><small>Read through our
+    <a href="https://jacksund.github.io/simmate/parameters/" target="_blank">our parameter documentation</a>
+    for more information.
+  </small></p>
+
+</div>
+
 <!-- Buttons at top -->
 <div class="container px-4">
-
-  <h2>Extras:</h2>
-  <a role="button" class="btn btn-primary btn"
-    href="{% url 'workflow_submit' workflow.name_type workflow.name_preset %}">Submit New Run</a>
+  <h3>Extras:</h3>
   {% if flow_id %}
   <a role="button" class="btn btn-primary btn" href="https://cloud.prefect.io/simmate/flow/{{ flow_id }}"
     target="_blank">Monitor Runs on Prefect ({{ nflows_submitted }})</a>

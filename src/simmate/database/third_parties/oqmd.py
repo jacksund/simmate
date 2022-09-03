@@ -17,7 +17,9 @@ class OqmdStructure(Structure):
 
     archive_fields = ["formation_energy"]
     api_filters = dict(formation_energy=["range"])
-    source = "The Open Quantum Materials Database"
+    source = "OQMD"
+    source_long = "The Open Quantum Materials Database"
+    homepage = "https://oqmd.org/"
     source_doi = "https://doi.org/10.1007/s11837-013-0755-4"
     remote_archive_link = "https://archives.simmate.org/OqmdStructure-2022-02-22.zip"
 

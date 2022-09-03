@@ -33,6 +33,8 @@ class MatprojStructure(Structure, Thermodynamics):
         is_theoretical=["exact"],
     )
     source = "Materials Project"
+    source_long = "The Materials Project at Berkeley National Labs"
+    homepage = "https://materialsproject.org/"
     source_doi = "https://doi.org/10.1063/1.4812323"
     remote_archive_link = "https://archives.simmate.org/MatprojStructure-2022-08-27.zip"
 

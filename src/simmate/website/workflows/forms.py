@@ -14,8 +14,8 @@ from simmate.workflow_engine import Workflow
 class SubmitWorkflow(forms.Form):
 
     # All workflows, regardless of their other parameters, will always have a
-    # "labels" input. This is a list of labels to submit the workflow with.
-    labels = forms.CharField(initial="WarWulf")
+    # "tags" input. This is a list of tags to submit the workflow with.
+    tags = forms.CharField(required=False)  # initial="WarWulf"
 
     def clean(self):
         # This method cleans multiple fields that depend on eachother.
@@ -123,19 +123,19 @@ class SubmitWorkflow(forms.Form):
     def clean_migration_images_file(self):
         return self.clean_structure_file("migration_images_file")
 
-    def clean_labels(self):
+    def clean_tags(self):
 
         # Grab what the user submitted
-        labels_str = self.cleaned_data["labels"]
+        tags_str = self.cleaned_data["tags"]
 
-        # convert the string to a list of labels.
+        # convert the string to a list of tags.
         # For example...
         #   "WarWulf, LongLeaf, DogWood"
         #       converts to
         #   ['WarWulf', ' LongLeaf', ' DogWood']
-        labels = labels_str.strip().split(",")
+        tags = tags_str.strip().split(",")
 
-        return labels
+        return tags
 
     @classmethod
     def from_workflow(cls, workflow: Workflow):

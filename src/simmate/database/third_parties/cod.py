@@ -19,7 +19,9 @@ class CodStructure(Structure):
         is_ordered=["exact"],
         has_implicit_hydrogens=["exact"],
     )
-    source = "The Crystallography Open Database"
+    source = "COD"
+    source_long = "The Crystallography Open Database"
+    homepage = "https://www.crystallography.net/cod/"
     source_doi = "https://doi.org/10.1107/S0021889809016690"
     remote_archive_link = "https://archives.simmate.org/CodStructure-2022-02-20.zip"
 

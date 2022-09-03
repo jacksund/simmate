@@ -61,6 +61,8 @@ class Relaxation__Vasp__Mit(VaspWorkflow):
     ```
     """
 
+    description_doc_short = "based on pymatgen's MITRelaxSet"
+
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS_LOW_QUALITY
 

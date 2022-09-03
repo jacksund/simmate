@@ -23,6 +23,8 @@ class Relaxation__Vasp__Quality04(VaspWorkflow):
     workflow, which uses this calculation as a fifth step (and final relaxation).
     """
 
+    description_doc_short = "for randomly-created structures"
+
     # This uses the PBE functional with POTCARs that have lower electron counts
     # and convergence criteria when available.
     functional = "PBE"

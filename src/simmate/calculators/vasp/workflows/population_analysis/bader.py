@@ -13,7 +13,7 @@ from simmate.toolkit import Structure
 from simmate.workflow_engine import Workflow
 
 
-class PopulationAnalysis__Vasp__BaderMatproj(Workflow):
+class PopulationAnalysis__VaspBader__BaderMatproj(Workflow):
     """
     Runs a static energy calculation using an extra-fine FFT grid and then
     carries out Bader analysis on the resulting charge density.

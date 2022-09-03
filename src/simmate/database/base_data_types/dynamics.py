@@ -16,7 +16,7 @@ from simmate.database.base_data_types import (
 from simmate.visualization.plotting import PlotlyFigure
 
 
-class DynamicsRun(Structure, Calculation):
+class Dynamics(Structure, Calculation):
     """
     Holds results from a dynamics simulations -- often referred to as a molecular
     dynamics run.
@@ -60,7 +60,7 @@ class DynamicsRun(Structure, Calculation):
 
     def write_output_summary(self, directory: Path):
         super().write_output_summary(directory)
-        self.write_convergence_plot(directory)
+        self.write_simmulation_detail_plot(directory=directory)
 
     @classmethod
     def from_vasp_run(cls, vasprun: Vasprun):
@@ -89,7 +89,7 @@ class DynamicsRun(Structure, Calculation):
     def update_from_vasp_run(self, vasprun: Vasprun):
         """
         Given a Vasprun object from a finished dynamics run, this will update the
-        DynamicsRun table entry and the corresponding DynamicsIonicStep entries.
+        Dynamics table entry and the corresponding DynamicsIonicStep entries.
 
         #### Parameters
 
@@ -141,9 +141,9 @@ class DynamicsRun(Structure, Calculation):
 
 class DynamicsIonicStep(Structure, Thermodynamics, Forces):
     """
-    Holds information for a single ionic step of a `DynamicsRun`.
+    Holds information for a single ionic step of a `Dynamics` entry.
 
-    Each entry will map to a `DynamicsRun`, so you should typically access this
+    Each entry will map to a `Dynamics`, so you should typically access this
     data through that class. The exception to this is when you want all ionic
     steps accross many relaxations for a machine learning input.
     """
@@ -172,7 +172,7 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
     """
 
     dynamics_run = table_column.ForeignKey(
-        DynamicsRun,
+        Dynamics,
         on_delete=table_column.CASCADE,
         related_name="structures",
     )
@@ -201,8 +201,8 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
     # nosepot
 
 
-class Convergence(PlotlyFigure):
-    def get_plot(result: DynamicsRun):
+class SimmulationDetail(PlotlyFigure):
+    def get_plot(result: Dynamics):
 
         # Grab the calculation's structure and convert it to a dataframe
         structures_dataframe = result.structures.order_by("number").to_dataframe()
@@ -271,5 +271,5 @@ class Convergence(PlotlyFigure):
 
 
 # register all plotting methods to the database table
-for _plot in [Convergence]:
-    _plot.register_to_class(DynamicsRun)
+for _plot in [SimmulationDetail]:
+    _plot.register_to_class(Dynamics)
