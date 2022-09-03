@@ -210,15 +210,15 @@ if not APPLICATIONS_YAML.exists():
         )
 # load apps that the user wants installed
 with APPLICATIONS_YAML.open() as file:
-    # load the list of extra apps. 
+    # load the list of extra apps.
     extra_apps = yaml.full_load(file)
-    
+
     # We only load extra apps if the file isn't empty
     if extra_apps:
-        # Since this is really just one line for each app, it is loaded as a 
+        # Since this is really just one line for each app, it is loaded as a
         # single string separated by a space.
         extra_apps = extra_apps.split()
-        
+
         # now add each app to our list above so Django loads it.
         for app in extra_apps:
             INSTALLED_APPS.append(app)

@@ -19,9 +19,25 @@ from rich import print
 from simmate import workflows
 from simmate.utilities import get_directory, make_archive
 from simmate.workflow_engine import Workflow
+from simmate.configuration.django.settings import extra_apps
 
 
-def get_workflow_types():
+def get_all_workflow_names() -> list[str]:
+    """
+    Returns a list of all the workflows of all types.
+
+    This utility was make specifically for the CLI where we print out all
+    workflow names for the user.
+    """
+
+    workflow_names = []
+    for flow_type in get_all_workflow_types():
+        workflow_names += get_workflow_names_by_type(flow_type)
+
+    return workflow_names
+
+
+def get_all_workflow_types():
     """
     Grabs all workflow types, which is also all "Project Names" and all of the
     submodules listed in the `simmate.workflows` module.
@@ -36,12 +52,17 @@ def get_workflow_types():
         if submodule.name != "utilities"
     ]
 
+    # add custom apps
+    for flow in get_workflows_from_apps():
+        if flow.name_type not in workflow_types:
+            workflow_types.append(flow.name_type)
+
     workflow_types.sort()
 
     return workflow_types
 
 
-def get_list_of_calculators_by_type(
+def get_calculators_by_type(
     flow_type: str,
     full_name: bool = True,
 ) -> list[str]:
@@ -52,7 +73,7 @@ def get_list_of_calculators_by_type(
     # Consider merging during refactor.
 
     # Make sure the type is supported
-    workflow_types = get_workflow_types()
+    workflow_types = get_all_workflow_types()
     if flow_type not in workflow_types:
         raise TypeError(
             f"{flow_type} is not allowed. Please use a workflow type from this"
@@ -79,11 +100,16 @@ def get_list_of_calculators_by_type(
                 calculator_names.append(attr.name_calculator)
     # OPTIMIZE: is there a more efficient way to do this?
 
+    # add custom app calculators
+    for flow in get_workflows_from_apps():
+        if flow.name_calculator not in calculator_names:
+            calculator_names.append(flow.name_calculator)
+
     calculator_names.sort()
     return calculator_names
 
 
-def get_list_of_workflows_by_type(
+def get_workflow_names_by_type(
     flow_type: str,
     calculator_name: str = None,
     full_name: bool = True,
@@ -93,7 +119,7 @@ def get_list_of_workflows_by_type(
     """
 
     # Make sure the type is supported
-    workflow_types = get_workflow_types()
+    workflow_types = get_all_workflow_types()
     if flow_type not in workflow_types:
         raise TypeError(
             f"{flow_type} is not allowed. Please use a workflow type from this"
@@ -130,22 +156,19 @@ def get_list_of_workflows_by_type(
             workflow_names.append(workflow_name)
     # OPTIMIZE: is there a more efficient way to do this?
 
+    # add custom app calculators
+    for flow in get_workflows_from_apps():
+        # this follows the same logic as the for-loop above
+        workflow_name = flow.name_full
+        if calculator_name and attr.name_calculator != calculator_name:
+            continue
+        if full_name:
+            workflow_name = attr.name_full
+        else:
+            workflow_name = attr.name_preset
+        workflow_names.append(workflow_name)
+
     workflow_names.sort()
-    return workflow_names
-
-
-def get_list_of_all_workflows() -> list[str]:
-    """
-    Returns a list of all the workflows of all types.
-
-    This utility was make specifically for the CLI where we print out all
-    workflow names for the user.
-    """
-
-    workflow_names = []
-    for flow_type in get_workflow_types():
-        workflow_names += get_list_of_workflows_by_type(flow_type)
-
     return workflow_names
 
 
@@ -226,7 +249,7 @@ def get_workflow(
     # This is optional because it is slow and loads all other workflows, rather
     # than just the one we are interested in.
     if precheck_flow_exists:
-        allowed_workflows = get_list_of_all_workflows()
+        allowed_workflows = get_all_workflow_names()
         if workflow_name not in allowed_workflows:
             raise ModuleNotFoundError(
                 "The workflow you provided isn't known. Make sure you don't have any "
@@ -353,7 +376,7 @@ def get_unique_parameters() -> list[str]:
     called elsewhere.
     """
 
-    flownames = get_list_of_all_workflows()
+    flownames = get_all_workflow_names()
     unique_parameters = []
     for flowname in flownames:
         workflow = get_workflow(flowname)
@@ -368,3 +391,30 @@ def get_unique_parameters() -> list[str]:
     unique_parameters.sort()
 
     return unique_parameters
+
+
+def get_workflow_names_from_apps(apps_to_search=extra_apps):
+    return [flow.name_full for flow in get_workflows_from_apps(apps_to_search)]
+
+
+def get_workflows_from_apps(apps_to_search=extra_apps):
+    app_workflows = []
+    for app_name in apps_to_search:
+        app_modulename = app_name.split(".")[0]
+        try:
+            app_module = importlib.import_module(f"{app_modulename}.workflows")
+        except:
+            logging.warning(
+                f"Failed to load workflows from {app_name}. Did you make sure "
+                "there is a workflows.py file or module present?"
+            )
+            continue
+
+        # iterate through each available object in the workflows file and find
+        # which ones are workflow objects
+        for workflow_name in app_module.__all__:
+            workflow = getattr(app_module, workflow_name)
+            if workflow not in app_workflows:
+                app_workflows.append(workflow)
+
+    return app_workflows

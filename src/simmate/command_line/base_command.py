@@ -79,17 +79,16 @@ def run_server():
 
 
 @simmate_app.command()
-def start_project(project_name: Path):
+def start_project():
     """
     Creates a new folder and fills it with an example project to
     get you started with custom Simmate workflows/datatables
     """
 
     import logging
+    import shutil
 
-    from django.core.management import call_command
-
-    from simmate import configuration  # needed just for the filepath
+    from simmate import configuration  # needed for the filepath
 
     # This directory is where our template folder is located. We find this
     # by looking at the import path to see where python installed it.
@@ -98,18 +97,11 @@ def start_project(project_name: Path):
     # We add on "project_template" to this file path as that's our full template
     template_directory = config_directory / "example_project"
 
-    # we now make the project folder using our template directory.
-    # Note, we are using Django's "startproject" command even though we are just
-    # copying files over. This might be overkill but it gets the job done.
-    call_command(
-        "startproject",
-        project_name,
-        template=str(template_directory),
-        extensions=["toml", "py"],
-    )
-
     # grab the full path to the new project for the user to see
-    new_project_directory = Path.cwd() / project_name
+    new_project_directory = Path.cwd() / "my_simmate_project"
+
+    # copy the directory over
+    shutil.copytree(template_directory, new_project_directory)
 
     # Let the user know what we did and how to continue.
     logging.info(
