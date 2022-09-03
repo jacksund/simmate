@@ -60,7 +60,7 @@ class Relaxation__Vasp__Mit(VaspWorkflow):
     methods.
     ```
     """
-    
+
     description_doc_short = "based on pymatgen's MITRelaxSet"
 
     functional = "PBE"

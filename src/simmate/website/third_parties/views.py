@@ -4,23 +4,28 @@ from django.shortcuts import render
 
 from simmate.database import third_parties
 from simmate.database.base_data_types import DatabaseTable
+from simmate.database.third_parties import (
+    AflowPrototype,
+    AflowStructure,
+    CodStructure,
+    JarvisStructure,
+    MatprojStructure,
+    OqmdStructure,
+)
 from simmate.website.core_components.base_api_view import SimmateAPIViewSet
 
 
 def providers_all(request):
-
-    # TODO: auto determine this list and descriptions
-    workflows_metadata = {
-        # "AflowStructure": "...",  # not allowed to redistribute
-        "AflowPrototype": "...",
-        "CodStructure": "...",
-        "JarvisStructure": "...",
-        "MatprojStructure": "...",
-        "OqmdStructure": "...",
+    context = {
+        "all_providers": [
+            AflowPrototype,
+            # AflowStructure,  # Not allowed yet
+            CodStructure,
+            JarvisStructure,
+            MatprojStructure,
+            OqmdStructure,
+        ]
     }
-
-    # now let's put the data and template together to send the user
-    context = {"workflows_metadata": workflows_metadata}
     template = "third_parties/providers_all.html"
     return render(request, template, context)
 

@@ -22,13 +22,14 @@ Simmate
 
 <!-- List of Cards -->
 <div class="row">
-  {% for workflow_type, workflow_description in workflows_metadata.items %}
+  {% for provider in all_providers %}
   <div class="col-md-4">
     <div class="card border-primary border">
       <div class="card-body">
-        <h5 class="card-title text-primary">{{ workflow_type }}</h5>
-        <p class="card-text">{{ workflow_description }}</p>
-        <a href="{% url 'third_parties:provider' workflow_type %}" class="btn btn-primary btn-sm">About</a>
+        <h5 class="card-title text-primary">{{ provider.source }}</h5>
+        <p class="card-text">{{ provider.source_long }}</p>
+        <a href="{% url 'third_parties:provider' provider.table_name %}" class="btn btn-primary btn-sm">About</a>
+        <a href="{{ provider.homepage }}" target="_blank" class="btn btn-secondary btn-sm">External Link</a>
       </div>
     </div>
   </div>

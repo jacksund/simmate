@@ -6,7 +6,7 @@ from simmate.calculators.vasp.workflows.static_energy.matproj import (
 from simmate.database.workflow_results import StaticEnergy
 
 
-class PopulationAnalysis__VaspBader__ElfMatproj(StaticEnergy__Vasp__Matproj):
+class PopulationAnalysis__Vasp__ElfMatproj(StaticEnergy__Vasp__Matproj):
     """
     Runs a static energy calculation under settings from the Materials Project
     and also writes the electron localization function (to ELFCAR).

@@ -53,7 +53,7 @@ class Relaxation__Vasp__Matproj(VaspWorkflow):
     properties), you should still test for convergence using higher-quality
     settings.
     """
-    
+
     description_doc_short = "based on pymatgen's MPRelaxSet"
 
     functional = "PBE"

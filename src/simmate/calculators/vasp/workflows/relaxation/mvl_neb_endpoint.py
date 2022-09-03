@@ -20,7 +20,7 @@ class Relaxation__Vasp__MvlNebEndpoint(Relaxation__Vasp__Mit):
     higher-level NEB workflows (e.g. diffusion/neb_all_paths or
     diffusion/neb_from_endpoints), which call this workflow for you.
     """
-    
+
     description_doc_short = "based on pymatgen's MVLCINEBEndPointSet"
 
     incar = Relaxation__Vasp__Mit.incar.copy()

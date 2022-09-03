@@ -8,8 +8,8 @@ from simmate.database.base_data_types import DatabaseTable
 from simmate.website.core_components.base_api_view import SimmateAPIViewSet
 from simmate.website.workflows.forms import SubmitWorkflow
 from simmate.workflows.utilities import (  # WORKFLOW_TYPES,
-    get_list_of_workflows_by_type,
     get_list_of_calculators_by_type,
+    get_list_of_workflows_by_type,
     get_workflow,
 )
 
@@ -63,7 +63,7 @@ def workflows_all(request):
 def workflows_by_type(request, workflow_type):
 
     calculators = get_list_of_calculators_by_type(workflow_type)
-    
+
     # pull the information together for each individual flow and organize by
     # workflow calculator.
     workflow_dict = {}

@@ -10,7 +10,7 @@ class Relaxation__Vasp__MvlGrainboundary(Relaxation__Vasp__Matproj):
     This task is a reimplementation of pymatgen's
     [MVLGBSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MVLGBSet).
     """
-    
+
     description_doc_short = "based on pymatgen's MVLGBSet"
 
     # The settings used for this calculation are based on the MITRelaxation, but

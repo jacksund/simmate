@@ -19,7 +19,7 @@ class Relaxation__Vasp__Quality01(VaspWorkflow):
     we recommend only using the relaxation/staged workflow, which uses this
     calculation as a second step.
     """
-    
+
     description_doc_short = "for randomly-created structures"
 
     # This uses the PBE functional with POTCARs that have lower electron counts

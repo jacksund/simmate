@@ -14,7 +14,7 @@ class Relaxation__Vasp__MatprojMetal(Relaxation__Vasp__Matproj):
     settings are adjusted to accomodate metals. This include a denser kpt grid
     and proper smearing.
     """
-    
+
     description_doc_short = "based on pymatgen's MPMetalRelaxSet"
 
     incar = Relaxation__Vasp__Matproj.incar.copy()
