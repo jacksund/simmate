@@ -11,6 +11,8 @@ class Relaxation__Vasp__MvlSlab(Relaxation__Vasp__MvlGrainboundary):
     [MVLGBSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MVLGBSet)
     with slab_mode=True.
     """
+    
+    description_doc_short = "based on pymatgen's MVLGBSet(slab=True)"
 
     # The settings used for this calculation are based on the MITRelaxation, but
     # we are updating/adding new settings here.

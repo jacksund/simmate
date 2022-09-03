@@ -18,8 +18,8 @@ from .electronic_structure.all import (
     ElectronicStructure__Vasp__MatprojHseFull,
 )
 from .population_analysis.all import (
-    PopulationAnalysis__Vasp__BadelfMatproj,
-    PopulationAnalysis__Vasp__BaderMatproj,
+    PopulationAnalysis__VaspBader__BadelfMatproj,
+    PopulationAnalysis__VaspBader__BaderMatproj,
     PopulationAnalysis__Vasp__ElfMatproj,
 )
 from .relaxation.all import (

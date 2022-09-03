@@ -45,6 +45,8 @@ class Relaxation__Vasp__MatprojScan(VaspWorkflow):
     This task is a reimplementation of pymatgen's
     [MPScanRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPScanRelaxSet).
     """
+    
+    description_doc_short = "based on pymatgen's MPScanRelaxSet"
 
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS
