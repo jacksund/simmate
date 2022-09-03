@@ -139,7 +139,7 @@ class SimmateAPIViewSet(GenericViewSet):
 
         # we also want to preload spacegroup for the structure mixin
         intial_queryset = initial_queryset or table.objects.all()
-        if issubclass(table, Spacegroup):
+        if issubclass(table, Spacegroup) and hasattr(table, "spacegroup"):
             intial_queryset = intial_queryset.select_related("spacegroup")
 
         NewViewSet = type(

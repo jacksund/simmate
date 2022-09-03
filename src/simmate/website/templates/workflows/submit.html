@@ -21,7 +21,7 @@ Simmate
           <li class="breadcrumb-item"><a href="{% url 'workflows_by_type' workflow.name_type %}">
               {{ workflow.name_type }}
             </a></li>
-          <li class="breadcrumb-item"><a href="{% url 'workflow_detail' workflow.name_type workflow.name_preset %}">
+          <li class="breadcrumb-item"><a href="{% url 'workflow_detail' workflow.name_type workflow.name_calculator workflow.name_preset %}">
               {{ workflow.name_preset }}</a></li>
           <li class="breadcrumb-item active">submit</li>
         </ol>
@@ -36,7 +36,6 @@ Simmate
 <section class="pt-4 jumbotron text-center">
   <div class="container">
     <h1 class="jumbotron-heading">{{ workflow.name_full }}</h1>
-    <p class="lead text-muted">{{ workflow.description_doc_short }}</p>
   </div>
 </section>
 
@@ -50,7 +49,7 @@ Simmate
 
 
 <!-- Submission form -->
-<form action="{% url 'workflow_submit' workflow.name_type workflow.name_preset %}" method="post"
+<form action="{% url 'workflow_submit' workflow.name_type workflow.name_calculator workflow.name_preset %}" method="post"
   enctype="multipart/form-data">
   {% csrf_token %}
   {% load crispy_forms_tags %}

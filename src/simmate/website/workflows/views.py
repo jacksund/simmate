@@ -33,7 +33,7 @@ def workflows_all(request):
             "to their lowest-energy positions until convergence criteria are met."
         ),
         "population-analysis": (
-            "Evaluate where electrons exist in a structure and assigned to a "
+            "Evaluate where electrons exist in a structure and assign them to a "
             "specific site/atom. Used to predicted oxidation states."
         ),
         # "band-structure": (
@@ -94,36 +94,39 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
     def get_table(
         request,
         workflow_type,
-        workflow_name,
+        workflow_calculator,
+        workflow_preset,
         pk=None,  # this is passed for 'retrieve' views but we don't use it
     ) -> DatabaseTable:
         """
         grabs the relevant database table using the URL request
         """
-        workflow_name_full = workflow_type + ".vasp." + workflow_name
-        workflow = get_workflow(workflow_name_full)
+        name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+        workflow = get_workflow(name_full)
         return workflow.database_table
 
     @staticmethod
     def get_initial_queryset(
-            request,
-            workflow_type,
-            workflow_name,
-            pk=None,  # this is passed for 'retrieve' views but we don't use it
-        ):
-        workflow_name_full = workflow_type + ".vasp." + workflow_name
-        workflow = get_workflow(workflow_name_full)
+        request,
+        workflow_type,
+        workflow_calculator,
+        workflow_preset,
+        pk=None,  # this is passed for 'retrieve' views but we don't use it
+    ):
+        name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+        workflow = get_workflow(name_full)
         return workflow.all_results
 
     def get_list_context(
         self,
         request,
         workflow_type,
-        workflow_name,
+        workflow_calculator,
+        workflow_preset,
     ) -> dict:
 
-        workflow_name_full = workflow_type + ".vasp." + workflow_name
-        workflow = get_workflow(workflow_name_full)
+        name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+        workflow = get_workflow(name_full)
 
         # TODO: grab some metadata about this calc. For example...
         # ncalculations = MITRelaxation.objects.count()
@@ -139,12 +142,13 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
         self,
         request,
         workflow_type,
-        workflow_name,
+        workflow_calculator,
+        workflow_preset,
         pk,
     ) -> dict:
 
-        workflow_name_full = workflow_type + ".vasp." + workflow_name
-        workflow = get_workflow(workflow_name_full)
+        name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+        workflow = get_workflow(name_full)
 
         return {"workflow": workflow}
 
@@ -153,11 +157,12 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
 def workflow_submit(
     request,
     workflow_type: str,
-    workflow_name: str,
+    workflow_calculator: str,
+    workflow_preset: str,
 ):
 
-    workflow_name_full = workflow_type + ".vasp." + workflow_name
-    workflow = get_workflow(workflow_name_full)
+    name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+    workflow = get_workflow(name_full)
 
     # dynamically create the form for this workflow
     FormClass = SubmitWorkflow.from_workflow(workflow)

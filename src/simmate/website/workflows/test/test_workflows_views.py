@@ -11,7 +11,28 @@ from simmate.workflows.utilities import (
     get_workflow_types,
 )
 
-ALL_WORKFLOWS = get_list_of_all_workflows()
+
+def get_workflows_to_test():
+    # Some views have not been configured yet, so we
+    # remove them from the list of all flows
+
+    all_flow_names = get_list_of_all_workflows()
+
+    flows_to_test = []
+    for workflow_name in all_flow_names:
+        workflow = get_workflow(workflow_name)
+        if workflow.name_type not in [
+            "customized",
+            "restart",
+            "electronic-structure",
+            "structure-prediction",
+            "diffusion",
+        ]:
+            flows_to_test.append(workflow)
+    return flows_to_test
+
+
+ALL_WORKFLOWS = get_workflows_to_test()
 
 
 def test_workflows_view(client):
@@ -35,35 +56,26 @@ def test_workflows_by_type_view(client, workflow_type):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("workflow_name", ALL_WORKFLOWS)
-def test_workflow_detail_view(client, workflow_name):
+@pytest.mark.parametrize("workflow", ALL_WORKFLOWS)
+def test_workflow_detail_view(client, workflow):
 
-    # BUG: I assume .vasp. in the view for now and also some views are broken
-    if workflow_name in [
-        "restart.simmate.automatic",
-        "customized.vasp.user-config",
-        "electronic-structure.vasp.matproj-full",
-        "electronic-structure.vasp.matproj-hse-full",
-        "structure-prediction.python.fixed-composition",
-        "structure-prediction.python.new-individual",
-        "structure-prediction.python.variable-composition",
-        "structure-prediction.python.binary-composition",
-        "diffusion.vasp.neb-all-paths-mit",
-        "diffusion.vasp.neb-from-endpoints-mit",
-        "diffusion.vasp.neb-from-images-mit",
-        "diffusion.vasp.neb-single-path-mit",
+    # Some views have not been configured yet
+    if workflow.name_type in [
+        "customized",
+        "electronic-structure",
+        "structure-prediction",
+        "diffusion",
     ]:
         return
 
-    workflow = get_workflow(workflow_name)
-
     # list view
-    # grabs f"/workflows/{type}/{name}/")
+    # grabs f"/workflows/{type}/{calculator}/{preset}/")
     url = reverse(
         "workflow_detail",
         kwargs={
             "workflow_type": workflow.name_type,
-            "workflow_name": workflow.name_preset,
+            "workflow_calculator": workflow.name_calculator,
+            "workflow_preset": workflow.name_preset,
         },
     )
 
@@ -72,16 +84,17 @@ def test_workflow_detail_view(client, workflow_name):
     assertTemplateUsed(response, "workflows/detail.html")
 
     # detail view - found
-    # grabs... "/workflows/static-energy/mit/1/"
+    # grabs... "/workflows/static-energy/vasp/mit/1/"
     # TODO: how should I populate with test data?
 
     # detail view - not found
-    # grabs... "/workflows/static-energy/mit/999/"
+    # grabs... "/workflows/static-energy/vasp/mit/999/"
     url = reverse(
         "workflow_run_detail",
         kwargs={
             "workflow_type": workflow.name_type,
-            "workflow_name": workflow.name_preset,
+            "workflow_calculator": workflow.name_calculator,
+            "workflow_preset": workflow.name_preset,
             "pk": 999,
         },
     )
@@ -91,7 +104,7 @@ def test_workflow_detail_view(client, workflow_name):
     # assertTemplateUsed(response, "workflows/detail_run.html")
 
 
-# @pytest.mark.parametrize("workflow_name", ALL_WORKFLOWS) # TODO
+# TODO: @pytest.mark.parametrize("workflow", ALL_WORKFLOWS)
 @pytest.mark.django_db
 def test_workflow_submit_view(client, sample_structures, mocker):
 
@@ -100,8 +113,9 @@ def test_workflow_submit_view(client, sample_structures, mocker):
     url = reverse(
         "workflow_submit",
         kwargs={
-            "workflow_type": "static-energy",
-            "workflow_name": "mit",
+            "workflow_type": "static-energy",  # workflow.name_type
+            "workflow_calculator": "vasp",  # workflow.name_calculator
+            "workflow_preset": "mit",  # workflow.name_preset
         },
     )
 
@@ -124,18 +138,19 @@ def test_workflow_submit_view(client, sample_structures, mocker):
     response = client.post(
         url,
         {
-            "labels": "test_label1",
+            "tags": "test_tag1",
             # This is just JSON for a NaCl structure
             "structure_json": structure.to_json(),
         },
     )
 
+    assert response.status_code == 302  # indicates a redirect URL
     assert (
         response.url == "https://cloud.prefect.io/simmate/flow-run/example-run-id-1234"
     )
     Workflow.run_cloud.assert_called_with(
         structure=structure,
-        labels=["test_label1"],
+        tags=["test_tag1"],
         compress_output=False,
         wait_for_run=False,
         # parameters not deserialized yet so these will still be present

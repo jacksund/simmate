@@ -24,21 +24,21 @@ urlpatterns = [
     # about the workflow as well as host actions for submitting and querying
     # new flow runs.
     path(
-        route="<workflow_type>/<workflow_name>/",
+        route="<workflow_type>/<workflow_calculator>/<workflow_preset>",
         view=views.WorkflowAPIViewSet.dynamic_list_view,
         name="workflow_detail",
     ),
     #
     # Views results for an individual calculation
     path(
-        route="<workflow_type>/<workflow_name>/<int:pk>",
+        route="<workflow_type>/<workflow_calculator>/<workflow_preset>/<int:pk>",
         view=views.WorkflowAPIViewSet.dynamic_retrieve_view,
         name="workflow_run_detail",
     ),
     #
     # Submit a new calculation
     path(
-        route="<workflow_type>/<workflow_name>/submit",
+        route="<workflow_type>/<workflow_calculator>/<workflow_preset>/submit",
         view=views.workflow_submit,
         name="workflow_submit",
     ),

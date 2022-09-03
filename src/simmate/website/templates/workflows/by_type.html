@@ -61,10 +61,10 @@ Simmate
                 <h5 class="card-title text-primary">{{ workflow.name_preset }}</h5>
                 {{ workflow.description_doc_short }}
                 <br><br>
-                <a href="{% url 'workflow_detail' workflow_type workflow.name_preset %}"
+                <a href="{% url 'workflow_detail' workflow_type workflow.name_calculator workflow.name_preset %}"
                   class="btn btn-primary btn-sm">Explore</a>
                 <a role="button" class="btn btn-secondary btn-sm"
-                  href="{% url 'workflow_submit' workflow.name_type workflow.name_preset %}">Submit</a>
+                  href="{% url 'workflow_submit' workflow.name_type workflow.name_calculator workflow.name_preset %}">Submit</a>
               </div>
             </div>
           </div>
