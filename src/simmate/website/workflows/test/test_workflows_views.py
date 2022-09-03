@@ -6,9 +6,9 @@ from pytest_django.asserts import assertTemplateUsed
 
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import (
-    get_list_of_all_workflows,
+    get_all_workflow_names,
+    get_all_workflow_types,
     get_workflow,
-    get_workflow_types,
 )
 
 
@@ -16,7 +16,7 @@ def get_workflows_to_test():
     # Some views have not been configured yet, so we
     # remove them from the list of all flows
 
-    all_flow_names = get_list_of_all_workflows()
+    all_flow_names = get_all_workflow_names()
 
     flows_to_test = []
     for workflow_name in all_flow_names:
@@ -41,7 +41,7 @@ def test_workflows_view(client):
     assertTemplateUsed(response, "workflows/all.html")
 
 
-@pytest.mark.parametrize("workflow_type", get_workflow_types())
+@pytest.mark.parametrize("workflow_type", get_all_workflow_types())
 def test_workflows_by_type_view(client, workflow_type):
 
     # grabs f"/workflows/{workflow_type}/"

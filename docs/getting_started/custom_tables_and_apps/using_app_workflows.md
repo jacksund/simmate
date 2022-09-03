@@ -43,4 +43,9 @@ Check and see your workflow listed now too:
     simmate workflows list-all
     ```
 
+!!! danger
+    Make sure you set the `__all__` attribute in your workflows.py file. Otherwise,
+    workflows will not be found or other errors may occur. This should just be
+    a list of the workflows you want registered.
+
 -------------------------------------------------------------------------------

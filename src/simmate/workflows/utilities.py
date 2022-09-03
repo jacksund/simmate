@@ -17,9 +17,9 @@ import yaml
 from rich import print
 
 from simmate import workflows
+from simmate.configuration.django.settings import extra_apps
 from simmate.utilities import get_directory, make_archive
 from simmate.workflow_engine import Workflow
-from simmate.configuration.django.settings import extra_apps
 
 
 def get_all_workflow_names() -> list[str]:
@@ -62,14 +62,11 @@ def get_all_workflow_types():
     return workflow_types
 
 
-def get_calculators_by_type(
-    flow_type: str,
-    full_name: bool = True,
-) -> list[str]:
+def get_calculators_by_type(flow_type: str) -> list[str]:
     """
     Returns a list of all the available calculators for a given workflow type.
     """
-    # !!! This is largely a copy/paste of code from get_list_of_workflows_by_type.
+    # !!! This is largely a copy/paste of code from get_workflow_names_by_type.
     # Consider merging during refactor.
 
     # Make sure the type is supported
@@ -83,26 +80,33 @@ def get_calculators_by_type(
     # switch the naming convention from "flow-name" to "flow_name".
     flow_type_u = flow_type.replace("-", "_")
 
-    # grab the relevent module
-    flow_module = importlib.import_module(f"simmate.workflows.{flow_type_u}")
+    # grab the relevent module. If this fails, then the user is giving a custom
+    # type that isn't in simmate.
+    try:
+        flow_module = importlib.import_module(f"simmate.workflows.{flow_type_u}")
+        is_custom_type = False
+    except ModuleNotFoundError:
+        is_custom_type = True
+
+    calculator_names = []
 
     # This loop goes through all attributes (as strings) of the workflow module
     # and select only those that are workflow or s3tasks.
-    calculator_names = []
-    for attr_name in dir(flow_module):
-        attr = getattr(flow_module, attr_name)
-        # OPTIMIZE: line below --> issubclass(attr, Workflow) --> raises error
-        if hasattr(attr, "run_config") and attr.__name__ != "Workflow":
-            # attr is now a workflow object (such as Relaxation__Vasp__Matproj)
-            # and we can grab whichever name we'd like from it and
-            # add the name to our list
-            if attr.name_calculator not in calculator_names:
-                calculator_names.append(attr.name_calculator)
-    # OPTIMIZE: is there a more efficient way to do this?
+    if not is_custom_type:
+        for attr_name in dir(flow_module):
+            attr = getattr(flow_module, attr_name)
+            # OPTIMIZE: line below --> issubclass(attr, Workflow) --> raises error
+            if hasattr(attr, "run_config") and attr.__name__ != "Workflow":
+                # attr is now a workflow object (such as Relaxation__Vasp__Matproj)
+                # and we can grab whichever name we'd like from it and
+                # add the name to our list
+                if attr.name_calculator not in calculator_names:
+                    calculator_names.append(attr.name_calculator)
+        # OPTIMIZE: is there a more efficient way to do this?
 
     # add custom app calculators
     for flow in get_workflows_from_apps():
-        if flow.name_calculator not in calculator_names:
+        if flow.name_type == flow_type and flow.name_calculator not in calculator_names:
             calculator_names.append(flow.name_calculator)
 
     calculator_names.sort()
@@ -129,43 +133,51 @@ def get_workflow_names_by_type(
     # switch the naming convention from "flow-name" to "flow_name".
     flow_type_u = flow_type.replace("-", "_")
 
-    # grab the relevent module
-    flow_module = importlib.import_module(f"simmate.workflows.{flow_type_u}")
+    # grab the relevent module. If this fails, then the user is giving a custom
+    # type that isn't in simmate.
+    try:
+        flow_module = importlib.import_module(f"simmate.workflows.{flow_type_u}")
+        is_custom_type = False
+    except ModuleNotFoundError:
+        is_custom_type = True
+
+    workflow_names = []
 
     # This loop goes through all attributes (as strings) of the workflow module
     # and select only those that are workflow or s3tasks.
-    workflow_names = []
-    for attr_name in dir(flow_module):
-        attr = getattr(flow_module, attr_name)
-        # OPTIMIZE: line below --> issubclass(attr, Workflow) --> raises error
-        if hasattr(attr, "run_config") and attr.__name__ != "Workflow":
-            # attr is now a workflow object (such as Relaxation__Vasp__Matproj)
-            # and we can grab whichever name we'd like from it.
+    if not is_custom_type:
+        for attr_name in dir(flow_module):
+            attr = getattr(flow_module, attr_name)
+            # OPTIMIZE: line below --> issubclass(attr, Workflow) --> raises error
+            if hasattr(attr, "run_config") and attr.__name__ != "Workflow":
+                # attr is now a workflow object (such as Relaxation__Vasp__Matproj)
+                # and we can grab whichever name we'd like from it.
 
-            # if a calculator_name was given, then we need to limit the results
-            # to that specific calculator.
-            if calculator_name and attr.name_calculator != calculator_name:
-                continue  # Skip those that don't match
+                # if a calculator_name was given, then we need to limit the results
+                # to that specific calculator.
+                if calculator_name and attr.name_calculator != calculator_name:
+                    continue  # Skip those that don't match
 
-            if full_name:
-                workflow_name = attr.name_full
-            else:
-                workflow_name = attr.name_preset
+                if full_name:
+                    workflow_name = attr.name_full
+                else:
+                    workflow_name = attr.name_preset
 
-            # and add the name to our list
-            workflow_names.append(workflow_name)
-    # OPTIMIZE: is there a more efficient way to do this?
+                # and add the name to our list
+                workflow_names.append(workflow_name)
+        # OPTIMIZE: is there a more efficient way to do this?
 
     # add custom app calculators
     for flow in get_workflows_from_apps():
+        if flow.name_type != flow_type:
+            continue
         # this follows the same logic as the for-loop above
-        workflow_name = flow.name_full
-        if calculator_name and attr.name_calculator != calculator_name:
+        if calculator_name and flow.name_calculator != calculator_name:
             continue
         if full_name:
-            workflow_name = attr.name_full
+            workflow_name = flow.name_full
         else:
-            workflow_name = attr.name_preset
+            workflow_name = flow.name_preset
         workflow_names.append(workflow_name)
 
     workflow_names.sort()
@@ -220,6 +232,11 @@ def get_workflow(
         workflow. Typically this is only useful for beginners using the CLI.
         Defaults to false.
     """
+
+    # check if we have a custom workflow first
+    if workflow_name in get_workflow_names_from_apps():
+        workflow_dict = get_workflows_from_apps(as_dict=True)
+        return workflow_dict[workflow_name]
 
     # First check if the user is providing a custom workflow, where the path is
     # given as "path/to/my/script:my_workflow_obj". If so, we need to load that
@@ -393,11 +410,14 @@ def get_unique_parameters() -> list[str]:
     return unique_parameters
 
 
-def get_workflow_names_from_apps(apps_to_search=extra_apps):
+def get_workflow_names_from_apps(apps_to_search: list[str] = extra_apps) -> list[str]:
     return [flow.name_full for flow in get_workflows_from_apps(apps_to_search)]
 
 
-def get_workflows_from_apps(apps_to_search=extra_apps):
+def get_workflows_from_apps(
+    apps_to_search: list[str] = extra_apps,
+    as_dict: bool = False,
+):
     app_workflows = []
     for app_name in apps_to_search:
         app_modulename = app_name.split(".")[0]
@@ -417,4 +437,8 @@ def get_workflows_from_apps(apps_to_search=extra_apps):
             if workflow not in app_workflows:
                 app_workflows.append(workflow)
 
-    return app_workflows
+    return (
+        app_workflows
+        if not as_dict
+        else {flow.name_full: flow for flow in app_workflows}
+    )

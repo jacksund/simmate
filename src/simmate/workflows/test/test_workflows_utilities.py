@@ -5,18 +5,18 @@ import pytest
 from simmate.conftest import copy_test_files
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import (
-    get_list_of_all_workflows,
-    get_list_of_calculators_by_type,
-    get_list_of_workflows_by_type,
+    get_all_workflow_names,
+    get_all_workflow_types,
+    get_calculators_by_type,
     get_unique_parameters,
     get_workflow,
-    get_workflow_types,
+    get_workflow_names_by_type,
     load_results_from_directories,
 )
 
 
 def test_get_workflow_types():
-    assert get_workflow_types() == [
+    assert get_all_workflow_types() == [
         "customized",
         "diffusion",
         "dynamics",
@@ -31,7 +31,7 @@ def test_get_workflow_types():
 
 def test_list_of_all_workflows():
 
-    assert get_list_of_all_workflows() == [
+    assert get_all_workflow_names() == [
         "customized.vasp.user-config",
         "diffusion.vasp.neb-all-paths-mit",
         "diffusion.vasp.neb-from-endpoints-mit",
@@ -75,15 +75,15 @@ def test_list_of_all_workflows():
 
 def test_list_of_calculators_by_type():
 
-    assert get_list_of_calculators_by_type("static-energy") == ["vasp"]
+    assert get_calculators_by_type("static-energy") == ["vasp"]
 
     with pytest.raises(TypeError):
-        get_list_of_calculators_by_type("non-existant-type")
+        get_calculators_by_type("non-existant-type")
 
 
 def test_list_of_workflows_by_type():
 
-    assert get_list_of_workflows_by_type("static-energy") == [
+    assert get_workflow_names_by_type("static-energy") == [
         "static-energy.vasp.matproj",
         "static-energy.vasp.matproj-hse",
         "static-energy.vasp.matproj-scan",
@@ -93,7 +93,7 @@ def test_list_of_workflows_by_type():
     ]
 
     assert (
-        get_list_of_workflows_by_type(
+        get_workflow_names_by_type(
             "static-energy",
             calculator_name="non-existant",
         )
@@ -101,7 +101,7 @@ def test_list_of_workflows_by_type():
     )
 
     with pytest.raises(TypeError):
-        get_list_of_workflows_by_type("non-existant-type")
+        get_workflow_names_by_type("non-existant-type")
 
 
 def test_get_workflow():

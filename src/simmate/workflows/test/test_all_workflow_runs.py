@@ -2,7 +2,7 @@
 
 import pytest
 
-from simmate.workflows.utilities import get_list_of_all_workflows, get_workflow
+from simmate.workflows.utilities import get_all_workflow_names, get_workflow
 
 
 # @pytest.mark.prefect_db
@@ -125,7 +125,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
             successful_flows.append(workflow_name)
 
     # check which flows either (1) failed or (2) weren't tested
-    all_flows = get_list_of_all_workflows()
+    all_flows = get_all_workflow_names()
     missing_failed_flows = list(set(all_flows) - set(successful_flows))
     missing_failed_flows.sort()
 
