@@ -1,8 +1,11 @@
 <!-- Calculation Info -->
+
+
+<!-- DISABLE PREFECT
 <div class="container p-4">
 
     <h3>Prefect Cloud:</h3>
-    <!-- 
+    
     This block would query Prefect cloud using logic like...  
 
         if calculation.flow_run_view:
@@ -18,19 +21,22 @@
     a prefect api key from the User and use it to query their prefect cloud here.
 
     For now, I simply leave the next two columns empty to prevent the slow-down.
-    -->
+    
     <a>Linking to Prefect Cloud has not been implemented yet.</a>
 
 </div>
+-->
 
 <div class="container p-4">
 
     <h3>Calculation Information:</h3>
     <ul>
-        <li><b>File Location:</b> {{ calculation.directory }}</li>
-        <li><b>Created at:</b> {{ calculation.created_at }}</li>
-        <li><b>Last updated at:</b> {{ calculation.updated_at }}</li>
+        <li><b>Workflow Name:</b> {{ calculation.workflow_name }}</li>
+        <li><b>Workflow Version:</b> {{ calculation.workflow_version }}</li>
         <li><b>Corrections Used:</b> {{ calculation.corrections }}</li>
+        <li><b>Run ID:</b> {{ calculation.run_id }}</li>
+        <li><b>Computer System:</b> {{ calculation.computer_system }}</li>
+        <li><b>File Location:</b> {{ calculation.directory }}</li>
     </ul>
 
 </div>

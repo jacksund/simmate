@@ -4,7 +4,7 @@
 # circular imports errors, so we prevent isort from changing this file.
 # isort: skip_file
 
-from .base import DatabaseTable, table_column
+from .base import DatabaseTable, table_column, SearchResults
 
 from .symmetry import Spacegroup
 from .structure import Structure

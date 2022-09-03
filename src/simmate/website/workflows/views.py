@@ -90,17 +90,27 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
     template_list = "workflows/detail.html"
     template_retrieve = "workflows/detail_run.html"
 
-    @classmethod
+    @staticmethod
     def get_table(
-        cls,
         request,
         workflow_type,
         workflow_name,
-        pk=None,
+        pk=None,  # this is passed for 'retrieve' views but we don't use it
     ) -> DatabaseTable:
         """
         grabs the relevant database table using the URL request
         """
+        workflow_name_full = workflow_type + ".vasp." + workflow_name
+        workflow = get_workflow(workflow_name_full)
+        return workflow.database_table
+
+    @staticmethod
+    def get_initial_queryset(
+            request,
+            workflow_type,
+            workflow_name,
+            pk=None,  # this is passed for 'retrieve' views but we don't use it
+        ):
         workflow_name_full = workflow_type + ".vasp." + workflow_name
         workflow = get_workflow(workflow_name_full)
         return workflow.all_results

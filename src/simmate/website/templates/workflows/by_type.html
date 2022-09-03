@@ -40,37 +40,38 @@ Simmate
 <div class="accordion" id="accordionExample">
   {% for calculator, workflows in workflow_dict.items %}
   <div class="card mb-0">
-      <div class="card-header" id="heading{{ calculator }}">
-          <h5 class="m-0">
-              <a class="custom-accordion-title d-block pt-2 pb-2"
-                  data-bs-toggle="collapse" href="#collapse{{ calculator }}"
-                  aria-expanded="true" aria-controls="collapse{{ calculator }}">
-                  {{ calculator }}
-              </a>
-          </h5>
-      </div>
+    <div class="card-header" id="heading{{ calculator }}">
+      <h5 class="m-0">
+        <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse" href="#collapse{{ calculator }}"
+          aria-expanded="true" aria-controls="collapse{{ calculator }}">
+          {{ calculator }}
+        </a>
+      </h5>
+    </div>
 
-      <div id="collapse{{ calculator }}" class="collapse"
-          aria-labelledby="heading{{ calculator }}" data-bs-parent="#accordionExample">
-          <div class="card-body">
-                <!-- List of Cards -->
-                <div class="row">
-                {% for workflow in workflows %}
-                <div class="col-md-4">
-                  <div class="card border-primary border">
-                    <div class="card-body">
-                      <h5 class="card-title text-primary">{{ workflow.name_preset }}</h5>
-                      {{ workflow.description_doc_short }}
-                      <br><br>
-                      <a href="{% url 'workflow_detail' workflow_type workflow.name_preset %}" class="btn btn-primary btn-sm">About</a>
-                      <!-- workflow.name_calculator -->
-                    </div>
-                  </div>
-                </div>
-                {% endfor %}
+    <div id="collapse{{ calculator }}" class="collapse" aria-labelledby="heading{{ calculator }}"
+      data-bs-parent="#accordionExample">
+      <div class="card-body">
+        <!-- List of Cards -->
+        <div class="row">
+          {% for workflow in workflows %}
+          <div class="col-md-4">
+            <div class="card border-primary border">
+              <div class="card-body">
+                <h5 class="card-title text-primary">{{ workflow.name_preset }}</h5>
+                {{ workflow.description_doc_short }}
+                <br><br>
+                <a href="{% url 'workflow_detail' workflow_type workflow.name_preset %}"
+                  class="btn btn-primary btn-sm">Explore</a>
+                <a role="button" class="btn btn-secondary btn-sm"
+                  href="{% url 'workflow_submit' workflow.name_type workflow.name_preset %}">Submit</a>
               </div>
+            </div>
           </div>
+          {% endfor %}
+        </div>
       </div>
+    </div>
   </div>
   {% endfor %}
 </div>

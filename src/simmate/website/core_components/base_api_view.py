@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import GenericViewSet
 
-from simmate.database.base_data_types import DatabaseTable
+from simmate.database.base_data_types import DatabaseTable, SearchResults, Spacegroup
 
 
 class SimmateAPIViewSet(GenericViewSet):
@@ -119,6 +119,7 @@ class SimmateAPIViewSet(GenericViewSet):
         cls,
         table: DatabaseTable,
         view_type: str,
+        initial_queryset: SearchResults = None,
         **kwargs,
     ):
         # For all tables, we share all the data -- no columns are hidden. Therefore
@@ -137,8 +138,8 @@ class SimmateAPIViewSet(GenericViewSet):
         )
 
         # we also want to preload spacegroup for the structure mixin
-        intial_queryset = table.objects.all()
-        if hasattr(table, "spacegroup"):
+        intial_queryset = initial_queryset or table.objects.all()
+        if issubclass(table, Spacegroup):
             intial_queryset = intial_queryset.select_related("spacegroup")
 
         NewViewSet = type(
@@ -195,16 +196,33 @@ class SimmateAPIViewSet(GenericViewSet):
     #   1. having a utility that prints out the full API spec but isn't called on startup
     #   2. making all APIViews up-
 
-    def get_table(self, request: HttpRequest, *args, **kwargs) -> Response:
-        if not self.table:
-            raise NotImplementedError()
+    @classmethod
+    def get_table(cls, request: HttpRequest, *args, **kwargs) -> Response:
+        if not cls.table:
+            raise NotImplementedError(
+                "Either set a table attribute to your viewset or write a custom"
+                "get_table method"
+            )
         else:
-            return self.table
+            return cls.table
+
+    @staticmethod
+    def get_initial_queryset(request: HttpRequest, *args, **kwargs) -> Response:
+        # Sometimes you may want the query to start from a filtered input, rather
+        # than 'objects.all()` An example of this when we are building a view
+        # for a specific workflow and need to filter by workflow_name.
+        # If you just return None, then 'objects.all()` will be used by default.
+        return
 
     @classmethod
     def dynamic_list_view(cls, request, **request_kwargs):
         table = cls.get_table(request, **request_kwargs)
-        view = cls.from_table(table=table, view_type="list")
+        initial_queryset = cls.get_initial_queryset(request, **request_kwargs)
+        view = cls.from_table(
+            table=table,
+            initial_queryset=initial_queryset,
+            view_type="list",
+        )
         return view(request, **request_kwargs)
 
     @classmethod
