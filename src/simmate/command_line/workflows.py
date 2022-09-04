@@ -123,24 +123,24 @@ def explore():
     prefix = "\n\n[bold green]"
 
     from simmate.workflows.utilities import (
-        get_list_of_calculators_by_type,
-        get_list_of_workflows_by_type,
+        get_all_workflow_types,
+        get_calculators_by_type,
         get_workflow,
-        get_workflow_types,
+        get_workflow_names_by_type,
     )
 
     print(f"{prefix}What type of analysis are you interested in?")
-    workflow_types = get_workflow_types()
+    workflow_types = get_all_workflow_types()
     type_index = list_options(workflow_types)
     selected_type = workflow_types[type_index]
 
     print(f"{prefix}Which calculator do you want to use?")
-    calculator_names = get_list_of_calculators_by_type(selected_type)
+    calculator_names = get_calculators_by_type(selected_type)
     calc_index = list_options(calculator_names)
     selected_calculator = calculator_names[calc_index]
 
     print(f"{prefix}What settings preset do you want to see the description for?")
-    presets = get_list_of_workflows_by_type(
+    presets = get_workflow_names_by_type(
         selected_type,
         calculator_name=selected_calculator,
         full_name=False,
@@ -172,7 +172,7 @@ def explore():
     console = Console()
 
     print(f"{prefix}Description:\n")
-    doc = workflow.__doc__ or "No description provided"
+    doc = workflow.description_doc
     description = Markdown(dedent(doc))
     console.print(description)
 
@@ -195,10 +195,10 @@ def list_all():
     This lists off all available workflows.
     """
 
-    from simmate.workflows.utilities import get_list_of_all_workflows
+    from simmate.workflows.utilities import get_all_workflow_names
 
     print("These are the workflows that have been registerd:")
-    all_workflows = get_list_of_all_workflows()
+    all_workflows = get_all_workflow_names()
     for i, workflow in enumerate(all_workflows):
         workflow_number = str(i + 1).zfill(2)
         print(f"\t({workflow_number}) {workflow}")  # gives "(01) example-flow"

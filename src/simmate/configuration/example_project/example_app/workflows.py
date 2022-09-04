@@ -32,7 +32,16 @@ from simmate.calculators.vasp.workflows.base import VaspWorkflow
 from simmate.workflow_engine import Workflow
 
 # Import our tables from the other files.
-from .models import MyCustomTable1, MyCustomTable2
+from .models import MyCustomTable1
+
+# -----------------------------------------------------------------------------
+# Make sure to list out all workflows that you want registered
+# -----------------------------------------------------------------------------
+
+__all__ = [
+    "Example__Python__MyExample1",
+    "Relaxation__Vasp__MyExample2",
+]
 
 # -----------------------------------------------------------------------------
 # Our first example shows off the basics
@@ -44,20 +53,22 @@ class Example__Python__MyExample1(Workflow):
     database_table = MyCustomTable1
 
     @staticmethod
-    def run_config(x, y, **kwargs):
+    def run_config(
+        input_01,
+        input_02,
+        structure,
+        **kwargs,
+    ):
         # This is a boring workflow because it just saves the input values
         # to our table. You can get much more creative with workflows though
-        new_entry = MyCustomTable2(
-            custom_column_01=x,
-            custom_column_02=y,
-        )
-        new_entry.save()
-
-        return new_entry.id
+        return {
+            "output_01": input_01 * 100,
+            "output_02": False,
+        }
 
 
 # -----------------------------------------------------------------------------
-# The example below will be especially helpful for VASP users
+# The example below will be helpful for VASP users
 # -----------------------------------------------------------------------------
 
 

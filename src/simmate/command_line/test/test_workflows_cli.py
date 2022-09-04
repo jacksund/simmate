@@ -38,7 +38,7 @@ def test_workflows_explore(command_line_runner):
     result = command_line_runner.invoke(
         workflows_app,
         ["explore"],
-        input="6\n2\n",  # gives 6 and then 2 for prompts
+        input="6\n2\n1\n",  # gives 6, 2, and 1 for prompts
     )
     assert result.exit_code == 0
 

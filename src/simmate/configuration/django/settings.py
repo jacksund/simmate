@@ -192,18 +192,38 @@ INSTALLED_APPS = [
     #   "debug_toolbar",  # django-debug-toolbar  # for debuging and profile-time info
 ]
 
-# We also check if the user has a "applications.yaml" file. In this file, the
+# We also check if the user has a "apps.yaml" file. In this file, the
 # user can provide extra apps to install for Django. We simply append these
-# to our list above
-APPLICATIONS_YAML = SIMMATE_DIRECTORY / "applications.yaml"
-if APPLICATIONS_YAML.exists():
-    with APPLICATIONS_YAML.open() as file:
-        # load the list of extra apps. Since this is really just one line for
-        # each, it is loaded as a single string separated by a space.
-        extra_apps = yaml.full_load(file).split()
+# to our list above.
+APPLICATIONS_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-apps.yaml"
+# create the file if it doesn't exist yet
+if not APPLICATIONS_YAML.exists():
+    with APPLICATIONS_YAML.open("w") as file:
+        file.write(
+            "# Here you can add any extra Simmate (or Django) apps to be loaded \n"
+            "# when Simmate starts. Be sure that your app is available in your \n"
+            "# python path! For example, if you add the following app: \n"
+            "#     mycustomapp.apps.MyCustomAppConfig \n"
+            "# then the the following line should also work in python: \n"
+            "#     from mycustomapp.apps import MyCustomAppConfig \n"
+            "# If this fails, make sure to re-read our custom-app tutorial. \n"
+        )
+# load apps that the user wants installed
+with APPLICATIONS_YAML.open() as file:
+    # load the list of extra apps.
+    extra_apps = yaml.full_load(file)
+
+    # We only load extra apps if the file isn't empty
+    if extra_apps:
+        # Since this is really just one line for each app, it is loaded as a
+        # single string separated by a space.
+        extra_apps = extra_apps.split()
+
         # now add each app to our list above so Django loads it.
         for app in extra_apps:
             INSTALLED_APPS.append(app)
+    else:
+        extra_apps = []
 
 # --------------------------------------------------------------------------------------
 

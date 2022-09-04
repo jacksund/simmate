@@ -128,6 +128,7 @@ nav:
             - Quickstart: getting_started/custom_tables_and_apps/quick_start.md
             - Creating a custom project: getting_started/custom_tables_and_apps/create_a_custom_app.md
             - Creating a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
+            - Using app workflows: getting_started/custom_tables_and_apps/using_app_workflows.md
         
         - Use a cloud database:
             - Quickstart: getting_started/use_a_cloud_database/quick_start.md

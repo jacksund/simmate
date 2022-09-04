@@ -541,7 +541,7 @@ class Workflow:
         is the same as `__doc__`. This attribute is only defined for beginners
         to python and for use in django templates for the website interface.
         """
-        return cls.__doc__
+        return cls.__doc__ or "No description provided"
 
     @classmethod
     @property
