@@ -31,6 +31,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - NEB workflow now accepts parameters to tune how distinct pathways are determined, including the max pathway length and cutoffs at 1D percolation.
 - add `MatplotlibFigure` and `PlotlyFigure` classes to help with writing output files and also implementing these figures in the website UI
 - update website to include workflow calculator types and add API links
+- custom projects and database tables are now registered with Simmate and a intro guide has been added
 
 **Refactors**
 - the `website.core_components.filters` module has been absorbed into the `DatabaseTable` class/module
