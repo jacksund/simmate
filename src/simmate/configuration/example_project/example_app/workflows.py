@@ -35,6 +35,15 @@ from simmate.workflow_engine import Workflow
 from .models import MyCustomTable1
 
 # -----------------------------------------------------------------------------
+# Make sure to list out all workflows that you want registered
+# -----------------------------------------------------------------------------
+
+__all__ = [
+    "Example__Python__MyExample1",
+    "Relaxation__Vasp__MyExample2",
+]
+
+# -----------------------------------------------------------------------------
 # Our first example shows off the basics
 # -----------------------------------------------------------------------------
 
@@ -44,14 +53,17 @@ class Example__Python__MyExample1(Workflow):
     database_table = MyCustomTable1
 
     @staticmethod
-    def run_config(input_parameter_01, input_parameter_02, **kwargs):
+    def run_config(
+        input_01,
+        input_02,
+        structure,
+        **kwargs,
+    ):
         # This is a boring workflow because it just saves the input values
         # to our table. You can get much more creative with workflows though
-        output_01 = input_parameter_01 * 100
-        output_02 = input_parameter_02 / 123
         return {
-            "custom_column_01": output_01,
-            "custom_column_02": output_02,
+            "output_01": input_01 * 100,
+            "output_02": False,
         }
 
 

@@ -222,6 +222,8 @@ with APPLICATIONS_YAML.open() as file:
         # now add each app to our list above so Django loads it.
         for app in extra_apps:
             INSTALLED_APPS.append(app)
+    else:
+        extra_apps = []
 
 # --------------------------------------------------------------------------------------
 

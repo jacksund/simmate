@@ -112,10 +112,6 @@ new_entry = MyCustomTable1.from_toolkit(structure=nacl)
 new_entry.save()
 ```
 
-!!! danger
-    Don't RUN THIS CODE
-    # Just read for understanding. We'll learn 
-
 !!! tip
     Manually filling your table with data is often not necessary. You can instead
     attach your database to a workflow, which will fill it with data automatically.
