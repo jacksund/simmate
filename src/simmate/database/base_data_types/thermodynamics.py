@@ -101,12 +101,12 @@ class Thermodynamics(DatabaseTable):
         # Given energy, this function builds the rest of the required fields
         # for this class as an object (or as a dictionary).
         data = dict(energy=energy) if energy else {}
-        
+
         # if a structure is present, we can update that information as well.
         if structure and energy:
-            epa_data = {"energy_per_atom":energy / structure.num_sites}
+            epa_data = {"energy_per_atom": energy / structure.num_sites}
             data.update(epa_data)
-        
+
         # OPTIMIZE: I try calculating these when each structure is added, but
         # this would be too slow. Instead, I have the user call the
         # update_all_stabilites method on a cycle.

@@ -201,10 +201,10 @@ class Structure(DatabaseTable):
         as_dict: bool = False,
         **kwargs,
     ):
-        
+
         if isinstance(structure, str):
             structure = ToolkitStructure.from_database_string(structure)
-        
+
         # if there isn't a structure, nothing is to be done.
         if not structure:
             return kwargs if as_dict else cls(**kwargs)

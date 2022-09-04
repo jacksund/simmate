@@ -18,11 +18,6 @@ from simmate.utilities import get_directory
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
-# TODO
-# StructurePrediction__Python__VariableTernaryComposition
-#   --> calls VariableBinaryComposition strategically
-#   --> might call FixedCompositionVariableNsites strategically too
-
 
 class StructurePrediction__Python__BinaryComposition(Workflow):
     """
@@ -193,9 +188,8 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
         #   3. results from smaller unitcells can help to speed up the larger
         #       compositional searches.
 
-
         for natoms in range(1, max_atoms + 1):
-            
+
             # for stage_number in range(1, 4) --> consider adding substages
 
             # Setting stop conditions for each search will be
@@ -203,22 +197,22 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
             # on one composition -- while simultaniously making sure we
             # searched a compositon enough.
             min_structures_exact = int(10 * natoms)
-            limit_best_survival = int(20 * natoms)
+            best_survival_cutoff = int(20 * natoms)
             max_structures = int(30 * natoms)
-            convergence_limit = 0.01  # 10 meV as looser convergence limit
-            
+            convergence_cutoff = 0.01  # 10 meV as looser convergence limit
+
             # OPTIMIZE: This code below is for printing out the cutoff limits
             # I keep this here for early development as we figure out ideal
             # stopping conditions.
             # for n in range(1, 10):
             #     min_structures_exact = int(10 * n)
-            #     limit_best_survival = int(10 * n)
+            #     best_survival_cutoff = int(10 * n)
             #     max_structures = int(25 * n)
-            #     # convergence_limit = 0.01
+            #     # convergence_cutoff = 0.01
             #     print(
             #         f"{n}\t{min_structures_exact}\t"
-            #         f"{limit_best_survival}\t{max_structures}"
-            #         # f"\t{convergence_limit}"
+            #         f"{best_survival_cutoff}\t{max_structures}"
+            #         # f"\t{convergence_cutoff}"
             #     )
 
             logging.info(f"Beginning compositional searches with natoms = {natoms}")
@@ -238,10 +232,10 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
                     subworkflow_name=subworkflow_name,
                     subworkflow_kwargs=subworkflow_kwargs,
                     min_structures_exact=min_structures_exact,
-                    limit_best_survival=limit_best_survival,
+                    best_survival_cutoff=best_survival_cutoff,
                     max_structures=max_structures,
                     directory=directory / composition.reduced_formula,
-                    convergence_limit=convergence_limit,
+                    convergence_cutoff=convergence_cutoff,
                     # Because we submitted all steady states above, we don't
                     # need the other workflows to do these anymore.
                     singleshot_sources=[],

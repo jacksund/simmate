@@ -56,6 +56,24 @@ if the angles between sites are symmetrically equivalent. (in Degrees)
 
 --------------------------
 
+## best_survival_cutoff
+For evolutionary searches, fixed compositions will be stopped when the best individual remains unbeaten for this number of new individuals. In order to absorb similar structures (e.g. identical structures but with minor energy differences), structures within the `convergence_cutoff` parameter (e.g. +1meV) are not considered when counting historical structures. This helps to prevent the search from continuing in cases where the search is likely already converged but making <0.1meV improvements. The default is typically set based on the number of atoms in the composition.
+
+=== "yaml"
+    ``` yaml
+    best_survival_cutoff: 100
+    ```
+=== "toml"
+    ``` toml
+    best_survival_cutoff = 100
+    ```
+=== "python"
+    ``` python
+    best_survival_cutoff = 100
+    ```
+
+--------------------------
+
 ## chemical_system
 The chemical system to be used in the analysis. This should be given as a string
 and in the format `Element1-Element2-Element3-...`. For example, `Na-Cl`, `Y-C`,
@@ -201,20 +219,20 @@ Whether to compress the `directory` to a zip file at the end of the run. After c
 
 --------------------------
 
-## convergence_limit
-For evolutionary searches, the search will be considered converged when the best structure is not changing by this amount (in eV). In order to officially signal the end of the search, the best structure must survive within this convergence limit for a specific number of new individuals -- this is controlled by the `limit_best_survival`. The default of 1meV is typically sufficient and does not need to be changed. More often, users should update `limit_best_survival` instead.
+## convergence_cutoff
+For evolutionary searches, the search will be considered converged when the best structure is not changing by this amount (in eV). In order to officially signal the end of the search, the best structure must survive within this convergence limit for a specific number of new individuals -- this is controlled by the `best_survival_cutoff`. The default of 1meV is typically sufficient and does not need to be changed. More often, users should update `best_survival_cutoff` instead.
 
 === "yaml"
     ``` yaml
-    convergence_limit: 0.005
+    convergence_cutoff: 0.005
     ```
 === "toml"
     ``` toml
-    convergence_limit = 0.005
+    convergence_cutoff = 0.005
     ```
 === "python"
     ``` python
-    convergence_limit = 0.005
+    convergence_cutoff = 0.005
     ```
 
 --------------------------
@@ -329,24 +347,6 @@ Whether the calculation is a restarted workflow run. Default is False. If set to
 
 --------------------------
 
-## limit_best_survival
-For evolutionary searches, fixed compositions will be stopped when the best individual remains unbeaten for this number of new individuals. In order to absorb similar structures (e.g. identical structures but with minor energy differences), structures within the `convergence_limit` parameter (e.g. +1meV) are not considered when counting historical structures. This helps to prevent the search from continuing in cases where the search is likely already converged but making <0.1meV improvements. The default is typically set based on the number of atoms in the composition.
-
-=== "yaml"
-    ``` yaml
-    limit_best_survival: 100
-    ```
-=== "toml"
-    ``` toml
-    limit_best_survival = 100
-    ```
-=== "python"
-    ``` python
-    limit_best_survival = 100
-    ```
-
---------------------------
-
 ## max_atoms
 For workflows that involve generating a supercell or random structure, this will be the maximum number of sites to allow in the generated structure(s). For example, an evolutionary search may set this to 10 atoms to limit the compositions & stoichiometries that are explored.
 
@@ -380,6 +380,12 @@ For workflows that generate new structures (and potentially run calculations on 
     ``` python
     max_structures = 100
     ```
+
+!!! warning
+    In `structure-prediction` workflows, `min_structure_exact` takes priority 
+    over this setting, so it is possible for your search to exceed your 
+    maximum number of structures. If you want `max_structures` to have absolute
+    control, you can set `min_structure_exact` to 0.
 
 --------------------------
 
@@ -995,6 +1001,17 @@ When submitting workflows via the `run_cloud` command, tags are 'labels' that he
 === "python"
     ``` python
     tags = ["my-tag-01", "my-tag-02"]
+    ```
+
+!!! warning
+    When you have a workflow that is submitting many smaller workflows (such as 
+    `structure-prediction` workflows), make sure you set the tags in the
+    `subworkflow_kwargs` settings:
+    ``` yaml
+    subworkflow_kwargs:
+        tags:
+            - my-tag-01
+            - my-tag-02
     ```
 
 --------------------------

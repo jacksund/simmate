@@ -28,8 +28,8 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         fitness_field: str = "energy_per_atom",
         max_structures: int = None,
         min_structures_exact: int = None,
-        limit_best_survival: int = None,
-        convergence_limit: float = 0.001,
+        best_survival_cutoff: int = None,
+        convergence_cutoff: float = 0.001,
         nfirst_generation: int = 15,
         nsteadystate: int = 40,
         singleshot_sources: list[str] = [],
@@ -48,7 +48,6 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         selector_kwargs: dict = {},
         validator_name: str = "PartialCrystalNNFingerprint",
         validator_kwargs: dict = {},
-        tags: list[str] = None,
         sleep_step: int = 60,
         directory: Path = None,
         write_summary_files: bool = True,
@@ -92,7 +91,7 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         n = composition.num_atoms
         min_structures_exact = min_structures_exact or max([int(30 * n), 100])
         max_structures = max_structures or max([int(n * 250 + n**2.75), 1500])
-        limit_best_survival = limit_best_survival or max([int(30 * n + n**2), 100])
+        best_survival_cutoff = best_survival_cutoff or max([int(30 * n + n**2), 100])
 
         #  Add the search entry to the DB.
         search_datatable = SearchDatatable(
@@ -102,15 +101,14 @@ class StructurePrediction__Python__FixedComposition(Workflow):
             fitness_field=fitness_field,
             max_structures=max_structures,
             min_structures_exact=min_structures_exact,
-            limit_best_survival=limit_best_survival,
-            convergence_limit=convergence_limit,
+            best_survival_cutoff=best_survival_cutoff,
+            convergence_cutoff=convergence_cutoff,
             nfirst_generation=nfirst_generation,
             nsteadystate=nsteadystate,
             selector_name=selector_name,
             selector_kwargs=selector_kwargs,
             validator_name=validator_name,
             validator_kwargs=validator_kwargs,
-            tags=tags,
             sleep_step=sleep_step,
         )
         search_datatable.save()

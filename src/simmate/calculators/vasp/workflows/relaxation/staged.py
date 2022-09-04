@@ -106,7 +106,6 @@ class Relaxation__Vasp__Staged(Workflow):
         }
         return final_result
 
-
     @classmethod
     def get_energy_series(cls, **filter_kwargs):
         directories = (
@@ -119,7 +118,7 @@ class Relaxation__Vasp__Staged(Workflow):
         for directory in directories:
             energy_series = []
             for subflow in cls.subworkflows:
-                query = cls.database_table.objects.filter(
+                query = subflow.database_table.objects.filter(
                     workflow_name=subflow.name_full,
                     directory__startswith=directory,
                     energy_per_atom__isnull=False,
@@ -131,7 +130,7 @@ class Relaxation__Vasp__Staged(Workflow):
                     energy_series.append(None)
             all_energy_series.append(energy_series)
 
-        return  all_energy_series
+        return all_energy_series
 
 
 class StagedSeriesConvergence(PlotlyFigure):
@@ -172,7 +171,7 @@ class StagedSeriesConvergence(PlotlyFigure):
 
             # Update xaxis properties
             figure.update_xaxes(
-                title_text=workflow.subworkflows[i + 1].name_full,
+                title_text=f"{workflow.subworkflows[i + 1].name_full}",
                 row=row,
                 col=col,
             )
@@ -182,7 +181,12 @@ class StagedSeriesConvergence(PlotlyFigure):
                 col=col,
             )
 
+        figure.update_layout(
+            title="Energy per atom (eV) comparison for each stage",
+            showlegend=False,
+        )
         return figure
+
 
 class StagedSeriesHistogram(PlotlyFigure):
     method_type = "classmethod"
@@ -205,22 +209,29 @@ class StagedSeriesHistogram(PlotlyFigure):
                     diffs.append(d)
 
             scatter = plotly_go.Histogram(
-                x=diffs, 
+                x=diffs,
                 name=(
-                f"{workflow.subworkflows[i].name_preset} "
-                f"--> {workflow.subworkflows[i+1].name_preset}"
+                    f"{workflow.subworkflows[i].name_full} "
+                    f"--> {workflow.subworkflows[i+1].name_full}"
                 ),
             )
             figure.add_trace(trace=scatter)
-        
+
         figure.update_layout(
-            barmode='overlay',
-            xaxis_title_text='delta Energy / atom',
-            yaxis_title_text='Structures (#)',
-            bargap=0.05, # gap between bars of adjacent location coordinates
+            barmode="overlay",
+            xaxis_title_text="Energy per atom change (eV)",
+            yaxis_title_text="Structures (#)",
+            bargap=0.05,
+            legend=dict(
+                yanchor="top",
+                y=0.99,
+                xanchor="left",
+                x=0.01,
+            ),
         )
-        
+
         return figure
+
 
 # register all plotting methods to the database table
 for _plot in [StagedSeriesConvergence, StagedSeriesHistogram]:

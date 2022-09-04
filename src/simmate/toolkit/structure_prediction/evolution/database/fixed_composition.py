@@ -42,10 +42,10 @@ class FixedCompositionSearch(DatabaseTable):
     # Other settings for the search
     min_structures_exact = table_column.IntegerField()
     max_structures = table_column.IntegerField()
-    limit_best_survival = table_column.IntegerField()
+    best_survival_cutoff = table_column.IntegerField()
     nfirst_generation = table_column.IntegerField()
     nsteadystate = table_column.IntegerField()
-    convergence_limit = table_column.FloatField()
+    convergence_cutoff = table_column.FloatField()
 
     # Key classes to use during the search
     selector_name = table_column.CharField(max_length=200)
@@ -56,20 +56,24 @@ class FixedCompositionSearch(DatabaseTable):
     # information about the singleshot_sources and steadystate_sources
     # are stored within the IndividualSources datatable
 
-    # Tags to submit the NewIndividual workflow with. Should be a list of strings
-    tags = table_column.JSONField()
-
     # the time to sleep between file writing and steady-state checks.
     sleep_step = table_column.FloatField()
 
     # disable the source column
     source = None
 
-    # TODO: maybe accept an input for an expected structure in order to allow
-    # creation of plots that show convergence vs. the expected. Will be very
+    # This is an optional an input for an expected structure in order to allow
+    # creation of plots that show convergence vs. the expected. This is very
     # useful benchmarking and when the user has a target structure that they
-    # hope to see.
-    # expected_structure = table_column.JSONField()
+    # hope to see. For now, this MUST a dictionary input (either pymatgen.as_dict()
+    # that points to another table entry because we don't want to use the
+    # Structure mix-in on this table (too many unecessary columns)
+    expected_structure = table_column.JSONField(default=dict)
+
+    #TODO:
+    #   parent_variable_nsite_searches
+    #   parent_binary_searches
+    #   parent_ternary_searches
 
     # -------------------------------------------------------------------------
     # Highest-level methods that run the overall search
@@ -105,7 +109,7 @@ class FixedCompositionSearch(DatabaseTable):
 
         # The next stop condition is based on how long we've have the same
         # "best" individual. If the number of new individuals calculated (without
-        # any becoming the new "best") is greater than limit_best_survival, then
+        # any becoming the new "best") is greater than best_survival_cutoff, then
         # we can stop the search.
         # grab the best individual for reference
         best = self.best_individual
@@ -115,7 +119,7 @@ class FixedCompositionSearch(DatabaseTable):
             return False
 
         # count the number of new individuals added AFTER the best one. If it is
-        # more than limit_best_survival, we stop the search.
+        # more than best_survival_cutoff, we stop the search.
         # Note, we look at all structures that have an energy_per_atom greater
         # than 1meV/atom higher than the best structure. The +1meV ensures
         # we aren't prolonging the calculation for insignificant changes in
@@ -124,13 +128,13 @@ class FixedCompositionSearch(DatabaseTable):
         # BUG: this filter needs to be updated to fitness_value and not
         # assume we are using energy_per_atom
         num_new_structures_since_best = self.individuals.filter(
-            energy_per_atom__gt=best.energy_per_atom + self.convergence_limit,
+            energy_per_atom__gt=best.energy_per_atom + self.convergence_cutoff,
             created_at__gte=best.created_at,
         ).count()
-        if num_new_structures_since_best > self.limit_best_survival:
+        if num_new_structures_since_best > self.best_survival_cutoff:
             logging.info(
                 "Best individual has not changed after "
-                f"{self.limit_best_survival} new individuals added."
+                f"{self.best_survival_cutoff} new individuals added."
             )
             return True
         # If we reached this point, then we haven't hit a stop condition yet!

@@ -10,7 +10,7 @@ from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition 
 from simmate.workflow_engine import Workflow
 
 
-class StructurePrediction__Python__VariableComposition(Workflow):
+class StructurePrediction__Python__VariableNsitesComposition(Workflow):
     """
     Runs an evolutionary search algorithm to predict the most stable structure
     of a specific composition but with variable number of sites in the unitcell.

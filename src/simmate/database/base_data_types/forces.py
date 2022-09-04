@@ -88,7 +88,7 @@ class Forces(DatabaseTable):
 
         if isinstance(structure, str):
             structure = ToolkitStructure.from_database_string(structure)
-        
+
         # TODO: in the future, this should accept an IonicStep toolkit object
         # or maybe Structure + Forces toolkit objects.
         site_data = (

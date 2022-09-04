@@ -6,5 +6,5 @@
 
 from .fixed_composition import StructurePrediction__Python__FixedComposition
 from .new_individual import StructurePrediction__Python__NewIndividual
-from .variable_composition import StructurePrediction__Python__VariableComposition
+from .variable_composition import StructurePrediction__Python__VariableNsitesComposition
 from .binary_composition import StructurePrediction__Python__BinaryComposition
