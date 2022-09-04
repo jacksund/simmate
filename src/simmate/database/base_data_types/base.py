@@ -386,8 +386,8 @@ class DatabaseTable(models.Model):
     """
     When writing output summaries, these columns will be ignored. This is useful
     if you have a column for storing raw data that isn't friendly to read in
-    the yaml format. 'structure_string' is an example of a field we'd want to
-    exclude.
+    the yaml format. 'structure' is an example of a field we'd want to
+    exclude because its not very readable and is available elsewhere.
     """
 
     # -------------------------------------------------------------------------

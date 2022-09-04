@@ -19,7 +19,7 @@ register = template.Library()
 def structure_to_url(structure):
     """
     Converts a toolkit Structure to a URL GET query. For example, a structure
-    would return "?structure_string='...'". This is useful for when we want
+    would return "?structure='...'". This is useful for when we want
     to pass a crystal structure directly from a URL -- which is what is
     done for our crystal structure viewer.
     """
@@ -27,7 +27,7 @@ def structure_to_url(structure):
     # if we are given a structure that is a database table instance, we simply
     # grab the structure string
     if isinstance(structure, DatabaseStructure):
-        structure_string = structure.structure_string
+        structure_string = structure.structure
     elif isinstance(structure, ToolkitStructure):
         # !!! This code should be located within a method on the toolkit class
         storage_format = "POSCAR" if structure.is_ordered else "CIF"

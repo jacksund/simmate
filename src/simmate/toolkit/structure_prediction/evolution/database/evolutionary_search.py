@@ -456,6 +456,8 @@ class FixedCompositionSearch(DatabaseTable):
     def write_summary(self, directory: Path):
         logging.info(f"Writing search summary to {directory}")
 
+        super().write_output_summary(directory=directory)
+
         # If the output fails to write, we have a non-critical issue that
         # doesn't affect the search. We therefore don't want to raise an
         # error here -- but instead warn the user and then continue the search
@@ -463,18 +465,25 @@ class FixedCompositionSearch(DatabaseTable):
             # calls all the key methods defined below
             best_cifs_directory = get_directory(directory / "best_structures_cifs")
             self.write_best_structures(100, best_cifs_directory)
-            self.write_individuals_completed(directory)
-            self.write_individuals_completed_full(directory)
-            self.write_best_individuals_history(directory)
-            self.write_individuals_incomplete(directory)
-            self.write_fitness_convergence_plot(directory)
-            self.write_fitness_distribution_plot(directory)
-            self.write_subworkflow_times_plot(directory)
+            self.write_individuals_completed(directory=directory)
+            self.write_individuals_completed_full(directory=directory)
+            self.write_best_individuals_history(directory=directory)
+            self.write_individuals_incomplete(directory=directory)
+            self.write_fitness_convergence_plot(directory=directory)
+            self.write_fitness_distribution_plot(directory=directory)
+            self.write_subworkflow_times_plot(directory=directory)
 
             # BUG: This is only for "relaxation.vasp.staged", which the assumed
             # workflow for now.
             composition = Composition(self.composition)
-            self.subworkflow.write_series_convergence_plot(
+            self.subworkflow.write_staged_series_convergence_plot(
+                directory=directory,
+                # See `individuals` method for why we use these filters
+                formula_reduced=composition.reduced_formula,
+                nsites__lte=composition.num_atoms,
+                energy_per_atom__isnull=False,
+            )
+            self.subworkflow.write_staged_series_histogram_plot(
                 directory=directory,
                 # See `individuals` method for why we use these filters
                 formula_reduced=composition.reduced_formula,
@@ -559,7 +568,7 @@ class FixedCompositionSearch(DatabaseTable):
                 )
 
         best = self.get_nbest_indiviudals(nbest)
-        structures = best.only("structure_string", "id").to_toolkit()
+        structures = best.only("structure", "id").to_toolkit()
         for rank, structure in enumerate(structures):
             rank_cleaned = str(rank).zfill(2)  # converts 1 to 01
             structure_filename = (
@@ -570,8 +579,8 @@ class FixedCompositionSearch(DatabaseTable):
 
     def write_individuals_completed_full(self, directory: Path):
         columns = self.individuals_datatable.get_column_names()
-        columns.remove("structure_string")
-        df = self.individuals_completed.defer("structure_string").to_dataframe(columns)
+        columns.remove("structure")
+        df = self.individuals_completed.defer("structure").to_dataframe(columns)
         csv_filename = directory / "individuals_completed__ALLDATA.csv"
         df.to_csv(csv_filename)
 
@@ -740,7 +749,7 @@ class Correctness(PlotlyFigure):
         from simmate.toolkit import Structure
 
         structures_dataframe["structure"] = [
-            Structure.from_str(s.structure_string, fmt="POSCAR")
+            Structure.from_str(s.structure, fmt="POSCAR")
             for _, s in structures_dataframe.iterrows()
         ]
 
@@ -822,5 +831,10 @@ class FitnessDistribution(PlotlyFigure):
 
 
 # register all plotting methods to the database table
-for _plot in [FitnessConvergence, Correctness, FitnessDistribution]:
+for _plot in [
+    FitnessConvergence,
+    Correctness,
+    FitnessDistribution,
+    SubworkflowTimes,
+]:
     _plot.register_to_class(FixedCompositionSearch)

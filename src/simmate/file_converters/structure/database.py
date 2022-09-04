@@ -144,7 +144,7 @@ class DatabaseAdapter:
         """
         # we just call the the other method of this adapter
         structure_toolkit = DatabaseAdapter.get_toolkit_from_database_string(
-            structure_object.structure_string
+            structure_object.structure
         )
 
         # For ease of access, we also link the calculation database entry
@@ -156,7 +156,7 @@ class DatabaseAdapter:
     def get_toolkit_from_database_string(structure_string: str) -> ToolkitStructure:
         """
         Loads a toolkit structure from a string -- specifically strings that
-        are stored in the structure_string column for
+        are stored in the 'structure' column for
         simmate.database.base_data_types.Structure.
         """
         # Dev note: this method should be merged with the Toolkit.from_str method.

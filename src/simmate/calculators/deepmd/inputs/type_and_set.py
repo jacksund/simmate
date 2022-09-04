@@ -100,7 +100,7 @@ class DeepmdDataset:
         # we need to iterate through the dataframe rows.
         # See https://github.com/chrisdev/django-pandas/issues/138 for issue
         structures_dataframe["structure"] = [
-            Structure.from_str(s.structure_string, fmt="POSCAR")
+            Structure.from_str(s.structure, fmt="POSCAR")
             for _, s in structures_dataframe.iterrows()
         ]
 

@@ -193,7 +193,33 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
         #   3. results from smaller unitcells can help to speed up the larger
         #       compositional searches.
 
+
         for natoms in range(1, max_atoms + 1):
+            
+            # for stage_number in range(1, 4) --> consider adding substages
+
+            # Setting stop conditions for each search will be
+            # essential in ensure we don't waste too much calculation time
+            # on one composition -- while simultaniously making sure we
+            # searched a compositon enough.
+            min_structures_exact = int(10 * natoms)
+            limit_best_survival = int(20 * natoms)
+            max_structures = int(30 * natoms)
+            convergence_limit = 0.01  # 10 meV as looser convergence limit
+            
+            # OPTIMIZE: This code below is for printing out the cutoff limits
+            # I keep this here for early development as we figure out ideal
+            # stopping conditions.
+            # for n in range(1, 10):
+            #     min_structures_exact = int(10 * n)
+            #     limit_best_survival = int(10 * n)
+            #     max_structures = int(25 * n)
+            #     # convergence_limit = 0.01
+            #     print(
+            #         f"{n}\t{min_structures_exact}\t"
+            #         f"{limit_best_survival}\t{max_structures}"
+            #         # f"\t{convergence_limit}"
+            #     )
 
             logging.info(f"Beginning compositional searches with natoms = {natoms}")
             current_compositions = [c for c in compositions if c.num_atoms == natoms]
@@ -207,27 +233,6 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
                     logging.warn(f"Skipping single-element composition {composition}")
                     continue
 
-                # OPTIMIZE: Setting stop conditions for each search will be
-                # essential in ensure we don't waste too much calculation time
-                # on one composition -- while simultaniously making sure we
-                # searched a compositon enough.
-                n = composition.num_atoms
-                min_structures_exact = int(10 * n)
-                limit_best_survival = int(20 * n)
-                max_structures = int(30 * n)
-
-                # NOTES: This code below is for printing out the cutoff limits
-                # I keep this here for early development as we figure out ideal
-                # stopping conditions.
-                # for n in range(1, 10):
-                #     min_structures_exact = int(10 * n)
-                #     limit_best_survival = int(10 * n)
-                #     max_structures = int(30 * n)
-                #     print(
-                #         f"{n}\t{min_structures_exact}\t"
-                #         f"{limit_best_survival}\t{max_structures}"
-                #     )
-
                 cls.fixed_comp_workflow.run(
                     composition=composition,
                     subworkflow_name=subworkflow_name,
@@ -236,6 +241,7 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
                     limit_best_survival=limit_best_survival,
                     max_structures=max_structures,
                     directory=directory / composition.reduced_formula,
+                    convergence_limit=convergence_limit,
                     # Because we submitted all steady states above, we don't
                     # need the other workflows to do these anymore.
                     singleshot_sources=[],

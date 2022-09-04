@@ -139,7 +139,7 @@ class PartialCrystalNNFingerprint(Validator):
         # now grab all the new structures!
         new_structures = (
             self.structure_pool_queryset.filter(created_at__gte=last_update_safe)
-            .only("structure_string")
+            .only("structure")
             .to_toolkit()
         )
 

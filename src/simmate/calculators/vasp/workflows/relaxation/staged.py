@@ -107,19 +107,10 @@ class Relaxation__Vasp__Staged(Workflow):
         return final_result
 
 
-class StagedSeriesConvergence(PlotlyFigure):
-    method_type = "classmethod"
-
-    def get_plot(
-        workflow,  # Relaxation__Vasp__Staged
-        **filter_kwargs,
-    ):
-
+    @classmethod
+    def get_energy_series(cls, **filter_kwargs):
         directories = (
-            workflow.database_table.objects.filter(
-                workflow_name=workflow.name_full,
-                **filter_kwargs,
-            )
+            cls.all_results.filter(**filter_kwargs)
             .values_list("directory", flat=True)
             .all()
         )
@@ -127,8 +118,8 @@ class StagedSeriesConvergence(PlotlyFigure):
         all_energy_series = []
         for directory in directories:
             energy_series = []
-            for subflow in workflow.subworkflows:
-                query = subflow.database_table.objects.filter(
+            for subflow in cls.subworkflows:
+                query = cls.database_table.objects.filter(
                     workflow_name=subflow.name_full,
                     directory__startswith=directory,
                     energy_per_atom__isnull=False,
@@ -140,7 +131,17 @@ class StagedSeriesConvergence(PlotlyFigure):
                     energy_series.append(None)
             all_energy_series.append(energy_series)
 
-        # -------
+        return  all_energy_series
+
+
+class StagedSeriesConvergence(PlotlyFigure):
+    method_type = "classmethod"
+
+    def get_plot(
+        workflow,  # Relaxation__Vasp__Staged
+        **filter_kwargs,
+    ):
+        all_energy_series = workflow.get_energy_series(**filter_kwargs)
 
         figure = make_subplots(
             rows=math.ceil((len(workflow.subworkflows) - 1) / 3),
@@ -183,7 +184,44 @@ class StagedSeriesConvergence(PlotlyFigure):
 
         return figure
 
+class StagedSeriesHistogram(PlotlyFigure):
+    method_type = "classmethod"
+
+    def get_plot(
+        workflow,  # Relaxation__Vasp__Staged
+        **filter_kwargs,
+    ):
+
+        all_energy_series = workflow.get_energy_series(**filter_kwargs)
+
+        figure = plotly_go.Figure()
+
+        for i in range(len(workflow.subworkflows) - 1):
+
+            diffs = []
+            for energy_series in all_energy_series:
+                if energy_series[i + 1] and energy_series[i]:
+                    d = energy_series[i + 1] - energy_series[i]
+                    diffs.append(d)
+
+            scatter = plotly_go.Histogram(
+                x=diffs, 
+                name=(
+                f"{workflow.subworkflows[i].name_preset} "
+                f"--> {workflow.subworkflows[i+1].name_preset}"
+                ),
+            )
+            figure.add_trace(trace=scatter)
+        
+        figure.update_layout(
+            barmode='overlay',
+            xaxis_title_text='delta Energy / atom',
+            yaxis_title_text='Structures (#)',
+            bargap=0.05, # gap between bars of adjacent location coordinates
+        )
+        
+        return figure
 
 # register all plotting methods to the database table
-for _plot in [StagedSeriesConvergence]:
+for _plot in [StagedSeriesConvergence, StagedSeriesHistogram]:
     _plot.register_to_class(Relaxation__Vasp__Staged)

@@ -865,10 +865,6 @@ class Workflow:
             if parameter in table_columns:
                 parameters_to_register.append(parameter)
 
-        # check special cases where input parameter doesn't match to a column name
-        if "structure_string" in table_columns:
-            parameters_to_register.append("structure")
-
         # put in alphabetical order for consistent results
         parameters_to_register.sort()
 

@@ -39,7 +39,7 @@ For these, you should see an output similar too...
 ``` json
 {
     "id": "mp-1",
-    "structure_string": "...(truncated for clarity)",
+    "structure": "...(hidden for clarity)",
     "nsites": 1,
     "nelements": 1,
     "elements": ["Cs"],

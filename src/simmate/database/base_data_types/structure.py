@@ -12,9 +12,9 @@ class Structure(DatabaseTable):
     class Meta:
         abstract = True
 
-    exclude_from_summary = ["structure_string", "elements"]
+    exclude_from_summary = ["structure", "elements"]
 
-    archive_fields = ["structure_string"]
+    archive_fields = ["structure"]
 
     api_filters = dict(
         nsites=["range"],
@@ -47,7 +47,7 @@ class Structure(DatabaseTable):
         ),
     )
 
-    structure_string = table_column.TextField(blank=True, null=True)
+    structure = table_column.TextField(blank=True, null=True)
     """
     The core structure information, which is written to a string and in a 
     compressed format using the `from_toolkit` method. To get back to our toolkit
@@ -197,10 +197,14 @@ class Structure(DatabaseTable):
     @classmethod
     def _from_toolkit(
         cls,
-        structure: ToolkitStructure = None,
+        structure: ToolkitStructure | str = None,
         as_dict: bool = False,
         **kwargs,
     ):
+        
+        if isinstance(structure, str):
+            structure = ToolkitStructure.from_database_string(structure)
+        
         # if there isn't a structure, nothing is to be done.
         if not structure:
             return kwargs if as_dict else cls(**kwargs)
@@ -233,7 +237,7 @@ class Structure(DatabaseTable):
         # object, but will NOT save it to the database yet. The kwargs input
         # is only if you inherit from this class and add extra fields.
         structure_dict = dict(
-            structure_string=structure.to(fmt=storage_format),
+            structure=structure.to(fmt=storage_format),
             nsites=structure.num_sites,
             nelements=len(structure.composition),
             elements=[str(e) for e in structure.composition.elements],

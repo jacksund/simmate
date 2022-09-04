@@ -76,7 +76,7 @@ class Forces(DatabaseTable):
     @classmethod
     def _from_toolkit(
         cls,
-        structure: ToolkitStructure = None,
+        structure: ToolkitStructure | str = None,
         site_forces=None,
         lattice_stress=None,
         as_dict=False,
@@ -86,6 +86,9 @@ class Forces(DatabaseTable):
         the required fields for this class as a dictionary.
         """
 
+        if isinstance(structure, str):
+            structure = ToolkitStructure.from_database_string(structure)
+        
         # TODO: in the future, this should accept an IonicStep toolkit object
         # or maybe Structure + Forces toolkit objects.
         site_data = (
