@@ -8,4 +8,5 @@ class FixedCompositionSearch(DatabaseTable):
     This database table holds all of the information related to an evolutionary
     search and also has convient methods to analyze the data + write output files.
     """
+
     pass

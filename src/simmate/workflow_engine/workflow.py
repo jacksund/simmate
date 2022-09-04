@@ -585,7 +585,42 @@ class Workflow:
         Prints a list of all the parameter names for this workflow.
         """
         # use yaml to make the printout pretty (no quotes and separate lines)
-        print(yaml.dump(cls.parameter_names))
+        print("REQUIRED PARAMETERS")
+        print("--------------------")
+        print(yaml.dump(cls.parameter_names_required))
+
+        print("OPTIONAL PARAMETERS (+ their defaults):")
+        print("---------------------------------------")
+        print(yaml.dump(cls.parameter_defaults))
+        print("*** 'null' indicates the parameter is set with advanced logic\n")
+
+    @classmethod
+    @property
+    def parameter_defaults(cls):
+        """
+        Inspect the run_config and other methods to see what the default
+        value for an input parameter is.
+        """
+        defaults = {}
+        for method in cls._parameter_methods:
+            sig = inspect.signature(getattr(cls, method))
+            for parameter_name in sig.parameters.keys():
+                if parameter_name in cls.parameter_names:
+                    value = sig.parameters[parameter_name]
+                    if value.default == value.empty:
+                        continue  # dont save if the value is none
+                    defaults.update({parameter_name: value.default})
+
+        # For a series of parameters, we want their default values to be loaded
+        # from class attributes if they are not set. To do this, we first check
+        # if the parameter is set in our kwargs dictionary and check if the
+        # value is set to "None". If it is, then we change to the value set as
+        # the class attribute.
+        for parameter_name in cls.parameter_names:
+            if hasattr(cls, parameter_name):
+                defaults[parameter_name] = getattr(cls, parameter_name)
+
+        return defaults
 
     @classmethod
     def get_config(cls):
@@ -658,7 +693,6 @@ class Workflow:
         # STEP 1: clean parameters
 
         parameters_cleaned = cls._deserialize_parameters(**parameters)
-
         # ---------------------------------------------------------------------
 
         # STEP 1b: Determine the "primary" input to use for setting the
@@ -796,7 +830,8 @@ class Workflow:
         # workflow run. This allows future users to reproduce the results if
         # desired -- and it also allows us to load old results into a database.
         input_summary = dict(
-            workflow_name=cls.name_full,
+            _WORKFLOW_NAME_=cls.name_full,
+            _WORKFLOW_VERSION_=cls.version,
             **parameters_serialized,
         )
 
@@ -888,7 +923,7 @@ class Workflow:
             key: kwargs.get(key, None) for key in cls._parameters_to_register
         }
         register_kwargs_cleaned = cls._deserialize_parameters(
-            add_defaults_from_attr=False, **register_kwargs
+            add_defaults=False, **register_kwargs
         )
 
         # SPECIAL CASE: The exception to the above is with SOURCE, which needs
@@ -921,6 +956,18 @@ class Workflow:
     # -------------------------------------------------------------------------
     # Methods that hanlde serialization and deserialization of input parameters.
     # -------------------------------------------------------------------------
+
+    @classmethod
+    def _update_with_defaults(cls, parameter_dict: dict) -> dict:
+        """
+        updates a dictoinary default input parameters if they were provided
+        """
+        for parameter_name, default_value in cls.parameter_defaults.items():
+            if (
+                parameter_dict.get(parameter_name, None) is None
+                and default_value is not None
+            ):
+                parameter_dict[parameter_name] = default_value
 
     @classmethod
     def _serialize_parameters(cls, **parameters) -> dict:
@@ -987,7 +1034,7 @@ class Workflow:
     @classmethod
     def _deserialize_parameters(
         cls,
-        add_defaults_from_attr: bool = True,
+        add_defaults: bool = True,
         **parameters,
     ) -> dict:
         """
@@ -1021,15 +1068,10 @@ class Workflow:
             return parameters_cleaned
         #######
 
-        # For a series of parameters, we want their default values to be loaded
-        # from class attributes if they are not set. To do this, we first check
-        # if the parameter is set in our kwargs dictionary and check if the
-        # value is set to "None". If it is, then we change to the value set as
-        # the class attribute.
-        if add_defaults_from_attr:
-            for parameter in cls.parameter_names:
-                if parameters.get(parameter, None) is None and hasattr(cls, parameter):
-                    parameters_cleaned[parameter] = getattr(cls, parameter)
+        # We populate this dictionary using the default input parameters if
+        # they were provided.
+        if add_defaults:
+            cls._update_with_defaults(parameters_cleaned)
 
         # The remaining checks look to intialize input to toolkit objects using
         # the from_dynamic methods.

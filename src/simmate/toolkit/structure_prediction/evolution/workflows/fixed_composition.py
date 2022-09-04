@@ -4,7 +4,7 @@ import logging
 import time
 from pathlib import Path
 
-from simmate.database.workflow_results import FixedCompositionSearch as SearchDatatable
+from simmate.database.workflow_results import FixedCompositionSearch
 from simmate.toolkit import Composition
 from simmate.workflow_engine import Workflow
 
@@ -15,13 +15,11 @@ class StructurePrediction__Python__FixedComposition(Workflow):
     number of sites. (e.g. Ca2N or Na4Cl4)
     """
 
-    use_database = False
-    # consider making a calculation table so that the first step of saving
-    # Evolutionary Search is done automatically. It will also ease the
-    # tracking of output files when many fixed compositions are submitted.
+    database_table = FixedCompositionSearch
 
-    @staticmethod
+    @classmethod
     def run_config(
+        cls,
         composition: str | Composition,
         subworkflow_name: str | Workflow = "relaxation.vasp.staged",
         subworkflow_kwargs: dict = {},
@@ -33,17 +31,17 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         nfirst_generation: int = 15,
         nsteadystate: int = 40,
         singleshot_sources: list[str] = [],
-        steadystate_sources: list[tuple[float, str]] = [
-            (0.30, "RandomSymStructure"),
-            (0.30, "from_ase.Heredity"),
-            (0.10, "from_ase.SoftMutation"),
-            (0.05, "from_ase.MirrorMutation"),
-            (0.05, "from_ase.LatticeStrain"),
-            (0.05, "from_ase.RotationalMutation"),
-            (0.05, "from_ase.AtomicPermutation"),
-            (0.05, "from_ase.CoordinatePerturbation"),
-            (0.05, "ExtremeSymmetry"),
-        ],
+        steadystate_sources: dict = {
+            "RandomSymStructure": 0.30,
+            "from_ase.Heredity": 0.30,
+            "from_ase.SoftMutation": 0.10,
+            "from_ase.MirrorMutation": 0.05,
+            "from_ase.LatticeStrain": 0.05,
+            "from_ase.RotationalMutation": 0.05,
+            "from_ase.AtomicPermutation": 0.05,
+            "from_ase.CoordinatePerturbation": 0.05,
+            "ExtremeSymmetry": 0.05,
+        },
         selector_name: str = "TruncatedSelection",
         selector_kwargs: dict = {},
         validator_name: str = "PartialCrystalNNFingerprint",
@@ -51,11 +49,9 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         sleep_step: int = 60,
         directory: Path = None,
         write_summary_files: bool = True,
+        run_id: str = None,
         **kwargs,
     ):
-        """
-        Sets up the search engine and its settings
-        """
 
         #######################################################################
         # TODO: Check if there is an existing search and grab it if so.
@@ -79,40 +75,29 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         #     if source not in past_singleshot_sources
         # ]
         # BUG: what if I want to rerun any of these even though its been ran before?
-        # An example would be rerunning substituitions when new structures are available
         #######################################################################
 
         logging.info(f"Setting up evolutionary search for {composition}")
 
+        # grab the calculation table linked to this workflow run
+        search_datatable = cls.database_table.objects.get(run_id=run_id)
+
         # Convergence criteria and stop conditions can be set based on the
-        # number of atoms in the composition. Here we try to set reasons criteria
+        # number of atoms in the composition. Here we try to set reasonable criteria
         # for these if a user-input was not given. Note we are using max(..., N)
         # to set an absolute minimum for these.
         n = composition.num_atoms
         min_structures_exact = min_structures_exact or max([int(30 * n), 100])
         max_structures = max_structures or max([int(n * 250 + n**2.75), 1500])
         best_survival_cutoff = best_survival_cutoff or max([int(30 * n + n**2), 100])
-
-        #  Add the search entry to the DB.
-        search_datatable = SearchDatatable(
-            composition=composition.formula,
-            subworkflow_name=subworkflow_name,
-            subworkflow_kwargs=subworkflow_kwargs,
-            fitness_field=fitness_field,
-            max_structures=max_structures,
+        search_datatable.update_from_fields(
             min_structures_exact=min_structures_exact,
-            best_survival_cutoff=best_survival_cutoff,
-            convergence_cutoff=convergence_cutoff,
-            nfirst_generation=nfirst_generation,
-            nsteadystate=nsteadystate,
-            selector_name=selector_name,
-            selector_kwargs=selector_kwargs,
-            validator_name=validator_name,
-            validator_kwargs=validator_kwargs,
-            sleep_step=sleep_step,
+            max_structures=max_structures,
+            best_survival_cutof=best_survival_cutoff,
         )
-        search_datatable.save()
 
+        # sometimes the conditions are already met by a previous search so we
+        # check for this up front.
         if search_datatable.check_stop_condition():
             logging.info("Looks like this search was already ran by someone else!")
             return
@@ -122,10 +107,6 @@ class StructurePrediction__Python__FixedComposition(Workflow):
         # new searches/compositions, this will submit all individuals from the
         # single shot sources before we even start the steady-state runs
         search_datatable._check_singleshot_sources(directory)
-
-        # Initialize the steady state sources by saving their config information
-        # to the database.
-        search_datatable._init_steadystate_sources_to_db(steadystate_sources)
 
         logging.info("Finished setup")
         logging.info(

@@ -9,7 +9,7 @@ import pandas
 import plotly.graph_objects as plotly_go
 from rich.progress import track
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.base_data_types import Calculation, table_column
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.structure_prediction import (
     get_known_structures,
@@ -22,7 +22,7 @@ from simmate.visualization.plotting import PlotlyFigure
 from simmate.workflow_engine.execution import WorkItem
 
 
-class FixedCompositionSearch(DatabaseTable):
+class FixedCompositionSearch(Calculation):
     """
     This database table holds all of the information related to an evolutionary
     search and also has convient methods to analyze the data + write output files.
@@ -32,35 +32,32 @@ class FixedCompositionSearch(DatabaseTable):
         app_label = "workflows"
 
     # !!! consider making a composition-based mixin
-    composition = table_column.CharField(max_length=50)
+    composition = table_column.CharField(max_length=50, null=True, blank=True)
 
     # Import path for the workflow and the database table of results
-    subworkflow_name = table_column.CharField(max_length=200)
-    subworkflow_kwargs = table_column.JSONField(default=dict)
-    fitness_field = table_column.CharField(max_length=200)
+    subworkflow_name = table_column.CharField(max_length=200, null=True, blank=True)
+    subworkflow_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
+    fitness_field = table_column.CharField(max_length=200, null=True, blank=True)
 
     # Other settings for the search
-    min_structures_exact = table_column.IntegerField()
-    max_structures = table_column.IntegerField()
-    best_survival_cutoff = table_column.IntegerField()
-    nfirst_generation = table_column.IntegerField()
-    nsteadystate = table_column.IntegerField()
-    convergence_cutoff = table_column.FloatField()
+    min_structures_exact = table_column.IntegerField(null=True, blank=True)
+    max_structures = table_column.IntegerField(null=True, blank=True)
+    best_survival_cutoff = table_column.IntegerField(null=True, blank=True)
+    nfirst_generation = table_column.IntegerField(null=True, blank=True)
+    nsteadystate = table_column.IntegerField(null=True, blank=True)
+    convergence_cutoff = table_column.FloatField(null=True, blank=True)
 
     # Key classes to use during the search
-    selector_name = table_column.CharField(max_length=200)
-    selector_kwargs = table_column.JSONField(default=dict)
-    validator_name = table_column.CharField(max_length=200)
-    validator_kwargs = table_column.JSONField(default=dict)
+    selector_name = table_column.CharField(max_length=200, null=True, blank=True)
+    selector_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
+    validator_name = table_column.CharField(max_length=200, null=True, blank=True)
+    validator_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
     # stop_condition_name ---> assumed for now
     # information about the singleshot_sources and steadystate_sources
     # are stored within the IndividualSources datatable
 
     # the time to sleep between file writing and steady-state checks.
-    sleep_step = table_column.FloatField()
-
-    # disable the source column
-    source = None
+    sleep_step = table_column.FloatField(null=True, blank=True)
 
     # This is an optional an input for an expected structure in order to allow
     # creation of plots that show convergence vs. the expected. This is very
@@ -70,10 +67,40 @@ class FixedCompositionSearch(DatabaseTable):
     # Structure mix-in on this table (too many unecessary columns)
     expected_structure = table_column.JSONField(default=dict)
 
-    #TODO:
+    # TODO:
     #   parent_variable_nsite_searches
     #   parent_binary_searches
     #   parent_ternary_searches
+
+    # -------------------------------------------------------------------------
+    # Setup of the database tables at the beginning of a new search
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def from_toolkit(
+        cls,
+        steadystate_sources: dict = None,
+        as_dict: bool = False,
+        **kwargs,
+    ):
+        breakpoint()
+
+        # Initialize the steady state sources by saving their config information
+        # to the database.
+        if steadystate_sources and not as_dict:
+            search = cls(**kwargs)
+            search.save()  # we must save up front because of relations
+            search._init_steadystate_sources_to_db(steadystate_sources)
+            return search
+
+        elif not steadystate_sources:
+            return kwargs if as_dict else cls(**kwargs)
+
+        if steadystate_sources and as_dict:
+            raise Exception(
+                "steadystate_sources cannot be set in an as_dict mannor because"
+                "it points to a related database table"
+            )
 
     # -------------------------------------------------------------------------
     # Highest-level methods that run the overall search

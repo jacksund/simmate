@@ -33,6 +33,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - update website to include workflow calculator types and add API links
 - custom projects and database tables are now registered with Simmate and a intro guide has been added
 - continued updates for `structure-prediction` workflows
+- add inspection of methods for default input values and display them in metadata
 
 **Refactors**
 - the `website.core_components.filters` module has been absorbed into the `DatabaseTable` class/module
