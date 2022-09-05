@@ -30,7 +30,10 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         convergence_cutoff: float = 0.001,
         nfirst_generation: int = 15,
         nsteadystate: int = 40,
-        singleshot_sources: list[str] = [],
+        singleshot_sources: list[str] = [
+            "from_third_parties",
+            "from_prototypes",
+        ],
         steadystate_sources: dict = {
             "RandomSymStructure": 0.30,
             "from_ase.Heredity": 0.30,
@@ -44,8 +47,12 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         },
         selector_name: str = "TruncatedSelection",
         selector_kwargs: dict = {},
-        validator_name: str = "PartialCrystalNNFingerprint",
-        validator_kwargs: dict = {},
+        validator_name: str = "PartialRdfFingerprint",
+        validator_kwargs: dict = {
+            "distance_tolerance": 0.001,
+            "cutoff": 10.0,
+            "bin_size": 0.1,
+        },
         sleep_step: int = 60,
         directory: Path = None,
         write_summary_files: bool = True,
@@ -93,7 +100,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         search_datatable.update_from_fields(
             min_structures_exact=min_structures_exact,
             max_structures=max_structures,
-            best_survival_cutof=best_survival_cutoff,
+            best_survival_cutoff=best_survival_cutoff,
         )
 
         # sometimes the conditions are already met by a previous search so we

@@ -4,6 +4,9 @@ import logging
 from pathlib import Path
 
 from simmate.toolkit import Composition
+from simmate.toolkit.structure_prediction.evolution.database.fixed_composition import (
+    VariableNsitesCompositionSearch,
+)
 from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (
     StructurePrediction__Toolkit__FixedComposition,
 )
@@ -18,7 +21,7 @@ class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):
     For example, this would be Ca2N and up to 12 atoms (Ca8N4).
     """
 
-    use_database = False
+    database_table = VariableNsitesCompositionSearch
 
     fixed_comp_workflow = StructurePrediction__Toolkit__FixedComposition
 

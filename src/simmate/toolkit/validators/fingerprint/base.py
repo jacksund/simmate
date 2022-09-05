@@ -37,7 +37,7 @@ class FingerprintValidator(Validator):
         # like 0.5 might be a better choice for finding a truly unique structure
         self.distance_tolerance = distance_tolerance
 
-        self.add_unique_to_pool = add_unique_to_pool()
+        self.add_unique_to_pool = add_unique_to_pool
 
         # setup featurizer with the given composition
         self.featurizer = self.get_featurizer(**kwargs)
@@ -108,19 +108,21 @@ class FingerprintValidator(Validator):
             if self.comparison_mode == "linalg_norm":
                 distance = numpy.linalg.norm(fingerprint1 - fingerprint2)
             elif self.comparison_mode == "cos":
-                distance = scipy.spatial.distance.cosine(fingerprint1 - fingerprint2)
+                distance = scipy.spatial.distance.cosine(fingerprint1, fingerprint2)
             elif self.comparison_mode == "custom":
                 distance = self.get_fingerprint_distance(fingerprint1, fingerprint2)
             else:
                 raise NotImplementedError("Unknown comparison_mode provided.")
 
+            # and determine if we have a match
             if distance < self.distance_tolerance:
-                # we can end the whole function as soon as one structure is deemed too similar
+                # we can end the whole function as soon as one structure is
+                # deemed too similar
                 return False
             else:
                 continue
         # If we make it through all structures and no distance is below the
-        # tolerance, we have a new and unique structure!
+        # tolerance, then we have a new and unique structure!
 
         # add this new structure to the database if it was requested.
         if self.add_unique_to_pool:

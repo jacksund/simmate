@@ -17,6 +17,7 @@ from simmate.toolkit.structure_prediction import (
     get_structures_from_substitution_of_known,
 )
 from simmate.toolkit.structure_prediction.evolution.database import SteadystateSource
+from simmate.toolkit.validators import fingerprint as validator_module
 from simmate.utilities import get_directory
 from simmate.visualization.plotting import PlotlyFigure
 from simmate.workflow_engine.execution import WorkItem
@@ -52,9 +53,10 @@ class FixedCompositionSearch(Calculation):
     selector_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
     validator_name = table_column.CharField(max_length=200, null=True, blank=True)
     validator_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
+    singleshot_sources = table_column.JSONField(default=list, null=True, blank=True)
     # stop_condition_name ---> assumed for now
-    # information about the singleshot_sources and steadystate_sources
-    # are stored within the IndividualSources datatable
+    # information about the steadystate_sources are stored within 
+    # the SteadstateSource datatable
 
     # the time to sleep between file writing and steady-state checks.
     sleep_step = table_column.FloatField(null=True, blank=True)
@@ -551,17 +553,14 @@ class FixedCompositionSearch(Calculation):
         # Initialize the fingerprint database
         # For this we need to grab all previously calculated structures of this
         # compositon too pass in too.
-        import logging
 
-        from simmate.toolkit import Composition
-        from simmate.toolkit.validators.fingerprint.pcrystalnn import (
-            PartialCrystalNNFingerprint,
-        )
+        validator_class = getattr(validator_module, self.validator_name)
 
         logging.info("Generating fingerprints for past structures...")
-        fingerprint_validator = PartialCrystalNNFingerprint(
+        fingerprint_validator = validator_class(
             composition=Composition(self.composition),
             structure_pool=self.individuals,
+            **self.validator_kwargs,
         )
         logging.info("Done generating fingerprints.")
 
