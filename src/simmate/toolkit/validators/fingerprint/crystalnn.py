@@ -2,26 +2,20 @@
 
 import numpy as np
 from matminer.featurizers.site import CrystalNNFingerprint as cnnf
-
-#!!! is it faster to import these all at once?
-from matminer.featurizers.structure import PartialRadialDistributionFunction as prdf
-from matminer.featurizers.structure import RadialDistributionFunction as rdf
 from matminer.featurizers.structure import SiteStatsFingerprint as ssf
 
 
-#!!! CHANGE TO COS DISTANCE
-class PartialRDFFingerprint:
+class CrystalNNFingerprint:
 
     # requires matminer code
     # see https://materialsproject.org/docs/structuresimilarity
 
     def __init__(
         self,
-        composition,
         on_fail,
         max_fails,
-        cutoff=20.0,
-        bin_size=0.1,  #!! consider changing to kwargs
+        cnn_options={},
+        stat_options=["mean", "std_dev", "minimum", "maximum"],
         initial_structures=[],
         parallel=False,
     ):
@@ -36,14 +30,16 @@ class PartialRDFFingerprint:
         self.max_fails_cum = [sum(max_fails[: x + 1]) for x in range(len(max_fails))]
 
         # make the matminer featurizer object
-        self.featurizer = prdf(cutoff, bin_size)
-
-        # for this specific featurizer, you're supposed to use the .fit() function with an example structure
-        # but really, all that does is get a list of unique elements - so we can make that with a composition object
-        #!!! note - if there are ever issues in the code, I would look here first!
-        self.featurizer.elements_ = np.array(
-            [element.symbol for element in composition.elements]
-        )
+        # if it isnt set, we will use the default, which is set to what the Materials project uses
+        if cnn_options:
+            sitefingerprint_method = cnnf(**cnn_options)
+        else:
+            # see https://materialsproject.org/docs/structuresimilarity
+            sitefingerprint_method = cnnf.from_preset(
+                "ops", distance_cutoffs=None, x_diff_weight=0
+            )
+        # now that we made the sitefingerprint_method, we can input it into the structurefingerprint_method which finishes up the featurizer
+        self.featurizer = ssf(sitefingerprint_method, stats=stat_options)
 
         # generate the fingerprint for each of the initial input structures
         # note this uses the parallel method for the matminer featurizer
@@ -65,10 +61,6 @@ class PartialRDFFingerprint:
             )
 
     def check_structure(self, structure, tolerance=1e-4):
-
-        # the .featurize() returns a 1D array without the corresponding x values
-        # for a more human-readable output, use .compute_prdf(structure), which is actually used insides of .featurize()
-        # dist_bins, prdf = prdf1.compute_prdf(rocksalt)  # assembles the PRDF for each pair
 
         # make the fingerprint for this structure and make into a numpy array for speed
         fingerprint1 = np.array(self.featurizer.featurize(structure))
@@ -94,15 +86,3 @@ class PartialRDFFingerprint:
             )
 
         return True
-
-    def point_next_step(self, attempt=0):
-
-        # based on the attempt number and the max_fails list, see what stage of on_fail we are on
-        for i, attempt_cutoff in enumerate(self.max_fails_cum):
-            # if we are below the attempt cutoff, return the corresponding on_fail object
-            if attempt <= attempt_cutoff:
-                return self.on_fail[i]
-
-        # If we make it through all of the cutoff list, that means we exceeded the maximum attempts allowed
-        # In this case, we don't return return an object from the on_fail list
-        return False
