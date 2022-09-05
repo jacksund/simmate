@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from simmate.toolkit import Composition
-from simmate.toolkit.structure_prediction.evolution.database.fixed_composition import (
+from simmate.toolkit.structure_prediction.evolution.database.variable_nsites_composition import (
     VariableNsitesCompositionSearch,
 )
 from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (

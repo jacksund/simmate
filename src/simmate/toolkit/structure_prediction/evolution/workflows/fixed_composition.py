@@ -31,8 +31,9 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         nfirst_generation: int = 15,
         nsteadystate: int = 40,
         singleshot_sources: list[str] = [
-            "from_third_parties",
-            "from_prototypes",
+            "third_parties",
+            "prototypes",
+            # "third_party_substituition",
         ],
         steadystate_sources: dict = {
             "RandomSymStructure": 0.30,

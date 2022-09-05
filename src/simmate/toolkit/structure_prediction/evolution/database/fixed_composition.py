@@ -17,6 +17,9 @@ from simmate.toolkit.structure_prediction import (
     get_structures_from_substitution_of_known,
 )
 from simmate.toolkit.structure_prediction.evolution.database import SteadystateSource
+from simmate.toolkit.structure_prediction.evolution.workflows.utilities import (
+    write_and_submit_structures,
+)
 from simmate.toolkit.validators import fingerprint as validator_module
 from simmate.utilities import get_directory
 from simmate.visualization.plotting import PlotlyFigure
@@ -55,7 +58,7 @@ class FixedCompositionSearch(Calculation):
     validator_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
     singleshot_sources = table_column.JSONField(default=list, null=True, blank=True)
     # stop_condition_name ---> assumed for now
-    # information about the steadystate_sources are stored within 
+    # information about the steadystate_sources are stored within
     # the SteadstateSource datatable
 
     # the time to sleep between file writing and steady-state checks.
@@ -172,56 +175,50 @@ class FixedCompositionSearch(Calculation):
 
         composition = Composition(self.composition)
 
-        structures_known = get_known_structures(
-            composition,
-            allow_multiples=False,
-        )
-        logging.info(
-            f"Generated {len(structures_known)} structures from other databases"
-        )
-        directory_known = get_directory(directory / "known_structures")
-        for i, s in enumerate(structures_known):
-            s.to("cif", directory_known / f"{i}.cif")
+        if "third_parties" in self.singleshot_sources:
+            structures_known = get_known_structures(
+                composition,
+                allow_multiples=False,
+            )
+            logging.info(
+                f"Generated {len(structures_known)} structures from thrid-party databases"
+            )
+            write_and_submit_structures(
+                structures=structures_known,
+                foldername=directory / "from_third_parties",
+                workflow=self.subworkflow,
+                workflow_kwargs=self.subworkflow_kwargs,
+            )
 
-        structures_sub = get_structures_from_substitution_of_known(
-            composition,
-            allow_multiples=False,
-        )
-        logging.info(f"Generated {len(structures_sub)} structures from substitutions")
-        directory_sub = get_directory(directory / "from_substitutions")
-        for i, s in enumerate(structures_sub):
-            s.to("cif", directory_sub / f"{i}.cif")
+        if "third_party_substituition" in self.singleshot_sources:
+            structures_sub = get_structures_from_substitution_of_known(
+                composition,
+                allow_multiples=False,
+            )
+            logging.info(
+                f"Generated {len(structures_sub)} structures from substitutions"
+            )
+            write_and_submit_structures(
+                structures=structures_sub,
+                foldername=directory / "from_third_party_substituition",
+                workflow=self.subworkflow,
+                workflow_kwargs=self.subworkflow_kwargs,
+            )
 
-        structures_prototype = get_structures_from_prototypes(
-            composition,
-            max_sites=int(composition.num_atoms),
-        )
-        logging.info(
-            f"Generated {len(structures_prototype)} structures from prototypes"
-        )
-        directory_sub = get_directory(directory / "from_prototypes")
-        for i, s in enumerate(structures_prototype):
-            s.to("cif", directory_sub / f"{i}.cif")
-
-        # Initialize the single-shot sources
-        # singleshot_sources = []
-        # for source in singleshot_sources:
-        #     # if we are given a string, we want initialize the class
-        #     # otherwise it should be a class alreadys
-        #     if type(source) == str:
-        #         source = self._init_common_class(source)
-        #     # and add it to our final list
-        #     self.singleshot_sources.append(source)
-        # singleshot_sources_db = []
-        # for source in self.singleshot_sources:
-        #     source_db = SourceDatatable(
-        #         name=source.table_name,
-        #         is_steadystate=False,
-        #         is_singleshot=True,
-        #         search=self.search_datatable,
-        #     )
-        #     source_db.save()
-        #     self.singleshot_sources_db.append(source_db)
+        if "prototypes" in self.singleshot_sources:
+            structures_prototype = get_structures_from_prototypes(
+                composition,
+                max_sites=int(composition.num_atoms),
+            )
+            logging.info(
+                f"Generated {len(structures_prototype)} structures from prototypes"
+            )
+            write_and_submit_structures(
+                structures=structures_prototype,
+                foldername=directory / "from_prototypes",
+                workflow=self.subworkflow,
+                workflow_kwargs=self.subworkflow_kwargs,
+            )
 
     def _init_steadystate_sources_to_db(self, steadystate_sources):
         composition = Composition(self.composition)

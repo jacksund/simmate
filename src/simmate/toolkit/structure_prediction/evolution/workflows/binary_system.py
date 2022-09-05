@@ -11,13 +11,15 @@ from simmate.toolkit.structure_prediction import (
     get_known_structures,
     get_structures_from_prototypes,
 )
-from simmate.toolkit.structure_prediction.evolution.database.fixed_composition import (
+from simmate.toolkit.structure_prediction.evolution.database.binary_system import (
     BinarySystemSearch,
 )
 from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (
     StructurePrediction__Toolkit__FixedComposition,
 )
-from simmate.utilities import get_directory
+from simmate.toolkit.structure_prediction.evolution.workflows.utilities import (
+    write_and_submit_structures,
+)
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
@@ -41,7 +43,10 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
         subworkflow_kwargs: dict = {},
         # max_stoich_factor: int = 4,
         directory: Path = None,
-        singleshot_sources: list[str] = ["from_third_parties", "from_prototypes",],
+        singleshot_sources: list[str] = [
+            "third_parties",
+            "prototypes",
+        ],
         **kwargs,  # passed to fixed_comp_workflow
     ):
 
@@ -106,7 +111,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
         # ---------------------------------------------------------------------
         # Submitting known structures
         # ---------------------------------------------------------------------
-        
+
         if "from_third_parties" in singleshot_sources:
 
             logging.info("Generating input structures from third-party databases")
@@ -121,39 +126,25 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
             logging.info(
                 f"Generated {len(structures_known)} structures from other databases"
             )
-    
-            # sort the structures from fewest nsites to most so that we can submit
-            # them in this order.
-            structures_known.sort(key=lambda s: s.num_sites)
-    
-            # write cif files
-            directory_known = get_directory(directory / "known_structures")
-            for i, s in enumerate(structures_known):
-                s.to("cif", directory_known / f"{i}.cif")
-    
-            # and submit them and disable the logs while we submit
-            logging.info("Submitting known structures")
-            logger = logging.getLogger()
-            logger.disabled = True
-            for structure in track(structures_known):
-                subworkflow.run_cloud(
-                    structure=structure,
-                    **subworkflow_kwargs,
-                )
-            logger.disabled = False
+            write_and_submit_structures(
+                structures=structures_known,
+                foldername=directory / "from_third_parties",
+                workflow=subworkflow,
+                workflow_kwargs=subworkflow_kwargs,
+            )
 
         # ---------------------------------------------------------------------
         # Submitting structures from prototypes
         # ---------------------------------------------------------------------
-        
+
         if "from_prototypes" in singleshot_sources:
-        
+
             # Start by generating the singleshot sources for each factor size.
             logging.info("Generating input structures from prototypes")
             structures_prototype = []
             # for singleshot_source in singleshot_sources: ## TODO
             for composition in track(compositions_maxed):
-    
+
                 # generate all prototypes
                 new_structures = get_structures_from_prototypes(
                     composition,
@@ -163,25 +154,12 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
             logging.info(
                 f"Generated {len(structures_prototype)} structures from prototypes"
             )
-    
-            # sort the structures from fewest nsites to most so that we can submit
-            # them in this order.
-            structures_prototype.sort(key=lambda s: s.num_sites)
-    
-            directory_sub = get_directory(directory / "from_prototypes")
-            for i, s in enumerate(structures_prototype):
-                s.to("cif", directory_sub / f"{i}.cif")
-    
-            # and submit them and disable the logs while we submit
-            logging.info("Submitting prototype structures")
-            logger = logging.getLogger()
-            logger.disabled = True
-            for structure in track(structures_prototype):
-                subworkflow.run_cloud(
-                    structure=structure,
-                    **subworkflow_kwargs,
-                )
-            logger.disabled = False
+            write_and_submit_structures(
+                structures=structures_prototype,
+                foldername=directory / "from_prototypes",
+                workflow=subworkflow,
+                workflow_kwargs=subworkflow_kwargs,
+            )
 
         # ---------------------------------------------------------------------
         # Starting search

@@ -4,6 +4,8 @@
 # circular imports errors, so we prevent isort from changing this file.
 # isort: skip_file
 
+from .utilities import write_and_submit_structures
+
 from .fixed_composition import StructurePrediction__Toolkit__FixedComposition
 from .new_individual import StructurePrediction__Toolkit__NewIndividual
 from .variable_nsites_composition import (
