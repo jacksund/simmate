@@ -894,6 +894,8 @@ class Workflow:
         # which is a related object and column.
         for field in cls.database_table._meta.get_fields():
             if field.is_relation:  # and isinstance(ForeignKey)
+                # we append BOTH but only one should be found during registration
+                table_columns.append(field.name)
                 table_columns.append(f"{field.name}_id")
 
         for parameter in cls.parameter_names:

@@ -16,7 +16,7 @@ from simmate.toolkit.structure_prediction import (
     get_structures_from_prototypes,
     get_structures_from_substitution_of_known,
 )
-from simmate.toolkit.structure_prediction.evolution.database import StructureSource
+from simmate.toolkit.structure_prediction.evolution.database import SteadystateSource
 from simmate.utilities import get_directory
 from simmate.visualization.plotting import PlotlyFigure
 from simmate.workflow_engine.execution import WorkItem
@@ -83,7 +83,6 @@ class FixedCompositionSearch(Calculation):
         as_dict: bool = False,
         **kwargs,
     ):
-        breakpoint()
 
         # Initialize the steady state sources by saving their config information
         # to the database.
@@ -230,7 +229,7 @@ class FixedCompositionSearch(Calculation):
         # these, we also collect the proportion list for them.
         steadystate_sources_cleaned = []
         steadystate_source_proportions = []
-        for proportion, source_name in steadystate_sources:
+        for source_name, proportion in steadystate_sources.items():
 
             # There are certain transformation sources that don't work for
             # single-element structures, so we check for this here and
@@ -242,7 +241,6 @@ class FixedCompositionSearch(Calculation):
                     f"{source_name} is not possible with single-element structures."
                     " This is being removed from your steadystate_sources."
                 )
-                steadystate_sources.pop()
                 continue  # skips to next source
 
             # Store proportion value and name of source. We do NOT initialize
@@ -300,11 +298,8 @@ class FixedCompositionSearch(Calculation):
                 raise Exception("Unknown source being used.")
                 # BUG: I should really allow any subclass of Creator/Transformation
 
-            source_db = StructureSource(
+            source_db = SteadystateSource(
                 name=source_name,
-                # kwargs --> default for now,
-                is_steadystate=True,
-                is_singleshot=False,
                 is_creator=is_creator,
                 is_transformation=is_transformation,
                 nsteadystate_target=ntarget_jobs,
@@ -340,9 +335,7 @@ class FixedCompositionSearch(Calculation):
         # we iterate through each steady-state source and check to see how many
         # jobs are still running for it. If it's less than the target steady-state,
         # then we need to submit more!
-        steadystate_sources_db = self.structure_sources.filter(
-            is_steadystate=True
-        ).all()
+        steadystate_sources_db = self.steadystate_sources.all()
         for source_db in steadystate_sources_db:
 
             # skip if we have a transformation but aren't ready for it yet
@@ -676,7 +669,7 @@ class FixedCompositionSearch(Calculation):
         df.to_markdown(md_filename)
 
     def write_individuals_incomplete(self, directory: Path):
-        structure_sources = self.structure_sources.all()
+        structure_sources = self.steadystate_sources.all()
         sources = []
         workitem_ids = []
         statuses = []

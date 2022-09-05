@@ -12,15 +12,13 @@ from simmate.toolkit import Composition
 from simmate.workflow_engine.execution import WorkItem
 
 
-class StructureSource(DatabaseTable):
+class SteadystateSource(DatabaseTable):
     class Meta:
         app_label = "workflows"
 
     name = table_column.CharField(max_length=50)
     kwargs = table_column.JSONField(default=dict)
 
-    is_steadystate = table_column.BooleanField()
-    is_singleshot = table_column.BooleanField()
     nsteadystate_target = table_column.FloatField(null=True, blank=True)
 
     is_creator = table_column.BooleanField()
@@ -32,7 +30,7 @@ class StructureSource(DatabaseTable):
     search = table_column.ForeignKey(
         "FixedCompositionSearch",
         on_delete=table_column.CASCADE,
-        related_name="structure_sources",
+        related_name="steadystate_sources",
     )
 
     def update_flow_workitem_ids(self):
