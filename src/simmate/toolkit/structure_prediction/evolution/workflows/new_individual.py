@@ -7,7 +7,7 @@ from simmate.database.workflow_results import FixedCompositionSearch
 from simmate.workflow_engine import Workflow
 
 
-class StructurePrediction__Python__NewIndividual(Workflow):
+class StructurePrediction__Toolkit__NewIndividual(Workflow):
     """
     Generates a new individual for an evolutionary search algorithm.
 

@@ -15,17 +15,6 @@ To see which parameters are allowed for a given workflow, you can use the `explo
 
     ``` python
     workflow.show_parameters()
-    
-    - angle_tolerance
-    - command
-    - compress_output
-    - directory
-    - is_restart
-    - run_id
-    - source
-    - standardize_structure
-    - structure
-    - symmetry_precision
     ```
 
 If you need more details on a parameter or would like to request a new one, just let us know!

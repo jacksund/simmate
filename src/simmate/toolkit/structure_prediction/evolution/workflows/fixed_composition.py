@@ -9,7 +9,7 @@ from simmate.toolkit import Composition
 from simmate.workflow_engine import Workflow
 
 
-class StructurePrediction__Python__FixedComposition(Workflow):
+class StructurePrediction__Toolkit__FixedComposition(Workflow):
     """
     Runs an evolutionary search algorithm on a fixed composition with a fixed
     number of sites. (e.g. Ca2N or Na4Cl4)

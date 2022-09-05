@@ -316,7 +316,7 @@ class FixedCompositionSearch(Calculation):
 
         # local import to prevent circular import issues
         from simmate.toolkit.structure_prediction.evolution.workflows.new_individual import (
-            StructurePrediction__Python__NewIndividual,
+            StructurePrediction__Toolkit__NewIndividual,
         )
 
         # transformations from a database table require that we have
@@ -366,7 +366,7 @@ class FixedCompositionSearch(Calculation):
                 # won't be evuluated until the job actually starts. This allows
                 # our validator to have the most current information available
                 # when starting the structure creation
-                state = StructurePrediction__Python__NewIndividual.run_cloud(
+                state = StructurePrediction__Toolkit__NewIndividual.run_cloud(
                     search_id=self.id,
                     structure_source_id=source_db.id,
                 )

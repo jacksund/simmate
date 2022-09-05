@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from simmate.toolkit.structure_prediction.evolution.workflows.all import (
-    StructurePrediction__Python__BinaryComposition,
-    StructurePrediction__Python__FixedComposition,
-    StructurePrediction__Python__NewIndividual,
-    StructurePrediction__Python__VariableNsitesComposition,
+    StructurePrediction__Toolkit__BinarySystem,
+    StructurePrediction__Toolkit__FixedComposition,
+    StructurePrediction__Toolkit__NewIndividual,
+    StructurePrediction__Toolkit__VariableNsitesComposition,
 )

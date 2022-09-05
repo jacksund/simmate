@@ -66,10 +66,10 @@ def test_list_of_all_workflows():
         "static-energy.vasp.mit",
         "static-energy.vasp.mvl-neb-endpoint",
         "static-energy.vasp.quality04",
-        "structure-prediction.python.binary-composition",
-        "structure-prediction.python.fixed-composition",
-        "structure-prediction.python.new-individual",
-        "structure-prediction.python.variable-composition",
+        "structure-prediction.toolkit.binary-system",
+        "structure-prediction.toolkit.fixed-composition",
+        "structure-prediction.toolkit.new-individual",
+        "structure-prediction.toolkit.variable-nsites-composition",
     ]
 
 
@@ -191,7 +191,6 @@ def test_get_unique_paramters():
         "supercell_end",
         "supercell_start",
         "symmetry_precision",
-        "tags",
         "temperature_end",
         "temperature_start",
         "time_step",

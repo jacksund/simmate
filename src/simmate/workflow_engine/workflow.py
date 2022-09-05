@@ -591,7 +591,8 @@ class Workflow:
 
         print("OPTIONAL PARAMETERS (+ their defaults):")
         print("---------------------------------------")
-        print(yaml.dump(cls.parameter_defaults))
+        as_list = [{k: v} for k, v in cls.parameter_defaults.items()]
+        print(yaml.dump(as_list))
         print("*** 'null' indicates the parameter is set with advanced logic\n")
 
     @classmethod

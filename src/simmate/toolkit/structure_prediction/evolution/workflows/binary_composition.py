@@ -12,14 +12,14 @@ from simmate.toolkit.structure_prediction import (
     get_structures_from_prototypes,
 )
 from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (
-    StructurePrediction__Python__FixedComposition,
+    StructurePrediction__Toolkit__FixedComposition,
 )
 from simmate.utilities import get_directory
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
 
-class StructurePrediction__Python__BinaryComposition(Workflow):
+class StructurePrediction__Toolkit__BinarySystem(Workflow):
     """
     Runs an evolutionary search algorithm to predict the most stable structures
     of a binary phase system (e.g Na-Cl or Y-C)
@@ -27,7 +27,7 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
 
     use_database = False
 
-    fixed_comp_workflow = StructurePrediction__Python__FixedComposition
+    fixed_comp_workflow = StructurePrediction__Toolkit__FixedComposition
 
     @classmethod
     def run_config(

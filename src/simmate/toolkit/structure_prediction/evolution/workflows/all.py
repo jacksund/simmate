@@ -4,7 +4,9 @@
 # circular imports errors, so we prevent isort from changing this file.
 # isort: skip_file
 
-from .fixed_composition import StructurePrediction__Python__FixedComposition
-from .new_individual import StructurePrediction__Python__NewIndividual
-from .variable_composition import StructurePrediction__Python__VariableNsitesComposition
-from .binary_composition import StructurePrediction__Python__BinaryComposition
+from .fixed_composition import StructurePrediction__Toolkit__FixedComposition
+from .new_individual import StructurePrediction__Toolkit__NewIndividual
+from .variable_composition import (
+    StructurePrediction__Toolkit__VariableNsitesComposition,
+)
+from .binary_composition import StructurePrediction__Toolkit__BinarySystem
