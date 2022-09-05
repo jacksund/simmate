@@ -112,7 +112,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
         # Submitting known structures
         # ---------------------------------------------------------------------
 
-        if "from_third_parties" in singleshot_sources:
+        if "third_parties" in singleshot_sources:
 
             logging.info("Generating input structures from third-party databases")
             structures_known = []
@@ -137,7 +137,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
         # Submitting structures from prototypes
         # ---------------------------------------------------------------------
 
-        if "from_prototypes" in singleshot_sources:
+        if "prototypes" in singleshot_sources:
 
             # Start by generating the singleshot sources for each factor size.
             logging.info("Generating input structures from prototypes")
