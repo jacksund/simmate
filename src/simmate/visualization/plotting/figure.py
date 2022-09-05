@@ -26,7 +26,8 @@ class Figure:
         # TODO: consider making a decorator so I don't have to write out each
         # of these functions
         def get_plot(input_obj=None, **kwargs):
-            return cls.get_plot(input_obj, **kwargs)
+            plot = cls.get_plot(input_obj, **kwargs)
+            return plot
 
         def view_plot(input_obj=None, **kwargs):
             return cls.view_plot(input_obj, **kwargs)

@@ -4,13 +4,16 @@ import logging
 from pathlib import Path
 
 from simmate.toolkit import Composition
+from simmate.toolkit.structure_prediction.evolution.database.variable_nsites_composition import (
+    VariableNsitesCompositionSearch,
+)
 from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (
-    StructurePrediction__Python__FixedComposition,
+    StructurePrediction__Toolkit__FixedComposition,
 )
 from simmate.workflow_engine import Workflow
 
 
-class StructurePrediction__Python__VariableComposition(Workflow):
+class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):
     """
     Runs an evolutionary search algorithm to predict the most stable structure
     of a specific composition but with variable number of sites in the unitcell.
@@ -18,9 +21,9 @@ class StructurePrediction__Python__VariableComposition(Workflow):
     For example, this would be Ca2N and up to 12 atoms (Ca8N4).
     """
 
-    use_database = False
+    database_table = VariableNsitesCompositionSearch
 
-    fixed_comp_workflow = StructurePrediction__Python__FixedComposition
+    fixed_comp_workflow = StructurePrediction__Toolkit__FixedComposition
 
     @classmethod
     def run_config(

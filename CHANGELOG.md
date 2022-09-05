@@ -32,6 +32,8 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add `MatplotlibFigure` and `PlotlyFigure` classes to help with writing output files and also implementing these figures in the website UI
 - update website to include workflow calculator types and add API links
 - custom projects and database tables are now registered with Simmate and a intro guide has been added
+- continued updates for `structure-prediction` workflows
+- add inspection of methods for default input values and display them in metadata
 
 **Refactors**
 - the `website.core_components.filters` module has been absorbed into the `DatabaseTable` class/module
@@ -39,6 +41,8 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - workup methods are largely depreciated and now database entries are returned when a workflow has `use_database=True`
 - several NEB input parameters have been renamed to accurate depict their meaning.
 - customized workflow runs now save in the original database table under the "-custom" workflow name
+- `structure_string` column renamed to `structure` to simplify api logic
+- clean up `toolkit.validators` module and establish fingerprint base class
 
 **Fixes**
 - fix bug in windows dev env where `simmate run-server` fails to find python path

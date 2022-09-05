@@ -68,7 +68,7 @@ class Selector:
         # entries. For example, a hereditary mutation can request parent ids of [123,123]
         # in which case we want to give the same input structure twice!
         parent_structures = [
-            datatable.only("structure_string").get(id=parent_id).to_toolkit()
+            datatable.only("structure").get(id=parent_id).to_toolkit()
             for parent_id in parent_ids
         ]
 

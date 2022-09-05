@@ -26,7 +26,7 @@ def structure_viewer(request):
     query = request.GET.dict()
 
     # convert the query to a Structure object
-    structure_string = query.get("structure_string", "")
+    structure_string = query.get("structure", "")
     structure = Structure.from_database_string(structure_string)
 
     # We want to make a 3d structure file. We make this so it...

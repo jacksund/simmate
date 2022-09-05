@@ -7,7 +7,7 @@ from simmate.database.workflow_results import FixedCompositionSearch
 from simmate.workflow_engine import Workflow
 
 
-class StructurePrediction__Python__NewIndividual(Workflow):
+class StructurePrediction__Toolkit__NewIndividual(Workflow):
     """
     Generates a new individual for an evolutionary search algorithm.
 
@@ -26,7 +26,7 @@ class StructurePrediction__Python__NewIndividual(Workflow):
     ):
 
         search_db = FixedCompositionSearch.objects.get(id=search_id)
-        source_db = search_db.structure_sources.get(id=structure_source_id)
+        source_db = search_db.steadystate_sources.get(id=structure_source_id)
 
         # Check the stop condition of the search and see if this new individual
         # is even needed. This will catch when a search ends while a new

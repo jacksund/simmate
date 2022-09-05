@@ -30,7 +30,7 @@ class MyCustomTable1(Structure, Calculation):
 - created_at
 - updated_at
 - source
-- structure_string
+- structure
 - nsites
 - nelements
 - elements

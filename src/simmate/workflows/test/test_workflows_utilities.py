@@ -66,10 +66,10 @@ def test_list_of_all_workflows():
         "static-energy.vasp.mit",
         "static-energy.vasp.mvl-neb-endpoint",
         "static-energy.vasp.quality04",
-        "structure-prediction.python.binary-composition",
-        "structure-prediction.python.fixed-composition",
-        "structure-prediction.python.new-individual",
-        "structure-prediction.python.variable-composition",
+        "structure-prediction.toolkit.binary-system",
+        "structure-prediction.toolkit.fixed-composition",
+        "structure-prediction.toolkit.new-individual",
+        "structure-prediction.toolkit.variable-nsites-composition",
     ]
 
 
@@ -144,11 +144,12 @@ def test_get_unique_paramters():
 
     assert get_unique_parameters() == [
         "angle_tolerance",
+        "best_survival_cutoff",
         "chemical_system",
         "command",
         "composition",
         "compress_output",
-        "convergence_limit",
+        "convergence_cutoff",
         "copy_previous_directory",
         "diffusion_analysis_id",
         "directory",
@@ -157,7 +158,6 @@ def test_get_unique_paramters():
         "fitness_field",
         "input_parameters",
         "is_restart",
-        "limit_best_survival",
         "max_atoms",
         "max_path_length",
         "max_structures",
@@ -191,7 +191,6 @@ def test_get_unique_paramters():
         "supercell_end",
         "supercell_start",
         "symmetry_precision",
-        "tags",
         "temperature_end",
         "temperature_start",
         "time_step",

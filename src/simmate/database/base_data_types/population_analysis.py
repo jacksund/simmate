@@ -56,8 +56,8 @@ class PopulationAnalysis(StaticEnergy):
     """
     A list of all element species in order that appear in the structure.
     
-    This information is stored in the structure_string as well, but it is stored
-    here as an extra for convenience.
+    This information is stored in the 'structure' column as well, but it is 
+    stored here as an extra for convenience.
     """
 
     vacuum_charge = table_column.FloatField(blank=True, null=True)

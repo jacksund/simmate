@@ -9,20 +9,24 @@ import pandas
 import plotly.graph_objects as plotly_go
 from rich.progress import track
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.base_data_types import Calculation, table_column
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.structure_prediction import (
     get_known_structures,
     get_structures_from_prototypes,
     get_structures_from_substitution_of_known,
 )
-from simmate.toolkit.structure_prediction.evolution.database import StructureSource
+from simmate.toolkit.structure_prediction.evolution.database import SteadystateSource
+from simmate.toolkit.structure_prediction.evolution.workflows.utilities import (
+    write_and_submit_structures,
+)
+from simmate.toolkit.validators import fingerprint as validator_module
 from simmate.utilities import get_directory
 from simmate.visualization.plotting import PlotlyFigure
 from simmate.workflow_engine.execution import WorkItem
 
 
-class FixedCompositionSearch(DatabaseTable):
+class FixedCompositionSearch(Calculation):
     """
     This database table holds all of the information related to an evolutionary
     search and also has convient methods to analyze the data + write output files.
@@ -32,44 +36,75 @@ class FixedCompositionSearch(DatabaseTable):
         app_label = "workflows"
 
     # !!! consider making a composition-based mixin
-    composition = table_column.CharField(max_length=50)
+    composition = table_column.CharField(max_length=50, null=True, blank=True)
 
     # Import path for the workflow and the database table of results
-    subworkflow_name = table_column.CharField(max_length=200)
-    subworkflow_kwargs = table_column.JSONField(default=dict)
-    fitness_field = table_column.CharField(max_length=200)
+    subworkflow_name = table_column.CharField(max_length=200, null=True, blank=True)
+    subworkflow_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
+    fitness_field = table_column.CharField(max_length=200, null=True, blank=True)
 
     # Other settings for the search
-    min_structures_exact = table_column.IntegerField()
-    max_structures = table_column.IntegerField()
-    limit_best_survival = table_column.IntegerField()
-    nfirst_generation = table_column.IntegerField()
-    nsteadystate = table_column.IntegerField()
-    convergence_limit = table_column.FloatField()
+    min_structures_exact = table_column.IntegerField(null=True, blank=True)
+    max_structures = table_column.IntegerField(null=True, blank=True)
+    best_survival_cutoff = table_column.IntegerField(null=True, blank=True)
+    nfirst_generation = table_column.IntegerField(null=True, blank=True)
+    nsteadystate = table_column.IntegerField(null=True, blank=True)
+    convergence_cutoff = table_column.FloatField(null=True, blank=True)
 
     # Key classes to use during the search
-    selector_name = table_column.CharField(max_length=200)
-    selector_kwargs = table_column.JSONField(default=dict)
-    validator_name = table_column.CharField(max_length=200)
-    validator_kwargs = table_column.JSONField(default=dict)
+    selector_name = table_column.CharField(max_length=200, null=True, blank=True)
+    selector_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
+    validator_name = table_column.CharField(max_length=200, null=True, blank=True)
+    validator_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
+    singleshot_sources = table_column.JSONField(default=list, null=True, blank=True)
     # stop_condition_name ---> assumed for now
-    # information about the singleshot_sources and steadystate_sources
-    # are stored within the IndividualSources datatable
-
-    # Tags to submit the NewIndividual workflow with. Should be a list of strings
-    tags = table_column.JSONField()
+    # information about the steadystate_sources are stored within
+    # the SteadstateSource datatable
 
     # the time to sleep between file writing and steady-state checks.
-    sleep_step = table_column.FloatField()
+    sleep_step = table_column.FloatField(null=True, blank=True)
 
-    # disable the source column
-    source = None
-
-    # TODO: maybe accept an input for an expected structure in order to allow
-    # creation of plots that show convergence vs. the expected. Will be very
+    # This is an optional an input for an expected structure in order to allow
+    # creation of plots that show convergence vs. the expected. This is very
     # useful benchmarking and when the user has a target structure that they
-    # hope to see.
-    # expected_structure = table_column.JSONField()
+    # hope to see. For now, this MUST a dictionary input (either pymatgen.as_dict()
+    # that points to another table entry because we don't want to use the
+    # Structure mix-in on this table (too many unecessary columns)
+    expected_structure = table_column.JSONField(default=dict)
+
+    # TODO:
+    #   parent_variable_nsite_searches
+    #   parent_binary_searches
+    #   parent_ternary_searches
+
+    # -------------------------------------------------------------------------
+    # Setup of the database tables at the beginning of a new search
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def from_toolkit(
+        cls,
+        steadystate_sources: dict = None,
+        as_dict: bool = False,
+        **kwargs,
+    ):
+
+        # Initialize the steady state sources by saving their config information
+        # to the database.
+        if steadystate_sources and not as_dict:
+            search = cls(**kwargs)
+            search.save()  # we must save up front because of relations
+            search._init_steadystate_sources_to_db(steadystate_sources)
+            return search
+
+        elif not steadystate_sources:
+            return kwargs if as_dict else cls(**kwargs)
+
+        if steadystate_sources and as_dict:
+            raise Exception(
+                "steadystate_sources cannot be set in an as_dict mannor because"
+                "it points to a related database table"
+            )
 
     # -------------------------------------------------------------------------
     # Highest-level methods that run the overall search
@@ -105,7 +140,7 @@ class FixedCompositionSearch(DatabaseTable):
 
         # The next stop condition is based on how long we've have the same
         # "best" individual. If the number of new individuals calculated (without
-        # any becoming the new "best") is greater than limit_best_survival, then
+        # any becoming the new "best") is greater than best_survival_cutoff, then
         # we can stop the search.
         # grab the best individual for reference
         best = self.best_individual
@@ -115,7 +150,7 @@ class FixedCompositionSearch(DatabaseTable):
             return False
 
         # count the number of new individuals added AFTER the best one. If it is
-        # more than limit_best_survival, we stop the search.
+        # more than best_survival_cutoff, we stop the search.
         # Note, we look at all structures that have an energy_per_atom greater
         # than 1meV/atom higher than the best structure. The +1meV ensures
         # we aren't prolonging the calculation for insignificant changes in
@@ -124,13 +159,13 @@ class FixedCompositionSearch(DatabaseTable):
         # BUG: this filter needs to be updated to fitness_value and not
         # assume we are using energy_per_atom
         num_new_structures_since_best = self.individuals.filter(
-            energy_per_atom__gt=best.energy_per_atom + self.convergence_limit,
+            energy_per_atom__gt=best.energy_per_atom + self.convergence_cutoff,
             created_at__gte=best.created_at,
         ).count()
-        if num_new_structures_since_best > self.limit_best_survival:
+        if num_new_structures_since_best > self.best_survival_cutoff:
             logging.info(
                 "Best individual has not changed after "
-                f"{self.limit_best_survival} new individuals added."
+                f"{self.best_survival_cutoff} new individuals added."
             )
             return True
         # If we reached this point, then we haven't hit a stop condition yet!
@@ -140,56 +175,50 @@ class FixedCompositionSearch(DatabaseTable):
 
         composition = Composition(self.composition)
 
-        structures_known = get_known_structures(
-            composition,
-            allow_multiples=False,
-        )
-        logging.info(
-            f"Generated {len(structures_known)} structures from other databases"
-        )
-        directory_known = get_directory(directory / "known_structures")
-        for i, s in enumerate(structures_known):
-            s.to("cif", directory_known / f"{i}.cif")
+        if "third_parties" in self.singleshot_sources:
+            structures_known = get_known_structures(
+                composition,
+                allow_multiples=False,
+            )
+            logging.info(
+                f"Generated {len(structures_known)} structures from thrid-party databases"
+            )
+            write_and_submit_structures(
+                structures=structures_known,
+                foldername=directory / "from_third_parties",
+                workflow=self.subworkflow,
+                workflow_kwargs=self.subworkflow_kwargs,
+            )
 
-        structures_sub = get_structures_from_substitution_of_known(
-            composition,
-            allow_multiples=False,
-        )
-        logging.info(f"Generated {len(structures_sub)} structures from substitutions")
-        directory_sub = get_directory(directory / "from_substitutions")
-        for i, s in enumerate(structures_sub):
-            s.to("cif", directory_sub / f"{i}.cif")
+        if "third_party_substituition" in self.singleshot_sources:
+            structures_sub = get_structures_from_substitution_of_known(
+                composition,
+                allow_multiples=False,
+            )
+            logging.info(
+                f"Generated {len(structures_sub)} structures from substitutions"
+            )
+            write_and_submit_structures(
+                structures=structures_sub,
+                foldername=directory / "from_third_party_substituition",
+                workflow=self.subworkflow,
+                workflow_kwargs=self.subworkflow_kwargs,
+            )
 
-        structures_prototype = get_structures_from_prototypes(
-            composition,
-            max_sites=int(composition.num_atoms),
-        )
-        logging.info(
-            f"Generated {len(structures_prototype)} structures from prototypes"
-        )
-        directory_sub = get_directory(directory / "from_prototypes")
-        for i, s in enumerate(structures_prototype):
-            s.to("cif", directory_sub / f"{i}.cif")
-
-        # Initialize the single-shot sources
-        # singleshot_sources = []
-        # for source in singleshot_sources:
-        #     # if we are given a string, we want initialize the class
-        #     # otherwise it should be a class alreadys
-        #     if type(source) == str:
-        #         source = self._init_common_class(source)
-        #     # and add it to our final list
-        #     self.singleshot_sources.append(source)
-        # singleshot_sources_db = []
-        # for source in self.singleshot_sources:
-        #     source_db = SourceDatatable(
-        #         name=source.table_name,
-        #         is_steadystate=False,
-        #         is_singleshot=True,
-        #         search=self.search_datatable,
-        #     )
-        #     source_db.save()
-        #     self.singleshot_sources_db.append(source_db)
+        if "prototypes" in self.singleshot_sources:
+            structures_prototype = get_structures_from_prototypes(
+                composition,
+                max_sites=int(composition.num_atoms),
+            )
+            logging.info(
+                f"Generated {len(structures_prototype)} structures from prototypes"
+            )
+            write_and_submit_structures(
+                structures=structures_prototype,
+                foldername=directory / "from_prototypes",
+                workflow=self.subworkflow,
+                workflow_kwargs=self.subworkflow_kwargs,
+            )
 
     def _init_steadystate_sources_to_db(self, steadystate_sources):
         composition = Composition(self.composition)
@@ -199,7 +228,7 @@ class FixedCompositionSearch(DatabaseTable):
         # these, we also collect the proportion list for them.
         steadystate_sources_cleaned = []
         steadystate_source_proportions = []
-        for proportion, source_name in steadystate_sources:
+        for source_name, proportion in steadystate_sources.items():
 
             # There are certain transformation sources that don't work for
             # single-element structures, so we check for this here and
@@ -211,7 +240,6 @@ class FixedCompositionSearch(DatabaseTable):
                     f"{source_name} is not possible with single-element structures."
                     " This is being removed from your steadystate_sources."
                 )
-                steadystate_sources.pop()
                 continue  # skips to next source
 
             # Store proportion value and name of source. We do NOT initialize
@@ -269,11 +297,8 @@ class FixedCompositionSearch(DatabaseTable):
                 raise Exception("Unknown source being used.")
                 # BUG: I should really allow any subclass of Creator/Transformation
 
-            source_db = StructureSource(
+            source_db = SteadystateSource(
                 name=source_name,
-                # kwargs --> default for now,
-                is_steadystate=True,
-                is_singleshot=False,
                 is_creator=is_creator,
                 is_transformation=is_transformation,
                 nsteadystate_target=ntarget_jobs,
@@ -290,7 +315,7 @@ class FixedCompositionSearch(DatabaseTable):
 
         # local import to prevent circular import issues
         from simmate.toolkit.structure_prediction.evolution.workflows.new_individual import (
-            StructurePrediction__Python__NewIndividual,
+            StructurePrediction__Toolkit__NewIndividual,
         )
 
         # transformations from a database table require that we have
@@ -309,9 +334,7 @@ class FixedCompositionSearch(DatabaseTable):
         # we iterate through each steady-state source and check to see how many
         # jobs are still running for it. If it's less than the target steady-state,
         # then we need to submit more!
-        steadystate_sources_db = self.structure_sources.filter(
-            is_steadystate=True
-        ).all()
+        steadystate_sources_db = self.steadystate_sources.all()
         for source_db in steadystate_sources_db:
 
             # skip if we have a transformation but aren't ready for it yet
@@ -342,7 +365,7 @@ class FixedCompositionSearch(DatabaseTable):
                 # won't be evuluated until the job actually starts. This allows
                 # our validator to have the most current information available
                 # when starting the structure creation
-                state = StructurePrediction__Python__NewIndividual.run_cloud(
+                state = StructurePrediction__Toolkit__NewIndividual.run_cloud(
                     search_id=self.id,
                     structure_source_id=source_db.id,
                 )
@@ -456,6 +479,8 @@ class FixedCompositionSearch(DatabaseTable):
     def write_summary(self, directory: Path):
         logging.info(f"Writing search summary to {directory}")
 
+        super().write_output_summary(directory=directory)
+
         # If the output fails to write, we have a non-critical issue that
         # doesn't affect the search. We therefore don't want to raise an
         # error here -- but instead warn the user and then continue the search
@@ -463,18 +488,25 @@ class FixedCompositionSearch(DatabaseTable):
             # calls all the key methods defined below
             best_cifs_directory = get_directory(directory / "best_structures_cifs")
             self.write_best_structures(100, best_cifs_directory)
-            self.write_individuals_completed(directory)
-            self.write_individuals_completed_full(directory)
-            self.write_best_individuals_history(directory)
-            self.write_individuals_incomplete(directory)
-            self.write_fitness_convergence_plot(directory)
-            self.write_fitness_distribution_plot(directory)
-            self.write_subworkflow_times_plot(directory)
+            self.write_individuals_completed(directory=directory)
+            self.write_individuals_completed_full(directory=directory)
+            self.write_best_individuals_history(directory=directory)
+            self.write_individuals_incomplete(directory=directory)
+            self.write_fitness_convergence_plot(directory=directory)
+            self.write_fitness_distribution_plot(directory=directory)
+            self.write_subworkflow_times_plot(directory=directory)
 
             # BUG: This is only for "relaxation.vasp.staged", which the assumed
             # workflow for now.
             composition = Composition(self.composition)
-            self.subworkflow.write_series_convergence_plot(
+            self.subworkflow.write_staged_series_convergence_plot(
+                directory=directory,
+                # See `individuals` method for why we use these filters
+                formula_reduced=composition.reduced_formula,
+                nsites__lte=composition.num_atoms,
+                energy_per_atom__isnull=False,
+            )
+            self.subworkflow.write_staged_series_histogram_plot(
                 directory=directory,
                 # See `individuals` method for why we use these filters
                 formula_reduced=composition.reduced_formula,
@@ -518,17 +550,14 @@ class FixedCompositionSearch(DatabaseTable):
         # Initialize the fingerprint database
         # For this we need to grab all previously calculated structures of this
         # compositon too pass in too.
-        import logging
 
-        from simmate.toolkit import Composition
-        from simmate.toolkit.validators.fingerprint.pcrystalnn import (
-            PartialCrystalNNFingerprint,
-        )
+        validator_class = getattr(validator_module, self.validator_name)
 
         logging.info("Generating fingerprints for past structures...")
-        fingerprint_validator = PartialCrystalNNFingerprint(
+        fingerprint_validator = validator_class(
             composition=Composition(self.composition),
             structure_pool=self.individuals,
+            **self.validator_kwargs,
         )
         logging.info("Done generating fingerprints.")
 
@@ -559,7 +588,7 @@ class FixedCompositionSearch(DatabaseTable):
                 )
 
         best = self.get_nbest_indiviudals(nbest)
-        structures = best.only("structure_string", "id").to_toolkit()
+        structures = best.only("structure", "id").to_toolkit()
         for rank, structure in enumerate(structures):
             rank_cleaned = str(rank).zfill(2)  # converts 1 to 01
             structure_filename = (
@@ -570,8 +599,8 @@ class FixedCompositionSearch(DatabaseTable):
 
     def write_individuals_completed_full(self, directory: Path):
         columns = self.individuals_datatable.get_column_names()
-        columns.remove("structure_string")
-        df = self.individuals_completed.defer("structure_string").to_dataframe(columns)
+        columns.remove("structure")
+        df = self.individuals_completed.defer("structure").to_dataframe(columns)
         csv_filename = directory / "individuals_completed__ALLDATA.csv"
         df.to_csv(csv_filename)
 
@@ -636,7 +665,7 @@ class FixedCompositionSearch(DatabaseTable):
         df.to_markdown(md_filename)
 
     def write_individuals_incomplete(self, directory: Path):
-        structure_sources = self.structure_sources.all()
+        structure_sources = self.steadystate_sources.all()
         sources = []
         workitem_ids = []
         statuses = []
@@ -740,7 +769,7 @@ class Correctness(PlotlyFigure):
         from simmate.toolkit import Structure
 
         structures_dataframe["structure"] = [
-            Structure.from_str(s.structure_string, fmt="POSCAR")
+            Structure.from_str(s.structure, fmt="POSCAR")
             for _, s in structures_dataframe.iterrows()
         ]
 
@@ -822,5 +851,10 @@ class FitnessDistribution(PlotlyFigure):
 
 
 # register all plotting methods to the database table
-for _plot in [FitnessConvergence, Correctness, FitnessDistribution]:
+for _plot in [
+    FitnessConvergence,
+    Correctness,
+    FitnessDistribution,
+    SubworkflowTimes,
+]:
     _plot.register_to_class(FixedCompositionSearch)

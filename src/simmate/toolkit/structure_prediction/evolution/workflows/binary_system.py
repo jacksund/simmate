@@ -11,28 +11,28 @@ from simmate.toolkit.structure_prediction import (
     get_known_structures,
     get_structures_from_prototypes,
 )
-from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (
-    StructurePrediction__Python__FixedComposition,
+from simmate.toolkit.structure_prediction.evolution.database.binary_system import (
+    BinarySystemSearch,
 )
-from simmate.utilities import get_directory
+from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (
+    StructurePrediction__Toolkit__FixedComposition,
+)
+from simmate.toolkit.structure_prediction.evolution.workflows.utilities import (
+    write_and_submit_structures,
+)
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
-# TODO
-# StructurePrediction__Python__VariableTernaryComposition
-#   --> calls VariableBinaryComposition strategically
-#   --> might call FixedCompositionVariableNsites strategically too
 
-
-class StructurePrediction__Python__BinaryComposition(Workflow):
+class StructurePrediction__Toolkit__BinarySystem(Workflow):
     """
     Runs an evolutionary search algorithm to predict the most stable structures
     of a binary phase system (e.g Na-Cl or Y-C)
     """
 
-    use_database = False
+    database_table = BinarySystemSearch
 
-    fixed_comp_workflow = StructurePrediction__Python__FixedComposition
+    fixed_comp_workflow = StructurePrediction__Toolkit__FixedComposition
 
     @classmethod
     def run_config(
@@ -43,7 +43,10 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
         subworkflow_kwargs: dict = {},
         # max_stoich_factor: int = 4,
         directory: Path = None,
-        singleshot_sources: list[str] = [],
+        singleshot_sources: list[str] = [
+            "third_parties",
+            "prototypes",
+        ],
         **kwargs,  # passed to fixed_comp_workflow
     ):
 
@@ -109,77 +112,54 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
         # Submitting known structures
         # ---------------------------------------------------------------------
 
-        logging.info("Generating input structures from third-party databases")
-        structures_known = []
-        for composition in track(compositions_maxed):
-            new_structures = get_known_structures(
-                composition,
-                allow_multiples=True,
-                nsites__lte=max_atoms,
+        if "third_parties" in singleshot_sources:
+
+            logging.info("Generating input structures from third-party databases")
+            structures_known = []
+            for composition in track(compositions_maxed):
+                new_structures = get_known_structures(
+                    composition,
+                    allow_multiples=True,
+                    nsites__lte=max_atoms,
+                )
+                structures_known += new_structures
+            logging.info(
+                f"Generated {len(structures_known)} structures from other databases"
             )
-            structures_known += new_structures
-        logging.info(
-            f"Generated {len(structures_known)} structures from other databases"
-        )
-
-        # sort the structures from fewest nsites to most so that we can submit
-        # them in this order.
-        structures_known.sort(key=lambda s: s.num_sites)
-
-        # write cif files
-        directory_known = get_directory(directory / "known_structures")
-        for i, s in enumerate(structures_known):
-            s.to("cif", directory_known / f"{i}.cif")
-
-        # and submit them and disable the logs while we submit
-        logging.info("Submitting known structures")
-        logger = logging.getLogger()
-        logger.disabled = True
-        for structure in track(structures_known):
-            subworkflow.run_cloud(
-                structure=structure,
-                **subworkflow_kwargs,
+            write_and_submit_structures(
+                structures=structures_known,
+                foldername=directory / "from_third_parties",
+                workflow=subworkflow,
+                workflow_kwargs=subworkflow_kwargs,
             )
-        logger.disabled = False
 
         # ---------------------------------------------------------------------
         # Submitting structures from prototypes
         # ---------------------------------------------------------------------
 
-        # Start by generating the singleshot sources for each factor size.
-        logging.info("Generating input structures from prototypes")
-        structures_prototype = []
-        # for singleshot_source in singleshot_sources: ## TODO
-        for composition in track(compositions_maxed):
+        if "prototypes" in singleshot_sources:
 
-            # generate all prototypes
-            new_structures = get_structures_from_prototypes(
-                composition,
-                max_sites=max_atoms,
+            # Start by generating the singleshot sources for each factor size.
+            logging.info("Generating input structures from prototypes")
+            structures_prototype = []
+            # for singleshot_source in singleshot_sources: ## TODO
+            for composition in track(compositions_maxed):
+
+                # generate all prototypes
+                new_structures = get_structures_from_prototypes(
+                    composition,
+                    max_sites=max_atoms,
+                )
+                structures_prototype += new_structures
+            logging.info(
+                f"Generated {len(structures_prototype)} structures from prototypes"
             )
-            structures_prototype += new_structures
-        logging.info(
-            f"Generated {len(structures_prototype)} structures from prototypes"
-        )
-
-        # sort the structures from fewest nsites to most so that we can submit
-        # them in this order.
-        structures_prototype.sort(key=lambda s: s.num_sites)
-
-        directory_sub = get_directory(directory / "from_prototypes")
-        for i, s in enumerate(structures_prototype):
-            s.to("cif", directory_sub / f"{i}.cif")
-
-        # and submit them and disable the logs while we submit
-        logging.info("Submitting prototype structures")
-        logger = logging.getLogger()
-        logger.disabled = True
-        for structure in track(structures_prototype):
-            subworkflow.run_cloud(
-                structure=structure,
-                **subworkflow_kwargs,
+            write_and_submit_structures(
+                structures=structures_prototype,
+                foldername=directory / "from_prototypes",
+                workflow=subworkflow,
+                workflow_kwargs=subworkflow_kwargs,
             )
-        logger.disabled = False
 
         # ---------------------------------------------------------------------
         # Starting search
@@ -195,6 +175,31 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
 
         for natoms in range(1, max_atoms + 1):
 
+            # for stage_number in range(1, 4) --> consider adding substages
+
+            # Setting stop conditions for each search will be
+            # essential in ensure we don't waste too much calculation time
+            # on one composition -- while simultaniously making sure we
+            # searched a compositon enough.
+            min_structures_exact = int(10 * natoms)
+            best_survival_cutoff = int(20 * natoms)
+            max_structures = int(30 * natoms)
+            convergence_cutoff = 0.01  # 10 meV as looser convergence limit
+
+            # OPTIMIZE: This code below is for printing out the cutoff limits
+            # I keep this here for early development as we figure out ideal
+            # stopping conditions.
+            # for n in range(1, 10):
+            #     min_structures_exact = int(10 * n)
+            #     best_survival_cutoff = int(10 * n)
+            #     max_structures = int(25 * n)
+            #     # convergence_cutoff = 0.01
+            #     print(
+            #         f"{n}\t{min_structures_exact}\t"
+            #         f"{best_survival_cutoff}\t{max_structures}"
+            #         # f"\t{convergence_cutoff}"
+            #     )
+
             logging.info(f"Beginning compositional searches with natoms = {natoms}")
             current_compositions = [c for c in compositions if c.num_atoms == natoms]
 
@@ -207,35 +212,15 @@ class StructurePrediction__Python__BinaryComposition(Workflow):
                     logging.warn(f"Skipping single-element composition {composition}")
                     continue
 
-                # OPTIMIZE: Setting stop conditions for each search will be
-                # essential in ensure we don't waste too much calculation time
-                # on one composition -- while simultaniously making sure we
-                # searched a compositon enough.
-                n = composition.num_atoms
-                min_structures_exact = int(10 * n)
-                limit_best_survival = int(20 * n)
-                max_structures = int(30 * n)
-
-                # NOTES: This code below is for printing out the cutoff limits
-                # I keep this here for early development as we figure out ideal
-                # stopping conditions.
-                # for n in range(1, 10):
-                #     min_structures_exact = int(10 * n)
-                #     limit_best_survival = int(10 * n)
-                #     max_structures = int(30 * n)
-                #     print(
-                #         f"{n}\t{min_structures_exact}\t"
-                #         f"{limit_best_survival}\t{max_structures}"
-                #     )
-
                 cls.fixed_comp_workflow.run(
                     composition=composition,
                     subworkflow_name=subworkflow_name,
                     subworkflow_kwargs=subworkflow_kwargs,
                     min_structures_exact=min_structures_exact,
-                    limit_best_survival=limit_best_survival,
+                    best_survival_cutoff=best_survival_cutoff,
                     max_structures=max_structures,
                     directory=directory / composition.reduced_formula,
+                    convergence_cutoff=convergence_cutoff,
                     # Because we submitted all steady states above, we don't
                     # need the other workflows to do these anymore.
                     singleshot_sources=[],

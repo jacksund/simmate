@@ -1,27 +1,26 @@
 # -*- coding: utf-8 -*-
 
-from abc import ABC, abstractmethod
-
 from dask import bag
 from dask.diagnostics import ProgressBar
 
 
-class Validator(ABC):
+class Validator:
     @classmethod
     @property
     def name(cls):
         """
         A nice string name for the validator. By default it just returns the name
-        of this class.
+        of this class by default.
         """
         return cls.__name__
 
-    @abstractmethod
     def check_structure(self, structure):
         # User needs to define this function where one structure is input.
         # The output should be a True or False value that indicates whether
         # or not the structure passed the check.
-        raise NotImplementedError
+        raise NotImplementedError(
+            "make sure you add a custom 'check_structure' method to your Validator"
+        )
 
     def check_many_structures(self, structures, progressbar=True, mode="threads"):
         # USING DASK TO PARALLELIZE
