@@ -28,7 +28,6 @@ def get_all_workflows(
     Goes through a list of apps and grabs all workflow objects available.
     By default, this will grab all installed SIMMATE_APPs
     """
-    breakpoint()
     app_workflows = []
     for app_name in apps_to_search:
         # modulename is by cutting off the "apps.AppConfig" part of the config
@@ -37,11 +36,13 @@ def get_all_workflows(
         app_modulename = ".".join(app_name.split(".")[:-2])
         try:
             app_module = importlib.import_module(f"{app_modulename}.workflows")
-        except:
+        except Exception as error:
             logging.warning(
                 f"Failed to load workflows from {app_name}. Did you make sure "
                 "there is a workflows.py file or module present?"
+                f"The error given was...\n {error}"
             )
+            # raise error  --- should I just raise the error?
             continue
 
         # iterate through each available object in the workflows file and find
@@ -222,8 +223,7 @@ def get_workflow(workflow_name: str) -> Workflow:
 
     # otherwise the app should be registered and available in the SIMMATE_APPS
     workflow_dict = get_all_workflows(as_dict=True)
-    workflow_class_name = reverse_workflow_name(workflow_name)
-    workflow = workflow_dict.get(workflow_class_name, None)
+    workflow = workflow_dict.get(workflow_name, None)
 
     # make sure we have a proper workflow name provided and were able to load
     # it successfully

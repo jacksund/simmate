@@ -7,10 +7,6 @@ from pathlib import Path
 from rich.progress import track
 
 from simmate.toolkit import Composition
-from simmate.toolkit.structure_prediction import (
-    get_known_structures,
-    get_structures_from_prototypes,
-)
 from simmate.toolkit.structure_prediction.evolution.database.binary_system import (
     BinarySystemSearch,
 )
@@ -19,6 +15,10 @@ from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition 
 )
 from simmate.toolkit.structure_prediction.evolution.workflows.utilities import (
     write_and_submit_structures,
+)
+from simmate.toolkit.structure_prediction.known import get_known_structures
+from simmate.toolkit.structure_prediction.prototypes import (
+    get_structures_from_prototypes,
 )
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow

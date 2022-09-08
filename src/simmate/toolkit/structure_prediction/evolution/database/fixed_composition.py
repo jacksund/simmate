@@ -164,7 +164,7 @@ class FixedCompositionSearch(Calculation):
         return False
 
     def _check_singleshot_sources(self, directory: Path):
-        
+
         # local imports to prevent circuluar import issues
         from simmate.toolkit.structure_prediction import (
             get_known_structures,

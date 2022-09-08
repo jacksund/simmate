@@ -311,10 +311,9 @@ class Workflow:
             from simmate.workflows.utilities import get_workflow
 
             workflow = get_workflow(
-                # we pop the workflow name so that it is also removed from the rest of kwargs
+                # we pop the workflow name so that it is also removed from the
+                # rest of kwargs
                 workflow_name=parameters.pop("workflow_name"),
-                precheck_flow_exists=True,
-                print_equivalent_import=True,
             )
             return workflow, parameters
 
