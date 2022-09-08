@@ -5,5 +5,5 @@
 #	from mycustomapp.apps import MyCustomAppConfig
 # If not, then be sure to take our tutorial on making custom apps!
 
-mycustomapp.apps.MyCustomAppConfig
-myotherapp.apps.MyOtherAppConfig
+- mycustomapp.apps.MyCustomAppConfig
+- myotherapp.apps.MyOtherAppConfig
