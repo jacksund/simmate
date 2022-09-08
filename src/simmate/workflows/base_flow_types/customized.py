@@ -43,7 +43,7 @@ import logging
 from simmate.workflow_engine import S3Workflow, Workflow
 
 
-class Customized__Vasp__UserConfig(Workflow):
+class Customized__Toolkit__UserConfig(Workflow):
     """
     "VASP calculation with updated INCAR/POTCAR settings
     """

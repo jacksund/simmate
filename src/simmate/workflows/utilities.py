@@ -28,6 +28,7 @@ def get_all_workflows(
     Goes through a list of apps and grabs all workflow objects available.
     By default, this will grab all installed SIMMATE_APPs
     """
+    breakpoint()
     app_workflows = []
     for app_name in apps_to_search:
         # modulename is by cutting off the "apps.AppConfig" part of the config

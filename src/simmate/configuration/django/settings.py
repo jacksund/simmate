@@ -197,8 +197,10 @@ INSTALLED_APPS = [
 # to our list above. By default we include apps that are packaged with simmate,
 # such as the VASP workflows app.
 DEFAULT_SIMMATE_APPS = [
+    "simmate.workflows.base_flow_types.apps.BaseWorkflowsConfig",
     "simmate.calculators.vasp.apps.VaspConfig",
     "simmate.calculators.bader.apps.BaderConfig",
+    "simmate.toolkit.structure_prediction.evolution.apps.EvolutionarySearchConfig",
 ]
 APPLICATIONS_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-apps.yaml"
 # create the file if it doesn't exist yet

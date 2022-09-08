@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from .customized import Customized__Vasp__UserConfig
 from .diffusion import (
     Diffusion__Vasp__NebAllPathsMit,
     Diffusion__Vasp__NebFromEndpointsMit,
