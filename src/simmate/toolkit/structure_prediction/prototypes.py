@@ -19,5 +19,4 @@ def get_structures_from_prototypes(
         composition,
         **kwargs,
     ).structures
-
     return from_prototypes

@@ -25,6 +25,29 @@ class Structure(PymatgenStructure):
     # Note, we don't set the type here because it is a cross-module dependency
     # that is frequently not required
 
+    _source: dict = {}  # the default source is none
+
+    @property
+    def source(self) -> dict:
+        """
+        Where the structure came from. Typically, the source is just the
+        database entry that the structure was loaded from. For more complex
+        origins (e.g. a structure mutation or prototype), this property can
+        also be set dynamically in other methods.
+        """
+        if self._source:
+            return self._source
+        elif self.database_object:
+            return self.database_object.to_dict()
+        else:
+            return {}
+
+    @source.setter
+    def source(self, new_value: dict):
+        # this method just lets us override the property method above
+        # https://stackoverflow.com/questions/1684828/
+        self._source = new_value
+
     def get_sanitized_structure(self):
         """
         Run symmetry analysis and "sanitization" on the pymatgen structure
@@ -76,10 +99,6 @@ class Structure(PymatgenStructure):
             filename for a structure (cif, poscar, etc.) [TODO]
         """
 
-        # keep track of this flag too, which we use in the next sections on loading
-        # the directory and source
-        is_from_past_calc = False
-
         # if the input is already a pymatgen structure, just return it back
         if isinstance(structure, PymatgenStructure):
             structure_cleaned = structure
@@ -92,7 +111,6 @@ class Structure(PymatgenStructure):
         # if there is a database_table key, then we are pointing to the simmate
         # database for the input structure
         elif isinstance(structure, dict) and "database_table" in structure.keys():
-            is_from_past_calc = True
             structure_cleaned = cls.from_database_dict(structure)
 
         # if the value is a str and it relates to a filepath, then we load the
@@ -105,7 +123,6 @@ class Structure(PymatgenStructure):
         # the checks above. So instead, we check an attribute that we know is
         # on all tables instead of checking isinstance(DatabaseStructure).
         elif hasattr(structure, "table_name"):
-            is_from_past_calc = True
             structure_cleaned = cls.from_database_object(structure)
 
         # Otherwise an incorrect format was given
@@ -121,9 +138,6 @@ class Structure(PymatgenStructure):
                     "Unknown format provided for structure input. "
                     f"{type(structure)} was provided."
                 )
-
-        # add this attribute to help with error checking in other methods
-        structure_cleaned.is_from_past_calc = is_from_past_calc
 
         return structure_cleaned
 

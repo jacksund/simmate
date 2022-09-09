@@ -110,16 +110,16 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             logging.info("Looks like this search was already ran by someone else!")
             return
 
+        logging.info("Finished setup")
+        logging.info(
+            f"Assigned this to FixedCompositionSearch id={search_datatable.id}."
+        )
+
         # See if the singleshot sources have been ran yet. For restarted calculations
         # this will likely not be needed (unless a new source was added). But for
         # new searches/compositions, this will submit all individuals from the
         # single shot sources before we even start the steady-state runs
         search_datatable._check_singleshot_sources(directory)
-
-        logging.info("Finished setup")
-        logging.info(
-            f"Assigned this to FixedCompositionSearch id={search_datatable.id}."
-        )
 
         # this loop will go until I hit 'break' below
         while True:

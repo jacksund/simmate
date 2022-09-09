@@ -115,5 +115,5 @@ class NebFromEndpointWorkflow(Workflow):
             # `update_database_from_results` method below
             run_id=run_id,
         )
-        
+
         return neb_state.result()
