@@ -794,6 +794,10 @@ class Workflow:
         else:
             source_cleaned = None
 
+        # before setting the source, we also need the source to json-seralized 
+        # for the database
+        source_cleaned = cls._serialize_parameters(source=source_cleaned)["source"]
+        
         # SPECIAL CASE for customized flows
         if "workflow_base" not in parameters_cleaned:
             parameters_cleaned["source"] = source_cleaned
@@ -1007,7 +1011,7 @@ class Workflow:
                 if parameter_key == "directory":
                     # convert Path to str
                     parameter_value = str(parameter_value)
-                elif parameter_key == "source":
+                elif parameter_key == "source" and isinstance(parameter_value, dict):
                     # recursive call to this function
                     parameter_value = cls._serialize_parameters(**parameter_value)
                 elif parameter_key == "composition":
@@ -1080,7 +1084,6 @@ class Workflow:
         # OPTIMIZE: if I have proper typing and parameter itrospection, I could
         # potentially grab the from_dynamic method on the fly -- rather than
         # doing these repeated steps here.
-
         parameter_mappings = {
             "structure": Structure,
             "composition": Composition,

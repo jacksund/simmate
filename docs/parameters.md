@@ -896,6 +896,13 @@ The crystal structure to be used for the analysis. The input can be anything com
     )
     ```
 
+**a `Structure` database object**
+
+=== "python"
+    ``` python
+    structure = ExampleTable.objects.get(id=123)
+    ```
+
 **json/dictionary serialization from pymatgen**
 
 --------------------------

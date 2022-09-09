@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import shutil
 from pathlib import Path
 
 from simmate.toolkit.structure_prediction.evolution.database.fixed_composition import (
@@ -38,6 +39,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
                 "The search ended while this individual was in the queue. "
                 "Canceling new individual."
             )
+            shutil.rmtree(directory)
             return
 
         if source_db.is_transformation:

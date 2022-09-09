@@ -83,11 +83,7 @@ class Relaxation__Vasp__Staged(Workflow):
         for i, current_task in enumerate(cls.subworkflows[1:]):
             preceding_task = cls.subworkflows[i]  # will be one before because of [:1]
             state = current_task.run(
-                structure={
-                    "database_table": preceding_task.database_table.table_name,
-                    "database_id": result.id,  # uses preceding result
-                    "structure_field": "structure_final",
-                },
+                structure=result,  # this is the result of the last run
                 command=command,
                 directory=directory / current_task.name_full,
             )

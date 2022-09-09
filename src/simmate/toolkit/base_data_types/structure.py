@@ -100,6 +100,14 @@ class Structure(PymatgenStructure):
         elif isinstance(structure, str) and Path(structure).exists():
             structure_cleaned = cls.from_file(structure)
 
+        # from_dynamic includes a check to the database, but we don't want to
+        # connect to the database unless we need to. This would slow down
+        # the checks above. So instead, we check an attribute that we know is
+        # on all tables instead of checking isinstance(DatabaseStructure).
+        elif hasattr(structure, "table_name"):
+            is_from_past_calc = True
+            structure_cleaned = cls.from_database_object(structure)
+
         # Otherwise an incorrect format was given
         else:
             if isinstance(structure, str):

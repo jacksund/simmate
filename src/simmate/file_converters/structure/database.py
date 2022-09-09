@@ -53,12 +53,9 @@ database_structure = toolkit_structure.database_object
 ```
 """
 
-from django.utils.module_loading import import_string
-
 from simmate.database import connect
 from simmate.database.base_data_types import Structure as DatabaseStructure
 from simmate.toolkit import Structure as ToolkitStructure
-from simmate.website.workflows import models as all_datatables
 
 
 class DatabaseAdapter:
@@ -82,43 +79,7 @@ class DatabaseAdapter:
         metadata.
         """
 
-        # start by loading the datbase table, which is given as a module path
-        datatable_str = structure_dict["database_table"]
-
-        # Import the datatable class -- how this is done depends on if it
-        # is from a simmate supplied class or if the user supplied a full
-        # path to the class
-        # OPTIMIZE: is there a better way to do this?
-        if hasattr(all_datatables, datatable_str):
-            datatable = getattr(all_datatables, datatable_str)
-        else:
-            datatable = import_string(datatable_str)
-
-        # These attributes tells us which structure to grab from our datatable.
-        # The user should have only provided one -- if they gave more, we just
-        # use whichever one comes first.
-        run_id = structure_dict.get("run_id")
-        database_id = structure_dict.get("database_id")
-        directory = structure_dict.get("directory")
-
-        # we must have either a run_id or database_id
-        if not run_id and not database_id and not directory:
-            raise Exception(
-                "You must have either a run_id, database_id, "
-                "or directory provided if you want to load a structure from "
-                "a previous calculation."
-            )
-
-        # now query the datable with which whichever was provided. Each of these
-        # are unique so all three should return a single calculation.
-        if database_id:
-            database_object = datatable.objects.get(id=database_id)
-        elif run_id:
-            database_object = datatable.objects.get(
-                run_id=run_id,
-            )
-        elif directory:
-            database_object = datatable.objects.get(directory=directory)
+        database_object = DatabaseStructure.from_dict(structure_dict)
 
         # In some cases, the structure we want is not within the calculation table.
         # For example, in relaxations the final structure is attached via
