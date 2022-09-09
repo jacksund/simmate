@@ -154,11 +154,7 @@ def explore():
     print(f"{prefix}===================== {final_workflow_name} =====================")
 
     # now we load this workflow and print the docstring.
-    workflow = get_workflow(
-        workflow_name=final_workflow_name,
-        precheck_flow_exists=True,
-        print_equivalent_import=True,
-    )
+    workflow = get_workflow(workflow_name=final_workflow_name)
 
     # extra import in order to render markdown in the terminal
     # from: https://rich.readthedocs.io/en/stable/markdown.html
@@ -215,11 +211,7 @@ def show_config(workflow_name: str):
 
     from simmate.workflows.utilities import get_workflow
 
-    workflow = get_workflow(
-        workflow_name=workflow_name,
-        precheck_flow_exists=True,
-        print_equivalent_import=True,
-    )
+    workflow = get_workflow(workflow_name)
 
     workflow.show_config()
 
@@ -239,11 +231,7 @@ def setup_only(context: Context, workflow_name: str):
 
     from simmate.workflows.utilities import get_workflow
 
-    workflow = get_workflow(
-        workflow_name=workflow_name,
-        precheck_flow_exists=True,
-        print_equivalent_import=True,
-    )
+    workflow = get_workflow(workflow_name)
     kwargs_input = parse_parameters(context=context)
     kwargs_cleaned = workflow._deserialize_parameters(**kwargs_input)
 
@@ -288,11 +276,7 @@ def run_quick(context: Context, workflow_name: str):
 
     from simmate.workflows.utilities import get_workflow
 
-    workflow = get_workflow(
-        workflow_name=workflow_name,
-        precheck_flow_exists=True,
-        print_equivalent_import=True,
-    )
+    workflow = get_workflow(workflow_name)
     kwargs_cleaned = parse_parameters(context=context)
 
     result = workflow.run(**kwargs_cleaned)

@@ -8,36 +8,76 @@ a workflow using its name.
 
 import importlib
 import logging
-import pkgutil
 import shutil
 import sys
+from inspect import getmembers, isclass
 from pathlib import Path
 
 import yaml
-from rich import print
 
-from simmate import workflows
-from simmate.configuration.django.settings import extra_apps
+from simmate.configuration.django.settings import SIMMATE_APPS
 from simmate.utilities import get_directory, make_archive
 from simmate.workflow_engine import Workflow
 
 
-def get_all_workflow_names() -> list[str]:
+def get_all_workflows(
+    apps_to_search: list[str] = SIMMATE_APPS,
+    as_dict: bool = False,
+) -> list[Workflow]:
+    """
+    Goes through a list of apps and grabs all workflow objects available.
+    By default, this will grab all installed SIMMATE_APPs
+    """
+    app_workflows = []
+    for app_name in apps_to_search:
+        # modulename is by cutting off the "apps.AppConfig" part of the config
+        # path. For example, "simmate.calculators.vasp.apps.VaspConfig" would
+        # give an app_modulename of "simmate.calculators.vasp"
+        app_modulename = ".".join(app_name.split(".")[:-2])
+        try:
+            app_module = importlib.import_module(f"{app_modulename}.workflows")
+        except Exception as error:
+            logging.warning(
+                f"Failed to load workflows from {app_name}. Did you make sure "
+                "there is a workflows.py file or module present?"
+                f"The error given was...\n {error}"
+            )
+            # raise error  --- should I just raise the error?
+            continue
+
+        # iterate through each available object in the workflows file and find
+        # which ones are workflow objects.
+
+        # If an __all__ value is set, then this will take priority when grabbing
+        # workflows from the module
+        if hasattr(app_module, "__all__"):
+            for workflow_name in app_module.__all__:
+                workflow = getattr(app_module, workflow_name)
+                if workflow not in app_workflows:
+                    app_workflows.append(workflow)
+
+        # otherwise we load ALL class objects from the module -- assuming the
+        # user properly limited these to just Workflow objects.
+        else:
+            # a tuple is returned by getmembers so c[0] is the string name while
+            # c[1] is the python class object.
+            app_workflows += [c[1] for c in getmembers(app_module) if isclass(c[1])]
+
+    return (
+        app_workflows
+        if not as_dict
+        else {flow.name_full: flow for flow in app_workflows}
+    )
+
+
+def get_all_workflow_names(apps_to_search: list[str] = SIMMATE_APPS) -> list[str]:
     """
     Returns a list of all the workflows of all types.
-
-    This utility was make specifically for the CLI where we print out all
-    workflow names for the user.
     """
-
-    workflow_names = []
-    for flow_type in get_all_workflow_types():
-        workflow_names += get_workflow_names_by_type(flow_type)
-
-    return workflow_names
+    return [flow.name_full for flow in get_all_workflows(apps_to_search)]
 
 
-def get_all_workflow_types():
+def get_all_workflow_types() -> list[str]:
     """
     Grabs all workflow types, which is also all "Project Names" and all of the
     submodules listed in the `simmate.workflows` module.
@@ -45,15 +85,9 @@ def get_all_workflow_types():
     Gives names in the format with all lowercase and hypens, such as "relaxation"
     or "static-energy"
     """
+    workflow_types = []
 
-    workflow_types = [
-        submodule.name.replace("_", "-")
-        for submodule in pkgutil.iter_modules(workflows.__path__)
-        if submodule.name != "utilities"
-    ]
-
-    # add custom apps
-    for flow in get_workflows_from_apps():
+    for flow in get_all_workflows():
         if flow.name_type not in workflow_types:
             workflow_types.append(flow.name_type)
 
@@ -62,50 +96,25 @@ def get_all_workflow_types():
     return workflow_types
 
 
-def get_calculators_by_type(flow_type: str) -> list[str]:
+def get_calculators_by_type(
+    flow_type: str,
+    precheck_type_exists: bool = True,
+) -> list[str]:
     """
     Returns a list of all the available calculators for a given workflow type.
     """
-    # !!! This is largely a copy/paste of code from get_workflow_names_by_type.
-    # Consider merging during refactor.
 
     # Make sure the type is supported
-    workflow_types = get_all_workflow_types()
-    if flow_type not in workflow_types:
-        raise TypeError(
-            f"{flow_type} is not allowed. Please use a workflow type from this"
-            f" list: {workflow_types}"
-        )
-
-    # switch the naming convention from "flow-name" to "flow_name".
-    flow_type_u = flow_type.replace("-", "_")
-
-    # grab the relevent module. If this fails, then the user is giving a custom
-    # type that isn't in simmate.
-    try:
-        flow_module = importlib.import_module(f"simmate.workflows.{flow_type_u}")
-        is_custom_type = False
-    except ModuleNotFoundError:
-        is_custom_type = True
+    if precheck_type_exists:
+        workflow_types = get_all_workflow_types()
+        if flow_type not in workflow_types:
+            raise TypeError(
+                f"{flow_type} is not allowed. Please use a workflow type from "
+                f"this list: {workflow_types}"
+            )
 
     calculator_names = []
-
-    # This loop goes through all attributes (as strings) of the workflow module
-    # and select only those that are workflow or s3tasks.
-    if not is_custom_type:
-        for attr_name in dir(flow_module):
-            attr = getattr(flow_module, attr_name)
-            # OPTIMIZE: line below --> issubclass(attr, Workflow) --> raises error
-            if hasattr(attr, "run_config") and attr.__name__ != "Workflow":
-                # attr is now a workflow object (such as Relaxation__Vasp__Matproj)
-                # and we can grab whichever name we'd like from it and
-                # add the name to our list
-                if attr.name_calculator not in calculator_names:
-                    calculator_names.append(attr.name_calculator)
-        # OPTIMIZE: is there a more efficient way to do this?
-
-    # add custom app calculators
-    for flow in get_workflows_from_apps():
+    for flow in get_all_workflows():
         if flow.name_type == flow_type and flow.name_calculator not in calculator_names:
             calculator_names.append(flow.name_calculator)
 
@@ -117,78 +126,43 @@ def get_workflow_names_by_type(
     flow_type: str,
     calculator_name: str = None,
     full_name: bool = True,
+    precheck_type_exists: bool = True,
 ) -> list[str]:
     """
-    Returns a list of all the workflows located in the given module.
+    Returns a list of all the workflows of a given type. Optionally, the
+    workflows can also be filtered by calculator name.
     """
 
     # Make sure the type is supported
-    workflow_types = get_all_workflow_types()
-    if flow_type not in workflow_types:
-        raise TypeError(
-            f"{flow_type} is not allowed. Please use a workflow type from this"
-            f" list: {workflow_types}"
-        )
-
-    # switch the naming convention from "flow-name" to "flow_name".
-    flow_type_u = flow_type.replace("-", "_")
-
-    # grab the relevent module. If this fails, then the user is giving a custom
-    # type that isn't in simmate.
-    try:
-        flow_module = importlib.import_module(f"simmate.workflows.{flow_type_u}")
-        is_custom_type = False
-    except ModuleNotFoundError:
-        is_custom_type = True
+    if precheck_type_exists:
+        workflow_types = get_all_workflow_types()
+        if flow_type not in workflow_types:
+            raise TypeError(
+                f"{flow_type} is not allowed. Please use a workflow type from "
+                f"this list: {workflow_types}"
+            )
 
     workflow_names = []
 
-    # This loop goes through all attributes (as strings) of the workflow module
-    # and select only those that are workflow or s3tasks.
-    if not is_custom_type:
-        for attr_name in dir(flow_module):
-            attr = getattr(flow_module, attr_name)
-            # OPTIMIZE: line below --> issubclass(attr, Workflow) --> raises error
-            if hasattr(attr, "run_config") and attr.__name__ != "Workflow":
-                # attr is now a workflow object (such as Relaxation__Vasp__Matproj)
-                # and we can grab whichever name we'd like from it.
+    for flow in get_all_workflows():
 
-                # if a calculator_name was given, then we need to limit the results
-                # to that specific calculator.
-                if calculator_name and attr.name_calculator != calculator_name:
-                    continue  # Skip those that don't match
-
-                if full_name:
-                    workflow_name = attr.name_full
-                else:
-                    workflow_name = attr.name_preset
-
-                # and add the name to our list
-                workflow_names.append(workflow_name)
-        # OPTIMIZE: is there a more efficient way to do this?
-
-    # add custom app calculators
-    for flow in get_workflows_from_apps():
         if flow.name_type != flow_type:
             continue
-        # this follows the same logic as the for-loop above
         if calculator_name and flow.name_calculator != calculator_name:
-            continue
+            continue  # Skip those that don't match
+
         if full_name:
             workflow_name = flow.name_full
         else:
             workflow_name = flow.name_preset
+
         workflow_names.append(workflow_name)
 
     workflow_names.sort()
     return workflow_names
 
 
-def get_workflow(
-    workflow_name: str,
-    precheck_flow_exists: bool = False,
-    print_equivalent_import: bool = False,
-) -> Workflow:
+def get_workflow(workflow_name: str) -> Workflow:
     """
     This is a utility for that grabs a workflow from the simmate workflows.
 
@@ -221,22 +195,7 @@ def get_workflow(
     - `workflow_name`:
         Name of the workflow to load. Examples include "relaxation.vasp.matproj",
         "static-energy.vasp.quality01", and "diffusion.vasp.all-paths"
-
-    - `precheck_flow_exists`:
-        Whether to check if the workflow actually exists before attempting the
-        import. Note, this requires loading all other workflows in order to make
-        this check, so it slows down the function substansially. Defaults to false.
-
-    - `print_equivalent_import`:
-        Whether to print a message indicating the equivalent import for this
-        workflow. Typically this is only useful for beginners using the CLI.
-        Defaults to false.
     """
-
-    # check if we have a custom workflow first
-    if workflow_name in get_workflow_names_from_apps():
-        workflow_dict = get_workflows_from_apps(as_dict=True)
-        return workflow_dict[workflow_name]
 
     # First check if the user is providing a custom workflow, where the path is
     # given as "path/to/my/script:my_workflow_obj". If so, we need to load that
@@ -262,18 +221,28 @@ def get_workflow(
 
         return workflow
 
-    # make sure we have a proper workflow name provided.
-    # This is optional because it is slow and loads all other workflows, rather
-    # than just the one we are interested in.
-    if precheck_flow_exists:
-        allowed_workflows = get_all_workflow_names()
-        if workflow_name not in allowed_workflows:
-            raise ModuleNotFoundError(
-                "The workflow you provided isn't known. Make sure you don't have any "
-                "typos! If you want a list of all available workflows, use the command "
-                "`simmate workflows list-all`. You can also interactively explore "
-                "workflows with `simmate workflows explore`"
-            )
+    # otherwise the app should be registered and available in the SIMMATE_APPS
+    workflow_dict = get_all_workflows(as_dict=True)
+    workflow = workflow_dict.get(workflow_name, None)
+
+    # make sure we have a proper workflow name provided and were able to load
+    # it successfully
+    if not workflow:
+        raise Exception(
+            "The workflow you provided isn't known. Make sure you don't have any "
+            "typos! If you want a list of all available workflows, use the command "
+            "`simmate workflows list-all`. You can also interactively explore "
+            "workflows with `simmate workflows explore`"
+        )
+
+    return workflow
+
+
+def reverse_workflow_name(workflow_name: str) -> str:
+    """
+    Converts the workflow name back into the pythonic class name. For example,
+    this converts "static-energy.vasp.mit" to "StaticEnergy__Vasp__Mit"
+    """
 
     # parse the workflow name. (e.g. static-energy.vasp.mit --> static_energy + vasp + mit)
     project_name, calculator_name, preset_name = workflow_name.replace("-", "_").split(
@@ -289,23 +258,32 @@ def get_workflow(
         ]
     )
 
-    # The naming convention matches the import path
-    # BUG: What about user workflows...? Should I try each custom app import?
-    workflow_module = importlib.import_module(f"simmate.workflows.{project_name}")
+    return workflow_class_name
 
-    # If requested, print a message indicating the import we are using
-    if print_equivalent_import:
-        print("\n\n[bold green]Using:")
-        print(
-            f"\n\tfrom simmate.workflows.{project_name} import {workflow_class_name} \n\n"
-            "You can find the source code for this workflow in the follwing module: \n\n\t"
-            f"simmate.calculators.{calculator_name}.workflows.{project_name}"
-        )
 
-    # and import the workflow
-    workflow = getattr(workflow_module, workflow_class_name)
+def get_unique_parameters() -> list[str]:
+    """
+    Returns a list of all unique parameter names accross all workflows.
 
-    return workflow
+    This utility is really just to help developers ensure they are covering
+    all cases when implementing new features, so this function isn't actually
+    called elsewhere.
+    """
+
+    workflows = get_all_workflows()
+    unique_parameters = []
+    for workflow in workflows:
+        for parameter in workflow.parameter_names:
+            if parameter not in unique_parameters and parameter not in [
+                "kwargs",
+                "cls",
+            ]:
+                unique_parameters.append(parameter)
+
+    # for consistency, we sort these alphabetically
+    unique_parameters.sort()
+
+    return unique_parameters
 
 
 def load_results_from_directories(base_directory: Path | str = "."):
@@ -382,63 +360,3 @@ def load_results_from_directories(base_directory: Path | str = "."):
 
         except:
             logging.warning("Failed to load into database")
-
-
-def get_unique_parameters() -> list[str]:
-    """
-    Returns a list of all unique parameter names accross all workflows.
-
-    This utility is really just to help developers ensure they are covering
-    all cases when implementing new features, so this function isn't actually
-    called elsewhere.
-    """
-
-    flownames = get_all_workflow_names()
-    unique_parameters = []
-    for flowname in flownames:
-        workflow = get_workflow(flowname)
-        for parameter in workflow.parameter_names:
-            if parameter not in unique_parameters and parameter not in [
-                "kwargs",
-                "cls",
-            ]:
-                unique_parameters.append(parameter)
-
-    # for consistency, we sort these alphabetically
-    unique_parameters.sort()
-
-    return unique_parameters
-
-
-def get_workflow_names_from_apps(apps_to_search: list[str] = extra_apps) -> list[str]:
-    return [flow.name_full for flow in get_workflows_from_apps(apps_to_search)]
-
-
-def get_workflows_from_apps(
-    apps_to_search: list[str] = extra_apps,
-    as_dict: bool = False,
-):
-    app_workflows = []
-    for app_name in apps_to_search:
-        app_modulename = app_name.split(".")[0]
-        try:
-            app_module = importlib.import_module(f"{app_modulename}.workflows")
-        except:
-            logging.warning(
-                f"Failed to load workflows from {app_name}. Did you make sure "
-                "there is a workflows.py file or module present?"
-            )
-            continue
-
-        # iterate through each available object in the workflows file and find
-        # which ones are workflow objects
-        for workflow_name in app_module.__all__:
-            workflow = getattr(app_module, workflow_name)
-            if workflow not in app_workflows:
-                app_workflows.append(workflow)
-
-    return (
-        app_workflows
-        if not as_dict
-        else {flow.name_full: flow for flow in app_workflows}
-    )

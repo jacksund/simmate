@@ -118,6 +118,8 @@ class Transformation:
             **select_kwargs,
         )
 
+        logging.info(f"Selected parents: {parent_ids}")
+
         # Until we get a new valid structure (or run out of attempts), keep trying
         # with our given source. Assume we don't have a valid structure until
         # proven otherwise

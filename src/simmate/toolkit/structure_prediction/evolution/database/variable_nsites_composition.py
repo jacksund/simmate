@@ -4,6 +4,9 @@ from simmate.database.base_data_types import Calculation, table_column
 
 
 class VariableNsitesCompositionSearch(Calculation):
+    class Meta:
+        app_label = "workflows"
+
     # OPTIMIZE: This is really just a copy/paste of the fixed-composition
     # workflow, where we aren't using the table directly in the search and
     # skips making steadystate_source table entries. It simply stores input

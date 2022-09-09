@@ -61,7 +61,7 @@ class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
 # Below are extra tasks and subflows for the workflow that is defined above
 
 
-class PopulationAnalysis__Vasp__PrebadelfMatproj(StaticEnergy__Vasp__Matproj):
+class StaticEnergy__Vasp__PrebadelfMatproj(StaticEnergy__Vasp__Matproj):
     """
     Runs a static energy calculation with a high-density FFT grid under settings
     from the Materials Project. Results can be used for Bader analysis where

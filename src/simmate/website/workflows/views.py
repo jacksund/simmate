@@ -3,7 +3,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from simmate import workflows as workflow_module
 from simmate.database.base_data_types import DatabaseTable
 from simmate.website.core_components.base_api_view import SimmateAPIViewSet
 from simmate.website.workflows.forms import SubmitWorkflow
@@ -12,6 +11,37 @@ from simmate.workflows.utilities import (  # WORKFLOW_TYPES,
     get_workflow,
     get_workflow_names_by_type,
 )
+
+TYPE_DESCRIPTIONS = {
+    "static-energy": (
+        "Calculate the energy for a structure. In many cases, this also "
+        "involves calculating the lattice strain and forces for each site."
+    ),
+    "relaxation": (
+        "Geometry-optimize a structure's the lattice and sites "
+        "to their lowest-energy positions until convergence criteria are met."
+    ),
+    "population-analysis": (
+        "Evaluate where electrons exist in a structure and assign them to a "
+        "specific site/atom. Used to predicted oxidation states."
+    ),
+    # "band-structure": (
+    #     "These workflows calculate the electronic band structure for a material."
+    # ),
+    # "density-of-states": (
+    #     "These workflows calculate the electronic density of states for a material."
+    # ),
+    "dynamics": (
+        "Run a molecular dynamics simulation for a material. Involves "
+        "iteratively evaluating the energy/forces at "
+        "specific temperature (or temperature ramp)."
+    ),
+    # "diffusion": (
+    #     "These workflows evaluate the diffusion of an atom through a material. "
+    #     "At this time, these workflows are entirely Nudged-Elastic-Band (NEB) "
+    #     "calculations."
+    # ),
+}
 
 
 def workflows_all(request):
@@ -23,39 +53,8 @@ def workflows_all(request):
     #     --> grab the module
     #     --> use the __doc__ as the text.
 
-    workflows_metadata = {
-        "static-energy": (
-            "Calculate the energy for a structure. In many cases, this also "
-            "involves calculating the lattice strain and forces for each site."
-        ),
-        "relaxation": (
-            "Geometry-optimize a structure's the lattice and sites "
-            "to their lowest-energy positions until convergence criteria are met."
-        ),
-        "population-analysis": (
-            "Evaluate where electrons exist in a structure and assign them to a "
-            "specific site/atom. Used to predicted oxidation states."
-        ),
-        # "band-structure": (
-        #     "These workflows calculate the electronic band structure for a material."
-        # ),
-        # "density-of-states": (
-        #     "These workflows calculate the electronic density of states for a material."
-        # ),
-        "dynamics": (
-            "Run a molecular dynamics simulation for a material. Involves "
-            "iteratively evaluating the energy/forces at "
-            "specific temperature (or temperature ramp)."
-        ),
-        # "diffusion": (
-        #     "These workflows evaluate the diffusion of an atom through a material. "
-        #     "At this time, these workflows are entirely Nudged-Elastic-Band (NEB) "
-        #     "calculations."
-        # ),
-    }
-
     # now let's put the data and template together to send the user
-    context = {"workflows_metadata": workflows_metadata}
+    context = {"workflows_metadata": TYPE_DESCRIPTIONS}
     template = "workflows/all.html"
     return render(request, template, context)
 
@@ -71,14 +70,10 @@ def workflows_by_type(request, workflow_type):
         workflow_names = get_workflow_names_by_type(workflow_type, calculator)
         workflow_dict[calculator] = [get_workflow(n) for n in workflow_names]
 
-    # for loading the docstring of the workflows.type module
-    workflow_type_module = getattr(workflow_module, workflow_type.replace("-", "_"))
-    # BUG: this must be AFTER the code above in order to have the module loaded
-
     # now let's put the data and template together to send the user
     context = {
         "workflow_type": workflow_type,
-        "workflow_type_description_short": workflow_type_module.__doc__,
+        "workflow_type_description": TYPE_DESCRIPTIONS.get(workflow_type, ""),
         "workflow_dict": workflow_dict,
     }
     template = "workflows/by_type.html"

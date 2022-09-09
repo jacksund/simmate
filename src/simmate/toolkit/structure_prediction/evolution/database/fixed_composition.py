@@ -11,15 +11,7 @@ from rich.progress import track
 
 from simmate.database.base_data_types import Calculation, table_column
 from simmate.toolkit import Composition, Structure
-from simmate.toolkit.structure_prediction import (
-    get_known_structures,
-    get_structures_from_prototypes,
-    get_structures_from_substitution_of_known,
-)
 from simmate.toolkit.structure_prediction.evolution.database import SteadystateSource
-from simmate.toolkit.structure_prediction.evolution.workflows.utilities import (
-    write_and_submit_structures,
-)
 from simmate.toolkit.validators import fingerprint as validator_module
 from simmate.utilities import get_directory
 from simmate.visualization.plotting import PlotlyFigure
@@ -172,6 +164,16 @@ class FixedCompositionSearch(Calculation):
         return False
 
     def _check_singleshot_sources(self, directory: Path):
+
+        # local imports to prevent circuluar import issues
+        from simmate.toolkit.structure_prediction import (
+            get_known_structures,
+            get_structures_from_prototypes,
+            get_structures_from_substitution_of_known,
+        )
+        from simmate.toolkit.structure_prediction.evolution.workflows.utilities import (
+            write_and_submit_structures,
+        )
 
         composition = Composition(self.composition)
 

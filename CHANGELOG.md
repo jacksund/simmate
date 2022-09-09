@@ -43,6 +43,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - customized workflow runs now save in the original database table under the "-custom" workflow name
 - `structure_string` column renamed to `structure` to simplify api logic
 - clean up `toolkit.validators` module and establish fingerprint base class
+- `calculators` and `workflows` modules are now based on simmate apps
 
 **Fixes**
 - fix bug in windows dev env where `simmate run-server` fails to find python path

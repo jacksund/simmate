@@ -32,14 +32,20 @@ def test_get_workflow_types():
 def test_list_of_all_workflows():
 
     assert get_all_workflow_names() == [
-        "customized.vasp.user-config",
+        "customized.toolkit.user-config",
+        "restart.toolkit.automatic",
         "diffusion.vasp.neb-all-paths-mit",
         "diffusion.vasp.neb-from-endpoints-mit",
         "diffusion.vasp.neb-from-images-mit",
+        "diffusion.vasp.neb-from-images-mvl-ci",
         "diffusion.vasp.neb-single-path-mit",
         "dynamics.vasp.matproj",
         "dynamics.vasp.mit",
         "dynamics.vasp.mvl-npt",
+        "electronic-structure.vasp.matproj-band-structure",
+        "electronic-structure.vasp.matproj-band-structure-hse",
+        "electronic-structure.vasp.matproj-density-of-states",
+        "electronic-structure.vasp.matproj-density-of-states-hse",
         "electronic-structure.vasp.matproj-full",
         "electronic-structure.vasp.matproj-hse-full",
         "population-analysis.vasp-bader.badelf-matproj",
@@ -59,13 +65,17 @@ def test_list_of_all_workflows():
         "relaxation.vasp.quality03",
         "relaxation.vasp.quality04",
         "relaxation.vasp.staged",
-        "restart.simmate.automatic",
         "static-energy.vasp.matproj",
         "static-energy.vasp.matproj-hse",
         "static-energy.vasp.matproj-scan",
         "static-energy.vasp.mit",
         "static-energy.vasp.mvl-neb-endpoint",
+        "static-energy.vasp.prebadelf-matproj",
+        "static-energy.vasp.prebader-matproj",
         "static-energy.vasp.quality04",
+        "population-analysis.bader.badelf",
+        "population-analysis.bader.bader",
+        "population-analysis.bader.combine-chgcars",
         "structure-prediction.toolkit.binary-system",
         "structure-prediction.toolkit.fixed-composition",
         "structure-prediction.toolkit.new-individual",
@@ -89,6 +99,8 @@ def test_list_of_workflows_by_type():
         "static-energy.vasp.matproj-scan",
         "static-energy.vasp.mit",
         "static-energy.vasp.mvl-neb-endpoint",
+        "static-energy.vasp.prebadelf-matproj",
+        "static-energy.vasp.prebader-matproj",
         "static-energy.vasp.quality04",
     ]
 
@@ -106,7 +118,9 @@ def test_list_of_workflows_by_type():
 
 def test_get_workflow():
 
-    from simmate.workflows.static_energy import StaticEnergy__Vasp__Matproj as workflow
+    from simmate.calculators.vasp.workflows import (
+        StaticEnergy__Vasp__Matproj as workflow,
+    )
 
     assert get_workflow("static-energy.vasp.matproj") == workflow
 

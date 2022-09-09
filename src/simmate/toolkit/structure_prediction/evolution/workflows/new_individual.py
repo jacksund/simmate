@@ -3,7 +3,9 @@
 import logging
 from pathlib import Path
 
-from simmate.database.workflow_results import FixedCompositionSearch
+from simmate.toolkit.structure_prediction.evolution.database.fixed_composition import (
+    FixedCompositionSearch,
+)
 from simmate.workflow_engine import Workflow
 
 

@@ -21,11 +21,15 @@ from pymatgen.io.vasp.sets import (
 )
 
 from simmate.calculators.vasp.inputs import Incar, Potcar
-from simmate.calculators.vasp.workflows.all import (  # Dynamics__Vasp__MvlNpt,
+from simmate.calculators.vasp.workflows import (  # Dynamics__Vasp__MvlNpt,
     Diffusion__Vasp__NebFromImagesMit,
     Diffusion__Vasp__NebFromImagesMvlCi,
     Dynamics__Vasp__Matproj,
     Dynamics__Vasp__Mit,
+    ElectronicStructure__Vasp__MatprojBandStructure,
+    ElectronicStructure__Vasp__MatprojBandStructureHse,
+    ElectronicStructure__Vasp__MatprojDensityOfStates,
+    ElectronicStructure__Vasp__MatprojDensityOfStatesHse,
     Relaxation__Vasp__Matproj,
     Relaxation__Vasp__MatprojHse,
     Relaxation__Vasp__MatprojMetal,
@@ -38,23 +42,7 @@ from simmate.calculators.vasp.workflows.all import (  # Dynamics__Vasp__MvlNpt,
     StaticEnergy__Vasp__MatprojScan,
 )
 from simmate.calculators.vasp.workflows.elastic.mvl import Elastic__Vasp__Mvl
-
-# extras that are hidden from the all endpoint
-# NOTE: these imports are long/ugly because we hide the imports from users --
-# and instead point them to higher-level workflows that call these.
-from simmate.calculators.vasp.workflows.electronic_structure.matproj_band_structure import (
-    ElectronicStructure__Vasp__MatprojBandStructure,
-)
-from simmate.calculators.vasp.workflows.electronic_structure.matproj_band_structure_hse import (
-    ElectronicStructure__Vasp__MatprojBandStructureHse,
-)
-from simmate.calculators.vasp.workflows.electronic_structure.matproj_density_of_states import (
-    ElectronicStructure__Vasp__MatprojDensityOfStates,
-)
-from simmate.calculators.vasp.workflows.electronic_structure.matproj_density_of_states_hse import (
-    ElectronicStructure__Vasp__MatprojDensityOfStatesHse,
-)
-from simmate.calculators.vasp.workflows.nuclear_magnetic_resonance.all import (
+from simmate.calculators.vasp.workflows.nuclear_magnetic_resonance import (
     Nmr__Vasp__MatprojChemicalShifts,
     Nmr__Vasp__MatprojFieldGradient,
 )

@@ -9,7 +9,7 @@ from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
 
-class Restart__Simmate__Automatic(Workflow):
+class Restart__Toolkit__Automatic(Workflow):
     """
     Given a directory of a incomplete Simmate workflow run, this will use the
     metadata file to restart the calculation.
