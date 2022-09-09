@@ -36,15 +36,15 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             # "third_party_substituition",
         ],
         steadystate_sources: dict = {
-            "RandomSymStructure": 0.30,
-            "from_ase.Heredity": 0.30,
-            "from_ase.SoftMutation": 0.10,
+            "RandomSymStructure": 0.60,
+            "from_ase.Heredity": 0.25,
+            # "from_ase.SoftMutation": 0.10,
             "from_ase.MirrorMutation": 0.05,
-            "from_ase.LatticeStrain": 0.05,
+            # "from_ase.LatticeStrain": 0.05,
             "from_ase.RotationalMutation": 0.05,
             "from_ase.AtomicPermutation": 0.05,
-            "from_ase.CoordinatePerturbation": 0.05,
-            "ExtremeSymmetry": 0.05,
+            # "from_ase.CoordinatePerturbation": 0.05,
+            # "ExtremeSymmetry": 0.05,
         },
         selector_name: str = "TruncatedSelection",
         selector_kwargs: dict = {},
@@ -110,16 +110,16 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             logging.info("Looks like this search was already ran by someone else!")
             return
 
+        logging.info("Finished setup")
+        logging.info(
+            f"Assigned this to FixedCompositionSearch id={search_datatable.id}."
+        )
+
         # See if the singleshot sources have been ran yet. For restarted calculations
         # this will likely not be needed (unless a new source was added). But for
         # new searches/compositions, this will submit all individuals from the
         # single shot sources before we even start the steady-state runs
         search_datatable._check_singleshot_sources(directory)
-
-        logging.info("Finished setup")
-        logging.info(
-            f"Assigned this to FixedCompositionSearch id={search_datatable.id}."
-        )
 
         # this loop will go until I hit 'break' below
         while True:

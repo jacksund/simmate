@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from pymatgen.analysis.structure_matcher import StructureMatcher
+
 from simmate.database import connect
 from simmate.database.third_parties import (
     AflowStructure,
@@ -14,6 +16,7 @@ from simmate.toolkit import Composition, Structure
 def get_known_structures(
     composition: Composition,
     allow_multiples: bool = False,
+    remove_matching: bool = False,
     **kwargs,  # Extra filtering criteria
 ) -> list[Structure]:
     """
@@ -51,5 +54,10 @@ def get_known_structures(
 
         # Convert to toolkit structures so that users can run analyses
         structures += search_results.to_toolkit()
+
+    if remove_matching:
+        matcher = StructureMatcher()
+        groups = matcher.group_structures(structures)
+        structures = [group[0] for group in groups]
 
     return structures

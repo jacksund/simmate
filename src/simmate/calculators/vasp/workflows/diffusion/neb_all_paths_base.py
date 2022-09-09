@@ -84,11 +84,7 @@ class NebAllPathsWorkflow(Workflow):
 
         # run static energy calculation on the relaxed structure
         bulk_static_energy_result = cls.bulk_static_energy_workflow.run(
-            structure={
-                "database_table": cls.bulk_relaxation_workflow.database_table.table_name,
-                "database_id": bulk_relax_result.id,
-                "structure_field": "structure_final",
-            },
+            structure=bulk_relax_result,
             command=command,  # subcommands["command_bulk"]
             directory=directory / cls.bulk_static_energy_workflow.name_full,
             is_restart=is_restart,

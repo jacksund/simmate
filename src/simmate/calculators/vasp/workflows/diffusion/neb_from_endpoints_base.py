@@ -96,16 +96,8 @@ class NebFromEndpointWorkflow(Workflow):
 
         # interpolate / empirically relax the endpoint structures
         images = get_migration_images_from_endpoints(
-            supercell_start={
-                "database_table": cls.endpoint_relaxation_workflow.database_table.table_name,
-                "database_id": endpoint_start_result.id,
-                "structure_field": "structure_final",
-            },
-            supercell_end={
-                "database_table": cls.endpoint_relaxation_workflow.database_table.table_name,
-                "database_id": endpoint_end_result.id,
-                "structure_field": "structure_final",
-            },
+            supercell_start=endpoint_start_result,
+            supercell_end=endpoint_end_result,
             nimages=nimages,
         ).result()
 
@@ -123,3 +115,5 @@ class NebFromEndpointWorkflow(Workflow):
             # `update_database_from_results` method below
             run_id=run_id,
         )
+
+        return neb_state.result()

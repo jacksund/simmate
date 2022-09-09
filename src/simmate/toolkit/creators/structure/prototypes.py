@@ -102,6 +102,8 @@ class FromAflowPrototypes:
         for i, structure in enumerate(self.structures):
             structure.scale_lattice(volume_guess)
             structure_santized = structure.get_sanitized_structure()
+            # and also copy over the source
+            structure_santized.source = structure.source
             self.structures[i] = structure_santized
 
         # ---------------------------------------------------------------------
@@ -259,6 +261,15 @@ class FromAflowPrototypes:
                     new_structure.composition.reduced_composition
                     == self.composition.reduced_composition
                 ):
+                    new_structure.source = {
+                        # we give the full element list because we can have
+                        # unique structures where elements were added to swapped
+                        # wy sites.
+                        "element_order": [
+                            str(e) for e in new_structure.composition.elements
+                        ],
+                        **prototype.database_object.to_dict(),
+                    }
                     self.structures.append(new_structure)
 
     def _create_structures_from_ordered(self):

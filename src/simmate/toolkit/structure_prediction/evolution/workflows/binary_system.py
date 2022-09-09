@@ -41,7 +41,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
         max_atoms: int = 10,
         subworkflow_name: str = "relaxation.vasp.staged",
         subworkflow_kwargs: dict = {},
-        # max_stoich_factor: int = 4,
+        max_stoich_factor: int = 4,
         directory: Path = None,
         singleshot_sources: list[str] = [
             "third_parties",
@@ -120,6 +120,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
                 new_structures = get_known_structures(
                     composition,
                     allow_multiples=True,
+                    remove_matching=True,
                     nsites__lte=max_atoms,
                 )
                 structures_known += new_structures
@@ -149,6 +150,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
                 new_structures = get_structures_from_prototypes(
                     composition,
                     max_sites=max_atoms,
+                    remove_matching=True,
                 )
                 structures_prototype += new_structures
             logging.info(
@@ -181,7 +183,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
             # essential in ensure we don't waste too much calculation time
             # on one composition -- while simultaniously making sure we
             # searched a compositon enough.
-            min_structures_exact = int(10 * natoms)
+            min_structures_exact = int(5 * natoms)
             best_survival_cutoff = int(20 * natoms)
             max_structures = int(30 * natoms)
             convergence_cutoff = 0.01  # 10 meV as looser convergence limit
@@ -190,7 +192,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
             # I keep this here for early development as we figure out ideal
             # stopping conditions.
             # for n in range(1, 10):
-            #     min_structures_exact = int(10 * n)
+            #     min_structures_exact = int(5 * n)
             #     best_survival_cutoff = int(10 * n)
             #     max_structures = int(25 * n)
             #     # convergence_cutoff = 0.01
@@ -212,6 +214,22 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
                     logging.warn(f"Skipping single-element composition {composition}")
                     continue
 
+                # For this first cycle, we only look at non-reduced compositions
+                # up to the max_stoich_factor. This means Ca2N and max factor
+                # of 4 would only look up to Ca8N4 and skip any compositions
+                # with more atoms.
+                current_factor = int(
+                    composition.reduced_composition.num_atoms / composition.num_atoms
+                )
+                if current_factor > max_stoich_factor:
+                    logging.warn(
+                        f"Skipping composition {composition} bc it exceeds the max "
+                        f"factor of {max_stoich_factor}"
+                    )
+                    continue
+
+                # If we pass the checks above, we can start the new fixed-composition
+                # search for this composition
                 cls.fixed_comp_workflow.run(
                     composition=composition,
                     subworkflow_name=subworkflow_name,

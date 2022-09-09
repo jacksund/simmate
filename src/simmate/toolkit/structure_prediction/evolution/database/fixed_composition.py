@@ -166,13 +166,15 @@ class FixedCompositionSearch(Calculation):
     def _check_singleshot_sources(self, directory: Path):
 
         # local imports to prevent circuluar import issues
-        from simmate.toolkit.structure_prediction import (
-            get_known_structures,
-            get_structures_from_prototypes,
-            get_structures_from_substitution_of_known,
-        )
         from simmate.toolkit.structure_prediction.evolution.workflows.utilities import (
             write_and_submit_structures,
+        )
+        from simmate.toolkit.structure_prediction.known import get_known_structures
+        from simmate.toolkit.structure_prediction.prototypes import (
+            get_structures_from_prototypes,
+        )
+        from simmate.toolkit.structure_prediction.substitution import (
+            get_structures_from_substitution_of_known,
         )
 
         composition = Composition(self.composition)
@@ -181,9 +183,10 @@ class FixedCompositionSearch(Calculation):
             structures_known = get_known_structures(
                 composition,
                 allow_multiples=False,
+                remove_matching=True,
             )
             logging.info(
-                f"Generated {len(structures_known)} structures from thrid-party databases"
+                f"Generated {len(structures_known)} structures from third-party databases"
             )
             write_and_submit_structures(
                 structures=structures_known,
@@ -211,6 +214,7 @@ class FixedCompositionSearch(Calculation):
             structures_prototype = get_structures_from_prototypes(
                 composition,
                 max_sites=int(composition.num_atoms),
+                remove_matching=True,
             )
             logging.info(
                 f"Generated {len(structures_prototype)} structures from prototypes"
@@ -369,7 +373,7 @@ class FixedCompositionSearch(Calculation):
                 # when starting the structure creation
                 state = StructurePrediction__Toolkit__NewIndividual.run_cloud(
                     search_id=self.id,
-                    structure_source_id=source_db.id,
+                    steadystate_source_id=source_db.id,
                 )
 
                 # Attached the id to our source so we know how many

@@ -354,6 +354,44 @@ For workflows that involve generating a supercell or random structure, this will
 
 --------------------------
 
+## max_path_length
+For diffusion workflows, this the maximum length allowed for a single path.
+
+=== "yaml"
+    ``` yaml
+    max_path_length: 3.5
+    ```
+=== "toml"
+    ``` toml
+    max_path_length = 3.5
+    ```
+=== "python"
+    ``` python
+    max_path_length = 3.5
+    ```
+
+--------------------------
+
+## max_stoich_factor
+The maximum stoichiometric ratio that will be analyzed. In a binary
+system evolutionary search, this only look at non-reduced compositions up to the max_stoich_factor. For example, this means Ca2N and max factor of 4 would only 
+look up to Ca8N4 and skip any compositions with more atoms (e.g. Ca10N5 is skipped)
+
+=== "yaml"
+    ``` yaml
+    max_stoich_factor: 5
+    ```
+=== "toml"
+    ``` toml
+    max_stoich_factor = 5
+    ```
+=== "python"
+    ``` python
+    max_stoich_factor = 5
+    ```
+
+--------------------------
+
 ## max_structures
 For workflows that generate new structures (and potentially run calculations on them), this will be the maximum number of structures allowed. The workflow will end at this number of structures regardless of whether the calculation/search is converged or not.
 
@@ -738,6 +776,12 @@ By default, no standardization is applied.
 
 --------------------------
 
+## steadystate_source_id
+(advanced users only)
+The structure source that this individual is associated with. This allows us to determine how the new individual should be created. When running a search, this is set automatically when submitting a new flow.
+
+--------------------------
+
 ## steadystate_sources
 (experimental feature; advanced users only)
 The sources that will be scheduled at a "steady-state", meaning there will always be a set number of individuals scheduled/running for this type of structure source. This should be defined as a dictionary where each is `{"source_name": percent}`. The percent determines the number of steady stage calculations that will be running for this at any given time. It will be a percent of the `nsteadystate` parameter, which sets the total number of individuals to be scheduled/running. For example, if `nsteadystate=40` and we add a source of `{"RandomSymStructure": 0.30, ...}`, this means 0.25*40=10 randomly-created individuals will be running/submitted at all times. The source can be from either the `toolkit.creator` or `toolkit.transformations` modules.
@@ -896,13 +940,14 @@ The crystal structure to be used for the analysis. The input can be anything com
     )
     ```
 
+**a `Structure` database object**
+
+=== "python"
+    ``` python
+    structure = ExampleTable.objects.get(id=123)
+    ```
+
 **json/dictionary serialization from pymatgen**
-
---------------------------
-
-## structure_source_id
-(advanced users only)
-The structure source that this individual is associated with. This allows us to determine how the new individual should be created. When running a search, this is set automatically when submitting a new flow.
 
 --------------------------
 

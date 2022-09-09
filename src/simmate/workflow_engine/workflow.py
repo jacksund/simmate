@@ -196,7 +196,6 @@ class Workflow:
     @classmethod
     def run_cloud(
         cls,
-        return_state: bool = True,
         tags: list[str] = None,
         **kwargs,
     ):
@@ -218,36 +217,31 @@ class Workflow:
 
         logging.info(f"Submitting new run of `{cls.name_full}` to cloud")
 
-        # To help with tracking the flow in cloud, we create the flow_id up front.
-        kwargs["run_id"] = kwargs.get("run_id", None) or cls._get_new_run_id()
-        run_id = kwargs["run_id"]  # just for easy reference below
-
+        # To help with tracking the flow in cloud, we load all of the inputs up
+        # front. This will include creating a run_id for us.
+        #
         # If we are submitting using a filename, we don't want to
         # submit to a cluster and have the job fail because it doesn't have
-        # access to the file. We therefore deserialize right before
-        # serializing in the next line in order to ensure parameters that
-        # accept file names are submitted with all necessary data.
-        parameters_deserialized = cls._deserialize_parameters(**kwargs)
-        parameters_serialized = cls._serialize_parameters(**parameters_deserialized)
+        # access to the file. We therefore go through the full load_input process
+        kwargs_cleaned = cls._load_input_and_register(
+            setup_directory=False,
+            write_metadata=False,
+            **kwargs,
+        )
 
-        # Because we often want to save some info to our database even before
-        # the calculation starts/finishes, we do that by calling _register_calc
-        # at this higher level. An example is storing the structure and run id.
-        # Thus, we create and register the run_id up front
-        if cls.use_database:
-            cls._register_calculation(**kwargs)
+        # Some backends can't pickle input parameters, so we need to serialize
+        # them before submission to the queue.
+        parameters_serialized = cls._serialize_parameters(**kwargs_cleaned)
 
         state = SimmateExecutor.submit(
             cls._run_full,  # should this be the run method...?
             tags=tags or cls.tags,
             **parameters_serialized,
         )
-        state.run_id = run_id  # attach the run id as an extra
 
         logging.info(f"Successfully submitted (workitem_id={state.pk})")
 
-        # If the user wants the future, return that instead of the run_id
-        return state if return_state else run_id
+        return state
 
     @classmethod
     def run_config(cls, **kwargs) -> any:
@@ -652,7 +646,12 @@ class Workflow:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_input_and_register(cls, **parameters: any) -> dict:
+    def _load_input_and_register(
+        cls,
+        setup_directory: bool = True,
+        write_metadata: bool = True,
+        **parameters: any,
+    ) -> dict:
         """
         How the input was submitted as a parameter depends on if we are submitting
         to Prefect Cloud, running the flow locally, or even continuing from a
@@ -693,112 +692,105 @@ class Workflow:
         # STEP 1: clean parameters
 
         parameters_cleaned = cls._deserialize_parameters(**parameters)
-        # ---------------------------------------------------------------------
-
-        # STEP 1b: Determine the "primary" input to use for setting the
-        # source (and previous directory)
-        # OPTIMIZE: Is there a better way to do this?
-
-        # Currently I just set a priority of possible parameters that can be
-        # the primary input. I go through each one at a time until I find one
-        # that was provided -- then I exit with that parameter's value.
-        primary_input = None
-        for primary_input_key in [
-            "structure",
-            "migration_hop",
-            "supercell_start",
-        ]:
-            primary_input = parameters.get(primary_input_key, None)
-            primary_input_cleaned = parameters_cleaned.get(primary_input_key, None)
-            if primary_input:
-                break
 
         # ---------------------------------------------------------------------
 
-        # STEP 2: Load the directory (and copy over from an old directory if necessary)
-
-        # Start by creating a new directory or grabbing the one given. We create
-        # this directory immediately (rather than just passing the name to the
-        # S3Task). We do this because NestedWorkflows often use a parent directory
-        # to organize results.
-        directory = parameters.get("directory", None)
-        directory_cleaned = get_directory(directory)
-
-        # if the user requested, we grab the previous directory as well
-        copy_previous_directory = parameters.get("copy_previous_directory", None)
-        if copy_previous_directory:
-
-            if not primary_input:
-                raise Exception(
-                    "No primary input detected, which is required for copying "
-                    "past directories. This is an experimental feature so "
-                    "please contact our team for more help."
-                )
-
-            # catch incorrect use of this function
-            if not primary_input_cleaned.is_from_past_calc:
-                raise Exception(
-                    "There isn't a previous directory available! Your source "
-                    "structure must point to a past calculation to use this feature."
-                )
-
-            # the past directory should be stored on the input object
-            previous_directory = Path(primary_input_cleaned.database_object.directory)
-
-            # Copy over all files except simmate ones (we have no need for the
-            # summaries or error archives)
-            copy_directory(
-                directory_old=previous_directory,
-                directory_new=directory_cleaned,
-                ignore_simmate_files=True,
-            )
-
-        # SPECIAL CASE for customized flows
-        if "workflow_base" not in parameters_cleaned:
-            parameters_cleaned["directory"] = directory_cleaned
-        else:
-            parameters_cleaned["input_parameters"]["directory"] = directory_cleaned
-
-        # ---------------------------------------------------------------------
-
-        # STEP 3: Load the source of the input object
+        # STEP 2: Load the source of the input object
 
         source = parameters.get("source", None)
 
-        # If we were given a input from a previous calculation, the source should
-        # point directory to that same input. Otherwise we are incorrectly trying
-        # to change what the source is.
-        # "primary_input and" is added to the start to ensure cleaned input exists
-        # and therefore prevent an error/bug.
-        if source and primary_input and primary_input_cleaned.is_from_past_calc:
-            # note primary_input here is a dictionary
-            # assert
-            if not source == primary_input:
-                # only warning for now because this is experimental
-                logging.warning(
-                    "Your source does not match the source of your "
-                    "primary input. Sources are an experimental feature, so "
-                    "this will not affect your results. Still, please report "
-                    "this to our team to help with development. \n\n"
-                    f"SOURCE: {source} \n\n"
-                    f"PRIMARY_INPUT: {primary_input} \n\n"
-                )
+        # User-given source takes the top priority
+        if source:
             source_cleaned = source
         # Check if we have a primary input loaded from a past calculation and
         # default to that as the source.
-        elif primary_input and primary_input_cleaned.is_from_past_calc:
-            source_cleaned = primary_input
-        # Otherwise just use the source given
-        elif source:
-            source_cleaned = source
         else:
-            source_cleaned = None
+            # If no source was given, we try to dynamically determine the source
+            # using the "primary" input.
+            # OPTIMIZE: Is there a better way to do this?
+
+            # Currently I just set a priority of possible parameters that can be
+            # the primary input. I go through each one at a time until I find one
+            # that was provided -- then I exit with that parameter's value.
+            primary_input = None
+            for primary_input_key in [
+                "structure",
+                "migration_hop",
+                "supercell_start",
+            ]:
+                if primary_input_key in parameters_cleaned.keys():
+                    # note we grab the deserialized input
+                    primary_input = parameters_cleaned.get(primary_input_key, None)
+                    break
+
+            if (
+                primary_input
+                and hasattr(primary_input, "source")
+                and primary_input.source
+            ):
+                source_cleaned = primary_input.source
+
+            else:
+                source_cleaned = None
+
+        # before setting the source, we also need it to be json-seralized
+        # for the database
+        source_cleaned = cls._serialize_parameters(source=source_cleaned)["source"]
 
         # SPECIAL CASE for customized flows
         if "workflow_base" not in parameters_cleaned:
             parameters_cleaned["source"] = source_cleaned
         else:
             parameters_cleaned["input_parameters"]["source"] = source_cleaned
+
+        # ---------------------------------------------------------------------
+
+        # STEP 3: Load the directory (and copy over from an old directory if necessary)
+
+        if setup_directory:
+            # Start by creating a new directory or grabbing the one given. We create
+            # this directory immediately (rather than just passing the name to the
+            # S3Task). We do this because NestedWorkflows often use a parent directory
+            # to organize results.
+            directory = parameters.get("directory", None)
+            directory_cleaned = get_directory(directory)
+
+            # if the user requested, we grab the previous directory as well
+            copy_previous_directory = parameters.get("copy_previous_directory", None)
+            if copy_previous_directory:
+
+                # BUG: I should switch this to checking the source input arg
+
+                if not primary_input:
+                    raise Exception(
+                        "No primary input detected, which is required for copying "
+                        "past directories. This is an experimental feature so "
+                        "please contact our team for more help."
+                    )
+
+                # catch incorrect use of this function
+                if not primary_input.database_object:
+                    raise Exception(
+                        "There isn't a previous directory available! Your source "
+                        "structure must point to a past calculation to use this feature."
+                    )
+
+                # the past directory should be stored on the input object
+                previous_directory = Path(primary_input.database_object.directory)
+
+                # Copy over all files except simmate ones (we have no need for the
+                # summaries or error archives)
+                copy_directory(
+                    directory_old=previous_directory,
+                    directory_new=directory_cleaned,
+                    ignore_simmate_files=True,
+                )
+
+            # SPECIAL CASE for customized flows
+            if "workflow_base" not in parameters_cleaned:
+                parameters_cleaned["directory"] = directory_cleaned
+            else:
+                parameters_cleaned["input_parameters"]["directory"] = directory_cleaned
 
         # ---------------------------------------------------------------------
 
@@ -816,45 +808,48 @@ class Workflow:
 
         # STEP 5: Write metadata file for user reference
 
-        # convert back to json format. We convert back rather than use the original
-        # to ensure the input data is all present. For example, we want to store
-        # structure data instead of a filename in the metadata.
-        # SPECIAL CASE: "if ..." used to catch customized workflows
-        parameters_serialized = (
-            cls._serialize_parameters(**parameters_cleaned)
-            if "workflow_base" not in parameters_cleaned
-            else parameters
-        )
-
-        # We want to write a file summarizing the inputs used for this
-        # workflow run. This allows future users to reproduce the results if
-        # desired -- and it also allows us to load old results into a database.
-        input_summary = dict(
-            _WORKFLOW_NAME_=cls.name_full,
-            _WORKFLOW_VERSION_=cls.version,
-            **parameters_serialized,
-        )
-
-        # now write the summary to file in the same directory as the calc.
-        # check the directory and see how many other "simmate_metadata*.yaml" files
-        # already exist. Our new file will be based off of this. Simply,
-        # if the biggest number is 04 --> then we will write a file named
-        # simmate_metadata__05.yaml to keep the count going.
-        count = (
-            len(
-                [
-                    f
-                    for f in directory_cleaned.iterdir()
-                    if f.name.startswith("simmate_metadata_")
-                ]
+        if write_metadata:
+            # convert back to json format. We convert back rather than use the original
+            # to ensure the input data is all present. For example, we want to store
+            # structure data instead of a filename in the metadata.
+            # SPECIAL CASE: "if ..." used to catch customized workflows
+            parameters_serialized = (
+                cls._serialize_parameters(**parameters_cleaned)
+                if "workflow_base" not in parameters_cleaned
+                else parameters
             )
-            + 1
-        )
-        count_str = str(count).zfill(2)
-        input_summary_file = directory_cleaned / f"simmate_metadata_{count_str}.yaml"
-        with input_summary_file.open("w") as file:
-            content = yaml.dump(input_summary)
-            file.write(content)
+
+            # We want to write a file summarizing the inputs used for this
+            # workflow run. This allows future users to reproduce the results if
+            # desired -- and it also allows us to load old results into a database.
+            input_summary = dict(
+                _WORKFLOW_NAME_=cls.name_full,
+                _WORKFLOW_VERSION_=cls.version,
+                **parameters_serialized,
+            )
+
+            # now write the summary to file in the same directory as the calc.
+            # check the directory and see how many other "simmate_metadata*.yaml" files
+            # already exist. Our new file will be based off of this. Simply,
+            # if the biggest number is 04 --> then we will write a file named
+            # simmate_metadata__05.yaml to keep the count going.
+            count = (
+                len(
+                    [
+                        f
+                        for f in directory_cleaned.iterdir()
+                        if f.name.startswith("simmate_metadata_")
+                    ]
+                )
+                + 1
+            )
+            count_str = str(count).zfill(2)
+            input_summary_file = (
+                directory_cleaned / f"simmate_metadata_{count_str}.yaml"
+            )
+            with input_summary_file.open("w") as file:
+                content = yaml.dump(input_summary)
+                file.write(content)
 
         # ---------------------------------------------------------------------
 
@@ -1007,7 +1002,7 @@ class Workflow:
                 if parameter_key == "directory":
                     # convert Path to str
                     parameter_value = str(parameter_value)
-                elif parameter_key == "source":
+                elif parameter_key == "source" and isinstance(parameter_value, dict):
                     # recursive call to this function
                     parameter_value = cls._serialize_parameters(**parameter_value)
                 elif parameter_key == "composition":
@@ -1080,7 +1075,6 @@ class Workflow:
         # OPTIMIZE: if I have proper typing and parameter itrospection, I could
         # potentially grab the from_dynamic method on the fly -- rather than
         # doing these repeated steps here.
-
         parameter_mappings = {
             "structure": Structure,
             "composition": Composition,

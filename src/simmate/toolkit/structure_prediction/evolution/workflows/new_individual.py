@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import shutil
 from pathlib import Path
 
 from simmate.toolkit.structure_prediction.evolution.database.fixed_composition import (
@@ -22,13 +23,13 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
     @staticmethod
     def run_config(
         search_id: int,
-        structure_source_id: int,
+        steadystate_source_id: int,
         directory: Path,
         **kwargs,
     ):
 
         search_db = FixedCompositionSearch.objects.get(id=search_id)
-        source_db = search_db.steadystate_sources.get(id=structure_source_id)
+        source_db = search_db.steadystate_sources.get(id=steadystate_source_id)
 
         # Check the stop condition of the search and see if this new individual
         # is even needed. This will catch when a search ends while a new
@@ -38,6 +39,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
                 "The search ended while this individual was in the queue. "
                 "Canceling new individual."
             )
+            shutil.rmtree(directory)
             return
 
         if source_db.is_transformation:

@@ -19,6 +19,13 @@ from pathlib import Path
 
 import pandas
 import yaml
+from django.db import models  # , transaction
+from django.db import models as table_column
+from django.utils.module_loading import import_string
+from django.utils.timezone import datetime
+from django_filters import rest_framework as django_api_filters
+from django_pandas.io import read_frame
+from rich.progress import track
 
 # The "as table_column" line does NOTHING but rename a module.
 # I have this because I want to use "table_column.CharField(...)" instead
@@ -26,12 +33,6 @@ import yaml
 # higher level classes and instantly understand what each thing represents
 # -- without them needing to understand that Django Model == Database Table.
 # Experts may find this annoying, so I'm sorry :(
-from django.db import models  # , transaction
-from django.db import models as table_column
-from django.utils.timezone import datetime
-from django_filters import rest_framework as django_api_filters
-from django_pandas.io import read_frame
-from rich.progress import track
 
 
 class SearchResults(models.QuerySet):
@@ -539,6 +540,57 @@ class DatabaseTable(models.Model):
         with summary_filename.open("w") as file:
             content = yaml.dump(all_data)
             file.write(content)
+
+    def to_dict(self):
+        return {
+            "database_table": self.table_name,
+            "database_id": self.id,
+        }
+
+    @staticmethod
+    def from_dict(source_dict: dict):
+
+        # This method can be return ANY table, so we need to import all of them
+        # here. This is a local import to prevent circular import issues.
+        from simmate.website.workflows import models as all_datatables
+
+        # start by loading the datbase table, which is given as a module path
+        datatable_str = source_dict["database_table"]
+
+        # Import the datatable class -- how this is done depends on if it
+        # is from a simmate supplied class or if the user supplied a full
+        # path to the class
+        # OPTIMIZE: is there a better way to do this?
+        if hasattr(all_datatables, datatable_str):
+            datatable = getattr(all_datatables, datatable_str)
+        else:
+            datatable = import_string(datatable_str)
+
+        # These attributes tells us which structure to grab from our datatable.
+        # The user should have only provided one -- if they gave more, we just
+        # use whichever one comes first.
+        run_id = source_dict.get("run_id")
+        database_id = source_dict.get("database_id")
+        directory = source_dict.get("directory")
+
+        # we must have either a run_id or database_id
+        if not run_id and not database_id and not directory:
+            raise Exception(
+                "You must have either a run_id, database_id, "
+                "or directory provided if you want to load a database entry "
+                "from a dictionary of metadata."
+            )
+
+        # now query the datable with which whichever was provided. Each of these
+        # are unique so all three should return a single calculation.
+        if database_id:
+            database_object = datatable.objects.get(id=database_id)
+        elif run_id:
+            database_object = datatable.objects.get(run_id=run_id)
+        elif directory:
+            database_object = datatable.objects.get(directory=directory)
+
+        return database_object
 
     # -------------------------------------------------------------------------
     # Methods for loading results from files

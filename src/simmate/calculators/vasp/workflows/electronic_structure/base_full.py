@@ -48,20 +48,14 @@ class ElectronicStructureWorkflow(Workflow):
         ).result()  # block until complete
 
         dos_state = cls.density_of_states_workflow.run(
-            structure={
-                "database_table": cls.static_energy_workflow.database_table.table_name,
-                "database_id": static_result.id,
-            },
+            structure=static_result,
             command=command,
             directory=directory / cls.density_of_states_workflow.name_full,
             copy_previous_directory=True,
         )
 
         bs_state = cls.band_structure_workflow.run(
-            structure={
-                "database_table": cls.static_energy_workflow.database_table.table_name,
-                "database_id": static_result.id,
-            },
+            structure=static_result,
             command=command,
             directory=directory / cls.band_structure_workflow.name_full,
             copy_previous_directory=True,
