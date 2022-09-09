@@ -6,6 +6,8 @@
 
 Thus far, you've been running Simmate on your local desktop or laptop, but we saw in the previous section, that we actually need VASP (which needs to be on Linux) for Simmate's workflows to run. 99% of the time, you'll be using a University or Federal supercomputer (aka "high performance computing (HPC) clusters"), which will have VASP already installed.
 
+----------------------------------------------------------------------
+
 ## A check-list before starting
 
 For teams that are actively using Simmate, we have a guides on submitting to that particular cluster. [Check to see if your university or federal cluster is listed](#). Use these guides as you work through the rest of this section. If your cluster/university is not listed, contact your IT team for help in completing this tutorial.
@@ -21,6 +23,7 @@ For workflows to run correctly, the following requirements need to be met:
 
 The remainder of this tutorial gives example commands to use. Replace these commands and scripts with the ones in your cluster's guide. (For example, the next command titled "Sign in with...", you should use the "Sign in with..." section of your cluster's guide.)
 
+----------------------------------------------------------------------
 
 ## Sign in to the cluster
 
@@ -39,6 +42,8 @@ After entering your password, you are now using a terminal on the remote superco
 
 pwd
 ```
+
+----------------------------------------------------------------------
 
 ## Load VASP
 
@@ -62,6 +67,8 @@ If the vasp_std command worked correctly, you will see the following output (bc 
 Error reading item 'VCAIMAGES' from file INCAR.
 ```
 
+----------------------------------------------------------------------
+
 ## Install Simmate on the cluster
 
 Next we need to ensure Simmate is installed. If you see `(base)` at the start of your command-line, Anaconda is already installed! If not, ask your IT team how they want you install it (typically it's by using [miniconda](https://docs.conda.io/en/latest/miniconda.html) which is just anaconda without the graphical user interface). With Anaconda set up, you can create your environment and install Simmate just like we did in tutorial 01:
@@ -78,6 +85,7 @@ conda activate my_env
 simmate database reset
 ```
 
+----------------------------------------------------------------------
 
 ## Set up Potentials
 
@@ -90,6 +98,8 @@ Typically, clusters will have a "scratch" directory that you should submit jobs 
 
 cd /pine/scr/j/a/jacksund
 ```
+
+----------------------------------------------------------------------
 
 ## Submit a workflow to the queue
 
@@ -142,6 +152,8 @@ Make sure you have VASP and your correct conda enviornment loaded. Then submit y
 sbatch submit.sh
 ```
 
+----------------------------------------------------------------------
+
 ## Monitor its progress
 
 You can then monitor your jobs progress with:
@@ -156,3 +168,5 @@ You've now submitted a Simmate workflow to a remote cluster :partying_face: :par
 
 !!! tip
     Be sure to go back through this section a few times before moving on. Submitting remote jobs can be tedious but it's important to understand. Advanced features of Simmate will let you skip a lot of this work down the road, but that won't happen until we reaching the "Adding Computational Resources" guide.
+
+----------------------------------------------------------------------
