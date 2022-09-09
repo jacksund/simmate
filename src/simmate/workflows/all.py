@@ -4,7 +4,11 @@
 This module provides a single endpoint where all registered workflows can be
 accessed for user-convenience. 
 
-
+This is best for accessing workflows in a quick debugging manner. If you need
+to access all workflows, we recommend using this utility instead:
+``` python
+simmate.workflows.utilities import get_all_workflows 
+```
 """
 
 # note, everything starts with an underscore because I don't want these variables
