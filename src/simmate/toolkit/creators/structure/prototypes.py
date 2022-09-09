@@ -262,7 +262,12 @@ class FromAflowPrototypes:
                     == self.composition.reduced_composition
                 ):
                     new_structure.source = {
-                        "from_prototype": True,
+                        # we give the full element list because we can have
+                        # unique structures where elements were added to swapped
+                        # wy sites.
+                        "element_order": [
+                            str(e) for e in new_structure.composition.elements
+                        ],
                         **prototype.database_object.to_dict(),
                     }
                     self.structures.append(new_structure)

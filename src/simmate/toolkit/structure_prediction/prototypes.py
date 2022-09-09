@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
+from pymatgen.analysis.structure_matcher import StructureMatcher
+
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.structure.prototypes import FromAflowPrototypes
 
 
 def get_structures_from_prototypes(
     composition: Composition,
+    remove_matching: bool = True,
     **kwargs,
 ) -> list[Structure]:
     """
@@ -15,8 +18,15 @@ def get_structures_from_prototypes(
     structures generated, refer to the underlying creator class.
     """
 
-    from_prototypes = FromAflowPrototypes(
+    structures = FromAflowPrototypes(
         composition,
         **kwargs,
     ).structures
-    return from_prototypes
+
+    if remove_matching:
+        matcher = StructureMatcher()
+        groups = matcher.group_structures(structures)
+        # just grab the first result of each group
+        structures = [group[0] for group in groups]
+
+    return structures

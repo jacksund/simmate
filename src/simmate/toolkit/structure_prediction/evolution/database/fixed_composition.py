@@ -183,6 +183,7 @@ class FixedCompositionSearch(Calculation):
             structures_known = get_known_structures(
                 composition,
                 allow_multiples=False,
+                remove_matching=True,
             )
             logging.info(
                 f"Generated {len(structures_known)} structures from third-party databases"
@@ -213,6 +214,7 @@ class FixedCompositionSearch(Calculation):
             structures_prototype = get_structures_from_prototypes(
                 composition,
                 max_sites=int(composition.num_atoms),
+                remove_matching=True,
             )
             logging.info(
                 f"Generated {len(structures_prototype)} structures from prototypes"
@@ -371,7 +373,7 @@ class FixedCompositionSearch(Calculation):
                 # when starting the structure creation
                 state = StructurePrediction__Toolkit__NewIndividual.run_cloud(
                     search_id=self.id,
-                    structure_source_id=source_db.id,
+                    steadystate_source_id=source_db.id,
                 )
 
                 # Attached the id to our source so we know how many

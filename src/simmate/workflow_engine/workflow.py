@@ -219,7 +219,7 @@ class Workflow:
 
         # To help with tracking the flow in cloud, we load all of the inputs up
         # front. This will include creating a run_id for us.
-        # 
+        #
         # If we are submitting using a filename, we don't want to
         # submit to a cluster and have the job fail because it doesn't have
         # access to the file. We therefore go through the full load_input process
@@ -232,7 +232,7 @@ class Workflow:
         # Some backends can't pickle input parameters, so we need to serialize
         # them before submission to the queue.
         parameters_serialized = cls._serialize_parameters(**kwargs_cleaned)
-        breakpoint()
+
         state = SimmateExecutor.submit(
             cls._run_full,  # should this be the run method...?
             tags=tags or cls.tags,
@@ -708,7 +708,7 @@ class Workflow:
             # If no source was given, we try to dynamically determine the source
             # using the "primary" input.
             # OPTIMIZE: Is there a better way to do this?
-    
+
             # Currently I just set a priority of possible parameters that can be
             # the primary input. I go through each one at a time until I find one
             # that was provided -- then I exit with that parameter's value.
@@ -722,14 +722,14 @@ class Workflow:
                     # note we grab the deserialized input
                     primary_input = parameters_cleaned.get(primary_input_key, None)
                     break
-            
+
             if (
                 primary_input
                 and hasattr(primary_input, "source")
                 and primary_input.source
             ):
                 source_cleaned = primary_input.source
-            
+
             else:
                 source_cleaned = None
 
@@ -746,7 +746,7 @@ class Workflow:
         # ---------------------------------------------------------------------
 
         # STEP 3: Load the directory (and copy over from an old directory if necessary)
-        
+
         if setup_directory:
             # Start by creating a new directory or grabbing the one given. We create
             # this directory immediately (rather than just passing the name to the
@@ -754,30 +754,30 @@ class Workflow:
             # to organize results.
             directory = parameters.get("directory", None)
             directory_cleaned = get_directory(directory)
-    
+
             # if the user requested, we grab the previous directory as well
             copy_previous_directory = parameters.get("copy_previous_directory", None)
             if copy_previous_directory:
-                
+
                 # BUG: I should switch this to checking the source input arg
-                
+
                 if not primary_input:
                     raise Exception(
                         "No primary input detected, which is required for copying "
                         "past directories. This is an experimental feature so "
                         "please contact our team for more help."
                     )
-    
+
                 # catch incorrect use of this function
                 if not primary_input.database_object:
                     raise Exception(
                         "There isn't a previous directory available! Your source "
                         "structure must point to a past calculation to use this feature."
                     )
-    
+
                 # the past directory should be stored on the input object
                 previous_directory = Path(primary_input.database_object.directory)
-    
+
                 # Copy over all files except simmate ones (we have no need for the
                 # summaries or error archives)
                 copy_directory(
@@ -785,7 +785,7 @@ class Workflow:
                     directory_new=directory_cleaned,
                     ignore_simmate_files=True,
                 )
-    
+
             # SPECIAL CASE for customized flows
             if "workflow_base" not in parameters_cleaned:
                 parameters_cleaned["directory"] = directory_cleaned
@@ -818,7 +818,7 @@ class Workflow:
                 if "workflow_base" not in parameters_cleaned
                 else parameters
             )
-    
+
             # We want to write a file summarizing the inputs used for this
             # workflow run. This allows future users to reproduce the results if
             # desired -- and it also allows us to load old results into a database.
@@ -827,7 +827,7 @@ class Workflow:
                 _WORKFLOW_VERSION_=cls.version,
                 **parameters_serialized,
             )
-    
+
             # now write the summary to file in the same directory as the calc.
             # check the directory and see how many other "simmate_metadata*.yaml" files
             # already exist. Our new file will be based off of this. Simply,
@@ -844,7 +844,9 @@ class Workflow:
                 + 1
             )
             count_str = str(count).zfill(2)
-            input_summary_file = directory_cleaned / f"simmate_metadata_{count_str}.yaml"
+            input_summary_file = (
+                directory_cleaned / f"simmate_metadata_{count_str}.yaml"
+            )
             with input_summary_file.open("w") as file:
                 content = yaml.dump(input_summary)
                 file.write(content)

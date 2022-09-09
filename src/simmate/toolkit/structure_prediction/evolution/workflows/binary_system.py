@@ -120,6 +120,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
                 new_structures = get_known_structures(
                     composition,
                     allow_multiples=True,
+                    remove_matching=True,
                     nsites__lte=max_atoms,
                 )
                 structures_known += new_structures
@@ -149,6 +150,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
                 new_structures = get_structures_from_prototypes(
                     composition,
                     max_sites=max_atoms,
+                    remove_matching=True,
                 )
                 structures_prototype += new_structures
             logging.info(
