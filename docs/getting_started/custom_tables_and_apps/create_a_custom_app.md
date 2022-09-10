@@ -29,11 +29,8 @@ my_new_project/
 ## Name our project and app
 
 !!! danger
-    One you choose a name, stick with it. Changing your project name or app name after it has
+    Once you choose a name, stick with it. Changing your project name or app name after it has
     been installed can lead your code failing with `ModuleNotFound` errors.
-    
-!!! tip
-    This step is optional and where many mistakes happen. If you run into errors below, try restarting your project from scratch and leaving the default app names.
 
 ** Name the project **
 
@@ -45,17 +42,14 @@ my_new_project/
 name = "my_simmate_project"  # <--- update with your new name
 ```
 
-!!! note
-    We will explain these files in a later section. For now, just stick to renaming!
-
 ** Name the app **
 
 1. Decide on how your code should be imported. For example, you may want your workflows to be loaded like so:
 ``` python
-from my_app.workflows import Example__Workflow__Settings
+from example_app.workflows import Example__Workflow__Settings
 ```
 
-2. Take the first part of this (`my_app`) and rename the `example_app` folder to match this. The python conventions (described above) also apply here. For example, `simmate_abinit` or `simmate_clease` are informative and good project names. These let the user know what's in your app and they're easy to remember. Here's how they would work:
+2. Take the first part of this (`example_app`) and rename the `example_app` folder to match this. The python conventions (described above) also apply here. For example, `simmate_abinit` or `simmate_clease` are informative and good project names. These let the user know what's in your app and they're easy to remember. Here's how they would work:
 ``` python
 from simmate_clease.workflows import ClusterExpansion__Clease__BasicSettings
 ```
@@ -113,37 +107,34 @@ it exists yet. We need to tell Simmate to load it.
 this where your database is stored, and it is located at...
 ```
 # in your home directory
-~/simmate/
+cd ~/simmate/
 ```
 
 2. Look for the file `~/simmate/my_env-apps.yaml`, which is named after your
-conda environment. If you don't see one, then make a new one!
+conda environment. Open it up and you'll see we have apps already installed
+with Simmate:
+``` yaml
+- simmate.workflows.base_flow_types.apps.BaseWorkflowsConfig
+- simmate.calculators.vasp.apps.VaspConfig
+- simmate.calculators.bader.apps.BaderConfig
+- simmate.toolkit.structure_prediction.evolution.apps.EvolutionarySearchConfig
+```
 
-3. In this file, add the following line:
+3. In this file, add the following line at the bottom
+``` yaml
+- example_app.apps.ExampleAppConfig
+```
 
-=== "example 1"
-    ``` yaml
-    example_app.apps.ExampleAppConfig
-    ```
-
-=== "example 2"
-    ``` yaml
-    simmate_clease.apps.SimmateCleaseConfig
-    ```
-
-4. Make sure Simmate can find and load your app
-
-=== "python"
-    ``` python
-    from simmate.configuration.django.settings import extra_apps
-    print(extra_apps)  # you should see your new app!
-    ```
+4. Make sure Simmate can find and load your app in python
+``` python
+from simmate.configuration.django.settings import SIMMATE_APPS
+print(SIMMATE_APPS)  # you should see your new app!
+```
 
 5. Make sure Simmate can configure your new app and it's tables properly
-=== "python"
-    ``` python
-    from simmate.database import connect
-    ```
+``` python
+from simmate.database import connect
+```
 
 
 !!! tip

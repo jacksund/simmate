@@ -2,13 +2,14 @@
 
 In this tutorial, you will learn how to run workflows on distributed computational resources -- with full scheduling and monitoring.
 
-
-## The quick tutorial
-
 !!! note
     This tutorial will use the default scheduler/executor, "SimmateExecutor". However, you can also use Prefect and/or Dask to build out your cluster. This is covered elsewhere, but it is not recommended at the moment.
 
-1. Be aware that you can share a cloud database *without* sharing computational resources. This flexibility is very important for many collaborations. 
+-------------------------------------------------------------------------------
+
+## The quick tutorial
+
+1. Be aware that you can share a cloud database **without** sharing computational resources. This flexibility is very important for many collaborations. 
 
 2. Just like with your cloud database, designate a point-person to manage your private computational resources. Everyone else only needs to switch from `run` to `run_cloud`.
 
@@ -20,7 +21,7 @@ In this tutorial, you will learn how to run workflows on distributed computation
 
 6. Schedule your simmate workflows by switching from the `run` method to the `run_cloud` method. This workflow will be scheduled but it won't run until we start a worker:
 ``` bash
-simmate workflows run-cloud relaxation.vasp.mit --structure POSCAR
+simmate workflows run-cloud my_settings.yaml
 ```
 
 8. Wherever you'd like to run the workflow, start a worker with the following command. :warning::warning: If you are on a cluster, start-worker should be called within your submit script (e.g. inside `submit.sh` for SLURM). Don't run workers on the head node.
@@ -50,3 +51,4 @@ simmate workflow-engine start-worker -t small-job
 
 12. To let others use your cluster, simply connect them to the same database.
 
+-------------------------------------------------------------------------------

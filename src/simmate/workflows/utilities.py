@@ -74,7 +74,9 @@ def get_all_workflow_names(apps_to_search: list[str] = SIMMATE_APPS) -> list[str
     """
     Returns a list of all the workflows of all types.
     """
-    return [flow.name_full for flow in get_all_workflows(apps_to_search)]
+    flow_names = [flow.name_full for flow in get_all_workflows(apps_to_search)]
+    flow_names.sort()
+    return flow_names
 
 
 def get_all_workflow_types() -> list[str]:
