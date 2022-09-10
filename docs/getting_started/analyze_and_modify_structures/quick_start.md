@@ -2,8 +2,10 @@
 
 In this tutorial, you will learn about the most important class in Simmate: the `Structure` class. Beginners will also be introduced to classes and the Spyder IDE.
 
-!!! warning
-    Simmate uses [pymatgen](https://pymatgen.org/) under the hood, so this tutorial is really one for using pymatgen. [Their guides](https://pymatgen.org/usage.html) also are useful, but they are written for those already familiar with python.
+!!! note
+    Simmate uses [pymatgen](https://pymatgen.org/) under the hood, so this tutorial is really one for using their package. [Their guides](https://pymatgen.org/usage.html) also are useful, but they are written for those already familiar with python.
+
+----------------------------------------------------------------------
 
 # The quick tutorial
 
@@ -94,3 +96,5 @@ is_matching = matcher.fit(structure1, structure2)
 ```
 
 There are many more features available! If you can't find what you're looking for, be sure to ask for help before trying to code something on your own. Chances are that the feature exists somewhere -- and if we don't have it, we'll direct you to a package that does.
+
+----------------------------------------------------------------------

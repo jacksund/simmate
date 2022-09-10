@@ -132,13 +132,12 @@ nav:
         
         - Use a cloud database:
             - Quickstart: getting_started/use_a_cloud_database/quick_start.md
-            - Consider collaborating: getting_started/use_a_cloud_database/consider_collaborating.md
-            - Build a Postgres database: getting_started/use_a_cloud_database/build_a_postgres_database.md
-            - Connect Simmate to your database: getting_started/use_a_cloud_database/connect_simmate_to_the_database.md
+            - Private vs shared: getting_started/use_a_cloud_database/private_vs_collab.md
+            - Building a database: getting_started/use_a_cloud_database/build_a_postgres_database.md
         
         - Add computational resources:
             - Quickstart: getting_started/add_computational_resources/quick_start.md
-            - A review of concepts: getting_started/add_computational_resources/review_of_concepts.md
+            - Intro to clusters: getting_started/add_computational_resources/intro_to_clusters.md
             - Should you set up workers?: getting_started/add_computational_resources/should_you_setup.md
             - Checklist for each worker: getting_started/add_computational_resources/checklist_for_workers.md
             - Adding workers and clusters: getting_started/add_computational_resources/adding_clusters_and_workers.md
@@ -159,10 +158,8 @@ nav:
             - Overview: full_guides/workflows/overview.md
             - Workflow Names: full_guides/workflows/workflow_names.md
             - Using existing workflows: full_guides/workflows/using_existing_workflows.md
-            # - Adding computational resources:
-            #     - Overview: test.md
-            #     - Workers: test.md
             - Creating new workflows: full_guides/workflows/creating_new_workflows.md
+            - Creating Nested Workflows: full_guides/workflows/nested_workflows.md
             - Creating S3 Workflows: full_guides/workflows/s3_workflows.md
             - Third-party software: 
                 - What is a calculator?: full_guides/workflows/third_party_software/what_is_a_calculator.md

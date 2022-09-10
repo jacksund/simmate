@@ -1,11 +1,13 @@
+----------------------------------------------------------------------
 
 ## Adding your data to Simmate
 
 !!! warning
-    This module is only for the Simmate dev team or third-party contributors that want to add their own data! Users should instead use the `load_remote_archive` method to access data. See the [database docs](https://jacksund.github.io/simmate/full_guides/database/overview/).
+    This module is only for the Simmate dev team or third-party contributors that want to add their own data! Users should instead use the `load_remote_archive` method to access data. See the [database docs](/full_guides/database/third_party_data/).
 
 This module is for pulling data from various databases into Simmate using third-party codes. This can then be used to build archives that users may access.
 
+----------------------------------------------------------------------
 
 ## Benefits of adding your data to Simmate
 
@@ -15,7 +17,6 @@ When deciding whether your team should use Simmate, we can break down discussion
 2. Can you benefit from distributing an archive? (private or public)
 
 We will answer these questions in the next two sections.
-
 
 ### Converting data into a Simmate format
 
@@ -59,6 +60,7 @@ If you are fine with making your data freely available, you can further benefit 
 
 Providers that permit redistribution are welcome to use our CDN for their archives. This only requires contacting our team and making this request. Further, once your archive is configured, all Simmate users will be able to easily access your data.
 
+----------------------------------------------------------------------
 
 ## How to add your data or a new provider
 
@@ -96,7 +98,7 @@ To illustrate how this is done, we will walk through the required steps:
 5. Link the CDN to the Simmate table
 
 !!! tip
-    these steps involve contributing changes to Simmate's code, so we recommend [opening a github issue](https://github.com/jacksund/simmate/issues) before starting too. That way, our team can help you through this process. If you are new to Github and contributing, be sure to read our [tutorial for contributors](https://jacksund.github.io/simmate/contributing/overview/) too.
+    these steps involve contributing changes to Simmate's code, so we recommend [opening a github issue](https://github.com/jacksund/simmate/issues) before starting too. That way, our team can help you through this process. If you are new to Github and contributing, be sure to read our [tutorial for contributors](/contributing/overview/) too.
 
 
 ### Step 1: Define a Simmate table
@@ -339,3 +341,5 @@ That's it! Let's test out everything again. Note, we are now using `load_remote_
 4. Try viewing your data again with `ExampleProviderData.objects.to_dataframe()`
 
 If you've made it this far, thank you for contributing!!! Your data is now easily accessible to all Simmate users, which we hope facilitates its use and even lessen the load on your own servers. Congrats!
+
+----------------------------------------------------------------------

@@ -187,7 +187,7 @@ class Workflow:
             make_archive(kwargs_cleaned["directory"])
 
         # If we made it this far, we successfully completed the workflow run
-        logging.info(f"Completed {cls.name_full}")
+        logging.info(f"Completed '{cls.name_full}'")
 
         # If we are using the database, then we return the database object.
         # Otherwise, we want to return the original result from run_config

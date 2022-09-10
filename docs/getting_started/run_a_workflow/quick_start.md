@@ -2,9 +2,7 @@
 
 In this tutorial, you will use the command line to view all available workflows and their settings. Beginners will also be introduced to remote terminals (SSH) and jobs queue (such as SLURM).
 
-!!! tip
-    For the full tutorial, you will start on your local computer, even if you don't have VASP installed. By the end of the tutorial, you will have switched to a computer with VASP (likely a remote university or federal supercomputer).
-
+----------------------------------------------------------------------
 
 ## The quick tutorial
 
@@ -68,7 +66,9 @@ simmate workflows run my_example.yaml
 10. While the plots and summary files are nice for quick testing, much more useful information is stored in our database. We will cover how to access your database in a following tutorial.
 
 !!! tip
-    This tutorial only convers the CLI and YAML input files, but submitting workflows through python is covered in the full guides
+    This tutorial only convers the CLI and YAML input files, but submitting workflows through python or TOML files is covered in the full guides
 
 !!! tip
     Want to customize a specific setting (e.g. set ENCUT to a custom value)? Customizing workflow settings is covered in the "Build Custom Workflows" tutorial. However, try to resist jumping ahead! There are still several important steps to learn before customizing workflows.
+
+----------------------------------------------------------------------

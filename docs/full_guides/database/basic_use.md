@@ -1,6 +1,8 @@
 
 # Basic Database Access
 
+----------------------------------------------------------------------
+
 ## Outline of all steps
 
 Accessing and analyzing data typically involves the following steps:
@@ -36,6 +38,8 @@ for structure in structures:
     # run your anaylsis/modifications here!
 ```
 
+----------------------------------------------------------------------
+
 ## Connect to your database
 
 For interactive use, Django settings must be configured before any of these submodules can be imported. This can be done with...
@@ -55,6 +59,8 @@ ImproperlyConfigured: Requested setting INSTALLED_APPS, but settings are not
 configured. You must either define the environment variable DJANGO_SETTINGS_MODULE 
 or call settings.configure() before accessing settings.
 ```
+
+----------------------------------------------------------------------
 
 ## Load your database table
 
@@ -86,6 +92,7 @@ from simmate.database.workflow_results import MITStaticEnergy
 assert table == MITStaticEnergy
 ```
 
+----------------------------------------------------------------------
 
 ## Query and filter data
 
@@ -127,6 +134,8 @@ MITStaticEnergy.objects.filter(
 
 Note, for the filtering condition `elements__icontains`, we used some odd quotations when querying for carbon: `'"C"'`. This is not a typo! The quotes ensure we don't accidentally grab Ca, Cs, Ce, Cl, and so on. This is an issue when you are using SQLite (the default datbase backend). If you are using Postgres, this line can change to the cleaner version `elements__contains="C"`.
 
+----------------------------------------------------------------------
+
 ## Convert data to desired format
 
 By default, Django returns your query results as a `queryset` (or `SearchResults` in simmate). This is a list of database objects. It is more useful to convert them to a pandas dataframe or to toolkit objects.
@@ -138,6 +147,10 @@ df = MITStaticEnergy.objects.filter(...).to_dataframe()
 df = MITStaticEnergy.objects.filter(...).to_toolkit()
 ```
 
+----------------------------------------------------------------------
+
 ## Modify data
 
 To modify and analyze data, see the [pandas](https://pandas.pydata.org/docs/) and `simmate.toolkit` documentation for more info.
+
+----------------------------------------------------------------------

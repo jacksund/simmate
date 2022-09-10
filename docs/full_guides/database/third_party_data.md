@@ -20,14 +20,21 @@ These providers are configured, but our team is waiting for permission to redist
 !!! tip
     If your team would like to make your own data available via Simmate, please see the Contributing data module. Even if its is a single table, don't hesistate to make a contribution! We outline the benefits of contributing and how to package your data within the `for_providers` module.
 
+----------------------------------------------------------------------
 
 ## Downloading data
 
-Make sure you have completed [our introductory tutorial](https://jacksund.github.io/simmate/getting_started/access_the_database/access_thirdparty_data/) for downloading data from these providers. Below we show example usage with `MatprojStructure`, but the same process can be done with all other tables in this module. 
+Make sure you have completed [our introductory tutorial](/getting_started/access_the_database/access_thirdparty_data/) for downloading data from these providers. Below we show example usage with `MatprojStructure`, but the same process can be done with all other tables in this module. 
 
 WARNING: The first time you load archives of data, it can take a long time, so we recommend running some things overnight. Once completed, we also recommend backing up your database (by making a copy of your ~/simmate/my_env-database.sqlite3 file). This ensures you don't have to repeat this long process.
 
 To download all data into your database:
+
+```shell
+simmate database load-remote-archives
+```
+
+Or in python, you can download a specific table:
 
 ``` python
 from simmate.database.third_parties import MatprojStructure
@@ -42,6 +49,8 @@ MatprojStructure.load_remote_archive()
 # If you use this providers data, be sure to cite them!
 MatprojStructure.source_doi
 ```
+
+----------------------------------------------------------------------
 
 ## Populating energy fields
 
@@ -58,6 +67,7 @@ MatprojStructure.update_all_stabilities()
 MatprojStructure.update_chemical_system_stabilities("Y-C-F")
 ```
 
+----------------------------------------------------------------------
 
 ## Alternatives
 
@@ -69,3 +79,5 @@ This module can be viewed as an alternative to and/or an extension of the follow
 - [OPTIMADE APIs](http://www.optimade.org/)
 
 This module stores data locally and then allows rapidly loading data to memory, whereas alternatives involve querying external APIs and loading data into memory. We choose to store data locally because it allows stability (i.e. no breaking changes in your source data) and fast loading accross python sessions. This is particullary useful for high-throughput studies.
+
+----------------------------------------------------------------------

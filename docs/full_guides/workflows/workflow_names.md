@@ -20,8 +20,7 @@ All workflow names follow a specific format of `type.calculator.preset`:
     - calculator = vasp (uses VASP to calculate the energy)
     - preset = matproj  (uses "Materials Project" settings)
 
-
-
+------------------------------------------------------------
 
 ## Class name vs. mini name
 
@@ -34,6 +33,7 @@ All workflow names follow a specific format of `type.calculator.preset`:
 Note, when converting a workflow name in python, we need to replace periods with 2 underscores each (`__`) and convert our phrases to
 [pascal case](https://khalilstemmler.com/blogs/camel-case-snake-case-pascal-case/). Hyphen (`-`) placement is based off of capital letters.
 
+------------------------------------------------------------
 
 ## Location of a workflow in the website interface
 
@@ -48,6 +48,8 @@ You can follow the naming conventions (described above) to find a workflow in th
     ```
     https://simmate.org/workflows/static-energy/vasp/matproj
     ```
+
+------------------------------------------------------------
 
 ## Location of a workflow's source code
 
@@ -67,3 +69,5 @@ This is a really long import, but it gives the same workflow as the `get_workflo
 
 1. Find the source code for a workflow
 2. Optimize the speed of your imports (advanced users only)
+
+------------------------------------------------------------

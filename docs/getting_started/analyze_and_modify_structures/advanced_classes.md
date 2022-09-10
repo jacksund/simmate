@@ -1,9 +1,16 @@
 
 # Advanced classes
 
+----------------------------------------------------------------------
+
 ## Beyond the Structure class
 
 To give you a sneak-peak of some advanced classes and functionality, we outline some examples in this section. Note that Simmate is still early in development, so there are many more features available through [PyMatGen](https://pymatgen.org/) and [MatMiner](https://hackingmaterials.lbl.gov/matminer/) packages, which were installed alongside Simmate.
+
+!!! tip
+    If you're trying to follow a paper and analyze a structure, odds are that someone made a class/function for that analysis! Be sure to search around the documentation for it (next tutorial teaches you how to do this) or just [post a question](https://github.com/jacksund/simmate/discussions/categories/q-a) and we'll point you in the right direction.
+
+----------------------------------------------------------------------
 
 ## Example 1: Structure Creation
 
@@ -20,6 +27,8 @@ creator = RandomSymStructure(composition)
 structure1 = creator.create_structure(spacegroup=166)
 structure2 = creator.create_structure(spacegroup=225)
 ```
+
+----------------------------------------------------------------------
 
 ## Example 2: Fingerprint analysis
 
@@ -51,6 +60,8 @@ plt.plot(rdf_x, rdf1)
 plt.show()
 ```
 
+----------------------------------------------------------------------
+
 ## Example 3: Structure matching
 
 Pymatgen is currently the largest package and has the most toolkit-like features. As an example, it's common to compare two structures and see if are symmetrically equivalent (within a given tolerance). You give it two structures and it will return True or False on whether they are matching:
@@ -65,6 +76,8 @@ matcher = StructureMatcher()
 is_matching = matcher.fit(structure1, structure2)  
 ```
 
-!!! tip
-    If you're trying to follow a paper and analyze a structure, odds are that someone made a class/function for that analysis! Be sure to search around the documentation for it (next tutorial teaches you how to do this) or just [post a question](https://github.com/jacksund/simmate/discussions/categories/q-a) and we'll point you in the right direction.
+----------------------------------------------------------------------
+
+
+    
 

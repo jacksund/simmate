@@ -20,7 +20,7 @@ Because we are using the "SimmateExecutor" all we need is a connection to the cl
 
 ## 4. Connecting custom projects
 
-!!! tip
-    Because SimmateExecutor uses cloudpickle when submitting tasks, many custom workflows will work just fine without this step. Our team is still working out how to guide users and make this as easy as possible. For now, we suggest just trying out your workflow when you skip this step -- as most times it will work. If not, then the text below explains why.
-
 If you have custom database tables or code, it's important that (a) the cloud database knows about these tables and (b) your remote resources can access your custom code. Therefore, your custom project/app should be installed and accessible by all of your computation resources. Be sure to `pip install your-cool-project` for all computers.
+
+!!! tip
+    Because SimmateExecutor uses cloudpickle when submitting tasks, many custom workflows will work just fine without this step. Our team is still working out how to guide users and make this as easy as possible. For now, we suggest just trying out your workflow when you skip this step -- as most times it will work. If not, then the text above explains why.

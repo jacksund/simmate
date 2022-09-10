@@ -136,7 +136,7 @@ these will inherit all of their features -- such as loading from filename, a
 dictionary, or python object.
 
 For example, if you use a `structure` input variable, it behaves as described
-in the [Parameters](https://jacksund.github.io/simmate/parameters/) section.
+in the [Parameters](/parameters/) section.
 
 ``` python
 from simmate.toolkit import Structure
@@ -572,47 +572,5 @@ us really take advantage of how we provide our input. For example, a
         #   `tuple(my_parameter)`
         # at the start of your workflow's `run_config` if you need a tuple.
         ```
-
-----------------------------------------------------------------------
-
-## Creating nested workflows
-
-Because workflows can contain any python code, they can also make calls to
-other workflows -- either via `run` or `run_cloud` methods
-
-When using `run`, you often want workflows to share a working directory, so
-that you can find the results all in one place.
-
-``` python
-from simmate.workflows.utilities import get_workflow
-from simmate.workflow_engine import Workflow
-
-class Example__Python__MyFavoriteSettings(Workflow):
-    
-    use_database = False  # we don't have a database table yet
-
-    @staticmethod
-    def run_config(structure, directory, **kwargs):
-    
-        # you can grab a workflow locally, attach one as a class
-        # attribute, or anything else possible with python
-        another_workflow = get_workflow("static-energy.vasp.mit")
-        
-        # And run the workflow how you would like. Here, we are
-        # just running the workflow 10 times in row on different
-        # perturbations or "rattling" of the original structure
-        for n in range(10):
-            structure.perturb(0.05)  # modifies in-place
-            another_workflow.run(
-                structure=structure,
-                directory= directory / f"perturb_number_{n}",
-            )
-```
-
-!!! warning
-    when using `run_cloud` you should **NOT** share a working directory. This
-    causes problems when you have computational resource scattered accross 
-    different computers & file systems.
-    See github [#237](https://github.com/jacksund/simmate/issues/237).
 
 ----------------------------------------------------------------------

@@ -1,15 +1,19 @@
 
 # Python Inheritance with Datatables
 
+----------------------------------------------------------------------
+
 ## Review of concepts
 
 To review key concepts up until this point...
 
-- we setup our database and added calcution results to it.
-- we learned about python classes, and in particular, the importance of the `Structure` class.
-- we learned how to explore the documentation and use new classes.
+- [x] we setup our database and added calcution results to it.
+- [x] we learned about python classes, and in particular, the importance of the `Structure` class.
+- [x] we learned how to explore the documentation and use new classes.
 
 Now, we want to bring these ideas together in order to expolore our database. 
+
+----------------------------------------------------------------------
 
 ## An example table in python
 
@@ -36,6 +40,7 @@ And the corresponding table (with random data added) would look like...
 
 That's how all tables are made! We just make a class, say it is a `DatabaseTable` and then list off our desired columns.
 
+----------------------------------------------------------------------
 
 ## Building tables with inheritance
 
@@ -70,7 +75,8 @@ The `Student` datatable now looks like this:
 | scott  | 14  | 6.2  | 2021 | 3.2 |
 | ... | ... | ... | ... | ...|
 
-Simmate uses this idea with common materials science data -- such as structures, thermodynamic data, site forces, and more. You'll find our fundamental building blocks for tables in the `simmate.database.base_data_types` module ([here](https://jacksund.github.io/simmate/full_guides/database/custom_tables/))
+Simmate uses this idea with common materials science data -- such as structures, thermodynamic data, site forces, and more. You'll find our fundamental building blocks for tables in the `simmate.database.base_data_types` module ([covered here](/full_guides/database/custom_tables/)).
 
 All of our datatables start from these classes and build up. Up next, we'll look at an actual database table and learn how to use it to view data.
 
+----------------------------------------------------------------------

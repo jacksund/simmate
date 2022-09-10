@@ -5,6 +5,7 @@ Unlike other major projects, Simmate makes our website's source-code openly
 available to everyone! This means that you can host your own Simmate website on 
 your own computer or even in production for your lab to privately use.
 
+------------------------------------------------------------
 
 ## Running a server locally
 
@@ -25,6 +26,7 @@ While this command is running, open up your preferred browser (Chrome, Firefox, 
     Beyond a local server, beginners don't need anything else from the website 
     interface documentation. Feel free to skip to the "Workflows" guides.
 
+------------------------------------------------------------
 
 ## Running a production-ready server
 
@@ -36,7 +38,9 @@ To have everything set up for your team, you can do one of the following...
 
 For options 1 and 2, just send us an email at `simmate.team@gmail.com`.
 
-For option 3, we have [a guide for setting a server up on DigitalOcean](https://github.com/jacksund/simmate/tree/main/.do). In addition to this guide, make sure you complete the base simmate tutorials -- and pay particular attention to the tutorials on [setting up a cloud database](https://jacksund.github.io/simmate/getting_started/use_a_cloud_database/quick_start/) and [setting up computational resources](https://jacksund.github.io/simmate/getting_started/add_computational_resources/quick_start/).
+For option 3, we have [a guide for setting a server up on DigitalOcean](https://github.com/jacksund/simmate/tree/main/.do). In addition to this guide, make sure you complete the base simmate tutorials -- and pay particular attention to the tutorials on [setting up a cloud database](/getting_started/use_a_cloud_database/quick_start/) and [setting up computational resources](/getting_started/add_computational_resources/quick_start/).
+
+------------------------------------------------------------
 
 ## Third-party sign ins
 
@@ -71,6 +75,8 @@ GOOGLE_SECRET = examplekey1234
 GOOGLE_CLIENT_ID = exampleid1234
 ```
 
+------------------------------------------------------------
+
 ## CSS and JS assets
 
 Simmate does not distribute the majority of source CSS and JavaScript files because we use assets from a third-party vendor and redistribution is not allowed under their licensing. Specifically, we use the [Hyper theme](https://themes.getbootstrap.com/product/hyper-responsive-admin-dashboard-template/) from the [CoderThemes team](https://coderthemes.com/). Using the subpages and guides available on their [Modern Dashboard template](https://coderthemes.com/hyper/modern/index.html), you'll be able to contribute to Simmate's website without needing to access any of the assets. Within our templates, you'll note we always load assets from a Simmate CDN:
@@ -84,3 +90,5 @@ Simmate does not distribute the majority of source CSS and JavaScript files beca
 ```
 
 If you ever need to alter the CSS or JS, please reach out to our team so we can discuss the best way to approach this.
+
+------------------------------------------------------------

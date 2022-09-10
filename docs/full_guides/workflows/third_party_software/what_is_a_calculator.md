@@ -1,9 +1,15 @@
-Simmate Calculators
---------------------
+
+----------------------------------------------------------------------
+
+## What is a calculator?
 
 Calculators are external codes/programs that perform some analysis for us. 
 
 For example, VASP is a program that can run a variety of density functional theory (DFT) calculations. But because it isn't written in Python, we need some "helper" code here to call VASP commands, make input files, and pull data from the outputs. 
+
+----------------------------------------------------------------------
+
+## Organization of code
 
 All calculators have the same folder structure:
 
@@ -29,4 +35,7 @@ In a more logical order (rather than alphabetical like above), here is what each
 - `workflows`  = brings together `tasks` and `database`, so these setup individual tasks and handle saving the results to our database
 - `website` = lets us submit workflows and view results with our website interface
 
-**NOTE:** *Beginners should start by looking at the `workflows` module as this ties all other modules together. Advanced users can start with each calculator's `tasks` to build your own custom workflow.*
+!!! note
+    Beginners should start by looking at the `workflows` module as this ties all other modules together. Advanced users can start with each calculator's `tasks` to build your own custom workflow.
+
+----------------------------------------------------------------------

@@ -6,7 +6,7 @@
 
 Inside your project, there are example database tables that show how to build simple ones. It may seem super minimal, but there's really nothing else to do! 
 
-Recall from [the section on inheritance](https://jacksund.github.io/simmate/getting_started/access_the_database/intro_to_python_inheritance/) from the "access the database" tutorial. This is why building out new tables is so easy. :fire:
+Recall the lesson from [the section on inheritance](/getting_started/access_the_database/intro_to_python_inheritance/) from the "access the database" tutorial. This is why building out new tables is so easy. :fire:
 
 Some thing as simple as...
 
@@ -48,14 +48,15 @@ class MyCustomTable1(Structure, Calculation):
 However, we won't be able to import these tables or load data just yet. We will cover this next.
 
 !!! tip
-    Here we just show `Structure` data, but there are many more `base_data_types` that you can use. All types build out features for you automatically. Be sure to read through our guides in the [`simmate.database`](https://jacksund.github.io/simmate/full_guides/database/overview/) module for more info. Advanced database tables may require reading more on the [base data types](https://jacksund.github.io/simmate/full_guides/database/custom_tables/) too.
+    Here we just show `Structure` and `Calculation` data, but there are many more `base_data_types` that you can use. All types build out features for you automatically. Be sure to read through our guides in the [`simmate.database`](/full_guides/database/overview/) module for more info. Advanced database tables may require reading more on the [base data types](/full_guides/database/custom_tables/) too.
 
 -------------------------------------------------------------------------------
 
 ## Add tables to your database
 
-1. Once we are happy with our tables in the `models.py` file, we can add them to
-our database by Simmate to update our database:
+1. Open up the `example_app/models.py` file and read through the example tables.
+
+1. We can add these table to our database by Simmate updating our database:
 ``` bash
 simmate database update
 ```
@@ -81,6 +82,9 @@ from example_app.models import MyCustomTable2
 MyCustomTable2.objects.count()  # should output 0 bc we haven't added data yet
 ```
 
+!!! danger
+    Whenever you change the `models.py` file, be sure to either (1) reset your database or (2) run `simmate database update` in order for your changes to be applied to your database.
+
 !!! info
     In Django (which Simmate uses under the hood), a `DatabaseTable` is known as
     a `Model`. So a model and table can be viewed as the same thing. Because we
@@ -90,9 +94,6 @@ MyCustomTable2.objects.count()  # should output 0 bc we haven't added data yet
 !!! tip
     `simmate database reset` will also load your changes to the database. Just
     make sure you say **no** to the prebuilt database.
-
-!!! danger
-    Whenever you change the `models.py` file, be sure to either (1) reset your database or (2) run `simmate database update` in order for your changes to be applied to your database.
 
 -------------------------------------------------------------------------------
 
