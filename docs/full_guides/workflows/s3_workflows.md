@@ -41,6 +41,7 @@ graph LR
 Running S3Workflows is the same as normal workflows (e.g. using the `run` method),
 and this entire process of supervising, staging, and shell execution is done for you!
 
+----------------------------------------------------------------------
 
 ## S3Workflows for common Calculators
 
@@ -50,6 +51,7 @@ listed there, then there is likely a subclass of `S3Workflow` already built
 for you. For example, VASP user can take advantage of `VaspWorkflow` to build
 workflows.
 
+----------------------------------------------------------------------
 
 ## Building a custom S3Workflow
 
@@ -84,8 +86,8 @@ state = Example__Echo__SayHello.run()
 result = state.result()
 ```
 
-IMPORTANT: Note that  we used "Echo" in our workflow name. This helps the user 
-see what commands or programs will be called when a workflow is ran.
+!!! tip
+    Note that  we used "Echo" in our workflow name. This helps the user see what commands or programs will be called when a workflow is ran.
 
 
 ### Custom setup and workup
@@ -152,6 +154,7 @@ For a full (and advanced) example of a subclass take a look at
 
 TODO -- Contact our team if you would like us to prioritize this guide
 
+----------------------------------------------------------------------
 
 ## Alternatives to the S3Workflow
 
@@ -159,3 +162,5 @@ For experts, this class can be viewed as a combination of prefect's ShellTask,
 a custodian Job, and Custodian monitoring. When subclassing this, we can absorb
 functionality of `pymatgen.io.vasp.sets` too. By merging all of these together
 into one class, we make things much easier for users and creating new Tasks.
+
+----------------------------------------------------------------------

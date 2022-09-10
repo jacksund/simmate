@@ -4,6 +4,8 @@
 Much like the `simmate.workflows` module, this module brings together all database tables that are linked to workflows and organizes them by application for convenience.
 
 
+----------------------------------------------------------------------
+
 ## Loading results
 
 
@@ -32,6 +34,7 @@ from simmate.database.workflow_results import MITStaticEnergy
 MITStaticEnergy.objects.filter(...)
 ```
 
+----------------------------------------------------------------------
 
 ## Location of Each Table's Source-code
 
@@ -46,3 +49,5 @@ Alternatively, this same database table could have been imported with...
 ``` python
 from simmate.calculators.vasp.database.energy import MITStaticEnergy
 ```
+
+----------------------------------------------------------------------

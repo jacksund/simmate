@@ -137,7 +137,25 @@ simmate database reset
 ```
 3. You're now ready to start using Simmate with your new database!
 
-### (vii) sharing the database
+### (vii) load third-party data
+
+This step is optional.
+
+With Sqlite, we were able to download a prebuilt database with data from
+third-parties already in it. However, creating our postgres database means our
+database is entirely empty.
+
+To load **ALL** third-party data (~5GB total), you can use the following command. We can also use Dask to run this in parallel and speed things up. Depending on your internet connection and CPU speed, this can take up to 24hrs.
+
+``` shell
+simmate database load-remote-archives --parallel
+```
+
+!!! warning
+    `--parallel` will use all cores on your CPU. Keep this in mind if you are
+    running other programs/calculations on your computer already.
+
+### (viii) sharing the database
 
 If you want to share this database with others, you simply need to have them copy your config file: `my_env-database.yaml`. They won't need to run `simmate database reset` because you did it for them.
 

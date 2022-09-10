@@ -3,6 +3,7 @@
 
 This module defines the fundamental building blocks for storing data. When building new and custom tables, you should inherit from one or more of these classes.
 
+----------------------------------------------------------------------
 
 ## The Base Data Types
 
@@ -30,6 +31,7 @@ These mixins are frequently combined in for types of calculations. We define som
 - `dynamics` : holds all steps of a molecular dynamics simmulation
 - `calculation_nested` : a special type of calculation that involves running a workflow made of smaller workflows
 
+----------------------------------------------------------------------
 
 ## Building an example table
 
@@ -94,6 +96,7 @@ class MyCustomTable(Structure, Thermodynamics):
 !!! warning
     Unless you are contributing to Simmate's source code, defining a new table does *NOT* automatically register it to your database. To do this, you must follow along with [our custom workflows guides](/full_guides/workflows/creating_new_workflows/).
 
+----------------------------------------------------------------------
 
 ## Loading data
 
@@ -121,6 +124,8 @@ new_row = MyCustomTable.from_toolkit(
 new_row.save()
 ```
 
+----------------------------------------------------------------------
+
 ## Updating a column
 
 To modify a row, you can load it from your database, update the column, and then resave. Note, there are may more ways to do this, so consult the Django documentation for advanced usage.
@@ -135,3 +140,5 @@ my_row.custom_column_01 = 4321
 
 my_row.save()
 ```
+
+----------------------------------------------------------------------

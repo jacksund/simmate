@@ -6,11 +6,13 @@
 
 While the accronym may not be super intuitive for beginners, "REST API" stands for "**Re**presentational **s**tate **t**ransfer (REST) **A**pplication **P**rogramming **I**nterfaces (API)". In simple terms, this is how we can access databases from a website url. 
 
+------------------------------------------------------------
 
 ## Our example endpoint
 
 The easiest way to understand our API is with some examples. In the examples below, we only look at the Materials Project database (at [`/third-parties/MatprojStructure/`](http://simmate.org/third-parties/MatprojStructure/)), but in addition to this example, nearly every URL within Simmate has REST API functionality! Our API endpoints are automatically built from our database module -- so it's very easy to implement new features and add new tables.
 
+------------------------------------------------------------
 
 ## Accessing the API
 
@@ -64,6 +66,7 @@ For these, you should see an output similar too...
 
 This is super useful because we can grab data from any programming language we'd like -- python, javascript, c++, fortran, or even the command-line. The only requirement to use our REST API is that you have access to the internet! Once you load your desired data, what you do with the JSON output is up to you.
 
+------------------------------------------------------------
 
 ## Filtering results
 
@@ -76,11 +79,13 @@ We specify our conditions by adding a question mark (`?`) at the end of the URL 
 
 Note, our python client for accessing data is MUCH more powerful for filtering through results, so we recommend accessing data using the `simmate.database` module in complex/advanced cases.
 
+------------------------------------------------------------
 
 ## Paginating results
 
 To protect our servers from overuse, Simmate currently returns a maximum of 12 results at a time. Pagination is handled automitically using the `page=...` keyword in the URL. In the HTML, API, and JSON views, you should always have the link to the next page of results available. For example in the JSON view, the returned data includes `next` and `previous` URLs.
 
+------------------------------------------------------------
 
 ## Ordering results
 
@@ -90,8 +95,12 @@ For API and JSON formats, you can manually set the ordering of returned data by 
 http://simmate.org/third-parties/MatprojStructure/?ordering=density_atomic
 ```
 
+------------------------------------------------------------
+
 ## The API for experts
 
 We build Simmate's REST API using the [django-rest-framework](https://www.django-rest-framework.org/) python package, and implement filtering using [django-filter](https://django-filter.readthedocs.io/en/stable/). 
 
 Our endpoints are NOT fixed but are instead dynamically created for each request. This is thanks to our `SimmateAPIViewset` class in the `simmate.website.core_components` module, which takes a Simmate database table and automatically renders an API endpoint for us. The backend implementation of dynamic APIs is still experimental because we are exploring the pros and cons the approach -- for example, this enables quick start-up times for configuring Django, but also comes at the cost of more CPU time per web request.
+
+------------------------------------------------------------

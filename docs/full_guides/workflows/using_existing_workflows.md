@@ -27,13 +27,15 @@
     Read through the "Workflow Names" section for a better understanding of
     the different workflows available.
 
+------------------------------------------------------------
 
 ## Viewing parameters & options
 
-Because parameters are super important for using Simmate, we gave them their own
-section in our documentation. Make sure you read through that section of our
+Because parameters are super important for using Simmate, we gave them [their own
+section in our documentation](/parameters). Make sure you read through that section of our
 documentation to view full parameter descriptions and examples for each.
 
+------------------------------------------------------------
 
 ## Running a workflow (local)
 
@@ -63,6 +65,7 @@ use the `run` method. As a quick example:
     )
     ```
 
+------------------------------------------------------------
 
 ## Running a workflow (cloud)
 
@@ -99,6 +102,7 @@ using the `run_cloud` method:
     run until you add computational resources (or `Workers`). To do this, you
     must read through the "Adding computational resources" section.
 
+------------------------------------------------------------
 
 ## Accessing results
 
@@ -134,7 +138,7 @@ but they make checking your results nice and quick.
     next two sections.
 
 
-### Option 2: toolkit objects
+### Option 2: python objects
 
 When running a workflow in python, a `State` object is returned. From this,
 you can access the results as `toolkit` objects. States allows you to
@@ -201,3 +205,23 @@ can use the `all_results` property:
 !!! tip
     Guides for filtering and manulipating the data in this table is covered 
     in the `Database` guides.
+
+
+### Option 4: the website server
+
+In the `simmate_summary.yaml` output file, there is the `_WEBSITE_URL_`. You can copy/paste this URL into your browser and view your results in an interactive format. Just make sure you are running your local server first:
+
+``` shell
+simmate run-server
+```
+
+Then open the link given by `_WEBSITE_URL_`:
+
+```
+http://127.0.0.1:8000/workflows/static-energy/vasp/mit/1
+```
+
+!!! note
+    Remember that the server and your database are limited to your local computer. Trying to access a URL on a computer that doesn't share the same database file will not work -- so you may need to copy your database file from the cluster to your local computer. Or even better -- if you would like to access results through the internet, then you have to switch to a cloud database.
+
+------------------------------------------------------------

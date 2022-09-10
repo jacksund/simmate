@@ -1,11 +1,13 @@
 
 # The full Simmate guides & API reference
 
+
 ## Before you begin
 
 To get started, make sure you have either completed our [introduction tutorials](/getting_started/overview/)
 or are comfortable with python.
 
+------------------------------------------------------------
 
 ## Organization of guides vs. code
 
@@ -54,4 +56,4 @@ There is also one extra file…
 
 - `conftest` = this is for running Simmate tests and only for contributing devs
 
-
+------------------------------------------------------------
