@@ -1,6 +1,8 @@
 
 # Accessing results from local calculations
 
+----------------------------------------------------------------------
+
 ## Loading a table
 
 In the "run a workflow" tutorial, we ran a calculation and then added results to our database table. Here, we will now go through the results. 
@@ -13,6 +15,8 @@ from simmate.workflows.utilities import get_workflow
 workflow = get_workflow("static-energy.vasp.mit")
 table = workflow.database_table
 ```
+
+----------------------------------------------------------------------
 
 ## Seeing the available columns
 
@@ -70,6 +74,8 @@ table.show_columns()
 
 These are a lot of columns... and you may not need all of them. But Simmate still builds all of these for you right away because they don't take up very much storage space.
 
+----------------------------------------------------------------------
+
 ## Convert to an excel-like table
 
 Next we'd want to see the table with all of its data. To access the table rows, we use the `objects` attribute, and then to get this into a table, we convert to a "dataframe". A dataframe is a filtered portion of a database table -- and because we didn't filter any of our results yet, our dataframe is just the whole table. 
@@ -83,6 +89,8 @@ Open up this variable by double-clicking `data` in Spyder's variable explorer (t
 <p align="center" style="margin-bottom:40px;">
 <img src="https://www.spyder-ide.org/blog/spyder-variable-explorer/table-headings.png"  height=330 style="max-height: 330px;">
 </p>
+
+----------------------------------------------------------------------
 
 ## Filtering results from the table
 
@@ -107,3 +115,5 @@ structures = search_results.to_toolkit()
 ```
 
 This isn't very exciting now because we just have one row/structure in our table :cry:, but we'll do some more exciting filtering in the next section.
+
+----------------------------------------------------------------------

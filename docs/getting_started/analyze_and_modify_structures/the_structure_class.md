@@ -3,16 +3,19 @@
 
 ## What is a class?
 
-"Classes" and "objects" are central concepts in python that are important to understand.
+Python "classes" and "objects" are central concepts in python that are important to understand.
 
-In real life, we might say that McDonald's, Burger King, and Wendy's are examples of restauraunts.  In python, we could say that `mcdonalds`, `burgerking`, and `wendys` are **objects** of the **class** `Restaurants`.  By organizing **objects** into **class**es, python simplifies the way we program. For example, we could design the `Restaurants` class to have a property called `menu`.  Then, we could view the menu simply by typing `wendys.menu`. We (essentially) set a rule that -- no matter what restaurant we have -- the menu info can be accessed with `example_restaurant.menu`.
+In real life, we might say that McDonald's, Burger King, and Wendy's are examples of restauraunts.  In python, we could say that `mcdonalds`, `burgerking`, and `wendys` are **objects** of the **class** `Restaurants`.  
+
+By organizing **objects** into **classes**, python simplifies the way we program. For example, we could design the `Restaurants` class to have a property called `menu`.  Then, we could view the menu simply by typing `wendys.menu`. We (essentially) set a rule that -- no matter what restaurant we have -- the menu info can be accessed with `example_restaurant.menu`.
 
 This might seem silly, but it becomes very powerful once we want to start building out functionality and anaylses.
 
-In materials science, the class we use most is crystal structure. In Simmate, we call this class `Structure`. A crystal structure is _**always**_ made up of a lattice and a list of atomic sites. Fortunately, this is exactly what we have in our `POSCAR` file from tutorial 2, so let's use Simmate to create an object of the `Structure`.
-
+----------------------------------------------------------------------
 
 ## Loading the Structure class
+
+In materials science, the class we use most is for crystal structures. In Simmate, we call this class `Structure`. A crystal structure is _**always**_ made up of a lattice and a list of atomic sites. Fortunately, this is exactly what we have in our `POSCAR` file from tutorial 2, so let's use Simmate to create an object of the `Structure`.
 
 Start by entering this line into the python console and hit enter:
 
@@ -22,6 +25,7 @@ from simmate.toolkit import Structure
 
 This line says we want to use the `Structure` class from Simmate's code. The `Structure` class is now loaded into memory and is waiting for you to do something with it.
 
+----------------------------------------------------------------------
 
 ## Loading our structure from a file
 
@@ -54,6 +58,7 @@ PeriodicSite: Cl (2.3236, 1.6431, 4.0246) [0.5000, 0.5000, 0.5000]
 
 This is the same information from our POSCAR! 
 
+----------------------------------------------------------------------
 
 ## Manually create a structure in python
 
@@ -75,6 +80,8 @@ s = Structure(
 )
 ```
 
+----------------------------------------------------------------------
+
 ## Use the structure in a workflow
 
 Whatever your method for creating a structure, we now have our `Structure` object and we can use its properties (and methods) to simplify our calculations.
@@ -95,7 +102,7 @@ For example, we can use it to run a workflow. We did this with the command-line 
     # ... modify your structure in some way ...
     # (we will learn how in the next section)
     
-    result = mit_workflow.run(structure=nacl_structure)
+    result = workflow.run(structure=nacl_structure)
     ```
 
 If we don't need to modify the structure, we could have just given the filename to our workflow:
@@ -105,12 +112,14 @@ If we don't need to modify the structure, we could have just given the filename 
     from simmate.workflows.utilities import get_workflow
     
     workflow = get_workflow("static-energy.vasp.mit")
-    result = mit_workflow.run(structure="POSCAR")
+    result = workflow.run(structure="POSCAR")
     ```
 
-=== "command line"
+=== "yaml"
     ``` yaml
     workflow_name: static-energy.vasp.mit
     structure: POSCAR
     ```
+
+----------------------------------------------------------------------
 

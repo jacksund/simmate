@@ -6,6 +6,8 @@ In this tutorial, you will learn how to explore your database as well as load da
 !!! tip
     This entire tutorial should be ran on your local computer because we will be using Spyder. To use results from your remote calculations, you can copy/paste your database file from your remote computer to where our local database one should be (~/simmate/my_env-database.sqlite3). Note, copy/pasting will no longer be necessary when we switch to a cloud database in the next tutorial.
 
+----------------------------------------------------------------------
+
 ## The quick tutorial
 
 1. Make sure you've initialized your database. This was done in tutorial 2 with the command `simmate database reset`. Do NOT rerun this command as it will empty your database and delete your results.
@@ -55,3 +57,5 @@ dataframe = first_150_rows.to_dataframe()
 
 !!! warning
     To protect our servers, you can only call `load_remote_archive()` a few times per month. Don't overuse this feature.
+
+----------------------------------------------------------------------

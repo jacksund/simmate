@@ -1,7 +1,11 @@
 
+----------------------------------------------------------------------
+
 ## Accessing third-party data
 
 When running our own calculations with Simmate, it is also important to know what other researchers have already calculated for a given material. Many research teams around the world have built databases made of 100,000+ structures -- and many of these teams even ran calculations on all of them. Here, we will use Simmate to explore their data.
+
+----------------------------------------------------------------------
 
 ## Loading a table
 
@@ -21,6 +25,8 @@ from simmate.database.third_parties import JarvisStructure
 ```
 
 `table` from the previous section and the `MITRelaxation` class here are the exact same class. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.database import connect`). When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database. So don't forget to include `from simmate.database import connect`!
+
+----------------------------------------------------------------------
 
 ## Filling data
 
@@ -44,6 +50,8 @@ JarvisStructure.load_remote_archive()  # This may take ~10min to complete
     It is very important that you read the warnings printed by `load_remote_archive`. This data was NOT made by Simmate. We are just helping to distribute it on behalf of these other teams. Be sure to cite them for their work!
 
 Calling `load_remote_archive` loads ALL data to your computer and saves it. This data will not be updated unless you call `load_remote_archive` again. This should only be done every time we release a new archive version (typically once per year). To protect our servers from misuse, you can only call `load_remote_archive()` a few times per month -- no matter what. **Don't overuse this feature.**
+
+----------------------------------------------------------------------
 
 ## Start exploring the data
 
@@ -77,7 +85,11 @@ df_1 = structures_1.to_dataframe()
 df_2 = structures_2.to_dataframe()
 ```
 
+----------------------------------------------------------------------
+
 ## Advanced data manipulation
 
 There are many ways to search through your tables, and we only covered the basics here. Advanced users will benefit from knowing that we use [Django's query api](https://docs.djangoproject.com/en/3.2/topics/db/queries/) under the hood. It can take a long time to master, so we only recommend going through [Django's full tutorial](https://docs.djangoproject.com/en/4.0/) if you plan on joining our team or are a fully computational student. Beginners can just ask for help. Figuring out the correct filter can take new users hours while it will only take our team a minute or two. Save your time and [post questions here](https://github.com/jacksund/simmate/discussions/categories/q-a).
+
+----------------------------------------------------------------------
 

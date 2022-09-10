@@ -1,6 +1,8 @@
 
 # Getting help through Spyder
 
+----------------------------------------------------------------------
+
 ## Auto-complete in python
 
 Where we left off in the last tutorial, we saw how to list all available properties and methods on an object. We did this by typing the object name plus a period (ex: `nacl_structure.`) and then hitting `tab`:
@@ -16,6 +18,7 @@ nacl_structure.  # hit "tab" on your keyboard
 !!! warning
     for this next part, pymatgen's documentation isn't always complete or beginner-friendly. This is why you won't see much. We're working on this at Simmate, so we hope this improves in the future. For now, don't expect too much guidance from the `Structure` class.
 
+----------------------------------------------------------------------
 
 ## Searching for a method's guides
 
@@ -41,3 +44,5 @@ nacl_structure.get_primitive_structure  # hit "ctrl+I" BEFORE hitting enter on t
 
 !!! tip
     If the documentation is too short and not what you're looking for, chances are that we have more guides in the "Full Guides & Reference" section
+
+----------------------------------------------------------------------

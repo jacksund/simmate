@@ -27,7 +27,7 @@ pip install -e .
 
 6. When resetting your database, make sure you do **NOT** use the prebuilt database. Pre-builts are only made for new releases and the dev database may differ from the most recent release.
 ``` bash
-simmate database reset --confirm-delete --use-prebuilt false
+simmate database reset --confirm-delete --no-use-prebuilt
 ```
 
 7. Make sure everything works properly by running our tests
