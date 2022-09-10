@@ -3,7 +3,7 @@
 
 ## Before you begin
 
-To get started, make sure you have either completed our [introduction tutorials](https://jacksund.github.io/simmate/getting_started/overview/)
+To get started, make sure you have either completed our [introduction tutorials](/getting_started/overview/)
 or are comfortable with python.
 
 

@@ -7,7 +7,7 @@ This module covers basic use, but more information is available in `simmate.work
 
 ## Basic use
 
-[Tutorials 01-05](https://jacksund.github.io/simmate/getting_started/overview/) will teach you how to run workflows and access their results. But as a review:
+[The getting-started tutorials](/getting_started/overview/) will teach you how to run workflows and access their results. But as a review:
 
 ``` python
 from simmate.workflows.static_energy import StaticEnergy__Vasp__Matproj as workflow
@@ -39,7 +39,7 @@ workflow = get_workflow("static-energy.vasp.matproj")
 # The Simmate Workflow Engine
 
 
-This module defines common workflows, error handling, and submission/running of workflows. It is ment for users that want to create custom workflows from scratch. Use of this module is closely tied with [Tutorials 06 and 09](https://jacksund.github.io/simmate/getting_started/overview/).
+This module defines common workflows, error handling, and submission/running of workflows. It is ment for users that want to create custom workflows from scratch. Use of this module is closely tied with [the getting-started tutorials](/getting_started/overview/).
 
 This module is only meant for advanced users. Beginners should instead start by checking if there is already a workflow built for them (in `simmate.workflows`) or by checking if there are common base workflows already built for the program they are using in `simmate.calculators`. For example, VASP users can check `simmate.calculators.vasp.workflows`.
 
@@ -51,7 +51,7 @@ Here we try to give a birds-eye view of Simmate workflows and a commonly used su
 
 ## What is a `Workflow`?
 
-Recall from Simmate's [tutorial 02](https://jacksund.github.io/simmate/getting_started/overview/), that a `Workflow` is made up of 4 stages:
+Recall from Simmate's [getting-started tutorial](/getting_started/run_a_workflow/stages_of_a_workflow/), that a `Workflow` is made up of 4 stages:
 
 - `configure`: chooses our desired settings for the calculation (such as VASP's INCAR settings)
 - `schedule`: decides whether to run the workflow immediately or send off to a job queue (e.g. SLURM, PBS, or remote computers)
@@ -68,7 +68,7 @@ The `save` step is simply taking the result of the `execute` and saving it to a 
 
 All stages of a `Workflow` are done through the `run` or `run_cloud` methods. That is... `Workflow.run` = `configure` + `schedule` + `execute` + `save`.
 
-To begin building custom workflows, make sure you have completed [tutorial 06](https://jacksund.github.io/simmate/getting_started/overview/) and then read through the `simmate.workflow_engine.workflow` documentation.
+To begin building custom workflows, make sure you have completed [the getting-started tutorials](getting_started/) and then read through the `simmate.workflow_engine.workflow` documentation.
 
 
 ## What is a `NestedWorkflow`?
@@ -90,7 +90,7 @@ Many workflows involve writing input files, calling some external program, and t
 All stages of this S3 workflow are packed into the `excute` step of a `Workflow`, where Simmate has a lot of functionality built for you already.
 
 If you would like to build a custom S3 workflow, we suggest going through:
-1. [tutorial 06](https://jacksund.github.io/simmate/getting_started/overview/)
+1. [getting-started guides](/simmate/getting_started/overview/)
 2. `simmate.workflow_engine.workflow` documentation
 3. `simmate.workflow_engine.s3_workflow` documentation
 

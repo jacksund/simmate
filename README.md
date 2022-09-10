@@ -43,7 +43,7 @@ The Simulated Materials Ecosystem (Simmate) is a toolbox and framework for compu
 This Github repo holds all of our source code. Before getting started here, you may way to check out... 
 
 - our main website at [simmate.org](https://simmate.org/)
-- our tutorials and documentation at [jacksund/simmate](https://jacksund.github.io/simmate/home/)
+- our tutorials and documentation at [jacksund.github.io/simmate](https://jacksund.github.io/simmate/home/)
 
 ## Need help or have a suggestion?
 

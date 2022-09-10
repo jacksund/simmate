@@ -1,10 +1,10 @@
 
 # Build custom database tables and apps
 
-!!! warning
-    There is no "quick tutorial" for this topic. Even advanced users should read everything!
+In this tutorial, you will learn how to build customized database table and also learn how to build out your customized features into a "project" and "apps".
 
-In this tutorial, you will learn how to build customized database table and also learn how to build out your customized features into "projects".
+!!! note
+    There is no "quick tutorial" for this topic. Even advanced users should read everything.
 
 -------------------------------------------------------------------------------
 
@@ -27,9 +27,9 @@ All of these can be done using Simmate "projects". These projects are really jus
 
 ## Is this just creating a new package?
 
-Yep. For expert python users, you will notice that projects are indeed building a new python package. In fact, our `start-project` command acts just like a cookie-cutter template.
+Yep -- Projects are indeed building a new python package. In fact, our `start-project` command acts just like a "cookie-cutter" template.
 
-This can have huge implications for sharing research and code. With a fully-functional and published Simmate project, you can upload your code for other labs to use via Github and PyPi! Then the entire Simmate community can install and use your custom workflows with Simmate. For them, it'd be as easy as doing
+This can have huge implications for sharing research and code. With a fully-functional and published Simmate project, you can upload your code for other labs to use via Github and PyPi. Then the entire Simmate community can install and use your custom workflows with Simmate. For them, it'd be as easy as doing
 
 1.  `pip install my_new_project`
 2.  adding `example_app.apps.ExampleAppConfig` to their `~/simmate/my_env-apps.yaml`

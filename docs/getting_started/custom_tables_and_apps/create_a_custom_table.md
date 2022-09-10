@@ -6,7 +6,7 @@
 
 Inside your project, there are example database tables that show how to build simple ones. It may seem super minimal, but there's really nothing else to do! 
 
-Recall from [the section on inheritance](https://jacksund.github.io/simmate/getting_started/access_the_database/intro_to_python_inheritance/) from the "access the database" tutorial. This is why building out new tables is so easy. :fire:
+Recall from [the section on inheritance](/getting_started/access_the_database/intro_to_python_inheritance/) from the "access the database" tutorial. This is why building out new tables is so easy. :fire:
 
 Some thing as simple as...
 
@@ -48,7 +48,7 @@ class MyCustomTable1(Structure, Calculation):
 However, we won't be able to import these tables or load data just yet. We will cover this next.
 
 !!! tip
-    Here we just show `Structure` data, but there are many more `base_data_types` that you can use. All types build out features for you automatically. Be sure to read through our guides in the [`simmate.database`](https://jacksund.github.io/simmate/full_guides/database/overview/) module for more info. Advanced database tables may require reading more on the [base data types](https://jacksund.github.io/simmate/full_guides/database/custom_tables/) too.
+    Here we just show `Structure` data, but there are many more `base_data_types` that you can use. All types build out features for you automatically. Be sure to read through our guides in the [`simmate.database`](/full_guides/database/overview/) module for more info. Advanced database tables may require reading more on the [base data types](/full_guides/database/custom_tables/) too.
 
 -------------------------------------------------------------------------------
 

@@ -36,7 +36,7 @@ To have everything set up for your team, you can do one of the following...
 
 For options 1 and 2, just send us an email at `simmate.team@gmail.com`.
 
-For option 3, we have [a guide for setting a server up on DigitalOcean](https://github.com/jacksund/simmate/tree/main/.do). In addition to this guide, make sure you complete the base simmate tutorials -- and pay particular attention to the tutorials on [setting up a cloud database](https://jacksund.github.io/simmate/getting_started/use_a_cloud_database/quick_start/) and [setting up computational resources](https://jacksund.github.io/simmate/getting_started/add_computational_resources/quick_start/).
+For option 3, we have [a guide for setting a server up on DigitalOcean](https://github.com/jacksund/simmate/tree/main/.do). In addition to this guide, make sure you complete the base simmate tutorials -- and pay particular attention to the tutorials on [setting up a cloud database](/getting_started/use_a_cloud_database/quick_start/) and [setting up computational resources](/getting_started/add_computational_resources/quick_start/).
 
 ## Third-party sign ins
 

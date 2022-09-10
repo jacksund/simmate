@@ -1,6 +1,11 @@
 
 # Create new & advanced workflows
 
+!!! note 
+    This guide only covers the bare-minimum. We highly recommend going through the full guides when building your custom workflows.
+
+----------------------------------------------------------------------
+
 ## Create a flow from scratch
 
 Simmate defines a base `Workflow` class to help with common material science analyses. The simplest possible workflow can look something like...
@@ -18,6 +23,8 @@ class Example__Python__MyFavoriteSettings(Workflow):
         print("This workflow doesn't do much")
         return 42
 ```
+
+----------------------------------------------------------------------
 
 ## Modify an existing workflow
 
@@ -48,6 +55,16 @@ class StaticEnergy__Vasp__MyCustomPreset(original_workflow):
 assert original_workflow.incar != StaticEnergy__Vasp__MyCustomPreset
 ```
 
+!!! danger
+    Updating workflows can often run into unexpected problems -- because not workflows
+    behave the same. More often then not, you should create your own custom 
+    `VaspWorkflow`. Learn more [in the full-guides](/full_guides/workflows/creating_new_workflows/#building-from-existing-workflows).
+    
+
+----------------------------------------------------------------------
+
+## Running your workflow
+
 You can now run and interact with your workflow like any other one!
 
 ``` python
@@ -55,7 +72,7 @@ state = StaticEnergy__Vasp__MyCustomPreset.run(structure="NaCl.cif")
 result = state.result()
 ```
 
+!!! tip
+    You can also run workflows from a YAML file too. Check out the [full-guides](/full_guides/workflows/creating_new_workflows/#running-our-custom-workflow) to learn more.
 
-!!! tip 
-    There's much more that's possible. We highly recommend going through the full guides when building your custom workflows.
-
+----------------------------------------------------------------------

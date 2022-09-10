@@ -24,7 +24,10 @@ from simmate.database.workflow_results import StaticEnergy
 from simmate.database.third_parties import JarvisStructure
 ```
 
-`table` from the previous section and the `MITRelaxation` class here are the exact same class. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.database import connect`). When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database. So don't forget to include `from simmate.database import connect`!
+`table` from the previous section (on accessing workflow data) and the `StaticEnergy` class here are the exact same class/table. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.database import connect`). 
+
+!!! warning 
+    When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database. So don't forget to include `from simmate.database import connect`!
 
 ----------------------------------------------------------------------
 
@@ -89,7 +92,10 @@ df_2 = structures_2.to_dataframe()
 
 ## Advanced data manipulation
 
-There are many ways to search through your tables, and we only covered the basics here. Advanced users will benefit from knowing that we use [Django's query api](https://docs.djangoproject.com/en/3.2/topics/db/queries/) under the hood. It can take a long time to master, so we only recommend going through [Django's full tutorial](https://docs.djangoproject.com/en/4.0/) if you plan on joining our team or are a fully computational student. Beginners can just ask for help. Figuring out the correct filter can take new users hours while it will only take our team a minute or two. Save your time and [post questions here](https://github.com/jacksund/simmate/discussions/categories/q-a).
+There are many ways to search through your tables, and we only covered the basics here. 
+
+Advanced users will benefit from knowing that we use [Django's query api](https://docs.djangoproject.com/en/3.2/topics/db/queries/) under the hood. It can take a long time to master, so we only recommend going through [Django's full tutorial](https://docs.djangoproject.com/en/4.0/) if you plan on joining our team or are a fully computational student. 
+
+Beginners can just ask for help. Figuring out the correct filter can take new users hours while it will only take our team a minute or two. Save your time and [post questions here](https://github.com/jacksund/simmate/discussions/categories/q-a).
 
 ----------------------------------------------------------------------
-
