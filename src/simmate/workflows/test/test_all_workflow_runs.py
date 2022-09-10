@@ -36,7 +36,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
         successful_flows = []
 
         # TEST CUSTOMIZED FLOW
-        workflow_name = "customized.vasp.user-config"
+        workflow_name = "customized.toolkit.user-config"
         workflow = get_workflow(workflow_name)
         state = workflow.run(
             workflow_base="relaxation.vasp.quality00",
@@ -73,7 +73,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
             "static-energy.vasp.quality04",
             "static-energy.vasp.matproj-hse",  # slow
             "static-energy.vasp.matproj-scan",  # slow
-            "population-analysis.vasp.bader-matproj",
+            "population-analysis.vasp-bader.bader-matproj",
             "population-analysis.vasp.elf-matproj",
             "electronic-structure.vasp.matproj-full",
             "electronic-structure.vasp.matproj-hse-full",  # slow
@@ -129,10 +129,5 @@ def test_all_workflow_runs(tmp_path, sample_structures):
     missing_failed_flows = list(set(all_flows) - set(successful_flows))
     missing_failed_flows.sort()
 
-    assert missing_failed_flows == [
-        "diffusion.vasp.neb-from-endpoints-mit",  # used within all-paths
-        "diffusion.vasp.neb-from-images-mit",  # used within all-paths
-        "diffusion.vasp.neb-single-path-mit",  # used within all-paths
-        "population-analysis.vasp.badelf-matproj",  # requires db
-        "restart.simmate.automatic",
-    ]
+    # TODO
+    assert missing_failed_flows == []
