@@ -45,21 +45,39 @@ class CalypsoStructure(StructureCreator):
     of this wrapper as well as the cleaniness of the code.
 
     source: http://www.calypso.cn/getting-calypso/
+
+
+    ## Dev Notes
+
+    For Ubuntu, I downloaded the x86 version of CALYPSO 6.0. Simply uncompress
+    the download file and the executable is there. No need for any install.
+
+    CALYPSO does require python 2.7 as well, and we can actually use the same
+    environment as USPEX (see above). Make sure this is active when
+    submitting a job.
+
+    To generate structures without running any analysis/calcs, I simply need
+    to run calypso in split mode:
+    ```
+    Split = T
+    ```
+
+    All the structures are put into POSCAR files named POSCAR_1, POSCAR_2, ... POSCAR_N
     """
 
     def __init__(
         self,
         composition: Composition,
         # location of the calypso.x file
-        calypso_exe_loc="/home/jacksund/Desktop/",
+        calypso_exe_loc: str = "/home/jacksund/Desktop/",
         # This needs to be a custom python env! It must be Python=2.7 and have
         # Numpy, Scipy, MatPlotLib, ASE, and SpgLib
-        calypso_python_env="uspex",
+        calypso_python_env: str = "uspex",
         # this will vary if you didn't install anaconda to your home
         # directory or installed miniconda instead.
-        conda_loc="/home/jacksund/anaconda3/etc/profile.d/conda.sh",
+        conda_loc: str = "/home/jacksund/anaconda3/etc/profile.d/conda.sh",
         # # this is the temporary directory where I will run calypso
-        temp_dir="/home/jacksund/Desktop/calypso_tmp",
+        temp_dir: str = "/home/jacksund/Desktop/calypso_tmp",
     ):
         self.calypso_python_env = calypso_python_env
         self.temp_dir = temp_dir
@@ -206,7 +224,7 @@ class CalypsoStructure(StructureCreator):
             # delete the file now that we are done with it
             os.remove(poscar_name)
 
-        # Do some cleanup and delete all the unneccesary directories/files 
+        # Do some cleanup and delete all the unneccesary directories/files
         # that were just made.
         # This sets us up to run new_structures again
         shutil.rmtree("results")
@@ -224,7 +242,7 @@ class CalypsoStructure(StructureCreator):
 
     def create_structure(self) -> Structure:
 
-        # call the create_structures() function and tell it to create 
+        # call the create_structures() function and tell it to create
         # just one structure
         structure = self.create_structures(1)[0]
 
