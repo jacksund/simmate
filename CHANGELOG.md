@@ -22,6 +22,12 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 -->
 
+- no new changes have been merged into the `main` branch yet
+
+
+
+# v0.11.0 (2022.09.10)
+
 **Enhancements**
 - REST API fields can now be specified directly with the `api_filters` attribute of any `DatabaseTable` class & fields from mix-ins are automatically added
 - add `archive_fields` attribute that sets the "raw data" for the database table & fields from mix-ins are automatically added
@@ -50,6 +56,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - fix bug in `workflows explore` command where 'vasp' is the assumed calculator name
 - fix broken example code in custom workflow docs
 - fix broken website links and workflow views
+
 
 
 # v0.10.0 (2022.08.29)
@@ -85,6 +92,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - fix evolutionary search failures when writing output files while files are opened/locked
 - fix NEB workflows failing due to Walltime handler
 - fix NEB workflows hints for `workup` failure due to missing start/end image folders
+
 
 
 # v0.9.0 (2022.08.17)
