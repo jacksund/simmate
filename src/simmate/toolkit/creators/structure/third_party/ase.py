@@ -9,7 +9,7 @@ from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.structure.base import StructureCreator
 
 
-class ASEStructure(StructureCreator):
+class AseStructure(StructureCreator):
     """
     Creates structures using ASE's start-generator
 

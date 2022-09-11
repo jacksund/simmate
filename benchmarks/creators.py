@@ -1,199 +1,121 @@
 # -*- coding: utf-8 -*-
 
-# TESTING PARALLEL
-
-# from dask.distributed import Client
-# client = Client() #  processes=False
-
-# from pymatdisc.core.creators.structure import RandomSymStructure
-# from pymatgen.core.composition import Composition
-# c = Composition('Al4O6')
-# test = RandomSymStructure(c)
-
-# import time
-# s = time.time()
-# x = test.create_structure(1)
-# e = time.time()
-# print(e-s)
-
-# import time
-# s = time.time()
-# x = test.create_many_structures(200, 1, progressbar=True, mode='threads')
-# e = time.time()
-# print(e-s)
-
-##############################################################################
-
-import os
-
-# from time import time # incorrectly gives 0 seconds in some cases
+import logging
 from timeit import default_timer as time
 
-# for progress monitoring and time recording
+import numpy
+import pandas
 from rich.progress import track
 
+from simmate.toolkit import Composition
+from simmate.utilities import get_directory
 
-def time_test_struct_creation(creator, n):
-    times = []
-    for n in track(range(n)):
-        structure = False
-        while not structure:
-            start = time()
-            structure = creator.create_structure()
-            end = time()
-        times.append(end - start)
-        structure.to(fmt="cif", filename=str(n) + ".cif")
-    return times
+# BUG: from time import time --> incorrectly gives 0 seconds in some cases, so
+# therefore use the timeit module instead
 
+# Disable logging throughout for cleaner output
+logger = logging.getLogger()
+logger.disabled = True
 
-##############################################################################
-
-import numpy
-
-# I'll store the data in these two variables
-import pandas
-
-times_all = []
-mapping = [
-    "PyMatDisc"
-]  # , 'ASE', 'GASP', 'PyXtal', 'XtalOpt', 'USPEX', 'CALYPSO', 'AIRSS'
-n = 100
-
-##############################################################################
-
-# Establish the composition that we are testing.
+# Establish the compositions and settings that we are testing.
 # Here is a list of our control (reduced) compositions and the total atom
 # counts for their known global minimum structures:
-# Fe 1
-# Si 2
-# C 4
-# TiO2 6
-# SiO2 6
-# Al2O3 10
-# Si2N2O 10
-# SrSiN2 16
-# MgSiO3 20 and 40
-
-from pymatgen.core.composition import Composition
-
-compositions_strs = [
+COMPOSITIONS_TO_TEST = [
     "Fe1",
     "Si2",
     "C4",
     "Ti2O4",
-    "Si4O8",
-    "Al4O6",
-]  # 'Si4N4O2', 'Sr4Si4N8', 'Mg4Si4O12', 'Mg8Si8O24'
-compositions_objs = [Composition(c) for c in compositions_strs]
+    # "Si4O8",
+    # "Al4O6",
+    # "Si4N4O2",
+    # "Sr4Si4N8",
+    # "Mg4Si4O12",
+]
 
-##############################################################################
+NSAMPLES_PER_COMPOSITION = 50
 
-### PYMATDISC
 
-# Let's test PyMatDisc first, which we need the generator for (bc only the gen has the site distance check)
-# !!! decide between with and without fingerprint check
-from pymatdisc.core.creators.structure import RandomSymStructure
+def time_test_creation(creator_class, creator_kwargs):
 
-times_creator = []
-os.mkdir("PyMatDisc")
-os.chdir("PyMatDisc")
-for comp_str, comp_obj in zip(compositions_strs, compositions_objs):
-    os.mkdir(comp_str)
-    os.chdir(comp_str)
-    creator = RandomSymStructure(comp_obj)
-    times_comp = time_test_struct_creation(creator, n)
-    os.chdir("..")
-    times_creator.append(times_comp)
-os.chdir("..")
-times_all.append(times_creator)
+    compositions = [Composition(c) for c in COMPOSITIONS_TO_TEST]
 
-df_pymatdisc = pandas.DataFrame(
-    numpy.transpose(times_creator), columns=compositions_strs
-)
-df_pymatdisc.to_csv("PyMatDisc.csv")
+    directory = get_directory(creator_class.name)
 
-##############################################################################
+    all_comp_times = []
 
-### ASE
+    for composition in compositions:
 
-# from pymatdisc.creators.structure import ASEStructure
+        # BUG: some creators fail for specific compositions
+        if str(composition) == "Fe1" and creator_class.name == "AseStructure":
+            all_comp_times.append([None] * NSAMPLES_PER_COMPOSITION)
+            continue
 
-# times_creator = []
-# os.mkdir('ASE')
-# os.chdir('ASE')
-# for comp_str, comp_obj in zip(compositions_strs, compositions_objs):
-#     if comp_str in ['Fe1']: # Fails with...
-#         times_creator.append([None]*n)
-#         continue
-#     os.mkdir(comp_str)
-#     os.chdir(comp_str)
-#     creator = ASEStructure(comp_obj)
-#     times_comp = time_test_struct_creation(creator, n)
-#     os.chdir('..')
-#     times_creator.append(times_comp)
-# os.chdir('..')
-# times_all.append(times_creator)
+        comp_directory = get_directory(directory / str(composition))
 
-# df_ase = pandas.DataFrame(numpy.transpose(times_creator),
-#                           columns=compositions_strs)
-# df_ase.to_csv('ASE.csv')
+        creator = creator_class(composition, **creator_kwargs)
 
-##############################################################################
+        single_comp_times = []
+        for n in track(
+            range(NSAMPLES_PER_COMPOSITION),
+            description=f"{creator_class.name} - {composition}",
+        ):
+            structure = False
+            attempt = 1
+            while not structure:
+                attempt += 1
+                start = time()
+                structure = creator.create_structure()
+                end = time()
+            single_comp_times.append(end - start)
+            structure.to(
+                fmt="cif",
+                filename=comp_directory / f"{n}.cif",
+            )
+        all_comp_times.append(single_comp_times)
 
-### GASP
+    df = pandas.DataFrame(
+        numpy.transpose(all_comp_times),
+        columns=COMPOSITIONS_TO_TEST,
+    )
+    # df.to_csv(f"{creator_class.name}.csv")
 
-# # from pymatdisc.creators.structure import GASPStructure
-# from pymatdisc.generators.base import PrimaryGenerator
+    # attach data for future reference
+    creator_class.benchmark_results = df
 
-# times_creator = []
-# os.mkdir('GASP')
-# os.chdir('GASP')
-# for comp_str, comp_obj in zip(compositions_strs, compositions_objs):
-#     if comp_str in []: # Fails with...
-#         times_creator.append([None]*n)
-#         continue
-#     os.mkdir(comp_str)
-#     os.chdir(comp_str)
-#     # creator = GASPStructure(comp_obj)
-#     # times_comp = time_test_struct_creation(creator, n)
-#     creator = PrimaryGenerator.from_preset('gasp', comp_obj)
-#     times_comp = time_test_struct_generation(creator, n)
-#     os.chdir('..')
-#     times_creator.append(times_comp)
-# os.chdir('..')
-# times_all.append(times_creator)
+    return df
 
-# df_gasp = pandas.DataFrame(numpy.transpose(times_creator),
-#                             columns=compositions_strs)
-# df_gasp.to_csv('GASP.csv')
 
-##############################################################################
+# -----------------------------------------------------------------------------
 
-### PyXtal
+from simmate.toolkit.creators.structure.random_symmetry import RandomSymStructure
+from simmate.toolkit.creators.structure.third_party.ase import AseStructure
+from simmate.toolkit.creators.structure.third_party.gasp import GaspStructure
+from simmate.toolkit.creators.structure.third_party.pyxtal import PyXtalStructure
+from simmate.toolkit.creators.structure.third_party.xtalopt import XtaloptStructure
 
-# from pymatdisc.creators.structure import PyXtalStructure
+CREATORS_TO_TEST = [
+    (
+        RandomSymStructure,
+        {
+            "site_gen_options": {
+                "lazily_generate_combinations": False,
+            }
+        },
+    ),
+    (AseStructure, {}),
+    (PyXtalStructure, {}),
+    (GaspStructure, {}),
+    (
+        XtaloptStructure,
+        {
+            "command": "/home/jacksund/Documents/github/randSpg/build/randSpg",
+        },
+    ),
+]
+for creator_class, creator_kwargs in CREATORS_TO_TEST:
+    time_test_creation(creator_class, creator_kwargs)
 
-# times_creator = []
-# os.mkdir('PyXtal')
-# os.chdir('PyXtal')
-# for comp_str, comp_obj in zip(compositions_strs, compositions_objs):
-#     if comp_str in []: # Fails with...
-#         times_creator.append([None]*n)
-#         continue
-#     os.mkdir(comp_str)
-#     os.chdir(comp_str)
-#     creator = PyXtalStructure(comp_obj)
-#     times_comp = time_test_struct_creation(creator, n)
-#     os.chdir('..')
-#     times_creator.append(times_comp)
-# os.chdir('..')
-# times_all.append(times_creator)
-
-# df_pyxtal = pandas.DataFrame(numpy.transpose(times_creator),
-#                               columns=compositions_strs)
-# df_pyxtal.to_csv('PyXtal.csv')
-
-##############################################################################
+# -----------------------------------------------------------------------------
 
 ### XtalOpt
 
@@ -219,7 +141,7 @@ df_pymatdisc.to_csv("PyMatDisc.csv")
 #                               columns=compositions_strs)
 # df_xtalopt.to_csv('XtalOpt.csv')
 
-##############################################################################
+# -----------------------------------------------------------------------------
 
 ### USPEX
 
@@ -243,7 +165,7 @@ df_pymatdisc.to_csv("PyMatDisc.csv")
 # os.chdir('..')
 # times_all.append(times_creator)
 
-##############################################################################
+# -----------------------------------------------------------------------------
 
 ### CALYPSO
 
@@ -267,46 +189,25 @@ df_pymatdisc.to_csv("PyMatDisc.csv")
 # os.chdir('..')
 # times_all.append(times_creator)
 
-##############################################################################
+# -----------------------------------------------------------------------------
 
 ### Plotting Timetest
-
-import pandas
-
-dfs = []
-for name in mapping:
-    df = pandas.read_csv("{}.csv".format(name), index_col=0)
-    dfs.append(df)
-
 
 import plotly.graph_objects as go
 from plotly.offline import plot
 
-composition_strs = [
-    "Fe1",
-    "Si2",
-    "C4",
-    "Ti2O4",
-    "Si4O8",
-    "Al4O6",
-    "Si4N4O2",
-    "Sr4Si4N8",
-    "Mg4Si4O12",
-    "Mg8Si8O24",
-]
-
 data = []
 
-for name, df in zip(mapping, dfs):
+for creator, _ in CREATORS_TO_TEST:
     # y should be all time values for ALL compositions put together in to a 1D array
-    ys = df.values.flatten(order="F")
+    ys = creator.benchmark_results.values.flatten(order="F")
     # x should be labels that are the same length as the xs list
     xs = []
-    for c in composition_strs:
-        xs += [c] * n
+    for c in COMPOSITIONS_TO_TEST:
+        xs += [c] * NSAMPLES_PER_COMPOSITION
 
     series = go.Box(
-        name=name,
+        name=creator.name,
         x=xs,
         y=ys,
         boxpoints=False,  # look at strip plots if you want the scatter points
@@ -355,10 +256,10 @@ fig = go.Figure(data=data, layout=layout)
 
 plot(fig, config={"scrollZoom": True})
 
-##############################################################################
-##############################################################################
-##############################################################################
-##############################################################################
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 ### Fingerprint Comparison
 
@@ -412,7 +313,7 @@ plot(fig, config={"scrollZoom": True})
 #                           columns=compositions_strs)
 #     df.to_csv('{}_distances.csv'.format(name))
 
-##############################################################################
+# -----------------------------------------------------------------------------
 
 ### Plotting DistanceTest
 
@@ -484,7 +385,4 @@ plot(fig, config={"scrollZoom": True})
 
 # plot(fig, config={'scrollZoom': True})
 
-##############################################################################
-##############################################################################
-##############################################################################
-##############################################################################
+# -----------------------------------------------------------------------------
