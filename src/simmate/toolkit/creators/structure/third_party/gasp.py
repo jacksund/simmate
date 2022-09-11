@@ -2,7 +2,7 @@
 
 import numpy
 
-from simmate.toolkit import Structure, Composition
+from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.structure.base import StructureCreator
 
 

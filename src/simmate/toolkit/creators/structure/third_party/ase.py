@@ -2,8 +2,7 @@
 
 from ase import Atoms
 from ase.ga.startgenerator import StartGenerator
-from ase.ga.utilities import closest_distances_generator
-from ase.ga.utilities import CellBounds
+from ase.ga.utilities import CellBounds, closest_distances_generator
 from pymatgen.io.ase import AseAtomsAdaptor
 
 from simmate.toolkit import Composition, Structure
