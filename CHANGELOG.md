@@ -27,7 +27,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 
 
-# v0.11.0 (2022.09.10)
+# v0.11.0 - v0.11.1 (2022.09.10 - 2022.09.12)
 
 **Enhancements**
 - REST API fields can now be specified directly with the `api_filters` attribute of any `DatabaseTable` class & fields from mix-ins are automatically added
@@ -57,6 +57,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - fix bug in `workflows explore` command where 'vasp' is the assumed calculator name
 - fix broken example code in custom workflow docs
 - fix broken website links and workflow views
+- fix transaction error with workers on a PostGres backend
 
 
 
