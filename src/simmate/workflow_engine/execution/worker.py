@@ -144,19 +144,20 @@ class SimmateWorker:
                         logging.info("The task queue is empty. Shutting down.")
                         return
 
-            # If we've made it this far, we're ready to grab a new WorkItem
-            # and run it!
-            # Query for PENDING WorkItems, lock it for editting, and update
-            # the status to RUNNING. And grab the first result
-            workitem = (
-                WorkItem.objects.select_for_update()
-                .filter(status="P")
-                .filter_by_tags(self.tags)
-                .first()
-            )
-
             # our lock exists only within this transation
             with transaction.atomic():
+
+                # If we've made it this far, we're ready to grab a new WorkItem
+                # and run it!
+                # Query for PENDING WorkItems, lock it for editting, and update
+                # the status to RUNNING. And grab the first result
+                workitem = (
+                    WorkItem.objects.select_for_update()
+                    .filter(status="P")
+                    .filter_by_tags(self.tags)
+                    .first()
+                )
+
                 # update the status to running before starting it so no other
                 # worker tries to grab the same WorkItem
                 workitem.status = "R"
@@ -242,11 +243,11 @@ class SimmateWorker:
                 # otherwise package the full error
                 result_pickled = cloudpickle.dumps(exception)
 
-            # requery the WorkItem to restart our lock
-            workitem = WorkItem.objects.select_for_update().get(pk=workitem.pk)
-
             # our lock exists only within this transation
             with transaction.atomic():
+                # requery the WorkItem to restart our lock
+                workitem = WorkItem.objects.select_for_update().get(pk=workitem.pk)
+
                 # pickle the result and update the workitem's result and status
                 # !!! should I have the pickle inside of a Try?
                 workitem.result_binary = result_pickled

@@ -4,6 +4,7 @@ import time
 
 # import pickle
 import cloudpickle  # needed to serialize Prefect workflow runs and tasks
+from django.db import transaction
 
 from simmate.database.base_data_types import DatabaseTable, table_column
 
@@ -118,21 +119,24 @@ class WorkItem(DatabaseTable):
         False, otherwise the call will be cancelled and the method will return
         True.
         """
-        # Query the WorkItem, lock it for editting, and check the status.
-        workitem = WorkItem.objects.select_for_update().get(pk=self.pk)
 
-        # check if the status is *not* PENDING
-        if workitem.status != "P":
-            # if so, the job is already running or finished, in which case
-            # we can't cancel it.
-            return False
+        # our lock exists only within this transation
+        with transaction.atomic():
+            # Query the WorkItem, lock it for editting, and check the status.
+            workitem = WorkItem.objects.select_for_update().get(pk=self.pk)
 
-        else:
-            # If it is still pending, we can go ahead and cancel it.
-            # This does not delete the task from the queue database though
-            workitem.status = "C"
-            workitem.save()
-            return True
+            # check if the status is *not* PENDING
+            if workitem.status != "P":
+                # if so, the job is already running or finished, in which case
+                # we can't cancel it.
+                return False
+
+            else:
+                # If it is still pending, we can go ahead and cancel it.
+                # This does not delete the task from the queue database though
+                workitem.status = "C"
+                workitem.save()
+                return True
 
     def is_cancelled(self) -> bool:
         """
