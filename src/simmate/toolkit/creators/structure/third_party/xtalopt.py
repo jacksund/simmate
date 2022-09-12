@@ -65,13 +65,12 @@ class XtaloptStructure(StructureCreator):
     make -j3;
     ```
 
+    Copy the build/randSpg file to a separate /bin folder
+
     Add the following to the bottom of ~/.bashrc
     ```
-    export PATH=/home/jacksund/Documents/github/randSpg/build/randSpg
+    export PATH=/home/jacksund/Documents/github/randSpg/bin/:$PATH
     ```
-
-    # BUG:
-    # Simmate installation breaks these.
 
     -------------------
     BUG: This section for python bindings is broken. Try without python bindings
@@ -105,9 +104,7 @@ class XtaloptStructure(StructureCreator):
 
         # check that the command exists
         if not shutil.which(command):
-            raise Exception(
-                "randSpg must be installed and available in the python path"
-            )
+            raise Exception("randSpg must be installed and available in the PATH")
         self.command = command
 
         # the input file wants the formula without spaces
@@ -158,7 +155,7 @@ class XtaloptStructure(StructureCreator):
             file.write(content)
 
         # call randSpg
-        process = subprocess.run(
+        subprocess.run(
             f"{self.command} {str(input_file)}",
             cwd=temp_directory,
             shell=True,

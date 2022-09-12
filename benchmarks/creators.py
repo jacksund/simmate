@@ -85,9 +85,8 @@ def time_test_creation(creator_class, creator_kwargs):
     return df
 
 
-# -----------------------------------------------------------------------------
-
 from simmate.toolkit.creators.structure.random_symmetry import RandomSymStructure
+from simmate.toolkit.creators.structure.third_party.airss import AirssStructure
 from simmate.toolkit.creators.structure.third_party.ase import AseStructure
 from simmate.toolkit.creators.structure.third_party.gasp import GaspStructure
 from simmate.toolkit.creators.structure.third_party.pyxtal import PyXtalStructure
@@ -102,93 +101,24 @@ CREATORS_TO_TEST = [
             }
         },
     ),
-    (AseStructure, {}),
-    (PyXtalStructure, {}),
-    (GaspStructure, {}),
     (
         XtaloptStructure,
         {
             "command": "/home/jacksund/Documents/github/randSpg/build/randSpg",
         },
     ),
+    (AseStructure, {}),
+    (PyXtalStructure, {}),
+    (GaspStructure, {}),
+    (AirssStructure, {}),
 ]
+
 for creator_class, creator_kwargs in CREATORS_TO_TEST:
     time_test_creation(creator_class, creator_kwargs)
 
 # -----------------------------------------------------------------------------
-
-### XtalOpt
-
-# from pymatdisc.creators.structure import XtalOptStructure
-
-# times_creator = []
-# os.mkdir('XtalOpt')
-# os.chdir('XtalOpt')
-# for comp_str, comp_obj in zip(compositions_strs, compositions_objs):
-#     if comp_str in []: # Fails with...
-#         times_creator.append([None]*n)
-#         continue
-#     os.mkdir(comp_str)
-#     os.chdir(comp_str)
-#     creator = XtalOptStructure(comp_obj)
-#     times_comp = time_test_struct_creation(creator, n)
-#     os.chdir('..')
-#     times_creator.append(times_comp)
-# os.chdir('..')
-# times_all.append(times_creator)
-
-# df_xtalopt= pandas.DataFrame(numpy.transpose(times_creator),
-#                               columns=compositions_strs)
-# df_xtalopt.to_csv('XtalOpt.csv')
-
 # -----------------------------------------------------------------------------
-
-### USPEX
-
-# from pymatdisc.creators.structure import USPEXStructure
-
-# times_creator = []
-# os.mkdir('USPEX')
-# os.chdir('USPEX')
-# for comp_str, comp_obj in zip(compositions_strs, compositions_objs):
-#     if comp_str in []: # Fails with...
-#         times_creator.append([None]*n)
-#         continue
-#     os.mkdir(comp_str)
-#     os.chdir(comp_str)
-#     creator = USPEXStructure(comp_obj)
-#     structures = creator.new_structures(n)
-#     for i, structure in enumerate(structures):
-#         structure.to(fmt='cif', filename=str(i) + '.cif')
-#     os.chdir('..')
-#     times_creator.append([]) #!!! cant timetest yet
-# os.chdir('..')
-# times_all.append(times_creator)
-
 # -----------------------------------------------------------------------------
-
-### CALYPSO
-
-# from pymatdisc.creators.structure import CALYPSOStructure
-
-# times_creator = []
-# os.mkdir('CALYPSO')
-# os.chdir('CALYPSO')
-# for comp_str, comp_obj in zip(compositions_strs, compositions_objs):
-#     if comp_str in []: # Fails with...
-#         times_creator.append([None]*n)
-#         continue
-#     os.mkdir(comp_str)
-#     os.chdir(comp_str)
-#     creator = CALYPSOStructure(comp_obj)
-#     structures = creator.new_structures(n)
-#     for i, structure in enumerate(structures):
-#         structure.to(fmt='cif', filename=str(i) + '.cif')
-#     os.chdir('..')
-#     times_creator.append([]) #!!! cant timetest yet
-# os.chdir('..')
-# times_all.append(times_creator)
-
 # -----------------------------------------------------------------------------
 
 ### Plotting Timetest
@@ -256,9 +186,6 @@ fig = go.Figure(data=data, layout=layout)
 
 plot(fig, config={"scrollZoom": True})
 
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
 ### Fingerprint Comparison

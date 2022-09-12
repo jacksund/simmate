@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import os
+import shutil
 import subprocess
 
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.structure.base import StructureCreator
+from simmate.utilities import get_directory
 
 
 class AirssStructure(StructureCreator):
@@ -17,10 +19,11 @@ class AirssStructure(StructureCreator):
 
     Dev Notes:
 
-    To install - https://airss-docs.github.io/getting-started/installation/
+    To install...
     It looks like we would only want their structure generation method, which
     is carried out via the buildcell script. They have a full page on its
     use: https://airss-docs.github.io/technical-reference/buildcell-manual/
+
     We first need to make a *.cell file with all of the inputs. The inputs are
     listed on their "Buildcell Manual" page, but the documentation is largely
     incomplete. After going through their examples, here's how I think we can
@@ -41,20 +44,21 @@ class AirssStructure(StructureCreator):
     (MAXTIME doesnt fix this for some reason).
     """
 
-    def __init__(self, composition: Composition):
+    def __init__(
+        self,
+        composition: Composition,
+        command: str = "buildcell",
+    ):
 
-        # see if the user has AIRSS installed
-        output = subprocess.run(
-            "airss.pl",  # command that calls AIRSS
-            shell=True,  # use commands instead of local files
-            capture_output=True,  # capture command output
-            text=True,  # convert output from bytes to string
-        )
-        if output.returncode == 1:
+        # check that the command exists
+        if not shutil.which(command):
             raise Exception(
                 "You must have AIRSS installed to use AirssStructure."
                 "See https://airss-docs.github.io/getting-started/installation/"
             )
+        self.command = command
+
+        self.temp_dir = get_directory()  # leave empty to allow parallel
 
         # to setup the AIRSS creator, we need to make a *.cell file that
         # for example, a SiO2 file will look like... (NOTE - the # symbols
@@ -62,13 +66,7 @@ class AirssStructure(StructureCreator):
         # VARVOL=35
         # SPECIES=Si%NUM=1,O%NUM=2
         # MINSEP=1.0 Si-Si=3.00 Si-O=1.60 O-O=2.58
-
-        # lets make this file and name it after the composition
-        self.cell_filename = (
-            composition.formula.replace(" ", "") + ".cell"
-        )  # .replace is to remove spaces
-
-        # create the file
+        self.cell_filename = self.temp_dir / "input.cell"
         with self.cell_filename.open("w") as file:
 
             # first write the VARVOL line using predicted volume
@@ -90,12 +88,10 @@ class AirssStructure(StructureCreator):
 
         # TODO: Maybe make an AIRSS calculator / S3 workflow
         output = subprocess.run(
-            "buildcell < {} | cabal cell cif > AIRSS_output.cif".format(
-                self.cell_filename
-            ),
+            f"buildcell < {self.cell_filename} | cabal cell cif > AIRSS_output.cif",
             shell=True,
             capture_output=True,
-            text=True,  # convert output from bytes to string
+            cwd=self.temp_dir,
         )
 
         # check to see if it was successful
@@ -104,9 +100,10 @@ class AirssStructure(StructureCreator):
             return False
 
         # convert the cif file to pymatgen Structure
-        structure = Structure.from_file("AIRSS_output.cif")
+        filename = self.temp_dir / "AIRSS_output.cif"
+        structure = Structure.from_file(filename)
 
         # and delete the cif file for cleanup
-        os.remove("AIRSS_output.cif")
+        filename.unlink()
 
         return structure
