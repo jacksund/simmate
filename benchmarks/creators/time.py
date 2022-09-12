@@ -62,10 +62,15 @@ def time_test_creation(creator_class, creator_kwargs):
             "CALYPSO",
         ]:
             start = time()
-            structure = creator.create_structures(NSAMPLES_PER_COMPOSITION)
+            structures = creator.create_structures(NSAMPLES_PER_COMPOSITION)
             end = time()
             average_time = (end - start) / NSAMPLES_PER_COMPOSITION
             all_comp_times.append([average_time] * NSAMPLES_PER_COMPOSITION)
+            for n, structure in enumerate(structures):
+                structure.to(
+                    fmt="cif",
+                    filename=comp_directory / f"{n}.cif",
+                )
             continue
 
         single_comp_times = []
@@ -122,24 +127,24 @@ AirssStructure.name = "AIRSS"
 UspexStructure.name = "USPEX"
 
 CREATORS_TO_TEST = [
-    (
-        RandomSymStructure,
-        {
-            "site_gen_options": {
-                "lazily_generate_combinations": False,
-            }
-        },
-    ),
-    (
-        XtaloptStructure,
-        {
-            "command": "/home/jacksund/Documents/github/randSpg/build/randSpg",
-        },
-    ),
-    (AseStructure, {}),
-    (PyXtalStructure, {}),
-    (GaspStructure, {}),
-    (AirssStructure, {}),
+    # (
+    #     RandomSymStructure,
+    #     {
+    #         "site_gen_options": {
+    #             "lazily_generate_combinations": False,
+    #         }
+    #     },
+    # ),
+    # (
+    #     XtaloptStructure,
+    #     {
+    #         "command": "/home/jacksund/Documents/github/randSpg/build/randSpg",
+    #     },
+    # ),
+    # (AseStructure, {}),
+    # (PyXtalStructure, {}),
+    # (GaspStructure, {}),
+    # (AirssStructure, {}),
     (UspexStructure, {}),
 ]
 

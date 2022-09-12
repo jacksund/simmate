@@ -184,7 +184,7 @@ class UspexStructure(StructureCreator):
             structures.append(structure)
 
         # delete the directory
-        shutil.rmtree(temp_dir)
+        shutil.rmtree(temp_dir, ignore_errors=True)
 
         # return the list of pymatgen Structure objects that we've made
         return structures

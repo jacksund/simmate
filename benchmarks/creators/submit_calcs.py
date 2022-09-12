@@ -22,9 +22,9 @@ compositions = [Composition(c) for c in COMPOSITIONS_TO_TEST]
 NSAMPLES_PER_COMPOSITION = 500
 
 CREATORS_TO_TEST = [
-    "Simmate",
-    # "XtalOpt",
-    # "ASE",
+    # "Simmate",
+    "XtalOpt",
+    "ASE",
     # "PyXtal",
     # "GASP",
     # "AIRSS",
@@ -54,6 +54,7 @@ for creator_name in CREATORS_TO_TEST:
                     "is_initial": True,
                 },
                 command="mpirun -n 4 vasp_std > vasp.out",
+                compress_output=True,
             )
             
             workflow_relax.run_cloud(
@@ -63,4 +64,5 @@ for creator_name in CREATORS_TO_TEST:
                     "file": str(file),
                 },
                 command="mpirun -n 4 vasp_std > vasp.out",
+                compress_output=True,
             )
