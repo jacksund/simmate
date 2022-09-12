@@ -1,82 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import os
 import shutil
 import subprocess
+import time
 
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.structure.base import StructureCreator
-
-# Here we setup the input file to create USPEX structures.
-# Note that the commandExecutable is just a dummy echo command and doesn't
-# do anything.
-# We also set the calc to VASP because we want POSCAR files made for us.
-INPUT_TEMPLATE = """
-{calculationType} : calculationType
-
-% symmetries
-{symmetries}
-% endSymmetries
-
-% atomType
-{atom_type}
-% EndAtomType
-
-% numSpecies
-{num_species}
-% EndNumSpecies
-
-{fracTopRand} : fracTopRand
-
-NUM_STRUCTURES : initialPopSize
-
-% abinitioCode
-1
-% ENDabinit
-
-% commandExecutable
-echo skip this
-% EndExecutable
-
-NUM_STRUCTURES : numParallelCalcs
-
-1 : whichCluster
-"""
-
-SUBMIT_SCRIPT = """
-from __future__ import with_statement
-from __future__ import absolute_import
-from subprocess import check_output
-import re
-import sys
-from io import open
-
-def submitJob_local(index, commnadExecutable):
-    return 12345 #
-
-if __name__ == u'__main__':
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument(u'-i', dest=u'index', type=int)
-    parser.add_argument(u'-c', dest=u'commnadExecutable', type=unicode)
-    args = parser.parse_args()
-
-    jobNumber = submitJob_local(index=args.index, commnadExecutable=args.commnadExecutable)
-    print('<CALLRESULT>')
-    print(int(jobNumber))
-"""
-
-# The last issue is that USPEX needs a different python enviornment,
-# which we need to access via a script.
-# Let's add a script run_uspex.sh that sets this env for us and
-# then runs uspex.
-SUBMIT_TEMPLATE = """
-source {conda_loc}
-conda activate {uspex_python_env}
-export USPEXPATH={uspex_loc}/application/archive/src
-export MCRROOT={uspex_loc}
-{uspex_loc}/application/archive/USPEX -r
-"""
+from simmate.utilities import get_directory
 
 
 class UspexStructure(StructureCreator):
@@ -107,29 +37,26 @@ class UspexStructure(StructureCreator):
     def __init__(
         self,
         composition: Composition,
+        command: str = "uspex",
+        command_build: str = "buildcell",
         # This needs to be a custom python env! It must be Python=2.7 and
         # have Numpy, Scipy, MatPlotLib, ASE, and SpgLib
-        uspex_python_env: str = "uspex",
-        # # Location where USPEX was installed to -- the command itself
-        # doesn't work... I need to figure out what's going on
-        uspex_loc: str = "/home/jacksund/USPEX",
-        # # this will vary if you didn't install anaconda to your home
-        # directory or installed miniconda instead.
-        conda_loc: str = "/home/jacksund/anaconda3/etc/profile.d/conda.sh",
-        # # this is the temporary directory where I will run uspex
-        temp_dir: str = "/home/jacksund/Desktop/uspex_tmp",
+        conda_env: str = "uspex_env",
     ):
 
-        self.uspex_python_env = uspex_python_env
-        self.temp_dir = temp_dir
+        self.composition = composition
 
-        # TODO: check uspex is installed
-        # output = subprocess.run(
-        #     "USPEX --help",
-        #     shell=True,
-        #     capture_output=True,
-        #     text=True,  # convert output from bytes to string
-        # )
+        # BUG: in separate env right now
+        # check that the command exists
+        if not shutil.which(command_build):  # and not shutil.which(command)
+            raise Exception(
+                "You must have USPEX installed and the uspex & buildcell "
+                "commands in your PATH."
+            )
+
+        self.command = command
+
+        self.conda_env = conda_env
 
         # Format composition in the manner USPEX requests it.
         # This is a list of atomic symvols (for example, MgSiO3 is 'Mg Si O')
@@ -146,7 +73,7 @@ class UspexStructure(StructureCreator):
             # see USPEX docs for more option - for example, set to 200
             # for 2-D structures
             "calculationType": "300",
-            "symmetries": "2-230",
+            "symmetries": "1-230",
             "fracTopRand": "0.0",  # fraction Topological structures to make
             "atom_type": atom_types,
             "num_species": num_species,
@@ -156,6 +83,8 @@ class UspexStructure(StructureCreator):
         # input to set is the number of structures to generate (NUM_STRUCTURES)
         self.uspex_input = INPUT_TEMPLATE.format(**uspex_options)
 
+    def create_structures(self, n: int, sleep_step: float = 5) -> list[Structure]:
+
         # In order to have USPEX create structures, it is also going to make
         # input files for VASP. To do this, there needs to be a Specific folder
         # with INCAR_1 and POTCAR_X (X=symbol). Because we aren't really
@@ -163,124 +92,189 @@ class UspexStructure(StructureCreator):
         # empty is easier on the computer because we don't have to repeated
         # paste large POTCAR files. Let's make those dummy files here.
 
-        # First let's switch to the temp_dir and save the current working
-        # dir (cwd) for reference
-        cwd = os.getcwd()
-        os.chdir(temp_dir)
+        temp_dir = get_directory()
 
         # make the Specifics folder and move into it
-        os.mkdir("Specific")
-        os.chdir("Specific")
+        specific_dir = get_directory(temp_dir / "Specific")
 
         # Make the INCAR_1 file.
-        subprocess.run("echo DUMMY INCAR > INCAR_1", shell=True)
+        incar_1 = specific_dir / "INCAR_1"
+        with incar_1.open("w") as file:
+            file.write("DUMMY INCAR")
 
         # Make the POTCAR_X files.
-        for element in composition:
-            subprocess.run(
-                f"echo DUMMY POTCAR > POTCAR_{element.symbol}",
-                shell=True,
-            )
-
-        # move back to the temp dir
-        os.chdir("..")
+        for element in self.composition:
+            potcar = specific_dir / f"POTCAR_{element.symbol}"
+            with potcar.open("w") as file:
+                file.write("DUMMY POTCAR")
 
         # make the Submission folder and move into it
-        os.mkdir("Submission")
-        os.chdir("Submission")
+        specific_dir = get_directory(temp_dir / "Submission")
 
         # make the submitJob_local.py file
-        with open("submitJob_local.py", "w") as file:
+        submit_local_file = specific_dir / "submitJob_local.py"
+        with submit_local_file.open("w") as file:
             file.writelines(SUBMIT_SCRIPT)
 
-        # go back up a directory
-        os.chdir("..")
-
         # write it and close immediately
-        with open("run_uspex.sh", "w") as file:
-            file.writelines(
-                SUBMIT_TEMPLATE.format(
-                    **{
-                        "conda_loc": conda_loc,
-                        "uspex_python_env": uspex_python_env,
-                        "uspex_loc": uspex_loc,
-                    }
-                )
+        submit_script = temp_dir / "run_uspex.sh"
+        with submit_script.open("w") as file:
+            content = SUBMIT_TEMPLATE.format(
+                conda_env=self.conda_env,
+                command=self.command,
             )
+            file.writelines(content)
+
         # give permissions to the script so we can run it below
-        subprocess.run("chmod a+x run_uspex.sh", shell=True)
+        subprocess.run(
+            "chmod a+x run_uspex.sh",
+            shell=True,
+            cwd=temp_dir,
+        )
 
         # We now have everything except the INPUT.txt file! We will write
         # that and run it below.
         # This is done later because we don't know NUM_STRUCTURES yet
 
-        # switch back to our original working dir
-        os.chdir(cwd)
-
-    def new_structures(self, n: int) -> list[Structure]:
-
-        # See my comments above on why this atypical function exists...
-        # (it's much faster than calling USPEX each new struct)
-
-        # First let's switch to the temp_dir and save the current working dir
-        # (cwd) for reference
-
-        cwd = os.getcwd()
-        os.chdir(self.temp_dir)
-
         # make the INPUT.txt file with n as our NUM_STRUCTURES to make
         # write it and close immediately
-        file = open("INPUT.txt", "w")
-        file.writelines(self.uspex_input.replace("NUM_STRUCTURES", str(n)))
-        file.close()
+        input_file = temp_dir / "input.uspex"
+        with input_file.open("w") as file:
+            content = self.uspex_input.replace("NUM_STRUCTURES", str(n))
+            file.writelines(content)
 
         # now let's have USPEX run and make the structures
-        subprocess.run(
+        process = subprocess.Popen(
             "bash run_uspex.sh",
             shell=True,
-            capture_output=True,
-            text=True,
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            cwd=temp_dir,
         )
+
+        # check if the shelltasks is complete. poll will return 0
+        # when it's done, in which case we break the loop
+        log_file = temp_dir / "log"
+
+        is_done = False
+        while not is_done:
+            if log_file.exists():
+                with log_file.open("r") as file:
+                    lines = file.readlines()
+                for line in lines:
+                    if "RuntimeError" in line:
+                        is_done = True
+                        process.terminate()
+                        break
+            time.sleep(sleep_step)
 
         # All the structures are put into folders as POSCAR files. The folders
         # are CalcFold1, CalcFold2, ... CalcFold200...
         # Let's iterate through these and pool them into a list to
         # remove directories
         structures = []
-        # we can assume all folders are there instead of grabbing os.listdir()
-        # for all CalcFold*
-        for i in range(n):
-            os.chdir("CalcFold{}".format(i + 1))
-            structure = Structure.from_file("POSCAR")
-            structures.append(structure)  # add it to the list
-            os.chdir("..")  # move back directory
-            # delete the folder now that we are done with it
-            shutil.rmtree("CalcFold{}".format(i + 1))
 
-        # Do some cleanup and delete all the unneccesary directories that
-        # were just made.
-        # This sets us up to run new_structures again
-        # let's go through the folders first
-        rm_dir_list = ["AntiSeeds", "results1", "Seeds", "CalcFoldTemp"]
-        for d in rm_dir_list:
-            shutil.rmtree(d)
-        # Rather than go through a list like with the directories, it's easier
-        # to just delete all .mat files because that's what they all are
-        subprocess.run(
-            "rm *.mat*",
-            shell=True,  # use commands instead of local files
-        )
+        for folder in temp_dir.iterdir():
 
-        # switch back to our original working dir
-        os.chdir(cwd)
+            if not folder.is_dir() or not folder.stem.startswith("CalcFold"):
+                continue
+
+            poscar_file = folder / "POSCAR"
+            structure = Structure.from_file(poscar_file)
+            structures.append(structure)
+
+        # delete the directory
+        shutil.rmtree(temp_dir)
 
         # return the list of pymatgen Structure objects that we've made
         return structures
 
-    def new_structure(self) -> Structure:
+    def create_structure(self) -> Structure:
 
         # call the new_structures() function and tell it to create
         # just one structure
-        structure = self.new_structures(1)[0]
+        structure = self.create_structures(1)[0]
 
         return structure
+
+
+# -----------------------------------------------------------------------------
+# Below are templates for writing USPEX input files
+# -----------------------------------------------------------------------------
+
+# Here we setup the input file to create USPEX structures.
+# Note that the commandExecutable is just a dummy echo command and doesn't
+# do anything.
+# We also set the calc to VASP because we want POSCAR files made for us.
+INPUT_TEMPLATE = """
+{{
+    optimizer: {{
+        type: GlobalOptimizer
+        target: {{
+            type: Atomistic
+            compositionSpace: {{symbols: [{atom_type}]
+                               blocks: [[{num_species}]]}}
+            randSym: {{nsym: '{symmetries}'}}
+        }}
+        optType: enthalpy
+        selection: {{
+            type: USPEXClassic
+            initialPopSize: NUM_STRUCTURES
+            fractions: {{
+                randSym: (0.05 1.0 1.0)
+                randTop: (0.05 1.0 {fracTopRand})
+            }}
+            popSize: 100
+            bestFrac: 0.6
+            optType: (aging enthalpy)
+        }}
+    }}
+    stages: [vasp1]
+    numParallelCalcs: 1
+    numGenerations: 1
+    stopCrit: 1
+}}
+
+#define vasp1
+{{type : vasp, commandExecutable : 'echo DUMMY', kresol: 0.13}}
+"""
+
+
+SUBMIT_SCRIPT = """
+from __future__ import with_statement
+from __future__ import absolute_import
+from subprocess import check_output
+import re
+import sys
+from io import open
+
+# WE DELETED THE ENITRE FUNCTION HERE AND NOW RETURN A RANDOM NUMBER
+# Note, the number is just a JobID reference that we will never use
+def submitJob_local(index, commnadExecutable):
+    return 12345 #
+
+if __name__ == u'__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument(u'-i', dest=u'index', type=int)
+    parser.add_argument(u'-c', dest=u'commnadExecutable', type=unicode)
+    args = parser.parse_args()
+
+    jobNumber = submitJob_local(
+        index=args.index, 
+        commnadExecutable=args.commnadExecutable,
+    )
+    print('<CALLRESULT>')
+    print(int(jobNumber))
+"""
+
+# The last issue is that USPEX needs a different python enviornment,
+# which we need to access via a script.
+# Let's add a script run_uspex.sh that sets this env for us and
+# then runs uspex.
+# https://stackoverflow.com/questions/34534513/
+SUBMIT_TEMPLATE = """
+eval "$(conda shell.bash hook)"
+conda activate {conda_env}
+{command} -r
+"""

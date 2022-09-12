@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import os
 import shutil
 import subprocess
 
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.structure.base import StructureCreator
+from simmate.utilities import get_directory
 
 # Here we setup the input file to create CALYPSO structures.
 # Note NumberOfFormula is input twice becuase we want a fixed min/max
@@ -53,7 +53,7 @@ class CalypsoStructure(StructureCreator):
     the download file and the executable is there. No need for any install.
 
     CALYPSO does require python 2.7 as well, and we can actually use the same
-    environment as USPEX (see above). Make sure this is active when
+    environment as USPEX. Make sure this is active when
     submitting a job.
 
     To generate structures without running any analysis/calcs, I simply need
@@ -69,22 +69,17 @@ class CalypsoStructure(StructureCreator):
         self,
         composition: Composition,
         # location of the calypso.x file
-        calypso_exe_loc: str = "/home/jacksund/Desktop/",
+        command: str = "calypso.x",
         # This needs to be a custom python env! It must be Python=2.7 and have
         # Numpy, Scipy, MatPlotLib, ASE, and SpgLib
-        calypso_python_env: str = "uspex",
-        # this will vary if you didn't install anaconda to your home
-        # directory or installed miniconda instead.
-        conda_loc: str = "/home/jacksund/anaconda3/etc/profile.d/conda.sh",
-        # # this is the temporary directory where I will run calypso
-        temp_dir: str = "/home/jacksund/Desktop/calypso_tmp",
+        conda_env: str = "calypso_env",
     ):
-        self.calypso_python_env = calypso_python_env
-        self.temp_dir = temp_dir
 
-        # TODO
-        # add check that the user is on Linux
-        # add check that the user has a proper python enviornment set up in conda
+        if not shutil.which(command):
+            raise Exception("You must have CALYPSO installed and in the PATH.")
+
+        self.command = command
+        self.conda_env = conda_env
 
         # Because of bug with calypso's poscar files, I need to save this
         self.comp = " ".join([element.symbol for element in composition])
@@ -131,111 +126,74 @@ class CalypsoStructure(StructureCreator):
         # input to set is the number of structures to generate (NUM_STRUCTURES)
         self.calypso_input = INPUT_TEMPLATE.format(**calypso_options)
 
-        # In order to have CALYPSO create structures, we need the calypso.x
-        # file copied into our directory
-
-        # First let's switch to the temp_dir and save the current working
-        # dir (cwd) for reference
-        cwd = os.getcwd()
-        os.chdir(temp_dir)
-
-        # Copy the calypso.x file into this directory
-        subprocess.run(
-            "cp {}/calypso.x {}/".format(calypso_exe_loc, temp_dir),
-            shell=True,  # use commands instead of local files
-        )
-
-        # write it and close immediately
-        with open("run_calypso.sh", "w") as file:
-            file.writelines(
-                SUBMIT_TEMPLATE.format(
-                    **{
-                        "conda_loc": conda_loc,
-                        "calypso_python_env": calypso_python_env,
-                    }
-                )
-            )
-
-        # give permissions to the script so we can run it below
-        subprocess.run(
-            "chmod a+x run_calypso.sh",
-            shell=True,
-        )
-
-        # We now have everything except the INPUT.txt file! We will write that
-        # and run it below.
-        # This is done later because we don't know NUM_STRUCTURES yet
-
-        # switch back to our original working dir
-        os.chdir(cwd)
-
     def create_structures(self, n: int) -> list[Structure]:
 
         # See my comments above on why this atypical function exists...
         # (it's much faster than calling USPEX each new struct)
 
-        # First let's switch to the temp_dir and save the current working dir
-        # (cwd) for reference
-        cwd = os.getcwd()
-        os.chdir(self.temp_dir)
+        temp_dir = get_directory()  # leave empty to allow parallel
+
+        # write the submit file
+        submit_file = temp_dir / "run_calypso.sh"
+        with submit_file.open("w") as file:
+            content = SUBMIT_TEMPLATE.format(conda_env=self.conda_env)
+            file.writelines(content)
+
+        # give permissions to the script so we can run it below
+        subprocess.run(
+            "chmod a+x run_calypso.sh",
+            shell=True,
+            cwd=temp_dir,
+        )
+
+        # We now have everything except the INPUT.txt file. We will write that
+        # and run it below.
+        # This is done later because we don't know NUM_STRUCTURES yet
 
         # make the INPUT.txt file with n as our NUM_STRUCTURES to make
         # write it and close immediately
-        file = open("input.dat", "w")
+        input_file = temp_dir / "input.dat"
+
+        file = input_file.open("w")
         file.writelines(self.calypso_input.replace("NUM_STRUCTURES", str(n)))
         file.close()
 
-        # now let's have USPEX run and make the structures!
-        import subprocess
-
+        # now let's have CALYPSO run and make the structures
         subprocess.run(
             "bash run_calypso.sh",
             shell=True,
             capture_output=True,
-            text=True,
+            cwd=temp_dir,
         )
 
         # All the structures are as POSCAR files. The files are
         #   POSCAR_1, POSCAR_2, ... POSCAR_n...
         # Let's iterate through these and pool them into a list
         structures = []
-        # we can assume all folders are there instead of grabbing
-        # os.listdir() for all CalcFold*
-        for i in range(n):
-            poscar_name = "POSCAR_{}".format(i + 1)
+        for poscar_file in temp_dir.iterdir():
 
-            #!!! BUG WITH CALYPSO...
+            if not poscar_file.stem.startswith("POSCAR_"):
+                continue
+
+            # ----------------------------
+            # BUG WITH CALYPSO...
             # They don't add the atom types to the POSCAR... wtf
             # I need to do that manually here
-            with open(poscar_name, "r") as file:
+            with poscar_file.open("r") as file:
                 lines = file.readlines()
-
             # add the composition line
             lines.insert(5, self.comp + "\n")
-
             # write the updated file
-            with open(poscar_name, "w") as file:
+            with poscar_file.open("w") as file:
                 file.writelines(lines)
+            # ----------------------------
 
             # now we can load the POSCAR and add it to our list
-            structure = Structure.from_file(poscar_name)
+            structure = Structure.from_file(poscar_file)
             structures.append(structure)
 
-            # delete the file now that we are done with it
-            os.remove(poscar_name)
-
-        # Do some cleanup and delete all the unneccesary directories/files
-        # that were just made.
-        # This sets us up to run new_structures again
-        shutil.rmtree("results")
-        # Rather than go through a list like with the directories, it's easier
-        # to just delete all .mat files because that's what they all are
-        subprocess.run("rm *.py*", shell=True)
-        # There's also two more files to remove - POSCAR and step
-        subprocess.run("rm POSCAR; rm step", shell=True)
-
-        # switch back to our original working dir
-        os.chdir(cwd)
+        # delete the directory
+        shutil.rmtree(self.temp_dir)
 
         # return the list of pymatgen Structure objects that we've made
         return structures
