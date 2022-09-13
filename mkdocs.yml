@@ -142,6 +142,9 @@ nav:
             - Checklist for each worker: getting_started/add_computational_resources/checklist_for_workers.md
             - Adding workers and clusters: getting_started/add_computational_resources/adding_clusters_and_workers.md
         
+        - Run an evolutionary search:
+            - Quickstart: getting_started/evolutionary_search/quick_start.md
+        
         - Wrap up: getting_started/wrap_up.md
 
     - Parameters: parameters.md
@@ -207,3 +210,5 @@ nav:
         - Creating & submitting changes: contributing/creating_and_submitting_changes.md
         - Extra notes & tips: contributing/extra.md
         - Maintainer notes: contributing/maintainer_notes.md
+    
+    - Changes & Updates: change_log.md

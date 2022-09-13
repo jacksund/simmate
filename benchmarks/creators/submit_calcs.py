@@ -27,7 +27,7 @@ CREATORS_TO_TEST = [
     # "ASE", done
     # "PyXtal", done
     # "GASP", done
-    # "AIRSS",
+    # "AIRSS", done
     # "USPEX",
 ]
 

@@ -1,4 +1,48 @@
-# Release History
+
+--------------------------------------------------------------------------------
+
+## Check your installed version
+
+When you first import simmate and connect to the database, a warning is printed
+if you are not using the most current version available. You can also check this in the command-line:
+
+``` bash
+simmate version
+```
+
+``` yaml
+# example output
+Installed version: v0.10.0
+Newest available: v0.11.1
+```
+
+--------------------------------------------------------------------------------
+
+## Updating to a newer version
+
+We highly recommended that you install simmate into a clean conda environment, rather than updating simmate within your existing one:
+``` shell
+conda create -n my_env -c conda-forge python=3.10 simmate
+```
+
+Make sure you check that the expected version is now installed:
+``` bash
+simmate version
+```
+
+Rebuild your database with one compatible with the new installation:
+``` bash
+simmate database reset
+```
+
+!!! tip
+    If you use the same environment name as an existing one, conda will ask if
+    you'd like to delete the existing environment before creating the new one.
+    This will save you time from having to delete the env in a separate command.
+
+--------------------------------------------------------------------------------
+
+## Version numbers & their meaning
 
 Our releases follow [semantic versioning](https://semver.org/). This means versions (e.g. `v1.2.3`) correspond to `MAJOR.MINOR.PATCH`. Each version number increases after the following changes:
 
@@ -9,11 +53,13 @@ Our releases follow [semantic versioning](https://semver.org/). This means versi
 There is one key exception to the rules above -- and that is with `MAJOR`=0 releases. Any v0.x.y release is considered developmental where APIs are subject to change and should not be considered stable. This is consistent with the semantic version spec (see [point 4](https://semver.org/#spec-item-4)).
 
 
-</br></br>
+--------------------------------------------------------------------------------
 
 
-# Upcoming Release
-> :bulb: For ongoing changes that have not been finalized/merged yet, view our [active pull-requests](https://github.com/jacksund/simmate/pulls) on github
+## Upcoming Release
+
+!!! tip
+    For ongoing changes that have not been finalized/merged yet, view our [active pull-requests](https://github.com/jacksund/simmate/pulls) on github
 
 <!-- (hidden message for maintainer to use between releases)
 - no new changes have been merged into the `main` branch yet
@@ -23,14 +69,18 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 -->
 
 **Enhancements**
+
 - add structure creators for `ASE`, `GASP`, `PyXtal`, `AIRSS`, `CALYPSO`, `USPEX`, and `XtalOpt` as well as documentation for creators.
 - add `simmate version` command
+- changelog and update guide added to documentation website
 
 
+--------------------------------------------------------------------------------
 
-# v0.11.0 - v0.11.1 (2022.09.10 - 2022.09.12)
+## v0.11.0 (2022.09.10)
 
 **Enhancements**
+
 - REST API fields can now be specified directly with the `api_filters` attribute of any `DatabaseTable` class & fields from mix-ins are automatically added
 - add `archive_fields` attribute that sets the "raw data" for the database table & fields from mix-ins are automatically added
 - accept `TOML` input files in addition to `YAML`
@@ -44,6 +94,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add inspection of methods for default input values and display them in metadata
 
 **Refactors**
+
 - the `website.core_components.filters` module has been absorbed into the `DatabaseTable` class/module
 - yaml input for custom workflows now matches the python input format
 - workup methods are largely depreciated and now database entries are returned when a workflow has `use_database=True`
@@ -54,17 +105,22 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - `calculators` and `workflows` modules are now based on simmate apps
 
 **Fixes**
+
 - fix bug in windows dev env where `simmate run-server` fails to find python path
 - fix bug in `workflows explore` command where 'vasp' is the assumed calculator name
 - fix broken example code in custom workflow docs
 - fix broken website links and workflow views
+
+**0.11.1 (2022.09.12)**
+
 - fix transaction error with workers on a PostGres backend
 
+--------------------------------------------------------------------------------
 
-
-# v0.10.0 (2022.08.29)
+## v0.10.0 (2022.08.29)
 
 **Enhancements**
+
 - add NEB base classes to inherit from for making new subflows
 - improve formatting of logging and cli using `typer` and `rich`
 - cli now supports auto-completion to help with long commands
@@ -76,6 +132,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - update MatProj data to new api, and add severl new columns for data (e.g. mag + band gap)
 
 **Refactors**
+
 - isolate optional dependencies so that our install is smaller
 - remove click in favor of higher-level package (typer)
 - `pre_standardize_structure` and `pre_sanitize_structure` functionality is now merged in to a `standardize_structure` parameter that accepts different mode. `symmetry_tolerance` and `angle_tolerance` parameters can also modify the symmetry analysis done.
@@ -88,6 +145,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - refactor transformations to static methods
 
 **Fixes**
+
 - fix `module not found` error by adding ASE to dependencies
 - fix bug with postgres database trying to delete sqlite locally
 - fix dask throwing errors with logging
@@ -96,11 +154,12 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - fix NEB workflows failing due to Walltime handler
 - fix NEB workflows hints for `workup` failure due to missing start/end image folders
 
+--------------------------------------------------------------------------------
 
-
-# v0.9.0 (2022.08.17)
+## v0.9.0 (2022.08.17)
 
 **Enhancements**
+
 - improve the warning associated with workflow failure because of "command not found" issues
 - workers now ignore and reset tasks that fail with "command not found". 2 workers failing with this error will result in the WorkItem being canceled
 - `RandomWySites` can now generate wyckoff combinations lazily (or up front) depending on use case
@@ -111,19 +170,22 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 
 **Refactors**
+
 - evolutionary search now delay creations, transformations, and validation until runtime (used to be at time of structure submission)
 - `directory`, `compress_ouput`, and `run_id` are now default input parameters for subclasses of `Workflow`. If these are unused, the `run_config` must include `**kwargs`
 - add `isort` for organizing module imports throughout package
 
 **Fixes**
+
 - fixed when `source` is not being registered by several workflows
 - fix docker image for installing anaconda, blender, and simmate on ubuntu
 
+--------------------------------------------------------------------------------
 
-
-# v0.8.0 (2022.08.11)
+## v0.8.0 (2022.08.11)
 
 **Enhancements**
+
 - NEB workflows now accept parameters for changing supercell size and number of images used
 - add HSE workflows for static energy, relaxation, and DOS/BS electronic states
 - add NPT and MatProj molecular dynamics workflows
@@ -135,6 +197,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 
 **Refactors**
+
 - to simplify the creation of new workflows, `S3Task` is now `S3Workflow` and database tables are dynamically determined using the workflow name
 - workflows of a given type (e.g. relaxation or static-energy) now share database tables in order to simplify overall database architecture
 - migrate from `os.path` to `pathlib.Path` throughout package
@@ -142,11 +205,12 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - updated tutorials for new workflow engine and workers
 - remove use of `setup.py` in favor of `pyproject.toml`
 
+--------------------------------------------------------------------------------
 
-
-# v0.7.0 - v0.7.3 (2022.07.19 - 2022.08.04)
+## v0.7.0 (2022.07.19)
 
 **Enhancements**
+
 - add guide for installing VASP v5 to Ubuntu v22.04 ([@scott-materials](https://github.com/scott-materials), [#183](https://github.com/jacksund/simmate/issues/183))
 - add `simmate database load-remote-archives` command and `load_remote_archives` utility that populates all tables from `database.third_parties`
 - add `load_default_sqlite3_build` utility that downloads a pre-built database with all third-party data present. This is an alternative to calling `load_all_remote_archives` if you are using sqlite3 and saves a significant amount of time for users.
@@ -158,21 +222,31 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - automatically build api documentation using github actions
 
 **Refactors**
+
 - refactor `start-worker` command to use prefect instead of the experimental django executor
 - remove experimental `workflow_engine.executor`
 - move contents of `configuration.django.database` to `database.utilities`
 - upgraded to Prefect v2 ("Orion"). This involved the refactoring the entire `workflow_engine` module, and therefore the entire workflow library. ([#185](https://github.com/jacksund/simmate/pull/185)).
 
-**Fixes**
-- fix incorrect passing of `source` in NEB all-paths workflow causing it to fail
-- fix missing SVG files for web UI ([#196](https://github.com/jacksund/simmate/pull/196)).
+
+**0.7.1 (2022.07.19)**
+
 - fix incorrect handling of prefect v2 futures by workflows
 
+**0.7.2 (2022.08.03)**
 
+- fix missing SVG files for web UI ([#196](https://github.com/jacksund/simmate/pull/196)).
 
-# v0.6.0 (2022.06.25)
+**0.7.3 (2022.08.04)**
+
+- fix incorrect passing of `source` in NEB all-paths workflow causing it to fail
+
+--------------------------------------------------------------------------------
+
+## v0.6.0 (2022.06.25)
 
 **Enhancements**
+
 - add `AflowPrototypes` to the `database.third_parties` module (only includes data distributed through pymatgen)
 - add new modules to `toolkit.structure_prediction` and `toolkit.creation`, including ones to provide `known`, `substitution`, and `prototype` based structures.
 - add `created_at` and `updated_at` columns to all database tables
@@ -182,6 +256,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add `database_obj` attribute to the `toolkit.Structure` base class that is dynamically set
 
 **Refactors**
+
 - standardize `database_table` attribute for workflows by merging `calculation_table` and `result_table` attributes ([#102](https://github.com/jacksund/simmate/issues/102))
 - removed use of `-s`, `-c`, and `-d` shortcuts from the `workflows` commands
 - refactor `relaxation/staged` workflow to run in single parent directory
@@ -191,6 +266,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - refactor `LoadInputAndRegister` and `SaveOutputTask` to `load_input_and_register` and `save_result`
 
 **Fixes**
+
 - fix import for `visualization.structure.blender` module ([@bocklund](https://github.com/bocklund), [#180](https://github.com/jacksund/simmate/issues/180))
 - fix bug where `command` or `directory` improperly passes `None` when they are not set in the `simmate workflows run` command
 - fix bug where `update_all_stabilities` grabs incomplete calculations ([#177](https://github.com/jacksund/simmate/pull/177))
@@ -198,44 +274,50 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - fix bug for Bader workflow by registering the prebader workflow ([#174](https://github.com/jacksund/simmate/pull/174))
 - fix bug where `source` is not determined with yaml-file submissions ([#172](https://github.com/jacksund/simmate/issues/172))
 
+--------------------------------------------------------------------------------
 
-
-# v0.5.0 (2022.05.30)
+## v0.5.0 (2022.05.30)
 - update CI to test all OSs and pin pytest<7.1 as temporary fix for [#162](https://github.com/jacksund/simmate/issues/162)
 - fix spelling typos in `keyword_modifiers` ([@laurenmm](https://github.com/laurenmm), [#165](https://github.com/jacksund/simmate/pull/165))
 - users can now apply their own unique keyword modifiers to Incars -- such as how we allow "__per_atom" or "__smart_ismear" tags on Incar settings. This change involved refactoring how `keyword_modifiers` are implemented for the `vasp.inputs.Incar` class. Rather than static methods attached to the base class, modifiers are now dynamically applied using the `add_keyword_modifier` classmethod.
 - large update of `calculators.vasp.tasks` module where many new presets are reimplemented from [`pymatgen.io.vasp.sets`](https://pymatgen.org/pymatgen.io.vasp.sets.html). This includes robust unit testing to confirm that generated inputs match between simmate and pymatgen (see [#157](https://github.com/jacksund/simmate/issues/157) for a list of presets)
 - catch error with vasp freezing when `Brmix` handler switches to kerker mixing ([@becca9835](https://github.com/becca9835), [#159](https://github.com/jacksund/simmate/issues/159))
 
+--------------------------------------------------------------------------------
 
-
-# v0.4.0 (2022.04.24)
+## v0.4.0 (2022.04.24)
 - add `description_doc_short` + `show_parameters` to workflows and use these to update the UI
 - add django-allauth dependency for account management and google/github sign-ins
 - archive directory as `simmate_attempt_01.zip` whenever an error handler is triggered
 - depreciate the workflow parameter `use_prev_directory` in favor of `copy_previous_directory`
 
+--------------------------------------------------------------------------------
 
-
-# v0.3.0 (2022.04.19)
+## v0.3.0 (2022.04.19)
 - add highly customizable VASP workflow
 - add Bader analysis and ELF workflows
 - update module readmes to warn of experimental features
 - reorganize `toolkit` module
 
+--------------------------------------------------------------------------------
 
-
-# v0.2.0 (2022.04.15)
+## v0.2.0 (2022.04.15)
 - start the CHANGELOG!
 - refactor API views and add `SimmateAPIViewSet` class
 - refactor `simmate start-project` command and underlying methods
 - refactor `simmate workflow-engine run-cluster` command and underlying methods
 - continue outlining `file_converters` module
 
+--------------------------------------------------------------------------------
 
-
-# v0.0.0 - v0.1.4 (2022.03.28 - 2022.04.12)
-- initial release
+## v0.1.4 (2022.04.12)
 - web interface styling
 - minor bug fixes
+
+--------------------------------------------------------------------------------
+
+## v0.0.0 (2022.03.28)
+- initial release
 - adding tests and docs
+
+--------------------------------------------------------------------------------
