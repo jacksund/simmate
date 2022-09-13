@@ -40,6 +40,16 @@ def base_command():
     # to decide what to do from there.
     pass
 
+@simmate_app.command()
+def version():
+    """
+    Prints the version of simmate that is installed.
+    """
+    import simmate
+    from simmate.utilities import get_latest_version
+
+    print(f"Installed version: v{simmate.__version__}")
+    print(f"Newest available: v{get_latest_version()}")
 
 @simmate_app.command()
 def run_server():

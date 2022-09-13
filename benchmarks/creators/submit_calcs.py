@@ -22,11 +22,11 @@ compositions = [Composition(c) for c in COMPOSITIONS_TO_TEST]
 NSAMPLES_PER_COMPOSITION = 500
 
 CREATORS_TO_TEST = [
-    # "Simmate",
-    "XtalOpt",
-    "ASE",
-    # "PyXtal",
-    # "GASP",
+    # "Simmate", done
+    # "XtalOpt", done
+    # "ASE", done
+    # "PyXtal", done
+    # "GASP", done
     # "AIRSS",
     # "USPEX",
 ]

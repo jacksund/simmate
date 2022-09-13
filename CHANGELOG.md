@@ -24,6 +24,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 **Enhancements**
 - add structure creators for `ASE`, `GASP`, `PyXtal`, `AIRSS`, `CALYPSO`, `USPEX`, and `XtalOpt` as well as documentation for creators.
+- add `simmate version` command
 
 
 
