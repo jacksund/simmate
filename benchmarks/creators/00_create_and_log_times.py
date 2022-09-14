@@ -127,95 +127,26 @@ AirssStructure.name = "AIRSS"
 UspexStructure.name = "USPEX"
 
 CREATORS_TO_TEST = [
-    # (
-    #     RandomSymStructure,
-    #     {
-    #         "site_gen_options": {
-    #             "lazily_generate_combinations": False,
-    #         }
-    #     },
-    # ),
-    # (
-    #     XtaloptStructure,
-    #     {
-    #         "command": "/home/jacksund/Documents/github/randSpg/build/randSpg",
-    #     },
-    # ),
-    # (AseStructure, {}),
-    # (PyXtalStructure, {}),
-    # (GaspStructure, {}),
-    # (AirssStructure, {}),
+    (
+        RandomSymStructure,
+        {
+            "site_gen_options": {
+                "lazily_generate_combinations": False,
+            }
+        },
+    ),
+    (
+        XtaloptStructure,
+        {
+            "command": "/home/jacksund/Documents/github/randSpg/build/randSpg",
+        },
+    ),
+    (AseStructure, {}),
+    (PyXtalStructure, {}),
+    (GaspStructure, {}),
+    (AirssStructure, {}),
     (UspexStructure, {}),
 ]
 
 for creator_class, creator_kwargs in CREATORS_TO_TEST:
     time_test_creation(creator_class, creator_kwargs)
-
-# -----------------------------------------------------------------------------
-
-### Plotting Timetest
-
-import plotly.graph_objects as go
-from plotly.offline import plot
-
-data = []
-
-for creator, _ in CREATORS_TO_TEST:
-    # y should be all time values for ALL compositions put together in to a 1D array
-    ys = creator.benchmark_results.values.flatten(order="F")
-    # x should be labels that are the same length as the xs list
-    xs = []
-    for c in COMPOSITIONS_TO_TEST:
-        xs += [c] * NSAMPLES_PER_COMPOSITION
-
-    series = go.Box(
-        name=creator.name,
-        x=xs,
-        y=ys,
-        boxpoints=False,  # look at strip plots if you want the scatter points
-    )
-    data.append(series)
-
-
-layout = go.Layout(
-    width=800,
-    height=600,
-    plot_bgcolor="white",
-    paper_bgcolor="white",
-    boxmode="group",
-    xaxis=dict(
-        title_text="Composition",
-        showgrid=False,
-        ticks="outside",
-        tickwidth=2,
-        showline=True,
-        color="black",
-        linecolor="black",
-        linewidth=2,
-        mirror=True,
-    ),
-    yaxis=dict(
-        title_text="Time to Generate Single Structure (s)",
-        type="log",
-        ticks="outside",
-        tickwidth=2,
-        showline=True,
-        linewidth=2,
-        color="black",
-        linecolor="black",
-        mirror=True,
-    ),
-    legend=dict(
-        x=0.05,
-        y=0.95,
-        bordercolor="black",
-        borderwidth=1,
-        font=dict(color="black"),
-    ),
-)
-
-fig = go.Figure(data=data, layout=layout)
-
-plot(fig, config={"scrollZoom": True})
-
-# -----------------------------------------------------------------------------

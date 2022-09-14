@@ -230,7 +230,7 @@ INPUT_TEMPLATE = """
         }}
     }}
     stages: [vasp1]
-    numParallelCalcs: 1
+    numParallelCalcs: NUM_STRUCTURES
     numGenerations: 1
     stopCrit: 1
 }}

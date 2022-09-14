@@ -28,7 +28,7 @@ CREATORS_TO_TEST = [
     # "PyXtal", done
     # "GASP", done
     # "AIRSS", done
-    # "USPEX",
+    # "USPEX", done
 ]
 
 parent_dir = get_directory("creator_benchmarks")
