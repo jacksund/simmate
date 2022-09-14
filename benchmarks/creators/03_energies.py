@@ -20,14 +20,14 @@ CREATORS_TO_TEST = [
 ]
 
 parent_dir = get_directory("creator_benchmarks")
-workflow_static = get_workflow("static-energy.vasp.quality04")
-# workflow_relax = get_workflow("relaxation.vasp.staged")
+# workflow_static = get_workflow("static-energy.vasp.quality04")
+workflow_relax = get_workflow("relaxation.vasp.staged")
 
 
 subplots = []
 for creator_name in CREATORS_TO_TEST:
 
-    data = workflow_static.all_results.filter(
+    data = workflow_relax.all_results.filter(
         energy_per_atom__isnull=False,
         source__creator=creator_name,
     ).values_list("energy_per_atom", "formula_reduced")
@@ -55,7 +55,7 @@ for creator_name in CREATORS_TO_TEST:
         ],
     )
     # df.to_csv(parent_dir / creator_name / "energies_initial.csv")
-    df.to_csv(parent_dir / creator_name / "energies_initial.csv")
+    df.to_csv(parent_dir / creator_name / "energies_final.csv")
 
 
 layout = go.Layout(

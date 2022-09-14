@@ -56,7 +56,7 @@ for creator_name in CREATORS_TO_TEST:
                 command="mpirun -n 4 vasp_std > vasp.out",
                 compress_output=True,
             )
-            
+
             workflow_relax.run_cloud(
                 structure=structure,
                 source={

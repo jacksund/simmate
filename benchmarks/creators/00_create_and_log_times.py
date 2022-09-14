@@ -104,19 +104,13 @@ def time_test_creation(creator_class, creator_kwargs):
     return df
 
 
-from simmate.toolkit.creators.structure.random_symmetry import (
-    RandomSymStructure,
-)
+from simmate.toolkit.creators.structure.random_symmetry import RandomSymStructure
 from simmate.toolkit.creators.structure.third_party.airss import AirssStructure
 from simmate.toolkit.creators.structure.third_party.ase import AseStructure
 from simmate.toolkit.creators.structure.third_party.gasp import GaspStructure
-from simmate.toolkit.creators.structure.third_party.pyxtal import (
-    PyXtalStructure,
-)
-from simmate.toolkit.creators.structure.third_party.xtalopt import (
-    XtaloptStructure,
-)
+from simmate.toolkit.creators.structure.third_party.pyxtal import PyXtalStructure
 from simmate.toolkit.creators.structure.third_party.uspex import UspexStructure
+from simmate.toolkit.creators.structure.third_party.xtalopt import XtaloptStructure
 
 RandomSymStructure.name = "Simmate"
 XtaloptStructure.name = "XtalOpt"
