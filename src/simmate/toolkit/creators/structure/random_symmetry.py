@@ -119,7 +119,7 @@ class RandomSymStructure(StructureCreator):
         # BUG: this requires all site and lattice creators to have a
         # spacegroup_options property.
 
-    def create_structure(self, spacegroup=None):
+    def create_structure(self, spacegroup: int = None) -> Structure:
 
         # If a spacegroup is not specified, grab a random one from our options
         # no check is done to see if the spacegroup specified is compatible

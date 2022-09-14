@@ -1,20 +1,35 @@
 
 # Using existing workflows
 
+------------------------------------------------------------
 
 ## Exploring available workflows
 
-=== "command line"
-    ``` bash
-    simmate workflows list-all  # gives all workflows
-    simmate workflows explore  # let's you inspect workflows
-    ```
-    
+All registered workflows can be listed off in the command-line.
+``` bash
+simmate workflows list-all
+```
+
+You can also learn more about a workflow with the `explore` command:
+``` bash
+simmate workflows explore
+```
+
+!!! tip
+    Read through the ["Workflow Names"](/full_guides/workflows/workflow_names/)
+    section for a better understanding of the different workflows available.    
+
+------------------------------------------------------------
+
+## Loading a workflow
+
+Once you have a desired workflow name, you can load the workflow with:
+
+=== "yaml"
     ``` yaml
     # in example.yaml
     workflow_name: static-energy.vasp.matproj
     ```
-    
 
 === "python"
     ``` python
@@ -22,10 +37,6 @@
     
     workflow = get_workflow("static-energy.vasp.matproj")
     ```
-
-!!! tip
-    Read through the "Workflow Names" section for a better understanding of
-    the different workflows available.
 
 ------------------------------------------------------------
 
@@ -69,7 +80,26 @@ use the `run` method. As a quick example:
 
 ## Running a workflow (cloud)
 
-When you want to schedule a workflow to run elsewhere, you must first make sure
+Workflows can also be submitted to a remote cluster. It is important to understand
+how local and cloud runs are different:
+
+=== "local (run)"
+    ``` mermaid
+    graph TD
+      A[submit with 'run' command] --> B[starts directly on your local computer & right away];
+    ```
+
+=== "remote submission (run-cloud)"
+    ``` mermaid
+    graph TD
+      A[submit with 'run-cloud' command] --> B[adds job to scheduler queue];
+      B --> C[waits for a worker to pick up job];
+      C --> D[worker selects job from queue];
+      D --> E[runs the job where the worker is];
+      F[launch a worker with 'start-worker' command] --> D;
+    ```
+
+Therefore, when you want to schedule a workflow to run elsewhere, you must first make sure
 you have your computational resources configured. You can then run workflows
 using the `run_cloud` method:
 
@@ -91,7 +121,7 @@ using the `run_cloud` method:
     
     workflow = get_workflow("static-energy.vasp.matproj")
     
-    state = workflow.run(
+    state = workflow.run_cloud(
         structure="NaCl.cif", 
         command="mpirun -n 4 vasp_std > vasp.out",
     )
@@ -100,7 +130,7 @@ using the `run_cloud` method:
 !!! warning
     The `run-cloud` command/method only **schedules** the workflow. It won't 
     run until you add computational resources (or `Workers`). To do this, you
-    must read through the "Adding computational resources" section.
+    must read through the ["Computational Resources"](/getting_started/add_computational_resources/quick_start/) documentation.
 
 ------------------------------------------------------------
 
@@ -224,4 +254,46 @@ http://127.0.0.1:8000/workflows/static-energy/vasp/mit/1
 !!! note
     Remember that the server and your database are limited to your local computer. Trying to access a URL on a computer that doesn't share the same database file will not work -- so you may need to copy your database file from the cluster to your local computer. Or even better -- if you would like to access results through the internet, then you have to switch to a cloud database.
 
-------------------------------------------------------------
+----------------------------------------------------------------------
+
+## Massively parallel workflows
+
+Some workflows submit many subworkflows. For example, evolutionary structure prediction does this by submitting hundreds of individual structure relaxations, analyzing the results, and submitting new structures based on the results.
+
+This is achieved by the workflow manually calling `run-cloud` on others ([see section above on how run-cloud works](http://127.0.0.1:8000/full_guides/workflows/using_existing_workflows/#running-a-workflow-cloud)). If you start multiple workers elsewhere, you can calculate these subworkflows in parallel:
+
+``` mermaid
+graph TD
+  A[main workflow];
+  A --> B[subworkflow];
+  B --> C[schedule run 1] --> G[scheduler];
+  B --> D[schedule run 2] --> G;
+  B --> E[schedule run 3] --> G;
+  B --> F[schedule run 4] --> G;
+  G --> H[worker 1];
+  G --> I[worker 2];
+  G --> J[worker 3];
+```
+
+
+
+So in order to run these types of workflows, you must...
+
+1. Start the main workflow with the `run` command
+2. Start at least one worker that will run the submitted the calculations
+
+!!! tip
+    Make sure you read through the ["Computational Resources"](/getting_started/add_computational_resources/quick_start/) documentation. There is also a 
+    [full walk-through example](/getting_started/evolutionary_search/quick_start/)
+    of a massively-parallel workflow in the getting started
+    guides.
+    
+!!! note
+    The number of workers will be how many jobs are ran in parallel -- and this
+    is only limited by the number of jobs queued. For example, if I submit 500
+    workflows with `run-cloud` but only start 100 workers, then only 100 workflows
+    will be ran at a time. Further, if I submit 25 workflows but have 100 workers,
+    then that means 75 of our workflows will be sitting idle without any job
+    to run.
+
+----------------------------------------------------------------------    
