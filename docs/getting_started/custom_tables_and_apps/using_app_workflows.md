@@ -2,6 +2,82 @@
 
 -------------------------------------------------------------------------------
 
+## Organizing app workflows
+
+By default, Simmate searches for a `workflows.py` (or `workflows` module) within your
+app and grabs **all** python classes within it -- assuming they are workflows you want registered. If you scripts contain non-workflow classes or even abstract base workflows, this can cause unexpected errors. You must therefore explicitly specify which workflows should be registered with your app.
+
+!!! note
+    If you are seeing `AttributeError: '...' object has no attribute 'name_full'`
+    or `Exception: Make sure you are following Simmate naming conventions`, then
+    you likely have misorganized your workflows.
+
+### in workflows.py file
+
+When you first create your project/app, you'll notice a single `workflows.py` file
+that has the following near the top:
+
+``` python
+# -----------------------------------------------------------------------------
+# Make sure to list out all workflows that you want registered
+# -----------------------------------------------------------------------------
+
+__all__ = [
+    "Example__Python__MyExample1",
+    "Relaxation__Vasp__MyExample2",
+]
+```
+
+You must explicitly list out all workflows that you want registered if you stay
+with a single `workflow.py` file format.
+
+### in a workflows module
+
+As your app grows, you may want to store your workflows in separate scripts or
+submodules. You can do this by deleting the `workflows.py` and replacing it with
+a folder named `workflows` that has the following organization:
+
+``` bash
+# rest of example_app is organized the same as before
+example_app
+└── workflows
+    ├── __init__.py   # <-- file used for registration
+    ├── example_1.py
+    ├── example_2.py
+    ├── example_3.py
+    └── example_submodule
+        ├── __init__.py
+        ├── example_4.py
+        └── example_5.py
+```
+
+Here, `example_N.py` files can be named whatever you'd like and do NOT require the
+`__all__` tag to be set. This folder structure allows us to organize all of our workflows nicely.
+
+Instead of the `__all__` tag, we can list out workflows to register in the 
+`workflows/__init__.py`. We can use relative python imports to accomplish this
+with minimal code:
+
+``` python
+# in workflows/__init__.py
+
+from .example_1 import Example__Python__MyExample1
+from .example_2 import Example__Python__MyExample2
+from .example_3 import Example__Python__MyExample3
+
+from .example_submodule.example_4 import Example__Python__MyExample4
+from .example_submodule.example_5 import Example__Python__MyExample5
+```
+
+!!! example
+    If you prefer to learn by example, you can take a look at Simmate's built-in
+    `Vasp` app. The `workflows` module of this app is located 
+    [here](https://github.com/jacksund/simmate/tree/main/src/simmate/calculators/vasp/workflows).
+    You can also see how our `workflows/__init__.py` file lists out all of our
+    workflows that are registered ([here](https://github.com/jacksund/simmate/blob/main/src/simmate/calculators/vasp/workflows/__init__.py))).
+
+-------------------------------------------------------------------------------
+
 ## Basic use
 
 On the surface, our workflows here behave exactly the same as they did before. We can run them with a yaml file or directly in python.
