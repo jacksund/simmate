@@ -107,6 +107,7 @@ def time_test_creation(creator_class, creator_kwargs):
 from simmate.toolkit.creators.structure.random_symmetry import RandomSymStructure
 from simmate.toolkit.creators.structure.third_party.airss import AirssStructure
 from simmate.toolkit.creators.structure.third_party.ase import AseStructure
+from simmate.toolkit.creators.structure.third_party.calypso import CalypsoStructure
 from simmate.toolkit.creators.structure.third_party.gasp import GaspStructure
 from simmate.toolkit.creators.structure.third_party.pyxtal import PyXtalStructure
 from simmate.toolkit.creators.structure.third_party.uspex import UspexStructure
@@ -119,6 +120,7 @@ PyXtalStructure.name = "PyXtal"
 GaspStructure.name = "GASP"
 AirssStructure.name = "AIRSS"
 UspexStructure.name = "USPEX"
+CalypsoStructure.name = "CALYPSO"
 
 CREATORS_TO_TEST = [
     (
@@ -140,6 +142,7 @@ CREATORS_TO_TEST = [
     (GaspStructure, {}),
     (AirssStructure, {}),
     (UspexStructure, {}),
+    (CalypsoStructure, {}),
 ]
 
 for creator_class, creator_kwargs in CREATORS_TO_TEST:

@@ -39,6 +39,7 @@ CREATORS_TO_TEST = [
     "GASP",
     "AIRSS",
     "USPEX",
+    "CALYPSO",
 ]
 
 sitefingerprint_method = cnnf.from_preset("ops", distance_cutoffs=None, x_diff_weight=3)
