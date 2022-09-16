@@ -28,7 +28,7 @@
     <img src="https://img.shields.io/badge/-Website-/?logo=iCloud&color=00666b&logoColor=white">
 </a>
 <!-- link to change-log -->
-<a href="https://github.com/jacksund/simmate/blob/main/CHANGELOG.md">
+<a href="https://jacksund.github.io/simmate/change_log/">
     <img src="https://img.shields.io/badge/-Changes & Updates-/?logo=git-extensions&color=00666b&logoColor=white">
 </a>
 </p>
