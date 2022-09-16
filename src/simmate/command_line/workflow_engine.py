@@ -79,15 +79,18 @@ def start_singleflow_worker():
 @workflow_engine_app.command()
 def start_cluster(
     nworkers: int,
-    worker_command: str = "simmate workflow-engine start-worker",
+    type: str = "local",
+    continuous: bool = False,
 ):
     """
     This starts many Simmate Workers that each run in a local subprocess
 
     - `nworkers`: the number of workers to start
 
-    - `worker_command`: the command to start each worker with. See start-worker
-    for options
+    - `cluster_type`: where to submit workers (either local or slurm)
+
+    - `continuous`: whether to do a single submission of workers or hold nworkers
+    at a steady-state number (runs endlessly)
 
     """
 
@@ -95,7 +98,8 @@ def start_cluster(
 
     start_cluster(
         nworkers=nworkers,
-        worker_command=worker_command,
+        cluster_type=type,
+        continuous=continuous,
     )
 
 

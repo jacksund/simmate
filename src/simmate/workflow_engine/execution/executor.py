@@ -162,7 +162,10 @@ class SimmateExecutor:
         nfinished = WorkItem.objects.filter(status="F").count()
         nerrored = WorkItem.objects.filter(status="E").count()
 
-        error_percent = (nerrored / (nerrored + nfinished)) * 100
+        if nfinished:
+            error_percent = (nerrored / (nerrored + nfinished)) * 100
+        else:
+            error_percent = 0
 
         nrunning_long = WorkItem.objects.filter(
             status="R",
