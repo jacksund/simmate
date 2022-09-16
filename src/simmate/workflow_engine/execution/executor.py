@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from datetime import timedelta
 
 import cloudpickle  # needed to serialize Prefect workflow runs and tasks
+from django.utils import timezone
 from rich import print
 
 from simmate.workflow_engine.execution.database import WorkItem
@@ -104,29 +106,34 @@ class SimmateExecutor:
         return queue_size
 
     @staticmethod
-    def clear_queue(are_you_sure: bool = False):
+    def delete_all(confirm: bool = False):
         """
         Empties the WorkItem database table and delete everything. This will
         not stop the workers if they are in the middle of a job though.
         """
         # Make sure the user ment to do this, otherwise raise an exception
-        if not are_you_sure:
+        if not confirm:
             raise Exception(
-                "Are you sure you want to do this? it deletes all of your queue"
-                "data and you can't get it back. If so, set are_you_sure=True."
+                "Are you sure you want to do this? This deletes all of your queue "
+                "data and you can't get it back. If so, run this method again "
+                "with confirmation."
             )
         else:
             WorkItem.objects.all().delete()
 
     @staticmethod
-    def clear_finished(are_you_sure: bool = False):
+    def delete_finished(confirm: bool = False):
         """
         Empties the WorkItem database table and delete everything. This will
         not stop the workers if they are in the middle of a job though.
         """
         # Make sure the user ment to do this, otherwise raise an exception
-        if not are_you_sure:
-            raise Exception
+        if not confirm:
+            raise Exception(
+                "Are you sure you want to do this? This deletes finished "
+                "entries from your queue-table and you can't get them back. "
+                "If so, run this method again with confirmation."
+            )
         else:
             WorkItem.objects.filter(status="F").delete()
 
@@ -146,6 +153,30 @@ class SimmateExecutor:
                 job.result()
             except Exception as error:
                 print(f"{job.id} | {error}")
+
+    @staticmethod
+    def show_stats() -> int:
+        npending = WorkItem.objects.filter(status="P").count()
+        nrunning = WorkItem.objects.filter(status="R").count()
+        ncanceled = WorkItem.objects.filter(status="C").count()
+        nfinished = WorkItem.objects.filter(status="F").count()
+        nerrored = WorkItem.objects.filter(status="E").count()
+
+        if nfinished:
+            error_percent = (nerrored / (nerrored + nfinished)) * 100
+        else:
+            error_percent = 0
+
+        nrunning_long = WorkItem.objects.filter(
+            status="R",
+            updated_at__lte=timezone.now() - timedelta(days=1),
+        ).count()
+
+        print(f"PENDING:   {npending}")
+        print(f"RUNNING:   {nrunning} ({nrunning_long} for +24hrs)")
+        print(f"FINISHED:  {nfinished}")
+        print(f"ERRORED:   {nerrored} ({error_percent:.2f}%)")
+        print(f"CANCELED:  {ncanceled}")
 
     # -------------------------------------------------------------------------
     # Extra methods to add if I want to be consistent with other Executor classes

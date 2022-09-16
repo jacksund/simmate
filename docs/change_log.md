@@ -73,6 +73,8 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add structure creators for `ASE`, `GASP`, `PyXtal`, `AIRSS`, `CALYPSO`, `USPEX`, and `XtalOpt` as well as documentation for creators.
 - add `simmate version` command
 - changelog and update guide added to documentation website
+- add `show-stats`, `delete-finished`, and `delete-all` commands to `workflow-engine`
+- add `Cluster` base class + commands that allow submitting a steady-state cluster via subprocesses or slurm
 
 
 --------------------------------------------------------------------------------
