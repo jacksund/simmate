@@ -1,47 +1,23 @@
 # -*- coding: utf-8 -*-
 
 import math
+from pathlib import Path
+from functools import cache
 
 import plotly.graph_objects as plotly_go
 from plotly.subplots import make_subplots
 
-from simmate.calculators.vasp.workflows.relaxation.quality00 import (
-    Relaxation__Vasp__Quality00,
-)
-from simmate.calculators.vasp.workflows.relaxation.quality01 import (
-    Relaxation__Vasp__Quality01,
-)
-from simmate.calculators.vasp.workflows.relaxation.quality02 import (
-    Relaxation__Vasp__Quality02,
-)
-from simmate.calculators.vasp.workflows.relaxation.quality03 import (
-    Relaxation__Vasp__Quality03,
-)
-from simmate.calculators.vasp.workflows.relaxation.quality04 import (
-    Relaxation__Vasp__Quality04,
-)
-from simmate.calculators.vasp.workflows.static_energy.quality04 import (
-    StaticEnergy__Vasp__Quality04,
-)
+from simmate.toolkit import Structure
+from simmate.toolkit.validators.base import Validator
 from simmate.visualization.plotting import PlotlyFigure
 from simmate.workflow_engine import Workflow
-
-# from simmate.calculators.vasp.database.relaxation import StagedRelaxation
+from simmate.workflows.utilities import get_workflow
 
 
 class Relaxation__Vasp__Staged(Workflow):
     """
     Runs a series of increasing-quality relaxations and then finishes with a single
     static energy calculation.
-
-    This is therefore a "Nested Workflow" made of the following smaller workflows:
-
-        - relaxation.vasp.quality00
-        - relaxation.vasp.quality01
-        - relaxation.vasp.quality02
-        - relaxation.vasp.quality03
-        - relaxation.vasp.quality04
-        - static-energy.vasp.quality04
 
     This workflow is most useful for randomly-created structures or extremely
     large supercells. More precise relaxations+energy calcs should be done
@@ -50,23 +26,24 @@ class Relaxation__Vasp__Staged(Workflow):
 
     description_doc_short = "runs a series of relaxations (00-04 quality)"
 
-    subworkflows = [
-        Relaxation__Vasp__Quality00,
-        Relaxation__Vasp__Quality01,
-        Relaxation__Vasp__Quality02,
-        Relaxation__Vasp__Quality03,
-        Relaxation__Vasp__Quality04,
-        StaticEnergy__Vasp__Quality04,
+    subworkflow_names = [
+        "relaxation.vasp.quality00",
+        "relaxation.vasp.quality01",
+        "relaxation.vasp.quality02",
+        "relaxation.vasp.quality03",
+        "relaxation.vasp.quality04",
+        "static-energy.vasp.quality04",
     ]
 
     @classmethod
     def run_config(
         cls,
-        structure,
-        command=None,
-        source=None,
-        directory=None,
-        copy_previous_directory=False,
+        structure: Structure,
+        command: str=None,
+        source: dict=None,
+        directory: Path=None,
+        copy_previous_directory: bool=False,
+        validator: Validator = None,
         **kwargs,
     ):
 
@@ -88,6 +65,17 @@ class Relaxation__Vasp__Staged(Workflow):
                 directory=directory / current_task.name_full,
             )
             result = state.result()
+            
+            # if a validator was given, we want to check the current structure
+            # and see if it passes our test. This is typically only done in
+            # expensive analysis -- like evolutionary searches
+            current_structure = result.to_toolkit()
+            if validator and not validator.check_structure(current_structure):
+                # if it fails the check, we want to stop the series of calculations
+                # and just exit the workflow run. We can, however, update the
+                # database entry with the final structure.
+                return {"structure": current_structure}
+                
 
         # when updating the original entry, we want to use the data from the
         # final result.
@@ -101,6 +89,12 @@ class Relaxation__Vasp__Staged(Workflow):
             "valence_band_maximum": result.valence_band_maximum,
         }
         return final_result
+
+    @classmethod
+    @property
+    @cache
+    def subworkflows(cls):
+        return [get_workflow(name) for name in cls.subworkflow_names]
 
     @classmethod
     def get_energy_series(cls, **filter_kwargs):
