@@ -138,7 +138,7 @@ def copy_directory(
     return directory_new_cleaned
 
 
-def make_archive(directory: Path):
+def make_archive(directory: Path, files_to_exclude: list[str] = []):
     """
     Compresses the directory to a zip file of the same name. After compressing,
     it then deletes the original directory.
@@ -150,6 +150,12 @@ def make_archive(directory: Path):
     """
 
     directory_full = directory.absolute()
+
+    # Remove any files that were requested to be deleted. For example, POTCAR
+    # files of VASP calculations.
+    for file_to_remove in files_to_exclude:
+        for file_found in Path.cwd().rglob(file_to_remove):
+            file_found.unlink()
 
     # This wraps shutil.make_archive to change the default parameters. Normally,
     # it writes the archive in the working directory, but we update it to use the

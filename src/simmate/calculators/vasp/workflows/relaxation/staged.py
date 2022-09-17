@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import math
-from pathlib import Path
 from functools import cache
+from pathlib import Path
 
 import plotly.graph_objects as plotly_go
 from plotly.subplots import make_subplots
@@ -24,6 +25,21 @@ class Relaxation__Vasp__Staged(Workflow):
     afterwards because ettings are still below MIT and Materials Project quality.
     """
 
+    exlcude_from_archives = [
+        "CHG",
+        "CHGCAR",
+        "DOSCAR",
+        "EIGENVAL",
+        "IBZKPT",
+        "OSZICAR",
+        "OUTCAR",
+        "PCDAT",
+        "POTCAR",
+        "REPORT",
+        "WAVECAR",
+        "XDATCAR",
+    ]
+
     description_doc_short = "runs a series of relaxations (00-04 quality)"
 
     subworkflow_names = [
@@ -39,10 +55,10 @@ class Relaxation__Vasp__Staged(Workflow):
     def run_config(
         cls,
         structure: Structure,
-        command: str=None,
-        source: dict=None,
-        directory: Path=None,
-        copy_previous_directory: bool=False,
+        command: str = None,
+        source: dict = None,
+        directory: Path = None,
+        copy_previous_directory: bool = False,
         validator: Validator = None,
         **kwargs,
     ):
@@ -58,14 +74,13 @@ class Relaxation__Vasp__Staged(Workflow):
 
         # The remaining tasks continue and use the past results as an input
         for i, current_task in enumerate(cls.subworkflows[1:]):
-            preceding_task = cls.subworkflows[i]  # will be one before because of [:1]
             state = current_task.run(
                 structure=result,  # this is the result of the last run
                 command=command,
                 directory=directory / current_task.name_full,
             )
             result = state.result()
-            
+
             # if a validator was given, we want to check the current structure
             # and see if it passes our test. This is typically only done in
             # expensive analysis -- like evolutionary searches
@@ -74,8 +89,10 @@ class Relaxation__Vasp__Staged(Workflow):
                 # if it fails the check, we want to stop the series of calculations
                 # and just exit the workflow run. We can, however, update the
                 # database entry with the final structure.
+                logging.info(
+                    "Did not pass validation checkpoint. Stopping workflow series."
+                )
                 return {"structure": current_structure}
-                
 
         # when updating the original entry, we want to use the data from the
         # final result.

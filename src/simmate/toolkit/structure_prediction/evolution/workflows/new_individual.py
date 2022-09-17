@@ -30,6 +30,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
 
         search_db = FixedCompositionSearch.objects.get(id=search_id)
         source_db = search_db.steadystate_sources.get(id=steadystate_source_id)
+        validator = search_db.validator
 
         # Check the stop condition of the search and see if this new individual
         # is even needed. This will catch when a search ends while a new
@@ -52,7 +53,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
                     ranking_column=search_db.fitness_field,
                     query_limit=200,  # Smarter way to do this...?
                 ),
-                validators=[search_db.validator],
+                validators=[validator],
             )
             source = {
                 "transformation": source_db.name,
@@ -64,7 +65,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
             creator = source_db.to_toolkit()
 
             new_structure = creator.create_structure_with_validation(
-                validators=[search_db.validator],
+                validators=[validator],
             )
             source = {
                 "creator": source_db.name,
@@ -72,13 +73,18 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
 
         # if structure creation was successful, run the workflow for it
         if new_structure:
+
+            subworkflow_kwargs = search_db.subworkflow_kwargs
+            if "validator" in search_db.subworkflow.parameter_names:
+                subworkflow_kwargs["validator"] = validator
+
             state = search_db.subworkflow.run(
                 structure=new_structure,
                 source=source,
                 directory=directory,
-                **search_db.subworkflow_kwargs,
+                **subworkflow_kwargs,
             )
-            result = state.result()
+            state.result()
             # NOTE: we tell the workflow to use the same directory. There is
             # good chance the user indicates that they want to compress the
             # folder to.

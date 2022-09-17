@@ -12,6 +12,7 @@ from rich.progress import track
 from simmate.database.base_data_types import Calculation, table_column
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.structure_prediction.evolution.database import SteadystateSource
+from simmate.toolkit.validators import fingerprint as validator_module
 from simmate.utilities import get_directory
 from simmate.visualization.plotting import PlotlyFigure
 from simmate.workflow_engine.execution import WorkItem
