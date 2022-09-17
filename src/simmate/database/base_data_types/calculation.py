@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import platform
+from datetime import datetime
 
 from simmate.database.base_data_types import DatabaseTable, table_column
 
@@ -25,6 +26,8 @@ class Calculation(DatabaseTable):
         "directory",
         "run_id",
         "corrections",
+        "started_at",
+        "finished_at",
     ]
 
     api_filters = {
@@ -33,7 +36,31 @@ class Calculation(DatabaseTable):
         "computer_system": ["exact"],
         "directory": ["exact"],
         "run_id": ["exact"],
+        "total_time": ["range"],
+        "queue_time": ["range"],
     }
+
+    started_at = table_column.DateTimeField(blank=True, null=True)
+    """
+    Timestamp of when the calculation starting running
+    """
+
+    finished_at = table_column.DateTimeField(blank=True, null=True)
+    """
+    Timestamp of when the calculation completed
+    """
+
+    total_time = table_column.FloatField(blank=True, null=True)
+    """
+    The total calculation time in seconds. Equal to the finished_at minus
+    started_at column.
+    """
+
+    queue_time = table_column.FloatField(blank=True, null=True)
+    """
+    The total time the calculation was waiting in the queue in seconds. Equal 
+    to the started_at column minus created_at.
+    """
 
     workflow_name = table_column.CharField(
         max_length=75,
@@ -98,9 +125,11 @@ class Calculation(DatabaseTable):
     @classmethod
     def from_run_context(
         cls,
-        run_id: str,
+        run_id: str = None,
         workflow_name: str = None,
         workflow_version: str = None,
+        started_at: datetime = None,
+        finished_at: datetime = None,
         **kwargs,  # other parameters you'd normally pass to 'from_toolkit'
     ):
         """
@@ -116,22 +145,44 @@ class Calculation(DatabaseTable):
         # extry existing already -- which we need to grab and then update. If it's
         # not there, we create a new one
 
-        # check if the calculation already exists in our database, and if so,
-        # grab it and return it.
-        if cls.objects.filter(run_id=run_id).exists():
-            return cls.objects.get(run_id=run_id)
-        # Otherwise we need to create a new one and return that.
+        # check if the calculation already exists in our database, and if not,
+        # we need to create a new one
+        if not cls.objects.filter(run_id=run_id).exists():
+            # To handle the initialization of other Simmate mix-ins, we pass all
+            # information to the from_toolkit method rather than directly to cls.
+            calculation = cls.from_toolkit(
+                run_id=run_id,
+                computer_system=platform.node(),
+                workflow_name=workflow_name,
+                workflow_version=workflow_version,
+                **kwargs,
+            )
+            calculation.save()
+        # Otherwise the entry exists and we can load it
+        else:
+            calculation = cls.objects.get(run_id=run_id)
 
-        # To handle the initialization of other Simmate mix-ins, we pass all
-        # information to the from_toolkit method rather than directly to cls.
-        calculation = cls.from_toolkit(
-            run_id=run_id,
-            computer_system=platform.node(),
-            workflow_name=workflow_name,
-            workflow_version=workflow_version,
-            **kwargs,
-        )
-        calculation.save()
+        # if this is the start of a calculation run (and not just scheduling via
+        # run cloud) then we also want to add a timestamp for the start
+        if started_at:
+            calculation.started_at = started_at
+            queue_time = (
+                calculation.started_at - calculation.created_at
+            ).total_seconds()
+            # if we run the workflow locally, this can sometimes give a negative
+            # value for queue time because of database hit / python continutation
+            # inconsistencies. We therefore give a minimum value of 0
+            if queue_time < 0:
+                queue_time = 0
+            calculation.queue_time = queue_time
+            calculation.save()
+
+        if finished_at:
+            calculation.finished_at = finished_at
+            calculation.total_time = (
+                calculation.finished_at - calculation.started_at
+            ).total_seconds()
+            calculation.save()
 
         return calculation
 

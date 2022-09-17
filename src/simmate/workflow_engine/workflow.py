@@ -10,6 +10,7 @@ from pathlib import Path
 import cloudpickle
 import toml
 import yaml
+from django.utils import timezone
 
 import simmate
 from simmate.database.base_data_types import Calculation
@@ -151,6 +152,7 @@ class Workflow:
             directory=directory,
             compress_output=compress_output,
             source=source,
+            started_at=timezone.now(),
             **kwargs,
         )
 
@@ -178,6 +180,7 @@ class Workflow:
                 results=results if results != None else {},
                 directory=kwargs_cleaned["directory"],
                 run_id=kwargs_cleaned["run_id"],
+                finished_at=timezone.now(),
             )
 
         # if requested, compresses the directory to a zip file and then removes
@@ -407,6 +410,7 @@ class Workflow:
         results: dict,
         run_id: str,
         directory: Path,
+        finished_at: timezone.datetime,
     ) -> Calculation:
         """
         Take the output of the `run_config` and any extra information and
@@ -421,6 +425,7 @@ class Workflow:
             run_id=run_id,
             workflow_name=cls.name_full,
             workflow_version=cls.version,
+            finished_at=finished_at,
         )
 
         # Now update the calculation entry with our results. Typically, all of this
@@ -922,6 +927,10 @@ class Workflow:
         register_kwargs_cleaned = cls._deserialize_parameters(
             add_defaults=False, **register_kwargs
         )
+
+        # as an extra, the start time is always registered for ALL calc if given
+        if "started_at" in kwargs.keys():
+            register_kwargs_cleaned["started_at"] = kwargs["started_at"]
 
         # SPECIAL CASE: The exception to the above is with SOURCE, which needs
         # to be in a JSON-serialized form for the database
