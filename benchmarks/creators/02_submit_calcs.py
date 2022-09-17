@@ -29,6 +29,7 @@ CREATORS_TO_TEST = [
     # "GASP", done
     # "AIRSS", done
     # "USPEX", done
+    # "CALYPSO", done
 ]
 
 parent_dir = get_directory("creator_benchmarks")
@@ -44,6 +45,11 @@ for creator_name in CREATORS_TO_TEST:
             continue
 
         for file in track(directory.iterdir()):
+
+            # skip if was submitted already
+            if workflow_static.all_results.filter(source__file=str(file)).exists():
+                continue
+
             structure = Structure.from_file(file)
 
             workflow_static.run_cloud(

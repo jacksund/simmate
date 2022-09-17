@@ -39,6 +39,7 @@ CREATORS_TO_TEST = [
     "GASP",
     "AIRSS",
     "USPEX",
+    "CALYPSO",
 ]
 
 sitefingerprint_method = cnnf.from_preset("ops", distance_cutoffs=None, x_diff_weight=3)
@@ -140,7 +141,7 @@ layout = go.Layout(
         mirror=True,
     ),
     yaxis=dict(
-        title_text="Distance Between Fingerprints",
+        title_text="Fingerprint Distance",
         # type="log",
         ticks="outside",
         tickwidth=2,

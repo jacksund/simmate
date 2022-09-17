@@ -17,6 +17,7 @@ CREATORS_TO_TEST = [
     "GASP",
     "AIRSS",
     "USPEX",
+    "CALYPSO",
 ]
 
 parent_dir = get_directory("creator_benchmarks")

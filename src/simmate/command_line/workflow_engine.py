@@ -126,7 +126,7 @@ def show_stats():
 @workflow_engine_app.command()
 def delete_finished(confirm: bool = False):
     """
-    Prints a summary of different workitems and their status
+    Deletes all finished workitems from the database
     """
     from simmate.workflow_engine.execution import SimmateExecutor
 
@@ -136,7 +136,7 @@ def delete_finished(confirm: bool = False):
 @workflow_engine_app.command()
 def delete_all(confirm: bool = False):
     """
-    Prints a summary of different workitems and their status
+    Deletes all workitems from the database
     """
     from simmate.workflow_engine.execution import SimmateExecutor
 

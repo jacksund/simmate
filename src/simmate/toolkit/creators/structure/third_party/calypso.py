@@ -7,31 +7,6 @@ from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.structure.base import StructureCreator
 from simmate.utilities import get_directory
 
-# Here we setup the input file to create CALYPSO structures.
-# Note NumberOfFormula is input twice becuase we want a fixed min/max
-INPUT_TEMPLATE = """
-NumberOfSpecies = {NumberOfSpecies}
-NameOfAtoms = {NameOfAtoms}
-NumberOfAtoms = {NumberOfAtoms}
-NumberOfFormula = {NumberOfFormula} {NumberOfFormula}
-PopSize = NUM_STRUCTURES
-Command = echo SKIP THIS
-Split = T
-Volume = {Volume}
-@DistanceOfIon
-{DistanceOfIon}
-@End
-"""
-
-# The last issue is that CALYPSO needs a different python enviornment,
-# which we need to access via a script.
-# Let's add a script run_uspex.sh that sets this env for us and then runs uspex.
-SUBMIT_TEMPLATE = """
-source {conda_loc}
-conda activate {calypso_python_env}
-./calypso.x
-"""
-
 
 class CalypsoStructure(StructureCreator):
     """
@@ -49,12 +24,13 @@ class CalypsoStructure(StructureCreator):
 
     ## Dev Notes
 
-    For Ubuntu, I downloaded the x86 version of CALYPSO 6.0. Simply uncompress
+    For Ubuntu, I downloaded the x64 version of CALYPSO 7.0. Simply uncompress
     the download file and the executable is there. No need for any install.
 
-    CALYPSO does require python 2.7 as well, and we can actually use the same
-    environment as USPEX. Make sure this is active when
-    submitting a job.
+    The following dependency is needed on ubuntu:
+    ``` bash
+    sudo apt-get install libomp-dev
+    ```
 
     To generate structures without running any analysis/calcs, I simply need
     to run calypso in split mode:
@@ -70,16 +46,12 @@ class CalypsoStructure(StructureCreator):
         composition: Composition,
         # location of the calypso.x file
         command: str = "calypso.x",
-        # This needs to be a custom python env! It must be Python=2.7 and have
-        # Numpy, Scipy, MatPlotLib, ASE, and SpgLib
-        conda_env: str = "calypso_env",
     ):
 
         if not shutil.which(command):
             raise Exception("You must have CALYPSO installed and in the PATH.")
 
         self.command = command
-        self.conda_env = conda_env
 
         # Because of bug with calypso's poscar files, I need to save this
         self.comp = " ".join([element.symbol for element in composition])
@@ -133,34 +105,15 @@ class CalypsoStructure(StructureCreator):
 
         temp_dir = get_directory()  # leave empty to allow parallel
 
-        # write the submit file
-        submit_file = temp_dir / "run_calypso.sh"
-        with submit_file.open("w") as file:
-            content = SUBMIT_TEMPLATE.format(conda_env=self.conda_env)
-            file.writelines(content)
-
-        # give permissions to the script so we can run it below
-        subprocess.run(
-            "chmod a+x run_calypso.sh",
-            shell=True,
-            cwd=temp_dir,
-        )
-
-        # We now have everything except the INPUT.txt file. We will write that
-        # and run it below.
-        # This is done later because we don't know NUM_STRUCTURES yet
-
         # make the INPUT.txt file with n as our NUM_STRUCTURES to make
         # write it and close immediately
         input_file = temp_dir / "input.dat"
-
-        file = input_file.open("w")
-        file.writelines(self.calypso_input.replace("NUM_STRUCTURES", str(n)))
-        file.close()
+        with input_file.open("w") as file:
+            file.writelines(self.calypso_input.replace("NUM_STRUCTURES", str(n)))
 
         # now let's have CALYPSO run and make the structures
         subprocess.run(
-            "bash run_calypso.sh",
+            self.command,
             shell=True,
             capture_output=True,
             cwd=temp_dir,
@@ -193,7 +146,7 @@ class CalypsoStructure(StructureCreator):
             structures.append(structure)
 
         # delete the directory
-        shutil.rmtree(self.temp_dir)
+        shutil.rmtree(temp_dir)
 
         # return the list of pymatgen Structure objects that we've made
         return structures
@@ -205,3 +158,20 @@ class CalypsoStructure(StructureCreator):
         structure = self.create_structures(1)[0]
 
         return structure
+
+
+# Here we setup the input file to create CALYPSO structures.
+# Note NumberOfFormula is input twice becuase we want a fixed min/max
+INPUT_TEMPLATE = """
+NumberOfSpecies = {NumberOfSpecies}
+NameOfAtoms = {NameOfAtoms}
+NumberOfAtoms = {NumberOfAtoms}
+NumberOfFormula = {NumberOfFormula} {NumberOfFormula}
+PopSize = NUM_STRUCTURES
+Command = echo SKIP THIS
+Split = T
+Volume = {Volume}
+@DistanceOfIon
+{DistanceOfIon}
+@End
+"""

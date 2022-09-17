@@ -15,6 +15,7 @@ CREATORS_TO_TEST = [
     "GASP",
     "AIRSS",
     "USPEX",
+    "CALYPSO",
 ]
 
 
