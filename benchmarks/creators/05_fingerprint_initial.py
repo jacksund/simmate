@@ -141,7 +141,7 @@ layout = go.Layout(
         mirror=True,
     ),
     yaxis=dict(
-        title_text="Distance Between Fingerprints",
+        title_text="Fingerprint Distance",
         # type="log",
         ticks="outside",
         tickwidth=2,

@@ -47,9 +47,7 @@ for creator_name in CREATORS_TO_TEST:
         for file in track(directory.iterdir()):
 
             # skip if was submitted already
-            if workflow_static.all_results.filter(
-                source__file=str(file)
-            ).exists():
+            if workflow_static.all_results.filter(source__file=str(file)).exists():
                 continue
 
             structure = Structure.from_file(file)
