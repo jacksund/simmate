@@ -30,6 +30,8 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
     of a binary phase system (e.g Na-Cl or Y-C)
     """
 
+    description_doc_short = "hull diagram for a two-element system (e.g. Na-Cl)"
+
     database_table = BinarySystemSearch
 
     fixed_comp_workflow = StructurePrediction__Toolkit__FixedComposition
@@ -174,7 +176,11 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
 
         all_submissions = states_prototype + states_known
         if len(all_submissions) > (nsteadystate * 2):
-            number_to_wait_for = nsteadystate - 20
+            number_to_wait_for = len(all_submissions) - nsteadystate - 20
+            logging.info(
+                f"Waiting for at least {number_to_wait_for} singleshot "
+                "submissions to finish"
+            )
             for state in all_submissions[:number_to_wait_for]:
                 state.result()
 
@@ -210,8 +216,8 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
             # stopping conditions.
             # for n in range(1, 10):
             #     min_structures_exact = int(5 * n)
-            #     best_survival_cutoff = int(10 * n)
-            #     max_structures = int(25 * n)
+            #     best_survival_cutoff = int(20 * n)
+            #     max_structures = int(30 * n)
             #     # convergence_cutoff = 0.01
             #     print(
             #         f"{n}\t{min_structures_exact}\t"

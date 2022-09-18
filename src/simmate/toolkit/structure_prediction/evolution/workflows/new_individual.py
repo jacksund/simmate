@@ -15,8 +15,12 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
     Generates a new individual for an evolutionary search algorithm.
 
     Note, this workflow should not be called directly, but instead used within
-    higher level workflows (such as `fixed-composition`)
+    higher level workflows (such as `fixed-composition`).
+
+    Users will rarely (if ever) need to call this workflow
     """
+
+    description_doc_short = "a single structure submission for a search"
 
     use_database = False
 

@@ -15,6 +15,8 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
     number of sites. (e.g. Ca2N or Na4Cl4)
     """
 
+    description_doc_short = "fixed number of sites (e.g. Ca2N or Na4Cl4)"
+
     database_table = FixedCompositionSearch
 
     @classmethod

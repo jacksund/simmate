@@ -16,7 +16,7 @@ def write_and_submit_structures(
     workflow_kwargs: dict,
 ):
     if not structures:
-        return
+        return []
 
     logging.info("Writing CIFs and submitting structures")
 

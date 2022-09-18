@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import traceback
 import warnings
 from pathlib import Path
 
@@ -117,25 +118,58 @@ class BinarySystemSearch(Calculation):
 
     def write_output_summary(self, directory):
 
-        logging.info(f"Writing search summary to {directory}")
-        logging.warning("The hull diagram and stabilities will not be")
+        # If the output fails to write, we have a non-critical issue that
+        # doesn't affect the search. We therefore don't want to raise an
+        # error here -- but instead warn the user and then continue the search
+        try:
 
-        super().write_output_summary(directory=directory)
+            if not self.individuals_completed.exists():
+                logging.info("No structures completed yet. Skipping output writing.")
+                return
 
-        # update all chemical stabilites before creating the output files
-        self.update_stabilities()
+            logging.info(f"Writing search summary to {directory}")
 
-        self.individuals_datatable.write_hull_diagram_plot(
-            chemical_system=self.chemical_system_cleaned,
-            workflow_name=self.subworkflow.name_full,
-            directory=directory,
-        )
+            super().write_output_summary(directory=directory)
 
-        stable_dir = get_directory(directory / "stable_structures")
-        self.write_stable_structures(stable_dir)
+            # update all chemical stabilites before creating the output files
+            self.update_stabilities()
 
-        all_comps_dir = get_directory(directory / "best_structure_per_composition")
-        self.write_stable_structures(all_comps_dir, include_best_metastable=True)
+            self.individuals_datatable.write_hull_diagram_plot(
+                chemical_system=self.chemical_system_cleaned,
+                workflow_name=self.subworkflow.name_full,
+                directory=directory,
+            )
+
+            stable_dir = get_directory(directory / "stable_structures")
+            self.write_stable_structures(stable_dir)
+
+            all_comps_dir = get_directory(directory / "best_structure_per_composition")
+            self.write_stable_structures(all_comps_dir, include_best_metastable=True)
+
+        except Exception as error:
+
+            if (
+                isinstance(error, ValueError)
+                and "no entries for the terminal elements" in error.args[0]
+            ):
+                logging.warning(
+                    "The convex hull and structure stabilities cannot be calculated "
+                    "without terminal elements. Either manually submit pure-element "
+                    "structures to your subworkflow, or make sure you run your "
+                    "search with singleshot sources active (the default) AND "
+                    "your database populated with third-party data. Output files "
+                    "will not be written until this is done."
+                )
+
+            else:
+                logging.warning(
+                    "Failed to write the output summary. This issue will be silenced "
+                    "to avoid stopping the search. But please report the following "
+                    "error to our github: https://github.com/jacksund/simmate/issues/"
+                )
+
+                # prints the most recent exception traceback
+                traceback.print_exc()
 
     def write_stable_structures(
         self,
