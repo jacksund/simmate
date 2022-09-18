@@ -519,6 +519,13 @@ class FixedCompositionSearch(Calculation):
                 nsites__lte=composition.num_atoms,
                 energy_per_atom__isnull=False,
             )
+            self.subworkflow.write_staged_series_times_plot(
+                directory=directory,
+                # See `individuals` method for why we use these filters
+                formula_reduced=composition.reduced_formula,
+                nsites__lte=composition.num_atoms,
+                energy_per_atom__isnull=False,
+            )
 
             logging.info("Done writing summary.")
 
@@ -819,7 +826,7 @@ class SubworkflowTimes(PlotlyFigure):
 
         # time is stored in seconds and we convert to minutes
         total_times = [e[0] / 60 for e in data]
-        queue_times = [e[1] / 60 for e in data]
+        # queue_times = [e[1] / 60 for e in data]
 
         figure = plotly_go.Figure()
         hist_1 = plotly_go.Histogram(x=total_times, name="Total run time (min)")

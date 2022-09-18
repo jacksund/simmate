@@ -9,7 +9,7 @@ In this tutorial, you will learn how to submit an evolutionary search and other 
     from different computers. Your calculations will be **slower** and
     **error-prone** with sqlite.
     
-    If you are seeing the error `Database Connection Closed`, then you have 
+    If you are seeing the error `database is locked`, then you have 
     exceeded the capabilities of sqlite.
 
 !!! warning

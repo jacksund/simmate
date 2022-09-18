@@ -154,7 +154,7 @@ def make_archive(directory: Path, files_to_exclude: list[str] = []):
     # Remove any files that were requested to be deleted. For example, POTCAR
     # files of VASP calculations.
     for file_to_remove in files_to_exclude:
-        for file_found in Path.cwd().rglob(file_to_remove):
+        for file_found in directory.rglob(file_to_remove):
             file_found.unlink()
 
     # This wraps shutil.make_archive to change the default parameters. Normally,

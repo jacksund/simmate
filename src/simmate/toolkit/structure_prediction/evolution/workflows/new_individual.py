@@ -46,7 +46,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
         if source_db.is_transformation:
 
             transformer = source_db.to_toolkit()
-            parent_ids, new_structure = transformer.apply_from_database_and_selector(
+            output = transformer.apply_from_database_and_selector(
                 selector=search_db.selector,
                 datatable=search_db.individuals_completed,
                 select_kwargs=dict(
@@ -55,6 +55,24 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
                 ),
                 validators=[validator],
             )
+
+            # if the source failed to create a structure, then we want to remove
+            # it to prevent repeated issues.
+            if output == False:
+                # TODO: consider more advanced logic for changing the steady
+                # state values of each source -- rather than just disabling
+                # them here.
+                logging.warning(
+                    "Failed to create new individual with steady-state "
+                    f"source {source_db.name}. Removing steady-state."
+                )
+                source_db.nsteadystate_target = 0
+                source_db.save()
+                shutil.rmtree(directory)
+                return
+
+            # otherwise we have a successful output that we can use
+            parent_ids, new_structure = output
             source = {
                 "transformation": source_db.name,
                 "parent_ids": parent_ids,
@@ -74,17 +92,28 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
         # if structure creation was successful, run the workflow for it
         if new_structure:
 
-            subworkflow_kwargs = search_db.subworkflow_kwargs
-            if "validator" in search_db.subworkflow.parameter_names:
-                subworkflow_kwargs["validator"] = validator
-
             state = search_db.subworkflow.run(
                 structure=new_structure,
                 source=source,
                 directory=directory,
-                **subworkflow_kwargs,
+                **search_db.subworkflow_kwargs,
             )
             state.result()
             # NOTE: we tell the workflow to use the same directory. There is
             # good chance the user indicates that they want to compress the
             # folder to.
+
+        # TODO: when I allow a series of subworkflows, I can do validation checks
+        # between each run.
+        # if a validator was given, we want to check the current structure
+        # and see if it passes our test. This is typically only done in
+        # expensive analysis -- like evolutionary searches
+        # current_structure = result.to_toolkit()
+        # if validator and not validator.check_structure(current_structure):
+        #     # if it fails the check, we want to stop the series of calculations
+        #     # and just exit the workflow run. We can, however, update the
+        #     # database entry with the final structure.
+        #     logging.info(
+        #         "Did not pass validation checkpoint. Stopping workflow series."
+        #     )
+        #     return {"structure": current_structure}

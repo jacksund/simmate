@@ -166,7 +166,8 @@ class Composition(PymatgenComposition):
         - `packing_factor` :
             Scaling value for the volume in relation to predict ionic radii.
             A value of 1 means the total volume will be exactly same as the sum
-            of all spheres. Larger values will give smaller volumes. Because this
+            of all spheres. Larger values corresponds to better packing (and
+            higher density) and therefore will give smaller volumes. Because this
             method is commonly used to define minimum possible distances for
             random structure creation, we make the default 0.5.
 
