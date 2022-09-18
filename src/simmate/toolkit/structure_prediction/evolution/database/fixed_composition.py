@@ -510,28 +510,9 @@ class FixedCompositionSearch(Calculation):
 
             # BUG: This is only for "relaxation.vasp.staged", which the assumed
             # workflow for now.
-            composition = Composition(self.composition)
-            self.subworkflow.write_staged_series_convergence_plot(
-                directory=directory,
-                # See `individuals` method for why we use these filters
-                formula_reduced=composition.reduced_formula,
-                nsites__lte=composition.num_atoms,
-                energy_per_atom__isnull=False,
-            )
-            self.subworkflow.write_staged_series_histogram_plot(
-                directory=directory,
-                # See `individuals` method for why we use these filters
-                formula_reduced=composition.reduced_formula,
-                nsites__lte=composition.num_atoms,
-                energy_per_atom__isnull=False,
-            )
-            self.subworkflow.write_staged_series_times_plot(
-                directory=directory,
-                # See `individuals` method for why we use these filters
-                formula_reduced=composition.reduced_formula,
-                nsites__lte=composition.num_atoms,
-                energy_per_atom__isnull=False,
-            )
+            self.write_staged_series_convergence_plot(directory=directory)
+            self.write_staged_series_histogram_plot(directory=directory)
+            self.write_staged_series_times_plot(directory=directory)
 
             logging.info("Done writing summary.")
 
@@ -846,12 +827,12 @@ class SubworkflowTimes(PlotlyFigure):
         # queue_times = [e[1] / 60 for e in data]
 
         figure = plotly_go.Figure()
-        hist_1 = plotly_go.Histogram(x=total_times, name="Total run time (min)")
+        hist_1 = plotly_go.Histogram(x=total_times)  # , name="Total run time (min)"
         # hist_2 = plotly_go.Histogram(x=queue_times, name="Total queue time (min)")
         figure.add_trace(hist_1)
         # figure.add_trace(hist_2)
         figure.update_layout(
-            xaxis_title="Total time (min)",
+            xaxis_title="Total calculation time (min)",
             yaxis_title="Individuals (#)",
             barmode="overlay",
         )
@@ -884,11 +865,50 @@ class FitnessDistribution(PlotlyFigure):
         return figure
 
 
+class StagedSeriesConvergence(PlotlyFigure):
+    def get_plot(search: FixedCompositionSearch):
+        composition = Composition(search.composition)
+        plot = search.subworkflow.get_staged_series_convergence_plot(
+            # See `individuals` method for why we use these filters
+            formula_reduced=composition.reduced_formula,
+            nsites__lte=composition.num_atoms,
+            energy_per_atom__isnull=False,
+        )
+        return plot
+
+
+class StagedSeriesHistogram(PlotlyFigure):
+    def get_plot(search: FixedCompositionSearch):
+        composition = Composition(search.composition)
+        plot = search.subworkflow.get_staged_series_histogram_plot(
+            # See `individuals` method for why we use these filters
+            formula_reduced=composition.reduced_formula,
+            nsites__lte=composition.num_atoms,
+            energy_per_atom__isnull=False,
+        )
+        return plot
+
+
+class StagedSeriesTimes(PlotlyFigure):
+    def get_plot(search: FixedCompositionSearch):
+        composition = Composition(search.composition)
+        plot = search.subworkflow.get_staged_series_times_plot(
+            # See `individuals` method for why we use these filters
+            formula_reduced=composition.reduced_formula,
+            nsites__lte=composition.num_atoms,
+            energy_per_atom__isnull=False,
+        )
+        return plot
+
+
 # register all plotting methods to the database table
 for _plot in [
     FitnessConvergence,
     Correctness,
     FitnessDistribution,
     SubworkflowTimes,
+    StagedSeriesConvergence,
+    StagedSeriesHistogram,
+    StagedSeriesTimes,
 ]:
     _plot.register_to_class(FixedCompositionSearch)

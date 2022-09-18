@@ -2,13 +2,16 @@
 {% load crispy_forms_tags %}
 <div class="container p-4">
   <h2>Filter Results:</h2>
+
+  <!-- Helpful for debugging
   <p>Filter mix-ins: {{ filterset_mixins }}</p>
   <p>Extra filters: {{ extra_filters }}</p>
+  -->
 
   <form method="get" enctype="multipart/form-data">
 
     {{ form.non_field_errors }}
-    <div class="accordion" id="accordionFilters">
+    <div class="accordion custom-accordion" id="accordionFilters">
 
       <!-- Iterate through the main tables that we've prebuilt pages for -->
       {% if filterset.filter_name == "StaticEnergy" %}
@@ -58,22 +61,37 @@
       <!-- end of mix-ins -->
       {% endif %}
 
-    </div>
-    <!-- end of mix-ins -->
+      <!-- end of mix-ins -->
 
-    <!-- Add any extra fields using default crispy formatting -->
-    {% if extra_filters %}
-    <div class="container p-4">
-      <h4>By Extra Info:</h4>
-      {% for field in form %}
-      {% if field in extra_filters %}
-      {{ field | as_crispy_field }}
+      <!-- Add any extra fields using default crispy formatting -->
+      {% if extra_filters %}
+      <div class="card mb-0">
+        <div class="card-header" id="headingExtraFilters">
+          <h5 class="m-0">
+            <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse" href="#collapseExtraFilters"
+              aria-expanded="true" aria-controls="collapseExtraFilters">
+              By Extra Info:
+              <i class="mdi mdi-chevron-down accordion-arrow"></i>
+            </a>
+          </h5>
+        </div>
+
+        <div id="collapseExtraFilters" class="collapse" aria-labelledby="headingExtraFilters"
+          data-bs-parent="#accordionExample">
+          <div class="card-body">
+            {% for field in form %}
+            {% if field.name in extra_filters %}
+            {{ field | as_crispy_field }}
+            {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
       {% endif %}
-      {% endfor %}
-    </div>
-    {% endif %}
-    <!-- end extra fields -->
+      <!-- end extra fields -->
 
-    <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Search</button>
   </form>
 </div>

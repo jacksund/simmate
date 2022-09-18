@@ -136,11 +136,7 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
         # ncalculations = MITRelaxation.objects.count()
         # nflows_submitted = workflow.nflows_submitted
 
-        return {
-            "workflow": workflow,
-            "flow_id": None,  # TODO
-            "nflows_submitted": None,
-        }
+        return {"workflow": workflow}
 
     def get_retrieve_context(
         self,
