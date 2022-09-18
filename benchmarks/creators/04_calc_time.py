@@ -88,6 +88,7 @@ layout = go.Layout(
     ),
     yaxis=dict(
         title_text="Calculation time (min)",
+        type="log",
         ticks="outside",
         tickwidth=2,
         showline=True,
@@ -106,5 +107,19 @@ layout = go.Layout(
 )
 
 fig = go.Figure(data=subplots, layout=layout)
+fig.update_xaxes(
+    categoryorder="array",
+    categoryarray=[
+        "Fe",
+        "Si",
+        "C",
+        "TiO2",
+        "SiO2",
+        "Al2O3",
+        "Si2N2O",
+        "SrSiN2",
+        "MgSiO3",
+    ],
+)
 
 plot(fig, config={"scrollZoom": True})
