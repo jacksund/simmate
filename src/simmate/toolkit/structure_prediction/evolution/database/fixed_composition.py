@@ -493,11 +493,9 @@ class FixedCompositionSearch(Calculation):
         # error here -- but instead warn the user and then continue the search
         try:
             # calls all the key methods defined below
-            best_cifs_directory = get_directory(directory / "best_structures_cifs")
+            best_cifs_directory = get_directory(directory / "best_structures")
             self.write_best_structures(100, best_cifs_directory)
-            best_cifs_directory = get_directory(
-                directory / "best_structures_cifs_unique"
-            )
+            best_cifs_directory = get_directory(directory / "best_structures_unique")
             self.write_best_structures(200, best_cifs_directory, remove_matching=True)
 
             self.write_individuals_completed(directory=directory)
