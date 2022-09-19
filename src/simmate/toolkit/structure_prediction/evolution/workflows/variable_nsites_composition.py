@@ -21,6 +21,8 @@ class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):
     For example, this would be Ca2N and up to 12 atoms (Ca8N4).
     """
 
+    description_doc_short = "variable number of sites (e.g. Ca2N through Ca8N4)"
+
     database_table = VariableNsitesCompositionSearch
 
     fixed_comp_workflow = StructurePrediction__Toolkit__FixedComposition

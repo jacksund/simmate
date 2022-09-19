@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pandas
 import plotly.graph_objects as plotly_go
+from pymatgen.analysis.structure_matcher import StructureMatcher
 from rich.progress import track
 
 from simmate.database.base_data_types import Calculation, table_column
@@ -482,7 +483,7 @@ class FixedCompositionSearch(Calculation):
 
         return best_history
 
-    def write_summary(self, directory: Path):
+    def write_output_summary(self, directory: Path):
         logging.info(f"Writing search summary to {directory}")
 
         super().write_output_summary(directory=directory)
@@ -492,8 +493,11 @@ class FixedCompositionSearch(Calculation):
         # error here -- but instead warn the user and then continue the search
         try:
             # calls all the key methods defined below
-            best_cifs_directory = get_directory(directory / "best_structures_cifs")
+            best_cifs_directory = get_directory(directory / "best_structures")
             self.write_best_structures(100, best_cifs_directory)
+            best_cifs_directory = get_directory(directory / "best_structures_unique")
+            self.write_best_structures(200, best_cifs_directory, remove_matching=True)
+
             self.write_individuals_completed(directory=directory)
             self.write_individuals_completed_full(directory=directory)
             self.write_best_individuals_history(directory=directory)
@@ -504,21 +508,9 @@ class FixedCompositionSearch(Calculation):
 
             # BUG: This is only for "relaxation.vasp.staged", which the assumed
             # workflow for now.
-            composition = Composition(self.composition)
-            self.subworkflow.write_staged_series_convergence_plot(
-                directory=directory,
-                # See `individuals` method for why we use these filters
-                formula_reduced=composition.reduced_formula,
-                nsites__lte=composition.num_atoms,
-                energy_per_atom__isnull=False,
-            )
-            self.subworkflow.write_staged_series_histogram_plot(
-                directory=directory,
-                # See `individuals` method for why we use these filters
-                formula_reduced=composition.reduced_formula,
-                nsites__lte=composition.num_atoms,
-                energy_per_atom__isnull=False,
-            )
+            self.write_staged_series_convergence_plot(directory=directory)
+            self.write_staged_series_histogram_plot(directory=directory)
+            self.write_staged_series_times_plot(directory=directory)
 
             logging.info("Done writing summary.")
 
@@ -578,7 +570,12 @@ class FixedCompositionSearch(Calculation):
     # Writing CSVs summaries and CIFs of best structures
     # -------------------------------------------------------------------------
 
-    def write_best_structures(self, nbest: int, directory: Path):
+    def write_best_structures(
+        self,
+        nbest: int,
+        directory: Path,
+        remove_matching: bool = False,
+    ):
         # if the directory is filled, we need to delete all the files
         # before writing the new ones.
         for file in directory.iterdir():
@@ -595,6 +592,12 @@ class FixedCompositionSearch(Calculation):
 
         best = self.get_nbest_indiviudals(nbest)
         structures = best.only("structure", "id").to_toolkit()
+
+        if remove_matching:
+            matcher = StructureMatcher()
+            groups = matcher.group_structures(structures)
+            structures = [group[0] for group in groups]
+
         for rank, structure in enumerate(structures):
             rank_cleaned = str(rank).zfill(2)  # converts 1 to 01
             structure_filename = (
@@ -819,15 +822,15 @@ class SubworkflowTimes(PlotlyFigure):
 
         # time is stored in seconds and we convert to minutes
         total_times = [e[0] / 60 for e in data]
-        queue_times = [e[1] / 60 for e in data]
+        # queue_times = [e[1] / 60 for e in data]
 
         figure = plotly_go.Figure()
-        hist_1 = plotly_go.Histogram(x=total_times, name="Total run time (min)")
+        hist_1 = plotly_go.Histogram(x=total_times)  # , name="Total run time (min)"
         # hist_2 = plotly_go.Histogram(x=queue_times, name="Total queue time (min)")
         figure.add_trace(hist_1)
         # figure.add_trace(hist_2)
         figure.update_layout(
-            xaxis_title="Total time (min)",
+            xaxis_title="Total calculation time (min)",
             yaxis_title="Individuals (#)",
             barmode="overlay",
         )
@@ -860,11 +863,50 @@ class FitnessDistribution(PlotlyFigure):
         return figure
 
 
+class StagedSeriesConvergence(PlotlyFigure):
+    def get_plot(search: FixedCompositionSearch):
+        composition = Composition(search.composition)
+        plot = search.subworkflow.get_staged_series_convergence_plot(
+            # See `individuals` method for why we use these filters
+            formula_reduced=composition.reduced_formula,
+            nsites__lte=composition.num_atoms,
+            energy_per_atom__isnull=False,
+        )
+        return plot
+
+
+class StagedSeriesHistogram(PlotlyFigure):
+    def get_plot(search: FixedCompositionSearch):
+        composition = Composition(search.composition)
+        plot = search.subworkflow.get_staged_series_histogram_plot(
+            # See `individuals` method for why we use these filters
+            formula_reduced=composition.reduced_formula,
+            nsites__lte=composition.num_atoms,
+            energy_per_atom__isnull=False,
+        )
+        return plot
+
+
+class StagedSeriesTimes(PlotlyFigure):
+    def get_plot(search: FixedCompositionSearch):
+        composition = Composition(search.composition)
+        plot = search.subworkflow.get_staged_series_times_plot(
+            # See `individuals` method for why we use these filters
+            formula_reduced=composition.reduced_formula,
+            nsites__lte=composition.num_atoms,
+            energy_per_atom__isnull=False,
+        )
+        return plot
+
+
 # register all plotting methods to the database table
 for _plot in [
     FitnessConvergence,
     Correctness,
     FitnessDistribution,
     SubworkflowTimes,
+    StagedSeriesConvergence,
+    StagedSeriesHistogram,
+    StagedSeriesTimes,
 ]:
     _plot.register_to_class(FixedCompositionSearch)

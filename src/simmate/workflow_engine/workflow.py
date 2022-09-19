@@ -72,10 +72,19 @@ class Workflow:
     `_register_calculation`.
     """
 
-    _parameter_methods = ["run_config", "_run_full"]
+    _parameter_methods: list[str] = ["run_config", "_run_full"]
     """
     List of methods that allow unique input parameters. This helps track where
     `**kwargs` are passed and let's us gather the inputs in one place.
+    """
+
+    exlcude_from_archives: list[str] = []
+    """
+    List of filenames that should be deleted when compressing the output files
+    to a zip file (i.e. when compress_output=True). Any file name is searched
+    for recursively in all subdirectories and removed.
+    
+    For example, VASP calculations remove all POTCAR files from archives.
     """
 
     # -------------------------------------------------------------------------
@@ -187,7 +196,10 @@ class Workflow:
         # the directory.
         if compress_output:
             logging.info("Compressing result to a ZIP file.")
-            make_archive(kwargs_cleaned["directory"])
+            make_archive(
+                directory=kwargs_cleaned["directory"],
+                files_to_exclude=cls.exlcude_from_archives,
+            )
 
         # If we made it this far, we successfully completed the workflow run
         logging.info(f"Completed '{cls.name_full}'")

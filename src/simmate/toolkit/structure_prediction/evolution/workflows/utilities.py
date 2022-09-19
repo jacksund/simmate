@@ -16,7 +16,7 @@ def write_and_submit_structures(
     workflow_kwargs: dict,
 ):
     if not structures:
-        return
+        return []
 
     logging.info("Writing CIFs and submitting structures")
 
@@ -29,6 +29,7 @@ def write_and_submit_structures(
 
     nalready_submitted = 0
     directory = get_directory(foldername)
+    states = []
     for i, s in enumerate(track(structures)):
 
         # check if the structure has been submitted before, and if so, skip it
@@ -39,10 +40,11 @@ def write_and_submit_structures(
         i_cleaned = str(i).zfill(3)  # converts 1 to 001
         s.to("cif", directory / f"{i_cleaned}.cif")
 
-        workflow.run_cloud(
+        state = workflow.run_cloud(
             structure=s,
             **workflow_kwargs,
         )
+        states.append(state)
 
     logger.disabled = False
 
@@ -51,3 +53,5 @@ def write_and_submit_structures(
             f"{nalready_submitted} structures were already submitted "
             "and therefore skipped."
         )
+
+    return states

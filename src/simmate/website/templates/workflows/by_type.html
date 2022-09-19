@@ -36,8 +36,9 @@ Simmate
 </section>
 
 
+<!-- Workflow details -->
 <h4>Available calculators:</h4>
-<div class="accordion" id="accordionExample">
+<div class="accordion custom-accordion" id="accordionExample">
   {% for calculator, workflows in workflow_dict.items %}
   <div class="card mb-0">
     <div class="card-header" id="heading{{ calculator }}">
@@ -45,6 +46,7 @@ Simmate
         <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse" href="#collapse{{ calculator }}"
           aria-expanded="true" aria-controls="collapse{{ calculator }}">
           {{ calculator }}
+          <i class="mdi mdi-chevron-down accordion-arrow"></i>
         </a>
       </h5>
     </div>

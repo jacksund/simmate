@@ -33,6 +33,7 @@ compositions = [Composition(c) for c in COMPOSITIONS_TO_TEST]
 
 CREATORS_TO_TEST = [
     "Simmate",
+    "Simmate (strict)",
     "XtalOpt",
     "ASE",
     "PyXtal",

@@ -15,6 +15,8 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
     number of sites. (e.g. Ca2N or Na4Cl4)
     """
 
+    description_doc_short = "fixed number of sites (e.g. Ca2N or Na4Cl4)"
+
     database_table = FixedCompositionSearch
 
     @classmethod
@@ -50,7 +52,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         selector_kwargs: dict = {},
         validator_name: str = "PartialRdfFingerprint",
         validator_kwargs: dict = {
-            "distance_tolerance": 0.001,
+            "distance_tolerance": 0.01,
             "cutoff": 10.0,
             "bin_size": 0.1,
         },
@@ -127,7 +129,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             # Write the output summary if there is at least one structure completed
             if write_summary_files:
                 if search_datatable.individuals_completed.count() >= 1:
-                    search_datatable.write_summary(directory)
+                    search_datatable.write_output_summary(directory)
                 else:
                     search_datatable.write_individuals_incomplete(directory)
 

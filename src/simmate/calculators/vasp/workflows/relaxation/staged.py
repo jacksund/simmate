@@ -1,32 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import math
+from functools import cache
+from pathlib import Path
 
+import numpy
 import plotly.graph_objects as plotly_go
 from plotly.subplots import make_subplots
 
-from simmate.calculators.vasp.workflows.relaxation.quality00 import (
-    Relaxation__Vasp__Quality00,
-)
-from simmate.calculators.vasp.workflows.relaxation.quality01 import (
-    Relaxation__Vasp__Quality01,
-)
-from simmate.calculators.vasp.workflows.relaxation.quality02 import (
-    Relaxation__Vasp__Quality02,
-)
-from simmate.calculators.vasp.workflows.relaxation.quality03 import (
-    Relaxation__Vasp__Quality03,
-)
-from simmate.calculators.vasp.workflows.relaxation.quality04 import (
-    Relaxation__Vasp__Quality04,
-)
-from simmate.calculators.vasp.workflows.static_energy.quality04 import (
-    StaticEnergy__Vasp__Quality04,
-)
+from simmate.toolkit import Structure
 from simmate.visualization.plotting import PlotlyFigure
 from simmate.workflow_engine import Workflow
-
-# from simmate.calculators.vasp.database.relaxation import StagedRelaxation
+from simmate.workflows.utilities import get_workflow
 
 
 class Relaxation__Vasp__Staged(Workflow):
@@ -34,39 +19,45 @@ class Relaxation__Vasp__Staged(Workflow):
     Runs a series of increasing-quality relaxations and then finishes with a single
     static energy calculation.
 
-    This is therefore a "Nested Workflow" made of the following smaller workflows:
-
-        - relaxation.vasp.quality00
-        - relaxation.vasp.quality01
-        - relaxation.vasp.quality02
-        - relaxation.vasp.quality03
-        - relaxation.vasp.quality04
-        - static-energy.vasp.quality04
-
     This workflow is most useful for randomly-created structures or extremely
     large supercells. More precise relaxations+energy calcs should be done
     afterwards because ettings are still below MIT and Materials Project quality.
     """
 
+    exlcude_from_archives = [
+        "CHG",
+        "CHGCAR",
+        "DOSCAR",
+        "EIGENVAL",
+        "IBZKPT",
+        "OSZICAR",
+        "OUTCAR",
+        "PCDAT",
+        "POTCAR",
+        "REPORT",
+        "WAVECAR",
+        "XDATCAR",
+    ]
+
     description_doc_short = "runs a series of relaxations (00-04 quality)"
 
-    subworkflows = [
-        Relaxation__Vasp__Quality00,
-        Relaxation__Vasp__Quality01,
-        Relaxation__Vasp__Quality02,
-        Relaxation__Vasp__Quality03,
-        Relaxation__Vasp__Quality04,
-        StaticEnergy__Vasp__Quality04,
+    subworkflow_names = [
+        "relaxation.vasp.quality00",
+        "relaxation.vasp.quality01",
+        "relaxation.vasp.quality02",
+        "relaxation.vasp.quality03",
+        "relaxation.vasp.quality04",
+        "static-energy.vasp.quality04",
     ]
 
     @classmethod
     def run_config(
         cls,
-        structure,
-        command=None,
-        source=None,
-        directory=None,
-        copy_previous_directory=False,
+        structure: Structure,
+        command: str = None,
+        source: dict = None,
+        directory: Path = None,
+        copy_previous_directory: bool = False,
         **kwargs,
     ):
 
@@ -81,7 +72,6 @@ class Relaxation__Vasp__Staged(Workflow):
 
         # The remaining tasks continue and use the past results as an input
         for i, current_task in enumerate(cls.subworkflows[1:]):
-            preceding_task = cls.subworkflows[i]  # will be one before because of [:1]
             state = current_task.run(
                 structure=result,  # this is the result of the last run
                 command=command,
@@ -103,13 +93,20 @@ class Relaxation__Vasp__Staged(Workflow):
         return final_result
 
     @classmethod
-    def get_energy_series(cls, **filter_kwargs):
+    @property
+    @cache
+    def subworkflows(cls):
+        return [get_workflow(name) for name in cls.subworkflow_names]
+
+    @classmethod
+    def get_series(cls, value: str, **filter_kwargs):
         directories = (
             cls.all_results.filter(**filter_kwargs)
             .values_list("directory", flat=True)
             .all()
         )
 
+        # OPTIMIZE: This is a query for EACH entry which is very inefficient
         all_energy_series = []
         for directory in directories:
             energy_series = []
@@ -118,12 +115,12 @@ class Relaxation__Vasp__Staged(Workflow):
                     workflow_name=subflow.name_full,
                     directory__startswith=directory,
                     energy_per_atom__isnull=False,
-                ).only("energy_per_atom")
+                ).values_list(value)
                 if query.exists():
                     result = query.get()
-                    energy_series.append(result.energy_per_atom)
+                    energy_series.append(result[0])
                 else:
-                    energy_series.append(None)
+                    energy_series.append(numpy.nan)
             all_energy_series.append(energy_series)
 
         return all_energy_series
@@ -136,7 +133,10 @@ class StagedSeriesConvergence(PlotlyFigure):
         workflow,  # Relaxation__Vasp__Staged
         **filter_kwargs,
     ):
-        all_energy_series = workflow.get_energy_series(**filter_kwargs)
+        all_energy_series = workflow.get_series(
+            value="energy_per_atom",
+            **filter_kwargs,
+        )
 
         figure = make_subplots(
             rows=math.ceil((len(workflow.subworkflows) - 1) / 3),
@@ -192,7 +192,10 @@ class StagedSeriesHistogram(PlotlyFigure):
         **filter_kwargs,
     ):
 
-        all_energy_series = workflow.get_energy_series(**filter_kwargs)
+        all_energy_series = workflow.get_series(
+            value="energy_per_atom",
+            **filter_kwargs,
+        )
 
         figure = plotly_go.Figure()
 
@@ -229,6 +232,55 @@ class StagedSeriesHistogram(PlotlyFigure):
         return figure
 
 
+class StagedSeriesTimes(PlotlyFigure):
+
+    method_type = "classmethod"
+
+    def get_plot(
+        workflow,  # Relaxation__Vasp__Staged
+        **filter_kwargs,
+    ):
+
+        all_time_series = workflow.get_series(
+            value="total_time",
+            **filter_kwargs,
+        )
+
+        figure = plotly_go.Figure()
+
+        all_time_series = numpy.transpose(all_time_series)
+        all_time_series = all_time_series / 60  # convert to minutes
+        traces = []
+        for i, times in enumerate(all_time_series):
+
+            trace = plotly_go.Histogram(
+                x=times,
+                name=f"{workflow.subworkflows[i].name_full}",
+            )
+            traces.append(trace)
+
+        # add them to the figure in reverse, so that the first relaxations are
+        # in the front and not hidden
+        traces.reverse()
+        for trace in traces:
+            figure.add_trace(trace=trace)
+
+        figure.update_layout(
+            barmode="overlay",
+            xaxis_title_text="Calculation time (min)",
+            yaxis_title_text="Structures (#)",
+            bargap=0.05,
+            legend=dict(
+                yanchor="top",
+                y=0.99,
+                xanchor="left",
+                x=0.01,
+            ),
+        )
+        figure.update_traces(opacity=0.75)
+        return figure
+
+
 # register all plotting methods to the database table
-for _plot in [StagedSeriesConvergence, StagedSeriesHistogram]:
+for _plot in [StagedSeriesConvergence, StagedSeriesHistogram, StagedSeriesTimes]:
     _plot.register_to_class(Relaxation__Vasp__Staged)
