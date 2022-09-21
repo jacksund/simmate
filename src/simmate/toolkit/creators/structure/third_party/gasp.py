@@ -10,6 +10,10 @@ class GaspStructure(StructureCreator):
     """
     Create structures using the GASP package.
 
+    BUG: only reduced compositions are possible.
+    This is enforced within GASP here:
+    https://github.com/henniggroup/GASP-python/blob/master/gasp/general.py#L603-L605
+
     see source: https://github.com/henniggroup/GASP-python
     see tutorials: https://github.com/henniggroup/GASP-python/blob/master/docs/usage.md
     """
