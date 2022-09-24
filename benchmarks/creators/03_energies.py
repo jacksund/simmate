@@ -11,6 +11,7 @@ NSAMPLES_PER_COMPOSITION = 500
 
 CREATORS_TO_TEST = [
     "Simmate",
+    "Simmate (strict)",
     "XtalOpt",
     "ASE",
     "PyXtal",

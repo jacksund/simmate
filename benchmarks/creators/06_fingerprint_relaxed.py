@@ -13,7 +13,7 @@ from plotly.offline import plot
 from rich.progress import track
 
 from simmate.configuration.dask import get_dask_client
-from simmate.toolkit import Composition, Structure
+from simmate.toolkit import Composition
 from simmate.utilities import get_directory
 from simmate.workflows.utilities import get_workflow
 
@@ -34,6 +34,7 @@ compositions = [Composition(c) for c in COMPOSITIONS_TO_TEST]
 
 CREATORS_TO_TEST = [
     "Simmate",
+    "Simmate (strict)",
     "XtalOpt",
     "ASE",
     "PyXtal",

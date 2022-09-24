@@ -114,6 +114,7 @@ from simmate.toolkit.creators.structure.third_party.uspex import UspexStructure
 from simmate.toolkit.creators.structure.third_party.xtalopt import XtaloptStructure
 
 RandomSymStructure.name = "Simmate"
+# RandomSymStructure.name = "Simmate (strict)",  # 0.75 packing factor for dist cutoffs
 XtaloptStructure.name = "XtalOpt"
 AseStructure.name = "ASE"
 PyXtalStructure.name = "PyXtal"

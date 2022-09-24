@@ -12,6 +12,7 @@ NSAMPLES_PER_COMPOSITION = 500
 
 CREATORS_TO_TEST = [
     "Simmate",
+    "Simmate (strict)",
     "XtalOpt",
     "ASE",
     "PyXtal",
@@ -89,6 +90,7 @@ layout = go.Layout(
     yaxis=dict(
         title_text="Calculation time (min)",
         ticks="outside",
+        type="log",
         tickwidth=2,
         showline=True,
         linewidth=2,
@@ -106,5 +108,19 @@ layout = go.Layout(
 )
 
 fig = go.Figure(data=subplots, layout=layout)
+fig.update_xaxes(
+    categoryorder="array",
+    categoryarray=[
+        "Fe",
+        "Si",
+        "C",
+        "TiO2",
+        "SiO2",
+        "Al2O3",
+        "Si2N2O",
+        "SrSiN2",
+        "MgSiO3",
+    ],
+)
 
 plot(fig, config={"scrollZoom": True})
