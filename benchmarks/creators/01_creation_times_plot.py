@@ -9,6 +9,7 @@ from simmate.utilities import get_directory
 
 CREATORS_TO_TEST = [
     "Simmate",
+    "Simmate (strict)",
     "XtalOpt",
     "ASE",
     "PyXtal",
@@ -75,8 +76,8 @@ layout = go.Layout(
         mirror=True,
     ),
     legend=dict(
-        x=0.05,
-        y=0.95,
+        # x=0.05,
+        # y=0.95,
         bordercolor="black",
         borderwidth=1,
         font=dict(color="black"),
@@ -84,7 +85,7 @@ layout = go.Layout(
 )
 
 fig = go.Figure(data=data, layout=layout)
-
+fig.write_image("creation_time.svg")
 plot(fig, config={"scrollZoom": True})
 
 # -----------------------------------------------------------------------------

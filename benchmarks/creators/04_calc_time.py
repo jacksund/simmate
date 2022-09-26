@@ -99,8 +99,8 @@ layout = go.Layout(
         mirror=True,
     ),
     legend=dict(
-        x=0.05,
-        y=0.95,
+        # x=0.05,
+        # y=0.95,
         bordercolor="black",
         borderwidth=1,
         font=dict(color="black"),
@@ -122,5 +122,5 @@ fig.update_xaxes(
         "MgSiO3",
     ],
 )
-
+fig.write_image("calc_time.svg")
 plot(fig, config={"scrollZoom": True})

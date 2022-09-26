@@ -22,23 +22,38 @@ CREATORS_TO_TEST = [
 ]
 
 parent_dir = get_directory("creator_benchmarks")
-# workflow_static = get_workflow("static-energy.vasp.quality04")
-workflow_relax = get_workflow("relaxation.vasp.staged")
 
 
 subplots = []
 for creator_name in CREATORS_TO_TEST:
 
-    data = workflow_relax.all_results.filter(
-        energy_per_atom__isnull=False,
-        source__creator=creator_name,
-    ).values_list("energy_per_atom", "formula_reduced")
+    workflow = get_workflow("static-energy.vasp.quality04")
+    csv_file = parent_dir / creator_name / "energies_initial.csv"
 
-    # y should be all energy values for ALL compositions put together in to
-    # a 1D array
-    ys = [entry[0] for entry in data]
-    # x should be labels that are the same length as the xs list
-    xs = [entry[1] for entry in data]
+    # workflow = get_workflow("relaxation.vasp.staged")
+    # csv_file = parent_dir / creator_name / "energies_final.csv"
+
+    if csv_file.exists():
+        df = pandas.read_csv(csv_file)
+
+    else:
+        data = workflow.all_results.filter(
+            energy_per_atom__isnull=False,
+            source__creator=creator_name,
+        ).values_list("energy_per_atom", "formula_reduced")
+
+        # also write csv for safekeeping
+        df = pandas.DataFrame(
+            data=data,
+            columns=[
+                "energy_per_atom",
+                "formula_reduced",
+            ],
+        )
+        df.to_csv(csv_file)
+
+    xs = list(df.formula_reduced.values)
+    ys = list(df.energy_per_atom.values)
 
     series = go.Box(
         name=creator_name,
@@ -47,17 +62,6 @@ for creator_name in CREATORS_TO_TEST:
         boxpoints=False,  # look at strip plots if you want the scatter points
     )
     subplots.append(series)
-
-    # also write csv for safekeeping
-    df = pandas.DataFrame(
-        data=data,
-        columns=[
-            "energy_per_atom",
-            "formula_reduced",
-        ],
-    )
-    # df.to_csv(parent_dir / creator_name / "energies_initial.csv")
-    df.to_csv(parent_dir / creator_name / "energies_final.csv")
 
 
 layout = go.Layout(
@@ -88,8 +92,8 @@ layout = go.Layout(
         mirror=True,
     ),
     legend=dict(
-        x=0.05,
-        y=0.95,
+        # x=0.05,
+        # y=0.95,
         bordercolor="black",
         borderwidth=1,
         font=dict(color="black"),
@@ -97,5 +101,20 @@ layout = go.Layout(
 )
 
 fig = go.Figure(data=subplots, layout=layout)
+fig.update_xaxes(
+    categoryorder="array",
+    categoryarray=[
+        "Fe",
+        "Si",
+        "C",
+        "TiO2",
+        "SiO2",
+        "Al2O3",
+        "Si2N2O",
+        "SrSiN2",
+        "MgSiO3",
+    ],
+)
 
+fig.write_image("energies.svg")
 plot(fig, config={"scrollZoom": True})
