@@ -30,6 +30,8 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
     of a binary phase system (e.g Na-Cl or Y-C)
     """
 
+    description_doc_short = "hull diagram for a two-element system (e.g. Na-Cl)"
+
     database_table = BinarySystemSearch
 
     fixed_comp_workflow = StructurePrediction__Toolkit__FixedComposition
@@ -42,17 +44,22 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
         subworkflow_name: str = "relaxation.vasp.staged",
         subworkflow_kwargs: dict = {},
         max_stoich_factor: int = 4,
+        nsteadystate: int = 40,
         directory: Path = None,
         singleshot_sources: list[str] = [
             "third_parties",
             "prototypes",
         ],
-        **kwargs,  # passed to fixed_comp_workflow
+        run_id: str = None,
+        **kwargs,
     ):
 
         # ---------------------------------------------------------------------
         # Setting up
         # ---------------------------------------------------------------------
+
+        # grab the calculation table linked to this workflow run
+        search_datatable = cls.database_table.objects.get(run_id=run_id)
 
         subworkflow = get_workflow(subworkflow_name)
 
@@ -127,7 +134,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
             logging.info(
                 f"Generated {len(structures_known)} structures from other databases"
             )
-            write_and_submit_structures(
+            states_known = write_and_submit_structures(
                 structures=structures_known,
                 foldername=directory / "from_third_parties",
                 workflow=subworkflow,
@@ -156,12 +163,28 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
             logging.info(
                 f"Generated {len(structures_prototype)} structures from prototypes"
             )
-            write_and_submit_structures(
+            states_prototype = write_and_submit_structures(
                 structures=structures_prototype,
                 foldername=directory / "from_prototypes",
                 workflow=subworkflow,
                 workflow_kwargs=subworkflow_kwargs,
             )
+
+        # ---------------------------------------------------------------------
+        # Wait for singlshot submissions if there are many of them
+        # ---------------------------------------------------------------------
+
+        all_submissions = states_prototype + states_known
+        if len(all_submissions) > (nsteadystate * 2):
+            number_to_wait_for = len(all_submissions) - nsteadystate - 20
+            logging.info(
+                f"Waiting for at least {number_to_wait_for} singleshot "
+                "submissions to finish"
+            )
+            for state in all_submissions[:number_to_wait_for]:
+                state.result()
+
+        search_datatable.write_output_summary(directory)
 
         # ---------------------------------------------------------------------
         # Starting search
@@ -193,8 +216,8 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
             # stopping conditions.
             # for n in range(1, 10):
             #     min_structures_exact = int(5 * n)
-            #     best_survival_cutoff = int(10 * n)
-            #     max_structures = int(25 * n)
+            #     best_survival_cutoff = int(20 * n)
+            #     max_structures = int(30 * n)
             #     # convergence_cutoff = 0.01
             #     print(
             #         f"{n}\t{min_structures_exact}\t"
@@ -242,8 +265,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
                     # Because we submitted all steady states above, we don't
                     # need the other workflows to do these anymore.
                     singleshot_sources=[],
-                    # If set to True, then the current fixed composition will be
-                    # written to fixed-compositon-logs
-                    ###### OPTIMIZE --- set this to false in the future...?
-                    # write_summary_files=False,
                 )
+
+                # after each fixed-composition, we can reevaluate the hull diagram
+                search_datatable.write_output_summary(directory)

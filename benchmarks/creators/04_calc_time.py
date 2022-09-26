@@ -89,6 +89,7 @@ layout = go.Layout(
     ),
     yaxis=dict(
         title_text="Calculation time (min)",
+        type="log",
         ticks="outside",
         type="log",
         tickwidth=2,

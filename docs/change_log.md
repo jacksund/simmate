@@ -75,7 +75,9 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - changelog and update guide added to documentation website
 - add `show-stats`, `delete-finished`, and `delete-all` commands to `workflow-engine`
 - add `Cluster` base class + commands that allow submitting a steady-state cluster via subprocesses or slurm
-
+- add `started_at`, `created_at`, `total_time`, and `queue_time` columns to `Calculation` tables
+- add `exlcude_from_archives` field to workflows to optionally delete files when compressing outputs to zip archives
+- various improvements added for evolutionary search workflows, such as parameter optimization, new output files, and website views
 
 --------------------------------------------------------------------------------
 

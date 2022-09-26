@@ -129,6 +129,7 @@ def get_workflow_names_by_type(
     calculator_name: str = None,
     full_name: bool = True,
     precheck_type_exists: bool = True,
+    remove_no_database_flows: bool = False,
 ) -> list[str]:
     """
     Returns a list of all the workflows of a given type. Optionally, the
@@ -152,6 +153,9 @@ def get_workflow_names_by_type(
             continue
         if calculator_name and flow.name_calculator != calculator_name:
             continue  # Skip those that don't match
+
+        if remove_no_database_flows and not flow.use_database:
+            continue
 
         if full_name:
             workflow_name = flow.name_full

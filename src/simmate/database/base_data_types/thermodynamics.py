@@ -119,11 +119,16 @@ class Thermodynamics(DatabaseTable):
         return data if as_dict else cls(**data)
 
     @classmethod
-    def update_chemical_system_stabilities(cls, chemical_system: str):
+    def update_chemical_system_stabilities(
+        cls,
+        chemical_system: str,
+        workflow_name: str = None,
+    ):
 
         phase_diagram, entries, entries_pmg = cls.get_phase_diagram(
             chemical_system,
             return_entries=True,
+            workflow_name=workflow_name,
         )
 
         # now go through the entries and update stability values
@@ -162,7 +167,7 @@ class Thermodynamics(DatabaseTable):
         )
 
     @classmethod
-    def update_all_stabilities(cls):
+    def update_all_stabilities(cls, workflow_name: str = None):
 
         # grab all unique chemical systems
         chemical_systems = cls.objects.values_list(
@@ -174,48 +179,59 @@ class Thermodynamics(DatabaseTable):
         # C would be repeatedly updated through C, C-O, Y-C-F, etc.
         for chemical_system in track(chemical_systems):
             try:
-                cls.update_chemical_system_stabilities(chemical_system)
+                cls.update_chemical_system_stabilities(
+                    chemical_system,
+                    workflow_name,
+                )
             except ValueError as exception:
                 logging.warning(f"Failed for {chemical_system} with error: {exception}")
-
-        # BUG: can't use parallel=True as an input
-        # Because different systems may need to update a single one at the same
-        # time, errors will be thrown due to row locking. For example, Y-C and
-        # Sc-C system might both try to update a C structure at the same time
-        # and one will throw an error.
-        #
-        # from simmate.configuration.dask import batch_submit
-        #
-        # batch_submit(
-        #     function=cls.update_chemical_system_stabilities,
-        #     args_list=chemical_systems,
-        #     batch_size=1000,
-        # )
 
     @classmethod
     def get_phase_diagram(
         cls,
         chemical_system: str,
+        workflow_name: str = None,
         return_entries: bool = False,
     ) -> PhaseDiagram:
+
+        if workflow_name is None and hasattr(cls, "workflow_name"):
+            raise Exception(
+                "This table contains results from multiple workflows, so you must "
+                "provide a workflow_name as an input to indicate which entries "
+                "should be loaded/updated."
+            )
 
         # if we have a multi-element system, we need to include subsystems as
         # well. ex: Na --> Na, Cl, Na-Cl
         subsystems = get_chemical_subsystems(chemical_system)
 
         # grab all entries for this chemical system
-        entries = (
-            cls.objects.filter(
-                # workflow_name="relaxation.vasp.staged",
-                chemical_system__in=subsystems,
-                energy__isnull=False,  # only completed calculations
-            )
-            .only("energy", "formula_full")
-            .all()
+        entries = cls.objects.filter(
+            # workflow_name="relaxation.vasp.staged",
+            chemical_system__in=subsystems,
+            energy__isnull=False,  # only completed calculations
         )
+        # add an extra filter if provided
+        if workflow_name:
+            entries = entries.filter(workflow_name=workflow_name)
+
+        # now make the queryy
+        entries = entries.only("id", "energy", "formula_full").all()
 
         # convert to pymatgen PDEntries and build into PhaseDiagram object
-        entries_pmg = [PDEntry(entry.formula_full, entry.energy) for entry in entries]
+        entries_pmg = []
+        for entry in entries:
+            pde = PDEntry(
+                composition=entry.formula_full,
+                energy=entry.energy,
+                # name=entry.id,  see bug below
+            )
+
+            # BUG: pymatgen grabs entry_id, when it should really be grabbing name.
+            # https://github.com/materialsproject/pymatgen/blob/de17dd84ba90dbf7a8ed709a33d894a4edb82d02/pymatgen/analysis/phase_diagram.py#L2926
+            pde.entry_id = f"id={entry.id}"
+            entries_pmg.append(pde)
+
         phase_diagram = PhaseDiagram(entries_pmg)
 
         return (
@@ -236,11 +252,13 @@ class HullDiagram(PlotlyFigure):
     def get_plot(
         table,  # Thermodynamics + Structure table
         chemical_system: str,
+        workflow_name: str = None,
     ):
 
-        phase_diagram = table.get_phase_diagram(chemical_system)
+        phase_diagram = table.get_phase_diagram(chemical_system, workflow_name)
 
-        plotter = PDPlotter(phase_diagram)  # alternatively use backend="matplotlib"
+        # alternatively use backend="matplotlib"
+        plotter = PDPlotter(phase_diagram, show_unstable=True)
 
         plot = plotter.get_plot(label_unstable=False)
 

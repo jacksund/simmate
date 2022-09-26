@@ -9,7 +9,7 @@ from simmate.utilities import get_directory
 
 CREATORS_TO_TEST = [
     "Simmate",
-    "Simmate (strict)",
+    "Simmate (strict)",  # 0.75 packing factor for dist cutoffs
     "XtalOpt",
     "ASE",
     "PyXtal",

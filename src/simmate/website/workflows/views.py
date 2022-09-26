@@ -41,6 +41,11 @@ TYPE_DESCRIPTIONS = {
     #     "At this time, these workflows are entirely Nudged-Elastic-Band (NEB) "
     #     "calculations."
     # ),
+    "structure-prediction": (
+        "Predict the most stable structure when given only chemical composition "
+        "or system. Strategies range from evolutionary searches to "
+        "substituition of known materials."
+    ),
 }
 
 
@@ -67,7 +72,11 @@ def workflows_by_type(request, workflow_type):
     # workflow calculator.
     workflow_dict = {}
     for calculator in calculators:
-        workflow_names = get_workflow_names_by_type(workflow_type, calculator)
+        workflow_names = get_workflow_names_by_type(
+            workflow_type,
+            calculator,
+            remove_no_database_flows=True,
+        )
         workflow_dict[calculator] = [get_workflow(n) for n in workflow_names]
 
     # now let's put the data and template together to send the user
@@ -127,11 +136,7 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
         # ncalculations = MITRelaxation.objects.count()
         # nflows_submitted = workflow.nflows_submitted
 
-        return {
-            "workflow": workflow,
-            "flow_id": None,  # TODO
-            "nflows_submitted": None,
-        }
+        return {"workflow": workflow}
 
     def get_retrieve_context(
         self,

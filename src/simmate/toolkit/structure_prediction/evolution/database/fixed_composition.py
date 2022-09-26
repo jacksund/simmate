@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pandas
 import plotly.graph_objects as plotly_go
+from pymatgen.analysis.structure_matcher import StructureMatcher
 from rich.progress import track
 
 from simmate.database.base_data_types import Calculation, table_column
@@ -152,7 +153,7 @@ class FixedCompositionSearch(Calculation):
         # assume we are using energy_per_atom
         num_new_structures_since_best = self.individuals.filter(
             energy_per_atom__gt=best.energy_per_atom + self.convergence_cutoff,
-            created_at__gte=best.created_at,
+            finished_at__gte=best.finished_at,
         ).count()
         if num_new_structures_since_best > self.best_survival_cutoff:
             logging.info(
@@ -463,7 +464,7 @@ class FixedCompositionSearch(Calculation):
         """
 
         individuals = (
-            self.individuals_completed.order_by("updated_at")
+            self.individuals_completed.order_by("finished_at")
             .only("id", self.fitness_field)
             .all()
         )
@@ -482,7 +483,7 @@ class FixedCompositionSearch(Calculation):
 
         return best_history
 
-    def write_summary(self, directory: Path):
+    def write_output_summary(self, directory: Path):
         logging.info(f"Writing search summary to {directory}")
 
         super().write_output_summary(directory=directory)
@@ -492,8 +493,11 @@ class FixedCompositionSearch(Calculation):
         # error here -- but instead warn the user and then continue the search
         try:
             # calls all the key methods defined below
-            best_cifs_directory = get_directory(directory / "best_structures_cifs")
+            best_cifs_directory = get_directory(directory / "best_structures")
             self.write_best_structures(100, best_cifs_directory)
+            best_cifs_directory = get_directory(directory / "best_structures_unique")
+            self.write_best_structures(200, best_cifs_directory, remove_matching=True)
+
             self.write_individuals_completed(directory=directory)
             self.write_individuals_completed_full(directory=directory)
             self.write_best_individuals_history(directory=directory)
@@ -504,21 +508,9 @@ class FixedCompositionSearch(Calculation):
 
             # BUG: This is only for "relaxation.vasp.staged", which the assumed
             # workflow for now.
-            composition = Composition(self.composition)
-            self.subworkflow.write_staged_series_convergence_plot(
-                directory=directory,
-                # See `individuals` method for why we use these filters
-                formula_reduced=composition.reduced_formula,
-                nsites__lte=composition.num_atoms,
-                energy_per_atom__isnull=False,
-            )
-            self.subworkflow.write_staged_series_histogram_plot(
-                directory=directory,
-                # See `individuals` method for why we use these filters
-                formula_reduced=composition.reduced_formula,
-                nsites__lte=composition.num_atoms,
-                energy_per_atom__isnull=False,
-            )
+            self.write_staged_series_convergence_plot(directory=directory)
+            self.write_staged_series_histogram_plot(directory=directory)
+            self.write_staged_series_times_plot(directory=directory)
 
             logging.info("Done writing summary.")
 
@@ -578,7 +570,12 @@ class FixedCompositionSearch(Calculation):
     # Writing CSVs summaries and CIFs of best structures
     # -------------------------------------------------------------------------
 
-    def write_best_structures(self, nbest: int, directory: Path):
+    def write_best_structures(
+        self,
+        nbest: int,
+        directory: Path,
+        remove_matching: bool = False,
+    ):
         # if the directory is filled, we need to delete all the files
         # before writing the new ones.
         for file in directory.iterdir():
@@ -595,6 +592,12 @@ class FixedCompositionSearch(Calculation):
 
         best = self.get_nbest_indiviudals(nbest)
         structures = best.only("structure", "id").to_toolkit()
+
+        if remove_matching:
+            matcher = StructureMatcher()
+            groups = matcher.group_structures(structures)
+            structures = [group[0] for group in groups]
+
         for rank, structure in enumerate(structures):
             rank_cleaned = str(rank).zfill(2)  # converts 1 to 01
             structure_filename = (
@@ -614,7 +617,7 @@ class FixedCompositionSearch(Calculation):
         columns = [
             "id",
             "energy_per_atom",
-            "updated_at",
+            "finished_at",
             "source",
             "spacegroup__number",
         ]
@@ -630,7 +633,7 @@ class FixedCompositionSearch(Calculation):
         def format_date(date):
             return date.strftime("%Y-%m-%d %H:%M:%S")
 
-        df["updated_at"] = df.updated_at.apply(format_date)
+        df["finished_at"] = df.finished_at.apply(format_date)
 
         def format_parents(source):
             return source.get("parent_ids", None) if source else None
@@ -653,11 +656,11 @@ class FixedCompositionSearch(Calculation):
         df.to_markdown(md_filename)
 
     def write_best_individuals_history(self, directory: Path):
-        columns = ["id", "energy_per_atom", "updated_at"]
+        columns = ["id", "energy_per_atom", "finished_at"]
         best_history = self.get_best_individual_history()
         df = (
             self.individuals.filter(id__in=best_history)
-            .order_by("-updated_at")
+            .order_by("-finished_at")
             .only(*columns)
             .to_dataframe(columns)
         )
@@ -666,7 +669,7 @@ class FixedCompositionSearch(Calculation):
         def format_date(date):
             return date.strftime("%Y-%m-%d %H:%M:%S")
 
-        df["updated_at"] = df.updated_at.apply(format_date)
+        df["finished_at"] = df.finished_at.apply(format_date)
         md_filename = directory / "history_of_the_best_individuals.md"
         df.to_markdown(md_filename)
 
@@ -703,7 +706,7 @@ class FitnessConvergence(PlotlyFigure):
     def get_plot(search: FixedCompositionSearch):
 
         # Grab the calculation's structure and convert it to a dataframe
-        columns = ["updated_at", search.fitness_field]
+        columns = ["finished_at", search.fitness_field]
         structures_dataframe = search.individuals_completed.only(*columns).to_dataframe(
             columns
         )
@@ -711,7 +714,7 @@ class FitnessConvergence(PlotlyFigure):
         # There's only one plot here, no subplot. So we make the scatter
         # object and just pass it directly to a Figure object
         scatter = plotly_go.Scatter(
-            x=structures_dataframe["updated_at"],
+            x=structures_dataframe["finished_at"],
             y=structures_dataframe[search.fitness_field],
             mode="markers",
         )
@@ -794,7 +797,7 @@ class Correctness(PlotlyFigure):
         # There's only one plot here, no subplot. So we make the scatter
         # object and just pass it directly to a Figure object
         scatter = plotly_go.Scatter(
-            x=structures_dataframe["updated_at"],
+            x=structures_dataframe["finished_at"],
             y=structures_dataframe["fingerprint_distance"],
             mode="markers",
             marker_color=structures_dataframe["energy_per_atom"],
@@ -813,21 +816,25 @@ class SubworkflowTimes(PlotlyFigure):
     def get_plot(search: FixedCompositionSearch):
 
         # Grab the calculation's structure and convert it to a dataframe
-        columns = ["created_at", "updated_at"]
-        df = search.individuals_completed.only(*columns).to_dataframe(columns)
-        df["total_time"] = df.updated_at - df.created_at
+        data = search.individuals_completed.values_list(
+            "total_time", "queue_time"
+        ).all()
 
-        def convert_to_min(time):
-            # time is stored in nanoseconds and we convert to minutes
-            return time.value * (10**-9) / 60
+        # time is stored in seconds and we convert to minutes
+        total_times = [e[0] / 60 for e in data]
+        # queue_times = [e[1] / 60 for e in data]
 
-        df["total_time_min"] = df.total_time.apply(convert_to_min)
-        histogram = plotly_go.Histogram(x=df.total_time_min)
-        figure = plotly_go.Figure(data=histogram)
+        figure = plotly_go.Figure()
+        hist_1 = plotly_go.Histogram(x=total_times)  # , name="Total run time (min)"
+        # hist_2 = plotly_go.Histogram(x=queue_times, name="Total queue time (min)")
+        figure.add_trace(hist_1)
+        # figure.add_trace(hist_2)
         figure.update_layout(
-            xaxis_title="Total time (min)",
+            xaxis_title="Total calculation time (min)",
             yaxis_title="Individuals (#)",
+            barmode="overlay",
         )
+        # figure.update_traces(opacity=0.75)
         return figure
 
 
@@ -856,11 +863,50 @@ class FitnessDistribution(PlotlyFigure):
         return figure
 
 
+class StagedSeriesConvergence(PlotlyFigure):
+    def get_plot(search: FixedCompositionSearch):
+        composition = Composition(search.composition)
+        plot = search.subworkflow.get_staged_series_convergence_plot(
+            # See `individuals` method for why we use these filters
+            formula_reduced=composition.reduced_formula,
+            nsites__lte=composition.num_atoms,
+            energy_per_atom__isnull=False,
+        )
+        return plot
+
+
+class StagedSeriesHistogram(PlotlyFigure):
+    def get_plot(search: FixedCompositionSearch):
+        composition = Composition(search.composition)
+        plot = search.subworkflow.get_staged_series_histogram_plot(
+            # See `individuals` method for why we use these filters
+            formula_reduced=composition.reduced_formula,
+            nsites__lte=composition.num_atoms,
+            energy_per_atom__isnull=False,
+        )
+        return plot
+
+
+class StagedSeriesTimes(PlotlyFigure):
+    def get_plot(search: FixedCompositionSearch):
+        composition = Composition(search.composition)
+        plot = search.subworkflow.get_staged_series_times_plot(
+            # See `individuals` method for why we use these filters
+            formula_reduced=composition.reduced_formula,
+            nsites__lte=composition.num_atoms,
+            energy_per_atom__isnull=False,
+        )
+        return plot
+
+
 # register all plotting methods to the database table
 for _plot in [
     FitnessConvergence,
     Correctness,
     FitnessDistribution,
     SubworkflowTimes,
+    StagedSeriesConvergence,
+    StagedSeriesHistogram,
+    StagedSeriesTimes,
 ]:
     _plot.register_to_class(FixedCompositionSearch)
