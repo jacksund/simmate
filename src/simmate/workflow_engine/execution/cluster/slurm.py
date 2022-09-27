@@ -39,9 +39,11 @@ class SlurmCluster(Cluster):
             process = subprocess.run(
                 f"squeue -j {job_id}",
                 shell=True,
+                capture_output=True,
+                text=True,
             )
             # an error is return if the job is no longer in the queue.
-            if process.returncode == 0:
+            if process.returncode == 1:
                 still_running.append(job_id)
 
         return still_running
