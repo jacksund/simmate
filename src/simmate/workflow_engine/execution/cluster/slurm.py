@@ -43,7 +43,7 @@ class SlurmCluster(Cluster):
                 text=True,
             )
             # an error is return if the job is no longer in the queue.
-            if process.returncode == 1:
+            if process.returncode == 0:
                 still_running.append(job_id)
 
         return still_running
