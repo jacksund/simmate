@@ -12,6 +12,7 @@ NSAMPLES_PER_COMPOSITION = 500
 
 CREATORS_TO_TEST = [
     "Simmate",
+    "Simmate (strict)",
     "XtalOpt",
     "ASE",
     "PyXtal",
@@ -90,6 +91,7 @@ layout = go.Layout(
         title_text="Calculation time (min)",
         type="log",
         ticks="outside",
+        type="log",
         tickwidth=2,
         showline=True,
         linewidth=2,
@@ -98,8 +100,8 @@ layout = go.Layout(
         mirror=True,
     ),
     legend=dict(
-        x=0.05,
-        y=0.95,
+        # x=0.05,
+        # y=0.95,
         bordercolor="black",
         borderwidth=1,
         font=dict(color="black"),
@@ -121,5 +123,5 @@ fig.update_xaxes(
         "MgSiO3",
     ],
 )
-
+fig.write_image("calc_time.svg")
 plot(fig, config={"scrollZoom": True})

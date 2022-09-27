@@ -66,8 +66,8 @@ class CalypsoStructure(StructureCreator):
             # This is a list of reduced species count
             "NumberOfAtoms": " ".join(
                 [
-                    str(int(composition[element]))
-                    for element in composition.reduced_composition
+                    str(int(composition.reduced_composition[element]))
+                    for element in composition
                 ]
             ),
             # factor of formula unit -- for example Mg3Si3O9 would have 3 (vs MgSiO3)

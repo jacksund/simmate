@@ -13,7 +13,7 @@ from plotly.offline import plot
 from rich.progress import track
 
 from simmate.configuration.dask import get_dask_client
-from simmate.toolkit import Composition, Structure
+from simmate.toolkit import Composition
 from simmate.utilities import get_directory
 from simmate.workflows.utilities import get_workflow
 
@@ -34,6 +34,7 @@ compositions = [Composition(c) for c in COMPOSITIONS_TO_TEST]
 
 CREATORS_TO_TEST = [
     "Simmate",
+    "Simmate (strict)",
     "XtalOpt",
     "ASE",
     "PyXtal",
@@ -155,10 +156,11 @@ layout = go.Layout(
         color="black",
         linecolor="black",
         mirror=True,
+        range=[-0.2, 4.5],
     ),
     legend=dict(
-        x=0.05,
-        y=0.95,
+        # x=0.05,
+        # y=0.95,
         bordercolor="black",
         borderwidth=1,
         font=dict(color="black"),
@@ -166,7 +168,7 @@ layout = go.Layout(
 )
 
 fig = go.Figure(data=plot_series, layout=layout)
-
+fig.write_image("fingerptint_final.svg")
 plot(fig, config={"scrollZoom": True})
 
 # -----------------------------------------------------------------------------
