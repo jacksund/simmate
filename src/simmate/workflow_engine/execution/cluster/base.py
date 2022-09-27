@@ -19,9 +19,6 @@ class Cluster:
         while True:
             job_ids = cls.update_jobs_list(job_ids)
             njobs_needed = nworkers - len(job_ids)
-            print(f"JOB IDS: {job_ids}")
-            print(f"JOBS NEEDED: {njobs_needed}")
-            print(f"NWORKERS: {nworkers}")
             if njobs_needed > 0:
                 job_ids = cls.submit_jobs(njobs_needed)
             time.sleep(sleep_step)

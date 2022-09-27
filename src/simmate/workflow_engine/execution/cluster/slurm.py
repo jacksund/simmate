@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import subprocess
 
 from simmate.workflow_engine.execution.cluster.base import Cluster
@@ -47,5 +48,7 @@ class SlurmCluster(Cluster):
             # stdout AND the return code will be 0.
             if process.returncode == 0 and process.stdout.count("\n") == 2:
                 still_running.append(job_id)
+            else:
+                logging.info(f"Slurm job {job_id} completed")
 
         return still_running
