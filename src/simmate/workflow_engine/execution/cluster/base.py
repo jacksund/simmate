@@ -23,7 +23,7 @@ class Cluster:
             print(f"JOBS NEEDED: {njobs_needed}")
             print(f"NWORKERS: {nworkers}")
             if njobs_needed > 0:
-                cls.submit_jobs(njobs_needed)
+                job_ids = cls.submit_jobs(njobs_needed)
             time.sleep(sleep_step)
 
     @classmethod
