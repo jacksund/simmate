@@ -42,8 +42,10 @@ class SlurmCluster(Cluster):
                 capture_output=True,
                 text=True,
             )
-            # an error is return if the job is no longer in the queue.
-            if process.returncode == 0:
+            # An error is return if the job is no longer in the queue.
+            # If the job is still running, then two lines will be printed to
+            # stdout AND the return code will be 0.
+            if process.returncode == 0 and process.stdout.count("\n") == 2:
                 still_running.append(job_id)
 
         return still_running
