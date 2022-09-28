@@ -552,6 +552,7 @@ class DatabaseTable(models.Model):
 
         # This method can be return ANY table, so we need to import all of them
         # here. This is a local import to prevent circular import issues.
+        from simmate.website.third_parties import models as third_party_datatables
         from simmate.website.workflows import models as all_datatables
 
         # start by loading the datbase table, which is given as a module path
@@ -563,6 +564,8 @@ class DatabaseTable(models.Model):
         # OPTIMIZE: is there a better way to do this?
         if hasattr(all_datatables, datatable_str):
             datatable = getattr(all_datatables, datatable_str)
+        elif hasattr(third_party_datatables, datatable_str):
+            datatable = getattr(third_party_datatables, datatable_str)
         else:
             datatable = import_string(datatable_str)
 

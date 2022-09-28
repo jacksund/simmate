@@ -79,6 +79,11 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add `exlcude_from_archives` field to workflows to optionally delete files when compressing outputs to zip archives
 - various improvements added for evolutionary search workflows, such as parameter optimization, new output files, and website views
 
+**Fixes**
+
+- fix dynamic loading of toolkit structures from third-party databases
+- fix race condition with workers and empty queues
+
 --------------------------------------------------------------------------------
 
 ## v0.11.0 (2022.09.10)
