@@ -82,9 +82,9 @@ class FingerprintValidator(Validator):
 
     def get_fingerprint_distance(self, fingerprint1, fingerprint2) -> float:
         raise NotImplementedError(
-            "If set the class attribute 'comparison_mode' to 'custom', make "
-            "sure you add a custom 'get_fingerprint_distance' method. This should "
-            "return a distance (float value) ."
+            "If you set the class attribute 'comparison_mode' to 'custom', make "
+            "sure you also add a custom 'get_fingerprint_distance' method. This "
+            "should return a distance (float value) ."
         )
 
     @staticmethod
@@ -127,6 +127,13 @@ class FingerprintValidator(Validator):
         # add this new structure to the database if it was requested.
         if self.add_unique_to_pool:
             self._add_fingerprint_to_database(fingerprint1)
+
+        # as an extra, we save the result to our database so that this
+        # fingerprint doesn't need to calculated again
+        if hasattr(structure, "database_object"):
+            from simmate.database.base_data_types import Fingerprint
+
+            pass
 
         # Return that we were successful
         return True
@@ -174,3 +181,12 @@ class FingerprintValidator(Validator):
             self.fingerprint_database = numpy.append(
                 self.fingerprint_database, [fingerprint], axis=0
             )
+
+    def remove_duplicates(self, structures: list[Structure]) -> list[Structure]:
+        # Note, order of the input structures is important here. If duplicates
+        # are found, only the first structure will be returned
+
+        structures_unique = []
+        for structure in track(structures):
+            if self.check_structure(structure):
+                structures_unique.append(structure)

@@ -103,8 +103,8 @@ class Relaxation__Vasp__Staged(Workflow):
     def get_series(cls, value: str, **filter_kwargs):
 
         directories = (
-            cls.all_results.filter(**filter_kwargs)
-            .values_list("directory", flat=True)
+            cls.all_results.filter(**filter_kwargs).values_list("directory", flat=True)
+            # .order_by("?")[:1000]
             .all()
         )
 
@@ -117,16 +117,11 @@ class Relaxation__Vasp__Staged(Workflow):
         #         query = subflow.database_table.objects.filter(
         #             workflow_name=subflow.name_full,
         #             directory__startswith=directory,
-        #             energy_per_atom__isnull=False,
+        #             **filter_kwargs,
         #         ).values_list(value)
         #
         # Thererfore everything below is just minimizing the number of queries
         # and reformatting the data output of the complex query.
-
-        complex_filter = dj_query(
-            *[("directory__startswith", d) for d in directories],
-            _connector=dj_query.OR,
-        )
 
         tables = []
         for subflow in cls.subworkflows:
@@ -136,17 +131,28 @@ class Relaxation__Vasp__Staged(Workflow):
         all_data = {w: {} for w in cls.subworkflow_names}
         for table in tables:
 
-            query = (
-                table.objects.filter(
-                    workflow_name__in=cls.subworkflow_names,
-                    energy_per_atom__isnull=False,
-                )
-                .filter(complex_filter)
-                .values_list(value, "directory", "workflow_name")
-            )
+            query = table.objects.filter(
+                workflow_name__in=cls.subworkflow_names,
+                **filter_kwargs,
+            ).values_list(value, "directory", "workflow_name")
+
+            # This filter crashes at large query sizes. It's actually more stable
+            # and efficient to grab ALL data and filter out results in python.
+            #
+            # complex_filter = dj_query(
+            #     *[("directory__startswith", d) for d in directories],
+            #     _connector=dj_query.OR,
+            # )
+            # .filter(complex_filter)
 
             for output, directory, workflow_name in query:
                 folder_base = str(Path(directory).parent)
+
+                # this is the replacement for the commented-out complex filter
+                # shown above
+                # if folder_base not in directories:
+                #     continue
+
                 all_data[workflow_name].update({folder_base: output})
 
         all_value_series = []
