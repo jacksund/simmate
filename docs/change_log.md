@@ -79,6 +79,10 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add `exlcude_from_archives` field to workflows to optionally delete files when compressing outputs to zip archives
 - various improvements added for evolutionary search workflows, such as parameter optimization, new output files, and website views
 
+**Refactors**
+
+- optimize `get_series` method of `relaxation.vasp.staged`
+
 **Fixes**
 
 - fix dynamic loading of toolkit structures from third-party databases
