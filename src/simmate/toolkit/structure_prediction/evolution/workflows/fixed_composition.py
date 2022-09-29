@@ -56,7 +56,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             "cutoff": 10.0,
             "bin_size": 0.1,
         },
-        sleep_step: int = 60,
+        sleep_step: int = 5,
         directory: Path = None,
         write_summary_files: bool = True,
         run_id: str = None,
@@ -123,11 +123,19 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         # single shot sources before we even start the steady-state runs
         search_datatable._check_singleshot_sources(directory)
 
+        # Regardless of what the sleep cycle is, we only write outputs a minimum
+        # of every 5 minutes. This helps save on database and file i/o when
+        # the sleep cycle is small. Large sleep cycles (>5min) will write
+        # every cycle still.
+        sleep_frequency = 60 * 5 // sleep_step
+        sleep_counter = 0
+
         # this loop will go until I hit 'break' below
         while True:
 
             # Write the output summary if there is at least one structure completed
-            if write_summary_files:
+            if write_summary_files and sleep_counter >= sleep_frequency:
+                sleep_counter = 0  # reset the cycle
                 if search_datatable.individuals_completed.count() >= 1:
                     search_datatable.write_output_summary(directory)
                 else:
@@ -154,9 +162,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             search_datatable._check_steadystate_workflows()
 
             # To save our database load, sleep until we run checks again.
-            logging.info(
-                f"Sleeping for {sleep_step} seconds before running checks again."
-            )
             time.sleep(sleep_step)
+            sleep_counter += 1
 
         logging.info("Stopping the search (running calcs will be left to finish).")
