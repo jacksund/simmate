@@ -55,7 +55,7 @@ class FingerprintValidator(Validator):
 
             # When the database isn't being used, we still need set these
             # variable as none to help with some other methods.
-            self.structure_pool_queryset = None
+            self.structure_pool_queryset = "local_only"
 
         # otherwise we have a queryset that should be used to populate the
         # fingerprint database
@@ -136,7 +136,7 @@ class FingerprintValidator(Validator):
 
         # add this new fingerprint to the database if it was requested.
         if is_unique and add_unique_to_pool:
-            breakpoint()
+
             # BUG-FIX:
             # in case a pymatgen structure was given, set the source to {}
             if not hasattr(structure, "source"):
@@ -192,7 +192,7 @@ class FingerprintValidator(Validator):
 
     def update_fingerprint_pool(self, use_fp_database: bool = True):
 
-        if not self.structure_pool_queryset:
+        if self.structure_pool_queryset == "local_only":
             raise Exception(
                 "This method should only be used when your structure pool"
                 " is based on a Simmate database table!"
