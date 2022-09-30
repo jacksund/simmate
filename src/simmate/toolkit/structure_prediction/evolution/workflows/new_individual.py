@@ -48,13 +48,17 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
             return
 
         if source_db.is_transformation:
-            breakpoint()
+
             transformer = source_db.to_toolkit()
 
             # Check the cache first to save time (even though it might be outdated)
             # and then actually calculate all unique as a backup
-            unique_queryset = (
-                search_db.individuals_unique_cache or search_db.unique_individuals
+            # We only activate the caching once we have >200 unique structures,
+            # as that is when it starts to cut into CPU time.
+            use_cache = bool(len(search_db.unique_individuals_ids) >= 200)
+            unique_queryset = search_db.get_unique_individuals(
+                use_cache=use_cache,
+                as_queryset=True,
             )
 
             output = transformer.apply_from_database_and_selector(
@@ -62,7 +66,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
                 datatable=unique_queryset,
                 select_kwargs=dict(
                     ranking_column=search_db.fitness_field,
-                    query_limit=200,  # Smarter way to do this...?
+                    # query_limit=200,  # OPTIMIZE: Smarter way to do this...?
                 ),
                 validators=[validator],
             )

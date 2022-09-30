@@ -58,7 +58,7 @@ class FixedCompositionSearch(Calculation):
 
     # Loading all unique structures is an expensive operation so its only
     # done on a cycle. This stores the list of unique ids.
-    unique_individuals_cache = table_column.JSONField(
+    unique_individuals_ids = table_column.JSONField(
         default=list,
         null=True,
         blank=True,
@@ -464,13 +464,31 @@ class FixedCompositionSearch(Calculation):
     def get_nbest_indiviudals(self, nbest: int):
         return self.individuals_completed.order_by(self.fitness_field)[:nbest]
 
-    @property
-    def unique_individuals(self):
-        unique = self.validator.get_unique_from_pool()
-        # This is an expensive method as the calculation scales, so make sure
-        # we cache thes values
-        self.unique_individuals_cache = [s.database_object.id for s in unique]
-        self.save()
+    def get_unique_individuals(
+        self,
+        use_cache: bool = False,
+        as_queryset: bool = False,
+    ):
+
+        # get the most-up-to-date results but is slow
+        if not use_cache:
+            unique = self.validator.get_unique_from_pool()
+            # This is an expensive method as the calculation scales, so make sure
+            # we cache thes values
+            self.unique_individuals_ids = [s.database_object.id for s in unique]
+            self.save()
+
+        # OPTIMIZE: this converts back to a queryset object but involves
+        # another database query.
+        if as_queryset or use_cache:
+            unique = (
+                self.individuals_completed.filter(id__in=self.unique_individuals_ids)
+                .order_by(self.fitness_field)
+                .all()
+            )
+
+        if not as_queryset and not isinstance(unique, list):
+            unique = unique.to_toolkit()
 
         return unique
 
@@ -512,12 +530,8 @@ class FixedCompositionSearch(Calculation):
             # calls all the key methods defined below
             best_cifs_directory = get_directory(directory / "best_structures")
             self.write_best_structures(100, best_cifs_directory)
-            best_cifs_directory = get_directory(directory / "best_structures_unique")
-            self.write_best_structures(
-                1000,
-                best_cifs_directory,
-                remove_matching=True,
-            )
+            unique_cifs_directory = get_directory(directory / "best_structures_unique")
+            self.write_unique_structures(unique_cifs_directory)
 
             self.write_individuals_completed(directory=directory)
             self.write_individuals_completed_full(directory=directory)
@@ -592,6 +606,16 @@ class FixedCompositionSearch(Calculation):
     # -------------------------------------------------------------------------
 
     def write_best_structures(self, nbest: int, directory: Path):
+        best = self.get_nbest_indiviudals(nbest)
+        structures = best.only("structure", "id").to_toolkit()
+        self._write_structures(structures, directory)
+
+    def write_unique_structures(self, directory: Path):
+        structures = self.get_unique_individuals(use_cache=False)
+        self._write_structures(structures, directory)
+
+    # TODO: consider making a utility elsewhere
+    def _write_structures(self, structures: list[Structure], directory: Path):
         # if the directory is filled, we need to delete all the files
         # before writing the new ones.
         for file in directory.iterdir():
@@ -600,14 +624,11 @@ class FixedCompositionSearch(Calculation):
             except OSError:
                 logging.warning("Unable to delete a CIF file: {file}")
                 logging.warning(
-                    "Updating the 'best structures' directory involves deleting "
+                    "Updating this directory involves deleting "
                     "and re-writing all CIF files each cycle. If you have a file "
                     "open while this step occurs, then you'll see this warning."
                     "Close your file for this to go away."
                 )
-
-        best = self.get_nbest_indiviudals(nbest)
-        structures = best.only("structure", "id").to_toolkit()
 
         for rank, structure in enumerate(structures):
             rank_cleaned = str(rank).zfill(2)  # converts 1 to 01

@@ -136,6 +136,12 @@ class FingerprintValidator(Validator):
 
         # add this new fingerprint to the database if it was requested.
         if is_unique and add_unique_to_pool:
+            breakpoint()
+            # BUG-FIX:
+            # in case a pymatgen structure was given, set the source to {}
+            if not hasattr(structure, "source"):
+                structure.source = {}
+
             self._add_to_pool(fingerprint1, structure.source)
 
         # as an extra, we save the result to our database so that this
@@ -221,7 +227,15 @@ class FingerprintValidator(Validator):
                 source__database_id__in=list(new_ids),
             ).all()
 
-            for entry in query:
+            # the query does not return the ids in the same order that new_ids
+            # was given. Order is important when finding unique structures, so
+            # we need to reorder the query results here
+            all_data_dict = {entry.source["database_id"]: entry for entry in query}
+            all_data_ordered = [
+                all_data_dict[id] for id in new_ids if id in all_data_dict.keys()
+            ]
+
+            for entry in all_data_ordered:
                 self._add_to_pool(entry.fingerprint, entry.source)
 
             # reset the new_structures list to those that are actually still needed
@@ -232,7 +246,7 @@ class FingerprintValidator(Validator):
         if not new_ids:
             return
 
-        logging.info(f"Found {len(new_ids)} new structures for the fingerprint pool.")
+        logging.info(f"Found {len(new_ids)} new structure(s) for the fingerprint pool.")
 
         new_structures = self.structure_pool_queryset.filter(
             id__in=new_ids

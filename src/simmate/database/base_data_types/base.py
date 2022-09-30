@@ -606,7 +606,16 @@ class DatabaseTable(models.Model):
             query = datatable.objects.filter(id__in=table_ids).all()
             results += list(query)
 
-        return results
+        # the query does not return the ids in the same order that table_ids
+        # was given. Order is important in some cases, so we fix this here.
+        all_data_dict = {entry.id: entry for entry in results}
+        all_data_ordered = [
+            all_data_dict[id]
+            for id in table_ids
+            if id in all_data_dict.keys()  # BUG: should I warn if the id isn't found?
+        ]
+
+        return all_data_ordered
 
     def get_table(table_name: str):
 
