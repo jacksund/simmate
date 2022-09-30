@@ -28,50 +28,69 @@ class FingerprintValidator(Validator):
         self,
         distance_tolerance: float = 0.001,
         structure_pool: list[Structure] = [],  # OR a queryset from a Structure table
-        add_unique_to_pool: bool = True,
         **kwargs,
     ):
 
-        # OPTIMIZE: my choice of tolerance is based on my evolutionary search.
-        # However, "clustering" after evolutionary search suggests that something
-        # like 0.5 might be a better choice for finding a truly unique structure
         self.distance_tolerance = distance_tolerance
-
-        self.add_unique_to_pool = add_unique_to_pool
 
         # setup featurizer with the given composition
         self.featurizer = self.get_featurizer(**kwargs)
 
         # check if we were given a list of pymatgen structures.
         if isinstance(structure_pool, list):
-            # set this variable as none to help with some warnings methods such
-            # as the update_fingerprint_database
-            self.structure_pool_queryset = "local_only"
+
             # If so, we generate the fingerprint for each of the initial input structures
             # We convert this to a numpy array for speed improvement at later stages
-            # OPTIMIZE: this can be slow and I should support parallel featurization
-            self.fingerprint_database = numpy.array(
+            self.fingerprint_pool = numpy.array(
                 [
                     self.featurizer.featurize(structure)
                     for structure in track(structure_pool)
                 ]
             )
+            # OPTIMIZE: this can be slow and I should support parallel featurization.
+
+            # populate the source_pool and order_by_pool with values. These
+            # will be in the same order as the fingerprints
+            self.source_pool = [structure.source for structure in structure_pool]
+
+            # When the database isn't being used, we still need set these
+            # variable as none to help with some other methods.
+            self.structure_pool_queryset = None
 
         # otherwise we have a queryset that should be used to populate the
         # fingerprint database
         else:
+            # The fingerprint database table can store many different
+            # fingerprints -- both from different fingerprint featurizers AND
+            # using different settings for a given featurizer. We therefore
+            # need to store the init kwargs with each fingerprint in the database
+            from simmate.workflow_engine import Workflow
+
+            self.init_kwargs = Workflow._serialize_parameters(
+                distance_tolerance=distance_tolerance,
+                **kwargs,
+            )
+            # TODO: _serialize_parameters should be a utility and not
+            # attached to the workflow class
+
             # we store the queryset as an attribute because we may want to
             # update the structure pool later on.
             self.structure_pool_queryset = structure_pool
-            self.fingerprint_database = numpy.array([])
+            self.fingerprint_pool = numpy.array([])
+            self.source_pool = []
+
             # we also keep a log of the last update so we only grab new structures
             # each time we update the database. To start, we set this as the
-            # eariest possible date, which tells our update_fingerprint_database
+            # eariest possible date, which tells our update_fingerprint_pool
             # method to include ALL structures
             self.last_update = timezone.make_aware(
                 timezone.datetime.min, timezone.get_default_timezone()
             )
-            self.update_fingerprint_database()
+            self.update_fingerprint_pool()
+
+    # -------------------------------------------------------------------------
+    # Methods that can be overwritten when creating a new subclass
+    # -------------------------------------------------------------------------
 
     @staticmethod
     def get_featurizer(self, **kwargs):
@@ -91,18 +110,53 @@ class FingerprintValidator(Validator):
     def format_fingerprint(fingerprint):
         return fingerprint  # does nothing by default
 
-    def check_structure(self, structure: Structure):
+    # -------------------------------------------------------------------------
+    # Core methods that generate and compare fingerprints
+    # -------------------------------------------------------------------------
 
-        # make the fingerprint for this structure and make into a numpy array for speed
+    def check_structure(
+        self,
+        structure: Structure,
+        add_unique_to_pool: bool = True,
+        store_in_database: bool = True,  # only if structures have database_object attribute
+    ):
+
+        # TODO:
+        # maybe add a check to see if a matching source is already in the
+        # the source_pool.
+
+        # make the fingerprint for this structure into a numpy array for speed
         fingerprint1 = numpy.array(self.featurizer.featurize(structure))
 
         # apply any extra formatting
         fingerprint1 = self.format_fingerprint(fingerprint1)
 
+        # compare this new fingerprint to all others
+        is_unique = self._check_fingerprint(fingerprint1, self.fingerprint_pool)
+
+        # add this new fingerprint to the database if it was requested.
+        if is_unique and add_unique_to_pool:
+            self._add_to_pool(fingerprint1, structure.source)
+
+        # as an extra, we save the result to our database so that this
+        # fingerprint doesn't need to be calculated again
+        if store_in_database and hasattr(structure, "database_object"):
+            self._add_to_database(structure, fingerprint1)
+
+        # Return that we were successful
+        return is_unique
+
+    def _check_fingerprint(
+        self,
+        fingerprint1: numpy.array,
+        fingerprint_pool: list[numpy.array],
+    ):
+
         # We now want to get the distance of this fingerprint relative to all others.
         # If the distance is within the specified tolerance, then the structures
         # are too similar - and we return  for a failure.
-        for fingerprint2 in self.fingerprint_database:
+        is_unique = True  # consider it unique until proven otherwise
+        for fingerprint2 in fingerprint_pool:
 
             # check fingerprint based on the mode set
             if self.comparison_mode == "linalg_norm":
@@ -116,31 +170,23 @@ class FingerprintValidator(Validator):
 
             # and determine if we have a match
             if distance < self.distance_tolerance:
-                # we can end the whole function as soon as one structure is
+                # we can end the whole for-loop as soon as one structure is
                 # deemed too similar
-                return False
-            else:
-                continue
+                is_unique = False
+                break
+
         # If we make it through all structures and no distance is below the
-        # tolerance, then we have a new and unique structure!
+        # tolerance, then we have a new and unique fingerprint
 
-        # add this new structure to the database if it was requested.
-        if self.add_unique_to_pool:
-            self._add_fingerprint_to_database(fingerprint1)
+        return is_unique
 
-        # as an extra, we save the result to our database so that this
-        # fingerprint doesn't need to calculated again
-        if hasattr(structure, "database_object"):
-            from simmate.database.base_data_types import Fingerprint
+    # -------------------------------------------------------------------------
+    # Methods that populate the pool and database with information
+    # -------------------------------------------------------------------------
 
-            pass
+    def update_fingerprint_pool(self, use_fp_database: bool = True):
 
-        # Return that we were successful
-        return True
-
-    def update_fingerprint_database(self):
-
-        if self.structure_pool_queryset == "local_only":
+        if not self.structure_pool_queryset:
             raise Exception(
                 "This method should only be used when your structure pool"
                 " is based on a Simmate database table!"
@@ -153,40 +199,134 @@ class FingerprintValidator(Validator):
         last_update_safe = self.last_update
         self.last_update = timezone.now()
 
-        # now grab all the new structures!
-        new_structures = (
-            self.structure_pool_queryset.filter(created_at__gte=last_update_safe)
-            .only("structure")
-            .to_toolkit()
-        )
+        # Now grab all the new structure ids that need to be added to the database
+        new_ids = self.structure_pool_queryset.filter(
+            created_at__gte=last_update_safe
+        ).values_list("id", flat=True)
 
         # If there aren't any new structures, just exit without printing the
         # message and progress bar
-        if not new_structures:
+        if not new_ids:
             return
 
-        logging.info(
-            f"Found {len(new_structures)} new structures for the fingerprint database."
-        )
+        # first we can check if these structures have fingerprints already
+        # calculated and load those.
+        if use_fp_database:
+            logging.info("Checking database for already-calculated fingerprints")
+
+            from simmate.database.base_data_types import Fingerprint
+
+            query = Fingerprint.objects.filter(
+                source__database_table=self.structure_pool_queryset.model.table_name,
+                source__database_id__in=list(new_ids),
+            ).all()
+
+            for entry in query:
+                self._add_to_pool(entry.fingerprint, entry.source)
+
+            # reset the new_structures list to those that are actually still needed
+            existing_ids = [fp.source["database_id"] for fp in query]
+            new_ids = [i for i in new_ids if i not in existing_ids]
+
+        # same as before -- exit if there aren't any new ids
+        if not new_ids:
+            return
+
+        logging.info(f"Found {len(new_ids)} new structures for the fingerprint pool.")
+
+        new_structures = self.structure_pool_queryset.filter(
+            id__in=new_ids
+        ).to_toolkit()
 
         # calculate each fingerprint and add it to the database
         for structure in track(new_structures):
             fingerprint = numpy.array(self.featurizer.featurize(structure))
-            self._add_fingerprint_to_database(fingerprint)
+            self._add_to_pool(fingerprint, structure.source)
 
-    def _add_fingerprint_to_database(self, fingerprint):
-        if self.fingerprint_database.size == 0:
-            self.fingerprint_database = numpy.array([fingerprint])
+            # OPTIMIZE: this can be faster if done in one query
+            if use_fp_database:
+                self._add_to_database(structure, fingerprint)
+
+    def _add_to_pool(self, fingerprint, source: dict = {}):
+
+        # source
+        self.source_pool.append(source)
+
+        # fingerprint
+        # Numpy arrays begin differently when empty
+        if self.fingerprint_pool.size == 0:
+            self.fingerprint_pool = numpy.array([fingerprint])
         else:
-            self.fingerprint_database = numpy.append(
-                self.fingerprint_database, [fingerprint], axis=0
+            self.fingerprint_pool = numpy.append(
+                self.fingerprint_pool, [fingerprint], axis=0
             )
 
-    def remove_duplicates(self, structures: list[Structure]) -> list[Structure]:
-        # Note, order of the input structures is important here. If duplicates
-        # are found, only the first structure will be returned
+    def _add_to_database(self, structure, fingerprint):
+        from simmate.database.base_data_types import Fingerprint
 
+        new_fp = Fingerprint(
+            method=self.name,
+            init_kwargs=self.init_kwargs,
+            source=structure.source,
+            fingerprint=list(fingerprint),
+        )
+        new_fp.save()
+
+    # -------------------------------------------------------------------------
+    # Extra high level methods that are useful for analyzing a structure pool
+    # -------------------------------------------------------------------------
+
+    def remove_duplicates(self, structures: list[Structure]) -> list[Structure]:
+        raise NotImplementedError("This method is still under development")
+        # This might need to be a class method because I don't want to use
+        # an already existing fingerprint_pool
         structures_unique = []
         for structure in track(structures):
             if self.check_structure(structure):
                 structures_unique.append(structure)
+
+    def get_unique_from_pool(self) -> list[Structure]:
+
+        # order of the input structures is important for this method
+        if (
+            self.structure_pool_queryset
+            and not self.structure_pool_queryset.query.order_by
+        ):
+            logging.warning(
+                "The order of your structures is important. You should set "
+                "order_by('some_column') on your database search. If duplicates "
+                " are found, only the first structure will be returned."
+            )
+
+        logging.info("Isolating unique structures")
+
+        # The first structure in our pool is unique by default so this
+        # starts out our list
+        unique_sources = [self.source_pool[0]]
+        unique_fingerprints = numpy.array([self.fingerprint_pool[0]])
+
+        # The rest need to be checked one at a time
+        for source, fingerprint in track(
+            list(zip(self.source_pool, self.fingerprint_pool))
+        ):
+            is_unique = self._check_fingerprint(
+                fingerprint,
+                unique_fingerprints,
+            )
+            if is_unique:
+                unique_sources.append(source)
+                unique_fingerprints = numpy.append(
+                    unique_fingerprints, [fingerprint], axis=0
+                )
+
+        logging.info(
+            f"{len(unique_sources)} unique entries found. "
+            "Pulling structures from database."
+        )
+
+        # collect the unique sources so that we can make a single query.
+        from simmate.file_converters.structure.database import DatabaseAdapter
+
+        structures = DatabaseAdapter.get_toolkits_from_database_dicts(unique_sources)
+
+        return structures

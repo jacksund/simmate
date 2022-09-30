@@ -48,11 +48,18 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
             return
 
         if source_db.is_transformation:
-
+            breakpoint()
             transformer = source_db.to_toolkit()
+
+            # Check the cache first to save time (even though it might be outdated)
+            # and then actually calculate all unique as a backup
+            unique_queryset = (
+                search_db.individuals_unique_cache or search_db.unique_individuals
+            )
+
             output = transformer.apply_from_database_and_selector(
                 selector=search_db.selector,
-                datatable=search_db.individuals_completed,
+                datatable=unique_queryset,
                 select_kwargs=dict(
                     ranking_column=search_db.fitness_field,
                     query_limit=200,  # Smarter way to do this...?
@@ -102,10 +109,17 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
                 directory=directory,
                 **search_db.subworkflow_kwargs,
             )
-            state.result()
+            result = state.result()
             # NOTE: we tell the workflow to use the same directory. There is
             # good chance the user indicates that they want to compress the
             # folder to.
+
+            # check the final structure with our validator again. This populates
+            # the fingerprint database (if one is being used).
+            validator.check_structure(result.to_toolkit())
+            # BUG: I think there is a race condition here... Other NewIndividual
+            # workflows may try to populate the fingerprint at the START of
+            # a run while this one must do it after .result() is called.
 
         # TODO: when I allow a series of subworkflows, I can do validation checks
         # between each run.

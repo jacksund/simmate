@@ -51,6 +51,8 @@ class Selector:
             datatable_cleaned = datatable_cleaned.order_by(ranking_column)
         if query_limit:
             datatable_cleaned = datatable_cleaned[:query_limit]
+
+        breakpoint()
         individuals_df = datatable_cleaned.to_dataframe()
 
         # From these individuals, select our parent structures
@@ -99,6 +101,8 @@ class TruncatedSelection(Selector):
         self.allow_duplicate = allow_duplicate
 
     def select(self, nselect, individuals, fitness_column):
+
+        breakpoint()
 
         # truncate the population to those with energies in the lowest X%. This
         # value should be greater or equal to our minimum set above

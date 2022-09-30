@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pandas
 import plotly.graph_objects as plotly_go
-from pymatgen.analysis.structure_matcher import StructureMatcher
 from rich.progress import track
 
 from simmate.database.base_data_types import Calculation, table_column
@@ -56,6 +55,14 @@ class FixedCompositionSearch(Calculation):
 
     # the time to sleep between file writing and steady-state checks.
     sleep_step = table_column.FloatField(null=True, blank=True)
+
+    # Loading all unique structures is an expensive operation so its only
+    # done on a cycle. This stores the list of unique ids.
+    unique_individuals_cache = table_column.JSONField(
+        default=list,
+        null=True,
+        blank=True,
+    )
 
     # This is an optional an input for an expected structure in order to allow
     # creation of plots that show convergence vs. the expected. This is very
@@ -457,6 +464,16 @@ class FixedCompositionSearch(Calculation):
     def get_nbest_indiviudals(self, nbest: int):
         return self.individuals_completed.order_by(self.fitness_field)[:nbest]
 
+    @property
+    def unique_individuals(self):
+        unique = self.validator.get_unique_from_pool()
+        # This is an expensive method as the calculation scales, so make sure
+        # we cache thes values
+        self.unique_individuals_cache = [s.database_object.id for s in unique]
+        self.save()
+
+        return unique
+
     def get_best_individual_history(self):
         """
         Goes through all structures in order that they were created and creates
@@ -558,7 +575,7 @@ class FixedCompositionSearch(Calculation):
         logging.info("Generating fingerprints for past structures...")
         fingerprint_validator = validator_class(
             composition=Composition(self.composition),
-            structure_pool=self.individuals,
+            structure_pool=self.individuals.order_by(self.fitness_field),
             **self.validator_kwargs,
         )
         logging.info("Done generating fingerprints.")
@@ -574,12 +591,7 @@ class FixedCompositionSearch(Calculation):
     # Writing CSVs summaries and CIFs of best structures
     # -------------------------------------------------------------------------
 
-    def write_best_structures(
-        self,
-        nbest: int,
-        directory: Path,
-        remove_matching: bool = False,
-    ):
+    def write_best_structures(self, nbest: int, directory: Path):
         # if the directory is filled, we need to delete all the files
         # before writing the new ones.
         for file in directory.iterdir():
@@ -596,11 +608,6 @@ class FixedCompositionSearch(Calculation):
 
         best = self.get_nbest_indiviudals(nbest)
         structures = best.only("structure", "id").to_toolkit()
-
-        if remove_matching:
-            matcher = StructureMatcher()
-            groups = matcher.group_structures(structures)
-            structures = [group[0] for group in groups]
 
         for rank, structure in enumerate(structures):
             rank_cleaned = str(rank).zfill(2)  # converts 1 to 01
