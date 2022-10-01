@@ -6,7 +6,6 @@ from pathlib import Path
 
 import numpy
 import plotly.graph_objects as plotly_go
-from django.db.models import Q as dj_query
 from plotly.subplots import make_subplots
 
 from simmate.toolkit import Structure
@@ -138,7 +137,7 @@ class Relaxation__Vasp__Staged(Workflow):
 
             # This filter crashes at large query sizes. It's actually more stable
             # and efficient to grab ALL data and filter out results in python.
-            #
+            # from django.db.models import Q as dj_query
             # complex_filter = dj_query(
             #     *[("directory__startswith", d) for d in directories],
             #     _connector=dj_query.OR,
