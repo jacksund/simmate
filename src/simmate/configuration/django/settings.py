@@ -48,7 +48,7 @@ CONDA_ENV = get_conda_env()
 # For DigitalOcean, we try grabbing this from an enviornment variable. If that
 # variable isn't set, then we assume we are debugging. The == at the end converts
 # the string to a boolean for us.
-DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 # To make this compatible with DigitalOcean, we try to grab the allowed hosts
 # from an enviornment variable, which we then split into a list. If this
