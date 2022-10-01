@@ -52,9 +52,9 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         selector_kwargs: dict = {},
         validator_name: str = "PartialRdfFingerprint",
         validator_kwargs: dict = {
-            "distance_tolerance": 0.05,
+            "distance_tolerance": 0.1,
             "cutoff": 10.0,
-            "bin_size": 0.1,
+            "bin_size": 0.05,
         },
         sleep_step: int = 5,
         directory: Path = None,

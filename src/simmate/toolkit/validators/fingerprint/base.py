@@ -43,7 +43,7 @@ class FingerprintValidator(Validator):
             # We convert this to a numpy array for speed improvement at later stages
             self.fingerprint_pool = numpy.array(
                 [
-                    self.featurizer.featurize(structure)
+                    self._get_fingerprint(structure)
                     for structure in track(structure_pool)
                 ]
             )
@@ -125,11 +125,8 @@ class FingerprintValidator(Validator):
         # maybe add a check to see if a matching source is already in the
         # the source_pool.
 
-        # make the fingerprint for this structure into a numpy array for speed
-        fingerprint1 = numpy.array(self.featurizer.featurize(structure))
-
-        # apply any extra formatting
-        fingerprint1 = self.format_fingerprint(fingerprint1)
+        # make the fingerprint
+        fingerprint1 = self._get_fingerprint(structure)
 
         # compare this new fingerprint to all others
         is_unique = self._check_fingerprint(fingerprint1, self.fingerprint_pool)
@@ -185,6 +182,15 @@ class FingerprintValidator(Validator):
         # tolerance, then we have a new and unique fingerprint
 
         return is_unique
+
+    def _get_fingerprint(self, structure: Structure):
+        # make the fingerprint for this structure into a numpy array for speed
+        fingerprint = numpy.array(self.featurizer.featurize(structure))
+
+        # apply any extra formatting
+        fingerprint = self.format_fingerprint(fingerprint)
+
+        return fingerprint
 
     # -------------------------------------------------------------------------
     # Methods that populate the pool and database with information
@@ -254,7 +260,7 @@ class FingerprintValidator(Validator):
 
         # calculate each fingerprint and add it to the database
         for structure in track(new_structures):
-            fingerprint = numpy.array(self.featurizer.featurize(structure))
+            fingerprint = self._get_fingerprint(structure)
             self._add_to_pool(fingerprint, structure.source)
 
             # OPTIMIZE: this can be faster if done in one query
