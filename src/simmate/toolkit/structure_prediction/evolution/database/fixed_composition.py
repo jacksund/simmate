@@ -6,6 +6,7 @@ import traceback
 from pathlib import Path
 
 import pandas
+import plotly.express as plotly_express
 import plotly.graph_objects as plotly_go
 from rich.progress import track
 
@@ -745,12 +746,12 @@ class FitnessConvergence(PlotlyFigure):
 
         # There's only one plot here, no subplot. So we make the scatter
         # object and just pass it directly to a Figure object
-        scatter = plotly_go.Scatter(
+        figure = plotly_express.scatter(
             x=structures_dataframe["finished_at"],
             y=structures_dataframe[search.fitness_field],
-            mode="markers",
+            marginal_x="histogram",
+            marginal_y="histogram",
         )
-        figure = plotly_go.Figure(data=scatter)
 
         figure.update_layout(
             xaxis_title="Date Completed",
