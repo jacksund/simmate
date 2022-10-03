@@ -228,10 +228,19 @@ class FingerprintValidator(Validator):
 
             from simmate.database.base_data_types import Fingerprint
 
-            query = Fingerprint.objects.filter(
-                source__database_table=self.structure_pool_queryset.model.table_name,
-                source__database_id__in=list(new_ids),
-            ).all()
+            query = (
+                Fingerprint.objects.filter(
+                    source__database_table=self.structure_pool_queryset.model.table_name,
+                    source__database_id__in=list(new_ids),
+                )
+                .distinct("source__database_id")
+                .all()
+            )
+            # BUG: somehow a database_id single database id is being store multiple
+            # times (4 times it looks like?), which makes this query much larger
+            # than it should be -- and slower/less stable. I think this is because
+            # the fingerprint is added at structure creation AND at the end
+            # of the static energy search. There might also be race conditions.
 
             # the query does not return the ids in the same order that new_ids
             # was given. Order is important when finding unique structures, so
@@ -257,6 +266,13 @@ class FingerprintValidator(Validator):
         new_structures = self.structure_pool_queryset.filter(
             id__in=new_ids
         ).to_toolkit()
+
+        # OPTIMIZE: I attempted to calculate fingerprints with Dask, but without
+        # any luck. Ends up crashing in many scenarios.
+        # from simmate.configuration.dask import get_dask_client
+        # with get_dask_client() as client:
+        #     futures = [client.submit(self._get_fingerprint, s) for s in new_structures]
+        #     fingerprints = [future.result() for future in track(futures)]
 
         # calculate each fingerprint and add it to the database
         for structure in track(new_structures):

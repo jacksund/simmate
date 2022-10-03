@@ -118,7 +118,8 @@ class Composition(PymatgenComposition):
             Scaling value for the volume in relation to predict ionic radii.
             A value of 1 means the total volume will be exactly same as the sum
             of all spheres. Larger values will give smaller volumes. The
-            default is 1.35, which is 74% packing efficiency (hexagonal packing).
+            default is 74% packing efficiency (hexagonal packing).
+            For reference, hcp/ccp = 74%, bcc = 68%, simple cubic = 52.4%
 
         #### Returns
 
