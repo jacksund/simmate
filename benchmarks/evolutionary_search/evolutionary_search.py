@@ -35,13 +35,16 @@ from simmate.toolkit import Structure
 # simmate workflows run search.yaml
 # simmate workflow-engine start-cluster 100 --type slurm
 
-search = FixedCompositionSearch.objects.get(id=11)
+search = FixedCompositionSearch.objects.get(id=1)
 
 # from pathlib import Path
 # d = Path.cwd() / "test"
 # search.write_output_summary(d)
 
-expected_structure = Structure.from_dynamic("benchmark_structures/Al2O3-1143_opt.cif")
+expected_structure = Structure.from_dynamic(
+    "benchmark_structures/SiO2-6945_opt.cif",
+    # "benchmark_structures/Al2O3-1143_opt.cif",
+)
 expected_structure.to("cif", "expected.cif")
 
 search.best_individual.to_toolkit().to("cif", "best.cif")

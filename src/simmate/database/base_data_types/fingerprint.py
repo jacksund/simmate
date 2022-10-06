@@ -13,6 +13,7 @@ class FingerprintPool(DatabaseTable):
 
     class Meta:
         app_label = "core_components"
+        # unique_together = ["method", "init_kwargs", "database_table"]
 
     method = table_column.JSONField(blank=True, null=True)
     """

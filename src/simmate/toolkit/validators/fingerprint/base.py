@@ -4,6 +4,7 @@ import logging
 
 import numpy
 import scipy
+from django.db import transaction
 from django.utils import timezone
 from rich.progress import track
 
@@ -78,11 +79,12 @@ class FingerprintValidator(Validator):
             # TODO: _serialize_parameters should be a utility and not
             # attached to the workflow class
 
-            self.database_pool = FingerprintPool.objects.get_or_create(
-                method=self.name,
-                init_kwargs=self.init_kwargs,
-                database_table=structure_pool.model.table_name,
-            )[0]
+            with transaction.atomic():
+                self.database_pool = FingerprintPool.objects.get_or_create(
+                    method=self.name,
+                    init_kwargs=self.init_kwargs,
+                    database_table=structure_pool.model.table_name,
+                )[0]
 
             # we also keep a log of the last update so we only grab new structures
             # each time we update the database. To start, we set this as the
