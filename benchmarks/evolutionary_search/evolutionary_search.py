@@ -11,6 +11,7 @@ from simmate.database.workflow_results import (
     StaticEnergy,
 )
 from simmate.toolkit import Structure
+from simmate.utilities import get_directory
 
 # reset database between each search attempt
 # FixedCompositionSearch.objects.all().delete()
@@ -39,7 +40,7 @@ from simmate.toolkit import Structure
 # Setup and loading
 # -----------------------------------------------------------------------------
 
-search = FixedCompositionSearch.objects.get(id=3)
+search = FixedCompositionSearch.objects.get(id=5)
 
 expected_structure = Structure.from_dynamic(
     # "benchmark_structures/SiO2-6945_opt.cif",
@@ -47,15 +48,15 @@ expected_structure = Structure.from_dynamic(
     "benchmark_structures/MgSiO3-603930_opt.cif",
     # "benchmarks/evolutionary_search/benchmark_structures/MgSiO3-603930_opt.cif",
 )
-expected_structure.to("cif", "expected.cif")
 
-search.best_individual.to_toolkit().to("cif", "best.cif")
 
 # -----------------------------------------------------------------------------
 # Write outputs
 # -----------------------------------------------------------------------------
 
-from simmate.utilities import get_directory
+expected_structure.to("cif", "expected.cif")
+
+search.best_individual.to_toolkit().to("cif", "best.cif")
 
 d = get_directory("search-output")
 search.write_output_summary(d)

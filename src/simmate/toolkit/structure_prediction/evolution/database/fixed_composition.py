@@ -804,7 +804,9 @@ class Correctness(PlotlyFigure):
 
         fingerprint_known = numpy.array(featurizer.featurize(structure_known))
 
+        # import scipy
         structures_dataframe["fingerprint_distance"] = [
+            # scipy.spatial.distance.cosine(fingerprint_known, s.fingerprint)
             numpy.linalg.norm(fingerprint_known - s.fingerprint)
             for _, s in structures_dataframe.iterrows()
         ]
