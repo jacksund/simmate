@@ -110,6 +110,13 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             logging.info("Looks like this search was already ran by someone else!")
             return
 
+        # BUG-FIX: There is a race condition when generating a search's
+        # fingerprint pool in the database. To prevent this race, we generate
+        # the pool up front. This is acheive just by accessing the validator.
+        # This also makes sure the Fingerprints are all up to date before
+        # submitting workers below
+        search_datatable.validator
+
         logging.info("Finished setup")
         logging.info(
             f"Assigned this to FixedCompositionSearch id={search_datatable.id}."
@@ -126,9 +133,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         # the sleep cycle is small. Large sleep cycles (>5min) will write
         # every cycle still. We start the counter at the target frequency because
         # we want the first loop to write output files -- even if nothing
-        # is available yet. There may be past calculations worth printing. As a
-        # bonus, this also sets up the FingerprintPool database entry and avoids
-        # a race condition for its creation by other workers.
+        # is available yet. There may be past calculations worth printing.
         sleep_frequency = 60 * 5 // sleep_step
         sleep_counter = 0 + sleep_frequency
 

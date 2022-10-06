@@ -73,7 +73,7 @@ class FingerprintValidator(Validator):
             from simmate.workflow_engine import Workflow
 
             self.init_kwargs = Workflow._serialize_parameters(
-                distance_tolerance=distance_tolerance,
+                distance_tolerance=self.distance_tolerance,
                 **kwargs,
             )
             # TODO: _serialize_parameters should be a utility and not
