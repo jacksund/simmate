@@ -35,20 +35,40 @@ from simmate.toolkit import Structure
 # simmate workflows run search.yaml
 # simmate workflow-engine start-cluster 100 --type slurm
 
-search = FixedCompositionSearch.objects.get(id=3)
+# -----------------------------------------------------------------------------
+# Setup and loading
+# -----------------------------------------------------------------------------
 
-# from pathlib import Path
-# d = Path.cwd() / "test"
-# search.write_output_summary(d)
+search = FixedCompositionSearch.objects.get(id=3)
 
 expected_structure = Structure.from_dynamic(
     # "benchmark_structures/SiO2-6945_opt.cif",
     # "benchmark_structures/Al2O3-1143_opt.cif",
-    "benchmarks/evolutionary_search/benchmark_structures/MgSiO3-603930_opt.cif",
+    "benchmark_structures/MgSiO3-603930_opt.cif",
+    # "benchmarks/evolutionary_search/benchmark_structures/MgSiO3-603930_opt.cif",
 )
 expected_structure.to("cif", "expected.cif")
 
 search.best_individual.to_toolkit().to("cif", "best.cif")
+
+# -----------------------------------------------------------------------------
+# Write outputs
+# -----------------------------------------------------------------------------
+
+from simmate.utilities import get_directory
+
+d = get_directory("search-output")
+search.write_output_summary(d)
+
+# -----------------------------------------------------------------------------
+# Check most similar
+# -----------------------------------------------------------------------------
+
+search.view_correctness_plot(structure_known=expected_structure)
+
+# -----------------------------------------------------------------------------
+# Check for exact match
+# -----------------------------------------------------------------------------
 
 individuals = search.individuals_completed.order_by("finished_at").all()
 structures = individuals.to_toolkit()
@@ -69,6 +89,10 @@ if not is_match:
 else:
     print("Found groundstate!")
 
+# -----------------------------------------------------------------------------
+# Check for computational time
+# -----------------------------------------------------------------------------
+
 # total real time of the search
 search_time = (individual.finished_at - search.started_at).total_seconds()
 
@@ -87,3 +111,5 @@ print(n + 1)
 print(search_time)
 print(job_time)
 print(cpu_time)
+
+# -----------------------------------------------------------------------------

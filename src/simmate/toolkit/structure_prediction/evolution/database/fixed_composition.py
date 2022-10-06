@@ -5,6 +5,7 @@ import math
 import traceback
 from pathlib import Path
 
+import numpy
 import pandas
 import plotly.express as plotly_express
 import plotly.graph_objects as plotly_go
@@ -771,29 +772,8 @@ class Correctness(PlotlyFigure):
         structure_known: Structure,
     ):
 
-        # --------------------------------------------------------
-        # This code is from simmate.toolkit.validators.fingerprint.pcrystalnn
-        # OPTIMIZE: There should be a convience method to make this featurizer
-        # since I use it so much
-        import numpy
-        from matminer.featurizers.site import CrystalNNFingerprint
-        from matminer.featurizers.structure.sites import (  # PartialsSiteStatsFingerprint,
-            SiteStatsFingerprint,
-        )
-
-        from simmate.toolkit import Composition
-
-        sitefingerprint_method = CrystalNNFingerprint.from_preset(
-            "ops", distance_cutoffs=None, x_diff_weight=3
-        )
-        featurizer = SiteStatsFingerprint(
-            sitefingerprint_method,
-            stats=["mean", "std_dev", "minimum", "maximum"],
-        )
-        featurizer.elements_ = numpy.array(
-            [element.symbol for element in Composition(search.composition).elements]
-        )
-        # --------------------------------------------------------
+        # load the featurizer from the search object
+        featurizer = search.validator.featurizer
 
         # Grab the calculation's structure and convert it to a dataframe
         structures_dataframe = search.individuals_completed.to_dataframe()
@@ -819,15 +799,17 @@ class Correctness(PlotlyFigure):
 
         structures_dataframe["fingerprint"] = [
             numpy.array(featurizer.featurize(s.structure))
-            for _, s in track(structures_dataframe.iterrows())
+            for _, s in track(list(structures_dataframe.iterrows()))
         ]
 
         fingerprint_known = numpy.array(featurizer.featurize(structure_known))
 
         structures_dataframe["fingerprint_distance"] = [
             numpy.linalg.norm(fingerprint_known - s.fingerprint)
-            for _, s in track(structures_dataframe.iterrows())
+            for _, s in structures_dataframe.iterrows()
         ]
+        # BUG: I assume distance method. I need to check the validator in
+        # case the method prefers something like cosine distance.
 
         # There's only one plot here, no subplot. So we make the scatter
         # object and just pass it directly to a Figure object

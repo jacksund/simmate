@@ -187,6 +187,7 @@ class FingerprintValidator(Validator):
         # If the distance is within the specified tolerance, then the structures
         # are too similar - and we return  for a failure.
         is_unique = True  # consider it unique until proven otherwise
+        # min_dist = 9999  # start with high value
         for fingerprint2 in fingerprint_pool:
 
             # check fingerprint based on the mode set
@@ -198,6 +199,10 @@ class FingerprintValidator(Validator):
                 distance = self.get_fingerprint_distance(fingerprint, fingerprint2)
             else:
                 raise NotImplementedError("Unknown comparison_mode provided.")
+
+            # keep track of the most similar structure
+            # if min_dist > distance:
+            #     min_dist = distance
 
             # and determine if we have a match
             if distance < self.distance_tolerance:
@@ -346,7 +351,7 @@ class FingerprintValidator(Validator):
         _add_many_to_pool method instead. See:
             https://stackoverflow.com/questions/7133885
         """
-        
+
         # source
         self.source_pool.append(source)
 
