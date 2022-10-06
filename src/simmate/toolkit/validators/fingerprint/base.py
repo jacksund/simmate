@@ -260,7 +260,7 @@ class FingerprintValidator(Validator):
             # fingerprints at a time.
             all_results = []
 
-            for query_chunk in chunk_list(new_ids, chunk_size=500):
+            for query_chunk in chunk_list(new_ids, chunk_size=1000):
                 query = self.database_pool.fingerprints.filter(
                     database_id__in=query_chunk
                 ).distinct("database_id")
@@ -282,7 +282,7 @@ class FingerprintValidator(Validator):
             self._add_many_to_pool(fingerprints, sources, skip_database=True)
 
             # reset the new_structures list to those that are actually still needed
-            existing_ids = [fp.database_id for fp in query]
+            existing_ids = [fp.database_id for fp in all_results]
             new_ids = [i for i in new_ids if i not in existing_ids]
 
         # same as before -- exit if there aren't any new ids
@@ -346,7 +346,7 @@ class FingerprintValidator(Validator):
         _add_many_to_pool method instead. See:
             https://stackoverflow.com/questions/7133885
         """
-
+        
         # source
         self.source_pool.append(source)
 
