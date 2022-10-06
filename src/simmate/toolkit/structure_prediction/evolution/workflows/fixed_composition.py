@@ -124,9 +124,13 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         # Regardless of what the sleep cycle is, we only write outputs a minimum
         # of every 5 minutes. This helps save on database and file i/o when
         # the sleep cycle is small. Large sleep cycles (>5min) will write
-        # every cycle still.
+        # every cycle still. We start the counter at the target frequency because
+        # we want the first loop to write output files -- even if nothing
+        # is available yet. There may be past calculations worth printing. As a
+        # bonus, this also sets up the FingerprintPool database entry and avoids
+        # a race condition for its creation by other workers.
         sleep_frequency = 60 * 5 // sleep_step
-        sleep_counter = 0
+        sleep_counter = 0 + sleep_frequency
 
         # this loop will go until I hit 'break' below
         while True:

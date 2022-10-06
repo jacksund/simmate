@@ -79,12 +79,13 @@ class FingerprintValidator(Validator):
             # TODO: _serialize_parameters should be a utility and not
             # attached to the workflow class
 
-            with transaction.atomic():
-                self.database_pool = FingerprintPool.objects.get_or_create(
-                    method=self.name,
-                    init_kwargs=self.init_kwargs,
-                    database_table=structure_pool.model.table_name,
-                )[0]
+            self.database_pool = FingerprintPool.objects.get_or_create(
+                method=self.name,
+                init_kwargs=self.init_kwargs,
+                database_table=structure_pool.model.table_name,
+            )[0]
+            # BUG: There is a race condition here. If a pool is started up from
+            # multiple locations, this could result in duplicate pools.
 
             # we also keep a log of the last update so we only grab new structures
             # each time we update the database. To start, we set this as the
