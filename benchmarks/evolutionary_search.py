@@ -4,7 +4,7 @@ from pymatgen.analysis.structure_matcher import StructureMatcher
 from rich.progress import track
 
 from simmate.database import connect
-from simmate.database.base_data_types import Fingerprint
+from simmate.database.base_data_types import FingerprintPool
 from simmate.database.workflow_results import (
     FixedCompositionSearch,
     Relaxation,
@@ -15,7 +15,7 @@ from simmate.toolkit import Structure
 # reset database between each search attempt
 # FixedCompositionSearch.objects.all().delete()
 # StaticEnergy.objects.all().delete()
-# Fingerprint.objects.all().delete()
+# FingerprintPool.objects.all().delete()
 # Relaxation.objects.all().delete()
 
 # EXAMPLE JOB SCRIPT
@@ -35,7 +35,7 @@ from simmate.toolkit import Structure
 # simmate workflows run search.yaml
 # simmate workflow-engine start-cluster 100 --type slurm
 
-search = FixedCompositionSearch.objects.get(id=136)
+search = FixedCompositionSearch.objects.get(id=11)
 
 # from pathlib import Path
 # d = Path.cwd() / "test"

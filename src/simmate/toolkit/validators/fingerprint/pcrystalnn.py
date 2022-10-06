@@ -1,30 +1,31 @@
 # -*- coding: utf-8 -*-
 
-import logging
-
 import numpy
 
 from simmate.toolkit import Composition
 from simmate.toolkit.validators.fingerprint.base import FingerprintValidator
 
 from .featurizers import CrystalNNFingerprint as cnnf
-from .featurizers import SiteStatsFingerprint as pssf  # PartialsSiteStatsFingerprint
+from .featurizers import PartialsSiteStatsFingerprint as pssf
 
 
 class PartialCrystalNNFingerprint(FingerprintValidator):
+
+    # Defaults grab from those suggested by the Materials Project
+    comparison_mode = "linalg_norm"
+    distance_tolerance = 0.9
+    # https://docs.materialsproject.org/methodology/materials-methodology/
+    # related-materials#structure-distance-dissimilarity
+
     @staticmethod
     def get_featurizer(
         composition: Composition,
-        stat_options: list[str] = ["mean", "std_dev", "minimum", "maximum"],
+        stat_options: list[str] = ["mean", "std_dev"],  # , "minimum", "maximum"
         **crystalnn_options,
     ):
 
-        # BUG: waiting on this pSS to be added to matminer. See the following PR:
-        #   https://github.com/hackingmaterials/matminer/pull/809
-        logging.warning(
-            "PartialsSiteStatsFingerprint current acts as a SiteStatsFingerprint. "
-            "We are waiting on a new MatMiner release to fix this issue."
-        )
+        # Note, defaults give the equivalent fingerprint method:
+        # PartialsSiteStatsFingerprint.from_preset("CrystalNNFingerprint_ops")
 
         # make the matminer featurizer object using the provided settings
         if crystalnn_options:

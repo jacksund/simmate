@@ -590,16 +590,18 @@ class FixedCompositionSearch(Calculation):
         logging.info("Generating fingerprints for past structures...")
         fingerprint_validator = validator_class(
             composition=Composition(self.composition),
-            structure_pool=self.individuals.order_by(self.fitness_field),
+            structure_pool=self.individuals_completed.order_by(self.fitness_field),
             **self.validator_kwargs,
         )
         logging.info("Done generating fingerprints.")
 
-        # BUG: should we only do structures that were successfully calculated?
+        # for now I only include final structures that have been calculated
+        # OPTIMIZE: should we only do structures that were successfully calculated?
         # If not, there's a chance a structure fails because of something like a
         # crashed slurm job, but it's never submitted again...
-        # OPTIMIZE: should we only do final structures? Or should I include input
+        # Or should we only do final structures? Or should I include input
         # structures and even all ionic steps as well...?
+
         return fingerprint_validator
 
     # -------------------------------------------------------------------------

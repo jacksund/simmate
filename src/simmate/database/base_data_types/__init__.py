@@ -9,7 +9,7 @@ from .base import DatabaseTable, table_column, SearchResults
 from .symmetry import Spacegroup
 from .structure import Structure
 from .calculation import Calculation
-from .fingerprint import Fingerprint
+from .fingerprint import FingerprintPool, Fingerprint
 from .forces import Forces
 from .thermodynamics import Thermodynamics
 

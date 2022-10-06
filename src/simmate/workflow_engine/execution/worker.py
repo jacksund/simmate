@@ -50,7 +50,7 @@ class SimmateWorker:
         # wait_on_timeout=False, # TODO
         # settings on what to do when the queue is empty
         close_on_empty_queue: bool = False,
-        waittime_on_empty_queue: float = 1,
+        waittime_on_empty_queue: float = 15,
         tags: list[str] = ["simmate"],  # should default be empty...?
     ):
         """
