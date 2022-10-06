@@ -4,7 +4,7 @@ import logging
 
 import numpy
 import scipy
-from django.db import transaction
+from django.core.exceptions import MultipleObjectsReturned
 from django.utils import timezone
 from rich.progress import track
 
@@ -263,7 +263,10 @@ class FingerprintValidator(Validator):
             for query_chunk in chunk_list(new_ids, chunk_size=500):
                 query = self.database_pool.fingerprints.filter(
                     database_id__in=query_chunk
-                )
+                ).distinct("database_id")
+                # BUG: there is a race condition that sometimes adds duplicate
+                # fingerprints to the database. We add distinct to keep our
+                # query smaller and just grab one.
                 all_results += list(query)
 
             # the query does not return the ids in the same order that new_ids
@@ -364,10 +367,17 @@ class FingerprintValidator(Validator):
         # as an extra, we save the result to our database so that this
         # fingerprint doesn't need to be calculated again
         if self.use_database and source.get("database_id"):
-            self.database_pool.fingerprints.update_or_create(
-                database_id=source.get("database_id"),
-                defaults=dict(fingerprint=list(fingerprint)),
-            )
+            try:
+                self.database_pool.fingerprints.update_or_create(
+                    database_id=source.get("database_id"),
+                    defaults=dict(fingerprint=list(fingerprint)),
+                )
+            # BUG: there is a race condition that sometimes triggers multiple
+            # fingerprints to be added. If this happens, we just move on. The
+            # key thing is that the fingerprint is there.
+            except MultipleObjectsReturned:
+                # TODO: maybe delete the duplicates here...?
+                pass
 
     # -------------------------------------------------------------------------
     # Extra high level methods that are useful for analyzing a structure pool
