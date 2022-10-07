@@ -49,7 +49,6 @@ expected_structure = Structure.from_dynamic(
     # "benchmarks/evolutionary_search/benchmark_structures/MgSiO3-603930_opt.cif",
 )
 
-
 # -----------------------------------------------------------------------------
 # Write outputs
 # -----------------------------------------------------------------------------
