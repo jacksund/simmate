@@ -804,14 +804,27 @@ class Correctness(PlotlyFigure):
 
         fingerprint_known = numpy.array(featurizer.featurize(structure_known))
 
-        # import scipy
-        structures_dataframe["fingerprint_distance"] = [
+        distances = []
+        smallest_distance_id = None
+        smallest_distance = 999
+        for _, s in structures_dataframe.iterrows():
+
+            distance = numpy.linalg.norm(fingerprint_known - s.fingerprint)
+            distances.append(distance)
+
+            # import scipy
             # scipy.spatial.distance.cosine(fingerprint_known, s.fingerprint)
-            numpy.linalg.norm(fingerprint_known - s.fingerprint)
-            for _, s in structures_dataframe.iterrows()
-        ]
-        # BUG: I assume distance method. I need to check the validator in
-        # case the method prefers something like cosine distance.
+            # BUG: I assume distance method. I need to check the validator in
+            # case the method prefers something like cosine distance.
+
+            if distance < smallest_distance:
+                smallest_distance = distance
+                smallest_distance_id = s.id
+        logging.info(
+            f"The most similar structure is id={smallest_distance_id} "
+            f"with distance {smallest_distance:.3f}"
+        )
+        structures_dataframe["fingerprint_distance"] = distances
 
         # There's only one plot here, no subplot. So we make the scatter
         # object and just pass it directly to a Figure object
