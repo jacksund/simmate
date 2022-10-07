@@ -38,25 +38,24 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             # "third_party_substituition",
         ],
         steadystate_sources: dict = {
-            "RandomSymStructure": 0.60,
+            "RandomSymStructure": 0.55,
             "from_ase.Heredity": 0.25,
             # "from_ase.SoftMutation": 0.10,
             "from_ase.MirrorMutation": 0.05,
             # "from_ase.LatticeStrain": 0.05,
             "from_ase.RotationalMutation": 0.05,
             "from_ase.AtomicPermutation": 0.05,
-            # "from_ase.CoordinatePerturbation": 0.05,
+            "from_ase.CoordinatePerturbation": 0.05,
             # "ExtremeSymmetry": 0.05,
         },
         selector_name: str = "TruncatedSelection",
         selector_kwargs: dict = {},
-        validator_name: str = "PartialRdfFingerprint",
+        validator_name: str = "PartialCrystalNNFingerprint",
         validator_kwargs: dict = {
-            "distance_tolerance": 0.01,
-            "cutoff": 10.0,
-            "bin_size": 0.1,
+            "distance_tolerance": 0.25,  # much stricter than default 0.9
+            "use_database": True,
         },
-        sleep_step: int = 60,
+        sleep_step: int = 10,
         directory: Path = None,
         write_summary_files: bool = True,
         run_id: str = None,
@@ -112,6 +111,13 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             logging.info("Looks like this search was already ran by someone else!")
             return
 
+        # BUG-FIX: There is a race condition when generating a search's
+        # fingerprint pool in the database. To prevent this race, we generate
+        # the pool up front. This is acheive just by accessing the validator.
+        # This also makes sure the Fingerprints are all up to date before
+        # submitting workers below
+        search_datatable.validator
+
         logging.info("Finished setup")
         logging.info(
             f"Assigned this to FixedCompositionSearch id={search_datatable.id}."
@@ -123,11 +129,21 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         # single shot sources before we even start the steady-state runs
         search_datatable._check_singleshot_sources(directory)
 
+        # Regardless of what the sleep cycle is, we only write outputs a minimum
+        # of every 5 minutes. This helps save on database and file i/o when
+        # the sleep cycle is small. Large sleep cycles (>5min) will write
+        # every cycle still. We start the counter at the target frequency because
+        # we want the first loop to write output files -- even if nothing
+        # is available yet. There may be past calculations worth printing.
+        sleep_frequency = 60 * 5 // sleep_step
+        sleep_counter = 0 + sleep_frequency
+
         # this loop will go until I hit 'break' below
         while True:
 
             # Write the output summary if there is at least one structure completed
-            if write_summary_files:
+            if write_summary_files and sleep_counter >= sleep_frequency:
+                sleep_counter = 0  # reset the cycle
                 if search_datatable.individuals_completed.count() >= 1:
                     search_datatable.write_output_summary(directory)
                 else:
@@ -154,9 +170,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             search_datatable._check_steadystate_workflows()
 
             # To save our database load, sleep until we run checks again.
-            logging.info(
-                f"Sleeping for {sleep_step} seconds before running checks again."
-            )
             time.sleep(sleep_step)
+            sleep_counter += 1
 
         logging.info("Stopping the search (running calcs will be left to finish).")

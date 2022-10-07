@@ -51,9 +51,8 @@ class Selector:
             datatable_cleaned = datatable_cleaned.order_by(ranking_column)
         if query_limit:
             datatable_cleaned = datatable_cleaned[:query_limit]
+
         individuals_df = datatable_cleaned.to_dataframe()
-        # NOTE: I assume we'll never need more than the best 200 structures, which
-        # may not be true in special cases.
 
         # From these individuals, select our parent structures
         parents_df = self.select(nselect, individuals_df, ranking_column)

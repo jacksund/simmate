@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy
+from scipy.ndimage import gaussian_filter1d
 
 from simmate.toolkit import Composition
 from simmate.toolkit.validators.fingerprint.base import FingerprintValidator
@@ -30,8 +31,8 @@ class PartialRdfFingerprint(FingerprintValidator):
 
         return featurizer
 
-    # @staticmethod
-    # def format_fingerprint(fingerprint):
-    #     Consider a sigma input that smooths the function
-    #     from scipy.ndimage import gaussian_filter1d
-    #     new_fp = gaussian_filter1d(fp, sigma=1)
+    @staticmethod
+    def format_fingerprint(fingerprint):
+        # smooths the function
+        new_fp = gaussian_filter1d(fingerprint, sigma=1)
+        return new_fp

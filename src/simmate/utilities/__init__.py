@@ -10,6 +10,7 @@ from .files import (
 )
 from .other import (
     check_if_using_latest_version,
+    chunk_list,
     get_chemical_subsystems,
     get_conda_env,
     get_latest_version,

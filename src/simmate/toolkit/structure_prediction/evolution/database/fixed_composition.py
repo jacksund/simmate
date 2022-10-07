@@ -5,11 +5,13 @@ import math
 import traceback
 from pathlib import Path
 
+import numpy
 import pandas
+import plotly.express as plotly_express
 import plotly.graph_objects as plotly_go
-from pymatgen.analysis.structure_matcher import StructureMatcher
 from rich.progress import track
 
+from simmate.configuration.dask import get_dask_client
 from simmate.database.base_data_types import Calculation, table_column
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.structure_prediction.evolution.database import SteadystateSource
@@ -56,6 +58,14 @@ class FixedCompositionSearch(Calculation):
 
     # the time to sleep between file writing and steady-state checks.
     sleep_step = table_column.FloatField(null=True, blank=True)
+
+    # Loading all unique structures is an expensive operation so its only
+    # done on a cycle. This stores the list of unique ids.
+    unique_individuals_ids = table_column.JSONField(
+        default=list,
+        null=True,
+        blank=True,
+    )
 
     # This is an optional an input for an expected structure in order to allow
     # creation of plots that show convergence vs. the expected. This is very
@@ -457,6 +467,34 @@ class FixedCompositionSearch(Calculation):
     def get_nbest_indiviudals(self, nbest: int):
         return self.individuals_completed.order_by(self.fitness_field)[:nbest]
 
+    def get_unique_individuals(
+        self,
+        use_cache: bool = False,
+        as_queryset: bool = False,
+    ):
+
+        # get the most-up-to-date results but is slow
+        if not use_cache:
+            unique = self.validator.get_unique_from_pool()
+            # This is an expensive method as the calculation scales, so make sure
+            # we cache thes values
+            self.unique_individuals_ids = [s.database_object.id for s in unique]
+            self.save()
+
+        # OPTIMIZE: this converts back to a queryset object but involves
+        # another database query.
+        if as_queryset or use_cache:
+            unique = (
+                self.individuals_completed.filter(id__in=self.unique_individuals_ids)
+                .order_by(self.fitness_field)
+                .all()
+            )
+
+        if not as_queryset and not isinstance(unique, list):
+            unique = unique.to_toolkit()
+
+        return unique
+
     def get_best_individual_history(self):
         """
         Goes through all structures in order that they were created and creates
@@ -495,8 +533,8 @@ class FixedCompositionSearch(Calculation):
             # calls all the key methods defined below
             best_cifs_directory = get_directory(directory / "best_structures")
             self.write_best_structures(100, best_cifs_directory)
-            best_cifs_directory = get_directory(directory / "best_structures_unique")
-            self.write_best_structures(200, best_cifs_directory, remove_matching=True)
+            unique_cifs_directory = get_directory(directory / "best_structures_unique")
+            self.write_unique_structures(unique_cifs_directory)
 
             self.write_individuals_completed(directory=directory)
             self.write_individuals_completed_full(directory=directory)
@@ -554,28 +592,35 @@ class FixedCompositionSearch(Calculation):
         logging.info("Generating fingerprints for past structures...")
         fingerprint_validator = validator_class(
             composition=Composition(self.composition),
-            structure_pool=self.individuals,
+            structure_pool=self.individuals_completed.order_by(self.fitness_field),
             **self.validator_kwargs,
         )
         logging.info("Done generating fingerprints.")
 
-        # BUG: should we only do structures that were successfully calculated?
+        # for now I only include final structures that have been calculated
+        # OPTIMIZE: should we only do structures that were successfully calculated?
         # If not, there's a chance a structure fails because of something like a
         # crashed slurm job, but it's never submitted again...
-        # OPTIMIZE: should we only do final structures? Or should I include input
+        # Or should we only do final structures? Or should I include input
         # structures and even all ionic steps as well...?
+
         return fingerprint_validator
 
     # -------------------------------------------------------------------------
     # Writing CSVs summaries and CIFs of best structures
     # -------------------------------------------------------------------------
 
-    def write_best_structures(
-        self,
-        nbest: int,
-        directory: Path,
-        remove_matching: bool = False,
-    ):
+    def write_best_structures(self, nbest: int, directory: Path):
+        best = self.get_nbest_indiviudals(nbest)
+        structures = best.only("structure", "id").to_toolkit()
+        self._write_structures(structures, directory)
+
+    def write_unique_structures(self, directory: Path):
+        structures = self.get_unique_individuals(use_cache=False)
+        self._write_structures(structures, directory)
+
+    # TODO: consider making a utility elsewhere
+    def _write_structures(self, structures: list[Structure], directory: Path):
         # if the directory is filled, we need to delete all the files
         # before writing the new ones.
         for file in directory.iterdir():
@@ -584,19 +629,11 @@ class FixedCompositionSearch(Calculation):
             except OSError:
                 logging.warning("Unable to delete a CIF file: {file}")
                 logging.warning(
-                    "Updating the 'best structures' directory involves deleting "
+                    "Updating this directory involves deleting "
                     "and re-writing all CIF files each cycle. If you have a file "
                     "open while this step occurs, then you'll see this warning."
                     "Close your file for this to go away."
                 )
-
-        best = self.get_nbest_indiviudals(nbest)
-        structures = best.only("structure", "id").to_toolkit()
-
-        if remove_matching:
-            matcher = StructureMatcher()
-            groups = matcher.group_structures(structures)
-            structures = [group[0] for group in groups]
 
         for rank, structure in enumerate(structures):
             rank_cleaned = str(rank).zfill(2)  # converts 1 to 01
@@ -713,12 +750,12 @@ class FitnessConvergence(PlotlyFigure):
 
         # There's only one plot here, no subplot. So we make the scatter
         # object and just pass it directly to a Figure object
-        scatter = plotly_go.Scatter(
+        figure = plotly_express.scatter(
             x=structures_dataframe["finished_at"],
             y=structures_dataframe[search.fitness_field],
-            mode="markers",
+            marginal_x="histogram",
+            marginal_y="histogram",
         )
-        figure = plotly_go.Figure(data=scatter)
 
         figure.update_layout(
             xaxis_title="Date Completed",
@@ -736,29 +773,8 @@ class Correctness(PlotlyFigure):
         structure_known: Structure,
     ):
 
-        # --------------------------------------------------------
-        # This code is from simmate.toolkit.validators.fingerprint.pcrystalnn
-        # OPTIMIZE: There should be a convience method to make this featurizer
-        # since I use it so much
-        import numpy
-        from matminer.featurizers.site import CrystalNNFingerprint
-        from matminer.featurizers.structure.sites import (  # PartialsSiteStatsFingerprint,
-            SiteStatsFingerprint,
-        )
-
-        from simmate.toolkit import Composition
-
-        sitefingerprint_method = CrystalNNFingerprint.from_preset(
-            "ops", distance_cutoffs=None, x_diff_weight=3
-        )
-        featurizer = SiteStatsFingerprint(
-            sitefingerprint_method,
-            stats=["mean", "std_dev", "minimum", "maximum"],
-        )
-        featurizer.elements_ = numpy.array(
-            [element.symbol for element in Composition(search.composition).elements]
-        )
-        # --------------------------------------------------------
+        # load the featurizer from the search object
+        featurizer = search.validator.featurizer
 
         # Grab the calculation's structure and convert it to a dataframe
         structures_dataframe = search.individuals_completed.to_dataframe()
@@ -775,24 +791,46 @@ class Correctness(PlotlyFigure):
         # through the queryset like in the commented out code above. Instead,
         # we need to iterate through the dataframe rows.
         # See https://github.com/chrisdev/django-pandas/issues/138 for issue
-        from simmate.toolkit import Structure
 
         structures_dataframe["structure"] = [
             Structure.from_str(s.structure, fmt="POSCAR")
             for _, s in structures_dataframe.iterrows()
         ]
 
-        structures_dataframe["fingerprint"] = [
-            numpy.array(featurizer.featurize(s.structure))
-            for _, s in track(structures_dataframe.iterrows())
+        # generating fingerprints is slow so we use dask to parallelize
+        client = get_dask_client()
+        logging.info("Submitting to jobs dask...")
+        futures = [
+            client.submit(featurizer.featurize, s.structure, pure=False)
+            for _, s in track(list(structures_dataframe.iterrows()))
         ]
+        logging.info("Waiting for dask jobs to finish...")
+        structures_dataframe["fingerprint"] = [numpy.array(f.result()) for f in futures]
+        logging.info("Done.")
 
         fingerprint_known = numpy.array(featurizer.featurize(structure_known))
 
-        structures_dataframe["fingerprint_distance"] = [
-            numpy.linalg.norm(fingerprint_known - s.fingerprint)
-            for _, s in track(structures_dataframe.iterrows())
-        ]
+        distances = []
+        smallest_distance_id = None
+        smallest_distance = 999
+        for _, s in structures_dataframe.iterrows():
+
+            distance = numpy.linalg.norm(fingerprint_known - s.fingerprint)
+            distances.append(distance)
+
+            # import scipy
+            # scipy.spatial.distance.cosine(fingerprint_known, s.fingerprint)
+            # BUG: I assume distance method. I need to check the validator in
+            # case the method prefers something like cosine distance.
+
+            if distance < smallest_distance:
+                smallest_distance = distance
+                smallest_distance_id = s.id
+        logging.info(
+            f"The most similar structure is id={smallest_distance_id} "
+            f"with distance {smallest_distance:.3f}"
+        )
+        structures_dataframe["fingerprint_distance"] = distances
 
         # There's only one plot here, no subplot. So we make the scatter
         # object and just pass it directly to a Figure object

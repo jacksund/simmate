@@ -92,3 +92,11 @@ def get_chemical_subsystems(chemical_system: str):
     composition = Composition(chemical_system.replace("-", ""))
 
     return composition.chemical_subsystems
+
+
+def chunk_list(full_list: list, chunk_size: int) -> list:
+    """
+    Yield successive n-sized chunks from a list.
+    """
+    for i in range(0, len(full_list), chunk_size):
+        yield full_list[i : i + chunk_size]

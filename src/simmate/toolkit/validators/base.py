@@ -23,7 +23,10 @@ class Validator:
         )
 
     def check_many_structures(self, structures, progressbar=True, mode="threads"):
-        # USING DASK TO PARALLELIZE
+
+        # REFACTOR: switch to the get_dask_client utility here.
+
+        # using dask to parallelize
         structures_bag = bag.from_sequence(structures)
         validation_bag = structures_bag.map(self.check_structure)
 

@@ -108,8 +108,8 @@ class Transformation:
         **kwargs,  # for apply_transformation_with_validation
     ):
 
-        logging.info(f"Creating a transformed structure with {self.name}")
-        logging.info(f"Parent(s) will be selected using {selector.name}")
+        logging.info(f"Creating a transformed structure with '{self.name}'")
+        logging.info(f"Parent(s) will be selected using '{selector.name}'")
 
         # grab parent structures using the selection method
         parent_ids, parent_structures = selector.select_from_datatable(
