@@ -11,6 +11,7 @@ import plotly.express as plotly_express
 import plotly.graph_objects as plotly_go
 from rich.progress import track
 
+from simmate.configuration.dask import get_dask_client
 from simmate.database.base_data_types import Calculation, table_column
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.structure_prediction.evolution.database import SteadystateSource
@@ -790,17 +791,22 @@ class Correctness(PlotlyFigure):
         # through the queryset like in the commented out code above. Instead,
         # we need to iterate through the dataframe rows.
         # See https://github.com/chrisdev/django-pandas/issues/138 for issue
-        from simmate.toolkit import Structure
 
         structures_dataframe["structure"] = [
             Structure.from_str(s.structure, fmt="POSCAR")
             for _, s in structures_dataframe.iterrows()
         ]
 
-        structures_dataframe["fingerprint"] = [
-            numpy.array(featurizer.featurize(s.structure))
+        # generating fingerprints is slow so we use dask to parallelize
+        client = get_dask_client()
+        logging.info("Submitting to jobs dask...")
+        futures = [
+            client.submit(featurizer.featurize, s.structure, pure=False)
             for _, s in track(list(structures_dataframe.iterrows()))
         ]
+        logging.info("Waiting for dask jobs to finish...")
+        structures_dataframe["fingerprint"] = [numpy.array(f.result()) for f in futures]
+        logging.info("Done.")
 
         fingerprint_known = numpy.array(featurizer.featurize(structure_known))
 

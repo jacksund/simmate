@@ -64,7 +64,7 @@ search.write_output_summary(d)
 # Check most similar
 # -----------------------------------------------------------------------------
 
-# search.view_correctness_plot(structure_known=expected_structure)
+search.view_correctness_plot(structure_known=expected_structure)
 
 # -----------------------------------------------------------------------------
 # Check for exact match
