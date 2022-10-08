@@ -32,10 +32,11 @@ class TournamentSelection(Selector):
         tournament_winners = []
         for n in range(nselect):
             df_tourn = individuals.sample(ntournament, replace=False)
-            winner_id = df_tourn.nsmallest(1, fitness_column).iloc[0].id
-            tournament_winners.append(winner_id)
+            winner = df_tourn.nsmallest(1, fitness_column).iloc[0]
+            tournament_winners.append(winner)
 
-        # take the winning ids and grab their enties
-        df_parents = individuals[individuals.id.isin(tournament_winners)]
+        # take the winning series and convert back to a pandas dataframe
+        df_parents = pandas.DataFrame(tournament_winners)
+        df_parents = df_parents.reset_index(drop=True)  # in case of duplicates
 
         return df_parents
