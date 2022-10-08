@@ -52,7 +52,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         selector_kwargs: dict = {},
         validator_name: str = "PartialCrystalNNFingerprint",
         validator_kwargs: dict = {
-            "distance_tolerance": 0.1,  # much stricter than default 0.9
+            "distance_tolerance": 0.2,  # much stricter than default 0.9
             "use_database": True,
         },
         sleep_step: int = 10,

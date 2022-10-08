@@ -40,7 +40,7 @@ from simmate.utilities import get_directory
 # Setup and loading
 # -----------------------------------------------------------------------------
 
-search = FixedCompositionSearch.objects.get(id=3)
+search = FixedCompositionSearch.objects.get(id=4)
 
 expected_structure = Structure.from_dynamic(
     # "benchmark_structures/SiO2-6945_opt.cif",
@@ -54,11 +54,10 @@ expected_structure = Structure.from_dynamic(
 # Write outputs
 # -----------------------------------------------------------------------------
 
-expected_structure.to("cif", "expected.cif")
-
-search.best_individual.to_toolkit().to("cif", "best.cif")
-
 d = get_directory("search-output")
+
+expected_structure.to("cif", d / "expected.cif")
+search.best_individual.to_toolkit().to("cif", d / "best.cif")
 search.write_output_summary(d)
 
 # -----------------------------------------------------------------------------
@@ -76,7 +75,7 @@ for n, individual in track(list(enumerate(individuals))):
 
     is_match = matcher.fit(expected_structure, structure)
     if is_match:  # or individual.id == 76827
-        structure.to("cif", "match.cif")
+        structure.to("cif", d / "match.cif")
         break
 
 if not is_match:
