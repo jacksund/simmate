@@ -177,7 +177,7 @@ class WorkItem(DatabaseTable):
         else:
             return False
 
-    def result(self, timeout: float = None, sleep_step: float = 0.1) -> any:
+    def result(self, timeout: float = None, sleep_step: float = 5) -> any:
         """
         Return the value returned by the call. If the call hasn’t yet completed
         then this method will wait up to timeout seconds. If the call hasn’t

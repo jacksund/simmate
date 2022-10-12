@@ -4,6 +4,7 @@ import itertools
 import logging
 from pathlib import Path
 
+from pymatgen.analysis.reaction_calculator import Reaction, ReactionError
 from rich.progress import track
 
 from simmate.toolkit import Composition
@@ -66,7 +67,9 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
         # Grab the two elements that we are working with. Also if this raises
         # an error, we want to provide useful feedback to the user
         try:
-            element_1, element_2 = chemical_system.split("-")
+            endpoint_compositions = [
+                Composition(sys) for sys in chemical_system.split("-")
+            ]
         except:
             raise Exception(
                 "Failed to split {} into elements. Your format for the input "
@@ -74,21 +77,58 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
                 "Element1-Element2. Ex: Na-Cl, Ca-N, Y-C, etc."
             )
 
-        # Find all unique compositions
+        # grab all unique elements
+        elements = []
+        for comp in endpoint_compositions:
+            for element in comp.elements:
+                if element not in elements:
+                    elements.append(element)
+
+        # Find all unique compositions for the list of elements.
+        # Note, for complex compositions, this will contain extra compositions
+        # that we will want removed. This is addressed in the next step.
         compositions = []
         for nsites in range(1, max_atoms + 1):
-            for combo in itertools.combinations_with_replacement(
-                [element_1, element_2], nsites
-            ):
-
-                composition = Composition(
-                    {
-                        element_1: combo.count(element_1),
-                        element_2: combo.count(element_2),
-                    }
-                )
-
+            for combo in itertools.combinations_with_replacement(elements, nsites):
+                counts = {e.symbol: combo.count(e) for e in elements}
+                composition = Composition(**counts)
                 compositions.append(composition)
+
+        # For complex chemical systems (e.g. the Sc2C-Sc2CF2 or Y6S4-YF3-Y systems)
+        # we need to make sure the composition is contained with that system.
+        # The general rule is that it must be possible to stoichiometrically
+        # balance the reaction of endpoint compositions with the composition
+        # being considered. For example, in the Y6S4-YF3-Y system,
+        # Y2SF would be accepted (0.5 Y3S2 + 0.33 YF3 + 0.166 Y -> Y2SF)
+        # while YSF would be rejected (0.5 Y3S2 + 0.33 YF3 - 0.833 Y ->  + YSF)
+        # (for YSF, note the negative sign for Y)
+        compositions_cleaned = []
+        for composition in compositions:
+
+            # BUG-FIX: endpoint compositions throw rounding errors, so we check
+            # for them here.
+            if any(
+                [
+                    composition.reduced_composition == c.reduced_composition
+                    for c in endpoint_compositions
+                ]
+            ):
+                compositions_cleaned.append(composition)
+                continue
+
+            try:
+                reaction = Reaction(
+                    reactants=endpoint_compositions,
+                    products=[composition],
+                )
+            except ReactionError:
+                # reaction could not be balanced and is therefore invalid
+                continue
+
+            if reaction.products == [composition]:
+                compositions_cleaned.append(composition)
+        compositions = compositions_cleaned
+
         logging.info(f"{len(compositions)} unique compositions will be explored")
 
         # now condense this list down to just the reduced formulas
