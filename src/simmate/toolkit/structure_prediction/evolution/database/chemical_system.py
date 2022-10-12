@@ -6,6 +6,7 @@ import warnings
 from pathlib import Path
 
 from simmate.database.base_data_types import Calculation, table_column
+from simmate.toolkit import Composition
 from simmate.utilities import get_chemical_subsystems, get_directory
 
 # BUG: This prints a tqdm error so we silence it here.
@@ -42,7 +43,14 @@ class ChemicalSystemSearch(Calculation):
     def chemical_system_cleaned(self):
         # simply ordered elements in alphabetical order as that is how they
         # are stored in the database
-        elements = [e for e in self.chemical_system.split("-")]
+        endpoint_compositions = [
+            Composition(sys) for sys in self.chemical_system.split("-")
+        ]
+        elements = []
+        for comp in endpoint_compositions:
+            for element in comp.elements:
+                if element not in elements:
+                    elements.append(element)
         elements.sort()
         chemical_system = "-".join(elements)
         return chemical_system
