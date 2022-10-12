@@ -9,7 +9,7 @@ from rich.progress import track
 
 from simmate.toolkit import Composition
 from simmate.toolkit.structure_prediction.evolution.database.binary_system import (
-    BinarySystemSearch,
+    ChemicalSystemSearch,
 )
 from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (
     StructurePrediction__Toolkit__FixedComposition,
@@ -25,7 +25,7 @@ from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
 
-class StructurePrediction__Toolkit__BinarySystem(Workflow):
+class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
     """
     Runs an evolutionary search algorithm to predict the most stable structures
     of a binary phase system (e.g Na-Cl or Y-C)
@@ -33,7 +33,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
 
     description_doc_short = "hull diagram for a two-element system (e.g. Na-Cl)"
 
-    database_table = BinarySystemSearch
+    database_table = ChemicalSystemSearch
 
     fixed_comp_workflow = StructurePrediction__Toolkit__FixedComposition
 

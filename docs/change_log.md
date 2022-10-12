@@ -79,6 +79,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add `exlcude_from_archives` field to workflows to optionally delete files when compressing outputs to zip archives
 - various improvements added for evolutionary search workflows, such as parameter optimization, new output files, and website views
 - add `Fingerprint` database table and integrate it with `Fingerprint` validator
+- support >2 element hull diargrams and complex chemical systems
 
 **Refactors**
 
@@ -88,6 +89,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 - fix dynamic loading of toolkit structures from third-party databases
 - fix race condition with workers and empty queues
+- increases default query rate for `state.result()` to lessen database load
 
 --------------------------------------------------------------------------------
 

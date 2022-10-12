@@ -13,7 +13,7 @@ with warnings.catch_warnings(record=True):
     from pymatgen.analysis.phase_diagram import PhaseDiagram
 
 
-class BinarySystemSearch(Calculation):
+class ChemicalSystemSearch(Calculation):
     class Meta:
         app_label = "workflows"
 
