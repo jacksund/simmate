@@ -84,6 +84,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Refactors**
 
 - optimize `get_series` method of `relaxation.vasp.staged`
+- reorganize `selectors` module for evolutionary structure prediction
 
 **Fixes**
 

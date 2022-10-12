@@ -55,7 +55,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
             # and then actually calculate all unique as a backup
             # We only activate the caching once we have >200 unique structures,
             # as that is when it starts to cut into CPU time.
-            use_cache = bool(len(search_db.unique_individuals_ids) >= 200)
+            use_cache = bool(len(search_db.unique_individuals_ids) >= 400)
             unique_queryset = search_db.get_unique_individuals(
                 use_cache=use_cache,
                 as_queryset=True,
@@ -65,7 +65,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
                 selector=search_db.selector,
                 datatable=unique_queryset,
                 select_kwargs=dict(
-                    ranking_column=search_db.fitness_field,
+                    fitness_column=search_db.fitness_field,
                     # query_limit=200,  # OPTIMIZE: Smarter way to do this...?
                 ),
                 validators=[validator],
