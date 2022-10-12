@@ -40,12 +40,13 @@ from simmate.utilities import get_directory
 # Setup and loading
 # -----------------------------------------------------------------------------
 
-search = FixedCompositionSearch.objects.get(id=5)
+search = FixedCompositionSearch.objects.get(id=4)
 
 expected_structure = Structure.from_dynamic(
     # "benchmark_structures/SiO2-6945_opt.cif",
     # "benchmark_structures/Al2O3-1143_opt.cif",
-    "benchmark_structures/MgSiO3-603930_opt.cif",
+    "benchmark_structures/Si2N2O-4497_opt.cif",
+    # "benchmark_structures/MgSiO3-603930_opt.cif",
     # "benchmarks/evolutionary_search/benchmark_structures/MgSiO3-603930_opt.cif",
 )
 
@@ -53,18 +54,11 @@ expected_structure = Structure.from_dynamic(
 # Write outputs
 # -----------------------------------------------------------------------------
 
-expected_structure.to("cif", "expected.cif")
-
-search.best_individual.to_toolkit().to("cif", "best.cif")
-
 d = get_directory("search-output")
+
+expected_structure.to("cif", d / "expected.cif")
+search.best_individual.to_toolkit().to("cif", d / "best.cif")
 search.write_output_summary(d)
-
-# -----------------------------------------------------------------------------
-# Check most similar
-# -----------------------------------------------------------------------------
-
-search.view_correctness_plot(structure_known=expected_structure)
 
 # -----------------------------------------------------------------------------
 # Check for exact match
@@ -81,7 +75,7 @@ for n, individual in track(list(enumerate(individuals))):
 
     is_match = matcher.fit(expected_structure, structure)
     if is_match:  # or individual.id == 76827
-        structure.to("cif", "match.cif")
+        structure.to("cif", d / "match.cif")
         break
 
 if not is_match:
@@ -111,5 +105,11 @@ print(n + 1)
 print(search_time)
 print(job_time)
 print(cpu_time)
+
+# -----------------------------------------------------------------------------
+# Check most similar
+# -----------------------------------------------------------------------------
+
+search.write_correctness_plot(directory=d, structure_known=expected_structure)
 
 # -----------------------------------------------------------------------------

@@ -14,6 +14,7 @@ from rich.progress import track
 from simmate.configuration.dask import get_dask_client
 from simmate.database.base_data_types import Calculation, table_column
 from simmate.toolkit import Composition, Structure
+from simmate.toolkit.structure_prediction.evolution import selectors as selector_module
 from simmate.toolkit.structure_prediction.evolution.database import SteadystateSource
 from simmate.toolkit.validators import fingerprint as validator_module
 from simmate.utilities import get_directory
@@ -569,15 +570,14 @@ class FixedCompositionSearch(Calculation):
     @property
     def selector(self):
 
-        # Initialize the selector
-        if self.selector_name == "TruncatedSelection":
-            from simmate.toolkit.structure_prediction.evolution.selectors import (
-                TruncatedSelection,
-            )
+        # !!! This is largley a copy/paste of the validator method. Consider
+        # making a utility to load classes by name
 
-            selector = TruncatedSelection()
-        else:  # BUG
-            raise Exception("We only support TruncatedSelection right now")
+        if hasattr(selector_module, self.selector_name):
+            selector_class = getattr(selector_module, self.selector_name)
+            selector = selector_class(**self.selector_kwargs)
+        else:
+            raise Exception("Unknown selector name provided")
 
         return selector
 
