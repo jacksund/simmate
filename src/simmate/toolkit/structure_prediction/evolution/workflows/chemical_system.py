@@ -4,11 +4,12 @@ import itertools
 import logging
 from pathlib import Path
 
+import numpy
 from pymatgen.analysis.reaction_calculator import Reaction, ReactionError
 from rich.progress import track
 
 from simmate.toolkit import Composition
-from simmate.toolkit.structure_prediction.evolution.database.binary_system import (
+from simmate.toolkit.structure_prediction.evolution.database.chemical_system import (
     ChemicalSystemSearch,
 )
 from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (
@@ -105,17 +106,6 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         compositions_cleaned = []
         for composition in compositions:
 
-            # BUG-FIX: endpoint compositions throw rounding errors, so we check
-            # for them here.
-            if any(
-                [
-                    composition.reduced_composition == c.reduced_composition
-                    for c in endpoint_compositions
-                ]
-            ):
-                compositions_cleaned.append(composition)
-                continue
-
             try:
                 reaction = Reaction(
                     reactants=endpoint_compositions,
@@ -125,7 +115,17 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
                 # reaction could not be balanced and is therefore invalid
                 continue
 
-            if reaction.products == [composition]:
+            # iterate and make sure our target composition is close to 1 while
+            # all other products are close to 0. Note the is-close checks
+            # are because of rounding bugs in the pymatgen code
+            is_valid = True
+            for product in reaction.products:
+                coeff = reaction.get_coeff(product)
+                if product == composition and not numpy.isclose(coeff, 1):
+                    is_valid = False
+                elif product != composition and not numpy.isclose(coeff, 0):
+                    is_valid = False
+            if is_valid:
                 compositions_cleaned.append(composition)
         compositions = compositions_cleaned
 
