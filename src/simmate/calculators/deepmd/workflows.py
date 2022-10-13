@@ -10,8 +10,6 @@ from simmate.workflows.utilities import get_workflow
 
 # from simmate.database.workflow_results import Dynamics
 
-# TEST PULL
-
 class Run__Deepmd__Training(S3Workflow):
 
     use_database = False
