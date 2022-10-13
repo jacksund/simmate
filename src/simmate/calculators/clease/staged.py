@@ -1,23 +1,19 @@
+from cluster_expansion import HighQRelaxation, LowQRelaxation, StaticEnergy
+
 from simmate.workflow_engine import Workflow
-from cluster_expansion import LowQRelaxation, HighQRelaxation, StaticEnergy
+
 
 class ClusterExpansion__Vasp__Staged(Workflow):
     use_database = False
-    
+
     subworkflows = [
-            LowQRelaxation.Relaxation__Vasp__ClusterLowQRelaxation(),
-            HighQRelaxation.Relaxation__Vasp__ClusterHighQRelaxation(),
-            StaticEnergy.StaticEnergy__Vasp__ClusterStaticEnergy(),
+        LowQRelaxation.Relaxation__Vasp__ClusterLowQRelaxation(),
+        HighQRelaxation.Relaxation__Vasp__ClusterHighQRelaxation(),
+        StaticEnergy.StaticEnergy__Vasp__ClusterStaticEnergy(),
     ]
 
     @classmethod
-    def run_config(
-            cls,
-            command: str,
-            directory: str,
-            structure: str,
-            **kwargs
-    ):
+    def run_config(cls, command: str, directory: str, structure: str, **kwargs):
         current_task = cls.subworkflows[0]
         state = current_task.run(
             structure=structure,

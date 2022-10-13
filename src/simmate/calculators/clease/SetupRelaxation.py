@@ -9,9 +9,11 @@ Created on Mon Sep 12 13:09:19 2022
 
 from pathlib import Path
 
-from simmate.workflow_engine import Workflow
-from simmate.toolkit import Structure
 from cluster_expansion import staged
+
+from simmate.toolkit import Structure
+from simmate.workflow_engine import Workflow
+
 
 class ClusterExpansion__Python__SetupRelaxation(Workflow):
     use_database = False
@@ -25,14 +27,14 @@ class ClusterExpansion__Python__SetupRelaxation(Workflow):
             if file.suffix == ".cif":
                 cif_structure = Structure.from_file(file)
 
-                state = staged.ClusterExpansion__Vasp__Staged.run_cloud( #check this before running
+                state = staged.ClusterExpansion__Vasp__Staged.run_cloud(  # check this before running
                     structure=cif_structure,
                     # this names the new folder after the original cif filename
                     directory=directory / file.stem,
                     command="mpirun -n 28 vasp_std > vasp.out",
                 )
                 submitted_states.append(state)
-                
+
         # ---------------------------------------------
         # Everything below is optional and only if you want to wait for and
         # the workup the results
