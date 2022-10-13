@@ -11,7 +11,7 @@ from ase import Atoms
 from clease.settings import Concentration, CECrystal
 from clease import Evaluate
 
-class ClusterExpansion__Python__StructureGen(Workflow):
+class ClusterExpansion__Python__Evaluate(Workflow):
     use_database = False
 
     @staticmethod #method bound to a class rather than its object; knows nothing about class and just deals with parameters
