@@ -223,7 +223,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
                 "submissions to finish"
             )
             for state in all_submissions[:number_to_wait_for]:
-                state.result()
+                state.result(raise_error=False)
 
         search_datatable.write_output_summary(directory)
 

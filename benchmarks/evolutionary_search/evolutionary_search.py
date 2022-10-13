@@ -41,7 +41,7 @@ from simmate.utilities import get_directory
 # Setup and loading (Chemical-system search)
 # -----------------------------------------------------------------------------
 
-search = ChemicalSystemSearch.objects.get(id=3)
+search = ChemicalSystemSearch.objects.get(id=1)
 d = get_directory("search-output")
 search.write_output_summary(d)
 
