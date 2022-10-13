@@ -10,6 +10,7 @@ from simmate.workflows.utilities import get_workflow
 
 # from simmate.database.workflow_results import Dynamics
 
+
 class Run__Deepmd__Training(S3Workflow):
 
     use_database = False
@@ -30,19 +31,17 @@ class Run__Deepmd__Training(S3Workflow):
     ):
 
         # establish list of elements
-        element_list = structure.composition.elements
-        type_map = []
-        for x in element_list:
-            type_map.append(x.symbol)
+        elements = [e.symbol for e in structure.composition.elements]
 
         # build the full deepmd input settings
         dictionary = {
             "model": {
-                "type_map": type_map,
+                "type_map": elements,
                 "descriptor": {
                     "type": "se_e2_a",
                     "rcut": 6.0,
                     "neuron": model_neuron,
+                    "sel": [180] * len(elements),  # OPTIMIZE
                 },
                 "fitting_net": {"type": "ener", "neuron": fitting_neuron},
             },
@@ -74,6 +73,8 @@ class Create__Deepmd__Model(Workflow):
         structure: Structure,
         directory: Path,
         temperature_list: list[int] = [300, 750, 1200],
+        relax_kwargs: dict = {},
+        md_kwargs: dict = {},
         **kwargs,
     ):
 
@@ -82,6 +83,7 @@ class Create__Deepmd__Model(Workflow):
         state = relax_workflow.run(
             structure=structure,
             directory=directory / relax_workflow.name_full,
+            **relax_kwargs,
         )
         relax_result = state.result()
 
@@ -90,11 +92,11 @@ class Create__Deepmd__Model(Workflow):
         submitted_states = []
         for temperature in temperature_list:
 
-            state = md_workflow.run_cloud(
+            state = md_workflow.run(  # ---------------- USE RUN CLOUD IN FINAL VERSION
                 structure=relax_result,
                 temperature_start=temperature,
                 temperature_end=temperature,  # constant temp for entire run
-                nsteps=50,
+                **md_kwargs,
             )
             submitted_states.append(state)
 
@@ -124,12 +126,18 @@ class Create__Deepmd__Model(Workflow):
         # run initial deepmd training iteration
         temperature = temperature_list[0]
         training_data.append(
-            directory / f"deepmd_data_{temperature}/{composition}_train"
+            str(directory / f"deepmd_data_{temperature}/{composition}_train")
         )
-        testing_data.append(directory / f"deepmd_data_{temperature}/{composition}_test")
+        testing_data.append(
+            str(directory / f"deepmd_data_{temperature}/{composition}_test")
+        )
+
+        deepmd_directory = directory / "deepmd"
+
         Run__Deepmd__Training.run(
+            directory=deepmd_directory,
             structure=structure,
-            command='eval "$(conda shell.bash hook)"; conda activate deepmd3; dp train input_1.json',
+            command='eval "$(conda shell.bash hook)"; conda activate deepmd; dp train input_1.json',
             input_filename="input_1.json",
             training_data=training_data,
             testing_data=testing_data,
@@ -141,17 +149,17 @@ class Create__Deepmd__Model(Workflow):
 
             # add the new dataset to our list
             training_data.append(
-                directory / f"deepmd_data_{temperature}/{composition}_train"
+                str(directory / f"deepmd_data_{temperature}/{composition}_train")
             )
             testing_data.append(
-                directory / f"deepmd_data_{temperature}/{composition}_test"
+                str(directory / f"deepmd_data_{temperature}/{composition}_test")
             )
 
             # find the newest available checkpoint file
             number_max = 0  # to keep track of checkpoint number
             checkpoint_file = None
-            for file in directory.iterdir():
-                if "model.ckpt" in file.stem:
+            for file in deepmd_directory.iterdir():
+                if "model.ckpt" in file.stem and "-" in file.stem:
                     number = int(file.stem.split("-")[-1])
                     if number > number_max:
                         number_max = number
@@ -162,9 +170,22 @@ class Create__Deepmd__Model(Workflow):
 
             # And continue the model training with this new data
             Run__Deepmd__Training.run(
-                structure=relax_result.structure,
-                command=f'eval "$(conda shell.bash hook)"; conda activate deepmd3; dp train -restart {str(checkpoint_file)} input_{n}.json',
+                directory=deepmd_directory,
+                structure=relax_result,
+                command=f'eval "$(conda shell.bash hook)"; conda activate deepmd; dp train --restart {checkpoint_file.stem} input_{n}.json',
                 input_filename=f"input_{n}.json",
                 training_data=training_data,
                 testing_data=testing_data,
             )
+
+
+# structure = Structure.from_file("test_structures/NaCl.cif")
+
+# state = Create__Deepmd__Model.run(
+#     structure=structure,
+#     relax_kwargs=dict(command="mpirun -n 8 vasp_std > vasp.out"),
+#     md_kwargs=dict(
+#         command="mpirun -n 12 vasp_std > vasp.out",
+#         nsteps=50,
+#     ),
+# )
