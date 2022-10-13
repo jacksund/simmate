@@ -1,12 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Sep 12 13:09:19 2022
-
-@author: WarrenLab
-"""
-
-
 from pathlib import Path
 
 from cluster_expansion import staged
