@@ -38,7 +38,15 @@ from simmate.utilities import get_directory
 # simmate workflow-engine start-cluster 100 --type slurm
 
 # -----------------------------------------------------------------------------
-# Setup and loading
+# Setup and loading (Chemical-system search)
+# -----------------------------------------------------------------------------
+
+search = ChemicalSystemSearch.objects.get(id=3)
+d = get_directory("search-output")
+search.write_output_summary(d)
+
+# -----------------------------------------------------------------------------
+# Setup and loading (Fixed-composition search)
 # -----------------------------------------------------------------------------
 
 search = FixedCompositionSearch.objects.get(id=4)
