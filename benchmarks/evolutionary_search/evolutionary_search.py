@@ -9,6 +9,7 @@ from simmate.database.workflow_results import (
     FixedCompositionSearch,
     Relaxation,
     StaticEnergy,
+    ChemicalSystemSearch,
 )
 from simmate.toolkit import Structure
 from simmate.utilities import get_directory

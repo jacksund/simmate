@@ -49,6 +49,7 @@ class ChemicalSystemSearch(Calculation):
         elements = []
         for comp in endpoint_compositions:
             for element in comp.elements:
+                element = str(element)
                 if element not in elements:
                     elements.append(element)
         elements.sort()

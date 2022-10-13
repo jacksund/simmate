@@ -37,13 +37,11 @@ def get_all_workflows(
         try:
             app_module = importlib.import_module(f"{app_modulename}.workflows")
         except Exception as error:
-            logging.warning(
+            logging.critical(
                 f"Failed to load workflows from {app_name}. Did you make sure "
                 "there is a workflows.py file or module present?"
-                f"The error given was...\n {error}"
             )
-            # raise error  --- should I just raise the error?
-            continue
+            raise error
 
         # iterate through each available object in the workflows file and find
         # which ones are workflow objects.
