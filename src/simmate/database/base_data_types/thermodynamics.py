@@ -258,7 +258,8 @@ class HullDiagram(PlotlyFigure):
         phase_diagram = table.get_phase_diagram(chemical_system, workflow_name)
 
         # alternatively use backend="matplotlib"
-        plotter = PDPlotter(phase_diagram, show_unstable=True)
+        plotter = PDPlotter(phase_diagram, show_unstable=5)
+        # Only shows structures up to 5eV above hull
 
         plot = plotter.get_plot(label_unstable=False)
 
