@@ -6,10 +6,10 @@ from rich.progress import track
 from simmate.database import connect
 from simmate.database.base_data_types import FingerprintPool
 from simmate.database.workflow_results import (
+    ChemicalSystemSearch,
     FixedCompositionSearch,
     Relaxation,
     StaticEnergy,
-    ChemicalSystemSearch,
 )
 from simmate.toolkit import Structure
 from simmate.utilities import get_directory
