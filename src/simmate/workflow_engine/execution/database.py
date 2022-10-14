@@ -211,7 +211,7 @@ class WorkItem(DatabaseTable):
                 # grab the result, unpickle it, and return it
                 result = cloudpickle.loads(workitem.result_binary)
                 # if the result is an Error or Exception, raise it
-                if isinstance(result, Exception):
+                if isinstance(result, Exception) and raise_error:
                     raise result
                 # otherwise return the result as-is
                 else:
