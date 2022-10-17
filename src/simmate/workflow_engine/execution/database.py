@@ -177,7 +177,12 @@ class WorkItem(DatabaseTable):
         else:
             return False
 
-    def result(self, timeout: float = None, sleep_step: float = 0.1) -> any:
+    def result(
+        self,
+        timeout: float = None,
+        sleep_step: float = 5,
+        raise_error: bool = True,
+    ) -> any:
         """
         Return the value returned by the call. If the call hasn’t yet completed
         then this method will wait up to timeout seconds. If the call hasn’t
@@ -206,7 +211,7 @@ class WorkItem(DatabaseTable):
                 # grab the result, unpickle it, and return it
                 result = cloudpickle.loads(workitem.result_binary)
                 # if the result is an Error or Exception, raise it
-                if isinstance(result, Exception):
+                if isinstance(result, Exception) and raise_error:
                     raise result
                 # otherwise return the result as-is
                 else:
