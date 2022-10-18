@@ -86,6 +86,8 @@ class DeepmdDataset:
 
         # convert the ionic_step_structures queryset to a pandas dataframe
         structures_dataframe = read_frame(ionic_step_structures)
+        # NOTE--- this might be legacy code (before the to_dataframe method).
+        # Maybe change this method to accept a dataframe...?
 
         # because we are using the database model, we first want to convert to
         # pymatgen structures objects and add a column to the dataframe for these
