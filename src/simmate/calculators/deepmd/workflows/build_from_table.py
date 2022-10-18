@@ -22,7 +22,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
         filter_kwargs: dict = {},
         **kwargs,
     ):
-        breakpoint()
+
         # Load the desired table and filter the target structures from it
         #
         # Import the datatable class -- how this is done depends on if it
@@ -51,16 +51,12 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
             )
 
         # write structure data to files for use with deepmd
-        DeepmdDataset.to_file(
+        training_data, testing_data = DeepmdDataset.to_file(
             ionic_step_structures=all_db_structures,
             directory=directory / "deepmd_data",
         )
         # TODO: consider splitting into separate datasets and training with
         # data in stages
-
-        # keep a running list of training and test datasets
-        training_data = [str(directory / f"deepmd_data/{composition}_train")]
-        testing_data = [str(directory / f"deepmd_data/{composition}_test")]
 
         deepmd_directory = directory / "deepmd"
 
@@ -70,7 +66,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
         deepmd_workflow.run(
             directory=deepmd_directory,
             composition=composition,
-            command='eval "$(conda shell.bash hook)"; conda activate deepmd; dp train input.json',
+            command='eval "$(conda shell.bash hook)"; conda activate deepmd; dp train input.json > deepmd.out',
             training_data=training_data,
             testing_data=testing_data,
             # TODO: consider making a subdirectory for deepmd

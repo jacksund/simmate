@@ -17,8 +17,10 @@ class MlPotential__Deepmd__TrainModel(S3Workflow):
     def setup(
         directory: Path,
         composition: Composition,
-        training_data: Path,  # consider accepting a Dynamics or IonicStep queryset
-        testing_data: Path,
+        training_data: list[
+            Path
+        ],  # consider accepting a Dynamics or IonicStep queryset
+        testing_data: list[Path],
         input_filename: str = "input.json",
         model_neuron: list[int] = [10, 20, 40],
         fitting_neuron: list[int] = [120, 120, 120],
@@ -28,6 +30,11 @@ class MlPotential__Deepmd__TrainModel(S3Workflow):
 
         # establish list of elements
         elements = [e.symbol for e in composition.elements]
+
+        # make sure training/test directories are strings. They are often
+        # given a Path objects
+        training_data = [str(p) for p in training_data]
+        testing_data = [str(p) for p in testing_data]
 
         # build the full deepmd input settings
         dictionary = {
