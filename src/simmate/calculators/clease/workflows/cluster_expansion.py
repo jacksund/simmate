@@ -111,7 +111,7 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
                 structure_step = AseAtomsAdaptor.get_structure(atoms)
 
                 # Submit a workflow for the new structure
-                state = subworkflow.run(  # ------------------ CHANGE TO RUN_CLOUD
+                state = subworkflow.run_cloud(
                     structure=structure_step,
                     source={
                         "method": "clease+ase",
@@ -124,12 +124,16 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
             # Now iterate through our submitted calcs and save them to our
             # database as they finish
             for state in submitted_states:
-                # wait for run to finish and load the results
-                result = state.result()  # structure_step
 
-                if isinstance(result, Exception):
-                    # TODO: do something with those that failed.
+                # wait for run to finish and load the results
+                try:
+                    result = state.result()  # structure_step
+                except:
+                    logging.warning("CALC {row.id} FAILED.")
                     continue
+                # if isinstance(result, Exception):
+                #     # TODO: do something with those that failed.
+                #     continue
 
                 # convert from Database Structure --> Toolkit Structure --> ASE
                 structure_result = result.to_toolkit()
