@@ -253,13 +253,14 @@ class HullDiagram(PlotlyFigure):
         table,  # Thermodynamics + Structure table
         chemical_system: str,
         workflow_name: str = None,
+        show_unstable_up_to: float = float("inf"),
     ):
 
         phase_diagram = table.get_phase_diagram(chemical_system, workflow_name)
 
         # alternatively use backend="matplotlib"
-        plotter = PDPlotter(phase_diagram, show_unstable=5)
-        # Only shows structures up to 5eV above hull
+        plotter = PDPlotter(phase_diagram, show_unstable=show_unstable_up_to)
+        # Only shows structures up to X eV above hull
 
         plot = plotter.get_plot(label_unstable=False)
 

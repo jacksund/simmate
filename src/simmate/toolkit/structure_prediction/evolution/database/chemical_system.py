@@ -147,6 +147,7 @@ class ChemicalSystemSearch(Calculation):
                 chemical_system=self.chemical_system_cleaned,
                 workflow_name=self.subworkflow.name_full,
                 directory=directory,
+                show_unstable_up_to=5,
             )
 
             stable_dir = get_directory(directory / "stable_structures")
@@ -208,9 +209,10 @@ class ChemicalSystemSearch(Calculation):
 
         for rank, structure in enumerate(structures):
             rank_cleaned = str(rank).zfill(2)  # converts 1 to 01
-            structure_filename = (
-                directory
-                / f"rank-{str(rank_cleaned)}__id-{structure.database_object.id}.cif"
+            structure_filename = directory / (
+                f"rank-{str(rank_cleaned)}__"
+                + f"id-{structure.database_object.id}"
+                + f"id-{structure.composition.reduced_formula}.cif"
             )
             structure.to("cif", structure_filename)
 
