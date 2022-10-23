@@ -38,10 +38,55 @@ from simmate.utilities import get_directory
 # simmate workflow-engine start-cluster 100 --type slurm
 
 # -----------------------------------------------------------------------------
+# Fix buggy structures
+# -----------------------------------------------------------------------------
+
+# in 2 out of the 75k+ structures of a Y-S-F search, VASP gave an excessively
+# large (negative) and incorrect energy. Recalculating the structure energy
+# confirmed these were incorrect. These energies throw off the hull energy
+# calculations so I need to delete them
+
+# df = (
+#     Relaxation.objects.filter(
+#         energy__isnull=False,
+#         formula_reduced="Y4S3F2",
+#         workflow_name="relaxation.vasp.staged",
+#     )
+#     .all()
+#     .to_dataframe()
+# )
+
+# structure = Relaxation.objects.get(id=327643) # "Y2S6F"
+# structure = Relaxation.objects.get(id=304806) # "Y4S3F2"
+# structure.to_toolkit().to("cif", "buggy_structure.cif")
+columns = [
+    "id",
+    "chemical_system",
+    "formula_full",
+    "formula_reduced",
+    "energy",
+    "energy_per_atom",
+    "energy_above_hull",
+    "formation_energy_per_atom",
+    "decomposes_to",
+    "band_gap",
+    "directory",
+    "total_time",
+]
+df = (
+    Relaxation.objects.filter(
+        workflow_name="relaxation.vasp.staged",
+        energy__isnull=False,
+    )
+    .only(*columns)
+    .to_dataframe(columns)
+)
+
+# -----------------------------------------------------------------------------
 # Setup and loading (Chemical-system search)
 # -----------------------------------------------------------------------------
 
-search = ChemicalSystemSearch.objects.get(id=1)
+search = ChemicalSystemSearch.objects.get(id=5)
 d = get_directory("search-output")
 search.write_output_summary(d)
 

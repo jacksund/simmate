@@ -68,6 +68,13 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 -->
 
+- no new changes have been merged into the `main` branch yet
+
+
+--------------------------------------------------------------------------------
+
+## v0.12.0 (2022.10.23)
+
 **Enhancements**
 
 - add structure creators for `ASE`, `GASP`, `PyXtal`, `AIRSS`, `CALYPSO`, `USPEX`, and `XtalOpt` as well as documentation for creators.
