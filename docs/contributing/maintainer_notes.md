@@ -1,5 +1,5 @@
 
-# Maintainers notes
+# Maintainer notes
 
 !!! note
     currently this section is only relevant to @jacksund

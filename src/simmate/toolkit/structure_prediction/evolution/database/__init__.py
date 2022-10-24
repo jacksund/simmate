@@ -7,4 +7,4 @@
 from .steadystate_source import SteadystateSource
 from .fixed_composition import FixedCompositionSearch
 from .variable_nsites_composition import VariableNsitesCompositionSearch
-from .binary_system import BinarySystemSearch
+from .chemical_system import ChemicalSystemSearch

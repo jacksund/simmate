@@ -100,30 +100,69 @@ class Relaxation__Vasp__Staged(Workflow):
 
     @classmethod
     def get_series(cls, value: str, **filter_kwargs):
+
         directories = (
-            cls.all_results.filter(**filter_kwargs)
-            .values_list("directory", flat=True)
+            cls.all_results.filter(**filter_kwargs).values_list("directory", flat=True)
+            # .order_by("?")[:1000]
             .all()
         )
 
-        # OPTIMIZE: This is a query for EACH entry which is very inefficient
-        all_energy_series = []
-        for directory in directories:
-            energy_series = []
-            for subflow in cls.subworkflows:
-                query = subflow.database_table.objects.filter(
-                    workflow_name=subflow.name_full,
-                    directory__startswith=directory,
-                    energy_per_atom__isnull=False,
-                ).values_list(value)
-                if query.exists():
-                    result = query.get()
-                    energy_series.append(result[0])
-                else:
-                    energy_series.append(numpy.nan)
-            all_energy_series.append(energy_series)
+        # Note, this method is optimized to grab ALL data up front in as few
+        # queries as possible. We grab all data rather than many smaller queries.
+        # Smaller queries are clear for code. The method would simplify to...
+        #
+        # for directory in directories:
+        #     for subflow in cls.subworkflows:
+        #         query = subflow.database_table.objects.filter(
+        #             workflow_name=subflow.name_full,
+        #             directory__startswith=directory,
+        #             **filter_kwargs,
+        #         ).values_list(value)
+        #
+        # Thererfore everything below is just minimizing the number of queries
+        # and reformatting the data output of the complex query.
 
-        return all_energy_series
+        tables = []
+        for subflow in cls.subworkflows:
+            if subflow.database_table not in tables:
+                tables.append(subflow.database_table)
+
+        all_data = {w: {} for w in cls.subworkflow_names}
+        for table in tables:
+
+            query = table.objects.filter(
+                workflow_name__in=cls.subworkflow_names,
+                **filter_kwargs,
+            ).values_list(value, "directory", "workflow_name")
+
+            # This filter crashes at large query sizes. It's actually more stable
+            # and efficient to grab ALL data and filter out results in python.
+            # from django.db.models import Q as dj_query
+            # complex_filter = dj_query(
+            #     *[("directory__startswith", d) for d in directories],
+            #     _connector=dj_query.OR,
+            # )
+            # .filter(complex_filter)
+
+            for output, directory, workflow_name in query:
+                folder_base = str(Path(directory).parent)
+
+                # this is the replacement for the commented-out complex filter
+                # shown above
+                # if folder_base not in directories:
+                #     continue
+
+                all_data[workflow_name].update({folder_base: output})
+
+        all_value_series = []
+        for directory in directories:
+            value_series = []
+            for subflow in cls.subworkflows:
+                new_value = all_data[subflow.name_full].get(directory, numpy.nan)
+                value_series.append(new_value)
+            all_value_series.append(value_series)
+
+        return all_value_series
 
 
 class StagedSeriesConvergence(PlotlyFigure):

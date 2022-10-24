@@ -50,7 +50,7 @@ class SimmateWorker:
         # wait_on_timeout=False, # TODO
         # settings on what to do when the queue is empty
         close_on_empty_queue: bool = False,
-        waittime_on_empty_queue: float = 1,
+        waittime_on_empty_queue: float = 15,
         tags: list[str] = ["simmate"],  # should default be empty...?
     ):
         """
@@ -144,7 +144,8 @@ class SimmateWorker:
                         logging.info("The task queue is empty. Shutting down.")
                         return
 
-            # our lock exists only within this transation
+            # make this atomic so that multiple workers don't accidentally
+            # grab the same job.
             with transaction.atomic():
 
                 # If we've made it this far, we're ready to grab a new WorkItem
@@ -152,16 +153,21 @@ class SimmateWorker:
                 # Query for PENDING WorkItems, lock it for editting, and update
                 # the status to RUNNING. And grab the first result
                 workitem = (
-                    WorkItem.objects.select_for_update()
+                    WorkItem.objects.select_for_update(skip_locked=True)
                     .filter(status="P")
                     .filter_by_tags(self.tags)
                     .first()
                 )
 
+                # Catch race condition where no workitems are available any more.
+                # If this is the case, we just restart the while loop.
+                if not workitem:
+                    continue
+
                 # update the status to running before starting it so no other
                 # worker tries to grab the same WorkItem
                 workitem.status = "R"
-                # TODO -- indicate that the WorkItem is with this Worker (relationship)
+                # TODO: indicate that the WorkItem is with this Worker (relationship)
                 workitem.save()
 
             # Print out the job ID that is being ran for the user to see

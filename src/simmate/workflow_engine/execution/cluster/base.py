@@ -20,8 +20,7 @@ class Cluster:
             job_ids = cls.update_jobs_list(job_ids)
             njobs_needed = nworkers - len(job_ids)
             if njobs_needed > 0:
-                cls.submit_jobs(njobs_needed)
-            # only check this list every sleep cycle
+                job_ids += cls.submit_jobs(njobs_needed)
             time.sleep(sleep_step)
 
     @classmethod

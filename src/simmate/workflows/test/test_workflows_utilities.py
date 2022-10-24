@@ -76,7 +76,7 @@ def test_list_of_all_workflows():
         "static-energy.vasp.prebadelf-matproj",
         "static-energy.vasp.prebader-matproj",
         "static-energy.vasp.quality04",
-        "structure-prediction.toolkit.binary-system",
+        "structure-prediction.toolkit.chemical-system",
         "structure-prediction.toolkit.fixed-composition",
         "structure-prediction.toolkit.new-individual",
         "structure-prediction.toolkit.variable-nsites-composition",

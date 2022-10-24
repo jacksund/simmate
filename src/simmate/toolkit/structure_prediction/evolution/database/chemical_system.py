@@ -6,6 +6,7 @@ import warnings
 from pathlib import Path
 
 from simmate.database.base_data_types import Calculation, table_column
+from simmate.toolkit import Composition
 from simmate.utilities import get_chemical_subsystems, get_directory
 
 # BUG: This prints a tqdm error so we silence it here.
@@ -13,7 +14,7 @@ with warnings.catch_warnings(record=True):
     from pymatgen.analysis.phase_diagram import PhaseDiagram
 
 
-class BinarySystemSearch(Calculation):
+class ChemicalSystemSearch(Calculation):
     class Meta:
         app_label = "workflows"
 
@@ -42,7 +43,15 @@ class BinarySystemSearch(Calculation):
     def chemical_system_cleaned(self):
         # simply ordered elements in alphabetical order as that is how they
         # are stored in the database
-        elements = [e for e in self.chemical_system.split("-")]
+        endpoint_compositions = [
+            Composition(sys) for sys in self.chemical_system.split("-")
+        ]
+        elements = []
+        for comp in endpoint_compositions:
+            for element in comp.elements:
+                element = str(element)
+                if element not in elements:
+                    elements.append(element)
         elements.sort()
         chemical_system = "-".join(elements)
         return chemical_system
@@ -138,6 +147,7 @@ class BinarySystemSearch(Calculation):
                 chemical_system=self.chemical_system_cleaned,
                 workflow_name=self.subworkflow.name_full,
                 directory=directory,
+                show_unstable_up_to=5,
             )
 
             stable_dir = get_directory(directory / "stable_structures")
@@ -199,9 +209,10 @@ class BinarySystemSearch(Calculation):
 
         for rank, structure in enumerate(structures):
             rank_cleaned = str(rank).zfill(2)  # converts 1 to 01
-            structure_filename = (
-                directory
-                / f"rank-{str(rank_cleaned)}__id-{structure.database_object.id}.cif"
+            structure_filename = directory / (
+                f"rank-{str(rank_cleaned)}__"
+                + f"id-{structure.database_object.id}"
+                + f"id-{structure.composition.reduced_formula}.cif"
             )
             structure.to("cif", structure_filename)
 

@@ -97,6 +97,21 @@ class DatabaseAdapter:
         return structure_cleaned
 
     @staticmethod
+    def get_toolkits_from_database_dicts(
+        structure_dicts: list[dict],
+    ) -> list[ToolkitStructure]:
+        """
+        Given many database dictionaries, this will perform optimized database
+        queries.
+
+        This method should be preffered over get_toolkit_from_database_dict
+        when you have a list of entries that you want to pull
+        """
+        database_objects = DatabaseStructure.from_dicts(structure_dicts)
+        structures = [s.to_toolkit() for s in database_objects]
+        return structures
+
+    @staticmethod
     def get_toolkit_from_database_object(
         structure_object: DatabaseStructure,
     ) -> ToolkitStructure:

@@ -68,6 +68,13 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 -->
 
+- no new changes have been merged into the `main` branch yet
+
+
+--------------------------------------------------------------------------------
+
+## v0.12.0 (2022.10.23)
+
 **Enhancements**
 
 - add structure creators for `ASE`, `GASP`, `PyXtal`, `AIRSS`, `CALYPSO`, `USPEX`, and `XtalOpt` as well as documentation for creators.
@@ -78,6 +85,19 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add `started_at`, `created_at`, `total_time`, and `queue_time` columns to `Calculation` tables
 - add `exlcude_from_archives` field to workflows to optionally delete files when compressing outputs to zip archives
 - various improvements added for evolutionary search workflows, such as parameter optimization, new output files, and website views
+- add `Fingerprint` database table and integrate it with `Fingerprint` validator
+- support >2 element hull diargrams and complex chemical systems
+
+**Refactors**
+
+- optimize `get_series` method of `relaxation.vasp.staged`
+- reorganize `selectors` module for evolutionary structure prediction
+
+**Fixes**
+
+- fix dynamic loading of toolkit structures from third-party databases
+- fix race condition with workers and empty queues
+- increases default query rate for `state.result()` to lessen database load
 
 --------------------------------------------------------------------------------
 

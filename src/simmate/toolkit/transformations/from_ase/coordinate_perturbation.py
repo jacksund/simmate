@@ -22,6 +22,7 @@ class CoordinatePerturbation(Transformation):
     @staticmethod
     def apply_transformation(
         structure: Structure,
+        perturb_strength: float = 0.8,
         ratio_of_covalent_radii: float = 0.1,
     ) -> Structure:
 
@@ -46,12 +47,10 @@ class CoordinatePerturbation(Transformation):
             n_top=int(
                 structure.composition.num_atoms
             ),  # number of atoms to optimize. I set this to all,
-            # rattle_strength=0.8, # strength of rattling
-            # rattle_prop=0.4, # propobility that atom is rattled
-            # test_dist_to_slab=True,
-            # use_tags=False,
-            # verbose=False,
-            # rng=np.random
+            rattle_strength=perturb_strength,  # strength of rattling
+            rattle_prop=1,  # propobility that atom is rattled
+            test_dist_to_slab=True,
+            # rng=np.random  # TODO: consider changing to normal dist
         )
 
         #!!! Their code suggests the use of .get_new_individual() but I think

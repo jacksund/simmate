@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import subprocess
 
 from simmate.workflow_engine.execution.cluster.base import Cluster
@@ -39,9 +40,15 @@ class SlurmCluster(Cluster):
             process = subprocess.run(
                 f"squeue -j {job_id}",
                 shell=True,
+                capture_output=True,
+                text=True,
             )
-            # an error is return if the job is no longer in the queue.
-            if process.returncode == 0:
+            # An error is return if the job is no longer in the queue.
+            # If the job is still running, then two lines will be printed to
+            # stdout AND the return code will be 0.
+            if process.returncode == 0 and process.stdout.count("\n") == 2:
                 still_running.append(job_id)
+            else:
+                logging.info(f"Slurm job {job_id} completed")
 
         return still_running

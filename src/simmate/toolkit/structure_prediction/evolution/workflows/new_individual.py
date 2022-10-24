@@ -50,12 +50,23 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
         if source_db.is_transformation:
 
             transformer = source_db.to_toolkit()
+
+            # Check the cache first to save time (even though it might be outdated)
+            # and then actually calculate all unique as a backup
+            # We only activate the caching once we have >200 unique structures,
+            # as that is when it starts to cut into CPU time.
+            use_cache = bool(len(search_db.unique_individuals_ids) >= 400)
+            unique_queryset = search_db.get_unique_individuals(
+                use_cache=use_cache,
+                as_queryset=True,
+            )
+
             output = transformer.apply_from_database_and_selector(
                 selector=search_db.selector,
-                datatable=search_db.individuals_completed,
+                datatable=unique_queryset,
                 select_kwargs=dict(
-                    ranking_column=search_db.fitness_field,
-                    query_limit=200,  # Smarter way to do this...?
+                    fitness_column=search_db.fitness_field,
+                    # query_limit=200,  # OPTIMIZE: Smarter way to do this...?
                 ),
                 validators=[validator],
             )
@@ -102,10 +113,17 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
                 directory=directory,
                 **search_db.subworkflow_kwargs,
             )
-            state.result()
+            result = state.result()
             # NOTE: we tell the workflow to use the same directory. There is
             # good chance the user indicates that they want to compress the
             # folder to.
+
+            # check the final structure with our validator again. This populates
+            # the fingerprint database (if one is being used).
+            validator.check_structure(result.to_toolkit())
+            # BUG: I think there is a race condition here... Other NewIndividual
+            # workflows may try to populate the fingerprint at the START of
+            # a run while this one must do it after .result() is called.
 
         # TODO: when I allow a series of subworkflows, I can do validation checks
         # between each run.
