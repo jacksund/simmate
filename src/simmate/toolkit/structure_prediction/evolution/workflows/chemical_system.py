@@ -4,11 +4,13 @@ import itertools
 import logging
 from pathlib import Path
 
+import numpy
+from pymatgen.analysis.reaction_calculator import Reaction, ReactionError
 from rich.progress import track
 
 from simmate.toolkit import Composition
-from simmate.toolkit.structure_prediction.evolution.database.binary_system import (
-    BinarySystemSearch,
+from simmate.toolkit.structure_prediction.evolution.database.chemical_system import (
+    ChemicalSystemSearch,
 )
 from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (
     StructurePrediction__Toolkit__FixedComposition,
@@ -24,7 +26,7 @@ from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
 
-class StructurePrediction__Toolkit__BinarySystem(Workflow):
+class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
     """
     Runs an evolutionary search algorithm to predict the most stable structures
     of a binary phase system (e.g Na-Cl or Y-C)
@@ -32,7 +34,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
 
     description_doc_short = "hull diagram for a two-element system (e.g. Na-Cl)"
 
-    database_table = BinarySystemSearch
+    database_table = ChemicalSystemSearch
 
     fixed_comp_workflow = StructurePrediction__Toolkit__FixedComposition
 
@@ -44,6 +46,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
         subworkflow_name: str = "relaxation.vasp.staged",
         subworkflow_kwargs: dict = {},
         max_stoich_factor: int = 4,
+        nfirst_generation: int = 15,
         nsteadystate: int = 40,
         directory: Path = None,
         singleshot_sources: list[str] = [
@@ -66,7 +69,9 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
         # Grab the two elements that we are working with. Also if this raises
         # an error, we want to provide useful feedback to the user
         try:
-            element_1, element_2 = chemical_system.split("-")
+            endpoint_compositions = [
+                Composition(sys) for sys in chemical_system.split("-")
+            ]
         except:
             raise Exception(
                 "Failed to split {} into elements. Your format for the input "
@@ -74,21 +79,57 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
                 "Element1-Element2. Ex: Na-Cl, Ca-N, Y-C, etc."
             )
 
-        # Find all unique compositions
+        # grab all unique elements
+        elements = []
+        for comp in endpoint_compositions:
+            for element in comp.elements:
+                if element not in elements:
+                    elements.append(element)
+
+        # Find all unique compositions for the list of elements.
+        # Note, for complex compositions, this will contain extra compositions
+        # that we will want removed. This is addressed in the next step.
         compositions = []
         for nsites in range(1, max_atoms + 1):
-            for combo in itertools.combinations_with_replacement(
-                [element_1, element_2], nsites
-            ):
-
-                composition = Composition(
-                    {
-                        element_1: combo.count(element_1),
-                        element_2: combo.count(element_2),
-                    }
-                )
-
+            for combo in itertools.combinations_with_replacement(elements, nsites):
+                counts = {e.symbol: combo.count(e) for e in elements}
+                composition = Composition(**counts)
                 compositions.append(composition)
+
+        # For complex chemical systems (e.g. the Sc2C-Sc2CF2 or Y6S4-YF3-Y systems)
+        # we need to make sure the composition is contained with that system.
+        # The general rule is that it must be possible to stoichiometrically
+        # balance the reaction of endpoint compositions with the composition
+        # being considered. For example, in the Y6S4-YF3-Y system,
+        # Y2SF would be accepted (0.5 Y3S2 + 0.33 YF3 + 0.166 Y -> Y2SF)
+        # while YSF would be rejected (0.5 Y3S2 + 0.33 YF3 - 0.833 Y ->  + YSF)
+        # (for YSF, note the negative sign for Y)
+        compositions_cleaned = []
+        for composition in compositions:
+
+            try:
+                reaction = Reaction(
+                    reactants=endpoint_compositions,
+                    products=[composition],
+                )
+            except ReactionError:
+                # reaction could not be balanced and is therefore invalid
+                continue
+
+            # iterate and make sure our target composition is close to 1 while
+            # all other products are close to 0. Note the is-close checks
+            # are because of rounding bugs in the pymatgen code
+            is_valid = True
+            for product in reaction.products:
+                coeff = reaction.get_coeff(product)
+                if product == composition and not numpy.isclose(coeff, 1):
+                    is_valid = False
+                elif product != composition and not numpy.isclose(coeff, 0):
+                    is_valid = False
+            if is_valid:
+                compositions_cleaned.append(composition)
+        compositions = compositions_cleaned
+
         logging.info(f"{len(compositions)} unique compositions will be explored")
 
         # now condense this list down to just the reduced formulas
@@ -182,7 +223,7 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
                 "submissions to finish"
             )
             for state in all_submissions[:number_to_wait_for]:
-                state.result()
+                state.result(raise_error=False)
 
         search_datatable.write_output_summary(directory)
 
@@ -208,16 +249,16 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
             # searched a compositon enough.
             min_structures_exact = int(5 * natoms)
             best_survival_cutoff = int(20 * natoms)
-            max_structures = int(30 * natoms)
+            max_structures = int(40 * natoms)
             convergence_cutoff = 0.01  # 10 meV as looser convergence limit
 
             # OPTIMIZE: This code below is for printing out the cutoff limits
             # I keep this here for early development as we figure out ideal
             # stopping conditions.
-            # for n in range(1, 10):
+            # for n in range(1, 20):
             #     min_structures_exact = int(5 * n)
             #     best_survival_cutoff = int(20 * n)
-            #     max_structures = int(30 * n)
+            #     max_structures = int(40 * n)
             #     # convergence_cutoff = 0.01
             #     print(
             #         f"{n}\t{min_structures_exact}\t"
@@ -262,6 +303,8 @@ class StructurePrediction__Toolkit__BinarySystem(Workflow):
                     max_structures=max_structures,
                     directory=directory / composition.reduced_formula,
                     convergence_cutoff=convergence_cutoff,
+                    nfirst_generation=nfirst_generation,
+                    nsteadystate=nsteadystate,
                     # Because we submitted all steady states above, we don't
                     # need the other workflows to do these anymore.
                     singleshot_sources=[],

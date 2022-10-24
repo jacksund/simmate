@@ -268,10 +268,17 @@ class FingerprintValidator(Validator):
             for query_chunk in chunk_list(new_ids, chunk_size=1000):
                 query = self.database_pool.fingerprints.filter(
                     database_id__in=query_chunk
-                ).distinct("database_id")
+                )
+
                 # BUG: there is a race condition that sometimes adds duplicate
                 # fingerprints to the database. We add distinct to keep our
-                # query smaller and just grab one.
+                # query smaller and just grab one. Distinct is also not supported
+                # by sqlite
+                from simmate.configuration.django.settings import DATABASES
+
+                if DATABASES["default"]["ENGINE"] != "django.db.backends.sqlite3":
+                    query = query.distinct("database_id")
+
                 all_results += list(query)
 
             # the query does not return the ids in the same order that new_ids

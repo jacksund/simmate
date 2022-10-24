@@ -11,4 +11,4 @@ from .fixed_composition import StructurePrediction__Toolkit__FixedComposition
 from .variable_nsites_composition import (
     StructurePrediction__Toolkit__VariableNsitesComposition,
 )
-from .binary_system import StructurePrediction__Toolkit__BinarySystem
+from .chemical_system import StructurePrediction__Toolkit__ChemicalSystem
