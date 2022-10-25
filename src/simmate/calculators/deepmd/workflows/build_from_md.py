@@ -7,8 +7,6 @@ from simmate.toolkit import Structure
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
-# from simmate.database.workflow_results import Dynamics
-
 
 class MlPotential__Deepmd__BuildFromMd(Workflow):
 
@@ -20,6 +18,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
         temperature_list: list[int] = [300, 750, 1200],
         relax_kwargs: dict = {},
         md_kwargs: dict = {},
+        #deepmd_kwargs: dict =  {} 
         **kwargs,
     ):
 
@@ -125,3 +124,8 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
                 training_data=training_data,
                 testing_data=testing_data,
             )
+            
+        freeze_workflow = get_workflow("ml-potential.deepmd.freeze-model")
+            
+        #!!!allow passing of unique name for deepmd graph file
+        freeze_workflow.run()
