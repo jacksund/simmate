@@ -20,6 +20,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
         filter_kwargs: dict = {},
         md_kwargs: dict = {},
         #deepmd_kwargs: dict ={},
+        #deepmd_env : str = 'deepmd', in case environment is called somethign else???
         training_iterations: int = 1, #setting to 1 means no iterative training 
         **kwargs,
     ):
@@ -53,7 +54,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
                 "your filtering criteria."
             )
         
-        #set the directory to run deepmd in 
+        #set directory to run deepmd in 
         deepmd_directory = directory / "deepmd"
         
         # grab the deepmd training workflow
@@ -84,22 +85,15 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
                 training_data=training_data,
                 testing_data=testing_data,
                     )
-                
-        
-        '''      
-        # write structure data to files for use with deepmd
-        training_data, testing_data = DeepmdDataset.to_file(
-            ionic_step_structures=all_db_structures,
-            directory=directory / "deepmd_data",
-            )
             
+        freeze_workflow = get_workflow("ml-potential.deepmd.freeze-model")
+        
+        #!!!allow passing of unique name for deepmd graph file 
+        freeze_workflow.run()
+        
+        
+        
 
-        deepmd_workflow.run(
-            directory=deepmd_directory,
-            composition=composition,
-            command='eval "$(conda shell.bash hook)"; conda activate deepmd; dp train input.json > deepmd.out',
-            training_data=training_data,
-            testing_data=testing_data,
-            # TODO: consider making a subdirectory for deepmd
-        )
-        '''
+            
+        
+                
