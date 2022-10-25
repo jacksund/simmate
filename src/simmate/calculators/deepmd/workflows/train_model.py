@@ -24,7 +24,8 @@ class MlPotential__Deepmd__TrainModel(S3Workflow):
         input_filename: str = "input.json",
         model_neuron: list[int] = [10, 20, 40],
         fitting_neuron: list[int] = [120, 120, 120],
-        num_training_steps: int = 50,
+        num_training_steps: int = 1000000,
+        settings_update: dict = {},
         **kwargs,
     ):
 
@@ -60,7 +61,8 @@ class MlPotential__Deepmd__TrainModel(S3Workflow):
                 "save_ckpt": "model.ckpt",
             },
         }
-
+        dictionary.update(settings_update)
+        
         # write input file
         input_file = directory / input_filename
         input_data = json.dumps(dictionary, indent=4)
