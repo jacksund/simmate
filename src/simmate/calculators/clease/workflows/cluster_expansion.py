@@ -65,7 +65,7 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
             # data from lattice definition
             cellpar=structure.lattice.parameters,  # [a, b, c, alph, beta, gamma]
             supercell_factor=max_supercell_atoms,
-            basis=structure.cart_coords,
+            basis=structure.frac_coords,
             db_name=str(directory / "clease_database.db"),
             max_cluster_dia=cluster_diameter,
         )
