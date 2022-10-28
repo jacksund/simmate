@@ -22,7 +22,7 @@ Newest available: v0.11.1
 
 We highly recommended that you install simmate into a clean conda environment, rather than updating simmate within your existing one:
 ``` shell
-conda create -n my_env -c conda-forge python=3.10 simmate
+conda create -n my_env -c conda-forge python=3.11 simmate
 ```
 
 Make sure you check that the expected version is now installed:
@@ -66,9 +66,12 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Enhancements**
 **Refactors**
 **Fixes**
+- no new changes have been merged into the `main` branch yet
 -->
 
-- no new changes have been merged into the `main` branch yet
+**Enhancements**
+
+- add python 3.11 support
 
 
 --------------------------------------------------------------------------------

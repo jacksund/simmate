@@ -12,7 +12,7 @@ In this tutorial, you will learn how to install Simmate with Anaconda and start 
 1. Install [anaconda](https://www.anaconda.com/products/distribution)
 2. Create a conda environment, install Simmate in it, and activate it. *(note: Spyder is our recommended IDE but optional)*
 ``` shell
-conda create -n my_env -c conda-forge python=3.10 simmate
+conda create -n my_env -c conda-forge python=3.11 simmate
 conda install -n my_env -c conda-forge spyder  # optional but recommended
 conda activate my_env
 ```
