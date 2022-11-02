@@ -23,7 +23,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
     ):
 
         # get relaxed structure
-        relax_workflow = get_workflow("relaxation.vasp.quality01")
+        relax_workflow = get_workflow("relaxation.vasp.quality01") #!!!set to higher quality or allow quality to be set by user
         state = relax_workflow.run(
             structure=structure,
             directory=directory / relax_workflow.name_full,
@@ -88,7 +88,6 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
             input_filename="input_1.json",
             training_data=training_data,
             testing_data=testing_data,
-            # TODO: consider making a subdirectory for deepmd
         )
 
         # run additional deepmd training iterations with restart function
