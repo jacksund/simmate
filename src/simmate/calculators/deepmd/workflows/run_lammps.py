@@ -12,19 +12,17 @@ from simmate.toolkit import Structure
 
 from pymatgen.io.lammps.data import LammpsData
 
-#steps for running lammps:
-    #create datafile for starting structure 
-    #write input file 
-    #submit lammps run 
+
 
 #!!! switch to deepmd environment to use lammps?
 #!!! lammps vs lammps-dp??
 
 class MlPotential__Deepmd__RunLammps(S3Workflow):
 
-    use_database = False
+    use_database = False #add database??? 
     monitor = False
-    command = "lmp -in in.lmp" #need mpi run part???
+    command = "lmp -in in.lmp" #!!!need mpi run part???
+    #'eval "$(conda shell.bash hook)"; conda activate deepmd; lmp -in in.lmp'
     
     def setup(
             structure: Structure, #structure to run lammps with 
@@ -38,12 +36,13 @@ class MlPotential__Deepmd__RunLammps(S3Workflow):
             ):
         
         #write structure data file for lammps to specific lammps directory
-        lammps_directory = directory / 'lammps' #set to dfault???
+        #!!!potentially remove bc this will be set where workflow is used???
+        lammps_directory = directory / 'lammps' #set to dfault??? 
         
         ldata = LammpsData.from_structure(structure = structure, 
                                           atom_style = 'atomic')
         
-        ldata.write_file(filename = lammps_directory / data_filename)
+        ldata.write_file(filename = directory / data_filename)
         
         #write input file 
         
@@ -61,7 +60,7 @@ class MlPotential__Deepmd__RunLammps(S3Workflow):
             'pair_coeff **',
             '# write out trajectories of atoms',
             f'dump TRAJ all custom 10 {lammps_dump_filename} id element x y z',
-            'dump_modify TRAJ element C', #change C to list of elements???
+            'dump_modify TRAJ element C', #!!!change to list of elements, in order of pair coefficients!!!???
             '# how often to write information to log file',
             'thermo_style custom step cpu etotal ke pe evdwl ecoul elong temp press vol density',
             'thermo 10',
@@ -86,6 +85,8 @@ class MlPotential__Deepmd__RunLammps(S3Workflow):
             for line in input_list:
                 file.write(line)
                 file.write('\n')
+                
+        input_file.close() #!!!is this right?
         
         
         
