@@ -18,7 +18,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
         temperature_list: list[int] = [300, 750, 1200],
         relax_kwargs: dict = {},
         md_kwargs: dict = {},
-        #deepmd_kwargs: dict =  {} 
+        # deepmd_kwargs: dict =  {}
         **kwargs,
     ):
 
@@ -123,8 +123,8 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
                 training_data=training_data,
                 testing_data=testing_data,
             )
-            
+
         freeze_workflow = get_workflow("ml-potential.deepmd.freeze-model")
-            
+
         #!!!allow passing of unique name for deepmd graph file
-        freeze_workflow.run()
+        freeze_workflow.run(directory=deepmd_directory)
