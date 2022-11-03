@@ -3,9 +3,10 @@
 from pathlib import Path
 
 import numpy
-from django_pandas.io import read_frame
+import pandas
 from sklearn.model_selection import train_test_split
 
+from simmate.database.base_data_types import SearchResults
 from simmate.toolkit import Composition, Structure
 from simmate.utilities import get_directory
 
@@ -76,16 +77,21 @@ class DeepmdDataset:
 
     @staticmethod
     def to_file(
-        ionic_step_structures,
-        directory="deepmd_data",
-        test_size=0.2,
+        ionic_step_structures: pandas.DataFrame | SearchResults,
+        directory: Path | str = "deepmd_data",
+        test_size: float = 0.2,
     ):
 
         # Grab the path to the desired directory and create it if it doesn't exist
         directory = get_directory(directory)
 
-        # convert the ionic_step_structures queryset to a pandas dataframe
-        structures_dataframe = read_frame(ionic_step_structures)
+        if isinstance(ionic_step_structures, SearchResults):
+            # convert the queryset to a pandas dataframe
+            structures_dataframe = ionic_step_structures.to_dataframe()
+        elif isinstance(ionic_step_structures, pandas.DataFrame):
+            structures_dataframe = ionic_step_structures
+        else:
+            raise Exception("unknown input provided")
 
         # because we are using the database model, we first want to convert to
         # pymatgen structures objects and add a column to the dataframe for these
