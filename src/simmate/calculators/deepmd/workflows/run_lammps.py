@@ -23,7 +23,7 @@ from simmate.workflow_engine import S3Workflow
 
 class MlPotential__Deepmd__RunLammps(S3Workflow):
 
-    use_database = False #add database??? 
+    use_database = False  # add database???
     monitor = False
     command = "lmp -in in.lmp"  # need mpi run part???
 

@@ -25,6 +25,7 @@ class MlPotential__Deepmd__TrainModel(S3Workflow):
         model_neuron: list[int] = [10, 20, 40],
         fitting_neuron: list[int] = [120, 120, 120],
         num_training_steps: int = 500,  # 1000000
+        seed: int = None,
         settings_update: dict = {},
         **kwargs,
     ):
@@ -69,5 +70,3 @@ class MlPotential__Deepmd__TrainModel(S3Workflow):
         input_data = json.dumps(dictionary, indent=4)
         with input_file.open("w") as file:
             file.write(input_data)
-        
-        input_file.close()

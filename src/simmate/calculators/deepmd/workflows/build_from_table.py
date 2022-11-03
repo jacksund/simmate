@@ -2,9 +2,9 @@
 
 from pathlib import Path
 
-from simmate.utilities import chunk_list
 from simmate.calculators.deepmd.inputs.type_and_set import DeepmdDataset
 from simmate.toolkit import Composition
+from simmate.utilities import chunk_list
 from simmate.website.workflows import models as all_datatables
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
@@ -25,7 +25,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
         training_iterations: int = 1,  # setting to 1 means no iterative training
         **kwargs,
     ):
-        breakpoint()
+
         # Load the desired table and filter the target structures from it
         #
         # Import the datatable class -- how this is done depends on if it
@@ -64,7 +64,13 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
         # divide overall query into equal sized list of structures
         structs_per_chunk = int(all_db_structures.count() / training_iterations)
 
-        structure_lists = chunk_list(all_db_structures, structs_per_chunk)
+        # We want to train in stages, so we split the queryset into smaller
+        # groups. We want the subsets each as a pandas dataframe for the
+        # DeepmdDataset input too.
+        structure_lists = chunk_list(
+            all_db_structures.to_dataframe(),
+            structs_per_chunk,
+        )
 
         # have list of training_data and testing_data
         training_data = []
@@ -78,13 +84,33 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
                 directory=directory / f"deepmd_data_{n}",
             )
 
-            training_data.append(train)
-            testing_data.append(test)
+            training_data += train
+            testing_data += test
+
+            if n == 0:
+                command = f'eval "$(conda shell.bash hook)"; conda activate deepmd; dp train input_{n}.json > deepmd.out'
+            else:
+
+                # find the newest available checkpoint file
+                number_max = 0  # to keep track of checkpoint number
+                checkpoint_file = None
+                for file in deepmd_directory.iterdir():
+                    if "model.ckpt" in file.stem and "-" in file.stem:
+                        number = int(file.stem.split("-")[-1])
+                        if number > number_max:
+                            number_max = number
+                            checkpoint_file = file
+                # make sure the loop above ended with finding a file
+                if not checkpoint_file:
+                    raise Exception("Unable to detect DeepMD checkpoint file")
+
+                command = f'eval "$(conda shell.bash hook)"; conda activate deepmd; dp train --restart {checkpoint_file.stem} input_{n}.json'
 
             deepmd_workflow.run(
+                input_filename=f"input_{n}.json",
                 directory=deepmd_directory,
                 composition=composition,
-                command=f'eval "$(conda shell.bash hook)"; conda activate deepmd; dp train input{n}.json > deepmd.out',
+                command=command,
                 training_data=training_data,
                 testing_data=testing_data,
             )
@@ -92,4 +118,6 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
         freeze_workflow = get_workflow("ml-potential.deepmd.freeze-model")
 
         #!!!allow passing of unique name for deepmd graph file
-        freeze_workflow.run()
+        freeze_workflow.run(
+            directory=deepmd_directory,
+        )

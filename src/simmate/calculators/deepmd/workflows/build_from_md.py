@@ -23,7 +23,9 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
     ):
 
         # get relaxed structure
-        relax_workflow = get_workflow("relaxation.vasp.quality01") #!!!set to higher quality or allow quality to be set by user
+        relax_workflow = get_workflow(
+            "relaxation.vasp.quality01"
+        )  #!!!set to higher quality or allow quality to be set by user
         state = relax_workflow.run(
             structure=structure,
             directory=directory / relax_workflow.name_full,
