@@ -26,30 +26,54 @@ class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
     def run_config(
         cls,
         structure: Structure,
+        empty_sites: list[float] = [],
+        empty_ion_template: str = None,
         command: str = None,
         source: dict = None,
         directory: Path = None,
         **kwargs,
     ):
+        
+        if empty_sites and empty_ion_template:
+            raise Exception(
+                "You can only use either empty_sites or an empty_ion_template. "
+                "Not both."
+            )
 
-        prebadelf_result = PopulationAnalysis__Vasp__PrebadelfMatproj.run(
+        # load the structure that contains dummy atoms in it
+        if empty_ion_template:
+            structure_w_empties = get_structure_w_empties(
+                structure=structure,
+                empty_ion_template=empty_ion_template,
+            )
+        elif empty_sites:
+            # BUG: what if hydrogren is already in the structure?
+            empty_ion_template = "H"
+            structure_w_empties = structure.copy()
+            for empty_coords in empty_sites:
+                structure_w_empties.append(
+                    species = empty_ion_template,
+                    coords = empty_coords, # I assume fractional coords
+                )
+        else:
+            # otherwise no empties will be used
+            empty_ion_template = "H"
+            structure_w_empties = structure.copy()
+
+        prebadelf_result = StaticEnergy__Vasp__PrebadelfMatproj.run(
             structure=structure,
             command=command,
             source=source,
             directory=directory,
         ).result()
 
-        # load the structure that contains dummy atoms in it
-        structure_w_empties = get_structure_w_empties(
-            structure=structure,
-            empty_ion_template="F",
-        )
-
+        
         # Bader only adds files and doesn't overwrite any, so I just run it
         # in the original directory. I may switch to copying over to a new
         # directory in the future though.
         badelf_result = PopulationAnalysis__Bader__Badelf.run(
             structure=structure_w_empties,
+            empty_ion_template=empty_ion_template,
             directory=prebadelf_result["directory"],
         ).result()
 
