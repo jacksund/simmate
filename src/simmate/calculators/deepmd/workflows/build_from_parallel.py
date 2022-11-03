@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Oct 26 11:26:18 2022
 
-@author: siona
-"""
 from pathlib import Path
 
 from simmate.calculators.deepmd.inputs.type_and_set import DeepmdDataset
@@ -12,14 +8,54 @@ from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
 # training multiple models at the same time
+
+# ---------- START DATA ----------
+# if no input structure, use common prototypes (e.g. BCC)
 # get starting data (either md run or from table)
+
+# ---------- TRAIN ----------
 # train models for 1 iteration
-# run short lammps simulation: 1000 steps?
-# compare forces/energy for each 10th or 100th structure from each model
-# if models produce different results, run dft calculations with structures and add to dataset
-# energy/forces within 5% of each other???
-# have running dataset of structures to add??
+
+# ---------- TEST MODELS (MD opt) ----------
+
+# if no input structure, use common prototypes (e.g. BCC)
+# run short lammps simulation (1000 steps) using ONE of the deepmd models
+
+# pull the output structures from the lammps run and use the OTHER deepmd models
+# to predict energy/forces
+
+# Compare energy/forces across all structures & models. Ones that differ the
+# most (i.e. models are most uncertain) should be calculated with DFT and added
+# to the training/test set.
+# (maybe grab N structures randomly from those with +5% error)
+
 # make new datasets after each iteration
+
+# ---------- TEST MODELS (Random struct opt) ----------
+
+# randomly create a series of new structures
+
+# (option 1)
+# predict energy/forces for ALL structures using ALL models
+
+# (option 2)
+# Relax ALL structures using ONE model. Store ionic steps + energies + forces.
+# Pull the output structures from the lammps run and use the OTHER deepmd models
+# to predict energy/forces.
+
+# (option 3)
+# Run MD simulations on ALL structures using ONE model --> follow MD opt above
+
+# Compare energy/forces across all structures & models. Ones that differ the
+# most (i.e. models are most uncertain) should be calculated with DFT and added
+# to the training/test set.
+# (maybe grab N structures randomly from those with +5% error)
+
+# make new datasets after each iteration
+
+# ---------- STOP CONDITION ----------
+
+# re-run train/test until all structures <5% error
 
 
 class MlPotential__Deepmd__BuildFromParallel(Workflow):
