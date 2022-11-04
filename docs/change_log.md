@@ -66,9 +66,11 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Enhancements**
 **Refactors**
 **Fixes**
--->
 
 - no new changes have been merged into the `main` branch yet
+-->
+
+- add `relax_bulk` and `relax_endpoints` parameters to optionally turn off pre-relaxations in NEB
 
 
 --------------------------------------------------------------------------------

@@ -50,6 +50,7 @@ class SinglePathWorkflow(Workflow):
         command: str = None,
         diffusion_analysis_id: int = None,
         is_restart: bool = False,
+        relax_endpoints: bool = True,
         # parameters for supercell and image generation
         nimages: int = 5,
         min_atoms: int = 80,
@@ -65,30 +66,33 @@ class SinglePathWorkflow(Workflow):
             min_length=min_length,
             vac_mode=True,
         )
-
-        # Relax the starting supercell structure
-        endpoint_start_state = cls.endpoint_relaxation_workflow.run(
-            structure=supercell_start,
-            command=command,  # subcommands["command_supercell"]
-            directory=directory / f"{cls.endpoint_relaxation_workflow.name_full}.start",
-            is_restart=is_restart,
-        )
-
-        # Relax the ending supercell structure
-        endpoint_end_state = cls.endpoint_relaxation_workflow.run(
-            structure=supercell_end,
-            command=command,  # subcommands["command_supercell"]
-            directory=directory / f"{cls.endpoint_relaxation_workflow.name_full}.end",
-            is_restart=is_restart,
-        )
-
-        # wait for the endpoint relaxations to finish
-        endpoint_start_result = endpoint_start_state.result()
-        endpoint_end_result = endpoint_end_state.result()
-
+        
+        if relax_endpoints:
+            # Relax the starting supercell structure
+            endpoint_start_state = cls.endpoint_relaxation_workflow.run(
+                structure=supercell_start,
+                command=command,  # subcommands["command_supercell"]
+                directory=directory / f"{cls.endpoint_relaxation_workflow.name_full}.start",
+                is_restart=is_restart,
+            )
+    
+            # Relax the ending supercell structure
+            endpoint_end_state = cls.endpoint_relaxation_workflow.run(
+                structure=supercell_end,
+                command=command,  # subcommands["command_supercell"]
+                directory=directory / f"{cls.endpoint_relaxation_workflow.name_full}.end",
+                is_restart=is_restart,
+            )
+    
+            # wait for the endpoint relaxations to finish and use them to
+            # update the structures we are using
+            supercell_start = endpoint_start_state.result()
+            supercell_end = endpoint_end_state.result()
+        
+        # use the endpoints to generate intermediate images
         images = get_migration_images_from_endpoints(
-            supercell_start=endpoint_start_result,
-            supercell_end=endpoint_end_result,
+            supercell_start=supercell_start,
+            supercell_end=supercell_end,
             nimages=nimages,
         )
 
