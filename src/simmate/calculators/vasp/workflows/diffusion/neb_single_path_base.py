@@ -33,7 +33,7 @@ class SinglePathWorkflow(Workflow):
     """
 
     endpoint_relaxation_workflow: Workflow = None
-
+    endpoint_energy_workflow: Workflow = None
     from_images_workflow: Workflow = None
 
     # Oddly enough, the from_images_workflow and this workflow share a table
@@ -66,29 +66,47 @@ class SinglePathWorkflow(Workflow):
             min_length=min_length,
             vac_mode=True,
         )
-        
+
         if relax_endpoints:
             # Relax the starting supercell structure
             endpoint_start_state = cls.endpoint_relaxation_workflow.run(
                 structure=supercell_start,
                 command=command,  # subcommands["command_supercell"]
-                directory=directory / f"{cls.endpoint_relaxation_workflow.name_full}.start",
+                directory=directory
+                / f"{cls.endpoint_relaxation_workflow.name_full}.start",
                 is_restart=is_restart,
             )
-    
+
             # Relax the ending supercell structure
             endpoint_end_state = cls.endpoint_relaxation_workflow.run(
                 structure=supercell_end,
                 command=command,  # subcommands["command_supercell"]
-                directory=directory / f"{cls.endpoint_relaxation_workflow.name_full}.end",
+                directory=directory
+                / f"{cls.endpoint_relaxation_workflow.name_full}.end",
                 is_restart=is_restart,
             )
-    
+
             # wait for the endpoint relaxations to finish and use them to
             # update the structures we are using
             supercell_start = endpoint_start_state.result()
             supercell_end = endpoint_end_state.result()
-        
+
+        # Run static-energy calculations for the endpoints
+        start_energy = cls.endpoint_energy_workflow.run(
+            structure=supercell_start,
+            command=command,  # subcommands["command_supercell"]
+            directory=directory / f"{cls.endpoint_energy_workflow.name_full}.start",
+            is_restart=is_restart,
+        )
+        end_energy = cls.endpoint_energy_workflow.run(
+            structure=supercell_end,
+            command=command,  # subcommands["command_supercell"]
+            directory=directory / f"{cls.endpoint_energy_workflow.name_full}.end",
+            is_restart=is_restart,
+        )
+        supercell_start = start_energy.result()
+        supercell_end = end_energy.result()
+
         # use the endpoints to generate intermediate images
         images = get_migration_images_from_endpoints(
             supercell_start=supercell_start,

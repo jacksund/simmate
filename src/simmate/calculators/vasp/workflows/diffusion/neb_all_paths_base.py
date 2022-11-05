@@ -76,8 +76,7 @@ class NebAllPathsWorkflow(Workflow):
         run_id: str = None,
         **kwargs,
     ):
-        
-        
+
         if relax_bulk:
             # run a relaxation on the bulk structure
             bulk_relax_result = cls.bulk_relaxation_workflow.run(
@@ -86,15 +85,15 @@ class NebAllPathsWorkflow(Workflow):
                 directory=directory / cls.bulk_relaxation_workflow.name_full,
                 is_restart=is_restart,
             ).result()
-    
-            # run static energy calculation on the relaxed structure
+
+            # run a static energy calculation on the relaxed structure
             bulk_static_energy_result = cls.bulk_static_energy_workflow.run(
                 structure=bulk_relax_result,
                 command=command,  # subcommands["command_bulk"]
                 directory=directory / cls.bulk_static_energy_workflow.name_full,
                 is_restart=is_restart,
             ).result()
-            
+
             # update the input structure with the relaxed one
             structure = bulk_static_energy_result.to_toolkit()
 
