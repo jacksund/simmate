@@ -637,6 +637,44 @@ to stop unique pathway finding when 1D percolation is achieved.
 
 --------------------------
 
+## relax_bulk
+Whether or not the bulk structure (typically the input structure) should be 
+relaxed before running the rest of the workflow.
+
+=== "yaml"
+    ``` yaml
+    relax_bulk: false
+    ```
+=== "toml"
+    ``` toml
+    relax_bulk: false
+    ```
+=== "python"
+    ``` python
+    relax_bulk: false
+    ```
+
+--------------------------
+
+## relax_endpoints
+Whether or not the endpoint structures for an NEB diffusion pathway should be 
+relaxed before running the rest of the workflow.
+
+=== "yaml"
+    ``` yaml
+    relax_endpoints: false
+    ```
+=== "toml"
+    ``` toml
+    relax_endpoints: false
+    ```
+=== "python"
+    ``` python
+    relax_endpoints: false
+    ```
+
+--------------------------
+
 ## run_id
 The id assigned to a specific workflow run / calculation. If not provided this will be randomly generated, and we highly recommended leaving this at the default value. Note, this is based on unique-ids (UUID), so every id should be 100% unique and in a string format.
 

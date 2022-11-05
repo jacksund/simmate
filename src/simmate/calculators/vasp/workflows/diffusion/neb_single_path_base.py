@@ -6,6 +6,7 @@ from simmate.calculators.vasp.workflows.diffusion.utilities import (
     get_migration_images_from_endpoints,
 )
 from simmate.toolkit.diffusion import MigrationHop
+from simmate.toolkit.diffusion.utilities import clean_start_end_images
 from simmate.workflow_engine import Workflow
 
 
@@ -66,6 +67,14 @@ class SinglePathWorkflow(Workflow):
             min_length=min_length,
             vac_mode=True,
         )
+
+        # BUG-CHECK to ensure sites are in proper order
+        # Consider moving this check into the get_sc_structures method.
+        supercell_start, supercell_end = clean_start_end_images(
+            supercell_start,
+            supercell_end,
+        )
+        ## end bugcheck
 
         if relax_endpoints:
             # Relax the starting supercell structure

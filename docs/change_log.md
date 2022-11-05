@@ -70,8 +70,13 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - no new changes have been merged into the `main` branch yet
 -->
 
+**Enhancements**
+
 - add `relax_bulk` and `relax_endpoints` parameters to optionally turn off pre-relaxations in NEB
 
+**Fixes**
+
+- fix site ordering in NEB supercell structures
 
 --------------------------------------------------------------------------------
 

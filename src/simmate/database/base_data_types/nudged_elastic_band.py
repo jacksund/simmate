@@ -338,7 +338,7 @@ class MigrationHop(Calculation):
         from simmate.calculators.vasp.outputs import Vasprun
 
         vasprun = Vasprun.from_directory(directory)
-        self.update_from_neb_toolkit(vasprun.neb_results)
+        self.update_from_neb_toolkit(vasprun)
 
     @classmethod
     def from_vasp_run(cls, vasprun: Vasprun, **kwargs):
