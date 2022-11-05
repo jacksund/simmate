@@ -48,6 +48,11 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
         **kwargs,
     ):
 
+        logging.critical(
+            "This is a highly experimental (and largely incomplete) workflow. "
+            "Proceed with caution and pay attention to the changelog for updates."
+        )
+
         # ---------------------------------------------------------------------
 
         # SETUP
