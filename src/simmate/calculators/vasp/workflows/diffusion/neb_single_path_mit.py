@@ -9,6 +9,9 @@ from simmate.calculators.vasp.workflows.diffusion.neb_single_path_base import (
 from simmate.calculators.vasp.workflows.relaxation.mvl_neb_endpoint import (
     Relaxation__Vasp__MvlNebEndpoint,
 )
+from simmate.calculators.vasp.workflows.static_energy import (
+    StaticEnergy__Vasp__MvlNebEndpoint,
+)
 
 
 class Diffusion__Vasp__NebSinglePathMit(SinglePathWorkflow):
@@ -18,4 +21,5 @@ class Diffusion__Vasp__NebSinglePathMit(SinglePathWorkflow):
     """
 
     endpoint_relaxation_workflow = Relaxation__Vasp__MvlNebEndpoint
+    endpoint_energy_workflow = StaticEnergy__Vasp__MvlNebEndpoint
     from_images_workflow = Diffusion__Vasp__NebFromImagesMit

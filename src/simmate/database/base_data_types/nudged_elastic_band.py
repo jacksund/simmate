@@ -112,6 +112,8 @@ class DiffusionAnalysis(Structure, Calculation):
                 "Unable to detect 'static-energy' directory and therefore unable "
                 "to determine the bulk structure used for this analysis."
             )
+            # TODO: try grabbing the bulk input structure from the metadata
+            # file.
 
         bulk_filename = static_energy_dir / "POSCAR"
         bulk_structure = ToolkitStructure.from_file(bulk_filename)
@@ -336,11 +338,13 @@ class MigrationHop(Calculation):
         from simmate.calculators.vasp.outputs import Vasprun
 
         vasprun = Vasprun.from_directory(directory)
-        self.update_from_neb_toolkit(vasprun.neb_results)
+        self.update_from_neb_toolkit(vasprun)
 
     @classmethod
-    def from_vasp_run(cls, vasprun: Vasprun):
-        return cls.from_neb_toolkit(neb_results=vasprun.neb_results)
+    def from_vasp_run(cls, vasprun: Vasprun, **kwargs):
+        # BUG: the input here is actually already an NEBAnalysis
+        # see the Vasprun.from_directory method
+        return cls.from_neb_toolkit(neb_results=vasprun)
 
     @classmethod
     def from_neb_toolkit(cls, neb_results: NEBAnalysis):
