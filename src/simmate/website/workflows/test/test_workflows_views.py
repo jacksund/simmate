@@ -65,6 +65,7 @@ def test_workflow_detail_view(client, workflow):
         "electronic-structure",
         "structure-prediction",
         "diffusion",
+        "cluster-expansion",
     ]:
         return
 

@@ -89,6 +89,8 @@ class Relaxation__Vasp__Staged(Workflow):
             "energy_fermi": result.energy_fermi,
             "conduction_band_minimum": result.conduction_band_minimum,
             "valence_band_maximum": result.valence_band_maximum,
+            "site_forces": result.site_forces,
+            "lattice_stress": result.lattice_stress,
         }
         return final_result
 

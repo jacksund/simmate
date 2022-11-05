@@ -73,6 +73,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Enhancements**
 
 - add `relax_bulk` and `relax_endpoints` parameters to optionally turn off pre-relaxations in NEB
+- add CLEASE app for cluster expanison calculations (these workflows are highly experimental at the moment - so use with caution)
 
 **Fixes**
 

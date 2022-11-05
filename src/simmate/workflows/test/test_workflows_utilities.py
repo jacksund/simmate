@@ -17,6 +17,7 @@ from simmate.workflows.utilities import (
 
 def test_get_workflow_types():
     assert get_all_workflow_types() == [
+        "cluster-expansion",
         "customized",
         "diffusion",
         "dynamics",
@@ -32,6 +33,7 @@ def test_get_workflow_types():
 def test_list_of_all_workflows():
 
     assert get_all_workflow_names() == [
+        "cluster-expansion.clease.bulk-structure",
         "customized.toolkit.user-config",
         "diffusion.vasp.neb-all-paths-mit",
         "diffusion.vasp.neb-from-endpoints-mit",
@@ -53,6 +55,8 @@ def test_list_of_all_workflows():
         "population-analysis.vasp-bader.badelf-matproj",
         "population-analysis.vasp-bader.bader-matproj",
         "population-analysis.vasp.elf-matproj",
+        "relaxation.vasp.cluster-high-q",
+        "relaxation.vasp.cluster-low-q",
         "relaxation.vasp.matproj",
         "relaxation.vasp.matproj-hse",
         "relaxation.vasp.matproj-metal",
@@ -67,7 +71,9 @@ def test_list_of_all_workflows():
         "relaxation.vasp.quality03",
         "relaxation.vasp.quality04",
         "relaxation.vasp.staged",
+        "relaxation.vasp.staged-cluster",
         "restart.toolkit.automatic",
+        "static-energy.vasp.cluster-high-qe",
         "static-energy.vasp.matproj",
         "static-energy.vasp.matproj-hse",
         "static-energy.vasp.matproj-scan",
@@ -94,6 +100,7 @@ def test_list_of_calculators_by_type():
 def test_list_of_workflows_by_type():
 
     assert get_workflow_names_by_type("static-energy") == [
+        "static-energy.vasp.cluster-high-qe",
         "static-energy.vasp.matproj",
         "static-energy.vasp.matproj-hse",
         "static-energy.vasp.matproj-scan",
@@ -160,19 +167,24 @@ def test_get_unique_paramters():
         "angle_tolerance",
         "best_survival_cutoff",
         "chemical_system",
+        "cluster_diameter",
         "command",
         "composition",
         "compress_output",
         "convergence_cutoff",
+        "convergence_limit",
         "copy_previous_directory",
+        "current_generation",
         "diffusion_analysis_id",
         "directory",
         "directory_new",
         "directory_old",
         "fitness_field",
+        "formula_unit",
         "input_parameters",
         "is_restart",
         "max_atoms",
+        "max_generations",
         "max_path_length",
         "max_stoich_factor",
         "max_structures",
@@ -199,10 +211,12 @@ def test_get_unique_paramters():
         "singleshot_sources",
         "sleep_step",
         "source",
+        "space_group",
         "standardize_structure",
         "steadystate_source_id",
         "steadystate_sources",
         "structure",
+        "structures_per_generation",
         "subworkflow_kwargs",
         "subworkflow_name",
         "supercell_end",
@@ -215,6 +229,7 @@ def test_get_unique_paramters():
         "vacancy_mode",
         "validator_kwargs",
         "validator_name",
+        "variable_range",
         "workflow_base",
         "write_summary_files",
     ]
