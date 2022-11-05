@@ -190,6 +190,8 @@ def test_get_unique_paramters():
         "nsteadystate",
         "nsteps",
         "percolation_mode",
+        "relax_bulk",
+        "relax_endpoints",
         "run_id",
         "search_id",
         "selector_kwargs",
