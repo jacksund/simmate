@@ -4,12 +4,16 @@ from pathlib import Path
 
 from ase.calculators.singlepoint import SinglePointCalculator
 from clease import Evaluate, NewStructures
+from clease.calculator import attach_calculator
+from clease.montecarlo import Montecarlo
+from clease.montecarlo.constraints import FixedElement
+from clease.montecarlo.observers import EnergyEvolution, LowestEnergyStructure
 from clease.settings import CECrystal, Concentration
 from clease.tools import update_db as update_clease_db
 
 from simmate.file_converters.structure.ase import AseAtomsAdaptor
 from simmate.toolkit import Structure
-from simmate.utilities import get_directory
+from simmate.utilities import get_chemical_subsystems, get_directory
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
@@ -34,6 +38,7 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
         space_group: int = 1,
         max_supercell_atoms: int = 64,
         current_generation: int = 0,  # or should this be inferred from the db?
+        convergence_limit: float = 0.005,
         max_generations: int = 10,
         structures_per_generation: int = 10,
         # "relaxation.vasp.staged-cluster" --> Workflow below is for quick testing
@@ -42,6 +47,10 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
         directory: Path = None,
         **kwargs,
     ):
+
+        # ---------------------------------------------------------------------
+
+        # SETUP
 
         # load the workflow that we want to do individual relaxations with
         subworkflow = get_workflow(subworkflow_name)
@@ -76,9 +85,58 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
         # database or if a calc access the database of a previous run.
         # Consider making a unique database located in the working directory
 
-        # TODO:
+        # ---------------------------------------------------------------------
+
+        # LOAD OLD RESULTS
+
         # Load previously completed structures from the Simmate database and
         # add them to the ASE/Clease database
+        # Following guide from...
+        #   https://clease.readthedocs.io/en/stable/import_structures.html
+
+        # TODO: consider filtering with concentration.todict() from source column
+        # BUG: Will adding irrelevent compositions to the database break clease?
+        # For now, I just filter any in the chemical system
+        all_elements = list(set([e for es in basis_elements for e in es]))
+        all_elements.sort()
+        chemical_system = "-".join(all_elements)
+
+        past_calculations = subworkflow.all_results.filter(
+            chemical_system__in=get_chemical_subsystems(chemical_system),
+            site_forces__isnull=False,
+            energy__isnull=False,
+        ).all()
+
+        ns = NewStructures(settings)
+
+        for past_calc in past_calculations:
+
+            # convert from Database Structure --> Toolkit Structure --> ASE
+            structure_result = past_calc.to_toolkit()
+            atoms = AseAtomsAdaptor.get_atoms(structure_result)
+
+            # set the results to the atoms object. We do this by creating
+            # a basic calculator and attaching it
+            calc = SinglePointCalculator(
+                atoms=atoms,
+                stress=past_calc.lattice_stress,
+                forces=past_calc.site_forces,
+                free_energy=past_calc.energy,
+                energy=past_calc.energy,
+            )
+            atoms.set_calculator(calc)
+
+            # documentation says we can just used the same structure for the
+            # intitial/final if we'd like.
+            try:
+                ns.insert_structure(init_struct=atoms, final_struct=atoms)
+            except Exception as error:
+                logging.warning("Failed to load past structure due to:")
+                logging.warning(error)
+
+        # ---------------------------------------------------------------------
+
+        # MAIN GENERATION LOOP
 
         # Start looping through CE generations
         for generation_number in range(current_generation, max_generations):
@@ -116,6 +174,7 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
                     source={
                         "method": "clease+ase",
                         "id": row.id,
+                        # TODO: consider storing concentration.todict()
                     },
                     **subworkflow_kwargs,
                 )
@@ -193,86 +252,100 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
                 fname=str(generation_directory / f"eci_gen_{generation_number}")
             )
 
-    # TODO:
-    # Once the loop exits above, we can write out ground state structures
-    # https://clease.readthedocs.io/en/stable/aucu_probe_gs.html#generate-ground-state-structures
+            # check if the fit is converged
+            if eva.rmse() <= convergence_limit and eva.loocv() <= convergence_limit:
+                logging.info("CE model is converged. Exitting generation loop.")
+                break
 
-    # THE CODE BELOW IS FROM LAURENS NOTES -- WHICH STILL NEED REFACTORED
-    # AND INTEGRATED
-    # these are taken from calculations
-    # eci = {
-    #   "c0": -6.752985422516767,
-    #   "c1_0": 1.3253551890476376,
-    #   "c2_d0004_0_00": 0.05988049764247872,
-    #   "c2_d0006_0_00": -0.0018572335717313064,
-    #   "c2_d0012_0_00": 0.014205248021860049,
-    #   "c2_d0015_0_00": 0.0031493348052340623,
-    #   "c3_d0014_0_000": 0.05990599094884079,
-    #   "c3_d0015_0_000": 0.09078354301781237,
-    #   "c3_d0016_0_000": -0.01761712377073125,
-    #   "c3_d0017_0_000": -0.0003400461721735883,
-    #   "c3_d0022_0_000": -0.052801823384517076,
-    #   "c3_d0025_0_000": 0.12194678755743693,
-    #   "c3_d0027_0_000": -0.15850374460679964,
-    #   "c3_d0040_0_000": 0.02892551579759695,
-    #   "c4_d0001_0_0000": 0.057727129322994564,
-    #   "c4_d0002_0_0000": -0.07458756016332646,
-    #   "c4_d0003_0_0000": 0.09689600405458178,
-    #   "c4_d0004_1_0000": 0.023964593114969332
-    # }
+        # double check that the loop above exited thanks to convergence
+        if eva.rmse() >= convergence_limit or eva.loocv() >= convergence_limit:
+            logging.warning("Maximum generations hit before CE model converged.")
 
-    # from clease.calculator import attach_calculator
-    # atoms = settings.atoms.copy()*(3, 3, 3)
-    # atoms = attach_calculator(settings, atoms=atoms, eci=eci)
-    # print(atoms)
+        # ---------------------------------------------------------------------
 
-    # def Al2Sc(a):
-    #     counter = a
-    #     while counter > 0:
-    #         for i in range(len(atoms)):
-    #             if atoms[i].symbol == 'Al':
-    #                 atoms[i].symbol = 'Sc'
-    #                 counter -= 1
-    #                 break
-    #     print(atoms)
+        # WRITE GROUND STATE
 
-    # def Sc2Al(a):
-    #     counter = a
-    #     while counter > 0:
-    #         for i in range(len(atoms)):
-    #             if atoms[i].symbol == 'Sc':
-    #                 atoms[i].symbol = 'Al'
-    #                 counter -= 1
-    #                 break
-    #     print(atoms)
+        # Once the loop exits above, we can write out ground state structures
+        # https://clease.readthedocs.io/en/stable/aucu_probe_gs.html#generate-ground-state-structures
 
-    # def runmc(frac):
-    #     from clease.montecarlo import Montecarlo
-    #     from clease.montecarlo.constraints import FixedElement
-    #     from clease.montecarlo.observers import EnergyEvolution
-    #     from clease.montecarlo.observers import LowestEnergyStructure
-    #     cnst = FixedElement('C')
-    #     T = 1e-10
-    #     counter = 1
-    #     while counter < 2:
-    #         counter = counter + 1
-    #         Al2Sc(frac)
-    #         mc = Montecarlo(atoms, T)
-    #         obs = EnergyEvolution(mc)
-    #         obs2 = LowestEnergyStructure(atoms)
-    #         mc.attach(obs, interval=100)
-    #         mc.attach(obs2, interval=1000)
-    #         mc.generator.add_constraint(cnst)
-    #         mc.run(steps=10000000)
-    #         thermo = mc.get_thermodynamic_quantities()
-    #         les = obs2.atoms
-    #         with open('thermo_AlScC_0K.csv', 'a', newline='') as f:
-    #              writer = csv.writer(f)
-    #              writer.writerow([thermo.get('energy'), thermo.get('F_conc')])
+        # TODO
 
-    # # run:
-    # count = 1296 #change this to the number of atoms you want to change
-    # i = 1 #change this to step value
-    # while i < count:
-    #     runmc(1)
-    #     i += 1
+        # ---------------------------------------------------------------------
+
+        # WORKUP + MONTE CARLO
+        # TODO: This will likely move to a separate workflow
+
+        # Likely inputs...
+        #   chemical_system (composition range)
+        #   max_atoms
+        #   max supercell size
+        #   temperature
+        #   ECI / setttings from past runs
+        #   elements to fix
+
+        # BUG: many parameters assumed for early testing
+        supercell_size = (3, 3, 3)
+        temperature = 1e-10
+        total_steps = 1000  # 10000000
+        monitor_interval = 100
+
+        # grab the ECI results (these are also stored in JSON files in the output)
+        eci_results = eva.get_eci_dict()
+
+        # use structure attached to the settings object as our starting point
+        # and make it a supercell. Note it is an ASE atoms object
+        supercell_to_test = settings.atoms.copy() * supercell_size
+        # TODO: supercell size an input parameter
+
+        # attach the CE model to it
+        supercell_to_test = attach_calculator(
+            settings,
+            atoms=supercell_to_test,
+            eci=eci_results,
+        )
+
+        # --- modify the input structure ---
+        # TODO: Use the chemical_system parameter to generate all compositions
+        # that should be evaluated. Then everything below will be in a for-loop
+        # that runs a MC simulation on each (+ pulls the ground state structure)
+
+        # randomly select sites and change composition via...
+        # counter = 1234
+        # while counter > 0:
+        #     for i in range(len(atoms)):
+        #         if atoms[i].symbol == 'Al':
+        #             atoms[i].symbol = 'Sc'
+        #             counter -= 1
+        #             break
+
+        # build simulation object
+        monte_carlo_engine = Montecarlo(supercell_to_test, temperature)
+
+        # set up constraints and input values
+        constraint_01 = FixedElement("C")  # elements to fix and not move/update
+        monte_carlo_engine.generator.add_constraint(constraint_01)
+        # BUG: We assume only Carbon is constrained in early testing
+        # BUG: clease docs indicate we likely need a ConstrainSwapByBasis
+
+        # set up monitors to write output files during run
+        observer_01 = EnergyEvolution(monte_carlo_engine)
+        observer_02 = LowestEnergyStructure(supercell_to_test)
+
+        monte_carlo_engine.attach(observer_01, monitor_interval)
+        monte_carlo_engine.attach(observer_02, monitor_interval)
+
+        # run the simulation
+        monte_carlo_engine.run(steps=total_steps)
+
+        # write output files
+        thermo = monte_carlo_engine.get_thermodynamic_quantities()
+        # TODO: this is a dictionary of data that I can hold on to for EACH
+        # composition + MC run. Then I'd put all results together in a
+        # pandas dataframe and write to a CSV. Maybe write a new CSV each cycle
+        # too.
+
+        # TODO: write summary files using our observers
+        # energy_progression = observer_01.energies
+        # structure_best = observer_02.atoms
+
+        # TODO: generate and plot the hull diagram using pymatgen
