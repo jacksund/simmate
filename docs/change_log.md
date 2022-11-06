@@ -74,6 +74,8 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 - add `relax_bulk` and `relax_endpoints` parameters to optionally turn off pre-relaxations in NEB
 - add CLEASE app for cluster expanison calculations (these workflows are highly experimental at the moment - so use with caution)
+- update "bad-elf" workflow to accept an empty-atom template structure or a list
+of empty sites
 
 **Fixes**
 
