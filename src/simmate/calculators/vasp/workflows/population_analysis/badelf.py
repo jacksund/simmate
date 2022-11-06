@@ -20,46 +20,57 @@ class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
     as a reference when partitioning.
     """
 
-    use_database = False
-
     @classmethod
     def run_config(
         cls,
         structure: Structure,
         empty_sites: list[float] = [],
-        empty_ion_template: str = None,
+        empty_ion: str = None,
         command: str = None,
         source: dict = None,
         directory: Path = None,
         **kwargs,
     ):
-        
-        if empty_sites and empty_ion_template:
+
+        if empty_sites and empty_ion:
             raise Exception(
                 "You can only use either empty_sites or an empty_ion_template. "
                 "Not both."
             )
 
-        # load the structure that contains dummy atoms in it
-        if empty_ion_template:
-            structure_w_empties = get_structure_w_empties(
-                structure=structure,
-                empty_ion_template=empty_ion_template,
-            )
+        if empty_ion:
+            # Check if the input structure given already has the empty atom in
+            # it. If so, we need to delete the empty atoms to get the base structure
+            if empty_ion in [e.symbol for e in structure.composition.elements]:
+                structure_w_empties = structure.copy()
+                structure.remove_species(empty_ion)
+            # Otherwise we run database queries to find a potential match
+            else:
+                # load the structure that contains dummy atoms in it
+                structure_w_empties = get_structure_w_empties(
+                    structure=structure,
+                    empty_ion=empty_ion,
+                )
+
         elif empty_sites:
-            # BUG: what if hydrogren is already in the structure?
-            empty_ion_template = "H"
+            # Select an empty element that is NOT already in the structure
+            for empty_ion in ["H", "He", "Lv"]:
+                if empty_ion not in [e.symbol for e in structure.composition.elements]:
+                    break
             structure_w_empties = structure.copy()
             for empty_coords in empty_sites:
                 structure_w_empties.append(
-                    species = empty_ion_template,
-                    coords = empty_coords, # I assume fractional coords
+                    species=empty_ion,
+                    coords=empty_coords,  # I assume fractional coords
                 )
+
         else:
             # otherwise no empties will be used
-            empty_ion_template = "H"
+            # Still, select an empty element that is NOT already in the structure
+            empty_ion = None
             structure_w_empties = structure.copy()
 
+        # Run the pre-static energy calculation to generate our CHGCAR and ELFCAR
         prebadelf_result = StaticEnergy__Vasp__PrebadelfMatproj.run(
             structure=structure,
             command=command,
@@ -67,17 +78,15 @@ class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
             directory=directory,
         ).result()
 
-        
         # Bader only adds files and doesn't overwrite any, so I just run it
         # in the original directory. I may switch to copying over to a new
         # directory in the future though.
         badelf_result = PopulationAnalysis__Bader__Badelf.run(
             structure=structure_w_empties,
-            empty_ion_template=empty_ion_template,
-            directory=prebadelf_result["directory"],
+            directory=directory,
         ).result()
 
-        save_badelf_results(badelf_result, prebadelf_result["run_id"])
+        return badelf_result
 
 
 # -----------------------------------------------------------------------------
@@ -102,17 +111,13 @@ class StaticEnergy__Vasp__PrebadelfMatproj(StaticEnergy__Vasp__Matproj):
         PREC="Single",  # ensures CHGCAR grid matches ELFCAR grid
         # Note that these set the FFT grid while the pre-Bader task sets the
         # fine FFT grid (e.g. useds NGX instead of NGXF)
-        NGX__density_a=12,
-        NGY__density_b=12,
-        NGZ__density_c=12,
+        NGX__density_a=10,
+        NGY__density_b=10,
+        NGZ__density_c=10,
     )
 
 
-def get_structure_w_empties(
-    structure,
-    empty_ion_template,
-    # directory,
-):
+def get_structure_w_empties(structure, empty_ion):
     """
     Searches the Materials Project database for a structure that contains
     the extra ion and matching host lattice, and uses it to introduce
@@ -126,20 +131,16 @@ def get_structure_w_empties(
     # !!! It might make more sense to have this accept a database Structure object
     # and also search the same table for a match (rather than the Matproj).
 
-    # Grab the chemical system of the structure when it includes the empty ion template
-    structure = Structure.from_dynamic(
-        structure
-    )  # !!! because we don't load input in this flow yet
+    # Grab the chemical system of the structure when it includes the empty ion
     structure_dummy = structure.copy()
-    structure_dummy.append(
-        empty_ion_template, [0, 0, 0]
-    )  # coords don't matter here bc I'm just after the chemical_system
+    # coords don't matter here bc I'm just after the chemical_system
+    structure_dummy.append(empty_ion, [0, 0, 0])
     template_system = structure_dummy.composition.chemical_system
 
     # Go through the Materials Project database and find a structure that
     # is matching when the empty ion type is ignored.
     matcher = StructureMatcher(
-        ignored_species=empty_ion_template,
+        ignored_species=empty_ion,
         primitive_cell=False,  # required for the get_s2_like_s1 method
     )
     potential_matches = MatprojStructure.objects.filter(
@@ -162,12 +163,11 @@ def get_structure_w_empties(
 
     # make a copy because we will be modifying the structure
     structure_w_empties = structure.copy()
-
     for site in structure_template.sites:
-        if site.specie.symbol == empty_ion_template:
-            structure_w_empties.append("H", site.frac_coords)
+        if site.specie.symbol == empty_ion:
+            structure_w_empties.append(empty_ion, site.frac_coords)
 
-    # TODO: consider doing a check to ensure the H atoms added are reasonable.
+    # TODO: consider doing a check to ensure the empty atoms added are reasonable.
     # A simple check could be to use the SiteDistance validator and make sure
     # the hydrogen isn't too close to another atom.
 
@@ -176,24 +176,3 @@ def get_structure_w_empties(
     # structure_w_empties.to("cif", filename)
 
     return structure_w_empties
-
-
-# THIS IS A COPY/PASTE FROM THE BADER WORKFLOW -- I need to condense these
-def save_badelf_results(bader_result, run_id):
-    # load the results. We are particullary after the first result with
-    # is a pandas dataframe of oxidation states.
-    oxidation_data, extra_data = bader_result["result"]
-
-    # load the calculation entry for this workflow run. This should already
-    # exist thanks to the load_input_and_register task of the prebader workflow
-    calculation = PopulationAnalysis__Bader__Badelf.database_table.from_run_context(
-        run_id=run_id,
-        workflow_name=PopulationAnalysis__Vasp__PrebadelfMatproj.name_full,
-        workflow_version=PopulationAnalysis__Vasp__PrebadelfMatproj.version,
-    )
-    # BUG: can't use context to grab the id because workflow tasks generate a
-    # different id than the main workflow
-
-    # now update the calculation entry with our results
-    calculation.oxidation_states = list(oxidation_data.oxidation_state.values)
-    calculation.save()

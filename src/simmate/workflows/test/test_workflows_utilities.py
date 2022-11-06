@@ -179,6 +179,8 @@ def test_get_unique_paramters():
         "directory",
         "directory_new",
         "directory_old",
+        "empty_ion",
+        "empty_sites",
         "fitness_field",
         "formula_unit",
         "input_parameters",

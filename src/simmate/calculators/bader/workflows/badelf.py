@@ -16,11 +16,11 @@ class PopulationAnalysis__Bader__Badelf(PopulationAnalysis__Bader__Bader):
     """
 
     command = "bader CHGCAR_empty -ref ELFCAR_empty > bader.out"
-    required_files = ["CHGCAR", "ELFCAR"]
+    required_files = ["CHGCAR", "ELFCAR", "CHGCAR_empty", "ELFCAR_empty"]
     use_database = False
 
     @staticmethod
-    def setup(structure: Structure, directory: Path):
+    def setup(structure: Structure, directory: Path, **kwargs):
         """
         Bader analysis requires that a static-energy calculation be ran beforehand
         - typically using VASP. This setup involves ensuring that
