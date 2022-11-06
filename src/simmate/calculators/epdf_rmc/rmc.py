@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from pathlib import Path
 from random import random
 
 import matplotlib.pyplot as plt
@@ -27,7 +28,7 @@ class EpdfRmc__Toolkit__FitExperimental(Workflow):
         max_steps: int = 1000,
         transformations: dict = {
             "from_ase.CoordinatePerturbation": {
-                "perturb_strength": 0.01,
+                "perturb_strength": 0.005,
                 "ratio_of_covalent_radii": 0.1,
             },
             # "AtomHop": {},
@@ -45,6 +46,7 @@ class EpdfRmc__Toolkit__FitExperimental(Workflow):
             #     "CoordinationRange": {"Al": [2, 7], "O": [1, 4]},
             # },
         },
+        directory: Path = None,
         **kwargs,
     ):
 
@@ -164,12 +166,13 @@ class EpdfRmc__Toolkit__FitExperimental(Workflow):
                 current_error = new_error
                 error_list.append(new_error)
                 successful_steps.append(nsteps)
+                current_structure.to("cif", directory / f"structure_step_{nsteps}.cif")
 
                 plt.plot(current_structure.full_pdf_G)
                 plt.show()
 
         output_structure = current_structure
-        output_structure.to("cif", "final_rmc_structure.cif")
+        output_structure.to("cif", directory / "final_rmc_structure.cif")
         logging.info(f"successful_steps = {successful_steps}")
         return output_structure
 
