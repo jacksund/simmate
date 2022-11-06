@@ -7,6 +7,8 @@ from pathlib import Path
 from pymatgen.analysis.transition_state import NEBAnalysis
 from pymatgen.io.vasp.outputs import Vasprun as VasprunPymatgen
 
+from simmate.calculators.vasp.inputs import Incar
+
 
 class Vasprun(VasprunPymatgen):
     @classmethod
@@ -14,6 +16,12 @@ class Vasprun(VasprunPymatgen):
 
         if not directory:
             directory = Path.cwd()
+
+        # special-case: check if we have an NEB directory, and if so,
+        # we need to switch to the NEB method
+        incar = Incar.from_file(directory / "INCAR")
+        if "IMAGES" in incar.keys():
+            return cls.from_neb_directory(directory)
 
         vasprun_filename = directory / "vasprun.xml"
 
@@ -44,16 +52,11 @@ class Vasprun(VasprunPymatgen):
 
         return vasprun
 
-    @property
-    def neb_results(self):
+    @classmethod
+    def from_neb_directory(cls, directory: Path = None) -> NEBAnalysis:
 
-        directory = getattr(self, "directory", None)
         if not directory:
-            raise Exception(
-                "The Vasprun must have been created with the `from_directory` "
-                "method in order to load neb results because it involves loading "
-                "more results from files."
-            )
+            directory = Path.cwd()
 
         # Make sure there is "*.start" and "*.end" directory present. These
         # will be our start/end folders. We go through all foldernames in the
@@ -67,16 +70,16 @@ class Vasprun(VasprunPymatgen):
         end_dirname = directory / "end"
 
         for name in directory.iterdir():
-            if name.suffix == ".start":
+            if name.suffix == ".start" and name.stem.startswith("static-energy"):
                 start_dirname = name
-            elif name.suffix == ".end":
+            elif name.suffix == ".end" and name.stem.startswith("static-energy"):
                 end_dirname = name
 
         if not start_dirname.exists() or not end_dirname.exists():
             raise Exception(
                 "Your NEB calculation finished (possibly successfully). However, "
                 "in order to run the workup, Simmate needs the start/end point "
-                "relaxations. These should be located in the same directory as "
+                "energy calcs. These should be located in the same directory as "
                 "the NEB run and with folder names ending  with '*.start' and"
                 " '*.end' (e.g. 'image.start' and image.end' will work)"
             )
@@ -91,7 +94,7 @@ class Vasprun(VasprunPymatgen):
         # the end filename should be the highest number in the directory
         numbered_dirs = [d for d in directory.iterdir() if d.name.isdigit()]
         numbered_dirs.sort()
-        new_end_filename = directory / numbered_dirs[-1] / "OUTCAR"
+        new_end_filename = numbered_dirs[-1] / "OUTCAR"
         # now copy the outcars over
         shutil.copyfile(start_dirname / "OUTCAR", new_start_filename)
         shutil.copyfile(end_dirname / "OUTCAR", new_end_filename)

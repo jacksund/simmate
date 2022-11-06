@@ -61,6 +61,9 @@ class NebAllPathsWorkflow(Workflow):
         source: dict = None,
         directory: Path = None,
         is_restart: bool = False,
+        # optional extra relaxations
+        relax_bulk: bool = True,
+        relax_endpoints: bool = True,
         # parameters for supercell and image generation
         nimages: int = 5,
         min_supercell_atoms: int = 80,
@@ -74,25 +77,29 @@ class NebAllPathsWorkflow(Workflow):
         **kwargs,
     ):
 
-        # run a relaxation on the bulk structure
-        bulk_relax_result = cls.bulk_relaxation_workflow.run(
-            structure=structure,
-            command=command,  # subcommands["command_bulk"]
-            directory=directory / cls.bulk_relaxation_workflow.name_full,
-            is_restart=is_restart,
-        ).result()
+        if relax_bulk:
+            # run a relaxation on the bulk structure
+            bulk_relax_result = cls.bulk_relaxation_workflow.run(
+                structure=structure,
+                command=command,  # subcommands["command_bulk"]
+                directory=directory / cls.bulk_relaxation_workflow.name_full,
+                is_restart=is_restart,
+            ).result()
 
-        # run static energy calculation on the relaxed structure
-        bulk_static_energy_result = cls.bulk_static_energy_workflow.run(
-            structure=bulk_relax_result,
-            command=command,  # subcommands["command_bulk"]
-            directory=directory / cls.bulk_static_energy_workflow.name_full,
-            is_restart=is_restart,
-        ).result()
+            # run a static energy calculation on the relaxed structure
+            bulk_static_energy_result = cls.bulk_static_energy_workflow.run(
+                structure=bulk_relax_result,
+                command=command,  # subcommands["command_bulk"]
+                directory=directory / cls.bulk_static_energy_workflow.name_full,
+                is_restart=is_restart,
+            ).result()
+
+            # update the input structure with the relaxed one
+            structure = bulk_static_energy_result.to_toolkit()
 
         # Using the relaxed structure, detect all symmetrically unique paths
         pathfinder = DistinctPathFinder(
-            structure=bulk_static_energy_result.to_toolkit(),
+            structure=structure,
             migrating_specie=migrating_specie,
             max_path_length=max_path_length,
             perc_mode=percolation_mode,
@@ -125,5 +132,6 @@ class NebAllPathsWorkflow(Workflow):
                 nimages=nimages,
                 vacancy_mode=vacancy_mode,
                 diffusion_analysis_id=current_calc.id,
+                relax_endpoints=relax_endpoints,
             )
             state.result()  # wait until the job finishes
