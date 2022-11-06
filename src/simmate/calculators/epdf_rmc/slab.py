@@ -232,13 +232,12 @@ class RdfSlab(Structure):
     r_experimental = None
     G_experimental = None
 
-    def load_experimental_from_file(self, file_name):
-        # NOTE: remove sep when using CSVs
-        my_data = pandas.read_csv(file_name, sep="\t")
+    def load_experimental_from_file(self, file_name: str):
+        data = pandas.read_csv(file_name)
 
         # save as attribute so we don't need to reload later
-        self.r_experimental = my_data.r.values
-        self.G_experimental = my_data.gr.values
+        self.r_experimental = data.r.values
+        self.G_experimental = data.gr.values
 
     @property
     def prdf_error(self):
@@ -268,23 +267,24 @@ class RdfSlab(Structure):
 
         return stderr
 
+    def _init_xyz_df(structure):
+        import pandas as pd
 
-"""
+        data = []
+        for i, site in enumerate(structure.sites):
+            temp = [
+                site.coords[0],
+                site.coords[1],
+                site.coords[2],
+                site.species_string,
+            ]
+            data.append(temp)
+        labels = ["x", "y", "z", "el"]
 
-initial_structure = RdfSlab.from_file('CONTCAR_from_MD_11_1')
+        df = pd.DataFrame(data, columns=labels)
 
-MinBondLength = {
-        ("Al", "Al"): 1.5,
-        ("Al", "O"): 0.8,
-        ("O", "O"): 1.2,
-    }
+        df_x = df.copy().sort_values("x")
+        df_y = df.copy().sort_values("y")
+        df_z = df.copy().sort_values("z")
 
-CoordinationRange = {"Al": [1, 10], "O": [1, 10]}
-
-
-dist_cord = DistancesCoordination(MinBondLength, CoordinationRange)
-
-dist_cord.check_structure(initial_structure)
-
-
-"""
+        return {"df_x": df_x, "df_y": df_y, "df_z": df_z}
