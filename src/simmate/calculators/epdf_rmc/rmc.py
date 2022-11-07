@@ -6,6 +6,8 @@ from random import random
 
 import matplotlib.pyplot as plt
 import numpy
+from dask.distributed import Client
+from rich.progress import track
 
 import simmate.toolkit.transformations.from_ase as ase_transform_module
 from simmate.calculators.epdf_rmc.slab import RdfSlab
@@ -49,6 +51,9 @@ class EpdfRmc__Toolkit__FitExperimental(Workflow):
         directory: Path = None,
         **kwargs,
     ):
+
+        # set up dask cluster
+        client = Client()
 
         # convert from a Structure to SlabStructure object
         initial_structure = RdfSlab.from_dict(structure.as_dict())
@@ -110,36 +115,62 @@ class EpdfRmc__Toolkit__FitExperimental(Workflow):
         while nsteps < max_steps:
             nsteps += 1
 
+            batch_size = 100
+            all_trial_structures = []
+
             # TODO: add logic to select a transformation
             # TODO: apply with validation
             # for now, just grab the first transformation
             transformer = transformation_objects[0]
-
-            trial_structure = current_structure.copy()
-
+            # breakpoint()
             # TODO: need a better way of passing kwargs
-            new_structure = transformer.apply_transformation(
-                trial_structure,
-                **transformations[transformer.name],  # gives the kwargs dict
-            )
+            futures = [
+                client.submit(
+                    transformer().apply_transformation_with_validation,
+                    current_structure.copy(),
+                    validators=validator_objects,
+                    **transformations[transformer.name],  # gives the kwargs dict
+                    pure=False,
+                )
+                for sample in range(batch_size)
+            ]
+            # breakpoint()
+            all_trial_structures = [
+                future.result() for future in futures if future.result()
+            ]
 
-            is_valid = True  # true until proven otherwise
-            for validator in validator_objects:
-                if not validator.check_structure(new_structure):
-                    is_valid = False
-                    break  # one failure is enough to stop and reject the structure
-            if not is_valid:
-                logging.info(f"Step {nsteps}. Move not valid.")
+            if not all_trial_structures:
+                logging.info(f"No structures in step {nsteps} were valid.")
                 continue  # restart the while loop
+
+            def get_trial_error(new_structure):
+                # BUG-FIX: transformations convert back to structure objects, which
+                # loses everything attached to the SlabStructure object. We need
+                # to rebuild it here.
+                new_structure = RdfSlab.from_dict(new_structure.as_dict())
+                new_structure.load_experimental_from_file(experimental_G_csv)
+
+                new_error = new_structure.prdf_error
+                return new_error
+
+            futures = [
+                client.submit(get_trial_error, t_struct, pure=False)
+                for t_struct in all_trial_structures
+            ]
+            # breakpoint()
+            all_errors = [future.result() for future in futures]
+
+            # Select the best error
+            new_error = min(all_errors)
+            best_index = all_errors.index(new_error)
+            new_structure = all_trial_structures[best_index]
+            new_e = "{:.5E}".format(new_error)
 
             # BUG-FIX: transformations convert back to structure objects, which
             # loses everything attached to the SlabStructure object. We need
             # to rebuild it here.
             new_structure = RdfSlab.from_dict(new_structure.as_dict())
             new_structure.load_experimental_from_file(experimental_G_csv)
-
-            new_error = new_structure.prdf_error
-            new_e = "{:.5E}".format(new_error)
 
             keep_new = True
             if new_error < current_error:
@@ -175,47 +206,3 @@ class EpdfRmc__Toolkit__FitExperimental(Workflow):
         output_structure.to("cif", directory / "final_rmc_structure.cif")
         logging.info(f"successful_steps = {successful_steps}")
         return output_structure
-
-
-# ---- DASK LOOP NOTES ----
-# from dask.distributed import Client
-# client = Client()
-# failed_cycles = 0
-# new_structure = False
-# while not new_structure:
-#     futures = [
-#         client.submit(
-#             make_candidate_structure,
-#             current_structure,
-#             validator_objects,
-#             transformer,
-#             pure=False,
-#         )
-#         for n in range(1000)
-#     ]
-#     for future in futures:
-#         new_structure = future.result()
-#         if new_structure:
-#             break
-#     for future in futures:
-#         future.cancel()
-#     if not new_structure:
-#         print(
-#             "Failed to find valid structure with 1000 attempts. Trying again."
-#         )
-#         failed_cycles += 1
-#         if failed_cycles >= 10:
-#             print("Critical failure. Returning most recent structure")
-#             return current_structure
-# def make_candidate_structure(
-#     current_structure, validator_objects, transformer
-# ):
-#     new_structure = transformer.apply_transformation(current_structure)
-#     is_valid = True  # true until proven otherwise
-#     for validator in validator_objects:
-#         if not validator.check_structure(new_structure):
-#             is_valid = False
-#             break  # one failure is enough to stop and reject the structure
-#     if not is_valid:
-#         return False
-#     return new_structure
