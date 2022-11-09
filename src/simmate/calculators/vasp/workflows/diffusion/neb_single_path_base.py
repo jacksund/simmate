@@ -126,6 +126,9 @@ class SinglePathWorkflow(Workflow):
             # BUG: IDPP has a bug when relaxing ALL elements so we limit IDPP
             # relaxation to the diffusing species here.
             species=[migration_hop.isite.specie.symbol],
+            sort_tol=0,  # sites in our structures should already be sorted
+            # BUG-FIX attempt disabling IDPP for now
+            idpp_relax=False,
         )
 
         # Run NEB on this set of images

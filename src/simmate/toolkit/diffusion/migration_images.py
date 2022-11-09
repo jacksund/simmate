@@ -214,6 +214,8 @@ class MigrationImages(list):
         structure_end: Structure,
         nimages: int = 5,
         species: list[str] = None,
+        sort_tol: float = 0,
+        idpp_relax: bool = True,
         **kwargs,
     ):
         """
@@ -238,16 +240,26 @@ class MigrationImages(list):
             Any arguments that are normally accepted by IDPPSolver
         """
 
-        # Run IDPP relaxation on the images before returning them
-        idpp_solver = IDPPSolver.from_endpoints(
-            [structure_start, structure_end],
-            nimages=nimages,
-            interpolate_lattices=True,
-        )
-        images = idpp_solver.run(
-            species=species,
-            **kwargs,
-        )
+        if idpp_relax:
+            # Run IDPP relaxation on the images before returning them
+            idpp_solver = IDPPSolver.from_endpoints(
+                [structure_start, structure_end],
+                nimages=nimages,
+                interpolate_lattices=True,
+                sort_tol=sort_tol,
+            )
+            images = idpp_solver.run(
+                species=species,
+                **kwargs,
+            )
+        else:
+            # Run a basic linear interpolation
+            images = structure_start.interpolate(
+                structure_end,
+                nimages=nimages + 1,
+                autosort_tol=sort_tol,
+                interpolate_lattices=True,
+            )
 
         return cls(images)
 
