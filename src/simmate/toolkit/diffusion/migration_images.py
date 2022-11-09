@@ -213,6 +213,7 @@ class MigrationImages(list):
         structure_start: Structure,
         structure_end: Structure,
         nimages: int = 5,
+        species: list[str] = None,
         **kwargs,
     ):
         """
@@ -241,9 +242,12 @@ class MigrationImages(list):
         idpp_solver = IDPPSolver.from_endpoints(
             [structure_start, structure_end],
             nimages=nimages,
+            interpolate_lattices=True,
+        )
+        images = idpp_solver.run(
+            species=species,
             **kwargs,
         )
-        images = idpp_solver.run()
 
         return cls(images)
 

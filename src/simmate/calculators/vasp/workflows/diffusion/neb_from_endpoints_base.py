@@ -2,9 +2,6 @@
 
 from pathlib import Path
 
-from simmate.calculators.vasp.workflows.diffusion.utilities import (
-    get_migration_images_from_endpoints,
-)
 from simmate.toolkit import Structure
 from simmate.workflow_engine import Workflow
 
@@ -73,6 +70,11 @@ class NebFromEndpointWorkflow(Workflow):
         #     command,
         #     commands_out=["command_supercell", "command_neb"],
         # )
+
+        raise NotImplementedError(
+            "This workflow is currently broken and requires a refactor. Please "
+            "contact our team if you would like us to prioritize this."
+        )
 
         # Relax the starting supercell structure
         endpoint_start_state = cls.endpoint_relaxation_workflow.run(
