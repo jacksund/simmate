@@ -51,7 +51,7 @@ dependencies:
     - rich >=11.0, <=12.5.1
     - scikit-learn >=1.1.1, <=1.1.1
     - toml >=0.10.2, <=0.10.2
-    - typer >=0.4.1, <=0.6.1
+    - typer >=0.4.1, <0.7.1
     # Recommended IDE for development -- We leave this as a separate install
     # because it's up to you and Spyder is a large package with many dependencies.
     # - spyder >=5.1.5
