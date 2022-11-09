@@ -64,7 +64,7 @@ dependencies=[
     "pandas >=1.3.5, <=1.4.4",
     "django >=4.0.0, <=4.1.1",
     "dask >=2021.12.0, <=2022.9.0",
-    "distributed >=2022.7.1, <=2022.9.0",  # part of dask
+    "distributed >=2022.7.1, <2022.11.0",  # part of dask
     "typer >=0.4.1, <=0.6.1",
     #
     # Extra (smaller) dependencies & utilities
