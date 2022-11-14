@@ -75,7 +75,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
         test_option: str, # set to either 'lammps' or 'rand_struct' 
         table_name: str = "",
         num_models: int = 3, #assuming that deepmd randomly selects seeds
-        max_error: float = 0.5, #make int?? 
+        max_error: float = 0.5, 
         filter_kwargs: dict = {},
         md_kwargs: dict = {"temperature_start": 300, "temperature_end": 300, "nsteps" : 1000},
     ):
@@ -146,7 +146,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
         for num in range(num_models):
             
             deepmd_workflow.run(  # ---------------- USE RUN CLOUD IN FINAL VERSION
-                directory=deepmd_directory / f'run_{num}', #setting directory with cloud???
+                directory=deepmd_directory / f'run_{num}', #remove if using run cloud
                 composition=structure.composition,
                 command=f'eval "$(conda shell.bash hook)"; conda activate deepmd; dp train input_{num}.json',
                 input_filename="input_{num}.json",
@@ -159,7 +159,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             #freeze_model         
             freeze_workflow.run(
                 command = f"dp freeze -o graph_{num}.pb",
-                directory=deepmd_directory,
+                directory=deepmd_directory / f'run_{num}', #how to set this if using run cloud???
             )
             
             #search for graph file name and add to list? 
@@ -183,19 +183,15 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             #set up directory to hold lammps data files and runs 
             lammps_directory = directory / "lammps"
             
-            #run initial lammps simulation with the first trained model 
-            #!!!this is where the loop should start 
             
             #make counter to keep track of the number of testing/retraining iterations
             counter = 0 
             while True:
                 
-                counter +=1 
-                
                 #run initial lammps simulation with first trained model 
                 lammps_workflow.run(
                     structure = structure, #randomly create a new structure for this instead??
-                    directory = lammps_directory / "_0",
+                    directory = lammps_directory / f"test_{counter}",
                     deepmd_model = model_list[0], 
                     lammps_timestep = 1000)
                 
@@ -215,7 +211,6 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
                     energy_errors = []
                     for model in model_list[1:]:
                         #!!! problem with workflow, having to create calculator each time its called 
-                        #wastes time when trying to use the same model to calculate a lot of structures 
                        state = prediction_workflow.run(
                             structure = struct,
                             deepmd_model = model)
@@ -235,7 +230,9 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
                     #if the average energy of the structure is 
                     if average_error > max_error:
                         new_training_structs.append(struct)
-                        
+                
+                #if there are less than x number of structures above the error
+                #don't bother retraining and end loop 
                 if len(new_training_structs) < 20:
                     break 
                 
@@ -245,15 +242,18 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
                         structure = struct,
                         )
                     
-                #create dataset for new structures 
-                #!!!make a query set for the static energy calcs just run 
+                # how to create query set with just these structures???
                 train, test = DeepmdDataset.to_file(
                     ionic_step_structures=start_structs,
                     directory=deepmd_directory / f"deepmd_data_{counter}",
                     )
                 
+                #add new data sets to list 
                 training_data += train
                 testing_data += test
+                
+                #!!!everything below needs to happen in each of the directories
+                #used to intially run deepmd 
                 
                 #find newest available checkpoint 
                 number_max = 0  # to keep track of checkpoint number
@@ -270,11 +270,14 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
 
                 command = f'eval "$(conda shell.bash hook)"; conda activate deepmd; dp train --restart {checkpoint_file.stem} input_{n}.json'
                 
+                counter +=1 
+                
+                
                 deepmd_workflow.run(
                     directory=deepmd_directory / f'run_{counter}', #setting directory with cloud???
                     composition=structure.composition,
                     command=command,
-                    input_filename="input_{num}.json",
+                    input_filename="input_{counter}.json",
                     training_data=training_data,
                     testing_data=testing_data,
                     )
