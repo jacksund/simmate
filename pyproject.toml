@@ -97,7 +97,7 @@ dependencies=[
 DEV = [
     "pytest >=6.2.5, <=7.1.3",
     "pytest-django >=4.5.2, <=4.5.2",
-    "pytest-mock >=3.7.0, <=3.8.2",
+    "pytest-mock >=3.7.0, <3.10.1",
     "pytest-xdist >=2.5.0, <=2.5.0",
     "black >=22.1.0, <=22.6.0",
     "coverage >=6.2, <=6.4.4",
