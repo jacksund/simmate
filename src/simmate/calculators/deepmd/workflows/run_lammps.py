@@ -38,12 +38,10 @@ class MlPotential__Deepmd__RunLammps(S3Workflow):
         lammps_dump_filename: str = "dump.lammpstrj",
     ):
 
-        # write structure data file for lammps to specific lammps directory
-        lammps_directory = directory / "lammps"  # set to dfault???
 
         ldata = LammpsData.from_structure(structure=structure, atom_style="atomic")
 
-        ldata.write_file(filename=lammps_directory / data_filename)
+        ldata.write_file(filename=directory / data_filename)
 
         # write input file
 

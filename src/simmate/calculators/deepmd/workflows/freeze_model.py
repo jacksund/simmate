@@ -12,4 +12,3 @@ class MlPotential__Deepmd__FreezeModel(S3Workflow):
 
     use_database = False
     command = "dp freeze -o graph.pb"
-    # !!! consider compressing model before using
