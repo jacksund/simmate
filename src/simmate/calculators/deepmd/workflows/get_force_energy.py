@@ -14,7 +14,7 @@ class MlPotential__Deepmd__Prediction(Workflow):
     use_database = False
 
     def run_config(
-        structure: Structure,  # consider making a list of structures
+        structures: list[Structure],
         directory: Path,  # directory where frozen model (graph.pb file ) is stored
         **kwargs,
     ):
@@ -25,16 +25,23 @@ class MlPotential__Deepmd__Prediction(Workflow):
         # !!! if doesn't work, set type_dict
         calculator = DP(model=directory / "graph.pb")
 
-        # get ase atoms from structure
-        structure_atoms = AseAtomsAdaptor.get_atoms(structure)
+        energies = []
+        site_forces = []
+                
+        for structure in structures:
 
-        # set calculator for ase object to deepmd calculator
-        structure_atoms.calc = calculator
+            # get ase atoms from structure
+            structure_atoms = AseAtomsAdaptor.get_atoms(structure)
+    
+            # set calculator for ase object to deepmd calculator
+            structure_atoms.calc = calculator
+    
+            # calculate values
+            deepmd_energy = structure_atoms.get_potential_energy()
+            deepmd_forces = structure_atoms.get_forces()
+            # !!! can deepmd model be used to predict other parameters??
+            
+            energies.append(deepmd_energy)
+            site_forces.append(deepmd_forces)
 
-        # calculate values
-        deepmd_energy = structure_atoms.get_potential_energy()
-        deepmd_forces = structure_atoms.get_forces()
-
-        # can deepmd model be used to predict other parameters??
-
-        return {"energy": deepmd_energy, "forces": deepmd_forces}
+        return {"energy": energies, "site_forces": site_forces}
