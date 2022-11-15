@@ -86,45 +86,47 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
         deepmd_workflow.run(
             directory=deepmd_directory,
             composition=structure.composition,
-            command='eval "$(conda shell.bash hook)"; conda activate deepmd; dp train input_1.json',
+            command='dp train input_1.json',
             input_filename="input_1.json",
             training_data=training_data,
             testing_data=testing_data,
         )
-
-        # run additional deepmd training iterations with restart function
-        for n, temperature in enumerate(temperature_list[1:]):
-
-            # add the new dataset to our list
-            training_data.append(
-                str(directory / f"deepmd_data_{temperature}/{composition}_train")
-            )
-            testing_data.append(
-                str(directory / f"deepmd_data_{temperature}/{composition}_test")
-            )
-
-            # find the newest available checkpoint file
-            number_max = 0  # to keep track of checkpoint number
-            checkpoint_file = None
-            for file in deepmd_directory.iterdir():
-                if "model.ckpt" in file.stem and "-" in file.stem:
-                    number = int(file.stem.split("-")[-1])
-                    if number > number_max:
-                        number_max = number
-                        checkpoint_file = file
-            # make sure the loop above ended with finding a file
-            if not checkpoint_file:
-                raise Exception("Unable to detect DeepMD checkpoint file")
-
-            # And continue the model training with this new data
-            deepmd_workflow.run(
-                directory=deepmd_directory,
-                composition=structure.composition,
-                command=f'eval "$(conda shell.bash hook)"; conda activate deepmd; dp train --restart {checkpoint_file.stem} input_{n}.json',
-                input_filename=f"input_{n}.json",
-                training_data=training_data,
-                testing_data=testing_data,
-            )
+        
+        #iterative training only if multiple temperatures submitted 
+        if len(temperature_list>1):
+            # run additional deepmd training iterations with restart function
+            for n, temperature in enumerate(temperature_list[1:]):
+    
+                # add the new dataset to our list
+                training_data.append(
+                    str(directory / f"deepmd_data_{temperature}/{composition}_train")
+                )
+                testing_data.append(
+                    str(directory / f"deepmd_data_{temperature}/{composition}_test")
+                )
+    
+                # find the newest available checkpoint file
+                number_max = 0  # to keep track of checkpoint number
+                checkpoint_file = None
+                for file in deepmd_directory.iterdir():
+                    if "model.ckpt" in file.stem and "-" in file.stem:
+                        number = int(file.stem.split("-")[-1])
+                        if number > number_max:
+                            number_max = number
+                            checkpoint_file = file
+                # make sure the loop above ended with finding a file
+                if not checkpoint_file:
+                    raise Exception("Unable to detect DeepMD checkpoint file")
+    
+                # And continue the model training with this new data
+                deepmd_workflow.run(
+                    directory=deepmd_directory,
+                    composition=structure.composition,
+                    command=f'dp train --restart {checkpoint_file.stem} input_{n}.json',
+                    input_filename=f"input_{n}.json",
+                    training_data=training_data,
+                    testing_data=testing_data,
+                )
 
         freeze_workflow = get_workflow("ml-potential.deepmd.freeze-model")
 
