@@ -93,7 +93,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
         )
         
         #iterative training only if multiple temperatures submitted 
-        if len(temperature_list>1):
+        if len(temperature_list) > 1:
             # run additional deepmd training iterations with restart function
             for n, temperature in enumerate(temperature_list[1:]):
     
