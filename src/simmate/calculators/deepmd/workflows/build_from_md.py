@@ -18,13 +18,13 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
         temperature_list: list[int] = [300, 750, 1200],
         relax_kwargs: dict = {},
         md_kwargs: dict = {},
-        # deepmd_kwargs: dict =  {}
+        deepmd_settings: dict =  {},
         **kwargs,
     ):
 
         # get relaxed structure
         relax_workflow = get_workflow(
-            "relaxation.vasp.quality01"
+            "relaxation.vasp.mit"
         )  #!!!set to higher quality or allow quality to be set by user
         state = relax_workflow.run(
             structure=structure,
@@ -38,7 +38,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
         submitted_states = []
         for temperature in temperature_list:
 
-            state = md_workflow.run(  # ---------------- USE RUN CLOUD IN FINAL VERSION
+            state = md_workflow.run_cloud(
                 structure=relax_result,
                 temperature_start=temperature,
                 temperature_end=temperature,  # constant temp for entire run
@@ -72,10 +72,10 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
         # run initial deepmd training iteration
         temperature = temperature_list[0]
         training_data.append(
-            str(directory / f"deepmd_data_{temperature}/{composition}_train")
+            directory / f"deepmd_data_{temperature}/{composition}_train"
         )
         testing_data.append(
-            str(directory / f"deepmd_data_{temperature}/{composition}_test")
+            directory / f"deepmd_data_{temperature}/{composition}_test"
         )
 
         deepmd_directory = directory / "deepmd"
@@ -90,6 +90,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
             input_filename="input_1.json",
             training_data=training_data,
             testing_data=testing_data,
+            settings_update = deepmd_settings,
         )
         
         #iterative training only if multiple temperatures submitted 
@@ -99,10 +100,10 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
     
                 # add the new dataset to our list
                 training_data.append(
-                    str(directory / f"deepmd_data_{temperature}/{composition}_train")
+                    directory / f"deepmd_data_{temperature}/{composition}_train"
                 )
                 testing_data.append(
-                    str(directory / f"deepmd_data_{temperature}/{composition}_test")
+                    directory / f"deepmd_data_{temperature}/{composition}_test"
                 )
     
                 # find the newest available checkpoint file
