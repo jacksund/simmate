@@ -22,13 +22,15 @@ from simmate.workflow_engine import Workflow
 
 class MlPotential__Deepmd__AseMD(Workflow):
     
+    use_database = False
+    
     def config(structure: Structure, 
                directory: Path,
                deepmd_model: str = 'graph.pb',
                temperature: int = 600, 
                nsteps: int = 1000,
                **kwargs):
-        
+                
         #convert structure to ASE atom type 
         atoms = AseAtomsAdaptor(structure)
         
