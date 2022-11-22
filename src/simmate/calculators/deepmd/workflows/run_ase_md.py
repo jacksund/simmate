@@ -24,7 +24,8 @@ class MlPotential__Deepmd__AseMD(Workflow):
     
     use_database = False
     
-    def config(structure: Structure, 
+    def run_config(
+               structure: Structure, 
                directory: Path,
                deepmd_model: str = 'graph.pb',
                temperature: int = 600, 
