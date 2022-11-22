@@ -15,8 +15,7 @@ class MlPotential__Deepmd__Prediction(Workflow):
 
     def run_config(
         structures: list[Structure],
-        directory: Path,  # directory where frozen model (graph.pb file ) is stored
-        deepmd_model: str = "graph.pb",
+        deepmd_model: str = "graph.pb", # w. directory where frozen model (graph.pb file ) is stored
         **kwargs,
     ):
 
@@ -24,7 +23,7 @@ class MlPotential__Deepmd__Prediction(Workflow):
         # assuming name is graph.pb but this depends on what name was used
         # in freeze_model workflow
         # !!! if doesn't work, set type_dict
-        calculator = DP(model=directory / deepmd_model)
+        calculator = DP(model=deepmd_model)
 
         energies = []
         site_forces = []
