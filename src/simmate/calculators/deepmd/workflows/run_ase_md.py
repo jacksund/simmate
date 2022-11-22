@@ -25,6 +25,7 @@ class MlPotential__Deepmd__AseMD(Workflow):
     def config(structure: Structure, 
                directory: Path,
                deepmd_model: str = 'graph.pb',
+               temperature: int = 600, 
                nsteps: int = 1000,
                **kwargs):
         
@@ -37,13 +38,17 @@ class MlPotential__Deepmd__AseMD(Workflow):
         atoms.calc = calculator
         
         #set the momenta corresponding to T=300K
-        MaxwellBoltzmannDistribution(atoms, temperature_K=300)
+        MaxwellBoltzmannDistribution(atoms, temperature_K=temperature)
         
         dyn = VelocityVerlet(atoms, dt=5.0 * units.fs,
                      trajectory='ase_md.traj', logfile='ase_md.log')
         
         #run dynamics for nsteps
+        #calculate/return energy and forces while dynamics is running 
         dyn.run(nsteps)  
+        
+        #return list of structures, list of energies, list of site forces
+        
         
 
 
