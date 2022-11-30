@@ -12,6 +12,7 @@ from pymatgen.io.ase import AseAtomsAdaptor
 
 from ase.md.velocitydistribution import MaxwellBoltzmannDistribution
 from ase.md.verlet import VelocityVerlet
+from ase.io.trajectory import Trajectory
 from ase import units
 
 from deepmd.calculator import DP
@@ -25,32 +26,43 @@ class MlPotential__Deepmd__AseMD(Workflow):
     use_database = False
     
     def run_config(
-               structure: Structure, 
-               directory: Path,
-               deepmd_model: str = 'graph.pb',
-               temperature: int = 600, 
-               nsteps: int = 1000,
+               structure: Structure,
+               deepmd_model: str = 'graph.pb', #set to directory where model file is located
+               temperature: int = 300, 
+               nsteps: int = 10000,
+               trajectory_file: str = 'ase_md.traj',
+               log_file: str = 'ase_md.log',
                **kwargs):
                 
         #convert structure to ASE atom type 
-        atoms = AseAtomsAdaptor(structure)
+        atoms = AseAtomsAdaptor.get_atoms(structure)
         
         #set calculator to deepmd model 
-        calculator = DP(model=directory / deepmd_model)        
+        calculator = DP(model=deepmd_model)        
     
         atoms.calc = calculator
         
-        #set the momenta corresponding to T=300K
+        #set the momenta corresponding to given temperature 
         MaxwellBoltzmannDistribution(atoms, temperature_K=temperature)
         
         dyn = VelocityVerlet(atoms, dt=5.0 * units.fs,
-                     trajectory='ase_md.traj', logfile='ase_md.log')
+                     trajectory= trajectory_file, logfile=log_file)
         
         #run dynamics for nsteps
         #calculate/return energy and forces while dynamics is running 
         dyn.run(nsteps)  
         
-        #return list of structures, list of energies, list of site forces
+        
+        ase_atoms = Trajectory(trajectory_file)
+
+        #convert atoms objects to pymatgen structure objects 
+        pym_structs = []
+        for struct in ase_atoms:
+            pym_structs.append(AseAtomsAdaptor.get_structure(struct))
+            
+        return {'structures':pym_structs}
+            
+        
         
         
 
