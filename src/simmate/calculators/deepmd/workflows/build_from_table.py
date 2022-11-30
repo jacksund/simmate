@@ -20,8 +20,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
         table_name: str,
         filter_kwargs: dict = {},
         md_kwargs: dict = {},
-        # deepmd_kwargs: dict ={},
-        # deepmd_env : str = 'deepmd', in case environment is called somethign else???
+        deepmd_settings: dict ={},
         training_iterations: int = 1,  # setting to 1 means no iterative training
         **kwargs,
     ):
@@ -113,6 +112,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
                 command=command,
                 training_data=training_data,
                 testing_data=testing_data,
+                settings_update = deepmd_settings,
             )
 
         freeze_workflow = get_workflow("ml-potential.deepmd.freeze-model")
