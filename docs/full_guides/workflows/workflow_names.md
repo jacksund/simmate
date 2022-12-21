@@ -1,13 +1,12 @@
 
 # Workflow naming conventions
 
-
 ## How we name workflows
 
-All workflow names follow a specific format of `type.calculator.preset`: 
+All workflow names follow a specific format of `type.calculator.preset`:
 
 `type`: the type of analysis the workflow is doing (relaxation, static-energy, dynamics, ...)
-    
+
 `calculator`: the third party software that the workflow uses to run (vasp, abinit, qe, deepmd, ...)
 
 `preset`: a unique name to identify the settings used (matproj, quality00, my-test-settings,...)

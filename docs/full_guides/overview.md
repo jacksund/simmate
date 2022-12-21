@@ -4,22 +4,17 @@
 
 ## Before you begin
 
-To get started, make sure you have either completed our [introduction tutorials](/getting_started/overview/)
-or are comfortable with python.
+To get started, make sure you have either completed our [introductory tutorials](/getting_started/overview/) or are comfortable with python.
 
 ------------------------------------------------------------
 
 ## Organization of guides vs. code
 
-Though we try to keep the organization of our guides and code as close as possible, they do not exactly follow the same structure. We learned over time that code/guide organization needs to be handled separately in order to help new users use Simmate without having mastered all of it components.
+Though we try to keep the organization of our guides and code as close as possible, they do not exactly follow the same structure. We learned over time that code/guide organization needs to be handled separately to help new users begin using Simmate without having mastered all of it components.
 
 ### documentation
 
-We try to organize our guides by difficultly level and how a user would normally
-begin using Simmate features. We expect users will start with highest-level features
-(e.g. the website interface) and then work their way to the lowest level ones
-from there (e.g. the toolkit and python objects). We therefore have the following
-up front:
+We try to organize our guides in order of progressing difficulty. This also matches the way in which most users will begin to work with Simmate&mdash;namely, beginning with the highest-level features (the website interface) and progressing towards the lowest-level features (the toolkit and python objects). The documentation therefore proceeds in the following sequence.
 
 ``` mermaid
 graph LR
@@ -36,24 +31,24 @@ graph LR
 
 ### python modules
 
-`simmate` is the base module and contains all of the code that our package runs on. Within each subfolder (aka each python “module”), you’ll find more details on what it contains.
+`simmate` is the base module and contains all of the code that our package runs on. Within each subfolder (i.e., each python “module”), you’ll find more details on its contents.
 
-But as a brief summary...
+These modules are:
 
-- `calculators` = third-party programs that run analyses for us (e.g. VASP which runs DFT calculations)
-- `command_line` = makes some common functions available as commands in the terminal
-- `configuration` = the defualt Simmate settings and how to update them 
-- `database` = defines how all Simmate data is organized into tables and let’s you access it 
-- `file_converters` = reformat to/from file types (e.g. POSCAR –> CIF)
-- `toolkit` = the fundamental functions and classes for Simmate (e.g. the `Structure` class)
-- `utilities` = contains simple functions that are used throughout the other modules
-- `visualization` = visualizing structures, 3D data, and simple plots
-- `website` = runs the simmate.org website 
-- `workflow_engine` = tools and utilities that help submit calculations as well as handle errors
-- `workflows` = common analyses used in materials chemistry
+- `calculators` = third-party programs that run analyses (e.g., VASP, which runs DFT calculations)
+- `command_line` = common functions that are available as commands in the terminal
+- `configuration` = default Simmate settings and methods to change them
+- `database` = defines the structure of data tables and the methods to access the tables
+- `file_converters` = methods to convert between filetypes (e.g., POSCAR to CIF)
+- `toolkit` = core methods and classes for Simmate (e.g. the `Structure` class)
+- `utilities` = simple functions that are used throughout other modules
+- `visualization` = methods to visualize structures and data
+- `website` = runs the simmate.org website
+- `workflow_engine` = tools that run calculations and handle errors
+- `workflows` = tools that define each calculation type (e.g., a structure optimization)
 
 There is also one extra file…
 
-- `conftest` = this is for running Simmate tests and only for contributing devs
+- `conftest` = this runs Simmate tests and is only for contributing devs
 
 ------------------------------------------------------------
