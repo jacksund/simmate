@@ -3,7 +3,7 @@
 
 This module downloads data from third-parties and stores it to your local database.
 
-This data is **NOT** from the Simmate team. These providers are independent groups, and you should cite them appropriately. All data from these providers remain under their source's terms and conditions.
+This data is **NOT** from the Simmate team. These providers are independent groups, and you should cite them appropriately. All data remain under the corresponding provider's terms and conditions.
 
 Currently, we support the following providers:
 
@@ -16,15 +16,14 @@ These providers are configured, but our team is waiting for permission to redist
 
 - [ ] [AFLOW (Automatic FLOW for Materials Discovery)](http://www.aflowlib.org/)
 
-
 !!! tip
-    If your team would like to make your own data available via Simmate, please see the Contributing data module. Even if its is a single table, don't hesistate to make a contribution! We outline the benefits of contributing and how to package your data within the `for_providers` module.
+    If your team would like to make your own data available via Simmate, please see the Contributing data module. Even if it is a single table, don't hesistate to make a contribution! We outline the benefits of contributing and how to package your data within the `for_providers` module.
 
 ----------------------------------------------------------------------
 
 ## Downloading data
 
-Make sure you have completed [our introductory tutorial](/getting_started/access_the_database/access_thirdparty_data/) for downloading data from these providers. Below we show example usage with `MatprojStructure`, but the same process can be done with all other tables in this module. 
+Make sure you have completed [our introductory tutorial](/getting_started/access_the_database/access_thirdparty_data/) for downloading data from these providers. Below we show example usage with `MatprojStructure`, but the same process can be done with all other tables in this module.
 
 WARNING: The first time you load archives of data, it can take a long time, so we recommend running some things overnight. Once completed, we also recommend backing up your database (by making a copy of your ~/simmate/my_env-database.sqlite3 file). This ensures you don't have to repeat this long process.
 

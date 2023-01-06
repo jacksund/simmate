@@ -5,25 +5,25 @@ This module defines the fundamental building blocks for storing data. When build
 
 ----------------------------------------------------------------------
 
-## The Base Data Types
+## Table Types
 
-There are different "levels" of data types define here -- as some types inherit functionality from others.
+The tables that store data can be classified from low-level to high-level. High-level tables inherit basic functionality from low-level tables and from the data types that are stored in that table to create tables with enhanced functionality.  
 
 At the lowest level...
 
-- `base.DatabaseTable` : all tables inherit from this one and it is where common functionality (like the `show_columns` method) is defined
+- `base.DatabaseTable` : all tables inherit from this base type and this is where common functionality (like the `show_columns` method) is defined
 
-Next are a series of mixins defined in each of these modules...
+At a higher level, tables inherit the `base.DatabaseTable` to create a series of more specialized tables. These tables contain additional columns that are specific to the kinds of data stored in each. The new columns in each table are created using a special feature called a [mixin](https://stackoverflow.com/questions/533631/what-is-a-mixin-and-why-is-it-useful).  These mixins create the following tables:
 
-- `calculation` : holds information about a flow run (corrections, timestamps, etc.)
+- `calculation` : holds information about a specific calculation run (corrections, timestamps, etc.)
 - `structure` : holds a periodic crystal structure
-- `symmetry` : NOT a mixin. Defines symmetry info for `structure` to reference
-- `forces` : holds site forces and lattice stress information
+- `symmetry` : NOT a mixin. Defines symmetry relationships for `structure` to reference
+- `forces` : holds site forces and lattice stresses
 - `thermodynamics` : holds energy and stability information
 - `density_of_states`: holds results of a density of states calculation
 - `band_structure`: holds results of a band structure calculation
 
-These mixins are frequently combined in for types of calculations. We define some of those common classes here too:
+At an even higher level, we can combine several lower-level tables via their mixins. This allows us to easily create tables that can store complex calculations:
 
 - `static_energy` : holds results of single point energy calculation
 - `relaxation` : holds all steps of a structure geometry optimization
@@ -37,11 +37,11 @@ These mixins are frequently combined in for types of calculations. We define som
 
 Creating a custom table involves the following steps:
 
-1. defining your new table's inheritance and custom columns
-2. making sure your table is registerd to your database
+1. defining the lower-level tables and data types used to create your new table
+2. registering the new table to your database
 3. saving data to your new table
 
-All classes in this module are abstract and largely ment to be used as mix-ins. Each class will contain details on it's specific use, but when combining multiple types, you can do the following:
+All classes in this module are abstract and largely meant to be used as mix-ins. Each class will contain details on its specific use, but when combining multiple types, you can do the following:
 
 ``` python
 
