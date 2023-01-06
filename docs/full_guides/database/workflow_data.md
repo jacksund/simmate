@@ -3,11 +3,9 @@
 
 Much like the `simmate.workflows` module, this module brings together all database tables that are linked to workflows and organizes them by application for convenience.
 
-
 ----------------------------------------------------------------------
 
 ## Loading results
-
 
 [The getting-started tutorials](/getting_started/overview/) will teach you how to run workflows and access their results. But as a review:
 

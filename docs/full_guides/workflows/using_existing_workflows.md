@@ -5,7 +5,7 @@
 
 ## Exploring available workflows
 
-All registered workflows can be listed off in the command-line.
+All registered workflows can be printed at the command-line.
 ``` bash
 simmate workflows list-all
 ```
@@ -289,10 +289,10 @@ So in order to run these types of workflows, you must...
     guides.
     
 !!! note
-    The number of workers will be how many jobs are ran in parallel -- and this
+    The number of workers will be how many jobs are run in parallel -- and this
     is only limited by the number of jobs queued. For example, if I submit 500
     workflows with `run-cloud` but only start 100 workers, then only 100 workflows
-    will be ran at a time. Further, if I submit 25 workflows but have 100 workers,
+    will be run at a time. Further, if I submit 25 workflows but have 100 workers,
     then that means 75 of our workflows will be sitting idle without any job
     to run.
 
