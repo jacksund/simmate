@@ -1,8 +1,7 @@
 
 # Blender setup
 
-I spent a significant amount of trying to get blender working as a python module, but I don't know enough about make files to package this for general use. For now, it's actually easier to just install Blender manually and have Simmate call it from the command line. It's extra work for the user who will just want to vizualize structures and never use Blender directly, but that's just how it is right now... In the future, I may want to just pay a Blender dev to begin supporting blender as bpy module -- even if its a minimal build specifically for Simmate.
-
+I spent a significant amount of trying to get blender working as a python module, but I don't know enough about makefiles to package this for general use. For now, it's actually easier to just install Blender manually and have Simmate call it from the command line. It's extra work for the user who will just want to vizualize structures and never use Blender directly, but that's just how it is right now... In the future, I may want to just pay a Blender dev to begin supporting blender as bpy module -- even if its a minimal build specifically for Simmate.
 
 # Past notes on making bpy from source
 
@@ -36,12 +35,12 @@ set(WITH_INSTALL_PORTABLE    ON CACHE BOOL "" FORCE)
 cd ~/blender-git/blender;
 make bpy;
 ```
-4. Lastly, let's copy the created module into our Anaconda enviornment and remove all these build files.
+4. Lastly, let's copy the created module into our Anaconda environment and remove all these build files.
 ```
 cp -r /home/jacksund/blender-git/build_linux_bpy/bin/* /home/jacksund/anaconda3/envs/jacks_env/lib/python3.7/site-packages/;
 sudo rm -r /home/jacksund/blender-git;
 ```
-5. You can now 'import bpy' in your python enviornment! 
+5. You can now 'import bpy' in your python environment! 
 
 ## Making my own blender bpy module (on Ubuntu 19.10)
 Following directions from https://wiki.blender.org/wiki/Building_Blender/Linux/Ubuntu and also troubleshooting with https://devtalk.blender.org/t/problem-with-running-blender-as-a-python-module/7367

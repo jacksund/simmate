@@ -60,19 +60,18 @@ requires-python=">=3.10"
 # This field lists other packages that your project depends on to run.
 dependencies=[
     # Core dependencies
-    "numpy >=1.22.0, <=1.23.3",
-    "pandas >=1.3.5, <=1.4.4",
+    "numpy >=1.22.0, <1.24.2",
+    "pandas >=1.3.5, <1.5.2",
     "django >=4.0.0, <=4.1.1",
-    "dask >=2021.12.0, <=2022.9.0",
-    "distributed >=2022.7.1, <=2022.9.0",  # part of dask
-    "typer >=0.4.1, <=0.6.1",
+    "dask >=2021.12.0, <2022.13.0",
+    "distributed >=2022.7.1, <2022.11.0",  # part of dask
     #
     # Extra (smaller) dependencies & utilities
     "django-allauth >=0.50.0, <=0.51.0",  # for website accounts and google/github sign-ins
     "django-crispy-forms >=1.13.0, <=1.14.0",  # for formatting of online forms
     "django-pandas >=0.6.6, <=0.6.6",  # for converting QuerySets to PandasDataFrames
     "dj-database-url >=0.5.0, <=0.5.0",  # for DigitalOcean URL conversion
-    "djangorestframework >=3.13.1, <=3.13.1",  # for our REST API
+    "djangorestframework >=3.13.1, <3.14.1",  # for our REST API
     "django-filter >=21.1, <=22.1",  # sets up automatic filters for our REST API
     "pyyaml >=6.0, <=6.0",  # for yaml configuration files
     "plotly >=5.4.0, <5.12.0",  # for interactive plots and visualization
@@ -86,7 +85,7 @@ dependencies=[
     # These are from the MP stack and I want to phase them out over time
     "pymatgen >=2022.1.9, <2022.10.23",
     "pymatgen-analysis-diffusion >=2021.4.29, <=2022.7.21",  # pymatgen-diffusion on conda
-    "matminer >=0.7.6, <=0.7.8",
+    "matminer >=0.7.6, <0.8.1",
     "ase >=3.22.1, <=3.22.1",
     "clease >=1.0.3, <=1.0.4",  # for cluster expansion calcs
 ]
@@ -98,14 +97,14 @@ dependencies=[
 DEV = [
     "pytest >=6.2.5, <=7.1.3",
     "pytest-django >=4.5.2, <=4.5.2",
-    "pytest-mock >=3.7.0, <=3.8.2",
-    "pytest-xdist >=2.5.0, <=2.5.0",
+    "pytest-mock >=3.7.0, <3.10.1",
+    "pytest-xdist >=2.5.0, <3.2.0",
     "black >=22.1.0, <=22.6.0",
     "coverage >=6.2, <=6.4.4",
     "isort >=5.10.1, <=5.10.1",
-    "mkdocs-material >=8.4.1, <=8.4.1",
+    "mkdocs-material >=8.4.1, <8.5.9",
     "mkdocstrings >=0.19.0, <=0.19.0",
-    "mkdocstrings-python >=0.7.1, <=0.7.1",
+    "mkdocstrings-python >=0.7.1, <0.8.3",
 ]
 
 EXE = [
@@ -134,7 +133,7 @@ EXTRAS = [
 
 # For downloading third-party data directly from source instead of Simmate
 DATA = [
-    "mp-api >=0.26.3, <=0.26.3",  # materials project
+    "mp-api >=0.26.3, <0.29.5",  # materials project
 ]
 
 # Link to our homepage. Use github for now.

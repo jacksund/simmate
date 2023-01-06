@@ -1,9 +1,6 @@
 # The Simmate Website
 
-The `simmate.website` module hosts everything for the website interface and API. 
-Unlike other major projects, Simmate makes our website's source-code openly 
-available to everyone! This means that you can host your own Simmate website on 
-your own computer or even in production for your lab to privately use.
+The `simmate.website` module hosts everything for the website interface and API. Unlike other major projects, Simmate makes our website's source-code openly available to everyone! This means that you can host your own Simmate website on your own computer or even in production for your lab to privately use.
 
 ------------------------------------------------------------
 
@@ -15,16 +12,15 @@ You can quickly get Simmate up-and-running on your local computer using the comm
     ``` bash
     # set up your database if you haven't done so already
     simmate database reset
-    
+
     # now run the website locally!
     simmate run-server
     ```
 
-While this command is running, open up your preferred browser (Chrome, Firefox, etc.) and go to [http://127.0.0.1:8000/](http://127.0.0.1:8000/). While this looks just like our actaul website at `simmate.org`, this one is running locally on your desktop and using your personal database!
+While this command is running, open up your preferred browser (Chrome, Firefox, etc.) and go to [http://127.0.0.1:8000/](http://127.0.0.1:8000/). While this looks just like our actual website at `simmate.org`, this one is running locally on your desktop and using your personal database!
 
 !!! tip
-    Beyond a local server, beginners don't need anything else from the website 
-    interface documentation. Feel free to skip to the "Workflows" guides.
+    Beyond a local server, beginners don't need anything else from the website interface documentation. Feel free to skip to the "Workflows" guides.
 
 ------------------------------------------------------------
 

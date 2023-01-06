@@ -3,7 +3,7 @@
 ## Adding your data to Simmate
 
 !!! warning
-    This module is only for the Simmate dev team or third-party contributors that want to add their own data! Users should instead use the `load_remote_archive` method to access data. See the [database docs](/full_guides/database/third_party_data/).
+    This module is only for the Simmate dev team or third-party contributors who want to add their own data! Users should instead use the `load_remote_archive` method to access data. See the [database docs](/full_guides/database/third_party_data/).
 
 This module is for pulling data from various databases into Simmate using third-party codes. This can then be used to build archives that users may access.
 
@@ -11,7 +11,7 @@ This module is for pulling data from various databases into Simmate using third-
 
 ## Benefits of adding your data to Simmate
 
-When deciding whether your team should use Simmate, we can break down discussion to two key questions:
+When deciding whether your team should contribute your database to Simmate, we can break down discussion to two key questions:
 
 1. Can you benefit from converting data into a Simmate format?
 2. Can you benefit from distributing an archive? (private or public)
@@ -19,7 +19,6 @@ When deciding whether your team should use Simmate, we can break down discussion
 We will answer these questions in the next two sections.
 
 ### Converting data into a Simmate format
-
 
 Whether your data is open-source or proprietary, the answer to question 1 will be the same: Providers can benefit from using Simmate's `database` module because it...
 
@@ -45,13 +44,13 @@ These small file sizes will make it much easier for downloading and sharing your
 
 ### Hosting & distributing the archive
 
-Here is where being a private vs. open-source provider becomes important. Simmate lets you to decide how others access your data. 
+Here is where being a private vs. open-source provider becomes important. Simmate lets you to decide how others access your data.
 
-If your data can only be accessible to among your own team members or subscribers, then you can be in charge of distruting the data (via a CDN, dropbox, etc.). Simmate does not require that you distribute your data freely -- though we do encourage open-source data. Either way, you can benefit from...
+If your data can only be accessible to your own team members or subscribers, then you can be in charge of distruting the data (via a CDN, dropbox, etc.). Simmate does not require that you distribute your data freely, although we do encourage open-source data. Either way, you can benefit from...
 
 - lessening the load on your own web APIs
 
-Server load can be reduced because, in Simmate, users download your archive once and then have the data stored locally for as long as they'd like. New users often want to download a massive portion a database (or all of it) -- and also do so repeatedly as they learn about APIs, so using Simmate archives upfront can save your team from these large and often-repeated queries.
+Server load can be reduced because, in Simmate, users download your archive once and then have the data stored locally for as long as they'd like. New users often want to download a massive portion a database (or all of it), and also do so repeatedly as they learn about APIs. Therefore, using Simmate archives upfront can save your team from these large and often-repeated queries.
 
 If you are fine with making your data freely available, you can further benefit by...
 
@@ -67,7 +66,6 @@ Providers that permit redistribution are welcome to use our CDN for their archiv
 !!! tip
     If you want to avoid this guide, you can just contact our team! [Open a github issue](https://github.com/jacksund/simmate/issues) to get our attention. In most cases, we only need a CSV or JSON file of your data (in any data format you'd like), and we can handle the rest for you. If you'd like to contribute the data on your own, keep reading.
 
-
 The end goal for each provider is to allow a user do the following:
 ``` python
 from simmate.database import connect
@@ -81,7 +79,7 @@ search_results = ExampleProviderData.objects.filter(...).all()
 
 The key part that providers must understand is the `load_remote_archive` method. This method...
 
-1. loads an archive of available data (as a `zip` file from some CDN)
+1. loads an archive of available data (as a `zip` file from a CDN)
 2. unpacks the data into the Simmate format
 3. saves everything to the user's database (by defualt this is `~/simmate/database.sqlite3`).
 
@@ -99,7 +97,6 @@ To illustrate how this is done, we will walk through the required steps:
 
 !!! tip
     these steps involve contributing changes to Simmate's code, so we recommend [opening a github issue](https://github.com/jacksund/simmate/issues) before starting too. That way, our team can help you through this process. If you are new to Github and contributing, be sure to read our [tutorial for contributors](/contributing/overview/) too.
-
 
 ### Step 1: Define a Simmate table
 

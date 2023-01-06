@@ -165,11 +165,7 @@ class Example__Python__MyFavoriteSettings(Workflow):
 
 ## Writing output files
 
-Of all the default parameters (described above), you'll most like get the most
-from using the `directory` input. It is important to note that
- `directory` is given as a 
-[`pathlib.Path`](https://docs.python.org/3/library/pathlib.html) object. Just
-add directory to your run_config() method and then use the object that's provided.
+Of all the default parameters (described above), you'll likely get the most from using the `directory` input. It is important to note that `directory` is given as a [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html) object. Just add the directory to your run_config() method and use the object that's provided.
 
 For example, this workflow will write an output file to 
 `simmate-task-12345/my_output.txt` (where the `simmate-task-12345` folder is
@@ -293,7 +289,6 @@ can use as a starting point. For example, VASP users can inherit from the
         # add your advanced logic to determine the keyword value.
         return structure.num_sites * example_mod_input
     
-    
     # STEP 2: register modifier with the Incar class
     from simmate.calculators.vasp.inputs import Incar
     Incar.add_keyword_modifier(keyword_modifier_multiply_nsites)
@@ -310,8 +305,7 @@ can use as a starting point. For example, VASP users can inherit from the
         reset every time a new python session starts. Therefore, we recommend 
         keeping your modifer in the same file that you define your workflow in.
 
-Further, can use python inheritance to borrow utilities and settings from an
-existing workflow:
+Further, can use python inheritance to borrow utilities and settings from an existing workflow:
 
 ``` python
 from simmate.workflows.utilities import get_workflow
