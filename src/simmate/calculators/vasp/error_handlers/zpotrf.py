@@ -62,11 +62,11 @@ class Zpotrf(ErrorHandler):
             poscar_filename = directory / "POSCAR"
             structure = Structure.from_file(poscar_filename)
             structure.to(
-                filename=poscar_filename.with_stem("POSCAR_original"),
+                filename=str(poscar_filename.with_stem("POSCAR_original")),
                 fmt="POSCAR",
             )
             structure.apply_strain(0.2)
-            structure.to(filename=poscar_filename, fmt="POSCAR")
+            structure.to(filename=str(poscar_filename), fmt="POSCAR")
             correction = "scaled the structure lattice by +20%"
 
         # Check the current ICHARG setting, where default is 0

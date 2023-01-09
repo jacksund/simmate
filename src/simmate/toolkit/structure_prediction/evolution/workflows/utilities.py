@@ -38,7 +38,7 @@ def write_and_submit_structures(
             continue
 
         i_cleaned = str(i).zfill(3)  # converts 1 to 001
-        s.to(filename=directory / f"{i_cleaned}.cif", fmt="cif")
+        s.to(filename=str(directory / f"{i_cleaned}.cif"), fmt="cif")
 
         state = workflow.run_cloud(
             structure=s,

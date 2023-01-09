@@ -271,7 +271,7 @@ class MigrationHop(Calculation):
         migration_images = self.get_migration_images()
         structure_sum = migration_images.get_sum_structure()
         structure_sum.to(
-            filename=directory / "simmate_path_relaxed_neb.cif",
+            filename=str(directory / "simmate_path_relaxed_neb.cif"),
             fmt="cif",
         )
 

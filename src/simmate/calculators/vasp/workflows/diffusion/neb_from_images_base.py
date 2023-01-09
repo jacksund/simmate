@@ -133,7 +133,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         # (>1s), but it is very little time compared to a full NEB run.
         path_vis = migration_images.get_sum_structure()
         path_vis.to(
-            filename=directory / "simmate_path_relaxed_idpp.cif",
+            filename=str(directory / "simmate_path_relaxed_idpp.cif"),
             fmt="cif",
         )
 

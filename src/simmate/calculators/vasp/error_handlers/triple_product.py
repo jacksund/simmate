@@ -27,7 +27,7 @@ class TripleProduct(ErrorHandler):
         poscar_filename = directory / "POSCAR"
         structure = Structure.from_file(poscar_filename)
         structure.to(
-            filename=poscar_filename.with_stem("POSCAR_original"),
+            filename=str(poscar_filename.with_stem("POSCAR_original")),
             fmt="POSCAR",
         )
 

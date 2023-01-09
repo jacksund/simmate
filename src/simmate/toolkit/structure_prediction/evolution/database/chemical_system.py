@@ -214,7 +214,7 @@ class ChemicalSystemSearch(Calculation):
                 + f"id-{structure.database_object.id}"
                 + f"id-{structure.composition.reduced_formula}.cif"
             )
-            structure.to(filename=structure_filename, fmt="cif")
+            structure.to(filename=str(structure_filename), fmt="cif")
 
     def write_individuals_completed_full(self, directory: Path):
         columns = self.individuals_datatable.get_column_names()
