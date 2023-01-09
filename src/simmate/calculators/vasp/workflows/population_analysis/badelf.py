@@ -173,6 +173,6 @@ def get_structure_w_empties(structure, empty_ion):
 
     # write the new structure to file
     # filename = directory / "simmate_structure_w_empties.cif"
-    # structure_w_empties.to("cif", filename)
+    # structure_w_empties.to(filename=str(filename), fmt="cif")
 
     return structure_w_empties

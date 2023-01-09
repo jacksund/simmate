@@ -68,8 +68,8 @@ def time_test_creation(creator_class, creator_kwargs):
             all_comp_times.append([average_time] * NSAMPLES_PER_COMPOSITION)
             for n, structure in enumerate(structures):
                 structure.to(
+                    filename=str(comp_directory / f"{n}.cif"),
                     fmt="cif",
-                    filename=comp_directory / f"{n}.cif",
                 )
             continue
 
@@ -87,8 +87,8 @@ def time_test_creation(creator_class, creator_kwargs):
                 end = time()
             single_comp_times.append(end - start)
             structure.to(
+                filename=str(comp_directory / f"{n}.cif"),
                 fmt="cif",
-                filename=comp_directory / f"{n}.cif",
             )
         all_comp_times.append(single_comp_times)
 
