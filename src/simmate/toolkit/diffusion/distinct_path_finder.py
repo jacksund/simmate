@@ -15,6 +15,6 @@ class DistinctPathFinder(PymatgenDPF):
             number = str(i).zfill(2)  # converts numbers like 2 to "02"
             # the files names here will be like "migration_hop_02.cif"
             migration_hop.write_path(
-                directory / f"migration_hop_{number}.cif",
+                str(directory / f"migration_hop_{number}.cif"),
                 nimages=10,  # this is just for visualization
             )
