@@ -270,7 +270,10 @@ class MigrationHop(Calculation):
     def write_migration_images(self, directory: Path):
         migration_images = self.get_migration_images()
         structure_sum = migration_images.get_sum_structure()
-        structure_sum.to("cif", directory / "simmate_path_relaxed_neb.cif")
+        structure_sum.to(
+            filename=directory / "simmate_path_relaxed_neb.cif",
+            fmt="cif",
+        )
 
     # TODO:
     # image_start --> OneToOneField for specific MigrationHop

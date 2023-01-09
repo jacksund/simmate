@@ -67,7 +67,7 @@ def test_workflows_setup_only(command_line_runner, structure, mocker, tmp_path):
     )
 
     # write the structure to file to be used
-    structure.to("cif", cif_filename)
+    structure.to(filename=cif_filename, fmt="cif")
 
     # now try writing input files to the tmp_path
     result = command_line_runner.invoke(
@@ -99,7 +99,7 @@ def test_workflows_run(command_line_runner, structure, mocker, tmp_path):
     new_dirname = str(tmp_path / "inputs")
 
     # write the structure to file to be used
-    structure.to("cif", cif_filename)
+    structure.to(filename=cif_filename, fmt="cif")
 
     # I don't want to actually run the workflow, so I override the run method
     mocker.patch.object(
@@ -145,7 +145,7 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmp_path):
     new_dirname = str(tmp_path / "inputs")
 
     # write the structure to file to be used
-    structure.to("cif", cif_filename)
+    structure.to(filename=cif_filename, fmt="cif")
 
     # write the yaml file with our input args
     input_args = dict(

@@ -641,7 +641,7 @@ class FixedCompositionSearch(Calculation):
                 directory
                 / f"rank-{str(rank_cleaned)}__id-{structure.database_object.id}.cif"
             )
-            structure.to("cif", structure_filename)
+            structure.to(filename=structure_filename, fmt="cif")
 
     def write_individuals_completed_full(self, directory: Path):
         columns = self.individuals_datatable.get_column_names()
