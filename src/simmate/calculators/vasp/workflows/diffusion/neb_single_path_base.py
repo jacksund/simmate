@@ -123,12 +123,11 @@ class SinglePathWorkflow(Workflow):
             structure_start=supercell_start_cleaned,
             structure_end=supercell_end_cleaned,
             nimages=nimages,
-            # BUG: IDPP has a bug when relaxing ALL elements so we limit IDPP
+            # TODO: Add extra IDPP relaxation parameters and an option to disable it
             # relaxation to the diffusing species here.
-            species=[migration_hop.isite.specie.symbol],
-            sort_tol=0,  # sites in our structures should already be sorted
-            # BUG-FIX attempt disabling IDPP for now
-            idpp_relax=False,
+            # species=[migration_hop.isite.specie.symbol],
+            # sort_tol=0,  # sites in our structures should already be sortedw
+            # idpp_relax=False,
         )
 
         # Run NEB on this set of images
