@@ -26,11 +26,14 @@ class TripleProduct(ErrorHandler):
         # load the structure and save it as a backup file
         poscar_filename = directory / "POSCAR"
         structure = Structure.from_file(poscar_filename)
-        structure.to("POSCAR", poscar_filename.with_stem("POSCAR_original"))
+        structure.to(
+            filename=str(poscar_filename.with_stem("POSCAR_original")),
+            fmt="POSCAR",
+        )
 
         # switch the b and c lattice vector of the structure
         structure.make_supercell([[1, 0, 0], [0, 0, 1], [0, 1, 0]])
-        structure.to("POSCAR", poscar_filename)
+        structure.to(filename=poscar_filename, fmt="POSCAR")
         correction = "adjusted lattice basis to swap b and c vectors"
 
         # rewrite the INCAR with new settings
