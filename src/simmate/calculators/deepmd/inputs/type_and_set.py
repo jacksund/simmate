@@ -138,9 +138,12 @@ class DeepmdDataset:
 
                 # convert to a pymatgen composition object
                 composition = Composition(composition_str)
+                
+                # replace the spaces in composition_str to underscores for naming purposes 
+                composition_name = composition_str.replace(" ", "_")
 
                 # Let's establish where this folder will be and also store it
-                composition_directory = directory / f"{composition_str}_{folder_suffix}"
+                composition_directory = directory / f"{composition_name}_{folder_suffix}"
                 folder_list.append(composition_directory)
                 # this creates the directory or grabs the full path
                 composition_directory = get_directory(composition_directory)
@@ -154,7 +157,7 @@ class DeepmdDataset:
                 # Now we can write the type file while also establish the mapping.
                 # Note the mapping is just the index (0, 1, 2, ...) of each element.
                 type_filename = (
-                    directory / f"{composition_str}_{folder_suffix}" / "type.raw"
+                    directory / f"{composition_name}_{folder_suffix}" / "type.raw"
                 )
                 with type_filename.open("w") as file:
                     for mapping_value, element in enumerate(composition):
