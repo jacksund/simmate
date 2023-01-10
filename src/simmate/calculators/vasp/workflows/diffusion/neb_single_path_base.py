@@ -2,10 +2,8 @@
 
 from pathlib import Path
 
-from simmate.calculators.vasp.workflows.diffusion.utilities import (
-    get_migration_images_from_endpoints,
-)
-from simmate.toolkit.diffusion import MigrationHop
+from simmate.toolkit import Structure
+from simmate.toolkit.diffusion import MigrationHop, MigrationImages
 from simmate.toolkit.diffusion.utilities import clean_start_end_images
 from simmate.workflow_engine import Workflow
 
@@ -117,10 +115,19 @@ class SinglePathWorkflow(Workflow):
         supercell_end = end_energy.result()
 
         # use the endpoints to generate intermediate images
-        images = get_migration_images_from_endpoints(
-            supercell_start=supercell_start,
-            supercell_end=supercell_end,
+        # Make sure we have toolkit objects, and if not, convert them
+        supercell_start_cleaned = Structure.from_dynamic(supercell_start)
+        supercell_end_cleaned = Structure.from_dynamic(supercell_end)
+        # Then generate the images
+        images = MigrationImages.from_endpoints(
+            structure_start=supercell_start_cleaned,
+            structure_end=supercell_end_cleaned,
             nimages=nimages,
+            # TODO: Add extra IDPP relaxation parameters and an option to disable it
+            # relaxation to the diffusing species here.
+            # species=[migration_hop.isite.specie.symbol],
+            # sort_tol=0,  # sites in our structures should already be sortedw
+            # idpp_relax=False,
         )
 
         # Run NEB on this set of images
