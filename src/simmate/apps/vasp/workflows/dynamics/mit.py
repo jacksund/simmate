@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.workflows.dynamics.base import DynamicsWorkflow
-from simmate.calculators.vasp.workflows.relaxation.mit import Relaxation__Vasp__Mit
+from simmate.apps.vasp.workflows.dynamics.base import DynamicsWorkflow
+from simmate.apps.vasp.workflows.relaxation.mit import Relaxation__Vasp__Mit
 
 
 class Dynamics__Vasp__Mit(DynamicsWorkflow, Relaxation__Vasp__Mit):

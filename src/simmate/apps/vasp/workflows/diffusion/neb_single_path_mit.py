@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.workflows.diffusion.neb_from_images_mit import (
+from simmate.apps.vasp.workflows.diffusion.neb_from_images_mit import (
     Diffusion__Vasp__NebFromImagesMit,
 )
-from simmate.calculators.vasp.workflows.diffusion.neb_single_path_base import (
+from simmate.apps.vasp.workflows.diffusion.neb_single_path_base import (
     SinglePathWorkflow,
 )
-from simmate.calculators.vasp.workflows.relaxation.mvl_neb_endpoint import (
+from simmate.apps.vasp.workflows.relaxation.mvl_neb_endpoint import (
     Relaxation__Vasp__MvlNebEndpoint,
 )
-from simmate.calculators.vasp.workflows.static_energy import (
-    StaticEnergy__Vasp__MvlNebEndpoint,
-)
+from simmate.apps.vasp.workflows.static_energy import StaticEnergy__Vasp__MvlNebEndpoint
 
 
 class Diffusion__Vasp__NebSinglePathMit(SinglePathWorkflow):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.error_handlers import (
+from simmate.apps.vasp.error_handlers import (
     Brions,
     Brmix,
     Edddav,
@@ -36,10 +36,8 @@ from simmate.calculators.vasp.error_handlers import (
     Zheev,
     Zpotrf,
 )
-from simmate.calculators.vasp.inputs.potcar_mappings import (
-    PBE_ELEMENT_MAPPINGS_LOW_QUALITY,
-)
-from simmate.calculators.vasp.workflows.base import VaspWorkflow
+from simmate.apps.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS_LOW_QUALITY
+from simmate.apps.vasp.workflows.base import VaspWorkflow
 
 
 class Relaxation__Vasp__Mit(VaspWorkflow):

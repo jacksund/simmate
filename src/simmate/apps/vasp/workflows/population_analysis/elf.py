@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.workflows.static_energy.matproj import (
+from simmate.apps.vasp.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
 from simmate.database.workflow_results import StaticEnergy

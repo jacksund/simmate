@@ -2,7 +2,7 @@
 
 # !!! In the future, I think this should be a "converter" class that loads data
 # into a more generic DftResults class -- so one that is more generically for
-# storing electronic and ionic steps across different calculators. I think it
+# storing electronic and ionic steps across different apps. I think it
 # would be useful to have a ElectronicStep and IonicStep classes.
 
 from pathlib import Path

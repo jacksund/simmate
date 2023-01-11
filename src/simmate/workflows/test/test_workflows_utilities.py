@@ -7,7 +7,7 @@ from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import (
     get_all_workflow_names,
     get_all_workflow_types,
-    get_calculators_by_type,
+    get_apps_by_type,
     get_unique_parameters,
     get_workflow,
     get_workflow_names_by_type,
@@ -89,12 +89,12 @@ def test_list_of_all_workflows():
     ]
 
 
-def test_list_of_calculators_by_type():
+def test_list_of_apps_by_type():
 
-    assert get_calculators_by_type("static-energy") == ["vasp"]
+    assert get_apps_by_type("static-energy") == ["vasp"]
 
     with pytest.raises(TypeError):
-        get_calculators_by_type("non-existant-type")
+        get_apps_by_type("non-existant-type")
 
 
 def test_list_of_workflows_by_type():
@@ -114,7 +114,7 @@ def test_list_of_workflows_by_type():
     assert (
         get_workflow_names_by_type(
             "static-energy",
-            calculator_name="non-existant",
+            app_name="non-existant",
         )
         == []
     )
@@ -125,9 +125,7 @@ def test_list_of_workflows_by_type():
 
 def test_get_workflow():
 
-    from simmate.calculators.vasp.workflows import (
-        StaticEnergy__Vasp__Matproj as workflow,
-    )
+    from simmate.apps.vasp.workflows import StaticEnergy__Vasp__Matproj as workflow
 
     assert get_workflow("static-energy.vasp.matproj") == workflow
 

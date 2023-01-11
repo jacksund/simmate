@@ -1,5 +1,5 @@
 
-# The Bader Calculator
+# The Bader App
 
 
 Bader Chager Analysis (or "Bader" for short) is a process of  partitioning charge density in order to predict oxidation states. This module is specifically for the [Henkelman Group](http://theory.cm.utexas.edu/henkelman/)'s code that implements this analysis.

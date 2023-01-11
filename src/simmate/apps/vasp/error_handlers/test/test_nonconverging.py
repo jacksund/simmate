@@ -2,8 +2,8 @@
 
 import pytest
 
-from simmate.calculators.vasp.error_handlers import NonConverging
-from simmate.calculators.vasp.inputs import Incar
+from simmate.apps.vasp.error_handlers import NonConverging
+from simmate.apps.vasp.inputs import Incar
 from simmate.conftest import copy_test_files
 
 

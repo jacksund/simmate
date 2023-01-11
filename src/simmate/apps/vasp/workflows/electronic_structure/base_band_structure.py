@@ -3,8 +3,8 @@
 from pymatgen.io.vasp.inputs import Kpoints
 from pymatgen.symmetry.bandstructure import HighSymmKpath
 
-from simmate.calculators.vasp.inputs import Incar, Poscar, Potcar
-from simmate.calculators.vasp.workflows.static_energy.matproj import (
+from simmate.apps.vasp.inputs import Incar, Poscar, Potcar
+from simmate.apps.vasp.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
 

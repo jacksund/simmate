@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.workflows.relaxation.mvl_neb_endpoint import (
+from simmate.apps.vasp.workflows.relaxation.mvl_neb_endpoint import (
     Relaxation__Vasp__MvlNebEndpoint,
 )
 

@@ -2,11 +2,11 @@
 
 from pathlib import Path
 
-from simmate.calculators.bader.workflows import (
+from simmate.apps.bader.workflows import (
     PopulationAnalysis__Bader__Bader,
     PopulationAnalysis__Bader__CombineChgcars,
 )
-from simmate.calculators.vasp.workflows.static_energy.matproj import (
+from simmate.apps.vasp.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
 from simmate.toolkit import Structure

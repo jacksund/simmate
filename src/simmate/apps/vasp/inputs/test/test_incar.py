@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.inputs import Incar
+from simmate.apps.vasp.inputs import Incar
 
 
 def test_incar(tmp_path, structure):

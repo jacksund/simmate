@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.workflows.diffusion.neb_from_images_mit import (
+from simmate.apps.vasp.workflows.diffusion.neb_from_images_mit import (
     Diffusion__Vasp__NebFromImagesMit,
 )
 

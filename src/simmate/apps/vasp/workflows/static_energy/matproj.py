@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.workflows.relaxation.matproj import (
-    Relaxation__Vasp__Matproj,
-)
+from simmate.apps.vasp.workflows.relaxation.matproj import Relaxation__Vasp__Matproj
 
 
 class StaticEnergy__Vasp__Matproj(Relaxation__Vasp__Matproj):

@@ -70,12 +70,12 @@ def test_workflow_detail_view(client, workflow):
         return
 
     # list view
-    # grabs f"/workflows/{type}/{calculator}/{preset}/")
+    # grabs f"/workflows/{type}/{app}/{preset}/")
     url = reverse(
         "workflow_detail",
         kwargs={
             "workflow_type": workflow.name_type,
-            "workflow_calculator": workflow.name_calculator,
+            "workflow_app": workflow.name_app,
             "workflow_preset": workflow.name_preset,
         },
     )
@@ -94,7 +94,7 @@ def test_workflow_detail_view(client, workflow):
         "workflow_run_detail",
         kwargs={
             "workflow_type": workflow.name_type,
-            "workflow_calculator": workflow.name_calculator,
+            "workflow_app": workflow.name_app,
             "workflow_preset": workflow.name_preset,
             "pk": 999,
         },
@@ -115,7 +115,7 @@ def test_workflow_submit_view(client, sample_structures, mocker):
         "workflow_submit",
         kwargs={
             "workflow_type": "static-energy",  # workflow.name_type
-            "workflow_calculator": "vasp",  # workflow.name_calculator
+            "workflow_app": "vasp",  # workflow.name_app
             "workflow_preset": "mit",  # workflow.name_preset
         },
     )

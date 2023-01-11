@@ -3,8 +3,8 @@
 import logging
 from pathlib import Path
 
-from simmate.calculators.vasp.inputs import Incar, Poscar, Potcar
-from simmate.calculators.vasp.workflows.base import VaspWorkflow
+from simmate.apps.vasp.inputs import Incar, Poscar, Potcar
+from simmate.apps.vasp.workflows.base import VaspWorkflow
 from simmate.toolkit.diffusion import MigrationImages
 
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.workflows.relaxation.matproj_hse import (
+from simmate.apps.vasp.workflows.relaxation.matproj_hse import (
     Relaxation__Vasp__MatprojHse,
 )
 

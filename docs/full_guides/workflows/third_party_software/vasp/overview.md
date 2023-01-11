@@ -1,5 +1,5 @@
 
-# The VASP Calculator
+# The VASP App
 
 The Vienna Ab initio Simulation Package (VASP) is a program for atomic scale materials modelling from first principles.
 

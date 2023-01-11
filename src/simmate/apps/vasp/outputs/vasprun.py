@@ -7,7 +7,7 @@ from pathlib import Path
 from pymatgen.analysis.transition_state import NEBAnalysis
 from pymatgen.io.vasp.outputs import Vasprun as VasprunPymatgen
 
-from simmate.calculators.vasp.inputs import Incar
+from simmate.apps.vasp.inputs import Incar
 
 
 class Vasprun(VasprunPymatgen):

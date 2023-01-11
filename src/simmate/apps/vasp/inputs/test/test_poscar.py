@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.inputs import Poscar
+from simmate.apps.vasp.inputs import Poscar
 
 
 def test_poscar(tmp_path, structure):

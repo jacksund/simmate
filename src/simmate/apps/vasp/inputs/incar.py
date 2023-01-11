@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.inputs.incar_modifiers import (
+from simmate.apps.vasp.inputs.incar_modifiers import (
     keyword_modifier_density,
     keyword_modifier_density_a,
     keyword_modifier_density_b,

@@ -16,7 +16,7 @@ As another example, Simmate includes a suite for evolutionary structure predicti
 All apps follow the same folder structure:
 
 ```
-├── example_calculator
+├── example_app
 │   ├── database
 │   ├── error_handlers
 │   ├── inputs
@@ -38,6 +38,6 @@ In a more logical order (rather than alphabetical like above), here is what each
 - `website` = lets us submit workflows and view results with our website interface
 
 !!! note
-    Beginners should start by looking at the `workflows` module as this ties all other modules together. Advanced users can start with each calculator's `tasks` to build your own custom workflow.
+    Beginners should start by looking at the `workflows` module as this ties all other modules together.
 
 ----------------------------------------------------------------------

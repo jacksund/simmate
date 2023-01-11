@@ -3,11 +3,11 @@
 
 ## How we name workflows
 
-All workflow names follow a specific format of `type.calculator.preset`:
+All workflow names follow a specific format of `type.app.preset`:
 
 `type`: the type of analysis the workflow is doing (relaxation, static-energy, dynamics, ...)
 
-`calculator`: the third party software that the workflow uses to run (vasp, abinit, qe, deepmd, ...)
+`app`: the third party software that the workflow uses to run (vasp, abinit, qe, deepmd, ...)
 
 `preset`: a unique name to identify the settings used (matproj, quality00, my-test-settings,...)
 
@@ -16,14 +16,14 @@ All workflow names follow a specific format of `type.calculator.preset`:
     Using the workflow like `static-energy.vasp.matproj` this means that...
     
     - type = static energy (runs a single point energy)
-    - calculator = vasp (uses VASP to calculate the energy)
+    - app = vasp (uses VASP to calculate the energy)
     - preset = matproj  (uses "Materials Project" settings)
 
 ------------------------------------------------------------
 
 ## Class name vs. mini name
 
-`type.calculator.preset` is what we see in most cases, but in python, the workflow class name translates to `Type__Calculator__Preset`. All workflows follow this format.
+`type.app.preset` is what we see in most cases, but in python, the workflow class name translates to `Type__App__Preset`. All workflows follow this format.
 
 !!! example
 
@@ -40,7 +40,7 @@ You can follow the naming conventions (described above) to find a workflow in th
 
 === "Template URL"
     ```
-    https://simmate.org/workflows/{TYPE}/{CALCULATOR}/{PRESET}
+    https://simmate.org/workflows/{TYPE}/{APP}/{PRESET}
     ```
 
 === "Example"
@@ -52,7 +52,7 @@ You can follow the naming conventions (described above) to find a workflow in th
 
 ## Location of a workflow's source code
 
-The code that defines these workflows and configures their settings are located in the corresponding `simmate.apps` module. We make workflows accessible here because users often want to search for workflows by application -- not by their calculator name. The source code of a workflow can be found using the naming convention for workflows described above:
+The code that defines these workflows and configures their settings are located in the corresponding `simmate.apps` module. We make workflows accessible here because users often want to search for workflows by type -- not by their app name. The source code of a workflow can be found using the naming convention for workflows described above:
 
 === "Template Python Import"
     ``` python

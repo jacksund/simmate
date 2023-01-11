@@ -2,10 +2,8 @@
 
 import pytest
 
-from simmate.calculators.vasp.inputs.potcar_mappings import (
-    PBE_ELEMENT_MAPPINGS_LOW_QUALITY,
-)
-from simmate.calculators.vasp.workflows.diffusion import (
+from simmate.apps.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS_LOW_QUALITY
+from simmate.apps.vasp.workflows.diffusion import (
     Diffusion__Vasp__NebAllPathsMit,
     Diffusion__Vasp__NebFromImagesMit,
 )

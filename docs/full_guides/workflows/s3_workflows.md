@@ -141,7 +141,7 @@ There are a two important things to note here:
     - Custom `workup` methods require the `directory` input paramter
 2. It's optional to set/overwrite attributes. You can also add new ones too.
 
-Note: S3Workflows for a custom calculator (such `VaspWorkflow` for VASP)
+Note: S3Workflows for a commonly used program (such `VaspWorkflow` for VASP)
 will often have custom `setup` and `workup` methods already defined for you.
 You can update/override these as you see fit.
 

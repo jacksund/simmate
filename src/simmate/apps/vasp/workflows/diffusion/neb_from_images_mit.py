@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from simmate.calculators.vasp.error_handlers import Walltime
-from simmate.calculators.vasp.workflows.diffusion.neb_from_images_base import (
+from simmate.apps.vasp.error_handlers import Walltime
+from simmate.apps.vasp.workflows.diffusion.neb_from_images_base import (
     VaspNebFromImagesWorkflow,
 )
-from simmate.calculators.vasp.workflows.relaxation.mit import Relaxation__Vasp__Mit
+from simmate.apps.vasp.workflows.relaxation.mit import Relaxation__Vasp__Mit
 
 
 class Diffusion__Vasp__NebFromImagesMit(

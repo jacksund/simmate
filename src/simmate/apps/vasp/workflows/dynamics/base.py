@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from simmate.calculators.vasp.inputs import Incar, Kpoints, Poscar, Potcar
-from simmate.calculators.vasp.workflows.base import VaspWorkflow
+from simmate.apps.vasp.inputs import Incar, Kpoints, Poscar, Potcar
+from simmate.apps.vasp.workflows.base import VaspWorkflow
 from simmate.toolkit import Structure
 
 

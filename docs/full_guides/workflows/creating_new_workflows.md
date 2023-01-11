@@ -20,7 +20,7 @@ my_workflow = Example__Python__MyFavoriteSettings
 # Now check that our naming convention works as expected
 assert my_workflow.name_full == "example.python.my-favorite-settings"
 assert my_workflow.name_type == "example"
-assert my_workflow.name_calculator == "python"
+assert my_workflow.name_app == "python"
 assert my_workflow.name_preset == "my-favorite-settings"
 ```
 

@@ -6,7 +6,7 @@ from pathlib import Path
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-from simmate.calculators.vasp.inputs import Incar, Kpoints, Poscar, Potcar
+from simmate.apps.vasp.inputs import Incar, Kpoints, Poscar, Potcar
 from simmate.toolkit import Structure
 from simmate.workflow_engine import S3Workflow
 
@@ -84,12 +84,12 @@ class VaspWorkflow(S3Workflow):
     """
     This is an optional parameter to override Simmate's default selection of
     potentials based off of the functional chosen. The defaults are located
-    in simmate.calculators.vasp.inputs.potcar_mappings. You can supply your
+    in simmate.apps.vasp.inputs.potcar_mappings. You can supply your
     own mapping dictionary or update the specific potentials you'd like. 
     For example:
     
     ``` python
-      from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
+      from simmate.apps.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
       element_mappings = PBE_ELEMENT_MAPPINGS.copy()  # don't forget to copy!
       element_mappings.update({"C": "C_h"})  # if you wish to update any
     ```
