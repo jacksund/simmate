@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy
 from pymatgen.io.vasp.outputs import Outcar
 
-from simmate.calculators.vasp.error_handlers import Unconverged
+from simmate.apps.vasp.error_handlers import Unconverged
 from simmate.workflow_engine import ErrorHandler
 
 

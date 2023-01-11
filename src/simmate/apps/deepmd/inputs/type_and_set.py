@@ -70,7 +70,7 @@ class DeepmdDataset:
     #     energy__isnull=False, site_forces__isnull=False
     # ).all()
     #
-    # from simmate.calculators.deepmd.inputs.set import DeepmdSet
+    # from simmate.apps.deepmd.inputs.set import DeepmdSet
     # DeepmdSet.to_folder(ionic_step_structures)
     #
 

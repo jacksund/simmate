@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pandas import DataFrame
 
-from simmate.calculators.bader.outputs import ACF
+from simmate.apps.bader.outputs import ACF
 from simmate.database.base_data_types import StaticEnergy, table_column
 
 

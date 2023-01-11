@@ -147,10 +147,11 @@ else:
 INSTALLED_APPS = [
     #
     # These are all apps that are built by Simmate
-    "simmate.website.core_components.apps.CoreComponentsConfig",
-    "simmate.website.third_parties.apps.ThirdPartyConfig",
-    "simmate.website.workflows.apps.WorkflowsConfig",
-    "simmate.website.workflow_engine.apps.WorkflowEngineConfig",
+    "simmate.website.configs.CoreComponentsConfig",
+    "simmate.website.configs.ThirdPartyConfig",
+    "simmate.website.configs.WorkflowsConfig",
+    "simmate.website.configs.WorkflowEngineConfig",
+    "simmate.workflows.configs.BaseWorkflowsConfig",
     #
     # These are built-in django apps that we use for extra features
     "django.contrib.admin",
@@ -167,9 +168,9 @@ INSTALLED_APPS = [
     #   "django.contrib.sitemaps",
     #
     # These are apps created by third-parties that give us extra features
-    "crispy_forms",  # django-crispy-forms
-    "rest_framework",  # djangorestframework
-    "django_filters",  # django-filter
+    "crispy_forms",  # django-crispy-forms for HTML boostrap forms
+    "rest_framework",  # djangorestframework for the REST API
+    "django_filters",  # django-filter for filterable REST API urls
     #
     # Apps for django-allauth that allow sign-on using external accounts
     "allauth",
@@ -197,11 +198,10 @@ INSTALLED_APPS = [
 # to our list above. By default we include apps that are packaged with simmate,
 # such as the VASP workflows app.
 DEFAULT_SIMMATE_APPS = [
-    "simmate.workflows.base_flow_types.apps.BaseWorkflowsConfig",
-    "simmate.calculators.vasp.apps.VaspConfig",
-    "simmate.calculators.bader.apps.BaderConfig",
-    "simmate.calculators.clease.apps.CleaseConfig",
-    "simmate.toolkit.structure_prediction.evolution.apps.EvolutionarySearchConfig",
+    # "simmate.apps.configs.VaspConfig",
+    # "simmate.apps.configs.BaderConfig",
+    # "simmate.apps.configs.CleaseConfig",
+    # "simmate.apps.configs.EvoSearchConfig",
 ]
 APPLICATIONS_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-apps.yaml"
 # create the file if it doesn't exist yet

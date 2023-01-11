@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from simmate.calculators.vasp.error_handlers import IncorrectShift, TetrahedronMesh
+from simmate.apps.vasp.error_handlers import IncorrectShift, TetrahedronMesh
 from simmate.workflow_engine import ErrorHandler
 
 

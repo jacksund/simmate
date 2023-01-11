@@ -43,7 +43,7 @@ and this entire process of supervising, staging, and shell execution is done for
 
 ----------------------------------------------------------------------
 
-## S3Workflows for common Calculators
+## S3Workflows for common programs
 
 For programs that are commonly used in material science, you should also read
 through their guides in the "Third-party Software" section. If your program is
@@ -57,7 +57,7 @@ workflows.
 
 !!! tip
     Before starting a custom `S3Workflow`, make sure you have read the section 
-    above this (on S3Workflows for common Calculators like VASP). You should also 
+    above this (on S3Workflows for common programs like VASP). You should also 
     have gone through the guides on building a custom `Workflow`.
 
 
@@ -146,8 +146,8 @@ will often have custom `setup` and `workup` methods already defined for you.
 You can update/override these as you see fit.
 
 For a full (and advanced) example of a subclass take a look at
-`simmate.calculators.vasp.workflows.base.VaspWorkflow` and the tasks that use it like
-`simmate.calculators.vasp.workflows.relaxation.matproj`.
+`simmate.apps.vasp.workflows.base.VaspWorkflow` and the tasks that use it like
+`simmate.apps.vasp.workflows.relaxation.matproj`.
 
 
 ### Custom error handling

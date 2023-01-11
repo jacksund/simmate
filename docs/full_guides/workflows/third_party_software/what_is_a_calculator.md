@@ -1,17 +1,19 @@
 
 ----------------------------------------------------------------------
 
-## What is a calculator?
+## What is an app?
 
-Calculators are external codes/programs that perform some analysis for us.
+Apps are codes/programs that perform some analysis for us. They can be based an external software or even a custom program built using Simmate for a specific technique.
 
 For example, VASP is a program that can run a variety of density functional theory (DFT) calculations. But because it isn't written in Python, we need some "helper" code here to call VASP commands, make input files, and pull data from the outputs.
+
+As another example, Simmate includes a suite for evolutionary structure prediction. All of the functionality need to carry out the search algorithm is contained within an `evo_search` "app".
 
 ----------------------------------------------------------------------
 
 ## Organization of code
 
-All calculators have the same folder structure:
+All apps follow the same folder structure:
 
 ```
 ├── example_calculator

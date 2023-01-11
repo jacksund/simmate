@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pymatgen.io.vasp.outputs import Vasprun
 
-from simmate.calculators.vasp.inputs import Incar
+from simmate.apps.vasp.inputs import Incar
 from simmate.workflow_engine import ErrorHandler
 
 

@@ -114,10 +114,10 @@ cd ~/simmate/
 conda environment. Open it up and you'll see we have apps already installed
 with Simmate:
 ``` yaml
-- simmate.workflows.base_flow_types.apps.BaseWorkflowsConfig
-- simmate.calculators.vasp.apps.VaspConfig
-- simmate.calculators.bader.apps.BaderConfig
-- simmate.toolkit.structure_prediction.evolution.apps.EvolutionarySearchConfig
+- simmate.workflows.configs.BaseWorkflowsConfig
+- simmate.apps.VaspConfig
+- simmate.apps.BaderConfig
+- simmate.apps.EvoSearchConfig
 ```
 
 3. In this file, add the following line at the bottom

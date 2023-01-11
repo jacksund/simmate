@@ -7,4 +7,4 @@ some of those file types for convenience.
 """
 
 # TODO these files don't exist yet
-# from simmate.calculators.vasp.outputs import CHGCAR, AECCAR0, AECCAR2
+# from simmate.apps.vasp.outputs import CHGCAR, AECCAR0, AECCAR2

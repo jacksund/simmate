@@ -1,5 +1,5 @@
-from simmate.calculators.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
-from simmate.calculators.vasp.workflows.base import VaspWorkflow
+from simmate.apps.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
+from simmate.apps.vasp.workflows.base import VaspWorkflow
 
 
 class Relaxation__Vasp__ClusterHighQ(VaspWorkflow):
