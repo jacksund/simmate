@@ -37,21 +37,21 @@ Simmate
 
 
 <!-- Workflow details -->
-<h4>Available calculators:</h4>
+<h4>Available apps:</h4>
 <div class="accordion custom-accordion" id="accordionExample">
-  {% for calculator, workflows in workflow_dict.items %}
+  {% for app, workflows in workflow_dict.items %}
   <div class="card mb-0">
-    <div class="card-header" id="heading{{ calculator }}">
+    <div class="card-header" id="heading{{ app }}">
       <h5 class="m-0">
-        <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse" href="#collapse{{ calculator }}"
-          aria-expanded="true" aria-controls="collapse{{ calculator }}">
-          {{ calculator }}
+        <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse" href="#collapse{{ app }}"
+          aria-expanded="true" aria-controls="collapse{{ app }}">
+          {{ app }}
           <i class="mdi mdi-chevron-down accordion-arrow"></i>
         </a>
       </h5>
     </div>
 
-    <div id="collapse{{ calculator }}" class="collapse" aria-labelledby="heading{{ calculator }}"
+    <div id="collapse{{ app }}" class="collapse" aria-labelledby="heading{{ app }}"
       data-bs-parent="#accordionExample">
       <div class="card-body">
         <!-- List of Cards -->
@@ -63,10 +63,10 @@ Simmate
                 <h5 class="card-title text-primary">{{ workflow.name_preset }}</h5>
                 {{ workflow.description_doc_short }}
                 <br><br>
-                <a href="{% url 'workflow_detail' workflow_type workflow.name_calculator workflow.name_preset %}"
+                <a href="{% url 'workflow_detail' workflow_type workflow.name_app workflow.name_preset %}"
                   class="btn btn-primary btn-sm">Explore</a>
                 <a role="button" class="btn btn-secondary btn-sm"
-                  href="{% url 'workflow_submit' workflow.name_type workflow.name_calculator workflow.name_preset %}">Submit</a>
+                  href="{% url 'workflow_submit' workflow.name_type workflow.name_app workflow.name_preset %}">Submit</a>
               </div>
             </div>
           </div>

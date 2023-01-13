@@ -2,7 +2,7 @@
 
 import pandas
 
-from simmate.toolkit.structure_prediction.evolution.selectors import Selector
+from simmate.apps.evolution.selectors import Selector
 
 
 class TournamentSelection(Selector):

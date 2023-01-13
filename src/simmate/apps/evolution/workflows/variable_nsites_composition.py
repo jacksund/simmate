@@ -3,13 +3,13 @@
 import logging
 from pathlib import Path
 
-from simmate.toolkit import Composition
-from simmate.toolkit.structure_prediction.evolution.database.variable_nsites_composition import (
+from simmate.apps.evolution.models.variable_nsites_composition import (
     VariableNsitesCompositionSearch,
 )
-from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (
+from simmate.apps.evolution.workflows.fixed_composition import (
     StructurePrediction__Toolkit__FixedComposition,
 )
+from simmate.toolkit import Composition
 from simmate.workflow_engine import Workflow
 
 

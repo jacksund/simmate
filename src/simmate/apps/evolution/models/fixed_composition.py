@@ -11,11 +11,11 @@ import plotly.express as plotly_express
 import plotly.graph_objects as plotly_go
 from rich.progress import track
 
+from simmate.apps.evolution import selectors as selector_module
+from simmate.apps.evolution.models import SteadystateSource
 from simmate.configuration.dask import get_dask_client
 from simmate.database.base_data_types import Calculation, table_column
 from simmate.toolkit import Composition, Structure
-from simmate.toolkit.structure_prediction.evolution import selectors as selector_module
-from simmate.toolkit.structure_prediction.evolution.database import SteadystateSource
 from simmate.toolkit.validators import fingerprint as validator_module
 from simmate.utilities import get_directory
 from simmate.visualization.plotting import PlotlyFigure
@@ -178,12 +178,12 @@ class FixedCompositionSearch(Calculation):
     def _check_singleshot_sources(self, directory: Path):
 
         # local imports to prevent circuluar import issues
-        from simmate.toolkit.structure_prediction.evolution.workflows.utilities import (
-            write_and_submit_structures,
-        )
-        from simmate.toolkit.structure_prediction.known import get_known_structures
-        from simmate.toolkit.structure_prediction.prototypes import (
+        from simmate.apps.evolution.singleshot_sources.known import get_known_structures
+        from simmate.apps.evolution.singleshot_sources.prototypes import (
             get_structures_from_prototypes,
+        )
+        from simmate.apps.evolution.workflows.utilities import (
+            write_and_submit_structures,
         )
         from simmate.toolkit.structure_prediction.substitution import (
             get_structures_from_substitution_of_known,
@@ -332,7 +332,7 @@ class FixedCompositionSearch(Calculation):
     def _check_steadystate_workflows(self):
 
         # local import to prevent circular import issues
-        from simmate.toolkit.structure_prediction.evolution.workflows.new_individual import (
+        from simmate.apps.evolution.workflows.new_individual import (
             StructurePrediction__Toolkit__NewIndividual,
         )
 

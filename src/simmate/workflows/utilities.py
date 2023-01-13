@@ -30,16 +30,21 @@ def get_all_workflows(
     """
     app_workflows = []
     for app_name in apps_to_search:
-        # modulename is by cutting off the "apps.AppConfig" part of the config
-        # path. For example, "simmate.apps.vasp.apps.VaspConfig" would
-        # give an app_modulename of "simmate.apps.vasp"
-        app_modulename = ".".join(app_name.split(".")[:-2])
         try:
-            app_module = importlib.import_module(f"{app_modulename}.workflows")
+            # modulename is by cutting off the "apps.AppConfig" part of the config
+            # path. For example, "simmate.apps.vasp.apps.VaspConfig" would
+            # give an app_modulename of "simmate.apps.vasp"
+            config_modulename = ".".join(app_name.split(".")[:-1])
+            config_name = app_name.split(".")[-1]
+            config_module = importlib.import_module(config_modulename)
+            config = getattr(config_module, config_name)
+            app_path = config.name
+            app_workflow_module = importlib.import_module(f"{app_path}.workflows")
         except Exception as error:
             logging.critical(
                 f"Failed to load workflows from {app_name}. Did you make sure "
-                "there is a workflows.py file or module present?"
+                "there is a workflows.py file or module present? This is the "
+                "error that was raised during loading:"
             )
             raise error
 
@@ -48,9 +53,9 @@ def get_all_workflows(
 
         # If an __all__ value is set, then this will take priority when grabbing
         # workflows from the module
-        if hasattr(app_module, "__all__"):
-            for workflow_name in app_module.__all__:
-                workflow = getattr(app_module, workflow_name)
+        if hasattr(app_workflow_module, "__all__"):
+            for workflow_name in app_workflow_module.__all__:
+                workflow = getattr(app_workflow_module, workflow_name)
                 if workflow not in app_workflows:
                     app_workflows.append(workflow)
 
@@ -59,7 +64,9 @@ def get_all_workflows(
         else:
             # a tuple is returned by getmembers so c[0] is the string name while
             # c[1] is the python class object.
-            app_workflows += [c[1] for c in getmembers(app_module) if isclass(c[1])]
+            app_workflows += [
+                c[1] for c in getmembers(app_workflow_module) if isclass(c[1])
+            ]
 
     return (
         app_workflows

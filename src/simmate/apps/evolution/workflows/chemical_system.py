@@ -8,20 +8,16 @@ import numpy
 from pymatgen.analysis.reaction_calculator import Reaction, ReactionError
 from rich.progress import track
 
-from simmate.toolkit import Composition
-from simmate.toolkit.structure_prediction.evolution.database.chemical_system import (
-    ChemicalSystemSearch,
-)
-from simmate.toolkit.structure_prediction.evolution.workflows.fixed_composition import (
-    StructurePrediction__Toolkit__FixedComposition,
-)
-from simmate.toolkit.structure_prediction.evolution.workflows.utilities import (
-    write_and_submit_structures,
-)
-from simmate.toolkit.structure_prediction.known import get_known_structures
-from simmate.toolkit.structure_prediction.prototypes import (
+from simmate.apps.evolution.models.chemical_system import ChemicalSystemSearch
+from simmate.apps.evolution.singleshot_sources.known import get_known_structures
+from simmate.apps.evolution.singleshot_sources.prototypes import (
     get_structures_from_prototypes,
 )
+from simmate.apps.evolution.workflows.fixed_composition import (
+    StructurePrediction__Toolkit__FixedComposition,
+)
+from simmate.apps.evolution.workflows.utilities import write_and_submit_structures
+from simmate.toolkit import Composition
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 

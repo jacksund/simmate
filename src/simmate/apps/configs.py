@@ -15,5 +15,5 @@ class VaspConfig(AppConfig):
     name = "simmate.apps.vasp"
 
 
-class EvoSearchConfig(AppConfig):
-    name = "simmate.apps.evo_search"
+class EvolutionConfig(AppConfig):
+    name = "simmate.apps.evolution"
