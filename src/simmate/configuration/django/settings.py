@@ -151,7 +151,6 @@ INSTALLED_APPS = [
     "simmate.website.configs.ThirdPartyConfig",
     "simmate.website.configs.WorkflowsConfig",
     "simmate.website.configs.WorkflowEngineConfig",
-    "simmate.workflows.configs.BaseWorkflowsConfig",
     #
     # These are built-in django apps that we use for extra features
     "django.contrib.admin",
@@ -198,6 +197,7 @@ INSTALLED_APPS = [
 # to our list above. By default we include apps that are packaged with simmate,
 # such as the VASP workflows app.
 DEFAULT_SIMMATE_APPS = [
+    "simmate.workflows.configs.BaseWorkflowsConfig",
     "simmate.apps.configs.VaspConfig",
     "simmate.apps.configs.BaderConfig",
     "simmate.apps.configs.CleaseConfig",

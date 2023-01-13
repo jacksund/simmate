@@ -15,4 +15,4 @@ test tables for us -- ones that we don't want outside of pytest.
 from .settings import *
 
 # of all the settings we just imported, we only need to update the installed apps
-INSTALLED_APPS.append("simmate.website.test_app.apps.TestAppConfig")
+INSTALLED_APPS.append("simmate.website.configs.TestAppConfig")
