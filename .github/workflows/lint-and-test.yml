@@ -47,17 +47,25 @@ jobs:
     # - name: Check import format with iSort
     #   uses: isort/isort-action@master
 
-    - name: Create conda env and install deps
-      uses: conda-incubator/setup-miniconda@v2
+    # - name: Create conda env and install deps
+    #   uses: conda-incubator/setup-miniconda@v2
+    #   with:
+    #     environment-file: .github/environment.yaml
+    #     python-version: ${{ matrix.python-version }}
+    #     auto-activate-base: false
+    #     channels: conda-forge
+    #     activate-environment: simmate_dev
+    #     mamba-version: "*"
+    #     channel-priority: true
+    # The lines "shell: bash -l {0}" ensure we use the created env below
+    
+    - name: Install Conda environment with Micromamba
+      uses: mamba-org/provision-with-micromamba@main
       with:
         environment-file: .github/environment.yaml
-        python-version: ${{ matrix.python-version }}
-        auto-activate-base: false
-        channels: conda-forge
-        activate-environment: simmate_dev
-        mamba-version: "*"
-        channel-priority: true
-    # The lines "shell: bash -l {0}" ensure we use the created env below
+        environment-name: simmate_dev
+        extra-specs: |
+          python=${{ matrix.python-version }}
 
     - name: Install Simmate
       shell: bash -l {0}
