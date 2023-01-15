@@ -55,6 +55,8 @@ jobs:
         auto-activate-base: false
         channels: conda-forge
         activate-environment: simmate_dev
+        mamba-version: "*"
+        channel-priority: true
     # The lines "shell: bash -l {0}" ensure we use the created env below
 
     - name: Install Simmate
