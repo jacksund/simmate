@@ -47,10 +47,13 @@ Read here for info on markdown, badges, and more:
 !!! warning
     For Simmate's workflow module, we are currently reliant on VASP, which is an expensive DFT software that can be difficult to install for beginners. We are working to move away from propriatary softwares and toward free/open-source codes like ABINIT, Quantum Espresso, or DFTK.jl. That way you can install Simmate and we will take care of the rest. This will take time though... so we recommend that fully experimental labs wait until Simmate hits this milestone. If you'd like to be notified when this occurs, send us an email at simmate.team@gmail.com.
 
+----------------------------------------------------------------------
+
 ## Before you begin
 
 If you are new to Simmate, jump over to our main website [simmate.org](https://simmate.org/) and take a look at what we have to offer. This page is for when you're ready to use Simmate in your own research and access some advanced functionality. Our software is open-source and free to use, so come back to try it when you're ready!
 
+--------------------------------------------------------------------------------
 
 ## What is Simmate?
 
@@ -64,18 +67,48 @@ Even if you consider yourself an experimentalist and have little-to-no coding ex
 
 At the other end of the spectrum, we provide an extremely powerful toolbox and API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we operate under a very different coding philosphy. **Here, usability and readability are our top priorities.** We therefore distribute Simmate as an "all-in-one" package rather than many separate programs. This includes a core material science toolkit, workflow management, database orm, and a website interface. **Simmate also focuses heavily on cloud-based storage**, which enables large scale collaborations and avoids researchers repeating calculations. To learn more about the different design choices made in Simmate compared to competing codes, read through our [comparisons and benchmarks page](https://github.com/jacksund/simmate/tree/main/benchmarks).
 
+--------------------------------------------------------------------------------
 
 ## Installation
 
 **Don't panic** if you're new to coding and Python. When you're ready, head to our [tutorials](/getting_started/overview/) where we teach you everything from the beginning.
 
 If you're comfortable with Python, you can install Simmate with...
-``` bash
-conda install -c conda-forge simmate
-```
+
+=== "conda"
+    ``` bash
+    conda create -n my_env -c conda-forge python=3.10 simmate  # (1)
+    ```
+    
+    1. While it is the recommended way to install Simmate, **conda
+       can be extremely slow**. It can take >20 minutes to solve the environment
+       on some systems because of Simmate's many large dependencies. 
+        
+        We therefore suggest experienced users try the following:
+        
+        - set `conda config --set channel_priority strict`
+            
+        - use the [libmamba](https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community) solver
+
+=== "mamba"
+    ``` bash
+    mamba create -n my_env -c conda-forge python=3.10 simmate
+    ```
+
+=== "pip"
+    ``` bash
+    pip install simmate
+    ```
+    
+    !!! danger
+        Pip should only be used as an absolute last resort for installing
+        Simmate. Do this only if you are an advanced python user and understand
+        how to manage your python env's effectively.
 
 !!! note
     Simmate itself is <2MB, but when installed to a clean conda environment, the entire download for Simmate and all it's dependencies comes to ~1.2GB. Additional disk space is also needed for optional downloads -- such as [third-party data](/full_guides/database/third_party_data/).
+
+--------------------------------------------------------------------------------
 
 ## Running a Server
 
@@ -89,11 +122,12 @@ simmate database reset
 simmate run-server
 ```
 
-After a few seconds, you can open http://127.0.0.1:8000/ in your browser to view your local server!
+After a few seconds, you can open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser to view your local server!
 
 !!! tip
     Read our website [tutorials and documentation](/getting_started/overview/) in order to switch to a production-ready server that's accessible through the internet and can be shared among a team.
 
+--------------------------------------------------------------------------------
 
 ## A Sneak-Peak of Features
 
@@ -219,6 +253,7 @@ At the beginning of a project, you may want to write and run code on a single co
     simmate engine start-worker
     ```
 
+--------------------------------------------------------------------------------
 
 ## Need help?
 
