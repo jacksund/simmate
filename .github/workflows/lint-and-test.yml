@@ -47,25 +47,24 @@ jobs:
     # - name: Check import format with iSort
     #   uses: isort/isort-action@master
 
-    # - name: Create conda env and install deps
-    #   uses: conda-incubator/setup-miniconda@v2
-    #   with:
-    #     environment-file: .github/environment.yaml
-    #     python-version: ${{ matrix.python-version }}
-    #     auto-activate-base: false
-    #     channels: conda-forge
-    #     activate-environment: simmate_dev
-    #     mamba-version: "*"
-    #     channel-priority: true
-    # The lines "shell: bash -l {0}" ensure we use the created env below
-    
-    - name: Install Conda environment with Micromamba
-      uses: mamba-org/provision-with-micromamba@main
+    - name: Create conda env and install deps
+      uses: conda-incubator/setup-miniconda@v2
       with:
         environment-file: .github/environment.yaml
-        environment-name: simmate_dev
-        extra-specs: |
-          python=${{ matrix.python-version }}
+        python-version: ${{ matrix.python-version }}
+        auto-activate-base: false
+        channels: conda-forge
+        activate-environment: simmate_dev
+        channel-priority: true
+    # The lines "shell: bash -l {0}" ensure we use the created env below
+    
+    # - name: Install Conda environment with Micromamba
+    #   uses: mamba-org/provision-with-micromamba@main
+    #   with:
+    #     environment-file: .github/environment.yaml
+    #     environment-name: simmate_dev
+    #     extra-specs: |
+    #       python=${{ matrix.python-version }}
 
     - name: Install Simmate
       shell: bash -l {0}
@@ -75,8 +74,10 @@ jobs:
     - name: Check conda info
       shell: bash -l {0}
       run: |
-        conda info
+        conda info   # !!! switch out these comments for those below w. conda
         conda list
+        # mamba info
+        # mamba list
 
     - name: Check dependencies
       shell: bash -l {0}
