@@ -50,37 +50,38 @@ jobs:
     # This is our original installation step using conda, but this is extremely
     # slow to solve the env. We therefore switched to using Mamba (see below),
     # and keep this section here for historical reference.
-    # - name: Create conda env and install deps
-    #   uses: conda-incubator/setup-miniconda@v2
-    #   with:
-    #     environment-file: .github/environment.yaml
-    #     python-version: ${{ matrix.python-version }}
-    #     auto-activate-base: false
-    #     channels: conda-forge
-    #     activate-environment: simmate_dev
-    #     channel-priority: true
+    - name: Create conda env and install deps
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        environment-file: .github/environment.yaml
+        python-version: ${{ matrix.python-version }}
+        auto-activate-base: false
+        channels: conda-forge
+        activate-environment: simmate_dev
+        channel-priority: strict
     # The lines "shell: bash -l {0}" ensure we use the created env below
     
     # We use Mamba instead of Conda for its faster solver.
-    - name: Install Conda environment with Micromamba
-      uses: mamba-org/provision-with-micromamba@main
-      with:
-        environment-file: .github/environment.yaml
-        environment-name: simmate_dev
-        extra-specs: |
-          python=${{ matrix.python-version }}
+    # - name: Install Conda environment with Micromamba
+    #   uses: mamba-org/provision-with-micromamba@main
+    #   with:
+    #     environment-file: .github/environment.yaml
+    #     environment-name: simmate_dev
+    #     extra-specs: |
+    #       python=${{ matrix.python-version }}
 
     - name: Install Simmate
       shell: bash -l {0}
       run: |
         pip install -e .
 
-    - name: Check conda info
-      shell: bash -l {0}
-      run: |
-        mamba info
-        mamba list
-    # !!! switch out mamba/conda commands as needed
+    # - name: Check conda info
+    #   shell: bash -l {0}
+    #   run: |
+    #     micromamba info
+    #     micromamba list
+    # !!! switch out micromamba/mamba/conda commands as needed
 
     - name: Check dependencies
       shell: bash -l {0}
