@@ -8,7 +8,7 @@
 Build your workflow name using the Simmate conventions and run some checks to
 make sure everything works as expected:
 ``` python
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     pass  # we will build the rest of workflow later
@@ -39,7 +39,7 @@ requirement is that you place that code inside a `run_config` method of a
 new subclass for `Workflow`:
 
 ``` python
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -140,7 +140,7 @@ in the [Parameters](/parameters/) section.
 
 ``` python
 from simmate.toolkit import Structure
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -172,7 +172,7 @@ For example, this workflow will write an output file to
 automatically set up by Simmate).
 
 ``` python
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     

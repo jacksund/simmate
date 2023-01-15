@@ -8,7 +8,7 @@ import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 from django.db import transaction
 from rich import print
 
-from simmate.workflow_engine.execution.database import WorkItem
+from simmate.engine.execution.database import WorkItem
 
 # This string is just something fancy to display in the console when a worker
 # starts up.
@@ -197,7 +197,7 @@ class SimmateWorker:
                 )
 
                 # local import to prevent circular import issues
-                from simmate.workflow_engine.s3_workflow import CommandNotFoundError
+                from simmate.engine.s3_workflow import CommandNotFoundError
 
                 # The most common error (by far) is a command-not-found issue.
                 # We want to handle this separately -- whereas other exceptions

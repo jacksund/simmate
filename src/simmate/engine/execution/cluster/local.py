@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from tempfile import mkstemp
 
-from simmate.workflow_engine.execution.cluster.base import Cluster
+from simmate.engine.execution.cluster.base import Cluster
 
 
 class LocalCluster(Cluster):
@@ -13,7 +13,7 @@ class LocalCluster(Cluster):
     Submits workers via subprocesses
     """
 
-    worker_command: str = "simmate workflow-engine start-worker"
+    worker_command: str = "simmate engine start-worker"
 
     @classmethod
     def submit_job(cls) -> subprocess.Popen:

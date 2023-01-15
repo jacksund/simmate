@@ -39,12 +39,12 @@ These modules are:
 - `command_line` = common functions that are available as commands in the terminal
 - `configuration` = default Simmate settings and methods to change them
 - `database` = defines the structure of data tables and the methods to access the tables
+- `engine` = tools that run calculations and handle errors
 - `file_converters` = methods to convert between filetypes (e.g., POSCAR to CIF)
 - `toolkit` = core methods and classes for Simmate (e.g. the `Structure` class)
 - `utilities` = simple functions that are used throughout other modules
 - `visualization` = methods to visualize structures and data
 - `website` = runs the simmate.org website
-- `workflow_engine` = tools that run calculations and handle errors
 - `workflows` = tools that define each calculation type (e.g., a structure optimization)
 
 There is also one extra file…

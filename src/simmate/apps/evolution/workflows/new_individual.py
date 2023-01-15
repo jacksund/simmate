@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 
 from simmate.apps.evolution.models.fixed_composition import FixedCompositionSearch
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 
 class StructurePrediction__Toolkit__NewIndividual(Workflow):

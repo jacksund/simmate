@@ -10,8 +10,8 @@ from pathlib import Path
 import typer
 
 from simmate.command_line.database import database_app
+from simmate.command_line.engine import engine_app
 from simmate.command_line.utilities import utilities_app
-from simmate.command_line.workflow_engine import workflow_engine_app
 from simmate.command_line.workflows import workflows_app
 
 simmate_app = typer.Typer(rich_markup_mode="markdown")
@@ -127,6 +127,6 @@ def start_project():
 # # All commands are organized into other files, so we need to manually register
 # # them to our base "simmate" command here.
 simmate_app.add_typer(database_app, name="database")
+simmate_app.add_typer(engine_app, name="engine")
 simmate_app.add_typer(workflows_app, name="workflows")
-simmate_app.add_typer(workflow_engine_app, name="workflow-engine")
 simmate_app.add_typer(utilities_app, name="utilities")

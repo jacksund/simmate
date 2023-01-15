@@ -21,8 +21,8 @@ import shutil
 
 import pytest
 
-from simmate.workflow_engine import ErrorHandler, S3Workflow
-from simmate.workflow_engine.s3_workflow import (
+from simmate.engine import ErrorHandler, S3Workflow
+from simmate.engine.s3_workflow import (
     CommandNotFoundError,
     MaxCorrectionsError,
     NonZeroExitError,

@@ -26,11 +26,11 @@ simmate --help
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ database         A group of commands for managing your database                                              │
+│ engine  A group of commands for starting up computational resources (Workers, Agents, and Clusters)          │
 │ run-server       Runs a local test server for the Simmate website interface                                  │
 │ start-project    Creates a new folder and fills it with an example project to get you started with custom    │
 │                  Simmate workflows/datatables                                                                │
 │ utilities        A group of commands for various simple tasks (such as file handling)                        │
-│ workflow-engine  A group of commands for starting up computational resources (Workers, Agents, and Clusters) │
 │ workflows        A group of commands for running workflows or viewing their settings                         │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

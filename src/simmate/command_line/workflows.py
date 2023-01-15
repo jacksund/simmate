@@ -250,7 +250,7 @@ def setup_only(context: Context, workflow_name: str):
 
     # Not all workflows have a single input because some are NestWorkflows,
     # meaning they are made of multiple smaller workflows.
-    from simmate.workflow_engine import S3Workflow
+    from simmate.engine import S3Workflow
 
     if issubclass(workflow, S3Workflow):
 
@@ -292,7 +292,7 @@ def run(filename: Path):
     Runs a workflow locally where parameters are loaded from a yaml or toml file
     """
 
-    from simmate.workflow_engine import Workflow
+    from simmate.engine import Workflow
 
     Workflow.run_from_file(filename).result()
 
@@ -304,6 +304,6 @@ def run_cloud(filename: Path):
     from a yaml file
     """
 
-    from simmate.workflow_engine import Workflow
+    from simmate.engine import Workflow
 
     Workflow.run_cloud_from_file(filename).result()

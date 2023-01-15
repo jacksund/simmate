@@ -29,11 +29,11 @@ In this tutorial, you will learn how to run workflows on distributed computation
     - Copy the created key
     - set your Prefect backend with the command `prefect backend cloud`
     - tell Prefect your key with the command `prefect auth login --key example_key_h123j2jfk`
-5. Register all Simmate workflows with Prefect using the command `simmate workflow-engine setup-cloud`
+5. Register all Simmate workflows with Prefect using the command `simmate engine setup-cloud`
 6. Test that Prefect is configured properly with the following steps (this will run the workflow locally):
     - run the command `prefect agent local start` (note that this will run endlessly and submit all workflows in parallel. use `crtl+C` to stop)
     - in a separate terminal, rerun our workflow from tutorial 2 with `run-cloud` instead of `run` (so `simmate workflows run-cloud relaxation_mit POSCAR`)
-7. Set up your computational resources using Dask (and if needed, Dask JobQueue). There are MANY options for this, which are covered in the [`simmate.workflow_engine`](https://github.com/jacksund/simmate/tree/main/src/simmate/workflow_engine) module. Take the time to read the documentation here. But as an example, we'll set up a SLURM cluster and then link it to a Prefect agent. Note, if you want to run workflows with commands like `mpirun -n 18 vasp_std > vasp.out`, then limit the Dask worker to one core while having the SLURM job request more cores. The resulting python script will look something like this:
+7. Set up your computational resources using Dask (and if needed, Dask JobQueue). There are MANY options for this, which are covered in the [`simmate.engine`](https://github.com/jacksund/simmate/tree/main/src/simmate/engine) module. Take the time to read the documentation here. But as an example, we'll set up a SLURM cluster and then link it to a Prefect agent. Note, if you want to run workflows with commands like `mpirun -n 18 vasp_std > vasp.out`, then limit the Dask worker to one core while having the SLURM job request more cores. The resulting python script will look something like this:
 ```python
 # --------------------------------------------------------------------------------------
 
@@ -175,7 +175,7 @@ To get your API key, go to Prefect Cloud's homepage and navigate to `User` -> `A
 
 On your computer, open a terminal and make sure you have your conda enviornment active. Prefect is already installed because the installation of Simmate did it for us. So run the command: `prefect backend cloud`. This just tells prefect that we decided to use their scheduler. Next, run the command `prefect auth login --key example_key_h123j2jfk` where you replace the end text with your copied API KEY. We can now use Simmate to access your cloud and submit workflows for us!
 
-To get started, we need to add all of our workflows to Prefect. This is done with `simmate workflow-engine setup-cloud`. After running this, you should see all of the workflow in your Prefect Cloud now! 
+To get started, we need to add all of our workflows to Prefect. This is done with `simmate engine setup-cloud`. After running this, you should see all of the workflow in your Prefect Cloud now! 
 
 If you were to use the `simmate workflows run` command that we've been using, you'll notice it still runs directly on your computer. To instead submit it to Prefect Cloud, use the command  `simmate workflows run-cloud` instead. So for an example workflow, the full command would be... `simmate workflows run-cloud relaxation_mit POSCAR`. 
 

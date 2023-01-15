@@ -5,8 +5,8 @@ import yaml
 from simmate.apps.vasp.inputs import Potcar
 from simmate.command_line.workflows import workflows_app
 from simmate.conftest import make_dummy_files
-from simmate.workflow_engine import Workflow
-from simmate.workflow_engine.workflow import DummyState
+from simmate.engine import Workflow
+from simmate.engine.workflow import DummyState
 
 
 def test_workflows_list_all(command_line_runner):

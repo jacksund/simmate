@@ -2,10 +2,10 @@
 
 from pathlib import Path
 
+from simmate.engine import Workflow
 from simmate.toolkit import Structure
 from simmate.toolkit.diffusion import MigrationHop, MigrationImages
 from simmate.toolkit.diffusion.utilities import clean_start_end_images
-from simmate.workflow_engine import Workflow
 
 
 class SinglePathWorkflow(Workflow):

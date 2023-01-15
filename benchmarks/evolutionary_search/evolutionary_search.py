@@ -35,7 +35,7 @@ from simmate.utilities import get_directory
 
 # EXAMPLE COMMANDS FOR START SEARCH AND WORKERS
 # simmate workflows run search.yaml
-# simmate workflow-engine start-cluster 100 --type slurm
+# simmate engine start-cluster 100 --type slurm
 
 # -----------------------------------------------------------------------------
 # Fix buggy structures

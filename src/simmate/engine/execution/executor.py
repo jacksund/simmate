@@ -7,7 +7,7 @@ import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 from django.utils import timezone
 from rich import print
 
-from simmate.workflow_engine.execution.database import WorkItem
+from simmate.engine.execution.database import WorkItem
 
 
 class SimmateExecutor:

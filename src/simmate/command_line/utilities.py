@@ -2,7 +2,7 @@
 
 """
 This defines commands for managing your Simmate workflow engine. All commands are 
-accessible through the "simmate workflow-engine" command.
+accessible through the "simmate engine" command.
 """
 
 from pathlib import Path

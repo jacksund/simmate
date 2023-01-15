@@ -16,8 +16,8 @@ from pathlib import Path
 import yaml
 
 from simmate.configuration.django.settings import SIMMATE_APPS
+from simmate.engine import Workflow
 from simmate.utilities import get_directory, make_archive
-from simmate.workflow_engine import Workflow
 
 
 def get_all_workflows(

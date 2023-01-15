@@ -74,7 +74,7 @@ As an example, let's just use the command `echo` to print something:
     
 ``` python
 
-from simmate.workflow_engine import S3Workflow
+from simmate.engine import S3Workflow
 
 class Example__Echo__SayHello(S3Workflow):
     use_database = False  # we aren't using a custom table for now
@@ -97,7 +97,7 @@ Here, we need to update our `setup` and `workup` methods:
 
 ``` python
 
-from simmate.workflow_engine import S3Workflow
+from simmate.engine import S3Workflow
 
 class Example__Echo__SayHello(S3Workflow):
     

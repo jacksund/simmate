@@ -65,7 +65,7 @@ For example, our workflow names become:
 
 Now let's test this out in python using a similar workflow name:
 ``` python
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     pass  # we will build the rest of workflow later

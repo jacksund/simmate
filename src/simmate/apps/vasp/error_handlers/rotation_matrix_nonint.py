@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from simmate.apps.vasp.inputs import Incar
-from simmate.workflow_engine import ErrorHandler
+from simmate.engine import ErrorHandler
 
 
 class RotationNonIntMatrix(ErrorHandler):

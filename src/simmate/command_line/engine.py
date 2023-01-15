@@ -2,16 +2,16 @@
 
 """
 This defines commands for managing your Simmate workflow engine. All commands are 
-accessible through the "simmate workflow-engine" command.
+accessible through the "simmate engine" command.
 """
 
 import typer
 
-workflow_engine_app = typer.Typer(rich_markup_mode="markdown")
+engine_app = typer.Typer(rich_markup_mode="markdown")
 
 
-@workflow_engine_app.callback(no_args_is_help=True)
-def workflow_engine():
+@engine_app.callback(no_args_is_help=True)
+def engine():
     """
     A group of commands for starting up computational resources (Workers,
     Agents, and Clusters)
@@ -19,7 +19,7 @@ def workflow_engine():
     pass
 
 
-@workflow_engine_app.command()
+@engine_app.command()
 def start_worker(
     nitems_max: int = None,
     timeout: float = None,
@@ -46,7 +46,7 @@ def start_worker(
 
     """
 
-    from simmate.workflow_engine import Worker
+    from simmate.engine import Worker
 
     worker = Worker(
         nitems_max,
@@ -58,7 +58,7 @@ def start_worker(
     worker.start()
 
 
-@workflow_engine_app.command()
+@engine_app.command()
 def start_singleflow_worker():
     """
     This starts a Simmate Worker that only runs one job and then shuts down. Also,
@@ -68,15 +68,15 @@ def start_singleflow_worker():
     this is such a common use-case, we include this command for convienence.
     It is the same as...
 
-    `simmate workflow-engine start-worker --nitems-max 1 --close-on-empty-queue`
+    `simmate engine start-worker --nitems-max 1 --close-on-empty-queue`
     """
 
-    from simmate.workflow_engine import Worker
+    from simmate.engine import Worker
 
     Worker.run_singleflow_worker()
 
 
-@workflow_engine_app.command()
+@engine_app.command()
 def start_cluster(
     nworkers: int,
     type: str = "local",
@@ -94,7 +94,7 @@ def start_cluster(
 
     """
 
-    from simmate.workflow_engine.execution.utilities import start_cluster
+    from simmate.engine.execution.utilities import start_cluster
 
     start_cluster(
         nworkers=nworkers,
@@ -103,41 +103,41 @@ def start_cluster(
     )
 
 
-@workflow_engine_app.command()
+@engine_app.command()
 def show_error_summary():
     """
     Prints the shorthand error for all failed jobs
     """
-    from simmate.workflow_engine.execution import SimmateExecutor
+    from simmate.engine.execution import SimmateExecutor
 
     SimmateExecutor.show_error_summary()
 
 
-@workflow_engine_app.command()
+@engine_app.command()
 def show_stats():
     """
     Prints a summary of different workitems and their status
     """
-    from simmate.workflow_engine.execution import SimmateExecutor
+    from simmate.engine.execution import SimmateExecutor
 
     SimmateExecutor.show_stats()
 
 
-@workflow_engine_app.command()
+@engine_app.command()
 def delete_finished(confirm: bool = False):
     """
     Deletes all finished workitems from the database
     """
-    from simmate.workflow_engine.execution import SimmateExecutor
+    from simmate.engine.execution import SimmateExecutor
 
     SimmateExecutor.delete_finished(confirm)
 
 
-@workflow_engine_app.command()
+@engine_app.command()
 def delete_all(confirm: bool = False):
     """
     Deletes all workitems from the database
     """
-    from simmate.workflow_engine.execution import SimmateExecutor
+    from simmate.engine.execution import SimmateExecutor
 
     SimmateExecutor.delete_all(confirm)
