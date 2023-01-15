@@ -8,9 +8,9 @@ import numpy
 import plotly.graph_objects as plotly_go
 from plotly.subplots import make_subplots
 
+from simmate.engine import Workflow
 from simmate.toolkit import Structure
 from simmate.visualization.plotting import PlotlyFigure
-from simmate.engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
 

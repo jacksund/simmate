@@ -11,10 +11,10 @@ from clease.montecarlo.observers import EnergyEvolution, LowestEnergyStructure
 from clease.settings import CECrystal, Concentration
 from clease.tools import update_db as update_clease_db
 
+from simmate.engine import Workflow
 from simmate.file_converters.structure.ase import AseAtomsAdaptor
 from simmate.toolkit import Structure
 from simmate.utilities import get_chemical_subsystems, get_directory
-from simmate.engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
 

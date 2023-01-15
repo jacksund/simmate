@@ -7,8 +7,8 @@ from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 from simmate.apps.vasp.inputs import Incar, Kpoints, Poscar, Potcar
-from simmate.toolkit import Structure
 from simmate.engine import S3Workflow
+from simmate.toolkit import Structure
 
 
 def get_default_parallel_settings():

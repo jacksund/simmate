@@ -3,8 +3,8 @@
 from pathlib import Path
 
 from simmate.apps.vasp.inputs import Incar
-from simmate.toolkit import Structure
 from simmate.engine import ErrorHandler
+from simmate.toolkit import Structure
 
 
 class LargeSigma(ErrorHandler):

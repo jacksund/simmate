@@ -9,8 +9,8 @@ from simmate.apps.vasp.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
 from simmate.database.third_parties import MatprojStructure
-from simmate.toolkit import Structure
 from simmate.engine import Workflow
+from simmate.toolkit import Structure
 
 
 class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
