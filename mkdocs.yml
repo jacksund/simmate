@@ -33,6 +33,12 @@ theme:
       - navigation.tabs.sticky
       - content.code.annotate
 
+# Adding versioning tags to the website
+# extra:
+#   version:
+#     provider: mike
+#     default: stable
+# !!! https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/
 
 # For emojis, annotations, etc.
 markdown_extensions:
