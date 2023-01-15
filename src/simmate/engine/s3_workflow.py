@@ -597,7 +597,13 @@ class S3Workflow(Workflow):
         # note: SIGTERM is the normal signal but I use SIGKILL to try to address
         # permission errors.
         else:
-            process.terminate()
+            try:
+                process.terminate()
+            except ProcessLookupError:
+                # This is a bug in the CI where a command fails BEFORE the terminate
+                # call even reaches it. The call has ended though, so we can
+                # simply move on with our code.
+                pass
 
         # As an example of an alternative approach to killing a job, here is
         # what Custodian (Materials Project) tries when killing a VASP job
