@@ -95,7 +95,7 @@ class ErrorHandler(ABC):
         error (or list of errors) for correct() method to use. If there are no
         errors, then None (or an empty list) will be returned. In many cases,
         you should read through the files directly rather than use
-        calculators.example.outputs which in many cases assumes a completed file.
+        apps.example.outputs which in many cases assumes a completed file.
 
         As some example, ErrorHandler's can have `check` functions that do one
         of the following:

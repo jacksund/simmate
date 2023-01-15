@@ -2,7 +2,7 @@
 
 import yaml
 
-from simmate.calculators.vasp.inputs import Potcar
+from simmate.apps.vasp.inputs import Potcar
 from simmate.command_line.workflows import workflows_app
 from simmate.conftest import make_dummy_files
 from simmate.workflow_engine import Workflow

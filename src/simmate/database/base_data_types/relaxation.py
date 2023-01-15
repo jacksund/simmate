@@ -163,7 +163,7 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
             # )
             return  # just exit
 
-        from simmate.calculators.vasp.outputs import Vasprun
+        from simmate.apps.vasp.outputs import Vasprun
 
         vasprun = Vasprun.from_directory(directory)
         self.update_from_vasp_run(vasprun)

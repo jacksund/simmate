@@ -6,7 +6,7 @@ from pymatgen.analysis.transition_state import NEBAnalysis
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-from simmate.calculators.vasp.outputs import Vasprun
+from simmate.apps.vasp.outputs import Vasprun
 from simmate.database.base_data_types import Calculation, Structure, table_column
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.toolkit.diffusion import MigrationHop as ToolkitMigrationHop
@@ -97,7 +97,7 @@ class DiffusionAnalysis(Structure, Calculation):
         """
 
         # I assume the directory is from a vasp calculation, but I need to update
-        # this when I begin adding new calculators.
+        # this when I begin adding new apps.
 
         # For now, I only grab the structure from the static-energy and store
         # it in the DiffusionAnalysis table.
@@ -338,7 +338,7 @@ class MigrationHop(Calculation):
         if not vasprun_filename.exists():
             raise Exception("Only VASP outputs are supported for NEB")
 
-        from simmate.calculators.vasp.outputs import Vasprun
+        from simmate.apps.vasp.outputs import Vasprun
 
         vasprun = Vasprun.from_directory(directory)
         self.update_from_neb_toolkit(vasprun)

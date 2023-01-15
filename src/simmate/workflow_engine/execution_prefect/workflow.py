@@ -105,7 +105,7 @@ class PrefectWorkflow:
         return [
             "simmate",
             cls.name_type,
-            cls.name_calculator,
+            cls.name_app,
         ]
 
     @staticmethod

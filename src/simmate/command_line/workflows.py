@@ -124,7 +124,7 @@ def explore():
 
     from simmate.workflows.utilities import (
         get_all_workflow_types,
-        get_calculators_by_type,
+        get_apps_by_type,
         get_workflow,
         get_workflow_names_by_type,
     )
@@ -134,22 +134,22 @@ def explore():
     type_index = list_options(workflow_types)
     selected_type = workflow_types[type_index]
 
-    print(f"{prefix}Which calculator do you want to use?")
-    calculator_names = get_calculators_by_type(selected_type)
-    calc_index = list_options(calculator_names)
-    selected_calculator = calculator_names[calc_index]
+    print(f"{prefix}Which app do you want to use?")
+    app_names = get_apps_by_type(selected_type)
+    calc_index = list_options(app_names)
+    selected_app = app_names[calc_index]
 
     print(f"{prefix}What settings preset do you want to see the description for?")
     presets = get_workflow_names_by_type(
         selected_type,
-        calculator_name=selected_calculator,
+        app_name=selected_app,
         full_name=False,
     )
     present_index = list_options(presets)
     selected_preset = presets[present_index]
 
     # combine selections into our final workflow name
-    final_workflow_name = f"{selected_type}.{selected_calculator}.{selected_preset}"
+    final_workflow_name = f"{selected_type}.{selected_app}.{selected_preset}"
 
     print(f"{prefix}===================== {final_workflow_name} =====================")
 

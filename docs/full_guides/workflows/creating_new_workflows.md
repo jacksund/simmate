@@ -20,7 +20,7 @@ my_workflow = Example__Python__MyFavoriteSettings
 # Now check that our naming convention works as expected
 assert my_workflow.name_full == "example.python.my-favorite-settings"
 assert my_workflow.name_type == "example"
-assert my_workflow.name_calculator == "python"
+assert my_workflow.name_app == "python"
 assert my_workflow.name_preset == "my-favorite-settings"
 ```
 
@@ -199,13 +199,13 @@ class Example__Python__MyFavoriteSettings(Workflow):
 
 ## Building from existing workflows
 
-For many calculators, there are workflow classes that you
+For many apps, there are workflow classes that you
 can use as a starting point. For example, VASP users can inherit from the
 `VaspWorkflow` class, which includes many features built-in:
 
 === "basic VASP example"
     ``` python
-    from simmate.calculators.vasp.workflows.base import VaspWorkflow
+    from simmate.apps.vasp.workflows.base import VaspWorkflow
     
     class Relaxation__Vasp__MyExample1(VaspWorkflow):
     
@@ -223,11 +223,11 @@ can use as a starting point. For example, VASP users can inherit from the
 
 === "full-feature VASP example"
     ``` python
-    from simmate.calculators.vasp.workflows.base import VaspWorkflow
-    from simmate.calculators.vasp.inputs.potcar_mappings import (
+    from simmate.apps.vasp.workflows.base import VaspWorkflow
+    from simmate.apps.vasp.inputs.potcar_mappings import (
         PBE_ELEMENT_MAPPINGS,
     )
-    from simmate.calculators.vasp.error_handlers import (
+    from simmate.apps.vasp.error_handlers import (
         Frozen,
         NonConverging,
         Unconverged,
@@ -290,7 +290,7 @@ can use as a starting point. For example, VASP users can inherit from the
         return structure.num_sites * example_mod_input
     
     # STEP 2: register modifier with the Incar class
-    from simmate.calculators.vasp.inputs import Incar
+    from simmate.apps.vasp.inputs import Incar
     Incar.add_keyword_modifier(keyword_modifier_multiply_nsites)
     
     # STEP 3: use your new modifier with any parameter you'd like

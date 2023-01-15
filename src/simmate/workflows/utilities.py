@@ -30,16 +30,21 @@ def get_all_workflows(
     """
     app_workflows = []
     for app_name in apps_to_search:
-        # modulename is by cutting off the "apps.AppConfig" part of the config
-        # path. For example, "simmate.calculators.vasp.apps.VaspConfig" would
-        # give an app_modulename of "simmate.calculators.vasp"
-        app_modulename = ".".join(app_name.split(".")[:-2])
         try:
-            app_module = importlib.import_module(f"{app_modulename}.workflows")
+            # modulename is by cutting off the "apps.AppConfig" part of the config
+            # path. For example, "simmate.apps.vasp.apps.VaspConfig" would
+            # give an app_modulename of "simmate.apps.vasp"
+            config_modulename = ".".join(app_name.split(".")[:-1])
+            config_name = app_name.split(".")[-1]
+            config_module = importlib.import_module(config_modulename)
+            config = getattr(config_module, config_name)
+            app_path = config.name
+            app_workflow_module = importlib.import_module(f"{app_path}.workflows")
         except Exception as error:
             logging.critical(
                 f"Failed to load workflows from {app_name}. Did you make sure "
-                "there is a workflows.py file or module present?"
+                "there is a workflows.py file or module present? This is the "
+                "error that was raised during loading:"
             )
             raise error
 
@@ -48,9 +53,9 @@ def get_all_workflows(
 
         # If an __all__ value is set, then this will take priority when grabbing
         # workflows from the module
-        if hasattr(app_module, "__all__"):
-            for workflow_name in app_module.__all__:
-                workflow = getattr(app_module, workflow_name)
+        if hasattr(app_workflow_module, "__all__"):
+            for workflow_name in app_workflow_module.__all__:
+                workflow = getattr(app_workflow_module, workflow_name)
                 if workflow not in app_workflows:
                     app_workflows.append(workflow)
 
@@ -59,7 +64,9 @@ def get_all_workflows(
         else:
             # a tuple is returned by getmembers so c[0] is the string name while
             # c[1] is the python class object.
-            app_workflows += [c[1] for c in getmembers(app_module) if isclass(c[1])]
+            app_workflows += [
+                c[1] for c in getmembers(app_workflow_module) if isclass(c[1])
+            ]
 
     return (
         app_workflows
@@ -96,12 +103,12 @@ def get_all_workflow_types() -> list[str]:
     return workflow_types
 
 
-def get_calculators_by_type(
+def get_apps_by_type(
     flow_type: str,
     precheck_type_exists: bool = True,
 ) -> list[str]:
     """
-    Returns a list of all the available calculators for a given workflow type.
+    Returns a list of all the available apps for a given workflow type.
     """
 
     # Make sure the type is supported
@@ -113,25 +120,25 @@ def get_calculators_by_type(
                 f"this list: {workflow_types}"
             )
 
-    calculator_names = []
+    app_names = []
     for flow in get_all_workflows():
-        if flow.name_type == flow_type and flow.name_calculator not in calculator_names:
-            calculator_names.append(flow.name_calculator)
+        if flow.name_type == flow_type and flow.name_app not in app_names:
+            app_names.append(flow.name_app)
 
-    calculator_names.sort()
-    return calculator_names
+    app_names.sort()
+    return app_names
 
 
 def get_workflow_names_by_type(
     flow_type: str,
-    calculator_name: str = None,
+    app_name: str = None,
     full_name: bool = True,
     precheck_type_exists: bool = True,
     remove_no_database_flows: bool = False,
 ) -> list[str]:
     """
     Returns a list of all the workflows of a given type. Optionally, the
-    workflows can also be filtered by calculator name.
+    workflows can also be filtered by app name.
     """
 
     # Make sure the type is supported
@@ -149,7 +156,7 @@ def get_workflow_names_by_type(
 
         if flow.name_type != flow_type:
             continue
-        if calculator_name and flow.name_calculator != calculator_name:
+        if app_name and flow.name_app != app_name:
             continue  # Skip those that don't match
 
         if remove_no_database_flows and not flow.use_database:
@@ -249,17 +256,12 @@ def reverse_workflow_name(workflow_name: str) -> str:
     """
 
     # parse the workflow name. (e.g. static-energy.vasp.mit --> static_energy + vasp + mit)
-    project_name, calculator_name, preset_name = workflow_name.replace("-", "_").split(
-        "."
-    )
+    project_name, app_name, preset_name = workflow_name.replace("-", "_").split(".")
 
     # Combine the names into the full class name
     # (e.g. static_energy + vasp + mit --> StaticEnergy__Vasp__Mit)
     workflow_class_name = "__".join(
-        [
-            n.title().replace("_", "")
-            for n in [project_name, calculator_name, preset_name]
-        ]
+        [n.title().replace("_", "") for n in [project_name, app_name, preset_name]]
     )
 
     return workflow_class_name

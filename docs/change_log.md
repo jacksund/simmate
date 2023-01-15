@@ -77,9 +77,21 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - update "bad-elf" workflow to accept an empty-atom template structure or a list
 of empty sites
 
+**Refactors**
+
+- `calculators` module is now the `apps` module and terminology is changed throughout the repo
+- many dependencies are reworked to optional dependencies as all `apps` are now optional
+
 **Fixes**
 
 - fix site ordering in NEB supercell structures
+- improve installation speed and guide users to conda alternatives
+
+
+!!! warning
+    The refactoring of simmate "apps" led to many breaking changes in the python API.
+    We strongly recommend clearing your `~/simmate/` directory, especially the
+    `my_env-apps.yaml` file because app names have changed.
 
 --------------------------------------------------------------------------------
 

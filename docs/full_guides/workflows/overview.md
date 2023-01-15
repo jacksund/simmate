@@ -79,7 +79,7 @@ Many workflows involve writing input files, calling some external program, and t
     1. `setup` = write input files
     2. `run_command_and_monitor` = the actual running & monitoring of the program
     3. `workup` = reading the output files
-- `Shell`: the calculator is called through the command-line (the actual `execution` call)
+- `Shell`: the program is called through the command-line (the actual `execution` call)
 - `Supervised`: once the shell command is started, Simmate runs in the background to monitor it for errors (occurs during the `execution` call)
 
 All stages of this S3 workflow are packed into the `excute` step of a `Workflow`, where Simmate has a lot of functionality built for you already.

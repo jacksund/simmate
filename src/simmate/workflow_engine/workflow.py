@@ -507,9 +507,9 @@ class Workflow:
 
     @classmethod
     @property
-    def name_calculator(cls) -> str:
+    def name_app(cls) -> str:
         """
-        Name of the calculator this workflow is associated with. This is the second
+        Name of the app this workflow is associated with. This is the second
         portion of the flow name (e.g. "vasp")
         """
         return cls.name_full.split(".")[1]
@@ -532,7 +532,7 @@ class Workflow:
         return [
             "simmate",
             cls.name_type,
-            cls.name_calculator,
+            cls.name_app,
             cls.name_full,
         ]
 

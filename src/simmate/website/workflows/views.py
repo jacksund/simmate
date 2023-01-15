@@ -7,7 +7,7 @@ from simmate.database.base_data_types import DatabaseTable
 from simmate.website.core_components.base_api_view import SimmateAPIViewSet
 from simmate.website.workflows.forms import SubmitWorkflow
 from simmate.workflows.utilities import (  # WORKFLOW_TYPES,
-    get_calculators_by_type,
+    get_apps_by_type,
     get_workflow,
     get_workflow_names_by_type,
 )
@@ -66,18 +66,18 @@ def workflows_all(request):
 
 def workflows_by_type(request, workflow_type):
 
-    calculators = get_calculators_by_type(workflow_type)
+    apps = get_apps_by_type(workflow_type)
 
     # pull the information together for each individual flow and organize by
-    # workflow calculator.
+    # workflow app.
     workflow_dict = {}
-    for calculator in calculators:
+    for app in apps:
         workflow_names = get_workflow_names_by_type(
             workflow_type,
-            calculator,
+            app,
             remove_no_database_flows=True,
         )
-        workflow_dict[calculator] = [get_workflow(n) for n in workflow_names]
+        workflow_dict[app] = [get_workflow(n) for n in workflow_names]
 
     # now let's put the data and template together to send the user
     context = {
@@ -98,14 +98,14 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
     def get_table(
         request,
         workflow_type,
-        workflow_calculator,
+        workflow_app,
         workflow_preset,
         pk=None,  # this is passed for 'retrieve' views but we don't use it
     ) -> DatabaseTable:
         """
         grabs the relevant database table using the URL request
         """
-        name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+        name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
         workflow = get_workflow(name_full)
         return workflow.database_table
 
@@ -113,11 +113,11 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
     def get_initial_queryset(
         request,
         workflow_type,
-        workflow_calculator,
+        workflow_app,
         workflow_preset,
         pk=None,  # this is passed for 'retrieve' views but we don't use it
     ):
-        name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+        name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
         workflow = get_workflow(name_full)
         return workflow.all_results
 
@@ -125,11 +125,11 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
         self,
         request,
         workflow_type,
-        workflow_calculator,
+        workflow_app,
         workflow_preset,
     ) -> dict:
 
-        name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+        name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
         workflow = get_workflow(name_full)
 
         # TODO: grab some metadata about this calc. For example...
@@ -142,12 +142,12 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
         self,
         request,
         workflow_type,
-        workflow_calculator,
+        workflow_app,
         workflow_preset,
         pk,
     ) -> dict:
 
-        name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+        name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
         workflow = get_workflow(name_full)
 
         return {"workflow": workflow}
@@ -157,11 +157,11 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
 def workflow_submit(
     request,
     workflow_type: str,
-    workflow_calculator: str,
+    workflow_app: str,
     workflow_preset: str,
 ):
 
-    name_full = f"{workflow_type}.{workflow_calculator}.{workflow_preset}"
+    name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
     workflow = get_workflow(name_full)
 
     # dynamically create the form for this workflow

@@ -43,7 +43,7 @@ vasp_std > vasp.out
 
 ### **OPTION 2** 
 
-Using the "customized" workflow for a calculator (e.g. `customized.vasp.user-config`)
+Using the "customized" workflow for an app (e.g. `customized.vasp.user-config`)
 
 ``` yaml
 # In a file named "my_example.yaml".

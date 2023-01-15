@@ -530,7 +530,7 @@ class DatabaseTable(models.Model):
                 workflow = get_workflow(self.workflow_name)
                 all_data["_WEBSITE_URL_"] = (
                     "http://127.0.0.1:8000/workflows/"  # I assume local host for now
-                    f"{workflow.name_type}/{workflow.name_calculator}/"
+                    f"{workflow.name_type}/{workflow.name_app}/"
                     f"{workflow.name_preset}/{self.id}"
                 )
         except:
@@ -652,7 +652,7 @@ class DatabaseTable(models.Model):
         if vasprun_filename.exists():
             return cls.from_vasp_directory(directory, as_dict=as_dict)
 
-        # TODO: add new elif statements when I begin adding new calculators.
+        # TODO: add new elif statements when I begin adding new apps.
 
         # If we don't detect any directory, we return an empty dictionary.
         # We don't print a warning or error for now because users may want
@@ -662,7 +662,7 @@ class DatabaseTable(models.Model):
     @classmethod
     def from_vasp_directory(cls, directory: Path, as_dict: bool = False):
 
-        from simmate.calculators.vasp.outputs import Vasprun
+        from simmate.apps.vasp.outputs import Vasprun
 
         vasprun = Vasprun.from_directory(directory)
         return cls.from_vasp_run(vasprun, as_dict=as_dict)

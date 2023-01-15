@@ -99,7 +99,7 @@ class S3Workflow(Workflow):
          #### Example use
 
          ``` python
-         from simmate.calculator.example.tasks import ExampleTask
+         from simmate.app.example.tasks import ExampleTask
 
          my_result = ExampleTask.run(command=my_command)
          ```

@@ -577,7 +577,7 @@ The number of images (or structures) to use in the analysis. This does NOT inclu
     ```
 
 !!! danger
-    For calculators such as VASP, your `command` parameter must use a number of cores that is divisible by `nimages`. For example, `nimages=3` and `command="mpirun -n 10 vasp_std > vasp.out"` will fail because 10 is not divisible by 3.
+    For apps such as VASP, your `command` parameter must use a number of cores that is divisible by `nimages`. For example, `nimages=3` and `command="mpirun -n 10 vasp_std > vasp.out"` will fail because 10 is not divisible by 3.
 
 --------------------------
 

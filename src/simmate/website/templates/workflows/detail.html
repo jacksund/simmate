@@ -38,7 +38,7 @@ Simmate
   <div class="container">
     <h1 class="jumbotron-heading">{{ workflow.name_full }}</h1>
     <a role="button" class="btn btn-primary btn-sm"
-      href="{% url 'workflow_submit' workflow.name_type workflow.name_calculator workflow.name_preset %}">Submit New
+      href="{% url 'workflow_submit' workflow.name_type workflow.name_app workflow.name_preset %}">Submit New
       Run</a>
     <a href="?format=api" target="_blank" class="btn btn-secondary btn-sm">API</a>
     <a href="?format=json" target="_blank" class="btn btn-secondary btn-sm">JSON</a>

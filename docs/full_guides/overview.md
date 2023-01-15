@@ -35,7 +35,7 @@ graph LR
 
 These modules are:
 
-- `calculators` = third-party programs that run analyses (e.g., VASP, which runs DFT calculations)
+- `apps` = each runs a specific analysis or third-party program (e.g., VASP, which runs DFT calculations)
 - `command_line` = common functions that are available as commands in the terminal
 - `configuration` = default Simmate settings and methods to change them
 - `database` = defines the structure of data tables and the methods to access the tables

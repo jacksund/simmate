@@ -39,7 +39,7 @@ def test_workflow(tmp_path):
     # testing naming conventions
     assert DummyFlow.name_full == "dummy-project.dummy-caclulator.dummy-preset"
     assert DummyFlow.name_type == "dummy-project"
-    assert DummyFlow.name_calculator == "dummy-caclulator"
+    assert DummyFlow.name_app == "dummy-caclulator"
     assert DummyFlow.name_preset == "dummy-preset"
 
     # testing class properties
