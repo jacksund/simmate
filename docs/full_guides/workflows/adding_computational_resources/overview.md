@@ -6,7 +6,7 @@ This is an SQL executor that intends to be a stripped down version of FireWorks 
 Example usage:
 
 ```python
-from simmate.workflow_engine.execution.executor import SimmateExecutor
+from simmate.engine.execution.executor import SimmateExecutor
 
 # EXAMPLE 1
 future = SimmateExecutor.submit(sum, [4, 3, 2, 1])
@@ -25,7 +25,7 @@ test()
 
 # ----------------------------------------------------------------------------
 
-from simmate.workflow_engine.execution.worker import SimmateWorker
+from simmate.engine.execution.worker import SimmateWorker
 
 worker = SimmateWorker(waittime_on_empty_queue=1, tags=[])  # nitems_max=1
 worker.start()

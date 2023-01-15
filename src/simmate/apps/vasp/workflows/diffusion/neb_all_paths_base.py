@@ -4,7 +4,7 @@ from pathlib import Path
 
 from simmate.toolkit import Structure
 from simmate.toolkit.diffusion import DistinctPathFinder
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 
 class NebAllPathsWorkflow(Workflow):

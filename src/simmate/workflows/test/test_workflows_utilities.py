@@ -3,7 +3,7 @@
 import pytest
 
 from simmate.conftest import copy_test_files
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 from simmate.workflows.utilities import (
     get_all_workflow_names,
     get_all_workflow_types,
@@ -132,7 +132,7 @@ def test_get_workflow():
 
 # This is for the test below on custom workflows
 WORKFLOW_SCRIPT = """
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
 

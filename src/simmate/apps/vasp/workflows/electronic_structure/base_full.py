@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 
 class ElectronicStructureWorkflow(Workflow):

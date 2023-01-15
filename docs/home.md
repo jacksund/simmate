@@ -216,7 +216,7 @@ At the beginning of a project, you may want to write and run code on a single co
     ``` bash
     # In a separate terminal or even on a remote HPC cluster, you
     # can start a worker that will start running any scheduled jobs
-    simmate workflow-engine start-worker
+    simmate engine start-worker
     ```
 
 

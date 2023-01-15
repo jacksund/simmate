@@ -17,7 +17,7 @@ You can use the `run` method of a workflow within another workflow and call it a
 
 ``` python
 from simmate.workflows.utilities import get_workflow
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -52,7 +52,7 @@ be accepted within the `run_config` so workflow usage does not change:
 
 ``` python
 from simmate.workflows.utilities import get_workflow
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -81,7 +81,7 @@ To do this, we simply need to set the directory manually for each subworkflow ru
 
 ``` python
 from simmate.workflows.utilities import get_workflow
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -120,7 +120,7 @@ object to pass the results to the next subworkflow.
 
 ``` python
 from simmate.workflows.utilities import get_workflow
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -165,7 +165,7 @@ Sometimes, we don't want to pause and wait for each workflow run to finish. Ther
 To do this, we can use the `run_cloud` command instead of calling `run`.
 ``` python
 from simmate.workflows.utilities import get_workflow
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     

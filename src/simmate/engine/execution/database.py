@@ -26,7 +26,7 @@ class WorkItem(DatabaseTable):
     """
 
     class Meta:
-        app_label = "workflow_engine"
+        app_label = "engine"
 
     tags = table_column.JSONField(default=list)
     """

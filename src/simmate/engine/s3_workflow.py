@@ -11,7 +11,7 @@ from pathlib import Path
 import pandas
 
 from simmate.utilities import get_directory, make_error_archive
-from simmate.workflow_engine import ErrorHandler, Workflow
+from simmate.engine import ErrorHandler, Workflow
 
 
 class S3Workflow(Workflow):

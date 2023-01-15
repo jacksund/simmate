@@ -10,7 +10,7 @@ from simmate.apps.evolution.workflows.fixed_composition import (
     StructurePrediction__Toolkit__FixedComposition,
 )
 from simmate.toolkit import Composition
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 
 class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):

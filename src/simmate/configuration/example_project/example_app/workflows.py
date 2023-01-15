@@ -27,7 +27,7 @@ from simmate.apps.vasp.error_handlers import (  # There are many more available 
 from simmate.apps.vasp.inputs import Incar
 from simmate.apps.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS_LOW_QUALITY
 from simmate.apps.vasp.workflows.base import VaspWorkflow
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 # Import our tables from the other files.
 from .models import MyCustomTable1

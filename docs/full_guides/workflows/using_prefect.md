@@ -27,7 +27,7 @@ To convert this to a Simmate workflow, we just need to change the format a littl
 # NOTE: this example does not follow Simmate's naming convention, so
 # some higher level features will be broken. We will fix in a later step.
 
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
 

@@ -26,18 +26,18 @@ simmate workflows run-cloud my_settings.yaml
 
 8. Wherever you'd like to run the workflow, start a worker with the following command. :warning::warning: If you are on a cluster, start-worker should be called within your submit script (e.g. inside `submit.sh` for SLURM). Don't run workers on the head node.
 ``` bash
-simmate workflow-engine start-singleflow-worker
+simmate engine start-singleflow-worker
 ```
 
 9. Note this "singleflow" worker will start, run 1 workflow, then shutdown. If you would like more control over how many workflows are ran or even run a worker endlessly, you can use the command:
 ``` bash
-simmate workflow-engine start-worker
+simmate engine start-worker
 ```
 
 10. Scale out your cluster! Start workers anywhere you'd like, and start as many as you'd like. Just make sure you follow steps 4 and 5 for every worker. If you need to start many workers at once, you can use the `start-cluster` command as well.
 ``` bash
 # starts 5 local workers
-simmate workflow-engine start-cluster 5
+simmate engine start-cluster 5
 ```
 
 11. To control which workers run which workflows, use tags. Workers will only pick up submissions that have matching tags.
@@ -46,7 +46,7 @@ simmate workflow-engine start-cluster 5
 simmate workflows run-cloud ... -t my_tag -t small-job
 
 # when starting the worker (typically on a different computer)
-simmate workflow-engine start-worker -t small-job
+simmate engine start-worker -t small-job
 ```
 
 12. To let others use your cluster, simply connect them to the same database.

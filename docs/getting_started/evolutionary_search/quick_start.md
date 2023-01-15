@@ -74,12 +74,12 @@ simmate workflows run my_search.yaml
 5) Start workers by submitting the `start-worker` command to a cluster's queue (e.g. SLURM) or whereever you'd like jobs to run. Submit as many workers as workflows that you want ran in parallel:
 === "basic worker"
     ``` shell
-    simmate workflow-engine start-worker
+    simmate engine start-worker
     ```
 === "best-pracitce worker"
     ``` shell
     # (1)
-    simmate workflow-engine start-worker --close-on-empty-queue --nitems-max 10
+    simmate engine start-worker --close-on-empty-queue --nitems-max 10
     ```
     
     1. `--close-on-empty-queue` shuts down the worker when the queue is empty. This
@@ -91,8 +91,8 @@ simmate workflows run my_search.yaml
 6) Monitor the output and log files for any issues. Important error information
 can also be accessed in the command line:
 ``` bash
-simmate workflow-engine show-stats
-simmate workflow-engine show-error-summary
+simmate engine show-stats
+simmate engine show-error-summary
 ```
 
 7) Submit new workers or cancel stale workers as needed.
@@ -116,7 +116,7 @@ simmate workflows run my_search.yaml
 
 4. Submit workers as-needed
 ``` shell
-simmate workflow-engine start-worker
+simmate engine start-worker
 ```
 
 -------------------------------------------------------------------------------

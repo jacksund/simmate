@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflow_engine.execution.cluster import LocalCluster, SlurmCluster
+from simmate.engine.execution.cluster import LocalCluster, SlurmCluster
 
 
 def start_cluster(

@@ -81,6 +81,7 @@ of empty sites
 
 - `calculators` module is now the `apps` module and terminology is changed throughout the repo
 - many dependencies are reworked to optional dependencies as all `apps` are now optional
+- `workflow_engine` module has been renamed to `engine` to help shorten commands and import lines
 
 **Fixes**
 

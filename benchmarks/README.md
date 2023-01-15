@@ -24,7 +24,7 @@ Component | Materials Project | Simmate
 ------------ | ------------- | -------------
 Defining and submitting workflows | [fireworks](https://github.com/materialsproject/fireworks) | [prefect](https://github.com/PrefectHQ/prefect)
 MatSci workflow library | [atomate](https://github.com/hackingmaterials/atomate) | our `workflows` module
-Tasks & Error handling | [custodian](https://github.com/materialsproject/custodian) | our `workflow_engine` module
+Tasks & Error handling | [custodian](https://github.com/materialsproject/custodian) | our `engine` module
 IO to different programs | [pymatgen.io](https://github.com/materialsproject/pymatgen) | our `apps` module
 Database backend | [MongoDB](https://github.com/mongodb/mongo-python-driver) | any engine supported by [django](https://github.com/django/django)
 Database API | [emmet](https://github.com/materialsproject/emmet) | our `database.base_data_types` module 
@@ -111,12 +111,12 @@ The `simmate.database` module is an independent implementation that builds off o
 
 ## Workflow Engine
 
-The `simmate.workflow_engine` module builds off of Prefect where a lot of the core functionality is inspired by [fireworks](https://github.com/materialsproject/fireworks) and [custodian](https://github.com/materialsproject/custodian).
+The `simmate.engine` module builds off of Prefect where a lot of the core functionality is inspired by [fireworks](https://github.com/materialsproject/fireworks) and [custodian](https://github.com/materialsproject/custodian).
 
-### `workflow_engine.s3task` alternatives
+### `engine.s3task` alternatives
 - [custodian](https://github.com/materialsproject/custodian)
 
-### `workflow_engine.workflow` alternatives
+### `engine.workflow` alternatives
 - [fireworks](https://github.com/materialsproject/fireworks)
 - [aiida-core](https://github.com/aiidateam/aiida-core)
 

@@ -18,7 +18,7 @@ from simmate.apps.evolution.workflows.fixed_composition import (
 )
 from simmate.apps.evolution.workflows.utilities import write_and_submit_structures
 from simmate.toolkit import Composition
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
 

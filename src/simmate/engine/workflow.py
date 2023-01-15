@@ -15,7 +15,7 @@ from django.utils import timezone
 import simmate
 from simmate.database.base_data_types import Calculation
 from simmate.utilities import copy_directory, get_directory, make_archive
-from simmate.workflow_engine.execution import SimmateExecutor, WorkItem
+from simmate.engine.execution import SimmateExecutor, WorkItem
 
 
 class DummyState:

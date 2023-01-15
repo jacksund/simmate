@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflow_engine import S3Workflow
+from simmate.engine import S3Workflow
 
 
 # TODO: The chgsum.pl script will be replaced with a simple python function

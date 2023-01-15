@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from simmate.toolkit import Structure
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 
 class NebFromEndpointWorkflow(Workflow):

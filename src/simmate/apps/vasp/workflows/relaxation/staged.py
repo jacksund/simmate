@@ -10,7 +10,7 @@ from plotly.subplots import make_subplots
 
 from simmate.toolkit import Structure
 from simmate.visualization.plotting import PlotlyFigure
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
 

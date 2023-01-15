@@ -12,7 +12,7 @@ class WorkflowsConfig(AppConfig):
 
 
 class WorkflowEngineConfig(AppConfig):
-    name = "simmate.website.workflow_engine"
+    name = "simmate.website.engine"
 
 
 class ThirdPartyConfig(AppConfig):

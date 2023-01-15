@@ -2,7 +2,7 @@
 
 """
 This defines commands for managing your Simmate workflow engine. All commands are 
-accessible through the "simmate workflow-engine" command.
+accessible through the "simmate engine" command.
 
 WARNING: This module is experimental and not used in the final CLI at the moment.
 
@@ -12,7 +12,7 @@ import click
 
 
 @click.group()
-def workflow_engine():
+def engine():
     """
     A group of commands for starting up Prefect Agents and Dask Clusters.
     There is also a simple "Simmate Cluster" that you can use too, but it
@@ -24,7 +24,7 @@ def workflow_engine():
     pass
 
 
-@workflow_engine.command()
+@engine.command()
 @click.option(
     "--queue_name",
     "-q",
@@ -66,7 +66,7 @@ def start_worker(
     This starts a Simmate Worker which will query the database for jobs to run.
     """
 
-    from simmate.workflow_engine import Worker
+    from simmate.engine import Worker
 
     worker = Worker(
         queue_name=queue_name,
@@ -78,7 +78,7 @@ def start_worker(
     worker.run()
 
 
-@workflow_engine.command()
+@engine.command()
 def start_singleflow_worker():
     """
     This starts a Simmate Worker that only runs one job and then shuts down. Also,
@@ -88,10 +88,10 @@ def start_singleflow_worker():
     this is such a common use-case, we include this command for convienence.
     It is the same as...
 
-    simmate workflow-engine start-worker -c 1 -n 1 -e True
+    simmate engine start-worker -c 1 -n 1 -e True
     """
 
-    from simmate.workflow_engine import Worker
+    from simmate.engine import Worker
 
     worker = Worker(
         concurrency_limit=1,
@@ -101,7 +101,7 @@ def start_singleflow_worker():
     worker.run()
 
 
-@workflow_engine.command()
+@engine.command()
 @click.option(
     "--agent_name",
     "-n",
@@ -153,7 +153,7 @@ def run_cluster(
     use case.
 
     If you would like this cluster to run endlessly in the background, you can
-    submit it with something like "nohup simmate workflow-engine run-cluster &".
+    submit it with something like "nohup simmate engine run-cluster &".
     The "nohup" and "&" symbol together make it so this runs in the background AND
     it won't shutdown if you close your terminal (or ssh). To stop this from running,
     you'll now need to find the running process and kill it. Use something like

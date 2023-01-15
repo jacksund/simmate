@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflow_engine import S3Workflow
+from simmate.engine import S3Workflow
 
 
 class PopulationAnalysis__Bader__Bader(S3Workflow):

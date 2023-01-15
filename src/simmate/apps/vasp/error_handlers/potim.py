@@ -5,7 +5,7 @@ from pathlib import Path
 from simmate.apps.vasp.inputs import Incar
 from simmate.apps.vasp.outputs import Oszicar
 from simmate.toolkit import Structure
-from simmate.workflow_engine import ErrorHandler
+from simmate.engine import ErrorHandler
 
 
 class Potim(ErrorHandler):

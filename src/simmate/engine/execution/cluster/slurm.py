@@ -3,7 +3,7 @@
 import logging
 import subprocess
 
-from simmate.workflow_engine.execution.cluster.base import Cluster
+from simmate.engine.execution.cluster.base import Cluster
 
 
 class SlurmCluster(Cluster):
