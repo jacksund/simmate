@@ -2,11 +2,9 @@
 # This workflow will check for Black formating, install Python dependencies using Anaconda, and then run tests with a single version of Python.
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 # 
-# We also use a third-party action for setting up our conda environment. See:
-#   https://github.com/marketplace/actions/setup-miniconda
-#
-# OPTIMIZE: consider switching to mamba for faster CI installs:
-#   https://github.com/marketplace/actions/setup-miniconda#example-6-mamba
+# We also use a third-party action(s) for setting up our conda environment. See:
+#   conda: https://github.com/marketplace/actions/setup-miniconda
+#   mamba: https://github.com/mamba-org/provision-with-micromamba
 
 name: Run linting and tests with Anaconda
 
@@ -62,7 +60,7 @@ jobs:
     #     channel-priority: strict
     # The lines "shell: bash -l {0}" ensure we use the created env below
     
-    # We use Mamba instead of Conda for its faster solver.
+    # We use Mamba instead of Conda for its faster solver. (see comment above)
     - name: Install Conda environment with Micromamba
       uses: mamba-org/provision-with-micromamba@main
       with:
@@ -76,11 +74,11 @@ jobs:
       run: |
         pip install -e .
 
-    # - name: Check conda info
-    #   shell: bash -l {0}
-    #   run: |
-    #     micromamba info
-    #     micromamba list
+    - name: Check conda info
+      shell: bash -l {0}
+      run: |
+        micromamba info
+        micromamba list
     # !!! switch out micromamba/mamba/conda commands as needed
 
     - name: Check dependencies
