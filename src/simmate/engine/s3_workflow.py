@@ -144,9 +144,7 @@ class S3Workflow(Workflow):
         # workflows where we don't know which task to restart at.
         summary_filename = directory / "simmate_summary.yaml"
         is_complete = summary_filename.exists()
-        is_dir_setup = cls._check_input_files(
-            directory, raise_if_missing=False
-        )
+        is_dir_setup = cls._check_input_files(directory, raise_if_missing=False)
 
         # run the setup stage of the task, where there is a unique method
         # if we are picking up from a previously paused run.
@@ -168,9 +166,7 @@ class S3Workflow(Workflow):
             # a list of any corrections applied during the run.
             corrections = cls.execute(directory, command)
         else:
-            logging.info(
-                "Calculation is already completed. Skipping execution."
-            )
+            logging.info("Calculation is already completed. Skipping execution.")
 
             # load the corrections from file for reference
             corrections_filename = directory / "simmate_corrections.csv"
@@ -277,7 +273,9 @@ class S3Workflow(Workflow):
 
     @classmethod
     def _check_input_files(
-        cls, directory: Path, raise_if_missing: bool = True
+        cls,
+        directory: Path,
+        raise_if_missing: bool = True,
     ):
         """
         Make sure that there are the proper input files to run this calc
@@ -324,9 +322,7 @@ class S3Workflow(Workflow):
         # some error_handlers run while the shelltask is running. These are known as
         # Monitors and are labled via the is_monitor attribute. It's good for us
         # to separate these out from other error_handlers.
-        cls.monitors = [
-            handler for handler in cls.error_handlers if handler.is_monitor
-        ]
+        cls.monitors = [handler for handler in cls.error_handlers if handler.is_monitor]
 
         # in case this is a restarted calculation, check if there is a list
         # of corrections in the current directory and load those as the start point
@@ -550,7 +546,9 @@ class S3Workflow(Workflow):
 
     @staticmethod
     def _terminate_job(
-        directory: Path, process: subprocess.Popen, command: str
+        directory: Path,
+        process: subprocess.Popen,
+        command: str,
     ):
         """
         Stopping the command we submitted can be a tricky business if we are running
