@@ -100,7 +100,7 @@ DEV = [
     "pytest-mock >=3.7.0, <3.10.1",
     "pytest-xdist >=2.5.0, <3.2.0",
     "black >=22.1.0, <=22.6.0",
-    "coverage >=6.2, <7.0.5",
+    "coverage >=6.2, <7.0.6",
     "isort >=5.10.1, <5.11.5",
     "mkdocs-material >=8.4.1, <8.5.9",
     "mkdocstrings >=0.19.0, <=0.19.0",
@@ -133,7 +133,7 @@ EXTRAS = [
 
 # For downloading third-party data directly from source instead of Simmate
 DATA = [
-    "mp-api >=0.26.3, <0.29.5",  # materials project
+    "mp-api >=0.26.3, <0.30.7",  # materials project
 ]
 
 # Specific dependencies needed for optional simmate apps
