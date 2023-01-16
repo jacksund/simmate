@@ -41,7 +41,7 @@ dependencies:
     - plotly >=5.4.0, <=5.10.0
     - pymatgen >=2022.1.9, <2022.11.8
     - pymatgen-analysis-diffusion >=2021.4.29, <=2022.7.21
-    - pytest >=7.0.0, <=7.1.3
+    - pytest >=7.1.3, <=7.1.3
     - pytest-django >=4.5.2, <=4.5.2
     - python >=3.10
     - pytest-mock >=3.7.0, <3.10.1
