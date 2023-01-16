@@ -88,7 +88,6 @@ dependencies=[
     "pymatgen-analysis-diffusion >=2021.4.29, <=2022.7.21",  # pymatgen-diffusion on conda
     "matminer >=0.7.6, <0.8.1",
     "ase >=3.22.1, <=3.22.1",
-    "clease >=1.0.3, <=1.0.4",  # for cluster expansion calcs
 ]
 
 # optional dependencies that are not installed by default
@@ -135,6 +134,11 @@ EXTRAS = [
 # For downloading third-party data directly from source instead of Simmate
 DATA = [
     "mp-api >=0.26.3, <0.29.5",  # materials project
+]
+
+# Specific dependencies needed for optional simmate apps
+CLEASE = [
+    "clease >=1.0.3, <=1.0.4",  # for cluster expansion calcs
 ]
 
 # Link to our homepage. Use github for now.
