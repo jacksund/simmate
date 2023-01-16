@@ -33,7 +33,7 @@ from simmate.database.base_data_types import (
 from simmate.visualization.plotting import PlotlyFigure
 
 
-class Relaxation(Structure, Thermodynamics, Calculation):
+class Relaxation(Structure, Thermodynamics, Forces, Calculation):
     """
     This table holds all data from a structure relaxation and also links to
     IonicStep table which holds all of the structure/energy/forces for each
@@ -163,7 +163,7 @@ class Relaxation(Structure, Thermodynamics, Calculation):
             # )
             return  # just exit
 
-        from simmate.calculators.vasp.outputs import Vasprun
+        from simmate.apps.vasp.outputs import Vasprun
 
         vasprun = Vasprun.from_directory(directory)
         self.update_from_vasp_run(vasprun)

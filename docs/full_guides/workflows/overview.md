@@ -2,7 +2,7 @@
 
 This module brings together all predefined workflows and organizes them by application for convenience.
 
-This module covers basic use, but more information is available in `simmate.workflow_engine.workflow`.
+This module covers basic use, but more information is available in `simmate.engine.workflow`.
 
 ------------------------------------------------------------
 
@@ -23,7 +23,7 @@ workflow.all_results  # --> gives all results for this relaxation preset
 df = workflow.all_results.to_dataframe()  # convert to pandas dataframe
 ```
 
-Further information on interacting with workflows can be found in the `simmate.workflow_engine` module as well -- particularly, the `simmate.workflow_engine.workflow` module.
+Further information on interacting with workflows can be found in the `simmate.engine` module as well -- particularly, the `simmate.engine.workflow` module.
 
 ------------------------------------------------------------
 
@@ -63,7 +63,7 @@ The `save` step is simply taking the result of the `execute` and saving it to a 
 
 All stages of a `Workflow` are done through the `run` or `run_cloud` methods. That is... `Workflow.run` = `configure` + `schedule` + `execute` + `save`.
 
-To begin building custom workflows, make sure you have completed [the getting-started tutorials](getting_started/) and then read through the `simmate.workflow_engine.workflow` documentation.
+To begin building custom workflows, make sure you have completed [the getting-started tutorials](getting_started/) and then read through the `simmate.engine.workflow` documentation.
 
 
 ### What is a `NestedWorkflow`?
@@ -79,14 +79,14 @@ Many workflows involve writing input files, calling some external program, and t
     1. `setup` = write input files
     2. `run_command_and_monitor` = the actual running & monitoring of the program
     3. `workup` = reading the output files
-- `Shell`: the calculator is called through the command-line (the actual `execution` call)
+- `Shell`: the program is called through the command-line (the actual `execution` call)
 - `Supervised`: once the shell command is started, Simmate runs in the background to monitor it for errors (occurs during the `execution` call)
 
 All stages of this S3 workflow are packed into the `excute` step of a `Workflow`, where Simmate has a lot of functionality built for you already.
 
 If you would like to build a custom S3 workflow, we suggest going through:
 1. [getting-started guides](/simmate/getting_started/overview/)
-2. `simmate.workflow_engine.workflow` documentation
-3. `simmate.workflow_engine.s3_workflow` documentation
+2. `simmate.engine.workflow` documentation
+3. `simmate.engine.s3_workflow` documentation
 
 ------------------------------------------------------------

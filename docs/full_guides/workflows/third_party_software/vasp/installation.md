@@ -2,10 +2,9 @@
 
 Official guides can be found on the VASP wiki [here](https://www.vasp.at/wiki/index.php/Installing_VASP.6.X.X). For example, there are clear [guides](https://www.vasp.at/wiki/index.php/Personal_computer_installation) for installing VASP onto your personal computer, such as VASP 6 on Ubuntu 22.04.
 
-
 ## VASP 5.4.4 on Ubuntu 22.04
 
-This guide is specifically for the Warren Lab as it requires build files that we share within the team. 
+This guide is specifically for the Warren Lab as it requires build files that we share within the team.
 
 To guarantee compatibility, we need to build all vasp dependencies by hand (for example, Ubuntu uses gcc v11 but vasp requires v9). For the Warren Lab, we have packaged everything in one zip file to make setup as simple as possible. Copy /media/synology/software/vasp/vasp.zip from WarWulf to your computer, such as your home directory (e.g. `/home/jacksund/`). This file is only 172.1MB, but will be over 9GB once we are finished installing vasp.
 

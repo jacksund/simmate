@@ -18,18 +18,16 @@ or
 [VaspWorkflow](https://jacksund.github.io/simmate/full_guides/workflows/third_party_software/vasp/overview/)
 """
 
-from simmate.calculators.vasp.error_handlers import (  # There are many more available too!
+from simmate.apps.vasp.error_handlers import (  # There are many more available too!
     Frozen,
     NonConverging,
     Unconverged,
     Walltime,
 )
-from simmate.calculators.vasp.inputs import Incar
-from simmate.calculators.vasp.inputs.potcar_mappings import (
-    PBE_ELEMENT_MAPPINGS_LOW_QUALITY,
-)
-from simmate.calculators.vasp.workflows.base import VaspWorkflow
-from simmate.workflow_engine import Workflow
+from simmate.apps.vasp.inputs import Incar
+from simmate.apps.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS_LOW_QUALITY
+from simmate.apps.vasp.workflows.base import VaspWorkflow
+from simmate.engine import Workflow
 
 # Import our tables from the other files.
 from .models import MyCustomTable1

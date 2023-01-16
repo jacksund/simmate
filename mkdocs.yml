@@ -33,6 +33,12 @@ theme:
       - navigation.tabs.sticky
       - content.code.annotate
 
+# Adding versioning tags to the website
+# extra:
+#   version:
+#     provider: mike
+#     default: stable
+# !!! https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/
 
 # For emojis, annotations, etc.
 markdown_extensions:
@@ -166,7 +172,7 @@ nav:
             - Creating Nested Workflows: full_guides/workflows/nested_workflows.md
             - Creating S3 Workflows: full_guides/workflows/s3_workflows.md
             - Third-party software: 
-                - What is a calculator?: full_guides/workflows/third_party_software/what_is_a_calculator.md
+                - What is an app?: full_guides/workflows/third_party_software/what_is_an_app.md
                 - VASP:
                     - Overview: full_guides/workflows/third_party_software/vasp/overview.md
                     - Installation: full_guides/workflows/third_party_software/vasp/installation.md

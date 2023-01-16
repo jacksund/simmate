@@ -25,7 +25,7 @@ class ASEFingerprint:
         from ase.ga.ofp_comparator import OFPComparator
 
         self.featurizer = OFPComparator(  # n_top=None, # atoms to optimize. None is all of them
-            # dE=1.0, # energy difference to be considered different (not used here b/c we dont have a calculator)
+            # dE=1.0, # energy difference to be considered different (not used here b/c we dont have a app)
             # cos_dist_max=5e-3, # cosine distance for structure to be considered different
             # rcut=20., # cutoff radius for the fingerprint
             # binwidth=0.05, # bin width (in Angstrom) over which fingerprints are discretized

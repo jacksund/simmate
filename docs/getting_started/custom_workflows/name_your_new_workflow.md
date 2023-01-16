@@ -32,7 +32,7 @@ For example, here's how a workflow name looks in different contexts:
 Simmate's naming conventions involves 3 parts:
 
 1.  The type of analysis the workflow is doing
-2.  The "calculator" (or program) that the workflow uses to run
+2.  The "app" (or program) that the workflow uses to run
 3.  A unique name to identify the settings used
 
 Examples for each part would be:
@@ -65,7 +65,7 @@ For example, our workflow names become:
 
 Now let's test this out in python using a similar workflow name:
 ``` python
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     pass  # we will build the rest of workflow later
@@ -77,7 +77,7 @@ my_workflow = Example__Python__MyFavoriteSettings
 # Now check that our naming convention works as expected
 assert my_workflow.name_full == "example.python.my-favorite-settings"
 assert my_workflow.name_type == "example"
-assert my_workflow.name_calculator == "python"
+assert my_workflow.name_app == "python"
 assert my_workflow.name_preset == "my-favorite-settings"
 ```
 

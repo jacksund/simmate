@@ -71,8 +71,29 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 **Enhancements**
 
+- add `relax_bulk` and `relax_endpoints` parameters to optionally turn off pre-relaxations in NEB
+- add CLEASE app for cluster expanison calculations (these workflows are highly experimental at the moment - so use with caution)
+- update "bad-elf" workflow to accept an empty-atom template structure or a list
+of empty sites
 - add python 3.11 support
 
+**Refactors**
+
+- `calculators` module is now the `apps` module and terminology is changed throughout the repo
+- many dependencies are reworked to optional dependencies as all `apps` are now optional
+- `workflow_engine` module has been renamed to `engine` to help shorten commands and import lines
+- rework CI to use mamba instead of conda
+- pull out dependencies for some apps that are now optional
+
+**Fixes**
+
+- fix site ordering in NEB supercell structures
+- improve installation speed and guide users to conda alternatives
+
+!!! warning
+    The refactoring of simmate "apps" led to many breaking changes in the python API.
+    We strongly recommend clearing your `~/simmate/` directory, especially the
+    `my_env-apps.yaml` file because app names have changed.
 
 --------------------------------------------------------------------------------
 

@@ -13,8 +13,3 @@ from simmate.database.base_data_types import (
     Relaxation,
     StaticEnergy,
 )
-from simmate.toolkit.structure_prediction.evolution.database import (
-    ChemicalSystemSearch,
-    FixedCompositionSearch,
-    SteadystateSource,
-)

@@ -8,7 +8,7 @@
 Build your workflow name using the Simmate conventions and run some checks to
 make sure everything works as expected:
 ``` python
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     pass  # we will build the rest of workflow later
@@ -20,7 +20,7 @@ my_workflow = Example__Python__MyFavoriteSettings
 # Now check that our naming convention works as expected
 assert my_workflow.name_full == "example.python.my-favorite-settings"
 assert my_workflow.name_type == "example"
-assert my_workflow.name_calculator == "python"
+assert my_workflow.name_app == "python"
 assert my_workflow.name_preset == "my-favorite-settings"
 ```
 
@@ -39,7 +39,7 @@ requirement is that you place that code inside a `run_config` method of a
 new subclass for `Workflow`:
 
 ``` python
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -140,7 +140,7 @@ in the [Parameters](/parameters/) section.
 
 ``` python
 from simmate.toolkit import Structure
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -165,18 +165,14 @@ class Example__Python__MyFavoriteSettings(Workflow):
 
 ## Writing output files
 
-Of all the default parameters (described above), you'll most like get the most
-from using the `directory` input. It is important to note that
- `directory` is given as a 
-[`pathlib.Path`](https://docs.python.org/3/library/pathlib.html) object. Just
-add directory to your run_config() method and then use the object that's provided.
+Of all the default parameters (described above), you'll likely get the most from using the `directory` input. It is important to note that `directory` is given as a [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html) object. Just add the directory to your run_config() method and use the object that's provided.
 
 For example, this workflow will write an output file to 
 `simmate-task-12345/my_output.txt` (where the `simmate-task-12345` folder is
 automatically set up by Simmate).
 
 ``` python
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -203,13 +199,13 @@ class Example__Python__MyFavoriteSettings(Workflow):
 
 ## Building from existing workflows
 
-For many calculators, there are workflow classes that you
+For many apps, there are workflow classes that you
 can use as a starting point. For example, VASP users can inherit from the
 `VaspWorkflow` class, which includes many features built-in:
 
 === "basic VASP example"
     ``` python
-    from simmate.calculators.vasp.workflows.base import VaspWorkflow
+    from simmate.apps.vasp.workflows.base import VaspWorkflow
     
     class Relaxation__Vasp__MyExample1(VaspWorkflow):
     
@@ -227,11 +223,11 @@ can use as a starting point. For example, VASP users can inherit from the
 
 === "full-feature VASP example"
     ``` python
-    from simmate.calculators.vasp.workflows.base import VaspWorkflow
-    from simmate.calculators.vasp.inputs.potcar_mappings import (
+    from simmate.apps.vasp.workflows.base import VaspWorkflow
+    from simmate.apps.vasp.inputs.potcar_mappings import (
         PBE_ELEMENT_MAPPINGS,
     )
-    from simmate.calculators.vasp.error_handlers import (
+    from simmate.apps.vasp.error_handlers import (
         Frozen,
         NonConverging,
         Unconverged,
@@ -293,9 +289,8 @@ can use as a starting point. For example, VASP users can inherit from the
         # add your advanced logic to determine the keyword value.
         return structure.num_sites * example_mod_input
     
-    
     # STEP 2: register modifier with the Incar class
-    from simmate.calculators.vasp.inputs import Incar
+    from simmate.apps.vasp.inputs import Incar
     Incar.add_keyword_modifier(keyword_modifier_multiply_nsites)
     
     # STEP 3: use your new modifier with any parameter you'd like
@@ -310,8 +305,7 @@ can use as a starting point. For example, VASP users can inherit from the
         reset every time a new python session starts. Therefore, we recommend 
         keeping your modifer in the same file that you define your workflow in.
 
-Further, can use python inheritance to borrow utilities and settings from an
-existing workflow:
+Further, can use python inheritance to borrow utilities and settings from an existing workflow:
 
 ``` python
 from simmate.workflows.utilities import get_workflow

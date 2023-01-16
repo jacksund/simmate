@@ -37,6 +37,10 @@ conda install -c conda-forge -n my_env simmate
 
 This may take a few minutes to run and install. But once it's done, you've now successfully installed Simmate! If you ran into any errors with this very last command, please let our team know immediately by [posting a new issue here](https://github.com/jacksund/simmate/issues/).
 
+!!! tip
+    If your installation is extremely slow (>20 minutes), you may want to read through
+    our ["Speed-up your installation" section](/getting_started/installation/quick_start/#speed-up-your-installation).
+
 ----------------------------------------------------------------------
 
 ## 4. Install Spyder

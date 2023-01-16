@@ -17,7 +17,7 @@ Load the structure into python and then write it to another file format:
 ```python
 from simmate.toolkit import Structure
 structure = Structure.from_file("POSCAR")
-structure.to("cif", "NaCl.cif")
+structure.to(filename="NaCl.cif", fmt="cif")
 ```
 
 The `Structure` class (aka a `ToolkitStructure`) provides many extra properties and methods, so nearly all functions in Simmate use it as an input. This includes running workflows like we did in the previous tutorial. All available workflows can be loaded from the `simmate.workflows` module:

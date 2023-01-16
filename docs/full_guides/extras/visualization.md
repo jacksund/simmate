@@ -2,7 +2,7 @@
 Simmate Visualization
 ---------------------
 
-This module helpd create plots and 3D models for visualizing data and structures. This ment to be an extension of the `pymatgen.ext` module.
+This module helps create plots and 3D models for visualizing data and structures. This is meant to be an extension of the `pymatgen.ext` module.
 
 NOTE: Currently, this module only creates 3D models for `Structure` objects usings [Blender](https://www.blender.org/), whereas other functionality is still under planning/development.
 

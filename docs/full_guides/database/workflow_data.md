@@ -3,11 +3,9 @@
 
 Much like the `simmate.workflows` module, this module brings together all database tables that are linked to workflows and organizes them by application for convenience.
 
-
 ----------------------------------------------------------------------
 
 ## Loading results
-
 
 [The getting-started tutorials](/getting_started/overview/) will teach you how to run workflows and access their results. But as a review:
 
@@ -38,7 +36,7 @@ MITStaticEnergy.objects.filter(...)
 
 ## Location of Each Table's Source-code
 
-The code that defines these tables are located in the corresponding `simmate.calculators` module. We make tables accessible here because users often want to search for results by application -- not by their calculator name. For example, the results from all static energy calculations that use VASP under MIT project settings can be imported with...
+The code that defines these tables are located in the corresponding `simmate.apps` module. We make tables accessible here because users often want to search for results by technique -- not by their app name. For example, the results from all static energy calculations that use VASP under MIT project settings can be imported with...
 
 ``` python
 from simmate.database.workflow_results import MITStaticEnergy
@@ -47,7 +45,7 @@ from simmate.database.workflow_results import MITStaticEnergy
 Alternatively, this same database table could have been imported with...
 
 ``` python
-from simmate.calculators.vasp.database.energy import MITStaticEnergy
+from simmate.apps.vasp.database.energy import MITStaticEnergy
 ```
 
 ----------------------------------------------------------------------

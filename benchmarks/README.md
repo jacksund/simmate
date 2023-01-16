@@ -8,7 +8,7 @@ This page gives an overview of alternatives to Simmate and also benchmarks some 
 3. [Database](#database)
 4. [Workflow Engine](#workflow-engine)
 5. [Workflow Library](#workflow-library)
-6. [Calculators](#calculators)
+6. [Apps](#apps)
 
 There are always new programs being developed and new features being added to Simmate, so our comparisons and benchmarks may not be up to date. If you would like us to mention a software or benchmark a new feature, let us know!
 
@@ -24,8 +24,8 @@ Component | Materials Project | Simmate
 ------------ | ------------- | -------------
 Defining and submitting workflows | [fireworks](https://github.com/materialsproject/fireworks) | [prefect](https://github.com/PrefectHQ/prefect)
 MatSci workflow library | [atomate](https://github.com/hackingmaterials/atomate) | our `workflows` module
-Tasks & Error handling | [custodian](https://github.com/materialsproject/custodian) | our `workflow_engine` module
-IO to different programs | [pymatgen.io](https://github.com/materialsproject/pymatgen) | our `calculators` module
+Tasks & Error handling | [custodian](https://github.com/materialsproject/custodian) | our `engine` module
+IO to different programs | [pymatgen.io](https://github.com/materialsproject/pymatgen) | our `apps` module
 Database backend | [MongoDB](https://github.com/mongodb/mongo-python-driver) | any engine supported by [django](https://github.com/django/django)
 Database API | [emmet](https://github.com/materialsproject/emmet) | our `database.base_data_types` module 
 Web API | [mapidoc](https://github.com/materialsproject/mapidoc) | built dynamically by our `website` module
@@ -40,7 +40,7 @@ In addition to the Materials Project, there are many other organizations (the AF
 
 1. Simmate is an all-in-one package while others break-up their components
     - This is much more beginner-friendly and helps non-coders understand advanced features without jumping between several github repos and api pages.
-    - When building new packages off of Simmate, we favor building features as custom apps that easily be incorporated to our source-code (as calculators). This is very different from (and easier than) building a new package entirely -- like you'd do with other ecosystems.
+    - When building new packages off of Simmate, we favor building features as custom apps that easily be incorporated to our source-code (as individual apps). This is very different from (and easier than) building a new package entirely -- like you'd do with other ecosystems.
 
 2. Simmate prefers the use of large-scale popular packages over custom implementations
     - Whereas other ecosystems write workflow managers and task distribution from scratch, we uses popular packages like Prefect, Dask, and Django. This greatly facilitates the addition of new features while also enabling best-practices with the communities outside of materials science.
@@ -111,12 +111,12 @@ The `simmate.database` module is an independent implementation that builds off o
 
 ## Workflow Engine
 
-The `simmate.workflow_engine` module builds off of Prefect where a lot of the core functionality is inspired by [fireworks](https://github.com/materialsproject/fireworks) and [custodian](https://github.com/materialsproject/custodian).
+The `simmate.engine` module builds off of Prefect where a lot of the core functionality is inspired by [fireworks](https://github.com/materialsproject/fireworks) and [custodian](https://github.com/materialsproject/custodian).
 
-### `workflow_engine.s3task` alternatives
+### `engine.s3task` alternatives
 - [custodian](https://github.com/materialsproject/custodian)
 
-### `workflow_engine.workflow` alternatives
+### `engine.workflow` alternatives
 - [fireworks](https://github.com/materialsproject/fireworks)
 - [aiida-core](https://github.com/aiidateam/aiida-core)
 
@@ -133,11 +133,11 @@ The `simmate.workflows` module is an independent implementation of materials sci
 
 </br>
 
-## Calculators
+## Apps
 
-The `simmate.calculators` module is an independent implementation of materials science workflows where much of our inspiration comes from [pymatgen.io](https://github.com/hackingmaterials/atomate) and [ase.calculators](). In several cases, we use some of pymatgen/ase functions directly in our module -- serving as a placeholder until we refactor/fork the their implementation.
+The `simmate.apps` module is an independent implementation of materials science workflows where much of our inspiration comes from [pymatgen.io](https://github.com/hackingmaterials/atomate) and [ase.calculators](). In several cases, we use some of pymatgen/ase functions directly in our module -- serving as a placeholder until we refactor/fork the their implementation.
 
-### `calculators` alternatives
+### `apps` alternatives
 - [pymatgen.io](https://pymatgen.org/pymatgen.io.html)
 - [ase.calculators](https://github.com/rosswhitfield/ase/tree/master/ase/calculators)
 

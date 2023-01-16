@@ -72,9 +72,9 @@ from .example_submodule.example_5 import Example__Python__MyExample5
 !!! example
     If you prefer to learn by example, you can take a look at Simmate's built-in
     `Vasp` app. The `workflows` module of this app is located 
-    [here](https://github.com/jacksund/simmate/tree/main/src/simmate/calculators/vasp/workflows).
+    [here](https://github.com/jacksund/simmate/tree/main/src/simmate/apps/vasp/workflows).
     You can also see how our `workflows/__init__.py` file lists out all of our
-    workflows that are registered ([here](https://github.com/jacksund/simmate/blob/main/src/simmate/calculators/vasp/workflows/__init__.py))).
+    workflows that are registered ([here](https://github.com/jacksund/simmate/blob/main/src/simmate/apps/vasp/workflows/__init__.py))).
 
 -------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-The DeePMD Calculator
+The DeePMD App
 --------------------
 
 The Deep Potential for Molecular Dynamics (DeePMD) is a package that builds machine-learned interatomic potentials from energy and force-field data. These machine-learned potentials are particularlly powerful when trained on DFT data and then subsequently used to run molecular dynamics simulations.

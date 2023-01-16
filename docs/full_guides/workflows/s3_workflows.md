@@ -43,7 +43,7 @@ and this entire process of supervising, staging, and shell execution is done for
 
 ----------------------------------------------------------------------
 
-## S3Workflows for common Calculators
+## S3Workflows for common programs
 
 For programs that are commonly used in material science, you should also read
 through their guides in the "Third-party Software" section. If your program is
@@ -57,7 +57,7 @@ workflows.
 
 !!! tip
     Before starting a custom `S3Workflow`, make sure you have read the section 
-    above this (on S3Workflows for common Calculators like VASP). You should also 
+    above this (on S3Workflows for common programs like VASP). You should also 
     have gone through the guides on building a custom `Workflow`.
 
 
@@ -74,7 +74,7 @@ As an example, let's just use the command `echo` to print something:
     
 ``` python
 
-from simmate.workflow_engine import S3Workflow
+from simmate.engine import S3Workflow
 
 class Example__Echo__SayHello(S3Workflow):
     use_database = False  # we aren't using a custom table for now
@@ -97,7 +97,7 @@ Here, we need to update our `setup` and `workup` methods:
 
 ``` python
 
-from simmate.workflow_engine import S3Workflow
+from simmate.engine import S3Workflow
 
 class Example__Echo__SayHello(S3Workflow):
     
@@ -141,13 +141,13 @@ There are a two important things to note here:
     - Custom `workup` methods require the `directory` input paramter
 2. It's optional to set/overwrite attributes. You can also add new ones too.
 
-Note: S3Workflows for a custom calculator (such `VaspWorkflow` for VASP)
+Note: S3Workflows for a commonly used program (such `VaspWorkflow` for VASP)
 will often have custom `setup` and `workup` methods already defined for you.
 You can update/override these as you see fit.
 
 For a full (and advanced) example of a subclass take a look at
-`simmate.calculators.vasp.workflows.base.VaspWorkflow` and the tasks that use it like
-`simmate.calculators.vasp.workflows.relaxation.matproj`.
+`simmate.apps.vasp.workflows.base.VaspWorkflow` and the tasks that use it like
+`simmate.apps.vasp.workflows.relaxation.matproj`.
 
 
 ### Custom error handling

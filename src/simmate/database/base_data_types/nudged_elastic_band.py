@@ -6,7 +6,7 @@ from pymatgen.analysis.transition_state import NEBAnalysis
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-from simmate.calculators.vasp.outputs import Vasprun
+from simmate.apps.vasp.outputs import Vasprun
 from simmate.database.base_data_types import Calculation, Structure, table_column
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.toolkit.diffusion import MigrationHop as ToolkitMigrationHop
@@ -97,7 +97,7 @@ class DiffusionAnalysis(Structure, Calculation):
         """
 
         # I assume the directory is from a vasp calculation, but I need to update
-        # this when I begin adding new calculators.
+        # this when I begin adding new apps.
 
         # For now, I only grab the structure from the static-energy and store
         # it in the DiffusionAnalysis table.
@@ -112,6 +112,8 @@ class DiffusionAnalysis(Structure, Calculation):
                 "Unable to detect 'static-energy' directory and therefore unable "
                 "to determine the bulk structure used for this analysis."
             )
+            # TODO: try grabbing the bulk input structure from the metadata
+            # file.
 
         bulk_filename = static_energy_dir / "POSCAR"
         bulk_structure = ToolkitStructure.from_file(bulk_filename)
@@ -268,7 +270,10 @@ class MigrationHop(Calculation):
     def write_migration_images(self, directory: Path):
         migration_images = self.get_migration_images()
         structure_sum = migration_images.get_sum_structure()
-        structure_sum.to("cif", directory / "simmate_path_relaxed_neb.cif")
+        structure_sum.to(
+            filename=str(directory / "simmate_path_relaxed_neb.cif"),
+            fmt="cif",
+        )
 
     # TODO:
     # image_start --> OneToOneField for specific MigrationHop
@@ -333,14 +338,16 @@ class MigrationHop(Calculation):
         if not vasprun_filename.exists():
             raise Exception("Only VASP outputs are supported for NEB")
 
-        from simmate.calculators.vasp.outputs import Vasprun
+        from simmate.apps.vasp.outputs import Vasprun
 
         vasprun = Vasprun.from_directory(directory)
-        self.update_from_neb_toolkit(vasprun.neb_results)
+        self.update_from_neb_toolkit(vasprun)
 
     @classmethod
-    def from_vasp_run(cls, vasprun: Vasprun):
-        return cls.from_neb_toolkit(neb_results=vasprun.neb_results)
+    def from_vasp_run(cls, vasprun: Vasprun, **kwargs):
+        # BUG: the input here is actually already an NEBAnalysis
+        # see the Vasprun.from_directory method
+        return cls.from_neb_toolkit(neb_results=vasprun)
 
     @classmethod
     def from_neb_toolkit(cls, neb_results: NEBAnalysis):

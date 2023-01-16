@@ -11,7 +11,7 @@
 Simmate defines a base `Workflow` class to help with common material science analyses. The simplest possible workflow can look something like...
 
 ``` python
-from simmate.workflow_engine import Workflow
+from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     # Note, the long name of this workflow class is important!

@@ -51,7 +51,7 @@ base_times = run_trials(run_popen, ntrials)
 
 # a task written with Simmate and 3 dummy error handlers
 
-from simmate.workflow_engine import ErrorHandler, S3Task
+from simmate.engine import ErrorHandler, S3Task
 
 
 class AlwaysPassesHandler(ErrorHandler):

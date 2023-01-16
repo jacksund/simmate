@@ -8,28 +8,28 @@
 Accessing and analyzing data typically involves the following steps:
 
 1. Connect to your database
-2. Load your database table
-3. Query and filter data
-4. Convert data to desired format
+2. Load a specific database table
+3. Filter data
+4. Convert data to a desired format
 5. Modify data via `simmate.toolkit` or [pandas.Dataframe](https://pandas.pydata.org/)
 
-The sections below will guide you on performing each of these steps. But to place everything up-front, your final script may look something like this:
+The sections below will guide you on performing each step. But to place everything up-front, your final script may look like this:
 
 ``` python
 # Connect to your database
 from simmate.database import connect
 
-# Load your database table
+# Load a specific database table
 from simmate.database.third_parties import MatprojStructure
 
-# Query and filter data
+# Filter data
 results = MatprojStructure.objects.filter(
     nsites=3,
     is_gap_direct=False,
     spacegroup=166,
 ).all()
 
-# Convert data to desired format
+# Convert data to a desired format
 structures = results.to_toolkit()
 dataframe = results.to_dataframe()
 
@@ -52,7 +52,7 @@ from simmate.database import connect
 from simmate.database.workflow_results import MITStaticEnergy
 ```
 
-If this is not done, you will recieve the following error:
+If the `connect` step is not done, you will recieve the following error:
 
 ``` python
 ImproperlyConfigured: Requested setting INSTALLED_APPS, but settings are not
@@ -64,31 +64,30 @@ or call settings.configure() before accessing settings.
 
 ## Load your database table
 
-The location of your table will depend on what data you're trying to access. To search, you can explore the other modules within this one (see top of this page where there are list). 
+The name of your table will depend on the source you're trying to access. To see the available sources (Materials Project, OQMD, Jarvis, COD), you can explore the contents the [database/third_parties](https://github.com/jacksund/simmate/blob/main/src/simmate/database/third_parties/__init__.py) module.
 
 Using Materials Project as an example, we can load the table using...
 ``` python
 from simmate.database.third_parties import MatprojStructure
 ```
 
-If you are accessing data from a specific workflow, then in addition to loading from the `workflow_results` module, most workflows have a `database_table` attribute that let you access the table as well:
+Alternatively, if you intend to access data from a specific workflow, there are two methods to access the table. in addition to loading from the `workflow_results` module, most workflows have a `database_table` attribute that let you access the table as well:
 
 ``` python
-# There are two ways to load a table from calculation results...
+########## METHOD 1 ########
 
-######## METHOD 1 ########
 from simmate.workflows.static_energy import mit_workflow
 
 table = mit_workflow.database_table
 
 
 ######## METHOD 2 ########
+
 from simmate.database import connect
 from simmate.database.workflow_results import MITStaticEnergy
 
-
-# This line proves these tables are the same! In practice, you only need to
-# load the table via one of these two methods -- whichever you prefer.
+# The line below shows that these tables are the same! Therfore, use
+# whichever method you prefer.
 assert table == MITStaticEnergy
 ```
 
@@ -96,7 +95,7 @@ assert table == MITStaticEnergy
 
 ## Query and filter data
 
-Simmate uses Django ORM under the hood, so it follows [the same API for making queries](https://docs.djangoproject.com/en/4.0/topics/db/queries/). Below we reiterate the most basic functionality, but full features are discussed in the [Django's Model-layer documentation](https://docs.djangoproject.com/en/4.0/#the-model-layer).
+To query a table, Simmate inherits methods from Django, which is a web framework for quering massive datasets. It is powerful and efficient, and is therefore used to deliver data to many familiar websites, such as Instagram and Spotify. The key feature of Django that we use is its Object-Relational Mapper (ORM). The ORM allows us to use a simple language for making complex queries to our database. Below, we show some common queries. A full description of all query methods is discussed on [Django's query page](https://docs.djangoproject.com/en/4.0/topics/db/queries/).
 
 All rows of the database table are available via the `objects` attribute:
 ``` python
@@ -119,7 +118,14 @@ MITStaticEnergy.objects.filter(
 
 To filter rows based on conditions, chain the column name with two underscores. Conditions supported are listed [here](https://docs.djangoproject.com/en/4.0/ref/models/querysets/#field-lookups), but the most commonly used ones are:
 
-- `contains`, `in`, `gt`, `gte`, `lt`, `lte`, `range`, `isnull`
+- `contains` = contains text, case-sensitive query
+- `icontains`= contains text, case-insensitive query
+- `gt` = greater than
+- `gte` =  greater than or equal to
+- `lt` = less than
+- `lte` = less than or equal to
+- `range` = provides upper and lower bound of values
+- `isnull` = returns `True` if the entry does not exist
 
 An example query with conditional filters:
 ``` python
@@ -140,11 +146,13 @@ Note, for the filtering condition `elements__icontains`, we used some odd quotat
 
 By default, Django returns your query results as a `queryset` (or `SearchResults` in simmate). This is a list of database objects. It is more useful to convert them to a pandas dataframe or to toolkit objects.
 ``` python
-# Gives a pandas dataframe
+# Gives a pandas dataframe.
 df = MITStaticEnergy.objects.filter(...).to_dataframe()
 
 # Gives a list of toolkit Structure objects
 df = MITStaticEnergy.objects.filter(...).to_toolkit()
+
+# '...' are the set of filters selected from above.
 ```
 
 ----------------------------------------------------------------------

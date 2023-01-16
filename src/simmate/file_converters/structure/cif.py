@@ -16,7 +16,7 @@ from simmate.toolkit import Structure
 initial_structure = Structure.from_file("example.cif")
 
 # write a cif file
-initial_structure.to("cif", "my_new_file.cif")
+initial_structure.to(filename="my_new_file.cif", fmt="cif")
 
 ```
 

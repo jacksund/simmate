@@ -577,7 +577,7 @@ The number of images (or structures) to use in the analysis. This does NOT inclu
     ```
 
 !!! danger
-    For calculators such as VASP, your `command` parameter must use a number of cores that is divisible by `nimages`. For example, `nimages=3` and `command="mpirun -n 10 vasp_std > vasp.out"` will fail because 10 is not divisible by 3.
+    For apps such as VASP, your `command` parameter must use a number of cores that is divisible by `nimages`. For example, `nimages=3` and `command="mpirun -n 10 vasp_std > vasp.out"` will fail because 10 is not divisible by 3.
 
 --------------------------
 
@@ -633,6 +633,44 @@ to stop unique pathway finding when 1D percolation is achieved.
 === "python"
     ``` python
     percolation_mode = "1d"
+    ```
+
+--------------------------
+
+## relax_bulk
+Whether or not the bulk structure (typically the input structure) should be 
+relaxed before running the rest of the workflow.
+
+=== "yaml"
+    ``` yaml
+    relax_bulk: false
+    ```
+=== "toml"
+    ``` toml
+    relax_bulk: false
+    ```
+=== "python"
+    ``` python
+    relax_bulk: false
+    ```
+
+--------------------------
+
+## relax_endpoints
+Whether or not the endpoint structures for an NEB diffusion pathway should be 
+relaxed before running the rest of the workflow.
+
+=== "yaml"
+    ``` yaml
+    relax_endpoints: false
+    ```
+=== "toml"
+    ``` toml
+    relax_endpoints: false
+    ```
+=== "python"
+    ``` python
+    relax_endpoints: false
     ```
 
 --------------------------

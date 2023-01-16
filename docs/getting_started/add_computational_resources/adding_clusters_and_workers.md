@@ -24,7 +24,7 @@ This schedules your workflow, but it won't run yet. It is simply sitting in the 
 
 Whereever you'd like to run the workflow, start a worker with:
 ``` bash
-simmate workflow-engine start-singleflow-worker
+simmate engine start-singleflow-worker
 ```
 
 !!! danger
@@ -38,14 +38,14 @@ When you run this "singleflow" worker, you'll notice that the Worker will start,
 
 However, if you would like more control over how many workflows are ran or even run a worker endlessly, you can use the command:
 ``` bash
-simmate workflow-engine start-worker
+simmate engine start-worker
 ```
 
 If your team runs many mini workflows that are under 5 minutes, starting/stopping workers could be a pain (sometimes it can take simmate up to 10 seconds to set everything up). That's a significant overhead and wasted computation time. 
 
 To overcome this, we would run a worker that shuts down after 10 workflows or if the queue is empty:
 ``` bash
-simmate workflow-engine start-worker --nitems-max 10 --close-on-empty-queue
+simmate engine start-worker --nitems-max 10 --close-on-empty-queue
 ```
 
 -------------------------------------------------------------------------------
@@ -55,7 +55,7 @@ simmate workflow-engine start-worker --nitems-max 10 --close-on-empty-queue
 If you need to start many workers at once, you can use the `start-cluster` command as well.
 ``` bash
 # starts 5 local workers
-simmate workflow-engine start-cluster 5
+simmate engine start-cluster 5
 ```
 
 -------------------------------------------------------------------------------

@@ -32,6 +32,6 @@ structure.to(fmt="poscar", filename="POSCAR")
 
 ## Other Converters
 
-This module does not host all file-converters that Simmate has. Others can be found in the `calculators` module, where they are associated with a specific program. For example, the converter for POSCAR files is directly from the VASP software -- therefore, you can find the POSCAR converter in the `vasp.inputs.poscar` module. Here is a list of other structure converters for reference: 
+This module does not host all file-converters that Simmate has. Others can be found in the `apps` module, where they are associated with a specific program. For example, the converter for POSCAR files is directly from the VASP software -- therefore, you can find the POSCAR converter in the `vasp.inputs.poscar` module. Here is a list of other structure converters for reference: 
 
-- POSCAR (`simmate.calculators.vasp.inputs.poscar`)
+- POSCAR (`simmate.apps.vasp.inputs.poscar`)

@@ -21,12 +21,12 @@ import pytest
 from django.contrib.auth.models import User
 from typer.testing import CliRunner
 
-from simmate.calculators.vasp.inputs import Potcar
+from simmate.apps.vasp.inputs import Potcar
 from simmate.database.base_data_types import Spacegroup
+from simmate.engine import S3Workflow
 from simmate.toolkit import Composition, Structure, base_data_types
 from simmate.utilities import get_directory
 from simmate.website.test_app.models import TestStructure
-from simmate.workflow_engine import S3Workflow
 
 COMPOSITIONS_STRS = [
     "Fe1",
