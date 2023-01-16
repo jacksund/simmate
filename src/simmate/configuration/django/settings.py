@@ -200,7 +200,7 @@ DEFAULT_SIMMATE_APPS = [
     "simmate.workflows.configs.BaseWorkflowsConfig",
     "simmate.apps.configs.VaspConfig",
     "simmate.apps.configs.BaderConfig",
-    "simmate.apps.configs.CleaseConfig",
+    # "simmate.apps.configs.CleaseConfig",
     "simmate.apps.configs.EvolutionConfig",
 ]
 APPLICATIONS_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-apps.yaml"

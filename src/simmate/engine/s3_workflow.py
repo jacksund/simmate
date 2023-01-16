@@ -272,7 +272,11 @@ class S3Workflow(Workflow):
         pass
 
     @classmethod
-    def _check_input_files(cls, directory: Path, raise_if_missing: bool = True):
+    def _check_input_files(
+        cls,
+        directory: Path,
+        raise_if_missing: bool = True,
+    ):
         """
         Make sure that there are the proper input files to run this calc
         """
@@ -541,7 +545,11 @@ class S3Workflow(Workflow):
         return corrections
 
     @staticmethod
-    def _terminate_job(directory: Path, process: subprocess.Popen, command: str):
+    def _terminate_job(
+        directory: Path,
+        process: subprocess.Popen,
+        command: str,
+    ):
         """
         Stopping the command we submitted can be a tricky business if we are running
         scripts in parallel (such as using mpirun). Different computers and OSs
@@ -592,18 +600,18 @@ class S3Workflow(Workflow):
         # which is also passed on to all child processes.
         # This command also doesn not work on windows, so I need to address this
         # as well.
-        if operating_system != "Windows":
-            os.killpg(os.getpgid(process.pid), signal.SIGKILL)
-        # note: SIGTERM is the normal signal but I use SIGKILL to try to address
-        # permission errors.
-        else:
-            try:
+        try:
+            if operating_system != "Windows":
+                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+            # note: SIGTERM is the normal signal but I use SIGKILL to try to address
+            # permission errors.
+            else:
                 process.terminate()
-            except ProcessLookupError:
-                # This is a bug in the CI where a command fails BEFORE the terminate
-                # call even reaches it. The call has ended though, so we can
-                # simply move on with our code.
-                pass
+        except ProcessLookupError:
+            # This is a bug in the CI where a command fails BEFORE the terminate
+            # call even reaches it. The call has ended though, so we can
+            # simply move on with our code.
+            pass
 
         # As an example of an alternative approach to killing a job, here is
         # what Custodian (Materials Project) tries when killing a VASP job
