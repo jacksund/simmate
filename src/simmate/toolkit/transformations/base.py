@@ -154,6 +154,7 @@ class Transformation:
         structures,  # either a structure or list of structures. Depends on ninput.
         validators=[],
         max_attempts=100,
+        **kwargs,
     ):
 
         # Until we get a new valid structure (or run out of attempts), keep trying
@@ -166,7 +167,7 @@ class Transformation:
             attempt += 1
 
             # make a new structure
-            new_structure = self.apply_transformation(structures)
+            new_structure = self.apply_transformation(structures, **kwargs)
 
             # check to see if the structure passes all validation checks.
             if new_structure:
