@@ -16,6 +16,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
         structure: Structure,
         directory: Path,
         temperature_list: list[int] = [300, 750, 1200],
+        relax_start_structure: bool = True, 
         relax_kwargs: dict = {},
         md_kwargs: dict = {},
         deepmd_settings: dict =  {},
@@ -23,23 +24,27 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
     ):
 
         # get relaxed structure
-        relax_workflow = get_workflow(
-            "relaxation.vasp.mit"
-        )  #!!!set to higher quality or allow quality to be set by user
-        state = relax_workflow.run(
-            structure=structure,
-            directory=directory / relax_workflow.name_full,
-            **relax_kwargs,
-        )
-        relax_result = state.result()
+        if relax_start_structure:
+            relax_workflow = get_workflow(
+                "relaxation.vasp.mit"
+            )  #!!!set to higher quality or allow quality to be set by user
+            state = relax_workflow.run(
+                structure=structure,
+                directory=directory / relax_workflow.name_full,
+                **relax_kwargs,
+            )
+            start_struct = state.result()
+        else:
+            start_struct = structure 
 
         # submit each md run to cloud to run in parallel
         md_workflow = get_workflow("dynamics.vasp.mit")
         submitted_states = []
         for temperature in temperature_list:
-
+            
+            #use run cloud to run dynamics in parallel 
             state = md_workflow.run_cloud(
-                structure=relax_result,
+                structure=start_struct,
                 temperature_start=temperature,
                 temperature_end=temperature,  # constant temp for entire run
                 **md_kwargs,
