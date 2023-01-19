@@ -29,7 +29,9 @@ from .population_analysis import (
 )
 from .relaxation import (
     Relaxation__Vasp__Matproj,
+    Relaxation__Vasp__MatprojPbesol,
     Relaxation__Vasp__MatprojHse,
+    Relaxation__Vasp__MatprojHsesol,
     Relaxation__Vasp__MatprojMetal,
     Relaxation__Vasp__MatprojScan,
     Relaxation__Vasp__Mit,
