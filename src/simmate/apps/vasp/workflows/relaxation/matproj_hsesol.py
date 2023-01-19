@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.vasp.workflows.relaxation.matproj_hse import Relaxation__Vasp__MatprojHse
+from simmate.apps.vasp.workflows.relaxation.matproj_hse import (
+    Relaxation__Vasp__MatprojHse,
+)
 
 
 class Relaxation__Vasp__MatprojHsesol(Relaxation__Vasp__MatprojHse):
@@ -15,8 +17,4 @@ class Relaxation__Vasp__MatprojHsesol(Relaxation__Vasp__MatprojHse):
     description_doc_short = "based on pymatgen's MPHSERelaxSet"
 
     incar = Relaxation__Vasp__MatprojHse.incar.copy()
-    incar.update(
-        dict(
-            GGA="PS"#Tells VASP to use PBEsol instead of base PBE
-        )
-    )
+    incar.update(dict(GGA="PS"))  # Tells VASP to use PBEsol instead of base PBE
