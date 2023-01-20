@@ -100,3 +100,97 @@ def chunk_list(full_list: list, chunk_size: int) -> list:
     """
     for i in range(0, len(full_list), chunk_size):
         yield full_list[i : i + chunk_size]
+
+
+def str_to_datatype(
+        parameter: str, 
+        value: str,
+        type_mappings: dict = {
+            "bool_keys": tuple(),
+            "float_keys": tuple(),
+            "int_keys": tuple(),
+            "int_list_keys": tuple(),
+            "float_list_keys": tuple(),
+            "vector_list_keys": tuple(),
+        },
+        # OPTIMIZE -- I should set these elsewhere so that these lists are not
+        # initialized every time I call this function. Maybe have a dictionary
+        # of {Parameter: Value_datatype} in the main enviornment for use.
+    ):
+    """
+    When given a parameter name and it's value as a string, this helper
+    function will use the key (parameter) to determine how to convert the
+    val string to the proper python datatype (int, float, bool, list...).
+    A full mapping of parameters should be provided, but if a parameter is
+    given that isn't mapped, the value will be leave left as a string.
+    
+    This is often ment to read to/from non-standard parameter file formats.
+    For example, VASP's INCAR does not follow any standard (yaml, toml, json, 
+    etc.) so this function helps read values into python types.
+    """
+
+    # If the value is not a string, then assume we are already in the
+    # correct format. Note, an incorrect format will throw an error
+    # somewhere below, which may be tricky for beginners to traceback.
+    if not isinstance(value, str):
+        return value
+
+    # if the parameter is in int_keys
+    if parameter in int_keys:
+        # sometimes "1." was written to indicate an integer so check for
+        # this and remove it if needed.
+        if value[-1] == ".":
+            value = value[:-1]
+        # return the value integer
+        return int(value)
+
+    # if the parameter is in float_keys, we convert value to a float
+    elif parameter in float_keys:
+        # return the value float
+        return float(value)
+
+    # if the parameter is in bool_keys
+    elif parameter in bool_keys:
+        # Python is weird where bool("FALSE") will return True... So I need
+        # to convert the string to lowercase and read it to know what to
+        # return here.
+        if "t" in value.lower():
+            return True
+        elif "f" in value.lower():
+            return False
+
+    # if the parameter is in vector_list_keys
+    # These vectors are always floats
+    elif parameter in vector_list_keys:
+        # convert a string of...
+        #   "x1 y1 z1 x2 y2 z2 x3 y3 z3"
+        # to...
+        #   [x1,y1,z1,x2,y2,z2,x3,y3,z3] (list of floats)
+        # and then to...
+        #   [[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]
+        value = [float(item) for item in value.split()]
+        return [value[i : i + 3] for i in range(0, len(value), 3)]
+
+    # if the parameter is in float_list_keys
+    elif parameter in float_list_keys:
+        final_list = []
+        for item in value.split():
+            # Sometimes, the values are given as "3*0.1 2*0.5" where the "*"
+            # means to include that value that many times. For example, this
+            # input would be the same as "0.1 0.1 0.1 0.5 0.5". We need to
+            # account for this when parsing.
+            if "*" in item:
+                nsubitems, subitem = item.split("*")
+                for n in range(int(nsubitems)):
+                    final_list.append(float(subitem))
+            else:
+                final_list.append(float(item))
+        return final_list
+
+    # if the parameter is in int_list_keys
+    elif parameter in int_list_keys:
+        return [int(item) for item in value.split()]
+
+    # If it is not in the common keys listed, just leave it as a string.
+    else:
+        return value

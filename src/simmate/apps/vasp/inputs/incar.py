@@ -11,6 +11,7 @@ from simmate.apps.vasp.inputs.incar_modifiers import (
     keyword_modifier_smart_lmaxmix,
     keyword_modifier_smart_magmom,
 )
+from simmate.utilities import str_to_datatype
 
 
 class Incar(dict):
@@ -56,7 +57,11 @@ class Incar(dict):
             # Otherwise, we need to convert values to the proper python datatype
             # because we might be reading from a file where everything is a string
             else:
-                formatted_value = self._str_to_datatype(parameter, value)
+                formatted_value = str_to_datatype(
+                    parameter, 
+                    value, 
+                    PARAMETER_MAPPINGS,
+                )
                 self.update({parameter: formatted_value})
 
         # SPECIAL CASE
@@ -232,166 +237,6 @@ class Incar(dict):
         # return the final dictionary as an Incar object
         return Incar(**parameters)
 
-    @staticmethod
-    def _str_to_datatype(parameter, value):
-        """
-        When given a vasp parameter and it's value as a string, this helper
-        function will use the key (parameter) to determine how to convert the
-        val string to the proper python datatype (int, float, bool, list...).
-        I have the most common keys mapped out, but if a parameter is given that
-        isn't mapped, I simply leave it as a string.
-        """
-
-        # I outline the most common keys to what their expected data types are.
-
-        # OPTIMIZE -- I should set these elsewhere so that these lists are not
-        # initialized every time I call this function. Maybe have a dictionary
-        # of {Parameter: Value_datatype} in the main enviornment for use.
-
-        vector_list_keys = (
-            # "MAGMOM",  # depends on other args -- see notes in init
-            "DIPOL",
-        )
-
-        float_list_keys = (
-            "LDAUU",
-            "LDAUJ",
-            "MAGMOM",  # depends on other args -- see notes in init
-            "LANGEVIN_GAMMA",
-            "QUAD_EFG",
-            "EINT",
-        )
-        int_list_keys = (
-            "LDAUL",
-            "LDAUJ",
-            "EINT",
-        )
-
-        bool_keys = (
-            "LDAU",
-            "LWAVE",
-            "LSCALU",
-            "LCHARG",
-            "LPLANE",
-            "LUSE_VDW",
-            "LHFCALC",
-            "ADDGRID",
-            "LSORBIT",
-            "LNONCOLLINEAR",
-            "KGAMMA",
-        )
-        float_keys = (
-            "EDIFF",
-            "SIGMA",
-            "TIME",
-            "ENCUTFOCK",
-            "HFSCREEN",
-            "POTIM",
-            "EDIFFG",
-            "AGGAC",
-            "PARAM1",
-            "PARAM2",
-            "KSPACING",
-            "SYMPREC",
-            "AMIX",
-            "BMIX",
-            "AMIN",
-            "SMASS",
-            "AMIX_MAG",
-            "BMIX_MAG",
-        )
-        int_keys = (
-            "NSW",
-            "NBANDS",
-            "NELMIN",
-            "ISIF",
-            "IBRION",
-            "ISPIN",
-            "ICHARG",
-            "NELM",
-            "ISMEAR",
-            "NPAR",
-            "LDAUPRINT",
-            "LMAXMIX",
-            "ENCUT",
-            "NSIM",
-            "NKRED",
-            "NUPDOWN",
-            "ISPIND",
-            "LDAUTYPE",
-            "IVDW",
-            "ISTART",
-            "NELMDL",
-            "IMIX",
-            "ISYM",
-        )
-
-        # If the value is not a string, then assume we are already in the
-        # correct format. Note, an incorrect format will throw an error
-        # somewhere below, which may be tricky for beginners to traceback.
-        if not isinstance(value, str):
-            return value
-
-        # if the parameter is in int_keys
-        if parameter in int_keys:
-            # sometimes "1." was written to indicate an integer so check for
-            # this and remove it if needed.
-            if value[-1] == ".":
-                value = value[:-1]
-            # return the value integer
-            return int(value)
-
-        # if the parameter is in float_keys, we convert value to a float
-        elif parameter in float_keys:
-            # return the value float
-            return float(value)
-
-        # if the parameter is in bool_keys
-        elif parameter in bool_keys:
-            # Python is weird where bool("FALSE") will return True... So I need
-            # to convert the string to lowercase and read it to know what to
-            # return here.
-            if "t" in value.lower():
-                return True
-            elif "f" in value.lower():
-                return False
-
-        # if the parameter is in vector_list_keys
-        # These vectors are always floats
-        elif parameter in vector_list_keys:
-            # convert a string of...
-            #   "x1 y1 z1 x2 y2 z2 x3 y3 z3"
-            # to...
-            #   [x1,y1,z1,x2,y2,z2,x3,y3,z3] (list of floats)
-            # and then to...
-            #   [[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]
-            value = [float(item) for item in value.split()]
-            return [value[i : i + 3] for i in range(0, len(value), 3)]
-
-        # if the parameter is in float_list_keys
-        elif parameter in float_list_keys:
-            final_list = []
-            for item in value.split():
-                # Sometimes, the values are given as "3*0.1 2*0.5" where the "*"
-                # means to include that value that many times. For example, this
-                # input would be the same as "0.1 0.1 0.1 0.5 0.5". We need to
-                # account for this when parsing.
-                if "*" in item:
-                    nsubitems, subitem = item.split("*")
-                    for n in range(int(nsubitems)):
-                        final_list.append(float(subitem))
-                else:
-                    final_list.append(float(item))
-            return final_list
-
-        # if the parameter is in int_list_keys
-        elif parameter in int_list_keys:
-            return [int(item) for item in value.split()]
-
-        # If it is not in the common keys listed, just leave it as a string.
-        else:
-            return value
-
     def compare_incars(self, other_incar):
         """
         Compares two Incars and indicates which parameters are the same and
@@ -515,3 +360,154 @@ for modifier in [
     keyword_modifier_smart_ismear,
 ]:
     Incar.add_keyword_modifier(modifier)
+
+# establish type mappings for common INCAR parameters
+PARAMETER_MAPPINGS = {
+    "bool_keys": (
+        "LDAU",
+        "LWAVE",
+        "LSCALU",
+        "LCHARG",
+        "LPLANE",
+        "LUSE_VDW",
+        "LHFCALC",
+        "ADDGRID",
+        "LSORBIT",
+        "LNONCOLLINEAR",
+        "KGAMMA",
+    ),
+    "float_keys": (
+        "EDIFF",
+        "SIGMA",
+        "TIME",
+        "ENCUTFOCK",
+        "HFSCREEN",
+        "POTIM",
+        "EDIFFG",
+        "AGGAC",
+        "PARAM1",
+        "PARAM2",
+        "KSPACING",
+        "SYMPREC",
+        "AMIX",
+        "BMIX",
+        "AMIN",
+        "SMASS",
+        "AMIX_MAG",
+        "BMIX_MAG",
+    ),
+    "int_keys": (
+        "NSW",
+        "NBANDS",
+        "NELMIN",
+        "ISIF",
+        "IBRION",
+        "ISPIN",
+        "ICHARG",
+        "NELM",
+        "ISMEAR",
+        "NPAR",
+        "LDAUPRINT",
+        "LMAXMIX",
+        "ENCUT",
+        "NSIM",
+        "NKRED",
+        "NUPDOWN",
+        "ISPIND",
+        "LDAUTYPE",
+        "IVDW",
+        "ISTART",
+        "NELMDL",
+        "IMIX",
+        "ISYM",
+    ),
+    "int_list_keys": (
+        "LDAUL",
+        "LDAUJ",
+        "EINT",
+    ),
+    "float_list_keys": (
+        "LDAUU",
+        "LDAUJ",
+        "MAGMOM",  # depends on other args -- see notes in init
+        "LANGEVIN_GAMMA",
+        "QUAD_EFG",
+        "EINT",
+    ),
+    "vector_list_keys": (
+        # "MAGMOM",  # depends on other args -- see notes in init
+        "DIPOL",
+    ),
+}
+
+PARAMETER_MAPPINGS = {
+    # BOOLEANS
+    "LDAU": bool,
+    "LWAVE": bool,
+    "LSCALU": bool,
+    "LCHARG": bool,
+    "LPLANE": bool,
+    "LUSE_VDW": bool,
+    "LHFCALC": bool,
+    "ADDGRID": bool,
+    "LSORBIT": bool,
+    "LNONCOLLINEAR": bool,
+    "KGAMMA": bool,
+    # FLOATS
+    "EDIFF": float,
+    "SIGMA": float,
+    "TIME": float,
+    "ENCUTFOCK": float,
+    "HFSCREEN": float,
+    "POTIM": float,
+    "EDIFFG": float,
+    "AGGAC": float,
+    "PARAM1": float,
+    "PARAM2": float,
+    "KSPACING": float,
+    "SYMPREC": float,
+    "AMIX": float,
+    "BMIX": float,
+    "AMIN": float,
+    "SMASS": float,
+    "AMIX_MAG": float,
+    "BMIX_MAG": float,
+    # INTEGERS
+    "NSW": int,
+    "NBANDS": int,
+    "NELMIN": int,
+    "ISIF": int,
+    "IBRION": int,
+    "ISPIN": int,
+    "ICHARG": int,
+    "NELM": int,
+    "ISMEAR": int,
+    "NPAR": int,
+    "LDAUPRINT": int,
+    "LMAXMIX": int,
+    "ENCUT": int,
+    "NSIM": int,
+    "NKRED": int,
+    "NUPDOWN": int,
+    "ISPIND": int,
+    "LDAUTYPE": int,
+    "IVDW": int,
+    "ISTART": int,
+    "NELMDL": int,
+    "IMIX": int,
+    "ISYM": int,
+    # LIST OF INTEGERS
+    "LDAUL": list[int],
+    "LDAUJ": list[int],
+    "EINT": list[int],
+    # LIST OF FLOATS
+    "LDAUU": list[float],
+    "LDAUJ": list[float],
+    "MAGMOM": list[float],  # depends on other args -- see notes in init
+    "LANGEVIN_GAMMA": list[float],
+    "QUAD_EFG": list[float],
+    "EINT": list[float],
+    # LIST OF VECTORS
+    # "MAGMOM",  # depends on other args -- see notes in init
+    "DIPOL": list[list[float]],
+}
