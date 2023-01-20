@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
+
 from simmate.apps.vasp.inputs.incar_modifiers import (
     keyword_modifier_density,
     keyword_modifier_density_a,
@@ -11,6 +13,7 @@ from simmate.apps.vasp.inputs.incar_modifiers import (
     keyword_modifier_smart_lmaxmix,
     keyword_modifier_smart_magmom,
 )
+from simmate.toolkit import Structure
 from simmate.utilities import str_to_datatype
 
 
@@ -28,6 +31,77 @@ class Incar(dict):
     "smart_ldau" modifier introduces more than one new setting to the INCAR, such
     as LDAUJ, LDAUU, LDAUL, LDAUTYPE, and LDAUPRINT.
     """
+
+    # establish type mappings for common INCAR parameters
+    PARAMETER_MAPPINGS = {
+        # BOOLEANS
+        "LDAU": bool,
+        "LWAVE": bool,
+        "LSCALU": bool,
+        "LCHARG": bool,
+        "LPLANE": bool,
+        "LUSE_VDW": bool,
+        "LHFCALC": bool,
+        "ADDGRID": bool,
+        "LSORBIT": bool,
+        "LNONCOLLINEAR": bool,
+        "KGAMMA": bool,
+        # FLOATS
+        "EDIFF": float,
+        "SIGMA": float,
+        "TIME": float,
+        "ENCUTFOCK": float,
+        "HFSCREEN": float,
+        "POTIM": float,
+        "EDIFFG": float,
+        "AGGAC": float,
+        "PARAM1": float,
+        "PARAM2": float,
+        "KSPACING": float,
+        "SYMPREC": float,
+        "AMIX": float,
+        "BMIX": float,
+        "AMIN": float,
+        "SMASS": float,
+        "AMIX_MAG": float,
+        "BMIX_MAG": float,
+        # INTEGERS
+        "NSW": int,
+        "NBANDS": int,
+        "NELMIN": int,
+        "ISIF": int,
+        "IBRION": int,
+        "ISPIN": int,
+        "ICHARG": int,
+        "NELM": int,
+        "ISMEAR": int,
+        "NPAR": int,
+        "LDAUPRINT": int,
+        "LMAXMIX": int,
+        "ENCUT": int,
+        "NSIM": int,
+        "NKRED": int,
+        "NUPDOWN": int,
+        "ISPIND": int,
+        "LDAUTYPE": int,
+        "IVDW": int,
+        "ISTART": int,
+        "NELMDL": int,
+        "IMIX": int,
+        "ISYM": int,
+        # LIST OF INTEGERS
+        "LDAUL": list[int],
+        # LIST OF FLOATS
+        "LDAUU": list[float],
+        "LDAUJ": list[float],
+        "MAGMOM": list[float],  # depends on other args -- see notes in init
+        "LANGEVIN_GAMMA": list[float],
+        "QUAD_EFG": list[float],
+        "EINT": list[float],
+        # LIST OF VECTORS
+        # "MAGMOM",  # depends on other args -- see notes in init
+        "DIPOL": list[list[float]],
+    }
 
     def __init__(self, **kwargs):
 
@@ -60,7 +134,7 @@ class Incar(dict):
                 formatted_value = str_to_datatype(
                     parameter,
                     value,
-                    PARAMETER_MAPPINGS,
+                    self.PARAMETER_MAPPINGS,
                 )
                 self.update({parameter: formatted_value})
 
@@ -86,7 +160,7 @@ class Incar(dict):
             # now update the dictionary with this value
             self.update({"MAGMOM": new_format})
 
-    def to_evaluated_str(self, structure=None):
+    def to_evaluated_str(self, structure: Structure = None):
 
         # Let's start with an empty string and build from there
         final_str = ""
@@ -195,18 +269,23 @@ class Incar(dict):
         # we now have our final string and can return it!
         return final_str
 
-    def to_file(self, filename="INCAR", structure=None):
+    def to_file(
+        self,
+        filename: Path | str = "INCAR",
+        structure: Structure = None,
+    ):
         """
         Write Incar to a file.
         Args:
             filename (str): filename to write to.
         """
         # we just take the string format and put it in a file
+        filename = Path(filename)
         with filename.open("w") as file:
             file.write(self.to_evaluated_str(structure=structure))
 
     @staticmethod
-    def from_file(filename="INCAR"):
+    def from_file(filename: Path | str = "INCAR"):
         """
         Reads an Incar object from a file.
         Args:
@@ -215,6 +294,7 @@ class Incar(dict):
             Incar object
         """
         # open the file, grab the lines, and then close it
+        filename = Path(filename)
         with filename.open() as file:
             lines = file.readlines()
 
@@ -360,74 +440,3 @@ for modifier in [
     keyword_modifier_smart_ismear,
 ]:
     Incar.add_keyword_modifier(modifier)
-
-# establish type mappings for common INCAR parameters
-PARAMETER_MAPPINGS = {
-    # BOOLEANS
-    "LDAU": bool,
-    "LWAVE": bool,
-    "LSCALU": bool,
-    "LCHARG": bool,
-    "LPLANE": bool,
-    "LUSE_VDW": bool,
-    "LHFCALC": bool,
-    "ADDGRID": bool,
-    "LSORBIT": bool,
-    "LNONCOLLINEAR": bool,
-    "KGAMMA": bool,
-    # FLOATS
-    "EDIFF": float,
-    "SIGMA": float,
-    "TIME": float,
-    "ENCUTFOCK": float,
-    "HFSCREEN": float,
-    "POTIM": float,
-    "EDIFFG": float,
-    "AGGAC": float,
-    "PARAM1": float,
-    "PARAM2": float,
-    "KSPACING": float,
-    "SYMPREC": float,
-    "AMIX": float,
-    "BMIX": float,
-    "AMIN": float,
-    "SMASS": float,
-    "AMIX_MAG": float,
-    "BMIX_MAG": float,
-    # INTEGERS
-    "NSW": int,
-    "NBANDS": int,
-    "NELMIN": int,
-    "ISIF": int,
-    "IBRION": int,
-    "ISPIN": int,
-    "ICHARG": int,
-    "NELM": int,
-    "ISMEAR": int,
-    "NPAR": int,
-    "LDAUPRINT": int,
-    "LMAXMIX": int,
-    "ENCUT": int,
-    "NSIM": int,
-    "NKRED": int,
-    "NUPDOWN": int,
-    "ISPIND": int,
-    "LDAUTYPE": int,
-    "IVDW": int,
-    "ISTART": int,
-    "NELMDL": int,
-    "IMIX": int,
-    "ISYM": int,
-    # LIST OF INTEGERS
-    "LDAUL": list[int],
-    # LIST OF FLOATS
-    "LDAUU": list[float],
-    "LDAUJ": list[float],
-    "MAGMOM": list[float],  # depends on other args -- see notes in init
-    "LANGEVIN_GAMMA": list[float],
-    "QUAD_EFG": list[float],
-    "EINT": list[float],
-    # LIST OF VECTORS
-    # "MAGMOM",  # depends on other args -- see notes in init
-    "DIPOL": list[list[float]],
-}
