@@ -48,6 +48,8 @@ from .relaxation import (
 from .static_energy import (
     StaticEnergy__Vasp__Matproj,
     StaticEnergy__Vasp__MatprojHse,
+    StaticEnergy__Vasp__MatprojHsesol,
+    StaticEnergy__Vasp__MatprojPbesol,
     StaticEnergy__Vasp__MatprojScan,
     StaticEnergy__Vasp__Mit,
     StaticEnergy__Vasp__MvlNebEndpoint,

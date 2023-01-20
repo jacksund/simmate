@@ -58,7 +58,7 @@ assert original_workflow.incar != StaticEnergy__Vasp__MyCustomPreset
 !!! danger
     Updating workflows can often run into unexpected problems -- because not workflows
     behave the same. More often then not, you should create your own custom 
-    `VaspWorkflow`. Learn more [in the full-guides](/full_guides/workflows/creating_new_workflows/#building-from-existing-workflows).
+    `VaspWorkflow`. Learn more [in the full-guides](/simmate/full_guides/workflows/creating_new_workflows/#building-from-existing-workflows).
     
 
 ----------------------------------------------------------------------
@@ -73,6 +73,6 @@ result = state.result()
 ```
 
 !!! tip
-    You can also run workflows from a YAML file too. Check out the [full-guides](/full_guides/workflows/creating_new_workflows/#running-our-custom-workflow) to learn more.
+    You can also run workflows from a YAML file too. Check out the [full-guides](/simmate/full_guides/workflows/creating_new_workflows/#running-our-custom-workflow) to learn more.
 
 ----------------------------------------------------------------------

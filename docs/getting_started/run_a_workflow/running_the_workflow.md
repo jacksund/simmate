@@ -77,7 +77,7 @@ Above, we gave our input structure as a `POSCAR` -- but what if we wanted to
 use a different format? Or even use a structure from a previous calculation or
 the Materials Project database?
 
-Recall from earlier, we can look at the [Parameters](http://127.0.0.1:8000/parameters/#structure) section of our documentation.
+Recall from earlier, we can look at the [Parameters](/simmate/getting_started/run_a_workflow/running_the_workflow/) section of our documentation.
 
 When we scroll down to `structure`, we see that we can do...
 
