@@ -3,7 +3,6 @@
 import logging
 import os
 import sys
-from pathlib import Path
 
 import requests
 
@@ -105,17 +104,7 @@ def chunk_list(full_list: list, chunk_size: int) -> list:
 def str_to_datatype(
         parameter: str, 
         value: str,
-        type_mappings: dict = {
-            "bool_keys": tuple(),
-            "float_keys": tuple(),
-            "int_keys": tuple(),
-            "int_list_keys": tuple(),
-            "float_list_keys": tuple(),
-            "vector_list_keys": tuple(),
-        },
-        # OPTIMIZE -- I should set these elsewhere so that these lists are not
-        # initialized every time I call this function. Maybe have a dictionary
-        # of {Parameter: Value_datatype} in the main enviornment for use.
+        type_mappings: dict = {},
     ):
     """
     When given a parameter name and it's value as a string, this helper
@@ -127,6 +116,18 @@ def str_to_datatype(
     This is often ment to read to/from non-standard parameter file formats.
     For example, VASP's INCAR does not follow any standard (yaml, toml, json, 
     etc.) so this function helps read values into python types.
+    
+    Example type_mapping using random VASP settings:
+    ``` python
+    type_mapping = {
+        "LDAU": bool,
+        "EDIFF": float,
+        "NSW": int,
+        "LDAUL": list[int],
+        "LDAUU": list[float],
+        "DIPOL": list[list[float]],
+    }
+    ```
     """
 
     # If the value is not a string, then assume we are already in the
@@ -134,9 +135,19 @@ def str_to_datatype(
     # somewhere below, which may be tricky for beginners to traceback.
     if not isinstance(value, str):
         return value
+    
+    # next, try grabbing the type from mapping dictionary. If the parameter is
+    # not mapped, then we assume it is a str.
+    target_type = type_mappings.get(parameter, str)
 
-    # if the parameter is in int_keys
-    if parameter in int_keys:
+    # Now that we know the target type to convert to, we can go through 
+    # decide how to handle converting the value    
+
+    if target_type == str:
+        # assert type(value) == str
+        return value
+
+    elif target_type == int:
         # sometimes "1." was written to indicate an integer so check for
         # this and remove it if needed.
         if value[-1] == ".":
@@ -144,13 +155,11 @@ def str_to_datatype(
         # return the value integer
         return int(value)
 
-    # if the parameter is in float_keys, we convert value to a float
-    elif parameter in float_keys:
+    elif target_type == float:
         # return the value float
         return float(value)
 
-    # if the parameter is in bool_keys
-    elif parameter in bool_keys:
+    elif target_type == bool:
         # Python is weird where bool("FALSE") will return True... So I need
         # to convert the string to lowercase and read it to know what to
         # return here.
@@ -159,20 +168,7 @@ def str_to_datatype(
         elif "f" in value.lower():
             return False
 
-    # if the parameter is in vector_list_keys
-    # These vectors are always floats
-    elif parameter in vector_list_keys:
-        # convert a string of...
-        #   "x1 y1 z1 x2 y2 z2 x3 y3 z3"
-        # to...
-        #   [x1,y1,z1,x2,y2,z2,x3,y3,z3] (list of floats)
-        # and then to...
-        #   [[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]
-        value = [float(item) for item in value.split()]
-        return [value[i : i + 3] for i in range(0, len(value), 3)]
-
-    # if the parameter is in float_list_keys
-    elif parameter in float_list_keys:
+    elif target_type == list[float]:
         final_list = []
         for item in value.split():
             # Sometimes, the values are given as "3*0.1 2*0.5" where the "*"
@@ -187,10 +183,24 @@ def str_to_datatype(
                 final_list.append(float(item))
         return final_list
 
-    # if the parameter is in int_list_keys
-    elif parameter in int_list_keys:
+    elif target_type == list[int]:
         return [int(item) for item in value.split()]
+    
+    # These vectors are always floats
+    elif target_type == list[list[float]]:
+        # convert a string of...
+        #   "x1 y1 z1 x2 y2 z2 x3 y3 z3"
+        # to...
+        #   [x1,y1,z1,x2,y2,z2,x3,y3,z3] (list of floats)
+        # and then to...
+        #   [[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]
+        value = [float(item) for item in value.split()]
+        return [value[i : i + 3] for i in range(0, len(value), 3)]
 
     # If it is not in the common keys listed, just leave it as a string.
     else:
+        logging.warning(
+            "Unknown parameter mapping of {parameter}: {target_type}. "
+            "Leaving as str."
+        )
         return value

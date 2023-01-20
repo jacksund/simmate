@@ -363,84 +363,6 @@ for modifier in [
 
 # establish type mappings for common INCAR parameters
 PARAMETER_MAPPINGS = {
-    "bool_keys": (
-        "LDAU",
-        "LWAVE",
-        "LSCALU",
-        "LCHARG",
-        "LPLANE",
-        "LUSE_VDW",
-        "LHFCALC",
-        "ADDGRID",
-        "LSORBIT",
-        "LNONCOLLINEAR",
-        "KGAMMA",
-    ),
-    "float_keys": (
-        "EDIFF",
-        "SIGMA",
-        "TIME",
-        "ENCUTFOCK",
-        "HFSCREEN",
-        "POTIM",
-        "EDIFFG",
-        "AGGAC",
-        "PARAM1",
-        "PARAM2",
-        "KSPACING",
-        "SYMPREC",
-        "AMIX",
-        "BMIX",
-        "AMIN",
-        "SMASS",
-        "AMIX_MAG",
-        "BMIX_MAG",
-    ),
-    "int_keys": (
-        "NSW",
-        "NBANDS",
-        "NELMIN",
-        "ISIF",
-        "IBRION",
-        "ISPIN",
-        "ICHARG",
-        "NELM",
-        "ISMEAR",
-        "NPAR",
-        "LDAUPRINT",
-        "LMAXMIX",
-        "ENCUT",
-        "NSIM",
-        "NKRED",
-        "NUPDOWN",
-        "ISPIND",
-        "LDAUTYPE",
-        "IVDW",
-        "ISTART",
-        "NELMDL",
-        "IMIX",
-        "ISYM",
-    ),
-    "int_list_keys": (
-        "LDAUL",
-        "LDAUJ",
-        "EINT",
-    ),
-    "float_list_keys": (
-        "LDAUU",
-        "LDAUJ",
-        "MAGMOM",  # depends on other args -- see notes in init
-        "LANGEVIN_GAMMA",
-        "QUAD_EFG",
-        "EINT",
-    ),
-    "vector_list_keys": (
-        # "MAGMOM",  # depends on other args -- see notes in init
-        "DIPOL",
-    ),
-}
-
-PARAMETER_MAPPINGS = {
     # BOOLEANS
     "LDAU": bool,
     "LWAVE": bool,
@@ -498,8 +420,6 @@ PARAMETER_MAPPINGS = {
     "ISYM": int,
     # LIST OF INTEGERS
     "LDAUL": list[int],
-    "LDAUJ": list[int],
-    "EINT": list[int],
     # LIST OF FLOATS
     "LDAUU": list[float],
     "LDAUJ": list[float],
