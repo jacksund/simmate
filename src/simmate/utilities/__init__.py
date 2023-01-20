@@ -14,4 +14,5 @@ from .other import (
     get_chemical_subsystems,
     get_conda_env,
     get_latest_version,
+    str_to_datatype,
 )
