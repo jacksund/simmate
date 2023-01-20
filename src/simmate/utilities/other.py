@@ -102,21 +102,21 @@ def chunk_list(full_list: list, chunk_size: int) -> list:
 
 
 def str_to_datatype(
-        parameter: str, 
-        value: str,
-        type_mappings: dict = {},
-    ):
+    parameter: str,
+    value: str,
+    type_mappings: dict = {},
+):
     """
     When given a parameter name and it's value as a string, this helper
     function will use the key (parameter) to determine how to convert the
     val string to the proper python datatype (int, float, bool, list...).
     A full mapping of parameters should be provided, but if a parameter is
     given that isn't mapped, the value will be leave left as a string.
-    
+
     This is often ment to read to/from non-standard parameter file formats.
-    For example, VASP's INCAR does not follow any standard (yaml, toml, json, 
+    For example, VASP's INCAR does not follow any standard (yaml, toml, json,
     etc.) so this function helps read values into python types.
-    
+
     Example type_mapping using random VASP settings:
     ``` python
     type_mapping = {
@@ -135,13 +135,13 @@ def str_to_datatype(
     # somewhere below, which may be tricky for beginners to traceback.
     if not isinstance(value, str):
         return value
-    
+
     # next, try grabbing the type from mapping dictionary. If the parameter is
     # not mapped, then we assume it is a str.
     target_type = type_mappings.get(parameter, str)
 
-    # Now that we know the target type to convert to, we can go through 
-    # decide how to handle converting the value    
+    # Now that we know the target type to convert to, we can go through
+    # decide how to handle converting the value
 
     if target_type == str:
         # assert type(value) == str
@@ -185,7 +185,7 @@ def str_to_datatype(
 
     elif target_type == list[int]:
         return [int(item) for item in value.split()]
-    
+
     # These vectors are always floats
     elif target_type == list[list[float]]:
         # convert a string of...

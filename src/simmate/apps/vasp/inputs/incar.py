@@ -58,8 +58,8 @@ class Incar(dict):
             # because we might be reading from a file where everything is a string
             else:
                 formatted_value = str_to_datatype(
-                    parameter, 
-                    value, 
+                    parameter,
+                    value,
                     PARAMETER_MAPPINGS,
                 )
                 self.update({parameter: formatted_value})
