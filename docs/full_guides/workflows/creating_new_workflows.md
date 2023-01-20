@@ -136,7 +136,7 @@ these will inherit all of their features -- such as loading from filename, a
 dictionary, or python object.
 
 For example, if you use a `structure` input variable, it behaves as described
-in the [Parameters](/parameters/) section.
+in the [Parameters](/simmate/parameters/) section.
 
 ``` python
 from simmate.toolkit import Structure

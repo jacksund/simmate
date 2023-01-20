@@ -16,7 +16,7 @@ simmate workflows explore
 ```
 
 !!! tip
-    Read through the ["Workflow Names"](/full_guides/workflows/workflow_names/)
+    Read through the ["Workflow Names"](/simmate/full_guides/workflows/workflow_names/)
     section for a better understanding of the different workflows available.    
 
 ------------------------------------------------------------
@@ -43,7 +43,7 @@ Once you have a desired workflow name, you can load the workflow with:
 ## Viewing parameters & options
 
 Because parameters are super important for using Simmate, we gave them [their own
-section in our documentation](/parameters). Make sure you read through that section of our
+section in our documentation](/simmate/parameters). Make sure you read through that section of our
 documentation to view full parameter descriptions and examples for each.
 
 ------------------------------------------------------------
@@ -130,7 +130,7 @@ using the `run_cloud` method:
 !!! warning
     The `run-cloud` command/method only **schedules** the workflow. It won't 
     run until you add computational resources (or `Workers`). To do this, you
-    must read through the ["Computational Resources"](/getting_started/add_computational_resources/quick_start/) documentation.
+    must read through the ["Computational Resources"](/simmate/getting_started/add_computational_resources/quick_start/) documentation.
 
 ------------------------------------------------------------
 
@@ -283,8 +283,8 @@ So in order to run these types of workflows, you must...
 2. Start at least one worker that will run the submitted the calculations
 
 !!! tip
-    Make sure you read through the ["Computational Resources"](/getting_started/add_computational_resources/quick_start/) documentation. There is also a 
-    [full walk-through example](/getting_started/evolutionary_search/quick_start/)
+    Make sure you read through the ["Computational Resources"](/simmate/getting_started/add_computational_resources/quick_start/) documentation. There is also a 
+    [full walk-through example](/simmate/getting_started/evolutionary_search/quick_start/)
     of a massively-parallel workflow in the getting started
     guides.
     

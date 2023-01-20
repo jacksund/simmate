@@ -2,7 +2,7 @@
 
 This module provides tools to define and interacting with your database.
 
-For beginners, make sure you have completed [our database tutorial](/getting_started/access_the_database/quick_start/).
+For beginners, make sure you have completed [our database tutorial](/simmate/getting_started/access_the_database/quick_start/).
 
 Submodules include...
 
