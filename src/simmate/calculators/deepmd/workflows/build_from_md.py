@@ -176,3 +176,6 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
 
         #!!!allow passing of unique name for deepmd graph file
         freeze_workflow.run(directory=deepmd_directory)
+        
+        return deepmd_directory
+        
