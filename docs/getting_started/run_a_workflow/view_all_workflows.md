@@ -98,7 +98,7 @@ To understand each parameter, you can read through our parameter docs, which giv
 ## Learning about parameters
 
 In the message above, there's a link to our **Parameter docs**. You can access this
-page by clicking the **Parameters** section at the top of this webpage (or click [here](/parameters)).
+page by clicking the **Parameters** section at the top of this webpage (or click [here](/simmate/parameters)).
 
 This page lists out ALL parameters for ALL workflows. If there's an input you'd
 like to learn more above -- this is the place to start.

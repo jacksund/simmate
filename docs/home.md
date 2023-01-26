@@ -71,7 +71,7 @@ At the other end of the spectrum, we provide an extremely powerful toolbox and A
 
 ## Installation
 
-**Don't panic** if you're new to coding and Python. When you're ready, head to our [tutorials](/getting_started/overview/) where we teach you everything from the beginning.
+**Don't panic** if you're new to coding and Python. When you're ready, head to our [tutorials](/simmate/getting_started/overview/) where we teach you everything from the beginning.
 
 If you're comfortable with Python, you can install Simmate with...
 
@@ -125,7 +125,7 @@ simmate run-server
 After a few seconds, you can open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser to view your local server!
 
 !!! tip
-    Read our website [tutorials and documentation](/getting_started/overview/) in order to switch to a production-ready server that's accessible through the internet and can be shared among a team.
+    Read our website [tutorials and documentation](/simmate/getting_started/overview/) in order to switch to a production-ready server that's accessible through the internet and can be shared among a team.
 
 --------------------------------------------------------------------------------
 
