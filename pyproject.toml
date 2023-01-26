@@ -133,7 +133,7 @@ EXTRAS = [
 
 # For downloading third-party data directly from source instead of Simmate
 DATA = [
-    "mp-api >=0.26.3, <0.30.7",  # materials project
+    "mp-api >=0.26.3, <0.30.9",  # materials project
 ]
 
 # Specific dependencies needed for optional simmate apps
