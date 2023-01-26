@@ -3,6 +3,7 @@
 import logging
 import os
 import sys
+from pathlib import Path
 
 import requests
 
@@ -186,7 +187,7 @@ def str_to_datatype(
     elif target_type == list[int]:
         return [int(item) for item in value.split()]
 
-    # These vectors are always floats
+    # These vectors are always 3x floats
     elif target_type == list[list[float]]:
         # convert a string of...
         #   "x1 y1 z1 x2 y2 z2 x3 y3 z3"
