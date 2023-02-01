@@ -9,6 +9,7 @@ from simmate.website.workflows import models as all_datatables
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
+#is the remote orign already set?????
 
 class MlPotential__Deepmd__BuildFromTable(Workflow):
 
