@@ -22,7 +22,7 @@ Newest available: v0.11.1
 
 We highly recommended that you install simmate into a clean conda environment, rather than updating simmate within your existing one:
 ``` shell
-conda create -n my_env -c conda-forge python=3.10 simmate
+conda create -n my_env -c conda-forge python=3.11 simmate
 ```
 
 Make sure you check that the expected version is now installed:
@@ -66,7 +66,6 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Enhancements**
 **Refactors**
 **Fixes**
-
 - no new changes have been merged into the `main` branch yet
 -->
 
@@ -76,6 +75,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add CLEASE app for cluster expanison calculations (these workflows are highly experimental at the moment - so use with caution)
 - update "bad-elf" workflow to accept an empty-atom template structure or a list
 of empty sites
+- add python 3.11 support
 
 **Refactors**
 
@@ -89,7 +89,6 @@ of empty sites
 
 - fix site ordering in NEB supercell structures
 - improve installation speed and guide users to conda alternatives
-
 
 !!! warning
     The refactoring of simmate "apps" led to many breaking changes in the python API.

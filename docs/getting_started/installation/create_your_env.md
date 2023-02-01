@@ -10,7 +10,7 @@ For now, let's create a new environment that uses the [conda-forge](https://cond
 Now let's run this command below. Note you can switch out the name `my_env` for whatever you want here, just make sure you use underscores instead of spaces (`my_env` will work while `my env` will give an error).
 
 ``` shell
-conda create -c conda-forge -n my_env python=3.10
+conda create -c conda-forge -n my_env python=3.11
 ```
 
 Say yes when the installation asks for confirmation. 

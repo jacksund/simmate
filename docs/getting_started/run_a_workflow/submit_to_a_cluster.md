@@ -124,7 +124,7 @@ With Anaconda set up, you can create your environment and install Simmate just l
 ``` shell
 # Create your conda env with...
 
-conda create -n my_env -c conda-forge python=3.10 simmate
+conda create -n my_env -c conda-forge python=3.11 simmate
 conda activate my_env
 
 
