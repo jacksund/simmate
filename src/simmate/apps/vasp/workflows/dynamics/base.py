@@ -19,7 +19,6 @@ class DynamicsWorkflow(VaspWorkflow):
         nsteps: int = 10000,
         **kwargs,
     ):
-
         # run cleaning and standardizing on structure (based on class attributes)
         structure_cleaned = cls._get_clean_structure(structure, **kwargs)
 

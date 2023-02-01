@@ -7,7 +7,6 @@ from simmate.website.test_app.models import TestForces
 
 @pytest.mark.django_db
 def test_forces_table(structure, tmp_path):
-
     # test writing columns
     TestForces.show_columns()
 

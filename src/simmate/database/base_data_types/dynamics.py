@@ -72,7 +72,6 @@ class Dynamics(Structure, Calculation):
         # See Relaxation.from_vasp_run as a starting point
 
     def update_from_directory(self, directory: Path):
-
         # check if we have a VASP directory
         vasprun_filename = directory / "vasprun.xml"
         if not vasprun_filename.exists():
@@ -203,7 +202,6 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
 
 class SimmulationDetail(PlotlyFigure):
     def get_plot(result: Dynamics):
-
         # Grab the calculation's structure and convert it to a dataframe
         structures_dataframe = result.structures.order_by("number").to_dataframe()
 

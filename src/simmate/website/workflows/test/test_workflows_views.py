@@ -43,7 +43,6 @@ def test_workflows_view(client):
 
 @pytest.mark.parametrize("workflow_type", get_all_workflow_types())
 def test_workflows_by_type_view(client, workflow_type):
-
     # grabs f"/workflows/{workflow_type}/"
     url = reverse(
         "workflows_by_type",
@@ -58,7 +57,6 @@ def test_workflows_by_type_view(client, workflow_type):
 @pytest.mark.django_db
 @pytest.mark.parametrize("workflow", ALL_WORKFLOWS)
 def test_workflow_detail_view(client, workflow):
-
     # Some views have not been configured yet
     if workflow.name_type in [
         "customized",
@@ -108,7 +106,6 @@ def test_workflow_detail_view(client, workflow):
 # TODO: @pytest.mark.parametrize("workflow", ALL_WORKFLOWS)
 @pytest.mark.django_db
 def test_workflow_submit_view(client, sample_structures, mocker):
-
     client.login(username="test_user", password="test_password")
 
     url = reverse(

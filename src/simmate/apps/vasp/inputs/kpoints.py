@@ -20,7 +20,6 @@ class Kpoints:
         filename="KPOINTS",
         comment=None,
     ):
-
         # let's have a list where we keep track of list of lines that we
         # will join at the end
         lines = []
@@ -39,7 +38,6 @@ class Kpoints:
         # density of 1 or greater should never be used, we should still be
         # ready for it.
         if isinstance(kpoint_method, float):
-
             # append 0 to the second line which tells VASP that the grid should
             # be generated automatically based on the lines below it
             lines.append("0")

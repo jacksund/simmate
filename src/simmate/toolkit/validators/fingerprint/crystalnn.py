@@ -12,7 +12,6 @@ class CrystalNNFingerprint(FingerprintValidator):
         stat_options: list[str] = ["mean", "std_dev", "minimum", "maximum"],
         **crystalnn_options,
     ):
-
         # make the matminer featurizer object
         # if it isnt set, we will use the default, which is set to what the Materials project uses
         if crystalnn_options:

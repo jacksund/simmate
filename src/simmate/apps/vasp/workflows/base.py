@@ -25,7 +25,6 @@ def get_default_parallel_settings():
 
 
 class VaspWorkflow(S3Workflow):
-
     _parameter_methods = S3Workflow._parameter_methods + ["_get_clean_structure"]
 
     required_files = ["INCAR", "POTCAR", "POSCAR"]
@@ -170,7 +169,6 @@ class VaspWorkflow(S3Workflow):
         # if standardize_structure is not requested, then we just return the
         # orignal input structure.
         if not standardize_mode:
-
             return structure
 
         # Make sure the user
@@ -210,7 +208,6 @@ class VaspWorkflow(S3Workflow):
 
     @classmethod
     def setup(cls, directory: Path, structure: Structure, **kwargs):
-
         # run cleaning and standardizing on structure (based on class attributes)
         structure_cleaned = cls._get_clean_structure(structure, **kwargs)
 
@@ -292,7 +289,6 @@ def check_for_standardization_bugs(
     structure_original: Structure,
     structure_new: Structure,
 ):
-
     # In pymatgen, they include this code with the standardization of their
     # structures because there were several bugs in the past and they want to
     # double-check themselves. I'm still using their code to standardize

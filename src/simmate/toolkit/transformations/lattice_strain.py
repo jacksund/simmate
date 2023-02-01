@@ -40,7 +40,6 @@ class LatticeStrain(Transformation):
         fixed_volume: float,
         max_attempts=100,
     ):
-
         # after straining the lattice, we need to scale it to a fixed volume
         fixed_volume = fixed_volume
 

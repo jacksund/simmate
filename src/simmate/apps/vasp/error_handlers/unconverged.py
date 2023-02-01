@@ -23,7 +23,6 @@ class Unconverged(ErrorHandler):
     is_monitor = False
 
     def check(self, directory: Path) -> bool:
-
         # Now check if the calculation converged. If not, we have the error!
         xml_filename = directory / "vasprun.xml"
         try:
@@ -46,7 +45,6 @@ class Unconverged(ErrorHandler):
         return False
 
     def correct(self, directory: Path) -> str:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)

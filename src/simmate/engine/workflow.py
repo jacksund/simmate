@@ -172,7 +172,6 @@ class Workflow:
 
         # save the result to the database
         if cls.use_database:
-
             # make sure the workflow is returning a dictionary that be used
             # to update the database columns. None is also allowed as it
             # represents an empty dictionary
@@ -293,7 +292,6 @@ class Workflow:
 
     @classmethod
     def _load_settings_file(cls, filename: Path):  # -> tuple[Workflow, dict]
-
         filename = Path(filename)
 
         # Load the settings to a dictionary using whichever format is given
@@ -314,7 +312,6 @@ class Workflow:
         # from the base workflow class -- and need to grab the proper workflow
         # object.
         if "workflow_name" in parameters.keys():
-
             # we are loading an external workflow, which will depend on this base
             # class. We need a local import to prevent circular-import bug.
             from simmate.workflows.utilities import get_workflow
@@ -775,7 +772,6 @@ class Workflow:
             # if the user requested, we grab the previous directory as well
             copy_previous_directory = parameters.get("copy_previous_directory", None)
             if copy_previous_directory:
-
                 # BUG: I should switch this to checking the source input arg
 
                 if not primary_input:
@@ -1014,11 +1010,9 @@ class Workflow:
 
         parameters_serialized = {}
         for parameter_key, parameter_value in parameters.items():
-
             try:
                 json.dumps(parameter_value)
             except TypeError:
-
                 # Special cases
                 if parameter_key == "directory":
                     # convert Path to str

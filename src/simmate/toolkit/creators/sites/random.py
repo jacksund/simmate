@@ -12,7 +12,6 @@ class RandomSites:
         coords_generation_method=UniformlyDistributedVectors,
         coords_gen_options=dict(),
     ):
-
         # save the composition for reference
         self.composition = composition
 
@@ -20,7 +19,6 @@ class RandomSites:
         self.coords_generator = coords_generation_method(**coords_gen_options)
 
     def new_sites(self):
-
         # make an empty list to store all the fractional coordinates
         coords_list = []  # regular list.append is faster than numpy.append
         # as well as an empty list for the species

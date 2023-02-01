@@ -16,7 +16,6 @@ def test_workflows_list_all(command_line_runner):
 
 
 def test_workflows_show_config(command_line_runner):
-
     # list the config for one workflow
     result = command_line_runner.invoke(
         workflows_app,
@@ -33,7 +32,6 @@ def test_workflows_show_config(command_line_runner):
 
 
 def test_workflows_explore(command_line_runner):
-
     # Make sure it passes when args match
     result = command_line_runner.invoke(
         workflows_app,
@@ -52,7 +50,6 @@ def test_workflows_explore(command_line_runner):
 
 
 def test_workflows_setup_only(command_line_runner, structure, mocker, tmp_path):
-
     # establish filenames
     cif_filename = str(tmp_path / "test.cif")
     new_dirname = tmp_path / "inputs"  # changed to str below
@@ -93,7 +90,6 @@ def test_workflows_setup_only(command_line_runner, structure, mocker, tmp_path):
 
 
 def test_workflows_run(command_line_runner, structure, mocker, tmp_path):
-
     # establish filenames
     cif_filename = str(tmp_path / "test.cif")
     new_dirname = str(tmp_path / "inputs")
@@ -138,7 +134,6 @@ def test_workflows_run(command_line_runner, structure, mocker, tmp_path):
 
 
 def test_workflows_run_yaml(command_line_runner, structure, mocker, tmp_path):
-
     # establish filenames
     cif_filename = str(tmp_path / "test.cif")
     yaml_filename = str(tmp_path / "test.yaml")

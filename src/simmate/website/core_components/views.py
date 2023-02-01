@@ -21,7 +21,6 @@ class SymmetryViewSet(SimmateAPIViewSet):
 
 
 def structure_viewer(request):
-
     # Grabs all data after the '?' in the URL
     query = request.GET.dict()
 
@@ -66,7 +65,6 @@ def structure_viewer(request):
 
 
 def test_viewer(request):
-
     # grab cif filenames to test with
     from simmate.toolkit import base_data_types
 

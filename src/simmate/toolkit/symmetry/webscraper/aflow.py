@@ -52,9 +52,7 @@ for row in track(rows[1:]):
 headers.append("POSCAR")
 # add POSCARs to each data row
 for entry in track(data):
-
     try:  # some POSCARs don't have a page... not sure why. I should contact their devs. see A_oC8_64_f.I (#179)
-
         # grab prototype POSCAR url
         poscar_url = entry[9]
 

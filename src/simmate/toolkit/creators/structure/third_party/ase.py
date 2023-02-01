@@ -22,7 +22,6 @@ class AseStructure(StructureCreator):
         composition: Composition,
         ratio_of_covalent_radii: int = 0.5,
     ):
-
         # I assume 3D structure for now. I could do things like pbc=[1,1,0]
         # for 2D in the future though
         slab = Atoms(pbc=True)
@@ -74,7 +73,6 @@ class AseStructure(StructureCreator):
         )
 
     def create_structure(self) -> Structure:
-
         # now make the new structure using ase,ga.startgenerator
         # NOTE: all of these options are set in the init except for spacegroup
         structure_ase = self.ase.get_new_candidate(maxiter=1000)

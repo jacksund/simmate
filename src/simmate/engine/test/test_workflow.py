@@ -30,7 +30,6 @@ DummyFlow = DummyProject__DummyCaclulator__DummyPreset
 
 @pytest.mark.django_db
 def test_workflow(tmp_path):
-
     # Same exact thing but using higher-level method
     state = DummyFlow.run(directory=tmp_path)
     assert state.is_completed()
@@ -96,7 +95,6 @@ def test_serialize_parameters():
 
 
 def test_deserialize_parameters(mocker):
-
     # -------
     # We don't want to actually call these methods, but just ensure that they
     # have been called.

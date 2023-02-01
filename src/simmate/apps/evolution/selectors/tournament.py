@@ -21,7 +21,6 @@ class TournamentSelection(Selector):
         tournament_size: float = 0.20,
         tournament_min: int = 3,
     ) -> pandas.DataFrame:
-
         # We want the tournament size to be based on the total number of
         # inidividuals available.
         ntournament = int(len(individuals) * tournament_size)

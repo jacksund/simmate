@@ -5,12 +5,10 @@ from scipy.spatial.distance import cosine
 
 
 class ASEFingerprint:
-
     # ASE cites this as a rewrite of the USPEX fingerprint
     # https://gitlab.com/ase/ase/-/blob/master/ase/ga/ofp_comparator.py
 
     def __init__(self, composition, on_fail, max_fails, initial_structures=[]):
-
         self.on_fail = on_fail
 
         # we need the cumulative max_fails list
@@ -66,7 +64,6 @@ class ASEFingerprint:
         self.fingerprint_database = np.array(self.fingerprint_database)
 
     def check_structure(self, structure, tolerance=5e-3):
-
         # convert the structure to ase Atoms object
         structure_ase = self.adaptor.get_atoms(structure)
 
@@ -108,7 +105,6 @@ class ASEFingerprint:
         return True
 
     def point_next_step(self, attempt=0):
-
         # based on the attempt number and the max_fails list, see what stage of on_fail we are on
         for i, attempt_cutoff in enumerate(self.max_fails_cum):
             # if we are below the attempt cutoff, return the corresponding on_fail object

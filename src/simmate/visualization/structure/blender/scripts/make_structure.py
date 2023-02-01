@@ -132,7 +132,6 @@ for key in JMOL_COLORING:
 
 
 def make_structure_blend(lattice, sites_to_draw, filename):
-
     # convert variable from json str to original format
     lattice = json.loads(lattice)
     sites_to_draw = json.loads(sites_to_draw.replace("'", '"'))
@@ -155,7 +154,6 @@ def make_structure_blend(lattice, sites_to_draw, filename):
     # We start by drawing each of the sites -- which is just a colored sphere
     # at the proper coordinates
     for site in sites_to_draw:
-
         # first pull the base information out of the serialized tuple
         element_symbol, radius, cartesian_coords = site
 
@@ -322,7 +320,6 @@ def make_structure_blend(lattice, sites_to_draw, filename):
 
 
 def main():
-
     # get the arguments passed to blender after "--", all of which are ignored by
     # blender so scripts may receive their own arguments.
     arguments = sys.argv[sys.argv.index("--") + 1 :]

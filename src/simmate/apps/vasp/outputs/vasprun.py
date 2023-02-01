@@ -13,7 +13,6 @@ from simmate.apps.vasp.inputs import Incar
 class Vasprun(VasprunPymatgen):
     @classmethod
     def from_directory(cls, directory: Path = None):
-
         if not directory:
             directory = Path.cwd()
 
@@ -54,7 +53,6 @@ class Vasprun(VasprunPymatgen):
 
     @classmethod
     def from_neb_directory(cls, directory: Path = None) -> NEBAnalysis:
-
         if not directory:
             directory = Path.cwd()
 

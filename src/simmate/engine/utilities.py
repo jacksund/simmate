@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 # OPTIMIZE: I needed to return a dictionary because Prefect struggles to handle
 # a list or tuple return in their workflow context. Maybe this will change in
 # Prefect Orion though.

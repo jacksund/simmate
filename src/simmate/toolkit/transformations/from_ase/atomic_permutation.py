@@ -24,7 +24,6 @@ class AtomicPermutation(Transformation):
         structure: Structure,
         ratio_of_covalent_radii: float = 0.1,
     ) -> Structure:
-
         # This mutation is not possible for structures that have only one element
         if len(structure.composition.elements) == 1:
             print(

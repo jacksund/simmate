@@ -17,7 +17,6 @@ class Edwav(ErrorHandler):
     possible_error_messages = ["EDWAV: internal error, the gradient is not orthogonal"]
 
     def correct(self, directory: Path) -> str:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
