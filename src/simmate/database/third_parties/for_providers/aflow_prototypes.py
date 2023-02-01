@@ -26,9 +26,7 @@ from simmate.database.third_parties import AflowPrototype
 
 @transaction.atomic
 def load_all_prototypes():
-
     for prototype_data in track(AFLOW_PROTOTYPE_LIBRARY):
-
         # first let's grab the structure
         structure = prototype_data["snl"].structure
 

@@ -201,7 +201,6 @@ class Structure(DatabaseTable):
         as_dict: bool = False,
         **kwargs,
     ):
-
         if isinstance(structure, str):
             structure = ToolkitStructure.from_database_string(structure)
 

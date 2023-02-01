@@ -4,7 +4,6 @@ from simmate.apps.vasp.inputs import Incar
 
 
 def test_incar(tmp_path, structure):
-
     # TODO: make a fixture of INCAR settings to iterate through.
 
     # These settings are taken from the relaxation/quality00 task
@@ -305,7 +304,6 @@ def test_incar(tmp_path, structure):
 
 
 def test_custom_keyword_modifier(tmp_path, sample_structures):
-
     structure = sample_structures["C_mp-48_primitive"]
 
     incar_filename = tmp_path / "INCAR"

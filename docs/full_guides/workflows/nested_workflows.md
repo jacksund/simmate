@@ -103,7 +103,7 @@ class Example__Python__MyFavoriteSettings(Workflow):
 ```
 
 !!! tip
-    Also see [writing output files](/full_guides/workflows/creating_new_workflows/#writing-output-files)
+    Also see [writing output files](/simmate/full_guides/workflows/creating_new_workflows/#writing-output-files)
 
 !!! danger
     when using `run_cloud` you should **NOT** share a working directory. This

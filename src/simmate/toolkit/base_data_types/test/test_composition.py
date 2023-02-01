@@ -18,7 +18,6 @@ def test_radii_estimate(composition, radius_method):
 
 
 def test_radii_estimate_metallic(sample_compositions):
-
     # make sure a metallic composition succeeds
     composition_fe = sample_compositions["Fe1"]
     composition_fe.radii_estimate("metallic")
@@ -40,7 +39,6 @@ def test_distance_matrix_estimate(composition, radius_method):
 
 
 def test_chemical_subsystems(sample_compositions):
-
     composition = sample_compositions["Fe1"]
     assert composition.chemical_subsystems == ["Fe"]
 

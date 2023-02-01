@@ -60,7 +60,6 @@ class Relaxation__Vasp__Staged(Workflow):
         copy_previous_directory: bool = False,
         **kwargs,
     ):
-
         # Our first relaxation is directly from our inputs.
         current_task = cls.subworkflows[0]
         state = current_task.run(
@@ -102,7 +101,6 @@ class Relaxation__Vasp__Staged(Workflow):
 
     @classmethod
     def get_series(cls, value: str, **filter_kwargs):
-
         directories = (
             cls.all_results.filter(**filter_kwargs).values_list("directory", flat=True)
             # .order_by("?")[:1000]
@@ -131,7 +129,6 @@ class Relaxation__Vasp__Staged(Workflow):
 
         all_data = {w: {} for w in cls.subworkflow_names}
         for table in tables:
-
             query = table.objects.filter(
                 workflow_name__in=cls.subworkflow_names,
                 **filter_kwargs,
@@ -185,11 +182,9 @@ class StagedSeriesConvergence(PlotlyFigure):
         )
 
         for i in range(len(workflow.subworkflows) - 1):
-
             xs = []
             ys = []
             for energy_series in all_energy_series:
-
                 xs.append(energy_series[i + 1])
                 ys.append(energy_series[i])
 
@@ -232,7 +227,6 @@ class StagedSeriesHistogram(PlotlyFigure):
         workflow,  # Relaxation__Vasp__Staged
         **filter_kwargs,
     ):
-
         all_energy_series = workflow.get_series(
             value="energy_per_atom",
             **filter_kwargs,
@@ -241,7 +235,6 @@ class StagedSeriesHistogram(PlotlyFigure):
         figure = plotly_go.Figure()
 
         for i in range(len(workflow.subworkflows) - 1):
-
             diffs = []
             for energy_series in all_energy_series:
                 if energy_series[i + 1] and energy_series[i]:
@@ -274,14 +267,12 @@ class StagedSeriesHistogram(PlotlyFigure):
 
 
 class StagedSeriesTimes(PlotlyFigure):
-
     method_type = "classmethod"
 
     def get_plot(
         workflow,  # Relaxation__Vasp__Staged
         **filter_kwargs,
     ):
-
         all_time_series = workflow.get_series(
             value="total_time",
             **filter_kwargs,
@@ -293,7 +284,6 @@ class StagedSeriesTimes(PlotlyFigure):
         all_time_series = all_time_series / 60  # convert to minutes
         traces = []
         for i, times in enumerate(all_time_series):
-
             trace = plotly_go.Histogram(
                 x=times,
                 name=f"{workflow.subworkflows[i].name_full}",

@@ -153,7 +153,6 @@ def get_workflow_names_by_type(
     workflow_names = []
 
     for flow in get_all_workflows():
-
         if flow.name_type != flow_type:
             continue
         if app_name and flow.name_app != app_name:
@@ -212,7 +211,6 @@ def get_workflow(workflow_name: str) -> Workflow:
     # given as "path/to/my/script:my_workflow_obj". If so, we need to load that
     # file and grab the workflow like it's an object from a python module.
     if ":" in workflow_name:
-
         # Note, windows paths have multiple ":" so we need to use rsplit.
         script_name, workflow_obj_name = workflow_name.rsplit(":", 1)
         script_name = Path(script_name)
@@ -320,7 +318,6 @@ def load_results_from_directories(base_directory: Path | str = "."):
     # Now go through this list and archive the folders that met the criteria
     # and load the data from each.
     for foldername in foldernames:
-
         # Print message for monitoring progress.
         logging.info(f"Loading data from {foldername}")
 
@@ -328,7 +325,6 @@ def load_results_from_directories(base_directory: Path | str = "."):
         # We don't want those to prevent others from being loaded so we put
         # everything in a try/except.
         try:
-
             # If we have a zip file, we need to unpack it before we can read results
             if not foldername.is_dir():
                 shutil.unpack_archive(

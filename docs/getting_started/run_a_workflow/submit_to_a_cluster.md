@@ -148,7 +148,7 @@ Next, copy your Potentials into `~/simmate/vasp/Potentials` and also copy the `P
 
 It can be diffult in the command line to move files around or even transfer them back and forth from your local computer to the supercomputer. It's much easier with a program like [FileZilla](https://filezilla-project.org/), [MobaXTerm](https://mobaxterm.mobatek.net/), or another file transfer program. We recommend FileZilla, but it's entirely optional and up to you.
 
-Review [our POTCAR guide](/getting_started/run_a_workflow/configure_potcars/) from before if you need help on this step.
+Review [our POTCAR guide](/simmate/getting_started/run_a_workflow/configure_potcars/) from before if you need help on this step.
 
 ----------------------------------------------------------------------
 

@@ -23,7 +23,6 @@ class RandomLattice:
         angle_generation_method=UniformlyDistributedVectors,
         angle_gen_options=dict(min_value=60, max_value=120),
     ):
-
         # establish the vector generation method and use the specified options
         self.vector_generator = vector_generation_method(**vector_gen_options)
 
@@ -31,7 +30,6 @@ class RandomLattice:
         self.angle_generator = angle_generation_method(**angle_gen_options)
 
     def new_lattice(self):
-
         # generate an (a,b,c) vector to pull lattice vectors from
         a, b, c = self.vector_generator.new_vector()
 
@@ -59,7 +57,6 @@ class RandomSymLattice:
         angle_generation_method=UniformlyDistributedVectors,
         angle_gen_options=dict(min_value=60, max_value=120),
     ):
-
         # sg_include = list of spacegroups that we are interested in. Default
         # is all 230 spacegroups
         # sg_exclude = list of spacegroups that we should explicitly ignore
@@ -76,7 +73,6 @@ class RandomSymLattice:
         ]
 
     def new_lattice(self, spacegroup=None):
-
         # if a spacegroup is not specified, grab a random one from our options
         # no check is done to see if the spacegroup specified is compatible with
         # the vector_generator built
@@ -121,7 +117,6 @@ class RandomSymLattice:
 
 
 class RSLFixedVolume(RandomSymLattice):
-
     # identical to RandomSymLattice, except the lattice is scaled to a fixed
     # volume at the end
 
@@ -185,7 +180,6 @@ class RSLSmartVolume:
         angle_generation_method=UniformlyDistributedVectors,
         angle_gen_options=dict(min_value=60, max_value=120),
     ):
-
         # make a list of spacegroups that we are allowed to choose from
         self.spacegroup_options = [
             sg for sg in spacegroup_include if sg not in spacegroup_exclude
@@ -247,7 +241,6 @@ class RSLSmartVolume:
         self.angle_generator = angle_generation_method(**angle_gen_options)
 
     def new_lattice(self, spacegroup=None):
-
         # if a spacegroup is not specified, grab a random one from our options
         # no check is done to see if the spacegroup specified is compatible
         # with the vector_generator built

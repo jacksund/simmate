@@ -9,7 +9,6 @@ from simmate.workflows.utilities import get_all_workflow_names, get_workflow
 @pytest.mark.vasp
 @pytest.mark.django_db
 def test_all_workflow_runs(tmp_path, sample_structures):
-
     # For testing, look at the NaCl rocksalt primitive structure
     structure = sample_structures["NaCl_mp-22862_primitive"]
 
@@ -32,7 +31,6 @@ def test_all_workflow_runs(tmp_path, sample_structures):
     # -----------------
 
     with working_directory(tmp_path):
-
         successful_flows = []
 
         # TEST CUSTOMIZED FLOW
@@ -79,7 +77,6 @@ def test_all_workflow_runs(tmp_path, sample_structures):
             "electronic-structure.vasp.matproj-hse-full",  # slow
         ]
         for workflow_name in s3_flows:
-
             workflow = get_workflow(workflow_name)
             state = workflow.run(
                 structure=structure,

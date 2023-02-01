@@ -45,7 +45,6 @@ else:
     energy_changes = []
 
     for entry in track(data):
-
         # grab total cpu time
         started_at = workflow_00.all_results.values("created_at").get(
             directory__startswith=entry.directory,
@@ -84,7 +83,6 @@ else:
 
 subplots = []
 for formula in df.formula.unique():
-
     df_filtered = df[df.formula == formula]
 
     series = go.Scatter(

@@ -7,7 +7,6 @@ from simmate.website.test_app.models import TestCalculation
 
 @pytest.mark.django_db
 def test_calculation_table():
-
     # test writing columns
     TestCalculation.show_columns()
 
@@ -37,7 +36,6 @@ def test_calculation_table():
 
 @pytest.mark.django_db
 def test_calculation_archives():
-
     calc_db = TestCalculation.from_run_context(
         run_id="example-id-123",
         workflow_name="example.test.workflow",

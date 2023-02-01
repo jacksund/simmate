@@ -4,7 +4,7 @@
 
 ## Before you begin
 
-To get started, make sure you have either completed our [introductory tutorials](/getting_started/overview/) or are comfortable with python.
+To get started, make sure you have either completed our [introductory tutorials](/simmate/getting_started/overview/) or are comfortable with python.
 
 ------------------------------------------------------------
 

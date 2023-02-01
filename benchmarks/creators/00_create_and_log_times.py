@@ -36,7 +36,6 @@ NSAMPLES_PER_COMPOSITION = 500
 
 
 def time_test_creation(creator_class, creator_kwargs):
-
     compositions = [Composition(c) for c in COMPOSITIONS_TO_TEST]
 
     # build parent directory
@@ -46,7 +45,6 @@ def time_test_creation(creator_class, creator_kwargs):
     all_comp_times = []
 
     for composition in compositions:
-
         # BUG: some creators fail for specific compositions
         if str(composition) == "Fe1" and creator_class.name == "ASE":
             all_comp_times.append([None] * NSAMPLES_PER_COMPOSITION)

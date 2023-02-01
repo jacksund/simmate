@@ -46,7 +46,6 @@ class SoftMutation(Transformation):
         use_tags: bool = False,
         used_modes_file: str = None,
     ) -> Structure:
-
         # This mutation is not possible for structures that have only one site
         if structure.num_sites == 1:
             print(

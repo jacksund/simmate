@@ -14,7 +14,6 @@ from simmate.toolkit.diffusion import MigrationImages
 @pytest.mark.slow
 @pytest.mark.django_db
 def test_neb_all_paths(sample_structures, tmp_path, mocker):
-
     SimmateMockHelper.mock_vasp(mocker)
     copy_test_files(
         tmp_path,
@@ -47,7 +46,6 @@ def test_neb_all_paths(sample_structures, tmp_path, mocker):
 
 
 def test_neb_from_images_setup(sample_structures, tmp_path, mocker):
-
     Potcar = SimmateMockHelper.get_mocked_potcar(mocker, tmp_path)
 
     # To test this task we need to create images, which we do using I diffusion

@@ -43,7 +43,6 @@ class UspexStructure(StructureCreator):
         # have Numpy, Scipy, MatPlotLib, ASE, and SpgLib
         conda_env: str = "uspex_env",
     ):
-
         self.composition = composition
 
         # BUG: in separate env right now
@@ -84,7 +83,6 @@ class UspexStructure(StructureCreator):
         self.uspex_input = INPUT_TEMPLATE.format(**uspex_options)
 
     def create_structures(self, n: int, sleep_step: float = 5) -> list[Structure]:
-
         # In order to have USPEX create structures, it is also going to make
         # input files for VASP. To do this, there needs to be a Specific folder
         # with INCAR_1 and POTCAR_X (X=symbol). Because we aren't really
@@ -175,7 +173,6 @@ class UspexStructure(StructureCreator):
         structures = []
 
         for folder in temp_dir.iterdir():
-
             if not folder.is_dir() or not folder.stem.startswith("CalcFold"):
                 continue
 
@@ -190,7 +187,6 @@ class UspexStructure(StructureCreator):
         return structures
 
     def create_structure(self) -> Structure:
-
         # call the new_structures() function and tell it to create
         # just one structure
         structure = self.create_structures(1)[0]

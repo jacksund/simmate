@@ -19,7 +19,6 @@ class LongVector(ErrorHandler):
     ]
 
     def correct(self, directory: Path) -> str:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)

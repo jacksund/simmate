@@ -6,7 +6,7 @@
 
 Inside your project, there are example database tables that show how to build simple ones. It may seem super minimal, but there's really nothing else to do! 
 
-Recall the lesson from [the section on inheritance](/getting_started/access_the_database/intro_to_python_inheritance/) from the "access the database" tutorial. This is why building out new tables is so easy. :fire:
+Recall the lesson from [the section on inheritance](/simmate/getting_started/access_the_database/intro_to_python_inheritance/) from the "access the database" tutorial. This is why building out new tables is so easy. :fire:
 
 Some thing as simple as...
 

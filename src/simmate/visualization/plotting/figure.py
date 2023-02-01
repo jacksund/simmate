@@ -5,7 +5,6 @@ from pathlib import Path
 
 
 class Figure:
-
     method_type: str = "objectmethod"  # or "classmethod"
 
     @classmethod

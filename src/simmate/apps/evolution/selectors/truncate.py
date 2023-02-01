@@ -24,7 +24,6 @@ class TruncatedSelection(Selector):
         # whether we can select the same individual more than once
         allow_duplicate: bool = True,
     ) -> pandas.DataFrame:
-
         # truncate the population to those with energies in the lowest X%. This
         # value should be greater or equal to our minimum set above
         ntruncate = int(len(individuals) * percentile)

@@ -34,7 +34,6 @@ class NonConverging(ErrorHandler):
 
         # check to see that the files are there first
         if oszicar_filename.exists() and incar_filename.exists():
-
             # then load each file's data
             oszicar = Oszicar(oszicar_filename)
             incar = Incar.from_file(incar_filename)
@@ -55,7 +54,6 @@ class NonConverging(ErrorHandler):
             # issues and the error exists. Note we ignore the final ionic step because
             # it may not be complete yet.
             for ionic_step in oszicar.ionic_steps[-1 * self.min_ionic_steps : -1]:
-
                 # As soon as we find one ionic step that converged before the
                 # NELM limit, we can say the error is not present and exit
                 if len(ionic_step["electronic_steps"]) != current_nelm:

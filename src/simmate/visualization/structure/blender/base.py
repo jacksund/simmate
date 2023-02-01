@@ -11,7 +11,6 @@ from simmate.visualization.structure.blender.configuration import get_blender_co
 
 
 def make_blender_structure(structure, filename="simmate_structure.blend"):
-
     # load the base blender command for use in function calls below
     BLENDER_COMMAND = get_blender_command()
     # OPTIMIZE: ideally I would load this outside the function so that it is only
@@ -65,7 +64,6 @@ def serialize_structure_sites(structure):
     # For example, if there a site at (0,0,0) then we also want to display the
     # site at (1,1,1).
     for site in structure:
-
         # Grab the base info that is the same for all site images here.
         # TODO: We fix the radius for now but may do oxidation analysis for
         # accurate ionic radii in the future
@@ -97,7 +95,6 @@ def serialize_structure_sites(structure):
 
         # Now let's iterate through each permutation and add it to our sites list
         for permutaton in permutatons:
-
             # make the vector that we need to add to the base site. For example,
             # if the permutation is (0,2) then we would do...
             # coords + [1, 0, 1]. Note I use fractional coords in this example

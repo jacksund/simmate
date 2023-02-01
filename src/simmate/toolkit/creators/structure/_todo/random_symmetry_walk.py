@@ -28,7 +28,6 @@ class StructureCreator:
         max_large_mult_attempt=400,
         max_dist_attempt=100,
     ):
-
         # save general input
         self.max_large_mult_attempt = max_large_mult_attempt
         self.max_dist_attempt = max_dist_attempt
@@ -53,7 +52,6 @@ class StructureCreator:
         self.wy_data = loadWyckoffData()
 
     def new_structure(self, spacegroup=None, lattice=None, species=None, coords=None):
-
         # shuffle compostion order
         elements = [e for e in self.composition]
         shuffle(elements)
@@ -93,7 +91,6 @@ class StructureCreator:
             large_mult_attempt = 0
             total_attempt_count = 0
             while not master_check:  # while not check and (attempts <= ...)
-
                 #!!! add an attempt
                 total_attempt_count += 1
                 if total_attempt_count == self.max_total_attempt:
@@ -146,7 +143,6 @@ class StructureCreator:
                 dist_attempt = 0
 
                 while not dist_check:
-
                     # add an attempt
                     dist_attempt += 1
 

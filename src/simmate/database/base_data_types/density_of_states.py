@@ -123,7 +123,6 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
 
     @classmethod
     def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):
-
         density_of_states_db = cls.from_toolkit(
             structure=vasprun.structures[0],
             density_of_states=vasprun.complete_dos,
@@ -136,7 +135,6 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
 
 class DosDiagram(MatplotlibFigure):
     def get_plot(result: DensityofStates):
-
         # NOTE: This method should be moved to a toolkit object
 
         # DEV NOTE: Pymatgen only implements matplotlib for their DOS

@@ -4,7 +4,6 @@ from numpy.random import normal as numpy_random_normal
 
 
 class NormallyDistributedVectors:
-
     # This class creates random coordinates (x,y,z) that follow a normal (Guassian)
     # distribution. The random values will between min_value and max_value, and also
     # extra conditions can be added. For example, ['x>=y', 'x<z*2', 'y<z+1']
@@ -12,7 +11,6 @@ class NormallyDistributedVectors:
     def __init__(
         self, min_value=0, max_value=1, extra_conditions=[], center=None, standdev=None
     ):
-
         # Extra conditions should be a list of strings that use x,y,z for vector
         # positions. For example, ['x>=y', 'x<z*2', 'y<z+1']
 
@@ -30,13 +28,11 @@ class NormallyDistributedVectors:
         self.standdev = standdev if standdev else (max_value - min_value) / 5
 
     def new_vector(self):
-
         # We want to attempt to make a vector until it meets all of the conditions
         # that we set above. We therefore have a while loop. To start the whileloop,
         # we need this conditon set to false
         is_valid_vector = False
         while not is_valid_vector:
-
             # generate random 3x1 matrix where values are normally distributed
             vector = numpy_random_normal(loc=self.center, scale=self.standdev, size=3)
 

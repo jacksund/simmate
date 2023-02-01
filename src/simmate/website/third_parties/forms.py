@@ -12,7 +12,6 @@ from simmate.utilities import get_chemical_subsystems
 
 
 class ChemicalSystemForm(forms.Form):
-
     include_subsystems = forms.BooleanField(
         label="Include Subsytems",
         required=False,
@@ -46,7 +45,6 @@ class ChemicalSystemForm(forms.Form):
     oqmd = forms.BooleanField(required=False)
 
     def clean_chemical_system(self):
-
         # Our database expects the chemical system to be given in alphabetical
         # order, but we don't want users to recieve errors when they search for
         # "Y-C-F" instead of "C-F-Y". Therefore, we fix that for them here! We

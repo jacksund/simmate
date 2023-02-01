@@ -16,7 +16,6 @@ class Brions(ErrorHandler):
     possible_error_messages = ["BRIONS problems: POTIM should be increased"]
 
     def correct(self, directory: Path) -> str:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)

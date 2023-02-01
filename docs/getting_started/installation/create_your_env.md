@@ -39,7 +39,7 @@ This may take a few minutes to run and install. But once it's done, you've now s
 
 !!! tip
     If your installation is extremely slow (>20 minutes), you may want to read through
-    our ["Speed-up your installation" section](/getting_started/installation/quick_start/#speed-up-your-installation).
+    our ["Speed-up your installation" section](/simmate/getting_started/installation/quick_start/#speed-up-your-installation).
 
 ----------------------------------------------------------------------
 
