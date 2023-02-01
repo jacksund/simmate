@@ -7,7 +7,6 @@ import time
 class Cluster:
     @classmethod
     def start_cluster(cls, nworkers: int, sleep_step: float = 5):
-
         logging.info(f"Starting cluster with {nworkers} workers")
 
         # on start-up we need to submit the target number of jobs
@@ -25,7 +24,6 @@ class Cluster:
 
     @classmethod
     def wait_for_jobs(cls, job_ids: list[int], sleep_step: float = 5):
-
         # loop until the job id list is empty
         while job_ids:
             job_ids = cls.update_jobs_list(job_ids)

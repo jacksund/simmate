@@ -44,7 +44,6 @@ class Species:
     """
 
     def __init__(self, symbol, oxidation_state=0.0, **kwargs):
-
         # Because oxidation states are the most commonly used with Species objects,
         # I set that keyword, but all others can be defined by the user. Here are
         # some standard keywords worth considering:

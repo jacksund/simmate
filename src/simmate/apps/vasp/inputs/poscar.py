@@ -125,7 +125,6 @@ class Poscar:
         # we can now iterate through all of these lines and pull out the
         # coordinates and check for the symbols at the end of each line
         for index, line in enumerate(lines[8:]):
-
             # if we are reading velocities after this, then we want to keep track
             # of what line we finish up on. The +9 is because that's where
             # we started for this enumeration for-loop.

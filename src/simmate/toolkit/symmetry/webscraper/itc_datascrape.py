@@ -33,7 +33,6 @@ driver = webdriver.Chrome(
 asym_data = []
 wy_data = []
 for spacegroup in track(range(1, 231)):
-
     # change the int spacegroup to a string in three digit format
     # for example, 15 will turn into 015 and 1 will turn into 001
     sg_format = (

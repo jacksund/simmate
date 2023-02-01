@@ -7,7 +7,6 @@ from simmate.website.test_app.models import TestThermodynamics
 
 @pytest.mark.django_db
 def test_thermo_table(structure, tmp_path):
-
     # test writing columns
     TestThermodynamics.show_columns()
 

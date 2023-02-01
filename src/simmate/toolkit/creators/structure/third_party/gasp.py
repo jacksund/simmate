@@ -26,7 +26,6 @@ class GaspStructure(StructureCreator):
     # be used as a python module, which really hinders its reusability.
 
     def __init__(self, composition: Composition):
-
         try:
             from gasp.development import Constraints
             from gasp.general import CompositionSpace, IDGenerator
@@ -53,7 +52,6 @@ class GaspStructure(StructureCreator):
         self.spacegroup_options = [1]
 
     def create_structure(self) -> Structure:
-
         # sometimes gasp fails to make a structure, but let's loop it until
         # we get a valid one
         structure_gasp = False

@@ -7,7 +7,6 @@ from simmate.command_line.engine import engine_app
 
 @pytest.mark.django_db
 def test_start_worker_cli(command_line_runner):
-
     # dump the database to json
     result = command_line_runner.invoke(
         engine_app,

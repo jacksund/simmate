@@ -49,7 +49,6 @@ class Lattice:
     @staticmethod
     @numba_speedup(cache=True)
     def _lengths_fast(matrix):
-
         # NOTE: users should not call this method! Use lattice.lengths instead
 
         # OPTIMIZE: is there an alternative way to write this that numba will
@@ -95,7 +94,6 @@ class Lattice:
     @staticmethod
     @numba_speedup(cache=True)
     def _angles_fast(matrix, lengths):
-
         # NOTE: users should not call this method! Use lattice.angles instead
 
         # OPTIMIZE: is there an alternative way to write this that numba will

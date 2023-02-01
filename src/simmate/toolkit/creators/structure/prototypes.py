@@ -158,7 +158,6 @@ class FromAflowPrototypes:
         self.prototype_structures = prototype_entries.to_toolkit()
 
     def _get_ordered_prototypes(self):
-
         # Load all of the prototype structures that have a compatible
         # number of sites in the structure.
 
@@ -228,7 +227,6 @@ class FromAflowPrototypes:
         # as we make them too.
         self.structures = []
         for prototype in self.prototype_structures:
-
             # we need to match elements in our target composition to those in
             # the prototype. For example, Ca2NF with the NaCrS2 prototype would
             # need to match S-->Ca, Cr-->N, and Na-->F.
@@ -240,7 +238,6 @@ class FromAflowPrototypes:
             # We then go through each ordering and see which ones will give our
             # target composition when substituted for Na-Cr-S in order.
             for target_elements in itertools.permutations(self.composition.elements):
-
                 # Using this ordering of target elements we can now
                 # attempt the subsitution for the prototype
 
@@ -273,7 +270,6 @@ class FromAflowPrototypes:
                     self.structures.append(new_structure)
 
     def _create_structures_from_ordered(self):
-
         # Create a flattened list of elements (e.g. Ca2N --> [Ca, Ca, N])
         # Note we use the reduced composition to ensure the smallest list, and
         # we duplicate this list to the proper size based on the prototype
@@ -285,7 +281,6 @@ class FromAflowPrototypes:
 
         self.structures = []
         for prototype in self.prototype_structures:
-
             if len(prototype.equivalent_indices) % len(element_list_expanded) == 0:
                 mult = len(prototype.equivalent_indices) // len(element_list_expanded)
                 element_list_scaled = element_list_expanded * mult
@@ -296,7 +291,6 @@ class FromAflowPrototypes:
                 raise Exception("Unknown scaling for prototype wyckoffs")
 
             for target_elements in itertools.permutations(element_list_scaled):
-
                 new_structure = prototype.copy()
 
                 # Go through and substitute out the elements

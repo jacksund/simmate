@@ -253,7 +253,6 @@ def setup_only(context: Context, workflow_name: str):
     from simmate.engine import S3Workflow
 
     if issubclass(workflow, S3Workflow):
-
         workflow.setup(**kwargs_cleaned)
     else:
         raise typer.BadParameter(

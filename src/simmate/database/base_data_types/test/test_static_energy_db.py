@@ -9,7 +9,6 @@ from simmate.toolkit import Structure
 
 @pytest.mark.django_db
 def test_static_energy_table(structure, tmp_path):
-
     # test writing columns
     StaticEnergy.show_columns()
 

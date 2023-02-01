@@ -109,7 +109,6 @@ class SimmateWorker:
         #   the queue is empty
         #   the nitems limit is hit
         while True:
-
             # check for timeout before starting a new workitem and exit
             # if we've hit the limit.
             if (time.time() - time_start) > self.timeout:
@@ -147,7 +146,6 @@ class SimmateWorker:
             # make this atomic so that multiple workers don't accidentally
             # grab the same job.
             with transaction.atomic():
-
                 # If we've made it this far, we're ready to grab a new WorkItem
                 # and run it!
                 # Query for PENDING WorkItems, lock it for editting, and update
@@ -184,7 +182,6 @@ class SimmateWorker:
             # if it fails, we want to "capture" the error and return it
             # rather than have the Worker fail itself.
             except Exception as exception:
-
                 traceback.print_exc()
 
                 logging.warning(
@@ -210,7 +207,6 @@ class SimmateWorker:
                     )
 
                     with transaction.atomic():
-
                         nfailures = workitem.command_not_found_failures + 1
 
                         # Check if this task is problematic. If this error happened

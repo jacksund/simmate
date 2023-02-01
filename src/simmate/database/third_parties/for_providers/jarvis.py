@@ -49,7 +49,6 @@ def load_all_structures():
     # We convert the data into a pymatgen object and sanitize it before saving
     # to the Simmate database
     for entry in track(data):
-
         # The structure is in the atoms field as a dictionary. We pull this data
         # out and convert it to a pymatgen Structure object
         structure = Structure(

@@ -3,7 +3,6 @@ from simmate.apps.vasp.workflows.base import VaspWorkflow
 
 
 class Relaxation__Vasp__ClusterHighQ(VaspWorkflow):
-
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS
 

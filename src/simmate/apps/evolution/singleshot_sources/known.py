@@ -38,7 +38,6 @@ def get_known_structures(
     structures = []
 
     for database_table in databases_to_search:
-
         # If there is a limit to nsites, we want to match the composition formula
         # exactly. Otherwise we can match the reduced formula.
         if not allow_multiples:

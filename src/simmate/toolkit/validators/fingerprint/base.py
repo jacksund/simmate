@@ -14,7 +14,6 @@ from simmate.utilities import chunk_list
 
 
 class FingerprintValidator(Validator):
-
     comparison_mode: str = "linalg_norm"
     """
     How fingerprints distances should be determined. Options are:
@@ -38,7 +37,6 @@ class FingerprintValidator(Validator):
         use_database: bool = False,
         **kwargs,
     ):
-
         self.use_database = use_database
         self.distance_tolerance = distance_tolerance or self.distance_tolerance
 
@@ -58,7 +56,6 @@ class FingerprintValidator(Validator):
         # If we are using the database, that means we are storing fingerprints
         # inside a cloud database table. Here, we set up the parent table entry.
         if use_database:
-
             if self.structure_pool_queryset == "local_only":
                 raise Exception(
                     "You can only use database features if a queryset is given "
@@ -100,7 +97,6 @@ class FingerprintValidator(Validator):
         # check if we were given a list of pymatgen structures. If so, we can
         # just set and store things locally.
         if isinstance(structure_pool, list):
-
             # If so, we generate the fingerprint for each of the initial input structures
             # We convert this to a numpy array for speed improvement at later stages
             fingerprints = numpy.array(
@@ -153,7 +149,6 @@ class FingerprintValidator(Validator):
         structure: Structure,
         add_unique_to_pool: bool = True,
     ):
-
         # TODO:
         # maybe add a check to see if a matching source is already in the
         # the source_pool.
@@ -166,7 +161,6 @@ class FingerprintValidator(Validator):
 
         # add this new fingerprint to the database if it was requested.
         if is_unique and add_unique_to_pool:
-
             # BUG-FIX:
             # in case a pymatgen structure was given, set the source to {}
             if not hasattr(structure, "source"):
@@ -182,14 +176,12 @@ class FingerprintValidator(Validator):
         fingerprint: numpy.array,
         fingerprint_pool: list[numpy.array],
     ):
-
         # We now want to get the distance of this fingerprint relative to all others.
         # If the distance is within the specified tolerance, then the structures
         # are too similar - and we return  for a failure.
         is_unique = True  # consider it unique until proven otherwise
         # min_dist = 9999  # start with high value
         for fingerprint2 in fingerprint_pool:
-
             # check fingerprint based on the mode set
             if self.comparison_mode == "linalg_norm":
                 distance = numpy.linalg.norm(fingerprint - fingerprint2)
@@ -230,7 +222,6 @@ class FingerprintValidator(Validator):
     # -------------------------------------------------------------------------
 
     def update_fingerprint_pool(self):
-
         if not self.use_database or self.structure_pool_queryset == "local_only":
             raise Exception(
                 "This method should only be used when your structure pool"
@@ -257,7 +248,6 @@ class FingerprintValidator(Validator):
         # first we can check if these structures have fingerprints already
         # calculated and load those.
         if self.use_database:
-
             logging.info("Checking database for already-calculated fingerprints")
 
             # a single query might be too large for some querysets. Several
@@ -405,7 +395,6 @@ class FingerprintValidator(Validator):
                 structures_unique.append(structure)
 
     def get_unique_from_pool(self) -> list[Structure]:
-
         # order of the input structures is important for this method
         if (
             self.structure_pool_queryset

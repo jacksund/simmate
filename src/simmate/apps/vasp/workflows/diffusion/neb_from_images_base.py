@@ -78,7 +78,6 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
         # folder. We make those folders here, where they are named 00, 01, 02...N
         # Also recall that "structure" is really a list of structures here.
         for i, image in enumerate(migration_images):
-
             # first make establish the foldername
             # The zfill function converts numbers from "1" to "01" for us
             foldername = directory / str(i).zfill(2)

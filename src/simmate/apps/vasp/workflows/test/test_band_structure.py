@@ -10,7 +10,6 @@ from simmate.conftest import SimmateMockHelper, copy_test_files
 
 
 def test_band_structure_setup(structure, tmp_path, mocker):
-
     Potcar = SimmateMockHelper.get_mocked_potcar(mocker, tmp_path)
 
     # estabilish filenames that we make and commonly reference

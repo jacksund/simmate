@@ -80,7 +80,6 @@ class DeepmdDataset:
         directory="deepmd_data",
         test_size=0.2,
     ):
-
         # Grab the path to the desired directory and create it if it doesn't exist
         directory = get_directory(directory)
 
@@ -121,7 +120,6 @@ class DeepmdDataset:
             ("train", dataframe_train, folders_train),
             ("test", dataframe_test, folders_test),
         ]:
-
             # grab a list of the unique compositions in our set of structures
             unique_compositions = dataframe_set.formula_full.unique()
 
@@ -129,7 +127,6 @@ class DeepmdDataset:
             # then write them to a individual folder for deepmd.
             # note these compositions are just strings right now.
             for composition_str in unique_compositions:
-
                 # convert to a pymatgen composition object
                 composition = Composition(composition_str)
 
@@ -169,7 +166,6 @@ class DeepmdDataset:
                 energies = []
                 # Note the "_," here is because row index is returned but we dont need it
                 for _, structure_data in dataframe_subset.iterrows():
-
                     # grab the pymatgen structure
                     structure = structure_data.structure
 

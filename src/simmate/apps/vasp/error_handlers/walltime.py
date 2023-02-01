@@ -157,7 +157,6 @@ class Walltime(ErrorHandler):
 
         # Next we see if we are in a SLURM environment
         elif "SLURM_JOBID" in os.environ:
-
             output = subprocess.run(
                 "squeue -h -O TimeLeft -j $SLURM_JOBID",
                 shell=True,
@@ -223,7 +222,6 @@ class Walltime(ErrorHandler):
 
         # Determine max time per ionic step.
         if not self.electronic_step_stop:
-
             outcar.read_pattern(
                 {"timings": r"LOOP\+.+real time(.+)"}, postprocess=float
             )
@@ -235,7 +233,6 @@ class Walltime(ErrorHandler):
 
         # Determine max time per electronic step.
         else:
-
             outcar.read_pattern({"timings": "LOOP:.+real time(.+)"}, postprocess=float)
             time_per_step = (
                 numpy.max(outcar.data.get("timings"))

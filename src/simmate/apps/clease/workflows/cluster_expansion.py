@@ -47,7 +47,6 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
         directory: Path = None,
         **kwargs,
     ):
-
         logging.critical(
             "This is a highly experimental (and largely incomplete) workflow. "
             "Proceed with caution and pay attention to the changelog for updates."
@@ -115,7 +114,6 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
         ns = NewStructures(settings)
 
         for past_calc in past_calculations:
-
             # convert from Database Structure --> Toolkit Structure --> ASE
             structure_result = past_calc.to_toolkit()
             atoms = AseAtomsAdaptor.get_atoms(structure_result)
@@ -168,7 +166,6 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
             # BUG: how are failed calculations handled?
             submitted_states = []
             for row in ase_database.select(converged=False):
-
                 # convert the entry to an ASE atoms and then a Toolkit structure
                 atoms = row.toatoms()
                 structure_step = AseAtomsAdaptor.get_structure(atoms)
@@ -188,7 +185,6 @@ class ClusterExpansion__Clease__BulkStructure(Workflow):
             # Now iterate through our submitted calcs and save them to our
             # database as they finish
             for state in submitted_states:
-
                 # wait for run to finish and load the results
                 try:
                     result = state.result()  # structure_step

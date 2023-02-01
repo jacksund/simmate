@@ -12,7 +12,6 @@ from simmate.toolkit import Structure
 
 
 class SubmitWorkflow(forms.Form):
-
     # All workflows, regardless of their other parameters, will always have a
     # "tags" input. This is a list of tags to submit the workflow with.
     tags = forms.CharField(required=False)  # initial="WarWulf"
@@ -50,7 +49,6 @@ class SubmitWorkflow(forms.Form):
         return cleaned_data
 
     def clean_structure_json(self, field_name: str = "structure_json"):
-
         # Grab what the user submitted
         structure_json = self.cleaned_data[field_name]
 
@@ -67,7 +65,6 @@ class SubmitWorkflow(forms.Form):
         return structure
 
     def clean_structure_file(self, field_name: str = "structure_file"):
-
         # Grab what the user submitted
         structure_file = self.cleaned_data[field_name]
 
@@ -124,7 +121,6 @@ class SubmitWorkflow(forms.Form):
         return self.clean_structure_file("migration_images_file")
 
     def clean_tags(self):
-
         # Grab what the user submitted
         tags_str = self.cleaned_data["tags"]
 
@@ -139,11 +135,9 @@ class SubmitWorkflow(forms.Form):
 
     @classmethod
     def from_workflow(cls, workflow: Workflow):
-
         # We keep a running dictionary of options for the form.
         form_fields = {}
         for parameter_name in workflow.parameter_names:
-
             is_required = parameter_name in workflow.parameter_names_required
 
             if parameter_name in INPUT_MAPPINGS["file-or-json"]:

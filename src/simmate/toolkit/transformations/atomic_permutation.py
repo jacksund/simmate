@@ -29,7 +29,6 @@ class AtomicPermutation(Transformation):
         max_exchanges=5,
         max_attempts=100,
     ):
-
         # grab a list of the elements
         elements = structure.composition.elements
 
@@ -57,7 +56,6 @@ class AtomicPermutation(Transformation):
         structure_matcher = StructureMatcher()
 
         for attempt in range(max_attempts):
-
             # Make a deepcopy of the structure so that we aren't modifying
             # it inplace. This also allows us to compare the new structure to
             # the original placing this at the top of the loop also resets
