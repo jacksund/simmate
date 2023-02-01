@@ -11,7 +11,6 @@ from simmate.toolkit import Structure
 
 @pytest.mark.django_db
 def test_static_energy_table(structure):
-
     # test writing columns
     Dynamics.show_columns()
     DynamicsIonicStep.show_columns()

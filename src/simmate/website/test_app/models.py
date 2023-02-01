@@ -11,7 +11,6 @@ from simmate.database.base_data_types import (
 
 
 class TestDatabaseTable(DatabaseTable):
-
     archive_fields = ["column1", "column2"]
 
     column1 = table_column.BooleanField()

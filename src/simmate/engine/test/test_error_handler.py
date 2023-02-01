@@ -30,7 +30,6 @@ class IncorrectHandler(ErrorHandler):
 
 
 def test_error_handler():
-
     directory = Path(__file__).parent
 
     # test basic use

@@ -17,7 +17,6 @@ class LocalCluster(Cluster):
 
     @classmethod
     def submit_job(cls) -> subprocess.Popen:
-
         output_file = (
             Path.cwd()
             / mkstemp(
@@ -37,7 +36,6 @@ class LocalCluster(Cluster):
 
     @staticmethod
     def update_jobs_list(job_ids: list[subprocess.Popen]) -> list[subprocess.Popen]:
-
         # each job id is actually a subprocess.Popen object
         still_running = []
         for process in job_ids:

@@ -32,7 +32,6 @@ DummyWorkflow = Testing__Vasp__Dummy
 
 
 def test_base_setup(structure, tmp_path, mocker):
-
     Potcar = SimmateMockHelper.get_mocked_potcar(mocker, tmp_path)
 
     # estabilish filenames that we make and commonly reference

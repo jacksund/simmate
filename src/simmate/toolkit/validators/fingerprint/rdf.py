@@ -6,7 +6,6 @@ from .featurizers import RadialDistributionFunction as rdf
 
 
 class RdfFingerprint(FingerprintValidator):
-
     comparison_mode = "cos"
 
     @staticmethod

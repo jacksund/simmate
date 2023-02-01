@@ -38,7 +38,6 @@ driver = webdriver.Chrome(
 
 table_info = []
 for spacegroup in track(range(1, 231)):
-
     # load the webpage
     driver.get("https://www.cryst.ehu.es/cryst/get_wp.html")
 
@@ -70,7 +69,6 @@ for spacegroup in track(range(1, 231)):
     # the second row is a spacer (empty)
     # then after that it's a mixture of the full row that we want with some duplicate "rows" (the last column)
     for row in rows[2:]:
-
         # grab the string
         info = row.text
         # remove the "\n" characters

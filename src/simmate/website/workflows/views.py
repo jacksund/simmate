@@ -50,7 +50,6 @@ TYPE_DESCRIPTIONS = {
 
 
 def workflows_all(request):
-
     # TODO: maybe instead load these descriptions from the simmate.{module}'s docstr
     # This would look something like...
     # all_metadata = {}
@@ -65,7 +64,6 @@ def workflows_all(request):
 
 
 def workflows_by_type(request, workflow_type):
-
     apps = get_apps_by_type(workflow_type)
 
     # pull the information together for each individual flow and organize by
@@ -90,7 +88,6 @@ def workflows_by_type(request, workflow_type):
 
 
 class WorkflowAPIViewSet(SimmateAPIViewSet):
-
     template_list = "workflows/detail.html"
     template_retrieve = "workflows/detail_run.html"
 
@@ -128,7 +125,6 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
         workflow_app,
         workflow_preset,
     ) -> dict:
-
         name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
         workflow = get_workflow(name_full)
 
@@ -146,7 +142,6 @@ class WorkflowAPIViewSet(SimmateAPIViewSet):
         workflow_preset,
         pk,
     ) -> dict:
-
         name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
         workflow = get_workflow(name_full)
 
@@ -160,7 +155,6 @@ def workflow_submit(
     workflow_app: str,
     workflow_preset: str,
 ):
-
     name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
     workflow = get_workflow(name_full)
 
@@ -174,7 +168,6 @@ def workflow_submit(
         # raise Exception(str(submission_form.errors))
 
         if submission_form.is_valid():
-
             # We can now submit the workflow for the structure.
             flow_run_id = workflow.run_cloud(
                 wait_for_run=False,

@@ -25,7 +25,6 @@ class MeshSymmetry(ErrorHandler):
     ]
 
     def check(self, directory: Path) -> bool:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
@@ -72,7 +71,6 @@ class MeshSymmetry(ErrorHandler):
         return super().check(directory)
 
     def correct(self, directory: Path) -> str:
-
         raise NotImplementedError(
             "The fix for MeshSymmetryError hasn't been converted from Custodian "
             "to Simmate yet. A fix does exist though, so be sure to tell our "

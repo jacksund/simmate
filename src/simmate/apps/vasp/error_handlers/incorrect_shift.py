@@ -17,7 +17,6 @@ class IncorrectShift(ErrorHandler):
     possible_error_messages = ["Could not get correct shifts"]
 
     def correct(self, directory: Path) -> str:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)

@@ -24,7 +24,6 @@ class LatticeStrain(Transformation):
         structure: Structure,
         ratio_of_covalent_radii: float = 0.1,
     ) -> Structure:
-
         # ----------- SETUP (consider caching as class attribute) -------------
         # the closest_distances_generator is exactly the same as an
         # element-dependent distance matrix expect ASE puts this in dictionary

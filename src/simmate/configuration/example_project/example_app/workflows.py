@@ -47,7 +47,6 @@ __all__ = [
 
 
 class Example__Python__MyExample1(Workflow):
-
     database_table = MyCustomTable1
 
     @staticmethod
@@ -71,7 +70,6 @@ class Example__Python__MyExample1(Workflow):
 
 
 class Relaxation__Vasp__MyExample2(VaspWorkflow):
-
     # This uses the PBE functional with POTCARs that have lower electron counts
     # and convergence criteria when available.
     functional = "PBE"
@@ -121,6 +119,7 @@ class Relaxation__Vasp__MyExample2(VaspWorkflow):
 
 # If you need to add advanced logic for one of your INCAR tags, you can register
 # a keyword_modifier to the INCAR class like so:
+
 
 # first define the logic of your modifier as a function
 def keyword_modifier_multiply_nsites(structure, example_mod_input):

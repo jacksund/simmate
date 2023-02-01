@@ -33,7 +33,6 @@ class RealOptlay(ErrorHandler):
     natoms_large_cell = 100
 
     def correct(self, directory: Path) -> str:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)

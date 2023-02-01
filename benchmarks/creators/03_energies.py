@@ -26,7 +26,6 @@ parent_dir = get_directory("creator_benchmarks")
 
 subplots = []
 for creator_name in CREATORS_TO_TEST:
-
     workflow = get_workflow("static-energy.vasp.quality04")
     csv_file = parent_dir / creator_name / "energies_initial.csv"
 

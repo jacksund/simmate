@@ -26,7 +26,6 @@ from simmate.toolkit import Structure
 
 @transaction.atomic
 def load_all_structures(api_key="9WPgw8xYqYcB91ylff1CogIaXd4MGq6RoEZjwC1L0fh66uMw"):
-
     # !!! Remove key in production
 
     # connect to the database

@@ -31,13 +31,11 @@ class Frozen(ErrorHandler):
 
         # check to see that the file is there first
         if output_filename.exists():
-
             # check when the file was last editted
             time_last_edit = output_filename.lstat().st_mtime
 
             # see how long ago this was and if it was longer than our timeout
             if time.time() - time_last_edit > self.timeout_limit:
-
                 # if so, we have a frozen error and need to report it
                 return True
 
@@ -47,7 +45,6 @@ class Frozen(ErrorHandler):
         return False
 
     def correct(self, directory: Path) -> str:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)

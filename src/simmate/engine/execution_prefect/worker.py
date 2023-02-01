@@ -52,7 +52,6 @@ class PrefectWorker:
         timeout: float = None,
         close_on_empty_queue: bool = False,
     ):
-
         # This will be used when creating the queue
         self.concurrency_limit = concurrency_limit
 
@@ -99,7 +98,6 @@ class PrefectWorker:
         nflows_submitted = 0
 
         async with OrionAgent(work_queue_name=self.queue_name) as agent:
-
             logging.info(
                 f"Worker started! Looking for work from queue '{self.queue_name}'..."
             )
@@ -110,7 +108,6 @@ class PrefectWorker:
             #   the nitems limit is hit
             #   the user stops the process with ctrl+C  # BUG
             while True:
-
                 # check for timeout before starting a new workitem and exit
                 # if we've hit the limit.
                 if (time.time() - time_start) > self.timeout:

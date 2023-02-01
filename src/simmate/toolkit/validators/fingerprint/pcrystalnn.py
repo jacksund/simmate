@@ -10,7 +10,6 @@ from .featurizers import PartialsSiteStatsFingerprint as pssf
 
 
 class PartialCrystalNNFingerprint(FingerprintValidator):
-
     # Defaults grab from those suggested by the Materials Project
     comparison_mode = "linalg_norm"
     distance_tolerance = 0.9
@@ -23,7 +22,6 @@ class PartialCrystalNNFingerprint(FingerprintValidator):
         stat_options: list[str] = ["mean", "std_dev"],  # , "minimum", "maximum"
         **crystalnn_options,
     ):
-
         # Note, defaults give the equivalent fingerprint method:
         # PartialsSiteStatsFingerprint.from_preset("CrystalNNFingerprint_ops")
 

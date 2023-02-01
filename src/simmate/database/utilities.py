@@ -16,7 +16,6 @@ APPS_TO_MIGRATE = list(apps.app_configs.keys())
 
 
 def update_database(apps_to_migrate=APPS_TO_MIGRATE, show_logs: bool = True):
-
     # check Django if there are any updates to be made
     if show_logs:
         logging.info("Checking for and applying updates...")
@@ -31,7 +30,6 @@ def update_database(apps_to_migrate=APPS_TO_MIGRATE, show_logs: bool = True):
 
 
 def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
-
     # BUG: Why doesn't call_command("flush") do this? How is it different?
 
     # We can now proceed with reseting the database
@@ -61,7 +59,6 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
 
     # go through each app directory and delete all folders named 'migrations'
     for app_name, app_config in apps.app_configs.items():
-
         # Skip if the app was not requested
         if app_config.label not in apps_to_migrate:
             continue
@@ -96,7 +93,6 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
 
 
 def dump_database_to_json(filename="database_dump.json", exclude=[]):
-
     # Begin writing the database to the json file.
     logging.info("Writing all data to JSON...")
 
@@ -110,7 +106,6 @@ def dump_database_to_json(filename="database_dump.json", exclude=[]):
 
 
 def load_database_from_json(filename="database_dump.json"):
-
     # Begin writing the database to the json file.
     logging.info("Loading all data from JSON...")
 

@@ -31,7 +31,6 @@ def test_get_workflow_types():
 
 
 def test_list_of_all_workflows():
-
     assert get_all_workflow_names() == [
         # "cluster-expansion.clease.bulk-structure",
         "customized.toolkit.user-config",
@@ -94,7 +93,6 @@ def test_list_of_all_workflows():
 
 
 def test_list_of_apps_by_type():
-
     assert get_apps_by_type("static-energy") == ["vasp"]
 
     with pytest.raises(TypeError):
@@ -102,7 +100,6 @@ def test_list_of_apps_by_type():
 
 
 def test_list_of_workflows_by_type():
-
     assert get_workflow_names_by_type("static-energy") == [
         # "static-energy.vasp.cluster-high-qe",
         "static-energy.vasp.matproj",
@@ -130,7 +127,6 @@ def test_list_of_workflows_by_type():
 
 
 def test_get_workflow():
-
     from simmate.apps.vasp.workflows import StaticEnergy__Vasp__Matproj as workflow
 
     assert get_workflow("static-energy.vasp.matproj") == workflow
@@ -154,7 +150,6 @@ my_workflow = Example__Python__MyFavoriteSettings
 
 
 def test_get_custom_workflow(tmp_path):
-
     script_name = tmp_path / "my_script.py"
 
     with script_name.open("w") as file:
@@ -166,7 +161,6 @@ def test_get_custom_workflow(tmp_path):
 
 
 def test_get_unique_paramters():
-
     assert get_unique_parameters() == [
         "angle_tolerance",
         "best_survival_cutoff",
@@ -243,7 +237,6 @@ def test_get_unique_paramters():
 
 @pytest.mark.django_db
 def test_load_results_from_directories(tmp_path):
-
     copy_test_files(
         tmp_path,
         test_directory=__file__,

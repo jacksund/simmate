@@ -152,7 +152,6 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
 
     @classmethod
     def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):
-
         band_structure = vasprun.get_band_structure(line_mode=True)
         band_structure_db = cls.from_toolkit(
             structure=vasprun.structures[0],
@@ -166,7 +165,6 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
 
 class BandDiagram(MatplotlibFigure):
     def get_plot(result: BandStructure):
-
         # NOTE: This method should be moved to a toolkit object
 
         # DEV NOTE: Pymatgen only implements matplotlib for their band-structures

@@ -11,7 +11,6 @@ import os
 import sys
 
 if __name__ == "__main__":
-
     # We set an enviornment variable that tells django where our site in installed
     os.environ.setdefault(
         "DJANGO_SETTINGS_MODULE", "simmate.configuration.django.settings"

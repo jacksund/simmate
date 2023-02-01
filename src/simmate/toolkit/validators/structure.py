@@ -9,11 +9,9 @@ from simmate.toolkit.validators.base import Validator
 
 class SiteDistance(Validator):
     def __init__(self, distance_cutoff):
-
         self.distance_cutoff = distance_cutoff
 
     def check_structure(self, structure):
-
         # check the min distance of sites
 
         # ignore the diangonal (which is also made of zeros)
@@ -34,7 +32,6 @@ class SiteDistanceMatrix(Validator):
         radius_method="ionic",
         packing_factor=0.5,
     ):
-
         # save inputs for reference
         self.composition = composition
         self.radius_method = radius_method

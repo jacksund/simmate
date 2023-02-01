@@ -21,7 +21,6 @@ class Brmix(ErrorHandler):
     possible_error_messages = ["BRMIX: very serious problems"]
 
     def check(self, directory: Path) -> bool:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
@@ -37,7 +36,6 @@ class Brmix(ErrorHandler):
         return super().check(directory)
 
     def correct(self, directory: Path) -> str:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
@@ -115,7 +113,6 @@ class Brmix(ErrorHandler):
             #         )
 
         else:
-
             # Try turning off symmetry and using a Gamma-packed grid
             incar["ISYM"] = 0
             incar["KGAMMA"] = True

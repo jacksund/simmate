@@ -42,7 +42,6 @@ class SimmateAPIViewSet(GenericViewSet):
     template_retrieve: str = None
 
     def get_list_response(self, request: HttpRequest, *args, **kwargs) -> Response:
-
         # This code is modified from the ListModelMixin, where instead of returning
         # a response, we perform additional introspection first.
         # https://github.com/encode/django-rest-framework/blob/master/rest_framework/mixins.py#L33
@@ -86,7 +85,6 @@ class SimmateAPIViewSet(GenericViewSet):
             return Response(data)
 
     def get_retrieve_response(self, request: HttpRequest, *args, **kwargs) -> Response:
-
         # self.format_kwarg --> not sure why this always returns None, so I
         # grab the format from the request instead. If it isn't listed, then
         # I'm using the default which is html.
