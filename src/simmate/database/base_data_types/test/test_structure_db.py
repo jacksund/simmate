@@ -9,7 +9,6 @@ from simmate.website.test_app.models import TestStructure
 
 @pytest.mark.django_db
 def test_structure_table(structure):
-
     # test writing columns
     TestStructure.show_columns()
 
@@ -29,7 +28,6 @@ def test_structure_table(structure):
 
 @pytest.mark.django_db
 def test_structure_queries():
-
     # test converting search results to dataframe and to toolkit
     df = TestStructure.objects.to_dataframe()
     assert isinstance(df, DataFrame)
@@ -41,7 +39,6 @@ def test_structure_queries():
 
 @pytest.mark.django_db
 def test_structure_archives():
-
     TestStructure.objects.to_archive()
     TestStructure.load_archive(
         confirm_override=True,

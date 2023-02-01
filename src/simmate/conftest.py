@@ -167,7 +167,6 @@ def django_db_setup(
     and a user.
     """
     with django_db_blocker.unblock():
-
         # add a user
         User.objects.create_user(
             username="test_user",
@@ -283,7 +282,6 @@ def make_dummy_files(*filenames: str):
 class SimmateMockHelper:
     @staticmethod
     def get_mocked_potcar(mocker, directory: Path):
-
         # Because we won't have POTCARs accessible, we need to cover this function
         # call -- specifically have it pretend to make a file
         mocker.patch.object(
@@ -295,7 +293,6 @@ class SimmateMockHelper:
         return Potcar  # in case we need to "assert_called_with"
 
     def mock_vasp(mocker):
-
         # Because we won't have POTCARs accessible, we need to skip this function
         # call -- specifically have it pretend to make a file
         mocker.patch.object(Potcar, "to_file_from_type", return_value=None)

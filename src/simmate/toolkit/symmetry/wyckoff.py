@@ -7,7 +7,6 @@ import pandas as pd
 
 
 def loadWyckoffData():
-
     """
     This function loads the csv file containing all wyckoff site data into
     a pandas dataframe. One column that we need is not directly stored in
@@ -49,7 +48,6 @@ def loadWyckoffData():
 
 
 def findValidWyckoffCombos(stoich, spacegroup, wy_data=loadWyckoffData()):
-
     """
     Given a composition's stoichiometry (such as [4,4,12] for Mg4Si4O12) and
     a single spacegroup (1-230), this function will find all valid wyckoff
@@ -194,7 +192,6 @@ def findValidWyckoffCombos(stoich, spacegroup, wy_data=loadWyckoffData()):
 def findValidWyckoffCombosForListofSpacegroups(
     stoich, sg_include=range(1, 231), sg_exclude=[]
 ):
-
     """
     Find all wyckoff group combinations for specified list of spacegroups.
     This function calls the findValidWyckoffCombos function repeatedly, so
@@ -222,7 +219,6 @@ def findValidWyckoffCombosForListofSpacegroups(
 
 
 def loadAsymmetricUnitData():
-
     """
     This function simply loads the csv file containing all asymmetric unit
     data into a pandas dataframe. It then just grabs the column we need and
@@ -247,7 +243,6 @@ def loadAsymmetricUnitData():
 
 
 def loadSpecifiedUnitData():
-
     """
     THIS IS JUST A COPY/PASTE OF loadAsymmetricUnitData() WITH A DIFFERENT
     COLUMN GRAB I NEED TO UPDATE THESE CSV FILES OR COMBINE THESE FUNCTIONS.

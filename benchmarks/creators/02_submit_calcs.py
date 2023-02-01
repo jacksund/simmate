@@ -38,7 +38,6 @@ workflow_static = get_workflow("static-energy.vasp.quality04")
 workflow_relax = get_workflow("relaxation.vasp.staged")
 
 for creator_name in CREATORS_TO_TEST:
-
     for composition in compositions:
         directory = parent_dir / creator_name / str(composition)
 
@@ -46,7 +45,6 @@ for creator_name in CREATORS_TO_TEST:
             continue
 
         for file in track(directory.iterdir()):
-
             # skip if was submitted already
             if workflow_static.all_results.filter(source__file=str(file)).exists():
                 continue

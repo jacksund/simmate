@@ -19,7 +19,6 @@ from simmate.visualization.structure.blender.configuration import (
 
 @pytest.mark.blender  # this test requires blender to NOT be installed
 def test_get_blender_command():
-
     operating_system = platform.system()
 
     if operating_system == "Darwin":

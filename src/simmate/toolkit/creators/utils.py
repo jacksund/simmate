@@ -25,7 +25,6 @@ class FixIndicator(ABC):
 
 class SingleFix(FixIndicator):
     def __init__(self, fixes, cutoffs):
-
         # The object to ALWAYS point to for the fix
         self.fixes = fixes
 
@@ -33,7 +32,6 @@ class SingleFix(FixIndicator):
         self.cutoffs = cutoffs
 
     def point_to_fix(self, attempt=0):
-
         if attempt <= self.cutoffs:
             return self.fixes
         else:
@@ -45,7 +43,6 @@ class SingleFix(FixIndicator):
 
 class SerialFixes(FixIndicator):
     def __init__(self, fixes, cutoffs):
-
         # How to handle the structure should check_structure() return false. Based on
         # the attempt number given in point_to_fix() and the maximum attempts allowed
         # for each fix (see maxFails), the point_to_fix() will return one of these objects.
@@ -65,7 +62,6 @@ class SerialFixes(FixIndicator):
         self.cutoffs_cum = [sum(cutoffs[: x + 1]) for x in range(len(cutoffs))]
 
     def point_to_fix(self, attempt=0):
-
         # based on the attempt number and the maxFails list, see what stage of onFail we are on
         for i, attempt_cutoff in enumerate(self.cutoffs_cum):
             # if we are below the attempt cutoff, return the corresponding onFail object
@@ -82,7 +78,6 @@ class SerialFixes(FixIndicator):
 
 class NestedFixes(FixIndicator):
     def __init__(self, fixes, cutoffs):
-
         # How to handle the structure should check_structure() return false. Based on
         # the attempt number given in point_to_fix() and the maximum attempts allowed
         # for each fix (see maxFails), the point_to_fix() will return one of these objects.
@@ -121,7 +116,6 @@ class NestedFixes(FixIndicator):
         self.attempt_map = self.attempt_map[len(cutoffs) - 1 :]
 
     def point_to_fix(self, attempt=0):
-
         if attempt >= self.max_attempt:
             return False
         # we have a nest map here, so we can just access it

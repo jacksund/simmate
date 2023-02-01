@@ -43,7 +43,6 @@ def write_to_csv(times, name):
 
 nomanager_times = []
 for ntasks in ntasks_range:
-
     # build the dummy workflow that simply `passes` N times
     def flow_dummy():
         for n in range(ntasks):
@@ -63,7 +62,6 @@ from simmate.engine import Workflow, task
 
 simmate_local_times = []
 for ntasks in ntasks_range:
-
     # build the dummy workflow that simply `passes` N times
     @task
     def dummy_task():

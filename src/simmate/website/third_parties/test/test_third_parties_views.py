@@ -6,7 +6,6 @@ from pytest_django.asserts import assertTemplateUsed
 
 
 def test_providers_view(client):
-
     # grabs f"/third-parties/"
     url = reverse("third_parties:home")
 
@@ -27,7 +26,6 @@ def test_providers_view(client):
     ],
 )
 def test_workflows_by_type_view(client, provider_name):
-
     # list view
 
     # grabs f"/workflows/{workflow_type}/"

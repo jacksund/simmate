@@ -11,7 +11,6 @@ from simmate.toolkit import Structure
 
 @pytest.mark.django_db
 def test_relaxation_table(structure):
-
     # test writing columns
     Relaxation.show_columns()
     IonicStep.show_columns()

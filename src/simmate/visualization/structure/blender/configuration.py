@@ -22,7 +22,6 @@ import yaml
 
 
 def get_blender_command():
-
     # First we look in the simmate configuration directory and check if it
     # has been set there.
     #   [home_directory] ~/simmate/blender.yaml
@@ -65,7 +64,6 @@ def find_blender_installation():
 
     # Linux includes all distros where we primarily test with Ubuntu.
     if operating_system == "Linux":
-
         # On Linux, we actually have the easiest setup because the blender
         # command should be directly accessible -- regardless of where blender
         # was installed.
@@ -73,7 +71,6 @@ def find_blender_installation():
 
     # Windows -- we assume Windows 10 for now.
     elif operating_system == "Windows":
-
         # On Windows, Blender is typically installed in the following directory:
         #   C:\Program Files\Blender Foundation\Blender 2.93
         expected_folder = Path("C:\\Program Files\\Blender Foundation\\")
@@ -82,7 +79,6 @@ def find_blender_installation():
 
         # We check the folder, and if it exists we grab the highest Blender version listed.
         if expected_folder.exists():
-
             # grab all the folders and find the highest blender version, which
             # be the last one when sorted alphabetically
             blender_version = sorted(expected_folder.iterdir())[-1]

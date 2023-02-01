@@ -92,7 +92,6 @@ class FixedCompositionSearch(Calculation):
         as_dict: bool = False,
         **kwargs,
     ):
-
         # Initialize the steady state sources by saving their config information
         # to the database.
         if steadystate_sources and not as_dict:
@@ -115,7 +114,6 @@ class FixedCompositionSearch(Calculation):
     # -------------------------------------------------------------------------
 
     def check_stop_condition(self):
-
         # First, see if we have at least our minimum limit for *exact* structures.
         # "Exact" refers to the nsites of the structures. We want to ensure at
         # least N structures with the input/expected number of sites have been
@@ -176,7 +174,6 @@ class FixedCompositionSearch(Calculation):
         return False
 
     def _check_singleshot_sources(self, directory: Path):
-
         # local imports to prevent circuluar import issues
         from simmate.apps.evolution.singleshot_sources.known import get_known_structures
         from simmate.apps.evolution.singleshot_sources.prototypes import (
@@ -247,7 +244,6 @@ class FixedCompositionSearch(Calculation):
         steadystate_sources_cleaned = []
         steadystate_source_proportions = []
         for source_name, proportion in steadystate_sources.items():
-
             # There are certain transformation sources that don't work for
             # single-element structures, so we check for this here and
             # remove them.
@@ -330,7 +326,6 @@ class FixedCompositionSearch(Calculation):
         return steadystate_sources_db
 
     def _check_steadystate_workflows(self):
-
         # local import to prevent circular import issues
         from simmate.apps.evolution.workflows.new_individual import (
             StructurePrediction__Toolkit__NewIndividual,
@@ -354,7 +349,6 @@ class FixedCompositionSearch(Calculation):
         # then we need to submit more!
         steadystate_sources_db = self.steadystate_sources.all()
         for source_db in steadystate_sources_db:
-
             # skip if we have a transformation but aren't ready for it yet
             if source_db.is_transformation and not ready_for_transformations:
                 continue
@@ -378,7 +372,6 @@ class FixedCompositionSearch(Calculation):
             logger.disabled = True
 
             for n in range(nflows_to_submit):
-
                 # submit the workflow for the new individual. Note, the structure
                 # won't be evuluated until the job actually starts. This allows
                 # our validator to have the most current information available
@@ -403,7 +396,6 @@ class FixedCompositionSearch(Calculation):
 
     @property
     def subworkflow(self):
-
         # local import to prevent circular import issues
         from simmate.workflows.utilities import get_workflow
 
@@ -473,7 +465,6 @@ class FixedCompositionSearch(Calculation):
         use_cache: bool = False,
         as_queryset: bool = False,
     ):
-
         # get the most-up-to-date results but is slow
         if not use_cache:
             unique = self.validator.get_unique_from_pool()
@@ -569,7 +560,6 @@ class FixedCompositionSearch(Calculation):
 
     @property
     def selector(self):
-
         # !!! This is largley a copy/paste of the validator method. Consider
         # making a utility to load classes by name
 
@@ -741,7 +731,6 @@ class FixedCompositionSearch(Calculation):
 
 class FitnessConvergence(PlotlyFigure):
     def get_plot(search: FixedCompositionSearch):
-
         # Grab the calculation's structure and convert it to a dataframe
         columns = ["finished_at", search.fitness_field]
         structures_dataframe = search.individuals_completed.only(*columns).to_dataframe(
@@ -772,7 +761,6 @@ class Correctness(PlotlyFigure):
         search: FixedCompositionSearch,
         structure_known: Structure,
     ):
-
         # load the featurizer from the search object
         featurizer = search.validator.featurizer
 
@@ -814,7 +802,6 @@ class Correctness(PlotlyFigure):
         smallest_distance_id = None
         smallest_distance = 999
         for _, s in structures_dataframe.iterrows():
-
             distance = numpy.linalg.norm(fingerprint_known - s.fingerprint)
             distances.append(distance)
 
@@ -852,7 +839,6 @@ class Correctness(PlotlyFigure):
 
 class SubworkflowTimes(PlotlyFigure):
     def get_plot(search: FixedCompositionSearch):
-
         # Grab the calculation's structure and convert it to a dataframe
         data = search.individuals_completed.values_list(
             "total_time", "queue_time"
@@ -878,7 +864,6 @@ class SubworkflowTimes(PlotlyFigure):
 
 class FitnessDistribution(PlotlyFigure):
     def get_plot(search: FixedCompositionSearch):
-
         # Grab the calculation's structure and convert it to a dataframe
         structures_dataframe = search.individuals_completed.only(
             search.fitness_field

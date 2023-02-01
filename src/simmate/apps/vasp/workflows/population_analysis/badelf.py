@@ -31,7 +31,6 @@ class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
         directory: Path = None,
         **kwargs,
     ):
-
         if empty_sites and empty_ion:
             raise Exception(
                 "You can only use either empty_sites or an empty_ion_template. "

@@ -52,7 +52,6 @@ def load_all_structures(
 
     # Connect to their database with personal API key
     with MPRester(api_key) as mpr:
-
         # For the filtered structures, this lists off which properties to grab.
         # All possible properties can be listed with:
         #   mpr.summary.available_fields
@@ -205,7 +204,6 @@ from django.utils.timezone import make_aware
 
 
 def fix_timezone(naive_datetime):
-
     settings.TIME_ZONE  # 'UTC'
     aware_datetime = make_aware(naive_datetime)
     aware_datetime.tzinfo  # <UTC>

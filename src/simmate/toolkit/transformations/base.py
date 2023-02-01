@@ -107,7 +107,6 @@ class Transformation:
         max_attempts: int = 100,
         **kwargs,  # for apply_transformation_with_validation
     ):
-
         logging.info(f"Creating a transformed structure with '{self.name}'")
         logging.info(f"Parent(s) will be selected using '{selector.name}'")
 
@@ -155,7 +154,6 @@ class Transformation:
         validators=[],
         max_attempts=100,
     ):
-
         # Until we get a new valid structure (or run out of attempts), keep trying
         # with our given source. Assume we don't have a valid structure until
         # proven otherwise
@@ -170,7 +168,6 @@ class Transformation:
 
             # check to see if the structure passes all validation checks.
             if new_structure:
-
                 for validator in validators:
                     is_valid = validator.check_structure(new_structure)
 

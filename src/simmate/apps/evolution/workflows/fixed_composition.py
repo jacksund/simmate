@@ -61,7 +61,6 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         run_id: str = None,
         **kwargs,
     ):
-
         #######################################################################
         # TODO: Check if there is an existing search and grab it if so.
         # We can also update, add logs, compare... I need to decide what to do
@@ -140,7 +139,6 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
 
         # this loop will go until I hit 'break' below
         while True:
-
             # Write the output summary if there is at least one structure completed
             if write_summary_files and sleep_counter >= sleep_frequency:
                 sleep_counter = 0  # reset the cycle

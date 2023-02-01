@@ -7,7 +7,6 @@ from simmate.website.test_app.models import TestDatabaseTable
 
 @pytest.mark.django_db
 def test_database_table():
-
     # add a row
     x = TestDatabaseTable(column1=True, column2=3.14)
     x.save()
@@ -34,7 +33,6 @@ def test_to_toolkit():
 
 @pytest.mark.django_db
 def test_from_toolkit():
-
     # to object and save
     x = TestDatabaseTable.from_toolkit(column1=True, column2=3.14)
     x.save()
@@ -46,7 +44,6 @@ def test_from_toolkit():
 
 @pytest.mark.django_db
 def test_archive():
-
     # BUG: This test does not save archives within a tmp_path -- but instead the
     # working directory. Therefore, these tests cannot be split up and ran
     # in parallel (with pytest-xdist).

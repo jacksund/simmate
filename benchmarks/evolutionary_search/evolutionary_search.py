@@ -124,7 +124,6 @@ structures = individuals.to_toolkit()
 matcher = StructureMatcher(attempt_supercell=True)
 
 for n, individual in track(list(enumerate(individuals))):
-
     structure = individual.to_toolkit()
 
     is_match = matcher.fit(expected_structure, structure)

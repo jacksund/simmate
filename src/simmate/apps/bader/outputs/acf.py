@@ -8,7 +8,6 @@ from pymatgen.io.vasp.outputs import Chgcar
 
 
 def ACF(directory: Path = None, filename="ACF.dat"):
-
     # grab working directory if one wasn't provided
     if not directory:
         directory = Path.cwd()
@@ -64,7 +63,6 @@ def ACF(directory: Path = None, filename="ACF.dat"):
     if potcar_filename.exists() and (
         chgcar_filename.exists() or chgcar_empty_filename.exists()
     ):
-
         # load the electron counts used by VASP from the POTCAR files
         # OPTIMIZE: this can be much faster if I have a reference file
         potcars = Potcar.from_file(potcar_filename)

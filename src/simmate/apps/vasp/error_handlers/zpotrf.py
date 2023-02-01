@@ -20,7 +20,6 @@ class Zpotrf(ErrorHandler):
     possible_error_messages = ["LAPACK: Routine ZPOTRF failed"]
 
     def correct(self, directory: Path) -> str:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)

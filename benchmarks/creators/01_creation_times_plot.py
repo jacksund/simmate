@@ -25,7 +25,6 @@ parent_dir = get_directory("creator_benchmarks")
 data = []
 
 for creator_name in CREATORS_TO_TEST:
-
     directory = parent_dir / creator_name
 
     df = pandas.read_csv(directory / "times.csv", index_col=0)

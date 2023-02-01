@@ -29,7 +29,6 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
         directory: Path,
         **kwargs,
     ):
-
         search_db = FixedCompositionSearch.objects.get(id=search_id)
         source_db = search_db.steadystate_sources.get(id=steadystate_source_id)
         validator = search_db.validator
@@ -46,7 +45,6 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
             return
 
         if source_db.is_transformation:
-
             transformer = source_db.to_toolkit()
 
             # Check the cache first to save time (even though it might be outdated)
@@ -92,7 +90,6 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
             }
 
         elif source_db.is_creator:
-
             creator = source_db.to_toolkit()
 
             new_structure = creator.create_structure_with_validation(
@@ -104,7 +101,6 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
 
         # if structure creation was successful, run the workflow for it
         if new_structure:
-
             state = search_db.subworkflow.run(
                 structure=new_structure,
                 source=source,

@@ -28,7 +28,6 @@ workflow_relax = get_workflow("relaxation.vasp.staged")
 
 subplots = []
 for creator_name in CREATORS_TO_TEST:
-
     csv_file = parent_dir / creator_name / "total_calc_times.csv"
     if csv_file.exists():
         df = pandas.read_csv(csv_file)

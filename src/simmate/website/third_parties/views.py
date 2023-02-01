@@ -31,7 +31,6 @@ def providers_all(request):
 
 
 class ProviderAPIViewSet(SimmateAPIViewSet):
-
     template_list = "third_parties/provider.html"
     template_retrieve = "third_parties/entry_detail.html"
 
@@ -55,7 +54,6 @@ class ProviderAPIViewSet(SimmateAPIViewSet):
         request,
         provider_name,
     ) -> dict:
-
         provider_table = getattr(third_parties, provider_name)
         return {"provider": provider_table}
 
@@ -65,7 +63,6 @@ class ProviderAPIViewSet(SimmateAPIViewSet):
         provider_name,
         pk,
     ) -> dict:
-
         return {
             "provider_name": provider_name,
             "entry_id": pk,

@@ -13,7 +13,6 @@ from simmate.toolkit.validators.structure import SiteDistanceMatrix
 
 
 class RandomSymStructure(StructureCreator):
-
     # BUG: because I use MultiplicityPrimitive in RandomWySites but make a
     # convential cell below, there may be a issue with the input composition
     # vs. output composition number of sites. For example, when making a Ca2N
@@ -43,7 +42,6 @@ class RandomSymStructure(StructureCreator):
         remove_failed_spacegroups: bool = False,
         cleanup: bool = True,
     ):
-
         # sg_include = list of spacegroups that we are interested in. Default
         # is all 230 spacegroups
         # sg_exclude = list of spacegroups that we should explicitly ignore
@@ -120,7 +118,6 @@ class RandomSymStructure(StructureCreator):
         # spacegroup_options property.
 
     def create_structure(self, spacegroup: int = None) -> Structure:
-
         # If a spacegroup is not specified, grab a random one from our options
         # no check is done to see if the spacegroup specified is compatible
         # with the vector_generator built
@@ -152,7 +149,6 @@ class RandomSymStructure(StructureCreator):
 
         # we want to continue this loop until we get a valid structure
         while not is_valid:
-
             # add an attempt to the validator
             attempts += 1
 
@@ -171,7 +167,6 @@ class RandomSymStructure(StructureCreator):
 
             # Otherwise, we need to try to fix the structure and check it again.
             if not is_valid:
-
                 # see the assigned 'fix' for the validator
                 fix = self.fixindicator.point_to_fix(attempts)
 

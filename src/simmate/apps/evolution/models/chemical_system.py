@@ -62,7 +62,6 @@ class ChemicalSystemSearch(Calculation):
 
     @property
     def subworkflow(self):
-
         from simmate.workflows.utilities import get_workflow
 
         if self.subworkflow_name == "relaxation.vasp.staged":
@@ -126,12 +125,10 @@ class ChemicalSystemSearch(Calculation):
     # -------------------------------------------------------------------------
 
     def write_output_summary(self, directory):
-
         # If the output fails to write, we have a non-critical issue that
         # doesn't affect the search. We therefore don't want to raise an
         # error here -- but instead warn the user and then continue the search
         try:
-
             if not self.individuals_completed.exists():
                 logging.info("No structures completed yet. Skipping output writing.")
                 return
@@ -157,7 +154,6 @@ class ChemicalSystemSearch(Calculation):
             self.write_stable_structures(all_comps_dir, include_best_metastable=True)
 
         except Exception as error:
-
             if (
                 isinstance(error, ValueError)
                 and "no entries for the terminal elements" in error.args[0]
@@ -186,7 +182,6 @@ class ChemicalSystemSearch(Calculation):
         directory: Path,
         include_best_metastable: bool = False,
     ):
-
         # if the directory is filled, we need to delete all the files
         # before writing the new ones.
         for file in directory.iterdir():
