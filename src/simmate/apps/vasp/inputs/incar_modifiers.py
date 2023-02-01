@@ -162,7 +162,6 @@ def keyword_modifier_smart_ldau(structure: Structure, ldau_config: dict):
     using_ldau = False
 
     for ldau_keyword in ["LDAUJ", "LDAUL", "LDAUU"]:
-
         # grab the sub-dictionary that maps elements to this keyword.
         # If it's not there, just use an empty dictionary.
         keyword_config = ldau_config.get(ldau_keyword, {})

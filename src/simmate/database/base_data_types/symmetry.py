@@ -65,7 +65,6 @@ class Spacegroup(DatabaseTable):
         """
 
         for number in track(range(1, 231)):
-
             # reverse() is 100% not needed but is nice for users to see progress
             # get faster instead of slower.
             number = 231 - number

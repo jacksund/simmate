@@ -101,7 +101,6 @@ class XtaloptStructure(StructureCreator):
         spacegroup_include: list[int] = range(1, 231),
         spacegroup_exclude: list[int] = [],
     ):
-
         # check that the command exists
         if not shutil.which(command):
             raise Exception("randSpg must be installed and available in the PATH")
@@ -132,7 +131,6 @@ class XtaloptStructure(StructureCreator):
         self.lattice_max = (3 * (str(max_vector) + ", ")) + "120.0, 120.0, 120.0"
 
     def create_structure(self, spacegroup: int = None) -> Structure:
-
         # if a spacegroup is not specified, grab a random one from our options
         # no check is done to see if the spacegroup specified is compatible
         # with the vector_generator built
@@ -252,7 +250,6 @@ class XtaloptStructure(StructureCreator):
         ]
 
     def _create_structure_old(self, spacegroup: int = None) -> Structure:
-
         # BUG: python binding are broken for randSpg
         raise Exception(
             "python binding are broken for randSpg. This method is kept only "

@@ -23,7 +23,6 @@ class Eddrmm(ErrorHandler):
     possible_error_messages = ["WARNING in EDDRMM: call to ZHEGV failed"]
 
     def correct(self, directory: Path) -> str:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
@@ -44,7 +43,6 @@ class Eddrmm(ErrorHandler):
         # and WAVECAR to ensure the next run is a clean start.
         current_icharg = incar.get("ICHARG", 0)
         if current_icharg < 10:
-
             # check if IMAGES is in the INCAR. If so, we have a NEB calculation,
             # and the there will be a different organization of folders.
             if "IMAGES" in incar.keys():

@@ -46,7 +46,6 @@ class Aliasing(ErrorHandler):
         incar = Incar.from_file(incar_filename)
 
         if "aliasing" in error:
-
             # VASP will actually tell us what to switch NGX, NGY, and NGZ to inside
             # the OUTCAR. So we look there for our fix.
             # Here is what the aliasing error typically looks like in the OUTCAR:
@@ -66,7 +65,6 @@ class Aliasing(ErrorHandler):
             # go through each line looking for the suggestions
             for line in outcar_lines:
                 if "to avoid them" in line:
-
                     # break the line up into a list, where NG* is at index 7 and
                     # the fix is at index 9.
                     # BUG: I expect an error will show up here if I was wrong about
@@ -82,7 +80,6 @@ class Aliasing(ErrorHandler):
                     corrections.append(f"switched {incar_key} to {new_value}")
 
         if "insufficient_fft_grid" in error:
-
             # This is typically caused by a user introducing too coarse of a grid.
             # Here we remove all NGX/NGY/NGZ settings from the INCAR
             incar.pop("NGX")
@@ -93,7 +90,6 @@ class Aliasing(ErrorHandler):
 
         # if any corrections were made above, we may want to reset some files
         if corrections:
-
             # Check the current ICHARG setting, where default is 0
             # !!! BUG: isn't the default 2 if we are starting from scratch?
             current_icharg = incar.get("ICHARG", 0)

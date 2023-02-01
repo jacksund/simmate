@@ -56,7 +56,6 @@ workflow = get_workflow("relaxation.vasp.staged")
 limit = 10000
 plot_series = []
 for creator_name in CREATORS_TO_TEST:
-
     csv_file = parent_dir / creator_name / "final_fingergprint_distances.csv"
 
     if csv_file.exists():
@@ -64,7 +63,6 @@ for creator_name in CREATORS_TO_TEST:
     else:
         distances_creator = []
         for composition in track(compositions):
-
             structures = workflow.all_results.filter(
                 source__creator=creator_name,
                 formula_reduced=composition.reduced_formula,

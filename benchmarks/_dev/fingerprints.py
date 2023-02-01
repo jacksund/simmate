@@ -44,7 +44,6 @@ size = [
 
 # we are going to try 10 different supercell sizes
 for n in track(range(10)):
-
     # reset the perovskite structure to its unitcell
     perovskite = mpr.get_structure_by_material_id("mp-5827")
 

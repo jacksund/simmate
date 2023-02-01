@@ -31,7 +31,6 @@ def loginstatus(request):
 
 
 def home(request):
-
     # The home page is also an html "form" because users submit queries from
     # here. So we need to handle form submissions properly.
 
@@ -42,7 +41,6 @@ def home(request):
         form = ChemicalSystemForm(request.POST)
         # see if all of the data is valid
         if form.is_valid():
-
             # grab the cleaned data from the form
             cleaned_data = form.cleaned_data
 

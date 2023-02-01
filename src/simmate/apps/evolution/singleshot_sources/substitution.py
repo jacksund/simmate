@@ -103,7 +103,6 @@ def get_structures_from_substitution_of_known(
     # now iterate through the expected substitutions, grab the known structures
     # from databases, and then perform the substitution to generate new structures
     for substituition in expected_substituitions:
-
         # The methods below expect this sub dictionary to be based off of strings
         # instead of Species objects, so we convert them first.
         substituition_cleaned = {

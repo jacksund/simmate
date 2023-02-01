@@ -124,7 +124,6 @@ class Thermodynamics(DatabaseTable):
         chemical_system: str,
         workflow_name: str = None,
     ):
-
         phase_diagram, entries, entries_pmg = cls.get_phase_diagram(
             chemical_system,
             return_entries=True,
@@ -133,7 +132,6 @@ class Thermodynamics(DatabaseTable):
 
         # now go through the entries and update stability values
         for entry, entry_pmg in zip(entries, entries_pmg):
-
             decomp, hull_energy = phase_diagram.get_decomp_and_e_above_hull(entry_pmg)
 
             entry.energy_above_hull = hull_energy
@@ -168,7 +166,6 @@ class Thermodynamics(DatabaseTable):
 
     @classmethod
     def update_all_stabilities(cls, workflow_name: str = None):
-
         # grab all unique chemical systems
         chemical_systems = cls.objects.values_list(
             "chemical_system", flat=True
@@ -193,7 +190,6 @@ class Thermodynamics(DatabaseTable):
         workflow_name: str = None,
         return_entries: bool = False,
     ) -> PhaseDiagram:
-
         if workflow_name is None and hasattr(cls, "workflow_name"):
             raise Exception(
                 "This table contains results from multiple workflows, so you must "
@@ -246,7 +242,6 @@ class Thermodynamics(DatabaseTable):
 
 
 class HullDiagram(PlotlyFigure):
-
     method_type = "classmethod"
 
     def get_plot(
@@ -255,7 +250,6 @@ class HullDiagram(PlotlyFigure):
         workflow_name: str = None,
         show_unstable_up_to: float = float("inf"),
     ):
-
         phase_diagram = table.get_phase_diagram(chemical_system, workflow_name)
 
         # alternatively use backend="matplotlib"

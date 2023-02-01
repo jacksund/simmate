@@ -27,7 +27,6 @@ class PyXtalStructure(StructureCreator):
         spacegroup_include: list[int] = range(1, 231),
         spacegroup_exclude: list[int] = [],
     ):
-
         try:
             from pyxtal import pyxtal
         except ModuleNotFoundError:
@@ -67,7 +66,6 @@ class PyXtalStructure(StructureCreator):
         # create_structure method.
 
     def create_structure(self, spacegroup: int = None) -> Structure:
-
         from pyxtal.msg import Comp_CompatibilityError
 
         # If a spacegroup is not specified, grab a random one from our options.

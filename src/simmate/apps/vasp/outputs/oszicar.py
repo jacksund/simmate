@@ -24,7 +24,6 @@ class Oszicar:
     """
 
     def __init__(self, filename="OSZICAR"):
-
         # convert to path obj
         filename = Path(filename)
 
@@ -42,10 +41,8 @@ class Oszicar:
         # now let's iterate through the contents and parse the data. We also need
         # to check the line number below, so we use the index too
         for line_number, line in enumerate(lines):
-
             # if "N" is in the line, that means we have the start of a new ionic step
             if "N" in line:
-
                 # let's start with an empty list to record all of the electronic
                 # steps. Note this will also reset the list every time we start
                 # a new ionic step.
@@ -55,7 +52,6 @@ class Oszicar:
             # in the middle of an ionic step. Therefore we also check if this is the final
             # line of the file.
             elif "F" in line:
-
                 # parse this line to pull out the ionic_step information
                 # The formatting is whacky, so I decided to remove all variable
                 # names, leaving only a list of values. I then split these values
@@ -134,7 +130,6 @@ class Oszicar:
                 self.ionic_steps.append(ionic_step)
             # Otherwise this line is an electronic step
             else:
-
                 # electronic step lines are pretty easy because they are just
                 # a row in a table of electronic steps. First let's split
                 # the values into and list and then convert them into floats.

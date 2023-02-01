@@ -10,7 +10,6 @@ from simmate.website.core_components.templatetags.structure_serialize_filter imp
 
 @pytest.mark.django_db
 def test_spacegroup_views(client):
-
     # list view
     response = client.get("/core-components/symmetry/?format=json")
     assert response.status_code == 200

@@ -57,7 +57,6 @@ class Selector:
         fitness_column: str = None,
         query_limit: str = None,
     ):
-
         # our selectors just require a dataframe where we specify the fitness
         # column. So we query our individuals database to give this as an input.
         datatable_cleaned = datatable

@@ -158,7 +158,6 @@ class S3Workflow(Workflow):
         # now if we have a restart OR have an incomplete calculation that is being
         # restarted, we can check our files and run the external program
         if not is_restart or not is_complete:
-
             # make sure proper files are present
             cls._check_input_files(directory)
 
@@ -342,7 +341,6 @@ class S3Workflow(Workflow):
         # correction is applied per attempt, you can view this as the maximum
         # number of attempts made on the calculation.
         while len(corrections) <= cls.max_corrections:
-
             # launch the shelltask without waiting for it to complete. Also,
             # make sure to use common shell commands and to set the working
             # directory.
@@ -383,7 +381,6 @@ class S3Workflow(Workflow):
             # want to go through the error_handlers to check for errors until
             # the shelltask completes.
             if cls.monitor and cls.monitors:
-
                 # ------ start of monitor while loop ------
 
                 # We want to loop until we find an error and keep track of
@@ -459,7 +456,6 @@ class S3Workflow(Workflow):
             # exception here but instead let the monitor handle that
             # error in the code below.
             if process.returncode != 0 and not has_error:
-
                 # convert the error from bytes to a string
                 errors = errors.decode("utf-8")
                 # and report the error to the user. Mac/Linux label this as exit
@@ -486,7 +482,6 @@ class S3Workflow(Workflow):
             # Since the error_handlers are in order of priority, only the first
             # will actually be applied and then we can retry the calc.
             for error_handler in cls.error_handlers:
-
                 # check if there's an error with this error_handler and grab the
                 # error if there is one
                 error = error_handler.check(directory)

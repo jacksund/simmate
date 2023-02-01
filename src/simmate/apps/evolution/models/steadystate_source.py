@@ -118,7 +118,6 @@ class SteadystateSource(DatabaseTable):
             return self._init_creator()
 
     def _init_transformation(self):
-
         if not self.is_transformation:
             raise Exception("This should not be called on non-transformations")
 
@@ -139,7 +138,6 @@ class SteadystateSource(DatabaseTable):
         return transformer
 
     def _init_creator(self):
-
         if not self.is_creator:
             raise Exception("This should not be called on non-creators")
 

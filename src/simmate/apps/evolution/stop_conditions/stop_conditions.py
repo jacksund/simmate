@@ -27,7 +27,6 @@ class BasicStopConditions:
         self.same_min_structures = same_min_structures
 
     def check(self, search):
-
         # Note, a single condition met is enough to stop the search (returns True)
 
         # start by looking at the total number of structures that completed their analysis

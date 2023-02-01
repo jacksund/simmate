@@ -24,7 +24,6 @@ class RotationalMutation(Transformation):
         structure: Structure,
         ratio_of_covalent_radii: float = 0.1,
     ) -> Structure:
-
         #!!! TO-DO. In many cases, you can perform this operation and simply
         # get back the original structure. I should check and make sure
         # that I'm actually returning a new structure

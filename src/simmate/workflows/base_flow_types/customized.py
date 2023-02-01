@@ -57,7 +57,6 @@ class Customized__Toolkit__UserConfig(Workflow):
         input_parameters: dict,
         **kwargs,
     ):
-
         logging.warning(
             "WARNING: customized workflows are meant only for quick testing. "
             "If you are using custom settings regularly, we highly recommend "
@@ -84,7 +83,6 @@ class Customized__Toolkit__UserConfig(Workflow):
         # Key will be something like "incar" and the update_values will be a
         # dictionary such as {"ENCUT": 520, "NPAR": 3}
         for update_attribute, update_values in updated_settings.items():
-
             original_config = getattr(workflow_base, update_attribute)
 
             # we will be deleting/editting the dictionary so we need to make a copy

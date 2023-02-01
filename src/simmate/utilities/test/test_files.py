@@ -8,7 +8,6 @@ from simmate.utilities.files import empty_directory, get_directory, make_error_a
 
 
 def test_get_directory(tmp_path):
-
     # create and delete a new directory
     new_directory = get_directory()
     assert "simmate-task-" in new_directory.name
@@ -25,7 +24,6 @@ def test_get_directory(tmp_path):
 
 
 def test_make_archive(tmp_path):
-
     copy_test_files(
         tmp_path,
         test_directory=__file__,
@@ -38,7 +36,6 @@ def test_make_archive(tmp_path):
 
 
 def test_make_error_archive(tmp_path):
-
     copy_test_files(
         tmp_path,
         test_directory=__file__,
@@ -53,7 +50,6 @@ def test_make_error_archive(tmp_path):
 
 
 def test_empty_directory(tmp_path):
-
     copy_test_files(
         tmp_path,
         test_directory=__file__,

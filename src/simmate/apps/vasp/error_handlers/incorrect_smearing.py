@@ -21,7 +21,6 @@ class IncorrectSmearing(ErrorHandler):
     filename_to_check = "vasprun.xml"
 
     def check(self, directory: Path) -> bool:
-
         # establish the full path to the output file
         filename = directory / self.filename_to_check
 
@@ -59,7 +58,6 @@ class IncorrectSmearing(ErrorHandler):
         return False
 
     def correct(self, directory: Path) -> str:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)

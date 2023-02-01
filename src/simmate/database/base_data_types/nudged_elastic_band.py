@@ -319,7 +319,6 @@ class MigrationHop(Calculation):
         return path
 
     def to_neb_toolkit(self) -> NEBAnalysis:
-
         images = self.migration_images.all()
         structures = self.migration_images.to_toolkit()
 
@@ -332,7 +331,6 @@ class MigrationHop(Calculation):
         return neb_toolkit
 
     def update_from_directory(self, directory: Path):
-
         # check if we have a VASP directory
         vasprun_filename = directory / "vasprun.xml"
         if not vasprun_filename.exists():
@@ -351,7 +349,6 @@ class MigrationHop(Calculation):
 
     @classmethod
     def from_neb_toolkit(cls, neb_results: NEBAnalysis):
-
         # This table entry will actually be completely empty... It only
         # serves to link the MigrationImages together. We only create this
         # if we are updating
@@ -364,7 +361,6 @@ class MigrationHop(Calculation):
         return hop_db
 
     def update_from_neb_toolkit(self, neb_results: NEBAnalysis):
-
         # build migration images and link them to this parent object.
         # Note, the start/end Migration images will exist already in the
         # relaxation database table. We still want to save them again here for

@@ -549,7 +549,6 @@ class DatabaseTable(models.Model):
 
     @classmethod
     def from_dict(cls, source_dict: dict):
-
         # start by loading the datbase table, which is given as a module path
         table_name = source_dict["database_table"]
         datatable = cls.get_table(table_name)
@@ -618,7 +617,6 @@ class DatabaseTable(models.Model):
         return all_data_ordered
 
     def get_table(table_name: str):
-
         # This method can be return ANY table, so we need to import all of them
         # here. This is a local import to prevent circular import issues.
         from simmate.website.third_parties import models as third_party_datatables
@@ -661,7 +659,6 @@ class DatabaseTable(models.Model):
 
     @classmethod
     def from_vasp_directory(cls, directory: Path, as_dict: bool = False):
-
         from simmate.apps.vasp.outputs import Vasprun
 
         vasprun = Vasprun.from_directory(directory)
@@ -769,7 +766,6 @@ class DatabaseTable(models.Model):
         all_data.pop("density_of_states", None)
 
         for parent in parents:
-
             # Skip the parent class if it doesn't directly inherit from the
             # DatabaseTable class. We do this because we want the fundamental
             # mixins that come with Simmate (such as Structure, Forces, Thermodynamics).
@@ -821,7 +817,6 @@ class DatabaseTable(models.Model):
     @classmethod
     @property
     def archive_fieldset(cls) -> list[str]:
-
         all_fields = ["id", "updated_at", "created_at", "source"]
 
         # If calling this method on the base class, just return the sole mix-in.
@@ -990,7 +985,6 @@ class DatabaseTable(models.Model):
                 load_single_entry(entry)
         # otherwise we use dask to submit these in batches!
         else:
-
             from simmate.configuration.dask import batch_submit
 
             batch_submit(

@@ -10,7 +10,6 @@ from .featurizers import PartialRadialDistributionFunction as prdf
 
 
 class PartialRdfFingerprint(FingerprintValidator):
-
     comparison_mode = "cos"
 
     @staticmethod
