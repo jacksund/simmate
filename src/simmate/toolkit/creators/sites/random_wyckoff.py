@@ -26,7 +26,6 @@ class RandomWySites:
         coords_gen_options: dict = dict(),
         lazily_generate_combinations: bool = True,
     ):
-
         # make a list of spacegroups that we are allowed to choose from
         self.spacegroup_options = [
             sg for sg in spacegroup_include if sg not in spacegroup_exclude
@@ -85,7 +84,6 @@ class RandomWySites:
         self.wy_data = loadWyckoffData().values
 
     def new_sites(self, spacegroup=None):
-
         # parse spacegroup or grab a random one (with necessary lazy-setup)
         spacegroup = self._init_spacegroup(spacegroup)
         # exit if we have an invalid spacegroup
@@ -183,7 +181,6 @@ class RandomWySites:
 
                 # check if the spacegroup is valid & analyzed before
                 while not spacegroup in self.coords_generators:
-
                     # bug-note: this loop should not go on endlessly, because
                     # spacegroup=1 should **always** be valid and it will be
                     # selected eventually in extreme cases.
@@ -197,7 +194,6 @@ class RandomWySites:
         # if the user provided a spacegroup, we still need to check if its been
         # analyzed and is valid.
         else:
-
             # make sure wyckoff combos have been analyzed before
             if (
                 self.lazily_generate_combinations
@@ -278,7 +274,6 @@ class RandomWySites:
 
 # Grab the boundry conditions for the asymmetric unit of a spacegroup's unitcell
 def asymmetric_unit_boundries(spacegroup, asym_data=loadAsymmetricUnitData()):
-
     # spacegroup = spacegroup that we are interested in
     # asym_data = result of loadAsmmetricUnitData() - this is in the header for speed reasons
 

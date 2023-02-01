@@ -347,7 +347,6 @@ class MigrationImages(list):
         # these as a list of paths.
         migration_paths = []
         for pathway in pathways:
-
             migration_path = cls.from_migration_hop(
                 migration_hop=pathway,
                 **kwargs,

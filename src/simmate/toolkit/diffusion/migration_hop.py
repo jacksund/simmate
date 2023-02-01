@@ -83,7 +83,6 @@ class MigrationHop(PymatgenMigrationHop):
         min_length: float = 10.0,
         tol: float = 1e-5,
     ):
-
         supercell_start, supercell_end, supercell_base = super().get_sc_structures(
             vac_mode, min_atoms, max_atoms, min_length, tol
         )

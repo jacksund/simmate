@@ -139,7 +139,6 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
 
     @classmethod
     def from_vasp_run(cls, vasprun: Vasprun):
-
         # Make the relaxation entry. Note we need to save this to the database
         # in order to link/save the ionic steps below. We save the structure
         # as the final one in the calculation.
@@ -154,7 +153,6 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
         relaxation.update_from_vasprun(vasprun)
 
     def update_from_directory(self, directory: Path):
-
         # check if we have a VASP directory
         vasprun_filename = directory / "vasprun.xml"
         if not vasprun_filename.exists():
@@ -305,7 +303,6 @@ class IonicStep(Structure, Thermodynamics, Forces):
 
 class RelaxationConvergence(PlotlyFigure):
     def get_plot(relaxation: Relaxation):
-
         # Grab the calculation's structure and convert it to a dataframe
         structures_dataframe = relaxation.structures.order_by("number").to_dataframe()
 

@@ -24,7 +24,6 @@ class ExtremeSymmetry(Transformation):
 
     @staticmethod
     def apply_transformation(structure: Structure):
-
         # To establish the original structure symmetry, we begin with strict
         # tolerances of 0.01Angstrom and 0.5 Deg cutoffs
         sga = SpacegroupAnalyzer(
@@ -44,7 +43,6 @@ class ExtremeSymmetry(Transformation):
         # The tolerances increase as we go, and no matter what, 24 different
         # attempts will be made.
         for attempt in range(25):
-
             # start-up the new analysis
             sga = SpacegroupAnalyzer(
                 structure,

@@ -47,7 +47,6 @@ class CalypsoStructure(StructureCreator):
         # location of the calypso.x file
         command: str = "calypso.x",
     ):
-
         if not shutil.which(command):
             raise Exception("You must have CALYPSO installed and in the PATH.")
 
@@ -99,7 +98,6 @@ class CalypsoStructure(StructureCreator):
         self.calypso_input = INPUT_TEMPLATE.format(**calypso_options)
 
     def create_structures(self, n: int) -> list[Structure]:
-
         # See my comments above on why this atypical function exists...
         # (it's much faster than calling USPEX each new struct)
 
@@ -124,7 +122,6 @@ class CalypsoStructure(StructureCreator):
         # Let's iterate through these and pool them into a list
         structures = []
         for poscar_file in temp_dir.iterdir():
-
             if not poscar_file.stem.startswith("POSCAR_"):
                 continue
 
@@ -152,7 +149,6 @@ class CalypsoStructure(StructureCreator):
         return structures
 
     def create_structure(self) -> Structure:
-
         # call the create_structures() function and tell it to create
         # just one structure
         structure = self.create_structures(1)[0]

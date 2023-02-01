@@ -20,7 +20,6 @@ class LargeSigma(ErrorHandler):
         self.entropy_per_atom_threshold = entropy_per_atom_threshold
 
     def check(self, directory: Path) -> bool:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)
@@ -37,7 +36,6 @@ class LargeSigma(ErrorHandler):
 
         # check to see that the file is there first
         if outcar_filename.exists():
-
             # read the file content and then close it
             with outcar_filename.open() as file:
                 outcar_lines = file.readlines()
@@ -64,7 +62,6 @@ class LargeSigma(ErrorHandler):
         return False
 
     def correct(self, directory: Path) -> str:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)

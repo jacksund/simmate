@@ -34,7 +34,6 @@ class TriggeredAction:
 
     @classmethod
     def from_composition(cls, composition=None, **kwargs):
-
         # note that trigger_options is a dict of custom inputs to use on the class trigger_class
 
         import pymatdisc.engine.triggers as trigger_module
@@ -66,25 +65,21 @@ class TriggeredAction:
 
 
 class InitStructures:
-
     # Super simple check that passes True if no structures have been created yet.
     # If that is the case, then it creates new structures using the input probilities for each generator.
     # This is used to start the entire search.
 
     def __init__(self, n_initial_structures):
-
         # Number of initial structures to create
         self.n_initial_structures = n_initial_structures
 
     def check(self, search):  #!!! can I move 'search' to the init?
-
         if not search.structures:  # same as len(structures) == 0
             return True
         else:
             return False
 
     def action(self, search):
-
         logging.info("Making new structures...")
 
         # we want n total structures so we are going to loop this number of times
@@ -98,14 +93,12 @@ class InitStructures:
 
 class AddStructures:
     def __init__(self, n_pending_limit, n_add_structures):
-
         self.n_pending_limit = n_pending_limit
 
         # Number of structures to create if the pending_limit is hit
         self.n_add_structures = n_add_structures
 
     def check(self, search):  #!!! can I move 'search' to the init?
-
         # if no structures have completed yet, we don't want to add any new structure with this trigger
         if search.njobs_completed == 0:
             return False
@@ -117,7 +110,6 @@ class AddStructures:
             return False
 
     def action(self, search):
-
         logging.info("Making new structures...")
 
         # we want n total structures so we are going to loop this number of times

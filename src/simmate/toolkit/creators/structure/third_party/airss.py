@@ -48,7 +48,6 @@ class AirssStructure(StructureCreator):
         composition: Composition,
         command: str = "buildcell",
     ):
-
         # check that the command exists
         if not shutil.which(command):
             raise Exception(
@@ -67,7 +66,6 @@ class AirssStructure(StructureCreator):
         # MINSEP=1.0 Si-Si=3.00 Si-O=1.60 O-O=2.58
         self.cell_filename = self.temp_dir / "input.cell"
         with self.cell_filename.open("w") as file:
-
             # first write the VARVOL line using predicted volume
             volume = composition.volume_estimate()
             file.write("#VARVOL={}".format(volume) + "\n")
@@ -84,7 +82,6 @@ class AirssStructure(StructureCreator):
             file.write("#MINSEP=1.0" + "\n")
 
     def create_structure(self) -> Structure:
-
         # TODO: Maybe make an AIRSS app / S3 workflow
         output = subprocess.run(
             f"buildcell < {self.cell_filename} | cabal cell cif > AIRSS_output.cif",

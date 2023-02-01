@@ -21,14 +21,12 @@ class Potim(ErrorHandler):
         self.dE_per_atom_threshold = dE_per_atom_threshold
 
     def check(self, directory: Path) -> bool:
-
         # We check for this error in the OSZICAR because it's the smallest file
         # that will tell us energies -- and therefore the fastest to read.
         oszicar_filename = directory / "OSZICAR"
 
         # check to see that the file is there first
         if oszicar_filename.exists():
-
             # then load the file's data
             oszicar = Oszicar(oszicar_filename)
 
@@ -51,7 +49,6 @@ class Potim(ErrorHandler):
         return False
 
     def correct(self, directory: Path) -> str:
-
         # load the INCAR file to view the current settings
         incar_filename = directory / "INCAR"
         incar = Incar.from_file(incar_filename)

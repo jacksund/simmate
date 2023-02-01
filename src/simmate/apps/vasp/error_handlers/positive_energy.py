@@ -31,7 +31,6 @@ class PositiveEnergy(ErrorHandler):
 
         # check to see that the file is there first
         if filename.exists():
-
             # then load the file's data
             oszicar = Oszicar(filename)
 
@@ -73,7 +72,6 @@ class PositiveEnergy(ErrorHandler):
 
         # If the current algo is *not* Normal, then switch it to that
         if current_algo != "Normal":
-
             # Set the new value
             incar["ALGO"] = "Normal"
 
@@ -85,7 +83,6 @@ class PositiveEnergy(ErrorHandler):
 
         # if the algo is already Normal, we try reducing the POTIM by half
         else:
-
             # check what the current POTIM is. If it's not set, that means it's using
             # the default which is 0.5.
             current_potim = incar.get("POTIM", 0.5)

@@ -35,7 +35,6 @@ class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):
         singleshot_sources: list[str] = [],
         **kwargs,  # passed to fixed_comp_workflow
     ):
-
         # Start by submitting the singleshot sources for each factor size.
         logging.warning("Single-shot sources are not implemented yet")
 
@@ -56,7 +55,6 @@ class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):
         # Starting at 1, go through each composition step and run a individual
         # fixed_comp_workflow for that composition.
         for factor in range(1, max_factor + 1):
-
             composition_current = composition_reduced * factor
 
             # logging.info(f"Beginning composition {composition_current}")

@@ -52,7 +52,6 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         run_id: str = None,
         **kwargs,
     ):
-
         # ---------------------------------------------------------------------
         # Setting up
         # ---------------------------------------------------------------------
@@ -102,7 +101,6 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         # (for YSF, note the negative sign for Y)
         compositions_cleaned = []
         for composition in compositions:
-
             try:
                 reaction = Reaction(
                     reactants=endpoint_compositions,
@@ -157,7 +155,6 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         # ---------------------------------------------------------------------
 
         if "third_parties" in singleshot_sources:
-
             logging.info("Generating input structures from third-party databases")
             structures_known = []
             for composition in track(compositions_maxed):
@@ -183,13 +180,11 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         # ---------------------------------------------------------------------
 
         if "prototypes" in singleshot_sources:
-
             # Start by generating the singleshot sources for each factor size.
             logging.info("Generating input structures from prototypes")
             structures_prototype = []
             # for singleshot_source in singleshot_sources: ## TODO
             for composition in track(compositions_maxed):
-
                 # generate all prototypes
                 new_structures = get_structures_from_prototypes(
                     composition,
@@ -236,7 +231,6 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         #       compositional searches.
 
         for natoms in range(1, max_atoms + 1):
-
             # for stage_number in range(1, 4) --> consider adding substages
 
             # Setting stop conditions for each search will be
@@ -266,7 +260,6 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
             current_compositions = [c for c in compositions if c.num_atoms == natoms]
 
             for composition in current_compositions:
-
                 # OPTIMIZE: Should I just skip single-element compositions?
                 # BUG: I do skip these for now because compositions like "N1"
                 # are failing in vasp for me.

@@ -126,7 +126,6 @@ class ErrorHandler(ABC):
 
         # check to see that the file is there first
         if filename.exists():
-
             # read the file content and then close it
             with filename.open() as file:
                 file_text = file.read()

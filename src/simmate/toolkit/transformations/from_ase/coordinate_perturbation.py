@@ -25,7 +25,6 @@ class CoordinatePerturbation(Transformation):
         perturb_strength: float = 0.8,
         ratio_of_covalent_radii: float = 0.1,
     ) -> Structure:
-
         # ----------- SETUP (consider caching as class attribute) -------------
         # The closest_distances_generator is exactly the same as an
         # element-dependent distance matrix, except ASE puts this in dictionary

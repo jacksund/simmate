@@ -42,7 +42,6 @@ class SimmateExecutor:
         tags: list[str] = [],
         **kwargs,
     ) -> WorkItem:
-
         # The *args and **kwargs input separates args into a tuple and kwargs into
         # a dictionary for me, which makes their storage very easy!
 
@@ -139,7 +138,6 @@ class SimmateExecutor:
 
     @staticmethod
     def show_error_summary():
-
         errored_jobs = WorkItem.objects.filter(status="E").all()
 
         if not errored_jobs:

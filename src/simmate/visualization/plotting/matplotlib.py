@@ -25,7 +25,6 @@ class MatplotlibFigure(Figure):
 
     @classmethod
     def get_html_div(cls, parent_class, **kwargs):
-
         figure = cls.get_plot(parent_class, **kwargs)
 
         # Lmao I have no idea how this works and I just got lucky when following

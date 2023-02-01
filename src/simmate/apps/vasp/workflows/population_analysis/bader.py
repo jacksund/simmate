@@ -28,7 +28,6 @@ class PopulationAnalysis__VaspBader__BaderMatproj(Workflow):
         directory: Path = None,
         **kwargs,
     ):
-
         prebader_result = StaticEnergy__Vasp__PrebaderMatproj.run(
             structure=structure,
             command=command,

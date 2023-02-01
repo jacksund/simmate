@@ -155,7 +155,6 @@ class Element(Enum):
     Unknown = "X"
 
     def __init__(self, symbol):
-
         self.symbol = symbol
 
         # OPTIMIZE: consider adding key attributes here for speed. The cost of
@@ -180,7 +179,6 @@ class Element(Enum):
 
         # See if the requested attribute is actually one we support
         if item in SUPPORTED_PROPERTIES:
-
             # Grab our target data
             # NOTE: I am using data.get(item) instead of data[item] because I want
             # to return None when the data is available. This is slower but gives

@@ -76,7 +76,6 @@ class NebAllPathsWorkflow(Workflow):
         run_id: str = None,
         **kwargs,
     ):
-
         if relax_bulk:
             # run a relaxation on the bulk structure
             bulk_relax_result = cls.bulk_relaxation_workflow.run(

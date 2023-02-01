@@ -104,7 +104,6 @@ class Incar(dict):
     }
 
     def __init__(self, **kwargs):
-
         # The kwargs are a dictionary of parameters (e.g. {"PREC": "accurate"})
 
         # Establish the dictionary with the given input
@@ -119,7 +118,6 @@ class Incar(dict):
         # datatypes and formatting? Also will this behave properly if the value
         # is already in the correct format?
         for parameter, value in self.items():
-
             # parameters may have tags like "__density" added onto them. We don't
             # convert to the datatype yet, but instead wait until a structure
             # is provided (when the to_file or str methods are called below).
@@ -161,7 +159,6 @@ class Incar(dict):
             self.update({"MAGMOM": new_format})
 
     def to_evaluated_str(self, structure: Structure = None):
-
         # Let's start with an empty string and build from there
         final_str = ""
 
@@ -171,14 +168,12 @@ class Incar(dict):
         # parameters into a final settings list.
         final_settings = {}
         for parameter, value in self.items():
-
             # if there is no modifier attached to the parameter, we just keep it as-is
             if "__" not in parameter:
                 final_settings[parameter] = value
 
             # Otherwise we have a modifier like "__density" and need to evaluate it
             else:
-
                 # make sure we have a structure supplied because all modifiers
                 # require one.
                 if not structure:
@@ -236,14 +231,12 @@ class Incar(dict):
         # iterate through each parameter and its set value. Each one will be
         # put on a separate line.
         for parameter, value in final_settings.items():
-
             # let's start by adding the parameter key to our output
             # It will be followed by an equal sign to separate it's value
             final_str += parameter + " = "
 
             # If we have a value that is a list (or list of lists)
             if isinstance(value, list):
-
                 # check if we have a list of lists
                 # Take MAGMOM with LSORBIT=True as an example, where we convert...
                 #   [[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]
@@ -345,7 +338,6 @@ class Incar(dict):
 
         # iterate through each unique parameter
         for parameter in set(parameters1 + parameters2):
-
             # try to grab the value from both Incar objects
             # If it doesn't have the value, None will be provided
             value1 = self.get(parameter)
@@ -371,7 +363,6 @@ class Incar(dict):
 
         # now iterate through the other incar parameters to incorporate them
         for parameter, value in other.items():
-
             # If both have a given parameter, make sure they are the same values
             if parameter in self and value != self[parameter]:
                 # If not, we shouldn't allow combining these Incars as it can

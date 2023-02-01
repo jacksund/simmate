@@ -53,7 +53,6 @@ parent_dir = get_directory("creator_benchmarks")
 limit = 10000
 plot_series = []
 for creator_name in CREATORS_TO_TEST:
-
     csv_file = parent_dir / creator_name / "initial_fingergprint_distances.csv"
 
     if csv_file.exists():

@@ -17,7 +17,6 @@ class Potcar:
         filename="POTCAR",
         element_mappings=None,  # actual default is ELEMENT_MAPPINGS
     ):
-
         # Element objects are passed along with a string representing the
         # desired functional ("PBE", "LDA", or "PBE_GW")
         # The order of the elements list MUST match the POSCAR!
@@ -49,7 +48,6 @@ class Potcar:
         # we also keep a list of where these are located
         potcar_locations = []
         for element in elements:
-
             # grab the proper POTCAR symbol based on the functional and element
             potcar_symbol = element_mappings[element.symbol]
 

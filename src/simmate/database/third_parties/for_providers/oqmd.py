@@ -55,9 +55,7 @@ def load_all_structures_from_api():
     is_last_page = False
     results_per_page = 100  # based on OQMD recommendations
     while not is_last_page:
-
         with qmpy_rester.QMPYRester() as query:
-
             # make the query
             result = query.get_oqmd_phases(
                 verbose=False,
@@ -88,7 +86,6 @@ def load_all_structures_from_api():
     # We convert the data into a pymatgen object and sanitize it before saving
     # to the Simmate database
     for entry in track(data):
-
         # Parse the data into a pymatgen object
         # Also before converting into a pymatgen object, we need to parse the sites,
         # which are given as a list of "Element @ X Y Z" (ex: "Na @ 0.5 0.5 0.5")
@@ -145,7 +142,6 @@ def load_all_structures_from_files(
     # iterate through the list and load the structures to our database!
     # Use rich to monitor progress.
     for _, row in track(df.iterrows()):
-
         # load the structure from the poscar file
         filename = base_directory / row.filename
         with filename.open() as file:

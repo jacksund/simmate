@@ -17,7 +17,6 @@ class Tetirr(ErrorHandler):
     possible_error_messages = ["Routine TETIRR needs special values"]
 
     def correct(self, directory: Path) -> str:
-
         # apply the fixes uses these other error handlers
         fixes_1 = TetrahedronMesh().correct(directory)
         fixes_2 = IncorrectShift().correct(directory)

@@ -31,7 +31,6 @@ def write_and_submit_structures(
     directory = get_directory(foldername)
     states = []
     for i, s in enumerate(track(structures)):
-
         # check if the structure has been submitted before, and if so, skip it
         if workflow.all_results.filter(source=s.source).exists():
             nalready_submitted += 1

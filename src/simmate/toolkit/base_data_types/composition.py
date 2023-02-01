@@ -241,7 +241,6 @@ class Composition(PymatgenComposition):
 
     @classmethod
     def from_dynamic(cls, composition):
-
         # if the input is already a pymatgen structure, just return it back
         if isinstance(composition, PymatgenComposition):
             return composition

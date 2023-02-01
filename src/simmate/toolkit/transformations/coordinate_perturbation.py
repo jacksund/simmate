@@ -35,7 +35,6 @@ class CoordinatePerturbation(Transformation):
         min_displace: float = 0,
         max_displace: float = 1,
     ):
-
         perturb_object = PerturbStructureTransformation(min_displace, max_displace)
 
         new_structure = perturb_object.apply_transformation(structure)

@@ -108,7 +108,6 @@ class StructureCreator(ABC):
         pass
 
     def create_structure_with_validation(self, validators=[], max_attempts=100):
-
         # While some structure creators go through validation while they are being
         # created (e.g. a site-distances check), there may be higher-level
         # validations that need to be done. I may need to rethink and refactor
@@ -128,7 +127,6 @@ class StructureCreator(ABC):
 
             # check to see if the structure passes all validation checks.
             if new_structure:
-
                 for validator in validators:
                     is_valid = validator.check_structure(new_structure)
 
