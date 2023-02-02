@@ -43,19 +43,21 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
     #   django-admin reset_db --settings=simmate.configuration.django.settings
     # Note: this does not remove migration files or reapply migrating after
 
-    # Check which 
+    # Check which
     using_sqlite = DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
-    using_postgres = DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql_psycopg2"
-    
+    using_postgres = (
+        DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql_psycopg2"
+    )
+
     if using_sqlite:
         # grab the location of the database file. I assume the default
         # database for now.
         db_filename = DATABASES["default"]["NAME"]
-    
+
         # delete the sqlite3 database file if it exists
         if db_filename.exists():
             db_filename.unlink()
-    
+
     elif using_postgres:
         # We do this with an independent postgress connection, rather than through
         # django so that we can close everything down easily.
@@ -69,13 +71,13 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
             password=DATABASES["default"]["PASSWORD"],
             port=DATABASES["default"]["PORT"],
         )
-        
+
         # In order to delete a full database, we need to isolate this call
         connection.set_isolation_level(0)
-        
+
         # Open connection cursor to perform database operations
         cursor = connection.cursor()
-        
+
         # Build out database extensions and tables
         logging.info("Deleting database & building an empty one")
         db_name = DATABASES["default"]["NAME"]
@@ -84,12 +86,12 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
 
         # Make the changes to the database persistent
         connection.commit()
-    
+
         # Close communication with the database
         cursor.close()
         connection.close()
         logging.info("Empty database established.")
-    
+
     elif not using_sqlite and not using_postgres:
         logging.warning(
             "reseting your database is only supported for SQLite and Postgres."
