@@ -35,27 +35,69 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
     # We can now proceed with reseting the database
     logging.info("Removing database and rebuilding...")
 
-    # BUG: this is only for SQLite3
-    # Consider wrapping the django-extensions function for this instead:
+    # BUG: this is only for SQLite3 and Postgres
+    # If I wish to add FULL functionality of all DBs, I could consider
+    # wrapping the django-extensions function for this instead:
     #   https://django-extensions.readthedocs.io/en/latest/reset_db.html
     # An example command to call this (when django-extensions is installed) is...
     #   django-admin reset_db --settings=simmate.configuration.django.settings
     # Note: this does not remove migration files or reapply migrating after
-    # Make sure the backend is using SQLite3 as this is the only allowed format
+
+    # Check which
     using_sqlite = DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
-    if not using_sqlite:
-        logging.warning(
-            "reseting your database does not clear your database tables "
-            "for non-sqlite3 backends. Make sure you only use this function when "
-            "initially building your database and not after."
+    using_postgres = (
+        DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql_psycopg2"
+    )
+
+    if using_sqlite:
+        # grab the location of the database file. I assume the default
+        # database for now.
+        db_filename = DATABASES["default"]["NAME"]
+
+        # delete the sqlite3 database file if it exists
+        if db_filename.exists():
+            db_filename.unlink()
+
+    elif using_postgres:
+        # We do this with an independent postgress connection, rather than through
+        # django so that we can close everything down easily.
+        import psycopg2
+
+        logging.info("Connecting to database")
+        # Setup Postgres connection
+        connection = psycopg2.connect(
+            host=DATABASES["default"]["HOST"],
+            user=DATABASES["default"]["USER"],
+            password=DATABASES["default"]["PASSWORD"],
+            port=DATABASES["default"]["PORT"],
         )
 
-    # grab the location of the database file. I assume the default database for now.
-    db_filename = DATABASES["default"]["NAME"]
+        # In order to delete a full database, we need to isolate this call
+        connection.set_isolation_level(0)
 
-    # delete the sqlite3 database file if it exists
-    if using_sqlite and db_filename.exists():
-        db_filename.unlink()
+        # Open connection cursor to perform database operations
+        cursor = connection.cursor()
+
+        # Build out database extensions and tables
+        logging.info("Deleting database & building an empty one")
+        db_name = DATABASES["default"]["NAME"]
+        cursor.execute(f"DROP DATABASE IF EXISTS {db_name} WITH (FORCE);")
+        cursor.execute(f"CREATE DATABASE {db_name};")
+
+        # Make the changes to the database persistent
+        connection.commit()
+
+        # Close communication with the database
+        cursor.close()
+        connection.close()
+        logging.info("Empty database established.")
+
+    elif not using_sqlite and not using_postgres:
+        logging.warning(
+            "reseting your database is only supported for SQLite and Postgres."
+            " Make sure you only use this function when initially building your "
+            "database and not after."
+        )
 
     # go through each app directory and delete all folders named 'migrations'
     for app_name, app_config in apps.app_configs.items():
