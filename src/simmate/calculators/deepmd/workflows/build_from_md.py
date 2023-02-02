@@ -7,7 +7,6 @@ from simmate.toolkit import Structure
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
-#I really hope this works !
 class MlPotential__Deepmd__BuildFromMd(Workflow):
 
     use_database = False
@@ -24,7 +23,8 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
         **kwargs,
     ):
 
-        # get relaxed structure
+        # Check if the user wants to relax the starting structure 
+        # If true (default), relax structure and set as starting structure 
         if relax_start_structure:
             relax_workflow = get_workflow(
                 "relaxation.vasp.mit"
@@ -38,7 +38,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
         else:
             start_struct = structure 
 
-        # submit each md run to cloud to run in parallel
+        # For each temperature submitted by user, submit a md run to cloud to run in parallel
         md_workflow = get_workflow("dynamics.vasp.mit")
         submitted_states = []
         for temperature in temperature_list:
@@ -52,12 +52,12 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
             )
             submitted_states.append(state)
 
-        # wait for all dynamics runs to finish
+        # Wait for all dynamics runs to finish (only if you're running with run cloud?)
         results = [state.result() for state in submitted_states]
 
-        # iterate through the result of each md simulation and get
+        # Iterate through the results of each md simulation and get
         # temperature and list of ionic steps
-        # write structure data to files for use with deepmd
+        # Write structure data to files for use with deepmd
         for result in results:
             temp = result.temperature_start
             structures = result.structures.all()
@@ -77,9 +77,10 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
         
         if not start_from_model:
 
-    
-            # run initial deepmd training iteration
+            # INITIAL DEEPMD TRIANING ITERATION
             temperature = temperature_list[0]
+            
+            #Add datasets from first temperature to overall training/testing lists
             training_data.append(
                 directory / f"deepmd_data_{temperature}/{composition}_train"
             )
@@ -89,7 +90,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
     
             deepmd_directory = directory / "deepmd"
     
-            # grab the deepmd training workflow and run the first step
+            # Grab the deepmd training workflow and run the first step
             deepmd_workflow = get_workflow("ml-potential.deepmd.train-model")
             
             deepmd_workflow.run(
@@ -102,7 +103,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
                 settings_update = deepmd_settings,
             )
             
-            #iterative training only if multiple temperatures submitted 
+            #ITERATIVE TRIANING STEPS (only if multiple temperatures are submitted) 
             if len(temperature_list) > 1:
                 # run additional deepmd training iterations with restart function
                 for n, temperature in enumerate(temperature_list[1:]):
