@@ -76,7 +76,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - update "bad-elf" workflow to accept an empty-atom template structure or a list
 of empty sites
 - add python 3.11 support
-- `simmate database reset` supports Postgres (requires admin user)
+- `simmate database reset` now supports Postgres (requires admin user)
 
 **Refactors**
 
@@ -85,11 +85,13 @@ of empty sites
 - `workflow_engine` module has been renamed to `engine` to help shorten commands and import lines
 - rework CI to use mamba instead of conda
 - pull out dependencies for some apps that are now optional
+- reorganize `Incar` class and move some functionality to general `utilities`
 
 **Fixes**
 
 - fix site ordering in NEB supercell structures
-- improve installation speed and guide users to conda alternatives
+- improve installation speed and guide users to conda alternatives like mamba
+- clean up docs and fix several links
 
 !!! warning
     The refactoring of simmate "apps" led to many breaking changes in the python API.
