@@ -178,6 +178,7 @@ of empty sites
 - add experimental `variable-composition` (variable refers to nsites, not stoichiometry) and `binary-composition` evolutionary searches
 - allow custom workflows to run from yaml
 - update MatProj data to new api, and add severl new columns for data (e.g. mag + band gap)
+- `simmate database reset` command now drops/re-adds the specified database for Postgres (requires admin user)
 
 **Refactors**
 
