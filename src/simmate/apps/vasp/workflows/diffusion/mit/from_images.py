@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.vasp.error_handlers import Walltime
+from simmate.apps.vasp.error_handlers import Frozen, Unconverged, Walltime
 from simmate.apps.vasp.workflows.diffusion.neb_from_images_base import (
     VaspNebFromImagesWorkflow,
 )
@@ -39,5 +39,5 @@ class Diffusion__Vasp__NebFromImagesMit(
     error_handlers = [
         handler
         for handler in Relaxation__Vasp__Mit.error_handlers
-        if type(handler) not in [Walltime]
+        if type(handler) not in [Walltime, Unconverged, Frozen]
     ]
