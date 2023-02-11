@@ -63,7 +63,6 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
         # django so that we can close everything down easily.
         import psycopg2
 
-        logging.info("Connecting to database")
         # Setup Postgres connection
         connection = psycopg2.connect(
             host=DATABASES["default"]["HOST"],
@@ -79,9 +78,12 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
         cursor = connection.cursor()
 
         # Build out database extensions and tables
-        logging.info("Deleting database & building an empty one")
         db_name = DATABASES["default"]["NAME"]
-        cursor.execute(f"DROP DATABASE IF EXISTS {db_name} WITH (FORCE);")
+        cursor.execute(f"DROP DATABASE IF EXISTS {db_name};")
+        # BUG: if others are connected I could add 'WITH (FORCE)' above.
+        # For now, I don't use this but should consider adding it for convenience.
+        # I think this is buggy with older versions of postgres (like RDkit),
+        # so I hold off on this for now.
         cursor.execute(f"CREATE DATABASE {db_name};")
 
         # Make the changes to the database persistent
@@ -90,7 +92,6 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
         # Close communication with the database
         cursor.close()
         connection.close()
-        logging.info("Empty database established.")
 
     elif not using_sqlite and not using_postgres:
         logging.warning(
@@ -106,7 +107,13 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
             continue
 
         migration_dir = Path(app_config.path) / "migrations"
-        if migration_dir.exists():
+        # BUG: I need a good way to avoid deleting initial migrations that
+        # do things like register extensions.
+        # Maybe have these migrations listed as 0000_setup.py and then delete
+        # everything after?
+        # Maybe skip folders that contain a 0001_setup.py?
+        skip_deletes = ["rdkit", "datasets"]
+        if migration_dir.exists() and migration_dir.parent.name not in skip_deletes:
             shutil.rmtree(migration_dir)
             continue
 
