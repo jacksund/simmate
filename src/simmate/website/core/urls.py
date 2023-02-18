@@ -1,9 +1,45 @@
 # -*- coding: utf-8 -*-
 
+import importlib
+
 from django.contrib import admin
 from django.urls import include, path
 
+from simmate.configuration.django.settings import SIMMATE_APPS
 from simmate.website.core import views
+
+
+def get_app_urls():
+    # First let's find our custom simmate apps that supply a 'urls' module. We
+    # want to automatically make these avaialable in the web UI.
+
+    extra_url_paths = []
+
+    for app_name in SIMMATE_APPS:
+        # This section of code is copied from...
+        #   simmate.workflows.utilities.get_all_workflows
+        # Consider making another util.
+        config_modulename = ".".join(app_name.split(".")[:-1])
+        config_name = app_name.split(".")[-1]
+        config_module = importlib.import_module(config_modulename)
+        config = getattr(config_module, config_name)
+        app_path = config.name
+        simple_name = app_path.split(".")[-1]
+
+        # check if there is a urls module in the app
+        #   stackoverflow.com/questions/14050281
+        urls_found = importlib.util.find_spec(f"{app_path}.urls") is not None
+
+        if urls_found:
+            new_path = path(
+                route=f"apps/{simple_name}",
+                view=include(f"{app_path}.urls"),
+                name=simple_name,
+            )
+            extra_url_paths.append(new_path)
+
+    return extra_url_paths
+
 
 urlpatterns = [
     #
@@ -62,4 +98,8 @@ urlpatterns = [
     path(route="extras/", view=views.extras, name="extras"),
     path(route="contact/", view=views.contact, name="contact"),
     path(route="about/", view=views.about, name="about"),
+    #
+    # Custom Simmate apps (if present)
+    path(route="apps/", view=views.apps, name="apps"),
+    *get_app_urls(),
 ]

@@ -1,0 +1,46 @@
+{% extends "core_components/site_base.html" %}
+
+{% block tabtitle %}
+Simmate
+{% endblock %}
+
+{% block banner %}
+{% include "core_components/header.html"%}
+{% endblock %}
+
+
+{% block body %}
+
+<!-- Header -->
+<section class="pt-5 jumbotron text-center">
+    <div class="container">
+        <h1 class="jumbotron-heading">Apps</h1>
+        <p class="lead text-muted">Additional apps, plugins, & dashboards made with Simmate.</p>
+    </div>
+</section>
+
+<div class="row">
+
+    {% for app_name in extra_apps %}
+    <div class="col-md-4">
+        <div class="card" style="width: 25rem;">
+            <div class="card-body">
+                <h5 class="card-title">{{ app_name }}</h5>
+                <p class="card-text">
+                    ~~ an example description for this new app ~~
+                </p>
+
+                <a role="button" class="btn btn-primary btn-sm"
+                    href="#" target="_blank">
+                    Learn More...</a>
+                <a role="button" class="btn btn-primary btn-sm"
+                    href="{{ app_name }}">
+                    Try it out!</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+{% endblock %}
