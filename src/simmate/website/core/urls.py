@@ -33,7 +33,9 @@ def get_app_urls():
         if urls_found:
             new_path = path(
                 route=f"apps/{simple_name}",
-                view=include(f"{app_path}.urls"),
+                # set the namespace so that we can easily look up app urls
+                #   https://stackoverflow.com/questions/48608894
+                view=include((f"{app_path}.urls", simple_name), namespace=simple_name),
                 name=simple_name,
             )
             extra_url_paths.append(new_path)
