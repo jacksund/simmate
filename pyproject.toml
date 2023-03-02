@@ -138,7 +138,7 @@ DATA = [
 
 # Specific dependencies needed for optional simmate apps
 CLEASE = [
-    "clease >=1.0.3, <=1.0.4",  # for cluster expansion calcs
+    "clease >=1.0.3, <=1.0.6",  # for cluster expansion calcs
 ]
 
 # Link to our homepage. Use github for now.
