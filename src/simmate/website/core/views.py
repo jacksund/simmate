@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import importlib
+
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
 from django.shortcuts import render
 
+from simmate.configuration.django.settings import SIMMATE_APPS
 from simmate.database.third_parties import (
     AflowStructure,
     CodStructure,
@@ -105,6 +108,31 @@ def home(request):
         "nstructures_possible": nstructures_possible,
     }
     template = "home/home.html"
+    return render(request, template, context)
+
+
+def apps(request):
+    ################
+    # This section of code is copied from...
+    #   simmate.web.core.urls
+    # Consider making another util. I might want a SimmateConfig class that
+    # subclasses Django app's Config class. Add things like "learn-more" links
+    # and short descriptions
+    extra_apps = []
+    for app_name in SIMMATE_APPS:
+        config_modulename = ".".join(app_name.split(".")[:-1])
+        config_name = app_name.split(".")[-1]
+        config_module = importlib.import_module(config_modulename)
+        config = getattr(config_module, config_name)
+        app_path = config.name
+        simple_name = app_path.split(".")[-1]
+        urls_found = importlib.util.find_spec(f"{app_path}.urls") is not None
+        if urls_found:
+            extra_apps.append(simple_name)
+            # TODO: maybe grab a short description too?
+    ################
+    context = {"extra_apps": extra_apps}
+    template = "core_components/apps.html"
     return render(request, template, context)
 
 

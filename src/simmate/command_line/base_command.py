@@ -85,9 +85,12 @@ def run_server():
 
     logging.info("Setting up local test server...")
     subprocess.run(
-        "django-admin runserver --settings=simmate.configuration.django.settings",
+        "django-admin runserver --settings=simmate.configuration.django.settings --insecure",
         shell=True,
     )
+    # BUG: we added the "--insecure" flag in order to serve static files with
+    # the DEBUG=False mode turned on. This makes the file serving slower though.
+    #   https://stackoverflow.com/questions/5836674/
 
 
 @simmate_app.command()
