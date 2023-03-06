@@ -1,7 +1,6 @@
-
 # This workflow will check for Black formating, install Python dependencies using Anaconda, and then run tests with a single version of Python.
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-# 
+#
 # We also use a third-party action(s) for setting up our conda environment. See:
 #   conda: https://github.com/marketplace/actions/setup-miniconda
 #   mamba: https://github.com/mamba-org/provision-with-micromamba
@@ -10,19 +9,18 @@ name: Run linting and tests with Anaconda
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
     # Runs the schedule every day at 5:30 and at 17:30 UTC
-    - cron:  '30 5,17 * * *'
+    - cron: "30 5,17 * * *"
 
 jobs:
   lint-and-test:
-
     # Establishes the combination of all OS and python versions
     # for us to test. The "steps" below will be ran for each
-    # of these combinations. 
+    # of these combinations.
     name: Test (${{ matrix.python-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
@@ -32,64 +30,80 @@ jobs:
         python-version: ["3.10", "3.11"]
 
     steps:
+      - name: Initial setup
+        uses: actions/checkout@v3
 
-    - name: Initial setup
-      uses: actions/checkout@v3
+      - name: Check code format with Black
+        uses: psf/black@stable
 
-    - name: Check code format with Black
-      uses: psf/black@stable
+      # This action seems poorly-maintained -- as it fails on MacOS and also
+      # directly installs isort (unlike the action used for Black). I therefore
+      # disable this for now.
+      # - name: Check import format with iSort
+      #   uses: isort/isort-action@master
 
-    # This action seems poorly-maintained -- as it fails on MacOS and also
-    # directly installs isort (unlike the action used for Black). I therefore
-    # disable this for now.
-    # - name: Check import format with iSort
-    #   uses: isort/isort-action@master
+      # This is our original installation step using conda, but this is extremely
+      # slow to solve the env. We therefore switched to using Mamba (see below),
+      # and keep this section here for historical reference.
+      # - name: Create conda env and install deps
+      #   uses: conda-incubator/setup-miniconda@v2
+      #   with:
+      #     auto-update-conda: true
+      #     environment-file: .github/environment.yaml
+      #     python-version: ${{ matrix.python-version }}
+      #     auto-activate-base: false
+      #     channels: conda-forge
+      #     activate-environment: simmate_dev
+      #     channel-priority: strict
+      # The lines "shell: bash -l {0}" ensure we use the created env below
 
-    # This is our original installation step using conda, but this is extremely
-    # slow to solve the env. We therefore switched to using Mamba (see below),
-    # and keep this section here for historical reference.
-    # - name: Create conda env and install deps
-    #   uses: conda-incubator/setup-miniconda@v2
-    #   with:
-    #     auto-update-conda: true
-    #     environment-file: .github/environment.yaml
-    #     python-version: ${{ matrix.python-version }}
-    #     auto-activate-base: false
-    #     channels: conda-forge
-    #     activate-environment: simmate_dev
-    #     channel-priority: strict
-    # The lines "shell: bash -l {0}" ensure we use the created env below
-    
-    # We use Mamba instead of Conda for its faster solver. (see comment above)
-    - name: Install Conda environment with Micromamba
-      uses: mamba-org/provision-with-micromamba@main
-      with:
-        environment-file: .github/environment.yaml
-        environment-name: simmate_dev
-        extra-specs: |
-          python=${{ matrix.python-version }}
+      # We use Mamba instead of Conda for its faster solver. (see comment above)
+      - name: Install Conda environment with Micromamba
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: envs/conda/dev.yaml
+          environment-name: simmate_dev
+          extra-specs: |
+            python=${{ matrix.python-version }}
 
-    - name: Install Simmate
-      shell: bash -l {0}
-      run: |
-        pip install -e .
+      - name: Install Simmate
+        shell: bash -l {0}
+        run: |
+          pip install -e .
 
-    - name: Check conda info
-      shell: bash -l {0}
-      run: |
-        micromamba info
-        micromamba list
-    # !!! switch out micromamba/mamba/conda commands as needed
+      - name: Check conda info
+        shell: bash -l {0}
+        run: |
+          micromamba info
+          micromamba list
+      # !!! switch out micromamba/mamba/conda commands as needed
+      - name: Check dependencies
+        shell: bash -l {0}
+        run: |
+          pip check
 
-    - name: Check dependencies
-      shell: bash -l {0}
-      run: |
-        pip check
-
-    - name: Run default tests
-      shell: bash -l {0}
-      run: |
-        pytest -vv --durations=15
+      - name: Run default tests
+        shell: bash -l {0}
+        run: |
+          pytest -vv --durations=15
     # "-vv" makes the pytest output verbose so errors are more useful
     # and "duration=0" has pytest print how long every test took. We ask for
     # the 15 slowest ones.
+
+  docker-build:
+    name: Test Docker Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+
+      - name: Initial setup
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          file: ./envs/docker/web_server.dockerfile
+          push: false

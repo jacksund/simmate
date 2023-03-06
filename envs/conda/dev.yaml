@@ -10,7 +10,7 @@
 # (2) grayskull to list deps
 #	https://www.marcelotrevisani.com/grayskull
 #
-# To install this env, use `conda env create -f environment.yaml`
+# To install this env, use `conda env create -f envs/conda/dev.yaml`
 
 name: simmate_dev
 channels:
