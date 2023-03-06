@@ -11,3 +11,6 @@ from .mit import (
     Diffusion__Vasp__NebFromImagesMvlCi,
     Diffusion__Vasp__NebSinglePathMit,
 )
+
+from .warren_lab import Diffusion__Vasp__NebAllPathsWarrenLab
+from .warren_lab_quick import Diffusion__Vasp__NebAllPathsWarrenLabQuick

@@ -35,6 +35,8 @@ def test_list_of_all_workflows():
         # "cluster-expansion.clease.bulk-structure",
         "customized.toolkit.user-config",
         "diffusion.vasp.neb-all-paths-mit",
+        "diffusion.vasp.neb-all-paths-warren-lab",
+        "diffusion.vasp.neb-all-paths-warren-lab-quick",
         "diffusion.vasp.neb-from-endpoints-mit",
         "diffusion.vasp.neb-from-images-mit",
         "diffusion.vasp.neb-from-images-mvl-ci",

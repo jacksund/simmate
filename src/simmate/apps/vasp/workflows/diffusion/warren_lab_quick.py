@@ -13,12 +13,12 @@ from simmate.apps.vasp.workflows.diffusion.neb_base import (
 # BULK UNITCELL RELAXATION
 
 
-class Relaxation__Vasp__WarrenLab(VaspWorkflow):
+class Relaxation__Vasp__WarrenLabQuick(VaspWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS
     incar = dict(
         ALGO="Fast",
-        EDIFF=1e-06,
+        EDIFF=1e-05,
         ENCUT=520,  # TODO: set dynamically to be 1.3x highest elemental ENMAX
         IBRION=2,
         ICHARG=1,
@@ -29,14 +29,12 @@ class Relaxation__Vasp__WarrenLab(VaspWorkflow):
         LORBIT=11,
         LREAL="Auto",
         LWAVE=False,
-        # MAGMOM = # TODO: set dynamically
         NELM=200,
-        NELMIN=4,
         NSW=99,
         PREC="Accurate",
         ISMEAR=0,
         SIGMA=0.05,
-        KSPACING=0.35,
+        KSPACING=0.5,
         LMAXMIX=4,
     )
     error_handlers = []
@@ -47,33 +45,9 @@ class Relaxation__Vasp__WarrenLab(VaspWorkflow):
 # BULK UNITCELL STATIC ENERGY
 
 
-class StaticEnergy__Vasp__WarrenLab(VaspWorkflow):
-    functional = "PBE"
-    potcar_mappings = PBE_ELEMENT_MAPPINGS
-    incar = dict(
-        ALGO="Fast",
-        EDIFF=1e-06,
-        ENCUT=520,  # TODO: set dynamically to be 1.3x highest elemental ENMAX
-        IBRION=-1,
-        ICHARG=1,
-        ISIF=3,
-        ISPIN=2,
-        ISYM=0,
-        IVDW=12,
-        LORBIT=11,
-        LREAL="Auto",
-        LWAVE=False,
-        # MAGMOM = # TODO: set dynamically
-        NELM=200,
-        NELMIN=4,
-        NSW=0,
-        PREC="Accurate",
-        ISMEAR=0,
-        SIGMA=0.05,
-        KSPACING=0.35,
-        LMAXMIX=4,
-    )
-    error_handlers = []
+class StaticEnergy__Vasp__WarrenLabQuick(Relaxation__Vasp__WarrenLabQuick):
+    incar = Relaxation__Vasp__WarrenLabQuick.incar.copy()
+    incar.update(dict(IBRION=-1, NSW=0))
 
 
 # -----------------------------------------------------------------------------
@@ -81,13 +55,13 @@ class StaticEnergy__Vasp__WarrenLab(VaspWorkflow):
 # ENDPOINT SUPERCELL RELAXATIONS
 
 
-class Relaxation__Vasp__WarrenLabNebEndpoint(VaspWorkflow):
+class Relaxation__Vasp__WarrenLabQuickNebEndpoint(VaspWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS
     incar = dict(
         ALGO="Fast",
-        EDIFF=5e-05,
-        EDIFFG=-0.01,
+        EDIFF=5e-04,
+        EDIFFG=-0.02,
         ENCUT=520,  # TODO: set dynamically to be 1.3x highest elemental ENMAX
         IBRION=2,
         ICHARG=1,
@@ -99,13 +73,12 @@ class Relaxation__Vasp__WarrenLabNebEndpoint(VaspWorkflow):
         LREAL="Auto",
         LWAVE=False,
         LCHARG=False,
-        # MAGMOM = # TODO: set dynamically
         NELM=200,
         NSW=99,
         PREC="Accurate",
         ISMEAR=0,
         SIGMA=0.05,
-        KSPACING=0.4,
+        KSPACING=0.5,
         LMAXMIX=4,
     )
     error_handlers = []
@@ -116,34 +89,11 @@ class Relaxation__Vasp__WarrenLabNebEndpoint(VaspWorkflow):
 # ENDPOINT SUPERCELL STATIC ENERGY
 
 
-class StaticEnergy__Vasp__WarrenLabNebEndpoint(VaspWorkflow):
-    functional = "PBE"
-    potcar_mappings = PBE_ELEMENT_MAPPINGS
-    incar = dict(
-        ALGO="Fast",
-        EDIFF=5e-05,
-        EDIFFG=-0.01,
-        ENCUT=520,  # TODO: set dynamically to be 1.3x highest elemental ENMAX
-        IBRION=-1,
-        ICHARG=1,
-        ISIF=2,
-        ISPIN=2,
-        ISYM=0,
-        IVDW=12,
-        LORBIT=11,
-        LREAL="Auto",
-        LWAVE=False,
-        LCHARG=False,
-        # MAGMOM = # TODO: set dynamically
-        NELM=200,
-        NSW=0,
-        PREC="Accurate",
-        ISMEAR=0,
-        SIGMA=0.05,
-        KSPACING=0.4,
-        LMAXMIX=4,
-    )
-    error_handlers = []
+class StaticEnergy__Vasp__WarrenLabQuickNebEndpoint(
+    Relaxation__Vasp__WarrenLabQuickNebEndpoint
+):
+    incar = Relaxation__Vasp__WarrenLabQuickNebEndpoint.incar.copy()
+    incar.update(dict(IBRION=-1, NSW=0))
 
 
 # -----------------------------------------------------------------------------
@@ -151,37 +101,31 @@ class StaticEnergy__Vasp__WarrenLabNebEndpoint(VaspWorkflow):
 # NEB FROM IMAGES
 
 
-class Diffusion__Vasp__WarrenLabCiNebFromImages(VaspNebFromImagesWorkflow):
+class Diffusion__Vasp__WarrenLabQuickCiNebFromImages(VaspNebFromImagesWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_ELEMENT_MAPPINGS
     incar = dict(
         ALGO="Fast",
-        EDIFF=5e-05,
-        EDIFFG=-0.01,
+        EDIFF=5e-04,
+        EDIFFG=-0.02,
         ENCUT=520,  # TODO: set dynamically to be 1.3x highest elemental ENMAX
         IBRION=3,
         ICHARG=1,
         ISIF=2,
         ISPIN=2,
         ISYM=0,
-        IVDW=12,
         LORBIT=11,
         LREAL="Auto",
         LWAVE=False,
         LCHARG=False,
-        # MAGMOM = # TODO: set dynamically
         NELM=200,
         NSW=99,
         PREC="Accurate",
         ISMEAR=0,
         SIGMA=0.05,
-        KSPACING=0.4,
+        KSPACING=0.5,
         LMAXMIX=4,
-        NIMAGES=5,
-        LCLIMB=True,
-        SPRING=-5,
-        POTIM=0,
-        IOPT=1,
+        IMAGES=3,
     )
     error_handlers = []
 
@@ -191,10 +135,10 @@ class Diffusion__Vasp__WarrenLabCiNebFromImages(VaspNebFromImagesWorkflow):
 # SINGLE PATH NEB
 
 
-class Diffusion__Vasp__WarrenLabNebSinglePath(SinglePathWorkflow):
-    endpoint_relaxation_workflow = Relaxation__Vasp__WarrenLabNebEndpoint
-    endpoint_energy_workflow = StaticEnergy__Vasp__WarrenLabNebEndpoint
-    from_images_workflow = Diffusion__Vasp__WarrenLabCiNebFromImages
+class Diffusion__Vasp__WarrenLabQuickNebSinglePath(SinglePathWorkflow):
+    endpoint_relaxation_workflow = Relaxation__Vasp__WarrenLabQuickNebEndpoint
+    endpoint_energy_workflow = StaticEnergy__Vasp__WarrenLabQuickNebEndpoint
+    from_images_workflow = Diffusion__Vasp__WarrenLabQuickCiNebFromImages
 
 
 # -----------------------------------------------------------------------------
@@ -202,10 +146,10 @@ class Diffusion__Vasp__WarrenLabNebSinglePath(SinglePathWorkflow):
 # ALL PATHS NEB
 
 
-class Diffusion__Vasp__NebAllPathsWarrenLab(NebAllPathsWorkflow):
-    bulk_relaxation_workflow = Relaxation__Vasp__WarrenLab
-    bulk_static_energy_workflow = StaticEnergy__Vasp__WarrenLab
-    single_path_workflow = Diffusion__Vasp__WarrenLabNebSinglePath
+class Diffusion__Vasp__NebAllPathsWarrenLabQuick(NebAllPathsWorkflow):
+    bulk_relaxation_workflow = Relaxation__Vasp__WarrenLabQuick
+    bulk_static_energy_workflow = StaticEnergy__Vasp__WarrenLabQuick
+    single_path_workflow = Diffusion__Vasp__WarrenLabQuickNebSinglePath
 
 
 # -----------------------------------------------------------------------------
