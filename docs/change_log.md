@@ -77,6 +77,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 of empty sites
 - add python 3.11 support
 - `simmate database reset` now supports Postgres (requires admin user)
+- docker images are now published to DockerHub and Github packages
 
 **Refactors**
 
@@ -86,12 +87,14 @@ of empty sites
 - rework CI to use mamba instead of conda
 - pull out dependencies for some apps that are now optional
 - reorganize `Incar` class and move some functionality to general `utilities`
+- NEB module is reorganized to help with building custom sets
 
 **Fixes**
 
 - fix site ordering in NEB supercell structures
 - improve installation speed and guide users to conda alternatives like mamba
 - clean up docs and fix several links
+- apps are now registered to the web UI
 
 !!! warning
     The refactoring of simmate "apps" led to many breaking changes in the python API.
