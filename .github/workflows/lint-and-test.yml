@@ -61,7 +61,7 @@ jobs:
       - name: Install Conda environment with Micromamba
         uses: mamba-org/provision-with-micromamba@main
         with:
-          environment-file: .github/environment.yaml
+          environment-file: envs/conda/dev.yaml
           environment-name: simmate_dev
           extra-specs: |
             python=${{ matrix.python-version }}
@@ -101,9 +101,9 @@ jobs:
       - name: Initial setup
         uses: actions/checkout@v3
 
-      - name: Build and push Docker images
+      - name: Build Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          file: ./envs/Dockerfile
+          file: ./envs/docker/web_server.dockerfile
           push: false

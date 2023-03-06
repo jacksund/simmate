@@ -65,8 +65,8 @@ RUN conda update -n base conda && \
     conda config --set solver libmamba
 
 # Install Simmate's Python dependencies 
-COPY .github/environment.yaml .
-RUN conda env update -f environment.yaml && \
+COPY envs/conda/dev.yaml .
+RUN conda env update -f dev.yaml && \
     conda install -n simmate_dev -c conda-forge gunicorn psycopg2 && \
     conda clean -afy
 
