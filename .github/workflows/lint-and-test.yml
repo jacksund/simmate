@@ -5,7 +5,7 @@
 #   conda: https://github.com/marketplace/actions/setup-miniconda
 #   mamba: https://github.com/mamba-org/provision-with-micromamba
 
-name: Run linting and tests with Anaconda
+name: Test lint, unittests, & builds
 
 on:
   push:
