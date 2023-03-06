@@ -4,8 +4,8 @@
 # circular imports errors, so we prevent isort from changing this file.
 # isort: skip_file
 
-from .neb_all_paths_mit import Diffusion__Vasp__NebAllPathsMit
-from .neb_from_endpoints_mit import Diffusion__Vasp__NebFromEndpointsMit
-from .neb_from_images_mit import Diffusion__Vasp__NebFromImagesMit
-from .neb_from_images_mvl_ci import Diffusion__Vasp__NebFromImagesMvlCi
-from .neb_single_path_mit import Diffusion__Vasp__NebSinglePathMit
+from .from_images import Diffusion__Vasp__NebFromImagesMit
+from .from_images_mvl_ci import Diffusion__Vasp__NebFromImagesMvlCi
+from .from_endpoints import Diffusion__Vasp__NebFromEndpointsMit
+from .single_path import Diffusion__Vasp__NebSinglePathMit
+from .all_paths import Diffusion__Vasp__NebAllPathsMit

@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.vasp.error_handlers import Frozen, Unconverged, Walltime
-from simmate.apps.vasp.workflows.diffusion.neb_from_images_base import (
-    VaspNebFromImagesWorkflow,
-)
+from simmate.apps.vasp.workflows.diffusion.neb_base import VaspNebFromImagesWorkflow
 from simmate.apps.vasp.workflows.relaxation.mit import Relaxation__Vasp__Mit
 
 
