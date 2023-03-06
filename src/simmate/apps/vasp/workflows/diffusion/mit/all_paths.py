@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.vasp.workflows.diffusion.neb_all_paths_base import NebAllPathsWorkflow
-from simmate.apps.vasp.workflows.diffusion.neb_single_path_mit import (
-    Diffusion__Vasp__NebSinglePathMit,
-)
+from simmate.apps.vasp.workflows.diffusion.mit import Diffusion__Vasp__NebSinglePathMit
+from simmate.apps.vasp.workflows.diffusion.neb_base import NebAllPathsWorkflow
 from simmate.apps.vasp.workflows.relaxation.mit import Relaxation__Vasp__Mit
 from simmate.apps.vasp.workflows.static_energy.mit import StaticEnergy__Vasp__Mit
 
