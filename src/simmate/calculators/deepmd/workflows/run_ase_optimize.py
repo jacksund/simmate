@@ -25,8 +25,8 @@ class MlPotential__Deepmd__AseOptimize(Workflow):
     
     def run_config(
                structure: Structure,
-               source: dict = None,
                directory: Path,
+               source: dict = None,
                deepmd_model: str = 'graph.pb', 
                fmax: int = 0.05, 
                max_dist: float = 0.2,
