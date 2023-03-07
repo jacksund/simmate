@@ -1,16 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+Created on Tue Jan 24 12:21:46 2023
 
-from pathlib import Path
-
-from simmate.calculators.deepmd.inputs.type_and_set import DeepmdDataset
-from simmate.toolkit import Structure
-from simmate.toolkit import Composition
-from simmate.workflow_engine import Workflow
-from simmate.workflows.utilities import get_workflow
-from simmate.website.workflows import models as all_datatables
-
-from statistics import mean 
-
+@author: siona
+"""
 # training multiple models at the same time
 
 # ---------- START DATA ----------
@@ -46,7 +39,7 @@ from statistics import mean
 # (option 2)
 # Relax ALL structures using ONE model. Store ionic steps + energies + forces.
 # Pull the output structures from the lammps run and use the OTHER deepmd models
-# to predict energy/forces.
+# to predict energy/forces. 
 
 # (option 3)
 # Run MD simulations on ALL structures using ONE model --> follow MD opt above
@@ -60,205 +53,138 @@ from statistics import mean
 
 # ---------- STOP CONDITION ----------
 
-# re-run train/test until all structures <5% error
+# relax input structure
+# run interation of build_from_md and grab location of deepmd runs 
+    # run with one temperature 
+# create random structures and preduct energy/forces with models and with dft 
 
+from pathlib import Path
+
+from simmate.calculators.deepmd.inputs.type_and_set import DeepmdDataset
+from simmate.toolkit import Structure, Composition 
+from simmate.workflow_engine import Workflow
+from simmate.workflows.utilities import get_workflow
+from simmate.website.workflows import models as all_datatables
+from simmate.toolkit.creators.structure.random_symmetry_walk import RandomSymWalkStructure
+
+from statistics import mean 
 
 class MlPotential__Deepmd__BuildFromParallel(Workflow):
-
+    
     use_database = False
-
+    
     def run_config(
-        structure: Structure,
-        directory: Path,
-        init_data: str,  # set to either 'md' or 'table', make md default setting??
-        composition: Composition, 
-        test_option: str, # set to either 'lammps' or 'rand_struct' 
-        table_name: str = "",
-        num_models: int = 3, #assuming that deepmd randomly selects seeds
-        max_error: float = 0.5, 
-        filter_kwargs: dict = {},
-        md_kwargs: dict = {"temperature_start": 300, "temperature_end": 300, "nsteps" : 1000},
-    ):
+            structure: Structure,
+            directory: Path,
+            composition: Composition = None, #if using build from table option 
+            md_temperature_list: list = [1200],
+            build_from_md_kwargs: dict = None,
+            num_test_structs: int = 100,
+            num_models: int = 3,
+            max_error: float = 0.5, 
+            max_attempts = 5,
+            ):
         
-        #---------- START STRUCT ---------
-        #grab prototype of composition if structure not given             
+        #import build_from_md workflow 
+        build_from_md = get_workflow('ml-potential.deepmd.build_from_md')
         
-        # ---------- START DATA ----------
-        # if user sets init_data to 'md', generate a list of starting structures from an md run 
+        #import random structure generation function
+        struct_generator = RandomSymWalkStructure(composition = structure.composition)
         
-        if init_data == 'md':
-            
-            md_workflow = get_workflow("dynamics.vasp.mit")
+        #import energy/force prediction workflow 
+        get_energy_force = get_workflow()
         
-            state = md_workflow.run(
-                structure=structure,
-                **md_kwargs,
-                )     
-            
-            start_structs = state.result().structures.all()
-            
-        #if user sets init_data to 'table', generate a list of starting  
-        #structures from an existing table    
-        elif init_data == 'table':
-            
-            if hasattr(all_datatables, table_name):
-                datatable = getattr(all_datatables, table_name)
-            else:
-                raise Exception("Unknown table name provided")
-                
-            start_structs = datatable.objects.filter(
-                formula_reduced=composition.reduced_formula, **filter_kwargs
-            ).order_by("energy_per_atom")
-            
-            if not start_structs:
-                raise Exception(
-                    "There are no results for the table+filter settings given."
-                    "Either populate your table with calculations or change "
-                    "your filtering criteria."
-                )
-                
-        else:
-            raise Exception("Parameter init_data must be either 'md' or 'table'")
+        #import deepmd training workflow 
+        deepmd_workflow = get_workflow("ml-potential.deepmd.train-model")
         
-        #set up directory to hold deepmd data files and runs
-        #this folder will hold all deepmd data sets and all information from training steps
-        deepmd_directory = directory / "deepmd"
+        #import freeze model workflow 
+        freeze_workflow = get_workflow("ml-potential.deepmd.freeze-model")
 
-        #create running list of training/testing data
-        #this list will be appended as more data sets are created 
-        training_data = []
-        testing_data = []
+##INITIAL TRAINING OF MODELS
         
-        #create deepmd datasets for initial structures 
-        train, test = DeepmdDataset.to_file(
-            ionic_step_structures=start_structs,
-            directory=deepmd_directory / "deepmd_data_init",
-        )
-
-        training_data += train
-        testing_data += test
-        
-        # ------- INITIAL TRAINING -------
-        
-        deepmd_workflow = get_workflow("ml-potential.deepmd.train_model")
-
-        # concurrently train specified number of models 
+        #Begin by training multiple models using same starting structure 
+        model_submitted_states = []
         for num in range(num_models):
+            state = build_from_md.run(structure = structure,
+                                      temperature_list = md_temperature_list,
+                                      **build_from_md_kwargs)
+            model_submitted_states.append(state)
             
-            deepmd_workflow.run(  # ---------------- USE RUN CLOUD IN FINAL VERSION
-                directory=deepmd_directory / f'run_{num}', #remove if using run cloud
-                composition=structure.composition,
-                command=f'eval "$(conda shell.bash hook)"; conda activate deepmd; dp train input_{num}.json',
-                input_filename="input_{num}.json",
-                training_data=training_data,
-                testing_data=testing_data,
+        #The build_from_md worklow returns the directory where the deepmd data/run files are 
+        #stored so this will collect all the directories in one list
+        deepmd_directories = [state.result() for state in model_submitted_states]
+        
+##TRAINING LOOP WITH RAND STRUCTS 
+        counter = 0 
+        master_check = True 
+        while master_check:
+            counter +=1 
+            #Create random structures to test each model with and to use as training
+            #data for the next step 
+            test_structures = []
+            while len(test_structures) < num_test_structs:
+                new_struct = struct_generator.new_structure() 
+                if new_struct == False:
+                    continue
+                else:
+                    test_structures.append(new_struct) 
+            
+            #Use each model created to predict the energies/forces for each randomly 
+            #created structure
+            deepmd_prediction_states = [] 
+            for directory in deepmd_directories:
+                state = get_energy_force.run(directory = directory/'deepmd',
+                                             structure = test_structures)
+                deepmd_prediction_states.append(state)
+            
+            #Collect a dictionary for each model containing the predicted energies and forces
+            #each list will contain the forces/energies predicted for each structure created 
+            energy_force_list = [state.result() for state in deepmd_prediction_states]
+            
+            average_error = []
+            #start by iterating through the first list 
+            for e1 in energy_force_list[0]['energies']:
+                error_list = []
+                for e2 in energy_force_list[1:]['energies']:
+                    error = abs((e1 - e2)/e1)
+                    error_list.append(error)
+                    
+                average_diff = mean(error)
+                average_error.append(average_diff)
+                
+            next_gen_structs = []
+            for n, error in average_error:
+                if error > max_error:
+                    next_gen_structs.append(test_structures[n])
+            
+            #if there are less than 20 structures in next_gen_structure, don't 
+            #bother retraining models 
+            if len(next_gen_structs) < 20:
+                master_check = False 
+                
+            if counter > max_attempts:
+                master_check = False 
+            
+            #create lists to hold new training/testing data
+            #!!!CAN REPLACE THE SECTION BELOW WITH THE BUILD_FROM_TABLE METHOD 
+            #if new_structs are added to a database?  
+            training_data = []
+            testing_data =[] 
+            ##RESTART TRAINING (run in parallel!!!) 
+            for directory in deepmd_directories:
+                #create datasets for the new trianing strucutres in each model directory
+                DeepmdDataset.to_file(
+                    ionic_step_structures=next_gen_structs,
+                    #!!!check directory name!!!
+                    directory = directory / f"deepmd_data_randstruct_{counter}",
                 )
-            
-            freeze_workflow = get_workflow("ml-potential.deepmd.freeze_model")
-            
-            #freeze_model         
-            freeze_workflow.run(
-                command = f"dp freeze -o graph_{num}.pb",
-                directory=deepmd_directory / f'run_{num}', #how to set this if using run cloud???
-            )
-            
-            #search for graph file name and add to list? 
-            #make variable/return graph name in freeze workflow
-            
-            model_list = [] 
-            
-            
-            #!!!at this point you have x number of models that need to be tested
-        
-        # ---------- TEST MODELS (MD opt) ----------
-        
-        if test_option == "md":
-            
-            prediction_workflow = get_workflow("ml-potential.deepmd.get_force_energy")
-        
-            lammps_workflow = get_workflow("ml-potential.deepmd.run_lammps")
-            
-            static_energy_workflow = get_workflow("static-energy.vasp.mit")
-            
-            #set up directory to hold lammps data files and runs 
-            lammps_directory = directory / "lammps"
-            
-            
-            #make counter to keep track of the number of testing/retraining iterations
-            counter = 0 
-            while True:
-                
-                #run initial lammps simulation with first trained model 
-                lammps_workflow.run(
-                    structure = structure, #randomly create a new structure for this instead??
-                    directory = lammps_directory / f"test_{counter}",
-                    deepmd_model = model_list[0], 
-                    lammps_timestep = 1000)
-                
-                #get energy and forces from lammps 
-                #hold lammps data in a table so grab directly from there?? 
-                lammps_energy = []
-                lammps_forces = [] 
-                
-                #get structures from lammps 
-                lammps_structures = []
-                
-                #create a list to hold new structures that will be incorperated
-                #into later training steps 
-                new_training_structs = []
-                
-                for n,struct in enumerate(lammps_structures):
-                    energy_errors = []
-                    for model in model_list[1:]:
-                        #!!! problem with workflow, having to create calculator each time its called 
-                       state = prediction_workflow.run(
-                            structure = struct,
-                            deepmd_model = model)
-                       
-                       predicted_energy, predicted_force_field = state.result()
-                       
-                       #calculate the error between the energy predicted in lammps with model 0
-                       #and the energy predicted using the calculator with other models 
-                       error = (abs(lammps_energy[n]-predicted_energy))/lammps_energy[n] 
-                       
-                       #add calculated error to running list 
-                       energy_errors.append(error)
-                       
-                    #calculate the average error for structure n 
-                    average_error = mean(energy_errors)
-                    
-                    #if the average energy of the structure is 
-                    if average_error > max_error:
-                        new_training_structs.append(struct)
-                
-                #if there are less than x number of structures above the error
-                #don't bother retraining and end loop 
-                if len(new_training_structs) < 20:
-                    break 
-                
-                #calculate properties for each new training structure
-                for struct in new_training_structs:
-                    static_energy_workflow.run(
-                        structure = struct,
-                        )
-                    
-                # how to create query set with just these structures???
-                train, test = DeepmdDataset.to_file(
-                    ionic_step_structures=start_structs,
-                    directory=deepmd_directory / f"deepmd_data_{counter}",
-                    )
-                
-                #add new data sets to list 
-                training_data += train
-                testing_data += test
-                
-                #!!!everything below needs to happen in each of the directories
-                #used to intially run deepmd 
-                
-                #find newest available checkpoint 
+                #add new datasets to running list of training/testing data 
+                training_data.append( directory / f"deepmd_data_randstruct_{counter}_train")
+                testing_data.append( directory / f"deepmd_data_randstruct_{counter}_test")
+                # find the newest available checkpoint file
                 number_max = 0  # to keep track of checkpoint number
                 checkpoint_file = None
-                for file in deepmd_directory.iterdir():
+                for file in directory.iterdir():
                     if "model.ckpt" in file.stem and "-" in file.stem:
                         number = int(file.stem.split("-")[-1])
                         if number > number_max:
@@ -267,26 +193,75 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
                 # make sure the loop above ended with finding a file
                 if not checkpoint_file:
                     raise Exception("Unable to detect DeepMD checkpoint file")
-
-                command = f'eval "$(conda shell.bash hook)"; conda activate deepmd; dp train --restart {checkpoint_file.stem} input_{n}.json'
-                
-                counter +=1 
-                
-                
+    
+                # And continue the model training with this new data
                 deepmd_workflow.run(
-                    directory=deepmd_directory / f'run_{counter}', #setting directory with cloud???
+                    directory=directory,
                     composition=structure.composition,
-                    command=command,
-                    input_filename="input_{counter}.json",
+                    command=f'dp train --restart {checkpoint_file.stem} input_{n}.json',
+                    input_filename=f"input_{n}.json",
                     training_data=training_data,
                     testing_data=testing_data,
-                    )
+                )
+                #freeze model once training is complete 
+                freeze_workflow.run(directory=directory)
+                
+                #!!!make sure model.pb file gets overridden!!!
+
+
+            
+            
+                    
+                    
+                
+            
+                
+                    
+              
+                
+                    
+                    
                 
                 
                 
+            
                 
+            
+            
+        
+        
+     
                 
-                
-                
-                
-                
+            
+            
+      
+        
+        
+        
+        
+        
+        
+        
+        
+            
+        
+            
+            
+            
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
+            
+            
+            
+            
+            
+        
+        
