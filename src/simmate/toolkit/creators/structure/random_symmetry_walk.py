@@ -13,12 +13,12 @@ from simmate.toolkit.creators.sites.random_wyckoff import (  # !!! this will mov
 from simmate.toolkit.creators.vector import UniformlyDistributedVectors
 from simmate.toolkit.symmetry.wyckoff import loadWyckoffData
 
-# from pymatdisc.core.estimate import distance_matrix # !!! TODO
+from simmate.toolkit.validators.structure import SiteDistanceMatrix
 
 ##############################################################################
 
 
-class StructureCreator:
+class RandomSymWalkStructure:
     def __init__(
         self,
         composition,
@@ -64,7 +64,7 @@ class StructureCreator:
         # create new ordered composition from dictionary
         new_composition = Composition.from_dict(comp_dict)
         # create cutoff matrix for composition
-        cutoff_matrix = distance_matrix(new_composition, radius_method="atomic")
+        cutoff_matrix = SiteDistanceMatrix(composition = new_composition, radius_method="atomic")
 
         if not spacegroup:
             spacegroup = choice(self.space_group_options)
@@ -90,6 +90,7 @@ class StructureCreator:
             mults = []
             # while loop check
             master_check = False
+            #what is this doing!!!
             large_mult_attempt = 0
             total_attempt_count = 0
             while not master_check:  # while not check and (attempts <= ...)
@@ -167,28 +168,11 @@ class StructureCreator:
                     fsg_test_struct = Structure.from_spacegroup(
                         spacegroup, struct_lattice, species_list, coords_list
                     )
+                    
+                    dist_check = cutoff_matrix.check_structure(fsg_test_struct)
                     #!!! speed improvements to be made here...?
                     # check distances in full unit cell to see if its too close to another site
-                    fsg_dm = fsg_test_struct.distance_matrix
-
-                    for x, specie1 in enumerate(new_composition):
-                        specie1_indicies = fsg_test_struct.indices_from_symbol(
-                            specie1.symbol
-                        )
-                        for y, specie2 in enumerate(new_composition):
-                            specie2_indicies = fsg_test_struct.indices_from_symbol(
-                                specie2.symbol
-                            )
-                            dist_cutoff = cutoff_matrix[x][y]
-                            combos = itertools.product(
-                                specie1_indicies, specie2_indicies
-                            )
-                            for s1, s2 in combos:
-                                if s1 == s2:
-                                    continue
-                                distance = fsg_dm[s1][s2]
-                                if distance < dist_cutoff:
-                                    dist_check = False
+                    
 
                     # see if the distance check passed or not
                     if not dist_check:
