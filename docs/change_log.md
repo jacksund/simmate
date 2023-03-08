@@ -68,7 +68,9 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 -->
 
-- no new changes have been merged into the `main` branch yet
+**Fixes**
+
+- recover from `connection already closed` errors after long workflow runs
 
 --------------------------------------------------------------------------------
 
