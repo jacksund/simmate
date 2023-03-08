@@ -9,8 +9,6 @@ from simmate.website.workflows import models as all_datatables
 from simmate.workflow_engine import Workflow
 from simmate.workflows.utilities import get_workflow
 
-#is the remote orign already set?????
-
 class MlPotential__Deepmd__BuildFromTable(Workflow):
 
     use_database = False
@@ -20,7 +18,6 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
         directory: Path,
         table_name: str,
         filter_kwargs: dict = {},
-        md_kwargs: dict = {},
         deepmd_settings: dict ={},
         training_iterations: int = 1,  # setting to 1 means no iterative training
         **kwargs,
@@ -89,7 +86,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
             testing_data += test
 
             if n == 0:
-                command = 'dp train input_{n}.json > deepmd.out'
+                command = f'dp train input_{n}.json'
             else:
 
                 # find the newest available checkpoint file
@@ -105,7 +102,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
                 if not checkpoint_file:
                     raise Exception("Unable to detect DeepMD checkpoint file")
 
-                command = 'dp train --restart {checkpoint_file.stem} input_{n}.json'
+                command = f'dp train --restart {checkpoint_file.stem} input_{n}.json'
 
             deepmd_workflow.run(
                 input_filename=f"input_{n}.json",
