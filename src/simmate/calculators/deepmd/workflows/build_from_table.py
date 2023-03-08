@@ -26,6 +26,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
         **kwargs,
     ):
 
+        overall_directory = directory
         # Load the desired table and filter the target structures from it
         #
         # Import the datatable class -- how this is done depends on if it
@@ -88,7 +89,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
             testing_data += test
 
             if n == 0:
-                command = f'eval "$(conda shell.bash hook)"; conda activate deepmd; dp train input_{n}.json > deepmd.out'
+                command = 'dp train input_{n}.json > deepmd.out'
             else:
 
                 # find the newest available checkpoint file
@@ -104,7 +105,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
                 if not checkpoint_file:
                     raise Exception("Unable to detect DeepMD checkpoint file")
 
-                command = f'eval "$(conda shell.bash hook)"; conda activate deepmd; dp train --restart {checkpoint_file.stem} input_{n}.json'
+                command = 'dp train --restart {checkpoint_file.stem} input_{n}.json'
 
             deepmd_workflow.run(
                 input_filename=f"input_{n}.json",
@@ -122,3 +123,5 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
         freeze_workflow.run(
             directory=deepmd_directory,
         )
+        
+        return overall_directory  
