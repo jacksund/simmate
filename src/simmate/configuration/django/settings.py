@@ -112,9 +112,8 @@ elif CONDA_DATABASE_YAML.exists():
         DATABASES = yaml.full_load(file)
 
 
-# Our 3rd prioirity is Digital Ocean setup.
-# Lastly, if we make it to this point, we are likely using DigitalOcean and
-# running a server. Here, we simply require a ENV variable to be set.
+# Our 3rd prioirity is Digital Ocean setup or ENV variable. The connection
+# parameters were set as an env variable named DATABASE_URL.
 elif DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.parse(DATABASE_URL),
