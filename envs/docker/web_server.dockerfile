@@ -3,7 +3,7 @@
 # TO RUN THIS FILE: (be sure to update version)
 # cd ~/Documents/github/simmate/
 # docker login -u jacksund
-# docker build -t jacksund/simmate:v0.9.0 -f .do/Dockerfile .
+# docker build -t jacksund/simmate:v0.9.0 -f envs/docker/web_server.dockerfile .
 # docker push jacksund/simmate:v0.9.0
 
 # This file sets up the environment for DigitalOcean to use on it's app platform.
