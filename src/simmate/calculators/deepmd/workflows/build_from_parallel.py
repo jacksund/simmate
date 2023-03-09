@@ -90,7 +90,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
         build_from_md = get_workflow('ml-potential.deepmd.build-from-md')
         
         #import random structure generation function
-        struct_generator = RandomSymWalkStructure(composition = structure.composition)
+        struct_generator = RandomSymWalkStructure(composition = Composition(structure.composition.formula))
         
         #import energy/force prediction workflow 
         get_energy_force = get_workflow()
