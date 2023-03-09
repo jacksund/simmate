@@ -93,7 +93,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
         struct_generator = RandomSymWalkStructure(composition = Composition(structure.composition.formula))
         
         #import energy/force prediction workflow 
-        get_energy_force = get_workflow()
+        get_energy_force = get_workflow("ml-potential.deepmd.prediction")
         
         #import deepmd training workflow 
         deepmd_workflow = get_workflow("ml-potential.deepmd.train-model")
@@ -113,7 +113,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             
         #The build_from_md worklow returns the directory where the deepmd data/run files are 
         #stored so this will collect all the directories in one list
-        deepmd_directories = [state.result() for state in model_submitted_states]
+        directories = [state.result() for state in model_submitted_states]
         
 ##TRAINING LOOP WITH RAND STRUCTS 
         counter = 0 
@@ -133,7 +133,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             #Use each model created to predict the energies/forces for each randomly 
             #created structure
             deepmd_prediction_states = [] 
-            for directory in deepmd_directories:
+            for directory in directories:
                 state = get_energy_force.run(directory = directory/'deepmd',
                                              structure = test_structures)
                 deepmd_prediction_states.append(state)
@@ -172,7 +172,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             training_data = []
             testing_data =[] 
             ##RESTART TRAINING (run in parallel!!!) 
-            for directory in deepmd_directories:
+            for directory in directories:
                 #create datasets for the new trianing strucutres in each model directory
                 DeepmdDataset.to_file(
                     ionic_step_structures=next_gen_structs,
