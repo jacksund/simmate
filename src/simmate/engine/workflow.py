@@ -188,6 +188,7 @@ class Workflow:
             # BUGFIX: for workflow runs that take >1hr, the database connection to
             # postgres can be dropped/terminated. So we need to catch this
             # and make a new connection.
+            #   https://github.com/jacksund/simmate/issues/364
             # TODO: Consider a decorator utility that we can apply to various
             # methods to catch database closure errors. (e.g. @check_db_conn)
             # Alternatively, we could wrap this around the .save() method
@@ -203,7 +204,8 @@ class Workflow:
             # Fix is from:
             #   https://stackoverflow.com/questions/48329685
             except Exception as error:
-                print(error)
+                logging.critical(error)
+                logging.info("retrying with new db connection")
                 # grab new connection
                 db_connection.connect()
                 # retry the database call
