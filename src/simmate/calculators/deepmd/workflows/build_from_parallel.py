@@ -83,6 +83,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             num_models: int = 3,
             max_error: float = 0.5, 
             max_attempts = 5,
+            **kwargs,
             ):
         
         #import build_from_md workflow 
