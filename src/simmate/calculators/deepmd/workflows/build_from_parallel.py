@@ -87,7 +87,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             ):
         
         #import build_from_md workflow 
-        build_from_md = get_workflow('ml-potential.deepmd.build_from_md')
+        build_from_md = get_workflow('ml-potential.deepmd.build-from-md')
         
         #import random structure generation function
         struct_generator = RandomSymWalkStructure(composition = structure.composition)
