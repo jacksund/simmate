@@ -45,9 +45,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
 
     # Check which
     using_sqlite = DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
-    using_postgres = (
-        DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql_psycopg2"
-    )
+    using_postgres = DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql"
 
     if using_sqlite:
         # grab the location of the database file. I assume the default

@@ -80,7 +80,7 @@ conda install -n my_env -c conda-forge psycopg2
 4. We need to pass this information to Simmate (which connects using Django). To do this, add a file named `my_env-database.yaml` (using your conda env name) to your simmate config directory (`~/simmate`) with the following content -- be sure substute in your connection information and note that ENGINE tells Django we are using Postgres:
 ``` yaml
 default:
-  ENGINE: django.db.backends.postgresql_psycopg2
+  ENGINE: django.db.backends.postgresql
   HOST: db-postgresql-nyc3-49797-do-user-8843535-0.b.db.ondigitalocean.com
   NAME: defaultdb
   USER: doadmin
@@ -116,7 +116,7 @@ When we have a bunch of calculations running at once, we need to make sure our d
 5. You'll have to update your `my_env-database.yaml` file to these connection settings. At this point your file will look similar to this (note, our NAME and PORT values have changed):
 ``` yaml
 default:
-  ENGINE: django.db.backends.postgresql_psycopg2
+  ENGINE: django.db.backends.postgresql
   HOST: db-postgresql-nyc3-49797-do-user-8843535-0.b.db.ondigitalocean.com
   NAME: simmate-database-00-pool  # THIS LINE WAS UPDATED
   USER: doadmin
