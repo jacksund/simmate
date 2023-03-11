@@ -72,6 +72,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 - recover from `connection already closed` errors after long workflow runs
 - fix bug where `simmate database reset` fails when there is no database `postgres` available
+- update django regression of `django.db.backends.postgresql_psycopg2` to `django.db.backends.postgresql`
 
 --------------------------------------------------------------------------------
 

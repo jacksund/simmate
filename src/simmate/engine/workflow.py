@@ -193,6 +193,8 @@ class Workflow:
             # methods to catch database closure errors. (e.g. @check_db_conn)
             # Alternatively, we could wrap this around the .save() method
             # of our base database model...
+            # New feature in Django worth exploring if this becomes an issue again
+            # https://docs.djangoproject.com/en/4.1/ref/settings/#conn-health-checks
             try:
                 database_entry = cls._update_database_with_results(
                     results=results if results != None else {},

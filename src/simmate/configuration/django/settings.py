@@ -77,7 +77,7 @@ SECRET_KEY = os.getenv(
 # Normally in Django, you can set the database like so: (using Postgres)
 # DATABASES = {
 #     "default": {
-#         "ENGINE": "django.db.backends.postgresql_psycopg2",
+#         "ENGINE": "django.db.backends.postgresql",
 #         "NAME": "simmate-database-pool",  # default on DigitalOcean is defaultdb
 #         "USER": "doadmin",
 #         "PASSWORD": "dibi5n3varep5ad8",

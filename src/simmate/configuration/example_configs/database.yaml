@@ -6,7 +6,7 @@
 # you MUST have one that is named "default" for Django+Simmate to work properly.
 
 default:
-  ENGINE: django.db.backends.postgresql_psycopg2
+  ENGINE: django.db.backends.postgresql
   HOST: db-postgresql-nyc3-1235-do-user-123456-0.b.db.ondigitalocean.com
   NAME: simmate-database-pool
   USER: doadmin

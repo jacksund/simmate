@@ -39,7 +39,7 @@ connecting to it will be the easiest thing we've done yet!
 Once you have the connection parameters for your cloud database, simply create the file `~/simmate/my_env-database.yaml` and add the connection parameters that your point-person provided. As an example, this `my_env-database.yaml` file gives a `default` database to use:
 ``` yaml
 default:
-  ENGINE: django.db.backends.postgresql_psycopg2
+  ENGINE: django.db.backends.postgresql
   HOST: simmate-database-do-user-8843535-0.b.db.ondigitalocean.com
   NAME: simmate-database-00-pool
   USER: doadmin

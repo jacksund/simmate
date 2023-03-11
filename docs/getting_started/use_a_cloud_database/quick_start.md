@@ -18,7 +18,7 @@ conda install -n my_env -c conda-forge psycopg2
 4. Add the file `~/simmate/my_env-database.yaml` with your connection details that match [django format](https://docs.djangoproject.com/en/dev/ref/settings/#databases). As an example, this `my_env-database.yaml` file gives a `default` database to use:
 ``` yaml
 default:
-  ENGINE: django.db.backends.postgresql_psycopg2
+  ENGINE: django.db.backends.postgresql
   HOST: simmate-database-do-user-8843535-0.b.db.ondigitalocean.com
   NAME: simmate-database-00-pool
   USER: doadmin
