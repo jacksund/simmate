@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import json
 from pathlib import Path
 
 from pymatgen.electronic_structure.bandstructure import (
@@ -114,7 +115,7 @@ class BandStructure(DatabaseTable):
         # for this class as an object (or as a dictionary).
         data = (
             dict(
-                band_structure_data=band_structure.as_dict(),
+                band_structure_data=band_structure.to_json(),
                 nbands=band_structure.nb_bands,
                 band_gap=band_structure.get_band_gap()["energy"],
                 is_gap_direct=band_structure.get_band_gap()["direct"],
@@ -137,7 +138,8 @@ class BandStructure(DatabaseTable):
         Converts this DatabaseTable object into a toolkit BandStructure, which
         has many more methods for plotting and analysis.
         """
-        return ToolkitBandStructure.from_dict(self.band_structure_data)
+        data = json.loads(self.band_structure_data)
+        return ToolkitBandStructure.from_dict(data)
 
 
 class BandStructureCalc(Structure, BandStructure, Calculation):

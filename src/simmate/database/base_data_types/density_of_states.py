@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import json
 from pathlib import Path
 
 from pymatgen.electronic_structure.dos import CompleteDos
@@ -89,7 +90,7 @@ class DensityofStates(DatabaseTable):
         # for this class as an object (or as a dictionary).
         data = (
             dict(
-                density_of_states_data=density_of_states.as_dict(),
+                density_of_states_data=density_of_states.to_json(),
                 band_gap=float(density_of_states.get_gap()),
                 energy_fermi=density_of_states.efermi,
                 conduction_band_minimum=float(density_of_states.get_cbm_vbm()[0]),
@@ -108,7 +109,8 @@ class DensityofStates(DatabaseTable):
         Converts this DatabaseTable object into a toolkit CompleteDos, which
         has many more methods for plotting and analysis.
         """
-        return CompleteDos.from_dict(self.density_of_states_data)
+        data = json.loads(self.density_of_states_data)
+        return CompleteDos.from_dict(data)
 
 
 class DensityofStatesCalc(Structure, DensityofStates, Calculation):
