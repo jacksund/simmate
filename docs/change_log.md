@@ -77,6 +77,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - fix bug where postgres cannot json serialize bs or dos results (int64 numbers)
 - fix incorrect pointing of VASP potcars in matproj presets
 - from `from_directory` method of the `Relaxation` database class
+- fix HSE bandstructure and DOS kpoint file writing
 
 --------------------------------------------------------------------------------
 
