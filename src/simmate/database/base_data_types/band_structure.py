@@ -114,7 +114,7 @@ class BandStructure(DatabaseTable):
         # for this class as an object (or as a dictionary).
         data = (
             dict(
-                band_structure_data=band_structure.as_dict(),
+                band_structure_data=band_structure.to_json(),
                 nbands=band_structure.nb_bands,
                 band_gap=band_structure.get_band_gap()["energy"],
                 is_gap_direct=band_structure.get_band_gap()["direct"],

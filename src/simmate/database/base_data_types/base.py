@@ -644,7 +644,6 @@ class DatabaseTable(models.Model):
         """
         Loads data from a directory of files
         """
-
         # check if we have a VASP directory
         vasprun_filename = directory / "vasprun.xml"
         if vasprun_filename.exists():

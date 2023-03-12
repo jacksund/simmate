@@ -45,7 +45,7 @@ class VaspDensityOfStates(StaticEnergy__Vasp__Matproj):
         # vasp.inputs.kpoints class. Until those classes are ready, we just use
         # pymatgen here.
         if incar.get("LHFCALC", False):
-            kpoints = get_hse_kpoints(mode="uniform")
+            kpoints = get_hse_kpoints(structure_cleaned, mode="uniform")
         elif cls.kpoints and ("KSPACING" not in cls.incar):
             Kpoints.to_file(
                 structure_cleaned,

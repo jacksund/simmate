@@ -61,7 +61,7 @@ class VaspBandStructure(StaticEnergy__Vasp__Matproj):
         # vasp.inputs.kpoints class. Until those classes are ready, we just use
         # pymatgen here.
         if incar.get("LHFCALC", False):
-            kpoints = get_hse_kpoints()
+            kpoints = get_hse_kpoints(structure_cleaned)
         else:
             sym_prec = cls.incar.get("SYMPREC", 1e-5) if cls.incar else 1e-5
             kpath = HighSymmKpath(structure_cleaned, symprec=sym_prec)

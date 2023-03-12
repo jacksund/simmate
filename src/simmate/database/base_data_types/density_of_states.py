@@ -89,7 +89,7 @@ class DensityofStates(DatabaseTable):
         # for this class as an object (or as a dictionary).
         data = (
             dict(
-                density_of_states_data=density_of_states.as_dict(),
+                density_of_states_data=density_of_states.to_json(),
                 band_gap=float(density_of_states.get_gap()),
                 energy_fermi=density_of_states.efermi,
                 conduction_band_minimum=float(density_of_states.get_cbm_vbm()[0]),
