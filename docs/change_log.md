@@ -73,6 +73,10 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - recover from `connection already closed` errors after long workflow runs
 - fix bug where `simmate database reset` fails when there is no database `postgres` available
 - update django regression of `django.db.backends.postgresql_psycopg2` to `django.db.backends.postgresql`
+- fix bug where simmate cannot read vasp results due atypical number (e.g. -0.33328-312)
+- fix bug where postgres cannot json serialize bs or dos results (int64 numbers)
+- fix incorrect pointing of VASP potcars in matproj presets
+- from `from_directory` method of the `Relaxation` database class
 
 --------------------------------------------------------------------------------
 
