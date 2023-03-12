@@ -12,8 +12,12 @@ potcar_dir = Path.home() / "simmate" / "vasp" / "Potentials"
 # files should be located in the same Potentals directory and follow
 # the original folder structure provided by VASP.
 FOLDER_MAPPINGS = {
-    "LDA": potcar_dir / "LDA" / "potpaw_LDA.54",
-    "PBE": potcar_dir / "PBE" / "potpaw_PBE.54",
+    "LDA": potcar_dir / "LDA" / "potpaw_LDA",
+    "LDA.52": potcar_dir / "LDA" / "potpaw_LDA.52",
+    "LDA.54": potcar_dir / "LDA" / "potpaw_LDA.54",
+    "PBE": potcar_dir / "PBE" / "potpaw_PBE",
+    "PBE.52": potcar_dir / "PBE" / "potpaw_PBE.52",
+    "PBE.54": potcar_dir / "PBE" / "potpaw_PBE.54",
     "PBE_GW": potcar_dir / "PBE" / "potpaw_PBE.54",
 }
 
