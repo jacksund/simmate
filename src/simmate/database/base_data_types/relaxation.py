@@ -138,7 +138,13 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
         self.write_relaxation_convergence_plot(directory=directory)
 
     @classmethod
-    def from_vasp_run(cls, vasprun: Vasprun):
+    def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):
+        if as_dict:
+            raise NotImplementedError(
+                "Relaxation database entries cannot be loaded with as_dict=True. "
+                "Please contact the Simmate team if you need this feature."
+            )
+
         # Make the relaxation entry. Note we need to save this to the database
         # in order to link/save the ionic steps below. We save the structure
         # as the final one in the calculation.
@@ -150,7 +156,9 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
         relaxation.save()
 
         # and we can populate the rest of the tables as if its the workup
-        relaxation.update_from_vasprun(vasprun)
+        relaxation.update_from_vasp_run(vasprun)
+
+        return relaxation
 
     def update_from_directory(self, directory: Path):
         # check if we have a VASP directory
