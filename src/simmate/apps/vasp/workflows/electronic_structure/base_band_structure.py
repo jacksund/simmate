@@ -4,6 +4,7 @@ from pymatgen.io.vasp.inputs import Kpoints
 from pymatgen.symmetry.bandstructure import HighSymmKpath
 
 from simmate.apps.vasp.inputs import Incar, Poscar, Potcar
+from simmate.apps.vasp.workflows.electronic_structure.utilities import get_hse_kpoints
 from simmate.apps.vasp.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
@@ -59,20 +60,23 @@ class VaspBandStructure(StaticEnergy__Vasp__Matproj):
         # functionality will be moved to the KptPath class and then extended to
         # vasp.inputs.kpoints class. Until those classes are ready, we just use
         # pymatgen here.
-        sym_prec = cls.incar.get("SYMPREC", 1e-5) if cls.incar else 1e-5
-        kpath = HighSymmKpath(structure_cleaned, symprec=sym_prec)
-        frac_k_points, k_points_labels = kpath.get_kpoints(
-            line_density=cls.kpoints_line_density,
-            coords_are_cartesian=False,
-        )
-        kpoints = Kpoints(
-            comment="Non SCF run along symmetry lines",
-            style=Kpoints.supported_modes.Reciprocal,
-            num_kpts=len(frac_k_points),
-            kpts=frac_k_points,
-            labels=k_points_labels,
-            kpts_weights=[1] * len(frac_k_points),
-        )
+        if incar.get("LHFCALC", False):
+            kpoints = get_hse_kpoints()
+        else:
+            sym_prec = cls.incar.get("SYMPREC", 1e-5) if cls.incar else 1e-5
+            kpath = HighSymmKpath(structure_cleaned, symprec=sym_prec)
+            frac_k_points, k_points_labels = kpath.get_kpoints(
+                line_density=cls.kpoints_line_density,
+                coords_are_cartesian=False,
+            )
+            kpoints = Kpoints(
+                comment="Non SCF run along symmetry lines",
+                style=Kpoints.supported_modes.Reciprocal,
+                num_kpts=len(frac_k_points),
+                kpts=frac_k_points,
+                labels=k_points_labels,
+                kpts_weights=[1] * len(frac_k_points),
+            )
         kpoints.write_file(directory / "KPOINTS")
         ##############
 
