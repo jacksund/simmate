@@ -72,7 +72,7 @@ class Oszicar:
 
                 # convert the list of strings to float values. We skip the first
                 # value which is just the ionic_step_number that we don't need
-                values = [float(value) for value in values[1:]]
+                values = [try_float(value) for value in values[1:]]
 
                 # Now there are three formats that we need to account for, which
                 # each have a different amount of information given, and we can
@@ -136,15 +136,6 @@ class Oszicar:
                 # Note we remove the first two values because these are the
                 # scheme used (i.e. DAV, RMM, or CG) and electronic step number
                 # which we don't need. (I grab the scheme below though)
-                # BUG: sometimes VASP prints a value like '-0.33328-312' which
-                # can't be converted to a float. I need a try/except here to
-                # catch this case and return a numpy.NAN instead.
-                def try_float(value):
-                    try:
-                        return float(value)
-                    except:
-                        return numpy.NaN
-
                 values = [try_float(value) for value in line.split()[2:]]
 
                 # now load the data into a dictionary for verbosity
@@ -202,3 +193,15 @@ class Oszicar:
     def energy_final(self):
         # TODO: move to DftCalc/IonicStep/ElectronicStep class
         return self.ionic_steps[-1]["energy_sigma_zero"]
+
+
+def try_float(value: str) -> float:
+    """
+    BUG: sometimes VASP prints a value like '-0.33328-312' which
+    can't be converted to a float. I need a try/except here to
+    catch this case and return a numpy.NAN instead.
+    """
+    try:
+        return float(value)
+    except:
+        return numpy.NaN
