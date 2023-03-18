@@ -89,6 +89,12 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
         #import build_from_md workflow 
         build_from_md = get_workflow('ml-potential.deepmd.build-from-md')
         
+        #import build_from_table worklfow 
+        build_from_table = get_workflow('ml-potential.deepmd.build-from-table')
+        
+        #import vasp static energy workflow 
+        static_energy = get_workflow('static-energy.vasp.mit')
+        
         #import random structure generation function
         struct_generator = RandomSymWalkStructure(composition = Composition(structure.composition.formula))
         
@@ -119,7 +125,12 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
         counter = 0 
         master_check = True 
         while master_check:
+            #check the counter to see if the max number of cycles has been reached 
+            if counter > max_attempts:
+                master_check = False 
+                
             counter +=1 
+            
             #Create random structures to test each model with and to use as training
             #data for the next step 
             test_structures = []
@@ -162,9 +173,17 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             #bother retraining models 
             if len(next_gen_structs) < 20:
                 master_check = False 
+            
+            #carry out static energy calculations for each of the structures 
+            static_energy_states = []
+            for struct in next_gen_structs:
+                #use run cloud to run static energy calculations in parallel 
+                state = static_energy.run_cloud(
+                    structure=struct,
+                )
+                static_energy_states.append(state)
                 
-            if counter > max_attempts:
-                master_check = False 
+            structure_results = [state.result() for state in static_energy_states]
             
             #create lists to hold new training/testing data
             #!!!CAN REPLACE THE SECTION BELOW WITH THE BUILD_FROM_TABLE METHOD 
@@ -175,7 +194,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             for directory in directories:
                 #create datasets for the new trianing strucutres in each model directory
                 DeepmdDataset.to_file(
-                    ionic_step_structures=next_gen_structs,
+                    ionic_step_structures=structure_results,
                     #!!!check directory name!!!
                     directory = directory / f"deepmd_data_randstruct_{counter}",
                 )
