@@ -15,8 +15,8 @@ class WorkflowEngineConfig(AppConfig):
     name = "simmate.website.engine"
 
 
-class ThirdPartyConfig(AppConfig):
-    name = "simmate.website.third_parties"
+class DataExplorerConfig(AppConfig):
+    name = "simmate.website.data_explorer"
 
 
 class TestAppConfig(AppConfig):

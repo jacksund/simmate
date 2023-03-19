@@ -12,7 +12,7 @@ class JarvisStructure(Structure):
     """
 
     class Meta:
-        app_label = "third_parties"
+        app_label = "data_explorer"
 
     archive_fields = ["energy_above_hull"]
     api_filters = dict(

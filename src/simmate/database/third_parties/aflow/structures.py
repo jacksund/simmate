@@ -14,7 +14,7 @@ class AflowStructure(Structure, Thermodynamics):
     """
 
     class Meta:
-        app_label = "third_parties"
+        app_label = "data_explorer"
 
     source = "AFLOW"
     source_long = "The Automatic-FLOW for Materials Discovery"

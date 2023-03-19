@@ -17,7 +17,7 @@ Simmate
     <div class="page-title-box">
       <div class="page-title-right">
         <ol class="breadcrumb m-0">
-          <li class="breadcrumb-item"><a href="{% url 'third_parties:home' %}">Third-Parties</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'data_explorer:home' %}">Data</a></li>
           <li class="breadcrumb-item active">{{ provider.source }}</li>
         </ol>
       </div>
@@ -45,6 +45,6 @@ Simmate
 {% include "core_components/search_form.html" %}
 
 <!-- Search Results -->
-{% include "third_parties/search_results.html" %}
+{% include "data_explorer/search_results.html" %}
 
 {% endblock %}

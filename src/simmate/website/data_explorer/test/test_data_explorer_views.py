@@ -7,11 +7,11 @@ from pytest_django.asserts import assertTemplateUsed
 
 def test_providers_view(client):
     # grabs f"/third-parties/"
-    url = reverse("third_parties:home")
+    url = reverse("data_explorer:home")
 
     response = client.get(url)
     assert response.status_code == 200
-    assertTemplateUsed(response, "third_parties/providers_all.html")
+    assertTemplateUsed(response, "data_explorer/providers_all.html")
 
 
 @pytest.mark.django_db
@@ -30,17 +30,17 @@ def test_workflows_by_type_view(client, provider_name):
 
     # grabs f"/workflows/{workflow_type}/"
     url = reverse(
-        "third_parties:provider",
+        "data_explorer:provider",
         kwargs={"provider_name": provider_name},
     )
 
     response = client.get(url)
     assert response.status_code == 200
-    assertTemplateUsed(response, "third_parties/provider.html")
+    assertTemplateUsed(response, "data_explorer/provider.html")
 
     # detail view
     url = reverse(
-        "third_parties:entry-detail",
+        "data_explorer:entry-detail",
         kwargs={
             "provider_name": provider_name,
             "pk": 999,
@@ -49,4 +49,4 @@ def test_workflows_by_type_view(client, provider_name):
 
     response = client.get(url)
     assert response.status_code == 404
-    # assertTemplateUsed(response, "third_parties/entry_detail.html")
+    # assertTemplateUsed(response, "data_explorer/entry_detail.html")

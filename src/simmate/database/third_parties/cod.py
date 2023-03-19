@@ -12,7 +12,7 @@ class CodStructure(Structure):
     """
 
     class Meta:
-        app_label = "third_parties"
+        app_label = "data_explorer"
 
     archive_fields = ["is_ordered", "has_implicit_hydrogens"]
     api_filters = dict(

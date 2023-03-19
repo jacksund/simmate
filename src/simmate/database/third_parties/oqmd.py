@@ -13,7 +13,7 @@ class OqmdStructure(Structure):
     """
 
     class Meta:
-        app_label = "third_parties"
+        app_label = "data_explorer"
 
     archive_fields = ["formation_energy"]
     api_filters = dict(formation_energy=["range"])

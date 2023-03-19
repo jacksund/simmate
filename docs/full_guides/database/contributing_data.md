@@ -69,7 +69,7 @@ Providers that permit redistribution are welcome to use our CDN for their archiv
 The end goal for each provider is to allow a user do the following:
 ``` python
 from simmate.database import connect
-from simmate.third_parties import ExampleProviderData
+from simmate.database.third_parties import ExampleProviderData
 
 ExampleProviderData.load_remote_archive()
 
@@ -124,7 +124,7 @@ class ExampleProviderData(Structure, Thermodynamics):
     # This Meta class tells Simmate where to store the table within our database.
     # All providers with have the exact same thing here. 
     class Meta:
-        app_label = "third_parties"
+        app_label = "data_explorer"
 
     # By default, the ID column is an IntegerField, but if your data uses a string
     # like "mp-1234" to denote structures, you can update this column to
@@ -186,7 +186,7 @@ simmate database reset
 # in python
 
 from simmate.database import connect
-from simmate.third_parties import ExampleProviderData
+from simmate.database.third_parties import ExampleProviderData
 
 # This will show you all the columns for your table
 ExampleProviderData.show_columns()
@@ -282,7 +282,7 @@ Try running this on your dataset (or a subset of data if you want to quickly tes
 # in python
 
 from simmate.database import connect
-from simmate.third_parties import ExampleProviderData
+from simmate.database.third_parties import ExampleProviderData
 
 # Check that the number of rows matches your source data.
 total_entries = ExampleProviderData.objects.count()
