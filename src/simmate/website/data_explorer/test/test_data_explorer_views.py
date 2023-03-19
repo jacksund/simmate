@@ -6,7 +6,7 @@ from pytest_django.asserts import assertTemplateUsed
 
 
 def test_providers_view(client):
-    # grabs f"/third-parties/"
+    # grabs f"/data/"
     url = reverse("data_explorer:home")
 
     response = client.get(url)

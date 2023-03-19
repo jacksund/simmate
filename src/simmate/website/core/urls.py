@@ -66,7 +66,7 @@ urlpatterns = [
     #
     #
     path(
-        route="third-parties/",
+        route="data/",
         view=include(
             ("simmate.website.data_explorer.urls", "simmate.website.data_explorer"),
             namespace="data_explorer",
