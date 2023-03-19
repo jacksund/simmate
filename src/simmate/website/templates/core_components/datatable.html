@@ -10,17 +10,15 @@ Currently we select...
     Step 4: CDN
 
 -->
-<link rel="stylesheet" type="text/css"
-    href="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/fh-3.1.9/r-2.2.9/datatables.min.css" />
-
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<link rel="stylesheet"
+      type="text/css"
+      href="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/fh-3.1.9/r-2.2.9/datatables.min.css"/>
 <script type="text/javascript"
-    src="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/fh-3.1.9/r-2.2.9/datatables.min.js"></script>
-
-
-
-
+        src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script type="text/javascript"
+        src="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/fh-3.1.9/r-2.2.9/datatables.min.js"></script>
 <!-- 
     This code activates the DataTable scripts and formatting for your table.
     Make sure you include the following for your table to actually work:
@@ -34,7 +32,7 @@ Currently we select...
     (3) The cdn downloads need to be place AFTER the footer (where jQuery is loaded).
 -->
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         $('#SearchResultsTable').DataTable({
             // Adapt table width with the screensize
             responsive: true,
@@ -43,18 +41,26 @@ Currently we select...
             dom: '<fB<t>lp>',
             buttons: ['copy', 'csv', 'excel', 'pdf'],
             // Keep header in view while scrolling
-            fixedHeader: { header: true },
+            fixedHeader: {
+                header: true
+            },
             // Order by the 4th column, then 3rd, then 5th
-            order: [[3, "asc"], [2, "asc"], [4, "asc"]],
+            order: [
+                [3, "asc"],
+                [2, "asc"],
+                [4, "asc"]
+            ],
             // Allow different pagination
-            lengthMenu: [[12, 25, 50, -1], [12, 25, 50, "All"]],
+            lengthMenu: [
+                [12, 25, 50, -1],
+                [12, 25, 50, "All"]
+            ],
             // Specify how each column should be aligned.
             // This doesn't seem to work with Bootstrap though.
             // columnDefs: [{targets: 3, className: 'text-right'}],
         });
     });
 </script>
-
 <!-- Example Code from Hyper
 
 I'll need to  integrate this via... 

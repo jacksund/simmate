@@ -1,144 +1,140 @@
 {% extends "core_components/site_base.html" %}
-
-{% block tabtitle %}
-Simmate
-{% endblock %}
-
+{% block tabtitle %}Simmate{% endblock %}
 {% block banner %}
-{% include "core_components/header.html"%}
+    {% include "core_components/header.html" %}
 {% endblock %}
-
-
 {% block body %}
-
-{% load markdown_filter %}
-
-<!-- start page title -->
-<div class="row pt-3">
-  <div class="col-12">
-    <div class="page-title-box">
-      <div class="page-title-right">
-        <ol class="breadcrumb m-0">
-          <li class="breadcrumb-item"><a href="{% url 'workflows' %}">workflows</a></li>
-          <li class="breadcrumb-item">
-            <a href="{% url 'workflows_by_type' workflow.name_type %}">
-              {{ workflow.name_type}}</a>
-          </li>
-          <li class="breadcrumb-item active">{{ workflow.name_preset }}</li>
-        </ol>
-      </div>
-      <h4 class="page-title">Workflow Results</h4>
-    </div>
-  </div>
-</div>
-<!-- end page title -->
-
-<!-- Workflow name and descriptoin header -->
-<section class="pt-4 jumbotron text-center">
-  <div class="container">
-    <h1 class="jumbotron-heading">{{ workflow.name_full }}</h1>
-    <a role="button" class="btn btn-primary btn-sm"
-      href="{% url 'workflow_submit' workflow.name_type workflow.name_app workflow.name_preset %}">Submit New
-      Run</a>
-    <a href="?format=api" target="_blank" class="btn btn-secondary btn-sm">API</a>
-    <a href="?format=json" target="_blank" class="btn btn-secondary btn-sm">JSON</a>
-    <a href="https://jacksund.github.io/simmate/getting_started/access_the_database/quick_start/" target="_blank"
-      class="btn btn-secondary btn-sm">Python-client</a>
-  </div>
-</section>
-
-
-<!-- Workflow details -->
-<div class="container px-4">
-  <h2>Workflow details:</h2>
-
-
-  <div class="accordion custom-accordion" id="accordionExample">
-
-    <!-- Description -->
-    <div class="card mb-0">
-      <div class="card-header" id="headingDescription">
-        <h5 class="m-0">
-          <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse" href="#collapseDescription"
-            aria-expanded="true" aria-controls="collapseDescription">
-            Description
-            <i class="mdi mdi-chevron-down accordion-arrow"></i>
-          </a>
-        </h5>
-      </div>
-      <div id="collapseDescription" class="collapse" aria-labelledby="headingDescription"
-        data-bs-parent="#accordionExample">
-        <div class="card-body">
-          {{ workflow.description_doc | markdown }}
+    {% load markdown_filter %}
+    <!-- start page title -->
+    <div class="row pt-3">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'workflows' %}">workflows</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'workflows_by_type' workflow.name_type %}">{{ workflow.name_type }}</a>
+                        </li>
+                        <li class="breadcrumb-item active">{{ workflow.name_preset }}</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Workflow Results</h4>
+            </div>
         </div>
-      </div>
     </div>
-
-    <!-- Required Parameters -->
-    <div class="card mb-0">
-      <div class="card-header" id="headingReqParams">
-        <h5 class="m-0">
-          <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse" href="#collapseReqParams"
-            aria-expanded="true" aria-controls="collapseReqParams">
-            Required Parameters
-            <i class="mdi mdi-chevron-down accordion-arrow"></i>
-          </a>
-        </h5>
-      </div>
-      <div id="collapseReqParams" class="collapse" aria-labelledby="headingReqParams"
-        data-bs-parent="#accordionExample">
-        <div class="card-body">
-          <ul>
-            {% for parameter in workflow.parameter_names_required %}
-            <li>
-              <a href="https://jacksund.github.io/simmate/parameters/#{{ parameter }}" target="_blank">
-                {{ parameter }}
-              </a>
-            </li>
-            {% endfor %}
-          </ul>
+    <!-- end page title -->
+    <!-- Workflow name and descriptoin header -->
+    <section class="pt-4 jumbotron text-center">
+        <div class="container">
+            <h1 class="jumbotron-heading">{{ workflow.name_full }}</h1>
+            <a role="button"
+               class="btn btn-primary btn-sm"
+               href="{% url 'workflow_submit' workflow.name_type workflow.name_app workflow.name_preset %}">Submit New
+            Run</a>
+            <a href="?format=api" target="_blank" class="btn btn-secondary btn-sm">API</a>
+            <a href="?format=json" target="_blank" class="btn btn-secondary btn-sm">JSON</a>
+            <a href="https://jacksund.github.io/simmate/getting_started/access_the_database/quick_start/"
+               target="_blank"
+               class="btn btn-secondary btn-sm">Python-client</a>
         </div>
-      </div>
-    </div>
-
-    <!-- Optional Parameters -->
-    <div class="card mb-0">
-      <div class="card-header" id="headingOptParams">
-        <h5 class="m-0">
-          <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse" href="#collapseOptParams"
-            aria-expanded="true" aria-controls="collapseOptParams">
-            Optional Parameters
-            <i class="mdi mdi-chevron-down accordion-arrow"></i>
-          </a>
-        </h5>
-      </div>
-      <div id="collapseOptParams" class="collapse" aria-labelledby="headingOptParams"
-        data-bs-parent="#accordionExample">
-        <div class="card-body">
-          <ul>
-            {% for parameter, default_value in workflow.parameter_defaults.items %}
-            <li>
-              <a href="https://jacksund.github.io/simmate/parameters/#{{ parameter }}" target="_blank">
-                {{ parameter }}
-              </a>: {{ default_value }}
-            </li>
-            {% endfor %}
-          </ul>
-          <p><small>Read through our
-              <a href="https://jacksund.github.io/simmate/parameters/" target="_blank">our parameter documentation</a>
-              for more information.
-            </small></p>
+    </section>
+    <!-- Workflow details -->
+    <div class="container px-4">
+        <h2>Workflow details:</h2>
+        <div class="accordion custom-accordion" id="accordionExample">
+            <!-- Description -->
+            <div class="card mb-0">
+                <div class="card-header" id="headingDescription">
+                    <h5 class="m-0">
+                        <a class="custom-accordion-title d-block pt-2 pb-2"
+                           data-bs-toggle="collapse"
+                           href="#collapseDescription"
+                           aria-expanded="true"
+                           aria-controls="collapseDescription">
+                            Description
+                            <i class="mdi mdi-chevron-down accordion-arrow"></i>
+                        </a>
+                    </h5>
+                </div>
+                <div id="collapseDescription"
+                     class="collapse"
+                     aria-labelledby="headingDescription"
+                     data-bs-parent="#accordionExample">
+                    <div class="card-body">{{ workflow.description_doc | markdown }}</div>
+                </div>
+            </div>
+            <!-- Required Parameters -->
+            <div class="card mb-0">
+                <div class="card-header" id="headingReqParams">
+                    <h5 class="m-0">
+                        <a class="custom-accordion-title d-block pt-2 pb-2"
+                           data-bs-toggle="collapse"
+                           href="#collapseReqParams"
+                           aria-expanded="true"
+                           aria-controls="collapseReqParams">
+                            Required Parameters
+                            <i class="mdi mdi-chevron-down accordion-arrow"></i>
+                        </a>
+                    </h5>
+                </div>
+                <div id="collapseReqParams"
+                     class="collapse"
+                     aria-labelledby="headingReqParams"
+                     data-bs-parent="#accordionExample">
+                    <div class="card-body">
+                        <ul>
+                            {% for parameter in workflow.parameter_names_required %}
+                                <li>
+                                    <a href="https://jacksund.github.io/simmate/parameters/#{{ parameter }}"
+                                       target="_blank">{{ parameter }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Optional Parameters -->
+            <div class="card mb-0">
+                <div class="card-header" id="headingOptParams">
+                    <h5 class="m-0">
+                        <a class="custom-accordion-title d-block pt-2 pb-2"
+                           data-bs-toggle="collapse"
+                           href="#collapseOptParams"
+                           aria-expanded="true"
+                           aria-controls="collapseOptParams">
+                            Optional Parameters
+                            <i class="mdi mdi-chevron-down accordion-arrow"></i>
+                        </a>
+                    </h5>
+                </div>
+                <div id="collapseOptParams"
+                     class="collapse"
+                     aria-labelledby="headingOptParams"
+                     data-bs-parent="#accordionExample">
+                    <div class="card-body">
+                        <ul>
+                            {% for parameter, default_value in workflow.parameter_defaults.items %}
+                                <li>
+                                    <a href="https://jacksund.github.io/simmate/parameters/#{{ parameter }}"
+                                       target="_blank">{{ parameter }}</a>: {{ default_value }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <p>
+                            <small>Read through our
+                                <a href="https://jacksund.github.io/simmate/parameters/" target="_blank">our parameter documentation</a>
+                                for more information.
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-
-  </div>
-</div>
-
-<!-- Search Form -->
-{% include "core_components/search_form.html" %}
-
-<!-- Search Results -->
-{% include "workflows/search_results.html" %}
-
+    <!-- Search Form -->
+    {% include "core_components/search_form.html" %}
+    <!-- Search Results -->
+    {% include "workflows/search_results.html" %}
 {% endblock %}

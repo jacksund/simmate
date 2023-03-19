@@ -1,46 +1,48 @@
 {% load crispy_forms_tags %}
-
 <!-- Relaxation Info -->
 <div class="card mb-0">
     <div class="card-header" id="headingRelaxFilters">
         <h5 class="m-0">
-            <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse" href="#collapseRelaxFilters"
-                aria-expanded="true" aria-controls="collapseRelaxFilters">
+            <a class="custom-accordion-title d-block pt-2 pb-2"
+               data-bs-toggle="collapse"
+               href="#collapseRelaxFilters"
+               aria-expanded="true"
+               aria-controls="collapseRelaxFilters">
                 By Relaxation Info:
                 <i class="mdi mdi-chevron-down accordion-arrow"></i>
             </a>
         </h5>
     </div>
-
-    <div id="collapseRelaxFilters" class="collapse" aria-labelledby="headingRelaxFilters"
-        data-bs-parent="#accordionExample">
-        <div class="card-body">
-            {{ form.volume_change__range | as_crispy_field }}
-        </div>
+    <div id="collapseRelaxFilters"
+         class="collapse"
+         aria-labelledby="headingRelaxFilters"
+         data-bs-parent="#accordionExample">
+        <div class="card-body">{{ form.volume_change__range | as_crispy_field }}</div>
     </div>
 </div>
-
 {% include "core_components/base_filter_types/calculation.html" %}
 {% include "core_components/base_filter_types/structure.html" %}
-
 <!-- Electronic Info -->
 <div class="card mb-0">
     <div class="card-header" id="headingElectronicFilters">
         <h5 class="m-0">
-            <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse"
-                href="#collapseElectronicFilters" aria-expanded="true" aria-controls="collapseElectronicFilters">
+            <a class="custom-accordion-title d-block pt-2 pb-2"
+               data-bs-toggle="collapse"
+               href="#collapseElectronicFilters"
+               aria-expanded="true"
+               aria-controls="collapseElectronicFilters">
                 By Electronic Info:
                 <i class="mdi mdi-chevron-down accordion-arrow"></i>
             </a>
         </h5>
     </div>
-
-    <div id="collapseElectronicFilters" class="collapse" aria-labelledby="headingElectronicFilters"
-        data-bs-parent="#accordionExample">
+    <div id="collapseElectronicFilters"
+         class="collapse"
+         aria-labelledby="headingElectronicFilters"
+         data-bs-parent="#accordionExample">
         <div class="card-body">
             <a><em><b>WARNING:</b> even though some relaxations provide this information, these values are
-                    very rough estimates.</em></a>
-
+            very rough estimates.</em></a>
             {{ form.band_gap__range | as_crispy_field }}
             {{ form.is_gap_direct | as_crispy_field }}
             {{ form.energy_fermi__range | as_crispy_field }}

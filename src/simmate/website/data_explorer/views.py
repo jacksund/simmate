@@ -2,13 +2,12 @@
 
 from django.shortcuts import render
 
+from simmate.configuration.django.settings import SIMMATE_DATA
 from simmate.database.base_data_types import DatabaseTable
 from simmate.website.core_components.base_api_view import SimmateAPIViewSet
-from simmate.configuration.django.settings import SIMMATE_DATA
-
 
 ALL_PROVIDERS = {
-    DatabaseTable.get_table(table_name).table_name: DatabaseTable.get_table(table_name) 
+    DatabaseTable.get_table(table_name).table_name: DatabaseTable.get_table(table_name)
     for table_name in SIMMATE_DATA
 }
 

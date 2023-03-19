@@ -1,16 +1,22 @@
 <div class="container p-4">
     <h2>Dynamics Run Results</h2>
-
     {% include "core_components/base_data_types/calculation.html" %}
     {% include "core_components/base_data_types/structure.html" %}
-
     <div class="container p-4">
         <h3>Dynamics detail:</h3>
         <ul>
-            <li><b>Start Temperature:</b> {{ calculation.temperature_start }} K</li>
-            <li><b>End Temperature:</b> {{ calculation.temperature_end }} K</li>
-            <li><b>Time per step:</b> {{ calculation.time_step }} picoseconds</li>
-            <li><b>Total steps:</b> {{ calculation.nsteps }}</li>
+            <li>
+                <b>Start Temperature:</b> {{ calculation.temperature_start }} K
+            </li>
+            <li>
+                <b>End Temperature:</b> {{ calculation.temperature_end }} K
+            </li>
+            <li>
+                <b>Time per step:</b> {{ calculation.time_step }} picoseconds
+            </li>
+            <li>
+                <b>Total steps:</b> {{ calculation.nsteps }}
+            </li>
         </ul>
         {{ calculation.get_simmulation_detail_html_div | safe }}
     </div>

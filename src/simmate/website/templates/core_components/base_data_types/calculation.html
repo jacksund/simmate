@@ -1,6 +1,4 @@
 <!-- Calculation Info -->
-
-
 <!-- DISABLE PREFECT
 <div class="container p-4">
 
@@ -26,26 +24,38 @@
 
 </div>
 -->
-
 <div class="container p-4">
-
     <h3>Calculation Information:</h3>
     <ul>
-        <li><b>Computer system:</b> {{ calculation.computer_system }}</li>
-        <li><b>File location:</b> {{ calculation.directory }}</li>
-        
-        <li><b>Workflow name:</b> {{ calculation.workflow_name }}</li>
-        <li><b>Workflow version:</b> {{ calculation.workflow_version }}</li>
-        
-        <li><b>Run ID:</b> {{ calculation.run_id }}</li>
-        
-        <li><b>Total calculation time (s):</b> {{ calculation.total_time |floatformat:-2 }}</li>
-        <li><b>Total queue time (s):</b> {{ calculation.queue_time | floatformat:-2 }}</li>
-
-        <li><b>Started at:</b> {{ calculation.started_at }}</li>
-        <li><b>Finished at:</b> {{ calculation.finished_at }}</li>
-
-        <li><b>Error corrections:</b> {{ calculation.corrections }}</li>
+        <li>
+            <b>Computer system:</b> {{ calculation.computer_system }}
+        </li>
+        <li>
+            <b>File location:</b> {{ calculation.directory }}
+        </li>
+        <li>
+            <b>Workflow name:</b> {{ calculation.workflow_name }}
+        </li>
+        <li>
+            <b>Workflow version:</b> {{ calculation.workflow_version }}
+        </li>
+        <li>
+            <b>Run ID:</b> {{ calculation.run_id }}
+        </li>
+        <li>
+            <b>Total calculation time (s):</b> {{ calculation.total_time |floatformat:-2 }}
+        </li>
+        <li>
+            <b>Total queue time (s):</b> {{ calculation.queue_time | floatformat:-2 }}
+        </li>
+        <li>
+            <b>Started at:</b> {{ calculation.started_at }}
+        </li>
+        <li>
+            <b>Finished at:</b> {{ calculation.finished_at }}
+        </li>
+        <li>
+            <b>Error corrections:</b> {{ calculation.corrections }}
+        </li>
     </ul>
-
 </div>

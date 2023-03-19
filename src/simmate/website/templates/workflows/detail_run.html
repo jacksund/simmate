@@ -1,36 +1,33 @@
 {% extends "core_components/site_base.html" %}
-
-{% block tabtitle %}
-Simmate
-{% endblock %}
-
+{% block tabtitle %}Simmate{% endblock %}
 {% block banner %}
-{% include "core_components/header.html"%}
+    {% include "core_components/header.html" %}
 {% endblock %}
-
-
 {% block body %}
-
-<!-- start page title -->
-<div class="row pt-3">
-  <div class="col-12">
-    <div class="page-title-box">
-      <div class="page-title-right">
-        <ol class="breadcrumb m-0">
-          <li class="breadcrumb-item"><a href="{% url 'workflows' %}">workflows</a></li>
-          <li class="breadcrumb-item"><a href="{% url 'workflows_by_type' workflow.name_type %}">{{ workflow.name_type }}</a></li>
-          <li class="breadcrumb-item"><a href="{% url 'workflow_detail' workflow.name_type workflow.name_app workflow.name_preset %}">
-              {{ workflow.name_preset }}</a></li>
-          <li class="breadcrumb-item active">{{ calculation.id }}</li>
-        </ol>
-      </div>
-      <h4 class="page-title">Entry Data</h4>
+    <!-- start page title -->
+    <div class="row pt-3">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'workflows' %}">workflows</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'workflows_by_type' workflow.name_type %}">{{ workflow.name_type }}</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'workflow_detail' workflow.name_type workflow.name_app workflow.name_preset %}">
+                            {{ workflow.name_preset }}</a>
+                        </li>
+                        <li class="breadcrumb-item active">{{ calculation.id }}</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Entry Data</h4>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-<!-- end page title -->
-
-<!-- Build views for the table entry's data -->
-{% include "core_components/table_entry.html" %}
-
+    <!-- end page title -->
+    <!-- Build views for the table entry's data -->
+    {% include "core_components/table_entry.html" %}
 {% endblock %}

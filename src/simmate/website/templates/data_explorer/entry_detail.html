@@ -1,34 +1,29 @@
 {% extends "core_components/site_base.html" %}
-
-{% block tabtitle %}
-Simmate
-{% endblock %}
-
+{% block tabtitle %}Simmate{% endblock %}
 {% block banner %}
-{% include "core_components/header.html"%}
+    {% include "core_components/header.html" %}
 {% endblock %}
-
-
 {% block body %}
-
-<!-- start page title -->
-<div class="row">
-  <div class="col-12">
-    <div class="page-title-box">
-      <div class="page-title-right">
-        <ol class="breadcrumb m-0">
-          <li class="breadcrumb-item"><a href="{% url 'data_explorer:home' %}">Data</a></li>
-          <li class="breadcrumb-item"><a href="{% url 'data_explorer:provider' calculation.table_name %}">{{ calculation.table_name }}</a></li>
-          <li class="breadcrumb-item active">{{ calculation.id }}</li>
-        </ol>
-      </div>
-      <h4 class="page-title">Entry Data</h4>
+    <!-- start page title -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'data_explorer:home' %}">Data</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'data_explorer:provider' calculation.table_name %}">{{ calculation.table_name }}</a>
+                        </li>
+                        <li class="breadcrumb-item active">{{ calculation.id }}</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Entry Data</h4>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-<!-- end page title -->
-
-<!-- Build views for the table entry's data -->
-{% include "core_components/table_entry.html" %}
-
+    <!-- end page title -->
+    <!-- Build views for the table entry's data -->
+    {% include "core_components/table_entry.html" %}
 {% endblock %}
