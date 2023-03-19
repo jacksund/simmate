@@ -10,7 +10,6 @@ from pathlib import Path
 import cloudpickle
 import toml
 import yaml
-from django.db import connection as db_connection
 from django.utils import timezone
 
 import simmate
@@ -209,7 +208,13 @@ class Workflow:
                 logging.critical(error)
                 logging.info("retrying with new db connection")
                 # grab new connection
+                # Note, this import needs to be done locally! Having it imported
+                # above causes pickling errors for this class.
+                #   see https://github.com/jacksund/simmate/issues/410
+                from django.db import connection as db_connection
+
                 db_connection.connect()
+
                 # retry the database call
                 database_entry = cls._update_database_with_results(
                     results=results if results != None else {},
