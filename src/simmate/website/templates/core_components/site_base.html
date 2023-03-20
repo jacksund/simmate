@@ -1,4 +1,5 @@
 {% load static %}
+{% load unicorn %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -30,6 +31,8 @@
               id="app-style"/>
         <!-- Load Plotly Javascript (this is needed in the header, not the footer!)-->
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <!-- Django-unicorn scripts for dynamic webpages -->
+        {% unicorn_scripts %}
         <!-- Some pages may require extra lines in the header such as loading extra libraries -->
         {% block extraheader %}{% endblock %}
     </head>
@@ -37,6 +40,8 @@
           data-layout-color="light"
           data-layout="detached"
           data-rightbar-onstart="true">
+        <!-- token always required for Django-Unicorn -->
+        {% csrf_token %}
         {% block preloader %}
             <!-- Pre-loader -->
             <div id="preloader">
