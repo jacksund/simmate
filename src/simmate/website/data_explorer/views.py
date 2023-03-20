@@ -2,37 +2,25 @@
 
 from django.shortcuts import render
 
-from simmate.database import third_parties
+from simmate.configuration.django.settings import SIMMATE_DATA
 from simmate.database.base_data_types import DatabaseTable
-from simmate.database.third_parties import (
-    AflowPrototype,
-    AflowStructure,
-    CodStructure,
-    JarvisStructure,
-    MatprojStructure,
-    OqmdStructure,
-)
 from simmate.website.core_components.base_api_view import SimmateAPIViewSet
+
+ALL_PROVIDERS = {
+    DatabaseTable.get_table(table_name).table_name: DatabaseTable.get_table(table_name)
+    for table_name in SIMMATE_DATA
+}
 
 
 def providers_all(request):
-    context = {
-        "all_providers": [
-            AflowPrototype,
-            # AflowStructure,  # Not allowed yet
-            CodStructure,
-            JarvisStructure,
-            MatprojStructure,
-            OqmdStructure,
-        ]
-    }
-    template = "third_parties/providers_all.html"
+    context = {"all_providers": ALL_PROVIDERS.values()}
+    template = "data_explorer/providers_all.html"
     return render(request, template, context)
 
 
 class ProviderAPIViewSet(SimmateAPIViewSet):
-    template_list = "third_parties/provider.html"
-    template_retrieve = "third_parties/entry_detail.html"
+    template_list = "data_explorer/provider.html"
+    template_retrieve = "data_explorer/entry_detail.html"
 
     @classmethod
     def get_table(
@@ -46,7 +34,8 @@ class ProviderAPIViewSet(SimmateAPIViewSet):
         """
         # using the provider name (which is really just the table name), load
         # the corresponding database table
-        provider_table = getattr(third_parties, provider_name)
+        #   provider_table = DatabaseTable.get_table(provider_name)
+        provider_table = ALL_PROVIDERS[provider_name]
         return provider_table
 
     def get_list_context(
@@ -54,7 +43,7 @@ class ProviderAPIViewSet(SimmateAPIViewSet):
         request,
         provider_name,
     ) -> dict:
-        provider_table = getattr(third_parties, provider_name)
+        provider_table = ALL_PROVIDERS[provider_name]
         return {"provider": provider_table}
 
     def get_retrieve_context(

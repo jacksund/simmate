@@ -14,7 +14,7 @@ class MatprojStructure(Structure, Thermodynamics):
     """
 
     class Meta:
-        app_label = "third_parties"
+        app_label = "data_explorer"
 
     archive_fields = [
         "energy_uncorrected",

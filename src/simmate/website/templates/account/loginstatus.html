@@ -1,23 +1,23 @@
 {% extends "core_components/site_base.html" %}
-
-{% block tabtitle %}
-Simmate | Login Status
-{% endblock %}
-
+{% block tabtitle %}Simmate | Login Status{% endblock %}
 {% block banner %}
-{% include "core_components/header.html"%}
+    {% include "core_components/header.html" %}
 {% endblock %}
-
-
 {% block body %}
-<div class="container mt-5">
-    <div class="col-6 offset-3">
-        {% if user.is_authenticated %}
-        <h2><b>You're still logged in!</b></h2>
-        <p>If you'd like sign out, select the 'Logout' button in navigation bar above.</p>
-        {% else %}
-        <h2><b>Logged off!</b></h2>
-        <p>You've successfully signed out of your account. Thanks for visiting our site!</i></p>
+    <div class="container mt-5">
+        <div class="col-6 offset-3">
+            {% if user.is_authenticated %}
+                <h2>
+                    <b>You're still logged in!</b>
+                </h2>
+                <p>If you'd like sign out, select the 'Logout' button in navigation bar above.</p>
+            {% else %}
+                <h2>
+                    <b>Logged off!</b>
+                </h2>
+                <p>
+                You've successfully signed out of your account. Thanks for visiting our site!</i>
+            </p>
         {% endif %}
     </div>
 </div>

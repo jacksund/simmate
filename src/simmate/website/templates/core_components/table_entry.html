@@ -1,67 +1,59 @@
 <a>Table mix-ins: {{ table_mixins }}</a>
 <a>Extra columns: {{ extra_columns }}</a>
-
 <!-- Fields from the base database table -->
 <div class="container p-4">
-
     <h3>Base Information:</h3>
     <ul>
-        <li><b>Database Entry ID:</b> {{ calculation.id }}</li>
-        <li><b>Created at:</b> {{ calculation.created_at }}</li>
-        <li><b>Last updated at:</b> {{ calculation.updated_at }}</li>
-        <li><b>Input Source:</b> {{ calculation.source }}</li>
+        <li>
+            <b>Database Entry ID:</b> {{ calculation.id }}
+        </li>
+        <li>
+            <b>Created at:</b> {{ calculation.created_at }}
+        </li>
+        <li>
+            <b>Last updated at:</b> {{ calculation.updated_at }}
+        </li>
+        <li>
+            <b>Input Source:</b> {{ calculation.source }}
+        </li>
     </ul>
-
 </div>
-
 <!-- Iterate through the main tables that we've prebuilt pages for -->
 {% if calculation.table_name == "StaticEnergy" %}
     {% include "core_components/base_data_types/static-energy.html" %}
-
 {% elif calculation.table_name == "DiffusionAnalysis" %}
     {% include "core_components/base_data_types/diffusion-analysis.html" %}
-
 {% elif calculation.table_name == "DensityofStatesCalc" %}
     {% include "core_components/base_data_types/density-of-states-calc.html" %}
-
 {% elif calculation.table_name == "BandStructureCalc" %}
     {% include "core_components/base_data_types/band-structure-calc.html" %}
-
 {% elif calculation.table_name == "Dynamics" %}
     {% include "core_components/base_data_types/dynamics-run.html" %}
-
 {% elif calculation.table_name == "Relaxation" %}
     {% include "core_components/base_data_types/relaxation.html" %}
-
 {% elif calculation.table_name == "FixedCompositionSearch" %}
     {% include "core_components/base_data_types/fixed_composition_search.html" %}
-<!-- End prebuilt pages -->
-
-
-<!-- If none of the pages above were used, then we iterate through the fundamental 
+    <!-- End prebuilt pages -->
+    <!-- If none of the pages above were used, then we iterate through the fundamental 
     mixins and pull the proper components. Is there a better way to do this as a django for-loop? -->
 {% else %}
     {% if "Calculation" in table_mixins %}
-    {% include "core_components/base_data_types/calculation.html" %}
+        {% include "core_components/base_data_types/calculation.html" %}
     {% endif %}
-
     {% if "Structure" in table_mixins %}
-    {% include "core_components/base_data_types/structure.html" %}
+        {% include "core_components/base_data_types/structure.html" %}
     {% endif %}
-
     {% if "Thermodynamics" in table_mixins %}
-    {% include "core_components/base_data_types/thermodynamics.html" %}
+        {% include "core_components/base_data_types/thermodynamics.html" %}
     {% endif %}
-
     {% if "Forces" in table_mixins %}
-    {% include "core_components/base_data_types/forces.html" %}
+        {% include "core_components/base_data_types/forces.html" %}
     {% endif %}
     {% if "BandStructure" in table_mixins %}
-    {% include "core_components/base_data_types/band-structure.html" %}
+        {% include "core_components/base_data_types/band-structure.html" %}
     {% endif %}
-
     {% if "DensityofStates" in table_mixins %}
-    {% include "core_components/base_data_types/density-of-states.html" %}
+        {% include "core_components/base_data_types/density-of-states.html" %}
     {% endif %}
-<!-- end of mix-ins -->
+    <!-- end of mix-ins -->
 {% endif %}

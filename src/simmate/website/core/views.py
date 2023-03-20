@@ -14,7 +14,7 @@ from simmate.database.third_parties import (
     MatprojStructure,
     OqmdStructure,
 )
-from simmate.website.third_parties.forms import ChemicalSystemForm
+from simmate.website.data_explorer.forms import ChemicalSystemForm
 
 
 @login_required

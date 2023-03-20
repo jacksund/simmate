@@ -5,20 +5,16 @@
 {% endblock %}
 {% block body %}
     <!-- start page title -->
-    <div class="row pt-3">
+    <div class="row">
         <div class="col-12">
             <div class="page-title-box">
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
                         <li class="breadcrumb-item">
-                            <a href="{% url 'workflows' %}">workflows</a>
+                            <a href="{% url 'data_explorer:home' %}">Data</a>
                         </li>
                         <li class="breadcrumb-item">
-                            <a href="{% url 'workflows_by_type' workflow.name_type %}">{{ workflow.name_type }}</a>
-                        </li>
-                        <li class="breadcrumb-item">
-                            <a href="{% url 'workflow_detail' workflow.name_type workflow.name_app workflow.name_preset %}">
-                            {{ workflow.name_preset }}</a>
+                            <a href="{% url 'data_explorer:provider' calculation.table_name %}">{{ calculation.table_name }}</a>
                         </li>
                         <li class="breadcrumb-item active">{{ calculation.id }}</li>
                     </ol>

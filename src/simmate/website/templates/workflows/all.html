@@ -1,38 +1,32 @@
 {% extends "core_components/site_base.html" %}
-
-{% block tabtitle %}
-Simmate
-{% endblock %}
-
+{% block tabtitle %}Simmate{% endblock %}
 {% block banner %}
-{% include "core_components/header.html"%}
+    {% include "core_components/header.html" %}
 {% endblock %}
-
-
 {% block body %}
-
-<!-- Header -->
-<section class="pt-5 jumbotron text-center">
-    <div class="container">
-        <h1 class="jumbotron-heading">Workflows</h1>
-        <p class="lead text-muted">Explore all of the workflows available with Simmate. By selecting a
-            workflow, you can submit new calculations and view the results of all past runs.</p>
-    </div>
-</section>
-
-<!-- List of Cards -->
-<div class="row pt-3">
-    {% for workflow_type, workflow_description in workflows_metadata.items %}
-    <div class="col-md-4">
-        <div class="card border-primary border">
-            <div class="card-body">
-                <h5 class="card-title text-primary">{{ workflow_type }}</h5>
-                <p class="card-text">{{ workflow_description }}</p>
-                <a href="{% url 'workflows_by_type' workflow_type %}" class="btn btn-primary btn-sm">View All</a>
-            </div>
+    <!-- Header -->
+    <section class="pt-5 jumbotron text-center">
+        <div class="container">
+            <h1 class="jumbotron-heading">Workflows</h1>
+            <p class="lead text-muted">
+                Explore all of the workflows available with Simmate. By selecting a
+                workflow, you can submit new calculations and view the results of all past runs.
+            </p>
         </div>
+    </section>
+    <!-- List of Cards -->
+    <div class="row pt-3">
+        {% for workflow_type, workflow_description in workflows_metadata.items %}
+            <div class="col-md-4">
+                <div class="card border-primary border">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">{{ workflow_type }}</h5>
+                        <p class="card-text">{{ workflow_description }}</p>
+                        <a href="{% url 'workflows_by_type' workflow_type %}"
+                           class="btn btn-primary btn-sm">View All</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-</div>
-
 {% endblock %}

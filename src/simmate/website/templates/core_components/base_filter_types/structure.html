@@ -1,35 +1,30 @@
 {% load crispy_forms_tags %}
-
 <!-- Composition filters -->
 <div class="card mb-0">
     <div class="card-header" id="headingCompFilters">
         <h5 class="m-0">
-            <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse" href="#collapseCompFilters"
-                aria-expanded="true" aria-controls="collapseCompFilters">
+            <a class="custom-accordion-title d-block pt-2 pb-2"
+               data-bs-toggle="collapse"
+               href="#collapseCompFilters"
+               aria-expanded="true"
+               aria-controls="collapseCompFilters">
                 By Composition Info:
                 <i class="mdi mdi-chevron-down accordion-arrow"></i>
             </a>
         </h5>
     </div>
-
-    <div id="collapseCompFilters" class="collapse" aria-labelledby="headingCompFilters"
-        data-bs-parent="#accordionExample">
+    <div id="collapseCompFilters"
+         class="collapse"
+         aria-labelledby="headingCompFilters"
+         data-bs-parent="#accordionExample">
         <div class="card-body">
-
             <!-- number of elements
             <div id="div_id_nelements__range" class="form-group">
                 {{ form.nelements__range.errors }}
-                <label for="{{ form.nelements__range.id_for_label }}" class="">
-                    Number of Elements:
-                </label>
-                <input type="text" name="{{ form.nelements__range.html_name }}" id="{{ form.nelements__range.html_name }}" data-plugin="range-slider" 
-                    data-min="1" data-max="10" data-input-values-separator="," data-max_postfix="+"
-                    data-from="{% if form.nelements__range.value %} {{ form.nelements__range.value.0 }} {% else %} 1 {% endif %}"
-                    data-to="{% if form.nelements__range.value %} {{ form.nelements__range.value.1 }} {% else %} 10 {% endif %}"
-                    data-type="double" data-grid="true">
+                <label for="{{ form.nelements__range.id_for_label }}" class="">Number of Elements:</label>
+                <input type="text" name="{{ form.nelements__range.html_name }}" id="{{ form.nelements__range.html_name }}" data-plugin="range-slider" data-min="1" data-max="10" data-input-values-separator="," data-max_postfix="+" data-from="{% if form.nelements__range.value %} {{ form.nelements__range.value.0 }} {% else %} 1 {% endif %}" data-to="{% if form.nelements__range.value %} {{ form.nelements__range.value.1 }} {% else %} 10 {% endif %}" data-type="double" data-grid="true">
             </div>
-            -->
-
+-->
             <!-- {{ form.nelements__range | as_crispy_field }} -->
             {{ form.formula_anonymous | as_crispy_field }}
             {{ form.formula_full | as_crispy_field }}
@@ -39,21 +34,24 @@
         </div>
     </div>
 </div>
-
 <!-- Structure filters -->
 <div class="card mb-0">
     <div class="card-header" id="headingStructFilters">
         <h5 class="m-0">
-            <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse" href="#collapseStructFilters"
-                aria-expanded="true" aria-controls="collapseStructFilters">
+            <a class="custom-accordion-title d-block pt-2 pb-2"
+               data-bs-toggle="collapse"
+               href="#collapseStructFilters"
+               aria-expanded="true"
+               aria-controls="collapseStructFilters">
                 By Structure Info:
                 <i class="mdi mdi-chevron-down accordion-arrow"></i>
             </a>
         </h5>
     </div>
-
-    <div id="collapseStructFilters" class="collapse" aria-labelledby="headingStructFilters"
-        data-bs-parent="#accordionExample">
+    <div id="collapseStructFilters"
+         class="collapse"
+         aria-labelledby="headingStructFilters"
+         data-bs-parent="#accordionExample">
         <div class="card-body">
             {{ form.nsites__range | as_crispy_field }}
             {{ form.density__range | as_crispy_field }}
@@ -63,21 +61,24 @@
         </div>
     </div>
 </div>
-
 <!-- Symmetry filters -->
 <div class="card mb-0">
     <div class="card-header" id="headingSymmFilters">
         <h5 class="m-0">
-            <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse" href="#collapseSymmFilters"
-                aria-expanded="true" aria-controls="collapseSymmFilters">
+            <a class="custom-accordion-title d-block pt-2 pb-2"
+               data-bs-toggle="collapse"
+               href="#collapseSymmFilters"
+               aria-expanded="true"
+               aria-controls="collapseSymmFilters">
                 By Symmetry Info:
                 <i class="mdi mdi-chevron-down accordion-arrow"></i>
             </a>
         </h5>
     </div>
-
-    <div id="collapseSymmFilters" class="collapse" aria-labelledby="headingSymmFilters"
-        data-bs-parent="#accordionExample">
+    <div id="collapseSymmFilters"
+         class="collapse"
+         aria-labelledby="headingSymmFilters"
+         data-bs-parent="#accordionExample">
         <div class="card-body">
             {{ form.spacegroup__number | as_crispy_field }}
             {{ form.spacegroup__symbol | as_crispy_field }}

@@ -619,19 +619,22 @@ class DatabaseTable(models.Model):
     def get_table(table_name: str):
         # This method can be return ANY table, so we need to import all of them
         # here. This is a local import to prevent circular import issues.
-        from simmate.website.third_parties import models as third_party_datatables
+        from simmate.website.data_explorer import models as third_party_datatables
         from simmate.website.workflows import models as all_datatables
 
         # Import the datatable class -- how this is done depends on if it
-        # is from a simmate supplied class or if the user supplied a full
-        # path to the class
+        # is from a simmate supplied class, if the user supplied a full
+        # path to the class, or if the model is in a custom app
         # OPTIMIZE: is there a better way to do this?
         if hasattr(all_datatables, table_name):
             datatable = getattr(all_datatables, table_name)
         elif hasattr(third_party_datatables, table_name):
             datatable = getattr(third_party_datatables, table_name)
-        else:
+        elif "." in table_name:
+            # "." in the name indicates an import path
             datatable = import_string(table_name)
+        else:
+            raise Exception("Unable to load database table by name")
 
         return datatable
 
@@ -1055,7 +1058,7 @@ class DatabaseTable(models.Model):
             remote_archive_link = cls.remote_archive_link
 
         # tell the user where the data comes from
-        if cls._meta.app_label == "third_parties":
+        if cls._meta.app_label == "data_explorer":
             logging.warning(
                 "this data is NOT from the Simmate team, so be sure "
                 "to visit the provider's website and to cite their work."
@@ -1103,7 +1106,7 @@ class DatabaseTable(models.Model):
         if cls.objects.exists() and not confirm_override:
             # if the user has a third-party app, we can be more specific with
             # our error message.
-            if cls._meta.app_label == "third_parties":
+            if cls._meta.app_label == "data_explorer":
                 raise Exception(
                     "It looks like you're using a third-party database table and "
                     "that the table already has data in it! This means you already "

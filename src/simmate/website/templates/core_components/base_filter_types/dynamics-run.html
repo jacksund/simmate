@@ -1,20 +1,22 @@
 {% load crispy_forms_tags %}
-
 <!-- Dynamics Run Info -->
-
 <div class="card mb-0">
     <div class="card-header" id="headingDynamFilters">
         <h5 class="m-0">
-            <a class="custom-accordion-title d-block pt-2 pb-2" data-bs-toggle="collapse"
-                href="#collapseDynamFilters" aria-expanded="true" aria-controls="collapseDynamFilters">
+            <a class="custom-accordion-title d-block pt-2 pb-2"
+               data-bs-toggle="collapse"
+               href="#collapseDynamFilters"
+               aria-expanded="true"
+               aria-controls="collapseDynamFilters">
                 By Dynamics Info:
                 <i class="mdi mdi-chevron-down accordion-arrow"></i>
             </a>
         </h5>
     </div>
-
-    <div id="collapseDynamFilters" class="collapse" aria-labelledby="headingDynamFilters"
-        data-bs-parent="#accordionExample">
+    <div id="collapseDynamFilters"
+         class="collapse"
+         aria-labelledby="headingDynamFilters"
+         data-bs-parent="#accordionExample">
         <div class="card-body">
             {{ form.temperature_start__range | as_crispy_field }}
             {{ form.temperature_end__range | as_crispy_field }}
@@ -23,6 +25,5 @@
         </div>
     </div>
 </div>
-
 {% include "core_components/base_filter_types/calculation.html" %}
 {% include "core_components/base_filter_types/structure.html" %}

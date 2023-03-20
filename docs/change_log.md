@@ -68,6 +68,10 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 -->
 
+**Refactors**
+
+- `simmate.website.third_parties` module is now the `data_explorer` module. With this, you can now specify custom database tables to appear in the "Data" section for the web UI
+
 **Fixes**
 
 - fix pickling error for `workflow.run_cloud` command

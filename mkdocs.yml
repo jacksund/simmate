@@ -156,7 +156,7 @@ nav:
 
     - Parameters: parameters.md
     
-    - Full Guides & Reference:
+    - Full Guides:
         
         - Overview: full_guides/overview.md
         
@@ -171,22 +171,6 @@ nav:
             - Creating new workflows: full_guides/workflows/creating_new_workflows.md
             - Creating Nested Workflows: full_guides/workflows/nested_workflows.md
             - Creating S3 Workflows: full_guides/workflows/s3_workflows.md
-            - Third-party software: 
-                - What is an app?: full_guides/workflows/third_party_software/what_is_an_app.md
-                - VASP:
-                    - Overview: full_guides/workflows/third_party_software/vasp/overview.md
-                    - Installation: full_guides/workflows/third_party_software/vasp/installation.md
-                    # - Workflows: full_guides/workflows/third_party_software/vasp/workflows.md
-                    # - Inputs: full_guides/workflows/third_party_software/vasp/inputs.md
-                    # - Outputs: full_guides/workflows/third_party_software/vasp/outputs.md
-                    # - Error Handlers: full_guides/workflows/third_party_software/vasp/error_handlers.md
-                - Bader (henklman):
-                    - Overview: full_guides/workflows/third_party_software/bader_henkelman/overview.md
-                    - Installation: full_guides/workflows/third_party_software/bader_henkelman/installation.md
-                    # - Workflows: full_guides/workflows/third_party_software/bader_henkelman/workflows.md
-                    # - Inputs: full_guides/workflows/third_party_software/bader_henkelman/inputs.md
-                    # - Outputs: full_guides/workflows/third_party_software/bader_henkelman/outputs.md
-                - DeepMD: full_guides/workflows/third_party_software/deepmd.md
 
         - Database:
             - Overview: full_guides/database/overview.md
@@ -210,6 +194,23 @@ nav:
             - Utilities: full_guides/extras/utilities.md
             # - Configuration: full_guides/extras/configuration.md
             # - Testing: full_guides/extras/testing.md  # Move to contributing...?
+
+    - Apps: 
+        - What is an app?: apps/what_is_an_app.md
+        - VASP:
+            - Overview: apps/vasp/overview.md
+            - Installation: apps/vasp/installation.md
+            # - Workflows: apps/vasp/workflows.md
+            # - Inputs: apps/vasp/inputs.md
+            # - Outputs: apps/vasp/outputs.md
+            # - Error Handlers: apps/vasp/error_handlers.md
+        - Bader (henklman):
+            - Overview: apps/bader_henkelman/overview.md
+            - Installation: apps/bader_henkelman/installation.md
+            # - Workflows: apps/bader_henkelman/workflows.md
+            # - Inputs: apps/bader_henkelman/inputs.md
+            # - Outputs: apps/bader_henkelman/outputs.md
+        - DeepMD: apps/deepmd.md
 
     - Contributing:
         - Overview: contributing/overview.md

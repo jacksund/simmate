@@ -147,7 +147,7 @@ INSTALLED_APPS = [
     #
     # These are all apps that are built by Simmate
     "simmate.website.configs.CoreComponentsConfig",
-    "simmate.website.configs.ThirdPartyConfig",
+    "simmate.website.configs.DataExplorerConfig",
     "simmate.website.configs.WorkflowsConfig",
     "simmate.website.configs.WorkflowEngineConfig",
     #
@@ -219,6 +219,36 @@ with APPLICATIONS_YAML.open() as file:
             INSTALLED_APPS.append(app)
     else:
         SIMMATE_APPS = []
+
+# --------------------------------------------------------------------------------------
+
+# DATBASE EXPLORER
+
+# We also check if the user has a "apps.yaml" file. In this file, the
+# user can provide extra apps to install for Django. We simply append these
+# to our list above. By default we include apps that are packaged with simmate,
+# such as the VASP workflows app.
+DEFAULT_SIMMATE_DATA = [
+    "simmate.database.third_parties.AflowPrototype",
+    # "simmate.database.third_parties.AflowStructure",  # Not allowed yet
+    "simmate.database.third_parties.CodStructure",
+    "simmate.database.third_parties.JarvisStructure",
+    "simmate.database.third_parties.MatprojStructure",
+    "simmate.database.third_parties.OqmdStructure",
+]
+DATA_EXPLORER_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-data.yaml"
+# create the file if it doesn't exist yet
+if not DATA_EXPLORER_YAML.exists():
+    with DATA_EXPLORER_YAML.open("w") as file:
+        content = yaml.dump(DEFAULT_SIMMATE_DATA)
+        file.write(content)
+
+# load apps that the user wants installed
+with DATA_EXPLORER_YAML.open() as file:
+    SIMMATE_DATA = yaml.full_load(file)
+    # If the file is empty, just keep our result as an empty list
+    if not SIMMATE_DATA:
+        SIMMATE_DATA = []
 
 # --------------------------------------------------------------------------------------
 

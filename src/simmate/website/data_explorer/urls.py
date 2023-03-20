@@ -2,7 +2,7 @@
 
 from django.urls import path
 
-from simmate.website.third_parties import views
+from simmate.website.data_explorer import views
 
 urlpatterns = [
     path(
