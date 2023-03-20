@@ -12,7 +12,7 @@ To make a new release, you must follow these steps:
 
 3. Ensure all tests pass when using the pre-built database. Otherwise, you need to (i) make a new one using the commands below, (ii) rename your db file to something like `prebuild-2022-07-05.sqlite3`, (iii) compress the db file to a zip file, (iv) upload it to the Simmate CDN, and (iii) update the `archive_filename` in `simmate.database.third_parties.utilites.load_default_sqlite3_build`.
 ``` bash
-simmate database reset --confirm-delete --use-prebuilt false
+simmate database reset --confirm-delete --no-use-prebuilt
 simmate database load-remote-archives
 ```
 
