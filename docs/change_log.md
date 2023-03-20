@@ -68,13 +68,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 -->
 
-**Refactors**
-
-- `simmate.website.third_parties` module is now the `data_explorer` module. With this, you can now specify custom database tables to appear in the "Data" section for the web UI
-
-**Fixes**
-
-- fix pickling error for `workflow.run_cloud` command
+- no new changes have been merged into the `main` branch yet
 
 --------------------------------------------------------------------------------
 
@@ -122,6 +116,11 @@ of empty sites
 - fix incorrect pointing of VASP potcars in matproj presets
 - from `from_directory` method of the `Relaxation` database class
 - fix HSE bandstructure and DOS kpoint file writing
+
+**0.13.2 (2023.03.20)**
+
+- fix pickling error for `workflow.run_cloud` command
+- `simmate.website.third_parties` module is now the `data_explorer` module. With this, you can now specify custom database tables to appear in the "Data" section for the web UI
 
 --------------------------------------------------------------------------------
 
