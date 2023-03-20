@@ -6,19 +6,15 @@ To update this file, visit https://datatables.net/download/
 Currently we select...
     Step 1: Bootstrap 5
     Step 2: Datatables
-    Step 3: FixedHeader, Responsive, Buttons (HTML5 export, JSZip, pdfmake)
+    Step 3: FixedHeader, Buttons (column vis, HTML5 export, JSZip, pdfmake)
     Step 4: CDN
 
 -->
-<link rel="stylesheet"
-      type="text/css"
-      href="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/fh-3.1.9/r-2.2.9/datatables.min.css"/>
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
-<script type="text/javascript"
-        src="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/fh-3.1.9/r-2.2.9/datatables.min.js"></script>
+<link href="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.13.4/b-2.3.6/b-colvis-2.3.6/b-html5-2.3.6/fh-3.3.2/datatables.min.css" rel="stylesheet"/>
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.13.4/b-2.3.6/b-colvis-2.3.6/b-html5-2.3.6/fh-3.3.2/datatables.min.js"></script>
 <!-- 
     This code activates the DataTable scripts and formatting for your table.
     Make sure you include the following for your table to actually work:
@@ -33,13 +29,13 @@ Currently we select...
 -->
 <script>
     $(document).ready(function() {
-        $('#SearchResultsTable').DataTable({
-            // Adapt table width with the screensize
-            responsive: true,
+        var table = $('#SearchResultsTable').DataTable({
+            // Allow horizontal scrolling with too many columns for screen
+            scrollX: true,
             // This is for objects around table (then B is for buttons)
             // For help see: https://datatables.net/examples/basic_init/dom.html
             dom: '<fB<t>lp>',
-            buttons: ['copy', 'csv', 'excel', 'pdf'],
+            buttons: ['copy', 'csv', 'excel', 'pdf', 'colvis'],
             // Keep header in view while scrolling
             fixedHeader: {
                 header: true
