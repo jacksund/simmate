@@ -180,6 +180,7 @@ INSTALLED_APPS = [
     # Django unicorn acts as a frontend framework for making dyanmic webpages
     # (i.e. AJAX calls can be made to update the views)
     "django_unicorn",
+    #
     # Other third-party apps/tools to consider. Note that some of these don't
     # need to be installed apps while some also request different setups.
     #   django-ratelimit
