@@ -262,7 +262,9 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    # https://docs.djangoproject.com/en/4.1/howto/csrf/#using-csrf-protection-with-ajax
+    # https://stackoverflow.com/questions/68554251/
+    # "django.middleware.csrf.CsrfViewMiddleware",  # BUG with Django-Unicorn
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
