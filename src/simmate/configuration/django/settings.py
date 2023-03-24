@@ -259,15 +259,13 @@ with DATA_EXPLORER_YAML.open() as file:
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 MIDDLEWARE = [
-    # "django.middleware.security.SecurityMiddleware",
-    # "django.contrib.sessions.middleware.SessionMiddleware",
-    # "django.middleware.common.CommonMiddleware",
-    # # https://docs.djangoproject.com/en/4.1/howto/csrf/#using-csrf-protection-with-ajax
-    # # https://stackoverflow.com/questions/68554251/
-    # # "django.middleware.csrf.CsrfViewMiddleware",  # BUG with Django-Unicorn
-    # "django.contrib.auth.middleware.AuthenticationMiddleware",
-    # "django.contrib.messages.middleware.MessageMiddleware",
-    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 # "core" here is based on the name of my main django folder
