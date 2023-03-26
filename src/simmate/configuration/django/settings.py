@@ -465,3 +465,6 @@ LOGOUT_REDIRECT_URL = "/accounts/loginstatus/"
 # Read more at...
 # https://docs.djangoproject.com/en/4.0/topics/async/#async-safety
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
+# Debugging django-unicorn
+CSRF_TRUSTED_ORIGINS = ["*"]
