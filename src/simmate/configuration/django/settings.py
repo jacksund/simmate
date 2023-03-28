@@ -59,7 +59,8 @@ ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split("
 # ingress (url for k8s) or a nginx load balancer. To get past a 403 forbidden
 # result, we need to sometimes specify allowed origins.
 CSRF_TRUSTED_ORIGINS = os.getenv(
-    "DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost",
+    "DJANGO_CSRF_TRUSTED_ORIGINS",
+    "http://localhost",
 ).split(",")
 
 # This is for setting the database via an connection URL. This is done as
