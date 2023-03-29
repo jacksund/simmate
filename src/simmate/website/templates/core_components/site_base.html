@@ -29,8 +29,57 @@
               rel="stylesheet"
               type="text/css"
               id="app-style"/>
-        <!-- Load Plotly Javascript (this is needed in the header, not the footer!)-->
+        <!-- Load Plotly Javascript -->
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <!-- Load ChemDoodle Javascript, CSS, and default styling setting -->
+        <link rel="stylesheet"
+              href="https://archives.simmate.org/assets/chemdoodle/ChemDoodleWeb.css"
+              type="text/css">
+        <script type="text/javascript"
+                src="https://archives.simmate.org/assets/chemdoodle/ChemDoodleWeb.js"></script>
+        <link rel="stylesheet"
+              href="https://archives.simmate.org/assets/chemdoodle/uis/jquery-ui-1.11.4.css"
+              type="text/css">
+        <script type="text/javascript"
+                src="https://archives.simmate.org/assets/chemdoodle/uis/ChemDoodleWeb-uis.js"></script>
+        <script>
+            ChemDoodle.DEFAULT_STYLES.bondLength_2D = 14.4;
+            ChemDoodle.DEFAULT_STYLES.bonds_width_2D = .6;
+            ChemDoodle.DEFAULT_STYLES.bonds_saturationWidthAbs_2D = 2.6;
+            ChemDoodle.DEFAULT_STYLES.bonds_hashSpacing_2D = 2.5;
+            ChemDoodle.DEFAULT_STYLES.atoms_font_size_2D = 10;
+            ChemDoodle.DEFAULT_STYLES.atoms_font_families_2D = ['Helvetica', 'Arial', 'sans-serif'];
+            ChemDoodle.DEFAULT_STYLES.atoms_displayTerminalCarbonLabels_2D = false;
+            ChemDoodle.DEFAULT_STYLES.atoms_useJMOLColors = true;
+            // changes the default JMol color of hydrogen to black so it appears on white backgrounds
+            ChemDoodle.ELEMENT['H'].jmolColor = 'black';
+            // darkens the default JMol color of sulfur so it appears on white backgrounds
+            ChemDoodle.ELEMENT['S'].jmolColor = '#B9A130';
+        </script>
+        <!-- Load the RDKit JS file -->
+        <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
+        <script>
+        window.initRDKitModule()
+            .then(function(RDKit) {
+                window.RDKit = RDKit;
+                /**
+                 * The RDKit module is now loaded.
+                 * You can use it anywhere.
+                 */
+            })
+            .catch(() => {
+                // handle loading errors here...
+            });
+        </script>
+        <script>
+            var drawmol = function() {
+                var smi = document.getElementById('smi').value;
+                console.log( smi );
+                var mol = RDKit.get_mol( smi );
+                var svg = mol.get_svg();
+                document.getElementById("drawer").innerHTML = svg;         
+            };
+        </script>
         <!-- Django-unicorn scripts for dynamic webpages -->
         {% unicorn_scripts %}
         <!-- Some pages may require extra lines in the header such as loading extra libraries -->
