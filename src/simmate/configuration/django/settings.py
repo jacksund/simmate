@@ -55,6 +55,14 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 # enviornment variable isn't set yet, then we just defaul to the localhost.
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
+# BUG-FIX: Django-unicorn ajax requests sometimes come from the server-side
+# ingress (url for k8s) or a nginx load balancer. To get past a 403 forbidden
+# result, we need to sometimes specify allowed origins.
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "DJANGO_CSRF_TRUSTED_ORIGINS",
+    "http://localhost",
+).split(",")
+
 # This is for setting the database via an connection URL. This is done as
 # an environment variable to allow setup with DigitalOcean
 DATABASE_URL = os.getenv("DATABASE_URL", None)
@@ -177,11 +185,14 @@ INSTALLED_APPS = [
     # note: there are extra apps installed based on configuration. See the
     # allauth section at the bottom of this page for more.
     #
+    # Django unicorn acts as a frontend framework for making dyanmic webpages
+    # (i.e. AJAX calls can be made to update the views)
+    "django_unicorn",
+    #
     # Other third-party apps/tools to consider. Note that some of these don't
     # need to be installed apps while some also request different setups.
     #   django-ratelimit
     #   dj-stripe
-    #   django-unicorn
     #   django-graphene (+ GraphQL)
     #   django-redis
     #

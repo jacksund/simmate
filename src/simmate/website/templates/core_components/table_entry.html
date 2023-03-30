@@ -34,7 +34,7 @@
 {% elif calculation.table_name == "FixedCompositionSearch" %}
     {% include "core_components/base_data_types/fixed_composition_search.html" %}
     <!-- End prebuilt pages -->
-    <!-- If none of the pages above were used, then we iterate through the fundamental 
+    <!-- If none of the pages above were used, then we iterate through the fundamental
     mixins and pull the proper components. Is there a better way to do this as a django for-loop? -->
 {% else %}
     {% if "Calculation" in table_mixins %}

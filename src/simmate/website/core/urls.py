@@ -101,6 +101,9 @@ urlpatterns = [
     path(route="contact/", view=views.contact, name="contact"),
     path(route="about/", view=views.about, name="about"),
     #
+    # Django-unicorn urls
+    path("unicorn/", include("django_unicorn.urls")),
+    #
     # Custom Simmate apps (if present)
     path(route="apps/", view=views.apps, name="apps"),
     *get_app_urls(),
