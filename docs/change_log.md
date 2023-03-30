@@ -72,6 +72,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Enhancements**
 
 - add `django-unicorn` to deps to enable dynamic fullstack web UIs
+- add ChemDoodle js/css to website headers for use elsewhere
 
 --------------------------------------------------------------------------------
 
