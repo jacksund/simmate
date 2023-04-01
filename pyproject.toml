@@ -81,7 +81,7 @@ dependencies=[
     "requests >=2.28.1, <2.28.3",  # for quick web queries and downloads
     "scikit-learn >=1.1.1, <1.2.2",  # machine-learning methods (may become core dep)
     "cloudpickle >=2.1.0, <=2.2.0",  # for serializing complex python objects
-    "rich >=11.0, <13.2.1",  # for coloring and styling the CLI outputs
+    "rich >=11.0, <13.3.4",  # for coloring and styling the CLI outputs
     "toml >=0.10.2, <=0.10.2",  # for toml configuration files
     #
     # These are from the MP stack and I want to phase them out over time
