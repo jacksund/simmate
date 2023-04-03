@@ -105,7 +105,19 @@ Just like how we don't use the `(base)` environment in Anaconda, we don't want t
 2. Create a new database using the "Add new database" button and name this `simmate-database-00`. We name it this way because you may want to make new/separate databases and numbering is a quick way to keep track of these.
 3. In your connection settings (from the section above), switch the NAME from defaultdb to `simmate-database-00`. You will change this in your `my_env-database.yaml` file.
 
-### (v) create a connection pool
+### (v) build our database tables
+
+Now that we set up and connected to our database, we can now make our Simmate database tables and start filling them with data! We do this the same way we did without a cloud database:
+
+1. In your terminal, make sure you have you Simmate enviornment activated
+2. Run the following command: 
+``` bash
+simmate database reset
+```
+3. You're now ready to start using Simmate with your new database!
+
+
+### (vi) create a connection pool
 
 When we have a bunch of calculations running at once, we need to make sure our database can handle all of these connections. Therefore, we make a connection pool which allows for thousands of connections. This "pool" works like a waitlist where the database handles each connection request in order.
 
@@ -126,16 +138,11 @@ default:
     sslmode: require
 ```
 
-### (vi) build our database tables
+!!! warning
+    Calling `simmate database reset` when using a connection pull will NOT work!
+    If you ever need to reset your database, make sure you connect to the database
+    directly instead of through a database pool.
 
-Now that we set up and connected to our database, we can now make our Simmate database tables and start filling them with data! We do this the same way we did without a cloud database:
-
-1. In your terminal, make sure you have you Simmate enviornment activated
-2. Run the following command: 
-``` bash
-simmate database reset
-```
-3. You're now ready to start using Simmate with your new database!
 
 ### (vii) load third-party data
 
