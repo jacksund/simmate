@@ -115,12 +115,12 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
 
         # Build out database extensions and tables
         db_name = DATABASES["default"]["NAME"]
-        cursor.execute(f"DROP DATABASE IF EXISTS {db_name};")
+        cursor.execute(f'DROP DATABASE IF EXISTS "{db_name}";')
         # BUG: if others are connected I could add 'WITH (FORCE)' above.
         # For now, I don't use this but should consider adding it for convenience.
         # I think this is buggy with older versions of postgres (like RDkit),
         # so I hold off on this for now.
-        cursor.execute(f"CREATE DATABASE {db_name};")
+        cursor.execute(f'CREATE DATABASE "{db_name}";')
 
         # Make the changes to the database persistent
         connection.commit()
