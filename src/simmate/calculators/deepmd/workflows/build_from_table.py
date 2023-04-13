@@ -19,7 +19,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
         table_name: str,
         filter_kwargs: dict = {},
         deepmd_settings: dict ={},
-        num_training_steps: int = 10000000,
+        deepmd_training_steps: int = 10000000,
         training_iterations: int = 1,  # setting to 1 means no iterative training
         **kwargs,
     ):
@@ -88,7 +88,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
 
             if n == 0:
                 command = f'dp train input_{n}.json'
-                num_training_steps = num_training_steps
+                num_training_steps = deepmd_training_steps
             else:
 
                 # find the newest available checkpoint file
@@ -105,7 +105,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
                     raise Exception("Unable to detect DeepMD checkpoint file")
 
                 command = f'dp train --restart {checkpoint_file.stem} input_{n}.json'
-                num_training_steps = number_max+num_training_steps
+                num_training_steps = number_max + deepmd_training_steps
 
             deepmd_workflow.run(
                 directory=deepmd_directory,
