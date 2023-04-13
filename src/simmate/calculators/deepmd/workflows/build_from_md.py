@@ -16,6 +16,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
         directory: Path,
         start_from_model: bool=False,
         temperature_list: list[int] = [300, 750, 1200],
+        num_training_steps: int = 10000000,
         relax_start_structure: bool = True, 
         relax_kwargs: dict = {},
         md_kwargs: dict = {}, 
@@ -98,6 +99,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
                 composition=structure.composition,
                 command='dp train input_1.json',
                 input_filename="input_1.json",
+                num_training_steps = num_training_steps,
                 training_data=training_data,
                 testing_data=testing_data,
                 settings_update = deepmd_settings,
@@ -135,7 +137,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
                         composition=structure.composition,
                         command=f'dp train --restart {checkpoint_file.stem} input_{n}.json',
                         input_filename=f"input_{n}.json",
-                        num_training_steps = number_max*2,
+                        num_training_steps = number_max + num_training_steps,
                         training_data=training_data,
                         testing_data=testing_data,
                     )
@@ -170,7 +172,7 @@ class MlPotential__Deepmd__BuildFromMd(Workflow):
                     composition=structure.composition,
                     command=f'dp train --restart {checkpoint_file.stem} input_{n}.json',
                     input_filename=f"input_{n}.json",
-                    num_training_steps = number_max*2,
+                    num_training_steps = number_max + num_training_steps,
                     training_data=training_data,
                     testing_data=testing_data,
                 )
