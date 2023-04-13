@@ -105,7 +105,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
                     raise Exception("Unable to detect DeepMD checkpoint file")
 
                 command = f'dp train --restart {checkpoint_file.stem} input_{n}.json'
-                num_training_steps = number_max*2
+                num_training_steps = number_max+num_training_steps
 
             deepmd_workflow.run(
                 directory=deepmd_directory,
