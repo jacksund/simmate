@@ -367,14 +367,17 @@ STATICFILES_DIRS = [DJANGO_DIRECTORY / "static_files"]
 # This sets the django-crispy formating style
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
-# Settings for sending emails with my gmail account
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"  # this is the default
-EMAIL_HOST = "smtp.gmail.com"
+# Settings for sending automated emails.
+# For example, this can be set up for GMail by...
+#   1. enabling IMAP (in gmail settings)
+#   2. Having 2-factor auth turned on
+#   3. Adding an App Password (in account settings)
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"  # this is the default
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")  # or outlook.office365.com
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "simmate.team@gmail.com"  # os.environ.get('EMAIL_USER')
-# !!! REMOVE IN PRODUCTION. Use this instead: os.environ.get('EMAIL_PASSWORD')
-EMAIL_HOST_PASSWORD = "example-password-123"
+EMAIL_HOST_USER = os.environ.get("EMAIL_USER", "simmate.team@gmail.com")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD", None)
 
 # These settings help configure djangorestframework and our REST API
 REST_FRAMEWORK = {
