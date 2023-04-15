@@ -166,8 +166,9 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             
             for directory in directories:
                 state = build_from_table.run(composition = composition,
-                                             directory = directory/'deepmd',
+                                             directory = directory,
                                              table_name = 'StaticEnergy',
+                                             start_from_model = True,
                                              filter_kwargs = {'id__range' : [structure_id[0], structure_id[-1]]},
                                              training_iterations = 1,)  # setting to 1 means no iterative training
                 deepmd_prediction_states.append(state)
