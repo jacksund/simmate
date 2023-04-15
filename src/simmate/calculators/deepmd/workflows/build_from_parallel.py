@@ -4,60 +4,14 @@ Created on Tue Jan 24 12:21:46 2023
 
 @author: siona
 """
-# training multiple models at the same time
 
-# ---------- START DATA ----------
-# if no input structure, use common prototypes (e.g. BCC)
-    # need at least composition? 
-# get starting data (either md run or from table)
+#User enters: composition for random structures, settings to use with build-from-md or build-from-table
 
-# ---------- TRAIN ----------
-# train models for 1 iteration
-
-# ---------- TEST MODELS (MD opt) ----------
-
-# if no input structure, use common prototypes (e.g. BCC)
-# run short lammps simulation (1000 steps) using ONE of the deepmd models
-
-# pull the output structures from the lammps run and use the OTHER deepmd models
-# to predict energy/forces
-
-# Compare energy/forces across all structures & models. Ones that differ the
-# most (i.e. models are most uncertain) should be calculated with DFT and added
-# to the training/test set.
-# (maybe grab N structures randomly from those with +5% error)
-
-# make new datasets after each iteration
-
-# ---------- TEST MODELS (Random struct opt) ----------
-
-# randomly create a series of new structures
-
-# (option 1)
-# predict energy/forces for ALL structures using ALL models
-
-# (option 2)
-# Relax ALL structures using ONE model. Store ionic steps + energies + forces.
-# Pull the output structures from the lammps run and use the OTHER deepmd models
-# to predict energy/forces. 
-
-# (option 3)
-# Run MD simulations on ALL structures using ONE model --> follow MD opt above
-
-# Compare energy/forces across all structures & models. Ones that differ the
-# most (i.e. models are most uncertain) should be calculated with DFT and added
-# to the training/test set.
-# (maybe grab N structures randomly from those with +5% error)
-
-# make new datasets after each iteration
-
-# ---------- STOP CONDITION ----------
-
-# relax input structure
-# run interation of build_from_md and grab location of deepmd runs 
-    # run with one temperature 
-# create random structures and preduct energy/forces with models and with dft 
-
+#TODO
+  #properly filter structures from the database using the id
+  #explicitly import the build_from_table workflow
+  #add way to conitnue model training with build-from-table method
+  
 from pathlib import Path
 
 from simmate.calculators.deepmd.inputs.type_and_set import DeepmdDataset
@@ -74,59 +28,73 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
     use_database = False
     
     def run_config(
-            structure: Structure,
+            composition: Composition,
             directory: Path,
-            composition: Composition = None, #if using build from table option 
-            md_temperature_list: list = [1200],
-            build_from_md_kwargs: dict = None,
+            init_model: str, #either md or table 
+            init_model_kwargs: dict = {},
             num_test_structs: int = 100,
+            rand_generator_attempts: int =1000,
             num_models: int = 3,
             max_error: float = 0.5, 
-            max_attempts = 5,
+            max_attempts: int = 5,
             **kwargs,
             ):
         
-        #import build_from_md workflow 
-        build_from_md = get_workflow('ml-potential.deepmd.build-from-md')
+        #import initial model training method 
+        if init_model == 'md':
+            init_model_training = get_workflow('ml-potential.deepmd.build-from-md')
+        if init_model == 'table':
+            init_model_training = get_workflow('ml-potential.deepmd.build-from-table')
+        else:
+            raise Exception("Invalid method entered for initial model training")
+            
+        print(init_model + ' loaded')
         
-        #import build_from_table worklfow 
+        #import build from table workflow
         build_from_table = get_workflow('ml-potential.deepmd.build-from-table')
+        print('build from table loaded')
+
         
-        #import vasp static energy workflow 
+        #import static energy workflow         
         static_energy = get_workflow('static-energy.vasp.mit')
+        static_energy.error_handlers = [] #turn error handlers off
+        print('static energy loaded')
         
-        #import random structure generation function
-        struct_generator = RandomSymWalkStructure(composition = Composition(structure.composition.formula))
+        #import random structure generation function 
+        struct_generator = RandomSymWalkStructure(composition = Composition(composition = composition),
+                                                  max_total_attempt = rand_generator_attempts)
+        
+        print('structure generator loaded')
+
         
         #import energy/force prediction workflow 
         get_energy_force = get_workflow("ml-potential.deepmd.prediction")
         
-        #import deepmd training workflow 
-        deepmd_workflow = get_workflow("ml-potential.deepmd.train-model")
+        print('force/energy prediction loaded')
+
         
-        #import freeze model workflow 
-        freeze_workflow = get_workflow("ml-potential.deepmd.freeze-model")
 
 ##INITIAL TRAINING OF MODELS
         
-        #Begin by training multiple models using same starting structure 
+        #Begin by training multiple models using same starting structure/composition
         model_submitted_states = []
         for num in range(num_models):
-            state = build_from_md.run(structure = structure,
-                                      temperature_list = md_temperature_list,
-                                      **build_from_md_kwargs)
+            state = init_model_training.run(**init_model_kwargs)
             model_submitted_states.append(state)
+        
+        print('begin model training')
             
-        #The build_from_md worklow returns the directory where the deepmd data/run files are 
+        #worklows returns the directory where the deepmd data/run files are 
         #stored so this will collect all the directories in one list
         directories = [state.result() for state in model_submitted_states]
         
 ##TRAINING LOOP WITH RAND STRUCTS 
+        print('start of training loop')
         counter = 0 
         master_check = True 
         while master_check:
             #check the counter to see if the max number of cycles has been reached 
-            if counter > max_attempts:
+            if counter == max_attempts:
                 master_check = False 
                 
             counter +=1 
@@ -140,7 +108,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
                     continue
                 else:
                     test_structures.append(new_struct) 
-            
+            print('test structures created')
             #Use each model created to predict the energies/forces for each randomly 
             #created structure
             deepmd_prediction_states = [] 
@@ -154,27 +122,37 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             energy_force_list = [state.result() for state in deepmd_prediction_states]
             
             average_error = []
-            #start by iterating through the first list 
-            for e1 in energy_force_list[0]['energies']:
+            #We start by iterating through the energies predicted by the first model 
+            #and compare it to the energies predicted by all other models 
+            print('checking errors')
+            for n, e1 in enumerate(energy_force_list[0]['energies']):
+                print(e1)
                 error_list = []
-                for e2 in energy_force_list[1:]['energies']:
+                for energy_list in energy_force_list[1:]['energies']:
+                    e2 = energy_list[n]
+                    print(e2)
                     error = abs((e1 - e2)/e1)
+                    print(error)
                     error_list.append(error)
                     
                 average_diff = mean(error)
                 average_error.append(average_diff)
-                
+            
+            #Iterate through the average erorrs and see which structures show disagreement 
+            #above the maximum error
             next_gen_structs = []
             for n, error in average_error:
                 if error > max_error:
                     next_gen_structs.append(test_structures[n])
-            
-            #if there are less than 20 structures in next_gen_structure, don't 
+            print('structures added to list')
+            #if there are less than 20 structures in next_gen_structs, don't 
             #bother retraining models 
+            #!!!change to a percentage, let user decide??
             if len(next_gen_structs) < 20:
                 master_check = False 
             
             #carry out static energy calculations for each of the structures 
+            #!!!keep track of state id's to use build_from_table
             static_energy_states = []
             for struct in next_gen_structs:
                 #use run cloud to run static energy calculations in parallel 
@@ -183,98 +161,23 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
                 )
                 static_energy_states.append(state)
                 
-            structure_results = [state.result() for state in static_energy_states]
+            structure_id = [state.result().id for state in static_energy_states]
+            print('static calcs run')
             
-            #create lists to hold new training/testing data
-            #!!!CAN REPLACE THE SECTION BELOW WITH THE BUILD_FROM_TABLE METHOD 
-            #if new_structs are added to a database?  
-            training_data = []
-            testing_data =[] 
-            ##RESTART TRAINING (run in parallel!!!) 
             for directory in directories:
-                #create datasets for the new trianing strucutres in each model directory
-                DeepmdDataset.to_file(
-                    ionic_step_structures=structure_results,
-                    #!!!check directory name!!!
-                    directory = directory / f"deepmd_data_randstruct_{counter}",
-                )
-                #add new datasets to running list of training/testing data 
-                training_data.append( directory / f"deepmd_data_randstruct_{counter}_train")
-                testing_data.append( directory / f"deepmd_data_randstruct_{counter}_test")
-                # find the newest available checkpoint file
-                number_max = 0  # to keep track of checkpoint number
-                checkpoint_file = None
-                for file in directory.iterdir():
-                    if "model.ckpt" in file.stem and "-" in file.stem:
-                        number = int(file.stem.split("-")[-1])
-                        if number > number_max:
-                            number_max = number
-                            checkpoint_file = file
-                # make sure the loop above ended with finding a file
-                if not checkpoint_file:
-                    raise Exception("Unable to detect DeepMD checkpoint file")
-    
-                # And continue the model training with this new data
-                deepmd_workflow.run(
-                    directory=directory,
-                    composition=structure.composition,
-                    command=f'dp train --restart {checkpoint_file.stem} input_{n}.json',
-                    input_filename=f"input_{n}.json",
-                    training_data=training_data,
-                    testing_data=testing_data,
-                )
-                #freeze model once training is complete 
-                freeze_workflow.run(directory=directory)
-                
-                #!!!make sure model.pb file gets overridden!!!
+                state = build_from_table.run(composition = composition,
+                                             directory = directory/'deepmd',
+                                             table_name = 'StaticEnergy',
+                                             filter_kwargs = {'id__range' : [structure_id[0], structure_id[-1]]},
+                                             training_iterations = 1,)  # setting to 1 means no iterative training
+                deepmd_prediction_states.append(state)
+            print('build from table run')
+            
+         
+            
+            
+            
 
-
-            
-            
-                    
-                    
-                
-            
-                
-                    
-              
-                
-                    
-                    
-                
-                
-                
-            
-                
-            
-            
-        
-        
-     
-                
-            
-            
-      
-        
-        
-        
-        
-        
-        
-        
-        
-            
-        
-            
-            
-            
-        
-        
-        
-        
-        
-        
-        
         
 
         
