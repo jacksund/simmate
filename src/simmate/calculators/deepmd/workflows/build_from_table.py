@@ -17,6 +17,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
         composition: Composition,
         directory: Path,
         table_name: str,
+        start_from_model: bool=False,
         filter_kwargs: dict = {},
         deepmd_settings: dict ={},
         deepmd_training_steps: int = 10000000,
@@ -61,6 +62,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
         deepmd_workflow = get_workflow("ml-potential.deepmd.train-model")
 
         # divide overall query into equal sized list of structures
+        # !!!throws error if list cannot be divided equally 
         structs_per_chunk = int(all_db_structures.count() / training_iterations)
 
         # We want to train in stages, so we split the queryset into smaller
@@ -77,7 +79,7 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
 
         for n, sublist in enumerate(structure_lists):
 
-            # create training/testing files for each chunk of strutures
+            # create training/testing files for the chunk of strutures
             train, test = DeepmdDataset.to_file(
                 ionic_step_structures=sublist,
                 directory=directory / f"deepmd_data_{n}",
@@ -85,12 +87,9 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
 
             training_data += train
             testing_data += test
-
-            if n == 0:
-                command = f'dp train input_{n}.json'
-                num_training_steps = deepmd_training_steps
-            else:
-
+            
+            #check if training has to be restarted or if starting from scratch 
+            if start_from_model:
                 # find the newest available checkpoint file
                 number_max = 0  # to keep track of checkpoint number
                 checkpoint_file = None
@@ -107,16 +106,50 @@ class MlPotential__Deepmd__BuildFromTable(Workflow):
                 command = f'dp train --restart {checkpoint_file.stem} input_{n}.json'
                 num_training_steps = number_max + deepmd_training_steps
 
-            deepmd_workflow.run(
-                directory=deepmd_directory,
-                composition=composition,
-                command=command,
-                input_filename=f"input_{n}.json",
-                num_training_steps = num_training_steps,
-                training_data=training_data,
-                testing_data=testing_data,
-                settings_update = deepmd_settings,
-            )
+                deepmd_workflow.run(
+                    directory=deepmd_directory,
+                    composition=composition,
+                    command=command,
+                    input_filename=f"input_{n}.json",
+                    num_training_steps = num_training_steps,
+                    training_data=training_data,
+                    testing_data=testing_data,
+                    settings_update = deepmd_settings,)   
+            
+            else:
+                
+                if n == 0:
+                    command = f'dp train input_{n}.json'
+                    num_training_steps = deepmd_training_steps
+                
+                else:
+    
+                    # find the newest available checkpoint file
+                    number_max = 0  # to keep track of checkpoint number
+                    checkpoint_file = None
+                    for file in deepmd_directory.iterdir():
+                        if "model.ckpt" in file.stem and "-" in file.stem:
+                            number = int(file.stem.split("-")[-1])
+                            if number > number_max:
+                                number_max = number
+                                checkpoint_file = file
+                    # make sure the loop above ended with finding a file
+                    if not checkpoint_file:
+                        raise Exception("Unable to detect DeepMD checkpoint file")
+    
+                    command = f'dp train --restart {checkpoint_file.stem} input_{n}.json'
+                    num_training_steps = number_max + deepmd_training_steps
+    
+                deepmd_workflow.run(
+                    directory=deepmd_directory,
+                    composition=composition,
+                    command=command,
+                    input_filename=f"input_{n}.json",
+                    num_training_steps = num_training_steps,
+                    training_data=training_data,
+                    testing_data=testing_data,
+                    settings_update = deepmd_settings,
+                )
 
         freeze_workflow = get_workflow("ml-potential.deepmd.freeze-model")
 
