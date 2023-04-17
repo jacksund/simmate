@@ -15,6 +15,7 @@ class MlPotential__Deepmd__Prediction(Workflow):
 
     def run_config(
         structures: list[Structure],
+        directory: Path,
         deepmd_model: str = "graph.pb", # w. directory where frozen model (graph.pb file ) is stored
         **kwargs,
     ):
