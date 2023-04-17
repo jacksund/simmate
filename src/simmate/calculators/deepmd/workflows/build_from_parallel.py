@@ -113,7 +113,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             #created structure
             deepmd_prediction_states = [] 
             for directory in directories:
-                state = get_energy_force.run(directory = directory/'deepmd',
+                state = get_energy_force.run(directory = directory / "deepmd",
                                              structure = test_structures)
                 deepmd_prediction_states.append(state)
             
