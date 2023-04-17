@@ -43,7 +43,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
         #import initial model training method 
         if init_model == 'md':
             init_model_training = get_workflow('ml-potential.deepmd.build-from-md')
-        if init_model == 'table':
+        elif init_model == 'table':
             init_model_training = get_workflow('ml-potential.deepmd.build-from-table')
         else:
             raise Exception("Invalid method entered for initial model training")
@@ -61,7 +61,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
         print('static energy loaded')
         
         #import random structure generation function 
-        struct_generator = RandomSymWalkStructure(composition = Composition(composition = composition),
+        struct_generator = RandomSymWalkStructure(composition = composition,
                                                   max_total_attempt = rand_generator_attempts)
         
         print('structure generator loaded')
