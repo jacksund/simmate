@@ -8,28 +8,30 @@
     <section class="pt-5 jumbotron text-center">
         <div class="container">
             <h1 class="jumbotron-heading">Data Explorer</h1>
-            <p class="lead text-muted">
-                Explore some of the most popular material databases and immediately jump to the
-                provider's website for more data
-            </p>
+            <p class="lead text-muted">Explore some of the most popular molecular and crystal databases</p>
         </div>
     </section>
     <!-- List of Cards -->
     <div class="row">
-        {% for provider in all_providers %}
-            <div class="col-md-4">
-                <div class="card border-primary border">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary">{{ provider.source }}</h5>
-                        <p class="card-text">{{ provider.source_long }}</p>
-                        <a href="{% url 'data_explorer:provider' provider.table_name %}"
-                           class="btn btn-primary btn-sm">Explore</a>
-                        <a href="{{ provider.homepage }}"
-                           target="_blank"
-                           class="btn btn-secondary btn-sm">Source Website</a>
+        {% for data_type, datasets in all_datasets.items %}
+            {% if datasets %}
+                <h3>{{ data_type }}</h3>
+                {% for dataset in datasets %}
+                    <div class="col-md-4">
+                        <div class="card border-primary border" style="height: 90%">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">{{ dataset.source }}</h5>
+                                <p class="card-text">{{ dataset.source_long }}</p>
+                                <a href="{% url 'data_explorer:provider' dataset.table_name %}"
+                                   class="btn btn-primary btn-sm">Explore</a>
+                                <a href="{{ provider.homepage }}"
+                                   target="_blank"
+                                   class="btn btn-secondary btn-sm">Source Website</a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                {% endfor %}
+            {% endif %}
         {% endfor %}
     </div>
 {% endblock %}

@@ -3,8 +3,15 @@
 from django.shortcuts import render
 
 from simmate.configuration.django.settings import SIMMATE_DATA
-from simmate.database.base_data_types import DatabaseTable
+from simmate.database.base_data_types import DatabaseTable, Structure
 from simmate.website.core_components.base_api_view import SimmateAPIViewSet
+
+# closed-source data types. We can skip these if they aren't present
+try:
+    from simmate_corteva.rdkit.models import Molecule
+except ModuleNotFoundError:
+    Molecule = None  # dummy class just for comparison below
+
 
 ALL_PROVIDERS = {
     DatabaseTable.get_table(table_name).table_name: DatabaseTable.get_table(table_name)
@@ -13,7 +20,24 @@ ALL_PROVIDERS = {
 
 
 def providers_all(request):
-    context = {"all_providers": ALL_PROVIDERS.values()}
+    crystal_dbs = []
+    molecular_dbs = []
+    other_dbs = []
+    for table in ALL_PROVIDERS.values():
+        if issubclass(table, Structure):
+            crystal_dbs.append(table)
+        elif Molecule and issubclass(table, Molecule):
+            molecular_dbs.append(table)
+        else:
+            other_dbs.append(table)
+
+    context = {
+        "all_datasets": {
+            "Molecular": molecular_dbs,
+            "Crystalline": crystal_dbs,
+            "Other": other_dbs,
+        }
+    }
     template = "data_explorer/providers_all.html"
     return render(request, template, context)
 
