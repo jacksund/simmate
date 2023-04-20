@@ -32,6 +32,8 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             directory: Path,
             init_model: str, #either md or table 
             init_model_kwargs: dict = {},
+            table_name: str = None,
+            md_structure: Structure = None, 
             num_test_structs: int = 100,
             rand_generator_attempts: int =1000,
             num_models: int = 3,
@@ -40,21 +42,10 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             **kwargs,
             ):
         
-        #import initial model training method 
-        if init_model == 'md':
-            init_model_training = get_workflow('ml-potential.deepmd.build-from-md')
-        elif init_model == 'table':
-            init_model_training = get_workflow('ml-potential.deepmd.build-from-table')
-        else:
-            raise Exception("Invalid method entered for initial model training")
-            
-        print(init_model + ' loaded')
-        
         #import build from table workflow
         build_from_table = get_workflow('ml-potential.deepmd.build-from-table')
         print('build from table loaded')
-
-        
+ 
         #import static energy workflow         
         static_energy = get_workflow('static-energy.vasp.mit')
         static_energy.error_handlers = [] #turn error handlers off
@@ -62,27 +53,39 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
         
         #import random structure generation function 
         struct_generator = RandomSymWalkStructure(composition = composition,
-                                                  max_total_attempt = rand_generator_attempts)
-        
+                                                  max_total_attempt = rand_generator_attempts) 
         print('structure generator loaded')
-
-        
+   
         #import energy/force prediction workflow 
-        get_energy_force = get_workflow("ml-potential.deepmd.prediction")
-        
+        get_energy_force = get_workflow("ml-potential.deepmd.prediction")  
         print('force/energy prediction loaded')
 
         
-
 ##INITIAL TRAINING OF MODELS
         
         #Begin by training multiple models using same starting structure/composition
-        model_submitted_states = []
-        for num in range(num_models):
-            state = init_model_training.run(**init_model_kwargs)
-            model_submitted_states.append(state)
-        
         print('begin model training')
+        model_submitted_states = []
+        
+        if init_model == 'md':
+            if not md_structure:
+                raise Exception("Please enter a valid structure for the build-from-md method")
+            init_model_training = get_workflow('ml-potential.deepmd.build-from-md')
+            for num in range(num_models):
+                state = init_model_training.run(structure = md_structure,**init_model_kwargs)
+                model_submitted_states.append(state)
+                
+        elif init_model == 'table':
+            if not table_name:
+                raise Exception("Please enter a valid table name for the build-from-table method")
+            init_model_training = get_workflow('ml-potential.deepmd.build-from-table')
+            for num in range(num_models):
+                state = init_model_training.run(composition = composition,**init_model_kwargs)
+                model_submitted_states.append(state)
+            
+        else:
+            raise Exception("Invalid method entered for initial model training")
+        
             
         #worklows returns the directory where the deepmd data/run files are 
         #stored so this will collect all the directories in one list
@@ -108,13 +111,15 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
                     continue
                 else:
                     test_structures.append(new_struct) 
-            print('test structures created')
+                    print('added structure to list')
+            print('all test structures created')
             #Use each model created to predict the energies/forces for each randomly 
             #created structure
             deepmd_prediction_states = [] 
             for directory in directories:
-                state = get_energy_force.run(directory = directory / "deepmd",
-                                             structure = test_structures)
+                state = get_energy_force.run(structures = test_structures,
+                                             directory = directory / "deepmd",
+                                             )
                 deepmd_prediction_states.append(state)
             
             #Collect a dictionary for each model containing the predicted energies and forces
@@ -144,7 +149,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             for n, error in average_error:
                 if error > max_error:
                     next_gen_structs.append(test_structures[n])
-            print('structures added to list')
+            print('structures added to next_gen list')
             #if there are less than 20 structures in next_gen_structs, don't 
             #bother retraining models 
             #!!!change to a percentage, let user decide??
@@ -153,6 +158,7 @@ class MlPotential__Deepmd__BuildFromParallel(Workflow):
             
             #carry out static energy calculations for each of the structures 
             #!!!keep track of state id's to use build_from_table
+            print('starting static energy calcs')
             static_energy_states = []
             for struct in next_gen_structs:
                 #use run cloud to run static energy calculations in parallel 
