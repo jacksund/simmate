@@ -2,10 +2,10 @@
 
 # These are dictionaries that tell us which POTCARs we should grab based on
 # the type of calculation as well as where to find them
-from simmate.apps.vasp.inputs.potcar_mappings import (  # TODO: LDA_ELEMENT_MAPPINGS
+from simmate.apps.vasp.inputs.potcar_mappings import (
     FOLDER_MAPPINGS,
-    PBE_ELEMENT_MAPPINGS,
-    PBE_GW_ELEMENT_MAPPINGS,
+    PBE_GW_POTCAR_MAPPINGS,
+    PBE_POTCAR_MAPPINGS,
 )
 
 
@@ -15,31 +15,31 @@ class Potcar:
         elements,
         functional,
         filename="POTCAR",
-        element_mappings=None,  # actual default is ELEMENT_MAPPINGS
+        potcar_mappings=None,  # actual default is PBE_POTCAR_MAPPINGS
     ):
         # Element objects are passed along with a string representing the
         # desired functional ("PBE", "LDA", or "PBE_GW")
         # The order of the elements list MUST match the POSCAR!
 
-        # If the user wants to override the ELEMENT_MAPPINGS and use different
+        # If the user wants to override the POTCAR_MAPPINGS and use different
         # VASP potentials than what we have picked, then they can provide their
         # own dictionary OR pass in an update version of our. For example, they
         # may want to use the PBE potential of "C_h" instead of "C" which uses
         # a harder psuedopotential (useful in high-pressure and molecular
         # calculations). Here, they can do something like...
-        #   element_mappings={"C": "C_h", ...} # with all of their other choices
+        #   potcar_mappings={"C": "C_h", ...} # with all of their other choices
         # or...
-        #   element_mappings = PBE_ELEMENT_MAPPINGS.copy()
-        #   element_mappings.update({"C": "C_h"})
+        #   potcar_mappings = PBE_POTCAR_MAPPINGS.copy()
+        #   potcar_mappings.update({"C": "C_h"})
         # NOTE: remember whereever you use update(), be careful and make sure
         # you update a copy of the imported dictionary and avoid logical bugs.
         # I don't do that here, but I know I'm not mutating the dictionary.
         # Otherwise, if nothing was supplied use our defaults:
-        if not element_mappings:
+        if not potcar_mappings:
             if functional == "PBE":
-                element_mappings = PBE_ELEMENT_MAPPINGS
+                potcar_mappings = PBE_POTCAR_MAPPINGS
             if functional == "PBE_GW":
-                element_mappings = PBE_GW_ELEMENT_MAPPINGS
+                potcar_mappings = PBE_GW_POTCAR_MAPPINGS
 
         # based on the functional, grab the proper folder location of all POTCARs
         folder_loc = FOLDER_MAPPINGS[functional]
@@ -49,7 +49,7 @@ class Potcar:
         potcar_locations = []
         for element in elements:
             # grab the proper POTCAR symbol based on the functional and element
-            potcar_symbol = element_mappings[element.symbol]
+            potcar_symbol = potcar_mappings[element.symbol]
 
             # now let's combine this information for the full path to the POTCAR.
             # The file will be located at /folder_loc/element_symbol/POTCAR

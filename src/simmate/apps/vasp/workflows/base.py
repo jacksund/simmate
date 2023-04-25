@@ -83,20 +83,20 @@ class VaspWorkflow(S3Workflow):
     """
     This is an optional parameter to override Simmate's default selection of
     potentials based off of the functional chosen. The defaults are located
-    in simmate.apps.vasp.inputs.potcar_mappings. You can supply your
+    in `simmate.apps.vasp.inputs.potcar_mappings`. You can supply your
     own mapping dictionary or update the specific potentials you'd like. 
     For example:
     
     ``` python
-      from simmate.apps.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
-      element_mappings = PBE_ELEMENT_MAPPINGS.copy()  # don't forget to copy!
-      element_mappings.update({"C": "C_h"})  # if you wish to update any
+      from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS
+      potcar_mappings = PBE_POTCAR_MAPPINGS.copy()  # don't forget to copy!
+      potcar_mappings.update({"C": "C_h"})  # if you wish to update any
     ```
     
     or if you only use Carbon and don't care about other elements...
     
     ``` python
-      element_mappings = {"C": "C_h"}
+      potcar_mappings = {"C": "C_h"}
     ```
     
     Read more on this inside the Potcar class and be careful with updating!

@@ -1,10 +1,10 @@
-from simmate.apps.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
+from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS
 from simmate.apps.vasp.workflows.base import VaspWorkflow
 
 
 class Relaxation__Vasp__ClusterHighQ(VaspWorkflow):
     functional = "PBE"
-    potcar_mappings = PBE_ELEMENT_MAPPINGS
+    potcar_mappings = PBE_POTCAR_MAPPINGS
 
     incar = dict(
         IBRION=2,

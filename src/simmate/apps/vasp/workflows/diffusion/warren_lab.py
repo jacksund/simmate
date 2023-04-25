@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
+from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS
 from simmate.apps.vasp.workflows.base import VaspWorkflow
 from simmate.apps.vasp.workflows.diffusion.neb_base import (
     NebAllPathsWorkflow,
@@ -15,7 +15,7 @@ from simmate.apps.vasp.workflows.diffusion.neb_base import (
 
 class Relaxation__Vasp__WarrenLab(VaspWorkflow):
     functional = "PBE"
-    potcar_mappings = PBE_ELEMENT_MAPPINGS
+    potcar_mappings = PBE_POTCAR_MAPPINGS
     incar = dict(
         ALGO="Fast",
         EDIFF=1e-06,
@@ -49,7 +49,7 @@ class Relaxation__Vasp__WarrenLab(VaspWorkflow):
 
 class StaticEnergy__Vasp__WarrenLab(VaspWorkflow):
     functional = "PBE"
-    potcar_mappings = PBE_ELEMENT_MAPPINGS
+    potcar_mappings = PBE_POTCAR_MAPPINGS
     incar = dict(
         ALGO="Fast",
         EDIFF=1e-06,
@@ -83,7 +83,7 @@ class StaticEnergy__Vasp__WarrenLab(VaspWorkflow):
 
 class Relaxation__Vasp__WarrenLabNebEndpoint(VaspWorkflow):
     functional = "PBE"
-    potcar_mappings = PBE_ELEMENT_MAPPINGS
+    potcar_mappings = PBE_POTCAR_MAPPINGS
     incar = dict(
         ALGO="Fast",
         EDIFF=5e-05,
@@ -118,7 +118,7 @@ class Relaxation__Vasp__WarrenLabNebEndpoint(VaspWorkflow):
 
 class StaticEnergy__Vasp__WarrenLabNebEndpoint(VaspWorkflow):
     functional = "PBE"
-    potcar_mappings = PBE_ELEMENT_MAPPINGS
+    potcar_mappings = PBE_POTCAR_MAPPINGS
     incar = dict(
         ALGO="Fast",
         EDIFF=5e-05,
@@ -153,7 +153,7 @@ class StaticEnergy__Vasp__WarrenLabNebEndpoint(VaspWorkflow):
 
 class Diffusion__Vasp__WarrenLabCiNebFromImages(VaspNebFromImagesWorkflow):
     functional = "PBE"
-    potcar_mappings = PBE_ELEMENT_MAPPINGS
+    potcar_mappings = PBE_POTCAR_MAPPINGS
     incar = dict(
         ALGO="Fast",
         EDIFF=5e-05,
