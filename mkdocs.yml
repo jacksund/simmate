@@ -149,10 +149,11 @@ nav:
             - Checklist for each worker: getting_started/add_computational_resources/checklist_for_workers.md
             - Adding workers and clusters: getting_started/add_computational_resources/adding_clusters_and_workers.md
         
-        - Run an evolutionary search:
-            - Quickstart: getting_started/evolutionary_search/quick_start.md
-        
         - Wrap up: getting_started/wrap_up.md
+        
+        - Extra Example Scripts:
+            - Overview: getting_started/example_scripts/overview.md
+            - Example-001: getting_started/example_scripts/example-001.md
 
     - Parameters: parameters.md
     
@@ -196,7 +197,7 @@ nav:
             # - Testing: full_guides/extras/testing.md  # Move to contributing...?
 
     - Apps: 
-        - What is an app?: apps/what_is_an_app.md
+        - Overview: apps/overview.md
         - VASP:
             - Overview: apps/vasp/overview.md
             - Installation: apps/vasp/installation.md
@@ -211,6 +212,8 @@ nav:
             # - Inputs: apps/bader_henkelman/inputs.md
             # - Outputs: apps/bader_henkelman/outputs.md
         - DeepMD: apps/deepmd.md
+        - Evolutionary Searches: apps/evolution.md
+        - CLEASE: apps/clease.md
 
     - Contributing:
         - Overview: contributing/overview.md

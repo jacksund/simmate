@@ -1,3 +1,7 @@
+
+!!! danger
+    This app is still under early testing and not really for use outside of the Warren Lab
+
 The DeePMD App
 --------------------
 
