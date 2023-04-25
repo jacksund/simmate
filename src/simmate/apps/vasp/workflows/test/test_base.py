@@ -2,7 +2,7 @@
 
 import pytest
 
-from simmate.apps.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS
+from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS
 from simmate.apps.vasp.workflows.base import VaspWorkflow
 from simmate.conftest import SimmateMockHelper, copy_test_files
 
@@ -15,7 +15,7 @@ class Testing__Vasp__Dummy(VaspWorkflow):
     use_database = False
 
     functional = "PBE"
-    potcar_mappings = PBE_ELEMENT_MAPPINGS
+    potcar_mappings = PBE_POTCAR_MAPPINGS
     standardize_structure = "primitive-LLL"
     symmetry_tolerance = 0.1
     angle_tolerance = 10.0
@@ -48,7 +48,7 @@ def test_base_setup(structure, tmp_path, mocker):
         structure.composition.elements,
         "PBE",
         potcar_filename,
-        PBE_ELEMENT_MAPPINGS,
+        PBE_POTCAR_MAPPINGS,
     )
 
 

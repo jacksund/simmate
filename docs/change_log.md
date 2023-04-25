@@ -73,6 +73,13 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 - add `django-unicorn` to deps to enable dynamic fullstack web UIs
 - add ChemDoodle js/css to website headers for use elsewhere
+- add "Example Scripts" section to doc website
+- many updates to the web UI to accomodate molecular datasets and workflows
+
+**Refactors**
+
+- VASP potcar references to "element mappings" is now standarized to "potcar mappings"
+- refactor docs with new "Apps" section
 
 **Fixes**
 

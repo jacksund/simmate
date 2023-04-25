@@ -2,7 +2,7 @@
 
 import pytest
 
-from simmate.apps.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS_LOW_QUALITY
+from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS_LOW_QUALITY
 from simmate.apps.vasp.workflows.diffusion import (
     Diffusion__Vasp__NebAllPathsMit,
     Diffusion__Vasp__NebFromImagesMit,
@@ -73,5 +73,5 @@ def test_neb_from_images_setup(sample_structures, tmp_path, mocker):
         structure.composition.elements,
         "PBE",
         potcar_filename,
-        PBE_ELEMENT_MAPPINGS_LOW_QUALITY,
+        PBE_POTCAR_MAPPINGS_LOW_QUALITY,
     )

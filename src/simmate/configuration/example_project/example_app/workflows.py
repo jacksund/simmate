@@ -24,8 +24,7 @@ from simmate.apps.vasp.error_handlers import (  # There are many more available 
     Unconverged,
     Walltime,
 )
-from simmate.apps.vasp.inputs import Incar
-from simmate.apps.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS_LOW_QUALITY
+from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS_LOW_QUALITY, Incar
 from simmate.apps.vasp.workflows.base import VaspWorkflow
 from simmate.engine import Workflow
 
@@ -73,7 +72,7 @@ class Relaxation__Vasp__MyExample2(VaspWorkflow):
     # This uses the PBE functional with POTCARs that have lower electron counts
     # and convergence criteria when available.
     functional = "PBE"
-    potcar_mappings = PBE_ELEMENT_MAPPINGS_LOW_QUALITY
+    potcar_mappings = PBE_POTCAR_MAPPINGS_LOW_QUALITY
 
     # These are all input settings for this task.
     incar = dict(

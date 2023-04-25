@@ -224,9 +224,7 @@ can use as a starting point. For example, VASP users can inherit from the
 === "full-feature VASP example"
     ``` python
     from simmate.apps.vasp.workflows.base import VaspWorkflow
-    from simmate.apps.vasp.inputs.potcar_mappings import (
-        PBE_ELEMENT_MAPPINGS,
-    )
+    from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS
     from simmate.apps.vasp.error_handlers import (
         Frozen,
         NonConverging,
@@ -238,7 +236,7 @@ can use as a starting point. For example, VASP users can inherit from the
     class Relaxation__Vasp__MyExample2(VaspWorkflow):
 
         functional = "PBE"
-        potcar_mappings = PBE_ELEMENT_MAPPINGS  # (1)
+        potcar_mappings = PBE_POTCAR_MAPPINGS  # (1)
 
         incar = dict(
             PREC="Normal",  # (2)

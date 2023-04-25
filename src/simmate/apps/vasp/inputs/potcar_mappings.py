@@ -45,7 +45,7 @@ FOLDER_MAPPINGS = {
 
 # TODO -- add LDA mappings. There's no example in Pymatgen that I see.
 
-PBE_ELEMENT_MAPPINGS = {
+PBE_POTCAR_MAPPINGS = {
     "Ac": "Ac",
     "Ag": "Ag",
     "Al": "Al",
@@ -142,8 +142,8 @@ PBE_ELEMENT_MAPPINGS = {
 # criteria is less tight. A lot of the elements are the same as above, so we
 # just copy those element mappings and update the elements that are actaully
 # lower quality here.
-PBE_ELEMENT_MAPPINGS_LOW_QUALITY = PBE_ELEMENT_MAPPINGS.copy()
-PBE_ELEMENT_MAPPINGS_LOW_QUALITY.update(
+PBE_POTCAR_MAPPINGS_LOW_QUALITY = PBE_POTCAR_MAPPINGS.copy()
+PBE_POTCAR_MAPPINGS_LOW_QUALITY.update(
     {
         "Be": "Be",
         "Cr": "Cr",
@@ -175,7 +175,7 @@ PBE_ELEMENT_MAPPINGS_LOW_QUALITY.update(
     }
 )
 
-PBE_GW_ELEMENT_MAPPINGS = {
+PBE_GW_POTCAR_MAPPINGS = {
     "Ac": "Ac",
     "Ag": "Ag_sv_GW",
     "Al": "Al_GW",

@@ -36,7 +36,7 @@ from simmate.apps.vasp.error_handlers import (
     Zheev,
     Zpotrf,
 )
-from simmate.apps.vasp.inputs.potcar_mappings import PBE_ELEMENT_MAPPINGS_LOW_QUALITY
+from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS_LOW_QUALITY
 from simmate.apps.vasp.workflows.base import VaspWorkflow
 
 
@@ -62,7 +62,7 @@ class Relaxation__Vasp__Mit(VaspWorkflow):
     description_doc_short = "based on pymatgen's MITRelaxSet"
 
     functional = "PBE"
-    potcar_mappings = PBE_ELEMENT_MAPPINGS_LOW_QUALITY
+    potcar_mappings = PBE_POTCAR_MAPPINGS_LOW_QUALITY
 
     incar = dict(
         ALGO="Fast",

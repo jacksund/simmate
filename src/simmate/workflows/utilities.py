@@ -17,7 +17,7 @@ import yaml
 
 from simmate.configuration.django.settings import SIMMATE_APPS
 from simmate.engine import Workflow
-from simmate.utilities import get_directory, make_archive
+from simmate.utilities import get_app_submodule, get_directory, make_archive
 
 
 def get_all_workflows(
@@ -30,23 +30,11 @@ def get_all_workflows(
     """
     app_workflows = []
     for app_name in apps_to_search:
-        try:
-            # modulename is by cutting off the "apps.AppConfig" part of the config
-            # path. For example, "simmate.apps.vasp.apps.VaspConfig" would
-            # give an app_modulename of "simmate.apps.vasp"
-            config_modulename = ".".join(app_name.split(".")[:-1])
-            config_name = app_name.split(".")[-1]
-            config_module = importlib.import_module(config_modulename)
-            config = getattr(config_module, config_name)
-            app_path = config.name
-            app_workflow_module = importlib.import_module(f"{app_path}.workflows")
-        except Exception as error:
-            logging.critical(
-                f"Failed to load workflows from {app_name}. Did you make sure "
-                "there is a workflows.py file or module present? This is the "
-                "error that was raised during loading:"
-            )
-            raise error
+        workflow_path = get_app_submodule(app_name, "workflows")
+        if not workflow_path:
+            continue  # skip to the next app
+
+        app_workflow_module = importlib.import_module(workflow_path)
 
         # iterate through each available object in the workflows file and find
         # which ones are workflow objects.
