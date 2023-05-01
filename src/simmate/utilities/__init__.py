@@ -13,6 +13,7 @@ from .other import (
     chunk_list,
     get_app_submodule,
     get_chemical_subsystems,
+    get_class,
     get_conda_env,
     get_latest_version,
     str_to_datatype,

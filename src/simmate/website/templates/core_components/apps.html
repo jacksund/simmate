@@ -13,13 +13,15 @@
     </section>
     <!-- List of Cards -->
     <div class="row">
-        {% for app_name in extra_apps %}
+        {% for extra_app in extra_apps %}
             <div class="col-md-4">
                 <div class="card border-primary border">
                     <div class="card-body">
-                        <h5 class="card-title text-primary">{{ app_name }}</h5>
-                        <p class="card-text">an example description for this app</p>
-                        <a role="button" class="btn btn-primary btn-sm" href="{{ app_name }}">Try it out!</a>
+                        <h5 class="card-title text-primary">{{ extra_app.verbose_name }}</h5>
+                        <p class="card-text">{{ extra_app.description_short }}</p>
+                        <a role="button"
+                           class="btn btn-primary btn-sm"
+                           href="{{ extra_app.short_name }}">Try it out!</a>
                     </div>
                 </div>
             </div>
