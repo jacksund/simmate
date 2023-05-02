@@ -1,17 +1,33 @@
-```# Run this script as SLURM job. This script will handle submitting
-# other workflows and will finish when ALL workflows finish.
-#
-# Check-list for this script:
-#   1. use a postgres database
-#   2. load the matproj database into your postgres database
-#   3. start a bunch of simmate workers (or a "cluster")
-#   4. submit this script as it's own slurm job
 
-# Helpful links for the steps above:
-#   1. https://jacksund.github.io/simmate/getting_started/use_a_cloud_database/build_a_postgres_database/
-#   2. https://jacksund.github.io/simmate/getting_started/use_a_cloud_database/build_a_postgres_database/#vii-load-third-party-data
-#   3. https://jacksund.github.io/simmate/getting_started/add_computational_resources/quick_start/
+# Example 001
 
+## About :star:
+
+This script queries the Material Project database for all ZnSnF6 structures with spacegroup=148 and then runs a (i) relaxation, (ii) static-energy, and (iii) bandstructure + density of states calculation on each -- passing the results between each step.
+
+| Key Info        |  |
+| ----------- | ----------- |
+| Contributor | Becca Radomsky |
+| Github User | [@becca9835](https://github.com/becca9835) |
+| Last updated | 2023.05.01 |
+| Simmate Version | v0.13.2 |
+
+## Prerequisites :rotating_light:
+
+- [x] use a postgres database ([guide](/simmate/getting_started/use_a_cloud_database/build_a_postgres_database/))
+- [x] load the matproj database into your postgres database ([guide](/simmate/getting_started/use_a_cloud_database/build_a_postgres_database/#vii-load-third-party-data))
+- [x] start a bunch of simmate workers (or a "cluster") ([guide](/simmate/getting_started/add_computational_resources/quick_start/))
+
+
+## The script :rocket:
+
+!!! info
+    We recommend submitting this script as it's own slurm job! This script will handle submitting
+    other workflows and will finish when ALL workflows finish. 
+    
+    Additionally, we run each job below with 8 cores, so our workers are also submitted to a SLURM cluster with n=8.
+
+``` python
 from simmate.database import connect
 from simmate.database.third_parties import MatprojStructure
 from simmate.workflows.utilities import get_workflow
@@ -51,16 +67,16 @@ for job in relax_jobs:
     )
     static_jobs.append(status)
 
-# and do the same thing again with HSE band structure
-hse_workflow = get_workflow("electronic-structure.vasp.matproj-full")
-hse_jobs = []
+# and do the same thing again with a band structure + density of states
+elec_workflow = get_workflow("electronic-structure.vasp.matproj-full")
+elec_jobs = []
 for job in static_jobs:
-    status = hse_workflow.run_cloud(
+    status = elec_workflow.run_cloud(
         structure=job.result(),  # result() here says to wait for the job before to finish
         command="mpirun -n 8 vasp_std > vasp.out",
     )
-    hse_jobs.append(status)
+    elec_jobs.append(status)
 
 # then you can have the job sit and wait for all results to finish
-results = [job.result() for job in hse_jobs]
+results = [job.result() for job in elec_jobs]
 ```
