@@ -1130,6 +1130,18 @@ class Workflow:
             "supercell_start": Structure,
             "supercell_end": Structure,
         }
+        # Add extra parameter mappings from internal code
+        try:
+            from simmate_corteva.rdkit import Molecule
+
+            parameter_mappings.update(
+                {
+                    "molecule": Molecule,
+                    "molecules": Molecule,
+                }
+            )
+        except:
+            pass  # just move on if there's no module present
 
         for parameter, target_class in parameter_mappings.items():
             if parameter in parameters.keys():
