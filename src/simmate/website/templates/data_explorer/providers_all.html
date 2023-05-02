@@ -15,7 +15,7 @@
     <div class="row">
         {% for data_type, datasets in all_datasets.items %}
             {% if datasets %}
-                <h3>{{ data_type }}</h3>
+                <h3 class="mt-4">{{ data_type }}</h3>
                 {% for dataset in datasets %}
                     <div class="col-md-4">
                         <div class="card border-primary border" style="height: 90%">
