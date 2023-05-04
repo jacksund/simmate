@@ -10,6 +10,6 @@ This section stores example python scripts of how Simmate can be used.
 
 | Script Name | Description                          |
 | ----------- | ------------------------------------ |
-| Example-001 |  An example one-sentence description on what the script does |
+| Example-001 | Performs relaxation, static-energy, and bandstruct/DOS calculations on a filtered set of structures from the Materials Project. |
 | Example-002 | (this is a placeholder entry) |
 | Example-003 | (this is a placeholder entry) |
