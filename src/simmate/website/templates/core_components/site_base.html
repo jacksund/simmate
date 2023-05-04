@@ -68,8 +68,8 @@
                 let molecule = ChemDoodle.readMOL(sdf_str);
                 myCanvas.loadMolecule(molecule);
                 // I can't find how to remove the boarders... so I just remove the class
-                var test = document.getElementById(canvas_id);
-                test.classList.remove("ChemDoodleWebComponent");
+                var canvas = document.getElementById(canvas_id);
+                canvas.classList.remove("ChemDoodleWebComponent");
             };
             // function to grab value from sketcher and paste it into a target unicorn input
             var get_mol_from_sketcher = function(
@@ -91,6 +91,19 @@
                 }
                 // and then we call unicorn to update the value
                 Unicorn.call(unicorn_view, unicorn_method, JSON.stringify(molStr));
+            };
+            // function to unhide + update a canvas for doodle molecules
+            var refresh_doodle = function(canvas_id, new_sdf_str) {
+                // todo-- combine with doodle_molecule fxn above
+                myCanvas = new ChemDoodle.ViewerCanvas(canvas_id);
+                myCanvas.styles.backgroundColor = undefined;
+                myCanvas.emptyMessage = 'No molecule loaded!';
+                let molecule = ChemDoodle.readMOL(new_sdf_str);
+                myCanvas.loadMolecule(molecule);
+                // make canvas visible and remove boarder
+                let canvas = document.getElementById(canvas_id);
+                canvas.removeAttribute("hidden");
+                canvas.classList.remove("ChemDoodleWebComponent");
             };
         </script>
         <!-- Some pages may require extra lines in the header such as loading extra libraries -->
