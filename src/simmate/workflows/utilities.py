@@ -30,10 +30,10 @@ def get_all_workflows(
     """
     app_workflows = []
     for app_name in apps_to_search:
+        # check if there is a workflow module for this app and load it if so
         workflow_path = get_app_submodule(app_name, "workflows")
         if not workflow_path:
             continue  # skip to the next app
-
         app_workflow_module = importlib.import_module(workflow_path)
 
         # iterate through each available object in the workflows file and find
