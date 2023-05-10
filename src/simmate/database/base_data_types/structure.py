@@ -201,12 +201,12 @@ class Structure(DatabaseTable):
         as_dict: bool = False,
         **kwargs,
     ):
-        if isinstance(structure, str):
-            structure = ToolkitStructure.from_database_string(structure)
-
         # if there isn't a structure, nothing is to be done.
         if not structure:
             return kwargs if as_dict else cls(**kwargs)
+
+        if isinstance(structure, str):
+            structure = ToolkitStructure.from_database_string(structure)
 
         # BUG: This is an old line and I can't remember why I have it. Once I
         # have implemented more unittests, consider deleting. This method is
