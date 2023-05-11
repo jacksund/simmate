@@ -25,26 +25,41 @@ TYPE_DESCRIPTIONS = {
         "Evaluate where electrons exist in a structure and assign them to a "
         "specific site/atom. Used to predicted oxidation states."
     ),
-    # "band-structure": (
-    #     "These workflows calculate the electronic band structure for a material."
-    # ),
-    # "density-of-states": (
-    #     "These workflows calculate the electronic density of states for a material."
-    # ),
+    "band-structure": (
+        "These workflows calculate the electronic band structure for a material."
+    ),
+    "density-of-states": (
+        "These workflows calculate the electronic density of states for a material."
+    ),
     "dynamics": (
         "Run a molecular dynamics simulation for a material. Involves "
         "iteratively evaluating the energy/forces at "
         "specific temperature (or temperature ramp)."
     ),
-    # "diffusion": (
-    #     "These workflows evaluate the diffusion of an atom through a material. "
-    #     "At this time, these workflows are entirely Nudged-Elastic-Band (NEB) "
-    #     "calculations."
-    # ),
+    "diffusion": (
+        "These workflows evaluate the diffusion of an atom through a material. "
+        "At this time, these workflows are entirely Nudged-Elastic-Band (NEB) "
+        "calculations."
+    ),
     "structure-prediction": (
         "Predict the most stable structure when given only chemical composition "
         "or system. Strategies range from evolutionary searches to "
         "substituition of known materials."
+    ),
+    "conformer-generation": (
+        "Predict the most stable structure when given only chemical composition "
+        "or system. Strategies range from evolutionary searches to "
+        "substituition of known materials."
+    ),
+    "docking": (
+        "Analyze ligand-protein binding affinity and preferred orientation. "
+        "Simulations can also be ran accross larger datasets "
+        "to evaluate probable mode(s) of action."
+    ),
+    "clustering": (
+        "Group a list of molecules or crystals based on chemical similarity. "
+        "These workflows can also be used to generate diverse subsets of compounds "
+        "for further analysis."
     ),
 }
 
@@ -73,7 +88,7 @@ def workflows_by_type(request, workflow_type):
         workflow_names = get_workflow_names_by_type(
             workflow_type,
             app,
-            remove_no_database_flows=True,
+            remove_no_database_flows=False,  # BUG: this breaks some views...
         )
         workflow_dict[app] = [get_workflow(n) for n in workflow_names]
 

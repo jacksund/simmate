@@ -6,6 +6,7 @@ import os
 import sys
 
 import requests
+from django.apps import AppConfig
 
 import simmate
 
@@ -207,6 +208,18 @@ def str_to_datatype(
         return value
 
 
+def get_class(class_path: str):
+    """
+    Given the import path for a python class (e.g. path.to.MyClass), this
+    utility will load the class given (MyClass).
+    """
+    config_modulename = ".".join(class_path.split(".")[:-1])
+    config_name = class_path.split(".")[-1]
+    config_module = importlib.import_module(config_modulename)
+    config = getattr(config_module, config_name)
+    return config
+
+
 def get_app_submodule(
     app_name: str,
     submodule_name: str,
@@ -216,13 +229,7 @@ def get_app_submodule(
     This is useful for checking if there are workflows or urls defined, which
     are optional accross all apps. None is return if no app exists
     """
-    # modulename is by cutting off the "apps.AppConfig" part of the config
-    # path. For example, "simmate.apps.vasp.apps.VaspConfig" would
-    # give an app_modulename of "simmate.apps.vasp"
-    config_modulename = ".".join(app_name.split(".")[:-1])
-    config_name = app_name.split(".")[-1]
-    config_module = importlib.import_module(config_modulename)
-    config = getattr(config_module, config_name)
+    config = get_class(app_name)
     app_path = config.name
     submodule_path = f"{app_path}.{submodule_name}"
 
