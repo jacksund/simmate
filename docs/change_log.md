@@ -75,11 +75,14 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add ChemDoodle js/css to website headers for use elsewhere
 - add "Example Scripts" section to doc website
 - many updates to the web UI to accomodate molecular datasets and workflows
+- add `simmate engine` commands to help with tags and different queues
+- add docs to help with simmate workers, clusters, and tagging
 
 **Refactors**
 
 - VASP potcar references to "element mappings" is now standarized to "potcar mappings"
 - refactor docs with new "Apps" section
+- full refactor of `simmate engine` commands. many have been shortened/renamed
 
 **Fixes**
 
