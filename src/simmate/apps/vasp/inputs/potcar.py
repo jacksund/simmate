@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
+
+from pymatgen.core import Element
+
 # These are dictionaries that tell us which POTCARs we should grab based on
 # the type of calculation as well as where to find them
 from simmate.apps.vasp.inputs.potcar_mappings import (
@@ -12,10 +16,10 @@ from simmate.apps.vasp.inputs.potcar_mappings import (
 class Potcar:
     @staticmethod
     def to_file_from_type(
-        elements,
-        functional,
-        filename="POTCAR",
-        potcar_mappings=None,  # actual default is PBE_POTCAR_MAPPINGS
+        elements: list[Element],
+        functional: str,
+        filename: str | Path = "POTCAR",
+        potcar_mappings: dict = None,  # actual default is PBE_POTCAR_MAPPINGS
     ):
         # Element objects are passed along with a string representing the
         # desired functional ("PBE", "LDA", or "PBE_GW")
@@ -60,6 +64,7 @@ class Potcar:
 
         # VASP expect all POTCAR files to be combined into one and in the same
         # order as the POSCAR elements. Let's do that here.
+        filename = Path(filename)
         with filename.open("w") as combinedfile:
             for potcar in potcar_locations:
                 with potcar.open() as singlefile:
