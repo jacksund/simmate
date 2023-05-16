@@ -92,8 +92,8 @@ simmate workflows run my_search.yaml
 6) Monitor the output and log files for any issues. Important error information
 can also be accessed in the command line:
 ``` bash
-simmate engine show-stats
-simmate engine show-error-summary
+simmate engine stats
+simmate engine error-summary
 ```
 
 7) Submit new workers or cancel stale workers as needed.

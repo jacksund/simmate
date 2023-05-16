@@ -104,7 +104,7 @@ def start_cluster(
 
 
 @engine_app.command()
-def show_error_summary():
+def error_summary():
     """
     Prints the shorthand error for all failed jobs
     """
@@ -114,7 +114,7 @@ def show_error_summary():
 
 
 @engine_app.command()
-def show_stats():
+def stats():
     """
     Prints a summary of different workitems and their status
     """
@@ -141,3 +141,13 @@ def delete_all(confirm: bool = False):
     from simmate.engine.execution import SimmateExecutor
 
     SimmateExecutor.delete_all(confirm)
+
+
+@engine_app.command()
+def delete(tag: list[str] = [], confirm: bool = False):
+    """
+    Deletes all workitems from the database that match the provided tags
+    """
+    from simmate.engine.execution import SimmateExecutor
+
+    SimmateExecutor.delete(tags=tag, confirm=confirm)

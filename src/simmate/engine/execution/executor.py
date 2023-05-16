@@ -104,6 +104,24 @@ class SimmateExecutor:
         queue_size = WorkItem.objects.filter(status="P").count()
         return queue_size
 
+    @classmethod
+    def delete(cls, tags: list[str], confirm: bool = False):
+        # no tags means delete all
+        if not tags:
+            cls.delete_all(confirm=confirm)
+
+        # Make sure the user ment to do this, otherwise raise an exception
+        if not confirm:
+            raise Exception(
+                "Are you sure you want to do this? This deletes all of your queue "
+                "data and you can't get it back. If so, run this method again "
+                "with confirmation."
+            )
+
+        # Filtering jobs with specific tags and delete all jobs that you pulled
+        jobs = WorkItem.objects.filter_by_tags(tags=tags).all()
+        jobs.delete()
+
     @staticmethod
     def delete_all(confirm: bool = False):
         """

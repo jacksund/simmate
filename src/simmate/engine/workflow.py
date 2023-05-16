@@ -1061,6 +1061,8 @@ class Workflow:
                     parameter_value = parameter_value.as_dict()
                 elif hasattr(parameter_value, "to_dict"):
                     parameter_value = parameter_value.to_dict()
+                elif hasattr(parameter_value, "to_binary"):
+                    parameter_value = parameter_value.to_binary()
 
                 # workflow_base and input_parameters are special cases that
                 # may require a refactor (for customized workflows)
@@ -1161,7 +1163,9 @@ class Workflow:
         if parameters.get("source", None):
             # !!! are there other types I should account for? Maybe I should just
             # make this a recursive call to catch everything?
-            if parameters_cleaned["source"].get("directory", None):
+            if isinstance(parameters_cleaned["source"], dict) and parameters_cleaned[
+                "source"
+            ].get("directory", None):
                 parameters_cleaned["source"]["directory"] = Path(
                     parameters_cleaned["directory"]
                 )
