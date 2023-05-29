@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import warnings
 from pathlib import Path
 
 import pandas
@@ -65,7 +66,9 @@ def ACF(directory: Path = None, filename="ACF.dat"):
     ):
         # load the electron counts used by VASP from the POTCAR files
         # OPTIMIZE: this can be much faster if I have a reference file
-        potcars = Potcar.from_file(potcar_filename)
+        # BUG: pymatgen prints warnings if potcars don't match. we ignore these
+        with warnings.catch_warnings(record=True):
+            potcars = Potcar.from_file(potcar_filename)
         nelectron_data = {}
         # the result is a list because there can be multiple element potcars
         # in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)
