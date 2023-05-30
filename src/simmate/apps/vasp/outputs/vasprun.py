@@ -42,6 +42,7 @@ class Vasprun(VasprunPymatgen):
             vasprun = cls(
                 filename=vasprun_filename,
                 exception_on_bad_xml=False,
+                parse_potcar_file=False,
             )
             vasprun.final_structure = vasprun.structures[-1]
         # This try/except is just for my really rough calculations
