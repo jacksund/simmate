@@ -5,12 +5,12 @@
 
 This script queries the Material Project database for all ZnSnF6 structures with spacegroup=148 and then runs a (i) relaxation, (ii) static-energy, and (iii) bandstructure + density of states calculation on each -- passing the results between each step.
 
-| Key Info        |  |
-| ----------- | ----------- |
-| Contributor | Becca Radomsky |
-| Github User | [@becca9835](https://github.com/becca9835) |
-| Last updated | 2023.05.01 |
-| Simmate Version | v0.13.2 |
+| Key Info        |                                            |
+| --------------- | ------------------------------------------ |
+| Contributor     | Becca Radomsky                             |
+| Github User     | [@becca9835](https://github.com/becca9835) |
+| Last updated    | 2023.05.01                                 |
+| Simmate Version | v0.13.2                                    |
 
 ## Prerequisites :rotating_light:
 

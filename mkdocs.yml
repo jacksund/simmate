@@ -154,6 +154,7 @@ nav:
         - Extra Example Scripts:
             - Overview: getting_started/example_scripts/overview.md
             - Example-001: getting_started/example_scripts/example-001.md
+            - Example-002: getting_started/example_scripts/example-002.md
 
     - Parameters: parameters.md
     
