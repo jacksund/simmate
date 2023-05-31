@@ -41,7 +41,8 @@ def get_potcar(elements: list[str], functional: str = "PBE", combine: bool = Fal
 @inputs_app.command()
 def compare_incars(incar1: Path, incar2: Path):
     """
-    Compares settings between two INCAR files and shows their results
+    Compares settings between two INCAR files and shows their similarities and
+    differences
     """
     import yaml
 
@@ -51,4 +52,10 @@ def compare_incars(incar1: Path, incar2: Path):
     incar2 = Incar.from_file(filename=incar2)
 
     result = incar1.compare_incars(incar2)
+
+    # BUG-FIX: Tuples print ugly, so we convert them to a list
+    for key, value in result["Different"].items():
+        if isinstance(value, tuple):
+            result["Different"][key] = list(value)
+
     print(yaml.dump(result))
