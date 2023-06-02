@@ -106,8 +106,8 @@ and understand best practices as well**.
 
 2. Build your input yaml file:
 ``` yaml
-workflow_name: structure-prediction.toolkit.binary-system
-chemical_sysyem: Ca-N
+workflow_name: structure-prediction.toolkit.chemical-system
+chemical_system: Ca-N
 ```
 
 3. Submit the search

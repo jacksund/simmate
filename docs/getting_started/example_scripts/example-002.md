@@ -15,7 +15,6 @@ This script queries the Material Project database for all ZnSnF6 structures with
 ## Prerequisites :rotating_light:
 
 - [x] Simmate configured with default settings will work!
-- [x] In the script below, go through and replace everywhere you see `write out the rest of your settings`. This file can be used as an example for common settings.
 - [x] The NEB settings below use CI-NEB, which requires some of the [VTST-tools](https://theory.cm.utexas.edu/vtsttools/neb.html) installed. You modify these settings to just use a normal VASP NEB run if you'd like (see the comment `Modify these if you don't want CI-NEB`).
 
 
