@@ -92,6 +92,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - fix incorrect evolutionary search imports
 - hide pymatgen POTCAR warnings
 - fix github CI bug for MacOS being unstable
+- fix bug for zombie jobs causing evolutionary search to hang
 
 --------------------------------------------------------------------------------
 
