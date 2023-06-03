@@ -2,6 +2,7 @@
 
 import itertools
 import logging
+import time
 from pathlib import Path
 
 import numpy
@@ -44,6 +45,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         max_stoich_factor: int = 4,
         nfirst_generation: int = 15,
         nsteadystate: int = 40,
+        sleep_step: float = 300,
         directory: Path = None,
         singleshot_sources: list[str] = [
             "third_parties",
@@ -209,12 +211,30 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         all_submissions = states_prototype + states_known
         if len(all_submissions) > (nsteadystate * 2):
             number_to_wait_for = len(all_submissions) - nsteadystate - 20
+            number_to_resume_on = nsteadystate + 20
             logging.info(
                 f"Waiting for at least {number_to_wait_for} singleshot "
-                "submissions to finish"
+                "submissions to finish."
             )
-            for state in all_submissions[:number_to_wait_for]:
-                state.result(raise_error=False)
+            done_waiting = False
+            while not done_waiting:
+                # go through submitted calculations and count the number of pending
+                # calculations
+                total_pending = 0
+                for state in all_submissions:
+                    if state.is_pending():
+                        total_pending += 1
+                    # we don't need to check past our number_to_wait_for so exiting
+                    # this loop saves on database load
+                    if total_pending > number_to_resume_on:
+                        break
+
+                # check if we exited the loop above with less pending than needed
+                if total_pending <= number_to_resume_on:
+                    done_waiting = True  # exits while loop
+
+                # sleep before checking again to save on database hits
+                time.sleep(sleep_step)
 
         search_datatable.write_output_summary(directory)
 
@@ -294,6 +314,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
                     convergence_cutoff=convergence_cutoff,
                     nfirst_generation=nfirst_generation,
                     nsteadystate=nsteadystate,
+                    sleep_step=sleep_step,
                     # Because we submitted all steady states above, we don't
                     # need the other workflows to do these anymore.
                     singleshot_sources=[],

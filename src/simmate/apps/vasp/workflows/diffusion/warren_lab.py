@@ -177,7 +177,7 @@ class Diffusion__Vasp__WarrenLabCiNebFromImages(VaspNebFromImagesWorkflow):
         SIGMA=0.05,
         KSPACING=0.4,
         LMAXMIX=4,
-        NIMAGES=5,
+        NIMAGES__auto=True,  # set by simmate
         LCLIMB=True,
         SPRING=-5,
         POTIM=0,

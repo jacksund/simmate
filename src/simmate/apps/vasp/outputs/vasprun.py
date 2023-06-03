@@ -25,10 +25,13 @@ class Vasprun(VasprunPymatgen):
         vasprun_filename = directory / "vasprun.xml"
 
         # load the xml file and all of the vasprun data
+        # BUG: we skip loading the POTCAR because we want skip pymatgen warnings
+        # that come with it. This may cause issues down the road though...
         try:
             vasprun = cls(
                 filename=vasprun_filename,
                 exception_on_bad_xml=True,
+                parse_potcar_file=False,
             )
         except:
             logging.warning(
@@ -39,6 +42,7 @@ class Vasprun(VasprunPymatgen):
             vasprun = cls(
                 filename=vasprun_filename,
                 exception_on_bad_xml=False,
+                parse_potcar_file=False,
             )
             vasprun.final_structure = vasprun.structures[-1]
         # This try/except is just for my really rough calculations

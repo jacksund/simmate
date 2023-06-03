@@ -179,11 +179,11 @@ class FixedCompositionSearch(Calculation):
         from simmate.apps.evolution.singleshot_sources.prototypes import (
             get_structures_from_prototypes,
         )
+        from simmate.apps.evolution.singleshot_sources.substitution import (
+            get_structures_from_substitution_of_known,
+        )
         from simmate.apps.evolution.workflows.utilities import (
             write_and_submit_structures,
-        )
-        from simmate.toolkit.structure_prediction.substitution import (
-            get_structures_from_substitution_of_known,
         )
 
         composition = Composition(self.composition)

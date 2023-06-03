@@ -152,7 +152,7 @@ class ErrorHandler(ABC):
         # When you define your own correct method, be sure to include directory
         # (or **kwargs) as an input argument for higher-level compatibility with
         # SupervisedStagedTask and other features
-        pass
+        return
 
     @classmethod
     @property
@@ -163,7 +163,7 @@ class ErrorHandler(ABC):
         """
         return cls.__name__
 
-    def terminate_job(directory: Path, process: subprocess.Popen, command: str):
+    def terminate_job(self, directory: Path, process: subprocess.Popen, command: str):
         """
         Signals for the end of a job or forces the end of the job. This method
         will only be used if `has_custom_termination` is set to True. Otherwise,

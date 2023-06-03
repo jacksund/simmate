@@ -73,11 +73,11 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 - add `django-unicorn` to deps to enable dynamic fullstack web UIs
 - add ChemDoodle js/css to website headers for use elsewhere
-- add "Example Scripts" section to doc website
+- add "Example Scripts" section to doc website with several new scripts
 - many updates to the web UI to accomodate molecular datasets and workflows
 - add `simmate engine` commands to help with tags and different queues
 - add docs to help with simmate workers, clusters, and tagging
-- add `simmate-vasp` command for common VASP utilities
+- add `simmate-vasp` command for common VASP utilities like testing config, plotting, and prepping inputs
 
 **Refactors**
 
@@ -89,6 +89,10 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 - fix bug where hyphens aren't allowed in the database name
 - fix guide for DO database setup
+- fix incorrect evolutionary search imports
+- hide pymatgen POTCAR warnings
+- fix github CI bug for MacOS being unstable
+- fix bug for zombie jobs causing evolutionary search to hang
 
 --------------------------------------------------------------------------------
 

@@ -138,6 +138,19 @@ class WorkItem(DatabaseTable):
                 workitem.save()
                 return True
 
+    def is_pending(self) -> bool:
+        """
+        Return True if the call is still pending.
+        """
+        # I don't use a lock to check the status here
+        workitem = WorkItem.objects.only("status").get(pk=self.pk)
+
+        # check the status and indicate whether it is CANCELED or not
+        if workitem.status == "P":
+            return True
+        else:
+            return False
+
     def is_cancelled(self) -> bool:
         """
         Return True if the call was successfully cancelled.

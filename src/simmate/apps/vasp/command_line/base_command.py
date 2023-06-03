@@ -31,31 +31,57 @@ def test(run_calcs: bool = False):
     import logging
     import shutil
 
-    # 1 - check for vasp command
+    from simmate.configuration.django.settings import APPLICATIONS_YAML, INSTALLED_APPS
+
+    # true until proven otherwise
+    passed_all = True
+
+    # 1 - check that VASP Simmate app is registered
+    app_name = "simmate.apps.configs.VaspConfig"
+    is_registered = app_name in INSTALLED_APPS
+    if is_registered:
+        logging.info("VASP app is registered :heavy_check_mark:")
+    else:
+        logging.warning(
+            "You must have the VASP app registered with Simmate. "
+            f"To do this, add '{app_name}' to {APPLICATIONS_YAML}"
+        )
+        passed_all = False
+
+    # 2 - check for vasp command
     command = "vasp_std"
     if shutil.which(command):
-        logging.info("VASP command found ('vasp_std') :white_check_mark:")
+        logging.info("VASP command found ('vasp_std') :heavy_check_mark:")
     else:
         logging.warning(
             "You must have VASP installed and in the PATH, but "
             "we were unable to detect the `vasp_std` command."
         )
+        passed_all = False
 
-    # 2 - check for vasp potcars
+    # 3 - check for vasp potcars
     from simmate.apps.vasp.inputs.potcar_mappings import FOLDER_MAPPINGS
 
     for potential, folder in FOLDER_MAPPINGS.items():
         if folder.exists():
-            logging.info(f"{potential} POTCARS found :white_check_mark:")
+            logging.info(f"{potential} POTCARS found :heavy_check_mark:")
         else:
             logging.warning(
                 f"{potential} POTCARS not found. These should be placed at... "
                 f"'{folder}'"
             )
+            passed_all = False
 
-    # 3 - run some sample workflows
+    # 4 - run some sample workflows
     if run_calcs:
         raise NotImplementedError("This test has not been added yet.")
+
+    # 5 - read out result of all tests
+    if passed_all:
+        logging.info("All VASP config checks passed! :fire::fire::fire::rocket:")
+    else:
+        logging.critical(":warning:  At least one check failed. See above :warning:")
+        raise typer.Exit(code=1)
 
 
 # All commands are organized into other files, so we need to manually register

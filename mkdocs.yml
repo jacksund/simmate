@@ -154,6 +154,7 @@ nav:
         - Extra Example Scripts:
             - Overview: getting_started/example_scripts/overview.md
             - Example-001: getting_started/example_scripts/example-001.md
+            - Example-002: getting_started/example_scripts/example-002.md
 
     - Parameters: parameters.md
     
@@ -198,6 +199,15 @@ nav:
 
     - Apps: 
         - Overview: apps/overview.md
+        - Bader (henklman):
+            - Overview: apps/bader_henkelman/overview.md
+            - Installation: apps/bader_henkelman/installation.md
+            # - Workflows: apps/bader_henkelman/workflows.md
+            # - Inputs: apps/bader_henkelman/inputs.md
+            # - Outputs: apps/bader_henkelman/outputs.md
+        - CLEASE: apps/clease.md
+        - DeepMD: apps/deepmd.md
+        - Evolutionary Searches: apps/evolution.md
         - VASP:
             - Overview: apps/vasp/overview.md
             - Installation: apps/vasp/installation.md
@@ -205,15 +215,9 @@ nav:
             # - Inputs: apps/vasp/inputs.md
             # - Outputs: apps/vasp/outputs.md
             # - Error Handlers: apps/vasp/error_handlers.md
-        - Bader (henklman):
-            - Overview: apps/bader_henkelman/overview.md
-            - Installation: apps/bader_henkelman/installation.md
-            # - Workflows: apps/bader_henkelman/workflows.md
-            # - Inputs: apps/bader_henkelman/inputs.md
-            # - Outputs: apps/bader_henkelman/outputs.md
-        - DeepMD: apps/deepmd.md
-        - Evolutionary Searches: apps/evolution.md
-        - CLEASE: apps/clease.md
+        - Warren Lab:
+            - Overview: apps/warren_lab/overview.md
+            - Installation: apps/warren_lab/installation.md
 
     - Contributing:
         - Overview: contributing/overview.md
