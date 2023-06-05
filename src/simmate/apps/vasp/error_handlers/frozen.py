@@ -16,7 +16,7 @@ class Frozen(ErrorHandler):
 
     is_monitor = True
 
-    def __init__(self, timeout_limit: float = 3600):
+    def __init__(self, timeout_limit: float = 36000):
         self.timeout_limit = timeout_limit
 
     def check(self, directory: Path) -> bool:
