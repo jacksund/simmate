@@ -10,7 +10,7 @@ from simmate.engine import ErrorHandler
 class Frozen(ErrorHandler):
     """
     Checks when the output file has last been editted. If the job has been sitting
-    for a long time (i.e. 1 hour), we consider it frozen and want to change the
+    for a long time (i.e. 10 hours), we consider it frozen and want to change the
     ALGO from Normal to Fast or alternatively reduce SYMPREC.
     """
 
