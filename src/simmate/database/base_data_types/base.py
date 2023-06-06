@@ -440,18 +440,15 @@ class DatabaseTable(models.Model):
     def get_mixins(cls) -> list:  # -> List[DatabaseTable]
         """
         Grabs the mix-in Tables that were used to make this class. This will
-        be mix-ins like Structure, Forces, etc. from the
-        `simmate.database.base_data_types` module.
-        """
-        # this must be imported locally because it depends on all other classes
-        # from this module -- and will create circular import issues if outside
-        from simmate.database import base_data_types as simmate_mixins
+        be mix-ins like Structure, Forces, etc.
 
+        These are typically all from the `simmate.database.base_data_types`
+        module. Custom mix-ins can be provided
+        """
         return [
             parent
             for parent in cls.__bases__
-            if hasattr(simmate_mixins, parent.table_name)
-            and parent.table_name != "DatabaseTable"
+            if issubclass(parent, DatabaseTable) and parent != DatabaseTable
         ]
 
     @classmethod
@@ -841,6 +838,13 @@ class DatabaseTable(models.Model):
                 all_fields.remove(field.removeprefix("--"))
             else:
                 all_fields.append(field)
+
+        # Some tables delete the columns that a mixin or base table provides.
+        # For example, the "source" column is deleted sometimes because
+        # the entire table comes from a fixed source (e.g. JARVIS or the
+        # MatProj). We check this with all default columns, just in case.
+        all_fields = [f for f in all_fields if f in cls.get_column_names()]
+
         return all_fields
 
     # -------------------------------------------------------------------------
