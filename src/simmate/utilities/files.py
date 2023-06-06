@@ -283,3 +283,36 @@ def empty_directory(directory: Path, files_to_keep: list[Path] = []):
                 shutil.rmtree(full_path)  # ignore_errors=False
             else:
                 full_path.unlink()
+
+
+def chunk_read(
+    filename: Path | str,
+    chunk_size: int,
+    delimiter: str,
+) -> list:
+    """
+    Yields n-sized chunks of entries from a file, where the chunks sizes are
+    determined by a delimiter.
+
+    This is useful for reading large files, such as a molecular format or CSV
+    that is too large to load into memory.
+
+    As an alternative to this function, consider using Dask to load larger than
+    memory CSVs.
+    """
+    filename = Path(filename)
+    with filename.open("r") as file:
+        is_end = False
+        while not is_end:
+            delimiter_count = 1  # start at 1 bc we need to match chunk_size at end
+            lines = []
+            while delimiter_count < chunk_size:
+                line = file.readline()
+                if not line:
+                    is_end = True
+                    break
+                lines.append(line)
+                if delimiter in line:
+                    delimiter_count += 1
+            lines = "".join(lines)
+            yield lines.split(delimiter)
