@@ -2,10 +2,6 @@
 {% load crispy_forms_tags %}
 <div class="container p-4">
     <h2>Filter Results:</h2>
-    <!-- Helpful for debugging
-  <p>Filter mix-ins: {{ filterset_mixins }}</p>
-  <p>Extra filters: {{ extra_filters }}</p>
--->
     <form method="get" enctype="multipart/form-data">
         {{ form.non_field_errors }}
         <div class="accordion custom-accordion" id="accordionFilters">
@@ -22,10 +18,9 @@
                 {% include "core_components/base_filter_types/dynamics-run.html" %}
             {% elif filterset.filter_name == "Relaxation" %}
                 {% include "core_components/base_filter_types/relaxation.html" %}
-                <!-- End prebuilt pages -->
+            {% else %}
                 <!-- If none of the pages above were used, then we iterate through the fundamental
       mixins and pull the proper components. Is there a better way to do this as a django for-loop? -->
-            {% else %}
                 {% if "Calculation" in filterset_mixins %}
                     {% include "core_components/base_filter_types/calculation.html" %}
                 {% endif %}
@@ -44,7 +39,6 @@
                 {% if "DensityofStates" in filterset_mixins %}
                     {% include "core_components/base_filter_types/density-of-states.html" %}
                 {% endif %}
-                <!-- end of mix-ins -->
             {% endif %}
             <!-- end of mix-ins -->
             <!-- Add any extra fields using default crispy formatting -->

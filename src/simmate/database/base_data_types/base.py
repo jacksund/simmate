@@ -530,6 +530,9 @@ class DatabaseTable(models.Model):
                     f"{workflow.name_type}/{workflow.name_app}/"
                     f"{workflow.name_preset}/{self.id}"
                 )
+                # OPTIMIZE: what if I switch database results to be queried
+                # in the Data tab rather than for each workflow:
+                # all_data["_WEBSITE_URL_"] = self.url
         except:
             pass
 
@@ -613,6 +616,7 @@ class DatabaseTable(models.Model):
 
         return all_data_ordered
 
+    @staticmethod
     def get_table(table_name: str):
         # This method can be return ANY table, so we need to import all of them
         # here. This is a local import to prevent circular import issues.
@@ -1349,3 +1353,23 @@ class DatabaseTable(models.Model):
             if column not in columns_w_mixin and column != "id"
         ]
         return extra_columns
+
+    # -------------------------------------------------------------------------
+    # Methods that link to the website UI
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    @property
+    def url_table(self) -> str:
+        """
+        Provides the URL link to the database table page in the Simmate website
+        """
+        # "http://127.0.0.1:8000"  # TODO: have env variable for host name?
+        return f"/data/{self.table_name}"
+
+    @property
+    def url(self) -> str:
+        """
+        Provides the URL link to the database entry page in the Simmate website
+        """
+        return f"{self.url_table}/{self.id}"
