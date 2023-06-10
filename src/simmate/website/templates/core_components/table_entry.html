@@ -1,5 +1,4 @@
-<a>Table mix-ins: {{ table_mixins }}</a>
-<a>Extra columns: {{ extra_columns }}</a>
+{% load getattribute %}
 <!-- Fields from the base database table -->
 <div class="container p-4">
     <h3>Base Information:</h3>
@@ -33,10 +32,9 @@
     {% include "core_components/base_data_types/relaxation.html" %}
 {% elif calculation.table_name == "FixedCompositionSearch" %}
     {% include "core_components/base_data_types/fixed_composition_search.html" %}
-    <!-- End prebuilt pages -->
+{% else %}
     <!-- If none of the pages above were used, then we iterate through the fundamental
     mixins and pull the proper components. Is there a better way to do this as a django for-loop? -->
-{% else %}
     {% if "Calculation" in table_mixins %}
         {% include "core_components/base_data_types/calculation.html" %}
     {% endif %}
@@ -55,5 +53,22 @@
     {% if "DensityofStates" in table_mixins %}
         {% include "core_components/base_data_types/density-of-states.html" %}
     {% endif %}
+    {% if "Molecule" in table_mixins %}
+        {% include "core_components/base_data_types/molecule.html" %}
+    {% endif %}
     <!-- end of mix-ins -->
 {% endif %}
+<!-- Add any extra columns using default formatting -->
+{% if extra_columns %}
+    <div class="container p-4">
+        <h3>Extra Information:</h3>
+        <ul>
+            {% for extra_column in extra_columns %}
+                <li>
+                    <b>{{ extra_column }}:</b> {{ calculation|getattribute:extra_column }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+<!-- end extra columns -->

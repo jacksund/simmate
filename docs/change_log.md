@@ -78,6 +78,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add `simmate engine` commands to help with tags and different queues
 - add docs to help with simmate workers, clusters, and tagging
 - add `simmate-vasp` command for common VASP utilities like testing config, plotting, and prepping inputs
+- add utilities to chunk larger than memory datafiles (csv, sdf, cifs, etc.)
 
 **Refactors**
 

@@ -19,16 +19,16 @@
         <!-- Set meta data for responsive viewport scaling/size (i.e. phone vs monitor) -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta content="A toolkit and framework for materials science"
-              name="description"/>
+              name="description" />
         <meta content="The Simmate Team" name="author" />
         <!-- Load CSS -->
         <link href="https://archives.simmate.org/assets/css/icons.min.css"
               rel="stylesheet"
-              type="text/css"/>
+              type="text/css" />
         <link href="https://archives.simmate.org/assets/css/app-modern.min.css"
               rel="stylesheet"
               type="text/css"
-              id="app-style"/>
+              id="app-style" />
         <!-- Load Plotly Javascript -->
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
         <!-- Django-unicorn scripts for dynamic webpages -->
@@ -145,6 +145,7 @@
         <!-- Many packages for JS libraries should be loaded last -->
         {% include "core_components/footer.html" %}
         <!-- Sometimes I need to load extra javascript at the bottom of the page -->
-        {% block extrafooter %}{% endblock %}
+        {% block extrafooter %}
+        {% endblock %}
     </body>
 </html>

@@ -42,7 +42,8 @@ def start_worker(
     - `waittime_on_empty_queue`: if the queue is empty, the time (in seconds)
     the worker should wait before checking the queue again
 
-    - `tags`: tags to filter tasks by for submission. defaults to just 'simmate'
+    - `tag`: tags to filter tasks by for submission. defaults to just 'simmate'.
+    To provide multiple use `--tag example1 --tag example2` etc.
 
     """
 

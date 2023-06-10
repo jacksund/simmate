@@ -1,0 +1,46 @@
+<!-- Molecule Info -->
+<div class="container p-4">
+    <h3>Molecule:</h3>
+    <script>doodle_molecule('{{ calculation.sdf_str }}', {{ calculation.id }}, 200)</script>
+    <ul>
+        <li>
+            <b>SMILES string:</b> {{ calculation.smiles }}
+        </li>
+        <li>
+            <b>INCHI:</b> {{ calculation.inchi }}
+        </li>
+        <li>
+            <b>INCHI key:</b> {{ calculation.inchi_key }}
+        </li>
+        <li>
+            <b>Number of atoms (non-Hydrogen):</b> {{ calculation.num_atoms }}
+        </li>
+        <li>
+            <b>Number of stereocenters:</b> {{ calculation.num_stereocenters }}
+        </li>
+        <li>
+            <b>Number of rings:</b> {{ calculation.num_rings }}
+        </li>
+        <li>
+            <b>Number of H acceptors:</b> {{ calculation.num_h_acceptors }}
+        </li>
+        <li>
+            <b>Number of H donors:</b> {{ calculation.num_h_donors }}
+        </li>
+        <li>
+            <b>Functional Groups (+ counts):</b> {{ calculation.functional_groups }}
+        </li>
+        <li>
+            <b>LogP (predicted):</b> {{ calculation.log_p_rdkit }}
+        </li>
+        <li>
+            <b>TPSA (predicted):</b> {{ calculation.tpsa_rdkit }}
+        </li>
+        <li>
+            <b>SDF (c-tab) string:</b> <small>{{ calculation.molecule|linebreaks }}</small>
+        </li>
+        <li>
+            <b>Original input:</b> <small>{{ calculation.molecule_original|linebreaks }}</small>
+        </li>
+    </ul>
+</div>

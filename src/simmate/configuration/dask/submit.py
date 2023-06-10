@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from dask.distributed import TimeoutError, wait
+from rich.progress import track
 
 from simmate.configuration.dask.client import get_dask_client
 
@@ -42,7 +43,10 @@ def batch_submit(
     client = get_dask_client()
 
     # Iterate through our inputs and submit them to the Dask cluster in batches
-    for i in range(0, len(args_list), batch_size):
+    for i in track(
+        sequence=range(0, len(args_list), batch_size),
+        total=(len(args_list) // batch_size) + 1,
+    ):
         chunk = args_list[i : i + batch_size]
         futures = client.map(
             function,
