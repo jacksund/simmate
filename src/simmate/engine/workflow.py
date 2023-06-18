@@ -77,9 +77,40 @@ class Workflow:
     `_register_calculation`.
     """
 
+    _parameter_methods: list[str] = ["run_config", "_run_full"]
+    """
+    List of methods that allow unique input parameters. This helps track where
+    `**kwargs` are passed and let's us gather the inputs in one place.
+    """
+
+    exlcude_from_archives: list[str] = []
+    """
+    List of filenames that should be deleted when compressing the output files
+    to a zip file (i.e. when compress_output=True). Any file name is searched
+    for recursively in all subdirectories and removed.
+    
+    For example, VASP calculations remove all POTCAR files from archives.
+    """
+
+    # -------------------------------------------------------------------------
+    # Helper attributes and methods for workflows that have prerequisites and/or
+    # required files from previous calculations
+    # -------------------------------------------------------------------------
+
+    parent_workflows: list[str] = []
+    """
+    Gives a list of recommeneded higher-level "parent" workflows that users 
+    might prefer. These parent workflows will include this one AND extra steps.
+    
+    This should always be set if the workflow has `use_previous_directory` 
+    set to True (or to filenames). These cases imply the workflow must have a
+    parent workflow that runs the prerequisite workflow and connects
+    """
+
     use_previous_directory: bool | list[str] = False
     """
     Whether this calculation requires a directory of files as an input.
+    AKA whether there is a prerequisite workflow for this one to work.
     
     When set to True, the entire previous directory will be copied to the new
     folder. Alternatively, this can be set to a list of filenames that will
@@ -98,24 +129,21 @@ class Workflow:
     ambiguous. Meanwhile, Option 1 sets `source` automatically for you AND
     keeps track of old calculation files. This is important for tracking the
     history of a calculation and reproducing its results.
+    
+    NOTE: if this attribute is set, make sure you set parent_workflows too in
+    order to give users helpful error messages.
     """
+
     # TODO: add `primary_input` as a class attribute that users can set! Right
     # now I just check from a list of potential inputs (see below)
+    # primary_input: str = None
 
-    _parameter_methods: list[str] = ["run_config", "_run_full"]
-    """
-    List of methods that allow unique input parameters. This helps track where
-    `**kwargs` are passed and let's us gather the inputs in one place.
-    """
-
-    exlcude_from_archives: list[str] = []
-    """
-    List of filenames that should be deleted when compressing the output files
-    to a zip file (i.e. when compress_output=True). Any file name is searched
-    for recursively in all subdirectories and removed.
-    
-    For example, VASP calculations remove all POTCAR files from archives.
-    """
+    @classmethod
+    def has_prerequisite(cls) -> bool:
+        """
+        Whether there is a prerequisite workflow for this one to work
+        """
+        return bool(cls.use_previous_directory)
 
     # -------------------------------------------------------------------------
     # Core methods that handle how and what a workflow run does
@@ -880,6 +908,8 @@ class Workflow:
                         f"Unknown input for previous_directory: {previous_directory}"
                         f"({type(previous_directory)})"
                     )
+
+                parameters_cleaned["previous_directory"] = previous_directory
 
             # SPECIAL CASE for customized flows
             if "workflow_base" not in parameters_cleaned:
