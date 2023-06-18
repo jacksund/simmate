@@ -173,7 +173,6 @@ def test_get_unique_paramters():
         "compress_output",
         "convergence_cutoff",
         # "convergence_limit",
-        "copy_previous_directory",
         # "current_generation",
         "diffusion_analysis_id",
         "directory",

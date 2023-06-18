@@ -215,7 +215,6 @@ INPUT_MAPPINGS = {
         "angle_tolerance",
     ],
     "boolean": [
-        "copy_previous_directory",
         "is_restart",
         "compress_output",
     ],

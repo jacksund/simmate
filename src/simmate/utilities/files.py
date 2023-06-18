@@ -57,11 +57,88 @@ def get_directory(directory: Path | str = None) -> Path:
     return directory_cleaned.absolute()
 
 
+def copy_files_from_directory(
+    files_to_copy: list[Path],
+    directory_old: Path,
+    directory_new: Path = None,
+) -> Path:
+    """
+    Given an old directory, copies all of the files listed over to a new one.
+
+    #### Parameters
+
+    - `files_to_copy`:
+        a list of filenames that should be copied over. If you want ALL files,
+        try using the `copy_directory` utility instead
+
+    - `directory_old`:
+        Name of the directory to be copied over. Must exist.
+
+    - `directory_new`:
+        Name of the new directory (optional). This will be passed to the
+        `get_directory` utility.
+
+    #### Returns
+
+    - `directory`:
+        The path to the new directory as a string
+
+    """
+    # Start by creating a new directory or grabbing the one given.
+    directory_new_cleaned = get_directory(directory_new)
+
+    # TODO: this is a copy/paste of the code in copy_directory. Consider
+    # refactoring and making a context manager (bc the delete_tmp is used below)
+    # First check if the previous directory exists. There are several
+    # possibilities that we need to check for:
+    #   1. directory exists on the same file system and can be found
+    #   2. directory exists on the same file system but is now an archive
+    #   3. directory/archive is on another file system (requires ssh to access)
+    #   4. directory was deleted and unavailable
+    if directory_old.exists():
+        # everything is good to go
+        delete_temp = False
+    elif directory_old.with_suffix(".zip").exists():
+        # unpack the old archive
+        shutil.unpack_archive(
+            filename=directory_old.with_suffix(".zip"),
+            extract_dir=directory_old.parent,
+        )
+        delete_temp = True
+    else:
+        raise Exception(
+            "Unable to locate the previous directory to copy. Make sure the "
+            "past directory is located on the same file system. Directory that "
+            f"couldn't be found was... {directory_old}"
+        )
+    # TODO: for possibility 3, I could implement automatic copying with
+    # the "fabric" python package (uses ssh). I'd also need to store
+    # filesystem names (e.g. "WarWulf") to know where to connect.
+
+    for filename in files_to_copy:
+        source_file = directory_old / filename
+        destination = directory_new_cleaned / filename
+        if not source_file.exists:
+            raise Exception(
+                "Unable to locate the file to copy. Make sure the "
+                "past directory is located on the same file system. File that "
+                f"couldn't be found was... {source_file}"
+            )
+        shutil.copy(source_file, destination)
+
+    # Then remove the unpacked archive now that we copied it.
+    # This leaves the original archive behind and unaltered too.
+    if delete_temp:
+        shutil.rmtree(directory_old)
+
+    return directory_new_cleaned
+
+
 def copy_directory(
     directory_old: Path,
     directory_new: Path = None,
     ignore_simmate_files: bool = False,
-) -> str:
+) -> Path:
     """
     Given an old directory, copies all of it's contents over to a new one.
     Optionally, you can avoid copying any simmate_* files and archives within

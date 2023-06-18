@@ -4,6 +4,7 @@ from .files import (
     archive_old_runs,
     chunk_read,
     copy_directory,
+    copy_files_from_directory,
     empty_directory,
     get_directory,
     make_archive,
