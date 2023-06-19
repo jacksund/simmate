@@ -1,46 +1,149 @@
 <!-- Molecule Info -->
-<div class="container p-4">
-    <h3>Molecule:</h3>
-    <script>doodle_molecule('{{ calculation.sdf_str }}', {{ calculation.id }}, 200)</script>
-    <ul>
-        <li>
-            <b>SMILES string:</b> {{ calculation.smiles }}
-        </li>
-        <li>
-            <b>INCHI:</b> {{ calculation.inchi }}
-        </li>
-        <li>
-            <b>INCHI key:</b> {{ calculation.inchi_key }}
-        </li>
-        <li>
-            <b>Number of atoms (non-Hydrogen):</b> {{ calculation.num_atoms }}
-        </li>
-        <li>
-            <b>Number of stereocenters:</b> {{ calculation.num_stereocenters }}
-        </li>
-        <li>
-            <b>Number of rings:</b> {{ calculation.num_rings }}
-        </li>
-        <li>
-            <b>Number of H acceptors:</b> {{ calculation.num_h_acceptors }}
-        </li>
-        <li>
-            <b>Number of H donors:</b> {{ calculation.num_h_donors }}
-        </li>
-        <li>
-            <b>Functional Groups (+ counts):</b> {{ calculation.functional_groups }}
-        </li>
-        <li>
-            <b>LogP (predicted):</b> {{ calculation.log_p_rdkit }}
-        </li>
-        <li>
-            <b>TPSA (predicted):</b> {{ calculation.tpsa_rdkit }}
-        </li>
-        <li>
-            <b>SDF (c-tab) string:</b> <small>{{ calculation.molecule|linebreaks }}</small>
-        </li>
-        <li>
-            <b>Original input:</b> <small>{{ calculation.molecule_original|linebreaks }}</small>
-        </li>
-    </ul>
+<div class="row py-2">
+    <div class="col-xl-4">
+        <div class="border border-dark mt-4">
+            <script>doodle_molecule('{{ calculation.sdf_str }}', {{ calculation.id }}, 300)</script>
+        </div>
+    </div>
+    <div class="col-xl-8">
+        <!-- Molecule formats -->
+        <ul class="nav nav-tabs nav-bordered mb-3">
+            <li class="nav-item">
+                <a href="#smiles"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link active ">
+                    <i class="mdi mdi-home-variant d-md-none d-block"></i>
+                    <span class="d-none d-md-block">SMILES</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#inchi"
+                   data-bs-toggle="tab"
+                   aria-expanded="true"
+                   class="nav-link">
+                    <i class="mdi mdi-account-circle d-md-none d-block"></i>
+                    <span class="d-none d-md-block">INCHI</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#inchi_key"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="mdi mdi-settings-outline d-md-none d-block"></i>
+                    <span class="d-none d-md-block">INCHI KEY</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#sdf_ctab"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="mdi mdi-settings-outline d-md-none d-block"></i>
+                    <span class="d-none d-md-block">SDF (c-tab)</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#origmol"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="mdi mdi-settings-outline d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Original Input</span>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane show active" id="smiles">
+                <p class="text-center">{{ calculation.smiles }}</p>
+            </div>
+            <div class="tab-pane" id="inchi">
+                <p class="text-center">{{ calculation.inchi }}</p>
+            </div>
+            <div class="tab-pane" id="inchi_key">
+                <p class="text-center">{{ calculation.inchi_key }}</p>
+            </div>
+            <div class="tab-pane" id="sdf_ctab">
+                <p>
+                    <small>{{ calculation.molecule|linebreaks }}</small>
+                </p>
+            </div>
+            <div class="tab-pane" id="origmol">
+                <p>
+                    <small>{{ calculation.molecule_original|linebreaks }}</small>
+                </p>
+            </div>
+        </div>
+        <!-- end molecule formats -->
+        <!-- table of properties -->
+        <div class="row pt-2">
+            <div class="col-xl-6">
+                <table class="table table-centered table-striped mb-0 border">
+                    <tbody>
+                        <tr>
+                            <td>non-H Atoms</td>
+                            <td>{{ calculation.num_atoms }}</td>
+                        </tr>
+                        <tr>
+                            <td>Stereocenters</td>
+                            <td>{{ calculation.num_stereocenters }}</td>
+                        </tr>
+                        <tr>
+                            <td>Rings</td>
+                            <td>{{ calculation.num_rings }}</td>
+                        </tr>
+                        <tr>
+                            <td>H acceptors</td>
+                            <td>{{ calculation.num_h_acceptors }}</td>
+                        </tr>
+                        <tr>
+                            <td>H donors</td>
+                            <td>{{ calculation.num_h_donors }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-xl-6">
+                <table class="table table-centered table-striped mb-0 border">
+                    <tbody>
+                        <tr>
+                            <td>
+                                Log P (predicted)
+                            </br>
+                            <small>(octanol-water)</small>
+                        </td>
+                        <td>{{ calculation.log_p_rdkit|floatformat:1 }}</td>
+                    </tr>
+                    <tr>
+                        <td>TPSA (predicted)</td>
+                        <td>{{ calculation.tpsa_rdkit|floatformat:1 }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- end table of properties -->
+</div>
+</div>
+<hr>
+<div class="row pt-4">
+    <div class="col-xl-5">
+        <table class="table table-centered table-striped mb-0 border">
+            <thead class="table-primary">
+                <tr>
+                    <th>Functional Group / Substructure</th>
+                    <th>Counts (#)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for key, value in calculation.functional_groups.items %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
