@@ -17,6 +17,7 @@ class ElectronicStructure__Vasp__MatprojBandStructure(
     Calculates the band structure using Materials Project HSE settings.
     """
 
+    parent_workflows = ["electronic-structure.vasp.matproj-full"]
     incar = Relaxation__Vasp__Matproj.incar.copy()
     incar.update(
         IBRION=-1,

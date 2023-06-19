@@ -22,6 +22,7 @@ class VaspBandStructure(StaticEnergy__Vasp__Matproj):
     the a fixed charge density from a previous static energy calculation.
     """
 
+    use_previous_directory = True
     required_files = StaticEnergy__Vasp__Matproj.required_files + ["CHGCAR"]
 
     # set the KptGrid or KptPath object

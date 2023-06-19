@@ -97,6 +97,18 @@ class Workflow:
     # required files from previous calculations
     # -------------------------------------------------------------------------
 
+    @classmethod
+    def has_prerequisite(cls) -> bool:
+        """
+        Whether there is a prerequisite workflow for this one to work.
+
+        If set to True, this is probably not a workflow the user will call
+        directly (but instead they should call one set in `parent_workflows`).
+        By default, this is set using `use_previous_directory` which
+        gives False.
+        """
+        return bool(cls.use_previous_directory)
+
     parent_workflows: list[str] = []
     """
     Gives a list of recommeneded higher-level "parent" workflows that users 
@@ -104,13 +116,18 @@ class Workflow:
     
     This should always be set if the workflow has `use_previous_directory` 
     set to True (or to filenames). These cases imply the workflow must have a
-    parent workflow that runs the prerequisite workflow and connects
+    parent workflow that runs the prerequisite steps and connects the result
+    to this one.
+    
+    NOTE: This property has no effect on the actual workflow! It only helps
+    improve error and help messages for users, so ommitting this is fine.
     """
 
     use_previous_directory: bool | list[str] = False
     """
     Whether this calculation requires a directory of files as an input.
-    AKA whether there is a prerequisite workflow for this one to work.
+    This also means there is a prerequisite workflow for this one to work, so
+    setting this will also update the `has_prerquisite` property.
     
     When set to True, the entire previous directory will be copied to the new
     folder. Alternatively, this can be set to a list of filenames that will
@@ -137,13 +154,6 @@ class Workflow:
     # TODO: add `primary_input` as a class attribute that users can set! Right
     # now I just check from a list of potential inputs (see below)
     # primary_input: str = None
-
-    @classmethod
-    def has_prerequisite(cls) -> bool:
-        """
-        Whether there is a prerequisite workflow for this one to work
-        """
-        return bool(cls.use_previous_directory)
 
     # -------------------------------------------------------------------------
     # Core methods that handle how and what a workflow run does
@@ -820,23 +830,25 @@ class Workflow:
 
         # detect primary input source if there is one
         if primary_input and hasattr(primary_input, "source") and primary_input.source:
-            source_primary = primary_input.source
+            primary_source = primary_input.source
+        else:
+            primary_source = None
 
         # User-given source is our first check
-        if source and not source_primary:
+        if source and not primary_source:
             source_cleaned = source
         # Check if we have a primary input loaded from a past calculation and
         # default to that as the backup source.
-        elif source_primary and not source:
-            source_cleaned = source_primary
+        elif primary_source and not source:
+            source_cleaned = primary_source
         # stop users from overriding the "correct" source which is the primary one
-        elif source_primary and source:
+        elif primary_source and source:
             raise Exception(
                 "You provided both a source and a primary source input for this workflow. "
                 "For calculations that use database inputs (e.g. from MatProj or a past "
                 "calculation), you should NOT set the `source` parameter as it is "
                 "determined automatically. You gave...\n"
-                f"source={source}\nbut autodetection found...\nsource={source_primary}"
+                f"source={source}\nbut autodetection found...\nsource={primary_source}"
             )
         # otherwise no source was given
         else:
