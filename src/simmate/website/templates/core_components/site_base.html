@@ -104,6 +104,7 @@
                 let canvas = document.getElementById(canvas_id);
                 canvas.removeAttribute("hidden");
                 canvas.classList.remove("ChemDoodleWebComponent");
+                canvas.classList.add("p-0"); // bug-fix for aspect ratio
             };
         </script>
         <!-- Some pages may require extra lines in the header such as loading extra libraries -->
