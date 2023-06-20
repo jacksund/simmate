@@ -19,6 +19,7 @@ class ElectronicStructure__Vasp__MatprojDensityOfStatesHse(
     Calculates the band structure using Materials Project HSE settings.
     """
 
+    parent_workflows = ["electronic-structure.vasp.matproj-hse-full"]
     incar = Relaxation__Vasp__MatprojHse.incar.copy()
     incar.update(
         NSW=0,

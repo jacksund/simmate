@@ -41,7 +41,6 @@ class Restart__Toolkit__Automatic(Workflow):
         # remove settings that will be reset elsewhere
         input_parameters.pop("run_id", None)
         input_parameters.pop("directory", None)
-        input_parameters.pop("copy_previous_directory", None)
         input_parameters.pop("is_restart", None)
 
         # grab the workflow we need to run

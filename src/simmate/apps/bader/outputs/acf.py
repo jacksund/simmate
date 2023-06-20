@@ -84,8 +84,13 @@ def ACF(directory: Path = None, filename="ACF.dat"):
             # We typically use hydrogen ("H") as the empty atom, so we will
             # need to add this to our element list for oxidation analysis.
             # We use 0 for electron count because this is an 'empty' atom, and
-            # not actually Hydrogen
-            nelectron_data.update({"H": 0})
+            # not actually Hydrogen.
+            # Note, this isn't ALWAYS H, so we iterate through the structure
+            # and whatever element is missing from our nelectron_data is said
+            # to be an empty and we set to 0.
+            for element in structure.composition:
+                if element.symbol not in nelectron_data.keys():
+                    nelectron_data.update({element.symbol: 0})
 
         # otherwise, grab the structure from the CHGCAR
         # OPTIMIZE: consider grabbing from the POSCAR or CONTCAR for speed

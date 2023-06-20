@@ -57,7 +57,6 @@ class Relaxation__Vasp__Staged(Workflow):
         command: str = None,
         source: dict = None,
         directory: Path = None,
-        copy_previous_directory: bool = False,
         **kwargs,
     ):
         # Our first relaxation is directly from our inputs.

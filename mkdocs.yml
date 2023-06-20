@@ -171,8 +171,8 @@ nav:
             - Workflow Names: full_guides/workflows/workflow_names.md
             - Using existing workflows: full_guides/workflows/using_existing_workflows.md
             - Creating new workflows: full_guides/workflows/creating_new_workflows.md
-            - Creating Nested Workflows: full_guides/workflows/nested_workflows.md
-            - Creating S3 Workflows: full_guides/workflows/s3_workflows.md
+            - Creating nested workflows: full_guides/workflows/nested_workflows.md
+            - Creating S3 workflows: full_guides/workflows/s3_workflows.md
 
         - Database:
             - Overview: full_guides/database/overview.md

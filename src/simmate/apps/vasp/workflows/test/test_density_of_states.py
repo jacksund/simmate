@@ -18,6 +18,10 @@ def test_density_of_states_run(sample_structures, tmp_path, mocker):
 
     SimmateMockHelper.mock_vasp(mocker)
 
+    # Even though this does use a previous dir, we need to skip this step
+    # because we already have all the test files copied in
+    ElectronicStructure__Vasp__MatprojDensityOfStates.use_previous_directory = False
+
     # run the full workflow, where the output files were pre-generated with
     # a specific structures
     structure = sample_structures["Fe_mp-13_primitive"]

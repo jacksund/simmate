@@ -20,6 +20,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
 
     description_doc_short = "a single structure submission for a search"
 
+    has_prerequisite = True
     use_database = False
 
     @staticmethod

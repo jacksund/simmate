@@ -15,7 +15,12 @@ from django.utils import timezone
 import simmate
 from simmate.database.base_data_types import Calculation
 from simmate.engine.execution import SimmateExecutor, WorkItem
-from simmate.utilities import copy_directory, get_directory, make_archive
+from simmate.utilities import (
+    copy_directory,
+    copy_files_from_directory,
+    get_directory,
+    make_archive,
+)
 
 
 class DummyState:
@@ -86,6 +91,70 @@ class Workflow:
     
     For example, VASP calculations remove all POTCAR files from archives.
     """
+
+    # -------------------------------------------------------------------------
+    # Helper attributes and methods for workflows that have prerequisites and/or
+    # required files from previous calculations
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    @property
+    def has_prerequisite(cls) -> bool:
+        """
+        Whether there is a prerequisite workflow for this one to work.
+
+        If set to True, this is probably not a workflow the user will call
+        directly (but instead they should call one set in `parent_workflows`).
+        By default, this is set using `use_previous_directory` which
+        gives False.
+        """
+        return bool(cls.use_previous_directory)
+
+    parent_workflows: list[str] = []
+    """
+    Gives a list of recommeneded higher-level "parent" workflows that users 
+    might prefer. These parent workflows will include this one AND extra steps.
+    
+    This should always be set if the workflow has `use_previous_directory` 
+    set to True (or to filenames). These cases imply the workflow must have a
+    parent workflow that runs the prerequisite steps and connects the result
+    to this one.
+    
+    NOTE: This property has no effect on the actual workflow! It only helps
+    improve error and help messages for users, so ommitting this is fine.
+    """
+
+    use_previous_directory: bool | list[str] = False
+    """
+    Whether this calculation requires a directory of files as an input.
+    This also means there is a prerequisite workflow for this one to work, so
+    setting this will also update the `has_prerquisite` property.
+    
+    When set to True, the entire previous directory will be copied to the new
+    folder. Alternatively, this can be set to a list of filenames that will
+    be selectively copied over from the previous directory to the new one.
+    
+    For example, Bader analysis requires the charge density file of a DFT 
+    calculation, so a Bader workflow might set...
+    `use_previous_directory=["CHGCAR"]`
+    
+    Workflows that have this set to True or a list of filenames MUST provide
+    either 
+    1. a database object from a previous calculation as a primary input
+    2. `previous_directory` parameter
+    
+    Option 2 is not preferred because the source of your input files is then
+    ambiguous. Meanwhile, Option 1 sets `source` automatically for you AND
+    keeps track of old calculation files. This is important for tracking the
+    history of a calculation and reproducing its results.
+    
+    NOTE: if this attribute is set, make sure you set parent_workflows too in
+    order to give users helpful error messages.
+    """
+
+    # TODO: add `primary_input` as a class attribute that users can set! Right
+    # now I just check from a list of potential inputs (see below)
+    # primary_input: str = None
 
     # -------------------------------------------------------------------------
     # Core methods that handle how and what a workflow run does
@@ -711,20 +780,16 @@ class Workflow:
             - a dictionary pointing to a database entry
             - a toolkit Structure object
             - etc...
-        Even though all of these inputs are accepted, `workflow.run` always expects
-        python objects, so this utility converts the input to a toolkit Structure
-        object.
+        Even though all of these inputs are accepted, `workflow.run_config` always
+        expects python objects, so this utility converts the input to a toolkit
+        Structure object.
 
-        `register_run` allows us to skip the database step if the database_table
-        isn't properly set yet. This input is a temporary fix for the
-        diffusion/from-images workflow.
 
-        `copy_previous_directory` is only used when we are pulling a structure from a
-        previous calculation. If copy_previous_directory=True, then the directory
-        parameter is ignored.
+        If `setup_directory` is True, this is also where `use_previous_directory`
+        is applied and used.
 
         `**parameters` includes all parameters and anything extra that you want saved
-        to simmate_metadata.yaml
+        to simmate_metadata.yaml AND submitted to executor
         """
 
         # OPTIMIZE: consider splitting this task into load_structure, load_directory,
@@ -735,9 +800,28 @@ class Workflow:
 
         # ---------------------------------------------------------------------
 
-        # STEP 1: clean parameters
+        # STEP 1: clean parameters & grab "primary input"
 
         parameters_cleaned = cls._deserialize_parameters(**parameters)
+
+        # Primary input is the paramater that can be a database object from
+        # an older run -- such as a database structure object. This allows
+        # us to dynamically set source and also determine where old directories
+        # can be pulled from.
+        # Currently I just set a priority of possible parameters that can be
+        # the primary input. I go through each one at a time until I find one
+        # that was provided -- then I exit with that parameter's value.
+        primary_input = None
+        for primary_input_key in [
+            "structure",
+            "molecule",
+            "migration_hop",
+            "supercell_start",
+        ]:
+            if primary_input_key in parameters_cleaned.keys():
+                # note we grab the deserialized input
+                primary_input = parameters_cleaned.get(primary_input_key, None)
+                break
 
         # ---------------------------------------------------------------------
 
@@ -745,39 +829,31 @@ class Workflow:
 
         source = parameters.get("source", None)
 
-        # User-given source takes the top priority
-        if source:
+        # detect primary input source if there is one
+        if primary_input and hasattr(primary_input, "source") and primary_input.source:
+            primary_source = primary_input.source
+        else:
+            primary_source = None
+
+        # User-given source is our first check
+        if source and not primary_source:
             source_cleaned = source
         # Check if we have a primary input loaded from a past calculation and
-        # default to that as the source.
+        # default to that as the backup source.
+        elif primary_source and not source:
+            source_cleaned = primary_source
+        # stop users from overriding the "correct" source which is the primary one
+        elif primary_source and source:
+            raise Exception(
+                "You provided both a source and a primary source input for this workflow. "
+                "For calculations that use database inputs (e.g. from MatProj or a past "
+                "calculation), you should NOT set the `source` parameter as it is "
+                "determined automatically. You gave...\n"
+                f"source={source}\nbut autodetection found...\nsource={primary_source}"
+            )
+        # otherwise no source was given
         else:
-            # If no source was given, we try to dynamically determine the source
-            # using the "primary" input.
-            # OPTIMIZE: Is there a better way to do this?
-
-            # Currently I just set a priority of possible parameters that can be
-            # the primary input. I go through each one at a time until I find one
-            # that was provided -- then I exit with that parameter's value.
-            primary_input = None
-            for primary_input_key in [
-                "structure",
-                "migration_hop",
-                "supercell_start",
-            ]:
-                if primary_input_key in parameters_cleaned.keys():
-                    # note we grab the deserialized input
-                    primary_input = parameters_cleaned.get(primary_input_key, None)
-                    break
-
-            if (
-                primary_input
-                and hasattr(primary_input, "source")
-                and primary_input.source
-            ):
-                source_cleaned = primary_input.source
-
-            else:
-                source_cleaned = None
+            source_cleaned = None
 
         # before setting the source, we also need it to be json-seralized
         # for the database
@@ -801,35 +877,51 @@ class Workflow:
             directory = parameters.get("directory", None)
             directory_cleaned = get_directory(directory)
 
-            # if the user requested, we grab the previous directory as well
-            copy_previous_directory = parameters.get("copy_previous_directory", None)
-            if copy_previous_directory:
-                # BUG: I should switch this to checking the source input arg
+            # if this workflow requires input files from a previous directory
+            # and/or calcuation, then we configure that here as well
+            if cls.use_previous_directory:
+                # see if the user provided a previous_directory input option
+                previous_directory = parameters.get("previous_directory", None)
 
-                if not primary_input:
+                # alternatively, the past directory should be stored on the
+                # primary input object. This is the preferred method, but the
+                # previous_directory input parameter takes priority
+                if (
+                    not previous_directory
+                    and primary_input.database_object
+                    and hasattr(primary_input.database_object, "directory")
+                ):
+                    previous_directory = Path(primary_input.database_object.directory)
+
+                # at least one of two inputs above needs to be set
+                if not previous_directory:
                     raise Exception(
-                        "No primary input detected, which is required for copying "
-                        "past directories. This is an experimental feature so "
-                        "please contact our team for more help."
+                        "This workflow requires either an input from a past calculation "
+                        "or a previous_directory set to run but neither was given."
                     )
 
-                # catch incorrect use of this function
-                if not primary_input.database_object:
+                # If "True" was given, then we copy over all files except
+                # simmate ones (we have no need for the summaries or error archives)
+                if cls.use_previous_directory == True:
+                    copy_directory(
+                        directory_old=previous_directory,
+                        directory_new=directory_cleaned,
+                        ignore_simmate_files=True,
+                    )
+                # alternatively users can give a list of filenames to copy
+                elif isinstance(cls.use_previous_directory, list):
+                    copy_files_from_directory(
+                        files_to_copy=cls.use_previous_directory,
+                        directory_old=previous_directory,
+                        directory_new=directory_cleaned,
+                    )
+                else:
                     raise Exception(
-                        "There isn't a previous directory available! Your source "
-                        "structure must point to a past calculation to use this feature."
+                        f"Unknown input for previous_directory: {previous_directory}"
+                        f"({type(cls.use_previous_directory)})"
                     )
 
-                # the past directory should be stored on the input object
-                previous_directory = Path(primary_input.database_object.directory)
-
-                # Copy over all files except simmate ones (we have no need for the
-                # summaries or error archives)
-                copy_directory(
-                    directory_old=previous_directory,
-                    directory_new=directory_cleaned,
-                    ignore_simmate_files=True,
-                )
+                parameters_cleaned["previous_directory"] = Path(previous_directory)
 
             # SPECIAL CASE for customized flows
             if "workflow_base" not in parameters_cleaned:

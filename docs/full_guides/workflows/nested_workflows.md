@@ -158,6 +158,81 @@ class Example__Python__MyFavoriteSettings(Workflow):
 
 ----------------------------------------------------------------------
 
+## Passing files between runs
+
+Sometimes a workflow requires a file from a previous calculation as
+an input. You can specify these flows with the `use_previous_directory` attribute,
+which effectly means "use this previous directory to copy over files into our current
+one".
+
+
+**Setting the parameter:**
+When set to `True`, the entire previous directory will be copied to the new
+folder. Alternatively, this can be set to a list of filenames that will
+be selectively copied over from the previous directory to the new one.
+
+``` python
+from simmate.workflows.utilities import get_workflow
+from simmate.engine import Workflow
+
+class Example__Python__MyFavoriteSettings(Workflow):
+    
+    use_database = False
+    use_previous_directory = ["filename1", "filename2"]
+
+    @staticmethod
+    def run_config(structure, directory, previous_directory, **kwargs):
+
+        # before this run_config starts, simmate will have copied over
+        # the files from our `previous_directory` parameter.
+        # To show that, we can just confirm those files exist here.
+        
+        expected_file1 = directory / "filename1"
+        assert expected_file1.exists()
+        
+        expected_file2 = directory / "filename2"
+        assert expected_file2.exists()
+
+# Examples of how to run this workflow are below
+```
+
+**How previous directory is detected:**
+
+Workflows that have this set to True or a list of filenames MUST provide
+one of the two: 
+
+1. `previous_directory` parameter
+2. a database object from a previous calculation as the `structure` parameter
+
+Option 1 is the most straightforward and intuitive. We can set the previous directory where
+our files can be found using the `previous_directory` parameter:
+
+```python
+workflow.run(previous_directory="path/to/my/folder")
+```
+
+Option 2 is a shortcut for Simmate database objects (see [the section prior to this one](##passing-results-between-runs)). If the result of another workflow is passed as the `structure`
+parameter, we can infer the previous directory from that past run:
+
+```python
+# using some other workflow as a starting point
+status = setup_workflow.run()
+previous_result = status.result()
+
+# Then this next workflow has `use_previous_directory` set.
+# `previous_directory` is automatically set to `previous_result.directory`
+workflow.run(structure=previous_result)
+```
+
+
+!!! tip
+    As a general rule of thumb, file copying/passing should only be used for
+    large files and chunks of data such as voxel data. Meanwhile, small pieces 
+    of data should be passed between workflows using python objects and the 
+    database (see section above this one).
+
+----------------------------------------------------------------------
+
 ## Submitting parallel workflows
 
 Sometimes, we don't want to pause and wait for each workflow run to finish. There are even cases where we would submit hundreds of workflow runs that are indpendent and can run in parallel.

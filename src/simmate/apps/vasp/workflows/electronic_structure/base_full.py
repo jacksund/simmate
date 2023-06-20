@@ -34,7 +34,6 @@ class ElectronicStructureWorkflow(Workflow):
         command: str = None,
         source: str = None,
         directory: Path = None,
-        copy_previous_directory: str = False,
         **kwargs,
     ):
         static_result = cls.static_energy_workflow.run(
@@ -50,14 +49,12 @@ class ElectronicStructureWorkflow(Workflow):
             structure=static_result,
             command=command,
             directory=directory / cls.density_of_states_workflow.name_full,
-            copy_previous_directory=True,
         )
 
         bs_state = cls.band_structure_workflow.run(
             structure=static_result,
             command=command,
             directory=directory / cls.band_structure_workflow.name_full,
-            copy_previous_directory=True,
         )
 
         # block until complete

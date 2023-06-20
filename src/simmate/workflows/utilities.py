@@ -23,6 +23,7 @@ from simmate.utilities import get_app_submodule, get_directory, make_archive
 def get_all_workflows(
     apps_to_search: list[str] = SIMMATE_APPS,
     as_dict: bool = False,
+    exclude_subflows: bool = False,
 ) -> list[Workflow]:
     """
     Goes through a list of apps and grabs all workflow objects available.
@@ -56,6 +57,12 @@ def get_all_workflows(
                 c[1] for c in getmembers(app_workflow_module) if isclass(c[1])
             ]
 
+    # I define subflows as any workflow that has prerequisites needed to run.
+    # These workflows are not user friendly and often hidden from docs
+    # and the web ui
+    if exclude_subflows:
+        app_workflows = [w for w in app_workflows if not w.has_prerequisite]
+
     return (
         app_workflows
         if not as_dict
@@ -63,16 +70,25 @@ def get_all_workflows(
     )
 
 
-def get_all_workflow_names(apps_to_search: list[str] = SIMMATE_APPS) -> list[str]:
+def get_all_workflow_names(
+    apps_to_search: list[str] = SIMMATE_APPS,
+    exclude_subflows: bool = False,
+) -> list[str]:
     """
     Returns a list of all the workflows of all types.
     """
-    flow_names = [flow.name_full for flow in get_all_workflows(apps_to_search)]
+    flow_names = [
+        flow.name_full
+        for flow in get_all_workflows(
+            apps_to_search=apps_to_search,
+            exclude_subflows=exclude_subflows,
+        )
+    ]
     flow_names.sort()
     return flow_names
 
 
-def get_all_workflow_types() -> list[str]:
+def get_all_workflow_types(exclude_subflows: bool = False) -> list[str]:
     """
     Grabs all workflow types, which is also all "Project Names" and all of the
     submodules listed in the `simmate.workflows` module.
@@ -82,7 +98,7 @@ def get_all_workflow_types() -> list[str]:
     """
     workflow_types = []
 
-    for flow in get_all_workflows():
+    for flow in get_all_workflows(exclude_subflows=exclude_subflows):
         if flow.name_type not in workflow_types:
             workflow_types.append(flow.name_type)
 
@@ -94,6 +110,7 @@ def get_all_workflow_types() -> list[str]:
 def get_apps_by_type(
     flow_type: str,
     precheck_type_exists: bool = True,
+    exclude_subflows: bool = False,
 ) -> list[str]:
     """
     Returns a list of all the available apps for a given workflow type.
@@ -101,7 +118,7 @@ def get_apps_by_type(
 
     # Make sure the type is supported
     if precheck_type_exists:
-        workflow_types = get_all_workflow_types()
+        workflow_types = get_all_workflow_types(exclude_subflows=exclude_subflows)
         if flow_type not in workflow_types:
             raise TypeError(
                 f"{flow_type} is not allowed. Please use a workflow type from "
@@ -109,7 +126,7 @@ def get_apps_by_type(
             )
 
     app_names = []
-    for flow in get_all_workflows():
+    for flow in get_all_workflows(exclude_subflows=exclude_subflows):
         if flow.name_type == flow_type and flow.name_app not in app_names:
             app_names.append(flow.name_app)
 
@@ -123,6 +140,7 @@ def get_workflow_names_by_type(
     full_name: bool = True,
     precheck_type_exists: bool = True,
     remove_no_database_flows: bool = False,
+    exclude_subflows: bool = False,
 ) -> list[str]:
     """
     Returns a list of all the workflows of a given type. Optionally, the
@@ -131,7 +149,7 @@ def get_workflow_names_by_type(
 
     # Make sure the type is supported
     if precheck_type_exists:
-        workflow_types = get_all_workflow_types()
+        workflow_types = get_all_workflow_types(exclude_subflows=exclude_subflows)
         if flow_type not in workflow_types:
             raise TypeError(
                 f"{flow_type} is not allowed. Please use a workflow type from "
@@ -140,7 +158,7 @@ def get_workflow_names_by_type(
 
     workflow_names = []
 
-    for flow in get_all_workflows():
+    for flow in get_all_workflows(exclude_subflows=exclude_subflows):
         if flow.name_type != flow_type:
             continue
         if app_name and flow.name_app != app_name:
