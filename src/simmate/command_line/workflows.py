@@ -112,11 +112,13 @@ def parse_parameters(context: Context) -> dict:
 
 
 @workflows_app.command()
-def explore():
+def explore(include_subflows: bool = False):
     """
     interactively view all available workflows to see docs & paramaters
     available
     """
+    # make a convenience variable that we use repeatedly below
+    esub = not include_subflows
 
     # when printing statements, we often want to add this to the start of the
     # string, so we save this up front
@@ -130,12 +132,12 @@ def explore():
     )
 
     print(f"{prefix}What type of analysis are you interested in?")
-    workflow_types = get_all_workflow_types()
+    workflow_types = get_all_workflow_types(exclude_subflows=esub)
     type_index = list_options(workflow_types)
     selected_type = workflow_types[type_index]
 
     print(f"{prefix}Which app do you want to use?")
-    app_names = get_apps_by_type(selected_type)
+    app_names = get_apps_by_type(selected_type, exclude_subflows=esub)
     calc_index = list_options(app_names)
     selected_app = app_names[calc_index]
 
@@ -144,6 +146,7 @@ def explore():
         selected_type,
         app_name=selected_app,
         full_name=False,
+        exclude_subflows=esub,
     )
     present_index = list_options(presets)
     selected_preset = presets[present_index]
@@ -186,7 +189,7 @@ def explore():
 
 
 @workflows_app.command()
-def list_all():
+def list_all(include_subflows: bool = False):
     """
     This lists off all available workflows.
     """
@@ -194,7 +197,7 @@ def list_all():
     from simmate.workflows.utilities import get_all_workflow_names
 
     print("These are the workflows that have been registerd:")
-    all_workflows = get_all_workflow_names()
+    all_workflows = get_all_workflow_names(exclude_subflows=not include_subflows)
     for i, workflow in enumerate(all_workflows):
         workflow_number = str(i + 1).zfill(2)
         print(f"\t({workflow_number}) {workflow}")  # gives "(01) example-flow"
