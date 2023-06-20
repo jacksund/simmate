@@ -23,6 +23,7 @@ from simmate.utilities import get_app_submodule, get_directory, make_archive
 def get_all_workflows(
     apps_to_search: list[str] = SIMMATE_APPS,
     as_dict: bool = False,
+    exclude_subflows: bool= False,
 ) -> list[Workflow]:
     """
     Goes through a list of apps and grabs all workflow objects available.
@@ -55,6 +56,17 @@ def get_all_workflows(
             app_workflows += [
                 c[1] for c in getmembers(app_workflow_module) if isclass(c[1])
             ]
+    
+    # breakpoint()
+    # for w in app_workflows:
+    #     if w.has_prerequisite:
+    #         print(w.name_full)
+
+    # I define subflows as any workflow that has prerequisites needed to run.
+    # These workflows are not user friendly and often hidden from docs
+    # and the web ui
+    if exclude_subflows:
+        app_workflows = [w for w in app_workflows if not w.has_prerequisite]
 
     return (
         app_workflows

@@ -11,6 +11,7 @@ from simmate.apps.vasp.workflows.static_energy.matproj import (
 )
 from simmate.engine import Workflow
 from simmate.toolkit import Structure
+from simmate.utilities import copy_files_from_directory
 
 
 class PopulationAnalysis__VaspBader__BaderMatproj(Workflow):
@@ -28,24 +29,48 @@ class PopulationAnalysis__VaspBader__BaderMatproj(Workflow):
         directory: Path = None,
         **kwargs,
     ):
-        prebader_result = StaticEnergy__Vasp__PrebaderMatproj.run(
+        
+        prebader_dir = directory / StaticEnergy__Vasp__PrebaderMatproj.name_full
+        StaticEnergy__Vasp__PrebaderMatproj.run(
             structure=structure,
             command=command,
             source=source,
-            directory=directory,
+            directory=prebader_dir,
         ).result()
 
         # Setup chargecars for the bader analysis and wait until complete
+        chgcomb_dir = directory / PopulationAnalysis__Bader__CombineChgcars.name_full
         PopulationAnalysis__Bader__CombineChgcars.run(
-            directory=prebader_result.directory,
+            directory=chgcomb_dir,
+            previous_directory=prebader_dir,
         ).result()
 
-        # Bader only adds files and doesn't overwrite any, so I just run it
-        # in the original directory. I may switch to copying over to a new
-        # directory in the future though.
+        # And run the bader analysis on the resulting chg denisty
+        bader_dir = directory / PopulationAnalysis__Bader__Bader.name_full
         PopulationAnalysis__Bader__Bader.run(
-            directory=prebader_result.directory,
+            directory=bader_dir,
+            previous_directory=chgcomb_dir,
         ).result()
+        
+        # The from_vasp_directory method that loads results into the database
+        # requires the following files to be in the main directory:
+        #  1. the ACF.dat 
+        #  2. INCAR
+        #  3. vasprun.xml
+        #  4. POTCAR
+        #  5. CHGCAR
+        copy_files_from_directory(
+            files_to_copy=["ACF.dat"],
+            directory_new=directory,
+            directory_old=bader_dir,
+        )
+        copy_files_from_directory(
+            files_to_copy=["INCAR", "vasprun.xml", "POTCAR", "CHGCAR"],
+            directory_new=directory,
+            directory_old=prebader_dir,
+        )
+        # !!! I need a better way to access these files in the workup method
+        # without copying them into the main dir...
 
 
 class StaticEnergy__Vasp__PrebaderMatproj(StaticEnergy__Vasp__Matproj):

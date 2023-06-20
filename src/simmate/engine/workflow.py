@@ -98,6 +98,7 @@ class Workflow:
     # -------------------------------------------------------------------------
 
     @classmethod
+    @property
     def has_prerequisite(cls) -> bool:
         """
         Whether there is a prerequisite workflow for this one to work.
@@ -879,6 +880,7 @@ class Workflow:
             # if this workflow requires input files from a previous directory
             # and/or calcuation, then we configure that here as well
             if cls.use_previous_directory:
+
                 # see if the user provided a previous_directory input option
                 previous_directory = parameters.get("previous_directory", None)
 
@@ -902,26 +904,26 @@ class Workflow:
 
                 # If "True" was given, then we copy over all files except
                 # simmate ones (we have no need for the summaries or error archives)
-                if previous_directory == True:
+                if cls.use_previous_directory == True:
                     copy_directory(
                         directory_old=previous_directory,
                         directory_new=directory_cleaned,
                         ignore_simmate_files=True,
                     )
                 # alternatively users can give a list of filenames to copy
-                elif isinstance(previous_directory, list):
+                elif isinstance(cls.use_previous_directory, list):
                     copy_files_from_directory(
-                        files_to_copy=previous_directory,
+                        files_to_copy=cls.use_previous_directory,
                         directory_old=previous_directory,
                         directory_new=directory_cleaned,
                     )
                 else:
                     raise Exception(
                         f"Unknown input for previous_directory: {previous_directory}"
-                        f"({type(previous_directory)})"
+                        f"({type(cls.use_previous_directory)})"
                     )
 
-                parameters_cleaned["previous_directory"] = previous_directory
+                parameters_cleaned["previous_directory"] = Path(previous_directory)
 
             # SPECIAL CASE for customized flows
             if "workflow_base" not in parameters_cleaned:

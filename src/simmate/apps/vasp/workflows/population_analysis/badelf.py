@@ -11,6 +11,7 @@ from simmate.apps.vasp.workflows.static_energy.matproj import (
 from simmate.database.third_parties import MatprojStructure
 from simmate.engine import Workflow
 from simmate.toolkit import Structure
+from simmate.utilities import copy_files_from_directory
 
 
 class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
@@ -33,7 +34,7 @@ class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
     ):
         if empty_sites and empty_ion:
             raise Exception(
-                "You can only use either empty_sites or an empty_ion_template. "
+                "You can only specify either empty_sites or an empty_ion type. "
                 "Not both."
             )
 
@@ -70,22 +71,41 @@ class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
             structure_w_empties = structure.copy()
 
         # Run the pre-static energy calculation to generate our CHGCAR and ELFCAR
-        prebadelf_result = StaticEnergy__Vasp__PrebadelfMatproj.run(
+        prebadelf_dir = directory / StaticEnergy__Vasp__PrebadelfMatproj.name_full
+        StaticEnergy__Vasp__PrebadelfMatproj.run(
             structure=structure,
             command=command,
             source=source,
-            directory=directory,
+            directory=prebadelf_dir,
         ).result()
 
-        # Bader only adds files and doesn't overwrite any, so I just run it
-        # in the original directory. I may switch to copying over to a new
-        # directory in the future though.
-        badelf_result = PopulationAnalysis__Bader__Badelf.run(
+        # And run the bader analysis on the resulting chg denisty + elfcar
+        badelf_dir = directory / PopulationAnalysis__Bader__Badelf.name_full
+        PopulationAnalysis__Bader__Badelf.run(
             structure=structure_w_empties,
-            directory=directory,
+            directory=badelf_dir,
+            previous_directory=prebadelf_dir,
         ).result()
 
-        return badelf_result
+        # The from_vasp_directory method that loads results into the database
+        # requires the following files to be in the main directory:
+        #  1. the ACF.dat 
+        #  2. INCAR
+        #  3. vasprun.xml
+        #  4. POTCAR
+        #  5. CHGCAR_empty
+        copy_files_from_directory(
+            files_to_copy=["ACF.dat", "CHGCAR_empty"],
+            directory_new=directory,
+            directory_old=badelf_dir,
+        )
+        copy_files_from_directory(
+            files_to_copy=["INCAR", "vasprun.xml", "POTCAR"],
+            directory_new=directory,
+            directory_old=prebadelf_dir,
+        )
+        # !!! I need a better way to access these files in the workup method
+        # without copying them into the main dir...
 
 
 # -----------------------------------------------------------------------------

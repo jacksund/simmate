@@ -145,6 +145,11 @@ class S3Workflow(Workflow):
         summary_filename = directory / "simmate_summary.yaml"
         is_complete = summary_filename.exists()
         is_dir_setup = cls._check_input_files(directory, raise_if_missing=False)
+        # BUG: is_complete check needs to be more robust to workflows that
+        # run in a directory but don't save a summary file (e.g. bader). Maybe
+        # I should make it so all workflows write a summary file even if they
+        # don't save anything to the database + set a rule that every workflow
+        # should have it own separate directory.
 
         # run the setup stage of the task, where there is a unique method
         # if we are picking up from a previously paused run.
@@ -152,8 +157,18 @@ class S3Workflow(Workflow):
             cls.setup(directory=directory, **kwargs)
         elif is_restart and not is_complete:
             cls.setup_restart(directory=directory, **kwargs)
-        else:
+        elif is_restart and is_complete:
             logging.info("Calculation is already completed. Skipping setup.")
+        else:  # (not is_restart and is_complete)
+            logging.warn(
+                "It looks like you are running a new workflow inside of a folder "
+                "where another has already completed. This is fine "
+                "for now, but be aware that a future version of Simmate may "
+                "enforce a rule where each workflow run requires its own "
+                "independent directory. Consider this a tentative depreciation "
+                "warning."
+            )
+            cls.setup(directory=directory, **kwargs)
 
         # now if we have a restart OR have an incomplete calculation that is being
         # restarted, we can check our files and run the external program

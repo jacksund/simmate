@@ -4,8 +4,12 @@ from simmate.engine import S3Workflow
 
 
 class PopulationAnalysis__Bader__Bader(S3Workflow):
-    required_files = ["CHGCAR_sum", "POTCAR"]
+    required_files = ["CHGCAR", "CHGCAR_sum", "POTCAR"]
     use_database = False
+    use_previous_directory = ["CHGCAR", "CHGCAR_sum", "POTCAR"]
+    parent_workflows = [
+        "population-analysis.vasp-bader.bader-matproj"
+    ]
 
     command = "bader CHGCAR -ref CHGCAR_sum -b weight > bader.out"
     """

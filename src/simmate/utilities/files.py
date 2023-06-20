@@ -84,8 +84,12 @@ def copy_files_from_directory(
         The path to the new directory as a string
 
     """
+
     # Start by creating a new directory or grabbing the one given.
     directory_new_cleaned = get_directory(directory_new)
+
+    # and make sure we have a path obj
+    directory_old = Path(directory_old)
 
     # TODO: this is a copy/paste of the code in copy_directory. Consider
     # refactoring and making a context manager (bc the delete_tmp is used below)
@@ -165,6 +169,9 @@ def copy_directory(
 
     # Start by creating a new directory or grabbing the one given.
     directory_new_cleaned = get_directory(directory_new)
+    
+    # and make sure we have a path obj
+    directory_old = Path(directory_old)
 
     # First check if the previous directory exists. There are several
     # possibilities that we need to check for:

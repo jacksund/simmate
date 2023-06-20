@@ -85,6 +85,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - VASP potcar references to "element mappings" is now standarized to "potcar mappings"
 - refactor docs with new "Apps" section
 - full refactor of `simmate engine` commands. many have been shortened/renamed
+- restrategized workflows that use output files from others. The `copy_previous_directory` input parameter has been removed and replaced with workflow attributes like `use_previous_directory` and `has_prerequisite`, combined with an optional `previous_directory` parameter.
 
 **Fixes**
 
