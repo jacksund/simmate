@@ -143,7 +143,7 @@ class Workflow:
     1. a database object from a previous calculation as a primary input
     2. `previous_directory` parameter
     
-    Option 2 is not recommended because the source of your input files is then
+    Option 2 is not preferred because the source of your input files is then
     ambiguous. Meanwhile, Option 1 sets `source` automatically for you AND
     keeps track of old calculation files. This is important for tracking the
     history of a calculation and reproducing its results.
@@ -897,8 +897,7 @@ class Workflow:
                 if not previous_directory:
                     raise Exception(
                         "This workflow requires either an input from a past calculation "
-                        "or a previous_directory set to run but neither was given. "
-                        "Read about this at: [still writing docs]"
+                        "or a previous_directory set to run but neither was given."
                     )
 
                 # If "True" was given, then we copy over all files except
