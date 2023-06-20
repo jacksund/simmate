@@ -880,7 +880,6 @@ class Workflow:
             # if this workflow requires input files from a previous directory
             # and/or calcuation, then we configure that here as well
             if cls.use_previous_directory:
-
                 # see if the user provided a previous_directory input option
                 previous_directory = parameters.get("previous_directory", None)
 

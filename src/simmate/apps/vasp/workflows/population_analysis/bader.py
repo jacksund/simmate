@@ -29,7 +29,6 @@ class PopulationAnalysis__VaspBader__BaderMatproj(Workflow):
         directory: Path = None,
         **kwargs,
     ):
-        
         prebader_dir = directory / StaticEnergy__Vasp__PrebaderMatproj.name_full
         StaticEnergy__Vasp__PrebaderMatproj.run(
             structure=structure,
@@ -51,10 +50,10 @@ class PopulationAnalysis__VaspBader__BaderMatproj(Workflow):
             directory=bader_dir,
             previous_directory=chgcomb_dir,
         ).result()
-        
+
         # The from_vasp_directory method that loads results into the database
         # requires the following files to be in the main directory:
-        #  1. the ACF.dat 
+        #  1. the ACF.dat
         #  2. INCAR
         #  3. vasprun.xml
         #  4. POTCAR

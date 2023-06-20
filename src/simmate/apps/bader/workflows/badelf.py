@@ -19,9 +19,7 @@ class PopulationAnalysis__Bader__Badelf(PopulationAnalysis__Bader__Bader):
     required_files = ["CHGCAR", "ELFCAR", "CHGCAR_empty", "ELFCAR_empty", "POTCAR"]
     use_database = False
     use_previous_directory = ["CHGCAR", "ELFCAR", "POTCAR"]
-    parent_workflows = [
-        "population-analysis.vasp-bader.badelf-matproj"
-    ]
+    parent_workflows = ["population-analysis.vasp-bader.badelf-matproj"]
 
     @staticmethod
     def setup(structure: Structure, directory: Path, **kwargs):

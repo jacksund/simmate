@@ -169,7 +169,7 @@ def copy_directory(
 
     # Start by creating a new directory or grabbing the one given.
     directory_new_cleaned = get_directory(directory_new)
-    
+
     # and make sure we have a path obj
     directory_old = Path(directory_old)
 

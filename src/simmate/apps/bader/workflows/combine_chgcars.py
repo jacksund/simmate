@@ -19,6 +19,4 @@ class PopulationAnalysis__Bader__CombineChgcars(S3Workflow):
     use_database = False
     # Note -- POTCAR is copied over so that downstream workflows can grab it
     use_previous_directory = ["CHGCAR", "AECCAR0", "AECCAR2", "POTCAR"]
-    parent_workflows = [
-        "population-analysis.vasp-bader.bader-matproj"
-    ]
+    parent_workflows = ["population-analysis.vasp-bader.bader-matproj"]
