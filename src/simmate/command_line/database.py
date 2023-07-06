@@ -31,7 +31,7 @@ def reset(confirm_delete: bool = False, use_prebuilt: bool = None):
     - `--use-prebuilt` and `--no-use-prebuilt`: automatically say yes/no to a
     prebuilt database. This only applies if you are using sqlite.
     """
-    from simmate.configuration.django.settings import DATABASES
+    from simmate.configuration.django.settings import DATABASE_BACKEND, DATABASES
 
     database_name = str(DATABASES["default"]["NAME"])
     print(f"\nUsing {database_name}")
@@ -47,8 +47,7 @@ def reset(confirm_delete: bool = False, use_prebuilt: bool = None):
 
     # if the user has a SQLite3 backend, ask if they'd like to use a prebuilt
     # database to begin
-    using_sqlite = DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
-    if using_sqlite and use_prebuilt is None:
+    if DATABASE_BACKEND == "sqlite3" and use_prebuilt is None:
         use_prebuilt = typer.confirm(
             "\nIt looks like you are using the default database backend (sqlite3). \n"
             "Would you like to use a prebuilt-database with all third-party data "
