@@ -68,7 +68,9 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 -->
 
-- no new changes have been merged into the `main` branch yet
+**Fixes**
+
+- fix bug where workers incorrectly grab substring tag matches (e.g. a worker submited with the tag `ex` would incorrectly grab jobs like `ex-01` or `ex-02`)
 
 --------------------------------------------------------------------------------
 
