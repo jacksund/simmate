@@ -137,6 +137,14 @@ else:
         }
     }
 
+# As an extra, we keep a DATABASE_BACKEND variable for backend-specific methods
+if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+    DATABASE_BACKEND = "sqlite3"
+elif DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql":
+    DATABASE_BACKEND = "postgresql"
+else:
+    DATABASE_BACKEND = "unknown"
+
 # --------------------------------------------------------------------------------------
 
 # INSTALLED APPS

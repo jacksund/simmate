@@ -1086,6 +1086,12 @@ When submitting workflows via the `run_cloud` command, tags are 'labels' that he
             - my-tag-02
     ```
 
+!!! danger
+    Filter tags does not always work as expected in SQLite3 because a worker with 
+    `my-tag` will incorrectly grab jobs like `my-tag-01` and `my-tag-02`. This
+    issue is known by both [Django](https://docs.djangoproject.com/en/4.2/ref/databases/#substring-matching-and-case-sensitivity) and [SQLite3](https://www.sqlite.org/faq.html#q18). Simmate addresses this issue by requiring all
+    tags to be 7 characters long AND fully lowercase when using SQLite3.
+
 --------------------------
 
 ## temperature_end
