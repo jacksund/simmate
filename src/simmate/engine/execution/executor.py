@@ -7,6 +7,7 @@ import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 from django.utils import timezone
 from rich import print
 
+from simmate.configuration.django.settings import DATABASE_BACKEND
 from simmate.engine.execution.database import WorkItem
 
 
@@ -44,6 +45,21 @@ class SimmateExecutor:
     ) -> WorkItem:
         # The *args and **kwargs input separates args into a tuple and kwargs into
         # a dictionary for me, which makes their storage very easy!
+
+        # BUG-FIX: sqlite can't filter tags properly so we add a rule that
+        # all tags must have the same number of characters AND be all lower-case.
+        # Issue is discussed at https://github.com/jacksund/simmate/issues/475
+        # Django discusses this issue in their docs as well:
+        #   https://docs.djangoproject.com/en/4.2/ref/databases/#substring-matching-and-case-sensitivity
+        if tags and DATABASE_BACKEND == "sqlite3":
+            for tag in tags:
+                if len(tag) != 7 or tag.lower() != tag:
+                    raise Exception(
+                        "All tags must be 7 characters long AND all lowercase "
+                        "when using SQLite3 (the default database backend). "
+                        "This is to avoid unexpected behavior/bugs. "
+                        "Read the `tags` parameter docs for more information."
+                    )
 
         # make the WorkItem where all of the provided inputs are pickled and
         # save the workitem to the database.

@@ -27,6 +27,8 @@ from django_filters import rest_framework as django_api_filters
 from django_pandas.io import read_frame
 from rich.progress import track
 
+from simmate.configuration.django.settings import DATABASE_BACKEND
+
 # The "as table_column" line does NOTHING but rename a module.
 # I have this because I want to use "table_column.CharField(...)" instead
 # of "models.CharField(...)" in my Models. This let's beginners read my
@@ -195,15 +197,23 @@ class SearchResults(models.QuerySet):
 
     def filter_by_tags(self, tags: list[str]):
         """
-        A utility filter() method that
+        A utility filter() method that helps query the 'tags' column of a table.
+
+        NOTE: Pay close attention to filtering when using the SQLite3 backend
+        as Django warns about unexpected substring matching:
+            https://docs.djangoproject.com/en/4.2/ref/databases/#substring-matching-and-case-sensitivity
         """
 
         if tags:
             new_query = self
             for tag in tags:
-                new_query = new_query.filter(tags__icontains=tag)
+                if DATABASE_BACKEND == "postgresql":
+                    new_query = new_query.filter(tags__contains=tag)
+                elif DATABASE_BACKEND == "sqlite3":
+                    new_query = new_query.filter(tags__icontains=tag)
         else:
             new_query = self.filter(tags=[])
+
         return new_query
 
 
