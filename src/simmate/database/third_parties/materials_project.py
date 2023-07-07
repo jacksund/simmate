@@ -36,7 +36,7 @@ class MatprojStructure(Structure, Thermodynamics):
     source_long = "The Materials Project at Berkeley National Labs"
     homepage = "https://materialsproject.org/"
     source_doi = "https://doi.org/10.1063/1.4812323"
-    remote_archive_link = "https://archives.simmate.org/MatprojStructure-2022-08-27.zip"
+    remote_archive_link = "https://archives.simmate.org/MatprojStructure-2023-07-07.zip"
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """
@@ -219,32 +219,39 @@ class MatprojStructure(Structure, Thermodynamics):
             # a specific structure (so a single mp-id)
             # Note: this is a very large query, so make sure your computer has enough
             # memory (RAM >10GB) and a stable internet connection.
-            # data = mpr.summary.search(
-            #     all_fields=False,
-            #     fields=fields_to_load,
-            #     deprecated=False,
-            #     # !!! DEV NOTE: you can uncomment these lines for quick testing
-            #     # num_chunks=3,
-            #     chunk_size=100,
-            # )
+            data = mpr.summary.search(
+                all_fields=False,
+                fields=fields_to_load,
+                deprecated=False,
+                # !!! DEV NOTE: you can uncomment these lines for quick testing
+                # num_chunks=3,
+                chunk_size=1000,
+            )
 
             # BUG: The search above is super unstable, so instead, I grab all mp-id
             # in one search, then make individual queries for the data of each
             # after that.
             # This takes about 30 minutes.
-            mp_ids = mpr.summary.search(
-                all_fields=False,
-                fields=["material_id"],
-                deprecated=False,
-            )
-            data = []
-            for entry in track(mp_ids):
-                result = mpr.summary.search(
-                    material_ids=[entry.material_id],
-                    all_fields=False,
-                    fields=fields_to_load,
-                )
-                data.append(result[0])
+            # mp_ids = mpr.summary.search(
+            #     all_fields=False,
+            #     fields=["material_id"],
+            #     deprecated=False,
+            # )
+            # data = []
+            # chunk_ids = []
+            # for entry in track(mp_ids):
+            #     chunk_ids.append(entry.material_id)
+            #     if (
+            #         len(chunk_ids) >= 1000
+            #         or entry.material_id == mp_ids[-1].material_id
+            #     ):
+            #         result = mpr.summary.search(
+            #             material_ids=[entry.material_id],
+            #             all_fields=False,
+            #             fields=fields_to_load,
+            #         )
+            #         data += result
+            #         chunk_ids = []
 
         # Let's iterate through each structure and save it to the database
         # This also takes a while, so we use a progress bar
