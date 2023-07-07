@@ -977,14 +977,6 @@ class DatabaseTable(models.Model):
             this function to Dask (for parallelization).
             """
 
-            # For all entries, convert the structure_string to a toolkit structure
-            if "structure_string" in entry:
-                structure_str = entry.pop("structure_string")
-                structure = ToolkitStructure.from_database_string(structure_str)
-                entry["structure"] = structure
-            # OPTIMIZE: is there a better way to do decide which entries need to be
-            # converted to toolkit objects?
-
             # BUG: some columns don't properly convert to python objects, but
             # it seems inconsistent when this is done... For now I just manually
             # convert JSON columns
@@ -995,17 +987,25 @@ class DatabaseTable(models.Model):
                         entry[column] = json.loads(entry[column])
             # OPTIMIZE: consider applying this to the df column for faster loading
 
-            entry_db = cls.from_toolkit(**entry)
-            entry_db.save()
+            return cls.from_toolkit(**entry)
 
         # now iterate through all entries to save them to the database
         if not parallel:
             # If user doesn't want parallelization, we run these in the main
             # thread and monitor progress
-            for entry in track(entries):
-                load_single_entry(entry)
+            db_objects = [load_single_entry(entry) for entry in track(entries)]
+            cls.objects.bulk_create(
+                db_objects,
+                batch_size=15000,
+                ignore_conflicts=True,
+            )
         # otherwise we use dask to submit these in batches!
         else:
+            raise Exception(
+                "Parallel loading is temporarily disabled. "
+                "Note, that the serial version is >100x faster compared to "
+                "Simmate v0.14.0 and earlier."
+            )
             from simmate.configuration.dask import batch_submit
 
             batch_submit(

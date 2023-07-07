@@ -52,8 +52,8 @@ class Spacegroup(DatabaseTable):
     Point group symbol
     """
 
-    @staticmethod
-    def _load_database_from_toolkit():
+    @classmethod
+    def _load_database_from_toolkit(cls):
         """
         Loads spacegroup data into the database table.
 
@@ -64,6 +64,7 @@ class Spacegroup(DatabaseTable):
         See `simmate.database.utilities.reset_database`
         """
 
+        db_objects = []
         for number in track(range(1, 231)):
             # reverse() is 100% not needed but is nice for users to see progress
             # get faster instead of slower.
@@ -73,12 +74,13 @@ class Spacegroup(DatabaseTable):
             spacegroup = PymatgenSpacegroup.from_int_number(number)
 
             # load the data into this django model
-            spacegroup_db = Spacegroup(
+            spacegroup_db = cls(
                 number=spacegroup.int_number,
                 symbol=spacegroup.symbol,
                 crystal_system=spacegroup.crystal_system,
                 point_group=spacegroup.point_group,
             )
+            db_objects.append(spacegroup_db)
 
-            # now save this information to the database
-            spacegroup_db.save()
+        # now save this information to the database
+        cls.objects.bulk_create(db_objects)

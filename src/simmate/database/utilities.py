@@ -7,7 +7,7 @@ from pathlib import Path
 from django.apps import apps
 from django.core.management import call_command
 
-from simmate.configuration.django.settings import DATABASES
+from simmate.configuration.django.settings import DATABASE_BACKEND, DATABASES
 
 # Lists off which apps to update/create. By default, I do all apps that are installed
 # so this list is grabbed directly from django. I also grab the CUSTOM_APPS to
@@ -30,7 +30,8 @@ def update_database(apps_to_migrate=APPS_TO_MIGRATE, show_logs: bool = True):
 
 
 def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
-    # BUG: Why doesn't call_command("flush") do this? How is it different?
+    # TODO: call_command("flush") could be used in the future to simply
+    # delete all data -- without rerunning migrations
 
     # We can now proceed with reseting the database
     logging.info("Removing database and rebuilding...")
@@ -43,11 +44,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
     #   django-admin reset_db --settings=simmate.configuration.django.settings
     # Note: this does not remove migration files or reapply migrating after
 
-    # Check which
-    using_sqlite = DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
-    using_postgres = DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql"
-
-    if using_sqlite:
+    if DATABASE_BACKEND == "sqlite3":
         # grab the location of the database file. I assume the default
         # database for now.
         db_filename = DATABASES["default"]["NAME"]
@@ -56,7 +53,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
         if db_filename.exists():
             db_filename.unlink()
 
-    elif using_postgres:
+    elif DATABASE_BACKEND == "postgresql":
         # We do this with an independent postgress connection, rather than through
         # django so that we can close everything down easily.
         import psycopg2
@@ -129,7 +126,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
         cursor.close()
         connection.close()
 
-    elif not using_sqlite and not using_postgres:
+    elif DATABASE_BACKEND not in ["postgresql", "sqlite3"]:
         logging.warning(
             "reseting your database is only supported for SQLite and Postgres."
             " Make sure you only use this function when initially building your "
@@ -158,7 +155,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
 
     # instead of building the database from scratch, we instead download a
     # prebuilt database file.
-    if using_sqlite and use_prebuilt:
+    if DATABASE_BACKEND == "sqlite3" and use_prebuilt:
         from simmate.database.third_parties import load_default_sqlite3_build
 
         logging.info("Setting up prebuilt database...")
