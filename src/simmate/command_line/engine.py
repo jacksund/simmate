@@ -84,7 +84,7 @@ def start_cluster(
     continuous: bool = False,
 ):
     """
-    This starts many Simmate Workers that each run in a local subprocess
+    Starts many workers and (optionally) continuously submits new ones
 
     - `nworkers`: the number of workers to start
 
@@ -122,6 +122,16 @@ def stats():
     from simmate.engine.execution import SimmateExecutor
 
     SimmateExecutor.show_stats()
+
+
+@engine_app.command()
+def workitems():
+    """
+    Prints a table of all workitems and quick information about them
+    """
+    from simmate.engine.execution import SimmateExecutor
+
+    SimmateExecutor.show_workitems()
 
 
 @engine_app.command()

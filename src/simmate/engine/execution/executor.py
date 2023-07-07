@@ -210,6 +210,16 @@ class SimmateExecutor:
         print(f"ERRORED:   {nerrored} ({error_percent:.2f}%)")
         print(f"CANCELED:  {ncanceled}")
 
+    @staticmethod
+    def show_workitems() -> int:
+        all_items = WorkItem.objects.order_by("created_at").values(
+            "id",
+            "created_at",
+            "status",
+            "tags",
+        ).to_dataframe()
+        print(all_items.to_markdown(index=False))
+
     # -------------------------------------------------------------------------
     # Extra methods to add if I want to be consistent with other Executor classes
     # -------------------------------------------------------------------------
