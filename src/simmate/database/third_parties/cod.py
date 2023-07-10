@@ -25,7 +25,7 @@ class CodStructure(Structure):
     source_long = "The Crystallography Open Database"
     homepage = "https://www.crystallography.net/cod/"
     source_doi = "https://doi.org/10.1107/S0021889809016690"
-    remote_archive_link = "https://archives.simmate.org/CodStructure-2022-02-20.zip"
+    remote_archive_link = "https://archives.simmate.org/CodStructure-2023-07-10.zip"
 
     # These fields overwrite the default Structure fields due to a bug.
     chemical_system = table_column.TextField()
@@ -116,6 +116,7 @@ class CodStructure(Structure):
         move on. I'm slowly adding functionality to account for these problematic
         cif files though.
         """
+        from rich.progress import track
 
         from simmate.configuration.dask import batch_submit
 
@@ -146,13 +147,14 @@ class CodStructure(Structure):
         if only_add_new_cifs:
             print("Removing existing cifs from to-do list...")
             new_cifs = []
-            existing_ids = cls.objects.values_list("id", flat=True).all()
-            for cif_filepath in all_cifs:
+            existing_ids = list(cls.objects.values_list("id", flat=True).all())
+            for cif_filepath in track(all_cifs):
                 cif_id = "cod-" + cif_filepath.stem
                 if cif_id not in existing_ids:
                     new_cifs.append(cif_filepath)
             # replace our all_cifs with this updated list
             all_cifs = new_cifs
+            print(f"Adding {len(all_cifs)} new entries...")
 
         # We run this function in parallel using Dask.
         # Dask seems to be unstable when we submit too much at once, so we chunk
