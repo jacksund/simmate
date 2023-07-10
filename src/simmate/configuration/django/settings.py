@@ -391,7 +391,11 @@ STATIC_URL = "/static/"
 STATIC_ROOT = DJANGO_DIRECTORY / "static"
 
 # Extra places for collectstatic to find static files.
-STATICFILES_DIRS = [DJANGO_DIRECTORY / "static_files"]
+STATICFILES_DIRS =  [
+    SIMMATE_DIRECTORY / "static_files",  # let's user add their own files
+    DJANGO_DIRECTORY / "static_files",
+]
+
 
 # For the dynamically-created structure files, we need to include the static
 # directory this to work during local testing. This is NOT allowed in a
