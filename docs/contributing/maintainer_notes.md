@@ -2,7 +2,9 @@
 # Maintainer notes
 
 !!! note
-    currently this section is only relevant to @jacksund
+    currently this page is only relevant to @jacksund
+
+## Making a release
 
 To make a new release, you must follow these steps:
 
@@ -30,3 +32,38 @@ conda create -n my_env -c conda-forge simmate -y
 # as an extra, make sure spyder can also be installed in the same env
 conda install -n my_env -c conda-forge spyder -y
 ```
+
+## Website CSS
+
+The Hyper theme described in our main docs [here](/simmate/full_guides/website/overview/#css-and-js-assets) must be built and hosted separately from any Simmate
+server to abide by licensing. The build/host the assests, follow these steps: 
+
+
+1. download hyper theme (private access): e.g. `Hyper_v4.6.0.zip`
+2. unpack the zip file and navigate to this directory:
+``` bash
+cd Hyper_v4.6.0/Bootstrap_5x/Hyper/
+```
+3. install prereqs into a new conda env and activate it
+``` bash
+conda create -n hyper -c conda-forge nodejs yarn git
+conda activate hyper
+```
+4. install gulp using npm (conda install of gulp doesn't work)
+``` bash
+npm install gulp -g
+```
+5. in the main dir, install all hyper dependencies using the `yarn.lock` file
+``` bash
+yarn install
+```
+6. edit any themes/colors in the following files (e.g. change primary to `#0072ce`)
+```
+/src/assests/scss/config/saas/
+>> go into each folder's _variables.scss
+```
+7. Build the assets
+``` bash
+gulp build
+```
+8. Upload assests (in `dist` folder) to your cdn for serving
