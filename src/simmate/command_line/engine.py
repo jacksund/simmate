@@ -84,7 +84,7 @@ def start_cluster(
     continuous: bool = False,
 ):
     """
-    This starts many Simmate Workers that each run in a local subprocess
+    Starts many workers and (optionally) continuously submits new ones
 
     - `nworkers`: the number of workers to start
 
@@ -122,6 +122,47 @@ def stats():
     from simmate.engine.execution import SimmateExecutor
 
     SimmateExecutor.show_stats()
+
+
+@engine_app.command()
+def stats_detail(tag: list[str] = [], recent: float = None):
+    """
+    Prints a summary of different workitems and their status
+    - `tag`: tags to filter tasks by for submission. To provide multiple use
+    `--tag example1 --tag example2` etc.
+
+    - `recent`: show only items that have been updated in the last N hours.
+    For example `--recent 24` limits to jobs editted in the last 24 hrs
+    """
+    from simmate.engine.execution import SimmateExecutor
+
+    SimmateExecutor.show_stats_detail(
+        tags=tag,
+        recent=recent,
+    )
+
+
+@engine_app.command()
+def workitems(tag: list[str] = [], status: str = None, recent: float = None):
+    """
+    Prints a table of all workitems and quick information about them
+
+    - `tag`: tags to filter tasks by for submission. To provide multiple use
+    `--tag example1 --tag example2` etc.
+
+    - `status`: status of jobs to filter by. Options are P, R, F, E, and C
+
+    - `recent`: show only items that have been updated in the last N hours.
+    For example `--recent 24` limits to jobs editted in the last 24 hrs
+
+    """
+    from simmate.engine.execution import SimmateExecutor
+
+    SimmateExecutor.show_workitems(
+        tags=tag,
+        status=status,
+        recent=recent,
+    )
 
 
 @engine_app.command()
