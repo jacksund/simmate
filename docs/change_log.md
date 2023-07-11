@@ -71,6 +71,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Enhancements**
 
 - Allow custom html templates and static files that override default shipped by default
+- add `simmate engine` commands like `stats-detail` and `workitems` that show details of workitems in the database
 
 
 **Fixes**

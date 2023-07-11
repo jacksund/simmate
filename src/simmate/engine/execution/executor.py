@@ -197,18 +197,18 @@ class SimmateExecutor:
         if tags:
             query = query.filter_by_tags(tags=tags)
 
-        npending = WorkItem.objects.filter(status="P").count()
-        nrunning = WorkItem.objects.filter(status="R").count()
-        ncanceled = WorkItem.objects.filter(status="C").count()
-        nfinished = WorkItem.objects.filter(status="F").count()
-        nerrored = WorkItem.objects.filter(status="E").count()
+        npending = query.filter(status="P").count()
+        nrunning = query.filter(status="R").count()
+        ncanceled = query.filter(status="C").count()
+        nfinished = query.filter(status="F").count()
+        nerrored = query.filter(status="E").count()
 
         if nfinished:
             error_percent = (nerrored / (nerrored + nfinished)) * 100
         else:
             error_percent = 0
 
-        nrunning_long = WorkItem.objects.filter(
+        nrunning_long = query.filter(
             status="R",
             updated_at__lte=timezone.now() - timedelta(days=1),
         ).count()
@@ -264,7 +264,7 @@ class SimmateExecutor:
         logging.info("Breaking down stats for each tag...")
         tag_data = []
         for tag in track(unique_tags):
-            stats = cls.get_stats(tags=tags)
+            stats = cls.get_stats(tags=[tag])
             tag_data.append(
                 [
                     tag,
