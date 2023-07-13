@@ -19,8 +19,9 @@ from pathlib import Path
 
 import pandas
 import yaml
-from django.db import models  # , transaction
+from django.db import models  # see comment below
 from django.db import models as table_column
+from django.urls import reverse
 from django.utils.module_loading import import_string
 from django.utils.timezone import datetime
 from django_filters import rest_framework as django_api_filters
@@ -1383,3 +1384,15 @@ class DatabaseTable(models.Model):
         Provides the URL link to the database entry page in the Simmate website
         """
         return f"{self.url_table}/{self.id}"
+
+    def get_absolute_url(self):
+        """
+        Provides the full URL link to the database entry page in the Simmate website.
+
+        This is for use in template views, whereas user may find the `url`
+        property easier to work with
+        """
+        return reverse(
+            "data_explorer:entry-detail",
+            kwargs={"provider_name": self.table_name, "pk": self.pk},
+        )
