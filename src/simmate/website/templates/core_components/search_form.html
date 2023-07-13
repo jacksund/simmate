@@ -27,6 +27,9 @@
                 {% if "Structure" in filterset_mixins %}
                     {% include "core_components/base_filter_types/structure.html" %}
                 {% endif %}
+                {% if "Molecule" in filterset_mixins %}
+                    {% include "core_components/base_filter_types/molecule.html" %}
+                {% endif %}
                 {% if "Thermodynamics" in filterset_mixins %}
                     {% include "core_components/base_filter_types/thermodynamics.html" %}
                 {% endif %}

@@ -192,7 +192,7 @@ class SimmateAPIViewSet(GenericViewSet):
     # (1) api spec or (2) speed of this method ever becomes an issue, I can
     # address these by either...
     #   1. having a utility that prints out the full API spec but isn't called on startup
-    #   2. making all APIViews up-
+    #   2. making all APIViews up-front
 
     @classmethod
     def get_table(cls, request: HttpRequest, *args, **kwargs) -> Response:

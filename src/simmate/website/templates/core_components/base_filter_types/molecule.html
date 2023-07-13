@@ -1,0 +1,52 @@
+{% load crispy_forms_tags %}
+<!-- Composition filters -->
+<div class="card mb-0">
+    <div class="card-header" id="headingCompFilters">
+        <h5 class="m-0">
+            <a class="custom-accordion-title d-block pt-2 pb-2"
+               data-bs-toggle="collapse"
+               href="#collapseCompFilters"
+               aria-expanded="true"
+               aria-controls="collapseCompFilters">
+                By Chemical Features:
+                <i class="mdi mdi-chevron-down accordion-arrow"></i>
+            </a>
+        </h5>
+    </div>
+    <div id="collapseCompFilters"
+         class="collapse"
+         aria-labelledby="headingCompFilters"
+         data-bs-parent="#accordionExample">
+        <div class="card-body">
+            {% include "core_components/elements/range_slider.html" with label="Numer of atoms:" min=1 max=200 form_field=form.num_atoms__range only %}
+            {% include "core_components/elements/range_slider.html" with label="Numer of stereocenters:" min=0 max=10 form_field=form.num_stereocenters__range only %}
+            {% include "core_components/elements/range_slider.html" with label="Numer of rings:" min=0 max=10 form_field=form.num_rings__range only %}
+            {% include "core_components/elements/range_slider.html" with label="Numer of H-bond Acceptors:" min=0 max=10 form_field=form.num_h_acceptors__range only %}
+            {% include "core_components/elements/range_slider.html" with label="Numer of H-bond Donors:" min=0 max=50 form_field=form.num_h_donors__range only %}
+        </div>
+    </div>
+</div>
+<!-- Structure filters -->
+<div class="card mb-0">
+    <div class="card-header" id="headingStructFilters">
+        <h5 class="m-0">
+            <a class="custom-accordion-title d-block pt-2 pb-2"
+               data-bs-toggle="collapse"
+               href="#collapseStructFilters"
+               aria-expanded="true"
+               aria-controls="collapseStructFilters">
+                By Predicted Properties:
+                <i class="mdi mdi-chevron-down accordion-arrow"></i>
+            </a>
+        </h5>
+    </div>
+    <div id="collapseStructFilters"
+         class="collapse"
+         aria-labelledby="headingStructFilters"
+         data-bs-parent="#accordionExample">
+        <div class="card-body">
+            {{ form.log_p_rdkit__range | as_crispy_field }}
+            {{ form.tpsa_rdkit__range | as_crispy_field }}
+        </div>
+    </div>
+</div>
