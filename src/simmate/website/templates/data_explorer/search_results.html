@@ -1,14 +1,11 @@
-<div id="search-results" class="container p-4">
-    <h2>Search Results:</h2>
+<div id="search-results" class="row">
     {% if calculations %}
         {% load chemical_formula_filter %}
-        <div class="alert alert-success d-flex align-items-center p-2"
+        <div class="alert alert-success d-flex align-items-center mt-2"
              role="alert">
-            <i class="bi bi-check-circle-fill fs-4"></i>
-            <div class="p-3">
-                This table includes <b>{{ ncalculations_matching }}</b> results that match your search criteria. These results
-                were
-                filtered from the <b>{{ ncalculations_possible }}</b> total possible results.
+            <i class="mdi mdi-check-circle"></i>&nbsp;&nbsp;
+            <div>
+                Showing <b>{{ calculations|length }}</b> of <b>{{ ncalculations_matching }}</b> filtered results from the dataset of <b>{{ ncalculations_possible }}</b>.
             </div>
         </div>
         <table id="SearchResultsTable"
@@ -40,16 +37,20 @@
         {% include "core_components/search_results_pagination.html" %}
     {% else %}
         <div class="alert alert-danger d-flex align-items-center p-2" role="alert">
-            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
-            <div class="p-3">
-                <b>No calculations found matching your search criteria!</b>
+            <div>
+                <i class="mdi mdi-alert-circle"></i>&nbsp;&nbsp;<b>No entries were found that match your search criteria!</b>
                 <br>
                 <br>
                 <i><small>
+                    <b>For crystal datasets:</b>
                     Make sure you don't have a typo in your search. If you are searching
                     for "Li-Co-O", common typos include searching "LiCoO" (missing hyphens),
                     "Li-Co-O-" (extra hyphen), or "li-co-o" (lowercase). We are working
                     to account for these common mistakes, but you'll have to fix these until then!
+                    <br>
+                    <br>
+                    <b>For molecular datasets:</b>
+                    Make sure you are using a properly formatted SMILES/INCHI/SDF input. You can test this by pasting into ChemDraw.
                     <br>
                     <br>
                     It is also possible that there just aren't any results for your search.
