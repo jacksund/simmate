@@ -241,7 +241,7 @@ def get_app_submodule(
     return submodule_path if has_submodule else None
 
 
-def bypass_nones(bypass_kwarg: str = None, ncols: int = 1):
+def bypass_nones(bypass_kwarg: str = None, multi_cols: bool = False):
     """
     experimental utility that removes None values before passing a list of
     entries to a method or function. The method or function then returns
@@ -274,21 +274,26 @@ def bypass_nones(bypass_kwarg: str = None, ncols: int = 1):
             results_orig = function_to_wrap(*args, **kwargs)
 
             # breakpoint()
-            # Add back None values in the proper position
-            results_final = []
-            failed_count = 0
-            for idx, result in enumerate(results_orig):
-                while (idx + failed_count) in failed_idxs:
-                    failed_count += 1
-                    results_final.append(None)
-                results_final.append(result)
-            # there may be extra None values needed at the end. We add Nones until
-            # we get the correct list length
-            while len(entries) != len(results_final):
-                results_final.append(None)
 
-            # breakpoint()
-            return results_final
+            if not multi_cols:
+                results_orig = [results_orig]
+            results_final = []
+            for column in results_orig:
+                # Add back None values in the proper position for this single column
+                col_final = []
+                failed_count = 0
+                for idx, result in enumerate(column):
+                    while (idx + failed_count) in failed_idxs:
+                        failed_count += 1
+                        col_final.append(None)
+                    col_final.append(result)
+                # there may be extra None values needed at the end. We add Nones until
+                # we get the correct list length
+                while len(entries) != len(col_final):
+                    col_final.append(None)
+                results_final.append(col_final)
+
+            return results_final if multi_cols else results_final[0]
 
         return wrapper
 
