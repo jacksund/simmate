@@ -241,6 +241,7 @@ class DatabaseTable(models.Model):
         auto_now_add=True,
         blank=True,
         null=True,
+        db_index=True,
     )
     """
     Timestamp of when this row was first added to the database table
@@ -250,6 +251,7 @@ class DatabaseTable(models.Model):
         auto_now=True,
         blank=True,
         null=True,
+        db_index=True,
     )
     """
     Timestamp of when this row was was lasted changed / updated
