@@ -72,7 +72,10 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 - Allow custom html templates and static files that override default shipped by default
 - add `simmate engine` commands like `stats-detail` and `workitems` that show details of workitems in the database
-
+- updated third-party archives (Materials Project, COD, JARVIS, OQMD)
+- eased database updates between simmate versions by using django migrations
+- added `bypass_nones` utility to help handle imperfect datasets where not all entries have a column
+- misc updates to the website interface, especially to the `data explorer` pages
 
 **Fixes**
 

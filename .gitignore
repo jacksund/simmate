@@ -11,10 +11,6 @@ tmp*.glb
 # Dask files created by workers
 dask-worker-space/
 
-# django-db migration files
-# NOTE: some forks comment this out to keep track of their production-level databases
-migrations/
-
 # ignore database files and database json dumps [this may be removed in the future]
 *.sqlite3
 db_dump*json

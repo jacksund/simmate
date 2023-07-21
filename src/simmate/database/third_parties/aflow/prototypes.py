@@ -43,7 +43,7 @@ class AflowPrototype(Structure):
     )
     homepage = "http://www.aflowlib.org/prototype-encyclopedia/"
     source_doi = "https://doi.org/10.1016/j.commatsci.2017.01.017"
-    remote_archive_link = "https://archives.simmate.org/AflowPrototype-2022-06-23.zip"
+    remote_archive_link = "https://archives.simmate.org/AflowPrototype-2023-07-06.zip"
 
     mineral_name = table_column.CharField(max_length=75, blank=True, null=True)
     """
@@ -61,7 +61,11 @@ class AflowPrototype(Structure):
     Pearson symbol for the prototype structure
     """
 
-    strukturbericht_symbol = table_column.CharField(max_length=6)
+    strukturbericht_symbol = table_column.CharField(
+        max_length=6,
+        blank=True,
+        null=True,
+    )
     """
     Strukturbericht symbol for the prototype structure
     """
@@ -96,3 +100,54 @@ class AflowPrototype(Structure):
         # All COD structures have their data mapped to a URL in the same way
         # ex: http://www.aflowlib.org/prototype-encyclopedia/A2B_hP9_150_ef_bd.html"
         return f"http://www.aflowlib.org/prototype-encyclopedia/{self.aflow_id}.html"
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def _load_all_prototypes(cls):
+        """
+        Only use this function if you are part of the Simmate dev team!
+        Users should instead access data via the load_remote_archive method.
+
+        This method is for pulling AFLOW data into the Simmate database.
+        """
+        # AFLOW's supported REST API can be accessed via "AFLUX API". This is a separate
+        # python package, which is maintained at https://github.com/rosenbrockc/aflow.
+        # Note that this not from the official AFLOW team, but it is made such that keywords
+        # are pulled dynamically from the AFLOW servers -- any updates in AFLOW's API should
+        # be properly handled. Also structures are loaded as ASE Atom objects, which we then
+        # convert to pymatgen.
+
+        # This looks like the easiest way to grab all of the data -- as AFLOW doesn't
+        # have any good documentation on doing this.
+        from pymatgen.analysis.prototypes import AFLOW_PROTOTYPE_LIBRARY
+        from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+        from rich.progress import track
+
+        # create database objects but don't save them to the database yet
+        db_objects = []
+        for prototype_data in track(AFLOW_PROTOTYPE_LIBRARY):
+            # first let's grab the structure
+            structure = prototype_data["snl"].structure
+
+            # To see how many unique wyckoff sites there are we also need the
+            # symmetrized structure
+            structure_sym = SpacegroupAnalyzer(structure).get_symmetrized_structure()
+
+            # Organize the data into our database format
+            new_prototype = cls.from_toolkit(
+                structure=structure,
+                mineral_name=prototype_data["tags"]["mineral"],
+                aflow_id=prototype_data["tags"]["aflow"],
+                pearson_symbol=prototype_data["tags"]["pearson"],
+                strukturbericht_symbol=prototype_data["tags"]["strukturbericht"],
+                nsites_wyckoff=len(structure_sym.wyckoff_symbols),
+            )
+            db_objects.append(new_prototype)
+
+        # and save it to our database
+        cls.objects.bulk_create(
+            db_objects,
+            batch_size=15000,
+            ignore_conflicts=True,
+        )

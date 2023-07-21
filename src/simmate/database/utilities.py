@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import shutil
-from pathlib import Path
 
 from django.apps import apps
 from django.core.management import call_command
 
-from simmate.configuration.django.settings import DATABASES
+from simmate.configuration.django.settings import DATABASE_BACKEND, DATABASES
 
 # Lists off which apps to update/create. By default, I do all apps that are installed
 # so this list is grabbed directly from django. I also grab the CUSTOM_APPS to
@@ -30,7 +28,8 @@ def update_database(apps_to_migrate=APPS_TO_MIGRATE, show_logs: bool = True):
 
 
 def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
-    # BUG: Why doesn't call_command("flush") do this? How is it different?
+    # TODO: call_command("flush") could be used in the future to simply
+    # delete all data -- without rerunning migrations
 
     # We can now proceed with reseting the database
     logging.info("Removing database and rebuilding...")
@@ -43,11 +42,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
     #   django-admin reset_db --settings=simmate.configuration.django.settings
     # Note: this does not remove migration files or reapply migrating after
 
-    # Check which
-    using_sqlite = DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
-    using_postgres = DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql"
-
-    if using_sqlite:
+    if DATABASE_BACKEND == "sqlite3":
         # grab the location of the database file. I assume the default
         # database for now.
         db_filename = DATABASES["default"]["NAME"]
@@ -56,7 +51,7 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
         if db_filename.exists():
             db_filename.unlink()
 
-    elif using_postgres:
+    elif DATABASE_BACKEND == "postgresql":
         # We do this with an independent postgress connection, rather than through
         # django so that we can close everything down easily.
         import psycopg2
@@ -129,36 +124,19 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
         cursor.close()
         connection.close()
 
-    elif not using_sqlite and not using_postgres:
+    elif DATABASE_BACKEND not in ["postgresql", "sqlite3"]:
         logging.warning(
             "reseting your database is only supported for SQLite and Postgres."
             " Make sure you only use this function when initially building your "
             "database and not after."
         )
 
-    # go through each app directory and delete all folders named 'migrations'
-    for app_name, app_config in apps.app_configs.items():
-        # Skip if the app was not requested
-        if app_config.label not in apps_to_migrate:
-            continue
-
-        migration_dir = Path(app_config.path) / "migrations"
-        # BUG: I need a good way to avoid deleting initial migrations that
-        # do things like register extensions.
-        # Maybe have these migrations listed as 0000_setup.py and then delete
-        # everything after?
-        # Maybe skip folders that contain a 0001_setup.py?
-        skip_deletes = ["rdkit", "datasets"]
-        if migration_dir.exists() and migration_dir.parent.name not in skip_deletes:
-            shutil.rmtree(migration_dir)
-            continue
-
     # now update the database based on the registered models
     update_database(apps_to_migrate, show_logs=False)
 
     # instead of building the database from scratch, we instead download a
     # prebuilt database file.
-    if using_sqlite and use_prebuilt:
+    if DATABASE_BACKEND == "sqlite3" and use_prebuilt:
         from simmate.database.third_parties import load_default_sqlite3_build
 
         logging.info("Setting up prebuilt database...")
@@ -213,10 +191,8 @@ def load_database_from_json(filename="database_dump.json"):
 
 # BUG: This function isn't working as intended
 # def graph_database(filename="database_graph.png"):
-
 #     # using django-extensions, we want to make an image of all the available
 #     # tables in our database as well as their relationships.
-
 #     # This is the equivalent of running the following command:
 #     #   django-admin graph_models -a -o image_of_models.png --settings=...
 #     call_command("graph_models", output=filename, all_applications=True, layout="fdp")
