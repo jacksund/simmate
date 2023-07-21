@@ -314,8 +314,11 @@ ROOT_URLCONF = "simmate.website.core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # I set DIRS below so I can have a single templates folder
-        "DIRS": [DJANGO_DIRECTORY / "templates"],
+        "DIRS": [
+            SIMMATE_DIRECTORY / "templates",  # let's user easily override html
+            DJANGO_DIRECTORY / "templates",  # a single templates folder
+            # Then APP_DIRS are checked in order
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -388,7 +391,11 @@ STATIC_URL = "/static/"
 STATIC_ROOT = DJANGO_DIRECTORY / "static"
 
 # Extra places for collectstatic to find static files.
-STATICFILES_DIRS = [DJANGO_DIRECTORY / "static_files"]
+STATICFILES_DIRS = [
+    SIMMATE_DIRECTORY / "static_files",  # let's user add their own files
+    DJANGO_DIRECTORY / "static_files",
+]
+
 
 # For the dynamically-created structure files, we need to include the static
 # directory this to work during local testing. This is NOT allowed in a

@@ -68,6 +68,12 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Fixes**
 -->
 
+**Enhancements**
+
+- Allow custom html templates and static files that override default shipped by default
+- add `simmate engine` commands like `stats-detail` and `workitems` that show details of workitems in the database
+
+
 **Fixes**
 
 - fix bug where workers incorrectly grab substring tag matches (e.g. a worker submited with the tag `ex` would incorrectly grab jobs like `ex-01` or `ex-02`)

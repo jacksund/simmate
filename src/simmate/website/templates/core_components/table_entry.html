@@ -1,24 +1,4 @@
 {% load getattribute %}
-<hr>
-<!-- Fields from the base database table -->
-<div class="row">
-    <div class="col-xl-4">
-        <div class="text-center p-1 bg-primary text-light opacity-90">
-            <b>{{ calculation.source }} ID:</b> {{ calculation.id }}
-        </div>
-    </div>
-    <div class="col-xl-4">
-        <div class="text-center p-1 bg-secondary text-light opacity-75">
-            <b>Created:</b> {{ calculation.created_at }}
-        </div>
-    </div>
-    <div class="col-xl-4">
-        <div class="text-center p-1 bg-secondary text-light opacity-75">
-            <b>Last updated:</b> {{ calculation.updated_at }}
-        </div>
-    </div>
-</div>
-<hr>
 <!-- Iterate through the main tables that we've prebuilt pages for -->
 {% if calculation.table_name == "StaticEnergy" %}
     {% include "core_components/base_data_types/static-energy.html" %}
