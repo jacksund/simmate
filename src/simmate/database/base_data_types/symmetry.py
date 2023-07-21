@@ -83,4 +83,4 @@ class Spacegroup(DatabaseTable):
             db_objects.append(spacegroup_db)
 
         # now save this information to the database
-        cls.objects.bulk_create(db_objects)
+        cls.objects.bulk_create(db_objects, ignore_conflicts=True)
