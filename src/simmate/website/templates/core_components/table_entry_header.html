@@ -1,0 +1,20 @@
+{# Gives a tabbed header of fields from the base database table (id, created_at, updated_at) #}
+<hr>
+<div class="row">
+    <div class="col-xl-4">
+        <div class="text-center p-1 bg-primary text-light opacity-90">
+            <b>{{ calculation.source }} ID:</b> {{ calculation.id }}
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="text-center p-1 bg-secondary text-light opacity-75">
+            <b>Created:</b> {{ calculation.created_at }}
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="text-center p-1 bg-secondary text-light opacity-75">
+            <b>Last updated:</b> {{ calculation.updated_at }}
+        </div>
+    </div>
+</div>
+<hr>

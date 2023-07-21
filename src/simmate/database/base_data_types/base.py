@@ -1369,6 +1369,10 @@ class DatabaseTable(models.Model):
     # Methods that link to the website UI
     # -------------------------------------------------------------------------
 
+    html_template_table: str = None
+    html_template_entry: str = None
+    # experimental override for templates using by the Data Explorer app
+
     @classmethod
     @property
     def url_table(self) -> str:

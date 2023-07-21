@@ -56,23 +56,93 @@
         </ul>
         <div class="tab-content">
             <div class="tab-pane show active" id="smiles">
-                <p class="text-center">{{ calculation.smiles }}</p>
+                <div class="row bg-light p-0 m-0 border border-secondary-lighten">
+                    <div class="col-11 mt-1">
+                        <pre id="smiles_text" class="text-center">{{ calculation.smiles }}</pre>
+                    </div>
+                    <div class="col-1">
+                        <button onclick="copyTextById('smiles_text')"
+                                class="btn btn-outline-secondary btn-sm border border-light"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="hover"
+                                data-bs-placement="bottom"
+                                data-bs-content="Click to copy">
+                            <i class="mdi mdi-content-copy"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="tab-pane" id="inchi">
-                <p class="text-center">{{ calculation.inchi }}</p>
+                <div class="row bg-light p-0 m-0 border border-secondary-lighten">
+                    <div class="col-11 mt-1">
+                        <pre id="inchi_text" class="text-center">{{ calculation.inchi }}</pre>
+                    </div>
+                    <div class="col-1">
+                        <button onclick="copyTextById('inchi_text')"
+                                class="btn btn-outline-secondary btn-sm border border-light"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="hover"
+                                data-bs-placement="bottom"
+                                data-bs-content="Click to copy">
+                            <i class="mdi mdi-content-copy"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="tab-pane" id="inchi_key">
-                <p class="text-center">{{ calculation.inchi_key }}</p>
+                <div class="row bg-light p-0 m-0 border border-secondary-lighten">
+                    <div class="col-11 mt-1">
+                        <pre id="inchi_key_text" class="text-center">{{ calculation.inchi_key }}</pre>
+                    </div>
+                    <div class="col-1">
+                        <button onclick="copyTextById('inchi_key_text')"
+                                class="btn btn-outline-secondary btn-sm border border-light"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="hover"
+                                data-bs-placement="bottom"
+                                data-bs-content="Click to copy">
+                            <i class="mdi mdi-content-copy"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="tab-pane" id="sdf_ctab">
-                <p>
-                    <small>{{ calculation.molecule|linebreaks }}</small>
-                </p>
+                <div class="row bg-light p-0 m-0 border border-secondary-lighten">
+                    <div class="col-11 mt-1">
+                        <pre id="sdf_ctab_text">
+                            <small>{{ calculation.molecule }}</small>
+                        </pre>
+                    </div>
+                    <div class="col-1">
+                        <button onclick="copyTextById('sdf_ctab_text')"
+                                class="btn btn-outline-secondary btn-sm border border-light"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="hover"
+                                data-bs-placement="bottom"
+                                data-bs-content="Click to copy">
+                            <i class="mdi mdi-content-copy"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="tab-pane" id="origmol">
-                <p>
-                    <small>{{ calculation.molecule_original|linebreaks }}</small>
-                </p>
+                <div class="row bg-light p-0 m-0 border border-secondary-lighten">
+                    <div class="col-11 mt-1">
+                        <pre id="origmol_text">
+                            <small>{{ calculation.molecule_original }}</small>
+                        </pre>
+                    </div>
+                    <div class="col-1">
+                        <button onclick="copyTextById('origmol_text')"
+                                class="btn btn-outline-secondary btn-sm border border-light"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="hover"
+                                data-bs-placement="bottom"
+                                data-bs-content="Click to copy">
+                            <i class="mdi mdi-content-copy"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- end molecule formats -->
@@ -118,6 +188,10 @@
                     <tr>
                         <td>TPSA (predicted)</td>
                         <td>{{ calculation.tpsa_rdkit|floatformat:1 }}</td>
+                    </tr>
+                    <tr>
+                        <td>SAS</td>
+                        <td>{{ calculation.synthetic_accessibility|floatformat:1 }}</td>
                     </tr>
                 </tbody>
             </table>
