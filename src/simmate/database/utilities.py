@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import shutil
-from pathlib import Path
 
 from django.apps import apps
 from django.core.management import call_command
@@ -133,23 +131,6 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
             "database and not after."
         )
 
-    # go through each app directory and delete all folders named 'migrations'
-    for app_name, app_config in apps.app_configs.items():
-        # Skip if the app was not requested
-        if app_config.label not in apps_to_migrate:
-            continue
-
-        migration_dir = Path(app_config.path) / "migrations"
-        # BUG: I need a good way to avoid deleting initial migrations that
-        # do things like register extensions.
-        # Maybe have these migrations listed as 0000_setup.py and then delete
-        # everything after?
-        # Maybe skip folders that contain a 0001_setup.py?
-        skip_deletes = ["rdkit", "datasets"]
-        if migration_dir.exists() and migration_dir.parent.name not in skip_deletes:
-            shutil.rmtree(migration_dir)
-            continue
-
     # now update the database based on the registered models
     update_database(apps_to_migrate, show_logs=False)
 
@@ -210,10 +191,8 @@ def load_database_from_json(filename="database_dump.json"):
 
 # BUG: This function isn't working as intended
 # def graph_database(filename="database_graph.png"):
-
 #     # using django-extensions, we want to make an image of all the available
 #     # tables in our database as well as their relationships.
-
 #     # This is the equivalent of running the following command:
 #     #   django-admin graph_models -a -o image_of_models.png --settings=...
 #     call_command("graph_models", output=filename, all_applications=True, layout="fdp")

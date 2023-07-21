@@ -87,12 +87,13 @@ class OqmdStructure(Structure):
         3hrs to run.
         """
 
-        import pandas
-        from rich.progress import track
         from pathlib import Path
 
+        import pandas
+        from rich.progress import track
+
         from simmate.toolkit import Structure as ToolkitStructure
-        
+
         base_directory = Path(base_directory)
 
         # load the csv that contains the list of filenames and their values
@@ -131,7 +132,7 @@ class OqmdStructure(Structure):
             batch_size=15000,
             ignore_conflicts=True,
         )
-    
+
         return failed_entries
 
     @classmethod
