@@ -21,3 +21,12 @@
         });
     });
 </script>
+<!-- Extra javascript that enables copy-to-clipboard for a given element -->
+<script>
+    function copyTextById(id2copy) {
+        // Get the text field
+        var copyText = document.getElementById(id2copy);
+        // Copy the text inside the text field
+        navigator.clipboard.writeText(copyText.innerHTML);
+    }
+</script>

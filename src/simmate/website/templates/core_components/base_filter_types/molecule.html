@@ -1,0 +1,52 @@
+{% load crispy_forms_tags %}
+{# Chemical feature filters #}
+<div class="card mb-0">
+    <div class="card-header" id="headingCompFilters">
+        <h5>
+            <a class="custom-accordion-title d-block"
+               data-bs-toggle="collapse"
+               href="#collapseCompFilters"
+               aria-expanded="true"
+               aria-controls="collapseCompFilters">
+                Chemical Features
+                <i class="mdi mdi-chevron-down accordion-arrow"></i>
+            </a>
+        </h5>
+    </div>
+    <div id="collapseCompFilters"
+         class="collapse"
+         aria-labelledby="headingCompFilters"
+         data-bs-parent="#accordionExample">
+        <div class="card-body">
+            {% include "core_components/elements/range_slider.html" with label="Numer of atoms:" min=1 max=200 form_field=form.num_atoms__range only %}
+            {% include "core_components/elements/range_slider.html" with label="Numer of stereocenters:" min=0 max=10 form_field=form.num_stereocenters__range only %}
+            {% include "core_components/elements/range_slider.html" with label="Numer of rings:" min=0 max=10 form_field=form.num_rings__range only %}
+            {% include "core_components/elements/range_slider.html" with label="Numer of H-bond Acceptors:" min=0 max=10 form_field=form.num_h_acceptors__range only %}
+            {% include "core_components/elements/range_slider.html" with label="Numer of H-bond Donors:" min=0 max=50 form_field=form.num_h_donors__range only %}
+        </div>
+    </div>
+</div>
+{# Predicted properties filters #}
+<div class="card mb-0">
+    <div class="card-header" id="headingStructFilters">
+        <h5>
+            <a class="custom-accordion-title d-block"
+               data-bs-toggle="collapse"
+               href="#collapseStructFilters"
+               aria-expanded="true"
+               aria-controls="collapseStructFilters">
+                Predicted Properties
+                <i class="mdi mdi-chevron-down accordion-arrow"></i>
+            </a>
+        </h5>
+    </div>
+    <div id="collapseStructFilters"
+         class="collapse"
+         aria-labelledby="headingStructFilters"
+         data-bs-parent="#accordionExample">
+        <div class="card-body">
+            {% include "core_components/elements/range_slider.html" with label="LogP (predicted)" min=-10 max=10 form_field=form.log_p_rdkit__range only %}
+            {% include "core_components/elements/range_slider.html" with label="Polar Surface Area (predicted)" min=0 max=1000 form_field=form.log_p_rdkit__range only %}
+        </div>
+    </div>
+</div>

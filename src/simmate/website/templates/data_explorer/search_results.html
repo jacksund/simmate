@@ -1,55 +1,83 @@
-<div id="search-results" class="container p-4">
-    <h2>Search Results:</h2>
+<div id="search-results" class="row">
     {% if calculations %}
         {% load chemical_formula_filter %}
-        <div class="alert alert-success d-flex align-items-center p-2"
+        <div class="alert alert-primary d-flex align-items-center mt-2"
              role="alert">
-            <i class="bi bi-check-circle-fill fs-4"></i>
-            <div class="p-3">
-                This table includes <b>{{ ncalculations_matching }}</b> results that match your search criteria. These results
-                were
-                filtered from the <b>{{ ncalculations_possible }}</b> total possible results.
+            <i class="mdi mdi-check-circle"></i>&nbsp;&nbsp;
+            <div>
+                Showing <b>{{ calculations|length }}</b> of <b>{{ ncalculations_matching }}</b> filtered results. The full dataset has <b>{{ ncalculations_possible }}</b> entries.
             </div>
         </div>
-        <table id="SearchResultsTable"
-               class="table table-striped"
-               style="width:100%">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Dashboards</th>
-                    <th>Full Formula</th>
-                    <th>Spacegroup</th>
-                    <th>Density</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for calculation in calculations %}
+        {% if "Structure" in filterset_mixins %}
+            <table id="SearchResultsTable"
+                   class="table table-striped"
+                   style="width:100%">
+                <thead>
                     <tr>
-                        <td>{{ calculation.id }}</td>
-                        <td>
-                            <a href="{{ calculation.id }}">simmate</a> / <a href="{{ calculation.external_link }}" target="_blank">provider</a>
-                        </td>
-                        <td>{{ calculation.formula_full | chemical_formula }}</td>
-                        <td>{{ calculation.spacegroup.number }}</td>
-                        <td>{{ calculation.density | floatformat:3 }}</td>
+                        <th>ID</th>
+                        <th>Dashboards</th>
+                        <th>Full Formula</th>
+                        <th>Spacegroup</th>
+                        <th>Density</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for calculation in calculations %}
+                        <tr>
+                            <td>{{ calculation.id }}</td>
+                            <td>
+                                <a href="{{ calculation.id }}">simmate</a> / <a href="{{ calculation.external_link }}" target="_blank">provider</a>
+                            </td>
+                            <td>{{ calculation.formula_full | chemical_formula }}</td>
+                            <td>{{ calculation.spacegroup.number }}</td>
+                            <td>{{ calculation.density | floatformat:3 }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+        {% if "Molecule" in filterset_mixins %}
+            {% for calculation in calculations %}
+                <div class="col-2">
+                    <div class="card border-secondary border ribbon-box">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="py-1 text-light bg-primary text-center fw-bold rounded col-12">id = {{ calculation.id }}</div>
+                            </div>
+                            <div class="row text-center my-2">
+                                <div class="col-12">
+                                    <script>doodle_molecule('{{ calculation.sdf_str }}', {{ calculation.id }}, 100)</script>
+                                </div>
+                            </div>
+                            <div class="row text-center">
+                                <div class="col">
+                                    <a role="button"
+                                       class="btn btn-outline-primary btn-sm"
+                                       href="{{ calculation.id }}">View  <i class="mdi mdi-open-in-new"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
         {% include "core_components/search_results_pagination.html" %}
     {% else %}
         <div class="alert alert-danger d-flex align-items-center p-2" role="alert">
-            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
-            <div class="p-3">
-                <b>No calculations found matching your search criteria!</b>
+            <div>
+                <i class="mdi mdi-alert-circle"></i>&nbsp;&nbsp;<b>No entries were found that match your search criteria!</b>
                 <br>
                 <br>
                 <i><small>
+                    <b>For crystal datasets:</b>
                     Make sure you don't have a typo in your search. If you are searching
                     for "Li-Co-O", common typos include searching "LiCoO" (missing hyphens),
                     "Li-Co-O-" (extra hyphen), or "li-co-o" (lowercase). We are working
                     to account for these common mistakes, but you'll have to fix these until then!
+                    <br>
+                    <br>
+                    <b>For molecular datasets:</b>
+                    Make sure you are using a properly formatted SMILES/INCHI/SDF input. You can test this by pasting into ChemDraw.
                     <br>
                     <br>
                     It is also possible that there just aren't any results for your search.

@@ -4,6 +4,7 @@ import importlib
 import logging
 import os
 import sys
+from functools import wraps
 
 import requests
 
@@ -238,3 +239,62 @@ def get_app_submodule(
     has_submodule = importlib.util.find_spec(submodule_path) is not None
 
     return submodule_path if has_submodule else None
+
+
+def bypass_nones(bypass_kwarg: str = None, multi_cols: bool = False):
+    """
+    experimental utility that removes None values before passing a list of
+    entries to a method or function. The method or function then returns
+    a list of results with the None values placed back in the proper index.
+    """
+    # https://stackoverflow.com/questions/5929107/decorators-with-parameters
+
+    def decorator(function_to_wrap):
+        @wraps(function_to_wrap)
+        def wrapper(*args, **kwargs):
+            # breakpoint()
+
+            # grab the list of original inputs
+            entries = kwargs.pop(bypass_kwarg)
+            # BUG: position arguments will cause errors
+
+            # remove None values and keep a record of their original positions
+            passed_entries = []
+            failed_idxs = []
+            for idx, entry in enumerate(entries):
+                if entry:
+                    passed_entries.append(entry)
+                else:
+                    failed_idxs.append(idx)
+            kwargs[bypass_kwarg] = passed_entries
+
+            # breakpoint()
+
+            # RUN THE ORIGINAL METHOD
+            results_orig = function_to_wrap(*args, **kwargs)
+
+            # breakpoint()
+
+            if not multi_cols:
+                results_orig = [results_orig]
+            results_final = []
+            for column in results_orig:
+                # Add back None values in the proper position for this single column
+                col_final = []
+                failed_count = 0
+                for idx, result in enumerate(column):
+                    while (idx + failed_count) in failed_idxs:
+                        failed_count += 1
+                        col_final.append(None)
+                    col_final.append(result)
+                # there may be extra None values needed at the end. We add Nones until
+                # we get the correct list length
+                while len(entries) != len(col_final):
+                    col_final.append(None)
+                results_final.append(col_final)
+
+            return results_final if multi_cols else results_final[0]
+
+        return wrapper
+
+    return decorator
