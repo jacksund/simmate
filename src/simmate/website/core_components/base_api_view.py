@@ -77,8 +77,11 @@ class SimmateAPIViewSet(GenericViewSet):
                 "form": filterset.form,
                 "extra_filters": filterset._meta.model.api_filters_extra,
                 "calculations": serializer.instance,  # return python objs, not dict
+                # OPTIMIZE: counting can take ~20 sec for ~10 mil rows, which is
+                # terrible for a web UI. I tried a series of fixes but no luck:
+                #   https://stackoverflow.com/questions/55018986/
                 "ncalculations_matching": queryset.count(),
-                "ncalculations_possible": self.get_queryset().count(),
+                # "ncalculations_possible": self.get_queryset().count(), # too slow
                 **self.paginator.get_html_context(),
                 **self.get_list_context(request, **kwargs),
             }

@@ -1,3 +1,4 @@
+{% load humanize %}
 <div id="search-results" class="row">
     {% if calculations %}
         {% load chemical_formula_filter %}
@@ -5,7 +6,8 @@
              role="alert">
             <i class="mdi mdi-check-circle"></i>&nbsp;&nbsp;
             <div>
-                Showing <b>{{ calculations|length }}</b> of <b>{{ ncalculations_matching }}</b> filtered results. The full dataset has <b>{{ ncalculations_possible }}</b> entries.
+                Showing <b>{{ calculations|length }}</b> of <b>{{ ncalculations_matching|intcomma }}</b> filtered results
+                {# (total counts too slow) The full dataset has <b>{{ ncalculations_possible|intcomma }}</b> entries. #}
             </div>
         </div>
         {% if "Structure" in filterset_mixins %}
