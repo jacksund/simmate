@@ -175,8 +175,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
+    "django.contrib.humanize",
     # Other apps installed with Django to consider
-    #   "django.contrib.humanize",
     #   "django.contrib.postgres",
     #   "django.contrib.redirects",
     #   "django.contrib.sitemaps",

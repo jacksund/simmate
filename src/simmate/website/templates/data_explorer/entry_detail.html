@@ -24,13 +24,13 @@
                     <a href="?format=api" target="_blank">API</a>
                     &
                     <a href="?format=json" target="_blank">JSON</a>)</small>
-                </h4>
-            </div>
+            </h4>
         </div>
     </div>
-    {% include "core_components/table_entry_header.html" %}
-    {# Build views for the table entry's data #}
-    {% block entrycontent %}
-        {% include "core_components/table_entry.html" %}
-    {% endblock %}
+</div>
+{% include "core_components/table_entry_header.html" %}
+{# Build views for the table entry's data #}
+{% block entrycontent %}
+    {% include "core_components/table_entry.html" %}
+{% endblock %}
 {% endblock %}
