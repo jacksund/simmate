@@ -533,6 +533,12 @@ LOGOUT_REDIRECT_URL = "/accounts/loginstatus/"
 
 # -----------------------------------------------------------------------------
 
+# Many auth endpoints require a https instead of http response:
+#   https://stackoverflow.com/questions/67726070/
+# We only use this in production
+if not DEBUG:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+
 if REQUIRE_LOGIN:
     MIDDLEWARE.append("simmate.website.require_login.RequireLoginMiddleware")
 
