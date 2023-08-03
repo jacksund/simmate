@@ -78,6 +78,25 @@ SECRET_KEY = os.getenv(
 # while testing my server. I may change this back in the future.
 # from django.core.management.utils import get_random_secret_key
 
+# Sometimes we lock down the website to registered/approved users.
+# By default, we allow anonymous users to explore because this makes things like
+# REST API calls much easier for them. In special cases, such as industry, we
+# ONLY let users sign in via a specific allauth endpoint. An example of this
+# is Corteva limiting users to those approved via their Microsoft auth.
+REQUIRE_LOGIN = os.getenv("REQUIRE_LOGIN", "False") == "True"
+# when setting REQUIRE_INTERNAL_LOGIN, set it to the allauth provider type
+# (such as "microsoft")
+REQUIRE_LOGIN_INTERNAL = os.getenv("REQUIRE_LOGIN_INTERNAL", "False")
+if REQUIRE_LOGIN_INTERNAL == "False":
+    REQUIRE_LOGIN_INTERNAL = False
+else:
+    assert REQUIRE_LOGIN_INTERNAL in ["microsoft", "google"]
+    REQUIRE_LOGIN = True
+# example: r'/apps/spotfire(.*)$'
+REQUIRE_LOGIN_EXCEPTIONS = [
+    e for e in os.getenv("REQUIRE_LOGIN_EXCEPTIONS", "").split(";") if e
+]
+
 # --------------------------------------------------------------------------------------
 
 # DATBASE CONNECTION
@@ -487,6 +506,20 @@ if GITHUB_CLIENT_ID and GITHUB_SECRET:
         "APP": {"client_id": GITHUB_CLIENT_ID, "secret": GITHUB_SECRET}
     }
 
+# Sign-in via Microsoft accounts
+MICROSOFT_CLIENT_ID = os.getenv("MICROSOFT_CLIENT_ID", None)
+MICROSOFT_SECRET = os.getenv("MICROSOFT_SECRET", None)
+if MICROSOFT_CLIENT_ID and MICROSOFT_SECRET:
+    INSTALLED_APPS.append("allauth.socialaccount.providers.microsoft")
+    SOCIALACCOUNT_PROVIDERS["microsoft"] = {
+        "APP": {
+            "client_id": MICROSOFT_CLIENT_ID,
+            "secret": MICROSOFT_SECRET,
+            "key": "",
+        },
+        "TENANT": "organizations",  # limits to internal use
+    }
+
 # Initiate social login immediately -- rather than jumping to a separate
 # page and then posting.
 # SECURITY: consider removing per django-allauth's recommendation
@@ -495,6 +528,19 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 # options for login/logoff views
 LOGIN_REDIRECT_URL = "/accounts/profile/"  # this is already the default
 LOGOUT_REDIRECT_URL = "/accounts/loginstatus/"
+
+# -----------------------------------------------------------------------------
+
+if REQUIRE_LOGIN:
+    MIDDLEWARE.append("simmate.website.require_login.RequireLoginMiddleware")
+
+LOGIN_REQUIRED_URLS = (r"/(.*)$",)
+LOGIN_REQUIRED_URLS_EXCEPTIONS = (
+    r"/accounts(.*)$",
+    r"/admin(.*)$",
+    r"/static(.*)$",
+    *REQUIRE_LOGIN_EXCEPTIONS,
+)
 
 # -----------------------------------------------------------------------------
 

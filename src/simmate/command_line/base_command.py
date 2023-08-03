@@ -59,11 +59,7 @@ def run_server():
     Runs a local test server for the Simmate website interface
 
     While this command is running, you can then view the working website
-    at http://127.0.0.1:8000/
-
-    This command is exactly the same as running:
-
-    `django-admin runserver --settings=simmate.configuration.django.settings`
+    at http://localhost/ (aka http://127.0.0.1:80/)
     """
 
     # BUG: windows dev version is throwing issues with this code section here,
@@ -85,12 +81,15 @@ def run_server():
 
     logging.info("Setting up local test server...")
     subprocess.run(
-        "django-admin runserver --settings=simmate.configuration.django.settings --insecure",
+        "django-admin runserver 80 --settings=simmate.configuration.django.settings --insecure",
         shell=True,
     )
     # BUG: we added the "--insecure" flag in order to serve static files with
     # the DEBUG=False mode turned on. This makes the file serving slower though.
     #   https://stackoverflow.com/questions/5836674/
+    # BUG: normally the 8000 port is used, but we change it to 80 so that
+    # some allauth endpoints work for local testing. For example, Microsoft
+    # doesn't allow redirect to the 8000 port.
 
 
 @simmate_app.command()

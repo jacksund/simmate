@@ -45,10 +45,12 @@
                                             {% if provider.id == "google" %}
                                                 <a class="btn btn-outline-danger"
                                                    href="{% provider_login_url provider.id process='login' scope=scope auth_params=auth_params %}"><i class="mdi mdi-google"></i> Log in using Google</a>
-                                            {% endif %}
-                                            {% if provider.id == "github" %}
+                                            {% elif provider.id == "github" %}
                                                 <a class="btn btn-outline-secondary"
                                                    href="{% provider_login_url provider.id process='login' scope=scope auth_params=auth_params %}"><i class="mdi mdi-github"></i> Log in using Github</a>
+                                            {% elif provider.id == "microsoft" %}
+                                                <a class="btn btn-outline-info"
+                                                   href="{% provider_login_url provider.id process='login' scope=scope auth_params=auth_params %}"><i class="mdi mdi-microsoft"></i> Log in using Microsoft</a>
                                             {% endif %}
                                         </div>
                                     {% endfor %}

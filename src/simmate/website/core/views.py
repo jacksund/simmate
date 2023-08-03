@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db.models import F
 from django.shortcuts import render
 
@@ -30,6 +31,10 @@ def loginstatus(request):
     context = {}
     template = "account/loginstatus.html"
     return render(request, template, context)
+
+
+def permission_denied(request):
+    raise PermissionDenied
 
 
 def home(request):
