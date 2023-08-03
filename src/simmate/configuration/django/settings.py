@@ -96,6 +96,8 @@ else:
 REQUIRE_LOGIN_EXCEPTIONS = [
     e for e in os.getenv("REQUIRE_LOGIN_EXCEPTIONS", "").split(";") if e
 ]
+LOGIN_MESSAGE = os.getenv("LOGIN_MESSAGE", "")
+
 
 # --------------------------------------------------------------------------------------
 
