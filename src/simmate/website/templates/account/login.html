@@ -7,6 +7,9 @@
     {% load crispy_forms_tags %}
     {% load static %}
     {% load account socialaccount %}
+    {% load getsetting %}
+    {% getsetting "REQUIRE_LOGIN_INTERNAL" as REQUIRE_LOGIN_INTERNAL %}
+    {% getsetting "LOGIN_MESSAGE" as LOGIN_MESSAGE %}
     <div class="account-pages pt-2 pt-sm-5 pb-4 pb-sm-5">
         <div class="container">
             <div class="row justify-content-center">
@@ -32,7 +35,11 @@
                                             Please login to see this page.
                                         {% endif %}
                                     {% else %}
-                                        Please login to access extra features.
+                                        {% if LOGIN_MESSAGE %}
+                                            {{ LOGIN_MESSAGE }}
+                                        {% else %}
+                                            Please login to access extra features.
+                                        {% endif %}
                                     {% endif %}
                                 </p>
                             </div>
@@ -45,38 +52,44 @@
                                             {% if provider.id == "google" %}
                                                 <a class="btn btn-outline-danger"
                                                    href="{% provider_login_url provider.id process='login' scope=scope auth_params=auth_params %}"><i class="mdi mdi-google"></i> Log in using Google</a>
-                                            {% endif %}
-                                            {% if provider.id == "github" %}
+                                            {% elif provider.id == "github" %}
                                                 <a class="btn btn-outline-secondary"
                                                    href="{% provider_login_url provider.id process='login' scope=scope auth_params=auth_params %}"><i class="mdi mdi-github"></i> Log in using Github</a>
+                                            {% elif provider.id == "microsoft" %}
+                                                <a class="btn btn-outline-info"
+                                                   href="{% provider_login_url provider.id process='login' scope=scope auth_params=auth_params %}"><i class="mdi mdi-microsoft"></i> Log in using Microsoft</a>
                                             {% endif %}
                                         </div>
                                     {% endfor %}
                                 </div>
                             {% endif %}
-                            <!-- Regular sign-in -->
-                            <form method="POST" action="{% url 'account_login' %}" novalidate>
-                                {% csrf_token %}
-                                {{ form | crispy }}
-                                {% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %}
-                                <div class="mt-3 mb-2 mb-0 text-center">
-                                    <a href="#" class="text-muted mt-1"><small>Forgot your
-                                    password?</small></a>
-                                </div>
-                                <div class="mb-3 mb-0 text-center">
-                                    <button class="primaryAction btn btn-primary" type="submit">Log In</button>
-                                </div>
-                            </form>
+                            {% if not REQUIRE_LOGIN_INTERNAL %}
+                                <!-- Regular sign-in -->
+                                <form method="POST" action="{% url 'account_login' %}" novalidate>
+                                    {% csrf_token %}
+                                    {{ form | crispy }}
+                                    {% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %}
+                                    <div class="mt-3 mb-2 mb-0 text-center">
+                                        <a href="#" class="text-muted mt-1"><small>Forgot your
+                                        password?</small></a>
+                                    </div>
+                                    <div class="mb-3 mb-0 text-center">
+                                        <button class="primaryAction btn btn-primary" type="submit">Log In</button>
+                                    </div>
+                                </form>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="row mt-3">
-                        <div class="col-12 text-center">
-                            <p class="text-muted">
-                                Don't have an account?
-                                <a href="{% url 'account_signup' %}" class="text-muted ms-1"><b>Sign Up</b></a>
-                            </p>
+                    {% if not REQUIRE_LOGIN_INTERNAL %}
+                        <div class="row mt-3">
+                            <div class="col-12 text-center">
+                                <p class="text-muted">
+                                    Don't have an account?
+                                    <a href="{% url 'account_signup' %}" class="text-muted ms-1"><b>Sign Up</b></a>
+                                </p>
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

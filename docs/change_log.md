@@ -76,6 +76,9 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - eased database updates between simmate versions by using django migrations
 - added `bypass_nones` utility to help handle imperfect datasets where not all entries have a column
 - misc updates to the website interface, especially to the `data explorer` pages
+- add Microsoft allauth support to sign in use external account
+- allow "login required" access to server via evironment variables (disabled by default)
+- allow "internal only" access to server via evironment variables (disabled by default)
 
 **Fixes**
 
