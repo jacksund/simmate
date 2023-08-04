@@ -218,6 +218,11 @@ INSTALLED_APPS = [
     # (i.e. AJAX calls can be made to update the views)
     "django_unicorn",
     #
+    # Django simple history lets you track history of changes (and who made
+    # those changes) for a given model. This is important for models that users
+    # interact with and edit in the UI
+    "simple_history",
+    #
     # Other third-party apps/tools to consider. Note that some of these don't
     # need to be installed apps while some also request different setups.
     #   django-ratelimit
@@ -327,6 +332,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # This is for tracking WHO changes a model (attaches User)
+    "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
 # "core" here is based on the name of my main django folder
