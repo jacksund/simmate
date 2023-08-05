@@ -440,9 +440,18 @@ CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 # These settings help configure djangorestframework and our REST API
 REST_FRAMEWORK = {
-    # The REST framework has both authentication AND permission classes. By
-    # default I allow anything, but may revisit these if the user-base ever grows:
-    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    # The REST framework has both authentication AND permission classes. Adding
+    # the auth classes ensure we have user data available when rendering the
+    # template. Then I allow anyone (anonymous and signed in users) to access
+    # the REST APIs. Note, even though this is allow-all, we still have the
+    # "RequireLoginMiddleware" applied elsewhere if the admin choses.
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ],
     # Because we have a massive number of results for different endpoints,
     # we want to set results to be paginated by 25 results per page. This
     # way we don't have to set a page limit for every individual endpoint. Note
