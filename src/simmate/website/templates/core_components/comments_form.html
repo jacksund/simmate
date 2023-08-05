@@ -1,0 +1,65 @@
+{% load comments %}
+{% load crispy_forms_tags %}
+{# Start of Sidebar-right #}
+<div class="end-bar">
+    {# sidebar header #}
+    <div class="rightbar-title">
+        <a href="javascript:void(0);" class="end-bar-toggle float-end">
+            <i class="dripicons-cross noti-icon"></i>
+        </a>
+        <h5 class="m-0">Discussion</h5>
+    </div>
+    {# sidebar content #}
+    <div class="rightbar-content h-100" data-simplebar>
+        <div class="p-3">
+            {# Comment Thread #}
+            {% get_comment_list for calculation as comment_list %}
+            <hr>
+            {% for comment in comment_list %}
+                <div class="text-primary">
+                    <b>{{ comment.user_name }}</b>
+                    <small><em>{{ comment.submit_date|date:"P m-d-Y" }}</em></small>
+                </div>
+                <div class="text-dark">{{ comment.comment }}</div>
+                <hr>
+            {% endfor %}
+            {# Comment Form #}
+            {% if user.is_authenticated %}
+                {% get_comment_form for calculation as form %}
+                <form action="{% comment_form_target %}" method="POST">
+                    {% csrf_token %}
+                    {# form.comment --> but wit custom rendering #}
+                    <textarea name="comment"
+                              id="id_comment"
+                              maxlength="3000"
+                              cols="40"
+                              rows="2"
+                              class="form-control"
+                              required=""
+                              placeholder="add a new comment"></textarea>
+                    {# form.honeypot BUG: for some reason adding this causes the form submission to fail #}
+                    {{ form.content_type }}
+                    {{ form.object_pk }}
+                    {{ form.timestamp }}
+                    {{ form.security_hash }}
+                    <input type="hidden" name="next" value="{{ request.path }}" />
+                    <div class="text-center">
+                        <div class="p-3">
+                            <button type="submit" class="btn btn-primary" id="id_submit">
+                                <i class="mdi mdi-plus"></i>&nbsp;&nbsp;Add comment
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            {% else %}
+                <p>
+                    Please <a href="{% url 'auth_login' %}">log in</a> to leave a comment.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{# Toggle sidebar & Search buttons #}
+<button type="button" class="btn btn-dark end-bar-toggle">
+    <i class="mdi mdi-comment py-1"></i>&nbsp;&nbsp;View & Add Comments
+</button>
