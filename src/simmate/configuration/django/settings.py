@@ -223,6 +223,10 @@ INSTALLED_APPS = [
     # interact with and edit in the UI
     "simple_history",
     #
+    # Django contrib comments let you track comments on a model and handles
+    # moderation / user / date features for you.
+    "django_comments",
+    #
     # Other third-party apps/tools to consider. Note that some of these don't
     # need to be installed apps while some also request different setups.
     #   django-ratelimit

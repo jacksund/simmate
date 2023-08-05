@@ -71,6 +71,7 @@ dependencies=[
     #
     # Extra (smaller) dependencies & utilities
     "django-allauth >=0.50.0, <=0.54.0",  # for website accounts and google/github sign-ins
+    "django-contrib-comments >=2.2.0, <=2.2.0",  # for tracking user comments in web
     "django-crispy-forms >=1.13.0, <=1.14.0",  # for formatting of online forms
     "django-pandas >=0.6.6, <=0.6.6",  # for converting QuerySets to PandasDataFrames
     "django-unicorn >=0.50.0, <=0.50.0",  # for responsive web UI (AJAX calls)
