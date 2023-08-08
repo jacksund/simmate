@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import importlib
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import F
 from django.shortcuts import render
 
-from simmate.configuration.django.settings import SIMMATE_APPS
+from simmate.configuration.django.settings import PROFILE_VIEW, SIMMATE_APPS
 from simmate.database.third_parties import (
     AflowStructure,
     CodStructure,
@@ -16,15 +18,34 @@ from simmate.database.third_parties import (
 from simmate.utilities import get_app_submodule, get_class
 from simmate.website.data_explorer.forms import ChemicalSystemForm
 
+# -----------------------------------------------------------------------------
+
+# this section is wacky because we want to dynamically set the profile fxn/view
+# using either a default or some env variable (which allows people to override it)
+
 
 @login_required
-def profile(request):
+def profile_default_view(request):
     # !!! For future reference, you can grab user-associated data via...
     # data = request.user.relateddata.all()
 
     context = {}
     template = "account/profile.html"
     return render(request, template, context)
+
+
+@login_required
+def profile(request):
+    if not PROFILE_VIEW:
+        return profile_default_view(request)  # This is the function above
+    else:
+        # we assume the view is named "profile" inside this module
+        profile_module = importlib.import_module(PROFILE_VIEW)
+        profile_view = getattr(profile_module, "profile")
+        return profile_view(request)
+
+
+# -----------------------------------------------------------------------------
 
 
 def loginstatus(request):
