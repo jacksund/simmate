@@ -24,6 +24,7 @@ class Spacegroup(DatabaseTable):
         point_group=["exact"],
     )
 
+    id = None
     source = None
     """
     The source column is disabled for this table because this is common
