@@ -1224,7 +1224,7 @@ class DatabaseTable(models.Model):
             class Meta:
                 table = DatabaseTable
                 fields = dict(
-                    id=["exact"],  # --> automatically added...?
+                    id=["exact"],
                     created_at=["range"],
                     updated_at=["range"],
                 )
