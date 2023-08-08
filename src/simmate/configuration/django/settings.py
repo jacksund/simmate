@@ -98,6 +98,9 @@ REQUIRE_LOGIN_EXCEPTIONS = [
 ]
 LOGIN_MESSAGE = os.getenv("LOGIN_MESSAGE", "")
 
+# This is for setting the database via an connection URL. This is done as
+# an environment variable to allow setup with DigitalOcean
+PROFILE_VIEW = os.getenv("PROFILE_VIEW", None)
 
 # --------------------------------------------------------------------------------------
 
@@ -453,14 +456,14 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.AllowAny",
     ],
     # Because we have a massive number of results for different endpoints,
-    # we want to set results to be paginated by 25 results per page. This
+    # we want to set results to be paginated by 20 results per page. This
     # way we don't have to set a page limit for every individual endpoint. Note
     # I can consider switching to LimitOffsetPagination in the future, which
     # allows the number of results per page to vary, but I don't do this
     # for now because there's no easy way to set paginator.max_limit in the
     # settings here.
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 12,
+    "PAGE_SIZE": 20,
     # To prevent users from querying too much and bringing down our servers,
     # we set a throttle rate on each user. Here, "anon" represents an anonymous
     # user (not signed-in) while signed-in users have access to higher download

@@ -40,8 +40,8 @@
         {% endif %}
         {% if "Molecule" in filterset_mixins %}
             {% for calculation in calculations %}
-                <div class="col-2">
-                    <div class="card border-secondary border ribbon-box">
+                <div class="col-auto">
+                    <div class="card border-secondary border ribbon-box" style="width: 12rem;">
                         <div class="card-body">
                             <div class="row">
                                 <div class="py-1 text-light bg-primary text-center fw-bold rounded col-12">id = {{ calculation.id }}</div>

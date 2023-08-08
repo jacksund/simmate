@@ -68,7 +68,10 @@ class ProviderAPIViewSet(SimmateAPIViewSet):
         provider_name,
     ) -> dict:
         provider_table = ALL_PROVIDERS[provider_name]
-        return {"provider": provider_table}
+        return {
+            "provider": provider_table,
+            **provider_table.extra_html_context,
+        }
 
     def get_retrieve_context(
         self,

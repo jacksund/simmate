@@ -237,6 +237,13 @@ class DatabaseTable(models.Model):
     class Meta:
         abstract = True
 
+    id = table_column.AutoField(primary_key=True)
+    """
+    The unique ID number assigned to each entry.
+    """
+    # DEV-NOTE: Normally this is set automatically by django, but we must
+    # list it explicitly in order for django_filters (the REST API) to work.
+
     created_at = table_column.DateTimeField(
         auto_now_add=True,
         blank=True,
@@ -386,11 +393,11 @@ class DatabaseTable(models.Model):
     
     For example...
     ``` python
-    filter_fields = {
+    filter_fields = dict(
         column1=["exact"],
         column2=["range"],
         column3=BooleanFilter(...),
-    }
+    )
     ```
     
     See the `api_filterset` property for the final filter object.
@@ -1217,7 +1224,7 @@ class DatabaseTable(models.Model):
             class Meta:
                 table = DatabaseTable
                 fields = dict(
-                    # id=["exact"],  --> automatically added...?
+                    id=["exact"],
                     created_at=["range"],
                     updated_at=["range"],
                 )
@@ -1402,3 +1409,8 @@ class DatabaseTable(models.Model):
             "data_explorer:entry-detail",
             kwargs={"provider_name": self.table_name, "pk": self.pk},
         )
+
+    @classmethod
+    @property
+    def extra_html_context(cls) -> dict:
+        return {}
