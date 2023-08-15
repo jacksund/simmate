@@ -319,6 +319,7 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_USER", "simmate.team@gmail.com")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD", None)
 DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_FROM", EMAIL_HOST_USER)
 EMAIL_SUBJECT_PREFIX = "[Simmate] "
+EMAIL_TIMEOUT = os.environ.get("EMAIL_TIMEOUT", 2)
 
 # These people get an email when DEBUG=False
 ADMINS = [
