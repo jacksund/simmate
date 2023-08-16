@@ -555,6 +555,10 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 LOGIN_REDIRECT_URL = "/accounts/profile/"  # this is already the default
 LOGOUT_REDIRECT_URL = "/accounts/loginstatus/"
 
+# By default, we turn off email verification. If you wish, you can switch
+# this to "optional" or "mandatory"
+ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "none")
+
 # -----------------------------------------------------------------------------
 
 # Many auth endpoints require a https instead of http response:
