@@ -24,4 +24,7 @@ def getattribute(obj, attr):
 
     Note `example_var` in the example above is a string set to a property name.
     """
-    return getattr(obj, attr)
+    try:
+        return getattr(obj, attr)
+    except:  # RelatedObjectDoesNotExist
+        return None
