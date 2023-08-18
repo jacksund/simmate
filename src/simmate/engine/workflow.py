@@ -254,44 +254,13 @@ class Workflow:
                     "(and avoid this message), set `use_database=False`"
                 )
             logging.info("Saving to database and writing outputs")
-            # BUGFIX: for workflow runs that take >1hr, the database connection to
-            # postgres can be dropped/terminated. So we need to catch this
-            # and make a new connection.
-            #   https://github.com/jacksund/simmate/issues/364
-            # TODO: Consider a decorator utility that we can apply to various
-            # methods to catch database closure errors. (e.g. @check_db_conn)
-            # Alternatively, we could wrap this around the .save() method
-            # of our base database model...
-            # New feature in Django worth exploring if this becomes an issue again
-            # https://docs.djangoproject.com/en/4.1/ref/settings/#conn-health-checks
-            try:
-                database_entry = cls._update_database_with_results(
-                    results=results if results != None else {},
-                    directory=kwargs_cleaned["directory"],
-                    run_id=kwargs_cleaned["run_id"],
-                    finished_at=timezone.now(),
-                )
-            # This 2nd attempt is a copy/paste where we reset the conn.
-            # Fix is from:
-            #   https://stackoverflow.com/questions/48329685
-            except Exception as error:
-                logging.critical(error)
-                logging.info("retrying with new db connection")
-                # grab new connection
-                # Note, this import needs to be done locally! Having it imported
-                # above causes pickling errors for this class.
-                #   see https://github.com/jacksund/simmate/issues/410
-                from django.db import connection as db_connection
 
-                db_connection.connect()
-
-                # retry the database call
-                database_entry = cls._update_database_with_results(
-                    results=results if results != None else {},
-                    directory=kwargs_cleaned["directory"],
-                    run_id=kwargs_cleaned["run_id"],
-                    finished_at=timezone.now(),
-                )
+            database_entry = cls._update_database_with_results(
+                results=results if results != None else {},
+                directory=kwargs_cleaned["directory"],
+                run_id=kwargs_cleaned["run_id"],
+                finished_at=timezone.now(),
+            )
 
         # if requested, compresses the directory to a zip file and then removes
         # the directory.

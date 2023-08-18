@@ -80,6 +80,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - allow "login required" access to server via evironment variables (disabled by default)
 - allow "internal only" access to server via evironment variables (disabled by default)
 - add `django-simple-history` support to track user changes on specific models
+- add `@check_db_conn` decorator to help with database connection closures/timeouts
 
 **Fixes**
 

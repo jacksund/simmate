@@ -21,7 +21,6 @@ import pandas
 import yaml
 from django.db import models  # see comment below
 from django.db import models as table_column
-from django.db.utils import DatabaseError
 from django.urls import reverse
 from django.utils.module_loading import import_string
 from django.utils.timezone import datetime
