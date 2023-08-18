@@ -21,6 +21,7 @@ import pandas
 import yaml
 from django.db import models  # see comment below
 from django.db import models as table_column
+from django.db.utils import DatabaseError
 from django.urls import reverse
 from django.utils.module_loading import import_string
 from django.utils.timezone import datetime
@@ -29,6 +30,7 @@ from django_pandas.io import read_frame
 from rich.progress import track
 
 from simmate.configuration.django.settings import DATABASE_BACKEND
+from simmate.database.utilities import check_db_conn
 
 # The "as table_column" line does NOTHING but rename a module.
 # I have this because I want to use "table_column.CharField(...)" instead
@@ -216,6 +218,18 @@ class SearchResults(models.QuerySet):
             new_query = self.filter(tags=[])
 
         return new_query
+
+    # -------------------------------------------------------------------------
+
+    # These methods behaves exactly the save as django's default ones, but they
+    # are wrapped to catch errors such as "connection closed" failures
+    # and retries with a new connection.
+
+    @check_db_conn
+    def bulk_create(self, *args, **kwargs):
+        return super().bulk_create(*args, **kwargs)
+
+    # -------------------------------------------------------------------------
 
 
 # Copied this line from...
@@ -410,6 +424,18 @@ class DatabaseTable(models.Model):
     the yaml format. 'structure' is an example of a field we'd want to
     exclude because its not very readable and is available elsewhere.
     """
+
+    # -------------------------------------------------------------------------
+    # The primary save methods used to add entries to the database
+    # -------------------------------------------------------------------------
+
+    # These methods behaves exactly the save as django's default ones, but they
+    # are wrapped to catch errors such as "connection closed" failures
+    # and retries with a new connection.
+
+    @check_db_conn
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
 
     # -------------------------------------------------------------------------
     # Core methods accessing key information and writing summary files
@@ -932,8 +958,6 @@ class DatabaseTable(models.Model):
             parallel,
             confirm_sqlite_parallel,
         )
-
-        from simmate.toolkit import Structure as ToolkitStructure
 
         # generate the file name if one wasn't given
         if not filename:

@@ -4,6 +4,7 @@ import logging
 
 from django.apps import apps
 from django.core.management import call_command
+from django.db.utils import DatabaseError
 
 from simmate.configuration.django.settings import DATABASE_BACKEND, DATABASES
 
@@ -11,6 +12,52 @@ from simmate.configuration.django.settings import DATABASE_BACKEND, DATABASES
 # so this list is grabbed directly from django. I also grab the CUSTOM_APPS to
 # check for user-installed applications.
 APPS_TO_MIGRATE = list(apps.app_configs.keys())
+
+
+def check_db_conn(original_function):
+    """
+    A decorator that catches errors such as "close connection" failures and
+    retries with a new connection.
+
+    ## Example use:
+    ``` python
+    @check_db_conn
+    def example():
+        return 12345 # some fxn that makes database calls
+    ```
+    """
+    # BUGFIX: for processes (e.g. workflows) that take >1hr, the database
+    # connection to postgres can be dropped/terminated. So we need to catch
+    # this and make a new connection.
+    #   https://github.com/jacksund/simmate/issues/364
+
+    # New feature in Django worth exploring if this becomes an issue again.
+    # However, this is only for web views... not local dev/runs:
+    #   https://docs.djangoproject.com/en/4.1/ref/settings/#conn-health-checks
+
+    def wrapper(*args, **kwargs):
+        # On our first try, just use default method and existing connection
+        try:
+            original_function(*args, **kwargs)
+
+        # This 2nd attempt is an exact retry where we grab a new db connection
+        # Fix is from:
+        #   https://stackoverflow.com/questions/48329685
+        except DatabaseError as error:
+            logging.critical(error)
+            logging.info("retrying with new db connection")
+
+            # Note, this import needs to be done locally! Having it imported
+            # above causes pickling errors.
+            #   see https://github.com/jacksund/simmate/issues/410
+            from django.db import connection as db_connection
+
+            db_connection.connect()
+
+            # retry the function call
+            original_function(*args, **kwargs)
+
+    return wrapper
 
 
 def update_database(apps_to_migrate=APPS_TO_MIGRATE, show_logs: bool = True):
