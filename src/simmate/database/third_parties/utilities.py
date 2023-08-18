@@ -5,8 +5,8 @@ import shutil
 import urllib
 
 from simmate.configuration.django.settings import DATABASES, SIMMATE_DIRECTORY
-from simmate.database.third_parties import AflowPrototype  # AflowStructure,
 from simmate.database.third_parties import (
+    AflowPrototype,
     CodStructure,
     JarvisStructure,
     MatprojStructure,
