@@ -313,13 +313,13 @@ with DATA_EXPLORER_YAML.open() as file:
 #   3. Adding an App Password (in account settings)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"  # this is the default
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")  # or outlook.office365.com
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get("EMAIL_USER", "simmate.team@gmail.com")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD", None)
-DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_FROM", EMAIL_HOST_USER)
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", False) == "True"
+EMAIL_HOST_USER = os.environ.get("EMAIL_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_FROM", "simmate.team@gmail.com")
 EMAIL_SUBJECT_PREFIX = "[Simmate] "
-EMAIL_TIMEOUT = os.environ.get("EMAIL_TIMEOUT", 2)
+EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", 5))
 
 # These people get an email when DEBUG=False
 ADMINS = [
