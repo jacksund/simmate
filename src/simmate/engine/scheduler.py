@@ -6,10 +6,11 @@ import logging
 import time
 from traceback import format_exc
 
+from django.core.mail import EmailMessage
 from rich import print
 from schedule import Scheduler
 
-from simmate.configuration.django.settings import SIMMATE_APPS
+from simmate.configuration.django.settings import ADMINS, SIMMATE_APPS
 from simmate.utilities import get_app_submodule
 
 # This string is just something fancy to display in the console when the process
@@ -112,6 +113,7 @@ class SimmateScheduler(Scheduler):
     def _run_job(self, job):
         # This is a modified run method that catches failed jobs and optionally
         # sends an email alert on failure events
+
         try:
             super()._run_job(job)
         except Exception:
@@ -122,3 +124,9 @@ class SimmateScheduler(Scheduler):
             job._schedule_next_run()
 
             # if emails are configured, send an alert of the failure
+            email = EmailMessage(
+                subject="[SIMMATE] Scheduled job failure",
+                body=error_msg,
+                to=[a[1] for a in ADMINS],  # get admin emails
+            )
+            email.send(fail_silently=True)
