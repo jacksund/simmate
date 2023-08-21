@@ -53,6 +53,7 @@ dependencies:
     - requests >=2.28.1, <2.28.3
     - rich >=11.0, <=13.5.2
     - scikit-learn >=1.1.1, <1.2.2
+    - schedule >=1.2.0, <=1.2.0
     - toml >=0.10.2, <=0.10.2
     - typer >=0.6.0, <0.7.1
     # Recommended IDE for development -- We leave this as a separate install

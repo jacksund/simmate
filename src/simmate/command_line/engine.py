@@ -20,6 +20,16 @@ def engine():
 
 
 @engine_app.command()
+def start_schedules():
+    """
+    Starts the main process for periodic tasks in each app's "schedules" module.
+    """
+    from simmate.engine.scheduler import SimmateScheduler
+
+    SimmateScheduler.start()
+
+
+@engine_app.command()
 def start_worker(
     nitems_max: int = None,
     timeout: float = None,
