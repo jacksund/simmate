@@ -24,9 +24,9 @@ def start_schedules():
     """
     Starts the main process for periodic tasks in each app's "schedules" module.
     """
-    from simmate.engine.scheduler import start_schedules
+    from simmate.engine.scheduler import SimmateScheduler
 
-    start_schedules()
+    SimmateScheduler.start()
 
 
 @engine_app.command()
