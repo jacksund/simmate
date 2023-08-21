@@ -81,6 +81,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - allow "internal only" access to server via evironment variables (disabled by default)
 - add `django-simple-history` support to track user changes on specific models
 - add `@check_db_conn` decorator to help with database connection closures/timeouts
+- add `simmate engine start-schedules` which let's you configure periodic tasks for individual apps (e.g. check a table for updates every 5 minutes). Includes error handling and email alerts. (Note: this a quick alternative to full Prefect system)
 
 **Fixes**
 
