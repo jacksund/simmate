@@ -62,6 +62,8 @@
             NOTE: ChemDraw requires a license, which you can place in any app folder with the
             following path: 
                 static/licenses/ChemDraw-JS-License.xml
+            Then set this in the header as well:
+                <script>var ChemDrawLicenseURL = '{% static "/licenses/ChemDraw-JS-License.xml" %}';</script>
         {% endcomment %}
         {# Some pages may require extra lines in the header such as loading extra libraries #}
         {% block extraheader %}{% endblock %}

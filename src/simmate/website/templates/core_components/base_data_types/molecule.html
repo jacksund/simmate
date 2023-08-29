@@ -3,6 +3,7 @@
     <div class="col-xl-4">
         <div class="border border-dark mt-4">
             <script>add_mol_viewer('{{ calculation.sdf_str }}', {{ calculation.id }}, 300)</script>
+            <canvas id='{{ calculation.id }}' class="img-fluid"></canvas>
         </div>
     </div>
     <div class="col-xl-8">

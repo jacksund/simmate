@@ -48,7 +48,8 @@
                             </div>
                             <div class="row text-center my-2">
                                 <div class="col-12">
-                                    <script>add_mol_viewer('{{ calculation.sdf_str }}', {{ calculation.id }}, 100)</script>
+                                    <script>add_mol_viewer('{{ calculation.sdf_str }}', {{ calculation.id }}, 300)</script>
+                                    <canvas id='{{ calculation.id }}' class="img-fluid"></canvas>
                                 </div>
                             </div>
                             <div class="row text-center">

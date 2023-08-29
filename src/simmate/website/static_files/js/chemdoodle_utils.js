@@ -64,3 +64,14 @@ var get_mol_from_sketcher = function (
 //     canvas.classList.remove("ChemDoodleWebComponent");
 //     canvas.classList.add("p-0"); // bug-fix for aspect ratio
 // };
+// initializes the SketcherCanvas
+// var add_mol_sketcher = function (sketcher_id) {
+//     let sketcher_{{ id }} = new ChemDoodle.SketcherCanvas('sketcher_id', 500, 300, {useServices:false, oneMolecule:true});
+//     // enables overlap clear widths, so that some depth is introduced to overlapping bonds
+//     sketcher_{{ id }}.styles.bonds_clearOverlaps_2D = true;
+//     // sets the shape color to improve contrast when drawing figures
+//     sketcher_{{ id }}.styles.shapes_color = 'c10000';
+//     // because we do not load any content, we need to repaint the sketcher, otherwise we would just see an empty area with the toolbar
+//     // however, you can instead use one of the Canvas.load... functions to pre-populate the canvas with content, then you don't need to call repaint
+//     sketcher_{{ id }}.repaint();
+// };
