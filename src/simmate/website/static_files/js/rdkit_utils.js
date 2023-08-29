@@ -48,3 +48,16 @@ var add_mol_viewer = function (mol_str, canvas_id, size) {
             // handle loading errors here...
         });
 };
+var refresh_mol_viewer = function (canvas_id, new_sdf_str) {
+    // // todo-- combine with add_mol_viewer fxn above
+    // myCanvas = new ChemDoodle.ViewerCanvas(canvas_id);
+    // myCanvas.styles.backgroundColor = undefined;
+    // myCanvas.emptyMessage = 'No molecule loaded!';
+    // let molecule = ChemDoodle.readMOL(new_sdf_str);
+    // myCanvas.loadMolecule(molecule);
+    // // make canvas visible and remove boarder
+    // let canvas = document.getElementById(canvas_id);
+    // canvas.removeAttribute("hidden");
+    // canvas.classList.remove("ChemDoodleWebComponent");
+    // canvas.classList.add("p-0"); // bug-fix for aspect ratio
+};
