@@ -230,7 +230,6 @@ def dump_database_to_json(
 
 
 def load_database_from_json(filename: str = "database_dump.json"):
-
     # Begin writing the database to the json file.
     logging.info("Loading all data from JSON...")
 
