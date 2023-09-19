@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os
 
 from django.apps import apps
 from django.core.management import call_command
@@ -14,7 +15,7 @@ from simmate.configuration.django.settings import DATABASE_BACKEND, DATABASES
 APPS_TO_MIGRATE = list(apps.app_configs.keys())
 
 
-def check_db_conn(original_function):
+def check_db_conn(original_function: callable):
     """
     A decorator that catches errors such as "close connection" failures and
     retries with a new connection.
@@ -60,7 +61,10 @@ def check_db_conn(original_function):
     return wrapper
 
 
-def update_database(apps_to_migrate=APPS_TO_MIGRATE, show_logs: bool = True):
+def update_database(
+    apps_to_migrate: list[str] = APPS_TO_MIGRATE,
+    show_logs: bool = True,
+):
     # check Django if there are any updates to be made
     if show_logs:
         logging.info("Checking for and applying updates...")
@@ -74,7 +78,10 @@ def update_database(apps_to_migrate=APPS_TO_MIGRATE, show_logs: bool = True):
         logging.info("Success! Your database tables are now up to date. :sparkles:")
 
 
-def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
+def reset_database(
+    apps_to_migrate: list[str] = APPS_TO_MIGRATE,
+    use_prebuilt: bool = False,
+):
     # TODO: call_command("flush") could be used in the future to simply
     # delete all data -- without rerunning migrations
 
@@ -202,7 +209,14 @@ def reset_database(apps_to_migrate=APPS_TO_MIGRATE, use_prebuilt=False):
     logging.info("Success! Your database has been reset. :sparkles:")
 
 
-def dump_database_to_json(filename="database_dump.json", exclude=[]):
+def dump_database_to_json(
+    filename: str = "database_dump.json",
+    exclude: list[str] = [],
+):
+    # BUG: https://stackoverflow.com/questions/67616945/
+    # os.environ["PYTHONIOENCODING"] = "utf8"  # DOESNT WORK...
+    # python -Xutf8 manage.py dumpdata > data.json  # WORKS!
+
     # Begin writing the database to the json file.
     logging.info("Writing all data to JSON...")
 
@@ -215,7 +229,8 @@ def dump_database_to_json(filename="database_dump.json", exclude=[]):
     )
 
 
-def load_database_from_json(filename="database_dump.json"):
+def load_database_from_json(filename: str = "database_dump.json"):
+
     # Begin writing the database to the json file.
     logging.info("Loading all data from JSON...")
 
