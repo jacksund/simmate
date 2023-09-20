@@ -424,6 +424,24 @@ class DatabaseTable(models.Model):
     exclude because its not very readable and is available elsewhere.
     """
 
+    workflow_columns: dict = {}
+    """
+    WARNING: advanced users only (this is still in early testing)
+    
+    When subclassing DatabaseTable, you may want to add a column that is 
+    populated via a specific workflow (e.g. a quick property calculation). This
+    attribute defines the mapping of a new column to a workflow name.
+    
+    You must define the column separately (as dynamically adding columns is not
+    possible with Django models) and the workflow must be accessible with
+    the `get_workflow` utility.
+    
+    Note, this is meant for bringing workflow results IN TO a table -- like
+    having a full dataset (like the OQMD library) and wanting to add a column
+    for some ML/AI model you've built. If your workflow takes >30s per entry,
+    it is often better to build a separate workflow table to store results there.
+    """
+
     # -------------------------------------------------------------------------
     # The primary save methods used to add entries to the database
     # -------------------------------------------------------------------------
@@ -1437,3 +1455,62 @@ class DatabaseTable(models.Model):
     @property
     def extra_html_context(cls) -> dict:
         return {}
+
+    # -------------------------------------------------------------------------
+    # Methods that populate "workflow columns" of custom tables
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def populate_workflow_columns(cls, batch_size: int = 1000):
+        """
+        Uses the `workflow_columns` property to fill a column with data.
+        """
+        # local import to avoid circular dependency
+        from simmate.workflows.utilities import get_workflow
+
+        for column_name, workflow_name in cls.workflow_columns.items():
+            workflow = get_workflow(workflow_name)
+
+            # BUG: I assume inputs are the common ones for now...
+            # but I need a way to specify this for more diverse workflows
+            # (I give one suggested fix to this in the while-loop below)
+            if "molecules" not in workflow.parameter_names:
+                raise Exception(
+                    "We are still at early stage testing for this method, so "
+                    "it only supports workflows that take 'molecules' as an "
+                    "input parameter. Reach out to our team if you'd like "
+                    "us to add additional support."
+                )
+
+            filters = {f"{column_name}__isnull": True}
+            nobjs_total = cls.objects.filter(**filters).count()
+            logging.info(
+                f"Updating '{column_name}' column using '{workflow_name}' "
+                f"for {nobjs_total} entries"
+            )
+
+            # Continue the loop until
+            while True:
+                # grab the next set of objects to update
+                objs_to_update = cls.objects.filter(**filters).all()[:batch_size]
+
+                # exit the while loop if there aren't any entries left
+                if not objs_to_update:
+                    break
+
+                # First check for a user-defined method.
+                predefined_method = f"_format_inputs_for__{column_name}"
+                if hasattr(cls, predefined_method):
+                    # method = getattr(cls, predefined_method)
+                    # method(workflow, objs_to_update)
+                    raise NotImplementedError("This feature is still being developed")
+                else:
+                    # OPTIMIZE: should I support run_cloud for parallelization?
+                    # BUG: see comment at start of for-loop where I say I assume
+                    # a 'molecules' input
+                    status = workflow.run(molecules=objs_to_update.to_toolkit())
+                    results = status.result()
+                    logging.info("Saving results to db")
+                    for entry, entry_result in zip(objs_to_update, results):
+                        setattr(entry, column_name, entry_result)
+                        entry.save()
