@@ -74,7 +74,7 @@ def update():
 
 
 @database_app.command()
-def dump_data(filename: Path = "database_dump.json"):
+def dump_data(filename: Path = "database_dump.json", exclude: list[str] = []):
     """
     Takes the Simmate database and writes it to a json file
 
@@ -84,7 +84,7 @@ def dump_data(filename: Path = "database_dump.json"):
     from simmate.database import connect
     from simmate.database.utilities import dump_database_to_json
 
-    dump_database_to_json(filename=filename)
+    dump_database_to_json(filename=filename, exclude=exclude)
 
 
 @database_app.command()

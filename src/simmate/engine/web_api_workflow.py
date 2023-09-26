@@ -19,6 +19,20 @@ class WebApiWorkflow(Workflow):
     _parameter_methods = Workflow._parameter_methods + ["_get_payload"]
 
     api_url: str = None
+    """
+    The full REST API endpoint that should be called for this method
+    """
+
+    repo_url: str = None
+    """
+    Because Web APIs are often hosted as a microservice elsewhere, their code
+    is hosted elsewhere as well. This points to the Web API's source code.
+    """
+
+    maintainer: str = None
+    """
+    The current maintainer of this API endpoint and service.
+    """
 
     chunk_input: str = None  # e.g. "molecules"
     chunk_size: int = None  # e.g. 10000
