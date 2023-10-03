@@ -228,6 +228,10 @@ class SearchResults(models.QuerySet):
     def bulk_create(self, *args, **kwargs):
         return super().bulk_create(*args, **kwargs)
 
+    @check_db_conn
+    def bulk_update(self, *args, **kwargs):
+        return super().bulk_update(*args, **kwargs)
+
     # -------------------------------------------------------------------------
 
 
