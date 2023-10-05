@@ -30,7 +30,7 @@ dependencies:
     - django-crispy-forms >=1.13.0, <=1.14.0
     - django-pandas >=0.6.6, <=0.6.6
     - django-filter >=21.1, <=22.1
-    - django_unicorn >=0.50.0, <=0.50.0
+    - django_unicorn >=0.50.0, <=0.55.0
     - django-simple-history >=3.3.0, <=3.3.0
     - djangorestframework >=3.13.1, <3.14.1
     - isort >=5.10.1, <=5.12.1
