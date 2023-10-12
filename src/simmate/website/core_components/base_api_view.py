@@ -41,6 +41,8 @@ class SimmateAPIViewSet(GenericViewSet):
 
     template_retrieve: str = None
 
+    max_query_size: int = 10000
+
     def get_list_response(self, request: HttpRequest, *args, **kwargs) -> Response:
         # This code is modified from the ListModelMixin, where instead of returning
         # a response, we perform additional introspection first.
@@ -52,6 +54,17 @@ class SimmateAPIViewSet(GenericViewSet):
         self._format_kwarg = request.GET.get("format", "html")
 
         queryset = self.filter_queryset(self.get_queryset())
+
+        # Suprisingly, counting the total number of results in a query is MUCH
+        # slower than loading some of the rows! See...
+        #   https://wiki.postgresql.org/wiki/Slow_Counting
+        # To address this, we limit the maximum queryset size to be 10k. This
+        # is a large number because counting queries really only becomes an
+        # issue with >1mil rows in the dataset.
+        # We still allow users to set "None" disable this feature.
+        if self.max_query_size:
+            queryset = queryset[: self.max_query_size]
+        # TODO: should max_query_size be attached to each model instead?
 
         # attempt to paginate the results
         page = self.paginate_queryset(queryset)

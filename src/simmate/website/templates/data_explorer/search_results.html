@@ -6,10 +6,24 @@
              role="alert">
             <i class="mdi mdi-check-circle"></i>&nbsp;&nbsp;
             <div>
-                Showing <b>{{ calculations|length }}</b> of <b>{{ ncalculations_matching|intcomma }}</b> filtered results
+                Showing <b>{{ calculations|length }}</b> of
+                <b>
+                    {# linting is disabled for this line to stop it from adding a space #}
+                    {# djlint:off #}
+                    {% if ncalculations_matching == 10000 %}&gt;{% endif %}{{ ncalculations_matching|intcomma }}
+                    {# djlint:on #}
+                </b> filtered results
                 {# (total counts too slow) The full dataset has <b>{{ ncalculations_possible|intcomma }}</b> entries. #}
             </div>
         </div>
+        {% if ncalculations_matching == 10000 %}
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                <i class="mdi mdi-alert"></i>&nbsp;&nbsp;
+                <div>
+                    Databases are slow to count total matching rows, so we limit searches to 10k results. The full filtered dataset is available via the Python API or direct database connection.
+                </div>
+            </div>
+        {% endif %}
         {% if "Structure" in filterset_mixins %}
             <table id="SearchResultsTable"
                    class="table table-striped"
