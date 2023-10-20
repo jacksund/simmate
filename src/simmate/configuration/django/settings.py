@@ -342,6 +342,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # This is for tracking WHO changes a model (attaches User)
     "simple_history.middleware.HistoryRequestMiddleware",
+    # adds specific authentication methods, such as login by email
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 # "core" here is based on the name of my main django folder
