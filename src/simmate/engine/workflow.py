@@ -1202,7 +1202,7 @@ class Workflow:
         }
         # Add extra parameter mappings from internal code
         try:
-            from simmate_corteva.rdkit import Molecule
+            from simmate_corteva.toolkit import Molecule
 
             parameter_mappings.update(
                 {
