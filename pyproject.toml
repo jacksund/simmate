@@ -117,7 +117,7 @@ EXE = [
     "prefect >=2.0.0, <2.6.6",  # for extra workflow orchestration 
     "dask-jobqueue >=0.7.3, <=0.8.2",  # for submitting on HPC clusters
     "anyio >=3.6.1",  # for async utilities when using Prefect
-    "nest_asyncio >=1.5.5, <1.5.7",  # to allow async calls in Spyder/iPython/Jupyter
+    "nest_asyncio >=1.5.5, <1.5.9",  # to allow async calls in Spyder/iPython/Jupyter
 ]
 
 # These are packages that I commonly use alongside simmate. I plan to
