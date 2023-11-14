@@ -88,7 +88,7 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
 
         # we also want the voxel resolution
         voxel_resolution = np.prod(lattice["grid_size"]) / lattice["volume"]
-        print(voxel_resolution)
+        print(f"Voxel Resolution: {voxel_resolution}")
 
         # read in partition grid
         if partition_file == "ELFCAR":
@@ -357,15 +357,24 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
             near_plane_pdf = near_plane_ddf.compute()
 
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # I've made it so that if some vertices are found multiple
-        # times, it adds an additional site labeled as -1 or -2.
+        # I've made it so that if some vertices are found to fit with multiple
+        # sites, it adds an additional site labeled as -1, -2, or -3.
         # This way I can count how many of them are doing this while still allowing
         # them to be treated as not belonging to any site.
+        
+        # Define counts for sites with this issue
         vert_multi_site_same_trans = 0
         vert_multi_site = 0
         multi_site_no_plane = 0
+        # Check each voxel near a plane
         for row in near_plane_pdf.iterrows():
             try:
+                # Check each voxels site assignment (stored in row[1][4]). If
+                # -1, the vertices of the voxel were found to potentially belong
+                # to multiple sites even at the same transformation. If -2, they
+                # were found to potentially belong to multiple sites at different
+                # transformations. If -3, the vertices were found to have different
+                # sites, but no plane was found to intersect the voxel.
                 for site in row[1][4]:
                     if site == -1:
                         vert_multi_site_same_trans += 1
@@ -379,6 +388,8 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
                     # for each site, multiply the fraction of the site times the charge
                     results_charge[site] += row[1][4][site] * row[1][3]
                     results_volume[site] += row[1][4][site] * voxel_volume
+                # If print_atom_voxels is requested, add the highest fraction
+                # site to all_charge_coords
                 if print_atom_voxels:
                     sites = row[1][4]
                     max_site_frac = max(sites.values())
@@ -387,8 +398,13 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
                     ]
                     all_charge_coords.loc[row[0], "site"] = max_site
             except:
-                if row[1][4] is not None:
-                    print(f"{row[1][4]}")
+                # If none of the above is true, there is some other issue with
+                # this voxel. For now we are just going to pass it, but in the
+                # future, we really shouldn't have any of these assignments. My
+                # guess is that each of these issues (-1,-2,-3, except) are related
+                # to improper plane assignment that isn't rigorous enough.
+                # if row[1][4] is not None:
+                #     print(f"{row[1][4]}")
                 pass
         # Some sites will be returned as none because they are being split
         # by more than one bordering plane. We handle these with less accuracy
@@ -430,7 +446,8 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
                     except:
                         continue
         else:
-            print("no voxels intercepted by more than one plane")
+            # print("no voxels intercepted by more than one plane")
+            pass
 
         # After all other parts have run, sometimes the algorithm still has some
         # voxels that are unassigned. The easiest way to handle these is to give
@@ -444,8 +461,8 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
         if len(missing_voxel_pdf) > 0:
             perc_voxels = (len(missing_voxel_pdf) / np.prod(lattice["grid_size"])) * 100
             print(
-                f"""{perc_voxels}% of voxels could not be assigned by base
-            algorithm. Remaining voxels will be assigned by closest atom
+                f"""{perc_voxels}% of voxels could not be assigned by the base
+            algorithm. Remaining voxels will be assigned by closest atom. 
                   """
             )
 

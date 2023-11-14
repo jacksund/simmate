@@ -13,7 +13,7 @@ from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
     get_partitioning_line_rough,
     get_position_from_min,
     get_real_from_vox,
-    get_voxel_from_frac,
+    get_voxel_from_index,
     get_voxel_from_neigh_CrystalNN,
 )
 
@@ -83,7 +83,7 @@ def get_max_radius(structure: Structure, partition_file: str):
         # create key for each site
         site_radii[site] = {}
         # get voxel position from fractional site.
-        site_pos = get_voxel_from_frac(site, lattice)
+        site_pos = get_voxel_from_index(site, lattice)
         # We want to get the radius based on bonds to closest neighbors. This
         # is stored in our closest neighbors dictionary as the first neighbor
         # site, neigh[0] for each site.

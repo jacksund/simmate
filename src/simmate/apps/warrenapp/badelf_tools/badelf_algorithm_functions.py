@@ -18,10 +18,17 @@ from scipy.interpolate import RegularGridInterpolator
 from scipy.spatial import ConvexHull
 from simmate.toolkit import Structure
 
-###############################################################################
-# This module defines functions that are used in the warren lab badelf
-# algorithm
-###############################################################################
+"""
+This module defines functions that are used in the warren lab badelf
+algorithm. There are general types of functions:
+    1. Miscellaneous functions used in several parts of the algorithm
+    2. Functions used during partitioning
+    3. Functions used when assigning voxels. This is further split as follows.
+        a. Functions for assigning voxels away from planes
+        b. Functions for assigning voxels split by one plane
+        c. Functions for assigning voxels split by multiple planes
+        d. Functions for assigning remaining voxels
+"""
 
 
 ###############################################################################
@@ -31,7 +38,7 @@ from simmate.toolkit import Structure
 ###############################################################################
 
 
-def get_voxel_from_frac(site, lattice):
+def get_voxel_from_index(site, lattice):
     """
     This function takes in a fractional coordinate and returns the index for
     the equivalent voxel.
@@ -39,23 +46,13 @@ def get_voxel_from_frac(site, lattice):
     VASP voxel indices go from 1 to grid_size along each axis. (e.g., 1 to 70)
     Fractional coordinates go from 0 to 1 along each axis.
 
-    Fractional coordinate (0,0,0) corresponds to the bottom left front corner
+    Fractional coordinate (0,0,0) corresponds to the center
     of voxel (1,1,1).
-    Fractional coordinate (1,1,1) cooresponds to the top right back corner
+    Fractional coordinate (1,1,1) cooresponds to the center
     of voxel (grid_size_a, grid_size_b, grid_size_c).
 
     This code maintains the VASP standards throughout.
 
-    The quasi-exception is for grid interpolation.  For interpolation, a voxel
-    should be identified based on its center rather than its corner.
-    Thus, voxel (1,1,1) has a center at voxel coordinates (0.5,0.5,0.5) of
-    at fractional coordinates ( (voxel_a/grid_size_a) - (0.5/grid_size_a) ),
-    and so on for axes b and c.
-
-    In addition, for the interpolation grid, I have to wrap around to the
-    other side.  So the interpolation grid needs extra padding of 1 unit on
-    each side. That allows the outer edges of the grid to have the correct
-    values that transition smoothly when wrapping.
     """
 
     grid_size = lattice["grid_size"]
@@ -104,7 +101,6 @@ def get_real_from_frac(frac_pos, lattice):
     """
     Function that takes in fractional coordinates and returns real coordinates
     """
-    #!!! round? NOT NECESSARY
     fa, fb, fc = frac_pos[0], frac_pos[1], frac_pos[2]
     a, b, c = lattice["a"], lattice["b"], lattice["c"]
     x = fa * a[0] + fb * b[0] + fc * c[0]
@@ -201,13 +197,18 @@ def get_closest_neighbors(structure: Structure):
     return closest_neighbors
 
 
-def get_26_neighbors(structure):
+def get_50_neighbors(structure):
+    """
+    Function for getting the 50 closest neighbors. This is necessary for partitioning
+    because the CrystalNN function from pymatgen will not necessarily find the
+    correct set of atoms needed to create a full partitioning set.
+    """
     # Get all possible neighbor atoms for each atom within 15 angstroms
     all_neighbors = structure.get_all_neighbors(15)
-    neighbors26 = []
+    neighbors50 = []
     # For each atom, create a df to store the neighbor and its distance
     # from the atom. Then sort this df by distance and only keep the
-    # 26 closest neighbors
+    # 50 closest neighbors
     for site, neighs in enumerate(all_neighbors):
         site_df = pd.DataFrame(columns=["neighbor", "distance"])
         site_object = structure[site]
@@ -216,15 +217,15 @@ def get_26_neighbors(structure):
             distance = math.dist(neigh.coords, site_object.coords)
             # add neighbor, distance pair to df
             site_df.loc[len(site_df)] = [neigh, distance]
-        # sort by distance and truncate to first 26
+        # sort by distance and truncate to first 50
         site_df = site_df.sort_values(by="distance")
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # Temporarily switching from 26 to 50 nearest planes
+        # Temporarily switching to 50 nearest planes
         site_df = site_df.iloc[0:50]
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # Add the neighbors as a list to the df
-        neighbors26.append(site_df["neighbor"].to_list())
-    return neighbors26
+        neighbors50.append(site_df["neighbor"].to_list())
+    return neighbors50
 
 
 def get_grid_axes(grid):
@@ -411,7 +412,7 @@ def get_line_frac_min_rough(values, rough_partitioning=False):
 def get_line_frac_min_fine(elf_pos, elf_min_index, grid):
     # !!! We need more padding for the more rigorous interpolation to get the same
     # results.
-    amount_to_pad = 10  # int((len(grid[0])+len(grid[1])+len(grid[2]))/6)
+    amount_to_pad = 10
 
     padded = np.pad(grid, amount_to_pad, mode="wrap")
 
@@ -429,12 +430,6 @@ def get_line_frac_min_fine(elf_pos, elf_min_index, grid):
     try:
         while centered == False:
             if attempts == 5:
-                print(
-                    """
-                          Failed to find minimum with quick method. Switching
-                          to intensive.
-                          """
-                )
                 raise Exception()
             else:
                 attempts += 1
@@ -454,16 +449,15 @@ def get_line_frac_min_fine(elf_pos, elf_min_index, grid):
             # Find the minimum value of this line as well as the index for this value's
             # position.
             minimum_value = min(values_fine)
-            min_pos = values_fine.index(minimum_value)  # + global_min_pos[0]-5
+            min_pos = values_fine.index(minimum_value)
 
             if min_pos == 4:
                 # Our line is centered and we can move on
-                print("centered")
                 centered = True
             else:
                 # Our line is not centered and we need to adjust it
                 amount_to_shift = min_pos - 4
-                print(f"not centered. Shifting {amount_to_shift}")
+
 
     except:
         # The above sometimes fails because the linear fitting gives a guess
@@ -504,21 +498,12 @@ def get_line_frac_min_fine(elf_pos, elf_min_index, grid):
     try:
         d, e, f = polyfit(line_section_x, values_fine, 2)
     except:
-        print(min_pos)
-        print(minimum_value)
-        print(values_fine)
-        print(line_section_x)
-        # print(values[global_min[0]-3: global_min[0]+4])
+        pass
     x = -e / (2 * d)
     elf_min_index_new = x
     elf_min_value_new = np.polyval(np.array([d, e, f]), x)
-    # Redefine the global minimum position with the new interpolated line.
-    # global_min_pos[0] = global_min_pos[0]/(len(line)-1)
 
-    # I may want to add the quadratic fitting back here.
     # Get the position along the line as a fraction
-
-    #!!! Round? NOT NECESSARY
     elf_min_frac_new = elf_min_index_new / (len(elf_pos) - 1)
     return elf_min_index_new, elf_min_value_new, elf_min_frac_new
 
@@ -534,7 +519,6 @@ def get_position_from_min(elf_min_frac, site_pos, neigh_pos):
     min_pos = [x * elf_min_frac for x in difference]
     # add the vector components of the site and minimum point together to get
     # the vector pointing directly to the minimum
-    #!!! Round? NOT NECESSARY
     min_pos = [(a + b) for a, b in zip(min_pos, site_pos)]
     return np.array(min_pos)
 
@@ -698,10 +682,7 @@ def get_site_neighbor_results_fine(site_df, grid, lattice):
     return site_df
 
 
-def get_partitioning_rough(neighbors26, lattice, grid, rough_partitioning=False):
-    # Get the closest 26 neighbors for each site
-    # neighbors26 = get_26_neighbors(structure)
-
+def get_partitioning_rough(neighbors50, lattice, grid, rough_partitioning=False):
     # Now we want to find the minimum in the ELF between the atom and each of its
     # neighbors and the vector between them. This will define a plane seperating
     # the atom from its neighbor.
@@ -723,11 +704,11 @@ def get_partitioning_rough(neighbors26, lattice, grid, rough_partitioning=False)
         "elf_min_frac",
         "elf_min_vox",
     ]
-    for site_index, neighs in enumerate(neighbors26):
+    for site_index, neighs in enumerate(neighbors50):
         # create df for each site
         site_df = pd.DataFrame(columns=columns)
         # get voxel position from fractional site
-        site_pos = get_voxel_from_frac(site_index, lattice)
+        site_pos = get_voxel_from_index(site_index, lattice)
         # site_pos_real = get_real_from_vox(site_pos, lattice)
         # iterate through each neighbor to the site
         for i, neigh in enumerate(neighs):
@@ -742,79 +723,16 @@ def get_partitioning_rough(neighbors26, lattice, grid, rough_partitioning=False)
             except:
                 pass
 
-        #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # # This is an old algorithm that didn't incorporate the correct planes
-        # # and caused errors in many structures. For now I am treating this
-        # # very rigorously and just using 26 partitioning planes now matter
-        # # that atom or system. I will update this in the future.
-        # # Finally, we want to figure out which of these planes are necessary to
-        # # completely partition our point from the surrounding atoms. To do this
-        # # we define a line segment between the point and the closest point on the
-        # # plane (the minimum of the ELF). Then we check if any other planes intersect
-        # # this line segment. If they don't then the plane belongs to the partitioning
-        # # set. If they do, then the plane is thrown out.
-        # #!!! SPEED UP: We should only have to do this for one neigh in each set
-        # # of distances. Others with the same distance would automatically be included
-        # # Remove duplicates from the df
-        # plane_distances = site_df["distance"].drop_duplicates().reset_index(drop=True)
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # For now I am treating partitioning in a static way by just using 50 
+        # partitioning planes no matter the atom or system. I believe plane
+        # selection is the source for many errors in voxel assignment.
+        # I will update this in the future to more rigorously select the planes.
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
         # # # create a list to store the final set of neighbors
         important_neighs = pd.DataFrame(columns=columns)
         for [index, row] in site_df.iterrows():
-            #     # if the plane belongs to the set that is closest to the atom,
-            #     # automatically add this neighbor to the final set
-            #     if row["distance"] == plane_distances[0]:
-            #         important_neighs.loc[len(important_neighs)] = row
-            #     else:
-            #         # if the plane is not in this first set, check if any other planes
-            #         # intercept the line between it and the atom
-            #         point1 = row["plane_point"]
-            #         intercept = False
-            #         for [neigh_index, neigh_row] in site_df.iterrows():
-            #             if neigh_index != index:
-            #                 plane_point = neigh_row["plane_point"]
-            #                 plane_vector = neigh_row["plane_vector"]
-            #                 intersection = get_vector_plane_intersection(
-            #                     site_pos_real,
-            #                     point1,
-            #                     plane_point,
-            #                     plane_vector,
-            #                     allow_point_intercept=True,
-            #                 )
-            #                 # print(intersection)
-            #                 # if the line is not intersected, this plane is is part
-            #                 # of the partitioning set and we pass. Otherwise we
-            #                 # break and move on.
-            #                 if intersection is None:
-            #                     pass
-            #                 else:
-            #                     intercept = True
-            #                     break
-            #         if intercept == False:
-            #             important_neighs.loc[len(important_neighs)] = row
-            # #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            # # This is a test algorithm to see if the same results are found
-            # # as when using an excessively large number of planes. It works
-            # # by checking if each plane point is underneath the other planes.
-            # # for a set of partitioning planes, all of these points should
-            # # be underneath any other potential partitioning plane
-            # under_planes = True
-            # # We need the plane point as a voxel because that's what the
-            # # sign function uses.
-            # min_point = row["elf_min_vox"]
-            # for [j, row1] in site_df.iterrows():
-            #     plane_point = row1["plane_point"]
-            #     plane_vector = row1["plane_vector"]
-            #     if j != index:
-            #         sign, distance = get_plane_sign(plane_point, plane_vector, min_point, lattice)
-            #         # print(sign)
-            #         if sign == "negative" or sign == "zero":
-            #             pass
-            #         else:
-            #             under_planes = False
-            #             break
-            # if under_planes == True:
-            #     important_neighs.loc[len(important_neighs)] = row
-            # #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             important_neighs.loc[len(important_neighs)] = row
         rough_partition_results.append(important_neighs)
 
@@ -962,37 +880,25 @@ def get_matching_site(pos, results, lattice, max_distance):
 
             # use plane equation to find sign
             sign, distance = get_plane_sign(point, normal_vector, pos, lattice)
-            # print(site, neigh, sign, expected_sign, distance)
+
             # if the sign matches, move to next neighbor.
             # if the sign ever doesn't match, then the site is wrong and we move
             # on to the next one after setting matched to false. We also check
             # to see if the voxel is possibly sliced by the plane. If it is we
             # want to seperate that charge later so we leave it here.
             if sign != "negative" or distance <= max_distance:
-                # print(expected_sign,sign)
                 matched = False
                 break
         if matched == True:
             sites.append(site)
-            # print(site, neigh, sign, expected_sign, distance)
             # return site
     if len(sites) == 1:
         return sites[0]
     elif len(sites) == 0:
         return
     else:
-        # print("Multiple sites found for one location")
-        # with open("multi_site_in_one_trans.csv", "a") as file:
-        #     file.write(f"{voxel_coord},{trans},{pos},{get_real_from_vox(pos,lattice)},{sites}\n")
-        # return sites[0]
+        # Multiple sites found for one location
         return -1
-        # if after looping through all neighbors we have matched every site,
-        # then this is the correct site.
-    #     if matched == True:
-    #         # print(site, neigh, sign, expected_sign, distance)
-    #         return site
-    # return
-
 
 def get_electride_sites(
     lattice: dict,
@@ -1048,8 +954,6 @@ def get_voxels_site(
     # are found across different transformations.
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     sites = []
-    translations = []
-    real_pos = []
     if site not in electride_sites:
         for t, u, v in permutations:
             new_pos = [x + t, y + u, z + v]
@@ -1119,45 +1023,6 @@ def get_voxels_site_dask(
 # belong to, where a plane intersects a given voxel, and what volume ratio of
 # each voxel belongs to a given site.
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# def get_matching_site_with_plane(vert_coord, results, lattice):
-#     """
-#     Function for determining the site that a voxel vertex should be assigned to.
-#     The only difference between this and get_matching_site is that if the vertex
-#     lies directly on a plane we want to allow it to match a site.
-#     """
-#     # Iterate over each site in the lattice
-#     for site, neighs in results.items():
-#         matched = True
-#         # Iterate through each neighbor
-#         for neigh, values in neighs.items():
-#             # get the minimum point and normal vector which define the plane
-#             # seperating the sites.
-#             point = values["real_min_point"]
-#             normal_vector = values["normal_vector"]
-#             # If a vertex is on the same side of the plane as the site, then they
-#             # should have the same sign when their coordinates are plugged into
-#             # the plane equation. We already have the sites sign stored here
-#             # expected_sign = values["sign"]
-
-#             # use the plane equation to find sign
-#             sign, distance = get_plane_sign(point, normal_vector, vert_coord, lattice)
-#             # print(site, neigh, sign, expected_sign, distance)
-
-#             # if the sign is zero we are directly on a plane and consider this
-#             # a pass
-#             # if sign == "zero":
-#             #     pass
-#             # if the sign doesn't match this is the wrong site
-#             if sign != "negative":
-#                 matched = False
-#                 break
-
-#         # if after looping through all neighbors we have matched every site,
-#         # this is the correct site.
-#         if matched == True:
-#             return site
-#     return
-
 
 def get_matching_site_with_plane(vert_coord, results, lattice):
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1184,67 +1049,25 @@ def get_matching_site_with_plane(vert_coord, results, lattice):
 
             # use plane equation to find sign
             sign, distance = get_plane_sign(point, normal_vector, vert_coord, lattice)
-            # print(site, neigh, sign, expected_sign, distance)
+
             # if the sign matches, move to next neighbor.
             # if the sign ever doesn't match, then the site is wrong and we move
             # on to the next one after setting matched to false. We also check
             # to see if the voxel is possibly sliced by the plane. If it is we
             # want to seperate that charge later so we leave it here.
             if sign != "negative":
-                # print(expected_sign,sign)
                 matched = False
                 break
         if matched == True:
             sites.append(site)
-            # print(site, neigh, sign, expected_sign, distance)
             # return site
     if len(sites) == 1:
         return sites[0]
     elif len(sites) == 0:
         return
     else:
-        # print("Multiple sites found for one vertex location")
-        # with open("multi_site_in_one_trans.csv", "a") as file:
-        #     file.write(f"{voxel_coord},{trans},{pos},{get_real_from_vox(pos,lattice)},{sites}\n")
-        # return sites[0]
+        # Multiple sites found for one vertex location
         return -1
-        # if after looping through all neighbors we have matched every site,
-        # then this is the correct site.
-    #     if matched == True:
-    #         # print(site, neigh, sign, expected_sign, distance)
-    #         return site
-    # return
-
-
-# def get_vertex_site(
-#     x,
-#     y,
-#     z,
-#     results,
-#     permutations,
-#     lattice,
-# ):
-#     """
-#     This function is similar to the original get_matching_site function, but
-#     doesn't contain a condition preventing sites that are within one voxel's
-#     distance of the center from being evaluated.
-#     """
-#     for t, u, v in permutations:
-#         new_vert_coord = [x + t, y + u, z + v]
-#         site = get_matching_site_with_plane(new_vert_coord, results, lattice)
-#         # site returns none if no match, otherwise gives a number
-#         # The site can't return as an electride site as we don't include
-#         # electride sites in the partitioning results
-#         if site is not None:
-#             break
-#     # We only want to store the planes that are near the original coordinates
-#     # of the voxel vertices. Here we replace any that result from permutations
-#     # with None type objects
-#     if site is not None:
-#         return site, [t, u, v]
-#     else:
-#         return None
-
 
 def get_vertex_site(
     x,
@@ -1260,11 +1083,12 @@ def get_vertex_site(
     of each site.
     """
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # I've had a bug in the past where one voxel returns multiple sites after
+    # I've noticed a bug where one voxel returns multiple sites after
     # being translated. I'm going to make this function temporarily go through
     # all sites in case the bug still exists. It will return -1 if the multiple
     # sites are found at the same transformation and it will return -2 if multiple
-    # are found across different transformations.
+    # are found across different transformations. This typically effects only
+    # a small number of sites if the system is ionic.
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     sites = []
     translations = []
@@ -1369,8 +1193,6 @@ def get_vector_plane_intersection(
     # calculate intersection point
     intersection_point = point0 + direction * distance
     # round the intersection points
-    #!!! round? PROBABLY NOT
-    # intersection_point = intersection_point.round(12)
 
     # check if intersection point is between the start and end points of our
     # line segment. To do this, we would normally first check if the point
@@ -1395,7 +1217,6 @@ def get_vector_plane_intersection(
             return None
     else:
         # The point is between point0 and point1
-        # print(point0, point1)
         return intersection_point
 
 
@@ -1429,7 +1250,6 @@ def get_intersections_df(
                         point0, point1, plane_point, plane_vector
                     )
                     if intersection is not None:
-                        # print(point0,point1, intersection)
                         # we transform all intersections to be relative to A0 being
                         # the origin. This is so planes from various transformations
                         # can be treated at the same time
@@ -1494,7 +1314,6 @@ def get_site_volume_ratio(x, y, z, results, lattice, permutations, voxel_volume)
     # In my test with Na2S, returning these vertices as None and allowing the
     # program to continue gave more even results.
     if -1 in sites["site"].to_list() or -2 in sites["site"].to_list():
-        # print(f"multiple sites found for vertices at: {[x,y,z]}")
         # If vertices are found to have multiple sites I've made it so that it
         # records his information as a new site in the site_vol_frac dictionary.
         # This should be searchable in post so that I can keep count of these
@@ -1526,25 +1345,11 @@ def get_site_volume_ratio(x, y, z, results, lattice, permutations, voxel_volume)
     # next.
 
     # Get the transform for the original site:
-    # transform = get_transform(x, y, z, results, permutations, lattice)
     try:
         voxel_site, transform = get_vertex_site(x, y, z, results, permutations, lattice)
     except:
         voxel_site, transform = None, None
-    # Now check if the transform exists. If it does, first try and find any
-    # points where a plane intersects the edges of the voxel.
-    # if transform is not None:
-    #     transformed_coords_real = {}
-    #     for key, coord in vertices_coords.items():
-    #         # get the transformed coordinate, convert it to a real coordinate,
-    #         # and add to our new dictionary of vertices
-    #         new_coord = [x+t for x,t in zip(coord, transform)]
-    #         real_coord = get_real_from_vox(new_coord, lattice)
-    #         transformed_coords_real[key] = real_coord
 
-    #     # get the locations where the edges are intersected by a plane
-    #     intersections_df = get_intersections_df(
-    #         sites, results, edges, transformed_coords_real, intersections_df)
 
     # If no intersections are found, check the other possible transforms
     if len(intersections_df) == 0:
@@ -1552,11 +1357,7 @@ def get_site_volume_ratio(x, y, z, results, lattice, permutations, voxel_volume)
         # transforms we found earlier
         transforms = vertices_sites.drop_duplicates(subset="transform").dropna()
         transforms = transforms["transform"].to_list()
-        # We already tried the original transform, so remove it if it exists.
-        # try:
-        #     transforms.remove(transform)
-        # except:
-        #     pass
+
         # Now iterate over the remaining transforms to find locations where the
         # edge is intersected.
         for transform in transforms:
@@ -1593,22 +1394,20 @@ def get_site_volume_ratio(x, y, z, results, lattice, permutations, voxel_volume)
     # If there is only one site in the list, return the site fraction dictionary
     # with 1 for this site.
     if len(sites) == 1:
-        # site_vol_frac[sites["site"][0]]=1.0
         if voxel_site is not None:
             #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             # Sometimes the voxel center is returned as belonging to more than
             # 1 site. I beleive this is because without the condition that the
             # voxel needs to be some distance away from the plane (Which exists
             # when we assign planes earlier in the code.) it is actually possible
-            # for a plane to almost exactly go through the site resulting in it
-            # being allowed to belong to two sites. In this situation I don't
+            # for a plane to exactly go through the site resulting in it
+            # being allowed to belong to two sites. In this situation I don't want
             # to give the voxel to a -2 site, I want it to go to the most common
             # site.
             if voxel_site == -1 or voxel_site == -2:
                 try:
                     site_vol_frac[most_common_site] = 1.0
                 except:
-                    print(f"Most common site is {most_common_site}")
                     site_vol_frac = None
             #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             elif len(intersections_df) == 0 or len(intersections_df) == 1:
@@ -1616,17 +1415,14 @@ def get_site_volume_ratio(x, y, z, results, lattice, permutations, voxel_volume)
             else:
                 site_vol_frac = None
         else:
-            # site_vol_frac[sites["site"][0]]=1.0
             site_vol_frac = None
     # If there are two sites, at least one plane is intersecting the voxel
     elif len(sites) == 2:
-        # if there are not intersections found, then something is broken
+        # if there are not intersections found, then something is not working
         if len(intersections_df) == 0:
-            # site_vol_frac[most_common_site]=1.0
             #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             # I'm having this problem return as -3 so that I can keep track of it
             site_vol_frac[-3] = float(0)
-            print(f"there's a problem assigning site: {vox_coord}")
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # Check that there is only one plane that is close to all of the vertices.
         # If so, our voxel is being split by a single plane.
@@ -1686,7 +1482,7 @@ def get_site_volume_ratio(x, y, z, results, lattice, permutations, voxel_volume)
                     site_vol_frac[site1] = seg1_ratio
                     site_vol_frac[site2] = round((1 - seg1_ratio), 16)
                 except:
-                    print(f"error with hull: {[x,y,z]}")
+                    print(f"Error with hull: {[x,y,z]}")
                     site_vol_frac = None
 
         elif len(intersections_df) > 1:
@@ -1785,7 +1581,7 @@ def get_voxels_site_multi_plane(
                             site_count[site_index] += frac
                     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             except:
-                print(index)
+                pass
     # ensure that some sites were found
     if sum(site_count.values()) != 0:
         # get the fraction of each site. This will allow us to split the
