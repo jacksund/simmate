@@ -1,22 +1,18 @@
 # -*- coding: utf-8 -*-
 
-# from warrenapp.workflows.population_analysis.badelf_pbe import (
-#     StaticEnergy__Warren__PrebadelfPbe,
-# )
-from simmate.apps.warrenapp.workflows.population_analysis.base import VaspBadElfBase
+from simmate.engine.workflow import Workflow
 
-# from warrenapp.workflows.static_energy import StaticEnergy__Warren__SeededHse
-from simmate.apps.warrenapp.workflows.population_analysis.prebader_badelf_dft import (
+from simmate.apps.warrenapp.workflows.population_analysis.base import VaspBaderBadElfBase
+from simmate.apps.warrenapp.workflows.population_analysis.prebadelf_dft import (
     StaticEnergy__Warren__PrebadelfHse,
 )
 
 
-class PopulationAnalysis__Warren__BadelfHse(VaspBadElfBase):
+class PopulationAnalysis__Warren__BaderBadelfHse(VaspBaderBadElfBase):
     """
-    Runs a static energy calculation using an extra-fine FFT grid and then
-    carries out Bader analysis on the resulting charge density using the ELFCAR
-    as a reference when partitioning. Uses the HSE functional and settings from
-    the Warren Lab.
+    Runs a static energy calculation using an extra-fine FFT grid using vasp
+    and then carries out Badelf and Bader analysis on the resulting charge density.
+    Uses the Warren lab settings HSE settings.
     """
 
-    static_energy_prebadelf = StaticEnergy__Warren__PrebadelfHse
+    static_energy_prebadelf: Workflow = StaticEnergy__Warren__PrebadelfHse

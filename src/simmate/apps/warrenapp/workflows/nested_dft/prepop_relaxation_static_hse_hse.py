@@ -9,7 +9,7 @@ from simmate.apps.warrenapp.workflows.relaxation.hse import (
 from simmate.apps.warrenapp.workflows.nested_dft.prepop_relaxation_static_pbesol_hse import (
     Relaxation__Warren__PbeWithWavecar,
 )
-from simmate.apps.warrenapp.workflows.population_analysis.prebader_badelf_dft import (
+from simmate.apps.warrenapp.workflows.population_analysis.prebadelf_dft import (
     StaticEnergy__Warren__PrebadelfHse,
 )
 

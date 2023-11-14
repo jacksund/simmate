@@ -12,18 +12,17 @@ from simmate.apps.warrenapp.badelf_tools.utilities import (
     get_density_file_empty,
 )
 from simmate.apps.warrenapp.models import WarrenPopulationAnalysis
-from simmate.apps.warrenapp.workflows.population_analysis.warren_badelf_v3_9 import (
+from simmate.apps.warrenapp.workflows.population_analysis.badelf_alg_v3_9 import (
     PopulationAnalysis__Warren__BadelfIonicRadii,
 )
 
-# This file contains classes for performing Bader and BadELF using the Henkelman
-# groups algorithm (http://theory.cm.utexas.edu/henkelman/code/bader/).
+# This file contains classes for performing Bader and BadELF. Parts of the code
+# are based off of the Henkelman groups algorithm for Bader analysis:
+# (http://theory.cm.utexas.edu/henkelman/code/bader/).
 # Some workflows in this file purposefully do not use a database as they are
-# intended to be part of a larger workflow. If they are not a larger workflow,
-# but do use a database, it is so the workflow will record all of the required
-# data in the database. All of the earlier workflows are building blocks for
-# either VaspBaderBase, VaspBadelfBase, or VaspBadelfBaderBase which are the
-# workflows that all the other workflows are built from.
+# part of a larger process that doesn't need to be recorded.
+# All of the earlier workflows are building blocks for VaspBadelfBaderBase which
+# is the workflow that all the other BadELF analysis workflows are built from.
 
 
 # Workflow for running a single bader analysis.
@@ -47,9 +46,9 @@ class PopulationAnalysis__Warren__Bader(S3Workflow):
     """
 
 
-# Workflow for for running a bader analysis on a material containing "empty"
-# atoms. Empty atoms are usually hydrogens and are meant to represent electride
-# sites.
+# Workflow for running a bader analysis on a material containing "empty"
+# atoms. Empty atoms are usually helium and are meant to represent electride
+# sites
 class PopulationAnalysis__Warren__BaderEmpty(S3Workflow):
     """
     This class is used to run a bader analysis when searching for or working
@@ -123,6 +122,9 @@ class PopulationAnalysis__Warren__BadelfGradient(S3Workflow):
 
 # Workflow for running the henkelman groups algorithm and
 # generating chgcar like files for each atom.
+# !!!
+# A future version of this workflow should only print the electride electrons
+# to save space.
 class PopulationAnalysis__Warren__GetAtomChgcar(S3Workflow):
     """
     This workflow runs the Henkleman groups bader algorithm, partitioning based
@@ -152,190 +154,19 @@ class PopulationAnalysis__Warren__GetAtomChgcar(S3Workflow):
             )
 
 
-# The base workflow that all workflows that just run bader analysis are built
-# from. For these a static_energy workflow needs to be created and set. The
-# workflow can take in an extra parameter, find_empties, which can be set to
-# true when searching for electrides is desired.
-class VaspBaderBase(Workflow):
-    """
-    Runs a static energy calculation using an extra-fine FFT grid using vasp
-    and then carries out Bader analysis on the resulting charge density. This
-    is the base workflow that all of the Bader workflows are built out from.
-    """
-
-    static_energy_prebader: Workflow = None  # This must be defined in inheriting class
-    static_energy_prebadelf: Workflow = None
-    use_database = False
-
-    @classmethod
-    def run_config(
-        cls,
-        structure: Structure,
-        command: str = None,
-        source: dict = None,
-        find_empties: bool = True,
-        directory: Path = None,
-        min_charge: float = 0.15,
-        **kwargs,
-    ):
-        if find_empties:
-            # Run static energy calculation if not already done
-            if cls.static_energy_prebadelf is not None:
-                prebader_result = cls.static_energy_prebadelf.run(
-                    structure=structure,
-                    command=command,
-                    source=source,
-                    directory=directory,
-                ).result()
-            # Run badelf on initial file output
-            PopulationAnalysis__Warren__BadelfInit.run(
-                structure=structure,
-                directory=directory,
-            ).result()
-            # Combine AECCAR0 and AECCAR2
-            #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            # The previous directory (where AECCAR0 and AECCAR2 are located) is
-            # the same as the new directory where CHGCAR_sum will be. Jack has
-            # warned that this may be disallowed in the future so it may need
-            # fixing.
-            PopulationAnalysis__Bader__CombineChgcars.run(
-                directory=directory,
-                previous_director=directory,
-            ).result()
-            # Find electride sites, place empty atoms, and run bader
-            PopulationAnalysis__Warren__BaderEmpty.run(
-                structure=structure,
-                directory=directory,
-                min_charge=min_charge,
-            )
-
-        else:
-            if cls.static_energy_prebader is not None:
-                prebader_result = cls.static_energy_prebader.run(
-                    structure=structure,
-                    command=command,
-                    source=source,
-                    directory=directory,
-                ).result()
-
-            # Setup chargecars for the bader analysis and wait until complete
-            PopulationAnalysis__Bader__CombineChgcars.run(
-                directory=directory,
-                previous_director=directory,
-            ).result()
-
-            # Bader only adds files and doesn't overwrite any, so I just run it
-            # in the original directory. I may switch to copying over to a new
-            # directory in the future though.
-            PopulationAnalysis__Warren__Bader.run(
-                directory=directory,
-            ).result()
-
-
-# Similar to the above workflow, this workflow is the base off of which all
-# workflows that just run badelf are built. It also takes in the find_empties
-# parameter.
-class VaspBadElfBase(Workflow):
-    """
-    Runs a static energy calculation using an extra-fine FFT grid and then
-    carries out Bader analysis on the resulting charge density using the ELFCAR
-    as a reference when partitioning. This is the base workflow that all of the
-    BadELF workflows are built out from.
-    """
-
-    static_energy_prebadelf: Workflow = None  # This must be defined in inheriting class
-    use_database = False
-
-    @classmethod
-    def run_config(
-        cls,
-        structure: Structure,
-        command: str = None,
-        source: dict = None,
-        find_empties: bool = False,
-        directory: Path = None,
-        min_charge: float = 0.15,
-        badelf_alg: str = "voronoi",
-        **kwargs,
-    ):
-        if find_empties:
-            # Run static_energy calculation if not already done
-            if cls.static_energy_prebadelf is not None:
-                prebadelf_result = cls.static_energy_prebadelf.run(
-                    structure=structure,
-                    command=command,
-                    source=source,
-                    directory=directory,
-                ).result()
-            # Run badelf on initial output
-            PopulationAnalysis__Warren__BadelfInit.run(
-                structure=structure,
-                directory=directory,
-            ).result()
-            # Find electride sites, place empty atoms, and generate chgcar
-            # like files for each atomic site
-            PopulationAnalysis__Warren__GetAtomChgcar.run(
-                directory=directory,
-                analysis_type="badelf",
-                min_charge=min_charge,
-            )
-            if badelf_alg == "voronoi":
-                # Run Warren lab version of BadELF algorithm
-                PopulationAnalysis__Warren__BadelfIonicRadii.run(
-                    directory=directory,
-                )
-            elif badelf_alg == "gradient":
-                PopulationAnalysis__Warren__BadelfGradientEmpty.run(
-                    directory=directory,
-                )
-            else:
-                print(
-                    """The badelf_alg setting you chose does not exist. Please select
-                      either 'voronoi' or 'gradient'.
-                      """
-                )
-        else:
-            if cls.static_energy_prebadelf is not None:
-                prebadelf_result = cls.static_energy_prebadelf.run(
-                    structure=structure,
-                    command=command,
-                    source=source,
-                    directory=directory,
-                ).result()
-
-            # Bader only adds files and doesn't overwrite any, so I just run it
-            # in the original directory. I may switch to copying over to a new
-            # directory in the future though.
-            # We don't need to generate empty atom files because we're not looking
-            # for electride sites here.
-            if badelf_alg == "voronoi":
-                PopulationAnalysis__Warren__BadelfIonicRadii.run(
-                    directory=directory,
-                    empty_structure_file="POSCAR",
-                    partition_file="ELFCAR",
-                    charge_file="CHGCAR",
-                ).result()
-            elif badelf_alg == "gradient":
-                PopulationAnalysis__Warren__BadelfGradient.run(
-                    directory=directory,
-                )
-            else:
-                print(
-                    """The badelf_alg setting you chose does not exist. Please select
-                      either 'voronoi' or 'gradient'.
-                      """
-                )
-
-
+# The base workflow that all workflows that just run BadELF analysis are built
+# from. If DFT is also desired, a static_energy workflow needs to be created 
+# and set.
 class VaspBaderBadElfBase(Workflow):
     """
     Runs a static energy calculation using an extra-fine FFT grid using vasp
     and then carries out Badelf and Bader analysis on the resulting charge density.
     This is the base workflow that all analyses that run both Bader and BadELF
-    are built from.
+    are built from. If a more traditional zero-flux surface type partitioning
+    is desired, the badelf_alg tag can be set as "gradient"
     """
 
-    static_energy_prebadelf: Workflow = None  # Must be defined in inheriting class
+    static_energy_prebadelf: Workflow = None  # Can be defined in inheriting class
     use_database = False
 
     @classmethod
@@ -344,9 +175,9 @@ class VaspBaderBadElfBase(Workflow):
         structure: Structure,
         command: str = None,
         source: dict = None,
-        find_empties: bool = True,
         directory: Path = None,
-        min_charge: float = 0.15,
+        find_empties: bool = True,
+        min_charge: float = 0.45, # This is somewhat arbitrarily set
         badelf_alg: str = "voronoi",
         **kwargs,
     ):
@@ -358,6 +189,7 @@ class VaspBaderBadElfBase(Workflow):
             "AVF.dat",
             "simmate_population_summary.csv",
         ]
+        # Check if the user would like to search for electride electrons
         if find_empties:
             # Run static_energy calculation if not already run
             if cls.static_energy_prebadelf is not None:
@@ -420,6 +252,9 @@ class VaspBaderBadElfBase(Workflow):
             # Copy bader results into bader
             for file in bader_files:
                 shutil.copy(directory / file, directory / "bader")
+                
+        # if finding electride sites is set to false by the user, switch to the
+        # following workflow
         else:
             if cls.static_energy_prebadelf is not None:
                 prebadelf_result = cls.static_energy_prebadelf.run(
@@ -429,7 +264,7 @@ class VaspBaderBadElfBase(Workflow):
                     directory=directory,
                 ).result()
 
-            # Setup chargecars for the bader analysis and wait until complete
+            # Setup CHGCAR_sum for the bader analysis and wait until complete
             PopulationAnalysis__Bader__CombineChgcars.run(
                 directory=directory,
                 previous_director=directory,
@@ -462,9 +297,7 @@ class VaspBaderBadElfBase(Workflow):
             # Copy badelf files
             for file in badelf_files:
                 shutil.copy(directory / file, directory / "badelf")
-            # shutil.copy(
-            #     directory / "simmate_population_summary.csv", directory / "badelf"
-            # )
+
             # Run bader
             PopulationAnalysis__Warren__Bader.run(
                 directory=directory,
@@ -472,23 +305,3 @@ class VaspBaderBadElfBase(Workflow):
             # Copy bader files
             for file in bader_files:
                 shutil.copy(directory / file, directory / "bader")
-
-
-# We want to define the settings that will be used when updating static energy
-# workflows for prebader or prebadelf DFT calculations. We do that here so
-# that we don't need to do it in every inheriting class.
-prebader_incar_settings = dict(
-    NGXF__density_a=40,
-    NGYF__density_b=40,
-    NGZF__density_c=40,
-    LAECHG=True,  # write core charge density to AECCAR0 and valence to AECCAR2
-)
-prebadelf_incar_settings = dict(
-    NGX__density_a=40,  # Note that these set the FFT grid while the pre-Bader task sets the
-    NGY__density_b=40,  # fine FFT grid (e.g. useds NGX instead of NGXF)
-    NGZ__density_c=40,
-    LELF=True,  # Writes the ELFCAR
-    NPAR=1,  # Must be set if LELF is set
-    PREC="Single",  # ensures CHGCAR grid matches ELFCAR grid
-    LAECHG=True,  # write core charge density to AECCAR0 and valence to AECCAR2
-)
