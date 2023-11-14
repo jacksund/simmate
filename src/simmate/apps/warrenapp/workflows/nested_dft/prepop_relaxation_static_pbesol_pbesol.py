@@ -9,7 +9,8 @@ from simmate.apps.warrenapp.workflows.relaxation.pbesol import Relaxation__Warre
 class Nested__Warren__RelaxationStaticPbePbe(RelaxationStaticBase):
     """
     Runs an PBEsol quality structure relaxation and PBEsol quality static energy
-    calculation.
+    calculation.This method will also write the ELFCARand CHGCAR files necessary 
+    for population analysis (i.e. oxidation state and electron count)
     """
 
     static_energy_workflow = StaticEnergy__Warren__PrebadelfPbesol

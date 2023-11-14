@@ -26,7 +26,9 @@ class Relaxation__Warren__HseWithWavecar(Relaxation__Warren__Hse):
 class Nested__Warren__RelaxationStaticHseHse(RelaxationRelaxationStaticBase):
     """
     Runs a PBEsol quality structure relaxation, an HSE quality relaxation, and
-    an HSE static energy calculation.
+    an HSE static energy calculation. This method will also write the ELFCAR
+    and CHGCAR files necessary for population analysis (i.e. oxidation state and
+    electron count)
     """
 
     static_energy_workflow = StaticEnergy__Warren__PrebadelfHse

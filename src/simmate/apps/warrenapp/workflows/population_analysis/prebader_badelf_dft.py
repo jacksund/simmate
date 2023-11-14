@@ -6,15 +6,15 @@ from simmate.apps.warrenapp.workflows.static_energy.pbesol import StaticEnergy__
 # workflows for prebader or prebadelf DFT calculations. We do that here so
 # that we don't need to do it in every inheriting class.
 prebader_incar_settings = dict(
-    NGXF__density_a=40,
-    NGYF__density_b=40,
-    NGZF__density_c=40,
+    NGXF__density_a=10, # fine FFT grid (e.g. useds NGX instead of NGXF)
+    NGYF__density_b=10,
+    NGZF__density_c=10,
     LAECHG=True,  # write core charge density to AECCAR0 and valence to AECCAR2
 )
 prebadelf_incar_settings = dict(
-    NGX__density_a=40,  # Note that these set the FFT grid while the pre-Bader task sets the
-    NGY__density_b=40,  # fine FFT grid (e.g. useds NGX instead of NGXF)
-    NGZ__density_c=40,
+    NGX__density_a=10,  # Note that these set the FFT grid while the pre-Bader task sets the
+    NGY__density_b=10,  # fine FFT grid (e.g. useds NGX instead of NGXF)
+    NGZ__density_c=10,
     LELF=True,  # Writes the ELFCAR
     NPAR=1,  # Must be set if LELF is set
     PREC="Single",  # ensures CHGCAR grid matches ELFCAR grid
