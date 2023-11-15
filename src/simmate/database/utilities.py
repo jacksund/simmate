@@ -39,7 +39,7 @@ def check_db_conn(original_function: callable):
     def wrapper(*args, **kwargs):
         # On our first try, just use default method and existing connection
         try:
-            original_function(*args, **kwargs)
+            return original_function(*args, **kwargs)
 
         # This 2nd attempt is an exact retry where we grab a new db connection
         # Fix is from:
@@ -56,7 +56,7 @@ def check_db_conn(original_function: callable):
             db_connection.connect()
 
             # retry the function call
-            original_function(*args, **kwargs)
+            return original_function(*args, **kwargs)
 
     return wrapper
 
