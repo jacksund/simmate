@@ -365,6 +365,88 @@ def get_partitioning_line_rough(site_pos, neigh_pos, grid):
         values.append(value)
     return line, values
 
+def find_minimum(values):
+    """
+    Finds the local minima in a list of values and returns the index and value
+    at each as a list of form [[min_index1, min_value1], [min_index2, min_value2], ...]
+    """
+    minima = [
+        [i, y]
+        for i, y in enumerate(values)
+        if ((i == 0) or (values[i - 1] >= y))
+        and ((i == len(values) - 1) or (y < values[i + 1]))
+    ]
+    return minima
+
+def find_maximum(values):
+    """
+    Finds the local maxima in a list of values and returns the index and value
+    at each as a list of form [[max_index1, max_value1], [max_index2, max_value2], ...]
+    """
+    maxima = [
+        [i,y]
+        for i, y in enumerate(values)
+        if ((i == 0) or (values[i - 1] <= y))
+        and ((i == len(values) - 1) or (y > values[i + 1])) 
+        ]
+    return maxima
+
+def get_closest_extrema_to_center(values, extrema):
+    """
+    Takes a list of values and the relative extrema (either minima or maxima)
+    and finds which extrema is closest to the center of the line.
+    """
+    midpoint = len(values) / 2
+    differences = []
+    for pos, val in extrema:
+        diff = abs(pos - midpoint)
+        differences.append(diff)
+    min_pos = differences.index(min(differences))
+    global_extrema = extrema[min_pos]
+    return global_extrema
+
+def check_for_covalency(values: list, minimum: list, maximum: list):
+    """
+    Checks for covalent/metallic behavior along a bond. This is done by comparing 
+    the closest local maximum and minimum to the center of the bond. If the
+    maximum is closer, the bond is considered to have some covalent behavior.
+    """
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # In the future, these covalent areas should also be assigned sites so that
+    # covalent electrides can be handled as well. There is also probably a more
+    # rigorous point to compare to than the center of the bond depending on the
+    # sizes of the atoms. Maybe compare the ratio of atomic radii and set the
+    # comparison point further from the larger atom based on this ratio?
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # get the center of the ELF line
+    midpoint = len(values) / 2
+    
+    # get the distance from the minimum and maximum to the center. The position 
+    # of the extrema is stored in the first index of the extrema list
+    min_dist = abs(midpoint-minimum[0])
+    max_dist = abs(midpoint-maximum[0])
+    
+    # get the ELF values at the minimum and maximum. This is stored in the
+    # second index of the extrema list
+    min_elf = minimum[1]
+    max_elf = maximum[1]
+    
+    # If the maximum is closer to the center of the line than the minimum, then
+    # we consider this bond to have metallic or covalent behavior and return True
+    if min_dist > max_dist:
+        return True
+    
+    # If the minimum is closer we need to do an extra check. If the minimum has
+    # a value that is over half the value of the maximum, it is likely that there
+    # are two local maxima that are close to the center of the bond, which we
+    # also view as covalent and return as True. If it is less than half the 
+    # value of the maximum, this bond is not strongly covalent and the partitioning
+    # will work, so we return False.
+    if min_dist <= max_dist:
+        if min_elf > max_elf/2:
+            return True
+        else:
+            return False
 
 def get_line_frac_min_rough(values, rough_partitioning=False):
     """
@@ -372,45 +454,58 @@ def get_line_frac_min_rough(values, rough_partitioning=False):
     fractional position of this values position along the line.
     """
     # minima function gives all local minima along the values
-    minima = [
-        [i, y]
-        for i, y in enumerate(values)
-        if ((i == 0) or (values[i - 1] >= y))
-        and ((i == len(values) - 1) or (y < values[i + 1]))
-    ]
+    minima = find_minimum(values)
+    maxima = find_maximum(values)
 
     # then we grab the local minima closest to the midpoint of the values
-    midpoint = len(values) / 2
-    differences = []
-    for pos, val in minima:
-        diff = abs(pos - midpoint)
-        differences.append(diff)
-    min_pos = differences.index(min(differences))
-    global_min_pos = minima[min_pos]
-
+    global_min = get_closest_extrema_to_center(values, minima)
+    global_max = get_closest_extrema_to_center(values, maxima)
+    
+    # Now we check for any strong covalency in the bond as in the current version
+    # of BadELF, this will break the partitioning scheme
+    if check_for_covalency(values, global_min, global_max):
+        raise Exception(
+            """
+            A maximum in the ELF line between atoms was found closer to the
+            center of the bond than any local minimum.
+            This typically indicates that there is some covalent behavior in
+            your system. Unfortunately, the current version of BadELF does not
+            have a way to partition peaks in the ELF from covalency, though
+            this will hopefully be implemented in a future version of the
+            algorithm.
+            
+            An alternative issue is that you are using a pseudopotential that
+            does not include more than the minimum valence electrons. This will
+            result in ELF values close to 0 around the core of the atom. Make
+            sure you are using suitable pseudopotentials for all of your atoms.
+            We are aware of at least two atoms, Al and B, that do not have a
+            suitable pseudopotential with core electrons in VASP 5.X.X.
+            """
+            )
+    
     # If we have a high enough voxel resolution we only want to run the rough
     # interpolation. If that's the case we want to do a polynomial fit here
     # to ensure that we have the correct position
     if rough_partitioning:
         # Get the section of the line surrounding the minimum to perform a fit
-        poly_line_section = values[global_min_pos[0] - 3 : global_min_pos[0] + 4]
-        poly_line_x = [i for i in range(global_min_pos[0] - 3, global_min_pos[0] + 4)]
+        poly_line_section = values[global_min[0] - 3 : global_min[0] + 4]
+        poly_line_x = [i for i in range(global_min[0] - 3, global_min[0] + 4)]
         # get the polynomial fit
         try:
             a, b, c = polyfit(poly_line_x, poly_line_section, 2)
-            # find the minimum and change the values of the global_min_pos list
+            # find the minimum and change the values of the global_min list
             x = -b / (2 * a)
-            global_min_pos[0] = x
-            global_min_pos[1] = np.polyval(np.array([a, b, c]), x)
+            global_min[0] = x
+            global_min[1] = np.polyval(np.array([a, b, c]), x)
         except:
             pass
 
-    global_min_pos.append(global_min_pos[0] / (len(values) - 1))
-    return global_min_pos
+    global_min.append(global_min[0] / (len(values) - 1))
+    return global_min
 
 
 def get_line_frac_min_fine(elf_pos, elf_min_index, grid):
-    # !!! We need more padding for the more rigorous interpolation to get the same
+    # We need more padding for the more rigorous interpolation to get the same
     # results.
     amount_to_pad = 10
 
@@ -472,21 +567,10 @@ def get_line_frac_min_fine(elf_pos, elf_min_index, grid):
             values.append(value)
 
         # Get a list of all of the minima along the line
-        minima = [
-            [i, y]
-            for i, y in enumerate(values)
-            if ((i == 0) or (values[i - 1] >= y))
-            and ((i == len(values) - 1) or (y < values[i + 1]))
-        ]
+        minima = find_minimum(values)
 
         # then we grab the local minima closest to the midpoint of the line
-        midpoint = len(values) / 2
-        differences = []
-        for pos, val in minima:
-            diff = abs(pos - midpoint)
-            differences.append(diff)
-        min_pos = differences.index(min(differences))
-        global_min = minima[min_pos]
+        global_min = get_closest_extrema_to_center(values, minima)
 
         # now we want a small section of the line surrounding the minimum
         values_fine = values[global_min[0] - 3 : global_min[0] + 4]
@@ -515,7 +599,7 @@ def get_position_from_min(elf_min_frac, site_pos, neigh_pos):
     """
     # get the vector that points between the site and its neighbor (in vox  coords)
     difference = [b - a for a, b in zip(site_pos, neigh_pos)]
-    # get the vector that points from the site to the global_min_pos
+    # get the vector that points from the site to the global_min
     min_pos = [x * elf_min_frac for x in difference]
     # add the vector components of the site and minimum point together to get
     # the vector pointing directly to the minimum
@@ -590,26 +674,6 @@ def get_site_neighbor_results_rough(
     elf_min_index, elf_min_value, elf_min_frac = get_line_frac_min_rough(
         elf_values_rough, rough_partitioning=rough_partitioning
     )
-
-    # For systems with considerable electron localization between atoms
-    # (ex. covalent systems) sometimes no minimum will be found except at the
-    # edges. In these cases, this algorithm will not work and we want to stop
-    if elf_min_index in [0, 1, 2, 198, 199, 200]:
-        raise Exception(
-            f"""
-            No minimum was found in the ELF line between at least one sites pair.
-            This typically indicates that there is a significant amount of 
-            electron localization between these atoms and very little near the
-            atom centers. Make sure you are using pseudopotentials that include
-            more than the minimum valence electrons. It is also possible that
-            your system has too much covalent character in which case BadELF
-            will not work.
-            
-            The atoms for which this problem was found are located at:
-            {lattice["elements"][site_index]}: {lattice["coords"][site_index]}
-            {neigh.species_string}: {neigh.frac_coords}
-            """
-        )
 
     # convert the minimum in the ELF back into a position in the voxel grid
     elf_min_vox = get_position_from_min(elf_min_frac, site_pos, neigh_pos)
@@ -712,16 +776,10 @@ def get_partitioning_rough(neighbors50, lattice, grid, rough_partitioning=False)
         # site_pos_real = get_real_from_vox(site_pos, lattice)
         # iterate through each neighbor to the site
         for i, neigh in enumerate(neighs):
-            #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            # Currently I have this passing errors because they showed up in
-            # mayenite.
-            #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            try:
-                site_df.loc[len(site_df)] = get_site_neighbor_results_rough(
-                    site_index, neigh, lattice, site_pos, grid, rough_partitioning
-                )
-            except:
-                pass
+            site_df.loc[len(site_df)] = get_site_neighbor_results_rough(
+                site_index, neigh, lattice, site_pos, grid, rough_partitioning
+            )
+
 
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # For now I am treating partitioning in a static way by just using 50 

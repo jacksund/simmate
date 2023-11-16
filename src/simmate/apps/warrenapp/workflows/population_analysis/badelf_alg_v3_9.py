@@ -23,7 +23,7 @@ from simmate.engine import Workflow
 from simmate.toolkit import Structure
 
 from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
-    get_26_neighbors,
+    get_50_neighbors,
     get_charge_density_grid,
     get_electride_sites,
     get_lattice,
@@ -67,7 +67,7 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
         # the same warning about He's EN so we suppress that here
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            neighbors26 = get_26_neighbors(structure=structure)
+            neighbors50 = get_50_neighbors(structure=structure)
 
         # read in lattice with and without electride sites
         lattice = get_lattice(partition_file=directory / partition_file)
@@ -108,14 +108,14 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
 
         if voxel_resolution > 130000:
             results = get_partitioning_rough(
-                neighbors26=neighbors26,
+                neighbors50=neighbors50,
                 lattice=lattice,
                 grid=grid,
                 rough_partitioning=True,
             )
         else:
             rough_partition_results = get_partitioning_rough(
-                neighbors26=neighbors26,
+                neighbors50=neighbors50,
                 lattice=lattice,
                 grid=grid,
             )
