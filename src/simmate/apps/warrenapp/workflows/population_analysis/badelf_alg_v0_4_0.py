@@ -14,13 +14,14 @@ from pathlib import Path
 
 import dask.dataframe as dd
 import numpy as np
-import pandas
 import pandas as pd
 import psutil
 from dask.distributed import Client, LocalCluster
-from pymatgen.io.vasp import Chgcar, Elfcar, Poscar
+from pymatgen.io.vasp import Chgcar, Elfcar, Poscar, Potcar
 from simmate.engine import Workflow
 from simmate.toolkit import Structure
+
+from simmate.apps.warrenapp.badelf_tools.utilities import get_electride_num
 
 from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
     check_structure_for_covalency,
@@ -40,7 +41,6 @@ from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
     get_voxels_site_nearest,
     get_voxels_site_volume_ratio_dask,
 )
-from simmate.apps.warrenapp.models import WarrenPopulationAnalysis
 
 ###############################################################################
 # Now that we have functions defined, it's time to define the main workflow
@@ -48,9 +48,7 @@ from simmate.apps.warrenapp.models import WarrenPopulationAnalysis
 
 
 class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
-    description_doc_short = "BadELF based on ionic radii"
-
-    database_table = WarrenPopulationAnalysis
+    use_database = False
 
     @classmethod
     def run_config(
@@ -60,6 +58,7 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
         partition_file: str = "ELFCAR",
         empty_partition_file: str = "ELFCAR_empty",
         charge_file: str = "CHGCAR",
+        valence_file: str = "POTCAR",
         print_atom_voxels: bool = False,
         **kwargs,
     ):
@@ -507,7 +506,7 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
         # this is a vasp convention
         for site, charge in results_charge.items():
             results_charge[site] = charge / (a * b * c)
-        total_charge = sum(results_charge.values())
+        nelectrons = sum(results_charge.values())
 
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # Now I need to save the number of problem voxels in a report document.
@@ -566,40 +565,64 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
                 chgcar.write_file(f"CHGCAR_{element}")
                 elfcar.write_file(f"ELFCAR_{element}")
         ###############################################################################
-        # Save information into ACF.dat like file
+        # Save information into a dictionary that will be saved to a database.
         ###############################################################################
-        # We need to write a file that's the same format as the Henkelman group's
-        # bader output files so that our database records properly. These lines
-        # format our output information. It should be noted that our algorithm
-        # currently doesn't give vacuum charges, vacuum volumes, or mininum
-        # distances to partition surfaces the way that the Henkelman groups does
-        acf_lines = []
-        acf_lines.extend(
-            [
-                "    #         X           Y           Z       CHARGE      MIN DIST   ATOMIC VOL\n",
-                " --------------------------------------------------------------------------------\n",
-            ]
-        )
-        for site in results_charge:
-            line = f"    {site}"
-            for coord in results_coords[site]:
-                line += "{:>12.6f}".format(coord)
-            line += "{:>12.6f}".format(results_charge[site])
-            line += "{:>13.6f}".format(results_min_dist[site])
-            line += "{:>13.6f}".format(results_volume[site])
-            line += "\n"
-            acf_lines.append(line)
-        acf_lines.extend(
-            [
-                " --------------------------------------------------------------------------------\n",
-                "    VACUUM CHARGE:               0.0000\n",
-                "    VACUUM VOLUME:               0.0000\n",
-                f"    NUMBER OF ELECTRONS:{format(total_charge,'>15.4f')}\n",
-            ]
-        )
 
-        with open(directory / "ACF.dat", "w") as file:
-            file.writelines(acf_lines)
-        t2 = time.time()
-        print(f"Time for partitioning: {t1 - t0}")
-        print(f"Total time: {t2-t0}")
+        # load the electron counts used by VASP from the POTCAR files
+        # OPTIMIZE: this can be much faster if I have a reference file
+        potcars = Potcar.from_file(directory / valence_file)
+        nelectron_data = {}
+        # the result is a list because there can be multiple element potcars
+        # in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)
+        for potcar in potcars:
+            nelectron_data.update({potcar.element: potcar.nelectrons})
+            
+        # create lists to store the element list, oxidation states, charges,
+        # minimum distances, and atomic volumes
+        elements = []
+        oxi_state_data = []
+        charge_data = []
+        min_dists = []
+        atomic_volumes = []
+        # iterate over the charge results and add the results to each list
+        for site_index, site_charge in results_charge.items():
+            # get structure site
+            site = structure[site_index]
+            # get element name
+            element_str = site.specie.name
+            # add element to element list
+            elements.append(element_str)
+            # calculate oxidation state and add it to the oxidation state list
+            oxi_state = nelectron_data[element_str] - site_charge
+            oxi_state_data.append(oxi_state)
+            # add the corresponding charge, distance, and atomic volume to the
+            # respective lits
+            charge_data.append(site_charge)
+            min_dists.append(results_min_dist[site_index])
+            atomic_volumes.append(results_volume[site_index])
+            
+        # Calculate the "vacuum charge" or the charge not associated with any atom.
+        # Idealy this should be 0
+        total_electrons = sum(nelectron_data.values())
+        vacuum_charge = round((total_electrons - nelectrons),6)
+        
+        # Calculate the "vacuum volume" or the volume not associated with any atom.
+        # Idealy this should be 0
+        vacuum_volume = round((lattice["volume"] - sum(results_volume.values())),6)
+        
+        # get the number of electride sites.
+        nelectrides = get_electride_num(directory, "POSCAR_empty")
+        
+        results_dataframe = {
+                "oxidation_states": oxi_state_data,
+                "algorithm": "badelf",
+                "charges": charge_data,
+                "min_dists": min_dists,
+                "atomic_volumes": atomic_volumes,
+                "element_list": elements,
+                "vacuum_charge": vacuum_charge,
+                "vacuum_volume": vacuum_volume,
+                "nelectrons": nelectrons,
+                "nelectrides": nelectrides, 
+            }
+        return results_dataframe

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
-from simmate.apps.warrenapp.workflows.population_analysis.base import VaspBaderBadElfBase
+from simmate.apps.warrenapp.workflows.population_analysis.base import VaspBadElfBase
+from simmate.apps.warrenapp.models import BadElfAnalysis
 
-
-class PopulationAnalysis__Warren__BaderBadelf(VaspBaderBadElfBase):
+class PopulationAnalysis__Warren__BaderBadelf(VaspBadElfBase):
     """
     This class runs a Bader and BadELF analysis without running a static
     energy calculation. The directory it is run in must already have an
@@ -16,4 +16,4 @@ class PopulationAnalysis__Warren__BaderBadelf(VaspBaderBadElfBase):
     You will also need to place a POSCAR file in the directory above.
     """
 
-    static_energy_prebadelf = None
+    database_table = BadElfAnalysis
