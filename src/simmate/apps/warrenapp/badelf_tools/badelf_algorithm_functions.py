@@ -141,14 +141,14 @@ def get_number_of_partitions(
     return npartitions
 
 
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+###############################################################################
 # This section defines functions that are used for partitioning a unit cell
 # based on the ELF (or possibly the charge density). This includes functions that
 # read in the POSCAR, ELFCAR and CHGCAR into arrays, find nearest and voronoi
 # neighbors for each atom, finds the minimum of an interpolated line drawn
 # between each atom pair, and finds the plane point and plane vector associated
 # with the plane dividing these atoms at this point.
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+###############################################################################
 def get_lattice(partition_file: str):
     """
     This function gets several important things from the lattice defined in
@@ -405,7 +405,7 @@ def get_closest_extrema_to_center(values, extrema):
     global_extrema = extrema[min_pos]
     return global_extrema
 
-def check_for_covalency(values: list, minimum: list, maximum: list):
+def check_bond_for_covalency(values: list):
     """
     Checks for covalent/metallic behavior along a bond. This is done by comparing 
     the closest local maximum and minimum to the center of the bond. If the
@@ -421,15 +421,23 @@ def check_for_covalency(values: list, minimum: list, maximum: list):
     # get the center of the ELF line
     midpoint = len(values) / 2
     
+    # minima function gives all local minima along the values
+    minima = find_minimum(values)
+    maxima = find_maximum(values)
+
+    # then we grab the local minima closest to the midpoint of the values
+    global_min = get_closest_extrema_to_center(values, minima)
+    global_max = get_closest_extrema_to_center(values, maxima)
+    
     # get the distance from the minimum and maximum to the center. The position 
     # of the extrema is stored in the first index of the extrema list
-    min_dist = abs(midpoint-minimum[0])
-    max_dist = abs(midpoint-maximum[0])
+    min_dist = abs(midpoint-global_min[0])
+    max_dist = abs(midpoint-global_max[0])
     
     # get the ELF values at the minimum and maximum. This is stored in the
     # second index of the extrema list
-    min_elf = minimum[1]
-    max_elf = maximum[1]
+    min_elf = global_min[1]
+    max_elf = global_max[1]
     
     # If the maximum is closer to the center of the line than the minimum, then
     # we consider this bond to have metallic or covalent behavior and return True
@@ -455,34 +463,12 @@ def get_line_frac_min_rough(values, rough_partitioning=False):
     """
     # minima function gives all local minima along the values
     minima = find_minimum(values)
-    maxima = find_maximum(values)
+    # maxima = find_maximum(values)
 
     # then we grab the local minima closest to the midpoint of the values
     global_min = get_closest_extrema_to_center(values, minima)
-    global_max = get_closest_extrema_to_center(values, maxima)
-    
-    # Now we check for any strong covalency in the bond as in the current version
-    # of BadELF, this will break the partitioning scheme
-    if check_for_covalency(values, global_min, global_max):
-        raise Exception(
-            """
-            A maximum in the ELF line between atoms was found closer to the
-            center of the bond than any local minimum.
-            This typically indicates that there is some covalent behavior in
-            your system. Unfortunately, the current version of BadELF does not
-            have a way to partition peaks in the ELF from covalency, though
-            this will hopefully be implemented in a future version of the
-            algorithm.
-            
-            An alternative issue is that you are using a pseudopotential that
-            does not include more than the minimum valence electrons. This will
-            result in ELF values close to 0 around the core of the atom. Make
-            sure you are using suitable pseudopotentials for all of your atoms.
-            We are aware of at least two atoms, Al and B, that do not have a
-            suitable pseudopotential with core electrons in VASP 5.X.X.
-            """
-            )
-    
+    # global_max = get_closest_extrema_to_center(values, maxima)
+       
     # If we have a high enough voxel resolution we only want to run the rough
     # interpolation. If that's the case we want to do a polynomial fit here
     # to ensure that we have the correct position
@@ -655,6 +641,43 @@ def get_radius(point, site_pos, lattice):
     return radius
 
 
+def check_structure_for_covalency(closest_neighbors, grid, lattice):
+    """
+    This function is designed to check for covalency along the bonds from each 
+    atom to its nearest neighbors. The NN are defined by Pymatgen's CrystalNN 
+    function and covalency is described as a maximum in the ELF that is closer
+    to the center of the bond than any minimum.
+    """
+    for site_index, neighs in closest_neighbors.items():
+        # get voxel position from fractional site
+        site_pos = get_voxel_from_index(site_index, lattice)
+        # iterate over each neighbor bond
+        for neigh_index, neigh in enumerate(neighs):
+            neigh_pos = get_voxel_from_neigh_CrystalNN(neigh, lattice)
+            values = get_partitioning_line_rough(site_pos, neigh_pos, grid)[1]
+            
+            # Now we check for any strong covalency in the bond as in the current version
+            # of BadELF, this will break the partitioning scheme
+            if check_bond_for_covalency(values):
+                raise Exception(
+                    """
+                    A maximum in the ELF line between atoms was found closer to the
+                    center of the bond than any local minimum.
+                    This typically indicates that there is some covalent behavior in
+                    your system. Unfortunately, the current version of BadELF does not
+                    have a way to partition peaks in the ELF from covalency, though
+                    this will hopefully be implemented in a future version of the
+                    algorithm.
+                    
+                    An alternative issue is that you are using a pseudopotential that
+                    does not include more than the minimum valence electrons. This will
+                    result in ELF values close to 0 around the core of the atom. Make
+                    sure you are using suitable pseudopotentials for all of your atoms.
+                    We are aware of at least two atoms, Al and B, that do not have a
+                    suitable pseudopotential with core electrons in VASP 5.X.X.
+                    """
+                    )
+
 def get_site_neighbor_results_rough(
     site_index, neigh, lattice: dict, site_pos: dict, grid, rough_partitioning=False
 ):
@@ -716,20 +739,13 @@ def get_site_neighbor_results_fine(site_df, grid, lattice):
         elf_min_index = row[1]["elf_min_index"]
         site_pos = row[1]["site_pos"]
         neigh_pos = row[1]["neigh_pos"]
+        
         # get the minimum position along the elf line
-        #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # This fails in mayenite in some cases so I'm letting it through for now.
-        # This just uses the rough partitioning instead of the fine in instances
-        # where it fails.
-        #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        try:
-            (
-                elf_min_index_new,
-                elf_min_value_new,
-                elf_min_frac_new,
-            ) = get_line_frac_min_fine(elf_positions, elf_min_index, grid)
-        except:
-            continue
+        (   elf_min_index_new,
+            elf_min_value_new,
+            elf_min_frac_new,
+        ) = get_line_frac_min_fine(elf_positions, elf_min_index, grid)
+
         # convert minimum in ELF line into voxel position
         elf_min_vox = get_position_from_min(elf_min_frac_new, site_pos, neigh_pos)
         # convert voxel position into real_space
@@ -859,13 +875,13 @@ def get_partitioning_fine(rough_partition_results, grid, lattice):
     return results
 
 
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+###############################################################################
 # This section defines functions that are used for assigning voxels that aren't
 # split by a plane to the correct atomic site.
 # This includes functions that determine which voxels might be split by a plane,
 # find which site a voxel should belong to, and parallelize this across a Dask
 # partitioned Dataframe.
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+###############################################################################
 
 
 def get_max_voxel_dist(lattice):
@@ -916,7 +932,8 @@ def get_matching_site(pos, results, lattice, max_distance):
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # I've had a bug in the past where more than one site is found for a single
     # voxel. As such, I'm going to temporarily make this function search all
-    # sites in case it finds more than one.
+    # sites in case it finds more than one. This bug seemed to be due to incorrect
+    # plane selection.
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     sites = []
     # Iterate over each site in the lattice
@@ -1009,7 +1026,8 @@ def get_voxels_site(
     # being translated. I'm going to make this function temporarily go through
     # all sites in case the bug still exists. It will return -1 if the multiple
     # sites are found at the same transformation and it will return -2 if multiple
-    # are found across different transformations.
+    # are found across different transformations. This bug seemed to be due to
+    # insufficient partitioning plane selection
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     sites = []
     if site not in electride_sites:
@@ -1074,19 +1092,20 @@ def get_voxels_site_dask(
     )
 
 
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+###############################################################################
 # This section defines functions that are used for assigning voxels that ARE
 # split by a plane
 # This includes functions that find the vertices of a voxel, which site they
 # belong to, where a plane intersects a given voxel, and what volume ratio of
 # each voxel belongs to a given site.
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+###############################################################################
 
 def get_matching_site_with_plane(vert_coord, results, lattice):
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # I've had a bug in the past where more than one site is found for a single
     # voxel location. As such, I'm going to temporarily make this function search all
-    # sites in case it finds more than one.
+    # sites in case it finds more than one. This bug seemed to be caused by
+    # insufficient partitioning plane selection.
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     sites = []
     # Iterate over each site in the lattice
@@ -1146,7 +1165,8 @@ def get_vertex_site(
     # all sites in case the bug still exists. It will return -1 if the multiple
     # sites are found at the same transformation and it will return -2 if multiple
     # are found across different transformations. This typically effects only
-    # a small number of sites if the system is ionic.
+    # a small number of sites if the system is ionic. This bug seemed to be
+    # caused by insufficient partitioning plane selection
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     sites = []
     translations = []
@@ -1311,7 +1331,7 @@ def get_intersections_df(
                         # we transform all intersections to be relative to A0 being
                         # the origin. This is so planes from various transformations
                         # can be treated at the same time
-                        #!!! MUST ROUND!
+                        # MUST ROUND!
                         intersection = [
                             round((x - x1), 12)
                             for x, x1 in zip(
@@ -1369,7 +1389,7 @@ def get_site_volume_ratio(x, y, z, results, lattice, permutations, voxel_volume)
     # My best guess for what is happening is that these sites are very close to
     # being exactly on a plane and are therefore returning as being part of
     # more than one site.
-    # In my test with Na2S, returning these vertices as None and allowing the
+    # In a test with Na2S, returning these vertices as None and allowing the
     # program to continue gave more even results.
     if -1 in sites["site"].to_list() or -2 in sites["site"].to_list():
         # If vertices are found to have multiple sites I've made it so that it
@@ -1535,7 +1555,6 @@ def get_site_volume_ratio(x, y, z, results, lattice, permutations, voxel_volume)
                 try:
                     hull = ConvexHull(hull_points)
                     seg1_vol = hull.volume
-                    #!!! round? PROBABLY NOT NECESSARY
                     seg1_ratio = round((seg1_vol / voxel_volume), 16)
                     site_vol_frac[site1] = seg1_ratio
                     site_vol_frac[site2] = round((1 - seg1_ratio), 16)

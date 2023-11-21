@@ -23,7 +23,9 @@ from simmate.engine import Workflow
 from simmate.toolkit import Structure
 
 from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
+    check_structure_for_covalency,
     get_50_neighbors,
+    get_closest_neighbors,
     get_charge_density_grid,
     get_electride_sites,
     get_lattice,
@@ -68,6 +70,7 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             neighbors50 = get_50_neighbors(structure=structure)
+            closest_neighbors = get_closest_neighbors(structure)
 
         # read in lattice with and without electride sites
         lattice = get_lattice(partition_file=directory / partition_file)
@@ -99,7 +102,12 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
             grid = get_charge_density_grid(
                 charge_file=directory / partition_file, lattice=lattice
             )
-
+        
+        # We now check for any covalency that may be in the structure.
+        # !!! the current version of BadELF does not have a method for handling
+        # covalency. This will hopefully be updated in the future
+        check_structure_for_covalency(closest_neighbors, grid, lattice)
+        
         # The algorithm now looks at each site-neighbor pair.
         # Along the bond between the pair, we look at ELF values.
         # We find the position of the minimum ELF value.

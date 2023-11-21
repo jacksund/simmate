@@ -3,7 +3,6 @@
 import shutil
 from pathlib import Path
 
-from simmate.apps.bader.workflows import PopulationAnalysis__Bader__CombineChgcars
 from simmate.engine import S3Workflow, Workflow
 from simmate.toolkit import Structure
 
@@ -15,6 +14,7 @@ from simmate.apps.warrenapp.models import WarrenPopulationAnalysis
 from simmate.apps.warrenapp.workflows.population_analysis.badelf_alg_v3_9 import (
     PopulationAnalysis__Warren__BadelfIonicRadii,
 )
+from simmate.apps.warrenapp.badelf_tools.chgsum import chgsum
 
 # This file contains classes for performing Bader and BadELF. Parts of the code
 # are based off of the Henkelman groups algorithm for Bader analysis:
@@ -200,10 +200,7 @@ class VaspBaderBadElfBase(Workflow):
                     directory=directory,
                 ).result()
             # Combine AECCAR0 and AECCAR2 for bader later in workflow
-            PopulationAnalysis__Bader__CombineChgcars.run(
-                directory=directory,
-                previous_director=directory,
-            ).result()
+            chgsum(directory)
             # Run badelf on initial output
             PopulationAnalysis__Warren__BadelfInit.run(
                 structure=structure,
@@ -237,12 +234,10 @@ class VaspBaderBadElfBase(Workflow):
                 Path(directory / "bader").mkdir()
             except:
                 pass
-            # Copy badelf results into badelf
+            # Copy badelf results into badelf directory
             for file in badelf_files:
                 shutil.copy(directory / file, directory / "badelf")
-            # shutil.copy(
-            #     directory / "simmate_population_summary.csv", directory / "badelf"
-            # )
+
             # Run bader analysis
             PopulationAnalysis__Warren__BaderEmpty.run(
                 structure=structure,
@@ -265,10 +260,7 @@ class VaspBaderBadElfBase(Workflow):
                 ).result()
 
             # Setup CHGCAR_sum for the bader analysis and wait until complete
-            PopulationAnalysis__Bader__CombineChgcars.run(
-                directory=directory,
-                previous_director=directory,
-            ).result()
+            chgsum(directory)
             if badelf_alg == "voronoi":
                 # Run badelf on initial output
                 PopulationAnalysis__Warren__BadelfIonicRadii.run(
