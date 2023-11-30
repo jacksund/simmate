@@ -6,23 +6,27 @@ Created on Tue Nov 21 15:18:45 2023
 @author: sweav
 """
 
-# from pandas import DataFrame
+from pandas import DataFrame
+from pathlib import Path
 from simmate.database.base_data_types import Structure, Calculation, table_column
 
 class BadElfAnalysis(Structure, Calculation):
     """
     This table contains results from a BadELF analysis.
     """
-
     class Meta:
-        app_label = "workflows"
-        
+        app_label = "workflows"    
+    
     oxidation_states = table_column.JSONField(blank=True, null=True)
     """
     A list of calculated oxidation states for each site.
     """
     
-    algorithm = table_column.CharField(blank=True, null=True)
+    algorithm = table_column.CharField(
+        blank=True, 
+        null=True,
+        max_length=75,
+        )
     """
     The selected algorithm. The default is BadELF as defined by the warren lab:
     https://pubs.acs.org/doi/10.1021/jacs.3c10876
@@ -85,8 +89,55 @@ class BadElfAnalysis(Structure, Calculation):
     consistent and accurate count of valence electrons
     """
 
-    nelectrides = table_column.FloatField(blank=True, null=True)
+    nelectrides = table_column.IntegerField(blank=True, null=True)
     """
     The total number of electrides that were found when searching the BCF.dat
     file in some BadELF or Bader workflows.
     """
+    
+    def write_output_summary(self, directory: Path):
+        super().write_output_summary(directory)
+        self.write_summary_dataframe(directory)
+    
+    # def from_vasp_run(vasprun, as_dict):
+    #     """
+    #     The base workflow class will register the vasprun.xml and try and load
+    #     vasp data using a from_vasp_run method. We don't actually want to load
+    #     anything so this method just passes.
+    #     """
+    #     pass
+    def update_from_directory(self, directory):
+        """
+        The base database workflow will try and register data from the local
+        directory. As part of this it checks for a vasprun.xml file and 
+        attempts to run a from_vasp_run method. Since this is not defined for
+        this model, an error is thrown. To account for this, I just create an empty
+        update_from_directory method here.
+        """        
+        pass
+    
+    def get_summary_dataframe(self):
+        """
+        Creates a dataframe containing the information that is most likely to
+        be useful to a user.
+        """
+        df = DataFrame(
+            {
+                "element": self.element_list,
+                "oxidation_state": self.oxidation_states,
+                "charge": self.charges,
+                "min_dist": self.min_dists,
+                "atomic_volume": self.atomic_volumes,
+                "nelectrons": self.nelectrons,
+                "nelectrides": self.nelectrides
+            }
+        )
+        return df
+
+    def write_summary_dataframe(self, directory: Path):
+        """
+        writes the summary dataframe from above to a csv file.
+        """
+        df = self.get_summary_dataframe()
+        filename = directory / "badelf_summary.csv"
+        df.to_csv(filename)

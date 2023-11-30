@@ -24,6 +24,7 @@ from simmate.toolkit import Structure
 from simmate.apps.warrenapp.badelf_tools.utilities import get_electride_num
 
 from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
+    check_closest_neighbor_for_same_type,
     check_structure_for_covalency,
     get_50_neighbors,
     get_closest_neighbors,
@@ -41,13 +42,13 @@ from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
     get_voxels_site_nearest,
     get_voxels_site_volume_ratio_dask,
 )
-
+import sys
 ###############################################################################
 # Now that we have functions defined, it's time to define the main workflow
 ###############################################################################
 
 
-class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
+class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
     use_database = False
 
     @classmethod
@@ -55,6 +56,7 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
         cls,
         directory: Path = None,
         structure_file: str = "POSCAR",
+        empty_structure_file: str = "POSCAR_empty",
         partition_file: str = "ELFCAR",
         empty_partition_file: str = "ELFCAR_empty",
         charge_file: str = "CHGCAR",
@@ -64,12 +66,17 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
     ):
         t0 = time.time()
         structure = Structure.from_file(directory / structure_file)
+        
+        try:
+            empty_structure = Structure.from_file(directory / empty_structure_file)
+        except:
+            empty_structure = structure.copy()
         # get dictionary of sites and closest neighbors. This always throws
         # the same warning about He's EN so we suppress that here
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             neighbors50 = get_50_neighbors(structure=structure)
-            closest_neighbors = get_closest_neighbors(structure)
+            closest_neighbors = get_closest_neighbors(empty_structure)
 
         # read in lattice with and without electride sites
         lattice = get_lattice(partition_file=directory / partition_file)
@@ -105,7 +112,8 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
         # We now check for any covalency that may be in the structure.
         # !!! the current version of BadELF does not have a method for handling
         # covalency. This will hopefully be updated in the future
-        check_structure_for_covalency(closest_neighbors, grid, lattice)
+        check_closest_neighbor_for_same_type(closest_neighbors, empty_structure)
+        check_structure_for_covalency(closest_neighbors, grid, empty_lattice, empty_structure)
         
         # The algorithm now looks at each site-neighbor pair.
         # Along the bond between the pair, we look at ELF values.
@@ -568,9 +576,12 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
         # Save information into a dictionary that will be saved to a database.
         ###############################################################################
 
-        # load the electron counts used by VASP from the POTCAR files
-        # OPTIMIZE: this can be much faster if I have a reference file
-        potcars = Potcar.from_file(directory / valence_file)
+        # load the electron counts from the POTCAR. Here I ignore a warning
+        # from pymatgen that often gets thrown if they don't recognize a given
+        # pseudopotential.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            potcars = Potcar.from_file(directory / valence_file)
         nelectron_data = {}
         # the result is a list because there can be multiple element potcars
         # in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)
@@ -587,13 +598,19 @@ class PopulationAnalysis__Warren__BadelfIonicRadii(Workflow):
         # iterate over the charge results and add the results to each list
         for site_index, site_charge in results_charge.items():
             # get structure site
-            site = structure[site_index]
+            site = empty_structure[site_index]
             # get element name
             element_str = site.specie.name
+            # Change electride dummy atom name to e
+            if element_str == "He":
+                element_str = "e"
             # add element to element list
             elements.append(element_str)
             # calculate oxidation state and add it to the oxidation state list
-            oxi_state = nelectron_data[element_str] - site_charge
+            if element_str == "e":
+                oxi_state = -site_charge
+            else:
+                oxi_state = nelectron_data[element_str] - site_charge
             oxi_state_data.append(oxi_state)
             # add the corresponding charge, distance, and atomic volume to the
             # respective lits

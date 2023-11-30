@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from simmate.apps.warrenapp.workflows.nested_dft.relaxation_static_base import RelaxationStaticBase
-from simmate.apps.warrenapp.workflows.population_analysis.prebadelf_dft import (
+from simmate.apps.warrenapp.workflows.badelf.prebadelf_dft import (
     StaticEnergy__Warren__PrebadelfHse,
 )
 from simmate.apps.warrenapp.workflows.relaxation.pbesol import Relaxation__Warren__Pbesol

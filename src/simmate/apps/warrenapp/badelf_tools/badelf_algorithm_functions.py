@@ -16,7 +16,9 @@ from numpy import polyfit
 from pymatgen.analysis.local_env import CrystalNN
 from scipy.interpolate import RegularGridInterpolator
 from scipy.spatial import ConvexHull
+from scipy.signal import savgol_filter
 from simmate.toolkit import Structure
+
 
 """
 This module defines functions that are used in the warren lab badelf
@@ -455,7 +457,7 @@ def check_bond_for_covalency(values: list):
             return True
         else:
             return False
-
+        
 def get_line_frac_min_rough(values, rough_partitioning=False):
     """
     Finds the minimum point of a list of values along a line, then returns the
@@ -640,8 +642,65 @@ def get_radius(point, site_pos, lattice):
     radius = sum([(b - a) ** 2 for a, b in zip(real_site_pos, point)]) ** (0.5)
     return radius
 
+def check_closest_neighbor_for_same_type(closest_neighbors, structure):
+    """
+    This function checks indirectly for covalency by checking if an atom's
+    closest neighbor is an atom of the same type. This suggests that the
+    atoms are covalently bonded. This is to account for the fact that in the
+    check_structure_for_covalency method, we skip any atom pairs that are the
+    same since they are likely to return as covalent regardless of how far apart
+    they are.
+    """
+    # we initially assume that the closest atom is not one of the same type.
+    same_atom_close = False
+    for site_index, neighs in closest_neighbors.items():
+        # get site atom string
+        specie = structure[site_index].species_string
+        # if the species is He, it is a dummy atom in an electride site and we
+        # want to skip it
+        if specie == "He": 
+            continue
+        
+        # to check if the closest atom is the same type of atom, we need ot find
+        # which atom is closest and which of the same atom is closest. First we
+        # make lists for all nearby atom distances and same atom distances.
+        site_distances = []
+        same_atom_distances = []
+        
+        # Now we find the sites coordinates and loop over each of its neighbors
+        # to find their coords. For each we find the distance away and add the
+        # distance to our distances list. If they are the same atom type we also
+        # add them to the same_atom_distances list.
+        site_coords = structure[site_index].coords
+        for neigh in neighs:
+            neigh_coords = neigh["site"].coords
+            site_distances.append(math.dist(site_coords, neigh_coords))
+            #check that the neighbors are the same species
+            if neigh["site"].specie == specie:
+                same_atom_distances.append(math.dist(site_coords, neigh_coords))
+        closest_atom_dist = min(site_distances)
+        # find the closest atom of the same type. Sometimes this doesn't exist
+        # in the nearest neighbors set so we set this to a large distance.
+        try: closest_same_atom_dist = min(same_atom_distances)
+        except: closest_same_atom_dist = 10
+        # if the closest atom is an atom of the same time, we 
+        if closest_same_atom_dist <= closest_atom_dist:
+            same_atom_close = True
+            break
+    # if the same atom is found as the closest atom, we want to raise an error
+    if same_atom_close:
+        raise Exception(
+            """
+            An atom's closest neighbor was found to be an atom of the same type.
+            This very likely indicates that these atoms are bonded covalently.
+            Unfortunately, the current version of BadELF does not have a way to 
+            partition peaks in the ELF from covalency, thoug this will hopefully 
+            be implemented in a future version of the algorithm.
+            """
+            )
 
-def check_structure_for_covalency(closest_neighbors, grid, lattice):
+            
+def check_structure_for_covalency(closest_neighbors, grid, lattice, structure):
     """
     This function is designed to check for covalency along the bonds from each 
     atom to its nearest neighbors. The NN are defined by Pymatgen's CrystalNN 
@@ -653,12 +712,33 @@ def check_structure_for_covalency(closest_neighbors, grid, lattice):
         site_pos = get_voxel_from_index(site_index, lattice)
         # iterate over each neighbor bond
         for neigh_index, neigh in enumerate(neighs):
+            # Check that we are not looking between two of the same atom. This
+            # is likely to have some amount of ELF between the two atoms even
+            # if they are not likely to actually be bonded with one another. I
+            # don't think this should cause any issues with the algorithm, but
+            # !!! it's worth testing
+            site_species = structure[site_index].species_string
+            neigh_species = structure[neigh["site_index"]].species_string
+            
+            if site_species == neigh_species:
+                continue
+            
+            # neigh_site_index = neigh["site_index"]
+            # if site_index == neigh_site_index:
+            #     continue
+
+            
             neigh_pos = get_voxel_from_neigh_CrystalNN(neigh, lattice)
             values = get_partitioning_line_rough(site_pos, neigh_pos, grid)[1]
             
+            #smooth line:
+            smoothed_values = savgol_filter(values, 20, 3)
+            
             # Now we check for any strong covalency in the bond as in the current version
             # of BadELF, this will break the partitioning scheme
-            if check_bond_for_covalency(values):
+            if check_bond_for_covalency(smoothed_values):
+                # import matplotlib.pyplot as plt
+                # plt.plot(smoothed_values)
                 raise Exception(
                     """
                     A maximum in the ELF line between atoms was found closer to the

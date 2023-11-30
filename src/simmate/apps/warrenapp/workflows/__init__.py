@@ -7,11 +7,11 @@ from .nested_dft import (
     Relaxation__Warren__HseWithWavecar,
     Relaxation__Warren__PbeWithWavecar,
 )
-from .population_analysis import (
+from .badelf import (
 
-    PopulationAnalysis__Warren__BaderBadelf,
-    PopulationAnalysis__Warren__BaderBadelfHse,
-    PopulationAnalysis__Warren__BaderBadelfPbesol,
+    BadElfAnalysis__Warren__Badelf,
+    BadElfAnalysis__Warren__BadelfHse,
+    BadElfAnalysis__Warren__BadelfPbesol,
     StaticEnergy__Warren__PrebadelfHse,
     StaticEnergy__Warren__PrebadelfPbesol,
 )
