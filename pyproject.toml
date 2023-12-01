@@ -65,7 +65,7 @@ dependencies=[
     "django >=4.0.0, <4.1.6",
     "dask >=2023.6.1, <2023.11.1",
     "distributed >=2023.6.1, <2023.11.1",  # part of dask
-    "django >=4.0.0, <4.2.3",
+    "django >=4.0.0, <4.2.8",
     "typer >=0.6.0, <0.7.1",
     #
     # Extra (smaller) dependencies & utilities
