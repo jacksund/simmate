@@ -119,7 +119,7 @@ def get_nodes_from_results(results):
     
     return atoms_polygon_nodes
 
-# nodes = get_all_nodes(planes)
+nodes = get_nodes_from_results(results)
 # hull = ConvexHull(nodes)
 
 def plot_points(points, ax, fig, color, size=20):
@@ -184,7 +184,7 @@ def plot_atom_shapes(atom_polygons: dict, lattice):
 
         ax.plot_trisurf(x, y, z, triangles=triangles, color=color_map(site))#, alpha=0.5)
 
-
+plot_atom_shapes(nodes, lattice)
 
 
     

@@ -101,8 +101,9 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         # use any zero-flux and need to disable anything based on this.
         if algorithm == "badelf":
             electride_sites = get_electride_sites(empty_lattice)
-        else:
+        elif algorithm == "voronoi":
             electride_sites = []
+            
 
         # we'll need the volume of each voxel later to calculate the atomic
         # volumes for our output file

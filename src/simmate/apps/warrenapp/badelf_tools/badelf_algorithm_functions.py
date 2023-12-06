@@ -19,6 +19,7 @@ from scipy.interpolate import RegularGridInterpolator
 from scipy.spatial import ConvexHull
 from scipy.signal import savgol_filter
 from simmate.toolkit import Structure
+from itertools import combinations
 
 from pymatgen.io.vasp import Poscar, Chgcar, Elfcar
 
@@ -225,7 +226,7 @@ def get_50_neighbors(structure):
         site_df = site_df.sort_values(by="distance")
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # Temporarily switching to 50 nearest planes
-        site_df = site_df.iloc[0:50]
+        site_df = site_df.iloc[0:100]
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # Add the neighbors as a list to the df
         neighbors50.append(site_df["neighbor"].to_list())
@@ -619,14 +620,14 @@ def get_unit_vector(site_pos, neigh_pos, lattice):
     return np.array(unit_vector)
 
 
-def get_plane_sign(point, unit_vector, site_pos, lattice):
+def get_plane_sign(point, unit_vector, site_real_coord):
     """
     Gets the sign associated with a point compared with a plane. This should
     be negative for an atoms position compared with a plane dividing it from
     other atoms.
     """
     # get all of the points in cartesian coordinates
-    x, y, z = get_real_from_vox(site_pos, lattice)
+    x, y, z = site_real_coord
     a, b, c = unit_vector
     x1, y1, z1 = point
     value_of_plane_equation = a * (x - x1) + b * (y - y1) + c * (z - z1)
@@ -847,6 +848,84 @@ def get_site_neighbor_results_fine(site_df, grid, lattice):
         row[1]["elf_min_vox"] = elf_min_vox
     return site_df
 
+#!!!!!!!!! These next several functions are for finding what planes are relavent
+def get_plane_equation(plane_point, plane_vector):
+    x0, y0, z0 = plane_point
+    a, b, c = plane_vector
+    d = a * x0 + b * y0 + c * z0
+    return a,b,c,d
+
+def find_intersection_point(plane1, plane2, plane3):
+    
+    a1,b1,c1,d1 = get_plane_equation(plane1["point"], plane1["vector"])
+    a2,b2,c2,d2 = get_plane_equation(plane2["point"], plane2["vector"])
+    a3,b3,c3,d3 = get_plane_equation(plane3["point"], plane3["vector"])
+    
+    A = np.array([[a1, b1, c1], [a2, b2, c2], [a3, b3, c3]])
+    b = np.array([d1, d2, d3])
+
+    # Solve the system of equations
+    intersection_point = np.linalg.solve(A, b)
+
+    return intersection_point
+
+def get_important_planes(planes):
+    # create list for points where planes intersect and for important planes
+    intercepts = []
+    important_planes = []
+    # iterate through each set of 3 planes
+    for combination in combinations(planes,3):
+        # try to find an intersection point. We do a try except because if two
+        # of the planes are parallel there wont be an intersect point
+        try: 
+            intercept = find_intersection_point(combination[0],combination[1],combination[2])
+        except:
+            continue
+        
+        # Check if the points are one or within the convex shape defined by the
+        # planes. Assume this is true at first
+        important_intercept = True
+        # Check each plane versus the intercept point. If we plug the point into
+        # the plane equation it should return as 0 or positive if it is within the
+        # shape?
+        for plane in planes:
+            sign, dist = get_plane_sign(intercept, plane["vector"], plane["point"])
+            if sign in ["positive", "zero"]:
+                pass
+            else:
+                important_intercept = False
+                break
+        # If the point is bound by all planes, it is an important intercept.
+        # append it to our list. Also append any new important planes
+        if important_intercept:
+            intercepts.append(intercept)
+            for plane in combination:
+                point = plane["point"]
+                vector = plane["vector"]
+                repeat_plane = False
+                # check if plane already exists in list
+                for plane1 in important_planes:
+                    point1 = plane1["point"]
+                    vector1 = plane1["vector"]
+                    
+                    # Check if these planes have the same point and vector. If
+                    # they do, indicate that this is a repeate plane
+                    if np.array_equal(point, point1) and np.array_equal(vector, vector1):
+                        repeat_plane = True
+                        break
+                # If this isn't a repeat plane, add it to our important planes list
+                if not repeat_plane:
+                    important_planes.append(plane)
+                # important_plane_points.append(plane["point"])
+                # important_plane_vectors.append(plane["vector"])
+        
+        # remove any unimportant planes
+        # for point, vector in zip(important_plane_points, important_plane_vectors):
+        #     for point1, vector1
+
+
+    return intercepts, important_planes
+
 
 def get_partitioning_rough(neighbors50, lattice, grid, rough_partitioning=False):
     # Now we want to find the minimum in the ELF between the atom and each of its
@@ -881,20 +960,36 @@ def get_partitioning_rough(neighbors50, lattice, grid, rough_partitioning=False)
             site_df.loc[len(site_df)] = get_site_neighbor_results_rough(
                 site_index, neigh, lattice, site_pos, grid, rough_partitioning
             )
-
-
+        
+        # Get list of planes for each atom. The planes are stored as a dictionary
+        planes = [{"point": i, "vector": j} for i, j in zip(site_df["plane_point"],site_df["plane_vector"])]
+        # Get the important planes
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # For now I am treating partitioning in a static way by just using 50 
         # partitioning planes no matter the atom or system. I believe plane
         # selection is the source for many errors in voxel assignment.
         # I will update this in the future to more rigorously select the planes.
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+        intercepts, important_planes = get_important_planes(planes)
+        
         # # # create a list to store the final set of neighbors
         important_neighs = pd.DataFrame(columns=columns)
         for [index, row] in site_df.iterrows():
-            important_neighs.loc[len(important_neighs)] = row
+            # get the associated point and vector for the partitioning plane in
+            # this neighbor.
+            plane_point = np.array(row["plane_point"])
+            plane_vector = np.array(row["plane_vector"])
+            # Check if this plane exists in our list of important planes. If it
+            # does than we'll add this row to our important partitioning planes
+            # list
+            for plane in important_planes:
+                point = plane["point"]
+                vector = plane["vector"]
+                if np.array_equal(plane_point, point) and np.array_equal(plane_vector, vector):
+                    important_neighs.loc[len(important_neighs)] = row
         rough_partition_results.append(important_neighs)
+
+
 
     if rough_partitioning:
         results = {}
@@ -1011,7 +1106,7 @@ def get_max_voxel_dist(lattice):
     return max_distance
 
 
-def get_matching_site(pos, results, lattice, max_distance):
+def get_matching_site(site_pos, results, lattice, max_distance):
     """
     Determines which atomic site a point belongs to.
     """
@@ -1038,9 +1133,10 @@ def get_matching_site(pos, results, lattice, max_distance):
             # should have the same sign when their coordinates are plugged into
             # the plane equation (negative).
             # expected_sign = values["sign"]
-
+            
             # use plane equation to find sign
-            sign, distance = get_plane_sign(point, normal_vector, pos, lattice)
+            site_real_coord = get_real_from_vox(site_pos, lattice)
+            sign, distance = get_plane_sign(point, normal_vector, site_real_coord)
 
             # if the sign matches, move to next neighbor.
             # if the sign ever doesn't match, then the site is wrong and we move
@@ -1211,7 +1307,8 @@ def get_matching_site_with_plane(vert_coord, results, lattice):
             # the plane equation (negative).
 
             # use plane equation to find sign
-            sign, distance = get_plane_sign(point, normal_vector, vert_coord, lattice)
+            vert_real_coord = get_real_from_vox(vert_coord, lattice)
+            sign, distance = get_plane_sign(point, normal_vector, vert_real_coord)
 
             # if the sign matches, move to next neighbor.
             # if the sign ever doesn't match, then the site is wrong and we move
