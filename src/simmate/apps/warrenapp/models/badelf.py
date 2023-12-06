@@ -95,6 +95,12 @@ class BadElfAnalysis(Structure, Calculation):
     file in some BadELF or Bader workflows.
     """
     
+    electride_dim = table_column.IntegerField(blank=True, null=True)
+    """
+    The dimensionality of the electride network in the structure. Defaults to
+    the highest dimension network.
+    """
+    
     def write_output_summary(self, directory: Path):
         super().write_output_summary(directory)
         self.write_summary_dataframe(directory)
@@ -129,7 +135,8 @@ class BadElfAnalysis(Structure, Calculation):
                 "min_dist": self.min_dists,
                 "atomic_volume": self.atomic_volumes,
                 "nelectrons": self.nelectrons,
-                "nelectrides": self.nelectrides
+                "nelectrides": self.nelectrides,
+                "electride_dim": self.electride_dim,
             }
         )
         return df

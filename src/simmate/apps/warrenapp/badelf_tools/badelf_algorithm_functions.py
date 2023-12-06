@@ -9,6 +9,7 @@ import itertools
 import math
 from math import ceil
 from math import prod as product
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -18,6 +19,8 @@ from scipy.interpolate import RegularGridInterpolator
 from scipy.spatial import ConvexHull
 from scipy.signal import savgol_filter
 from simmate.toolkit import Structure
+
+from pymatgen.io.vasp import Poscar, Chgcar, Elfcar
 
 
 """
@@ -184,8 +187,7 @@ def get_lattice(partition_file: str):
                 lattice["lines"] = ceil(product(lattice["grid_size"]) / 10)
                 break
     return lattice
-
-
+   
 def get_closest_neighbors(structure: Structure):
     """
     Function for getting the closest neighbors
@@ -261,6 +263,10 @@ def get_partitioning_grid(
     """
     Loads in the partitioning file (usualy ELFCAR) into a 3D numpy array
     """
+    #!!! this does not read ELFCARS written by pymatgen properly. The number
+    # of lines in that case would be 2*lattice["lines"] similar to reading a
+    # charge density. This should be fixed.
+    
     try:
         grid = np.loadtxt(
             partition_file,
@@ -320,7 +326,7 @@ def get_charge_density_grid(
     return chg
 
 
-def get_partitioning_line_rough(site_pos, neigh_pos, grid):
+def get_partitioning_line(site_pos, neigh_pos, grid, method = "linear"):
     """
     Finds a line of voxel positions between two atom sites and then finds the value
     of the partitioning grid at each of these positions. The values are found
@@ -357,7 +363,7 @@ def get_partitioning_line_rough(site_pos, neigh_pos, grid):
     # is examened more closely with a more rigorous interpolation in
     # get_line_frac_min
     a, b, c = get_grid_axes(grid)
-    fn = RegularGridInterpolator((a, b, c), padded, method="linear")
+    fn = RegularGridInterpolator((a, b, c), padded, method=method)
     # get a list of the ELF values along the line
     values = []
 
@@ -729,7 +735,7 @@ def check_structure_for_covalency(closest_neighbors, grid, lattice, structure):
 
             
             neigh_pos = get_voxel_from_neigh_CrystalNN(neigh, lattice)
-            values = get_partitioning_line_rough(site_pos, neigh_pos, grid)[1]
+            values = get_partitioning_line(site_pos, neigh_pos, grid)[1]
             
             #smooth line:
             smoothed_values = savgol_filter(values, 20, 3)
@@ -768,7 +774,7 @@ def get_site_neighbor_results_rough(
     neigh_pos = get_voxel_from_neigh(neigh, lattice)
 
     # we need a straight line between these two points.  get list of all ELF values
-    elf_positions, elf_values_rough = get_partitioning_line_rough(
+    elf_positions, elf_values_rough = get_partitioning_line(
         site_pos, neigh_pos, grid
     )
 
@@ -1778,3 +1784,77 @@ def get_voxels_site_nearest(
     min_dist = min(distances)
     # return the index associated with the smallest distance
     return sites[distances.index(min_dist)]
+
+def write_atom_elfcar(directory: Path,
+                      lattice: dict,
+                      all_charge_coords: pd.DataFrame(),
+                      grid: pd.DataFrame(),
+                      structure: Structure,
+                      element: str,
+                      ):
+    """
+    Writes a VASP ELFCAR type file with only the voxels related to a given atom
+    """
+    # get a poscar object to make our CHGCAR/ELFCAR
+    poscar = Poscar(structure)
+    
+    # get the associated indices with the type of atom we're interested in
+    site_indices = structure.indices_from_symbol(element)
+    
+    # If the element is He, it is a dummy atom for an electride site. Replace it
+    # with e
+    if element == "He":
+        element = "e"    
+    
+    # create a numpy array with all zeros
+    elfcar_data = np.zeros(lattice["grid_size"])
+    # iterate over all voxels and assign elf values
+    # to numpy array
+    for row in all_charge_coords.iterrows():
+        if row[1]["site"] in site_indices:
+            x = int(row[1]["x"] - 1)
+            y = int(row[1]["y"] - 1)
+            z = int(row[1]["z"] - 1)
+            elfcar_data[x][y][z] = grid[x][y][z]
+
+    # create elfcar and chgcar objects and write to file
+    elfcar_data = {"diff": elfcar_data, "total": elfcar_data}
+    elfcar = Elfcar(poscar, elfcar_data)
+    elfcar.write_file(directory / f"ELFCAR_{element}")
+    
+def write_atom_chgcar(directory: Path,
+                      lattice: dict,
+                      all_charge_coords: pd.DataFrame(),
+                      structure: Structure,
+                      element: str,
+                      ):
+    """
+    Writes a VASP CHGCAR type file with only the voxels related to a given atom
+    """
+    # get a poscar object to make our CHGCAR/ELFCAR
+    poscar = Poscar(structure)
+    
+    # get the associated indices with the type of atom we're interested in
+    site_indices = structure.indices_from_symbol(element)
+    
+    # If the element is He, it is a dummy atom for an electride site. Replace it
+    # with e
+    if element == "He":
+        element = "e"  
+    
+    # create a numpy array with all zeros
+    chgcar_data = np.zeros(lattice["grid_size"])
+    # iterate over all voxels and assign charge values
+    # to numpy arrays
+    for row in all_charge_coords.iterrows():
+        if row[1]["site"] in site_indices:
+            x = int(row[1]["x"] - 1)
+            y = int(row[1]["y"] - 1)
+            z = int(row[1]["z"] - 1)
+            chgcar_data[x][y][z] = row[1]["chg"]
+
+    # create elfcar and chgcar objects and write to file
+    chgcar_data = {"diff": chgcar_data, "total": chgcar_data}
+    chgcar = Chgcar(poscar, chgcar_data)
+    chgcar.write_file(directory / f"CHGCAR_{element}")
+

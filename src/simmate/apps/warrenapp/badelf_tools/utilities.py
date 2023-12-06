@@ -2,7 +2,7 @@
 from pathlib import Path
 
 import numpy as np
-from pymatgen.io.vasp.inputs import Poscar
+from pymatgen.io.vasp import Poscar, Elfcar, Chgcar
 from simmate.toolkit import Structure
 
 from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
@@ -10,7 +10,7 @@ from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
     get_lattice,
     get_line_frac_min_rough,
     get_partitioning_grid,
-    get_partitioning_line_rough,
+    get_partitioning_line,
     get_position_from_min,
     get_real_from_vox,
     get_voxel_from_index,
@@ -41,7 +41,7 @@ def get_badelf_radius(neigh: list, lattice: dict, site_pos: dict, grid):
     neigh_pos = get_voxel_from_neigh_CrystalNN(neigh, lattice)
     real_site_pos = get_real_from_vox(site_pos, lattice)
     # we need a straight line between these two points.  get list of all ELF values
-    elf_pos, elf_values = get_partitioning_line_rough(site_pos, neigh_pos, grid)
+    elf_pos, elf_values = get_partitioning_line(site_pos, neigh_pos, grid)
     # smooth the line
 
     # find the minimum position and value along the elf_line
@@ -218,6 +218,7 @@ def get_empties_from_bcf(
             if structure_empty.get_distance(site_index, other_site_index) < 0.3:
                 sites_to_remove.append(site_index)
     structure_empty.remove_sites(sites_to_remove)
+    
     return structure_empty
 
 
@@ -258,13 +259,14 @@ def write_poscar_empty(directory: Path, structure_empty: Structure):
         file.writelines(poscar_empty_corrected)
 
 
-def get_electride_num(directory: Path = None, filename: str = "POSCAR_empty"):
+def get_electride_num(directory: Path = None, structure: Structure = None):
     """
     A function for getting the total number of electride sites. Used for
     data workup for database entry.
     """
-
-    structure = Structure.from_file(directory / filename)
+    if structure is None:
+        structure = Structure.from_file(directory / "POSCAR_empty")
+    
     electride_sites = 0
     # We search for helium atoms which we use as the dummy atoms for electride
     # sites.
@@ -326,14 +328,15 @@ def write_density_file_empty(
 def get_density_file_empty(
     directory: Path,
     structure: Structure,
-    min_charge: float = 0.15,
+    min_charge: float = 0.45,
     analysis_type: str = "badelf",
 ):
     """
     Checks the BCF.dat output file from the Henkelman algorithm for charge
     maxima that are far from other atoms with large charges, and adds in "dummy"
     atoms at these sites. This is meant to be used when searching for electrides
-    or when working with known electrides.
+    or when working with known electrides. It will return the empty structure
+    and number of electrides if any electrides are found.
     """
     # Get a structure object with empty atoms at electride sites
     structure_empty = get_empties_from_bcf(
@@ -341,13 +344,38 @@ def get_density_file_empty(
         structure=structure,
         min_charge=min_charge,
     )
-
-    # Write the structure to a POSCAR_empty file. This must be in a specific format.
-    # Here we take care of the formatting of lines 6 and on. The early lines
-    # are handled in the replace_density_function function
-    write_poscar_empty(directory=directory, structure_empty=structure_empty)
-
-    # Replace the ELFCAR and CHGCAR files with empty versions
-    write_density_file_empty(
-        directory=directory, structure=structure, analysis_type=analysis_type
-    )
+    
+    # Check if there are any electrides in the empty structure
+    electride_num = get_electride_num(directory, structure_empty)
+    
+    if electride_num > 0 :
+        # Write the structure to a POSCAR_empty file. This must be in a specific format.
+        # Here we take care of the formatting of lines 6 and on. The early lines
+        # are handled in the replace_density_function function
+        print("Electride sites detected. Writing files with empty 'dummy' sites")
+        write_poscar_empty(directory=directory, structure_empty=structure_empty)
+    
+        # Replace the ELFCAR and CHGCAR files with empty versions
+        write_density_file_empty(
+            directory=directory, structure=structure, analysis_type=analysis_type
+        )
+        return structure_empty, electride_num
+    else:
+        print("No electrides detected. Continuing with base structure.")
+        return None, 0
+    
+def convert_atom_chgcar_to_elfcar(directory: Path,
+                                 chgcar_file: str = "BvAt_summed.dat",
+                                 elfcar_file: str = "ELFCAR_empty",
+                                 output_file: str = "ELFCAR_e"
+                                 ):
+    chgcar = Chgcar.from_file(directory / chgcar_file)
+    elfcar = Elfcar.from_file(directory / elfcar_file)
+    
+    chgcar_data = chgcar.data["total"]
+    elfcar_data = elfcar.data["total"]
+    
+    elfcar_data[chgcar_data == 0] = 0
+    
+    elfcar.data = {"diff": elfcar_data, "total": elfcar_data}
+    elfcar.write_file(directory / output_file)

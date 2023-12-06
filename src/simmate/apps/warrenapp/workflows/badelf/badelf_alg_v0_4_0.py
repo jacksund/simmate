@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 import psutil
 from dask.distributed import Client, LocalCluster
-from pymatgen.io.vasp import Chgcar, Elfcar, Poscar, Potcar
+from pymatgen.io.vasp import Potcar
 from simmate.engine import Workflow
 from simmate.toolkit import Structure
 
@@ -41,8 +41,10 @@ from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
     get_voxels_site_multi_plane,
     get_voxels_site_nearest,
     get_voxels_site_volume_ratio_dask,
+    write_atom_chgcar,
+    write_atom_elfcar,
 )
-import sys
+
 ###############################################################################
 # Now that we have functions defined, it's time to define the main workflow
 ###############################################################################
@@ -62,15 +64,30 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         charge_file: str = "CHGCAR",
         valence_file: str = "POTCAR",
         print_atom_voxels: bool = False,
+        algorithm: str = "badelf", # other option is voronoi
         **kwargs,
     ):
         t0 = time.time()
         structure = Structure.from_file(directory / structure_file)
+
+        # read in lattice and structure with and without electride sites
+        lattice = get_lattice(partition_file=directory / partition_file)
+        # try:
+        empty_lattice = get_lattice(directory / empty_partition_file)
+        empty_structure = Structure.from_file(directory / empty_structure_file)
+        # except:
+        #     print("No ELFCAR_empty found. Continuing with no electride sites.")
+        #     empty_lattice = lattice
+        #     empty_structure = structure.copy()
         
-        try:
-            empty_structure = Structure.from_file(directory / empty_structure_file)
-        except:
-            empty_structure = structure.copy()
+        # if the algorithm is voronoi, we treat the structure with electride
+        # sites as the main structure. We will skip the step where electride
+        # sites found by the Henkelman algorithm are read in
+        # if algorithm == "voronoi":
+        #     structure, lattice = empty_structure.copy(), empty_lattice.copy()
+            
+            
+            
         # get dictionary of sites and closest neighbors. This always throws
         # the same warning about He's EN so we suppress that here
         with warnings.catch_warnings():
@@ -78,18 +95,14 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
             neighbors50 = get_50_neighbors(structure=structure)
             closest_neighbors = get_closest_neighbors(empty_structure)
 
-        # read in lattice with and without electride sites
-        lattice = get_lattice(partition_file=directory / partition_file)
-        try:
-            empty_lattice = get_lattice(directory / empty_partition_file)
-        except:
-            print("No ELFCAR_empty found. Continuing with no electride sites.")
-            empty_lattice = lattice
-
-        # We need to assign electride voxels based on the traditional Bader
-        # method, then assign the remaining voxels in the hard-sphere division way.
-        # get the indices for electride sites
-        electride_sites = get_electride_sites(empty_lattice)
+        # When using the badelf algorithm, we want to assign electride voxels 
+        # based on the zero-flux method, then assign the remaining voxels 
+        # using the voronoi method. If we are using the voronoi method, we don't
+        # use any zero-flux and need to disable anything based on this.
+        if algorithm == "badelf":
+            electride_sites = get_electride_sites(empty_lattice)
+        else:
+            electride_sites = []
 
         # we'll need the volume of each voxel later to calculate the atomic
         # volumes for our output file
@@ -100,11 +113,11 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         print(f"Voxel Resolution: {voxel_resolution}")
 
         # read in partition grid
-        if partition_file == "ELFCAR":
+        if "ELFCAR" in partition_file:
             grid = get_partitioning_grid(
                 partition_file=directory / partition_file, lattice=lattice
             )
-        elif partition_file == "CHGCAR":
+        elif "CHGCAR" in partition_file:
             grid = get_charge_density_grid(
                 charge_file=directory / partition_file, lattice=lattice
             )
@@ -219,7 +232,8 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         all_charge_coords["chg"] = voxel_charges
         all_charge_coords["site"] = None
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # Now iterate through the charge density coordinates for each electride
+        # Now iterate through the charge density coordinates for each electride.
+        # This only does something for the BadELF algorithm not the Vornoi one
         for electride in electride_sites:
             # Pull in electride charge density from bader output file (BvAt####.dat format)
             electride_chg = get_charge_density_grid(
@@ -332,8 +346,8 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
                 results_charge[site] = pdf_grouped_charge[site]
                 results_volume[site] = pdf_grouped_voxels[site] * voxel_volume
             # if printed voxels are requested, update all_coords dataframe
-            if print_atom_voxels:
-                all_charge_coords["site"] = pdf["site"]
+            # if print_atom_voxels:
+            all_charge_coords["site"] = pdf["site"]
             # some of the voxels will not return a site. For these we need to check the
             # nearby voxels to see which site is the most common and assign them to that
             # site. To do this we essentially repeat the previous several steps but with
@@ -405,13 +419,13 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
                     results_volume[site] += row[1][4][site] * voxel_volume
                 # If print_atom_voxels is requested, add the highest fraction
                 # site to all_charge_coords
-                if print_atom_voxels:
-                    sites = row[1][4]
-                    max_site_frac = max(sites.values())
-                    max_site = list(sites.keys())[
-                        list(sites.values()).index(max_site_frac)
-                    ]
-                    all_charge_coords.loc[row[0], "site"] = max_site
+                # if print_atom_voxels:
+                sites = row[1][4]
+                max_site_frac = max(sites.values())
+                max_site = list(sites.keys())[
+                    list(sites.values()).index(max_site_frac)
+                ]
+                all_charge_coords.loc[row[0], "site"] = max_site
             except:
                 # If none of the above is true, there is some other issue with
                 # this voxel. For now we are just going to pass it, but in the
@@ -448,18 +462,18 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
                 for site in row[1][4]:
                     results_charge[site] += row[1][4][site] * row[1][3]
                     results_volume[site] += row[1][4][site] * voxel_volume
-                if print_atom_voxels:
-                    # If no sites are found, using the max function will through
+                # if print_atom_voxels:
+                    # If no sites are found, using the max function will throw
                     # an error. I just skip these instances here.
-                    try:
-                        sites = row[1][4]
-                        max_site_frac = max(sites.values())
-                        max_site = list(sites.keys())[
-                            list(sites.values()).index(max_site_frac)
-                        ]
-                        all_charge_coords.loc[row[0], "site"] = max_site
-                    except:
-                        continue
+                try:
+                    sites = row[1][4]
+                    max_site_frac = max(sites.values())
+                    max_site = list(sites.keys())[
+                        list(sites.values()).index(max_site_frac)
+                    ]
+                    all_charge_coords.loc[row[0], "site"] = max_site
+                except:
+                    continue
         else:
             # print("no voxels intercepted by more than one plane")
             pass
@@ -538,40 +552,29 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         #######################################################################
         # Print atom voxels
         #######################################################################
+      
         if print_atom_voxels:
-            # get poscar object
-            try:
-                poscar = Poscar(Structure.from_file(directory / "POSCAR_empty"))
-            except:
-                poscar = Poscar(structure)
-
             # iterate over each element in the empty lattice
+            print("Writing atom CHGCARs and ELFCARs")
             for element in empty_lattice["elements"]:
-                # get list of site indices for each type of atom
-                site_indices = structure.indices_from_symbol(element)
-                # if "dummy" atom, replace string with e
-                if element == "He":
-                    element = "e"
-                # create an empty numpy array for the chgcar and elfcar
-                chgcar_data = np.zeros(lattice["grid_size"])
-                elfcar_data = np.zeros(lattice["grid_size"])
-                # iterate over all voxels and assign elf and charge values
-                # to numpy arrays
-                for row in all_charge_coords.iterrows():
-                    if row[1]["site"] in site_indices:
-                        x = int(row[1]["x"] - 1)
-                        y = int(row[1]["y"] - 1)
-                        z = int(row[1]["z"] - 1)
-                        chgcar_data[x][y][z] = row[1]["chg"]
-                        elfcar_data[x][y][z] = grid[x][y][z]
-
-                # create elfcar and chgcar objects and write to file
-                chgcar_data = {"diff": chgcar_data, "total": chgcar_data}
-                elfcar_data = {"diff": elfcar_data, "total": elfcar_data}
-                chgcar = Chgcar(poscar, chgcar_data)
-                elfcar = Elfcar(poscar, elfcar_data)
-                chgcar.write_file(f"CHGCAR_{element}")
-                elfcar.write_file(f"ELFCAR_{element}")
+                # write each atom/electride type to a CHGCAR/ELFCAR type file
+                write_atom_chgcar(directory, lattice, all_charge_coords, empty_structure, element)
+                write_atom_elfcar(directory, lattice, all_charge_coords, grid, empty_structure, element)
+            print("Done")
+            # The topology algorithm works by looking along lines in the ELF from
+            # one electride to the next. We need to pass the voxels belonging to
+            # electride sites on to this workflow by saving the information to a
+            # single file. We do this regardless of if the user requests the
+            # other voxels be printed
+        else:
+            print("Writing electride ELFCAR")
+            for element in empty_lattice["elements"]:
+                # We only want electrides (noted with an He) so we skip everything
+                # else here.
+                if element != "He":
+                    continue
+                write_atom_elfcar(directory, lattice, all_charge_coords, grid, empty_structure, element)
+                       
         ###############################################################################
         # Save information into a dictionary that will be saved to a database.
         ###############################################################################
@@ -628,11 +631,11 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         vacuum_volume = round((lattice["volume"] - sum(results_volume.values())),6)
         
         # get the number of electride sites.
-        nelectrides = get_electride_num(directory, "POSCAR_empty")
+        nelectrides = get_electride_num(directory, empty_structure)
         
         results_dataframe = {
                 "oxidation_states": oxi_state_data,
-                "algorithm": "badelf",
+                "algorithm": algorithm,
                 "charges": charge_data,
                 "min_dists": min_dists,
                 "atomic_volumes": atomic_volumes,
