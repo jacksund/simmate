@@ -21,8 +21,9 @@ from scipy.signal import savgol_filter
 from simmate.toolkit import Structure
 from itertools import combinations
 
-from pymatgen.io.vasp import Poscar, Chgcar, Elfcar
+from pyrho.pgrid import PGrid
 
+from pymatgen.io.vasp import Poscar, Chgcar, Elfcar
 
 """
 This module defines functions that are used in the warren lab badelf
@@ -326,6 +327,51 @@ def get_charge_density_grid(
     chg = chg.reshape(lattice["grid_size"], order="F")
     return chg
 
+def regrid_numpy_array(lattice: dict, data: np.array, desired_resolution: int = 130000):
+    """
+    Scales a 3D numpy grid using Fourier interplation as implemented by
+    PyRho (https://materialsproject.github.io/pyrho/) The data is a numpy array. T
+    he desired resolution is the voxels/A^3 that is desired.
+    """
+    # find the minimum and maximum value of the data. This will be used to
+    # renormalize the data later
+    min_value = data.min()
+    max_value = data.max()
+    
+    # Get the lattice unit vectors as a 3x3 array
+    lattice_array = np.array([lattice["a"], lattice["b"], lattice["c"]])
+    
+    # get the original grid size and lattice volume.
+    grid_shape = np.array(lattice["grid_size"])
+    volume = lattice["volume"]
+    
+    # calculate how much the number of voxels along each unit cell must be
+    # multiplied to reach the desired resolution.
+    scale_factor = ((desired_resolution*volume)/grid_shape.prod())**(1/3)
+    
+    # calculate the new grid shape. round up to the nearest integer for each
+    # side
+    new_grid_shape = np.around(grid_shape*scale_factor).astype(np.int32)
+    
+    # create a pyrho pgrid instance.
+    pgrid = PGrid(data, lattice_array)
+    
+    # regrid to the desired voxel resolution and get the data back out.
+    new_pgrid = pgrid.get_transformed([[1,0,0],[0,1,0],[0,0,1]], new_grid_shape)
+    new_data = new_pgrid.grid_data
+    
+    # normalize the regridded data back to the original max and min. Something
+    # about how fourier integration works results in the value ranges being
+    # altered slightly
+    array_min = np.min(new_data)
+    array_max = np.max(new_data)
+    normalized_new_data = (new_data - array_min) / (array_max - array_min) * (max_value - min_value) + min_value
+    
+    # create a new lattice dict that has the updated grid size
+    regrid_lattice = lattice.copy()
+    regrid_lattice["grid_size"] = new_grid_shape
+    
+    return normalized_new_data, regrid_lattice
 
 def get_partitioning_line(site_pos, neigh_pos, grid, method = "linear"):
     """
@@ -739,11 +785,11 @@ def check_structure_for_covalency(closest_neighbors, grid, lattice, structure):
             values = get_partitioning_line(site_pos, neigh_pos, grid)[1]
             
             #smooth line:
-            smoothed_values = savgol_filter(values, 20, 3)
+            smoothed_values = savgol_filter(values,20,3)
             
             # Now we check for any strong covalency in the bond as in the current version
             # of BadELF, this will break the partitioning scheme
-            if check_bond_for_covalency(smoothed_values):
+            if check_bond_for_covalency(smoothed_values) is True:
                 # import matplotlib.pyplot as plt
                 # plt.plot(smoothed_values)
                 raise Exception(
@@ -817,36 +863,36 @@ def get_site_neighbor_results_rough(
     ]
 
 
-def get_site_neighbor_results_fine(site_df, grid, lattice):
-    # iterate through each neighbor in the dataframe and update the partitioning
-    # plane info
-    for row in site_df.iterrows():
-        # get necessary information from the rough dataframe
-        elf_positions = row[1]["elf_positions"]
-        elf_min_index = row[1]["elf_min_index"]
-        site_pos = row[1]["site_pos"]
-        neigh_pos = row[1]["neigh_pos"]
+# def get_site_neighbor_results_fine(site_df, grid, lattice):
+#     # iterate through each neighbor in the dataframe and update the partitioning
+#     # plane info
+#     for row in site_df.iterrows():
+#         # get necessary information from the rough dataframe
+#         elf_positions = row[1]["elf_positions"]
+#         elf_min_index = row[1]["elf_min_index"]
+#         site_pos = row[1]["site_pos"]
+#         neigh_pos = row[1]["neigh_pos"]
         
-        # get the minimum position along the elf line
-        (   elf_min_index_new,
-            elf_min_value_new,
-            elf_min_frac_new,
-        ) = get_line_frac_min_fine(elf_positions, elf_min_index, grid)
+#         # get the minimum position along the elf line
+#         (   elf_min_index_new,
+#             elf_min_value_new,
+#             elf_min_frac_new,
+#         ) = get_line_frac_min_fine(elf_positions, elf_min_index, grid)
 
-        # convert minimum in ELF line into voxel position
-        elf_min_vox = get_position_from_min(elf_min_frac_new, site_pos, neigh_pos)
-        # convert voxel position into real_space
-        plane_point = get_real_from_vox(elf_min_vox, lattice)
-        # get the new distance between the site and the plane point
-        distance = get_radius(plane_point, site_pos, lattice)
-        # update the dataframe
-        row[1]["elf_min_index"] = elf_min_index_new
-        row[1]["elf_min_value"] = elf_min_value_new
-        row[1]["elf_min_frac"] = elf_min_frac_new
-        row[1]["plane_point"] = plane_point
-        row[1]["distance"] = distance
-        row[1]["elf_min_vox"] = elf_min_vox
-    return site_df
+#         # convert minimum in ELF line into voxel position
+#         elf_min_vox = get_position_from_min(elf_min_frac_new, site_pos, neigh_pos)
+#         # convert voxel position into real_space
+#         plane_point = get_real_from_vox(elf_min_vox, lattice)
+#         # get the new distance between the site and the plane point
+#         distance = get_radius(plane_point, site_pos, lattice)
+#         # update the dataframe
+#         row[1]["elf_min_index"] = elf_min_index_new
+#         row[1]["elf_min_value"] = elf_min_value_new
+#         row[1]["elf_min_frac"] = elf_min_frac_new
+#         row[1]["plane_point"] = plane_point
+#         row[1]["distance"] = distance
+#         row[1]["elf_min_vox"] = elf_min_vox
+#     return site_df
 
 #!!!!!!!!! These next several functions are for finding what planes are relavent
 def get_plane_equation(plane_point, plane_vector):
@@ -949,6 +995,7 @@ def get_partitioning_rough(neighbors50, lattice, grid, rough_partitioning=False)
         "elf_min_frac",
         "elf_min_vox",
     ]
+    
     for site_index, neighs in enumerate(neighbors50):
         # create df for each site
         site_df = pd.DataFrame(columns=columns)
@@ -1024,36 +1071,36 @@ def get_partitioning_rough(neighbors50, lattice, grid, rough_partitioning=False)
         return rough_partition_results
 
 
-def get_partitioning_fine(rough_partition_results, grid, lattice):
-    results = {}
-    for site_index, site_df in enumerate(rough_partition_results):
-        fine_site_df = get_site_neighbor_results_fine(site_df, grid, lattice)
-        neigh_dict = {}
-        for neigh_row in fine_site_df.iterrows():
-            # convert dataframe row into a dictionary
-            site_neigh_dict = {}
-            site_neigh_dict["vox_site"] = neigh_row[1]["site_pos"]
-            site_neigh_dict["vox_neigh"] = neigh_row[1]["neigh_pos"]
-            site_neigh_dict["value_elf"] = neigh_row[1]["elf_min_value"]
-            site_neigh_dict["pos_elf_frac"] = neigh_row[1]["elf_min_frac"]
-            site_neigh_dict["vox_min_point"] = neigh_row[1]["elf_min_vox"]
-            site_neigh_dict["real_min_point"] = neigh_row[1]["plane_point"]
-            site_neigh_dict["normal_vector"] = neigh_row[1]["plane_vector"]
-            site_neigh_dict["sign"] = "negative"
-            site_neigh_dict["radius"] = neigh_row[1]["distance"]
-            site_neigh_dict["neigh"] = neigh_row[1]["neigh"]
-            # site_neigh_dict["elf_line"] = smoothed_line
-            site_neigh_dict["elf_line_raw"] = neigh_row[1]["elf_values_rough"]
-            # adding some results for testing
-            site_neigh_dict["neigh_index"] = neigh_row[1]["neigh"].index
-            # site_neigh_dict["neigh_distance"] = math.dist(real_site_point, real_neigh_point)
+# def get_partitioning_fine(rough_partition_results, grid, lattice):
+#     results = {}
+#     for site_index, site_df in enumerate(rough_partition_results):
+#         fine_site_df = get_site_neighbor_results_fine(site_df, grid, lattice)
+#         neigh_dict = {}
+#         for neigh_row in fine_site_df.iterrows():
+#             # convert dataframe row into a dictionary
+#             site_neigh_dict = {}
+#             site_neigh_dict["vox_site"] = neigh_row[1]["site_pos"]
+#             site_neigh_dict["vox_neigh"] = neigh_row[1]["neigh_pos"]
+#             site_neigh_dict["value_elf"] = neigh_row[1]["elf_min_value"]
+#             site_neigh_dict["pos_elf_frac"] = neigh_row[1]["elf_min_frac"]
+#             site_neigh_dict["vox_min_point"] = neigh_row[1]["elf_min_vox"]
+#             site_neigh_dict["real_min_point"] = neigh_row[1]["plane_point"]
+#             site_neigh_dict["normal_vector"] = neigh_row[1]["plane_vector"]
+#             site_neigh_dict["sign"] = "negative"
+#             site_neigh_dict["radius"] = neigh_row[1]["distance"]
+#             site_neigh_dict["neigh"] = neigh_row[1]["neigh"]
+#             # site_neigh_dict["elf_line"] = smoothed_line
+#             site_neigh_dict["elf_line_raw"] = neigh_row[1]["elf_values_rough"]
+#             # adding some results for testing
+#             site_neigh_dict["neigh_index"] = neigh_row[1]["neigh"].index
+#             # site_neigh_dict["neigh_distance"] = math.dist(real_site_point, real_neigh_point)
 
-            # add row dictionary to neighbor dictionary
-            neigh_dict[neigh_row[0]] = site_neigh_dict
+#             # add row dictionary to neighbor dictionary
+#             neigh_dict[neigh_row[0]] = site_neigh_dict
 
-        # add the neighbor dictionary to the results dictionary
-        results[site_index] = neigh_dict
-    return results
+#         # add the neighbor dictionary to the results dictionary
+#         results[site_index] = neigh_dict
+#     return results
 
 
 ###############################################################################

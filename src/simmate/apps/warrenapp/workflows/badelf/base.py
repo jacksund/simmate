@@ -87,6 +87,9 @@ class BadElfBase(Workflow):
         print_atom_voxels: bool = False,
         **kwargs,
     ):
+        #!!! Add method to set ELFCAR grid to the same size as CHGCAR grid if
+        # they are not. This would solve any issues with users not using the
+        # correct vasp settings.
         #######################################################################
         # This section of the workflow finds electride sites (if requested)   #
         #######################################################################
@@ -186,7 +189,7 @@ class BadElfBase(Workflow):
                 ).result()
             
             
-        elif algorithm == "voronoi":
+        elif algorithm == "voronelf":
             if electrides_present:
                 # Run Warren lab BadELF algorithm and get desired data to save
                 # to the dataframe
@@ -241,7 +244,7 @@ class BadElfBase(Workflow):
         else:
             raise Exception(
                 """The algorithm setting you chose does not exist. Please select
-                  either 'badelf', 'voronoi', or 'zero-flux'.
+                  either 'badelf', 'voronelf', or 'zero-flux'.
                   """
             )
             

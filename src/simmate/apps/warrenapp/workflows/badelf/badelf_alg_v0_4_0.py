@@ -29,11 +29,12 @@ from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
     get_50_neighbors,
     get_closest_neighbors,
     get_charge_density_grid,
+    regrid_numpy_array,
     get_electride_sites,
     get_lattice,
     get_max_voxel_dist,
     get_number_of_partitions,
-    get_partitioning_fine,
+    # get_partitioning_fine,
     get_partitioning_grid,
     get_partitioning_rough,
     get_real_from_frac,
@@ -44,6 +45,9 @@ from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
     write_atom_chgcar,
     write_atom_elfcar,
 )
+
+from rich.console import Console
+console = Console()
 
 ###############################################################################
 # Now that we have functions defined, it's time to define the main workflow
@@ -64,10 +68,11 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         charge_file: str = "CHGCAR",
         valence_file: str = "POTCAR",
         print_atom_voxels: bool = False,
-        algorithm: str = "badelf", # other option is voronoi
+        algorithm: str = "badelf", # other option is voronelf
         **kwargs,
     ):
         t0 = time.time()
+        console.print(f"\nBeginning {algorithm} analysis :goblin:", style="bold green")
         structure = Structure.from_file(directory / structure_file)
 
         # read in lattice and structure with and without electride sites
@@ -80,10 +85,10 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         #     empty_lattice = lattice
         #     empty_structure = structure.copy()
         
-        # if the algorithm is voronoi, we treat the structure with electride
+        # if the algorithm is voronelf, we treat the structure with electride
         # sites as the main structure. We will skip the step where electride
         # sites found by the Henkelman algorithm are read in
-        # if algorithm == "voronoi":
+        # if algorithm == "voronelf":
         #     structure, lattice = empty_structure.copy(), empty_lattice.copy()
             
             
@@ -97,11 +102,11 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
 
         # When using the badelf algorithm, we want to assign electride voxels 
         # based on the zero-flux method, then assign the remaining voxels 
-        # using the voronoi method. If we are using the voronoi method, we don't
+        # using the voronelf method. If we are using the voronelf method, we don't
         # use any zero-flux and need to disable anything based on this.
         if algorithm == "badelf":
             electride_sites = get_electride_sites(empty_lattice)
-        elif algorithm == "voronoi":
+        elif algorithm == "voronelf":
             electride_sites = []
             
 
@@ -111,7 +116,7 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
 
         # we also want the voxel resolution
         voxel_resolution = np.prod(lattice["grid_size"]) / lattice["volume"]
-        print(f"Voxel Resolution: {voxel_resolution}")
+        console.print(f"Voxel Resolution: {round(voxel_resolution, 2)}", style="green")
 
         # read in partition grid
         if "ELFCAR" in partition_file:
@@ -129,29 +134,54 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         check_closest_neighbor_for_same_type(closest_neighbors, empty_structure)
         check_structure_for_covalency(closest_neighbors, grid, empty_lattice, empty_structure)
         
+        # regrid the partitioning grid to a higher voxel resolution. This means
+        # that high quality interpolation of the grid data only has to happen once.
+        # This should speed up the process of partitioning
+        if voxel_resolution < 130000:
+            console.print("Increasing voxel resolution :chart_increasing:", 
+                  style = "green")
+            grid, regrid_lattice = regrid_numpy_array(lattice, grid)
+        else:
+            regrid_lattice = lattice.copy()
+        
+        new_voxel_resolution = np.prod(regrid_lattice["grid_size"]) / regrid_lattice["volume"]
+        console.print(f"New Voxel Resolution: {round(new_voxel_resolution, 2)}",
+              style = "green")
+
+        # !!! BadELF alg seems to converge around 10,000-20,000 voxels/A^3. I
+        # can probably decrease voxel grids larger than this to speed up the
+        # algorithm
+
+        
         # The algorithm now looks at each site-neighbor pair.
         # Along the bond between the pair, we look at ELF values.
         # We find the position of the minimum ELF value.
         # We then find the plane that passes through this minimum and
         # that is perpendicular to the bond between the pair.
 
-        if voxel_resolution > 130000:
-            results = get_partitioning_rough(
-                neighbors50=neighbors50,
-                lattice=lattice,
-                grid=grid,
-                rough_partitioning=True,
-            )
-        else:
-            rough_partition_results = get_partitioning_rough(
-                neighbors50=neighbors50,
-                lattice=lattice,
-                grid=grid,
-            )
-            results = get_partitioning_fine(rough_partition_results, grid, lattice)
+        # if new_voxel_resolution > 130000:
+        console.print("\nBeginning Partitioning",
+              style = "bold green")
+        results = get_partitioning_rough(
+            neighbors50=neighbors50,
+            lattice=regrid_lattice,
+            grid=grid,
+            rough_partitioning=True,
+        )
+        # else:
+        #     rough_partition_results = get_partitioning_rough(
+        #         neighbors50=neighbors50,
+        #         lattice=regrid_lattice,
+        #         grid=grid,
+        #     )
+        #     results = get_partitioning_fine(rough_partition_results, grid, regrid_lattice)
         t1 = time.time()
 
-        print(f"Partitioning Time: {t1-t0}")
+        console.print(f"Partitioning completed in {round(t1-t0,2)} seconds.", style = "green")
+        console.print("""
+Beginning Voxel Assignment
+                      """,
+              style = "bold green")
         # We will also need to find the maximum distance the center of a voxel
         # can be from a plane and still be intersected by it. That way we can
         # handle voxels near partitioning planes with more accuracy
@@ -490,10 +520,11 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         )
         if len(missing_voxel_pdf) > 0:
             perc_voxels = (len(missing_voxel_pdf) / np.prod(lattice["grid_size"])) * 100
-            print(
+            console.print(
                 f"""{perc_voxels}% of voxels could not be assigned by the base
             algorithm. Remaining voxels will be assigned by closest atom. 
-                  """
+                  """,
+                  style = "bold red"
             )
 
             missing_voxel_pdf["sites"] = missing_voxel_pdf.apply(
@@ -523,8 +554,11 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
                     site = row[1]["sites"]
                     all_charge_coords.loc[row[0], "site"] = site
         else:
-            print("All voxels assigned.")
-
+            console.print("All voxels assigned",
+                  style = "green")
+        
+        t2 = time.time()
+        console.print(f"Total Time: {t2-t0}", style = "green")
         # divide charge by volume to get true charge
         # this is a vasp convention
         for site, charge in results_charge.items():
@@ -556,26 +590,28 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
       
         if print_atom_voxels:
             # iterate over each element in the empty lattice
-            print("Writing atom CHGCARs and ELFCARs")
+            console.print("Writing atom CHGCARs and ELFCARs",
+                  style = "green")
             for element in empty_lattice["elements"]:
                 # write each atom/electride type to a CHGCAR/ELFCAR type file
                 write_atom_chgcar(directory, lattice, all_charge_coords, empty_structure, element)
                 write_atom_elfcar(directory, lattice, all_charge_coords, grid, empty_structure, element)
-            print("Done")
             # The topology algorithm works by looking along lines in the ELF from
             # one electride to the next. We need to pass the voxels belonging to
             # electride sites on to this workflow by saving the information to a
             # single file. We do this regardless of if the user requests the
             # other voxels be printed
         else:
-            print("Writing electride ELFCAR")
+            console.print("Writing electride ELFCAR",
+                  style = "green")
             for element in empty_lattice["elements"]:
                 # We only want electrides (noted with an He) so we skip everything
                 # else here.
                 if element != "He":
                     continue
                 write_atom_elfcar(directory, lattice, all_charge_coords, grid, empty_structure, element)
-                       
+        
+        console.print(f"{algorithm} analysis completed :party_popper:", style="bold blue")
         ###############################################################################
         # Save information into a dictionary that will be saved to a database.
         ###############################################################################
