@@ -379,6 +379,10 @@ class FixedCompositionSearch(Calculation):
                 state = StructurePrediction__Toolkit__NewIndividual.run_cloud(
                     search_id=self.id,
                     steadystate_source_id=source_db.id,
+                    # NOTE: we *only* pass tags because that is all that is
+                    # relevent for submission. All other kwargs are passed
+                    # within the new-individual workflow to the expected subflow
+                    tags=self.subworkflow_kwargs.get("tags", []),
                 )
 
                 # Attached the id to our source so we know how many
