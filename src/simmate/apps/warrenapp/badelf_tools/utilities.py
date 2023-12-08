@@ -133,7 +133,17 @@ def get_empties_from_bcf(
     required_files = ["ELFCAR", "POSCAR", "BCF.dat"]
 
     # Check that all of the required files are present
-    check_required_files(directory=directory, required_files=required_files)
+    try: check_required_files(directory=directory, required_files=required_files)
+    except: 
+        raise Exception(
+            f"""
+            One or more of the following required files is missing.
+            files: {required_files}.
+            directory: {directory}
+            If the BCF.dat is missing, make sure that your VASP settings result
+            in an ELFCAR and GHGCAR with the same grid size.
+            """
+            )
 
     # We want to compare each ELF maximum to each atom and determine if it is
     # within that atoms "badelf radius" which is the distance between an atom
