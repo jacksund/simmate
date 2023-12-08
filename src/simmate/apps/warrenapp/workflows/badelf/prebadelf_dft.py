@@ -7,9 +7,9 @@ from simmate.apps.warrenapp.workflows.static_energy.pbesol import StaticEnergy__
 # need to do it in every inheriting class.
 
 prebadelf_incar_settings = dict(
-    NGX__density_a=10,  # Note that these set the FFT grid while the pre-Bader task sets the
-    NGY__density_b=10,  # fine FFT grid (e.g. useds NGX instead of NGXF)
-    NGZ__density_c=10,
+    NGX__density_a=22,  # Note that these set the FFT grid while the pre-Bader task sets the
+    NGY__density_b=22,  # fine FFT grid (e.g. useds NGX instead of NGXF)
+    NGZ__density_c=22,
     LELF=True,  # Writes the ELFCAR
     NPAR=1,  # Must be set if LELF is set
     PREC="Single",  # ensures CHGCAR grid matches ELFCAR grid
