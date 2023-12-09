@@ -101,6 +101,12 @@ class BadElfAnalysis(Structure, Calculation):
     the highest dimension network.
     """
     
+    elf_connect_cutoff = table_column.FloatField(blank=True, null=True)
+    """
+    The ELF value cutoff used to determine if two electride sites are connected.
+    Used to determine the dimensionality of the electride electron network.
+    """
+    
     def write_output_summary(self, directory: Path):
         super().write_output_summary(directory)
         self.write_summary_dataframe(directory)

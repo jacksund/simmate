@@ -22,7 +22,10 @@ from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
     get_real_from_vox,
     get_voxel_from_index,
     get_voxel_from_neigh_CrystalNN,
+    regrid_numpy_array
 )
+
+import numpy as np
 
 
 class Elfcar(PymatgenElfcar):
@@ -91,3 +94,33 @@ class Elfcar(PymatgenElfcar):
         min_pos = get_position_from_min(global_min_pos[2], site_pos, neigh_pos)
         min_coord = get_real_from_vox(min_pos, lattice)
         return get_radius(min_coord, site_pos, lattice)
+    
+    def regrid(self,
+               desired_resolution: int = None,
+               new_grid_shape: np.array = None,
+               ):
+        """
+        Changes the dimensions of an Elfcar instance's data. Either desired_resolution
+        or new_grid_shape must be set, with new_grid_shape taking precedence.
+        
+        desired_resolution: The voxel density in voxels/Angstrom that's desired
+        new_grid_shape: The grid shape that is desired in form np.array([a,b,c])
+        """
+        if desired_resolution is None and new_grid_shape is None:
+            raise Exception(
+                """
+                Either desired_resolution or new_grid_shape must be set.
+                new_grid_shape will take precedence.
+                """
+                )
+        
+        lattice = self.get_lattice_from_elfcar()
+        data = self.data
+        total = data["total"]
+        diff = data["diff"]
+        new_total, regrid_lattice = regrid_numpy_array(lattice, total, desired_resolution, new_grid_shape)
+        new_diff, regrid_lattice = regrid_numpy_array(lattice, diff, desired_resolution, new_grid_shape)
+        new_data = {"total": new_total, "diff": new_diff}
+        self.data = new_data
+        self.dim = tuple(regrid_lattice["grid_size"])
+        

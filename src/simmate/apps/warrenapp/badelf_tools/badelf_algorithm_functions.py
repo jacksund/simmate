@@ -203,15 +203,16 @@ def get_closest_neighbors(structure: Structure):
     return closest_neighbors
 
 
-def get_50_neighbors(structure):
+def get_neighbors_set(structure: Structure, neighbor_num: int = 26):
     """
-    Function for getting the 50 closest neighbors. This is necessary for partitioning
+    Function for getting the closest neighbors. This is necessary for partitioning
     because the CrystalNN function from pymatgen will not necessarily find the
-    correct set of atoms needed to create a full partitioning set.
+    correct set of atoms needed to create a full partitioning set. We default
+    to 26, but if this is not large enough we automatically increase the amount.
     """
     # Get all possible neighbor atoms for each atom within 15 angstroms
     all_neighbors = structure.get_all_neighbors(15)
-    neighbors50 = []
+    neighbors = []
     # For each atom, create a df to store the neighbor and its distance
     # from the atom. Then sort this df by distance and only keep the
     # 50 closest neighbors
@@ -225,13 +226,12 @@ def get_50_neighbors(structure):
             site_df.loc[len(site_df)] = [neigh, distance]
         # sort by distance and truncate to first 50
         site_df = site_df.sort_values(by="distance")
-        #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # Temporarily switching to 50 nearest planes
-        site_df = site_df.iloc[0:100]
-        #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        site_df = site_df.iloc[0:neighbor_num]
+
         # Add the neighbors as a list to the df
-        neighbors50.append(site_df["neighbor"].to_list())
-    return neighbors50
+        neighbors.append(site_df["neighbor"].to_list())
+    return neighbors
 
 
 def get_grid_axes(grid):
@@ -256,41 +256,6 @@ def get_grid_axes_large_pad(grid, size):
     b = np.linspace(0, grid.shape[1] + (size - 1) * 2 + 1, grid.shape[1] + size * 2)
     c = np.linspace(0, grid.shape[2] + (size - 1) * 2 + 1, grid.shape[2] + size * 2)
     return a, b, c
-
-
-def get_partitioning_grid(
-    partition_file: str,
-    lattice: dict,
-):
-    """
-    Loads in the partitioning file (usualy ELFCAR) into a 3D numpy array
-    """
-    #!!! this does not read ELFCARS written by pymatgen properly. The number
-    # of lines in that case would be 2*lattice["lines"] similar to reading a
-    # charge density. This should be fixed.
-    
-    try:
-        grid = np.loadtxt(
-            partition_file,
-            skiprows=10 + lattice["num_atoms"],
-            max_rows=lattice["lines"],
-        ).ravel()
-    except:
-        grid1 = np.loadtxt(
-            partition_file,
-            skiprows=10 + lattice["num_atoms"],
-            max_rows=lattice["lines"] - 1,
-        ).ravel()
-        grid2 = np.loadtxt(
-            partition_file,
-            skiprows=10 + lattice["num_atoms"] + lattice["lines"] - 1,
-            max_rows=1,
-        ).ravel()
-        grid = np.concatenate((grid1, grid2))
-
-    grid = grid.ravel().reshape(lattice["grid_size"], order="F")
-    return grid
-
 
 def get_charge_density_grid(
     charge_file: str,
@@ -327,17 +292,57 @@ def get_charge_density_grid(
     chg = chg.reshape(lattice["grid_size"], order="F")
     return chg
 
-def regrid_numpy_array(lattice: dict, data: np.array, desired_resolution: int = 130000):
+def get_partitioning_grid(
+    partition_file: str,
+    lattice: dict,
+):
+    """
+    Loads in the partitioning file (usualy ELFCAR) into a 3D numpy array
+    """
+    #!!! this does not read ELFCARS written by pymatgen properly. The number
+    # of lines in that case would be 2*lattice["lines"] similar to reading a
+    # charge density. This should be fixed.
+    
+    try:
+        grid = np.loadtxt(
+            partition_file,
+            skiprows=10 + lattice["num_atoms"],
+            max_rows=lattice["lines"],
+        ).ravel()
+    except:
+        grid1 = np.loadtxt(
+            partition_file,
+            skiprows=10 + lattice["num_atoms"],
+            max_rows=lattice["lines"] - 1,
+        ).ravel()
+        grid2 = np.loadtxt(
+            partition_file,
+            skiprows=10 + lattice["num_atoms"] + lattice["lines"] - 1,
+            max_rows=1,
+        ).ravel()
+        grid = np.concatenate((grid1, grid2))
+    
+    # !!! This is ugly. I should be able to do a check and then use the
+    # appropriate option.
+    try:
+        grid = grid.ravel().reshape(lattice["grid_size"], order="F")
+    except:
+        grid = get_charge_density_grid(charge_file=partition_file, lattice=lattice)
+        grid = grid.ravel().reshape(lattice["grid_size"], order="F")
+    return grid
+
+
+def regrid_numpy_array(lattice: dict, 
+                       data: np.array, 
+                       desired_resolution: int = 130000,
+                       new_grid_shape: np.array = None,
+                       ):
     """
     Scales a 3D numpy grid using Fourier interplation as implemented by
     PyRho (https://materialsproject.github.io/pyrho/) The data is a numpy array. T
     he desired resolution is the voxels/A^3 that is desired.
     """
-    # find the minimum and maximum value of the data. This will be used to
-    # renormalize the data later
-    min_value = data.min()
-    max_value = data.max()
-    
+
     # Get the lattice unit vectors as a 3x3 array
     lattice_array = np.array([lattice["a"], lattice["b"], lattice["c"]])
     
@@ -345,33 +350,28 @@ def regrid_numpy_array(lattice: dict, data: np.array, desired_resolution: int = 
     grid_shape = np.array(lattice["grid_size"])
     volume = lattice["volume"]
     
-    # calculate how much the number of voxels along each unit cell must be
-    # multiplied to reach the desired resolution.
-    scale_factor = ((desired_resolution*volume)/grid_shape.prod())**(1/3)
-    
-    # calculate the new grid shape. round up to the nearest integer for each
-    # side
-    new_grid_shape = np.around(grid_shape*scale_factor).astype(np.int32)
+    if new_grid_shape is None:
+        # calculate how much the number of voxels along each unit cell must be
+        # multiplied to reach the desired resolution.
+        scale_factor = ((desired_resolution*volume)/grid_shape.prod())**(1/3)
+        
+        # calculate the new grid shape. round up to the nearest integer for each
+        # side
+        new_grid_shape = np.around(grid_shape*scale_factor).astype(np.int32)
     
     # create a pyrho pgrid instance.
     pgrid = PGrid(data, lattice_array)
     
     # regrid to the desired voxel resolution and get the data back out.
     new_pgrid = pgrid.get_transformed([[1,0,0],[0,1,0],[0,0,1]], new_grid_shape)
+    # new_data = pgrid.lossy_smooth_compression(new_grid_shape)
     new_data = new_pgrid.grid_data
-    
-    # normalize the regridded data back to the original max and min. Something
-    # about how fourier integration works results in the value ranges being
-    # altered slightly
-    array_min = np.min(new_data)
-    array_max = np.max(new_data)
-    normalized_new_data = (new_data - array_min) / (array_max - array_min) * (max_value - min_value) + min_value
-    
+
     # create a new lattice dict that has the updated grid size
     regrid_lattice = lattice.copy()
     regrid_lattice["grid_size"] = new_grid_shape
     
-    return normalized_new_data, regrid_lattice
+    return new_data, regrid_lattice
 
 def get_partitioning_line(site_pos, neigh_pos, grid, method = "linear"):
     """
@@ -973,7 +973,10 @@ def get_important_planes(planes):
     return intercepts, important_planes
 
 
-def get_partitioning_rough(neighbors50, lattice, grid, rough_partitioning=False):
+def get_partitioning_rough(neighbors, lattice, grid, structure:Structure, rough_partitioning=False,):
+    """
+    Gets the partitioning planes for each atom.
+    """
     # Now we want to find the minimum in the ELF between the atom and each of its
     # neighbors and the vector between them. This will define a plane seperating
     # the atom from its neighbor.
@@ -996,45 +999,66 @@ def get_partitioning_rough(neighbors50, lattice, grid, rough_partitioning=False)
         "elf_min_vox",
     ]
     
-    for site_index, neighs in enumerate(neighbors50):
+    # look at each atom neighbor pair for the closest 26 neighbors
+    
+    for site_index, neighs in enumerate(neighbors):
+        # create a variable indicating that the number of neighbors we've set
+        # is enough
+        number_of_neighbors = len(neighs)
+        enough_neighbors = False
+        
         # create df for each site
         site_df = pd.DataFrame(columns=columns)
         # get voxel position from fractional site
         site_pos = get_voxel_from_index(site_index, lattice)
         # site_pos_real = get_real_from_vox(site_pos, lattice)
         # iterate through each neighbor to the site
-        for i, neigh in enumerate(neighs):
-            site_df.loc[len(site_df)] = get_site_neighbor_results_rough(
-                site_index, neigh, lattice, site_pos, grid, rough_partitioning
-            )
         
-        # Get list of planes for each atom. The planes are stored as a dictionary
-        planes = [{"point": i, "vector": j} for i, j in zip(site_df["plane_point"],site_df["plane_vector"])]
-        # Get the important planes
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # For now I am treating partitioning in a static way by just using 50 
-        # partitioning planes no matter the atom or system. I believe plane
-        # selection is the source for many errors in voxel assignment.
-        # I will update this in the future to more rigorously select the planes.
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        intercepts, important_planes = get_important_planes(planes)
-        
-        # # # create a list to store the final set of neighbors
-        important_neighs = pd.DataFrame(columns=columns)
-        for [index, row] in site_df.iterrows():
-            # get the associated point and vector for the partitioning plane in
-            # this neighbor.
-            plane_point = np.array(row["plane_point"])
-            plane_vector = np.array(row["plane_vector"])
-            # Check if this plane exists in our list of important planes. If it
-            # does than we'll add this row to our important partitioning planes
-            # list
-            for plane in important_planes:
-                point = plane["point"]
-                vector = plane["vector"]
-                if np.array_equal(plane_point, point) and np.array_equal(plane_vector, vector):
-                    important_neighs.loc[len(important_neighs)] = row
-        rough_partition_results.append(important_neighs)
+        while enough_neighbors is False:
+            # For each neighbor, get the plane seperating it from our site and
+            # add the info to the site_df
+            for i, neigh in enumerate(neighs):
+                site_df.loc[len(site_df)] = get_site_neighbor_results_rough(
+                    site_index, neigh, lattice, site_pos, grid, rough_partitioning
+                )
+            
+            # Get list of planes for each atom. The planes are stored as a dictionary
+            planes = [{"point": i, "vector": j} for i, j in zip(site_df["plane_point"],site_df["plane_vector"])]
+            # get the important planes
+            intercepts, important_planes = get_important_planes(planes)
+            
+            # Create a list to store the final set of neighbors
+            important_neighs = pd.DataFrame(columns=columns)
+            for [index, row] in site_df.iterrows():
+                # get the associated point and vector for the partitioning plane in
+                # this neighbor.
+                plane_point = np.array(row["plane_point"])
+                plane_vector = np.array(row["plane_vector"])
+                # Check if this plane exists in our list of important planes. If it
+                # does than we'll add this row to our important partitioning planes
+                # list
+                for plane in important_planes:
+                    point = plane["point"]
+                    vector = plane["vector"]
+                    if np.array_equal(plane_point, point) and np.array_equal(plane_vector, vector):
+                        important_neighs.loc[len(important_neighs)] = row
+            
+            # Check how many neighbors were found for this site. If it is the
+            # same as the maximum number that could of been found, we want to
+            # increase the possible number. We increase the desired neighbors by
+            # 25 and get the new set of neighbors. Otherwise, we have an
+            # appropriate number of neighbors and we add the results to our
+            # partitioning results.
+            if len(important_neighs) == number_of_neighbors:
+
+                number_of_neighbors += 25
+                new_neighbors = get_neighbors_set(structure, number_of_neighbors)
+                neighs = new_neighbors[site_index]
+
+            else:
+                enough_neighbors = True
+                rough_partition_results.append(important_neighs)
+
 
 
 

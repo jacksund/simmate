@@ -10,6 +10,7 @@ from simmate.toolkit import Structure
 from simmate.apps.warrenapp.badelf_tools.utilities import (
     get_density_file_empty,
     convert_atom_chgcar_to_elfcar,
+    check_chgcar_elfcar_grids,
 )
 
 from simmate.apps.warrenapp.workflows.badelf.badelf_alg_v0_4_0 import (
@@ -19,7 +20,12 @@ from simmate.apps.warrenapp.workflows.badelf.topology_alg_v0_1_0 import (
     get_electride_dimensionality    
 )
 
+from simmate.apps.warrenapp.outputs.elfcar import Elfcar
+
 from simmate.apps.warrenapp.badelf_tools.acf import ACF
+
+from rich.console import Console
+console = Console()
 
 # This file contains workflows for performing Bader and BadELF. Parts of the code
 # use the Henkelman groups algorithm for Bader analysis:
@@ -85,11 +91,30 @@ class BadElfBase(Workflow):
         min_charge: float = 0.45, # This is somewhat arbitrarily set
         algorithm: str = "badelf",
         print_atom_voxels: bool = False,
+        elf_connection_cutoff: float = 0,
         **kwargs,
     ):
-        #!!! Add method to set ELFCAR grid to the same size as CHGCAR grid if
-        # they are not. This would solve any issues with users not using the
-        # correct vasp settings.
+        #######################################################################
+        # This section of the workflow checks that the CHGCAR and ELFCAR have #
+        # the same size. If not, it resizes the ELFCAR to the same size.      #
+        #######################################################################
+        if algorithm == "badelf" and find_electrides == True or algorithm == "zero-flux":  
+            same_grid, chgcar_grid_axes = check_chgcar_elfcar_grids(directory)
+            if not same_grid:
+                console.print(
+                    """
+        The provided ELFCAR and CHGCAR were found to have different size
+        grids. This will cause the sections of the algorithm using the
+        Henkelman bader code to fail. A new ELFCAR will be created using
+        pyRho and the provided ELFCAR will be renamed ELFCAR_original               
+                    """, 
+                    style = "rgb(255,255,153)"
+                    )
+                elfcar = Elfcar.from_file(directory / "ELFCAR")
+                elfcar.write_file(directory / "ELFCAR_original")
+                elfcar.regrid(new_grid_shape = chgcar_grid_axes)
+                elfcar.write_file(directory / "ELFCAR")
+        
         #######################################################################
         # This section of the workflow finds electride sites (if requested)   #
         #######################################################################
@@ -256,8 +281,10 @@ class BadElfBase(Workflow):
             dimensionality = get_electride_dimensionality(
                 directory = badelf_directory,
                 empty_structure = empty_structure,
+                elf_connection_cutoff=elf_connection_cutoff,
                 )
             results["electride_dim"] = dimensionality
+            results["elf_connect_cutoff"] = elf_connection_cutoff
         
         return results
 

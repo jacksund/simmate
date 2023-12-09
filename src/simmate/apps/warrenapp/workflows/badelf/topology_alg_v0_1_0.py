@@ -14,7 +14,7 @@ from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
     get_voxel_from_index,
     get_voxel_from_neigh,
     get_partitioning_line,
-    get_50_neighbors
+    get_neighbors_set
     )
 from pymatgen.analysis.dimensionality import get_dimensionality_larsen
 
@@ -24,7 +24,8 @@ def get_electride_dimensionality(
         empty_structure: Structure = None,
         empty_file: str = "POSCAR_empty",
         electride_elfcar: Elfcar = None,
-        electride_elfcar_file: str = "ELFCAR_e"
+        electride_elfcar_file: str = "ELFCAR_e",
+        elf_connection_cutoff: float = 0
         ):
     #read in structure and remove all atoms except dummy electride sites
     if empty_structure is None:
@@ -49,7 +50,7 @@ def get_electride_dimensionality(
     
     # get the 50 nearest electride neighbors. We only do this because we need to make
     # sure that electride sites that are very far away are thoroughly checked
-    nearest_neighbors = get_50_neighbors(structure)
+    nearest_neighbors = get_neighbors_set(structure, neighbor_num=50)
     
     # create an empty StructureGraph object. This maps connections between different
     # atoms, including those across unit cell boundaries. We will fill this out using
@@ -88,7 +89,7 @@ def get_electride_dimensionality(
             
             # If a 0 is not found in the elf line these sites are connected and we
             # want to add an edge to our graph.
-            if 0 not in values:
+            if all(value >= elf_connection_cutoff for value in values):
                 graph.add_edge(
                     from_index=index, # The site index of the electride site of interest
                     from_jimage=(0, 0, 0), # The image the electride site is in. Always (0,0,0)

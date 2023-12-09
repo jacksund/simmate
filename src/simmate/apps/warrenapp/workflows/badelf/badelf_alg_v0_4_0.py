@@ -26,7 +26,7 @@ from simmate.apps.warrenapp.badelf_tools.utilities import get_electride_num
 from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
     check_closest_neighbor_for_same_type,
     check_structure_for_covalency,
-    get_50_neighbors,
+    get_neighbors_set,
     get_closest_neighbors,
     get_charge_density_grid,
     regrid_numpy_array,
@@ -97,7 +97,7 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         # the same warning about He's EN so we suppress that here
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            neighbors50 = get_50_neighbors(structure=structure)
+            neighbors = get_neighbors_set(structure=structure)
             closest_neighbors = get_closest_neighbors(empty_structure)
 
         # When using the badelf algorithm, we want to assign electride voxels 
@@ -109,11 +109,6 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         elif algorithm == "voronelf":
             electride_sites = []
             
-
-        # we'll need the volume of each voxel later to calculate the atomic
-        # volumes for our output file
-        voxel_volume = lattice["volume"] / np.prod(lattice["grid_size"])
-
         # we also want the voxel resolution
         voxel_resolution = np.prod(lattice["grid_size"]) / lattice["volume"]
         console.print(f"Voxel Resolution: {round(voxel_resolution, 2)}", style="green")
@@ -140,9 +135,10 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         if voxel_resolution < 130000:
             console.print("Increasing voxel resolution :chart_increasing:", 
                   style = "green")
-            grid, regrid_lattice = regrid_numpy_array(lattice, grid)
+            new_grid, regrid_lattice = regrid_numpy_array(lattice, grid)
         else:
             regrid_lattice = lattice.copy()
+            new_grid = grid.copy()
         
         new_voxel_resolution = np.prod(regrid_lattice["grid_size"]) / regrid_lattice["volume"]
         console.print(f"New Voxel Resolution: {round(new_voxel_resolution, 2)}",
@@ -163,14 +159,15 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         console.print("\nBeginning Partitioning",
               style = "bold green")
         results = get_partitioning_rough(
-            neighbors50=neighbors50,
+            neighbors=neighbors,
             lattice=regrid_lattice,
-            grid=grid,
+            grid=new_grid,
             rough_partitioning=True,
+            structure=structure,
         )
         # else:
         #     rough_partition_results = get_partitioning_rough(
-        #         neighbors50=neighbors50,
+        #         neighbors=neighbors,
         #         lattice=regrid_lattice,
         #         grid=grid,
         #     )
@@ -182,11 +179,7 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
 Beginning Voxel Assignment
                       """,
               style = "bold green")
-        # We will also need to find the maximum distance the center of a voxel
-        # can be from a plane and still be intersected by it. That way we can
-        # handle voxels near partitioning planes with more accuracy
-        max_voxel_dist = get_max_voxel_dist(lattice)
-
+        
         # Now that we've identified the planes that divide the ELF, we now need to
         # actually apply that knowledge, voxel by voxel.
 
@@ -241,18 +234,35 @@ Beginning Voxel Assignment
             charge_file=directory / charge_file,
             lattice=lattice,
         )
-
+        
+        # !!! BadELF converges around 10,000-15,000 voxels/A^3. I should regrid the
+        # chg grid here. I should also regrid the incoming electride files if
+        # I do this. For now, I'll just do this if we're using the Voronoi method
+        # !!! This may not work unless I can make sure everything adds up the
+        # same as before. normalizing might be what's causing this problem.
+        if algorithm == "voronelf" and voxel_resolution > 20000:
+            chg, lattice = regrid_numpy_array(
+                lattice, 
+                chg, 
+                desired_resolution=15000,
+                )
+            
+        # we'll need the volume of each voxel later to calculate the atomic
+        # volumes for our output file
+        voxel_volume = lattice["volume"] / np.prod(lattice["grid_size"])
+        
+        # We will also need to find the maximum distance the center of a voxel
+        # can be from a plane and still be intersected by it. That way we can
+        # handle voxels near partitioning planes with more accuracy
+        max_voxel_dist = get_max_voxel_dist(lattice)
+        
+        
         # We need to get the charge on each electride site and get the coordinates that
         # belong to the electride. We first get a dataframe that indexes all of the
         # coordinates. We'll remove the electride coordinates from this later.
-
         a, b, c = lattice["grid_size"]
 
         # Create lists that contain the coordinates of each voxel and their charges
-
-        #!!!!
-        # Why did I do this instead of keeping everything in an array so that
-        # indexing is easier?
         voxel_coords = [idx for idx in itertools.product(range(a), range(b), range(c))]
         voxel_charges = [float(chg[idx[0], idx[1], idx[2]]) for idx in voxel_coords]
 
@@ -271,6 +281,7 @@ Beginning Voxel Assignment
                 charge_file=directory / f"BvAt{str(electride+1).zfill(4)}.dat",
                 lattice=empty_lattice,
             )
+            electride_chg, _ = regrid_numpy_array(empty_lattice, electride_chg)
             electride_indices = []
             # For each voxel, check if the electride charge density file has any
             # charge. If it does add its index to the electride_indices list
@@ -316,6 +327,13 @@ Beginning Voxel Assignment
         # of workers that could have at least this much memory or the number
         # of cores/threads, whichever is smaller
         nworkers = min(math.floor(memory_gb / 2), cpu_count)
+        
+        console.print(
+            """
+            Opening local Dask cluster
+            """,
+            style="bold green"
+            )
         with LocalCluster(
             n_workers=nworkers,
             threads_per_worker=2,

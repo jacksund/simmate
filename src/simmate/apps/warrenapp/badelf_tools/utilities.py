@@ -29,6 +29,17 @@ def check_required_files(directory: Path, required_files: list):
         The following files must exist in the directory where 
         this task is ran but some are missing: {required_files}"""
         )
+        
+def check_chgcar_elfcar_grids(directory):
+    
+    check_required_files(directory, ["ELFCAR", "CHGCAR"])
+    chgcar_lattice = get_lattice("CHGCAR")
+    elfcar_lattice = get_lattice("ELFCAR")
+    
+    if chgcar_lattice["grid_size"] == elfcar_lattice["grid_size"]:
+        return True, chgcar_lattice["grid_size"]
+    else:
+        return False, chgcar_lattice["grid_size"]
 
 
 def get_badelf_radius(neigh: list, lattice: dict, site_pos: dict, grid):
