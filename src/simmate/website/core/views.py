@@ -7,7 +7,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import F
 from django.shortcuts import render
 
-from simmate.configuration.django.settings import PROFILE_VIEW, SIMMATE_APPS
+from simmate.configuration.django.settings import HOME_VIEW, PROFILE_VIEW, SIMMATE_APPS
 from simmate.database.third_parties import (
     AflowStructure,
     CodStructure,
@@ -20,8 +20,9 @@ from simmate.website.data_explorer.forms import ChemicalSystemForm
 
 # -----------------------------------------------------------------------------
 
-# this section is wacky because we want to dynamically set the profile fxn/view
-# using either a default or some env variable (which allows people to override it)
+# this section is wacky because we want to dynamically set the home and profile
+# fxn/views using either a default or some env variable (which allows people
+# to override it)
 
 
 @login_required
@@ -45,20 +46,10 @@ def profile(request):
         return profile_view(request)
 
 
-# -----------------------------------------------------------------------------
+def home_default_view(request):
+    # The default homepage is a bulk query for crystal structures. For internal
+    # websites, a different homepage (e.g. a chatbot) is used instead.
 
-
-def loginstatus(request):
-    context = {}
-    template = "account/loginstatus.html"
-    return render(request, template, context)
-
-
-def permission_denied(request):
-    raise PermissionDenied
-
-
-def home(request):
     # The home page is also an html "form" because users submit queries from
     # here. So we need to handle form submissions properly.
 
@@ -134,6 +125,29 @@ def home(request):
     }
     template = "home/home.html"
     return render(request, template, context)
+
+
+def home(request):
+    if not HOME_VIEW:
+        return home_default_view(request)  # This is the function above
+    else:
+        # we assume the view is named "home" inside this module
+        home_module = importlib.import_module(HOME_VIEW)
+        home_view = getattr(home_module, "home")
+        return home_view(request)
+
+
+# -----------------------------------------------------------------------------
+
+
+def loginstatus(request):
+    context = {}
+    template = "account/loginstatus.html"
+    return render(request, template, context)
+
+
+def permission_denied(request):
+    raise PermissionDenied
 
 
 def apps(request):

@@ -98,9 +98,10 @@ REQUIRE_LOGIN_EXCEPTIONS = [
 ]
 LOGIN_MESSAGE = os.getenv("LOGIN_MESSAGE", "")
 
-# This is for setting the database via an connection URL. This is done as
-# an environment variable to allow setup with DigitalOcean
+# These allow server maintainers to override the homepage and profile views, which
+# is important if they involve loading custom apps/models for their templates.
 PROFILE_VIEW = os.getenv("PROFILE_VIEW", None)
+HOME_VIEW = os.getenv("HOME_VIEW", None)
 
 # --------------------------------------------------------------------------------------
 
