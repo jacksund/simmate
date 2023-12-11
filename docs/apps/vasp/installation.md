@@ -179,7 +179,7 @@ nano ~/.bashrc
 source ~/.bashrc
 ```
 
-You can now use commands like `mpirun -n 4 vasp_std`!!! If you try this right away, you’ll see the “error” (vasp fails because no input files are present)..
+You can now use commands like `mpirun -n 4 vasp_std`!!! If you try this right away, you’ll see the "error" (vasp fails because no input files are present).
 ``` bash
 Error reading item 'VCAIMAGES' from file INCAR.
 Error reading item 'VCAIMAGES' from file INCAR.
