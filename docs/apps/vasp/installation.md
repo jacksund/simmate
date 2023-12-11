@@ -39,7 +39,7 @@ cd gmp-6.2.1
 # Look for "Thread(s) per core and use" this in the next command
 lscpu
 
-# “2” here is based on our output from the previous command. This value will 
+# "2" here is based on our output from the previous command. This value will 
 # be used in building our other packages too 
 make -j 2
 make install
@@ -179,7 +179,7 @@ nano ~/.bashrc
 source ~/.bashrc
 ```
 
-You can now use commands like `mpirun -n 4 vasp_std`!!! If you try this right away, you’ll see the "error" (vasp fails because no input files are present).
+You can now use commands like `mpirun -n 4 vasp_std`!!! If you try this right away, you’ll see the "error" (vasp fails because no input files are present)..
 ``` bash
 Error reading item 'VCAIMAGES' from file INCAR.
 Error reading item 'VCAIMAGES' from file INCAR.
