@@ -69,6 +69,7 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         valence_file: str = "POTCAR",
         print_atom_voxels: bool = False,
         algorithm: str = "badelf", # other option is voronelf
+        check_covalency: bool = True,
         **kwargs,
     ):
         t0 = time.time()
@@ -126,8 +127,9 @@ class BadElfAnalysis__Warren__BadelfIonicRadii(Workflow):
         # We now check for any covalency that may be in the structure.
         # !!! the current version of BadELF does not have a method for handling
         # covalency. This will hopefully be updated in the future
-        check_closest_neighbor_for_same_type(closest_neighbors, empty_structure)
-        check_structure_for_covalency(closest_neighbors, grid, empty_lattice, empty_structure)
+        if check_covalency:
+            check_closest_neighbor_for_same_type(closest_neighbors, empty_structure)
+            check_structure_for_covalency(closest_neighbors, grid, empty_lattice, empty_structure)
         
         # regrid the partitioning grid to a higher voxel resolution. This means
         # that high quality interpolation of the grid data only has to happen once.

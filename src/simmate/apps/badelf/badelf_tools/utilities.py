@@ -5,6 +5,7 @@ import numpy as np
 from pymatgen.io.vasp import Poscar, Elfcar, Chgcar
 from simmate.toolkit import Structure
 
+from simmate.utilities import check_required_files
 from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
     get_closest_neighbors,
     get_lattice,
@@ -18,17 +19,7 @@ from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
 )
 
 
-def check_required_files(directory: Path, required_files: list):
-    """
-    Checks to make sure that all the files in a folder exist. Otherwise raises
-    an error.
-    """
-    if not all((directory / file).exists() for file in required_files):
-        raise Exception(
-            f"""Make sure your `setup` method directory source is defined correctly. 
-        The following files must exist in the directory where 
-        this task is ran but some are missing: {required_files}"""
-        )
+
         
 def check_chgcar_elfcar_grids(directory):
     

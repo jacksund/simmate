@@ -2,6 +2,7 @@
 
 from .files import (
     archive_old_runs,
+    check_required_files,
     chunk_read,
     copy_directory,
     copy_files_from_directory,

@@ -28,6 +28,7 @@ from simmate.apps.warrenapp.badelf_tools.badelf_algorithm_functions import (
 import numpy as np
 
 
+
 class Elfcar(PymatgenElfcar):
     # Leave docstring blank and inherit from pymatgen
 
