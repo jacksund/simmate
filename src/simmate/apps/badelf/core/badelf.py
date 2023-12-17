@@ -307,11 +307,13 @@ class BadElfToolkit:
         directory = self.directory
         charge_file = directory / "CHGCAR_electride"
         partitioning_file = directory / "ELFCAR_electride"
-        self.write_electride_structure_files(charge_file, partitioning_file)
+        if not (directory/"CHGCAR_electride").exists():
+            self.write_electride_structure_files(charge_file, partitioning_file)
         # Run the henkelman code to print out electride files
         electride_indices = self.electride_indices
         zero_flux_executor = ZeroFluxToolkit(directory=directory)
-        zero_flux_executor.execute_henkelman_code_sel_atom(charge_file, partitioning_file, electride_indices)
+        # zero_flux_executor.execute_henkelman_code_sel_atom(charge_file, partitioning_file, electride_indices)
+        zero_flux_executor.execute_henkelman_code_sel_atom("CHGCAR_electride", "ELFCAR_electride", electride_indices)
         
         for electride in electride_indices:
             # Create a dictionary with all sites to store the value in. We do

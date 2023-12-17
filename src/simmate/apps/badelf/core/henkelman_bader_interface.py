@@ -15,7 +15,7 @@ class ZeroFluxToolkit:
     """
     def __init__(
             self,
-            directory: Path = Path("."),
+            directory: Path = None,
                  ):
         self.directory = directory
     

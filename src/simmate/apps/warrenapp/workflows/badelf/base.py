@@ -57,11 +57,12 @@ class BadElfBase(Workflow):
             find_electrides=find_electrides,
             algorithm=algorithm,
             )
+        print("Yay")
         if not check_for_covalency:
             badelf_tools._check_for_covalency = False
         badelf_tools._elf_cutoff = min_elf
         badelf_tools._elf_connection_cutoff = elf_connection_cutoff
-        return badelf_tools.results
+        return badelf_tools.results()
 
 
 class VaspBadElfBase(Workflow):
