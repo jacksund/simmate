@@ -96,7 +96,46 @@ class PartitioningToolkit:
             adjusted_pos = [x for x in pos]
             value = float(fn(adjusted_pos))
             values.append(value)
+            
+        # smooth line with savgol filter
+        values = savgol_filter(values,20,3)
         return line, values
+    
+    @staticmethod
+    def _check_partitioning_line_for_symmetry(values:list, tolerance:float = 0.1):
+        """
+        Check if the values are roughly symmetric.
+    
+        Parameters:
+        - values: List of numeric values
+        - tolerance: Tolerance level for symmetry check
+    
+        Returns:
+        - True if roughly symmetric, False otherwise
+        """
+        n = len(values)
+    
+        # Check if the list has an even number of elements
+        if n % 2 != 0:
+            # remove the center if odd number
+            center_index = math.ceil(n/2)
+            values.pop(center_index)
+    
+        # Split the list into two halves
+        half_size = n // 2
+        first_half = values[:half_size]
+        second_half = values[half_size:]
+    
+        # Reverse the second half
+        reversed_second_half = list(reversed(second_half))
+    
+        # Check if the values are roughly equal within the given tolerance
+        for val1, val2 in zip(first_half, reversed_second_half):
+            if abs(val1 - val2) > tolerance:
+                return False
+    
+        return True
+   
     
     @staticmethod
     def find_minimum(values: list | ArrayLike):
@@ -167,6 +206,8 @@ class PartitioningToolkit:
     def get_line_minimum_as_frac(
             cls,
             values: list | ArrayLike, 
+            site_string: str,
+            neigh_string: str,
             ):
         """
         Finds the minimum point of a list of values along a line, then returns the
@@ -174,35 +215,57 @@ class PartitioningToolkit:
         
         Args:
             values (list): A list of values to find the minimum of
+            site_string (str): The symbol of the atom at the start of the line
+            neigh_string (str): The symbol of the atom at the end of the line
             
         results:
             The global minimum of form [line_position, value, frac_position]
         """
-        # minima function gives all local minima along the values
-        minima = cls.find_minimum(values)
-        # maxima = find_maximum(values)
-
-        # then we grab the local minima closest to the midpoint of the values
-        global_min = cls.get_closest_extrema_to_center(values, minima)
-        # global_max = get_closest_extrema_to_center(values, maxima)
-           
-        # If we have a high enough voxel resolution we only want to run the rough
-        # interpolation. If that's the case we want to do a polynomial fit here
-        # to ensure that we have the correct position
-        # Get the section of the line surrounding the minimum to perform a fit
-        poly_line_section = values[global_min[0] - 3 : global_min[0] + 4]
-        poly_line_x = [i for i in range(global_min[0] - 3, global_min[0] + 4)]
-        # get the polynomial fit
-        try:
-            a, b, c = polyfit(poly_line_x, poly_line_section, 2)
-            # find the minimum and change the values of the global_min list
-            x = -b / (2 * a)
-            global_min[0] = x
-            global_min[1] = np.polyval(np.array([a, b, c]), x)
-        except:
-            pass
-
-        global_min.append(global_min[0] / (len(values) - 1))
+        
+        if site_string == neigh_string:
+            list_values = list(values)
+            # We have the same type of atom on either side. We want to check
+            # if they are the same and if they are return a frac of 0.5. This
+            # is because usually there will be some slight covalency between
+            # atoms of the same type, but they should share the area equally
+            symmetric = cls._check_partitioning_line_for_symmetry(list_values)
+        else:
+            symmetric = False
+        
+        # If we found symmetry, we return a global min exactly at the center
+        if symmetric:
+            # 100 is the index directly at the center of the line
+            elf_value = values[100]
+            elf_min_frac = 0.5
+            global_min = [100, elf_value, elf_min_frac]
+        else:
+            # We either don't have the same atoms, or the same atoms are not
+            # symmetric along the elf.
+            # minima function gives all local minima along the values
+            minima = cls.find_minimum(values)
+            # maxima = find_maximum(values)
+    
+            # then we grab the local minima closest to the midpoint of the values
+            global_min = cls.get_closest_extrema_to_center(values, minima)
+            # global_max = get_closest_extrema_to_center(values, maxima)
+               
+            # If we have a high enough voxel resolution we only want to run the rough
+            # interpolation. If that's the case we want to do a polynomial fit here
+            # to ensure that we have the correct position
+            # Get the section of the line surrounding the minimum to perform a fit
+            poly_line_section = values[global_min[0] - 3 : global_min[0] + 4]
+            poly_line_x = [i for i in range(global_min[0] - 3, global_min[0] + 4)]
+            # get the polynomial fit
+            try:
+                a, b, c = polyfit(poly_line_x, poly_line_section, 2)
+                # find the minimum and change the values of the global_min list
+                x = -b / (2 * a)
+                global_min[0] = x
+                global_min[1] = np.polyval(np.array([a, b, c]), x)
+            except:
+                pass
+    
+            global_min.append(global_min[0] / (len(values) - 1))
         return global_min
     
     @staticmethod
@@ -316,7 +379,7 @@ class PartitioningToolkit:
     
     def get_elf_ionic_radius(
             self, 
-            site: int, 
+            site_index: int, 
             method: str = "linear",
             structure: Structure = None,
             site_is_electride: bool = False,
@@ -328,7 +391,7 @@ class PartitioningToolkit:
         similar to the Shannon Crystal Radius, but gives more specific values
         
         Args:
-            site (int): 
+            site_index (int): 
                 An integer value referencing an atom in the structure
             method (str): 
                 Whether to use linear or cubic interpolation
@@ -343,9 +406,9 @@ class PartitioningToolkit:
         # get neighbors for all atoms in structure
         all_neighbors = self.get_closest_neighbors(structure)
         # Get neighbors only for requested site
-        site_neighbors = all_neighbors[site]
+        site_neighbors = all_neighbors[site_index]
         # Get site voxel postion from cartesian coordinates
-        site_voxel_coord = self.grid.get_voxel_coords_from_cart(structure[site].coords)
+        site_voxel_coord = self.grid.get_voxel_coords_from_cart(structure[site_index].coords)
         
         # Create list to store distances in
         distances = []
@@ -356,8 +419,11 @@ class PartitioningToolkit:
             neigh_voxel_coord = self.grid.get_voxel_coords_from_cart(neigh["site"].coords)
             elf_positions, elf_values = self.get_partitioning_line(site_voxel_coord, neigh_voxel_coord)
             
+            # Get site and neighbor strings
+            site_string = self.grid.structure[site_index].species_string
+            neighbor_string = neigh["site"].species_string
             # Get the min position along the line
-            global_min_pos = self.get_line_minimum_as_frac(elf_values)
+            global_min_pos = self.get_line_minimum_as_frac(elf_values, site_string, neighbor_string)
             min_voxel_coord = self.get_voxel_coords_from_min_along_line(
                 global_min_pos[2], site_voxel_coord, neigh_voxel_coord)
             min_cart_coord = self.grid.get_cart_coords_from_vox(min_voxel_coord)
@@ -604,9 +670,8 @@ class PartitioningToolkit:
 
                 
                 neigh_voxel_coord = grid.get_voxel_coords_from_neigh_CrystalNN(neigh)
-                values = self.get_partitioning_line(site_voxel_coord, neigh_voxel_coord, grid)[1]
-                
-                #smooth line:
+                values = self.get_partitioning_line(site_voxel_coord, neigh_voxel_coord)[1]
+                #smooth line
                 # smoothed_values = savgol_filter(values,20,3)
                 
                 # Now we check for any strong covalency in the bond as in the current version
@@ -669,8 +734,12 @@ class PartitioningToolkit:
 
         # find the minimum position and value along the elf_line
         # the third element is the fractional position, measured from site_voxel_coord
+        site_string = grid.structure[site_index].species_string
+        neighbor_string = neigh.species_string
         elf_min_index, elf_min_value, elf_min_frac = self.get_line_minimum_as_frac(
             elf_values,
+            site_string,
+            neighbor_string,
         )
 
         # convert the minimum in the ELF back into a position in the voxel grid
@@ -831,23 +900,32 @@ class PartitioningToolkit:
     def get_partitioning(
             self,
             neighbors: list = None,
+            check_for_covalency: bool = True,
             ):
         """
         Gets the partitioning planes for each atom.
         
         Args:
-            neighbors (list): A list of neighbors from pymagten's structure.get_neighbors
+            neighbors (list): 
+                A list of neighbors from pymagten's structure.get_neighbors
                 method
+            check_for_covalency (bool):
+                Whether to check the structure for signs of covalency. This can
+                be turned off, but it may give strange results!
                 
         Returns:
             A dictionary where the keys are site indices and the values
             are neighbor dictionaries containing information on the partitioning
             planes.
         """
+        if check_for_covalency:
+            closest_neighbors = self.get_closest_neighbors()
+            self.check_structure_for_covalency(closest_neighbors)
+            self.check_closest_neighbor_for_same_type(closest_neighbors)
+        
         if neighbors is None:
             neighbors = self.get_set_number_of_neighbors()
-        grid = self.grid.copy()
-        grid.regrid()
+        # self.grid.regrid()
         # structure = grid.structure
         # grid_data = grid.total
         # Now we want to find the minimum in the ELF between the atom and each of its
@@ -952,7 +1030,7 @@ class PartitioningToolkit:
                 site_neigh_dict["radius"] = neigh_row[1]["distance"]
                 site_neigh_dict["neigh"] = neigh_row[1]["neigh"]
                 # site_neigh_dict["elf_line"] = smoothed_line
-                site_neigh_dict["elf_line_raw"] = neigh_row[1]["elf_values_rough"]
+                site_neigh_dict["elf_line"] = neigh_row[1]["elf_values_rough"]
                 # adding some results for testing
                 site_neigh_dict["neigh_index"] = neigh_row[1]["neigh"].index
                 # site_neigh_dict["neigh_distance"] = math.dist(real_site_point, real_neigh_point)

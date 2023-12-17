@@ -107,6 +107,12 @@ class BadElfAnalysis(Structure, Calculation):
     Used to determine the dimensionality of the electride electron network.
     """
     
+    coord_envs = table_column.JSONField(blank=True, null=True)
+    """
+    A list of coordination environments for the atoms and electrides in the
+    structure
+    """
+    
     def write_output_summary(self, directory: Path):
         super().write_output_summary(directory)
         self.write_summary_dataframe(directory)

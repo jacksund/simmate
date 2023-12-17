@@ -58,7 +58,7 @@ def ACF(directory: Path = None, filename="ACF.dat"):
 
     potcar_filename = directory / "POTCAR"
     chgcar_filename = directory / "CHGCAR"
-    chgcar_empty_filename = directory / "CHGCAR_empty"  # SPECIAL CASE
+    chgcar_empty_filename = directory / "CHGCAR_electride"  # SPECIAL CASE
 
     # check if the required vasp files are present before doing the workup
     if potcar_filename.exists() and (

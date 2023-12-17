@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.badelf.core import Grid, PartitioningToolkit, VoxelAssignmentToolkit
-from scipy.ndimage import label, find_objects, maximum_filter
-from scipy.interpolate import RegularGridInterpolator
-from scipy.optimize import curve_fit, fmin
+from simmate.apps.badelf.core import Grid, PartitioningToolkit
+# from scipy.ndimage import label, find_objects, maximum_filter
+# from scipy.interpolate import RegularGridInterpolator
+# from scipy.optimize import curve_fit, fmin
 import numpy as np
 import math
 from pymatgen.analysis.local_env import CrystalNN
@@ -44,122 +44,45 @@ class ElectrideFinder:
         Returns:
         - List of tuples containing the coordinates of local maxima
         """
-        elf_data = self.grid.total
+        grid = self.grid.copy()
+        grid.regrid(desired_resolution=1000)
+        elf_data = grid.total
         # Get padded data so that we can look at voxels at the edges
         padded_elf_data = np.pad(elf_data, neighborhood_size, mode="wrap")
-        local_maxima = []
+        maxima_cart_coords = []
         maxima_values = []
         
         # Look across each voxel in the structure.
         for z in range(neighborhood_size, padded_elf_data.shape[0] - neighborhood_size):
             for y in range(neighborhood_size, padded_elf_data.shape[1] - neighborhood_size):
                 for x in range(neighborhood_size, padded_elf_data.shape[2] - neighborhood_size):
+                    # Get a section of the dataframe around the voxel
                     neighborhood = padded_elf_data[z - neighborhood_size:z + neighborhood_size + 1,
                                        y - neighborhood_size:y + neighborhood_size + 1,
                                        x - neighborhood_size:x + neighborhood_size + 1]
+                    # Get the max value in the neighborhood
                     max_value = np.max(neighborhood)
                     z_orig = z - neighborhood_size
                     y_orig = y - neighborhood_size
                     x_orig = x - neighborhood_size
+                    # If the maximum value is at the voxel we're looking at, this
+                    # is a maximum and we add the cartesian coordinates and value
+                    # to our list
                     if elf_data[z_orig, y_orig, x_orig] == max_value and (threshold is None or max_value > threshold):
-                        local_maxima.append((z_orig+1, y_orig+1, x_orig+1))
+                        maxima_voxel_coord = (z_orig+1, y_orig+1, x_orig+1)
+                        maxima_cart_coord = grid.get_cart_coords_from_vox(maxima_voxel_coord)
+                        maxima_cart_coords.append(maxima_cart_coord)
                         maxima_values.append(elf_data[z_orig, y_orig, x_orig])
         
-        return local_maxima, maxima_values
-    
-    def get_refined_local_maxima(
-            self, 
-            neighborhood_size: int = 2,
-            voxel_maxima: list = None,
-            ):
-        """
-        Fit a 3D Gaussian function around each local maximum.
         
-        Args:
-            neighborhood_size (int): 
-                Size of the neighborhood for finding local maxima
-            
-            voxel_maxima (list):
-                A list of maxima in voxel coordinates. Will be found automatically
-                if not given.
         
-        Returns:
-            - List of local maxima in the structure in cartesian coordinates
-        """
-        # Define a 3D gaussian function that will be used to fit the regions
-        # around each local maximum
-        # def gaussian_fit(coordinates, amplitude, x0, y0, z0, sigma_x, sigma_y, sigma_z):
-        #     x, y, z = coordinates
-        #     return amplitude * np.exp(
-        #         -((x - x0)**2 / (2 * sigma_x**2)) - ((y - y0)**2 / (2 * sigma_y**2)) - ((z - z0)**2 / (2 * sigma_z**2))
-        #     )
-        
-        # elf_data = self.grid.total
-        if voxel_maxima is None:
-            voxel_maxima, voxel_values = self.find_local_maxima()
-        maxima_cart_coords = []
-        # maxima_values = []
-        for voxel_maximum in voxel_maxima:
-            cart_maximum = self.grid.get_cart_coords_from_vox(voxel_maximum)
-            maxima_cart_coords.append(cart_maximum)
-        
-        #!!! Just using the exact voxel locations seems to give better results
-        # than fitting to a gaussian
-        # # Create a padded grid so that values around local maxima at an edge
-        # # can be obtained
-        # padded_elf_data = np.pad(elf_data, neighborhood_size, mode="wrap")
-        
-        # # Create a new list of maxima voxels adjusted for the padding.
-        # padded_voxel_maxima = []
-        # for maximum in voxel_maxima:
-        #     # add the padded number to the voxel. Also remove 1 because these
-        #     # valuse come in in voxel coord format.
-        #     adjusted_maximum = [i+neighborhood_size-1 for i in maximum]
-        #     padded_voxel_maxima.append(adjusted_maximum)
-        
-        # for max_point in padded_voxel_maxima:
-        #     x, y, z = max_point
-        #     # Get a [3,3,3] array of values around the voxel found to be a local
-        #     # maximum
-        #     neighborhood = padded_elf_data[x - neighborhood_size:x + neighborhood_size + 1,
-        #                   y - neighborhood_size:y + neighborhood_size + 1,
-        #                   z - neighborhood_size:z + neighborhood_size + 1,]
-            
-        #     # We are going to flatten this array into 1D so we need a list of
-        #     # indices that maps the 1D array to the original 3D
-        #     indices = np.indices(neighborhood.shape)
-        #     original_indices = np.column_stack((indices[0].flatten(), indices[1].flatten(), indices[2].flatten()))
-        #     xs, ys, zs = original_indices[ :,0], original_indices[ :,1], original_indices[ :,2]
-            
-        #     # Our voxel maximum is located at [1,1,1] in our 3D array so we make the
-        #     # guess for the amplitute the value there. The guesses for x0,y0,z0
-        #     # should also be 1,1,1 because we are likely to find the maximum
-        #     # around there.
-        #     initial_guess = (np.max(neighborhood), neighborhood_size, neighborhood_size, neighborhood_size, 1, 1, 1)
-        #     # fit the curve to our faussian function and get the parameters back
-        #     popt, _ = curve_fit(gaussian_fit, (xs,ys,zs), neighborhood.flatten(), p0=initial_guess)
-            
-        #     # convert the coords back to the original voxel grids indices.
-        #     # We need to add back the neighborhood size twice because we removed
-        #     # it twice. We also need to add x back and 1 to get to the proper
-        #     # voxel coordinates ([1,1,1] at bottom corner)
-        #     max_coord = [popt[1]+x+1-(2*neighborhood_size), popt[2]+y+1-(2*neighborhood_size), popt[3]+z+1-(2*neighborhood_size)]
-            
-        #     # Get the fit max value from the gaussian fit
-        #     # max_value = gaussian_fit([popt[1],popt[2],popt[3]], popt[0], popt[1], 
-        #     #                          popt[2], popt[3],popt[4], popt[5], popt[6])
-        #     # convert to cartesian coords and append to list
-        #     maxima_cart_coords.append(self.grid.get_cart_coords_from_vox(max_coord))
-            # maxima_values.append(max_value)
-        
-        return maxima_cart_coords, voxel_values
-            
-
-    def find_electrides(
+        return maxima_cart_coords, maxima_values
+          
+    def get_electride_structure(
             self,
             local_maxima_coords: list = None,
             local_maxima_values: list = None,
-            remove_old_electrides: bool = True,
+            remove_old_electrides: bool = False,
             distance_cutoff: float = 1.6,
             elf_cutoff: float = 0.5,
             min_electride_radius: float = 0.8 
@@ -198,10 +121,8 @@ class ElectrideFinder:
         dummy atoms.
         """
         grid = self.grid.copy()
-        grid.regrid(desired_resolution=1000)
-        
         if local_maxima_coords is None:
-            local_maxima_coords, local_maxima_values = ElectrideFinder(grid).get_refined_local_maxima()
+            local_maxima_coords, local_maxima_values = self.find_local_maxima()
         
         structure = grid.structure
         if "He" in structure.symbol_set and remove_old_electrides:
@@ -234,8 +155,10 @@ class ElectrideFinder:
                 continue
             
             # get distances to min along lines to closest atoms
-            electride_radius = PartitioningToolkit(grid).get_elf_ionic_radius(
-                site=len(electride_structure)-1,
+            electride_grid = grid.copy()
+            electride_grid.structure = electride_structure
+            electride_radius = PartitioningToolkit(electride_grid).get_elf_ionic_radius(
+                site_index=len(electride_structure)-1,
                 structure=electride_structure,
                 
                 )
@@ -294,98 +217,9 @@ class ElectrideFinder:
                     # a new set of electride sites from our updated empty_structure
                     # and repeate everything
         
-        electride_coordinations = []
-        # The electride indices are the same as our last while loop
-        for electride_index in electride_indices:
-            electride_coord = empty_structure[electride_index].coords
-            electride_structure = structure.copy()
-            electride_structure.append("He", electride_coord, coords_are_cartesian=True)
-            electride_coordinations.append(cnn.get_cn(electride_structure, -1))
-        
-        return empty_structure, electride_coordinations
+        return empty_structure
                     
                 
-        
-        # # We now need to look through and see if any found electride sites are
-        # # very close. If they are we want to combine them. This can happen I
-        # # believe due to voxelation
-        # empty_structure = structure.copy()
-        # # create structure with all electrides
-        # for electride in electride_coords:
-        #     empty_structure.append("He", electride, coords_are_cartesian=True)
-        
-        # # Create an indicator that all nearby electrides have been combined
-        # all_combined = False
-        # # Loop over the process for combining electrides until all nearby ones
-        # # have been
-        # while all_combined == False:
-        #     # Get the indices of the electride sites
-        #     electride_sites = empty_structure.indices_from_symbol("He")
-        #     # Assume all electrides have been combined
-        #     all_combined = True
-        #     # Iterate over each electride
-        #     for site_index in electride_sites:
-        #         # Get the pymatgen Site class object for this site and its nearest
-        #         # neighbor. Then get the distance. We want to check if they are
-        #         # close (somewhat arbitrarily we set this to .3 Angstrom)
-        #         site = empty_structure[site_index]
-        #         neighbor = empty_structure.get_neighbors(site, 15)[0]
-        #         if neighbor.species_string != "He":
-        #             continue
-        #         distance = math.dist(site.coords, neighbor.coords)
-        #         if distance < 0.3:
-        #             # These haven't been combined so we set all_combined to false.
-        #             # We remove the two sites and add a new one at the midpoint
-        #             # between them.
-        #             all_combined = False
-        #             empty_structure.remove_sites([site_index, neighbor.index])
-        #             site_to_add = np.round(((empty_structure[site_index].coords + neighbor.coords)/2),2)
-        #             empty_structure.append("He", site_to_add, coords_are_cartesian=True)
-        #             break
-        
-        # Now we want to get the coordination environment of all of the electrides
-        # for electride_index in electride_sites
-                
-        # return empty_structure
-        
-        # sites_to_remove = []
-        # coords_to_append = []
-        # # Get indices of the electrides
-        # electride_sites = empty_structure.indices_from_symbol("He")
-        # # Get the single closest atom to each atom in the system
-        # closest_neighbors = PartitioningToolkit(grid).get_set_number_of_neighbors(1)
-        # # Loop over the electride sites in the empty_structure
-        # for site_index in electride_sites:
-        #     # If the site is already in the sites to remove, skip it
-        #     # if site_index in sites_to_remove:
-        #     #     continue
-            
-        #     neighbor = closest_neighbors[site_index][0]
-        #     # If the neighbor index is already in the sites to remove, skip it.
-        #     # if neighbor.index in sites_to_remove:
-        #     #     continue
-        #     # Get the distance between the site and its neighbor. If it is less
-        #     # than 0.3 A we want to remove both sites and get the point exactly
-        #     # between them. We append this middle point to our list of coords to
-        #     # add.
-        #     distance = math.dist(empty_structure[site_index].coords, neighbor.coords)
-        #     if distance < 0.3:
-        #         sites_to_remove.extend([site_index, neighbor.index])
-        #         site_to_add = np.round(((empty_structure[site_index].coords + neighbor.coords)/2),2)
-        #         coords_to_append.append(site_to_add)
-        
-        # empty_structure.remove_sites(sites_to_remove)
-        
-        # for electride in coords_to_append:
-        #     empty_structure.append("He", electride, coords_are_cartesian=True)
-        
-        # # Get the coordination of each electron in the system
-        # electrides_coordination = []
-        # new_electride_sites = empty_structure.indices_from_symbol("He")
-        # for site_index in new_electride_sites:
-        #     electrides_coordination.append(cnn.get_cn(empty_structure, n=site_index))
-            
-        # return empty_structure, electrides_coordination
         
         
         

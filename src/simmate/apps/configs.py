@@ -20,3 +20,6 @@ class EvolutionConfig(AppConfig):
 
 class WarrenConfig(AppConfig):
     name = "simmate.apps.warrenapp"
+    
+class BadelfConfig(AppConfig):
+    name = "simmate.apps.badelf"

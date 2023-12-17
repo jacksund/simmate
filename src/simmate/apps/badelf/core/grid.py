@@ -6,7 +6,7 @@ import math
 import itertools
 from pymatgen.io.vasp import Poscar
 from pathlib import Path
-import itertools
+# import itertools
 from pyrho.pgrid import PGrid
 import matplotlib.pyplot as plt
 import matplotlib
@@ -33,13 +33,13 @@ class Grid:
                  diff: ArrayLike | None, 
                  structure: Structure,
                  data_type: str):
-        if total.shape != diff.shape:
+        if diff is not None and diff.shape != total.shape:
             raise ValueError("total and diff arrays must have the same shape.")
         self.total = total
         self.diff = diff
         self.structure = structure
-        if data_type not in ["elf", "charge density"]:
-            raise ValueError("data type must be 'elf' or 'charge density'")
+        if data_type not in ["elf", "charge density", "unknown"]:
+            raise ValueError("data type must be 'elf', 'charge density', or 'unknown'")
         self.data_type = data_type
             
        
@@ -98,6 +98,10 @@ class Grid:
         volume = self.structure.volume
         voxel_num = np.prod(self.grid_shape)
         return volume/voxel_num
+    
+    @property
+    def voxel_num(self):
+        return self.grid_shape.prod()
     
     @property
     def max_voxel_dist(self):
@@ -171,6 +175,12 @@ class Grid:
                 permutations_sorted.append(item)
         permutations_sorted.insert(0, permutations_sorted.pop(7))
         return permutations_sorted
+    
+    @property
+    def voxel_resolution(self):
+        volume = self.structure.volume
+        number_of_voxels = self.grid_shape.prod()
+        return number_of_voxels/volume
     
     def get_grid_axes(self, padding: int = 0):
         """
@@ -261,27 +271,34 @@ class Grid:
             # to determine the data type. We also need to determine how many
             # lines this data takes up.
             aug_occ_lines_num = 0
-            if "augmentation occupancies" in content[skip_rows_total + line_num]:
-                data_type = "charge density"
-                for line in content[skip_rows_total + line_num : ]:
-                    # If we find the start of a new set of data or the end of
-                    # the file we end.
-                    if grid_shape_str in line:
-                        break
-                    else:
-                        aug_occ_lines_num += 1
+            try:
+                if "augmentation occupancies" in content[skip_rows_total + line_num]:
+                    data_type = "charge density"
+                    for line in content[skip_rows_total + line_num : ]:
+                        # If we find the start of a new set of data or the end of
+                        # the file we end.
+                        if grid_shape_str in line:
+                            break
+                        else:
+                            aug_occ_lines_num += 1
+                    
+                else:
+                    data_type = "elf"
                 
-            else:
-                data_type = "elf"
-            
-            # If the VASP calculation was spin polarized there will be another
-            # set of data. We check this is true and then read in the data if
-            # it exists
-            skip_rows_diff = skip_rows_total + line_num + aug_occ_lines_num+1
-            if grid_shape_str in content[skip_rows_diff-1]:
-                # there is a second set of data we need to load
-                for line in content[skip_rows_diff:skip_rows_diff+line_num]:
-                    diff_str += f"{line}"
+                # If the VASP calculation was spin polarized there will be another
+                # set of data. We check this is true and then read in the data if
+                # it exists
+                skip_rows_diff = skip_rows_total + line_num + aug_occ_lines_num+1
+                if grid_shape_str in content[skip_rows_diff-1]:
+                    # there is a second set of data we need to load
+                    for line in content[skip_rows_diff:skip_rows_diff+line_num]:
+                        diff_str += f"{line}"
+            except:
+                # We've reached the end of the file without finding an
+                # augmentation occupancies or additional set of data. We either
+                # have a non-spin polarized ELF file or the output 
+                # BvAt_.dat file from the Henkelman Bader code.
+                data_type = "unknown"
             
         # Create the structure object
         structure = Structure.from_str(structure_str, fmt="poscar")

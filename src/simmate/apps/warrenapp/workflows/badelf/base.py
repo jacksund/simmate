@@ -1,28 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import shutil
+import os
 from pathlib import Path
-import warnings
 
-from simmate.engine import S3Workflow, Workflow
+from simmate.engine import Workflow
 from simmate.toolkit import Structure
 
-from simmate.apps.warrenapp.badelf_tools.utilities import (
-    get_density_file_empty,
-    convert_atom_chgcar_to_elfcar,
-    check_chgcar_elfcar_grids,
-)
-
-from simmate.apps.warrenapp.workflows.badelf.badelf_alg_v0_4_0 import (
-    BadElfAnalysis__Warren__BadelfIonicRadii,
-)
-from simmate.apps.warrenapp.workflows.badelf.topology_alg_v0_1_0 import (
-    get_electride_dimensionality    
-)
-
-from simmate.apps.warrenapp.outputs.elfcar import Elfcar
-
-from simmate.apps.warrenapp.badelf_tools.acf import ACF
+from simmate.apps.badelf.core.badelf import BadElfToolkit
+# from simmate.apps.badelf.core import Grid
 
 from rich.console import Console
 console = Console()
@@ -31,52 +17,13 @@ console = Console()
 # use the Henkelman groups algorithm for Bader analysis:
 # (http://theory.cm.utexas.edu/henkelman/code/bader/).
 
-# Some workflows in this file purposefully do not use a database as they are
-# part of a larger process that doesn't need to be recorded.
-# All of the earlier workflows are building blocks for VaspBadelfBaderBase which
-# is the workflow that all the other BadELF analysis workflows are built from.
-
-# The only differences between the following S3Workflows is that they have different
-# required files and some use the previous directory and need specific files.
-# The command can be changed when the workflow is called for a run, so it is
-# not strictly necessary that this be set if their only use is in the base
-# BadELF workflow below.
-
-
-class BadElfAnalysis__Warren__BadelfZeroFlux(S3Workflow):
-    """
-    Runs charge analysis where the ELFCAR is used as the partitioning reference. 
-    This corresponds to the Zero-Flux bader method.
-    """
-    command = "bader CHGCAR -ref ELFCAR > bader.out"
-    required_files = ["CHGCAR", "ELFCAR", "POSCAR"]
-    monitor = False #There is no monitor for the Henkelman's code built out yet
-    use_database = False
-
-class BadElfAnalysis__Warren__BadelfZeroFluxEmpty(BadElfAnalysis__Warren__BadelfZeroFlux):
-    """
-    Runs the same analysis as the BadelfZeroFlux workflow above. However, it
-    uses files with _empty at the end which indicate that the algorithm searched
-    for electrides.
-    """
-    command = "bader CHGCAR_empty -ref ELFCAR_empty > bader.out"
-    required_files = ["CHGCAR_empty", "ELFCAR_empty"]
-
-class BadElfAnalysis__Warren__BadelfInit(BadElfAnalysis__Warren__BadelfZeroFlux):
-    """
-    Runs the same analysis as the BadelfZeroFlux workflow above, but copies the
-    necessary files from a previous directory. This workflow is run at the beginning
-    of the base BadELF workflow to create the BCF.dat file that is used to
-    automatically find electride sites.
-    """
-    use_previous_directory = ["CHGCAR", "ELFCAR", "POSCAR", "POTCAR"]
-
 
 class BadElfBase(Workflow):
     """
     Controls a Badelf analysis on a pre-ran VASP calculation.
     This is the base workflow that all analyses that run BadELF
-    are built from.
+    are built from. Note that for more in depth analysis, it may be more
+    useful to use the BadElfToolkit class.
     """
 
     use_database = False
@@ -84,209 +31,37 @@ class BadElfBase(Workflow):
     @classmethod
     def run_config(
         cls,
-        structure: Structure,
+        # structure: Structure,
         source: dict = None,
         directory: Path = None,
         find_electrides: bool = True,
-        min_charge: float = 0.45, # This is somewhat arbitrarily set
+        min_elf: float = 0.5, # This is somewhat arbitrarily set
         algorithm: str = "badelf",
-        print_atom_voxels: bool = False,
+        # print_atom_voxels: bool = False,
         elf_connection_cutoff: float = 0,
+        check_for_covalency: bool = True,
         **kwargs,
     ):
-        #######################################################################
-        # This section of the workflow checks that the CHGCAR and ELFCAR have #
-        # the same size. If not, it resizes the ELFCAR to the same size.      #
-        #######################################################################
-        if algorithm == "badelf" and find_electrides == True or algorithm == "zero-flux":  
-            same_grid, chgcar_grid_axes = check_chgcar_elfcar_grids(directory)
-            if not same_grid:
-                console.print(
-                    """
-        The provided ELFCAR and CHGCAR were found to have different size
-        grids. This will cause the sections of the algorithm using the
-        Henkelman bader code to fail. A new ELFCAR will be created using
-        pyRho and the provided ELFCAR will be renamed ELFCAR_original               
-                    """, 
-                    style = "rgb(255,255,153)"
-                    )
-                elfcar = Elfcar.from_file(directory / "ELFCAR")
-                elfcar.write_file(directory / "ELFCAR_original")
-                elfcar.regrid(new_grid_shape = chgcar_grid_axes)
-                elfcar.write_file(directory / "ELFCAR")
-        
-        #######################################################################
-        # This section of the workflow finds electride sites (if requested)   #
-        #######################################################################
-        if find_electrides:
-            # Run Henkelman Bader code on CHGCAR -ref ELFCAR to get initial list
-            # of ELF basins. This is run in a new directory, "files_w_dummies" because
-            # running workflows in the same directory will eventually be depracated
-            empties_directory = directory / "files_w_electrides"
-            
-            BadElfAnalysis__Warren__BadelfInit.run(
-                structure=structure,
-                directory=empties_directory,
-                previous_directory=directory,
-            ).result()
-            
-            # Get CHGCAR_empty, ELFCAR_empty, and POSCAR_empty files in the
-            # files_w_dummies directory. This function also returns a structure
-            # with empty 'dummy' atoms if electrides are found as well as the
-            # number of electride sites. Otherwise it returns None, None.
-            # We also suppress warnings from pymatgen that we know exist but may 
-            # confuse the user.
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                empty_structure, electride_num = get_density_file_empty(
-                    directory=empties_directory,
-                    structure=structure,
-                    analysis_type="badelf",
-                    min_charge=min_charge,
-                )
-            
-            if empty_structure is not None:
-                # get indices for electrides in new empty structure. These are stored
-                # as a string because we are going to use them to run a command
-                # in a specific format for the Henkelman group's code
-                electride_indices_str = ""
-                for index, element in enumerate(empty_structure.atomic_numbers):
-                        if element == 2:
-                            electride_indices_str = f"{electride_indices_str} {index+1}"
-        
-        # If finding electride sites wasn't requested, we set the number of electrides
-        # to zero.
-        else: electride_num = 0
-        
-        #######################################################################
-        # This section of the workflow creates a badelf folder and copies the #
-        # appropriate files into it.                                          #
-        #######################################################################
-        
-        # Create variable for if electrides are present and make lists of the
-        # required files.
-        if electride_num > 0:
-            electrides_present = True
-            required_files = ["CHGCAR","ELFCAR","POSCAR", "POTCAR","CHGCAR_empty", "ELFCAR_empty", "POSCAR_empty"]
-        else:
-            required_files = ["CHGCAR","ELFCAR","POSCAR", "POTCAR"]
-            empties_directory = directory
-            electrides_present = False
-        
-        # Create a directory to run our badelf calculation in. The try/except is
-        # in case the directory already exists from a previous run.
-        badelf_directory = directory / "badelf"
-        if not badelf_directory.exists():
-            Path(badelf_directory).mkdir()    
-        # Copy required files over to our badelf directory
-        for file in required_files:
-            shutil.copy(empties_directory/file, badelf_directory)
-        
-        
-        #######################################################################
-        # This section of the workflow checks which algorithm was selected and#
-        # runs the algorithm with the appropriate settings (depending on if   #
-        # there are any electride sites.)                                     #
-        #######################################################################
-        if algorithm == "badelf":
-            if electrides_present:
-                         
-                # Get electride basins in CHGCAR format. These will be stored in a
-                # new directory, "electride_basins". If there are no electride sites
-                # we don't run an s3workflow at all and instead just manually copy the
-                # necessary files
-                BadElfAnalysis__Warren__BadelfZeroFluxEmpty.run(
-                        directory=badelf_directory,
-                        command=f"bader CHGCAR_empty -ref ELFCAR_empty -p sel_atom {electride_indices_str} > bader.out"
-                    ).result()
-                
-                # Run Warren lab BadELF algorithm and get desired data to save
-                # to the dataframe
-                results = BadElfAnalysis__Warren__BadelfIonicRadii.run(
-                    directory=badelf_directory,
-                    print_atom_voxels=print_atom_voxels).result()
-            else:
-                results = BadElfAnalysis__Warren__BadelfIonicRadii.run(
-                    directory=badelf_directory,
-                    empty_structure_file="POSCAR",
-                    partition_file="ELFCAR",
-                    empty_partition_file="ELFCAR",
-                ).result()
-            
-            
-        elif algorithm == "voronelf":
-            if electrides_present:
-                # Run Warren lab BadELF algorithm and get desired data to save
-                # to the dataframe
-                results = BadElfAnalysis__Warren__BadelfIonicRadii.run(
-                    directory=badelf_directory,
-                    print_atom_voxels=print_atom_voxels,
-                    algorithm=algorithm,
-                    structure_file="POSCAR_empty",
-                    partition_file="ELFCAR_empty",
-                    charge_file="CHGCAR_empty"
-                    ).result()
-            else:
-                results = BadElfAnalysis__Warren__BadelfIonicRadii.run(
-                    directory=badelf_directory,
-                    print_atom_voxels=print_atom_voxels,
-                    algorithm=algorithm,
-                    empty_structure_file="POSCAR",
-                    empty_partition_file="ELFCAR",
-                    ).result()
-                
-        elif algorithm == "zero-flux":
-            # Run the appropriate zero-flux algorithm depending on if we need
-            # empty files or not
-            if electrides_present:
-                BadElfAnalysis__Warren__BadelfZeroFluxEmpty.run(
-                    directory=badelf_directory,
-                    command=f"bader CHGCAR_empty -ref ELFCAR_empty -p sum_atom {electride_indices_str} > bader.out",
-                )
-                # We need a file named ELFCAR_e for the topology function to run.
-                # We run a function here that converts from a BvAt_sum.dat chgcar
-                # type file to the required ELFCAR type file
-                convert_atom_chgcar_to_elfcar(badelf_directory)
-            
-            else:
-                BadElfAnalysis__Warren__BadelfZeroFlux.run(
-                    directory=badelf_directory,
-                )
-            
-            # get the desired data that will be saved to the dataframe
-            dataframe, extra_data = ACF(badelf_directory)
-            results = {
-                "oxidation_states": list(dataframe.oxidation_state.values),
-                "charges": list(dataframe.charge.values),
-                "min_dists": list(dataframe.min_dist.values),
-                "atomic_volumes": list(dataframe.atomic_vol.values),
-                "element_list": list(dataframe.element.values),
-                "nelectrides": electride_num,
-                "algorithm": algorithm,
-                **extra_data,
-            }
-           
-        else:
-            raise Exception(
-                """The algorithm setting you chose does not exist. Please select
-                  either 'badelf', 'voronelf', or 'zero-flux'.
-                  """
+        # make a new directory to run badelf algorithm in
+        badelf_directory = directory/"badelf"
+        try:
+            os.mkdir(badelf_directory)
+        except:
+            pass
+        files_to_copy = ["CHGCAR", "ELFCAR", "POTCAR"]
+        for file in files_to_copy:
+            shutil.copy(directory/file, badelf_directory)
+
+        badelf_tools = BadElfToolkit.from_files(
+            directory=badelf_directory,
+            find_electrides=find_electrides,
+            algorithm=algorithm,
             )
-            
-        #######################################################################
-        # This section of the workflow determines the dimensionality of the   #
-        # electride network (if it exists) and adds it to the workflow results#
-        #######################################################################
-        if electrides_present:
-            dimensionality = get_electride_dimensionality(
-                directory = badelf_directory,
-                empty_structure = empty_structure,
-                elf_connection_cutoff=elf_connection_cutoff,
-                )
-            results["electride_dim"] = dimensionality
-            results["elf_connect_cutoff"] = elf_connection_cutoff
-        
-        return results
+        if not check_for_covalency:
+            badelf_tools._check_for_covalency = False
+        badelf_tools._elf_cutoff = min_elf
+        badelf_tools._elf_connection_cutoff = elf_connection_cutoff
+        return badelf_tools.results
 
 
 class VaspBadElfBase(Workflow):
