@@ -22,8 +22,35 @@ from pymatgen.io.vasp import Potcar
 from pymatgen.analysis.graphs import StructureGraph
 from pymatgen.analysis.dimensionality import get_dimensionality_larsen
 
+import warnings
+warnings.filterwarnings("ignore")
 
 class BadElfToolkit:
+    """
+    A set of tools for performing BadELF, VoronELF, or Zero-Flux analysis on
+    outputs from a VASP calculation.
+    
+    Args:
+        partitioning_grid (Grid):
+            A badelf app Grid like object used for partitioning the unit cell
+            volume. Usually contains ELF.
+        charge_grid (Grid):
+            A badelf app Grid like object used for summing charge. Usually
+            contains charge density.
+        directory (Path):
+            The Path to perform the analysis in.
+        cores (int):
+            The number of cores (NOT threads) to use for voxel assignment.
+            Defaults to 0.9*the total number of cores available.
+        algorithm (str):
+            The algorithm to use for partitioning. Options are "badelf", "voronelf",
+            or "zero-flux".
+        find_electrides (bool):
+            Whether or not to search for electride sites. Usually set to true.
+    """
+    check_for_covalency = True
+    electride_finder_cutoff = 0.5
+    electride_connection_cutoff = 0
     
     def __init__(
             self,
@@ -33,7 +60,6 @@ class BadElfToolkit:
             cores: int = None,
             algorithm: str = "badelf",
             find_electrides: bool = True,
-            electride_dim_elf_cutoff: float = 0,
                         ):
         if partitioning_grid.structure != charge_grid.structure:
             raise ValueError(
@@ -64,7 +90,6 @@ class BadElfToolkit:
         self.algorithm = algorithm
         self.find_electrides = find_electrides
         self.structure = partitioning_grid.structure
-        self.electride_dim_elf_cutoff = electride_dim_elf_cutoff
         
         self._electride_structure = None
         self._coord_envs = None
@@ -73,10 +98,7 @@ class BadElfToolkit:
         self._voxel_assignments_array = None
         self._results = None
         self._voxel_errors = None
-        self._check_for_covalency = True
-        self._elf_cutoff = 0.5
-        self._elf_connection_cutoff = 0
-        
+      
 
     
     @property
@@ -91,7 +113,7 @@ class BadElfToolkit:
         if self._electride_structure is None:
             if self.find_electrides:
                 self._electride_structure = ElectrideFinder(self.partitioning_grid).get_electride_structure(
-                    elf_cutoff=self._elf_cutoff)
+                    electride_finder_cutoff=self.electride_finder_cutoff)
             else:
                 self._electride_structure = self.structure
         
@@ -158,7 +180,7 @@ class BadElfToolkit:
             # remove electrides from grid structure and get 
             partitioning_grid.structure.remove_species("He")
             partitioning = PartitioningToolkit(partitioning_grid).get_partitioning(
-                check_for_covalency=self._check_for_covalency
+                check_for_covalency=self.check_for_covalency
                 )
             return partitioning
         elif self.algorithm == "voronelf":
@@ -167,7 +189,7 @@ class BadElfToolkit:
             # are no electride sites.
             partitioning_grid.structure = self.electride_structure.copy()
             partitioning = PartitioningToolkit(partitioning_grid).get_partitioning(
-                check_for_covalency=self._check_for_covalency
+                check_for_covalency=self.check_for_covalency
                 )
             return partitioning
         elif self.algorithm == "zero-flux":
@@ -258,6 +280,7 @@ class BadElfToolkit:
             self._voxel_errors = {"vert_multi_site_same_trans":vert_multi_site_same_trans,
                                   "vert_multi_site":vert_multi_site,
                                   "multi_site_no_plane":multi_site_no_plane,}
+            self._write_voxel_errors()
 
             # Remove the site errors
             voxel_assignments['site'] = np.where( #assigns values based on boolean value. returns array
@@ -462,7 +485,7 @@ class BadElfToolkit:
     
     def get_electride_dimensionality(
             self,
-            elf_connection_cutoff:float = 0
+            electride_connection_cutoff:float = 0
             ):
         electride_indices = self.electride_indices
         
@@ -477,13 +500,14 @@ class BadElfToolkit:
                 self.write_electride_structure_files(directory / "CHGCAR_electride", partitioning_file)
             zero_flux_executor = ZeroFluxToolkit(directory=directory)
             zero_flux_executor.execute_henkelman_code_sum_atom(
-                charge_file=partitioning_file, 
-                partitioning_file=partitioning_file,
+                charge_file="ELFCAR_electride", 
+                partitioning_file="ELFCAR_electride",
                 species_to_print="He",
                 structure=self.electride_structure,
                 )
+            self._fix_BvAt_summed()
             elf_grid = Grid.from_file(directory / "BvAt_summed.dat")
-            elf_grid.reshape(desired_resolution=self.charge_grid.voxel_resolution)
+            elf_grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
             pass
         elif self.algorithm in ["badelf", "voronelf"]:
             # read in ELF data and regridso that it is the same size as the 
@@ -549,7 +573,7 @@ class BadElfToolkit:
                 # want to add an edge to our graph.
                 #!!! create cutoff for how much space is allowed between sites
                 # for when vorelf cuts it off by a voxel or so?
-                if all(value > elf_connection_cutoff for value in values):
+                if all(value > electride_connection_cutoff for value in values):
                     graph.add_edge(
                         from_index=index, # The site index of the electride site of interest
                         from_jimage=(0, 0, 0), # The image the electride site is in. Always (0,0,0)
@@ -564,10 +588,26 @@ class BadElfToolkit:
         # is found, it will default to the highest dimensionality.
         return get_dimensionality_larsen(graph)#, partitioning_lines
     
+    def _fix_BvAt_summed(self):
+        electride_structure = self.electride_structure
+        symbols = electride_structure.types_of_species
+        new_symbol_line = ""
+        for symbol in symbols:
+            new_symbol_line += f"{symbol.name}   "
+        directory = self.directory
+        with open(directory/"BvAt_summed.dat", 'r') as file:
+            content = file.readlines()
+        symbol_line = content[5]
+        if not all(symbol.name in symbol_line for symbol in symbols):
+            content[5] = new_symbol_line + "\n"
+            with open(directory/"BvAt_summed.dat", 'w') as file:
+                file.writelines(content)
+        
+    
     @property
     def results(self):
         if self._results is None:
-            self._results = self._get_results
+            self._results = self._get_results()
         return self._results
     
     def _get_results(self):
@@ -594,8 +634,8 @@ class BadElfToolkit:
             self.write_electride_structure_files(charge_file, partitioning_file)
             zero_flux_executor = ZeroFluxToolkit(directory=directory)
             zero_flux_executor.execute_henkelman_code(
-                charge_file=charge_file, 
-                partitioning_file=partitioning_file,
+                charge_file="CHGCAR_electride", 
+                partitioning_file="ELFCAR_electride",
                 )
             # get the desired data that will be saved to the dataframe
             #!!! I should rework the ACF.dat reader now that I have better
@@ -717,11 +757,16 @@ class BadElfToolkit:
         results["algorithm"] = algorithm
         results["element_list"] = elements
         results["coord_envs"] = self.coord_envs
-        results["electride_dim"] = self.get_electride_dimensionality(elf_connection_cutoff=self.electride_dim_elf_cutoff)
-        results["elf_connect_cutoff"] = self.electride_dim_elf_cutoff
+        results["electride_dim"] = self.get_electride_dimensionality(electride_connection_cutoff=self.electride_connection_cutoff)
+        results["elf_connect_cutoff"] = self.electride_connection_cutoff
         
         return results
-
+    
+    def write_results_csv(self):
+        directory = self.directory
+        results_dataframe = pd.DataFrame.from_dict(self.results)
+        results_dataframe.to_csv(directory / "badelf_summary.csv")
+        
     
     @classmethod
     def from_files(
@@ -798,5 +843,36 @@ class BadElfToolkit:
             grid.write_file(f"ELFCAR_{species}")
         elif file_type == "charge":
             grid.write_file(f"CHGCAR_{species}")
+    
+    def write_atom_file(
+            self,
+            atom_index: int,
+            file_type: str = "elf",
+            ):
+        voxel_assignment_array = self.voxel_assignments_array
+        if file_type == "elf":
+            grid = self.partitioning_grid.copy()
+            grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
+        elif file_type == "charge":
+            grid = self.charge_grid.copy()
+        else:
+            raise ValueError(
+                """
+                Invalid file_type. Options are "elf" or "charge".
+                """
+                )
+        grid.structure = self.electride_structure
+        # Get array where values are ELF values when voxels belong to electrides
+        # and are 0 otherwise
+        array = np.where(np.isin(voxel_assignment_array, atom_index), grid.total, 0)
+        grid.total = array
+        if grid.diff is not None:
+            diff_array = np.where(np.isin(voxel_assignment_array, atom_index), grid.diff, 0)
+            grid.diff = diff_array
+
+        if file_type == "elf":
+            grid.write_file(f"ELFCAR_{atom_index}")
+        elif file_type == "charge":
+            grid.write_file(f"CHGCAR_{atom_index}")
     
 

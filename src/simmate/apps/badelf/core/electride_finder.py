@@ -84,8 +84,8 @@ class ElectrideFinder:
             local_maxima_values: list = None,
             remove_old_electrides: bool = False,
             distance_cutoff: float = 1.6,
-            elf_cutoff: float = 0.5,
-            min_electride_radius: float = 0.8 
+            electride_finder_cutoff: float = 0.5,
+            min_electride_radius: float = 0.7
             ):
         #!!! The distance cutoff and min_electride_radius are fairly arbitrary
         # How should I find them instead?
@@ -133,7 +133,7 @@ class ElectrideFinder:
         electride_coords = []
         for i, maximum_coords in enumerate(local_maxima_coords):
             # Check if the elf value is below the cutoff
-            if local_maxima_values[i] < elf_cutoff:
+            if local_maxima_values[i] < electride_finder_cutoff:
                 continue
             
             electride_structure = structure.copy()

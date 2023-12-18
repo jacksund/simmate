@@ -8,14 +8,12 @@ from simmate.engine import Workflow
 from simmate.toolkit import Structure
 
 from simmate.apps.badelf.core.badelf import BadElfToolkit
-# from simmate.apps.badelf.core import Grid
-
-from rich.console import Console
-console = Console()
 
 # This file contains workflows for performing Bader and BadELF. Parts of the code
 # use the Henkelman groups algorithm for Bader analysis:
 # (http://theory.cm.utexas.edu/henkelman/code/bader/).
+import warnings
+warnings.filterwarnings("ignore")
 
 
 class BadElfBase(Workflow):
@@ -31,18 +29,17 @@ class BadElfBase(Workflow):
     @classmethod
     def run_config(
         cls,
-        # structure: Structure,
         source: dict = None,
         directory: Path = None,
+        cores: int = None,
         find_electrides: bool = True,
-        min_elf: float = 0.5, # This is somewhat arbitrarily set
+        electride_finder_cutoff: float = 0.5, # This is somewhat arbitrarily set
         algorithm: str = "badelf",
-        # print_atom_voxels: bool = False,
-        elf_connection_cutoff: float = 0,
+        electride_connection_cutoff: float = 0,
         check_for_covalency: bool = True,
         **kwargs,
     ):
-        # make a new directory to run badelf algorithm in
+        # make a new directory to run badelf algorithm in and copy necessary files.
         badelf_directory = directory/"badelf"
         try:
             os.mkdir(badelf_directory)
@@ -51,18 +48,21 @@ class BadElfBase(Workflow):
         files_to_copy = ["CHGCAR", "ELFCAR", "POTCAR"]
         for file in files_to_copy:
             shutil.copy(directory/file, badelf_directory)
-
+        
+        # Get the badelf toolkit object for running badelf.
         badelf_tools = BadElfToolkit.from_files(
             directory=badelf_directory,
             find_electrides=find_electrides,
             algorithm=algorithm,
             )
-        print("Yay")
+        # Set options and run badelf.
         if not check_for_covalency:
-            badelf_tools._check_for_covalency = False
-        badelf_tools._elf_cutoff = min_elf
-        badelf_tools._elf_connection_cutoff = elf_connection_cutoff
-        return badelf_tools.results()
+            badelf_tools.check_for_covalency = False
+        badelf_tools.electride_finder_cutoff = electride_finder_cutoff
+        badelf_tools.electride_connection_cutoff = electride_connection_cutoff
+        results = badelf_tools.results
+        badelf_tools.write_results_csv()
+        return results
 
 
 class VaspBadElfBase(Workflow):

@@ -31,8 +31,10 @@ class ZeroFluxToolkit:
         """
         # We add the following line to all of our commands so that the output
         # is printed and we use the weighted method.
-        if "-b weight > bader.out" not in command:
-            command += " -b weight > bader.out"
+        # if "-b weight > bader.out" not in command:
+        #     command += " -b weight > bader.out"
+        if "> bader.out" not in command:
+            command += " > bader.out"
             
         # Begin the process
         process = subprocess.Popen(
