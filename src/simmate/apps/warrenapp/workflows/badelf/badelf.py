@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-
 from simmate.apps.warrenapp.models import BadElfAnalysis
 from simmate.apps.warrenapp.workflows.badelf.base import BadElfBase
+from simmate.database import connect
 
 
 class BadElfAnalysis__Warren__Badelf(BadElfBase):
