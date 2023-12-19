@@ -18,10 +18,12 @@ from simmate.workflows.utilities import (
 def test_get_workflow_types():
     assert get_all_workflow_types() == [
         # "cluster-expansion",
+        "bad-elf-analysis",
         "customized",
         "diffusion",
         "dynamics",
         "electronic-structure",
+        "nested",
         "population-analysis",
         "relaxation",
         "restart",
@@ -33,6 +35,9 @@ def test_get_workflow_types():
 def test_list_of_all_workflows():
     assert get_all_workflow_names() == [
         # "cluster-expansion.clease.bulk-structure",
+        "bad-elf-analysis.warren.badelf",
+        "bad-elf-analysis.warren.badelf-hse",
+        "bad-elf-analysis.warren.badelf-pbesol",
         "customized.toolkit.user-config",
         "diffusion.vasp.neb-all-paths-mit",
         "diffusion.vasp.neb-all-paths-warren-lab",
@@ -50,6 +55,9 @@ def test_list_of_all_workflows():
         "electronic-structure.vasp.matproj-density-of-states-hse",
         "electronic-structure.vasp.matproj-full",
         "electronic-structure.vasp.matproj-hse-full",
+        "nested.warren.relaxation-static-hse-hse",
+        "nested.warren.relaxation-static-pbe-hse",
+        "nested.warren.relaxation-static-pbe-pbe",
         "population-analysis.bader.badelf",
         "population-analysis.bader.bader",
         "population-analysis.bader.combine-chgcars",
@@ -74,6 +82,14 @@ def test_list_of_all_workflows():
         "relaxation.vasp.quality03",
         "relaxation.vasp.quality04",
         "relaxation.vasp.staged",
+        "relaxation.warren.hse",
+        "relaxation.warren.hse-with-wavecar",
+        "relaxation.warren.hsesol",
+        "relaxation.warren.pbe",
+        "relaxation.warren.pbe-metal",
+        "relaxation.warren.pbe-with-wavecar",
+        "relaxation.warren.pbesol",
+        "relaxation.warren.scan",
         # "relaxation.vasp.staged-cluster",
         "restart.toolkit.automatic",
         # "static-energy.vasp.cluster-high-qe",
@@ -87,6 +103,14 @@ def test_list_of_all_workflows():
         "static-energy.vasp.prebadelf-matproj",
         "static-energy.vasp.prebader-matproj",
         "static-energy.vasp.quality04",
+        "static-energy.warren.hse",
+        "static-energy.warren.hsesol",
+        "static-energy.warren.pbe",
+        "static-energy.warren.pbe-metal",
+        "static-energy.warren.pbesol",
+        "static-energy.warren.prebadelf-hse",
+        "static-energy.warren.prebadelf-pbesol",
+        "static-energy.warren.scan",
         "structure-prediction.toolkit.chemical-system",
         "structure-prediction.toolkit.fixed-composition",
         "structure-prediction.toolkit.new-individual",
@@ -95,7 +119,7 @@ def test_list_of_all_workflows():
 
 
 def test_list_of_apps_by_type():
-    assert get_apps_by_type("static-energy") == ["vasp"]
+    assert get_apps_by_type("static-energy") == ["vasp", "warren"]
 
     with pytest.raises(TypeError):
         get_apps_by_type("non-existant-type")
@@ -114,6 +138,14 @@ def test_list_of_workflows_by_type():
         "static-energy.vasp.prebadelf-matproj",
         "static-energy.vasp.prebader-matproj",
         "static-energy.vasp.quality04",
+        "static-energy.warren.hse",
+        "static-energy.warren.hsesol",
+        "static-energy.warren.pbe",
+        "static-energy.warren.pbe-metal",
+        "static-energy.warren.pbesol",
+        "static-energy.warren.prebadelf-hse",
+        "static-energy.warren.prebadelf-pbesol",
+        "static-energy.warren.scan",
     ]
 
     assert (
@@ -164,22 +196,28 @@ def test_get_custom_workflow(tmp_path):
 
 def test_get_unique_paramters():
     assert get_unique_parameters() == [
+        "algorithm",
         "angle_tolerance",
         "best_survival_cutoff",
+        "check_for_covalency",
         "chemical_system",
         # "cluster_diameter",
         "command",
         "composition",
         "compress_output",
         "convergence_cutoff",
+        "cores",
         # "convergence_limit",
         # "current_generation",
         "diffusion_analysis_id",
         "directory",
         "directory_new",
         "directory_old",
+        "electride_connection_cutoff",
+        "electride_finder_cutoff",
         "empty_ion",
         "empty_sites",
+        "find_electrides",
         "fitness_field",
         # "formula_unit",
         "input_parameters",

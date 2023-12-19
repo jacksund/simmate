@@ -65,12 +65,28 @@ def test_all_workflow_runs(tmp_path, sample_structures):
             "relaxation.vasp.matproj-hse",  # slow
             "relaxation.vasp.mvl-grainboundary",
             "relaxation.vasp.mvl-slab",
+            "relaxation.warren.hse",
+            "relaxation.warren.hse-with-wavecar",
+            "relaxation.warren.hsesol",
+            "relaxation.warren.pbe",
+            "relaxation.warren.pbe-metal",
+            "relaxation.warren.pbe-with-wavecar",
+            "relaxation.warren.pbesol",
+            "relaxation.warren.scan",
             "static-energy.vasp.matproj",
             "static-energy.vasp.mit",
             "static-energy.vasp.mvl-neb-endpoint",
             "static-energy.vasp.quality04",
             "static-energy.vasp.matproj-hse",  # slow
             "static-energy.vasp.matproj-scan",  # slow
+            "static-energy.warren.hse",
+            "static-energy.warren.hsesol",
+            "static-energy.warren.pbe",
+            "static-energy.warren.pbe-metal",
+            "static-energy.warren.pbesol",
+            "static-energy.warren.prebadelf-hse",
+            "static-energy.warren.prebadelf-pbesol",
+            "static-energy.warren.scan",
             "population-analysis.vasp-bader.bader-matproj",
             "population-analysis.vasp.elf-matproj",
             "electronic-structure.vasp.matproj-full",
@@ -120,6 +136,25 @@ def test_all_workflow_runs(tmp_path, sample_structures):
         state.result()
         if state.is_completed():
             successful_flows.append(workflow_name)
+
+        # TEST BadELF FLOWS
+        structure = sample_structures["Ca2N_mp-2686_primitive.csv"]
+        workflow_name = "bad-elf-analysis.warren.badelf-pbesol"
+        workflow = get_workflow(workflow_name)
+        # This workflow runs a static energy and then badelf calculation. The
+        # hse version is identical, but uses a different static energy step
+        # which is tested above. However, there are 3 different algorithms
+        # which can be used for partitioning, each of which needs to be tested
+        algorithms = ["badelf", "voronelf", "zero-flux"]
+        for algorithm in algorithms:
+            state = workflow.run(
+                structure=structure,
+                command="mpirun -n 12 vasp_std > vasp.out",
+                algorithm=algorithm,
+            )
+            state.result()
+            if state.is_completed():
+                successful_flows.append(workflow_name)
 
     # check which flows either (1) failed or (2) weren't tested
     all_flows = get_all_workflow_names()

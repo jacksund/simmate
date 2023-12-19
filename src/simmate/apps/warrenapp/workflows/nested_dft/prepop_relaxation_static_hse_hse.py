@@ -25,6 +25,7 @@ class Relaxation__Warren__HseWithWavecar(Relaxation__Warren__Hse):
     incar = Relaxation__Warren__Hse().incar.copy()
     incar.update(dict(LWAVE=True))
 
+
 class Nested__Warren__RelaxationStaticHseHse(RelaxationRelaxationStaticBase):
     """
     Runs a PBEsol quality structure relaxation, an HSE quality relaxation, and
