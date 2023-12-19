@@ -58,7 +58,8 @@ class RelaxationStaticBase(Workflow):
             directory=static_energy_directory,
             # copy_previous_directory=True,
         )
-        
+
+
 class RelaxationRelaxationStaticBase(Workflow):
     """
     Base class for running a PBE relaxation followed by an HSE relaxation

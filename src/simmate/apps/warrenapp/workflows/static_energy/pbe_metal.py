@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warrenapp.workflows.relaxation.pbe_metal import Relaxation__Warren__PbeMetal
+from simmate.apps.warrenapp.workflows.relaxation.pbe_metal import (
+    Relaxation__Warren__PbeMetal,
+)
 from simmate.apps.warrenapp.workflows.static_energy.pbe import pbe_static_settings
 
 
