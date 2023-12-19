@@ -12,19 +12,9 @@ This extension is built off of [Simmate](https://github.com/jacksund/simmate). I
 
 Tutorials are at: https://jacksund.github.io/simmate/getting_started/overview/
 
-### How to Install
-1. If you don't already have Simmate installed, follow the instructions to [install Simmate](https://jacksund.github.io/simmate/getting_started/installation/quick_start/)
-``` shell
-conda create -n my_env -c conda-forge python=3.11 simmate=0.13.2
-conda activate my_env
-simmate database reset
-```
-2. Install the warrenapp using pip
-``` shell
-pip install warrenapp
-```
-3. Register the warrenapp with simmate by adding `- warrenapp.apps.SimmateWarrenConfig` to ~/Home/simmate/my_env-apps.yaml
-4. Update your database to include custom tables from the warrenapp
+### How to Use
+1. If you haven't already, you may need to register the warrenapp with simmate. Register the warrenapp with simmate by adding `- warrenapp.apps.SimmateWarrenConfig` to ~/Home/simmate/my_env-apps.yaml
+2. Update your database to include custom tables from the warrenapp
 ``` shell
 simmate database update
 ```

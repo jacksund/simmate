@@ -26,6 +26,26 @@ You can then search for these parameters below to learn more about them.
 --------------------------
 
 
+## alogirthm
+Unique to the BadELf workflows in the warrenapp. Options are `badelf`, `voronelf`,
+or `zero-flux`.
+
+=== "yaml"
+    ``` yaml
+    algorithm: badelf
+    ```
+=== "toml"
+    ``` toml
+    algorithm = "badelf"
+    ```
+=== "python"
+    ``` python
+    algorithm = "badelf"
+    ```
+
+--------------------------
+
+
 ## angle_tolerance
 If standardize_structure=True, then this is the cutoff value used to determine
 if the angles between sites are symmetrically equivalent. (in Degrees)
@@ -59,6 +79,24 @@ For evolutionary searches, fixed compositions will be stopped when the best indi
 === "python"
     ``` python
     best_survival_cutoff = 100
+    ```
+
+--------------------------
+
+## check_for_covalency
+Unique to the badelf workflows of the warrenapp. Indicates whether the algorithm should search the structure for covalency features. It is generally recommended to leave this as True. Covalency is not currently handled by the BadELF algorithm and covalency features in the ELF can heavily throw off the partitioning scheme, causing nonsense results.
+
+=== "yaml"
+    ``` yaml
+    check_for_covalence: true
+    ```
+=== "toml"
+    ``` yaml
+    check_for_covalence = true
+    ```
+=== "python"
+    ``` python
+    check_for_covalence = True
     ```
 
 --------------------------
@@ -226,6 +264,25 @@ For evolutionary searches, the search will be considered converged when the best
 
 --------------------------
 
+## cores
+Unique to the BadELF workflows in the warrenapp. The number of computer cores to allow the BadELF algorithm to use. Note that this is distinctly cores and not threads.
+
+=== "yaml"
+    ``` yaml
+    cores: 10
+    ```
+=== "toml"
+    ``` toml
+    cores = 10
+    ```
+=== "python"
+    ``` python
+    cores = 10
+    ```
+
+--------------------------
+
+
 ## copy_previous_directory
 Whether to copy the directory from the previous calculation (if there is one) and then use it as a starting point for this new calculation. This is only possible if you provided an input that points to a previous calculation. For example, `structure` would need to use a database-like input:
 
@@ -299,6 +356,60 @@ Unique to the `restart.simmate.automatic` workflow, this is the folder that the 
 
 ## directory_old
 Unique to the `restart.simmate.automatic` workflow, this is the original folder that should be used at the starting point. Follows the same rules/inputs as the `directory` parameter.
+
+--------------------------
+
+## electride_connection_cutoff
+Unique to the badelf workflows in the simmate app. This is the ELF value cutoff to be allowed when determining the dimensionality of an electride. The default is 0, but a good option might be 0.5 which is the normal cutoff for what is considered an electride.
+
+=== "yaml"
+    ``` yaml
+    electride_connection_cutoff: 0.5
+    ```
+=== "toml"
+    ``` toml
+    electride_connection_cutoff = 0.5
+    ```
+=== "python"
+    ``` python
+    electride_connection_cutoff = 0.5
+    ```
+
+--------------------------
+
+## electride_finder_cutoff
+Unique to the badelf workflows in the simmate app. This is the minimum ELF value that the algorithm will consider an electride. Any maxima in the ELF below this will not be considered an electride site during the algorithm.
+
+=== "yaml"
+    ``` yaml
+    electride_finder_cutoff: 0.5
+    ```
+=== "toml"
+    ``` toml
+    electride_finder_cutoff = 0.5
+    ```
+=== "python"
+    ``` python
+    electride_finder_cutoff = 0.5
+    ```
+
+--------------------------
+
+## find_electrides
+Unique to the badelf workflows in the simmate app. Indicates whether the algorithm should search for electrides. Reasons to have this as false may be that the user knows there is no electride character in the structure of interest or if the user has manually placed electride sites.
+
+=== "yaml"
+    ``` yaml
+    find_electrides: true
+    ```
+=== "toml"
+    ``` toml
+    find_electrides = true
+    ```
+=== "python"
+    ``` python
+    find_electrides = True
+    ```
 
 --------------------------
 
