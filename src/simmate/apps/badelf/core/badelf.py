@@ -497,7 +497,7 @@ class BadElfToolkit:
         # dataframe["vert_multi_site_same_trans"] = voxel_errors["vert_multi_site_same_trans"]
         # dataframe["vert_multi_site"] = voxel_errors["vert_multi_site"]
         # dataframe["multi_site_no_plane"] = voxel_errors["multi_site_no_plane"]
-        dataframe = pd.DataFrame.from_dict(self.voxel_errors)
+        dataframe = pd.DataFrame.from_dict(self._voxel_errors)
         dataframe.to_csv(self.directory / "same_site_voxels.csv")
 
     @property
