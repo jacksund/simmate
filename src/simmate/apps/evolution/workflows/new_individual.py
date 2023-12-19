@@ -105,7 +105,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
             state = search_db.subworkflow.run(
                 structure=new_structure,
                 source=source,
-                directory=directory,
+                directory=directory,  # BUG: consider making subfolder
                 **search_db.subworkflow_kwargs,
             )
             result = state.result()
