@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from simmate.apps.warrenapp.workflows.badelf.badelf import (
+    BadElfAnalysis__Warren__Badelf,
+)
 from simmate.apps.warrenapp.workflows.badelf.base import VaspBadElfBase
 from simmate.apps.warrenapp.workflows.badelf.prebadelf_dft import (
     StaticEnergy__Warren__PrebadelfPbesol,
 )
-from simmate.apps.warrenapp.workflows.badelf.badelf import BadElfAnalysis__Warren__Badelf
 
 
 class BadElfAnalysis__Warren__BadelfPbesol(VaspBadElfBase):
@@ -16,4 +18,3 @@ class BadElfAnalysis__Warren__BadelfPbesol(VaspBadElfBase):
 
     static_energy_workflow = StaticEnergy__Warren__PrebadelfPbesol
     badelf_workflow = BadElfAnalysis__Warren__Badelf
-    

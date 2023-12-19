@@ -6,27 +6,31 @@ Created on Tue Nov 21 15:18:45 2023
 @author: sweav
 """
 
-from pandas import DataFrame
 from pathlib import Path
-from simmate.database.base_data_types import Structure, Calculation, table_column
+
+from pandas import DataFrame
+
+from simmate.database.base_data_types import Calculation, Structure, table_column
+
 
 class BadElfAnalysis(Structure, Calculation):
     """
     This table contains results from a BadELF analysis.
     """
+
     class Meta:
-        app_label = "workflows"    
-    
+        app_label = "workflows"
+
     oxidation_states = table_column.JSONField(blank=True, null=True)
     """
     A list of calculated oxidation states for each site.
     """
-    
+
     algorithm = table_column.CharField(
-        blank=True, 
+        blank=True,
         null=True,
         max_length=75,
-        )
+    )
     """
     The selected algorithm. The default is BadELF as defined by the warren lab:
     https://pubs.acs.org/doi/10.1021/jacs.3c10876
@@ -62,7 +66,7 @@ class BadElfAnalysis(Structure, Calculation):
     This information is stored in the 'structure' column as well, but it is 
     stored here as an extra for convenience.
     """
-    
+
     vacuum_charge = table_column.FloatField(blank=True, null=True)
     """
     Total electron count that was NOT assigned to ANY site -- and therefore
@@ -78,7 +82,7 @@ class BadElfAnalysis(Structure, Calculation):
     
     In most cases, this value should be zero.
     """
-    
+
     nelectrons = table_column.FloatField(blank=True, null=True)
     """
     The total number of electrons involved in the charge density partitioning.
@@ -94,29 +98,29 @@ class BadElfAnalysis(Structure, Calculation):
     The total number of electrides that were found when searching the BCF.dat
     file in some BadELF or Bader workflows.
     """
-    
+
     electride_dim = table_column.IntegerField(blank=True, null=True)
     """
     The dimensionality of the electride network in the structure. Defaults to
     the highest dimension network.
     """
-    
+
     elf_connect_cutoff = table_column.FloatField(blank=True, null=True)
     """
     The ELF value cutoff used to determine if two electride sites are connected.
     Used to determine the dimensionality of the electride electron network.
     """
-    
+
     coord_envs = table_column.JSONField(blank=True, null=True)
     """
     A list of coordination environments for the atoms and electrides in the
     structure
     """
-    
+
     def write_output_summary(self, directory: Path):
         super().write_output_summary(directory)
         self.write_summary_dataframe(directory)
-    
+
     # def from_vasp_run(vasprun, as_dict):
     #     """
     #     The base workflow class will register the vasprun.xml and try and load
@@ -127,13 +131,13 @@ class BadElfAnalysis(Structure, Calculation):
     def update_from_directory(self, directory):
         """
         The base database workflow will try and register data from the local
-        directory. As part of this it checks for a vasprun.xml file and 
+        directory. As part of this it checks for a vasprun.xml file and
         attempts to run a from_vasp_run method. Since this is not defined for
         this model, an error is thrown. To account for this, I just create an empty
         update_from_directory method here.
-        """        
+        """
         pass
-    
+
     def get_summary_dataframe(self):
         """
         Creates a dataframe containing the information that is most likely to

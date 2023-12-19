@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from simmate.apps.warrenapp.workflows.static_energy.hse import StaticEnergy__Warren__Hse
-from simmate.apps.warrenapp.workflows.static_energy.pbesol import StaticEnergy__Warren__Pbesol
+from simmate.apps.warrenapp.workflows.static_energy.pbesol import (
+    StaticEnergy__Warren__Pbesol,
+)
 
 # We want to define the settings that will be used when updating static energy
 # workflows for prebadelf DFT calculations. We do that here so that we don't
@@ -15,6 +17,7 @@ prebadelf_incar_settings = dict(
     PREC="Single",  # ensures CHGCAR grid matches ELFCAR grid
     LAECHG=True,  # write core charge density to AECCAR0 and valence to AECCAR2
 )
+
 
 class StaticEnergy__Warren__PrebadelfPbesol(StaticEnergy__Warren__Pbesol):
     """
