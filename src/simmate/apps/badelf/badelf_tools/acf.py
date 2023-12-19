@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import warnings
 from pathlib import Path
 
 import pandas
 from pymatgen.io.vasp import Potcar
 from pymatgen.io.vasp.outputs import Chgcar
 
-import warnings
 
 def ACF(directory: Path = None, filename="ACF.dat"):
     # grab working directory if one wasn't provided

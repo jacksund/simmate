@@ -1,63 +1,63 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.badelf.core.grid import Grid
-from simmate.apps.badelf.core import PartitioningToolkit
-from numpy.typing import ArrayLike
-from scipy.spatial import ConvexHull
-import pandas as pd
-import numpy  as np
 import itertools
 
+import numpy as np
+import pandas as pd
+from numpy.typing import ArrayLike
+from scipy.spatial import ConvexHull
+
+from simmate.apps.badelf.core.grid import Grid
+from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.toolkit import Structure
+
 
 class VoxelAssignmentToolkit:
     """
     A set of tools for assigning charge to atoms in a unit cell.
-    
+
     Args:
-        charge_grid (Grid): 
+        charge_grid (Grid):
             A BadELF app Grid type object usually with CHGCAR type data.
         partitioning_grid (Grid):
             A BadELF app Grid type object usually with ELFCAR type data.
         algorithm (str):
             The algorithm to use for partitioning. Defaults to BadELF
-        partitioning (dict): 
-            A partitioning dictionary generated from the BadELF app 
+        partitioning (dict):
+            A partitioning dictionary generated from the BadELF app
             PartitioningToolkit. Will be generated from the grid if None.
-        electride_structure (Structure): 
+        electride_structure (Structure):
             The structure with electride sites. Will be generated if not given.
-            
-    """
-    
-    def __init__(
-            self,
-            charge_grid: Grid,
-            partitioning_grid: Grid,
-            algorithm: str,
-            electride_structure: Structure,
-            partitioning: dict,
 
-            ):
+    """
+
+    def __init__(
+        self,
+        charge_grid: Grid,
+        partitioning_grid: Grid,
+        algorithm: str,
+        electride_structure: Structure,
+        partitioning: dict,
+    ):
         self.partitioning_grid = partitioning_grid.copy()
         self.charge_grid = charge_grid.copy()
         self.algorithm = algorithm
         # partitioning will contain electride sites for voronelf
-        self.partitioning = partitioning       
+        self.partitioning = partitioning
         self.electride_structure = electride_structure
-            
+
     @property
     def permutations(self):
         return self.charge_grid.permutations
-    
-   
+
     def get_matching_site(
-            self,
-            point_voxel_coord: ArrayLike | list,
-            check_near_plane: bool = True,
-            ):
+        self,
+        point_voxel_coord: ArrayLike | list,
+        check_near_plane: bool = True,
+    ):
         """
         Determines which atomic site a point belongs to.
-        
+
         Args:
             point_voxel_coord (ArrayLike): The voxel coordinate of the point of
                 interest.
@@ -98,10 +98,14 @@ class VoxelAssignmentToolkit:
                 # should have the same sign when their coordinates are plugged into
                 # the plane equation (negative).
                 # expected_sign = values["sign"]
-                
+
                 # use plane equation to find sign
-                site_real_coord = self.charge_grid.get_cart_coords_from_vox(point_voxel_coord)
-                sign, distance = PartitioningToolkit.get_plane_sign(point, normal_vector, site_real_coord)
+                site_real_coord = self.charge_grid.get_cart_coords_from_vox(
+                    point_voxel_coord
+                )
+                sign, distance = PartitioningToolkit.get_plane_sign(
+                    point, normal_vector, site_real_coord
+                )
 
                 # if the sign matches, move to next neighbor.
                 # if the sign ever doesn't match, then the site is wrong and we move
@@ -121,12 +125,12 @@ class VoxelAssignmentToolkit:
         else:
             # Multiple sites found for one location
             return -1
-    
+
     @property
     def electride_sites(self):
         """
         Function for getting the number of sites that are electrides
-        
+
         Returns:
             A tuple of the indices corresponding to the electride sites in the
             structure.
@@ -136,7 +140,7 @@ class VoxelAssignmentToolkit:
             return structure.indices_from_symbol("He")
         elif self.algorithm == "voronelf":
             return []
-    
+
     def get_voxels_site_base(
         self,
         point_voxel_coord: ArrayLike | list,
@@ -145,20 +149,20 @@ class VoxelAssignmentToolkit:
         Finds the site a voxel belongs to. Mostly does the same as the
         get_matching_site function, but also checks other possible symmetric locations
         of each site.
-        
+
         Args:
             point_voxel_coord (ArrayLike): The voxel coordinates of the point
                 to find the associated site for.
-                
+
             site (int): A site index. It is None if the voxel has not already
                 been assigned to an electride.
-        
+
         Returns:
             The site the voxel coordinate is associated with.
         """
         permutations = self.permutations
         # partitioning = self.partitioning
-        x,y,z = point_voxel_coord
+        x, y, z = point_voxel_coord
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # I've had a bug in the past where one voxel returns multiple sites after
         # being translated. I'm going to make this function temporarily go through
@@ -204,11 +208,11 @@ class VoxelAssignmentToolkit:
             return site_vol_frac
         else:
             site_vol_frac = None
- 
+
             # there wasn't any site found so we don't return our site variable which
             # is None
         return site_vol_frac
-    
+
     def _get_vertex_site(
         self,
         vertex_coords,
@@ -217,17 +221,17 @@ class VoxelAssignmentToolkit:
         Finds the site a voxel vertex belongs to and returns the site and the
         transformation that it was found at. Mostly does the same as the
         get_voxels_site_base function, but also returns the transformation.
-        
+
         Args:
             point_voxel_coord (ArrayLike): The voxel coordinates of the point
                 to find the associated site for.
-        
+
         Returns:
             The site a voxel vertex is assigned to as well as the transformation.
         """
         permutations = self.permutations
-        x,y,z = vertex_coords
-        
+        x, y, z = vertex_coords
+
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # I've noticed a bug where one voxel returns multiple sites after
         # being translated. I'm going to make this function temporarily go through
@@ -237,15 +241,15 @@ class VoxelAssignmentToolkit:
         # a small number of sites if the system is ionic. This bug seemed to be
         # caused by insufficient partitioning plane selection
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        
+
         sites = []
         translations = []
         for t, u, v in permutations:
             new_vert_coord = [x + t, y + u, z + v]
             site: int = self.get_matching_site(
                 new_vert_coord,
-                check_near_plane = False,
-                )
+                check_near_plane=False,
+            )
             # site returns none if no match, otherwise gives a number
             # The site can't return as an electride site as we don't include
             # electride sites in the partitioning results
@@ -274,15 +278,15 @@ class VoxelAssignmentToolkit:
             # is None
             return None, None
         # return site
-    
+
     def get_voxel_vertices_sites(
-            self,
-            point_voxel_coord: ArrayLike | list,
-            ):
+        self,
+        point_voxel_coord: ArrayLike | list,
+    ):
         """
         Takes in the coordinates of a voxel and returns the coordinates of each
         of its vertices and the sites they belong to.
-        
+
         Args:
             point_voxel_coord (ArrayLike): The voxel coordinates of the point
                 to find the associated site for.
@@ -302,7 +306,9 @@ class VoxelAssignmentToolkit:
         B3 = [1 / 2, -1 / 2, 1 / 2]
         transforms = [A0, A1, A2, A3, B0, B1, B2, B3]
         for key, transform in zip(keys, transforms):
-            vertices_coords[key] = [x + x1 for x, x1 in zip(point_voxel_coord, transform)]
+            vertices_coords[key] = [
+                x + x1 for x, x1 in zip(point_voxel_coord, transform)
+            ]
 
         # create a dataframe to store results in
         vertices_sites = pd.DataFrame(columns=["id", "transform", "site"])
@@ -320,19 +326,19 @@ class VoxelAssignmentToolkit:
             #     vertices_sites.loc[len(vertices_sites.index)] = vertex_row
         # return both the vertices coords and the information about their sites
         return vertices_coords, vertices_sites
-    
+
     @staticmethod
     def _get_vector_plane_intersection(
-        point0: ArrayLike | list, 
-        point1: ArrayLike | list, 
-        plane_point: ArrayLike | list,  
-        plane_vector: ArrayLike | list,  
-        allow_point_intercept: bool=False
+        point0: ArrayLike | list,
+        point1: ArrayLike | list,
+        plane_point: ArrayLike | list,
+        plane_vector: ArrayLike | list,
+        allow_point_intercept: bool = False,
     ):
         """
         Takes in two points and the point/vector defining a plane and returns
         the point where the line segment and plane intersect (if it exists)
-        
+
         Args:
             point0 (ArrayLike): The first point of a line segment
             point1 (ArrayLike): The second point of a line segment
@@ -340,7 +346,7 @@ class VoxelAssignmentToolkit:
             plane_vector (ArrayLike): The vector normal to the plane
             allow_point_intercept (bool): Whether to count a point at the end
                 of the line segment touching the plane as an intercept.
-                
+
         Returns:
             The point where the line segment intersects the plane or None if
             there is no intersection.
@@ -390,29 +396,29 @@ class VoxelAssignmentToolkit:
         else:
             # The point is between point0 and point1
             return intersection_point
-    
+
     def _get_voxel_plane_intersections(
         self,
         sites: list,
-        vertices_coords: dict, 
+        vertices_coords: dict,
         intersections_df: pd.DataFrame,
     ):
         """
         Function for finding which planes intersect a voxel. Returns dataframe
         with all planes and intersections.
-        
+
         Args:
             sites (list): A list of sites that the vertices of a voxel are assigned to.
-            
+
             vertices_coords (dict): A dictionary relating the coordinates of a
                 voxels vertices to their label.
-            
+
             intersections_df (Dataframe): A dataframe of intersections that have
                 already been found.
-        
+
         Returns:
             A dataframe of where planes intersect the edges of a voxel.
-            
+
         """
         partitioning = self.partitioning
         # Define the indices of the vertices making up the edges of the voxel.
@@ -459,9 +465,7 @@ class VoxelAssignmentToolkit:
                             # MUST ROUND!
                             intersection = [
                                 round((x - x1), 12)
-                                for x, x1 in zip(
-                                    intersection, vertices_coords["A0"]
-                                )
+                                for x, x1 in zip(intersection, vertices_coords["A0"])
                             ]
                             intersections.append(intersection)
                     if len(intersections) > 0:
@@ -470,22 +474,24 @@ class VoxelAssignmentToolkit:
                         plane_row = [site, values["neigh_index"], intersections]
                         intersections_df.loc[len(intersections_df)] = plane_row
         return intersections_df
-    
+
     def get_intersected_voxel_volume_ratio(
-            self,
-            point_voxel_coord: ArrayLike | list,
-            ):
+        self,
+        point_voxel_coord: ArrayLike | list,
+    ):
         """
         Takes in the coordinates of a voxel and returns the ratio of the voxel
         that belongs to the sites around it.
-        
+
         Args:
             point_voxel_coord (ArrayLike): The voxel coordinates of the point
                 to find the associated site for.
         """
         grid = self.charge_grid.copy()
         voxel_volume = grid.voxel_volume
-        vertices_coords, vertices_sites = self.get_voxel_vertices_sites(point_voxel_coord)
+        vertices_coords, vertices_sites = self.get_voxel_vertices_sites(
+            point_voxel_coord
+        )
 
         # create dictionary for recording what fraction of a voxels volume should
         # be associated with a given site.
@@ -539,10 +545,9 @@ class VoxelAssignmentToolkit:
         # try:
         voxel_site, transform = self._get_vertex_site(
             point_voxel_coord,
-            )
+        )
         # except:
         #     voxel_site, transform = None, None
-
 
         # If no intersections are found, check the other possible transforms
         if len(intersections_df) == 0:
@@ -564,10 +569,8 @@ class VoxelAssignmentToolkit:
                 # get any intersections between planes and voxel edges and add to
                 # our intersection dataframe
                 intersections_df = self._get_voxel_plane_intersections(
-                    sites, 
-                    transformed_coords_real, 
-                    intersections_df
-                    )
+                    sites, transformed_coords_real, intersections_df
+                )
         # It's possible for the plane to intersect a vertex exactly causing there
         # to be multiple instances of the same intersection. Remove any duplicates
         # this may cause.
@@ -580,9 +583,13 @@ class VoxelAssignmentToolkit:
         # convert coordinate to real for use later
         for key, coord in vertices_coords.items():
             # transform so that A0 is at origin
-            transformed_coord = [x - x1 + 1 for x, x1 in zip(coord, vertices_coords["A0"])]
+            transformed_coord = [
+                x - x1 + 1 for x, x1 in zip(coord, vertices_coords["A0"])
+            ]
             # add the real coord to our dictionary of vertices
-            vertices_coords_real_origin[key] = grid.get_cart_coords_from_vox(transformed_coord)
+            vertices_coords_real_origin[key] = grid.get_cart_coords_from_vox(
+                transformed_coord
+            )
 
         # Now that we have a list of plane intersections, we can find the what portion
         # of the voxels should be applied to each site.
@@ -658,7 +665,9 @@ class VoxelAssignmentToolkit:
                         repeat = False
                         for site_point in site_points:
                             site_array = np.array(site_point)
-                            if np.allclose(intersect_array, site_array, rtol=0, atol=1e-6):
+                            if np.allclose(
+                                intersect_array, site_array, rtol=0, atol=1e-6
+                            ):
                                 repeat = True
                                 break
                             else:
@@ -689,21 +698,20 @@ class VoxelAssignmentToolkit:
         else:
             site_vol_frac = None
         return site_vol_frac
-    
-    def get_voxels_multi_plane(
-            self,
-            point_voxel_coords: ArrayLike | list,
-            site_vol_frac: dict,
-            voxel_assignments: pd.DataFrame,
-            ):
 
+    def get_voxels_multi_plane(
+        self,
+        point_voxel_coords: ArrayLike | list,
+        site_vol_frac: dict,
+        voxel_assignments: pd.DataFrame,
+    ):
         """
         This function finds what sites a voxel divided by more than one plane should
         be applied to. It looks at nearby voxels and finds what sites they are applied
         to and finds the ratio between these sites.
         """
         if site_vol_frac is None:
-            x,y,z = point_voxel_coords
+            x, y, z = point_voxel_coords
             grid_shape = self.charge_grid.grid_shape
             electride_sites = self.electride_sites
             # create dictionary for counting number of sites and for the fraction
@@ -716,10 +724,10 @@ class VoxelAssignmentToolkit:
             # look at all neighbors around the voxel of interest
             for t, u, v in itertools.product([-1, 0, 1], [-1, 0, 1], [-1, 0, 1]):
                 new_idx = [x - 1 + t, y - 1 + u, z - 1 + v]
-    
+
                 # wrap around for voxels on edge of cell
                 new_idx = [a % b for a, b in zip(new_idx, grid_shape)]
-    
+
                 # get site ditionary from the neighboring voxel using its row
                 # index. This is much faster than searching by values. To get the index
                 # we can utilize the fact that an increase in z will increase the index
@@ -727,36 +735,42 @@ class VoxelAssignmentToolkit:
                 # and an increase in x will increase the index by (range of z)*(range of y)
                 zrange = grid_shape[2]
                 yrange = grid_shape[1]
-                index = int((new_idx[0]) * zrange * yrange + (new_idx[1]) * zrange + new_idx[2])
+                index = int(
+                    (new_idx[0]) * zrange * yrange + (new_idx[1]) * zrange + new_idx[2]
+                )
                 site_dict = voxel_assignments["site"].iloc[index]
                 # If the site dict exists, we want to look at each of its key/item
                 # pairs. -1,-2,-3 indicate some error in voxel assignment. We skip
                 # these for now. Also, if the algorithm is "badelf" we don't want to
-                # assign anything to electride sites so we also sip thee. Otherwise 
+                # assign anything to electride sites so we also sip thee. Otherwise
                 # we add the fraction of each voxel to the voxel count
                 #!!! avoiding electrides is going to cause problems for voronelf
                 if site_dict is not None:
                     for site_index, frac in site_dict.items():
                         if site_index in [-3, -2, -1]:
                             continue
-                        elif site_index in electride_sites and self.algorithm == "badelf":
+                        elif (
+                            site_index in electride_sites and self.algorithm == "badelf"
+                        ):
                             continue
                         else:
                             site_count[site_index] += frac
-               
+
             if sum(site_count.values()) != 0:
                 # get the fraction of each site. This will allow us to split the
                 # charge of the voxel more evenly
                 for site_index in site_count:
-                    site_vol_frac[site_index] = site_count[site_index] / sum(site_count.values())
-            
+                    site_vol_frac[site_index] = site_count[site_index] / sum(
+                        site_count.values()
+                    )
+
             else:
                 #  of the voxels nearby returned either None, as an error, or as
                 # an electride. To assign this voxel we just give it to the closest
                 # atom
                 site_vol_frac = self.get_voxels_site_nearest(point_voxel_coords)
         return site_vol_frac
-    
+
     def get_voxels_site_nearest(
         self,
         point_voxel_coords: ArrayLike | list,
@@ -774,14 +788,14 @@ class VoxelAssignmentToolkit:
         for site in range(len(self.electride_structure)):
             site_vol_frac[site] = float(0)
         site_vol_frac[nearest_site] = float(1)
-        
+
         return site_vol_frac
-       
+
     def get_voxels_site(
-            self, 
-            point_voxel_coords: ArrayLike | list,
-            site_vol_frac,
-            ):
+        self,
+        point_voxel_coords: ArrayLike | list,
+        site_vol_frac,
+    ):
         """
         Combines methods of voxel assignment to guarantee that the voxel
         site is returned.
@@ -790,22 +804,22 @@ class VoxelAssignmentToolkit:
             site_vol_frac = self.get_voxels_site_base(point_voxel_coords)
         if site_vol_frac is None:
             site_vol_frac = self.get_intersected_voxel_volume_ratio(point_voxel_coords)
-        
+
         return site_vol_frac
-    
+
     def _get_voxels_site_dask(
         self,
         voxel_dataframe: pd.DataFrame,
     ):
         """
-        Applies the get_intersected_voxel_volume_ratio function across a Pandas 
+        Applies the get_intersected_voxel_volume_ratio function across a Pandas
         dataframe. This is the function that we give to dasks map_partitions
         function to parallelize voxel assignment.
-        
+
         Args:
             voxel_dataframe (pd.DataFrame): A dataframe consisting of columns
             [x,y,z] representing the voxels of a system.
-        
+
         Returns:
             A series of dictionaries containing the ratio of each voxel assigned
             to each site.
@@ -817,5 +831,3 @@ class VoxelAssignmentToolkit:
             ),
             axis=1,
         )
-        
-        
