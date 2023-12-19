@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from simmate.database import connect
+
 from .badelf import (
     BadElfAnalysis__Warren__Badelf,
     BadElfAnalysis__Warren__BadelfHse,
