@@ -17,3 +17,9 @@ class VaspConfig(AppConfig):
 
 class EvolutionConfig(AppConfig):
     name = "simmate.apps.evolution"
+
+class WarrenConfig(AppConfig):
+    name = "simmate.apps.warrenapp"
+    
+class BadelfConfig(AppConfig):
+    name = "simmate.apps.badelf"
