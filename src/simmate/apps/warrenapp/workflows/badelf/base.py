@@ -83,10 +83,12 @@ class VaspBadElfBase(Workflow):
         command: str = None,
         source: dict = None,
         directory: Path = None,  # we default to the current directory
+        cores: int = None,
         find_electrides: bool = True,
-        min_charge: float = 0.45,  # This is somewhat arbitrarily set
+        electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
         algorithm: str = "badelf",
-        print_atom_voxels: bool = False,
+        electride_connection_cutoff: float = 0,
+        check_for_covalency: bool = True,
         **kwargs,
     ):
         # Run the dft calculation. This workflow should be set as something
@@ -103,13 +105,13 @@ class VaspBadElfBase(Workflow):
         # should be set to something that already saves to a database table.
 
         badelf_result = cls.badelf_workflow.run(
-            structure=structure,
-            command=command,
             source=source,
             directory=static_energy_directory,
+            cores=cores,
             find_electrides=find_electrides,
-            min_charge=min_charge,
+            electride_finder_cutoff=electride_finder_cutoff,
             algorithm=algorithm,
-            print_atom_voxels=print_atom_voxels,
+            electride_connection_cutoff=electride_connection_cutoff,
+            check_for_covalency=check_for_covalency,
             # copy_previous_directory=True,
         ).result()

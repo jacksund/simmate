@@ -56,6 +56,7 @@ def get_directory(directory: Path | str = None) -> Path:
     # and return the full path to the directory
     return directory_cleaned.absolute()
 
+
 def check_required_files(directory: Path, required_files: list):
     """
     Checks to make sure that all the files in a folder exist. Otherwise raises
@@ -67,6 +68,7 @@ def check_required_files(directory: Path, required_files: list):
         The following files must exist in the directory where 
         this task is ran but some are missing: {required_files}"""
         )
+
 
 def copy_files_from_directory(
     files_to_copy: list[Path],

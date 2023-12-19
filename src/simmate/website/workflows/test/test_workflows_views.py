@@ -64,6 +64,8 @@ def test_workflow_detail_view(client, workflow):
         "structure-prediction",
         "diffusion",
         "cluster-expansion",
+        "bad-elf-analysis",
+        "nested",
     ]:
         return
 
