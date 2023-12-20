@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import csv
 import itertools
 import math
 import warnings
 from pathlib import Path
-import csv
 
 import dask.dataframe
 import numpy as np
@@ -825,7 +825,7 @@ class BadElfToolkit:
         with open(directory / "badelf_summary.csv", "w") as csv_file:
             writer = csv.writer(csv_file)
             for key, value in results.items():
-                writer.writerow([key,value])
+                writer.writerow([key, value])
 
     @classmethod
     def from_files(
