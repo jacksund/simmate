@@ -1,9 +1,6 @@
 
 # Maintainer notes
 
-!!! note
-    currently this page is only relevant to @jacksund
-
 ## Making a release
 
 To make a new release, you must follow these steps:
@@ -32,6 +29,55 @@ conda create -n my_env -c conda-forge simmate -y
 # as an extra, make sure spyder can also be installed in the same env
 conda install -n my_env -c conda-forge spyder -y
 ```
+
+## The full test suite
+
+Unit tests that require third-party programs (such as VASP) are disabled by default. While there are tests that "mock" program behavior, it is still best to run a full test before making new releases. To run all unit tests that actually call programs like VASP:
+
+1. Make sure you have the following prerequisites:
+   - a linux env with VASP & Bader installed
+   - dev version of simmate installed
+   - the `main` branch of the official repo checked out
+   - `simmate_dev` env is active
+   - the base simmate directory as the current working directory
+   - clear any custom `~/simmate` configs (i.e. make sure we have defaults)
+
+2. Make sure the default test suite works:
+``` bash
+pytest
+```
+
+1. Reset your database, switch to the pre-built, and make sure it's up to date. We do this to mimic the database of a brand new user:
+```bash
+simmate database reset --confirm-delete --use-prebuilt
+simmate database update
+```
+
+1. Open `pyproject.toml` and find the following line:
+``` toml
+addopts = "--no-migrations --durations=15 -m 'not blender and not vasp'"
+```
+
+1. This line contains the default options when calling `pytest`. You can see how `not vasp` is included to skip tests that require VASP. Let's modify this line such that the VASP tests do in fact run:
+``` toml
+addopts = "--no-migrations --durations=15 -m 'not blender'"
+```
+
+1. save the `pyproject.toml` -- but remember that you changed it! You will undo these changes later.
+
+2. (optional) By default, all VASP tests will run using `mpirun -n 12 vasp_std > vasp.out`. You can update this in the file `src/simmate/workflows/tests/test_all_workflow_runs.py` if you would like to. There are multiple places where this is defined -- so make sure you read the entire script!
+
+3. Now run `pytest` again where it will now pick up these tests. Note, we may only want to run specific test AND enable logging (`-s`) for them so that we can monitor -- both are optional but recommended:
+``` bash
+# option 1
+pytest
+
+# option 2(recommended)
+pytest src/simmate/workflows/test/test_all_workflow_runs.py -s
+```
+
+9. If everything worked, then we can make a new release! Feel free to discard your changes
+
 
 ## Website CSS
 
