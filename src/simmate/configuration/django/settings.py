@@ -254,7 +254,7 @@ DEFAULT_SIMMATE_APPS = [
     "simmate.apps.configs.BadelfConfig",
     # "simmate.apps.configs.CleaseConfig",
     "simmate.apps.configs.EvolutionConfig",
-    "simmate.apps.confis.WarrenLabConfig",
+    "simmate.apps.configs.WarrenLabConfig",
 ]
 APPLICATIONS_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-apps.yaml"
 # create the file if it doesn't exist yet
