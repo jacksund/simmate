@@ -14,6 +14,7 @@ from pymatgen.analysis.dimensionality import get_dimensionality_larsen
 from pymatgen.analysis.graphs import StructureGraph
 from pymatgen.analysis.local_env import CrystalNN
 from pymatgen.io.vasp import Potcar
+from scipy.constants import Avogadro
 
 from simmate.apps.badelf.badelf_tools.acf import ACF
 from simmate.apps.badelf.core.electride_finder import ElectrideFinder
@@ -489,15 +490,11 @@ class BadElfToolkit:
         return voxel_assignments
 
     def _write_voxel_errors(self):
-        # voxel_errors = self._voxel_errors
-        # dataframe = pd.DataFrame(columns=[
-        #     "vert_multi_site_same_trans",
-        #     "vert_multi_site",
-        #     "multi_site_no_plane"])
-        # dataframe["vert_multi_site_same_trans"] = voxel_errors["vert_multi_site_same_trans"]
-        # dataframe["vert_multi_site"] = voxel_errors["vert_multi_site"]
-        # dataframe["multi_site_no_plane"] = voxel_errors["multi_site_no_plane"]
-        dataframe = pd.DataFrame.from_dict(self._voxel_errors)
+        """
+        Writes any voxel errors that were found to a csv file.
+        """
+        
+        dataframe = pd.DataFrame.from_dict(dict([ (key,pd.Series(value)) for key,value in self._voxel_errors.items() ]))
         dataframe.to_csv(self.directory / "same_site_voxels.csv")
 
     @property
@@ -800,6 +797,23 @@ class BadElfToolkit:
             electride_connection_cutoff=self.electride_connection_cutoff
         )
         results["elf_connect_cutoff"] = self.electride_connection_cutoff
+        # Fill out columns unrelated to badelf alg
+        structure = self.structure
+        results["structure"] = structure
+        results["nelements"] = len(structure.composition)
+        results["elements"] = [str(e) for e in structure.composition.elements]
+        results["chemical_system"] = structure.composition.chemical_system
+        results["density"] = float(structure.density)
+        results["density_volume"] = structure.num_sites / structure.volume
+        results["volume"] = structure.volume
+        results["volume_molar"] = (structure.volume / structure.num_sites)*Avogadro*1e-27*1e3
+        results["spacegroup"] = structure.get_space_group_info(symprec=0.1)[1]
+        results["formula_full"] = structure.composition.formula
+        results["formula_reduced"] = structure.composition.reduced_formula
+        results["formula_anonymous"] = structure.composition.anonymized_formula
+        
+        
+        
 
         return results
 
@@ -915,3 +929,25 @@ class BadElfToolkit:
             grid.write_file(f"ELFCAR_{atom_index}")
         elif file_type == "charge":
             grid.write_file(f"CHGCAR_{atom_index}")
+            
+    def plot_partitioning(self):
+        """
+        Plots the partitioning surface around each atom.
+        """
+        partitioning = self.partitioning
+        grid = self.partitioning_grid.copy()
+        if self.algorithm == "badelf":
+            grid.structure = self.structure
+            PartitioningToolkit(grid).plot_partitioning_results(partitioning)
+        elif self.algorithm == "voronelf":
+            grid.structure = self.electride_structure
+            PartitioningToolkit(grid).plot_partitioning_results(partitioning)
+        else:
+            print(
+                f"""
+                Plotting of zero-flux partitioning surfaces is not currently
+                supported.
+                """
+                )
+            
+        
