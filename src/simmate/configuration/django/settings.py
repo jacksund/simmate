@@ -251,6 +251,7 @@ DEFAULT_SIMMATE_APPS = [
     "simmate.workflows.configs.BaseWorkflowsConfig",
     "simmate.apps.configs.VaspConfig",
     "simmate.apps.configs.BaderConfig",
+    "simmate.apps.configs.BadelfConfig",
     # "simmate.apps.configs.CleaseConfig",
     "simmate.apps.configs.EvolutionConfig",
     "simmate.apps.confis.WarrenLabConfig"

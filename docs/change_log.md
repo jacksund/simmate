@@ -89,6 +89,16 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 --------------------------------------------------------------------------------
 
+## v0.15.0 (2023.12.21)
+
+**Enhancements**
+
+- add warren_lab app with Warren Lab preferred VASP settings
+- add badelf app with class oriented tools for performing BadELF analyses
+- add `simmate-badelf` command for running badelf analysis
+
+--------------------------------------------------------------------------------
+
 ## v0.14.0 (2023.07.06)
 
 **Enhancements**
