@@ -9,7 +9,6 @@ from pathlib import Path
 
 import typer
 
-from simmate.apps.warrenapp.command_line.badelf import badelf_app
 from simmate.command_line.database import database_app
 from simmate.command_line.engine import engine_app
 from simmate.command_line.utilities import utilities_app
@@ -133,4 +132,3 @@ simmate_app.add_typer(database_app, name="database")
 simmate_app.add_typer(engine_app, name="engine")
 simmate_app.add_typer(workflows_app, name="workflows")
 simmate_app.add_typer(utilities_app, name="utilities")
-simmate_app.add_typer(badelf_app, name="badelf")

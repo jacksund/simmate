@@ -4,6 +4,7 @@ import itertools
 import math
 import warnings
 from pathlib import Path
+import csv
 
 import dask.dataframe
 import numpy as np
@@ -493,8 +494,10 @@ class BadElfToolkit:
         """
         Writes any voxel errors that were found to a csv file.
         """
-        
-        dataframe = pd.DataFrame.from_dict(dict([ (key,pd.Series(value)) for key,value in self._voxel_errors.items() ]))
+
+        dataframe = pd.DataFrame.from_dict(
+            dict([(key, pd.Series(value)) for key, value in self._voxel_errors.items()])
+        )
         dataframe.to_csv(self.directory / "same_site_voxels.csv")
 
     @property
@@ -800,27 +803,29 @@ class BadElfToolkit:
         # Fill out columns unrelated to badelf alg
         structure = self.structure
         results["structure"] = structure
-        results["nelements"] = len(structure.composition)
-        results["elements"] = [str(e) for e in structure.composition.elements]
-        results["chemical_system"] = structure.composition.chemical_system
-        results["density"] = float(structure.density)
-        results["density_volume"] = structure.num_sites / structure.volume
-        results["volume"] = structure.volume
-        results["volume_molar"] = (structure.volume / structure.num_sites)*Avogadro*1e-27*1e3
-        results["spacegroup"] = structure.get_space_group_info(symprec=0.1)[1]
-        results["formula_full"] = structure.composition.formula
-        results["formula_reduced"] = structure.composition.reduced_formula
-        results["formula_anonymous"] = structure.composition.anonymized_formula
-        
-        
-        
+        # results["nelements"] = len(structure.composition)
+        # results["elements"] = [str(e) for e in structure.composition.elements]
+        # results["chemical_system"] = structure.composition.chemical_system
+        # results["density"] = float(structure.density)
+        # results["density_volume"] = structure.num_sites / structure.volume
+        # results["volume"] = structure.volume
+        # results["volume_molar"] = (
+        #     (structure.volume / structure.num_sites) * Avogadro * 1e-27 * 1e3
+        # )
+        # results["spacegroup"] = structure.get_space_group_info(symprec=0.1)#[1]
+        # results["formula_full"] = structure.composition.formula
+        # results["formula_reduced"] = structure.composition.reduced_formula
+        # results["formula_anonymous"] = structure.composition.anonymized_formula
 
         return results
 
     def write_results_csv(self):
         directory = self.directory
-        results_dataframe = pd.DataFrame.from_dict(self.results)
-        results_dataframe.to_csv(directory / "badelf_summary.csv")
+        results = self.results
+        with open(directory / "badelf_summary.csv", "w") as csv_file:
+            writer = csv.writer(csv_file)
+            for key, value in results.items():
+                writer.writerow([key,value])
 
     @classmethod
     def from_files(
@@ -929,7 +934,7 @@ class BadElfToolkit:
             grid.write_file(f"ELFCAR_{atom_index}")
         elif file_type == "charge":
             grid.write_file(f"CHGCAR_{atom_index}")
-            
+
     def plot_partitioning(self):
         """
         Plots the partitioning surface around each atom.
@@ -948,6 +953,4 @@ class BadElfToolkit:
                 Plotting of zero-flux partitioning surfaces is not currently
                 supported.
                 """
-                )
-            
-        
+            )

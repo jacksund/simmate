@@ -157,6 +157,7 @@ documentation = "https://jacksund.github.io/simmate/home/"
 [project.scripts]
 simmate = "simmate.command_line.base_command:simmate_app"
 simmate-vasp = "simmate.apps.vasp.command_line.base_command:vasp_app"
+simmate-badelf = "simmate.apps.warren_lab.command_line.base_command:badelf_app"
 
 # -----------------------------------------------------------------------------
 
