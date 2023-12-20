@@ -40,7 +40,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
             workflow_base="relaxation.vasp.quality00",
             input_parameters={
                 "structure": structure,
-                "command": "mpirun -n 12 vasp_std > vasp.out",
+                "command": "mpirun -n 14 vasp_std > vasp.out",
             },
             updated_settings={
                 "incar": {"NPAR": 1, "ENCUT": 600},
@@ -96,7 +96,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
             workflow = get_workflow(workflow_name)
             state = workflow.run(
                 structure=structure,
-                command="mpirun -n 12 vasp_std > vasp.out",
+                command="mpirun -n 14 vasp_std > vasp.out",
             )
             if state.is_completed():
                 successful_flows.append(workflow_name)
@@ -111,7 +111,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
             workflow = get_workflow(workflow_name)
             state = workflow.run(
                 structure=structure,
-                command="mpirun -n 12 vasp_std > vasp.out",
+                command="mpirun -n 14 vasp_std > vasp.out",
                 nsteps=50,
                 temperature_start=400,
                 temperature_end=400,
@@ -127,7 +127,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
         state = workflow.run(
             structure=structure,
             migrating_specie="I",
-            command="mpirun -n 12 vasp_std > vasp.out",
+            command="mpirun -n 14 vasp_std > vasp.out",
             nimages=1,
             min_atoms=10,
             max_atoms=25,
@@ -149,7 +149,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
         for algorithm in algorithms:
             state = workflow.run(
                 structure=structure,
-                command="mpirun -n 12 vasp_std > vasp.out",
+                command="mpirun -n 14 vasp_std > vasp.out",
                 algorithm=algorithm,
             )
             state.result()
