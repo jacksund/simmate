@@ -185,9 +185,6 @@ def reset_database(
             "database and not after."
         )
 
-    # now update the database based on the registered models
-    update_database(apps_to_migrate, show_logs=False)
-
     # instead of building the database from scratch, we instead download a
     # prebuilt database file.
     if DATABASE_BACKEND == "sqlite3" and use_prebuilt:
@@ -196,13 +193,19 @@ def reset_database(
         logging.info("Setting up prebuilt database...")
         load_default_sqlite3_build()
 
-    # Otherwise we leave the empty database.
+        # now update the database based on the registered apps
+        update_database(apps_to_migrate, show_logs=False)
+
+    # Otherwise we make an empty database.
     # Because this is our first time building the database, we also want to
     # load the Spacegroup metadata for us to query Structures by.
     else:
         from simmate.database.base_data_types import Spacegroup
 
-        logging.info("Loading default data")
+        logging.info("Building empty database...")
+        update_database(apps_to_migrate, show_logs=False)
+
+        logging.info("Loading default data...")
         Spacegroup._load_database_from_toolkit()
 
     # Let the user know everything succeeded
