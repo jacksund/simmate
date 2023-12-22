@@ -82,6 +82,9 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add `django-simple-history` support to track user changes on specific models
 - add `@check_db_conn` decorator to help with database connection closures/timeouts
 - add `simmate engine start-schedules` which let's you configure periodic tasks for individual apps (e.g. check a table for updates every 5 minutes). Includes error handling and email alerts. (Note: this a quick alternative to full Prefect system)
+- add warren_lab app with Warren Lab preferred VASP settings
+- add badelf app with class oriented tools for performing BadELF analyses
+- add `simmate-badelf` command for running badelf analysis
 
 **Fixes**
 
