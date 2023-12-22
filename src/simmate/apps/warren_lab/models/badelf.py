@@ -1,10 +1,5 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Nov 21 15:18:45 2023
 
-@author: sweav
-"""
 
 from pathlib import Path
 
@@ -17,9 +12,6 @@ class BadElfAnalysis(Structure, Calculation):
     """
     This table contains results from a BadELF analysis.
     """
-
-    class Meta:
-        app_label = "workflows"
 
     oxidation_states = table_column.JSONField(blank=True, null=True)
     """

@@ -1,10 +1,4 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Dec  9 16:35:48 2023
-
-@author: sweav
-"""
 
 import math
 from itertools import combinations

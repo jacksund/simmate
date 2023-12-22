@@ -1,10 +1,4 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Nov 21 11:20:59 2023
-
-@author: sweav
-"""
 
 from pathlib import Path
 
