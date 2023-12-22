@@ -24,6 +24,7 @@ from simmate.apps.badelf.core.henkelman_bader_interface import ZeroFluxToolkit
 from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.apps.badelf.core.voxel_assignment import VoxelAssignmentToolkit
 
+# BUG: we shouldn't fully turning off warnings. This should be used within a context.
 warnings.filterwarnings("ignore")
 
 
