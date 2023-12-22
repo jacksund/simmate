@@ -18,12 +18,12 @@ from simmate.workflows.utilities import (
 def test_get_workflow_types():
     assert get_all_workflow_types() == [
         # "cluster-expansion",
-        "bad-elf-analysis",
+        # "bad-elf-analysis",
         "customized",
         "diffusion",
         "dynamics",
         "electronic-structure",
-        "nested",
+        # "nested",
         "population-analysis",
         "relaxation",
         "restart",
