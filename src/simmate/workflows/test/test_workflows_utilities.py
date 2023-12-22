@@ -138,14 +138,14 @@ def test_list_of_workflows_by_type():
         "static-energy.vasp.prebadelf-matproj",
         "static-energy.vasp.prebader-matproj",
         "static-energy.vasp.quality04",
-        "static-energy.vasp.warren-lab-hse",
-        "static-energy.vasp.warren-lab-hsesol",
-        "static-energy.vasp.warren-lab-pbe",
-        "static-energy.vasp.warren-lab-pbe-metal",
-        "static-energy.vasp.warren-lab-pbesol",
-        "static-energy.vasp.warren-lab-prebadelf-hse",
-        "static-energy.vasp.warren-lab-prebadelf-pbesol",
-        "static-energy.vasp.warren-lab-scan",
+        # "static-energy.vasp.warren-lab-hse",
+        # "static-energy.vasp.warren-lab-hsesol",
+        # "static-energy.vasp.warren-lab-pbe",
+        # "static-energy.vasp.warren-lab-pbe-metal",
+        # "static-energy.vasp.warren-lab-pbesol",
+        # "static-energy.vasp.warren-lab-prebadelf-hse",
+        # "static-energy.vasp.warren-lab-prebadelf-pbesol",
+        # "static-energy.vasp.warren-lab-scan",
     ]
 
     assert (
