@@ -57,8 +57,10 @@ jobs:
       - name: Install Simmate
         shell: bash -l {0}
         run: |
-          pip install --no-deps .
-      # note: we skip installing the deps because they were done in last step
+          pip install .
+      # note: we want to skip installing the deps (--no-deps) because they were 
+      # done in last step, but we repeat this because of a bug:
+      #  "maggma 0.57.0 has requirement ruamel.yaml<0.18, but you have ruamel-yaml 0.18.5."
       
       # Run checks to see that simmate & deps are installed correctly
       - name: Check conda info
