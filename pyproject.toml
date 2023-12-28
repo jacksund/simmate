@@ -62,7 +62,6 @@ dependencies=[
     # Core dependencies
     "numpy >=1.22.0, <1.24.2",
     "pandas >=2.0.0, <2.1.4",
-    "django >=4.0.0, <4.1.6",
     "dask >=2023.6.1, <2023.11.1",
     "distributed >=2023.6.1, <2023.11.1",  # part of dask
     "django >=4.0.0, <4.2.8",
@@ -127,9 +126,9 @@ EXE = [
 EXTRAS = [
     "numba >=0.53.0",  # for speed-up of basic calcs
     "psycopg2-binary >=2.9.2",  # for Postgres connections (added -binary to fix bug)
-    'selenium',  # for web scraping (slow but robust)
-    'spyder',  # IDE for writing/editting
-    'gunicorn',  # for website server (Django+DigitalOcean) # NOT WINDOWS
+    "selenium",  # for web scraping (slow but robust)
+    "spyder",  # IDE for writing/editting
+    "gunicorn",  # for website server (Django+DigitalOcean) # NOT WINDOWS
     "graphviz ==1.7",  # python-graphviz on conda. for viewing prefect flows
     "pygraphviz ==1.10",  # pygraphviz on conda. for viewing django tables
     "scikit-learn >=1.0.1",  # for machine-learning
