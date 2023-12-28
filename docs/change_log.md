@@ -70,7 +70,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 **Enhancements**
 
-- Allow custom html templates and static files that override default shipped by default
+- Allow custom html templates and static files that override those shipped by default
 - add `simmate engine` commands like `stats-detail` and `workitems` that show details of workitems in the database
 - updated third-party archives (Materials Project, COD, JARVIS, OQMD)
 - eased database updates between simmate versions by using django migrations
@@ -85,6 +85,11 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add warren_lab app with Warren Lab preferred VASP settings
 - add badelf app with class oriented tools for performing BadELF analyses
 - add `simmate-badelf` command for running badelf analysis
+
+**Refactors**
+
+- remove mamba support now that libmamba is default conda solver
+- switch CI from mamba back to conda
 
 **Fixes**
 

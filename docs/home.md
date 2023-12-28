@@ -80,20 +80,11 @@ If you're comfortable with Python, you can install Simmate with...
     conda create -n my_env -c conda-forge python=3.10 simmate  # (1)
     ```
     
-    1. While it is the recommended way to install Simmate, **conda
-       can be extremely slow**. It can take >20 minutes to solve the environment
-       on some systems because of Simmate's many large dependencies. 
-        
-        We therefore suggest experienced users try the following:
-        
-        - set `conda config --set channel_priority strict`
-            
-        - use the [libmamba](https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community) solver
-
-=== "mamba"
-    ``` bash
-    mamba create -n my_env -c conda-forge python=3.10 simmate
-    ```
+    1. If it takes >2 minutes to solve the environment,
+       then you are likely using an outdated version of conda.
+       Make sure to update your conda version ([>=23.10.0](https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community))
+       so that it is using the new 
+       [libmamba solver](https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community)
 
 === "pip"
     ``` bash
@@ -106,7 +97,7 @@ If you're comfortable with Python, you can install Simmate with...
         how to manage your python env's effectively.
 
 !!! note
-    Simmate itself is <2MB, but when installed to a clean conda environment, the entire download for Simmate and all it's dependencies comes to ~1.2GB. Additional disk space is also needed for optional downloads -- such as [third-party data](/full_guides/database/third_party_data/).
+    Simmate itself is <1MB, but when installed to a clean conda environment, the entire download for Simmate and all it's dependencies comes to ~1GB. Additional disk space is also needed for optional downloads -- such as [third-party data](/full_guides/database/third_party_data/).
 
 --------------------------------------------------------------------------------
 
