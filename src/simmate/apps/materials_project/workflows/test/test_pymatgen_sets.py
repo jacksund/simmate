@@ -20,8 +20,7 @@ from pymatgen.io.vasp.sets import (
     MVLGBSet,
 )
 
-from simmate.apps.vasp.inputs import Incar, Potcar
-from simmate.apps.vasp.workflows import (  # Dynamics__Vasp__MvlNpt,
+from simmate.apps.materials_project.workflows import (  # Dynamics__Vasp__MvlNpt,
     Diffusion__Vasp__NebFromImagesMit,
     Diffusion__Vasp__NebFromImagesMvlCi,
     Dynamics__Vasp__Matproj,
@@ -41,11 +40,12 @@ from simmate.apps.vasp.workflows import (  # Dynamics__Vasp__MvlNpt,
     StaticEnergy__Vasp__Matproj,
     StaticEnergy__Vasp__MatprojScan,
 )
-from simmate.apps.vasp.workflows.elastic.mvl import Elastic__Vasp__Mvl
-from simmate.apps.vasp.workflows.nuclear_magnetic_resonance import (
+from simmate.apps.materials_project.workflows.elastic.mvl import Elastic__Vasp__Mvl
+from simmate.apps.materials_project.workflows.nuclear_magnetic_resonance import (
     Nmr__Vasp__MatprojChemicalShifts,
     Nmr__Vasp__MatprojFieldGradient,
 )
+from simmate.apps.vasp.inputs import Incar, Potcar
 from simmate.conftest import make_dummy_files
 from simmate.toolkit.diffusion import MigrationImages
 

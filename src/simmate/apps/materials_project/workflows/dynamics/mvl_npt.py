@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from simmate.apps.materials_project.workflows.dynamics.mit import Dynamics__Vasp__Mit
 from simmate.apps.vasp.inputs import Incar
-from simmate.apps.vasp.workflows.dynamics.mit import Dynamics__Vasp__Mit
 from simmate.toolkit import Structure
 
 

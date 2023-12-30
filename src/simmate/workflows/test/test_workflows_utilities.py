@@ -161,7 +161,9 @@ def test_list_of_workflows_by_type():
 
 
 def test_get_workflow():
-    from simmate.apps.vasp.workflows import StaticEnergy__Vasp__Matproj as workflow
+    from simmate.apps.materials_project.workflows import (
+        StaticEnergy__Vasp__Matproj as workflow,
+    )
 
     assert get_workflow("static-energy.vasp.matproj") == workflow
 

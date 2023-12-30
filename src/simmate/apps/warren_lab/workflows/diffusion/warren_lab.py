@@ -2,7 +2,7 @@
 
 from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS
 from simmate.apps.vasp.workflows.base import VaspWorkflow
-from simmate.apps.vasp.workflows.diffusion.neb_base import (
+from simmate.apps.vasp.workflows.diffusion import (
     NebAllPathsWorkflow,
     SinglePathWorkflow,
     VaspNebFromImagesWorkflow,

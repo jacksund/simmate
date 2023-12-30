@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.vasp.workflows.relaxation.quality04 import Relaxation__Vasp__Quality04
+from simmate.apps.warren_lab.workflows.relaxation.quality04 import (
+    Relaxation__Vasp__Quality04,
+)
 
 
 class StaticEnergy__Vasp__Quality04(Relaxation__Vasp__Quality04):

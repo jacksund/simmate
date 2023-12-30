@@ -49,24 +49,3 @@ You can follow the naming conventions (described above) to find a workflow in th
     ```
 
 ------------------------------------------------------------
-
-## Location of a workflow's source code
-
-The code that defines these workflows and configures their settings are located in the corresponding `simmate.apps` module. We make workflows accessible here because users often want to search for workflows by type -- not by their app name. The source code of a workflow can be found using the naming convention for workflows described above:
-
-=== "Template Python Import"
-    ``` python
-    from simmate.apps.{APP_NAME}.workflows.{TYPE}.{PRESET} import {FULL_NAME}
-    ```
-
-=== "Example"
-    ``` python
-    from simmate.apps.vasp.workflows.static_energy.matproj import StaticEnergy__Vasp__Matproj
-    ```
-
-This is a really long import, but it gives the same workflow as the `get_workflow` utility. We recommend sticking to `get_workflow` because it is the most convienent and easiest to remember. The only reason you'll need to interact with this longer import is to either:
-
-1. Find the source code for a workflow
-2. Optimize the speed of your imports (advanced users only)
-
-------------------------------------------------------------

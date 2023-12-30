@@ -147,7 +147,7 @@ You can update/override these as you see fit.
 
 For a full (and advanced) example of a subclass take a look at
 `simmate.apps.vasp.workflows.base.VaspWorkflow` and the tasks that use it like
-`simmate.apps.vasp.workflows.relaxation.matproj`.
+`simmate.apps.materials_project.workflows.relaxation.matproj`.
 
 
 ### Custom error handling

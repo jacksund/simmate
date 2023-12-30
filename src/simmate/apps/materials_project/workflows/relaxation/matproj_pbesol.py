@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.vasp.workflows.relaxation.matproj import Relaxation__Vasp__Matproj
+from simmate.apps.materials_project.workflows.relaxation.matproj import (
+    Relaxation__Vasp__Matproj,
+)
 
 
 class Relaxation__Vasp__MatprojPbesol(Relaxation__Vasp__Matproj):

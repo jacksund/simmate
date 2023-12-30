@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.vasp.workflows.diffusion.mit import Diffusion__Vasp__NebFromImagesMit
+from simmate.apps.materials_project.workflows.diffusion.mit import (
+    Diffusion__Vasp__NebFromImagesMit,
+)
 
 
 class Diffusion__Vasp__NebFromImagesMvlCi(Diffusion__Vasp__NebFromImagesMit):

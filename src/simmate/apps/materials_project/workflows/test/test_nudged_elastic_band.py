@@ -2,11 +2,11 @@
 
 import pytest
 
-from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS_LOW_QUALITY
-from simmate.apps.vasp.workflows.diffusion import (
+from simmate.apps.materials_project.workflows.diffusion import (
     Diffusion__Vasp__NebAllPathsMit,
     Diffusion__Vasp__NebFromImagesMit,
 )
+from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS_LOW_QUALITY
 from simmate.conftest import SimmateMockHelper, copy_test_files
 from simmate.toolkit.diffusion import MigrationImages
 

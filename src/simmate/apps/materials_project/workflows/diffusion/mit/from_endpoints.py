@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.vasp.workflows.diffusion.mit import Diffusion__Vasp__NebFromImagesMit
-from simmate.apps.vasp.workflows.diffusion.neb_base import NebFromEndpointWorkflow
-from simmate.apps.vasp.workflows.relaxation.mvl_neb_endpoint import (
+from simmate.apps.materials_project.workflows.diffusion.mit import (
+    Diffusion__Vasp__NebFromImagesMit,
+)
+from simmate.apps.materials_project.workflows.relaxation.mvl_neb_endpoint import (
     Relaxation__Vasp__MvlNebEndpoint,
 )
+from simmate.apps.vasp.workflows.diffusion import NebFromEndpointWorkflow
 
 
 class Diffusion__Vasp__NebFromEndpointsMit(NebFromEndpointWorkflow):

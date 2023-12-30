@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from simmate.apps.materials_project.workflows.relaxation.matproj import (
+    Relaxation__Vasp__Matproj,
+)
 from simmate.apps.vasp.workflows.dynamics.base import DynamicsWorkflow
-from simmate.apps.vasp.workflows.relaxation.matproj import Relaxation__Vasp__Matproj
 
 
 class Dynamics__Vasp__Matproj(DynamicsWorkflow, Relaxation__Vasp__Matproj):

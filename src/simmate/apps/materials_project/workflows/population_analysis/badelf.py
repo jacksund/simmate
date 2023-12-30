@@ -5,7 +5,7 @@ from pathlib import Path
 from pymatgen.analysis.structure_matcher import StructureMatcher
 
 from simmate.apps.bader.workflows import PopulationAnalysis__Bader__Badelf
-from simmate.apps.vasp.workflows.static_energy.matproj import (
+from simmate.apps.materials_project.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
 from simmate.database.third_parties import MatprojStructure

@@ -2,10 +2,10 @@
 
 import pytest
 
-from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS
-from simmate.apps.vasp.workflows.electronic_structure.matproj_band_structure import (
+from simmate.apps.materials_project.workflows.electronic_structure.matproj_band_structure import (
     ElectronicStructure__Vasp__MatprojBandStructure,
 )
+from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS
 from simmate.conftest import SimmateMockHelper, copy_test_files
 
 

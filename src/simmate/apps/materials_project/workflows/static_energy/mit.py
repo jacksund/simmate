@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.vasp.workflows.relaxation.mit import Relaxation__Vasp__Mit
+from simmate.apps.materials_project.workflows.relaxation.mit import (
+    Relaxation__Vasp__Mit,
+)
 
 
 class StaticEnergy__Vasp__Mit(Relaxation__Vasp__Mit):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.vasp.workflows.relaxation.mvl_grainboundary import (
+from simmate.apps.materials_project.workflows.relaxation.mvl_grainboundary import (
     Relaxation__Vasp__MvlGrainboundary,
 )
 

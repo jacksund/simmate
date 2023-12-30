@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.vasp.workflows.relaxation.matproj_scan import (
+from simmate.apps.materials_project.workflows.relaxation.matproj_scan import (
     Relaxation__Vasp__MatprojScan,
 )
 

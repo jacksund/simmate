@@ -1,4 +1,4 @@
-from simmate.apps.vasp.workflows.static_energy.matproj_hse import (
+from simmate.apps.materials_project.workflows.static_energy.matproj_hse import (
     StaticEnergy__Vasp__MatprojHse,
 )
 

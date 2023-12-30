@@ -2,8 +2,6 @@
 
 from .diffusion import (
     Diffusion__Vasp__NebAllPathsMit,
-    Diffusion__Vasp__NebAllPathsWarrenLab,
-    Diffusion__Vasp__NebAllPathsWarrenLabQuick,
     Diffusion__Vasp__NebFromEndpointsMit,
     Diffusion__Vasp__NebFromImagesMit,
     Diffusion__Vasp__NebFromImagesMvlCi,
