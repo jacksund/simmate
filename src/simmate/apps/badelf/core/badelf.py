@@ -17,12 +17,12 @@ from pymatgen.analysis.local_env import CrystalNN
 from pymatgen.io.vasp import Potcar
 from scipy.constants import Avogadro
 
-from simmate.apps.badelf.badelf_tools.acf import ACF
 from simmate.apps.badelf.core.electride_finder import ElectrideFinder
 from simmate.apps.badelf.core.grid import Grid
 from simmate.apps.badelf.core.henkelman_bader_interface import ZeroFluxToolkit
 from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.apps.badelf.core.voxel_assignment import VoxelAssignmentToolkit
+from simmate.apps.bader.outputs import ACF
 
 # BUG: we shouldn't fully turning off warnings. This should be used within a context.
 warnings.filterwarnings("ignore")
