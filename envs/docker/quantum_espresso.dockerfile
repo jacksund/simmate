@@ -8,8 +8,10 @@
 #   (2) all required psuedopotentials (*.usp files, typically in a single directory)
 # These are normally given as volumes. This image will run then calculation.
 
-# Example command:
-#   docker run jacksund/quantum-espresso:v0.0.0 -v $(pwd):/qe_calc -v /path/to/potentials:/potentials
+# Command template:
+#   docker run jacksund/quantum-espresso:v0.0.0 -v $(pwd):/qe_calc/ -v /path/to/potentials:/potentials/
+# Command example:
+#   docker run -v C:\Users\jacks\Documents\SpyderWD\qe_test:/qe_calc -v C:\Users\jacks\simmate\quantum_espresso\potentials:/potentials jacksund/quantum-espresso:v0.0.0
 # ** also consider running in detatched mode: --rm -it
 
 # -----------------------------------------------------------------------------
@@ -65,4 +67,4 @@ WORKDIR qe_calc/
 # Command to call QE and run the PWscf calcualtion.
 # This entrypoint must be overwritten if the user wants parallel execution.  
 # (assumes settings.in + psuedopotentials are provided by user via volumes)
-ENTRYPOINT pw.x < settings.in > pw-scf.out
+ENTRYPOINT pw.x < settings.in > pwscf.out
