@@ -12,7 +12,6 @@ from .dynamics import (
     Dynamics__Vasp__Mit,
     Dynamics__Vasp__MvlNpt,
 )
-from .elastic import Elastic__Vasp__Mvl
 from .electronic_structure import (
     ElectronicStructure__Vasp__MatprojBandStructure,
     ElectronicStructure__Vasp__MatprojBandStructureHse,
