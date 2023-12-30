@@ -6,4 +6,3 @@ from .matproj_pbesol import StaticEnergy__Vasp__MatprojPbesol
 from .matproj_scan import StaticEnergy__Vasp__MatprojScan
 from .mit import StaticEnergy__Vasp__Mit
 from .mvl_neb_endpoint import StaticEnergy__Vasp__MvlNebEndpoint
-from .quality04 import StaticEnergy__Vasp__Quality04
