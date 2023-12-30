@@ -1,4 +1,4 @@
-from simmate.apps.vasp.workflows import Relaxation__Vasp__Staged
+from simmate.apps.warren_lab.workflows import Relaxation__Vasp__Staged
 
 
 class Relaxation__Vasp__StagedCluster(Relaxation__Vasp__Staged):

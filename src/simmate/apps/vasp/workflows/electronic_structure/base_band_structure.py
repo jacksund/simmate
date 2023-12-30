@@ -3,11 +3,11 @@
 from pymatgen.io.vasp.inputs import Kpoints
 from pymatgen.symmetry.bandstructure import HighSymmKpath
 
-from simmate.apps.vasp.inputs import Incar, Poscar, Potcar
-from simmate.apps.vasp.workflows.electronic_structure.utilities import get_hse_kpoints
-from simmate.apps.vasp.workflows.static_energy.matproj import (
+from simmate.apps.materials_project.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
+from simmate.apps.vasp.inputs import Incar, Poscar, Potcar
+from simmate.apps.vasp.workflows.electronic_structure import get_hse_kpoints
 
 
 class VaspBandStructure(StaticEnergy__Vasp__Matproj):
