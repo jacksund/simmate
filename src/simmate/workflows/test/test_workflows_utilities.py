@@ -40,8 +40,8 @@ def test_list_of_all_workflows():
         # "bad-elf-analysis.badelf.badelf-pbesol",
         "customized.toolkit.user-config",
         "diffusion.vasp.neb-all-paths-mit",
-        "diffusion.vasp.neb-all-paths-warren-lab",
-        "diffusion.vasp.neb-all-paths-warren-lab-quick",
+        # "diffusion.vasp.neb-all-paths-warren-lab",
+        # "diffusion.vasp.neb-all-paths-warren-lab-quick",
         "diffusion.vasp.neb-from-endpoints-mit",
         "diffusion.vasp.neb-from-images-mit",
         "diffusion.vasp.neb-from-images-mvl-ci",
@@ -161,7 +161,9 @@ def test_list_of_workflows_by_type():
 
 
 def test_get_workflow():
-    from simmate.apps.vasp.workflows import StaticEnergy__Vasp__Matproj as workflow
+    from simmate.apps.materials_project.workflows import (
+        StaticEnergy__Vasp__Matproj as workflow,
+    )
 
     assert get_workflow("static-energy.vasp.matproj") == workflow
 

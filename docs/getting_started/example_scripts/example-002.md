@@ -3,13 +3,13 @@
 
 ## About :star:
 
-This script queries the Material Project database for all ZnSnF6 structures with spacegroup=148 and then runs a (i) relaxation, (ii) static-energy, and (iii) bandstructure + density of states calculation on each -- passing the results between each step.
+This script configures and runs a custom NEB workflow that borrows features of path finding, endpoint relaxations, and more.
 
 | Key Info        |                                            |
 | --------------- | ------------------------------------------ |
 | Contributor     | Becca Radomsky                             |
 | Github User     | [@becca9835](https://github.com/becca9835) |
-| Last updated    | 2023.05.31                                 |
+| Last updated    | 2023.12.30                                 |
 | Simmate Version | v0.13.2                                    |
 
 ## Prerequisites :rotating_light:
@@ -31,7 +31,7 @@ This script queries the Material Project database for all ZnSnF6 structures with
 
 from simmate.apps.vasp.inputs import PBE_POTCAR_MAPPINGS
 from simmate.apps.vasp.workflows.base import VaspWorkflow
-from simmate.apps.vasp.workflows.diffusion.neb_base import (
+from simmate.apps.vasp.workflows.diffusion import (
     NebAllPathsWorkflow,
     SinglePathWorkflow,
     VaspNebFromImagesWorkflow,

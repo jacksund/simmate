@@ -4,13 +4,9 @@
 # circular imports errors, so we prevent isort from changing this file.
 # isort: skip_file
 
-from .matproj_full import ElectronicStructure__Vasp__MatprojFull
-from .matproj_hse_full import ElectronicStructure__Vasp__MatprojHseFull
-from .matproj_band_structure import ElectronicStructure__Vasp__MatprojBandStructure
-from .matproj_density_of_states import ElectronicStructure__Vasp__MatprojDensityOfStates
-from .matproj_band_structure_hse import (
-    ElectronicStructure__Vasp__MatprojBandStructureHse,
-)
-from .matproj_density_of_states_hse import (
-    ElectronicStructure__Vasp__MatprojDensityOfStatesHse,
-)
+# must be done first bc other submods depend on it
+from .utilities import get_hse_kpoints
+
+from .base_band_structure import VaspBandStructure
+from .base_density_of_states import VaspDensityOfStates
+from .base_full import ElectronicStructureWorkflow
