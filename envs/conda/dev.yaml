@@ -57,6 +57,7 @@ dependencies:
     - schedule >=1.2.0, <=1.2.0
     - toml >=0.10.2, <=0.10.2
     - typer >=0.6.0, <0.7.1
+    - xmltodict >=0.13.0, <=0.13.0
     # Recommended IDE for development -- We leave this as a separate install
     # because it's up to you and Spyder is a large package with many dependencies.
     # - spyder >=5.1.5

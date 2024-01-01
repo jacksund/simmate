@@ -27,5 +27,9 @@ class VaspConfig(AppConfig):
     name = "simmate.apps.vasp"
 
 
+class QuantumEspressoConfig(AppConfig):
+    name = "simmate.apps.quantum_espresso"
+
+
 class WarrenLabConfig(AppConfig):
     name = "simmate.apps.warren_lab"
