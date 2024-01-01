@@ -4,28 +4,151 @@
 # https://gitlab.com/ase/ase/-/blob/master/ase/io/espresso.py
 # https://github.com/materialsproject/pymatgen/blob/master/pymatgen/io/pwscf.py
 
-import re
 from pathlib import Path
 
-import numpy
 from pymatgen.core import Element, Lattice  # TODO: replace with toolkit objs
-from pymatgen.util.io_utils import clean_lines
 
 from simmate.toolkit import Structure
+from simmate.utilities import str_to_datatype
+
+# TODO: add/merge functionality of kw modifiers from INCAR
+# from simmate.apps.vasp.inputs.incar_modifiers import ....
 
 
 class PwscfInput:
     """
-    Base input file class. Right now, only supports no symmetry and is
+    Base input file class. Right now, it does not support symmetry and is
     very basic.
 
     The official input file docs (which this class wraps) is located here:
         https://www.quantum-espresso.org/Doc/INPUT_PW.html
+
+    Currently we make the following assumptions about the file:
+    - section titles are in all caps
+    - all key-value pairs are on separate lines
+    - there are no commas at the end of lines (for key-value pair sections)
+    - float values use "e" instead of "d" (ex: 1.23e-4)
     """
 
     # This class is a fork of PWInput from pymatgen. Many changes have been
     # made, but it good to know where we start & where we can contrib back to.
     # https://github.com/materialsproject/pymatgen/blob/master/pymatgen/io/pwscf.py
+
+    PARAMETER_SECTIONS = [
+        # key-value pairs
+        "&CONTROL",
+        "&SYSTEM",
+        "&ELECTRONS",
+        "&IONS",
+        "&CELL",
+        "&FCP",
+        "&RISM",
+        # structure-based (each has a unique format)
+        "ATOMIC_SPECIES",
+        "ATOMIC_POSITIONS",
+        "K_POINTS",
+        "ADDITIONAL_K_POINTS",
+        "CELL_PARAMETERS",
+        "CONSTRAINTS",
+        "OCCUPATIONS",
+        "ATOMIC_VELOCITIES",
+        "ATOMIC_FORCES",
+        "SOLVENTS",
+        "HUBBARD",
+    ]
+
+    # establish type mappings for common parameters.
+    # Note: this is for ALL sections (control, system, electrons, etc.)
+    PARAMETER_MAPPINGS = {
+        # BOOLEANS
+        "wf_collect": bool,
+        "tstress": bool,
+        "tprnfor": bool,
+        "lkpoint_dir": bool,
+        "tefield": bool,
+        "dipfield": bool,
+        "lelfield": bool,
+        "lorbm": bool,
+        "lberry": bool,
+        "lfcpopt": bool,
+        "monopole": bool,
+        "nosym": bool,
+        "nosym_evc": bool,
+        "noinv": bool,
+        "no_t_rev": bool,
+        "force_symmorphic": bool,
+        "use_all_frac": bool,
+        "one_atom_occupations": bool,
+        "starting_spin_angle": bool,
+        "noncolin": bool,
+        "x_gamma_extrapolation": bool,
+        "lda_plus_u": bool,
+        "lspinorb": bool,
+        "london": bool,
+        "ts_vdw_isolated": bool,
+        "xdm": bool,
+        "uniqueb": bool,
+        "rhombohedral": bool,
+        "realxz": bool,
+        "block": bool,
+        "scf_must_converge": bool,
+        "adaptive_thr": bool,
+        "diago_full_acc": bool,
+        "tqr": bool,
+        "remove_rigid_rot": bool,
+        "refold_pos": bool,
+        # FLOATS
+        "etot_conv_thr": float,
+        "forc_conv_thr": float,
+        "conv_thr": float,
+        "Hubbard_U": float,
+        "Hubbard_J0": float,
+        "degauss": float,
+        "starting_magnetization": float,
+        # INTEGERS
+        "nstep": int,
+        "iprint": int,
+        "nberrycyc": int,
+        "gdir": int,
+        "nppstr": int,
+        "ibrav": int,
+        "nat": int,
+        "ntyp": int,
+        "nbnd": int,
+        "nr1": int,
+        "nr2": int,
+        "nr3": int,
+        "nr1s": int,
+        "nr2s": int,
+        "nr3s": int,
+        "nspin": int,
+        "nqx1": int,
+        "nqx2": int,
+        "nqx3": int,
+        "lda_plus_u_kind": int,
+        "edir": int,
+        "report": int,
+        "esm_nfit": int,
+        "space_group": int,
+        "origin_choice": int,
+        "electron_maxstep": int,
+        "mixing_ndim": int,
+        "mixing_fixed_ns": int,
+        "ortho_para": int,
+        "diago_cg_maxiter": int,
+        "diago_david_ndim": int,
+        "nraise": int,
+        "bfgs_ndim": int,
+        "if_pos": int,
+        "nks": int,
+        "nk1": int,
+        "nk2": int,
+        "nk3": int,
+        "sk1": int,
+        "sk2": int,
+        "sk3": int,
+        "nconstr": int,
+    }
 
     def __init__(
         self,
@@ -92,426 +215,85 @@ class PwscfInput:
         self.kpoints_grid = kpoints_grid
         self.kpoints_shift = kpoints_shift
 
-    def __str__(self):
-        out = []
-        site_descriptions = {}
-
-        if self.pseudo is not None:
-            site_descriptions = self.pseudo
-        else:
-            c = 1
-            for site in self.structure:
-                name = None
-                for k, v in site_descriptions.items():
-                    if site.properties == v:
-                        name = k
-
-                if name is None:
-                    name = f"{site.specie.symbol}{c}"
-                    site_descriptions[name] = site.properties
-                    c += 1
-
-        def to_str(v):
-            if isinstance(v, str):
-                return f"{v!r}"
-            if isinstance(v, float):
-                return f"{str(v).replace('e', 'd')}"
-            if isinstance(v, bool):
-                if v:
-                    return ".TRUE."
-                return ".FALSE."
-            return v
-
-        for k1 in ["control", "system", "electrons", "ions", "cell"]:
-            v1 = self.sections[k1]
-            out.append(f"&{k1.upper()}")
-            sub = []
-            for k2 in sorted(v1):
-                if isinstance(v1[k2], list):
-                    n = 1
-                    for _ in v1[k2][: len(site_descriptions)]:
-                        sub.append(f"  {k2}({n}) = {to_str(v1[k2][n - 1])}")
-                        n += 1
-                else:
-                    sub.append(f"  {k2} = {to_str(v1[k2])}")
-            if k1 == "system":
-                if "ibrav" not in self.sections[k1]:
-                    sub.append("  ibrav = 0")
-                if "nat" not in self.sections[k1]:
-                    sub.append(f"  nat = {len(self.structure)}")
-                if "ntyp" not in self.sections[k1]:
-                    sub.append(f"  ntyp = {len(site_descriptions)}")
-            sub.append("/")
-            out.append(",\n".join(sub))
-
-        out.append("ATOMIC_SPECIES")
-        for k, v in sorted(site_descriptions.items(), key=lambda i: i[0]):
-            e = re.match(r"[A-Z][a-z]?", k).group(0)
-            p = v if self.pseudo is not None else v["pseudo"]
-            out.append(f"  {k}  {Element(e).atomic_mass:.4f} {p}")
-
-        out.append("ATOMIC_POSITIONS crystal")
-        if self.pseudo is not None:
-            for site in self.structure:
-                out.append(f"  {site.specie} {site.a:.6f} {site.b:.6f} {site.c:.6f}")
-        else:
-            for site in self.structure:
-                name = None
-                for k, v in sorted(site_descriptions.items(), key=lambda i: i[0]):
-                    if v == site.properties:
-                        name = k
-                out.append(f"  {name} {site.a:.6f} {site.b:.6f} {site.c:.6f}")
-
-        out.append(f"K_POINTS {self.kpoints_mode}")
-        if self.kpoints_mode == "automatic":
-            kpt_str = [f"{i}" for i in self.kpoints_grid]
-            kpt_str.extend([f"{i}" for i in self.kpoints_shift])
-            out.append(f"  {' '.join(kpt_str)}")
-        elif self.kpoints_mode == "crystal_b":
-            out.append(f" {len(self.kpoints_grid)}")
-            for i in range(len(self.kpoints_grid)):
-                kpt_str = [f"{entry:.4f}" for entry in self.kpoints_grid[i]]
-                out.append(f" {' '.join(kpt_str)}")
-        elif self.kpoints_mode == "gamma":
-            pass
-
-        out.append("CELL_PARAMETERS angstrom")
-        for vec in self.structure.lattice.matrix:
-            out.append(f"  {vec[0]:f} {vec[1]:f} {vec[2]:f}")
-        return "\n".join(out)
-
-    def as_dict(self):
+    @classmethod
+    def from_file(cls, filename: Path | str = "INCAR"):
         """
-        Create a dictionary representation of a PWInput object.
-
-        Returns:
-            dict
+        Builds an PwscfInput object from a file.
         """
-        return {
-            "structure": self.structure.as_dict(),
-            "pseudo": self.pseudo,
-            "sections": self.sections,
-            "kpoints_mode": self.kpoints_mode,
-            "kpoints_grid": self.kpoints_grid,
-            "kpoints_shift": self.kpoints_shift,
-        }
+        filename = Path(filename)
+        with filename.open() as file:
+            content = file.read()
+        return cls.from_str(content)
 
     @classmethod
-    def from_dict(cls, pwinput_dict):
+    def from_str(cls, content: str):
         """
-        Load a PWInput object from a dictionary.
-
-        Args:
-            pwinput_dict (dict): dictionary with PWInput data
-
-        Returns:
-            PWInput object
+        Builds an PwscfInput object from a string.
         """
-        return cls(
-            structure=Structure.from_dict(pwinput_dict["structure"]),
-            pseudo=pwinput_dict["pseudo"],
-            control=pwinput_dict["sections"]["control"],
-            system=pwinput_dict["sections"]["system"],
-            electrons=pwinput_dict["sections"]["electrons"],
-            ions=pwinput_dict["sections"]["ions"],
-            cell=pwinput_dict["sections"]["cell"],
-            kpoints_mode=pwinput_dict["kpoints_mode"],
-            kpoints_grid=pwinput_dict["kpoints_grid"],
-            kpoints_shift=pwinput_dict["kpoints_shift"],
-        )
+        # split the file content into separate lines
+        lines = content.split("\n")
 
-    def write_file(self, filename):
-        """
-        Write the PWSCF input file.
-
-        Args:
-            filename (str): The string filename to output to.
-        """
-        with open(filename, "w") as f:
-            f.write(str(self))
-
-    @classmethod
-    def from_file(cls, filename):
-        """
-        Reads an PWInput object from a file.
-
-        Args:
-            filename (str): Filename for file
-
-        Returns:
-            PWInput object
-        """
-        with open(filename, "rt") as f:
-            return cls.from_str(f.read())
-
-    @classmethod
-    def from_str(cls, string):
-        """
-        Reads an PWInput object from a string.
-
-        Args:
-            string (str): PWInput string
-
-        Returns:
-            PWInput object
-        """
-        lines = list(clean_lines(string.splitlines()))
-
-        def input_mode(line):
-            if line[0] == "&":
-                return ("sections", line[1:].lower())
-            if "ATOMIC_SPECIES" in line:
-                return ("pseudo",)
-            if "K_POINTS" in line:
-                return "kpoints", line.split()[1]
-            if "OCCUPATIONS" in line:
-                return "occupations"
-            if "CELL_PARAMETERS" in line or "ATOMIC_POSITIONS" in line:
-                return "structure", line.split()[1]
-            if line == "/":
-                return None
-            return mode
-
-        sections = {
-            "control": {},
-            "system": {},
-            "electrons": {},
-            "ions": {},
-            "cell": {},
-        }
-        pseudo = {}
-        lattice = []
-        species = []
-        coords = []
-        structure = None
-        site_properties = {"pseudo": []}
-        mode = None
+        # organize all lines by their section headers
+        sections = {}
+        current_section = None
         for line in lines:
-            mode = input_mode(line)
-            if mode is None:
-                pass
-            elif mode[0] == "sections":
-                section = mode[1]
-                m = re.match(r"(\w+)\(?(\d*?)\)?\s*=\s*(.*)", line)
-                if m:
-                    key = m.group(1).strip()
-                    key_ = m.group(2).strip()
-                    val = m.group(3).strip()
-                    if key_ != "":
-                        if sections[section].get(key) is None:
-                            val_ = [0.0] * 20  # MAX NTYP DEFINITION
-                            val_[int(key_) - 1] = cls.proc_val(key, val)
-                            sections[section][key] = val_
+            # clean the line
+            line = line.strip()
 
-                            site_properties[key] = []
-                        else:
-                            sections[section][key][int(key_) - 1] = cls.proc_val(
-                                key, val
-                            )
-                    else:
-                        sections[section][key] = cls.proc_val(key, val)
+            # If the line starts with a # or ! then its a comment and we should skip.
+            # It also could be an empty line that we should skip,
+            if (
+                # empty lines
+                not line
+                or line.startswith("\n")
+                # comment lines
+                or line.startswith("#")
+                or line.startswith("!")
+                # end of section
+                or line == "/"
+            ):
+                continue
+            # Check to see if the line is the start of a new section
+            elif line in cls.PARAMETER_SECTIONS:
+                current_section = line
+                sections[current_section] = []
+            else:
+                assert current_section is not None  # bug-check
+                sections[current_section].append(line)
 
-            elif mode[0] == "pseudo":
-                m = re.match(r"(\w+)\s+(\d*.\d*)\s+(.*)", line)
-                if m:
-                    pseudo[m.group(1).strip()] = m.group(3).strip()
-            elif mode[0] == "kpoints":
-                m = re.match(r"(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)", line)
-                if m:
-                    kpoints_grid = (int(m.group(1)), int(m.group(2)), int(m.group(3)))
-                    kpoints_shift = (int(m.group(4)), int(m.group(5)), int(m.group(6)))
-                else:
-                    kpoints_mode = mode[1]
-                    kpoints_grid = (1, 1, 1)
-                    kpoints_shift = (0, 0, 0)
+        # now go through each section and convert/format to as needed
+        sections_cleaned = {}
+        for section, lines in sections.items():
+            # these sections are key-value pairs and give a dictionary
+            if section in [
+                "&CONTROL",
+                "&SYSTEM",
+                "&ELECTRONS",
+                "&IONS",
+                "&CELL",
+                "&FCP",
+                "&RISM",
+            ]:
+                section_name = section.replace("&", "").lower()
+                section_data = {}
+                for line in lines:
+                    parameter, value = [i.strip() for i in line.split("=")]
+                    section_data[parameter] = str_to_datatype(
+                        parameter=parameter,
+                        value=value,
+                        type_mappings=cls.PARAMETER_MAPPINGS,
+                    )
+                sections_cleaned[section_name] = section_data
 
-            elif mode[0] == "structure":
-                m_l = re.match(r"(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s+(-?\d+\.?\d*)", line)
-                m_p = re.match(
-                    r"(\w+)\s+(-?\d+\.\d*)\s+(-?\d+\.?\d*)\s+(-?\d+\.?\d*)", line
-                )
-                if m_l:
-                    lattice += [
-                        float(m_l.group(1)),
-                        float(m_l.group(2)),
-                        float(m_l.group(3)),
-                    ]
-                elif m_p:
-                    site_properties["pseudo"].append(pseudo[m_p.group(1)])
-                    species.append(m_p.group(1))
-                    coords += [
-                        [float(m_p.group(2)), float(m_p.group(3)), float(m_p.group(4))]
-                    ]
+            # All other sections need special handling
 
-                    if mode[1] == "angstrom":
-                        coords_are_cartesian = True
-                    elif mode[1] == "crystal":
-                        coords_are_cartesian = False
-        structure = Structure(
-            Lattice(lattice),
-            species,
-            coords,
-            coords_are_cartesian=coords_are_cartesian,
-            site_properties=site_properties,
-        )
-        return cls(
-            structure=structure,
-            control=sections["control"],
-            pseudo=pseudo,
-            system=sections["system"],
-            electrons=sections["electrons"],
-            ions=sections["ions"],
-            cell=sections["cell"],
-            kpoints_mode=kpoints_mode,
-            kpoints_grid=kpoints_grid,
-            kpoints_shift=kpoints_shift,
-        )
+        breakpoint()
+        # return the final dictionary as an Incar object
+        # return cls(**parameters)
 
-    @staticmethod
-    def proc_val(key, val):
-        """
-        Static helper method to convert PWINPUT parameters to proper type, e.g.,
-        integers, floats, etc.
-
-        Args:
-            key: PWINPUT parameter key
-            val: Actual value of PWINPUT parameter.
-        """
-        float_keys = (
-            "etot_conv_thr",
-            "forc_conv_thr",
-            "conv_thr",
-            "Hubbard_U",
-            "Hubbard_J0",
-            "degauss",
-            "starting_magnetization",
-        )
-
-        int_keys = (
-            "nstep",
-            "iprint",
-            "nberrycyc",
-            "gdir",
-            "nppstr",
-            "ibrav",
-            "nat",
-            "ntyp",
-            "nbnd",
-            "nr1",
-            "nr2",
-            "nr3",
-            "nr1s",
-            "nr2s",
-            "nr3s",
-            "nspin",
-            "nqx1",
-            "nqx2",
-            "nqx3",
-            "lda_plus_u_kind",
-            "edir",
-            "report",
-            "esm_nfit",
-            "space_group",
-            "origin_choice",
-            "electron_maxstep",
-            "mixing_ndim",
-            "mixing_fixed_ns",
-            "ortho_para",
-            "diago_cg_maxiter",
-            "diago_david_ndim",
-            "nraise",
-            "bfgs_ndim",
-            "if_pos",
-            "nks",
-            "nk1",
-            "nk2",
-            "nk3",
-            "sk1",
-            "sk2",
-            "sk3",
-            "nconstr",
-        )
-
-        bool_keys = (
-            "wf_collect",
-            "tstress",
-            "tprnfor",
-            "lkpoint_dir",
-            "tefield",
-            "dipfield",
-            "lelfield",
-            "lorbm",
-            "lberry",
-            "lfcpopt",
-            "monopole",
-            "nosym",
-            "nosym_evc",
-            "noinv",
-            "no_t_rev",
-            "force_symmorphic",
-            "use_all_frac",
-            "one_atom_occupations",
-            "starting_spin_angle",
-            "noncolin",
-            "x_gamma_extrapolation",
-            "lda_plus_u",
-            "lspinorb",
-            "london",
-            "ts_vdw_isolated",
-            "xdm",
-            "uniqueb",
-            "rhombohedral",
-            "realxz",
-            "block",
-            "scf_must_converge",
-            "adaptive_thr",
-            "diago_full_acc",
-            "tqr",
-            "remove_rigid_rot",
-            "refold_pos",
-        )
-
-        def smart_int_or_float(numstr):
-            if numstr.find(".") != -1 or numstr.lower().find("e") != -1:
-                return float(numstr)
-            return int(numstr)
-
-        try:
-            if key in bool_keys:
-                if val.lower() == ".true.":
-                    return True
-                if val.lower() == ".false.":
-                    return False
-                raise ValueError(key + " should be a boolean type!")
-
-            if key in float_keys:
-                return float(
-                    re.search(r"^-?\d*\.?\d*d?-?\d*", val.lower())
-                    .group(0)
-                    .replace("d", "e")
-                )
-
-            if key in int_keys:
-                return int(re.match(r"^-?[0-9]+", val).group(0))
-
-        except ValueError:
-            pass
-
-        try:
-            return smart_int_or_float(val.replace("d", "e"))
-        except ValueError:
-            pass
-
-        if "true" in val.lower():
-            return True
-        if "false" in val.lower():
-            return False
-
-        m = re.match(r"^[\"|'](.+)[\"|']$", val)
-        if m:
-            return m.group(1)
-        return None
-
-
-class PWInputError(BaseException):
-    """Error for PWInput."""
+    # TODO:
+    # to_str
+    # to_file
+    # to_dict
+    # from_dict
+    # refactor __init__
