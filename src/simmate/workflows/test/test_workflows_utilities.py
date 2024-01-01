@@ -93,6 +93,7 @@ def test_list_of_all_workflows():
         # "relaxation.vasp.staged-cluster",
         "restart.toolkit.automatic",
         # "static-energy.vasp.cluster-high-qe",
+        "static-energy.quantum-espresso.quality00",
         "static-energy.vasp.matproj",
         "static-energy.vasp.matproj-hse",
         "static-energy.vasp.matproj-hsesol",
@@ -119,7 +120,7 @@ def test_list_of_all_workflows():
 
 
 def test_list_of_apps_by_type():
-    assert get_apps_by_type("static-energy") == ["vasp"]
+    assert get_apps_by_type("static-energy") == ["quantum-espresso", "vasp"]
 
     with pytest.raises(TypeError):
         get_apps_by_type("non-existant-type")
@@ -127,6 +128,7 @@ def test_list_of_apps_by_type():
 
 def test_list_of_workflows_by_type():
     assert get_workflow_names_by_type("static-energy") == [
+        "static-energy.quantum-espresso.quality00",
         # "static-energy.vasp.cluster-high-qe",
         "static-energy.vasp.matproj",
         "static-energy.vasp.matproj-hse",

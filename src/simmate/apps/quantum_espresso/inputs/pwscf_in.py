@@ -6,7 +6,7 @@
 
 from pathlib import Path
 
-from pymatgen.core import Element, Lattice  # TODO: replace with toolkit objs
+from pymatgen.core import Lattice
 
 from simmate.toolkit import Structure
 from simmate.utilities import str_to_datatype
@@ -29,6 +29,8 @@ class PwscfInput:
     - there are no commas at the end of lines (for key-value pair sections)
     - float values use "e" instead of "d" (ex: 1.23e-4)
     - no "if_pos" values are used in the ATOMIC_POSITIONS section
+    - use CELL_PARAMETERS with 'angstrom'. avoid `alat` and `bohr`
+    - use ATOMIC_POSITIONS with 'crystal' or 'angstrom'. avoid others
     """
 
     # This class is a fork of PWInput from pymatgen. Many changes have been
@@ -157,11 +159,13 @@ class PwscfInput:
         pseudo: str | Path = None,
         # sections of input file
         # TODO: should these just be a single dictionary?
-        control: dict = {"calculation": "scf"},
+        control: dict = {},
         system: dict = {},
         electrons: dict = {},
         ions: dict = {},
         cell: dict = {},
+        fcp: dict = {},
+        rism: dict = {},
         # kpts settings
         # TODO: replace with Kpoints class
         kpoints_mode: str = "automatic",
@@ -170,28 +174,8 @@ class PwscfInput:
     ):
         """
         Initializes a PWSCF input file.
-
-        Args:
-            structure (Structure): Input structure. For spin-polarized calculation,
-                properties (e.g. {"starting_magnetization": -0.5,
-                "pseudo": "Mn.pbe-sp-van.UPF"}) on each site is needed instead of
-                pseudo (dict).
-            pseudo (dict): A dict of the pseudopotentials to use. Default to None.
-            control (dict): Control parameters. Refer to official PWSCF doc
-                on supported parameters. Default to {"calculation": "scf"}
-            system (dict): System parameters. Refer to official PWSCF doc
-                on supported parameters. Default to None, which means {}.
-            electrons (dict): Electron parameters. Refer to official PWSCF doc
-                on supported parameters. Default to None, which means {}.
-            ions (dict): Ions parameters. Refer to official PWSCF doc
-                on supported parameters. Default to None, which means {}.
-            cell (dict): Cell parameters. Refer to official PWSCF doc
-                on supported parameters. Default to None, which means {}.
-            kpoints_mode (str): Kpoints generation mode. Default to automatic.
-            kpoints_grid (sequence): The kpoint grid. Default to (1, 1, 1).
-            kpoints_shift (sequence): The shift for the kpoints. Defaults to
-                (0, 0, 0).
         """
+        breakpoint()
         self.structure = structure
         self.pseudo = pseudo
         self.kpoints_mode = kpoints_mode
@@ -319,6 +303,7 @@ class PwscfInput:
             ):
                 section_name, *section_mode = section.lower().split()
                 if not section_mode:
+                    section_name = section_name[0]
                     section_mode = "tpiba"  # using default value
                 section_data = {
                     "mode": section_mode,
@@ -354,9 +339,7 @@ class PwscfInput:
                         section_data["data"].append(kpt)
 
             elif section.startswith("CELL_PARAMETERS"):
-                section_name, *section_mode = section.lower().split()
-                if not section_mode:
-                    section_mode = "alat"  # using default value
+                section_name, section_mode = section.lower().split()
                 section_data = {
                     "mode": section_mode,
                     "data": [],
@@ -366,7 +349,7 @@ class PwscfInput:
                 #   v2(1)  v2(2)  v2(3)    ... 2nd lattice vector
                 #   v3(1)  v3(2)  v3(3)    ... 3rd lattice vector
                 assert len(lines) == 3  # bug-check
-                lattice = [float(line.strip().split()) for line in lines]
+                lattice = [[float(v.strip()) for v in l.split()] for l in lines]
                 section_data["data"].append(lattice)
 
             elif section == "CONSTRAINTS":
@@ -391,11 +374,102 @@ class PwscfInput:
             sections_cleaned[section_name] = section_data
 
         # we now have all the infomation we need in a clean dictionary format
-        return sections_cleaned
-        # return cls.from_dict(sections_cleaned)
+        return cls.from_dict(sections_cleaned)
 
-    # @classmethod
-    # def from_dict(cls, data: dict):
+    @classmethod
+    def from_dict(cls, data: dict):
+        # We do not yet support symmetry-based inputs for lattice/structures
+        lattice_symmetry = data["system"]["ibrav"]  # ibrav is a required input
+        if lattice_symmetry != 0:
+            raise NotImplementedError("PwscfInput currently only supports ibrav=0")
+            # TODO: add support via Structure.from_spacegroup
+
+        # ----------------------
+
+        # build the lattice
+
+        lattice_parameters = data.get("cell_parameters")
+        if not lattice_parameters:
+            raise Exception(
+                "PwscfInput requires cell parameters to determine the structure"
+            )
+
+        # regardless of input, we convert to Angstrom for simmate
+        lattice_units = lattice_parameters.get("mode")
+        if lattice_units == "alat":
+            raise NotImplementedError("alat is not yet supported for cell parameters")
+        elif lattice_units == "bohr":
+            raise NotImplementedError("bohr is not yet supported for cell parameters")
+        elif lattice_units == "angstrom":
+            # we already have the matrix in proper units
+            lattice_matrix = lattice_parameters["data"]
+        else:
+            raise Exception(f"Unknown cell parameters mode: {lattice_units}.")
+
+        lattice = Lattice(matrix=lattice_matrix)
+
+        # ----------------------
+
+        # build the structure using lattice + atomic sites
+
+        site_parameters = data.get("atomic_positions")
+        if not site_parameters:
+            raise Exception(
+                "PwscfInput requires atomic positions to determine the structure"
+            )
+
+        # regardless of input, we convert to either Angstrom or fractional coords
+        site_units = site_parameters.get("mode")
+        if site_units == "alat":
+            raise NotImplementedError("alat is not yet supported for cell parameters.")
+        elif site_units == "bohr":
+            raise NotImplementedError("bohr is not yet supported for cell parameters.")
+        elif site_units == "angstrom":
+            coords_are_cartesian = True
+            lattice_matrix = lattice_parameters["data"]
+        elif site_units == "crystal":
+            coords_are_cartesian = False
+        elif site_units == "crystal_sg":
+            raise NotImplementedError(
+                "crystal_sg is not yet supported for cell parameters."
+            )
+        else:
+            raise Exception(f"Unknown atomic positions mode: {lattice_units}.")
+
+        # regardless of mode, we bring all site coords and elements into
+        # independent lists
+        species = [site["element"] for site in site_parameters["data"]]
+        coords = [site["coords"] for site in site_parameters["data"]]
+
+        structure = Structure(
+            lattice=lattice,
+            species=species,
+            coords=coords,
+            coords_are_cartesian=coords_are_cartesian,
+        )
+
+        # ----------------------
+
+        # build k-points info
+        # TODO: have base class to help here + merge with VASP
+        breakpoint()
+
+        # ----------------------
+
+        return cls(
+            structure=structure,
+            pseudo=data.get("control", {}).get("psuedo_file"),
+            control=data.get("control", {}),  # !!! should I pop psuedo_file?
+            system=data.get("system", {}),
+            electrons=data.get("electrons", {}),
+            ions=data.get("ions", {}),
+            cell=data.get("cell", {}),
+            fcp=data.get("fcp", {}),
+            rism=data.get("rism", {}),
+            kpoints_mode="automatic",
+            kpoints_grid=(1, 1, 1),
+            kpoints_shift=(0, 0, 0),
+        )
 
     # -------------------------------------------------------------------------
 

@@ -12,7 +12,7 @@ class Kpoints:
     """
 
     @staticmethod
-    def write_file(
+    def to_file(
         # structure to base off of. this will be passed through the kpoint_method
         structure,
         # either a KptGrid or KptPath object. TODO - KptGrid is just a float (density)
