@@ -28,6 +28,7 @@ class PwscfInput:
     - all key-value pairs are on separate lines
     - there are no commas at the end of lines (for key-value pair sections)
     - float values use "e" instead of "d" (ex: 1.23e-4)
+    - no "if_pos" values are used in the ATOMIC_POSITIONS section
     """
 
     # This class is a fork of PWInput from pymatgen. Many changes have been
@@ -156,11 +157,11 @@ class PwscfInput:
         pseudo: str | Path = None,
         # sections of input file
         # TODO: should these just be a single dictionary?
-        control: dict = None,
-        system: dict = None,
-        electrons: dict = None,
-        ions: dict = None,
-        cell: dict = None,
+        control: dict = {"calculation": "scf"},
+        system: dict = {},
+        electrons: dict = {},
+        ions: dict = {},
+        cell: dict = {},
         # kpts settings
         # TODO: replace with Kpoints class
         kpoints_mode: str = "automatic",
@@ -192,28 +193,14 @@ class PwscfInput:
                 (0, 0, 0).
         """
         self.structure = structure
-        sections = {}
-        sections["control"] = control or {"calculation": "scf"}
-        sections["system"] = system or {}
-        sections["electrons"] = electrons or {}
-        sections["ions"] = ions or {}
-        sections["cell"] = cell or {}
-        if pseudo is None:
-            for site in structure:
-                try:
-                    site.properties["pseudo"]
-                except KeyError:
-                    raise PWInputError(f"Missing {site} in pseudo specification!")
-        else:
-            for species in self.structure.composition:
-                if str(species) not in pseudo:
-                    raise PWInputError(f"Missing {species} in pseudo specification!")
         self.pseudo = pseudo
-
-        self.sections = sections
         self.kpoints_mode = kpoints_mode
         self.kpoints_grid = kpoints_grid
         self.kpoints_shift = kpoints_shift
+
+    # -------------------------------------------------------------------------
+
+    # Loading methods
 
     @classmethod
     def from_file(cls, filename: Path | str = "INCAR"):
@@ -254,7 +241,9 @@ class PwscfInput:
             ):
                 continue
             # Check to see if the line is the start of a new section
-            elif line in cls.PARAMETER_SECTIONS:
+            # Note, we only grab the first 'word' because you can have headers
+            # such as "ATOMIC_POSITIONS angstrom" or "ATOMIC_POSITIONS alat"
+            elif line.strip().split()[0] in cls.PARAMETER_SECTIONS:
                 current_section = line
                 sections[current_section] = []
             else:
@@ -283,17 +272,137 @@ class PwscfInput:
                         value=value,
                         type_mappings=cls.PARAMETER_MAPPINGS,
                     )
-                sections_cleaned[section_name] = section_data
 
             # All other sections need special handling
 
-        breakpoint()
-        # return the final dictionary as an Incar object
-        # return cls(**parameters)
+            elif section == "ATOMIC_SPECIES":
+                section_name = section.lower()
+                section_data = []
+                # each line follows...
+                #   X(symbol)    Mass_X     PseudoPot_X
+                # for ex:
+                #   Si  28.086  Si.pz-vbc.UPF
+                # Note: mass is only used for MD calcs.
+                for line in lines:
+                    element, mass, psuedo_file = line.strip().split()
+                    # TODO: use an Element base class...?
+                    specie = {
+                        "element": element.strip(),
+                        "mass": mass.strip(),
+                        "psuedo_file": psuedo_file.strip(),
+                    }
+                    section_data.append(specie)
 
-    # TODO:
-    # to_str
-    # to_file
-    # to_dict
-    # from_dict
-    # refactor __init__
+            elif section.startswith("ATOMIC_POSITIONS"):
+                section_name, section_mode = section.lower().split()
+                section_data = {
+                    "mode": section_mode,
+                    "data": [],
+                }
+                # each line follows...
+                #   X(symbol)    x    y    z
+                # for ex:
+                #   Si 0.00 0.00 0.00
+                #   Si 0.25 0.25 0.25
+                # Note: mass is only used for MD calcs.
+                for line in lines:
+                    # TODO: use a PeriodicSite base class...?
+                    element, x, y, z = line.strip().split()
+                    specie = {
+                        "element": element.strip(),
+                        "coords": [float(x), float(y), float(z)],
+                    }
+                    section_data["data"].append(specie)
+
+            elif section.startswith("K_POINTS") or section.startswith(
+                "ADDITIONAL_K_POINTS"
+            ):
+                section_name, *section_mode = section.lower().split()
+                if not section_mode:
+                    section_mode = "tpiba"  # using default value
+                section_data = {
+                    "mode": section_mode,
+                    "data": [],
+                }
+                if section_mode == "gamma":
+                    raise NotImplementedError()  # TODO
+                elif section_mode == "automatic":
+                    raise NotImplementedError()  # TODO
+                elif section_mode in [
+                    "tpiba",
+                    "crystal",
+                    "tpiba_b",
+                    "crystal_b",
+                    "tpiba_c",
+                    "crystal_c",
+                ]:
+                    # The first line is always just the total number of kpts.
+                    # Then each line follows...
+                    #   xk_x(1) 	 xk_y(1) 	 xk_z(1) 	 wk(1)
+                    # for ex:
+                    #   10
+                    #   0.1250000  0.1250000  0.1250000   1.00
+                    #   0.1250000  0.1250000  0.3750000   3.00
+                    #   ..... (+ 8 more lines for kpts)
+                    # nkpts = line[0]  # we don't store this because it can be inferred
+                    for line in lines[1:]:
+                        x, y, z, weight = line.strip().split()
+                        kpt = {
+                            "coords": [float(x), float(y), float(z)],
+                            "weight": float(weight),
+                        }
+                        section_data["data"].append(kpt)
+
+            elif section.startswith("CELL_PARAMETERS"):
+                section_name, *section_mode = section.lower().split()
+                if not section_mode:
+                    section_mode = "alat"  # using default value
+                section_data = {
+                    "mode": section_mode,
+                    "data": [],
+                }
+                # section format follows...
+                #   v1(1)  v1(2)  v1(3)    ... 1st lattice vector
+                #   v2(1)  v2(2)  v2(3)    ... 2nd lattice vector
+                #   v3(1)  v3(2)  v3(3)    ... 3rd lattice vector
+                assert len(lines) == 3  # bug-check
+                lattice = [float(line.strip().split()) for line in lines]
+                section_data["data"].append(lattice)
+
+            elif section == "CONSTRAINTS":
+                raise NotImplementedError()  # TODO
+
+            elif section == "OCCUPATIONS":
+                raise NotImplementedError()  # TODO
+
+            elif section.startswith("ATOMIC_VELOCITIES"):
+                raise NotImplementedError()  # TODO
+
+            elif section == "ATOMIC_FORCES":
+                raise NotImplementedError()  # TODO
+
+            elif section.startswith("SOLVENTS"):
+                raise NotImplementedError()  # TODO
+
+            elif section.startswith("HUBBARD"):
+                raise NotImplementedError()  # TODO
+
+            # regardless of the method above, we now have cleaned the section
+            sections_cleaned[section_name] = section_data
+
+        # we now have all the infomation we need in a clean dictionary format
+        return sections_cleaned
+        # return cls.from_dict(sections_cleaned)
+
+    # @classmethod
+    # def from_dict(cls, data: dict):
+
+    # -------------------------------------------------------------------------
+
+    # Export methods
+
+    # def to_str(self) -> str:
+    # def to_file(self, filename: Path | str = "settings.in"):
+    # def to_dict(self) -> dict:
+
+    # -------------------------------------------------------------------------
