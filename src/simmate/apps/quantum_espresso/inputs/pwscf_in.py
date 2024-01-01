@@ -15,6 +15,24 @@ from simmate.utilities import str_to_datatype
 # from simmate.apps.vasp.inputs.incar_modifiers import ....
 
 
+class Kpoints:
+    # placeholder class until we have general one for both vasp, qe, & others
+
+    def __init__(
+        self,
+        mode: str,
+        grid: list[list[float]] | list[float],
+        offset: list[list[float]] | list[float],
+        weights: list[list[float]] | list[float],
+        # to help evaluate...? or maybe attach to structure obj instead?
+        # structure: Structure = None,
+    ):
+        self.mode = mode
+        self.grid = grid
+        self.offset = offset
+        self.weights = weights
+
+
 class PwscfInput:
     """
     Base input file class. Right now, it does not support symmetry and is
@@ -24,13 +42,13 @@ class PwscfInput:
         https://www.quantum-espresso.org/Doc/INPUT_PW.html
 
     Currently we make the following assumptions about the file:
-    - section titles are in all caps
-    - all key-value pairs are on separate lines
-    - there are no commas at the end of lines (for key-value pair sections)
-    - float values use "e" instead of "d" (ex: 1.23e-4)
-    - no "if_pos" values are used in the ATOMIC_POSITIONS section
-    - use CELL_PARAMETERS with 'angstrom'. avoid `alat` and `bohr`
-    - use ATOMIC_POSITIONS with 'crystal' or 'angstrom'. avoid others
+        - section titles are in all caps
+        - all key-value pairs are on separate lines
+        - there are no commas at the end of lines (for key-value pair sections)
+        - float values use "e" instead of "d" (ex: 1.23e-4)
+        - no "if_pos" values are used in the ATOMIC_POSITIONS section
+        - use CELL_PARAMETERS with 'angstrom'. avoid `alat` and `bohr`
+        - use ATOMIC_POSITIONS with 'crystal' or 'angstrom'. avoid others
     """
 
     # This class is a fork of PWInput from pymatgen. Many changes have been
@@ -63,6 +81,45 @@ class PwscfInput:
     # establish type mappings for common parameters.
     # Note: this is for ALL sections (control, system, electrons, etc.)
     PARAMETER_MAPPINGS = {
+        # STRINGS - these must be quoted in the input file
+        "calculation": str,
+        "title": str,
+        "verbosity": str,
+        "restart_mode": str,
+        "outdir": str,
+        "wfcdir": str,
+        "prefix": str,
+        "disk_io": str,
+        "pseudo_dir": str,
+        "occupations": str,
+        "smearing": str,
+        "pol_type": str,
+        "input_dft": str,
+        "exxdiv_treatment": str,
+        "dmft_prefix": str,
+        "constrained_magnetization": str,
+        "assume_isolated": str,
+        "esm_bc": str,
+        "vdw_corr": str,
+        "mixing_mode": str,
+        "diagonalization": str,
+        "efield_phase": str,
+        "startingpot": str,
+        "startingwfc": str,
+        "ion_positions": str,
+        "ion_velocities": str,
+        "ion_dynamics": str,
+        "pot_extrapolation": str,
+        "wfc_extrapolation": str,
+        "ion_temperature": str,
+        "cell_dynamics": str,
+        "cell_dofree": str,
+        "fcp_dynamics": str,
+        "fcp_temperature": str,
+        "closure": str,
+        "starting1d": str,
+        "starting3d": str,
+        "laue_wall": str,
         # BOOLEANS
         "wf_collect": bool,
         "tstress": bool,
@@ -156,9 +213,8 @@ class PwscfInput:
     def __init__(
         self,
         structure: Structure,
-        pseudo: str | Path = None,
-        # sections of input file
-        # TODO: should these just be a single dictionary?
+        kpoints: Kpoints,
+        psuedo_mappings: dict = {},
         control: dict = {},
         system: dict = {},
         electrons: dict = {},
@@ -166,21 +222,21 @@ class PwscfInput:
         cell: dict = {},
         fcp: dict = {},
         rism: dict = {},
-        # kpts settings
-        # TODO: replace with Kpoints class
-        kpoints_mode: str = "automatic",
-        kpoints_grid: tuple[int] = (1, 1, 1),
-        kpoints_shift: tuple[float] = (0, 0, 0),
     ):
         """
         Initializes a PWSCF input file.
         """
-        breakpoint()
         self.structure = structure
-        self.pseudo = pseudo
-        self.kpoints_mode = kpoints_mode
-        self.kpoints_grid = kpoints_grid
-        self.kpoints_shift = kpoints_shift
+        self.kpoints = kpoints
+        self.psuedo_mappings = psuedo_mappings
+
+        self.control = control
+        self.system = system
+        self.electrons = electrons
+        self.ions = ions
+        self.cell = cell
+        self.fcp = fcp
+        self.rism = rism
 
     # -------------------------------------------------------------------------
 
@@ -237,6 +293,8 @@ class PwscfInput:
         # now go through each section and convert/format to as needed
         sections_cleaned = {}
         for section, lines in sections.items():
+            # ----------------------
+
             # these sections are key-value pairs and give a dictionary
             if section in [
                 "&CONTROL",
@@ -255,9 +313,11 @@ class PwscfInput:
                         parameter=parameter,
                         value=value,
                         type_mappings=cls.PARAMETER_MAPPINGS,
+                        strip_quotes=True,
                     )
 
             # All other sections need special handling
+            # ----------------------
 
             elif section == "ATOMIC_SPECIES":
                 section_name = section.lower()
@@ -276,6 +336,8 @@ class PwscfInput:
                         "psuedo_file": psuedo_file.strip(),
                     }
                     section_data.append(specie)
+
+            # ----------------------
 
             elif section.startswith("ATOMIC_POSITIONS"):
                 section_name, section_mode = section.lower().split()
@@ -298,21 +360,35 @@ class PwscfInput:
                     }
                     section_data["data"].append(specie)
 
+            # ----------------------
+
             elif section.startswith("K_POINTS") or section.startswith(
                 "ADDITIONAL_K_POINTS"
             ):
                 section_name, *section_mode = section.lower().split()
                 if not section_mode:
-                    section_name = section_name[0]
                     section_mode = "tpiba"  # using default value
+                    # Note: if the is NO section at all, then the default is
+                    # actually gamma. This is handled within `from_dict`
+                else:
+                    section_mode = section_mode[0]
                 section_data = {
                     "mode": section_mode,
                     "data": [],
                 }
                 if section_mode == "gamma":
-                    raise NotImplementedError()  # TODO
+                    section_data.pop("data")  # no extra info needed
                 elif section_mode == "automatic":
-                    raise NotImplementedError()  # TODO
+                    # there should be a single line for this mode.
+                    #   nk1  nk2  nk3  sk1  sk2  sk3
+                    # n = grid, s = offset
+                    assert len(lines) == 1
+                    nk1, nk2, nk3, sk1, sk2, sk3 = lines[0].strip().split()
+                    section_data["data"] = {
+                        "grid": [int(nk1), int(nk2), int(nk3)],
+                        "offset": [int(sk1), int(sk2), int(sk3)],
+                    }
+
                 elif section_mode in [
                     "tpiba",
                     "crystal",
@@ -322,6 +398,8 @@ class PwscfInput:
                     "crystal_c",
                 ]:
                     # The first line is always just the total number of kpts.
+                    # nkpts = line[0]  # we don't store this because it can be inferred
+
                     # Then each line follows...
                     #   xk_x(1) 	 xk_y(1) 	 xk_z(1) 	 wk(1)
                     # for ex:
@@ -329,7 +407,6 @@ class PwscfInput:
                     #   0.1250000  0.1250000  0.1250000   1.00
                     #   0.1250000  0.1250000  0.3750000   3.00
                     #   ..... (+ 8 more lines for kpts)
-                    # nkpts = line[0]  # we don't store this because it can be inferred
                     for line in lines[1:]:
                         x, y, z, weight = line.strip().split()
                         kpt = {
@@ -337,6 +414,8 @@ class PwscfInput:
                             "weight": float(weight),
                         }
                         section_data["data"].append(kpt)
+
+            # ----------------------
 
             elif section.startswith("CELL_PARAMETERS"):
                 section_name, section_mode = section.lower().split()
@@ -351,6 +430,8 @@ class PwscfInput:
                 assert len(lines) == 3  # bug-check
                 lattice = [[float(v.strip()) for v in l.split()] for l in lines]
                 section_data["data"].append(lattice)
+
+            # ----------------------
 
             elif section == "CONSTRAINTS":
                 raise NotImplementedError()  # TODO
@@ -369,6 +450,8 @@ class PwscfInput:
 
             elif section.startswith("HUBBARD"):
                 raise NotImplementedError()  # TODO
+
+            # ----------------------
 
             # regardless of the method above, we now have cleaned the section
             sections_cleaned[section_name] = section_data
@@ -452,13 +535,52 @@ class PwscfInput:
 
         # build k-points info
         # TODO: have base class to help here + merge with VASP
-        breakpoint()
+
+        kpt_parameters = data.get("k_points", {})
+        # default when no section at all is a single point gamma kpt
+        kpoints_mode = kpt_parameters.get("mode", "gamma")
+
+        if kpoints_mode == "gamma":  # Use only the Gamma point.
+            kpoints_grid = None
+            kpoints_offset = None
+            kpoints_weights = None
+        elif (
+            kpoints_mode == "automatic"
+        ):  # Automatically generate a Monkhorst-Pack grid
+            kpoints_grid = kpt_parameters["data"]["grid"]
+            kpoints_offset = kpt_parameters["data"]["offset"]
+            kpoints_weights = None
+        elif kpoints_mode in [
+            "tpiba",  # Monkhorst-Pack grid specified in reciprocal lattice units
+            "crystal",  # Specify k-points in crystal coordinates.
+        ]:
+            kpoints_offset = None
+            kpoints_grid = [k["coords"] for k in kpt_parameters["data"]]
+            kpoints_weights = [k["weight"] for k in kpt_parameters["data"]]
+        elif kpoints_mode in [
+            "tpiba_b",  # Monkhorst-Pack grid specified in reciprocal lattice units, with a shift.
+            "tpiba_c",  #  Monkhorst-Pack grid specified in reciprocal lattice units, with a different shift.
+            "crystal_b",  # Specify k-points in crystal coordinates with a shift.
+            "crystal_c",  # Specify k-points in crystal coordinates with a different shift.
+        ]:
+            raise NotImplementedError(
+                f"{kpoints_mode} is not yet supported for k points"
+            )
+        else:
+            raise Exception(f"Unknown k points mode: {kpoints_mode}.")
+
+        kpoints = Kpoints(
+            mode=kpoints_mode,
+            grid=kpoints_grid,
+            offset=kpoints_offset,
+            weights=kpoints_weights,
+        )
 
         # ----------------------
 
         return cls(
             structure=structure,
-            pseudo=data.get("control", {}).get("psuedo_file"),
+            kpoints=kpoints,
             control=data.get("control", {}),  # !!! should I pop psuedo_file?
             system=data.get("system", {}),
             electrons=data.get("electrons", {}),
@@ -466,17 +588,142 @@ class PwscfInput:
             cell=data.get("cell", {}),
             fcp=data.get("fcp", {}),
             rism=data.get("rism", {}),
-            kpoints_mode="automatic",
-            kpoints_grid=(1, 1, 1),
-            kpoints_shift=(0, 0, 0),
         )
 
     # -------------------------------------------------------------------------
 
     # Export methods
 
-    # def to_str(self) -> str:
-    # def to_file(self, filename: Path | str = "settings.in"):
+    def to_str(self) -> str:
+        final_str = ""
+
+        # ----------------------
+
+        # place key-value sections up top
+
+        for section in [
+            "control",
+            "system",
+            "electrons",
+            "ions",
+            "cell",
+            "fcp",
+            "rism",
+        ]:
+            content = getattr(self, section)
+            if not content:
+                continue
+
+            # section title
+            final_str += f"&{section.upper()}\n"
+            # parameters (we copy because we modify values some)
+            for key, value in content.copy().items():
+                # if the input type is a str, we want to make sure it's
+                # wrapped in single quotes for pw-scf to read
+                if self.PARAMETER_MAPPINGS.get(key) == str:
+                    value = f"'{value}'"
+                # booleans are written differently than in python
+                elif self.PARAMETER_MAPPINGS.get(key) == bool:
+                    value = f".{str(value).lower()}."
+                final_str += f"\t{key} = {value}\n"
+            # section ending
+            final_str += "/\n\n"
+
+        # ----------------------
+
+        # then write structural information
+
+        # lattice info
+        # string is the same as str(lattice) but we just indent the entire thing
+        final_str += "CELL_PARAMETERS angstrom\n"
+        lattice_str = str(self.structure.lattice).replace("\n", "\n\t")
+        final_str += f"\t{lattice_str}\n\n"
+
+        # specie info
+        final_str += "ATOMIC_SPECIES\n"
+        for element in self.structure.composition:
+            psuedo_name = self.get_psuedo_from_element(element)
+            final_str += (
+                f"\t{element.symbol}  {float(element.atomic_mass)}  {psuedo_name}\n"
+            )
+        final_str += "\n"  # extra empty line after final specie
+
+        # site info
+        # ATOMIC_POSITIONS (angstrom or crystal)
+        site_mode = "crystal"  # !!! we assume frac coords for now
+        final_str += f"ATOMIC_POSITIONS {site_mode}\n"
+        for site in self.structure:
+            final_str += f"\t{site.specie.symbol} {site.a} {site.b} {site.c}\n"
+        final_str += "\n"  # extra empty line after final site
+
+        # ----------------------
+
+        # then write kpoint information
+        final_str += f"K_POINTS {self.kpoints.mode}\n"
+
+        if self.kpoints.mode == "gamma":
+            pass  # no extra lines needed
+
+        elif self.kpoints.mode == "automatic":
+            # a single line is needed
+            nk1, nk2, nk3 = self.kpoints.grid
+            sk1, sk2, sk3 = self.kpoints.offset
+            final_str += f"{nk1} {nk2} {nk3} {sk1} {sk2} {sk3}\n"
+
+        elif self.kpoints.mode in ["tpiba", "crystal"]:
+            final_str += f"\t{len(self.kpoints.grid)}\n"
+            for kpt, kpt_wt in zip(self.kpoints.grid, self.kpoints.weights):
+                final_str += f"\t{kpt[0]} {kpt[1]} {kpt[2]} {kpt_wt}\n"
+
+        elif self.kpoints.mode in [
+            "tpiba_b",
+            "tpiba_c",
+            "crystal_b",
+            "crystal_c",
+        ]:
+            raise NotImplementedError(
+                f"{self.kpoints.mode} is not yet supported for k points"
+            )
+
+        else:
+            raise Exception(f"Unknown k points mode: {self.kpoints.mode}.")
+
+        final_str += "\n"
+
+        # ----------------------
+
+        return final_str
+
+    def to_file(self, filename: Path | str = "pwscf.in"):
+        """
+        Write PWSCF input settings to a file.
+        Args:
+            filename (str): filename to write to.
+        """
+        # we just take the string format and put it in a file
+        filename = Path(filename)
+        with filename.open("w") as file:
+            file.write(self.to_str())
+
     # def to_dict(self) -> dict:
+    #   TODO
+
+    # -------------------------------------------------------------------------
+
+    # Handling psuedopotential directory and files
+
+    @property
+    def get_psuedo_dir(self):
+        # TODO: return a default dir (ie in the simmate home dir)
+        return self.control.get("psuedo_file")
+
+    @property
+    def check_psuedo_files(self):
+        # makes sure the psuedo files are available and if not downloads them
+        raise NotImplementedError()
+
+    def get_psuedo_from_element(self, element) -> str:  # : str | Element
+        # TODO:
+        return "Si.pz-vbc.UPF"
 
     # -------------------------------------------------------------------------
