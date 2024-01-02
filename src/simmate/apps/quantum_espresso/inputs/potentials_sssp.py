@@ -33,7 +33,7 @@ DEFAULT_PSUEDO_DIR = get_directory(SIMMATE_QE_DIR / "potentials")
 # -----------------------------------------------------------------------------
 
 
-def _setup_sssp() -> bool:
+def setup_sssp() -> bool:
     """
     Downloads all of the SSSP potentials and mapping files needed for this app
     """
@@ -91,7 +91,7 @@ SSSP_PBE_PRECISION_MAPPINGS = _load_mappings("SSSP_1.3.0_PBE_precision.json")
 # -----------------------------------------------------------------------------
 
 
-def _check_psuedo_setup() -> bool:
+def check_psuedo_setup() -> bool:
     """
     Checks if SSSP psuedo files have been downloaded and are ready for use.
 

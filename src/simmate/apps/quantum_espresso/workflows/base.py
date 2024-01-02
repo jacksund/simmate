@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
+
+from simmate.apps.quantum_espresso.inputs import PwscfInput
+from simmate.apps.quantum_espresso.inputs.k_points import Kpoints
+from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
+    SSSP_PBE_EFFICIENCY_MAPPINGS,
+    SSSP_PBE_PRECISION_MAPPINGS,
+)
 from simmate.engine import S3Workflow
+from simmate.toolkit import Structure
 
 
 # TODO: add StructureInputWorkflow mixin which can be made from VaspWorkflow class
@@ -17,32 +26,37 @@ class PwscfWorkflow(S3Workflow):
     # We set each section of PW-SCF's input parameters as a class attribute
     # https://www.quantum-espresso.org/Doc/INPUT_PW.html
 
-    control: dict = None
+    control: dict = {}
     """
     key-value pairs for the `&CONTROL` section of `settings.in`
     """
 
-    system: dict = None
+    system: dict = {}
     """
     key-value pairs for the `&SYSTEM` section of `settings.in`
     """
 
-    electrons: dict = None
+    electrons: dict = {}
     """
     key-value pairs for the `&ELECTRONS` section of `settings.in`
     """
 
-    ions: dict = None
+    ions: dict = {}
     """
     key-value pairs for the `&IONS` section of `settings.in`
     """
 
-    fcp: dict = None
+    cell: dict = {}
+    """
+    key-value pairs for the `&CELL` section of `settings.in`
+    """
+
+    fcp: dict = {}
     """
     key-value pairs for the `&FCP` section of `settings.in`
     """
 
-    rism: dict = None
+    rism: dict = {}
     """
     key-value pairs for the `&RISM` section of `settings.in`
     """
@@ -61,3 +75,54 @@ class PwscfWorkflow(S3Workflow):
         )
 
     # -------------------------------------------------------------------------
+
+    psuedo_mappings_set: str = None
+    """
+    Indicates which psuedopotentials mappings to use (in the `psuedo_mappings` attribute).
+    Can be either 'SSSP_PBE_PRECISION' or 'SSSP_PBE_EFFICIENCY'
+    """
+
+    @classmethod
+    @property
+    def psuedo_mappings(cls) -> dict:
+        if cls.psuedo_mappings_set == "SSSP_PBE_PRECISION":
+            return SSSP_PBE_PRECISION_MAPPINGS
+        elif cls.psuedo_mappings_set == "SSSP_PBE_EFFICIENCY":
+            return SSSP_PBE_EFFICIENCY_MAPPINGS
+        else:
+            raise Exception(
+                f"Unknown psuedo_mappings_set provided: {cls.psuedo_mappings_set}"
+            )
+
+    # -------------------------------------------------------------------------
+
+    k_points: dict = {}
+    """
+    Configuration for generating the k-points grid for each input. This
+    config is passed to `Kpoints.from_dynamic`
+    """
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def setup(cls, directory: Path, structure: Structure, **kwargs):
+        # run cleaning and standardizing on structure (based on class attributes)
+        # TODO: structure_cleaned = cls._get_clean_structure(structure, **kwargs)
+
+        input_config = PwscfInput(
+            structure=structure,
+            kpoints=Kpoints.from_dynamic(
+                k_points=cls.k_points,
+                structure=structure,
+            ),
+            psuedo_mappings=cls.psuedo_mappings,
+            control=cls.control,
+            system=cls.system,
+            electrons=cls.electrons,
+            ions=cls.ions,
+            cell=cls.cell,
+            fcp=cls.fcp,
+            rism=cls.rism,
+        )
+        print(input_config.to_str())
+        # breakpoint()

@@ -4,33 +4,21 @@
 # https://gitlab.com/ase/ase/-/blob/master/ase/io/espresso.py
 # https://github.com/materialsproject/pymatgen/blob/master/pymatgen/io/pwscf.py
 
+import logging
 from pathlib import Path
 
 from pymatgen.core import Lattice
 
+from simmate.apps.quantum_espresso.inputs.k_points import Kpoints
+from simmate.apps.quantum_espresso.inputs.pwscf_in_modifiers import (
+    keyword_modifier_ecutrho,
+    keyword_modifier_ecutwfc,
+    keyword_modifier_nat,
+    keyword_modifier_ntyp,
+    keyword_modifier_pseudo_dir,
+)
 from simmate.toolkit import Structure
 from simmate.utilities import str_to_datatype
-
-# TODO: add/merge functionality of kw modifiers from INCAR
-# from simmate.apps.vasp.inputs.incar_modifiers import ....
-
-
-class Kpoints:
-    # placeholder class until we have general one for both vasp, qe, & others
-
-    def __init__(
-        self,
-        mode: str,
-        grid: list[list[float]] | list[float],
-        offset: list[list[float]] | list[float],
-        weights: list[list[float]] | list[float],
-        # to help evaluate...? or maybe attach to structure obj instead?
-        # structure: Structure = None,
-    ):
-        self.mode = mode
-        self.grid = grid
-        self.offset = offset
-        self.weights = weights
 
 
 class PwscfInput:
@@ -226,6 +214,17 @@ class PwscfInput:
         """
         Initializes a PWSCF input file.
         """
+
+        # check for psuedo mappings:
+        if not psuedo_mappings:
+            logging.warning(
+                "No psuedopotential mappings were provided. If you are trying to "
+                "use the Simmate defaults (from SSSP), then make sure you have "
+                "ran 'simmate-qe setup-sssp' to download the files for you. "
+                "Otherwise, make sure you provide a mapping and that the "
+                "files are present in '~/simmate/quantum_espresso/potentials'"
+            )
+
         self.structure = structure
         self.kpoints = kpoints
         self.psuedo_mappings = psuedo_mappings
@@ -237,13 +236,6 @@ class PwscfInput:
         self.cell = cell
         self.fcp = fcp
         self.rism = rism
-
-        # check for psuedo mappings:
-        # pseudo_dir="__auto__"
-        # from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
-        #     SSSP_PBE_EFFICIENCY_MAPPINGS,
-        #     SSSP_PBE_PRECISION_MAPPINGS,
-        # )
 
     # -------------------------------------------------------------------------
 
@@ -607,17 +599,10 @@ class PwscfInput:
         # ----------------------
 
         # place key-value sections up top
+        # Note: we pull the final evaluated settings, which fills out modifiers
+        # such as "__per_atom" or "__auto__"
 
-        for section in [
-            "control",
-            "system",
-            "electrons",
-            "ions",
-            "cell",
-            "fcp",
-            "rism",
-        ]:
-            content = getattr(self, section)
+        for section, content in self.evaluated_settings.items():
             if not content:
                 continue
 
@@ -643,15 +628,15 @@ class PwscfInput:
         # lattice info
         # string is the same as str(lattice) but we just indent the entire thing
         final_str += "CELL_PARAMETERS angstrom\n"
-        lattice_str = str(self.structure.lattice).replace("\n", "\n\t")
-        final_str += f"\t{lattice_str}\n\n"
+        lattice_str = str(self.structure.lattice).replace("\n", "\n ")
+        final_str += f" {lattice_str}\n\n"
 
         # specie info
         final_str += "ATOMIC_SPECIES\n"
         for element in self.structure.composition:
-            psuedo_name = self.get_psuedo_from_element(element)
+            psuedo_name = self.psuedo_mappings[element.symbol]["filename"]
             final_str += (
-                f"\t{element.symbol}  {float(element.atomic_mass)}  {psuedo_name}\n"
+                f" {element.symbol}  {float(element.atomic_mass)}  {psuedo_name}\n"
             )
         final_str += "\n"  # extra empty line after final specie
 
@@ -660,40 +645,43 @@ class PwscfInput:
         site_mode = "crystal"  # !!! we assume frac coords for now
         final_str += f"ATOMIC_POSITIONS {site_mode}\n"
         for site in self.structure:
-            final_str += f"\t{site.specie.symbol} {site.a} {site.b} {site.c}\n"
+            final_str += f" {site.specie.symbol} {site.a} {site.b} {site.c}\n"
         final_str += "\n"  # extra empty line after final site
 
         # ----------------------
 
         # then write kpoint information
-        final_str += f"K_POINTS {self.kpoints.mode}\n"
 
-        if self.kpoints.mode == "gamma":
+        # we evaluate the class in case there are modifiers like __kpt_density
+        kpoints = self.evaluated_k_points
+
+        final_str += f"K_POINTS {kpoints.mode}\n"
+        if kpoints.mode == "gamma":
             pass  # no extra lines needed
 
-        elif self.kpoints.mode == "automatic":
+        elif kpoints.mode == "automatic":
             # a single line is needed
-            nk1, nk2, nk3 = self.kpoints.grid
-            sk1, sk2, sk3 = self.kpoints.offset
-            final_str += f"{nk1} {nk2} {nk3} {sk1} {sk2} {sk3}\n"
+            nk1, nk2, nk3 = kpoints.grid
+            sk1, sk2, sk3 = kpoints.offset
+            final_str += f" {nk1} {nk2} {nk3} {sk1} {sk2} {sk3}\n"
 
-        elif self.kpoints.mode in ["tpiba", "crystal"]:
-            final_str += f"\t{len(self.kpoints.grid)}\n"
-            for kpt, kpt_wt in zip(self.kpoints.grid, self.kpoints.weights):
-                final_str += f"\t{kpt[0]} {kpt[1]} {kpt[2]} {kpt_wt}\n"
+        elif kpoints.mode in ["tpiba", "crystal"]:
+            final_str += f" {len(self.kpoints.grid)}\n"
+            for kpt, kpt_wt in zip(kpoints.grid, kpoints.weights):
+                final_str += f" {kpt[0]} {kpt[1]} {kpt[2]} {kpt_wt}\n"
 
-        elif self.kpoints.mode in [
+        elif kpoints.mode in [
             "tpiba_b",
             "tpiba_c",
             "crystal_b",
             "crystal_c",
         ]:
             raise NotImplementedError(
-                f"{self.kpoints.mode} is not yet supported for k points"
+                f"{kpoints.mode} is not yet supported for k points"
             )
 
         else:
-            raise Exception(f"Unknown k points mode: {self.kpoints.mode}.")
+            raise Exception(f"Unknown k points mode: {kpoints.mode}.")
 
         final_str += "\n"
 
@@ -712,25 +700,124 @@ class PwscfInput:
         with filename.open("w") as file:
             file.write(self.to_str())
 
-    # def to_dict(self) -> dict:
-    #   TODO
-
     # -------------------------------------------------------------------------
 
-    # Handling psuedopotential directory and files
+    @property
+    def evaluated_settings(self) -> dict:
+        final_settings = {}
+
+        for section in [
+            "control",
+            "system",
+            "electrons",
+            "ions",
+            "cell",
+            "fcp",
+            "rism",
+        ]:
+            content = getattr(self, section)
+            if content:
+                final_settings[section] = self._evaluate_dict(content)
+
+        return final_settings
+
+    def _evaluate_dict(self, data: dict) -> dict:
+        # TODO: Refactor and combine this functionality with vasp.Incar
+
+        # First we need to iterate through all parameters and check if we have
+        # ones that are structure-specific. For example, we would need to
+        # evaluate "ecutwfc__per_atom". We go through all these and collect the
+        # parameters into a final settings list.
+        final_settings = {}
+        for parameter, value in data.items():
+            # if there is no modifier attached to the parameter, we just keep it as-is
+            if "__" not in parameter:
+                final_settings[parameter] = value
+
+            # Otherwise we have a modifier like "__density" and need to evaluate it
+            else:
+                # make sure we have a structure supplied because all modifiers
+                # require one.
+                if not self.structure:
+                    raise Exception(
+                        "It looks like you used a keyword modifier but didn't "
+                        f"supply a structure! If you want to use {parameter}, "
+                        "then you need to make sure you provide a structure so "
+                        "that the modifier can be evaluated."
+                    )
+
+                # separate the input into the base parameter and modifier.
+                # This also overwrites what our paramter value is.
+                parameter, modifier_tag = parameter.split("__")
+
+                # check that this class has this modifier supported. It should
+                # be a method named "keyword_modifier_mymodifier".
+                # If everything looks good, we grab the modifier function.
+                # If the tag is just "auto", then we look for a tag that is
+                # named after the input variable
+                if modifier_tag == "auto":
+                    modifier_fxn_name = "keyword_modifier_" + parameter
+                else:
+                    modifier_fxn_name = "keyword_modifier_" + modifier_tag
+                if hasattr(self, modifier_fxn_name):
+                    modifier_fxn = getattr(self, modifier_fxn_name)
+                else:
+                    raise AttributeError(
+                        """
+                        It looks like you used a keyword modifier that hasn't
+                        been defined yet! If you want something like `ENCUT__per_atom`,
+                        then you need to make sure there is a `keyword_modifier_per_atom`
+                        method available. "auto" modifiers are a special case where,
+                        `ENCUT__auto` needs the method to be `keyword_modifier_ENCUT`.
+                        """
+                    )
+
+                # now that we have the modifier function, let's use it to update
+                # our value for this keyword.
+                value = modifier_fxn(self.structure, value)
+
+                # sometimes the modifier returns None. In this case we don't
+                # set anything in the INCAR, but leave it to the programs
+                # default value.
+                if not value:
+                    continue
+                # BUG: Are there cases where None is return but we still want
+                # to write it to the INCAR? If so, it'd be skipped here.
+
+                # if the "parameter" is actually "multiple_keywords", then we
+                # have our actual parameters as a dictionary. We need to
+                # pull these out of the "value" we have.
+                if parameter == "multiple_keywords":
+                    for subparameter, subvalue in value.items():
+                        final_settings[subparameter] = subvalue
+
+                # otherwise we were just given back an update value
+                else:
+                    final_settings[parameter] = value
+        return final_settings
 
     @property
-    def get_psuedo_dir(self):
-        # TODO: return a default dir (ie in the simmate home dir)
-        return self.control.get("psuedo_file")
+    def evaluated_k_points(self) -> Kpoints:
+        # TODO: move this to the Kpoints class
+        return Kpoints(**self._evaluate_dict(self.kpoints.to_dict()))
 
-    @property
-    def check_psuedo_files(self):
-        # makes sure the psuedo files are available and if not downloads them
-        raise NotImplementedError()
+    @classmethod
+    def add_keyword_modifier(cls, keyword_modifier: callable):
+        # !!! this is a copy/paste of the method from vasp.Incar
+        if hasattr(cls, keyword_modifier.__name__):
+            raise Exception(
+                "The Incar class already has a modifier with this name. "
+                "Please use a different modifier name to avoid conflicts."
+            )
+        setattr(cls, keyword_modifier.__name__, staticmethod(keyword_modifier))
 
-    def get_psuedo_from_element(self, element) -> str:  # : str | Element
-        # TODO:
-        return "Si.pz-vbc.UPF"
 
-    # -------------------------------------------------------------------------
+# set some default keyword modifiers
+for modifier in [
+    keyword_modifier_pseudo_dir,
+    keyword_modifier_nat,
+    keyword_modifier_ntyp,
+    keyword_modifier_ecutwfc,
+    keyword_modifier_ecutrho,
+]:
+    PwscfInput.add_keyword_modifier(modifier)

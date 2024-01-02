@@ -25,9 +25,9 @@ def setup_sssp():
     """
     Downloads and configures potentials from SSSP
     """
-    from simmate.apps.quantum_espresso.inputs.potentials_sssp import _setup_sssp
+    from simmate.apps.quantum_espresso.inputs.potentials_sssp import setup_sssp
 
-    _setup_sssp()
+    setup_sssp()
 
 
 @qe_app.command()
@@ -67,9 +67,9 @@ def test(run_calcs: bool = False):
         passed_all = False
 
     # 3 - check for psuedopotentials
-    from simmate.apps.quantum_espresso.inputs.potentials_sssp import _check_psuedo_setup
+    from simmate.apps.quantum_espresso.inputs.potentials_sssp import check_psuedo_setup
 
-    is_passed = _check_psuedo_setup()
+    is_passed = check_psuedo_setup()
 
     if is_passed:
         logging.info("Psuedopotentials (SSSP) found :heavy_check_mark:")
