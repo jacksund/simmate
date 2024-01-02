@@ -46,7 +46,7 @@ dependencies:
     - pymatgen >=2022.1.9, <2023.5.32
     - pymatgen-analysis-diffusion >=2021.4.29, <=2023.8.15
     - pytest >=6.2.5, <=7.3.2
-    - pytest-django >=4.5.2, <=4.6.0
+    - pytest-django >=4.5.2, <=4.7.0
     - python >=3.10
     - pytest-mock >=3.7.0, <3.11.2
     - pytest-xdist >=2.5.0, <3.4.0
