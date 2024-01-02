@@ -88,14 +88,6 @@ def _load_mappings(json_file: str):
 SSSP_PBE_EFFICIENCY_MAPPINGS = _load_mappings("SSSP_1.3.0_PBE_efficiency.json")
 SSSP_PBE_PRECISION_MAPPINGS = _load_mappings("SSSP_1.3.0_PBE_precision.json")
 
-if not SSSP_PBE_EFFICIENCY_MAPPINGS or not SSSP_PBE_PRECISION_MAPPINGS:
-    logging.warning(
-        "You have Simmate's Quantum Espresso app installed but are likely missing "
-        "the required psuedopotential files. Run the command `simmate-qe setup-sssp` "
-        "to download them and restart your python/cli session for changes to take "
-        "affect. "
-    )
-
 # -----------------------------------------------------------------------------
 
 
