@@ -238,6 +238,13 @@ class PwscfInput:
         self.fcp = fcp
         self.rism = rism
 
+        # check for psuedo mappings:
+        # pseudo_dir="__auto__"
+        # from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
+        #     SSSP_PBE_EFFICIENCY_MAPPINGS,
+        #     SSSP_PBE_PRECISION_MAPPINGS,
+        # )
+
     # -------------------------------------------------------------------------
 
     # Loading methods
