@@ -59,14 +59,10 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -
     bash miniconda.sh -b -p miniconda && \
     rm miniconda.sh
 
-# Set the solver to LibMamba for faster env setup below
-RUN conda update -n base conda && \
-    conda install -n base conda-libmamba-solver && \
-    conda config --set solver libmamba
-
 # Install Simmate's Python dependencies 
 COPY envs/conda/dev.yaml .
-RUN conda env update -f dev.yaml && \
+RUN conda update -n base conda && \
+    conda env update -f dev.yaml && \
     conda install -n simmate_dev -c conda-forge gunicorn psycopg2 && \
     conda clean -afy
 
@@ -109,12 +105,6 @@ CMD $CMD_PREFIX gunicorn \
 # #   https://github.com/nytimes/rd-blender-docker/
 # FROM nytimes/blender:latest as blender_build
 # WORKDIR /root/blender
-
-# Consider switching to micromamba using either 
-# a manual install, minimal docker image, or miniforge
-# https://mamba.readthedocs.io/en/latest/installation.html
-# https://github.com/mamba-org/micromamba-docker
-# https://github.com/conda-forge/miniforge
 
 # # Consider separate stages for all the simmate steps that copy over
 # # the basics from the blender/conda stages

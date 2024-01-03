@@ -12,6 +12,7 @@ from simmate.apps.vasp.inputs.incar_modifiers import (
     keyword_modifier_smart_ldau,
     keyword_modifier_smart_lmaxmix,
     keyword_modifier_smart_magmom,
+    keyword_modifier_smart_quad_efg,
 )
 from simmate.toolkit import Structure
 from simmate.utilities import str_to_datatype
@@ -277,19 +278,23 @@ class Incar(dict):
         with filename.open("w") as file:
             file.write(self.to_evaluated_str(structure=structure))
 
-    @staticmethod
-    def from_file(filename: Path | str = "INCAR"):
+    @classmethod
+    def from_file(cls, filename: Path | str = "INCAR"):
         """
-        Reads an Incar object from a file.
-        Args:
-            filename (str): Filename for file
-        Returns:
-            Incar object
+        Builds an Incar object from a file.
         """
-        # open the file, grab the lines, and then close it
         filename = Path(filename)
         with filename.open() as file:
-            lines = file.readlines()
+            content = file.read()
+        return cls.from_str(content)
+
+    @classmethod
+    def from_str(cls, content: str):
+        """
+        Builds an Incar object from a string.
+        """
+        # split the file content into separate lines
+        lines = content.split("\n")
 
         # store parameters in this dictionary
         parameters = {}
@@ -297,7 +302,7 @@ class Incar(dict):
         for line in lines:
             # If the line starts with a # then its a comment and we should skip.
             # It also could be an empty line that we should skip,
-            if line.startswith("#") or line.startswith("\n"):
+            if not line or line.startswith("#") or line.startswith("\n"):
                 continue
             # multiple parameters on a single line are separated by a semicolon
             for sub_line in line.split(";"):
@@ -308,7 +313,7 @@ class Incar(dict):
                 parameters[parameter.strip()] = value.strip()
 
         # return the final dictionary as an Incar object
-        return Incar(**parameters)
+        return cls(**parameters)
 
     def compare_incars(self, other_incar):
         """
@@ -429,5 +434,6 @@ for modifier in [
     keyword_modifier_smart_lmaxmix,
     keyword_modifier_smart_ldau,
     keyword_modifier_smart_ismear,
+    keyword_modifier_smart_quad_efg,
 ]:
     Incar.add_keyword_modifier(modifier)

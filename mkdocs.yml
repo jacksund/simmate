@@ -199,12 +199,8 @@ nav:
 
     - Apps: 
         - Overview: apps/overview.md
-        - Bader (henklman):
-            - Overview: apps/bader_henkelman/overview.md
-            - Installation: apps/bader_henkelman/installation.md
-            # - Workflows: apps/bader_henkelman/workflows.md
-            # - Inputs: apps/bader_henkelman/inputs.md
-            # - Outputs: apps/bader_henkelman/outputs.md
+        - Bader + ELF ("bad elf"): apps/badelf.md
+        - Bader (henklman): apps/bader_henkelman.md
         - CLEASE: apps/clease.md
         - DeepMD: apps/deepmd.md
         - Evolutionary Searches: apps/evolution.md
@@ -215,9 +211,7 @@ nav:
             # - Inputs: apps/vasp/inputs.md
             # - Outputs: apps/vasp/outputs.md
             # - Error Handlers: apps/vasp/error_handlers.md
-        - Warren Lab:
-            - Overview: apps/warren_lab/overview.md
-            - Installation: apps/warren_lab/installation.md
+        - Warren Lab: apps/warren_lab.md
 
     - Contributing:
         - Overview: contributing/overview.md

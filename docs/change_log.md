@@ -70,7 +70,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 
 **Enhancements**
 
-- Allow custom html templates and static files that override default shipped by default
+- Allow custom html templates and static files that override those shipped by default
 - add `simmate engine` commands like `stats-detail` and `workitems` that show details of workitems in the database
 - updated third-party archives (Materials Project, COD, JARVIS, OQMD)
 - eased database updates between simmate versions by using django migrations
@@ -82,6 +82,14 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add `django-simple-history` support to track user changes on specific models
 - add `@check_db_conn` decorator to help with database connection closures/timeouts
 - add `simmate engine start-schedules` which let's you configure periodic tasks for individual apps (e.g. check a table for updates every 5 minutes). Includes error handling and email alerts. (Note: this a quick alternative to full Prefect system)
+- add warren_lab app with Warren Lab preferred VASP settings
+- add badelf app with class oriented tools for performing BadELF analyses
+- add basic quantum espresso support
+
+**Refactors**
+
+- remove mamba support now that libmamba is default conda solver
+- switch CI from mamba back to conda
 
 **Fixes**
 
