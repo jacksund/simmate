@@ -95,20 +95,19 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
 
     @classmethod
     def from_pwscf_run(cls, pwscf_run: PwscfXml, as_dict: bool = False):
-        breakpoint()
-
         # Take our structure, energy, and forces to build all of our other
         # fields for this datatable
         static_energy = cls.from_toolkit(
-            structure=vasprun.final_structure,
-            energy=ionic_step["e_wo_entrp"],
-            site_forces=ionic_step["forces"],
-            lattice_stress=ionic_step["stress"],
-            band_gap=data.get("bandgap"),
-            is_gap_direct=data.get("is_gap_direct"),
-            energy_fermi=data.get("efermi"),
-            conduction_band_minimum=data.get("cbm"),
-            valence_band_maximum=data.get("vbm"),
+            structure=pwscf_run.final_structure,
+            energy=pwscf_run.final_energy,
+            site_forces=pwscf_run.site_forces.tolist(),
+            lattice_stress=pwscf_run.lattice_stress.tolist(),
+            # TODO: I have not parsed this info out yet
+            # band_gap=None,
+            # is_gap_direct=None,
+            # energy_fermi=None,
+            # conduction_band_minimum=None,
+            # valence_band_maximum=None,
             as_dict=as_dict,
         )
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from functools import cached_property
 from pathlib import Path
 
 import numpy
@@ -62,7 +63,7 @@ class PwscfXml:
 
     # -------------------------------------------------------------------------
 
-    @property
+    @cached_property
     def final_structure(self):
         struct_data = self.data["qes:espresso"]["output"]["atomic_structure"]
         site_data = struct_data["atomic_positions"]["atom"]
@@ -95,5 +96,47 @@ class PwscfXml:
             coords=site_coords,
             coords_are_cartesian=True,
         )
+
+    @cached_property
+    def final_energy(self) -> float:
+        rydberg_to_ev = physical_constants["Rydberg constant times hc in eV"][0]
+        energy_ry = float(self.data["qes:espresso"]["output"]["total_energy"]["etot"])
+
+        # BUG: something is off here... These values don't match what is in the
+        # pwscf.out file. Perhaps these here are per atom?
+        natoms = len(self.final_structure)
+
+        # convert to eV & total energy
+        return energy_ry * rydberg_to_ev * natoms
+
+    @cached_property
+    def site_forces(self) -> numpy.array:
+        force_data = self.data["qes:espresso"]["output"]["forces"]["#text"]
+
+        site_forces = []
+        sites = force_data.split("\n")
+        for site in sites:
+            forces = [float(i) for i in site.split()]
+            site_forces.append(forces)
+
+        site_forces = numpy.array(site_forces)
+        # TODO: convert to differnt units...?
+
+        return site_forces
+
+    @cached_property
+    def lattice_stress(self) -> numpy.array:
+        stress_data = self.data["qes:espresso"]["output"]["stress"]["#text"]
+
+        stress = []
+        vectors = stress_data.split("\n")
+        for vector in vectors:
+            stress_vector = [float(i) for i in vector.split()]
+            stress.append(stress_vector)
+
+        stress = numpy.array(stress)
+        # TODO: convert to differnt units...?
+
+        return stress
 
     # -------------------------------------------------------------------------
