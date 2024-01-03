@@ -393,6 +393,12 @@ class S3Workflow(Workflow):
         else:
             corrections = []
 
+        # BUG-FIX:
+        # Some commands need to call the current working directory via ${pwd},
+        # but this does not work when calling from python. We therefore
+        # expand out that part of the command first.
+        command_cleaned = command.replace("${pwd}", str(directory))
+
         # ------ start of main while loop ------
 
         # we can try running the shelltask up to max_corrections. Because only one
@@ -420,7 +426,7 @@ class S3Workflow(Workflow):
             logging.info(f"Using {directory}")
             logging.info(f"Running '{command}'")
             process = subprocess.Popen(
-                command,
+                command_cleaned,
                 cwd=directory,
                 shell=True,
                 preexec_fn=None if platform.system() == "Windows"
@@ -521,18 +527,18 @@ class S3Workflow(Workflow):
                 # read.
                 if process.returncode == 127 or (
                     platform.system() == "Windows"
-                    and "is not recognized as an internal or external command"
+                    and "is not recognized as an internal or external command" in errors
                 ):
                     raise CommandNotFoundError(
                         f"The command ({command}) failed becauase it could not be found. "
                         "This typically means that either (a) you have not installed "
                         "the program required for this command or (b) you forgot to "
                         "call 'module load ...' before trying to start the program. "
-                        f"The full error output was:\n\n {errors}"
+                        f"The full error output (if any) is below:\n\n {errors}"
                     )
                 else:
                     raise NonZeroExitError(
-                        f"The command ({command}) failed. The error output was...\n {errors}"
+                        f"The command ({command}) failed. The error output (if any) is below:\n {errors}"
                     )
 
             # Check for errors again, because a non-monitor may be higher

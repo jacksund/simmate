@@ -85,6 +85,7 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 - add warren_lab app with Warren Lab preferred VASP settings
 - add badelf app with class oriented tools for performing BadELF analyses
 - add `simmate-badelf` command for running badelf analysis
+- add basic quantum espresso support
 
 **Refactors**
 
