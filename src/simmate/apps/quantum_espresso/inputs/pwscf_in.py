@@ -220,7 +220,7 @@ class PwscfInput:
             logging.warning(
                 "No psuedopotential mappings were provided. If you are trying to "
                 "use the Simmate defaults (from SSSP), then make sure you have "
-                "ran 'simmate-qe setup-sssp' to download the files for you. "
+                "ran 'simmate-qe setup sssp' to download the files for you. "
                 "Otherwise, make sure you provide a mapping and that the "
                 "files are present in '~/simmate/quantum_espresso/potentials'"
             )

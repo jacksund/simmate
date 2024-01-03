@@ -8,17 +8,20 @@ from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
     SSSP_PBE_EFFICIENCY_MAPPINGS,
     SSSP_PBE_PRECISION_MAPPINGS,
 )
+from simmate.apps.quantum_espresso.settings import DEFAULT_PWSCF_COMMAND
 from simmate.engine import S3Workflow
 from simmate.toolkit import Structure
 
 
 # TODO: add StructureInputWorkflow mixin which can be made from VaspWorkflow class
 class PwscfWorkflow(S3Workflow):
-    required_files = ["settings.in"]
+    required_files = ["pwscf.in"]
 
-    command: str = "pw.x < settings.in > pw-scf.out"
+    command: str = DEFAULT_PWSCF_COMMAND
     """
     The command to call PW-SCF, which is typically `pw.x`.
+    
+    The typical default is "pw.x < pwscf.in > pw-scf.out"
     """
 
     # -------------------------------------------------------------------------
@@ -28,37 +31,37 @@ class PwscfWorkflow(S3Workflow):
 
     control: dict = {}
     """
-    key-value pairs for the `&CONTROL` section of `settings.in`
+    key-value pairs for the `&CONTROL` section of `pwscf.in`
     """
 
     system: dict = {}
     """
-    key-value pairs for the `&SYSTEM` section of `settings.in`
+    key-value pairs for the `&SYSTEM` section of `pwscf.in`
     """
 
     electrons: dict = {}
     """
-    key-value pairs for the `&ELECTRONS` section of `settings.in`
+    key-value pairs for the `&ELECTRONS` section of `pwscf.in`
     """
 
     ions: dict = {}
     """
-    key-value pairs for the `&IONS` section of `settings.in`
+    key-value pairs for the `&IONS` section of `pwscf.in`
     """
 
     cell: dict = {}
     """
-    key-value pairs for the `&CELL` section of `settings.in`
+    key-value pairs for the `&CELL` section of `pwscf.in`
     """
 
     fcp: dict = {}
     """
-    key-value pairs for the `&FCP` section of `settings.in`
+    key-value pairs for the `&FCP` section of `pwscf.in`
     """
 
     rism: dict = {}
     """
-    key-value pairs for the `&RISM` section of `settings.in`
+    key-value pairs for the `&RISM` section of `pwscf.in`
     """
 
     @classmethod
@@ -124,5 +127,4 @@ class PwscfWorkflow(S3Workflow):
             fcp=cls.fcp,
             rism=cls.rism,
         )
-        print(input_config.to_str())
-        # breakpoint()
+        input_config.to_file(directory / "pwscf.in")

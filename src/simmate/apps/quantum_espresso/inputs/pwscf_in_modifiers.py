@@ -3,10 +3,10 @@
 from pathlib import Path
 
 from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
-    DEFAULT_PSUEDO_DIR,
     SSSP_PBE_EFFICIENCY_MAPPINGS,
     SSSP_PBE_PRECISION_MAPPINGS,
 )
+from simmate.apps.quantum_espresso.settings import DEFAULT_PSUEDO_DIR, SIMMATE_QE_DOCKER
 from simmate.toolkit import Structure
 
 
@@ -16,7 +16,10 @@ def keyword_modifier_pseudo_dir(structure: Structure, confirm_auto: bool) -> Pat
     for psuedopotentials
     """
     assert confirm_auto
-    return DEFAULT_PSUEDO_DIR
+    if not SIMMATE_QE_DOCKER:  # used in the majority of cases
+        return DEFAULT_PSUEDO_DIR
+    else:
+        return "/potentials"
 
 
 def keyword_modifier_nat(structure: Structure, confirm_auto: bool) -> int:

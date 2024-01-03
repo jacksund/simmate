@@ -6,6 +6,8 @@ This defines the base "simmate-qe" command that all other commands stem from.
 
 import typer
 
+from simmate.apps.quantum_espresso.command_line.setup import setup_app
+
 qe_app = typer.Typer(rich_markup_mode="markdown")
 
 
@@ -18,16 +20,6 @@ def base_command():
     # looks for all other functions that have the decorator "@simmate_vasp.command()"
     # to decide what to do from there.
     pass
-
-
-@qe_app.command()
-def setup_sssp():
-    """
-    Downloads and configures potentials from SSSP
-    """
-    from simmate.apps.quantum_espresso.inputs.potentials_sssp import setup_sssp
-
-    setup_sssp()
 
 
 @qe_app.command()
@@ -56,7 +48,9 @@ def test(run_calcs: bool = False):
         passed_all = False
 
     # 2 - check for pw.x command
-    command = "pw.x"
+    from simmate.apps.quantum_espresso.settings import SIMMATE_QE_DOCKER
+
+    command = "pw.x" if not SIMMATE_QE_DOCKER else "docker"
     if shutil.which(command):
         logging.info("PW-SCF command found ('pw.x') :heavy_check_mark:")
     else:
@@ -89,3 +83,8 @@ def test(run_calcs: bool = False):
     else:
         logging.critical(":warning:  At least one check failed. See above :warning:")
         raise typer.Exit(code=1)
+
+
+# All commands are organized into other files, so we need to manually register
+# them to our base "simmate-qe" command here.
+qe_app.add_typer(setup_app, name="setup")

@@ -20,15 +20,8 @@ import json
 import logging
 import tarfile
 import urllib
-from pathlib import Path
 
-from simmate.utilities import get_directory
-
-# grab the user's set directory for all of their QE psuedopotential files
-# we use get_directory to create folders if they are not there already
-# TODO: I assume the location for now and don't let users override it
-SIMMATE_QE_DIR = Path.home() / "simmate" / "quantum_espresso"
-DEFAULT_PSUEDO_DIR = get_directory(SIMMATE_QE_DIR / "potentials")
+from simmate.apps.quantum_espresso.settings import DEFAULT_PSUEDO_DIR, SIMMATE_QE_DIR
 
 # -----------------------------------------------------------------------------
 
