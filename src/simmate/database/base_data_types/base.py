@@ -715,12 +715,20 @@ class DatabaseTable(models.Model):
         """
         Loads data from a directory of files
         """
-        # check if we have a VASP directory
+        # If any of these files are present, then we immediately know which
+        # program was used to write the output files
         vasprun_filename = directory / "vasprun.xml"
+        pwscf_filename = directory / "pwscf.out"
+
+        # check if we have a VASP directory
         if vasprun_filename.exists():
             return cls.from_vasp_directory(directory, as_dict=as_dict)
 
-        # TODO: add new elif statements when I begin adding new apps.
+        # check if we have a Quantum Espresso (PWscf) directory
+        elif pwscf_filename.exists():
+            return cls.from_pwscf_directory(directory, as_dict=as_dict)
+
+        # TODO: add new elif statements when I begin adding other new apps.
 
         # If we don't detect any directory, we return an empty dictionary.
         # We don't print a warning or error for now because users may want
@@ -733,6 +741,13 @@ class DatabaseTable(models.Model):
 
         vasprun = Vasprun.from_directory(directory)
         return cls.from_vasp_run(vasprun, as_dict=as_dict)
+
+    @classmethod
+    def from_pwscf_directory(cls, directory: Path, as_dict: bool = False):
+        from simmate.apps.quantum_espresso.outputs import PwscfXml
+
+        pwscf_run = PwscfXml.from_directory(directory)
+        return cls.from_pwscf_run(pwscf_run, as_dict=as_dict)
 
     # -------------------------------------------------------------------------
     # Methods that handle updating a database entry and its related entries

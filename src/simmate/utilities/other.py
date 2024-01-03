@@ -107,6 +107,7 @@ def str_to_datatype(
     parameter: str,
     value: str,
     type_mappings: dict = {},
+    strip_quotes: bool = False,
 ):
     """
     When given a parameter name and it's value as a string, this helper
@@ -147,6 +148,8 @@ def str_to_datatype(
 
     if target_type == str:
         # assert type(value) == str
+        if strip_quotes and ("'" in value or '"' in value):
+            return value.strip("'").strip('"')
         return value
 
     elif target_type == int:

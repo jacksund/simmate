@@ -86,6 +86,7 @@ dependencies=[
     "rich >=11.0, <13.5.2",  # for coloring and styling the CLI outputs
     "toml >=0.10.2, <=0.10.2",  # for toml configuration files
     "schedule >=1.2.0, <=1.2.0",  # for running periodic tasks (prefect alternative)
+    "xmltodict >=0.13.0, <=0.13.0",  # for reading XML files (QE outputs)
     #
     # These are from the MP stack and I want to phase them out over time.
     # Some of these could be optional, but we add them for convenience.
@@ -135,6 +136,7 @@ EXTRAS = [
     "fabric >=2.6.0",  # for remote ssh connections
     "django-extensions >=3.1.5",  # simple tools to help with django development
     "bokeh >=2.1.1",  # for the dask dashboard
+    "h5py >=3.10.0, <=3.10.0",  # for reading QE's binary output files
 ]
 
 # For downloading third-party data directly from source instead of Simmate
@@ -158,6 +160,7 @@ documentation = "https://jacksund.github.io/simmate/home/"
 simmate = "simmate.command_line.base_command:simmate_app"
 simmate-vasp = "simmate.apps.vasp.command_line.base_command:vasp_app"
 simmate-badelf = "simmate.apps.warren_lab.command_line.base_command:badelf_app"
+simmate-qe = "simmate.apps.quantum_espresso.command_line.base_command:qe_app"
 
 # -----------------------------------------------------------------------------
 
