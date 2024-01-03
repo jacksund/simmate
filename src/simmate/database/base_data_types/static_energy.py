@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from pymatgen.io.vasp.outputs import Vasprun
-
+from simmate.apps.quantum_espresso.outputs import PwscfXml
+from simmate.apps.vasp.outputs import Vasprun
 from simmate.database.base_data_types import (
     Calculation,
     Forces,
@@ -9,6 +9,8 @@ from simmate.database.base_data_types import (
     Thermodynamics,
     table_column,
 )
+
+# OPTIMIZE: consider lazy loading PwscfXml and Vasprun bc these apps are optional
 
 
 class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
@@ -81,6 +83,31 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
             energy_fermi=data.get("efermi"),
             conduction_band_minimum=data.get("cbm"),
             valence_band_maximum=data.get("vbm"),
+            as_dict=as_dict,
+        )
+
+        # If we don't want the data as a dictionary, then we are saving a new
+        # object and can go ahead and do that here.
+        if not as_dict:
+            static_energy.save()
+
+        return static_energy
+
+    @classmethod
+    def from_pwscf_run(cls, pwscf_run: PwscfXml, as_dict: bool = False):
+        # Take our structure, energy, and forces to build all of our other
+        # fields for this datatable
+        static_energy = cls.from_toolkit(
+            structure=pwscf_run.final_structure,
+            energy=pwscf_run.final_energy,
+            site_forces=pwscf_run.site_forces.tolist(),
+            lattice_stress=pwscf_run.lattice_stress.tolist(),
+            # TODO: I have not parsed this info out yet
+            # band_gap=None,
+            # is_gap_direct=None,
+            # energy_fermi=None,
+            # conduction_band_minimum=None,
+            # valence_band_maximum=None,
             as_dict=as_dict,
         )
 

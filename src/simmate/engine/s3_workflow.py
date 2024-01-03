@@ -21,12 +21,49 @@ class S3Workflow(Workflow):
     errors during a calculation, and working up the results.
     """
 
-    _parameter_methods = Workflow._parameter_methods + ["setup"]
+    _parameter_methods = Workflow._parameter_methods + ["setup", "get_final_command"]
+
+    # -------------------------------------------------------------------------
+
+    # This section defines how the command is set & determined at run time.
+    # In the simplest case, command is constant for all workflow runs, so
+    # you just set `command="example command"`. However, if the command needs
+    # formatted using input arguments, then you should define a custom
+    # `get_final_command`, which will then build the command at run time
+    # using the workflow run's input parameters.
 
     command: str = None
     """
     The defualt shell command to use.
+    
+    This can also be a command template (e.g. "example -n {cores}" 
+    where 'cores' is variable). See `get_final_command` for how to do this.
     """
+
+    @classmethod
+    def get_final_command(cls, **kwargs) -> str:
+        """
+        Takes the `command` attribute and performs additional formatting on
+        it if necessary. By default, the `command` is left unchanged, and this
+        method must be overwritten in a subclass to achieve desired formatting.
+
+        For example, you may override it to look like so:
+
+        ``` python
+        command = "example -n {custom_param}"
+
+        @classmethod
+        def format_command(cls, custom_param, **kwargs) -> str:
+            return cls.command.format(custom_param)
+        ```
+
+        The inputs for this function are dynamically pulled from the parameters
+        passed to `workflow.run_config`, so this method should not be used directly.
+        The default `run_config` of the `S3Workflow` class handles this for you.
+        """
+        return cls.command  # default bahavior to be overwritten in some subclasses
+
+    # -------------------------------------------------------------------------
 
     required_files = []
     """
@@ -120,7 +157,8 @@ class S3Workflow(Workflow):
             see if the calculation completed already too.
 
          - `**kwargs`:
-             Any extra keywords that should be passed to the setup() method.
+             Any extra keywords that should be passed to the setup() and/or
+             get_final_command() methods.
 
         #### Returns
 
@@ -131,9 +169,14 @@ class S3Workflow(Workflow):
         # because the command is something that is frequently changed at the
         # workflow level, then we want to make it so the user can set it for
         # each unique task.run() call. Otherwise we grab the default from the
-        # class attribute
+        # class attribute.
         if not command:
-            command = cls.command
+            command = cls.get_final_command(
+                # we pass everything and let the method decide what's needed
+                directory=directory,
+                is_restart=is_restart,
+                **kwargs,
+            )
 
         # establish the working directory
         directory = get_directory(directory)
@@ -350,6 +393,12 @@ class S3Workflow(Workflow):
         else:
             corrections = []
 
+        # BUG-FIX:
+        # Some commands need to call the current working directory via ${pwd},
+        # but this does not work when calling from python. We therefore
+        # expand out that part of the command first.
+        command_cleaned = command.replace("${pwd}", str(directory))
+
         # ------ start of main while loop ------
 
         # we can try running the shelltask up to max_corrections. Because only one
@@ -377,7 +426,7 @@ class S3Workflow(Workflow):
             logging.info(f"Using {directory}")
             logging.info(f"Running '{command}'")
             process = subprocess.Popen(
-                command,
+                command_cleaned,
                 cwd=directory,
                 shell=True,
                 preexec_fn=None if platform.system() == "Windows"
@@ -478,18 +527,18 @@ class S3Workflow(Workflow):
                 # read.
                 if process.returncode == 127 or (
                     platform.system() == "Windows"
-                    and "is not recognized as an internal or external command"
+                    and "is not recognized as an internal or external command" in errors
                 ):
                     raise CommandNotFoundError(
                         f"The command ({command}) failed becauase it could not be found. "
                         "This typically means that either (a) you have not installed "
                         "the program required for this command or (b) you forgot to "
                         "call 'module load ...' before trying to start the program. "
-                        f"The full error output was:\n\n {errors}"
+                        f"The full error output (if any) is below:\n\n {errors}"
                     )
                 else:
                     raise NonZeroExitError(
-                        f"The command ({command}) failed. The error output was...\n {errors}"
+                        f"The command ({command}) failed. The error output (if any) is below:\n {errors}"
                     )
 
             # Check for errors again, because a non-monitor may be higher

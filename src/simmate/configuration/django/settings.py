@@ -249,6 +249,7 @@ INSTALLED_APPS = [
 # such as the VASP workflows app.
 DEFAULT_SIMMATE_APPS = [
     "simmate.workflows.configs.BaseWorkflowsConfig",
+    "simmate.apps.configs.QuantumEspressoConfig",
     "simmate.apps.configs.VaspConfig",
     "simmate.apps.configs.BaderConfig",
     "simmate.apps.configs.EvolutionConfig",

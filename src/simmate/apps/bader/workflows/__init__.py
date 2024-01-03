@@ -2,4 +2,5 @@
 
 from .badelf import PopulationAnalysis__Bader__Badelf
 from .bader import PopulationAnalysis__Bader__Bader
+from .bader_dev import PopulationAnalysis__Bader__BaderDev
 from .combine_chgcars import PopulationAnalysis__Bader__CombineChgcars
