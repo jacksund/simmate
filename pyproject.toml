@@ -103,14 +103,14 @@ dependencies=[
 # For development and testing
 DEV = [
     "pytest >=6.2.5, <7.3.2",
-    "pytest-django >=4.5.2, <=4.6.0",
+    "pytest-django >=4.5.2, <=4.7.0",
     "pytest-mock >=3.7.0, <3.11.2",
     "pytest-xdist >=2.5.0, <3.4.0",
-    "black >=22.1.0, <23.2.0",
+    "black >=22.1.0, <23.13.0",
     "coverage >=6.2, <7.3.1",
     "isort >=5.10.1, <5.12.1",
     "mkdocs-material >=8.4.1, <9.4.15",
-    "mkdocstrings >=0.19.0, <=0.21.2",
+    "mkdocstrings >=0.19.0, <=0.24.0",
     "mkdocstrings-python >=0.7.1, <0.8.4",
 ]
 
@@ -131,7 +131,7 @@ EXTRAS = [
     "spyder",  # IDE for writing/editting
     "gunicorn",  # for website server (Django+DigitalOcean) # NOT WINDOWS
     "graphviz ==1.7",  # python-graphviz on conda. for viewing prefect flows
-    "pygraphviz ==1.10",  # pygraphviz on conda. for viewing django tables
+    "pygraphviz ==1.11",  # pygraphviz on conda. for viewing django tables
     "scikit-learn >=1.0.1",  # for machine-learning
     "fabric >=2.6.0",  # for remote ssh connections
     "django-extensions >=3.1.5",  # simple tools to help with django development
