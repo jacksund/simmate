@@ -31,7 +31,7 @@ graph LR
 
 ### python modules
 
-`simmate` is the base module and contains all of the code that our package runs on. Within each subfolder (i.e., each python “module”), you’ll find more details on its contents.
+`simmate` is the base module and contains all of the code that our package runs on. Within each subfolder (i.e., each python "module"), you’ll find more details on its contents.
 
 These modules are:
 
