@@ -44,8 +44,25 @@ BadELF requires the outputs from VASP calculations (e.g. the CHGCAR, ELFCAR, etc
 ### (a) from VASP outputs
 
 The BadELF algorithm can be run in a folder with VASP results. Please note that your VASP settings must produce a CHGCAR and ELFCAR with the same grid size.
+
+Create a yaml file:
+``` yaml
+# inside input.yaml
+workflow_name: bad-elf-analysis.bad-elf.bad-elf
+
+# all parameters below are optional
+directory: /path/to/folder
+cores: 4
+find_electrides: true
+min_elf: 0.5
+algorithm: badelf
+elf_connection_cutoff: 0
+check_for_covalency: true
+```
+
+And run the workflow:
 ``` bash
-simmate-badelf run
+simmate workflows run input.yaml
 ```
 
 ### (b) from structure
