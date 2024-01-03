@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from pymatgen.io.vasp.outputs import Vasprun
-
+from simmate.apps.quantum_espresso.outputs import PwscfXml
+from simmate.apps.vasp.outputs import Vasprun
 from simmate.database.base_data_types import (
     Calculation,
     Forces,
@@ -9,6 +9,8 @@ from simmate.database.base_data_types import (
     Thermodynamics,
     table_column,
 )
+
+# OPTIMIZE: consider lazy loading PwscfXml and Vasprun bc these apps are optional
 
 
 class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
@@ -68,6 +70,32 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         # In a static energy calculation, there is only one ionic step so we
         # grab that up front.
         ionic_step = data["ionic_steps"][0]
+
+        # Take our structure, energy, and forces to build all of our other
+        # fields for this datatable
+        static_energy = cls.from_toolkit(
+            structure=vasprun.final_structure,
+            energy=ionic_step["e_wo_entrp"],
+            site_forces=ionic_step["forces"],
+            lattice_stress=ionic_step["stress"],
+            band_gap=data.get("bandgap"),
+            is_gap_direct=data.get("is_gap_direct"),
+            energy_fermi=data.get("efermi"),
+            conduction_band_minimum=data.get("cbm"),
+            valence_band_maximum=data.get("vbm"),
+            as_dict=as_dict,
+        )
+
+        # If we don't want the data as a dictionary, then we are saving a new
+        # object and can go ahead and do that here.
+        if not as_dict:
+            static_energy.save()
+
+        return static_energy
+
+    @classmethod
+    def from_pwscf_run(cls, pwscf_run: PwscfXml, as_dict: bool = False):
+        breakpoint()
 
         # Take our structure, energy, and forces to build all of our other
         # fields for this datatable

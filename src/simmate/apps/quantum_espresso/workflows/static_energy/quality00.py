@@ -4,9 +4,9 @@ from simmate.apps.quantum_espresso.workflows.base import PwscfWorkflow
 
 
 class StaticEnergy__QuantumEspresso__Quality00(PwscfWorkflow):
-    # just a basic static energy calc for me to test with
-
-    use_database = False
+    """
+    A very a basic static energy calc for testing
+    """
 
     control = dict(
         pseudo_dir__auto=True,
