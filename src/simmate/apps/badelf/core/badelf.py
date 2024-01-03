@@ -19,10 +19,10 @@ from scipy.constants import Avogadro
 
 from simmate.apps.badelf.core.electride_finder import ElectrideFinder
 from simmate.apps.badelf.core.grid import Grid
-from simmate.apps.badelf.core.henkelman_bader_interface import ZeroFluxToolkit
 from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.apps.badelf.core.voxel_assignment import VoxelAssignmentToolkit
 from simmate.apps.bader.outputs import ACF
+from simmate.workflows.utilities import get_workflow
 
 # BUG: we shouldn't fully turning off warnings. This should be used within a context.
 warnings.filterwarnings("ignore")
@@ -357,20 +357,22 @@ class BadElfToolkit:
         Returns:
             updated voxel_assignments dataframe
         """
+
         directory = self.directory
         charge_file = directory / "CHGCAR_electride"
         partitioning_file = directory / "ELFCAR_electride"
         if not (directory / "CHGCAR_electride").exists():
             self.write_electride_structure_files(charge_file, partitioning_file)
         # Run the henkelman code to print out electride files
-        electride_indices = self.electride_indices
-        zero_flux_executor = ZeroFluxToolkit(directory=directory)
-        # zero_flux_executor.execute_henkelman_code_sel_atom(charge_file, partitioning_file, electride_indices)
-        zero_flux_executor.execute_henkelman_code_sel_atom(
-            "CHGCAR_electride", "ELFCAR_electride", electride_indices
+        badelf_workflow = get_workflow("population-analysis.bader.bader-dev")
+        badelf_workflow.run(
+            directory=directory,
+            charge_file="CHGCAR_electride",
+            partitioning_file="ELFCAR_electride",
+            atoms_to_print=self.electride_indices,
         )
 
-        for electride in electride_indices:
+        for electride in self.electride_indices:
             # Create a dictionary with all sites to store the value in. We do
             # this to have the same format for all sites including those that
             # are shared by more than one atom
@@ -533,8 +535,9 @@ class BadElfToolkit:
                 self.write_electride_structure_files(
                     directory / "CHGCAR_electride", partitioning_file
                 )
-            zero_flux_executor = ZeroFluxToolkit(directory=directory)
-            zero_flux_executor.execute_henkelman_code_sum_atom(
+            badelf_workflow = get_workflow("population-analysis.bader.bader-dev")
+            badelf_workflow.run(
+                directory=directory,
                 charge_file="ELFCAR_electride",
                 partitioning_file="ELFCAR_electride",
                 species_to_print="He",
@@ -671,9 +674,10 @@ class BadElfToolkit:
             charge_file = directory / "CHGCAR_electride"
             partitioning_file = directory / "ELFCAR_electride"
             self.write_electride_structure_files(charge_file, partitioning_file)
-            zero_flux_executor = ZeroFluxToolkit(directory=directory)
-            zero_flux_executor.execute_henkelman_code(
-                charge_file="CHGCAR_electride",
+            badelf_workflow = get_workflow("population-analysis.bader.bader-dev")
+            badelf_workflow.run(
+                directory=directory,
+                charge_file="ELFCAR_electride",
                 partitioning_file="ELFCAR_electride",
             )
             # get the desired data that will be saved to the dataframe
