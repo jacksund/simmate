@@ -32,8 +32,13 @@ simmate version
 
 Rebuild your database with one compatible with the new installation:
 ``` bash
-simmate database reset
+simmate database update
 ```
+
+!!! warning
+    `simmate database update` is only effective starting in `v0.15.0`. Earlier
+    versions of simmate require a fully database reset accross version updates.
+    Therefore, if you have `<=0.14.0` you must run `simmate database reset`.
 
 !!! tip
     If you use the same environment name as an existing one, conda will ask if
@@ -67,6 +72,12 @@ There is one key exception to the rules above -- and that is with `MAJOR`=0 rele
 **Refactors**
 **Fixes**
 -->
+
+- no new changes have been merged into the `main` branch yet
+
+--------------------------------------------------------------------------------
+
+## v0.15.0 (2024.01.04)
 
 **Enhancements**
 
