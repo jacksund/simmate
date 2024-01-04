@@ -15,8 +15,8 @@ class PopulationAnalysis__Bader__Badelf(PopulationAnalysis__Bader__Bader):
     instead of CHGCAR.
     """
 
-    command = "bader CHGCAR_empty -ref ELFCAR_empty > bader.out"
-    required_files = ["CHGCAR", "ELFCAR", "CHGCAR_empty", "ELFCAR_empty", "POTCAR"]
+    command = "bader CHGCAR_w_empty_atoms -ref ELFCAR_w_empty_atoms > bader.out"
+    required_files = ["CHGCAR", "ELFCAR", "CHGCAR_w_empty_atoms", "ELFCAR_w_empty_atoms", "POTCAR"]
     use_database = False
     use_previous_directory = ["CHGCAR", "ELFCAR", "POTCAR"]
     parent_workflows = ["population-analysis.vasp-bader.badelf-matproj"]

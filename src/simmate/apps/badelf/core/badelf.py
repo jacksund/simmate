@@ -326,8 +326,8 @@ class BadElfToolkit:
 
     def write_electride_structure_files(
         self,
-        charge_file: str = "CHGCAR_electride",
-        partitioning_file: str = "ELFCAR_electride",
+        charge_file: str = "CHGCAR_w_empty_atoms",
+        partitioning_file: str = "ELFCAR_w_empty_atoms",
     ):
         """
         Writes copies of the charge file and partitioning file (usually CHGCAR
@@ -359,16 +359,16 @@ class BadElfToolkit:
         """
 
         directory = self.directory
-        charge_file = directory / "CHGCAR_electride"
-        partitioning_file = directory / "ELFCAR_electride"
-        if not (directory / "CHGCAR_electride").exists():
+        charge_file = directory / "CHGCAR_w_empty_atoms"
+        partitioning_file = directory / "ELFCAR_w_empty_atoms"
+        if not (directory / "CHGCAR_w_empty_atoms").exists():
             self.write_electride_structure_files(charge_file, partitioning_file)
         # Run the henkelman code to print out electride files
         badelf_workflow = get_workflow("population-analysis.bader.bader-dev")
         badelf_workflow.run(
             directory=directory,
-            charge_file="CHGCAR_electride",
-            partitioning_file="ELFCAR_electride",
+            charge_file="CHGCAR_w_empty_atoms",
+            partitioning_file="ELFCAR_w_empty_atoms",
             atoms_to_print=self.electride_indices,
         )
 
@@ -530,16 +530,16 @@ class BadElfToolkit:
             # Henkelman Bader code, printing the resulting electride voxels in
             # one file for topolgoy analysis.
             directory = self.directory
-            partitioning_file = directory / "ELFCAR_electride"
+            partitioning_file = directory / "ELFCAR_w_empty_atoms"
             if not partitioning_file.exists():
                 self.write_electride_structure_files(
-                    directory / "CHGCAR_electride", partitioning_file
+                    directory / "CHGCAR_w_empty_atoms", partitioning_file
                 )
             badelf_workflow = get_workflow("population-analysis.bader.bader-dev")
             badelf_workflow.run(
                 directory=directory,
-                charge_file="ELFCAR_electride",
-                partitioning_file="ELFCAR_electride",
+                charge_file="ELFCAR_w_empty_atoms",
+                partitioning_file="ELFCAR_w_empty_atoms",
                 species_to_print="He",
                 structure=self.electride_structure,
             )
@@ -671,14 +671,14 @@ class BadElfToolkit:
             # Get the necessary CHGCAR and ELFCAR files. Then run the
             # Henkelman Bader code, printing the resulting electride voxels in
             # one file for topolgoy analysis.
-            charge_file = directory / "CHGCAR_electride"
-            partitioning_file = directory / "ELFCAR_electride"
+            charge_file = directory / "CHGCAR_w_empty_atoms"
+            partitioning_file = directory / "ELFCAR_w_empty_atoms"
             self.write_electride_structure_files(charge_file, partitioning_file)
             badelf_workflow = get_workflow("population-analysis.bader.bader-dev")
             badelf_workflow.run(
                 directory=directory,
-                charge_file="ELFCAR_electride",
-                partitioning_file="ELFCAR_electride",
+                charge_file="ELFCAR_w_empty_atoms",
+                partitioning_file="ELFCAR_w_empty_atoms",
             )
             # get the desired data that will be saved to the dataframe
             #!!! I should rework the ACF.dat reader now that I have better
