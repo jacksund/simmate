@@ -436,7 +436,7 @@ STATIC_ROOT = DJANGO_DIRECTORY / "static"
 
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = [
-    SIMMATE_DIRECTORY / "static_files",  # let's user add their own files
+    get_directory(SIMMATE_DIRECTORY / "static_files"),  # let's user add their own files
     DJANGO_DIRECTORY / "static_files",
 ]
 
