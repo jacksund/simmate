@@ -7,3 +7,4 @@ from .prebadelf_dft import (
     StaticEnergy__Vasp__WarrenLabPrebadelfHse,
     StaticEnergy__Vasp__WarrenLabPrebadelfPbesol,
 )
+from .test import BadElfAnalysis__Badelf__BadelfTest
