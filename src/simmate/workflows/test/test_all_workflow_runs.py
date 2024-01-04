@@ -140,7 +140,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
             successful_flows.append(workflow_name)
 
         # TEST BadELF FLOWS
-        structure = sample_structures["Ca2N_mp-2686_primitive.csv"]
+        structure = sample_structures["Ca2N_mp-2686_primitive"]
         workflow_name = "bad-elf-analysis.badelf.badelf-pbesol"
         workflow = get_workflow(workflow_name)
         # This workflow runs a static energy and then badelf calculation. The
