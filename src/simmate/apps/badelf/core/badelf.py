@@ -15,7 +15,6 @@ from pymatgen.analysis.dimensionality import get_dimensionality_larsen
 from pymatgen.analysis.graphs import StructureGraph
 from pymatgen.analysis.local_env import CrystalNN
 from pymatgen.io.vasp import Potcar
-from scipy.constants import Avogadro
 
 from simmate.apps.badelf.core.electride_finder import ElectrideFinder
 from simmate.apps.badelf.core.grid import Grid
@@ -25,7 +24,7 @@ from simmate.apps.bader.outputs import ACF
 from simmate.workflows.utilities import get_workflow
 
 # BUG: we shouldn't fully turning off warnings. This should be used within a context.
-warnings.filterwarnings("ignore")
+# warnings.filterwarnings("ignore")
 
 
 class BadElfToolkit:
@@ -236,11 +235,6 @@ class BadElfToolkit:
 
         # Get the objects that we'll need to assign voxels.
         elif algorithm in ["badelf", "voronelf"]:
-            # if we are doing voronelf, we can reduce the size of the grid to
-            # speed up the process.
-            if self.charge_grid.voxel_resolution > 20000 and algorithm == "voronelf":
-                self.charge_grid.regrid(desired_resolution=15000)
-
             a, b, c = self.charge_grid.grid_shape
             charge_data = self.charge_grid.total
 
