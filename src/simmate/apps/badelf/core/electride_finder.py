@@ -95,7 +95,7 @@ class ElectrideFinder:
         remove_old_electrides: bool = False,
         distance_cutoff: float = 1.6,
         electride_finder_cutoff: float = 0.5,
-        min_electride_radius: float = 0.7,
+        min_electride_radius: float = 0.8,
     ):
         #!!! The distance cutoff and min_electride_radius are fairly arbitrary
         # How should I find them instead?
