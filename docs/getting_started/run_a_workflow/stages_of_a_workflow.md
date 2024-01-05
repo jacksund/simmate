@@ -1,47 +1,45 @@
-
-# The 4 stages of a workflow
-
+# Understanding Workflow Stages
 
 !!! note
-    For the full tutorial, you will start on your local computer, even if you don't have VASP installed. By the end of the tutorial, you will have switched to a computer with VASP (likely a remote university or federal supercomputer).
+    This tutorial begins on your local computer, even if you don't have VASP installed. By the end, you'll transition to a computer with VASP, likely a remote university or federal supercomputer.
 
 ----------------------------------------------------------------------
 
-## the 4 key stages
+## The Four Key Stages
 
-Before running any workflows, it is important to understand what's happening behind the scenes. All workflows carry out four steps:
+Before initiating any workflows, it's crucial to comprehend the processes occurring behind the scenes. Every workflow undergoes four stages:
 
-- `configure`: chooses our desired settings for the calculation (such as VASP's INCAR settings)
-- `schedule`: decides whether to run the workflow immediately or send off to a job queue (e.g. SLURM, PBS, or remote computers)
-- `execute`: writes our input files, runs the calculation (e.g. VASP), and checks the results for errors
-- `save`: saves the results to our database
-
-----------------------------------------------------------------------
-
-## changing each stage
-
-There are many different scenarios where we may want to change the behavior of these steps. For example, what if I want to `execute` on a remote computer instead of my local one? Or if I want to `save` results to a cloud database that my entire lab shares? These can be configured easily, but because they require extra setup, we will save them for a later tutorial.
+- `configure`: Selects our preferred settings for the calculation (like VASP's INCAR settings)
+- `schedule`: Determines whether to run the workflow immediately or dispatch it to a job queue (such as SLURM, PBS, or remote computers)
+- `execute`: Creates our input files, performs the calculation (like VASP), and scrutinizes the results for errors
+- `save`: Stores the results in our database
 
 ----------------------------------------------------------------------
 
-## simmate defaults
-For now, we just want to run a workflow using Simmate's default settings. Without setting anything up, here is what Simmate will do:
+## Modifying Each Stage
 
-- `configure`: take the default settings from the workflow you request
-- `schedule`: decides that we want to run the workflow immediately
-- `execute`: runs the calculation directly on our local computer
-- `save`: saves the results on our local computer
+There are numerous situations where we might want to alter the behavior of these stages. For instance, what if we want to `execute` on a remote computer instead of our local one? Or what if we want to `save` results to a shared cloud database for our entire lab? These configurations are straightforward but require additional setup, so we'll cover them in a future tutorial.
 
 ----------------------------------------------------------------------
 
-## check-list before running workflows
+## Default Simmate Settings
+For now, we'll run a workflow using Simmate's default settings. Without any setup, here's what Simmate will do:
 
-Before we can actually run a workflow, we must:
+- `configure`: Applies the default settings from the requested workflow
+- `schedule`: Decides to run the workflow immediately
+- `execute`: Performs the calculation directly on our local computer
+- `save`: Stores the results on our local computer
 
-- [x] tell Simmate where our VASP files are
-- [x] set up our database so results can be saved
-- [x] select a structure for our calculation
+----------------------------------------------------------------------
 
-The next three sections will address each of these requirements.
+## Pre-Workflow Checklist
+
+Before we can run a workflow, we need to:
+
+- [x] Inform Simmate about the location of our VASP files
+- [x] Set up our database for result storage
+- [x] Choose a structure for our calculation
+
+The following three sections will address each of these prerequisites.
 
 ----------------------------------------------------------------------

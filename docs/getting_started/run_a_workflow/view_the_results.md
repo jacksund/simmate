@@ -1,12 +1,10 @@
+# Reviewing Workflow Results
 
-# Viewing the workflow's results
+## Understanding Basic Output Files
 
+Upon completion of your job, you will find additional files in your output. One such file is `simmate_summary.yaml`, which provides a brief summary of your results.
 
-## Basic output files
-
-Once your job completes, you may notice a few extra files in your output. One of them is `simmate_summary.yaml`, which contains some quick information for you.
-
-The information in this file is a snippet of what's available in the database:
+This file contains a subset of the data available in the database:
 ``` yaml
 _DATABASE_TABLE_: StaticEnergy
 _TABLE_ID_: 1
@@ -45,32 +43,31 @@ workflow_name: static-energy.vasp.mit
 workflow_version: 0.10.0
 ```
 
-Other workflows will also write out plots for you. For example, `electronic-structure` workflows will calculate a band structure using Materials Project settings, and write an image of your final band structure to `band_structure.png`. These extra files and plots vary for each workflow, but they make checking your results nice and quick.
+Different workflows may generate additional files and plots. For instance, `electronic-structure` workflows compute a band structure using Materials Project settings and create an image of your final band structure named `band_structure.png`. These additional files and plots, which vary by workflow, facilitate a quick review of your results.
 
 ----------------------------------------------------------------------
 
-## The website view
+## Accessing Results via the Website
 
-In the `simmate_summary.yaml` file, there is the `_WEBSITE_URL_`. You can copy/paste this URL into your browser and view your results in an interactive format. Just make sure you are running your local server first:
+The `simmate_summary.yaml` file includes a `_WEBSITE_URL_`. To view your results interactively, copy and paste this URL into your browser. Ensure your local server is running before doing so:
 
 ``` shell
 simmate run-server
 ```
 
-Then open the link given by `_WEBSITE_URL_`:
+Then, open the link provided by `_WEBSITE_URL_`:
 
 ```
 http://127.0.0.1:8000/workflows/static-energy/vasp/mit/1
 ```
 
 !!! note
-    Remember that the server and your database are limited to your local computer. Trying to access a URL on a computer that doesn't share the same database file will not work -- so you may need to copy your database file from the cluster to your local computer. Or even better -- if you would like to access results through the internet, then you have to switch to a cloud database (which is covered in a later tutorial).
+    Keep in mind that the server and your database are confined to your local computer. Attempting to access a URL on a computer that doesn't have the same database file will fail. You may need to transfer your database file from the cluster to your local computer. Alternatively, if you wish to access results online, consider switching to a cloud database. This process is explained in a subsequent tutorial.
 
 ----------------------------------------------------------------------
 
-## Advanced data analysis
+## Performing Advanced Data Analysis
 
-We can analyze our final structure and the full results with Simmate's toolkit and database. Accessing these require Python, so our next tutorial will introduce you to Python by directly interacting with the toolkit. We will then work our way up to accessing our database in a follow-up tutorial.
+Simmate's toolkit and database allow for in-depth analysis of our final structure and complete results. As this requires Python, our next tutorial will guide you through interacting with the toolkit using Python. Subsequent tutorials will cover accessing our database. 
 
 ----------------------------------------------------------------------
-

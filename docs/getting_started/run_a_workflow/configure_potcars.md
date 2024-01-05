@@ -1,27 +1,24 @@
-
-# Configuring Potentials (for VASP users)
+# Setting Up Potentials (for VASP users)
 
 !!! warning
-    once Simmate switches from VASP to a free DFT alternative, this section of the tutorial will be optional and removed.
+    This section will become optional and eventually be removed once Simmate transitions from VASP to a free DFT alternative.
 
 ----------------------------------------------------------------------
 
 ## What is VASP?
 
-VASP is a very popular software for running DFT calculations, but our team can't install it for you because VASP is commercially licensed (i.e. you need to [purchase it from their team](https://www.vasp.at/), which we are not affiliated with). 
-
-Simmate is working to switch to another DFT software -- specifically one that is free/open-source, that can be preinstalled for you, and that you can use on Windows+Mac+Linux. Until Simmate reaches this milestone, you'll have to use VASP. We apologize for the inconvenience.
+VASP is a widely used software for executing DFT calculations. However, our team cannot install it for you due to its commercial licensing. You need to [acquire it directly from the VASP team](https://www.vasp.at/), with whom we have no affiliation. 
 
 ----------------------------------------------------------------------
 
-## Configuring VASP
+## Setting Up VASP
 
-While VASP can only be installed on Linux, we will still practice configuring VASP on our local computer -- even if it's Windows or Mac. To do this, you only need the Potentials that are distrubited with the VASP installation files. You can either...
+Even though VASP can only be installed on Linux, we will guide you through the process of configuring VASP on your local computer, regardless of whether it's a Windows or Mac system. For this, you only need the Potentials that come with the VASP installation files. You can either:
 
-1. Grab these from the VASP installation files. You can find them at `vasp/5.x.x/dist/Potentials`. Be sure to unpack the `tar.gz` files.
-2. Ask a team member or your IT team for a copy of these files.
+1. Extract these from the VASP installation files located at `vasp/5.x.x/dist/Potentials`. Remember to unpack the `tar.gz` files.
+2. Request a copy of these files from a team member or your IT department.
 
-Once you have the potentials, paste them into a folder named `~/simmate/vasp/Potentials`. Note, this is same directory that your database is in (`~/simmate`) where you need to make a new folder named `vasp`. This folder will have the potentials that came with VASP -- and with their original folder+file names. Once you have all of this done, you're folder should look like this:
+After obtaining the potentials, place them in a folder named `~/simmate/vasp/Potentials`. This is the same directory where your database is located (`~/simmate`). Here, you need to create a new folder named `vasp`. This folder should contain the potentials that came with VASP, maintaining their original folder and file names. Once you've completed these steps, your folder should look like this:
 
 ```
 # Located at /home/my_username (~)
@@ -45,17 +42,17 @@ simmate/
 
 ----------------------------------------------------------------------
 
-## Checking your configuration
+## Verifying Your Configuration
 
-If you made this folder incorrectly, commands that you use later will fail with an error like...
+If the folder is not set up correctly, subsequent commands may fail, resulting in an error like this:
 
 ``` python
 FileNotFoundError: [Errno 2] No such file or directory: '/home/jacksund/simmate/vasp/Potentials/PBE/potpaw_PBE.54/Na/POTCAR'
 ```
 
-If you see this error, double-check your folder setup.
+If you encounter this error, revisit your folder setup.
 
 !!! danger 
-    our team only has access to VASP v5.4.4, so if your folder structure differs for newer versions of VASP, please let our know by [opening an issue](https://github.com/jacksund/simmate/issues).
+    Our team only has access to VASP v5.4.4. If your folder structure differs for newer versions of VASP, please inform us by [opening an issue](https://github.com/jacksund/simmate/issues).
 
 ----------------------------------------------------------------------

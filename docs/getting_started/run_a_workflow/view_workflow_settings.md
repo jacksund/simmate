@@ -1,47 +1,45 @@
-
-# Viewing a workflow's settings and inputs
+# Accessing Workflow Settings and Inputs
 
 !!! warning
-    This section is aimed at experienced VASP users that want to preview settings
-    used. Beginners will rarely use the commands shared here.
+    This section is designed for seasoned VASP users who wish to preview settings. Beginners may not frequently use the commands provided here.
 
 ----------------------------------------------------------------------
 
-## Viewing settings (basic)
+## Accessing Basic Settings
 
-To view a workflow's configuration before using it, we type the command `simmate workflows show-config`. Try this out by running:
+To preview a workflow's configuration prior to its use, enter the command `simmate workflows show-config`. Test this by executing:
 
 ``` shell
 simmate workflows show-config relaxation.vasp.quality00
 ```
 
-VASP users will recognize that this specifies the contents of a VASP INCAR file.  The `quality00` is the most basic workflow configuration because the INCAR will not depend on the structure or composition of your crystal.
+VASP users will recognize this as specifying the contents of a VASP INCAR file. The `quality00` represents the most fundamental workflow configuration as the INCAR will not be influenced by the structure or composition of your crystal.
 
 ----------------------------------------------------------------------
 
-## Viewing settings (complex)
+## Accessing Complex Settings
 
-Next, look at a more advanced calculation. Run the command:
+Next, examine a more sophisticated calculation. Execute the command:
 
 ``` shell
 simmate workflows show-config static-energy.vasp.mit
 ```
 
-Here, you'll see that some INCAR settings rely on composition and that we have a list of error handlers to help ensure that the calculation finishes successfully.
+Here, you'll observe that some INCAR settings are dependent on composition and that we have a list of error handlers to ensure the successful completion of the calculation.
 
 ----------------------------------------------------------------------
 
-## Generating input files (optional)
+## Generating Input Files (Optional)
 
-Now, let's go one step further and provide a specific structure (the POSCAR we just made) into a specific workflow (static-energy/mit). To do this, make sure our terminal has the same folder open as where our file is! For example, if your POSCAR is on your Desktop while your terminal is in your home directory, you can type `cd Desktop` to change your active folder to your Desktop. Then run the command:
+Now, let's advance further and input a specific structure (the POSCAR we just created) into a specific workflow (static-energy/mit). To do this, ensure that our terminal is open in the same folder as our file! For instance, if your POSCAR is on your Desktop while your terminal is in your home directory, you can type `cd Desktop` to switch your active folder to your Desktop. Then execute the command:
 
 ``` shell
 simmate workflows setup-only static-energy.vasp.mit --structure POSCAR
 ```
 
-You'll see a new folder created named `static-energy.vasp.mit.SETUP-ONLY`. When you open it, you'll see all the files that Simmate made for VASP to use. This is useful when you're an advanced user who wants to alter these files before running VASP manually -- this could happen when you want to test new workflows or unique systems.
+You'll notice a new folder named `static-energy.vasp.mit.SETUP-ONLY`. Upon opening it, you'll find all the files that Simmate created for VASP to utilize. This is beneficial for advanced users who wish to modify these files prior to manually running VASP -- this could occur when you want to experiment with new workflows or unique systems.
 
 !!! note
-    For absolute beginners, you don't immediately need to understand these files, but they will eventually be important for understanding the scientific limitations of your results or for running your own custom calculations. Whether you use [VASP](https://www.vasp.at/wiki/index.php/Category:Tutorials), [ABINIT](https://docs.abinit.org/tutorial/), or another program, be sure to go through their tutorials, rather than always depending on Simmate to run the program for you.  Until you reach that point, we'll have Simmate do it all for us.
+    For absolute beginners, understanding these files is not immediately necessary, but they will eventually become crucial for comprehending the scientific limitations of your results or for executing your own custom calculations. Whether you use [VASP](https://www.vasp.at/wiki/index.php/Category:Tutorials), [ABINIT](https://docs.abinit.org/tutorial/), or another program, it's recommended to go through their tutorials, rather than solely relying on Simmate to run the program for you. Until you reach that stage, we'll let Simmate handle everything.
 
 ----------------------------------------------------------------------
