@@ -67,5 +67,5 @@ class PopulationAnalysis__Bader__BaderDev(S3Workflow):
                 # TODO: grab the structure from the CHGCAR
             atom_indices = structure.indices_from_symbol(species_to_print)
             indices_str = indices_str = " ".join([str(i + 1) for i in atom_indices])
-            command_final += f"-p sel_atom {indices_str}"
+            command_final += f" -p sum_atom {indices_str}"
         return command_final

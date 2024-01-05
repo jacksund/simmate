@@ -2,9 +2,6 @@
 
 import math
 
-# from scipy.ndimage import label, find_objects, maximum_filter
-# from scipy.interpolate import RegularGridInterpolator
-# from scipy.optimize import curve_fit, fmin
 import numpy as np
 from pymatgen.analysis.local_env import CrystalNN
 

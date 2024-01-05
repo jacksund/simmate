@@ -4,6 +4,7 @@ import csv
 import itertools
 import math
 import warnings
+from functools import cached_property
 from pathlib import Path
 
 import dask.dataframe
@@ -15,7 +16,6 @@ from pymatgen.analysis.dimensionality import get_dimensionality_larsen
 from pymatgen.analysis.graphs import StructureGraph
 from pymatgen.analysis.local_env import CrystalNN
 from pymatgen.io.vasp import Potcar
-from scipy.constants import Avogadro
 
 from simmate.apps.badelf.core.electride_finder import ElectrideFinder
 from simmate.apps.badelf.core.grid import Grid
@@ -91,26 +91,17 @@ class BadElfToolkit:
         self.directory = directory
         self.algorithm = algorithm
         self.find_electrides = find_electrides
-        # self.structure = partitioning_grid.structure.copy().remove_species("He")
 
-        self._electride_structure = None
-        self._coord_envs = None
-        self._partitioning = None
-        self._voxel_assignments = None
-        self._voxel_assignments_array = None
-        self._results = None
-        self._voxel_errors = None
-        self._structure = None
+        self._voxel_errors = None  # Stores voxel coordinates that had errors when
+        # Being assigned. Only filled after badelf/vorelf have run
 
-    @property
+    @cached_property
     def structure(self):
-        if self._structure is None:
-            structure = self.partitioning_grid.structure.copy()
-            structure.remove_species(["He"])
-            self._structure = structure
-        return self._structure
+        structure = self.partitioning_grid.structure.copy()
+        structure.remove_species(["He"])
+        return structure
 
-    @property
+    @cached_property
     def electride_structure(self):
         """
         Searches the partitioning grid for potential electride sites and returns
@@ -119,31 +110,31 @@ class BadElfToolkit:
         Returns:
             A Structure object with electride sites as "He" atoms.
         """
-        if self._electride_structure is None:
-            if self.find_electrides:
-                self._electride_structure = ElectrideFinder(
-                    self.partitioning_grid
-                ).get_electride_structure(
-                    electride_finder_cutoff=self.electride_finder_cutoff
-                )
-            else:
-                self._electride_structure = self.structure
 
-        return self._electride_structure
+        if self.find_electrides:
+            electride_structure = ElectrideFinder(
+                self.partitioning_grid
+            ).get_electride_structure(
+                electride_finder_cutoff=self.electride_finder_cutoff
+            )
+        else:
+            electride_structure = self.structure
 
-    @property
+        return electride_structure
+
+    @cached_property
     def electride_indices(self):
+        """
+        The indices of the structure that are electride sites.
+        """
         return self.electride_structure.indices_from_symbol("He")
 
-    @property
+    @cached_property
     def coord_envs(self):
         """
         The coordination environment around each electride.
         """
-        if self._coord_envs is None:
-            self._coord_envs = self._get_coord_envs()
-
-        return self._coord_envs
+        return self._get_coord_envs()
 
     def _get_coord_envs(self):
         """
@@ -163,15 +154,13 @@ class BadElfToolkit:
             coord_envs.append(cnn.get_cn(structure=self.electride_structure, n=i))
         return coord_envs
 
-    @property
+    @cached_property
     def partitioning(self):
         """
         The partitioning planes for the structure as a dictionary. None if the
         zero-flux method is selected
         """
-        if self._partitioning is None:
-            self._partitioning = self._get_partitioning()
-        return self._partitioning
+        return self._get_partitioning()
 
     def _get_partitioning(self):
         """
@@ -212,12 +201,13 @@ class BadElfToolkit:
             )
             return None
 
-    @property
+    @cached_property
     def voxel_assignments(self):
-        if self._voxel_assignments is None:
-            self._voxel_assignments = self._get_voxel_assignments()
-
-        return self._voxel_assignments
+        """
+        A dataframe with each voxel coordinate, charge, and dictionary of sites
+        that the voxel is assigned to.
+        """
+        return self._get_voxel_assignments()
 
     def _get_voxel_assignments(self):
         """
@@ -498,11 +488,12 @@ class BadElfToolkit:
         )
         dataframe.to_csv(self.directory / "same_site_voxels.csv")
 
-    @property
+    @cached_property
     def voxel_assignments_array(self):
-        if self._voxel_assignments_array is None:
-            self._voxel_assignments_array = self._get_voxel_assignments_array()
-        return self._voxel_assignments_array
+        """
+        An array that relates each voxel in the charge_grid to a site.
+        """
+        return self._get_voxel_assignments_array()
 
     def _get_voxel_assignments_array(self):
         voxel_assignments = self.voxel_assignments
@@ -518,6 +509,9 @@ class BadElfToolkit:
 
     def get_electride_dimensionality(self, electride_connection_cutoff: float = 0):
         electride_indices = self.electride_indices
+        # If we have no electrides theres no reason to continue so we stop here
+        if len(electride_indices) == 0:
+            return None
 
         if self.algorithm == "zero-flux":
             # !!! read in electride only ELFCAR. Regrid to charge_grid size
@@ -543,7 +537,7 @@ class BadElfToolkit:
             elf_grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
             pass
         elif self.algorithm in ["badelf", "voronelf"]:
-            # read in ELF data and regridso that it is the same size as the
+            # read in ELF data and regrid so that it is the same size as the
             # charge grid
             elf_grid = self.partitioning_grid.copy()
             elf_grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
@@ -563,6 +557,7 @@ class BadElfToolkit:
         elf_grid.structure = electride_structure
 
         partitioning_tools = PartitioningToolkit(elf_grid)
+
         # get the 50 nearest electride neighbors. We only do this because we need to make
         # sure that electride sites that are very far away are thoroughly checked
         nearest_neighbors = partitioning_tools.get_set_number_of_neighbors(50)
@@ -642,11 +637,12 @@ class BadElfToolkit:
             with open(directory / f"{file_name}", "w") as file:
                 file.writelines(content)
 
-    @property
+    @cached_property
     def results(self):
-        if self._results is None:
-            self._results = self._get_results()
-        return self._results
+        """
+        A summary of the results from a BadELF run.
+        """
+        return self._get_results()
 
     def _get_results(self):
         algorithm = self.algorithm

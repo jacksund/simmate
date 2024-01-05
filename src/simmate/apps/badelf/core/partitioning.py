@@ -479,7 +479,8 @@ class PartitioningToolkit:
             A list of relating an atoms index to its  neighbors.
 
         """
-        structure = self.grid.structure
+        structure = self.grid.structure.copy()
+        print(structure)
         # Get all possible neighbor atoms for each atom within 15 angstroms
         all_neighbors = structure.get_all_neighbors(15)
         neighbors = []

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import itertools
 import math
 from pathlib import Path
@@ -8,13 +9,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike
 from pymatgen.io.vasp import Poscar
-
-# import itertools
 from pyrho.pgrid import PGrid
 
 from simmate.toolkit import Structure
-
-# from typing import TYPE_CHECKING
 
 
 class Grid:
