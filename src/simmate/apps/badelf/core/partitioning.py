@@ -438,7 +438,6 @@ class PartitioningToolkit:
             min_cart_coord = self.grid.get_cart_coords_from_vox(min_voxel_coord)
             distance_to_min = self.get_distance_to_min(min_cart_coord, site_voxel_coord)
             distances.append(distance_to_min)
-            # print(distance_to_min)
 
         elf_radius = min(distances)
         return elf_radius
@@ -480,7 +479,7 @@ class PartitioningToolkit:
 
         """
         structure = self.grid.structure.copy()
-        print(structure)
+
         # Get all possible neighbor atoms for each atom within 15 angstroms
         all_neighbors = structure.get_all_neighbors(15)
         neighbors = []

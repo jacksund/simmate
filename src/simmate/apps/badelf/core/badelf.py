@@ -668,7 +668,7 @@ class BadElfToolkit:
             badelf_workflow = get_workflow("population-analysis.bader.bader-dev")
             badelf_workflow.run(
                 directory=directory,
-                charge_file="ELFCAR_w_empty_atoms",
+                charge_file="CHGCAR_w_empty_atoms",
                 partitioning_file="ELFCAR_w_empty_atoms",
             )
             # get the desired data that will be saved to the dataframe
