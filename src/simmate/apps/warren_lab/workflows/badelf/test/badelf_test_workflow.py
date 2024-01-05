@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warren_lab.workflows.badelf.badelf import BadElf__Badelf__Badelf
-from simmate.apps.warren_lab.workflows.badelf.base import VaspBadElfBase
+from simmate.apps.badelf.workflows.badelf import BadElf__Badelf__Badelf
+from simmate.apps.badelf.workflows.base import VaspBadElfBase
 from simmate.apps.warren_lab.workflows.static_energy.pbesol import (
     StaticEnergy__Vasp__WarrenLabPbesol,
 )

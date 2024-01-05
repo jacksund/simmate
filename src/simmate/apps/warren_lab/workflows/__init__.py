@@ -3,7 +3,6 @@
 from simmate.database import connect
 
 from .badelf import (
-    BadElf__Badelf__Badelf,
     BadElf__Badelf__BadelfHse,
     BadElf__Badelf__BadelfPbesol,
     BadElf__Badelf__BadelfTest,

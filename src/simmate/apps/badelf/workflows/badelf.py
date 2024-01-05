@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warren_lab.models import BadElf
-from simmate.apps.warren_lab.workflows.badelf.base import BadElfBase
+from simmate.apps.badelf.models import BadElf
+from simmate.apps.badelf.workflows.base import BadElfBase
 from simmate.database import connect
 
 

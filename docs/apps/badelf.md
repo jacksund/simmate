@@ -28,7 +28,7 @@ This app provides workflows and utilities to help with BadELF analysis.
 
 1. Make sure you have Simmate installed and have reset your database.
 
-2. Register the warrenapp with simmate by adding `- warrenapp.apps.WarrenConfig` to `~/simmate/my_env-apps.yaml`
+2. Register the badelf app with simmate by adding `- simmate.apps.BadelfConfig` to `~/simmate/my_env-apps.yaml`
 
 3. Update your database to include custom tables from the warrenapp
 ``` shell
@@ -48,7 +48,7 @@ The BadELF algorithm can be run in a folder with VASP results. Please note that 
 Create a yaml file:
 ``` yaml
 # inside input.yaml
-workflow_name: bad-elf-analysis.bad-elf.bad-elf
+workflow_name: bad-elf.badelf.badelf
 
 # all parameters below are optional
 directory: /path/to/folder

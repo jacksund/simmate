@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from .badelf import BadElf__Badelf__Badelf
 from .badelf_hse import BadElf__Badelf__BadelfHse
 from .badelf_pbesol import BadElf__Badelf__BadelfPbesol
 from .prebadelf_dft import (
