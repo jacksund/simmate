@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from .badelf import BadElfAnalysis
+from .badelf import BadElf

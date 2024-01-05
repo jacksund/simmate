@@ -8,7 +8,7 @@ from pandas import DataFrame
 from simmate.database.base_data_types import Calculation, Structure, table_column
 
 
-class BadElfAnalysis(Structure, Calculation):
+class BadElf(Structure, Calculation):
     """
     This table contains results from a BadELF analysis.
     """

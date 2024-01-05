@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warren_lab.workflows.badelf.badelf import (
-    BadElfAnalysis__Badelf__Badelf,
-)
+from simmate.apps.warren_lab.workflows.badelf.badelf import BadElf__Badelf__Badelf
 from simmate.apps.warren_lab.workflows.badelf.base import VaspBadElfBase
 from simmate.apps.warren_lab.workflows.static_energy.pbesol import (
     StaticEnergy__Vasp__WarrenLabPbesol,
@@ -34,7 +32,7 @@ class StaticEnergy__Vasp__WarrenLabPrebadelfTest(StaticEnergy__Vasp__WarrenLabPb
     incar.update(settings)
 
 
-class BadElfAnalysis__Badelf__BadelfTest(VaspBadElfBase):
+class BadElf__Badelf__BadelfTest(VaspBadElfBase):
     """
     Runs a static energy calculation using very low settings followed by a
     badelf run. This is intended for testing only and is not recommended for
@@ -42,4 +40,4 @@ class BadElfAnalysis__Badelf__BadelfTest(VaspBadElfBase):
     """
 
     static_energy_workflow = StaticEnergy__Vasp__WarrenLabPrebadelfTest
-    badelf_workflow = BadElfAnalysis__Badelf__Badelf
+    badelf_workflow = BadElf__Badelf__Badelf
