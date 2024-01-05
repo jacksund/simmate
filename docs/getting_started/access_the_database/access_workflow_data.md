@@ -1,13 +1,12 @@
-
-# Accessing results from local calculations
+# Accessing Results from Local Calculations
 
 ----------------------------------------------------------------------
 
-## Loading a table
+## Loading a Table
 
-In the "run a workflow" tutorial, we ran a calculation and then added results to our database table. Here, we will now go through the results. 
+In the "Run a Workflow" tutorial, we executed a calculation and stored the results in our database table. This section will guide you through accessing these results. 
 
-The database table for results is always attached to the workflow as the `database_table` attribute. You can load it like this:
+The results database table is always linked to the workflow via the `database_table` attribute. Here's how to load it:
 
 ```python
 from simmate.workflows.utilities import get_workflow
@@ -18,72 +17,26 @@ table = workflow.database_table
 
 ----------------------------------------------------------------------
 
-## Seeing the available columns
+## Viewing Available Columns
 
-To see all of the data this table stores, we can use it's `show_columns()` method. Here, we'll see a bunch of columns printed for us...
+To view the data stored in this table, use the `show_columns()` method. This will display all the columns in the table:
 
 ```python
 table.show_columns()
 ```
 
-... which will output ...
-
-```
-- id
-- created_at
-- updated_at
-- source
-- structure
-- nsites
-- nelements
-- elements
-- chemical_system
-- density
-- density_atomic
-- volume
-- volume_molar
-- formula_full
-- formula_reduced
-- formula_anonymous
-- spacegroup (relation to Spacegroup)
-- workflow_name
-- location
-- directory
-- run_id
-- corrections
-- site_forces
-- lattice_stress
-- site_force_norm_max
-- site_forces_norm
-- site_forces_norm_per_atom
-- lattice_stress_norm
-- lattice_stress_norm_per_atom
-- energy
-- energy_per_atom
-- energy_above_hull
-- is_stable
-- decomposes_to
-- formation_energy
-- formation_energy_per_atom
-- band_gap
-- is_gap_direct
-- energy_fermi
-- conduction_band_minimum
-- valence_band_maximum
-```
-
-These are a lot of columns... and you may not need all of them. But Simmate still builds all of these for you right away because they don't take up very much storage space.
+The output will be a list of all the columns in the table. Simmate automatically generates all these columns as they require minimal storage space.
 
 ----------------------------------------------------------------------
 
-## Convert to an excel-like table
+## Converting to an Excel-like Table
 
-Next we'd want to see the table with all of its data. To access the table rows, we use the `objects` attribute, and then to get this into a table, we convert to a "dataframe". A dataframe is a filtered portion of a database table -- and because we didn't filter any of our results yet, our dataframe is just the whole table. 
+To view the table with all its data, use the `objects` attribute to access the table rows. Then, convert this to a "dataframe" to view the table. A dataframe is a filtered section of a database table. Since we haven't applied any filters to our results, our dataframe will display the entire table. 
 
 ```python
 data = table.objects.to_dataframe()
 ```
-Open up this variable by double-clicking `data` in Spyder's variable explorer (top right window) and you can view the table. Here's what a typical dataframe looks like in Spyder:
+To view the table, double-click `data` in Spyder's variable explorer (top right window). Here's what a typical dataframe looks like in Spyder:
 
 <!-- This is an image of an Pandas Dataframe in Spyder -->
 <p align="center" style="margin-bottom:40px;">
@@ -92,28 +45,28 @@ Open up this variable by double-clicking `data` in Spyder's variable explorer (t
 
 ----------------------------------------------------------------------
 
-## Filtering results from the table
+## Filtering Results from the Table
 
-Next, we can use our table columns to start filtering through our results. Your search results will be given back as a list of rows that met the filtering criteria. In the example above, we converted that list of results to into a dataframe for easy viewing. You can also convert each row into our `ToolkitStructure` from tutorial 3! There are a bunch of things to try, so play around with each:
+You can use the table columns to filter your results. The filtered results will be returned as a list of rows that meet the filtering criteria. In the previous example, we converted this list of results into a dataframe for easier viewing. You can also convert each row into our `ToolkitStructure` from tutorial 3! Feel free to experiment with each:
 
 ```python
 
-# We can filter off rows in the table. Any column can be used!
+# You can filter rows in the table using any column!
 search_results = table.objects.filter(
     formula_reduced="NaCl",  # check an exact match for any column
     nelements=2,  # filter a column based on a greater or equal to (gte) condition
 ).all()
 
-# If we look at this closely, you notice this is just a list of database objects (1 object = 1 row)
+# This is just a list of database objects (1 object = 1 row)
 print(search_results)
 
-# We can convert this list of objects to a dataframe like we did above
+# You can convert this list of objects to a dataframe like we did above
 data = search_results.to_dataframe()
 
-# Or we can convert to a list of structure objects (ToolkitStructure)
+# Or you can convert to a list of structure objects (ToolkitStructure)
 structures = search_results.to_toolkit()
 ```
 
-This isn't very exciting now because we just have one row/structure in our table :cry:, but we'll do some more exciting filtering in the next section.
+This may not seem very exciting now as we only have one row/structure in our table, but we'll explore more advanced filtering in the next section.
 
 ----------------------------------------------------------------------

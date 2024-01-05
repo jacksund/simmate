@@ -1,34 +1,33 @@
-
-# Python Inheritance with Datatables
-
-----------------------------------------------------------------------
-
-## Review of concepts
-
-To review key concepts up until this point...
-
-- [x] we setup our database and added calcution results to it.
-- [x] we learned about python classes, and in particular, the importance of the `Structure` class.
-- [x] we learned how to explore the documentation and use new classes.
-
-Now, we want to bring these ideas together in order to expolore our database. 
+# Python Inheritance in Datatables
 
 ----------------------------------------------------------------------
 
-## An example table in python
+## Recap of Key Concepts
 
-Let's start simple... All datatables are represented by a class, where the general format looks like this:
+Before we proceed, let's quickly recap the main concepts we've covered so far...
+
+- [x] We've established our database and populated it with calculation results.
+- [x] We've delved into Python classes, focusing on the significance of the `Structure` class.
+- [x] We've explored how to navigate documentation and utilize new classes.
+
+Now, we'll integrate these concepts to navigate our database. 
+
+----------------------------------------------------------------------
+
+## Python Table Example
+
+Let's start with the basics... All datatables are represented by a class, and the general format is as follows:
 
 ```python
 from simmate.database.base_data_types import DatabaseTable, table_column
 
 class MyExampleTable(DatabaseTable):
-   column_01 = table_columns.CharField()  # CharField --> means we store text
-   column_02 = table_columns.BoolField()  # BoolField --> means we store True/False
-   column_03 = table_columns.FloatField()  # FloatField --> means we store a number/decimal
+   column_01 = table_columns.CharField()  # CharField --> text storage
+   column_02 = table_columns.BoolField()  # BoolField --> True/False storage
+   column_03 = table_columns.FloatField()  # FloatField --> number/decimal storage
 ```
 
-And the corresponding table (with random data added) would look like...
+The corresponding table (populated with random data) would look like this:
 
 | column_01  | column_02 | column_03 |
 | ---------- | --------- | --------- |
@@ -38,15 +37,15 @@ And the corresponding table (with random data added) would look like...
 | scott  | False  | 1.602e-19  |
 | ... | ... | ...  |
 
-That's how all tables are made! We just make a class, say it is a `DatabaseTable` and then list off our desired columns.
+Creating tables is as simple as defining a class, declaring it as a `DatabaseTable`, and specifying the desired columns.
 
 ----------------------------------------------------------------------
 
-## Building tables with inheritance
+## Constructing Tables with Inheritance
 
-However, this could get really repetitive if we have a bunch of tables that contain similar information. For example, we may want to store structures in many different tables -- each one with columns like density, number of sites, number of elements, etc.. To save time, we use what is known as python "inheritance". Here's how it works:
+However, if we have multiple tables with similar data, this process can become repetitive. For instance, we might want to store structures in various tables, each with columns like density, number of sites, number of elements, etc. To streamline this process, we use Python "inheritance". Here's how it works:
 
-First, we define a table with common information (let's say a `Person`).
+First, we define a table with common data (let's use `Person` as an example).
 
 ```python
 from simmate.database.base_data_types import DatabaseTable, table_column
@@ -57,7 +56,7 @@ class Person(DatabaseTable):
    height = table_columns.FloatField()
 ```
 
-Next, we want a separate table to contain this type of information and more:
+Next, we create a separate table that includes this data and more:
 
 ```python
 class Student(Person):  # <--- note we have Person here instead of DatabaseTable
@@ -75,8 +74,8 @@ The `Student` datatable now looks like this:
 | scott  | 14  | 6.2  | 2021 | 3.2 |
 | ... | ... | ... | ... | ...|
 
-Simmate uses this idea with common materials science data -- such as structures, thermodynamic data, site forces, and more. You'll find our fundamental building blocks for tables in the `simmate.database.base_data_types` module ([covered here](/full_guides/database/custom_tables/)).
+Simmate employs this concept with common materials science data, such as structures, thermodynamic data, site forces, and more. Our fundamental building blocks for tables are found in the `simmate.database.base_data_types` module ([covered here](/full_guides/database/custom_tables/)).
 
-All of our datatables start from these classes and build up. Up next, we'll look at an actual database table and learn how to use it to view data.
+All our datatables are built upon these classes. Next, we'll examine an actual database table and learn how to use it to view data.
 
 ----------------------------------------------------------------------
