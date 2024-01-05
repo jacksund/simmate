@@ -177,53 +177,14 @@ class ElectrideFinder:
             electride_coords.append(maximum_coords)
             # electride_coordinations.append(cnn.get_cn(electride_structure, n=-1))
 
+        # Add our potential electride sites to our structure
+        electride_structure = structure.copy()
+        for coord in electride_coords:
+            electride_structure.append("He", coord, coords_are_cartesian=True)
+
         # Often the algorithm will find several electride sites right next to
         # eachother. This can be due to voxelation or because of oddly shaped
         # electrides. We want to combine these into one electride site.
-        empty_structure = structure.copy()
-        for coord in electride_coords:
-            empty_structure.append("He", coord, coords_are_cartesian=True)
+        electride_structure.merge_sites(tol=0.5, mode="average")
 
-        # We are going to start a loop where we continuosly combine potential
-        # electride sites until they are all combined. We start with an
-        # indicator for a while loop to check against
-        all_combined = False
-        # Now we loop over the electride sites
-        while not all_combined:
-            electride_indices = empty_structure.indices_from_symbol("He")
-            # Assume that everything is combined.
-            all_combined = True
-            for electride_index in electride_indices:
-                # Get any neighbors within 0.5 Angstrom of our electride. Because
-                # one of our cutoffs earlier was that atoms had to be more than
-                # 1.6 A away, we shouldn't find anything but other electride
-                # sites in this range.
-                site = empty_structure[electride_index]
-                neighbors = empty_structure.get_neighbors(site, 0.5)
-                if len(neighbors) > 0:
-                    # Indicate that we still have things to combine
-                    all_combined = False
-                    # Add all neighboring electride indices to a list. Do the
-                    # same for their coords
-                    nearby_electride_indices = [neigh.index for neigh in neighbors]
-                    nearby_electride_indices.append(electride_index)
-                    nearby_electride_coords = [neigh.coords for neigh in neighbors]
-                    nearby_electride_coords.append(site.coords)
-
-                    # Calculate the position of the new electride coord.
-                    new_electride_coord = sum(nearby_electride_coords) / len(
-                        nearby_electride_coords
-                    )
-
-                    # remove the old sites from the structure
-                    empty_structure.remove_sites(nearby_electride_indices)
-                    # Add our new coord
-                    empty_structure.append(
-                        "He", new_electride_coord, coords_are_cartesian=True
-                    )
-                    break
-                    # We now go back to the beginning of the while loop. We get
-                    # a new set of electride sites from our updated empty_structure
-                    # and repeate everything
-
-        return empty_structure
+        return electride_structure
