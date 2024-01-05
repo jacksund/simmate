@@ -1,4 +1,3 @@
-
 # Welcome!
 
 <!-- This displays the Simmate Logo -->
@@ -48,32 +47,32 @@ Read here for info on markdown, badges, and more:
 
 ## Before you begin
 
-This website holds all of our tutorials & guides. Before getting started here, you may way to check out... 
+This website is your go-to resource for all our tutorials and guides. Before diving in, you might want to explore:
 
-- our main website at [simmate.org](https://simmate.org/)
-- our source code [github.com/jacksund/simmate](https://github.com/jacksund/simmate)
+- Our main website at [simmate.org](https://simmate.org/)
+- Our source code at [github.com/jacksund/simmate](https://github.com/jacksund/simmate)
 
 --------------------------------------------------------------------------------
 
 ## What is Simmate?
 
-The Simulated Materials Ecosystem (Simmate) is a toolbox and framework for computational materials research. It lets you explore various crystal databases, predict new materials, and quickly calculate properties (electronic, elastic, thermodynamic, and more).
+Simmate, or the Simulated Materials Ecosystem, is a comprehensive toolbox and framework designed for computational materials research. It allows you to explore various crystal databases, predict new materials, and easily calculate properties such as electronic, elastic, thermodynamic, and more.
 
-Computational research can be intimidating because there are so many programs to choose from, and it's hard to mix-and-match them for your specific project. Simmate aims to be the glue between all these different programs, databases, and utilities. We do the heavy lifting and explain these other programs to you along the way.
+Computational research can be intimidating because there are so many programs to choose from, and it's challenging to select and combine them for your specific project. Simmate is designed to bridge this gap, acting as the adhesive between these diverse programs, databases, and utilities. We take on the heavy lifting and provide clear explanations of these programs along the way.
 
-Even if you consider yourself an experimentalist and have little-to-no coding experience, Simmate's barrier to entry is built to be as low as possible. Our web interface can generate property predictions with a single mouse click. And for learning how to code, we wrote our tutorials and documentation for those that have never used python before. 
+Simmate is designed to be accessible to all, including experimentalists with minimal coding experience. Our user-friendly web interface can generate property predictions with a single mouse click. For those interested in learning to code, our tutorials and documentation are written with beginners in mind.
 
-At the other end of the spectrum, we provide an extremely powerful toolbox and API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we operate under a very different coding philosphy. **Here, usability and readability are our top priorities.** We therefore distribute Simmate as an "all-in-one" package rather than many separate programs. This includes a core material science toolkit, workflow management, database orm, and a website interface. **Simmate also focuses heavily on cloud-based storage**, which enables large scale collaborations and avoids researchers repeating calculations. To learn more about the different design choices made in Simmate compared to competing codes, read through our [comparisons and benchmarks page](https://github.com/jacksund/simmate/tree/main/benchmarks).
+At the other end of the spectrum, we provide an extremely powerful toolbox and API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we operate under a distinct coding philosophy. **Our top priorities are usability and readability.** We distribute Simmate as an "all-in-one" package, including a core material science toolkit, workflow management, database ORM, and a website interface. **Simmate also emphasizes cloud-based storage**, facilitating large scale collaborations and preventing redundant calculations. To understand more about the unique design choices in Simmate compared to other codes, visit our [comparisons and benchmarks page](https://github.com/jacksund/simmate/tree/main/benchmarks).
 
 --------------------------------------------------------------------------------
 
 ## A Sneak-Peak of Features
 
-Again, take a look at [our main website](https://simmate.org/) if you'd like to see the end-result of what Simmate has to offer. There are many more functions and utilities once you download Simmate, so this section showcases a few of those features.
+Visit [our main website](https://simmate.org/) to see the full range of what Simmate offers. This section highlights a few features available once you download Simmate.
 
 
 ### Prebuilt Workflows
-All of the most common material properties have workflows ready to go. These range from simple XRD pattern predictions to intensive dynamic simulations. Simmate also builds off of [Prefect](https://github.com/PrefectHQ/prefect) for orchestrating and managing workflows. This means that it's up to you whether to run jobs via (i) an advanced user-interface, (ii) the command-line, or (iii) in custom python scripts:
+Simmate comes with ready-to-use workflows for most common material properties, ranging from simple XRD pattern predictions to intensive dynamic simulations. Simmate builds on [Prefect](https://github.com/PrefectHQ/prefect) for orchestrating and managing workflows, giving you the flexibility to run jobs via an advanced user-interface, the command-line, or in custom python scripts:
 
 === "yaml"
     ``` yaml
@@ -114,7 +113,7 @@ All of the most common material properties have workflows ready to go. These ran
 
 
 ### Full-Feature Database
-Using all the data on our official site along with your own private data, you can take advantage of Simmate's extremely powerful database that is built off of [Django ORM](https://github.com/django/django). Simmate also brings together third-party databases and their data -- including those like the COD, Materials Project, JARVIS, and others. With so much data, being able to easily download and navigate it is critical:
+Simmate's powerful database, built on [Django ORM](https://github.com/django/django), allows you to leverage all the data on our official site along with your private data. Simmate also integrates third-party databases and their data, including COD, Materials Project, JARVIS, and more. With such a wealth of data, easy navigation and download capabilities are crucial:
 
 ```python
 from simmate.database import connect # (1)
@@ -137,13 +136,13 @@ df = structures.to_dataframe()
 structures = structures.to_toolkit()
 ```
 
-1. Be sure to follow the database tutorial where we build our initial database with the command `simmate database reset`
-2. all structures that have less than 6 sites in their unitcell
-3. This filter to... greater or equal to 3 sites, the structure DOES have an energy, density is between 1 and 5, the structure includes the element Carbon, and the spacegroup number is 167
+1. Follow the database tutorial to build our initial database with the command `simmate database reset`
+2. Retrieves all structures with less than 6 sites in their unit cell
+3. This filter retrieves structures with: greater or equal to 3 sites, an energy value, density between 1 and 5, the element Carbon, and spacegroup number 167
 
 
 ### Utilities & Toolbox 
-A lot of times in research, a new method is needed to analyze a structure, so a prebuilt workflow won't exist for you yet. Here, you'll need common functions ready to go (such as grabbing the volume of a crystal or running symmetry analysis). Our toolkit functions and classes largely inherit from [PyMatGen](https://github.com/materialsproject/pymatgen), which gives you a wide variety of functions to use:
+In research, you often need a new method to analyze a structure, and a prebuilt workflow may not exist. Simmate provides common functions ready to use, such as calculating the volume of a crystal or running symmetry analysis. Our toolkit functions and classes largely inherit from [PyMatGen](https://github.com/materialsproject/pymatgen), offering a wide variety of functions:
 
 ``` python
 # Load the structure file you'd like to use
@@ -163,7 +162,7 @@ structure.add_oxidation_state_by_guess()
 
 
 ### Scalable to Clusters
-At the beginning of a project, you may want to write and run code on a single computer and single core. But as you run into some intense calculations, you may want to use all of your CPU and GPU to run calculations. At the extreme, some projects require thousands of computers across numerous locations, including university clusters (using SLURM or PBS) and cloud computing (using Kubernetes and Docker). Simmate can meet all of these needs thanks to integration with a custom `SimmateExecutor` (the default), [Dask](https://github.com/dask/dask), and/or [Prefect](https://github.com/PrefectHQ/prefect):
+Simmate is designed to scale with your project. Whether you're working on a single computer or need to use all your CPU and GPU for intense calculations, Simmate has you covered. For large-scale projects requiring thousands of computers across multiple locations, including university clusters (using SLURM or PBS) and cloud computing (using Kubernetes and Docker), Simmate integrates with a custom `SimmateExecutor` (the default), [Dask](https://github.com/dask/dask), and/or [Prefect](https://github.com/PrefectHQ/prefect):
 
 === "schedule jobs"
     ```python
@@ -172,7 +171,7 @@ At the beginning of a project, you may want to write and run code on a single co
     ```
 
     1. On your local computer, schedule your workflow run. This is as easy as replacing "run" with "run_cloud". This returns a "future-like" object.
-    2. Calling result will wait until the job completes and grab the result! Note, the job won't run until you start a worker that is connected to the same database (see command below)
+    2. Calling result will wait until the job completes and grab the result! Note, the job won't run until you start a worker that is connected to the same database
 
 === "add remote resources"
     ``` bash
