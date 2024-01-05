@@ -3,17 +3,17 @@
 import os
 import shutil
 
-# This file contains workflows for performing Bader and BadELF. Parts of the code
-# use the Henkelman groups algorithm for Bader analysis:
-# (http://theory.cm.utexas.edu/henkelman/code/bader/).
-import warnings
+# This will be added back once I go through and handle warnings within context
+# import warnings
 from pathlib import Path
 
 from simmate.apps.badelf.core.badelf import BadElfToolkit
 from simmate.engine import Workflow
 from simmate.toolkit import Structure
 
-warnings.filterwarnings("ignore")
+# This file contains workflows for performing Bader and BadELF. Parts of the code
+# use the Henkelman groups algorithm for Bader analysis:
+# (http://theory.cm.utexas.edu/henkelman/code/bader/).
 
 
 class BadElfBase(Workflow):
