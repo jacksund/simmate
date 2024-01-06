@@ -1,42 +1,37 @@
-
-# Should I set up my own database?
+# Should I Create My Own Database?
 
 -------------------------------------------------------------------------------
 
-## Share a database with others
+## Sharing a Database with Others
 
-A cloud database lets you save your results to a remote computer through an internet connection, and once a database is set up, you can add as many users and connections as you'd like. 
+A cloud database allows you to store your results on a remote server via an internet connection. Once a database is established, you can add unlimited users and connections. 
 
-Therefore, if you are part of a team, you only need **ONE** person to setup and manage **ONE** cloud database. Anyone can collaborate if they have a username and password.
+If you're part of a team, only **ONE** member needs to set up and manage **ONE** cloud database. Collaboration is possible for anyone with a username and password.
 
 -------------------------------------------------------------------------------
 
 ## Collaborating with the Warren Lab
 
-We could (theoretically) have the entire scientific community working together and sharing their results. To this end, our Simmate team tries to get as many labs collaborating as possible. If you would like join this effort, simply send an email to **simmate.team@gmail.com** and ask. Once you're on our team, you won't have to setup or manage any cloud database.
-
-!!! note 
-    If you decide to collaborate, we will take on the costs of the cloud database for now, but as our database and community grows, we may need help with funding. Until then, don't hesitate to ask for our status.
+Ideally, the entire scientific community could work together, sharing their results. Our Simmate team encourages as many labs as possible to collaborate. If you're interested in joining this effort, simply email **simmate.team@gmail.com**. As a team member, you won't need to set up or manage any cloud database.
 
 -------------------------------------------------------------------------------
 
-## Using a private database
+## Using a Private Database
 
-If you would instead like a private database for your team, designate one person to be the database manager. Only that person needs to complete the next section (on setting up your cloud database). All other members, wait until you get connection information and then jump to the final section (on connecting to your cloud database).
+If you prefer a private database for your team, appoint one member as the database manager. This person alone needs to complete the next section (on setting up your cloud database). All other members should wait for connection information before proceeding to the final section (on connecting to your cloud database).
 
-So to summarize, only create your own cloud database if both of these conditions are met:
+In summary, only establish your own cloud database if:
 
-1. you prefer a private database instead of Simmate's collaborative effort
-2. you are the point-person for managing your team's private database
+1. You prefer a private database over Simmate's collaborative effort.
+2. You are the designated manager of your team's private database.
 
 -------------------------------------------------------------------------------
 
-## Connecting to a cloud database
+## Connecting to a Cloud Database
 
-If you are collaborating with someone that set up a database already, then
-connecting to it will be the easiest thing we've done yet! 
+If you're collaborating with someone who has already set up a database, connecting to it will be straightforward. 
 
-Once you have the connection parameters for your cloud database, simply create the file `~/simmate/my_env-database.yaml` and add the connection parameters that your point-person provided. As an example, this `my_env-database.yaml` file gives a `default` database to use:
+Once you have your cloud database's connection parameters, create the file `~/simmate/my_env-database.yaml` and input the connection parameters provided by your point-person. For instance, this `my_env-database.yaml` file designates a `default` database:
 ``` yaml
 default:
   ENGINE: django.db.backends.postgresql
@@ -49,16 +44,12 @@ default:
     sslmode: require
 ```
 
-That's it! When you run a new workflow, results will be saved to this cloud database instead of your local file.
-
+That's all! When you run a new workflow, results will be saved to this cloud database instead of your local file.
 
 !!! danger
-    If you lab uses postgres, make sure you have extra database dependencies installed. For postgres, run the command:
+    If your lab uses postgres, ensure you have the necessary database dependencies installed. For postgres, execute the command:
     ``` shell
     conda install -n my_env -c conda-forge psycopg2
     ```
-
-!!! tip
-    If you would like to share the database with anyone or any other computer, just share this connection file with them.
 
 -------------------------------------------------------------------------------

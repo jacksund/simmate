@@ -1,11 +1,10 @@
-
-# Setting up your cluster and workers
+# Configuring Your Cluster and Workers
 
 -------------------------------------------------------------------------------
 
-## Run vs. Run-cloud
+## Switching from Run to Run-cloud
 
-Scheduling a workflow is straight-forward. Simply change all your scripts and commands from the `run` method to the `run_cloud` method. For example, if you are using the command line:
+Transitioning a workflow to a schedule is simple. All you need to do is replace all your scripts and commands from the `run` method to the `run_cloud` method. For instance, if you're using the command line:
 
 === "command line"
     ``` bash
@@ -16,43 +15,43 @@ Scheduling a workflow is straight-forward. Simply change all your scripts and co
     workflow.run_cloud(...)
     ```
 
-This schedules your workflow, but it won't run yet. It is simply sitting in the queue and waiting for a worker to pick it up. Once we start a worker, then it will actually run.
+This action schedules your workflow, but it doesn't initiate it. It merely places it in the queue, waiting for a worker to execute it. The workflow will only run once a worker is started.
 
 -------------------------------------------------------------------------------
 
-## Start a "single-flow" worker
+## Initiating a "single-flow" worker
 
-Whereever you'd like to run the workflow, start a worker with:
+To run the workflow, start a worker with the following command:
 ``` bash
 simmate engine start-singleflow-worker
 ```
 
 !!! danger
-    If you are on a cluster, start-worker should be called within your submit script (e.g. inside `submit.sh` for SLURM). Don't run workers on the head node! :warning: :warning: :warning: :warning: :warning: :warning:
+    If you're using a cluster, the start-worker command should be executed within your submit script (for example, inside `submit.sh` for SLURM). Avoid running workers on the head node! :warning: :warning: :warning: :warning: :warning: :warning:
 
 -------------------------------------------------------------------------------
 
-## Start a "many-flow" worker
+## Initiating a "many-flow" worker
 
-When you run this "singleflow" worker, you'll notice that the Worker will start, run 1 workflow, then shutdown. This is the recommended approach for HPC clusters because it follow best practices for sharing resources. You don't want a worker hogging computational resources if there aren't any workflows scheduled to run! 
+When you initiate this "singleflow" worker, you'll observe that the Worker starts, executes one workflow, then shuts down. This method is recommended for HPC clusters as it adheres to best practices for resource sharing. It prevents a worker from monopolizing computational resources when there are no scheduled workflows to run! 
 
-However, if you would like more control over how many workflows are ran or even run a worker endlessly, you can use the command:
+However, if you want more control over the number of workflows run or even to run a worker indefinitely, use the following command:
 ``` bash
 simmate engine start-worker
 ```
 
-If your team runs many mini workflows that are under 5 minutes, starting/stopping workers could be a pain (sometimes it can take simmate up to 10 seconds to set everything up). That's a significant overhead and wasted computation time. 
+If your team frequently runs many short workflows that take less than 5 minutes, constantly starting and stopping workers can be inconvenient (sometimes it can take simmate up to 10 seconds to set everything up). This can lead to significant overhead and wasted computation time. 
 
-To overcome this, we would run a worker that shuts down after 10 workflows or if the queue is empty:
+To mitigate this, you can run a worker that shuts down after executing 10 workflows or when the queue is empty:
 ``` bash
 simmate engine start-worker --nitems-max 10 --close-on-empty-queue
 ```
 
 -------------------------------------------------------------------------------
 
-## Starting many workers at once
+## Initiating Multiple Workers Simultaneously
 
-If you need to start many workers at once, you can use the `start-cluster` command as well.
+If you need to initiate multiple workers at once, you can use the `start-cluster` command as well.
 ``` bash
 # starts 5 local workers
 simmate engine start-cluster 5
@@ -60,15 +59,15 @@ simmate engine start-cluster 5
 
 -------------------------------------------------------------------------------
 
-## Controlling what workflows are ran by each worker
+## Managing the Workflows Run by Each Worker
 
 !!! warning
-    The full guide for custom workers is still being written. See workflow "tags" in the full guides for more information.
+    The comprehensive guide for custom workers is currently under development. Refer to the workflow "tags" in the full guides for more details.
 
 -------------------------------------------------------------------------------
 
-## Connecting others to your scheduler
+## Allowing Others to Connect to Your Scheduler
 
-If they are connected to your database, then they're good to go! Other schedulers like Prefect or Dask require extra setup.
+If others are connected to your database, they're all set! Other schedulers like Prefect or Dask may require additional setup.
 
 -------------------------------------------------------------------------------

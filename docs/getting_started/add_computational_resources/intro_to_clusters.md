@@ -1,24 +1,23 @@
-
-# Intro to engine concepts
+# Introduction to Engine Concepts
 
 -------------------------------------------------------------------------------
 
 ## Overview
 
-Recall from our earlier tutorial, there are 4 steps to a workflow (`configure`, `schedule`, `execute`, and `save`).
+In a previous tutorial, we discussed the four steps of a workflow: `configure`, `schedule`, `execute`, and `save`.
 
-This tutorial will give an overview of how to modify the `schedule` and determine which computer `execute` is called on. Up until now, we have been using the default behavior for these two steps. But now we want to instead do the following:
+This tutorial will focus on how to modify the `schedule` and determine the computer on which `execute` is called. Until now, we have been using the default behavior for these two steps. However, we will now explore how to:
 
-- `schedule`: submit the workflow to a queue of many other workflows
-- `execute`: run the calculation on a remote cluster
+- `schedule`: Submit the workflow to a queue containing multiple workflows.
+- `execute`: Run the calculation on a remote cluster.
 
 -------------------------------------------------------------------------------
 
-## Visualizing our setup
+## Visualizing Our Setup
 
-The following schematic will help with understanding the concepts described below. Take a moment to understand the organization our resources and use this as a reference when reading below.
+The schematic below will aid in understanding the concepts discussed in this tutorial. Take a moment to familiarize yourself with the organization of our resources and refer back to this schematic as needed.
 
-=== "general setup"
+=== "General Setup"
     ``` mermaid
     graph TD;
         A[user 1]-->E[scheduler];
@@ -38,7 +37,7 @@ The following schematic will help with understanding the concepts described belo
         H-->P[worker 8];
         H-->Q[worker 9];
     ```
-=== "example (the Warren lab)"
+=== "Example (The Warren Lab)"
     ``` mermaid
     graph TD;
         A[Jack's submissions]-->E[cloud database];
@@ -61,18 +60,18 @@ The following schematic will help with understanding the concepts described belo
 
 -------------------------------------------------------------------------------
 
-## What is a scheduler?
+## What is a Scheduler?
 
-A **scheduler** is something we submit workflows to and it is what controls when & where to run workflows. 
+A **scheduler** is a tool to which we submit workflows. It controls when and where workflows are run. 
 
-The terms "scheduler" and "executor" are sometimes used interchangeably. As a bunch of workflows are submitted, our scheduler forms a queue and keeps track of which ones to run next. To do this, we can use the built-in `SimmateExecutor`, [Dask](https://docs.dask.org/en/stable/futures.html), or [Prefect](https://www.prefect.io/) as our scheduler. For this tutorial, we will use the `SimmateExecutor` because it is the default one and it's already set up for us.
+The terms "scheduler" and "executor" are often used interchangeably. As workflows are submitted, the scheduler forms a queue and determines the order of execution. We can use the built-in `SimmateExecutor`, [Dask](https://docs.dask.org/en/stable/futures.html), or [Prefect](https://www.prefect.io/) as our scheduler. For this tutorial, we will use the `SimmateExecutor` as it is the default option and is already set up for us.
 
 -------------------------------------------------------------------------------
 
-## What is a cluster?
+## What is a Cluster?
 
-A **cluster** is a group of computational resources that actually run the workflows. So our scheduler will find whichever workflow should be ran next, and send it to our cluster to run. 
+A **cluster** is a collection of computational resources that execute the workflows. The scheduler identifies the next workflow to be run and sends it to the cluster for execution. 
 
-Clusters are often made up of **workers** -- where a worker is just a single resource and it works through one job at a time. For example, say we have 10 computers (or slurm jobs) that each run one workflow at a time. All computers together are our cluster. Each computer is a worker. At any given time, 10 workflows will be running because each worker will have one it is in charge of. Because we are using the `SimmateExectuor`, we will be using `SimmateWorker`s to set up each worker and therefore our cluster. Set-up for each worker is the same -- whether your resources are on a cloud service, a supercomputer, or just simple desktops.
+Clusters typically consist of **workers** -- individual resources that process one job at a time. For instance, if we have 10 computers (or slurm jobs) each running one workflow at a time, these computers collectively form our cluster. Each computer is a worker. At any given time, 10 workflows will be running, with each worker handling one. As we are using the `SimmateExectuor`, we will use `SimmateWorker`s to set up each worker and, consequently, our cluster. The setup for each worker is the same, regardless of whether your resources are on a cloud service, a supercomputer, or simple desktops.
 
 -------------------------------------------------------------------------------
