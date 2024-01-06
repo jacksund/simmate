@@ -1,28 +1,27 @@
-
-# Updating settings for a workflow
+# Modifying Workflow Settings
 
 !!! danger
-    The methods described in this section are **generally considered bad practice**, but they are still useful for getting things started. After this section, we will cover to best way to update settings and create new workflows.
+    The techniques outlined in this section are **generally not recommended**, but they can be useful for initial setup. Following this, we will discuss the optimal method for modifying settings and creating new workflows.
 
 ----------------------------------------------------------------------
 
 ## Why isn't there a `custom_settings` option?
 
-We intentionally avoid the use of `workflow.run(custom_settings=...)`. **This will NOT work.** Simmate does this because we do not want to store results from customized settings in the same results table -- as this would (a) complicate analysis of many structures/systems and (b) make navigating results extremely difficult for beginners. 
+We deliberately do not use `workflow.run(custom_settings=...)`. **This will NOT work.** Simmate takes this approach because we want to avoid storing results from custom settings in the same results table. This would (a) complicate the analysis of multiple structures/systems and (b) make navigating results extremely challenging for beginners. 
 
-For example, reducing the `ENCUT` or changing the dispersion correction of a VASP calculation makes it so energies cannot be compared between all materials in the table, and thus, features like calculated hull energies would become inaccruate.
+For instance, altering the `ENCUT` or changing the dispersion correction of a VASP calculation would prevent energy comparisons between all materials in the table, rendering features like calculated hull energies inaccurate.
 
-Instead, Simmate encourages the creation of new workflows and result tables when you want to customize settings. This puts Simmate's emphasis on "scaling up" workflows (i.e. running a fixed workflow on thousands on materials) as opposed to "scaling out" workflows (i.e. a flexible workflow that changes on a structure-by-structure basis).
+Instead, Simmate promotes the creation of new workflows and result tables for custom settings. This emphasizes Simmate's focus on "scaling up" workflows (i.e., running a fixed workflow on thousands of materials) rather than "scaling out" workflows (i.e., a flexible workflow that changes on a structure-by-structure basis).
 
 ----------------------------------------------------------------------
 
-## Update settings for an existing workflow
+## Modifying settings for an existing workflow
 
-For very quick testing, it is still useful to customize a workflow's settings without having to create a new workflow altogether. There are two approaches you can take to edit your settings:
+For quick testing, it can be useful to adjust a workflow's settings without creating a new workflow. There are two methods to edit your settings:
 
 ### **OPTION 1** 
 
-Writing input files and manually submitting a separate program
+Write input files and manually submit a separate program
 
 ``` bash
 # This simply writes input files
@@ -43,7 +42,7 @@ vasp_std > vasp.out
 
 ### **OPTION 2** 
 
-Using the "customized" workflow for an app (e.g. `customized.vasp.user-config`)
+Use the "customized" workflow for an app (e.g., `customized.vasp.user-config`)
 
 ``` yaml
 # In a file named "my_example.yaml".
@@ -76,12 +75,12 @@ simmate workflows run-yaml my_example.yaml
 ```
 
 !!! warning
-    These approaches are only possible with single-calcultion workflows (i.e. "nested" workflows that call several workflows within them are not supported)
+    These methods are only applicable to single-calculation workflows (i.e., "nested" workflows that call several workflows within them are not supported)
 
 ----------------------------------------------------------------------
 
-## **Avoid these approaches if possible!** 
+## **Avoid these methods if possible!** 
 
-Both of options shown above are only suitable for customizing settings for a few calculations -- and also you lose some key Simmate features. If you are submitting many calculations (>20) and this process doesn't suit your needs, keep reading!
+Both options above are only suitable for customizing settings for a few calculations, and you lose some key Simmate features. If you are submitting many calculations (>20) and these methods do not meet your needs, continue reading!
 
 ----------------------------------------------------------------------
