@@ -196,6 +196,12 @@ nav:
             - Utilities: full_guides/extras/utilities.md
             # - Configuration: full_guides/extras/configuration.md
             # - Testing: full_guides/extras/testing.md  # Move to contributing...?
+            - Contributing:
+                - Overview: contributing/overview.md
+                - First time setup: contributing/first_time_setup.md
+                - Creating & submitting changes: contributing/creating_and_submitting_changes.md
+                - Extra notes & tips: contributing/extra.md
+                - Maintainer notes: contributing/maintainer_notes.md
 
     - Apps: 
         - Overview: apps/overview.md
@@ -212,12 +218,5 @@ nav:
             # - Outputs: apps/vasp/outputs.md
             # - Error Handlers: apps/vasp/error_handlers.md
         - Warren Lab: apps/warren_lab.md
-
-    - Contributing:
-        - Overview: contributing/overview.md
-        - First time setup: contributing/first_time_setup.md
-        - Creating & submitting changes: contributing/creating_and_submitting_changes.md
-        - Extra notes & tips: contributing/extra.md
-        - Maintainer notes: contributing/maintainer_notes.md
     
-    - Changes & Updates: change_log.md
+    - Updates: change_log.md
