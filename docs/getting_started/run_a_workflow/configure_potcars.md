@@ -1,8 +1,5 @@
 # Setting Up Potentials (for VASP users)
 
-!!! warning
-    This section will become optional and eventually be removed once Simmate transitions from VASP to a free DFT alternative.
-
 ----------------------------------------------------------------------
 
 ## What is VASP?

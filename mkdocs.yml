@@ -89,17 +89,15 @@ nav:
             - d) Explore Simmate commands: getting_started/installation/explore_simmate_cli.md
             - e) Set up a Local Server: getting_started/installation/local_server_setup.md
             
-        - 2. Run a workflow:
+        - 2. Workflows:
             - Quickstart: getting_started/run_a_workflow/quick_start.md
-            - Stages of a Workflow: getting_started/run_a_workflow/stages_of_a_workflow.md
-            - Configure VASP potentials: getting_started/run_a_workflow/configure_potcars.md
-            - Configure the database: getting_started/run_a_workflow/configure_database.md
-            - Make a input structure: getting_started/run_a_workflow/make_a_structure.md
-            - View all workflows: getting_started/run_a_workflow/view_all_workflows.md
-            - View workflow settings: getting_started/run_a_workflow/view_workflow_settings.md
-            - Run a workflow: getting_started/run_a_workflow/running_the_workflow.md
-            - Submit to a cluster: getting_started/run_a_workflow/submit_to_a_cluster.md
-            - Viewing the results: getting_started/run_a_workflow/view_the_results.md
+            - a) Configure VASP potentials: getting_started/run_a_workflow/configure_potcars.md
+            - b) Configure the database: getting_started/run_a_workflow/configure_database.md
+            - c) Make a input structure: getting_started/run_a_workflow/make_a_structure.md
+            - d) View all workflows: getting_started/run_a_workflow/view_all_workflows.md
+            - e) Run a workflow: getting_started/run_a_workflow/running_the_workflow.md
+            - h) Viewing the results: getting_started/run_a_workflow/view_the_results.md
+            - (extra) Submit to a cluster: getting_started/run_a_workflow/submit_to_a_cluster.md
         
         - 3. Toolkit:
             - Quickstart: getting_started/analyze_and_modify_structures/quick_start.md

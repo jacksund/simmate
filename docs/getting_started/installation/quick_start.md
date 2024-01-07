@@ -1,6 +1,6 @@
 # Installation
 
-## Quick start
+## Quick Start
 
 1. Download and install [anaconda](https://www.anaconda.com/products/distribution)
 2. Set up a conda environment, install Simmate within it, and activate it. *(Note: We recommend using Spyder as your IDE, but it's not mandatory)*

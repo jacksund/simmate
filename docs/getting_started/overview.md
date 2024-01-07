@@ -1,6 +1,6 @@
 # Getting Started Tutorials
 
-Welcome! :partying_face: These tutorials help introduce you to Simmate, whether you're new to coding or a python expert.
+Welcome! :partying_face: These tutorials will help introduce you to Simmate, whether you're new to coding or a python expert.
 
 !!! tip
     We recommend creating a [GitHub account](https://github.com/join) before starting the tutorials, if you don't have one already. While not mandatory, having an account will enable you to ask questions on our forum and log in to our website.
