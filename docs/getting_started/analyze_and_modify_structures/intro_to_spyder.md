@@ -1,45 +1,42 @@
+# An Introduction to Spyder
 
-# An introduction to Spyder
-
-Prebuilt workflows can only take you so far when carrying out materials research. At some point, you'll want to make new crystal structures, modify them in some way, and perform a novel analysis. To do all of this, we turn away from the command-line and now start using python. 
+Prebuilt workflows are beneficial for materials research, but they have their limitations. When you need to create new crystal structures, modify existing ones, or conduct unique analyses, Python becomes an essential tool. 
 
 ----------------------------------------------------------------------
 
-## Intro lessons for python
+## Python Introductory Lessons
 
-If you are a brand new to coding and python, we will introduce the bare-minimum of python needed to start using simmate's toolkit in this tutorial, but we highly recommend spending 2-3 days on learning all the python fundamentals. [Codecademy's python lessons](https://www.codecademy.com/learn/learn-python-3) are a great way to learn without installing anything extra.
+If you're new to coding and Python, we'll introduce the basic Python skills needed to use Simmate's toolkit in this tutorial. However, we strongly recommend dedicating 2-3 days to learn Python fundamentals. [Codecademy's Python lessons](https://www.codecademy.com/learn/learn-python-3) are an excellent resource for beginners.
 
 !!! tip
-    Spending a full day with these tutorials (or even more time) will certainly save you time and headache in the long rule. We highly recommend taking the time to go through these.
+    Investing a full day or more in these tutorials will save you time and frustration in the long run. We strongly encourage you to take the time to complete them.
 
 ----------------------------------------------------------------------
 
-## Selecting our IDE
+## Choosing our IDE
 
-Ready or not, let's learn how to use Simmate's python code. 
+Whether you're ready or not, it's time to learn how to use Simmate's Python code. 
 
-Recall from the Installation tutorial: Anaconda gave us a bunch of programs on their home screen, such as Orange3, Jupyter Notebook, Spyder, and others. These programs are for you to write your own python code. Just like how there is Microsoft Word, Google Docs, and LibreOffice for writing papers -- all of these programs are different ways to write Python. 
+Remember from the Installation tutorial: Anaconda provided several programs on their home screen, including Orange3, Jupyter Notebook, Spyder, and others. These programs allow you to write your own Python code. Just as there are various platforms for writing papers, like Microsoft Word, Google Docs, and LibreOffice, these programs offer different ways to write Python. 
 
-Our team uses Spyder, so we highly recommend users pick Spyder too.
+Our team prefers Spyder, and we highly recommend it to our users.
 
 ----------------------------------------------------------------------
 
-## Opening Spyder
+## Launching Spyder
 
-If you followed the installation tutorial exactly, you should have Spyder installed and ready to go. To open it, search for Spyder in your computer's apps (use the searchbar on the bottom-left of your screen on windows 10) and select `Spyder (my_env)`. 
+If you followed the installation tutorial correctly, Spyder should be installed and ready to use. To launch it, search for Spyder in your computer's apps (use the search bar at the bottom-left of your screen on Windows 10) and select `Spyder (my_env)`. 
 
-Your Spyder will be empty when you first open it up, but here's a showcase of Spyder in full swing:
+Spyder will be empty when you first launch it. Here's a glimpse of what Spyder looks like when it's in use:
 
 <!-- This is an image of the Spyder IDE -->
 <p align="center" style="margin-bottom:40px;">
 <img src="https://raw.githubusercontent.com/spyder-ide/spyder/5.x/img_src/screenshot.png"  height=440 style="max-height: 440px;">
 </p>
 
-For this tutorial, we will only be using the Python console (bottom-right of the screen).
+For this tutorial, we'll only be using the Python console (located at the bottom-right of the screen).
 
 !!! tip 
-    If you are comfortable with python or took the Codecademy intro course, you can get up to speed with Spyder with their intro videos. [There are 3 videos, and each is under 4 minutes](https://docs.spyder-ide.org/current/videos/first-steps-with-spyder.html).
+    If you're already comfortable with Python or have completed the Codecademy intro course, you can quickly familiarize yourself with Spyder by watching their intro videos. [There are 3 videos, each under 4 minutes long](https://docs.spyder-ide.org/current/videos/first-steps-with-spyder.html).
 
 ----------------------------------------------------------------------
-
-

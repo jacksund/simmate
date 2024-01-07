@@ -1,33 +1,31 @@
-----------------------------------------------------------------------
-
-## Adding your data to Simmate
+## Contributing Your Data with Simmate
 
 !!! warning
-    This module is only for the Simmate dev team or third-party contributors who want to add their own data! Users should instead use the `load_remote_archive` method to access data. See the [database docs](/full_guides/database/third_party_data/).
+    This module is intended for the Simmate development team or third-party contributors who wish to integrate their own data. Users should use the `load_remote_archive` method to access data. For more information, refer to the [database documentation](/full_guides/database/third_party_data/).
 
-This module is for pulling data from various databases into Simmate using third-party codes. This can then be used to build archives that users may access.
+This module enables the import of data from various databases into Simmate using third-party codes. This data can then be used to build archives that users can access.
 
 ----------------------------------------------------------------------
 
-## Benefits of adding your data to Simmate
+## Benefits of Integrating Your Data with Simmate
 
-When deciding whether your team should contribute your database to Simmate, we can break down discussion to two key questions:
+When deciding whether to contribute your database to Simmate, consider the following:
 
-1. Can you benefit from converting data into a Simmate format?
-2. Can you benefit from distributing an archive? (private or public)
+1. Will you benefit from converting data into a Simmate format?
+2. Will you benefit from distributing an archive? (private or public)
 
-We will answer these questions in the next two sections.
+The following sections will provide answers to these questions.
 
-### Converting data into a Simmate format
+### Converting Data into a Simmate Format
 
-Whether your data is open-source or proprietary, the answer to question 1 will be the same: Providers can benefit from using Simmate's `database` module because it...
+Whether your data is open-source or proprietary, the benefits of using Simmate's `database` module remain the same. It...
 
-- automatically builds an API and ORM for your data
-- greatly reduces the file size of your archives
+- automatically constructs an API and ORM for your data
+- significantly reduces the file size of your archives
 
-By providing raw data (like a structure or energy), Simmate will automatically expand your data into the most useful columns, and you can then use our ORM to query data rapidly. For example, Simmate can use an `energy` column/field to create columns for `energy_above_hull`, `formation_energy`, `decomposes_to`, and more -- then you can filter through your data using these new columns. See the "Querying Data" section in the `simmate.database` module for examples of this query language.
+By providing raw data (such as a structure or energy), Simmate will automatically expand your data into the most useful columns, and you can then use our ORM to quickly query data. For example, Simmate can use an `energy` column/field to create columns for `energy_above_hull`, `formation_energy`, `decomposes_to`, and more -- then you can filter through your data using these new columns. Refer to the "Querying Data" section in the `simmate.database` module for examples of this query language.
 
-Using the concepts of "raw data" vs "secondary columns" (columns that can be rapidly remade/calculated using the raw data), Simmate can efficiently compress your data to a small format. To see just how small, check out the file sizes for archives of current providers:
+Simmate can efficiently compress your data to a small format by using the concepts of "raw data" vs "secondary columns" (columns that can be quickly recalculated using the raw data). To see just how compact, check out the file sizes for archives of current providers:
 
 | Provider            | Number of Structures | Av. Sites per Structure| Archive Size |
 | ------------------- | -------------------- | ---------------------- | ------------ |
@@ -41,27 +39,26 @@ Using the concepts of "raw data" vs "secondary columns" (columns that can be rap
 
 These small file sizes will make it much easier for downloading and sharing your data. This can have major savings on your database server as well.
 
+### Hosting & Distributing the Archive
 
-### Hosting & distributing the archive
+Here is where being a private vs. open-source provider becomes important. Simmate allows you to decide how others access your data.
 
-Here is where being a private vs. open-source provider becomes important. Simmate lets you to decide how others access your data.
+If your data can only be accessible to your own team members or subscribers, then you can manage the distribution of the data (via a CDN, dropbox, etc.). Simmate does not require that you distribute your data freely, although we do encourage open-source data. Either way, you can benefit from...
 
-If your data can only be accessible to your own team members or subscribers, then you can be in charge of distruting the data (via a CDN, dropbox, etc.). Simmate does not require that you distribute your data freely, although we do encourage open-source data. Either way, you can benefit from...
+- reducing the load on your own web APIs
 
-- lessening the load on your own web APIs
-
-Server load can be reduced because, in Simmate, users download your archive once and then have the data stored locally for as long as they'd like. New users often want to download a massive portion a database (or all of it), and also do so repeatedly as they learn about APIs. Therefore, using Simmate archives upfront can save your team from these large and often-repeated queries.
+Server load can be reduced because, in Simmate, users download your archive once and then have the data stored locally for as long as they'd like. New users often want to download a large portion of a database (or all of it), and also do so repeatedly as they learn about APIs. Therefore, using Simmate archives upfront can save your team from these large and often-repeated queries.
 
 If you are fine with making your data freely available, you can further benefit by...
 
-- skipping the setup of up your own server and instead use Simmate's for free
+- avoiding the setup of your own server and instead use Simmate's for free
 - exposing your data to the Simmate user base
 
 Providers that permit redistribution are welcome to use our CDN for their archives. This only requires contacting our team and making this request. Further, once your archive is configured, all Simmate users will be able to easily access your data.
 
 ----------------------------------------------------------------------
 
-## How to add your data or a new provider
+## How to Integrate Your Data or a New Provider
 
 !!! tip
     If you want to avoid this guide, you can just contact our team! [Open a github issue](https://github.com/jacksund/simmate/issues) to get our attention. In most cases, we only need a CSV or JSON file of your data (in any data format you'd like), and we can handle the rest for you. If you'd like to contribute the data on your own, keep reading.
@@ -81,11 +78,11 @@ The key part that providers must understand is the `load_remote_archive` method.
 
 1. loads an archive of available data (as a `zip` file from a CDN)
 2. unpacks the data into the Simmate format
-3. saves everything to the user's database (by defualt this is `~/simmate/database.sqlite3`).
+3. saves everything to the user's database (by default this is `~/simmate/database.sqlite3`).
 
 **This guide serves to make the first step work!** Specifically, providers must make the archive that `load_remote_archive` will load in step 1 and make it downloadable by a CDN or API endpoint. It is up to the provider whether they personally distribute the archive or allow Simmate to distribute it for them.
 
-### Outline of steps
+### Outline of Steps
 
 To illustrate how this is done, we will walk through the required steps:
 
@@ -96,9 +93,9 @@ To illustrate how this is done, we will walk through the required steps:
 5. Link the CDN to the Simmate table
 
 !!! tip
-    these steps involve contributing changes to Simmate's code, so we recommend [opening a github issue](https://github.com/jacksund/simmate/issues) before starting too. That way, our team can help you through this process. If you are new to Github and contributing, be sure to read our [tutorial for contributors](/contributing/overview/) too.
+    These steps involve contributing changes to Simmate's code, so we recommend [opening a github issue](https://github.com/jacksund/simmate/issues) before starting too. That way, our team can help you through this process. If you are new to Github and contributing, be sure to read our [tutorial for contributors](/contributing/overview/) too.
 
-### Step 1: Define a Simmate table
+### Step 1: Define a Simmate Table
 
 To host data, Simmate must first know what kind of data you are going to host. We do this by adding a new file to the `simmate.database.third_party` module. You can view this folder on github [here](https://github.com/jacksund/simmate/tree/main/src/simmate/database/third_parties).
 
@@ -196,11 +193,11 @@ my_table = ExampleProviderData.objects.to_dataframe()
 ```
 
 
-### Step 2: Download data into the Simmate format
+### Step 2: Download Data into the Simmate Format
 
-Now that Simmate knows what to expect, we can load your data into the database. This can be done in serveral ways. It is entirely up to you which method to use, but here are our recommended options:
+Now that Simmate knows what to expect, we can load your data into the database. This can be done in several ways. It is entirely up to you which method to use, but here are our recommended options:
 
-1. **JSON or CSV file.** If all of your data can be provide via a dump file, then we can use that! This is typically the easiest for a provider's server. For an example of this, see the COD implementation, which uses a download of CIF files.
+1. **JSON or CSV file.** If all of your data can be provided via a dump file, then we can use that! This is typically the easiest for a provider's server. For an example of this, see the COD implementation, which uses a download of CIF files.
 
 2. **A custom python package.** Feel free to add an optional dependency if your team has already put a lot of work into loading data using a python package. A great example of this is the MPRester class in pymatgen, which we use to pull Material Project data. (JARVIS, AFLOW, OQMD currently use this option too).
 
@@ -210,7 +207,7 @@ Now that Simmate knows what to expect, we can load your data into the database. 
 
 5. **Web scraping.** As an absolute last resort, we can use `requests` to scrape webpages for data (or `selenium` in even more extreme cases.). This requires the most work from our team and is also the least efficient way to grab data. Therefore, scraping should always be avoided if possible.
 
-With your data in hand, you will now add a file that saves data to the local simmate database on your computer. This file can be added to the `for_providers` module ([here](https://github.com/jacksund/simmate/tree/main/src/simmate/database/third_parties/for_providers)). However, if you want your data and it's access to remain private, you can also keep this file out of Simmate's source-code. It's up to you, but we encourage providers to host their file in the Simmate repo -- so we can give feedback and so future providers can use it as an example/guide. 
+With your data in hand, you will now add a file that saves data to the local simmate database on your computer. This file can be added to the `for_providers` module ([here](https://github.com/jacksund/simmate/tree/main/src/simmate/database/third_parties/for_providers)). However, if you want your data and its access to remain private, you can also keep this file out of Simmate's source-code. It's up to you, but we encourage providers to host their file in the Simmate repo -- so we can give feedback and so future providers can use it as an example/guide. 
 
 Either way, here is a template of how that file will look like:
 
@@ -233,7 +230,7 @@ except:
 
 
 # We make this an "atomic transaction", which means if any error is encountered
-# while saving results to the database, then the database will be reset to it's
+# while saving results to the database, then the database will be reset to its
 # original state. Adding this decorator is optional
 @transaction.atomic
 def load_all_structures():
@@ -295,7 +292,7 @@ my_table = ExampleProviderData.objects.to_dataframe()[:100]
 And that's it for writing new code! All that's left is making your data available for others.
 
 
-### Step 3: Compress the data to archive file
+### Step 3: Compress the Data to Archive File
 
 This will be the easiest step yet. We need to make a `zip` file for users to download, which can be done in one line:
 
@@ -311,9 +308,9 @@ You'll find a file named `ExampleProviderData-2022-01-25.zip` (but with the curr
 4. Try viewing your data again with `ExampleProviderData.objects.to_dataframe()`
 
 
-### Step 4: Make the archive available via a CDN
+### Step 4: Make the Archive Available via a CDN
 
-Users with now need the archive file you made to access your data. So you must decide: how should this `zip` file be downloaded by users? 
+Users will now need the archive file you made to access your data. So you must decide: how should this `zip` file be downloaded by users? 
 
 If you give Simmate approval, we can host your archive file on our own servers. Otherwise you must host your own. The only requirement for your host server is that the `zip` file can be downloaded from a URL.
 
@@ -322,7 +319,7 @@ While we encourage open-source databases, if you consider your dataset private o
 Note: when uploading new versions of your archive, you should keep the outdated archive either available via its previous URL or, at a minimum, available upon request from users.
 
 
-### Step 5: Link the CDN to the Simmate table
+### Step 5: Link the CDN to the Simmate Table
 
 In Step 1, we left one attribute as None in our code: `remote_archive_link`. As a final step, you need to take the URL that you're host your `zip` file at and paste it here. For example, that line will become:
 

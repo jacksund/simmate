@@ -1,23 +1,22 @@
-
-# The DeePMD App
+# DeePMD Application
 
 !!! danger
-    This app is still under early testing and not really for use outside of the Warren Lab
+    Be aware that this application is currently undergoing initial testing and is not advised for use outside of the Warren Lab.
 
 --------------------------------------------------------------------------------
 
-## About
+## Overview
 
-The Deep Potential for Molecular Dynamics (DeePMD) is a package that builds machine-learned interatomic potentials from energy and force-field data. These machine-learned potentials are particularlly powerful when trained on DFT data and then subsequently used to run molecular dynamics simulations.
+The Deep Potential for Molecular Dynamics (DeePMD) is a software package designed to build machine-learned interatomic potentials using energy and force-field data. When trained on Density Functional Theory (DFT) data, these machine-learned potentials demonstrate significant efficiency in performing molecular dynamics simulations.
 
-The code is free and open-source.
+This software is open-source and available for free.
 
 --------------------------------------------------------------------------------
 
-## Helpful links
+## Useful Resources
 
- - [github](https://github.com/deepmodeling/deepmd-kit)
- - [documentation](https://docs.deepmodeling.org/projects/deepmd/en/master/)
- - [paper](https://www.sciencedirect.com/science/article/pii/S0010465518300882)
+ - [GitHub Repository](https://github.com/deepmodeling/deepmd-kit)
+ - [Official Documentation](https://docs.deepmodeling.org/projects/deepmd/en/master/)
+ - [Research Paper](https://www.sciencedirect.com/science/article/pii/S0010465518300882)
 
 --------------------------------------------------------------------------------

@@ -1,28 +1,28 @@
 # Introduction to Python Modules
 
-One big question still remains though: how did we know to type `from simmate.toolkit import Structure`? Here, you should learn to think of python packages (such as Simmate) as many classes and functions organized into folders. 
+A key question to address is: how do we know to type `from simmate.toolkit import Structure`? To understand this, it's important to view Python packages (like Simmate) as a collection of classes and functions neatly organized into directories. 
 
 ----------------------------------------------------------------------
 
 ## Conceptual examples
 
-As an example, you can read `from simmate.toolkit import Structure` as "Inside of the `simmate` folder, go to the `toolkit` file and load the `Structure` class". 
+For instance, the command `from simmate.toolkit import Structure` can be interpreted as "Navigate to the `simmate` directory, access the `toolkit` file, and load the `Structure` class". 
 
-Here's a second example: `from simmate.toolkit.base_data_types.lattice import Lattice` is the same as saying "Go to the `simmate` folder --> `toolkit` folder --> `base_data_types` folder --> `lattice.py` file --> grab the `Lattice` class".
+Here's another example: `from simmate.toolkit.base_data_types.lattice import Lattice` essentially means "Navigate to the `simmate` directory --> `toolkit` directory --> `base_data_types` directory --> `lattice.py` file, and then load the `Lattice` class".
 
-So whenever you see an `import` line, it's just telling you where the actual code is located. All of Simmate's code (and all python codes everywhere) is organized like this.
+In essence, an `import` line is simply a guide to the location of the actual code. This is the standard organization for Simmate's code, as well as Python codes universally.
 
 ----------------------------------------------------------------------
 
 ## A walk-through example
 
-To prove it, let's go through these steps:
+To illustrate this, let's follow these steps:
 
-1. on Simmate's github homepage, go the [src/simmate folder](https://github.com/jacksund/simmate/tree/main/src/simmate) (src = source code)
-2. You'll see the `toolkit` folder that we were using before.
-3. Navigate through the folders. `simmate` --> `database` --> `base_data_types` --> `calculation.py`. 
-4. You see a Calculation class where all of it's methods and properties are defined.
+1. Visit Simmate's GitHub homepage and navigate to the [src/simmate directory](https://github.com/jacksund/simmate/tree/main/src/simmate) (src = source code).
+2. Here, you'll find the `toolkit` directory that we previously used.
+3. Continue navigating through the directories: `simmate` --> `database` --> `base_data_types` --> `calculation.py`. 
+4. Here, you'll find a Calculation class with all its methods and properties defined.
 
-Each of these folders and files are referred to as python "modules" -- it's just python terminology.
+Each of these directories and files are referred to as Python "modules" -- a term specific to Python.
 
 ----------------------------------------------------------------------

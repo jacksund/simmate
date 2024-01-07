@@ -1,23 +1,22 @@
-
-# Should I set up my own cluster?
+# Should I Establish My Own Cluster?
 
 !!! note
-    We understand that resource restrictions can be very stingent between labs and companies. So sharing resources is not possible, even in close collaborations. Simmate addresses this issue by making it easy to share a cloud database *without* sharing computational resources. In other words, you can contribute to a shared database without letting others see/access your computational resources.
+    We recognize that resource limitations can be stringent across labs and companies, making resource sharing unfeasible, even in close collaborations. Simmate addresses this by facilitating the sharing of a cloud database *without* the need to share computational resources. This means you can contribute to a shared database without exposing your computational resources to others.
 
 -------------------------------------------------------------------------------
 
-## Basic use of resources
+## Basic Resource Utilization
 
-Each team will likely need to handle their own computational resources, which can be any number of things:
+Each team will likely manage their own computational resources, which could include:
 
-- a university or federal HPC cluster with SLURM, PBS, or some other queue system
-- a single node or even a Kubernetes cluster on a cloud provider
-- a series of desktop computers that your lab shares
-- any combination of these resources
+- A university or federal HPC cluster with SLURM, PBS, or another queue system
+- A single node or a Kubernetes cluster on a cloud provider
+- A collection of shared desktop computers within your lab
+- Any combination of these resources
 
-The easiest way to use these resources is to sign on and run a simmate workflow using the `run` method. When this is done, the workflow runs directly on your resource. 
+The simplest way to utilize these resources is to log in and execute a simmate workflow using the `run` method. This action runs the workflow directly on your resource. 
 
-This was done in the "Run a workflow" tutorial when we called `simmate workflows run ...`. When on a HPC SLURM cluster, we would run simmate using a `submit.sh`:
+This was demonstrated in the "Run a workflow" tutorial when we executed `simmate workflows run ...`. On an HPC SLURM cluster, simmate would be run using a `submit.sh`:
 
 ```
 #!/bin/bash
@@ -30,16 +29,16 @@ simmate workflows run-yaml my_settings.yaml > simmate.out
 ```
 
 !!! tip 
-    If you are only running a few workflows per day (<10), we recommend you stick to running workflows in this way. That is, just calling `simmate workflows run`. Don't overcomplicate things. Go back to tutorial 02 to review these concepts.
+    If you're only executing a few workflows per day (<10), we recommend sticking to this method of running workflows. In other words, just execute `simmate workflows run`. Avoid unnecessary complexity. Revisit tutorial 02 to refresh these concepts.
 
 -------------------------------------------------------------------------------
 
-## Deciding to set up workers
+## When to Establish Workers
 
-If your team is submitting hundreds or thousands of workflows at a time, then it would be extremely useful to monitor and orchestrate these workflows using a **scheduler** and **cluster**. 
+If your team is submitting hundreds or thousands of workflows simultaneously, it would be highly beneficial to monitor and manage these workflows using a **scheduler** and **cluster**. 
 
-Just like with our cloud database in the previous tutorial, you only need **ONE** person to manage **ALL** of your computational resources. Once the resources have been set up, the other users can connect using the database connection file (or an API key if you are using Prefect).
+Similar to our cloud database in the previous tutorial, you only need **ONE** person to manage **ALL** of your computational resources. Once the resources are established, other users can connect using the database connection file (or an API key if you're using Prefect).
 
-If you are that one person for your team, then continue with this tutorial. If not, then you should instead talk with your point person! Using your teams resources should be as easy as switching from the `run` to `run_cloud` method.
+If you're the designated person for your team, proceed with this tutorial. If not, consult with your point person! Utilizing your team's resources should be as simple as switching from the `run` to `run_cloud` method.
 
 -------------------------------------------------------------------------------

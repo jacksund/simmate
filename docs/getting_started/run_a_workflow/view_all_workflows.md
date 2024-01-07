@@ -1,34 +1,33 @@
-
-# Viewing all available workflows
-
-----------------------------------------------------------------------
-
-## Review
-
-In the last three sections, we completed our check list for running a workflow:
-
-- [x] tell Simmate where our VASP files are
-- [x] set up our database so results can be saved
-- [x] select a structure for our calculation
-
-Now we can explore the different workflows available and choose one to run.
+# Exploring Available Workflows
 
 ----------------------------------------------------------------------
 
-## Viewing all workflows
+## Recap
 
-At the most basic level, you'll want to use Simmate to calculate a material's energy, structure, or properties. For each type of task, we have prebuilt workflows. All of these are accessible through the `simmate workflows` command.
+In the preceding sections, we accomplished the following prerequisites for running a workflow:
 
-Let's start by seeing what is available by running:
+- [x] Specified the location of our VASP files to Simmate
+- [x] Configured our database for result storage
+- [x] Selected a structure for our calculation
+
+Now, let's delve into the various workflows at our disposal and select one to execute.
+
+----------------------------------------------------------------------
+
+## Accessing All Workflows
+
+Primarily, Simmate is used to compute a material's energy, structure, or properties. For each of these tasks, we have preconfigured workflows. You can access all of these via the `simmate workflows` command.
+
+To view all available workflows, run:
 
 ``` shell
 simmate workflows list-all
 ```
 
-The output will be similar to...
+The output will resemble the following:
 
 ```
-These are the workflows that have been registerd:
+These are the workflows that have been registered:
         (01) customized.vasp.user-config
         (02) diffusion.vasp.neb-all-paths-mit
         (03) diffusion.vasp.neb-from-endpoints-mit
@@ -38,20 +37,20 @@ These are the workflows that have been registerd:
         (07) dynamics.vasp.mit
         (08) dynamics.vasp.mvl-npt
         (09) electronic-structure.vasp.matproj-full
-  ... << plus others that are cut-off for clarity >>
+  ... << additional workflows truncated for brevity >>
 ```
 
 ----------------------------------------------------------------------
 
-## Learning about a workflow
+## Understanding a Workflow
 
-Next, try out the `explore` command, which gives us a more interactive way to view the available workflows.
+Next, use the `explore` command for a more interactive way to view the available workflows.
 
 ``` shell
 simmate workflows explore
 ```
 
-When prompted to choose a type of workflow or a specific preset, choose whichever you'd like! A description of the workflow will be printed at the very end. As an example, here's the output of an example workflow `relaxation.vasp.staged` which is commonly used in our evolutionary search algorithm. To get this output, we used the `simmate workflows explore` then selected option `6` (relaxation) and then option `1` (matproj):
+When prompted, select a workflow type or a specific preset. A description of the chosen workflow will be displayed at the end. For instance, here's the output of the `relaxation.vasp.staged` workflow, frequently used in our evolutionary search algorithm. This output was obtained by running `simmate workflows explore`, selecting option `6` (relaxation), and then option `1` (matproj):
 
 ```
 ===================== relaxation.vasp.matproj =====================
@@ -95,18 +94,17 @@ To understand each parameter, you can read through our parameter docs, which giv
 
 ----------------------------------------------------------------------
 
-## Learning about parameters
+## Understanding Parameters
 
-In the message above, there's a link to our **Parameter docs**. You can access this
+In the above message, there's a reference to our **Parameter docs**. You can access this
 page by clicking the **Parameters** section at the top of this webpage (or click [here](/simmate/parameters)).
 
-This page lists out ALL parameters for ALL workflows. If there's an input you'd
-like to learn more above -- this is the place to start.
+This page provides a comprehensive list of ALL parameters for ALL workflows. If you want to learn more about a specific input, this is your go-to resource.
 
 ----------------------------------------------------------------------
 
-## Selecting our practice workflow
+## Choosing a Workflow for Practice
 
-In the rest of tutorial, we will be using `static-energy.vasp.mit` which runs a simple static energy calculation using MIT Project settings (these settings are based on pymatgen's [MITRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITRelaxSet)).
+For the remainder of this tutorial, we will use the `static-energy.vasp.mit` workflow, which performs a basic static energy calculation using MIT Project settings (these settings are based on pymatgen's [MITRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITRelaxSet)).
 
 ----------------------------------------------------------------------

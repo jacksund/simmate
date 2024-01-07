@@ -1,16 +1,16 @@
-# Run a workflow
-
-In this tutorial, you will use the command line to view all available workflows and their settings. Beginners will also be introduced to remote terminals (SSH) and jobs queue (such as SLURM).
-
-----------------------------------------------------------------------
-
-## The quick tutorial
+# Run a Workflow
 
 !!! danger
-    we assume you have VASP installed and that the `vasp_std` command is in the available path. In the future, we hope to update this tutorial with a workflow that doesn't require VASP or remote Linux cluster. Until then, we apologize for the inconvenience. :cry:
+    This tutorial assumes that you have VASP installed and that the `vasp_std` command is accessible in your path. We plan to update this tutorial in the future with a workflow that doesn't require VASP or a remote Linux cluster. We apologize for any inconvenience this may cause.
 
-1. Before running a workflow, we must initialize our Simmate database with `simmate database reset`. Your database will be built at `~/simmate/my_env-database.sqlite3`, where "my_env" is the name of your active conda environment.
-2. To practice calculating, make structure file for tablesalt (NaCl). Name it `POSCAR`, where the contents are...
+## Quick Tutorial
+
+1. Initialize your Simmate database before running a workflow. Your database will be created at `~/simmate/my_env-database.sqlite3`, where "my_env" is the name of your active conda environment:
+```bash
+simmate database reset
+```
+
+2. Create a structure file for tablesalt (NaCl) to practice calculations. Name it `POSCAR` and fill it with the following content...
 ```
 Na1 Cl1
 1.0
@@ -23,10 +23,23 @@ direct
 0.000000 0.000000 0.000000 Na
 0.500000 0.500000 0.500000 Cl
 ```
-3. View a list of all workflows available with `simmate workflows list-all`
-4. Interactively learn about all workflows with `simmate workflows explore`
-5. View the settings used for the `static-energy.vasp.mit` workflow with `simmate workflows show-config static-energy.vasp.mit`
-6. Copy and paste VASP POTCAR files to the folder `~/simmate/vasp/Potentials`. Be sure to unpack the `tar.gz` files. This folder will have the potentials that came with VASP -- and with their original folder+file names:
+
+3. Use the following command to view a list of all available workflows:
+```bash
+simmate workflows list-all
+```
+
+4. Learn about all workflows interactively with the following command:
+``` bash
+simmate workflows explore
+```   
+
+5. View the settings used for the `static-energy.vasp.mit` workflow with `show-config`
+``` bash
+simmate workflows show-config static-energy.vasp.mit
+```
+
+6. Copy and paste VASP POTCAR files into the `~/simmate/vasp/Potentials` folder. Make sure to unpack the `tar.gz` files. This folder should contain the potentials that came with VASP, maintaining their original folder and file names:
 ```
 # Located at /home/my_username (~)
 simmate/
@@ -46,7 +59,7 @@ simmate/
             └── potUSPP_GGA
 ```
 
-7. With everything configured, there are now two ways you can submit your workflow using the command-line. This can be done in the CLI or in python. Here, let's use a settings file in yaml format:
+7. Once everything is configured, you can submit your workflow using the command-line. This can be done either in the CLI or in Python. Here, we'll use a settings file in YAML format:
 ``` yaml
 # In a file named "my_example.yaml".
 # Note, different workflows accept different settings here.
@@ -56,19 +69,11 @@ command: mpirun -n 5 vasp_std > vasp.out  # OPTIONAL
 directory: my_new_folder  # OPTIONAL
 ```
 
-8. Now run the workflow configuration file we just made
+8. Run the workflow configuration file we just created
 ``` bash
 simmate workflows run my_example.yaml
 ```
 
-9. Once the workflow completes, you will see files named `simmate_metadata.yaml` and `simmate_summary.yaml` which contains some quick information for you. Other workflows (such as `band-structure` calculations) will also write out plots for you.
+9. Once the workflow is complete, you'll find files named `simmate_metadata.yaml` and `simmate_summary.yaml` which contain some quick information. Other workflows (like `band-structure` calculations) will also generate plots for you.
 
-10. While the plots and summary files are nice for quick testing, much more useful information is stored in our database. We will cover how to access your database in a following tutorial.
-
-!!! tip
-    This tutorial only convers the CLI and YAML input files, but submitting workflows through python or TOML files is covered in the full guides
-
-!!! tip
-    Want to customize a specific setting (e.g. set ENCUT to a custom value)? Customizing workflow settings is covered in the "Build Custom Workflows" tutorial. However, try to resist jumping ahead! There are still several important steps to learn before customizing workflows.
-
-----------------------------------------------------------------------
+10.  While the plots and summary files are useful for quick testing, more detailed information is stored in our database. We'll cover how to access your database in a subsequent tutorial.

@@ -1,19 +1,18 @@
+# Navigating Simmate's Modules
 
-# Exploring Simmate's Modules
+Understanding that Simmate is essentially a collection of classes organized into directories, let's delve deeper.
 
-Now that we know Simmate is just a bunch of classes organized into folders, let's explore a bit.
-
-We'll start with the `toolkit` module ([here](https://github.com/jacksund/simmate/tree/main/src/simmate/toolkit), but try finding it yourself without the link). When you open it up, you'll see an overview/guide. You can also access this module using `from simmate import toolkit` and getting help directly in spyder.
+We'll begin with the `toolkit` module. You can find it [here](https://github.com/jacksund/simmate/tree/main/src/simmate/toolkit), but try to locate it independently without using the link. Upon opening it, you'll find a guide or overview. You can also access this module by using `from simmate import toolkit` and seeking help directly in Spyder.
 
 ```
 from simmate import toolkit
 
-toolkit  # use ctrl+I before hitting enter
+toolkit  # press ctrl+I before pressing enter
 ```
 
-A good folder to look through is the `simmate.toolkit.creators` module, which provides many ways to create lattices, sites, and structures (e.g. randomly, random symmetry, etc.) and also incorporates third-party codes.
+A worthwhile directory to explore is the `simmate.toolkit.creators` module. It offers numerous methods to create lattices, sites, and structures (for example, randomly, random symmetry, etc.) and also integrates third-party codes.
 
-Take some time to look through the features and functions. Always feel free to ask if a feature exists, and if not, request one too. Post those questions in our [discussions page](https://github.com/jacksund/simmate/discussions/categories/q-a).
+Spend some time familiarizing yourself with the features and functions. Don't hesitate to inquire if a feature exists, and feel free to suggest new ones. Post your questions on our [discussions page](https://github.com/jacksund/simmate/discussions/categories/q-a).
 
 !!! warning
-     because simmate is still at the early stages, some folders will be more complete than others. Keep this in mind while exploring. If you aren't seeing a guide or documentation, we probably haven't finished that module yet.
+     Please note that Simmate is still in its early development stages, so some directories may be more comprehensive than others. Keep this in mind as you navigate. If you don't see a guide or documentation, it's likely that we haven't completed that module yet.

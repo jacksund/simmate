@@ -1,51 +1,40 @@
+# Overview of Bader App
 
-# The Bader App
+## Introduction to Bader
 
---------------------------------------------------------------------------------
+Bader Charge Analysis, often known as "Bader", is a technique for partitioning charge density to forecast oxidation states. This module is specifically tailored for the [Henkelman Group](http://theory.cm.utexas.edu/henkelman/)'s code that performs this analysis.
 
-## About Bader
+You can access the open-source code [here](http://theory.cm.utexas.edu/henkelman/code/bader/).
 
-Bader Charge Analysis (or "Bader" for short) is a process of  partitioning charge density in order to predict oxidation states. This module is specifically for the [Henkelman Group](http://theory.cm.utexas.edu/henkelman/)'s code that implements this analysis.
+## About the Bader App
 
-The code is free to everyone and can be downloaded [here](http://theory.cm.utexas.edu/henkelman/code/bader/).
+The Bader app utilizes Simmate tools to build workflows and utilities based on the Bader code from the Henkelman Lab. 
 
---------------------------------------------------------------------------------
+Typically, other workflows oversee the execution of the workflows registered in this app. For example, workflows in the `Warren Lab` app combine Bader, VASP, and rational settings. Hence, beginners are recommended to start with other apps.
 
-## About this app
+## Installation Guide (Ubuntu 22.04)
 
-This app uses Simmate tools to build workflows and utilities on top of the Henkelman Lab's Bader code. 
+### Installing the `bader` command
 
-Typically, other workflows handle calling the workflows registered here. For example, you can find workflows in the `Warren Lab` app that combine Bader, VASP, and rational settings together for you. Beginners should therefore start elsewhere.
-
---------------------------------------------------------------------------------
-
-## Installation (Ubuntu 22.04)
-
-### `bader` command
-
-1. Download `Linux x86-64` from the Henkelman website [here](http://theory.cm.utexas.edu/henkelman/code/bader/)
-2. Unpack the compressed file. There should only be one "file" in it named bader. This is the executable.
-3. Move the `bader` executable to a folder of your choosing. For example, `~/jacksund/bader/bader` (within a folder named bader in my home directory)
-4. run `nano ~/.bashrc` to edit your bash and add this line to the bottom:
+1. Download the `Linux x86-64` version from the Henkelman website [here](http://theory.cm.utexas.edu/henkelman/code/bader/)
+2. Unzip the downloaded file. It should contain a single executable named "bader".
+3. Move the `bader` executable to a directory of your preference. For example, `~/jacksund/bader/bader` (inside a folder named bader in my home directory)
+4. Run `nano ~/.bashrc` to modify your bash and add this line at the end:
 ``` bash
 export PATH=/home/jacksund/bader/:$PATH
 ```
-5. restart your terminal and try the command `bader --help`
+5. Restart your terminal and test the command `bader --help`
 
-### `chgsum.pl` and extra scripts
+### Installing `chgsum.pl` and additional scripts
 
 1. Download the scripts from [VTST-tools](http://theory.cm.utexas.edu/vtsttools/scripts.html)
-2. Unpack the folder (`vtstscripts-1033`) and move it into the folder with your bader executable
-3. run `nano ~/.bashrc` to edit your bash and add this line to the bottom:
+2. Unzip the folder (`vtstscripts-1033`) and move it to the directory where your bader executable is located.
+3. Run `nano ~/.bashrc` to modify your bash and add this line at the end:
 ``` bash
 export PATH=/home/jacksund/bader/vtstscripts-1033:$PATH
 ```
-4. restart your terminal and you're ready to try Bader analyses with Simmate!
+4. Restart your terminal and you're ready to perform Bader analyses with Simmate!
 
---------------------------------------------------------------------------------
+## Useful Resources
 
-## Helpful links
-
- - [website](http://theory.cm.utexas.edu/henkelman/code/bader/) (includes docs + guide)
-
---------------------------------------------------------------------------------
+ - [Bader Website](http://theory.cm.utexas.edu/henkelman/code/bader/) (includes documentation and guide)

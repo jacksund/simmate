@@ -1,20 +1,19 @@
-
-# Create new & advanced workflows
+# Constructing New & Advanced Workflows
 
 !!! note 
-    This guide only covers the bare-minimum. We highly recommend going through the full guides when building your custom workflows.
+    This guide provides a basic overview. For a comprehensive understanding when constructing your custom workflows, we strongly recommend referring to the complete guides.
 
 ----------------------------------------------------------------------
 
-## Create a flow from scratch
+## Building a Workflow from Scratch
 
-Simmate defines a base `Workflow` class to help with common material science analyses. The simplest possible workflow can look something like...
+Simmate offers a foundational `Workflow` class to assist with routine material science analyses. The most basic workflow could appear as follows...
 
 ``` python
 from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
-    # Note, the long name of this workflow class is important!
+    # Remember, the extended name of this workflow class is crucial!
     
     use_database = False  # we don't have a database table yet
 
@@ -26,9 +25,9 @@ class Example__Python__MyFavoriteSettings(Workflow):
 
 ----------------------------------------------------------------------
 
-## Modify an existing workflow
+## Altering an Existing Workflow
 
-Building a workflow from scratch can be a lot of work. Most often, we don't want to create a new workflow. We just want to take an existing one and update a few settings. In python, we can do that with...
+Creating a workflow from scratch can be time-consuming. More often than not, we simply want to modify an existing workflow by updating a few settings. This can be achieved in Python as follows...
 
 ``` python
 from simmate.workflows.utilities import get_workflow
@@ -37,13 +36,13 @@ original_workflow = get_workflow("static-energy.vasp.matproj")
 
 
 class StaticEnergy__Vasp__MyCustomPreset(original_workflow):
-    # NOTE: the name we gave is important! 
-    # Don't skip reading the guide above
+    # NOTE: The name we assigned is crucial! 
+    # Don't overlook the guide above
     
-    # give a version to help you and you team keep track of what changes
+    # Assign a version to help you and your team track changes
     version = "2022.07.04"
 
-    incar = original_workflow.incar.copy()  # Make sure you copy!
+    incar = original_workflow.incar.copy()  # Always make a copy!
     incar.update(
         dict(
             NPAR=1,
@@ -51,21 +50,21 @@ class StaticEnergy__Vasp__MyCustomPreset(original_workflow):
         )
     )
 
-# make sure we have new settings updated and that we didn't change the original
+# Ensure the new settings are updated and that the original remains unchanged
 assert original_workflow.incar != StaticEnergy__Vasp__MyCustomPreset
 ```
 
 !!! danger
-    Updating workflows can often run into unexpected problems -- because not workflows
-    behave the same. More often then not, you should create your own custom 
+    Modifying workflows can often lead to unforeseen issues -- as not all workflows
+    behave identically. More often than not, it's advisable to create your own custom 
     `VaspWorkflow`. Learn more [in the full-guides](/simmate/full_guides/workflows/creating_new_workflows/#building-from-existing-workflows).
     
 
 ----------------------------------------------------------------------
 
-## Running your workflow
+## Executing your Workflow
 
-You can now run and interact with your workflow like any other one!
+You can now execute and interact with your workflow like any other!
 
 ``` python
 state = StaticEnergy__Vasp__MyCustomPreset.run(structure="NaCl.cif")
@@ -73,6 +72,6 @@ result = state.result()
 ```
 
 !!! tip
-    You can also run workflows from a YAML file too. Check out the [full-guides](/simmate/full_guides/workflows/creating_new_workflows/#running-our-custom-workflow) to learn more.
+    Workflows can also be executed from a YAML file. Refer to the [full-guides](/simmate/full_guides/workflows/creating_new_workflows/#running-our-custom-workflow) for more information.
 
 ----------------------------------------------------------------------

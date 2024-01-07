@@ -1,19 +1,14 @@
+## Understanding Apps
 
-----------------------------------------------------------------------
+Apps are essentially codes or programs designed to perform specific analyses. They can be based on external software or custom-built using Simmate for a particular technique.
 
-## What is an app?
+For instance, VASP is a program capable of running a variety of density functional theory (DFT) calculations. However, since it's not written in Python, we require some "helper" code to execute VASP commands, create input files, and extract data from the outputs.
 
-Apps are codes/programs that perform some analysis for us. They can be based an external software or even a custom program built using Simmate for a specific technique.
+Similarly, Simmate includes an `evo_search` "app" that encompasses all the functionalities required to execute the evolutionary structure prediction algorithm.
 
-For example, VASP is a program that can run a variety of density functional theory (DFT) calculations. But because it isn't written in Python, we need some "helper" code here to call VASP commands, make input files, and pull data from the outputs.
+## Code Structure
 
-As another example, Simmate includes a suite for evolutionary structure prediction. All of the functionality need to carry out the search algorithm is contained within an `evo_search` "app".
-
-----------------------------------------------------------------------
-
-## Organization of code
-
-All apps follow the same folder structure:
+All apps adhere to the same folder structure:
 
 ```
 ├── example_app
@@ -27,17 +22,15 @@ All apps follow the same folder structure:
 │   └── workflows
 ```
 
-In a more logical order (rather than alphabetical like above), here is what each module contains:
+Here's a logical breakdown of what each module contains:
 
-- `configuration` = helps to install the program and set up common settings for it
-- `inputs` & `outputs` = automatically generate files as well as load their data into python
-- `error_handlers` = help correct common errors in calculations that cause the program to fail
-- `tasks` = how the program is actually set up, executed, and worked-up. It ties together all the `inputs`, `outputs`, and `error-handler` functions into one. A single task can be viewed as a single call to the program (i.e. a single calculation).
-- `database` = holds all of the datatables for storing our results
-- `workflows`  = brings together `tasks` and `database`, so these setup individual tasks and handle saving the results to our database
-- `website` = lets us submit workflows and view results with our website interface
+- `configuration`: Assists in installing the program and configuring common settings.
+- `inputs` & `outputs`: Automates file generation and data loading into Python.
+- `error_handlers`: Helps rectify common calculation errors that cause the program to fail.
+- `tasks`: Defines how the program is set up, executed, and processed. It integrates all the `inputs`, `outputs`, and `error-handler` functions. A single task can be seen as a single call to the program (i.e., a single calculation).
+- `database`: Contains all the datatables for storing our results.
+- `workflows`: Combines `tasks` and `database` to set up individual tasks and manage the saving of results to our database.
+- `website`: Allows us to submit workflows and view results via our website interface.
 
 !!! note
-    Beginners should start by looking at the `workflows` module as this ties all other modules together.
-
-----------------------------------------------------------------------
+    Beginners are advised to start with the `workflows` module as it integrates all other modules.

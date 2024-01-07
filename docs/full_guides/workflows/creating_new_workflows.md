@@ -1,42 +1,28 @@
+# Creating New Workflows
 
-# Creating new workflows
+## Workflow Naming
 
-----------------------------------------------------------------------
+To create a workflow name, adhere to the Simmate conventions and run checks to ensure everything operates as expected:
 
-## Create a workflow name
-
-Build your workflow name using the Simmate conventions and run some checks to
-make sure everything works as expected:
 ``` python
 from simmate.engine import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     pass  # we will build the rest of workflow later
 
-# These names can be long and unfriendly, so it can be nice to
-# link them to a variable name for easier access.
+# Assign long and complex names to a variable for easier access.
 my_workflow = Example__Python__MyFavoriteSettings
 
-# Now check that our naming convention works as expected
+# Verify that our naming convention works as expected
 assert my_workflow.name_full == "example.python.my-favorite-settings"
 assert my_workflow.name_type == "example"
 assert my_workflow.name_app == "python"
 assert my_workflow.name_preset == "my-favorite-settings"
 ```
 
-!!! warning
-    Higher level features such as the website interface require that workflow names follow a certain format. If you skip this step, your workflows will fail and cause errors elsewhere.
+## Basic Workflow
 
-!!! tip
-    make sure you have read of "Workflow Names" documentation.
-
-----------------------------------------------------------------------
-
-## A basic workflow
-
-To build a Simmate workflow, you can have ANY python code you'd like. The only
-requirement is that you place that code inside a `run_config` method of a 
-new subclass for `Workflow`:
+To construct a Simmate workflow, you can use any Python code. The only requirement is that you place the code inside a `run_config` method of a new subclass for `Workflow`:
 
 ``` python
 from simmate.engine import Workflow
@@ -52,20 +38,14 @@ class Example__Python__MyFavoriteSettings(Workflow):
 ```
 
 !!! note
-    Behind the scenes, the `run` method is converting our `run_config` to a 
-    workflow and doing extra setup tasks for us.
-    
+    Behind the scenes, the `run` method transforms our `run_config` into a workflow and performs additional setup tasks.
+
 !!! danger
-    Note that we added `**kwargs` to our function input. This is required for
-    your workflow to run. Make sure you read the "Default parameters" section
-    below to understand why.
+    We added `**kwargs` to our function input. This is required for your workflow to run. Make sure you read the "Default parameters" section below to understand why.
 
-----------------------------------------------------------------------
+## Pythonic Workflow
 
-## A pythonic workflow
-
-Now let's look at a realistic example where we build a Workflow that has
-input parameters and accesses class attributes/methods:
+Here's a realistic example where we construct a Workflow that has input parameters and accesses class attributes/methods:
 
 ``` python
 
@@ -80,63 +60,45 @@ class Example__Python__MyFavoriteSettings(Workflow):
 
     @classmethod
     def run_config(cls, name, say_hello=True, **kwargs):
-        # Workflows can contain ANY python code!
-        # In other words...
-        #   "The ceiling is the roof" -Michael Jordan
-
         if say_hello:
             print(f"Hello and welcome, {name}!")
 
-        # grab class values and methods
+        # access class values and methods
         x = cls.example_constant
         example_calc = cls.squared(x)
         print(f"Our calculation gave a result of {example_calc}")
 
-        # grab extra arguments if you need them
+        # access extra arguments if needed
         for key, value in kwargs.items():
             print(
                 f"An extra parameter for {key} was given "
-                "with a value of {value}"
+                f"with a value of {value}"
             )
 
         return "Success!"
 ```
 
 !!! danger
-    The `**kwargs` is still important here. Make sure we are adding it at the 
-    end of our input parameters. (see the next section for why)
+    The `**kwargs` is still crucial here. Make sure we are adding it at the end of our input parameters. (see the next section for why)
 
-----------------------------------------------------------------------
+## Default Parameters and Using kwargs
 
-## Default parameters and using kwargs
+In the workflows above, we used `**kwargs` in each of our `run_config` methods. If you remove these, the workflow will fail. This is because Simmate automatically passes default parameters to the `run_config` method -- even if you didn't define them as inputs. 
 
-You'll notice in the workflows above that we used `**kwargs` in each of our
-`run_config` methods, and if you remove these, the workflow will fail. This
-is because simmate automatically passes default parameters to the `run_config` 
-method -- even if you didn't define them as inputs. 
+We do this to allow all workflows to access key information about the run. These parameters are:
 
-We do this to allow all workflows to access key information about the run. 
-These parameters are:
-
-- `run_id`: a unique id to help with tracking a calculation
-- `directory`: a unique foldername that the calculation will take place in
+- `run_id`: a unique id for tracking a calculation
+- `directory`: a unique folder name where the calculation will take place
 - `compress_output`: whether to compress the directory to a zip file when we're done
 - `source`: where the input of this calculation came from
 
-You can use any of these inputs to help with your workflow. Or alternatively,
-just add `**kwargs` to your function and ignore them.
+You can use any of these inputs to assist with your workflow. Alternatively, just add `**kwargs` to your function and ignore them.
 
-----------------------------------------------------------------------
+## Common Input Parameters
 
-## Common input parameters
+You often will use input parameters that correspond to `toolkit` objects, such as `Structure` or `Composition`. If you use the matching input parameter name, these will inherit all of their features -- such as loading from filename, a dictionary, or python object.
 
-You often will use input parameters that correspond to `toolkit` objects, such
-as `Structure` or `Composition`. If you use the matching input parameter name,
-these will inherit all of their features -- such as loading from filename, a 
-dictionary, or python object.
-
-For example, if you use a `structure` input variable, it behaves as described
-in the [Parameters](/simmate/parameters/) section.
+For example, if you use a `structure` input variable, it behaves as described in the [Parameters](/simmate/parameters/) section.
 
 ``` python
 from simmate.toolkit import Structure
@@ -158,18 +120,13 @@ class Example__Python__MyFavoriteSettings(Workflow):
 ```
 
 !!! tip
-    if you see a parameter in our documentation that has similar use to yours,
-    make sure you use the same name. It can help with adding extra functionality.
+    If you see a parameter in our documentation that has similar use to yours, make sure you use the same name. It can help with adding extra functionality.
 
-----------------------------------------------------------------------
-
-## Writing output files
+## Writing Output Files
 
 Of all the default parameters (described above), you'll likely get the most from using the `directory` input. It is important to note that `directory` is given as a [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html) object. Just add the directory to your run_config() method and use the object that's provided.
 
-For example, this workflow will write an output file to 
-`simmate-task-12345/my_output.txt` (where the `simmate-task-12345` folder is
-automatically set up by Simmate).
+For example, this workflow will write an output file to `simmate-task-12345/my_output.txt` (where the `simmate-task-12345` folder is automatically set up by Simmate).
 
 ``` python
 from simmate.engine import Workflow
@@ -188,20 +145,12 @@ class Example__Python__MyFavoriteSettings(Workflow):
         with output_file.open("w") as file:
             file.write("Writing my output!")
         
-        # If you don't like/know pathlib.Path, you can
-        # convert the directory name back to a string
-        output_filename = str(output_file)
-        
         return "Done!"
 ```
 
-----------------------------------------------------------------------
+## Building from Existing Workflows
 
-## Building from existing workflows
-
-For many apps, there are workflow classes that you
-can use as a starting point. For example, VASP users can inherit from the
-`VaspWorkflow` class, which includes many features built-in:
+For many apps, there are workflow classes that you can use as a starting point. For example, VASP users can inherit from the `VaspWorkflow` class, which includes many built-in features:
 
 === "basic VASP example"
     ``` python
@@ -303,7 +252,7 @@ can use as a starting point. For example, VASP users can inherit from the
         reset every time a new python session starts. Therefore, we recommend 
         keeping your modifer in the same file that you define your workflow in.
 
-Further, can use python inheritance to borrow utilities and settings from an existing workflow:
+You can also use Python inheritance to borrow utilities and settings from an existing workflow:
 
 ``` python
 from simmate.workflows.utilities import get_workflow
@@ -333,20 +282,14 @@ assert original_workflow.incar != StaticEnergy__Vasp__MyCustomPreset
     
 !!! tip
     To gain more insight to workflows like this, you should read through **both**
-    the "Creating S3 Workflows" and "Third-party Software" sections for more 
+    the "Creating S3 Workflows" and related "Apps" sections for more 
     information.
 
-----------------------------------------------------------------------
+## Linking a Database Table
 
-## Linking a database table
+Many workflows will want to store common types of data (such as static energy or relaxation data). If you want to use these tables automatically, you simply need to ensure your `name_type` matches what is available!
 
-Many of workflows will want to store common types of data (such as static energy
-or relaxation data). If you would like to use these tables automatically, you 
-simply to make sure you `name_type` matches what is available!
-
-For example, if we look at a static-energy calculation, you will see
-the `StaticEnergy` database table is automatically used because the
-name of our workflow starts with "StaticEnergy":
+For example, if we look at a static-energy calculation, you will see the `StaticEnergy` database table is automatically used because the name of our workflow starts with "StaticEnergy":
 
 ``` python
 from simmate.database import connect
@@ -356,10 +299,7 @@ from simmate.database.workflow_results import StaticEnergy
 assert StaticEnergy__Vasp__MyCustomPreset.database_table == StaticEnergy
 ```
 
-If you would like to build or use a custom database, you must first have
-a registered `DatabaseTable`, and then you can link the database table to 
-your workflow directly. The only other requiredment is that your database table
-uses the `Calculation` database mix-in: 
+If you want to build or use a custom database, you must first have a registered `DatabaseTable`, and then you can link the database table to your workflow directly. The only other requirement is that your database table uses the `Calculation` database mix-in: 
 
 ``` python
 from my_project.models import MyCustomTable
@@ -368,41 +308,17 @@ class Example__Python__MyFavoriteSettings(Workflow):
     database_table = MyCustomTable
 ```
 
-!!! tip
-    See the "Getting Started" and "Database" tutorials for how to build a 
-    custom database table.
-    
-!!! warning
-    Make sure your table uses the `Calculation` mix-in so that the run 
-    information can be stored properly
+## Workflows that Call a Command
 
-----------------------------------------------------------------------
+In many cases, you may have a workflow that runs a command or some external program and then reads the results from output files. An example of this would be an energy calculation using VASP. If your workflow involves calling another program, you should read about the `S3Workflow` which helps with writing input files, calling other programs, and handling errors.
 
-## Workflows that call a command
+## Registering Your Workflow
 
-In many cases, you may have a workflow that runs a command or some external
-program and then reads the results from output files. An example of
-this would be an energy calculation using VASP. If your workflow involves
-calling another program, you should read about the `S3Workflow` which helps
-with writing input files, calling other programs, and handling errors.
+Registering your workflow so that you can access it in the UI requires you to build a "simmate project". This is covered in the getting-started tutorials.
 
-----------------------------------------------------------------------
+## Running Your Custom Workflow
 
-## Registering your workflow
-
-Registering your workflow so that you can access it in the UI requires you to
-build a "simmate project". This is covered in the getting-started tutorials.
-
-!!! note
-    For now, you can treat this step as optional if you do **not** have any 
-    custom database tables.
-
-----------------------------------------------------------------------
-
-## Running our custom workflow
-
-Once you have your new workflow and registered it, you can run it as you would 
-any other one.
+Once you have your new workflow and registered it, you can run it as you would any other one.
 
 === "yaml"
     ``` yaml
@@ -565,4 +481,56 @@ us really take advantage of how we provide our input. For example, a
         # at the start of your workflow's `run_config` if you need a tuple.
         ```
 
-----------------------------------------------------------------------
+    === "nested lists"
+        ``` python
+        # in python
+        my_parameter = [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+        ]
+        ```
+        ``` yaml
+        # in yaml (we recommend switching to TOML!)
+        my_parameter:
+            - - 1
+              - 2
+              - 3
+            - - 4
+              - 5
+              - 6
+            - - 7
+              - 8
+              - 9
+        ```
+        ``` toml
+        # in toml
+        my_parameter = [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+        ]
+        ```
+
+    === "tuple"
+        ``` python
+        # in python
+        my_parameter = (1,2,3)
+        ```
+        ``` yaml
+        # in yaml
+        my_parameter:
+            - 1
+            - 2
+            - 3
+        # WARNING: This will return a list! Make sure you call 
+        #   `tuple(my_parameter)`
+        # at the start of your workflow's `run_config` if you need a tuple.
+        ```
+        ``` toml
+        # in toml
+        my_parameter = [1, 2, 3]
+        # WARNING: This will return a list! Make sure you call 
+        #   `tuple(my_parameter)`
+        # at the start of your workflow's `run_config` if you need a tuple.
+        ```

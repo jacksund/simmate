@@ -1,15 +1,14 @@
-
-# Properties of a `Structure` object
+# Understanding the `Structure` Object Properties
 
 ----------------------------------------------------------------------
 
-## Classes give us properties
+## The Role of Classes in Defining Properties
 
-We make classes because they allow us to automate common calculations. 
+Classes are created to automate routine calculations. 
 
-For example, all structures have a `density`, which is easily calculated once you know the lattice and atomic sites. The formula to calculate is always the same, so we can automate the calculation. 
+For instance, all structures possess a `density` property, which can be computed once the lattice and atomic sites are known. The formula for this calculation remains constant, allowing for automation. 
 
-You can access this and other properties through our structure object. Try typing `nacl_structure.density` in the python terminal and hit enter. It should tell you the density of our structure:
+Access this and other properties through the structure object. For example, input `nacl_structure.density` in the python terminal and press enter to display the density of the structure:
 
 ``` python
 nacl_structure.density
@@ -17,11 +16,11 @@ nacl_structure.density
 
 ----------------------------------------------------------------------
 
-## Lattice properties
+## Exploring Lattice Properties
 
-Now what about other properties for the lattice, like volume, angles, and vectors? 
+What about other lattice properties such as volume, angles, and vectors? 
 
-For the sake of organization, the `Structure` class has an associated class called `Lattice`, and within the `lattice` object we find properties like `volume`. Try out these in your python terminal (only run one line at a time):
+For better organization, the `Structure` class includes an associated class called `Lattice`. Within the `lattice` object, properties like `volume` can be found. Test these in your python terminal (run one line at a time):
 
 ```python
 nacl_structure.lattice.volume
@@ -29,7 +28,7 @@ nacl_structure.lattice.matrix
 nacl_structure.lattice.beta
 ```
 
-Your outputs will be...
+The expected outputs are...
 
 ```
 # EXPECTED OUTPUTS
@@ -43,7 +42,7 @@ array([[3.48543651, 0.        , 2.01231771],
 59.99999999999999
 ```
 
-If you don't like to type long lines, there is a shortcut.  We save the `Lattice` object (here, we call it as `nacl_lat`, but you can pick a different name) to a new variable name and then call its properties:
+For convenience, you can use a shortcut. Save the `Lattice` object to a new variable name (here, it's `nacl_lat`, but you can choose a different name) and then call its properties:
 
 ```python
 nacl_lat = nacl_structure.lattice
@@ -52,20 +51,20 @@ nacl_lat.matrix
 nacl_lat.beta
 ```
 
-Note, outputs will be the same as above.
+The outputs will be identical to the previous ones.
 
 ----------------------------------------------------------------------
 
-## Composition properties
+## Investigating Composition Properties
 
-We can apply the same idea to other `Structure` sub-classes, such as `Composition`. This allows us to see properties related to composition:
+The same concept can be applied to other `Structure` sub-classes, such as `Composition`. This enables us to view properties related to composition:
 ```
 nacl_compo = nacl_structure.composition
 nacl_compo.reduced_formula
 nacl_compo.elements
 ```
 
-This will give outputs of...
+The expected outputs are...
 
 ```
 # EXPECTED OUTPUTS
@@ -79,9 +78,9 @@ Comp: Na1 Cl1
 
 ----------------------------------------------------------------------
 
-## Keeping track of our variables
+## Managing Variables
 
-As you create new python objects and name them different things, you'll need help keep track of them. Fortunately, Spyder's variable explorer (a tab in top right window) let's us track them! Try double-clicking some of your variables and explore what Spyder can do:
+As you create new python objects and assign them different names, you'll need a way to keep track of them. Spyder's variable explorer (located in the top right window tab) can help with this! Try double-clicking on some of your variables to explore what Spyder can do:
 
 <!-- This is an image of the Spyder IDE variable explorer -->
 <p align="center" style="margin-bottom:40px;">

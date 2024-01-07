@@ -1,16 +1,16 @@
-# The Simmate Database
+# Simmate Database Module
 
-This module provides tools to define and interacting with your database.
+This module provides tools for defining and managing your database.
 
-For beginners, make sure you have completed [our database tutorial](/simmate/getting_started/access_the_database/quick_start/).
+If you're new to this, make sure you've gone through [our database tutorial](/simmate/getting_started/access_the_database/quick_start/).
 
-Submodules include...
+The module includes the following submodules:
 
-- `base_data_types` : fundamental mix-ins for creating new tables
-- `workflow_results` : collection of result tables for `simmate.workflows`
-- `prototypes` : tables of prototype structures
-- `third_parties` : tables from external providers (such as Materials Project)
+- `base_data_types` : Fundamental mix-ins for creating new tables
+- `workflow_results` : A set of result tables for `simmate.workflows`
+- `prototypes` : Tables that hold prototype structures
+- `third_parties` : Tables derived from external sources (like Materials Project)
 
-And there is one extra file in this module:
+In addition, this module includes an extra file:
 
-- `connect`: configures the database and installed apps (i.e. sets up Django)
+- `connect`: This file sets up the database and installed apps (in other words, it configures Django)

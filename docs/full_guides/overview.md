@@ -1,20 +1,18 @@
-
-# The full Simmate guides & API reference
-
+# Comprehensive Guides & API Reference for Simmate
 
 ## Before you begin
 
-To get started, make sure you have either completed our [introductory tutorials](/simmate/getting_started/overview/) or are comfortable with python.
+Before diving in, ensure you've either completed our [introductory tutorials](/simmate/getting_started/overview/) or have a robust understanding of Python.
 
 ------------------------------------------------------------
 
-## Organization of guides vs. code
+## Guide and Code Structure
 
-Though we try to keep the organization of our guides and code as close as possible, they do not exactly follow the same structure. We learned over time that code/guide organization needs to be handled separately to help new users begin using Simmate without having mastered all of it components.
+The structure of our guides and code may not always match. We've found that separating the two helps newcomers navigate Simmate without having to grasp all its components at once.
 
-### documentation
+### Documentation
 
-We try to organize our guides in order of progressing difficulty. This also matches the way in which most users will begin to work with Simmate&mdash;namely, beginning with the highest-level features (the website interface) and progressing towards the lowest-level features (the toolkit and python objects). The documentation therefore proceeds in the following sequence.
+Our guides are arranged in ascending order of complexity, mirroring the typical user journey with Simmate. Users generally start with high-level features (the website interface) and progressively delve into lower-level features (the toolkit and Python objects). The documentation mirrors this progression.
 
 ``` mermaid
 graph LR
@@ -25,30 +23,30 @@ graph LR
 ```
 
 !!! tip
-    Advanced topics are located at the end of each section. Unlike the 
-    getting-started guides, you do **not** need to complete a section in order 
-    to move on to the next one.
+    Advanced topics are situated at the end of each section. Unlike the 
+    getting-started guides, you do **not** need to complete a section before 
+    proceeding to the next one.
 
-### python modules
+### Python Modules
 
-`simmate` is the base module and contains all of the code that our package runs on. Within each subfolder (i.e., each python "module"), you’ll find more details on its contents.
+`simmate` is the base module, housing all the code that our package operates on. Each subfolder (or Python "module") provides detailed information about its contents.
 
-These modules are:
+These modules include:
 
-- `apps` = each runs a specific analysis or third-party program (e.g., VASP, which runs DFT calculations)
-- `command_line` = common functions that are available as commands in the terminal
-- `configuration` = default Simmate settings and methods to change them
-- `database` = defines the structure of data tables and the methods to access the tables
-- `engine` = tools that run calculations and handle errors
-- `file_converters` = methods to convert between filetypes (e.g., POSCAR to CIF)
-- `toolkit` = core methods and classes for Simmate (e.g. the `Structure` class)
-- `utilities` = simple functions that are used throughout other modules
-- `visualization` = methods to visualize structures and data
-- `website` = runs the simmate.org website
-- `workflows` = tools that define each calculation type (e.g., a structure optimization)
+- `apps`: Runs specific analyses or third-party programs (e.g., VASP, which performs DFT calculations)
+- `command_line`: Provides common functions as terminal commands
+- `configuration`: Contains default Simmate settings and methods for modifying them
+- `database`: Sets up data table structures and methods for accessing these tables
+- `engine`: Offers tools for running calculations and managing errors
+- `file_converters`: Includes methods for converting between file types (e.g., POSCAR to CIF)
+- `toolkit`: Houses core methods and classes for Simmate (e.g., the `Structure` class)
+- `utilities`: Contains simple functions used across other modules
+- `visualization`: Provides methods for visualizing structures and data
+- `website`: Powers the simmate.org website
+- `workflows`: Contains tools defining each calculation type (e.g., a structure optimization)
 
-There is also one extra file…
+Additionally, there's one extra file:
 
-- `conftest` = this runs Simmate tests and is only for contributing devs
+- `conftest`: Runs Simmate tests and is intended solely for contributing developers
 
 ------------------------------------------------------------

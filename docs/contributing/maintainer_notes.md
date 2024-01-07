@@ -1,70 +1,69 @@
+# Maintainer Guidelines
 
-# Maintainer notes
+## Release Procedure
 
-## Making a release
+To generate a new release, adhere to these steps:
 
-To make a new release, you must follow these steps:
+1. Modify the Simmate version number in `pyproject.toml` ([link](https://github.com/jacksund/simmate/blob/main/pyproject.toml))
 
-1. Update the Simmate version number in `pyproject.toml` ([here](https://github.com/jacksund/simmate/blob/main/pyproject.toml))
+2. Update the changelog with the new release and its release date.
 
-2. Update the changelog with the new release and date
-
-3. Ensure all tests pass when using the pre-built database. Otherwise, you need to (i) make a new one using the commands below, (ii) rename your db file to something like `prebuild-2022-07-05.sqlite3`, (iii) compress the db file to a zip file, (iv) upload it to the Simmate CDN, and (iii) update the `archive_filename` in `simmate.database.third_parties.utilites.load_default_sqlite3_build`.
+3. Confirm all tests pass using the pre-built database. If they don't, generate a new one using the commands below, rename your db file (e.g., `prebuild-2022-07-05.sqlite3`), compress the db file into a zip file, upload it to the Simmate CDN, and modify the `archive_filename` in `simmate.database.third_parties.utilites.load_default_sqlite3_build`.
 ``` bash
 simmate database reset --confirm-delete --no-use-prebuilt
 simmate database load-remote-archives
 ```
 
-4. Make a [release](https://github.com/jacksund/simmate/releases/new) on Github (which will automatically release to pypi)
+4. Generate a [release](https://github.com/jacksund/simmate/releases/new) on Github, which will automatically release to pypi.
 
-5. Wait for the autotick bot to open a pull request for the [simmate feedstock](https://github.com/conda-forge/simmate-feedstock). This can take up to 24hrs, but you can check the status [here](https://conda-forge.org/status/#version_updates) (under "Queued").
+5. Wait for the autotick bot to initiate a pull request for the [simmate feedstock](https://github.com/conda-forge/simmate-feedstock). Check the status [here](https://conda-forge.org/status/#version_updates) (under "Queued").
 
-6. Make sure the autotick bot made the proper changes before merging. If there were any major changes, you can use [grayskull](https://github.com/conda-incubator/grayskull) to help update the version number, sha256, and dependencies.
+6. Review the autotick bot's changes before merging. If there were substantial changes, use [grayskull](https://github.com/conda-incubator/grayskull) to modify the version number, sha256, and dependencies.
 
-7. After merging, it takes the conda-forge channels 30min or so to update their indexes. Afterwards, you can test the conda install with:
+7. After merging, wait for the conda-forge channels to update their indexes (about 30 minutes). Then, test the conda install with:
 ``` bash
 # for a normal release
 conda create -n my_env -c conda-forge simmate -y
 
-# as an extra, make sure spyder can also be installed in the same env
+# additionally, ensure spyder can also be installed in the same environment
 conda install -n my_env -c conda-forge spyder -y
 ```
 
-## The full test suite
+## Full Test Suite
 
-Unit tests that require third-party programs (such as VASP) are disabled by default. While there are tests that "mock" program behavior, it is still best to run a full test before making new releases. To run all unit tests that actually call programs like VASP:
+Unit tests that require third-party programs (like VASP) are disabled by default. However, it's advisable to run a full test before new releases. To execute all unit tests that call programs like VASP:
 
-1. Make sure you have the following prerequisites:
-      - a linux env with VASP & Bader installed
-      - dev version of simmate installed
-      - the `main` branch of the official repo checked out
-      - `simmate_dev` env is active
-      - the base simmate directory as the current working directory
-      - clear any custom `~/simmate` configs (i.e. make sure we have defaults)
+1. Ensure you have the following prerequisites:
+      - A Linux environment with VASP & Bader installed
+      - Dev version of Simmate installed
+      - The `main` branch of the official repo checked out
+      - `simmate_dev` environment is active
+      - The base Simmate directory as the current working directory
+      - Clear any custom `~/simmate` configs (i.e., ensure default settings)
 
-2. Make sure the default test suite works:
+2. Confirm the default test suite works:
 ``` bash
 pytest
 ```
 
-3. Reset your database, switch to the pre-built, and make sure it's up to date. We do this to mimic the database of a brand new user:
+3. Reset your database, switch to the pre-built, and update it. This simulates the database of a new user:
 ```bash
 simmate database reset --confirm-delete --use-prebuilt
 simmate database update
 ```
 
-4. Open `pyproject.toml` and find the following line (below). This line contains the default options when calling `pytest`, and `not vasp` is included to skip tests that require VASP. Let's modify this line so that the VASP tests will run:
+4. Open `pyproject.toml` and modify the following line to run the VASP tests:
 ``` toml
 # original line
 addopts = "--no-migrations --durations=15 -m 'not blender and not vasp'"
 
-# what we update it to
+# updated line
 addopts = "--no-migrations --durations=15 -m 'not blender'"
 ```
 
-5. (optional) By default, all VASP tests will run using `mpirun -n 12 vasp_std > vasp.out`. You can update this in the file `src/simmate/workflows/tests/test_all_workflow_runs.py` if you would like to. There are multiple places where this is defined -- so make sure you read the entire script!
+5. (Optional) By default, all VASP tests run using `mpirun -n 12 vasp_std > vasp.out`. Modify this in `src/simmate/workflows/tests/test_all_workflow_runs.py` if needed.
 
-6. Now run `pytest` again where it will now pick up these tests. Note, we may only want to run specific test AND enable logging (`-s`) for them so that we can monitor -- both are optional but recommended:
+6. Run `pytest` again to pick up these tests. It's advisable to run specific tests and enable logging (`-s`) for monitoring:
 ``` bash
 # option 1
 pytest
@@ -73,40 +72,37 @@ pytest
 pytest src/simmate/workflows/test/test_all_workflow_runs.py -s
 ```
 
-7. If everything worked, then we can make a new release! Feel free to discard your changes
-
+7. If all tests pass, proceed with the new release. Discard your changes afterwards.
 
 ## Website CSS
 
-The Hyper theme described in our main docs [here](/simmate/full_guides/website/overview/#css-and-js-assets) must be built and hosted separately from any Simmate
-server to abide by licensing. The build/host the assests, follow these steps: 
+The Hyper theme, as outlined in our main docs [here](/simmate/full_guides/website/overview/#css-and-js-assets), must be built and hosted separately from any Simmate server due to licensing. To build/host the assets, adhere to these steps: 
 
-
-1. download hyper theme (private access): e.g. `Hyper_v4.6.0.zip`
-2. unpack the zip file and navigate to this directory:
+1. Download the Hyper theme (private access): e.g., `Hyper_v4.6.0.zip`
+2. Unpack the zip file and navigate to this directory:
 ``` bash
 cd Hyper_v4.6.0/Bootstrap_5x/Hyper/
 ```
-3. install prereqs into a new conda env and activate it
+3. Install prerequisites into a new conda environment and activate it:
 ``` bash
 conda create -n hyper -c conda-forge nodejs yarn git
 conda activate hyper
 ```
-4. install gulp using npm (conda install of gulp doesn't work)
+4. Install gulp using npm (conda install of gulp doesn't work):
 ``` bash
 npm install gulp -g
 ```
-5. in the main dir, install all hyper dependencies using the `yarn.lock` file
+5. In the main directory, install all Hyper dependencies using the `yarn.lock` file:
 ``` bash
 yarn install
 ```
-6. edit any themes/colors in the following files (e.g. change primary to `#0072ce`)
+6. Edit themes/colors in the following files (e.g., change primary to `#0072ce`):
 ```
 /src/assests/scss/config/saas/
 >> go into each folder's _variables.scss
 ```
-7. Build the assets
+7. Build the assets:
 ``` bash
 gulp build
 ```
-8. Upload assests (in `dist` folder) to your cdn for serving
+8. Upload assets (in `dist` folder) to your CDN for serving.

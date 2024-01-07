@@ -1,32 +1,28 @@
-# Analyze and modify structures
-
-In this tutorial, you will learn about the most important class in Simmate: the `Structure` class. Beginners will also be introduced to classes and the Spyder IDE.
+# Analyzing and Modifying Structures
 
 !!! note
-    Simmate uses [pymatgen](https://pymatgen.org/) under the hood, so this tutorial is really one for using their package. [Their guides](https://pymatgen.org/usage.html) also are useful, but they are written for those already familiar with python.
+    Simmate is built on [pymatgen](https://pymatgen.org/). Therefore, this tutorial also serves as a guide to using their package. [Their guides](https://pymatgen.org/usage.html) are also helpful, but they are designed for those already familiar with python.
 
-----------------------------------------------------------------------
+# Quick Tutorial
 
-# The quick tutorial
+1. In the python console of Spyder, run `import simmate` to ensure everything is properly set up.
+2. Ensure you have the `POSCAR` file of NaCl from the previous tutorial. 
+3. Now, let's delve into the toolkit and explore some of its features!
 
-1. In Spyder's python console, run `import simmate` to make sure everything is set up.
-2. Make sure you still have our `POSCAR` file of NaCl from the last tutorial. 
-3. Now let's explore the toolkit and a few of its features!
-
-Load the structure into python and then write it to another file format:
+Load the structure into python and then convert it to another file format:
 ```python
 from simmate.toolkit import Structure
 structure = Structure.from_file("POSCAR")
 structure.to(filename="NaCl.cif", fmt="cif")
 ```
 
-The `Structure` class (aka a `ToolkitStructure`) provides many extra properties and methods, so nearly all functions in Simmate use it as an input. This includes running workflows like we did in the previous tutorial. All available workflows can be loaded from the `simmate.workflows` module:
+The `Structure` class, also known as `ToolkitStructure`, offers numerous additional properties and methods. Almost all functions in Simmate use it as an input. This includes running workflows like we did in the previous tutorial. All available workflows can be loaded from the `simmate.workflows` module:
 ```python
 from simmate.workflows.relaxation import mit_workflow
 result = mit_workflow.run(structure=structure)
 ```
 
-Grab varius properties of the structure, lattice, and composition:
+Access various properties of the structure, lattice, and composition:
 ```python
 # explore structure-based properties
 structure.density
@@ -34,26 +30,26 @@ structure.distance_matrix
 structure.cart_coords
 structure.num_sites
 
-# grab the structure's composition and access it's properties
+# access the structure's composition and its properties
 composition = structure.composition
 composition.reduced_formula
 composition.elements
 
-# grab the structure's lattice and access it's properties
+# access the structure's lattice and its properties
 lattice = structure.lattice
 lattice.volume
 lattice.matrix
 lattice.beta
 ```
 
-Make new structures using some tranformation or analysis:
+Create new structures using some transformation or analysis:
 ```python
 structure.add_oxidation_state_by_guess()
 structure.make_supercell([2,2,2])
 new_structure = structure.get_primitive_structure()
 ```
 
-What about advanced features? Simmate is slowly adding these to our toolkit module, but many more are available through [PyMatGen](https://pymatgen.org/) and [MatMiner](https://hackingmaterials.lbl.gov/matminer/) (which are preinstalled for you).
+Looking for advanced features? Simmate is gradually incorporating these into our toolkit module, but many more are available through [PyMatGen](https://pymatgen.org/) and [MatMiner](https://hackingmaterials.lbl.gov/matminer/) (which are preinstalled for you).
 ```python
 # Simmate is in the process of adding new features. One example
 # creating a random structure from a spacegroup and composition
@@ -69,7 +65,7 @@ structure2 = creator.create_structure(spacegroup=225)
 
 # ----------------------------------------------------------------------
 
-# Matminer is handy for analyzing structures and making
+# Matminer is useful for analyzing structures and creating
 # machine-learning inputs. One common analysis is the generating
 # a RDF fingerprint to help analyze bonding and compare structures
 
@@ -82,7 +78,7 @@ rdf2 = rdf_analyzer.featurize(structure2)
 
 # ----------------------------------------------------------------------
 
-# Pymatgen currently has the most functionality. One common
+# Pymatgen currently offers the most functionality. One common
 # function is checking if two structures are symmetrically
 # equivalent (under some tolerance).
 
@@ -95,6 +91,4 @@ matcher = StructureMatcher()
 is_matching = matcher.fit(structure1, structure2)
 ```
 
-There are many more features available! If you can't find what you're looking for, be sure to ask for help before trying to code something on your own. Chances are that the feature exists somewhere -- and if we don't have it, we'll direct you to a package that does.
-
-----------------------------------------------------------------------
+There are many more features available! If you can't find what you're looking for, don't hesitate to ask for help before trying to code something on your own. The feature you're looking for probably exists somewhere -- and if we don't have it, we'll guide you to a package that does.

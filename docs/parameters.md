@@ -2,9 +2,9 @@
 
 ## Overview
 
-Knowing which parameters are available and how to use them is essential. We therefore outline **all** unique parameters for **all** workflows here.
+This section provides a detailed overview of all unique parameters for all workflows.
 
-To see which parameters are allowed for a given workflow, you can use the `explore` command or `workflow.show_parameters()`:
+To identify the parameters allowed for a specific workflow, use the `explore` command or `workflow.show_parameters()`:
 
 === "command line"
     ``` bash
@@ -17,18 +17,10 @@ To see which parameters are allowed for a given workflow, you can use the `explo
     workflow.show_parameters()
     ```
 
-If you need more details on a parameter or would like to request a new one, just let us know!
-
-
-You can then search for these parameters below to learn more about them.
-
-
 --------------------------
 
-
-## alogirthm
-Unique to the BadELf workflows in the warrenapp. Options are `badelf`, `voronelf`,
-or `zero-flux`.
+## algorithm
+This parameter is specific to the BadELf workflows in the warrenapp. Options include `badelf`, `voronelf`, or `zero-flux`.
 
 === "yaml"
     ``` yaml
@@ -47,8 +39,7 @@ or `zero-flux`.
 
 
 ## angle_tolerance
-If standardize_structure=True, then this is the cutoff value used to determine
-if the angles between sites are symmetrically equivalent. (in Degrees)
+This parameter is used to determine if the angles between sites are symmetrically equivalent when `standardize_structure=True`. The value is in degrees.
 
 === "yaml"
     ``` yaml
@@ -66,7 +57,9 @@ if the angles between sites are symmetrically equivalent. (in Degrees)
 --------------------------
 
 ## best_survival_cutoff
-For evolutionary searches, fixed compositions will be stopped when the best individual remains unbeaten for this number of new individuals. In order to absorb similar structures (e.g. identical structures but with minor energy differences), structures within the `convergence_cutoff` parameter (e.g. +1meV) are not considered when counting historical structures. This helps to prevent the search from continuing in cases where the search is likely already converged but making <0.1meV improvements. The default is typically set based on the number of atoms in the composition.
+In evolutionary searches, fixed compositions will stop when the best individual remains unbeaten for this number of new individuals. 
+
+To account for similar structures (e.g., identical structures with minor energy differences), structures within the `convergence_cutoff` parameter (e.g., +1meV) are not considered when counting historical structures. This helps to prevent the search from continuing in cases where the search is likely already converged but making <0.1meV improvements. The default is typically set based on the number of atoms in the composition.
 
 === "yaml"
     ``` yaml
@@ -84,7 +77,7 @@ For evolutionary searches, fixed compositions will be stopped when the best indi
 --------------------------
 
 ## check_for_covalency
-Unique to the badelf workflows of the warrenapp. Indicates whether the algorithm should search the structure for covalency features. It is generally recommended to leave this as True. Covalency is not currently handled by the BadELF algorithm and covalency features in the ELF can heavily throw off the partitioning scheme, causing nonsense results.
+This parameter is unique to the badelf workflows of the warrenapp. It indicates whether the algorithm should search the structure for covalency features. It is generally recommended to leave this as True. Covalency is not currently handled by the BadELF algorithm and covalency features in the ELF can heavily throw off the partitioning scheme, causing nonsense results.
 
 === "yaml"
     ``` yaml
@@ -102,9 +95,7 @@ Unique to the badelf workflows of the warrenapp. Indicates whether the algorithm
 --------------------------
 
 ## chemical_system
-The chemical system to be used in the analysis. This should be given as a string
-and in the format `Element1-Element2-Element3-...`. For example, `Na-Cl`, `Y-C`,
-and `Y-C-F` are valid chemical systems.
+This parameter specifies the chemical system to be used in the analysis. It should be given as a string in the format `Element1-Element2-Element3-...`. For example, `Na-Cl`, `Y-C`, and `Y-C-F` are valid chemical systems.
 
 === "yaml"
     ``` yaml
@@ -127,7 +118,7 @@ and `Y-C-F` are valid chemical systems.
 --------------------------
 
 ## command
-The command that will be called during execution of a program. There is typically a default set for this that you only need to change unless you'd like parallelization. For example, VASP workflows use `vasp_std > vasp.out` by default but you can override this to use `mpirun`.
+This parameter specifies the command that will be called during the execution of a program. There is typically a default set for this that you only need to change if you'd like parallelization. For example, VASP workflows use `vasp_std > vasp.out` by default but you can override this to use `mpirun`.
 
 === "yaml"
     ``` yaml
@@ -141,33 +132,6 @@ The command that will be called during execution of a program. There is typicall
     ``` python
     command = "mpirun -n 8 vasp_std > vasp.out"
     ```
-
-<!-- NOTES ON SUBCOMMANDS (feature is currently disabled)
-
-command list expects three subcommands:
-  command_bulk, command_supercell, and command_neb
-
-I separate these out because each calculation is a very different scale.
-For example, you may want to run the bulk relaxation on 10 cores, the
-supercell on 50, and the NEB on 200. Even though more cores are available,
-running smaller calculation on more cores could slow down the calc.
-["command_bulk", "command_supercell", "command_neb"]
-
-
-If you are running this workflow via the command-line, you can run this
-with...
-
-``` bash
-simmate workflows run diffusion/all-paths -s example.cif -c "cmd1; cmd2; cmd3"
-```
-Note, the `-c` here is very important! Here we are passing three commands
-separated by semicolons. Each command is passed to a specific workflow call:
-    - cmd1 --> used for bulk crystal relaxation and static energy
-    - cmd2 --> used for endpoint supercell relaxations
-    - cmd3 --> used for NEB
-Thus, you can scale your resources for each step. Here's a full -c option:
--c "vasp_std > vasp.out; mpirun -n 12 vasp_std > vasp.out; mpirun -n 70 vasp_std > vasp.out"
--->
 
 --------------------------
 
@@ -223,13 +187,10 @@ The composition input can be anything compatible with the `Composition` toolkit 
     composition = Composition("Ca2NF")
     ```
 
-**json/dictionary serialization from pymatgen**
-
-
 --------------------------
 
 ## compress_output
-Whether to compress the `directory` to a zip file at the end of the run. After compression, it will also delete the directory. The default is False.
+This parameter determines whether to compress the `directory` to a zip file at the end of the run. After compression, it will also delete the directory. The default is False.
 
 === "yaml"
     ``` yaml
@@ -265,7 +226,7 @@ For evolutionary searches, the search will be considered converged when the best
 --------------------------
 
 ## cores
-Unique to the BadELF workflows in the warrenapp. The number of computer cores to allow the BadELF algorithm to use. Note that this is distinctly cores and not threads.
+This parameter is exclusive to the BadELF workflows in the warrenapp. It specifies the number of computer cores that the BadELF algorithm can utilize. Note that this refers specifically to cores and not threads.
 
 === "yaml"
     ``` yaml
@@ -284,7 +245,7 @@ Unique to the BadELF workflows in the warrenapp. The number of computer cores to
 
 
 ## copy_previous_directory
-Whether to copy the directory from the previous calculation (if there is one) and then use it as a starting point for this new calculation. This is only possible if you provided an input that points to a previous calculation. For example, `structure` would need to use a database-like input:
+This parameter determines whether to copy the directory from the previous calculation (if one exists) and use it as a starting point for the new calculation. This is only possible if you provided an input that points to a previous calculation. For instance, `structure` would need to use a database-like input:
 
 === "yaml"
     ``` yaml
@@ -307,18 +268,15 @@ Whether to copy the directory from the previous calculation (if there is one) an
     copy_previous_directory=True
     ```
 
-
-The default is `False`, and it is not recommended to use this in existing workflows. Nested workflows that benefit from this feature use it automatically.
-
 --------------------------
 
 ## diffusion_analysis_id
-(advanced users only) The entry id from the `DiffusionAnalysis` table to link the results to. This is set automatically by higher-level workflows and rarely (if ever) set by the user.
+(advanced users only) This is the entry id from the `DiffusionAnalysis` table to link the results to. This is set automatically by higher-level workflows and rarely (if ever) set by the user.
 
 --------------------------
 
 ## directory
-The directory to run everything in -- either as a relative or full path. This is passed to the ulitities function `simmate.ulitities.get_directory`, which generates a unique foldername if not provided (such as `simmate-task-12390u243`). This will be converted into a `pathlib.Path` object. Accepted inputs include:
+This is the directory where everything will be run -- either as a relative or full path. This is passed to the utilities function `simmate.ulitities.get_directory`, which generates a unique folder name if not provided (such as `simmate-task-12390u243`). This will be converted into a `pathlib.Path` object. Accepted inputs include:
 
 **leave as default (recommended)**
 
@@ -350,17 +308,17 @@ The directory to run everything in -- either as a relative or full path. This is
 --------------------------
 
 ## directory_new
-Unique to the `restart.simmate.automatic` workflow, this is the folder that the workflow will be continued in. Follows the same rules/inputs as the `directory` parameter.
+Exclusive to the `restart.simmate.automatic` workflow, this is the folder where the workflow will be continued. It follows the same rules/inputs as the `directory` parameter.
 
 --------------------------
 
 ## directory_old
-Unique to the `restart.simmate.automatic` workflow, this is the original folder that should be used at the starting point. Follows the same rules/inputs as the `directory` parameter.
+Exclusive to the `restart.simmate.automatic` workflow, this is the original folder that should be used as the starting point. It follows the same rules/inputs as the `directory` parameter.
 
 --------------------------
 
 ## electride_connection_cutoff
-Unique to the badelf workflows in the simmate app. This is the ELF value cutoff to be allowed when determining the dimensionality of an electride. The default is 0, but a good option might be 0.5 which is the normal cutoff for what is considered an electride.
+Exclusive to the badelf workflows in the simmate app. This is the ELF value cutoff to be allowed when determining the dimensionality of an electride. The default is 0, but a good option might be 0.5 which is the normal cutoff for what is considered an electride.
 
 === "yaml"
     ``` yaml
@@ -378,7 +336,7 @@ Unique to the badelf workflows in the simmate app. This is the ELF value cutoff 
 --------------------------
 
 ## electride_finder_cutoff
-Unique to the badelf workflows in the simmate app. This is the minimum ELF value that the algorithm will consider an electride. Any maxima in the ELF below this will not be considered an electride site during the algorithm.
+Exclusive to the badelf workflows in the simmate app. This is the minimum ELF value that the algorithm will consider an electride. Any maxima in the ELF below this will not be considered an electride site during the algorithm.
 
 === "yaml"
     ``` yaml
@@ -396,7 +354,7 @@ Unique to the badelf workflows in the simmate app. This is the minimum ELF value
 --------------------------
 
 ## find_electrides
-Unique to the badelf workflows in the simmate app. Indicates whether the algorithm should search for electrides. Reasons to have this as false may be that the user knows there is no electride character in the structure of interest or if the user has manually placed electride sites.
+Exclusive to the badelf workflows in the simmate app. This parameter indicates whether the algorithm should search for electrides. Reasons to set this as false may be that the user knows there is no electride character in the structure of interest or if the user has manually placed electride sites.
 
 === "yaml"
     ``` yaml
@@ -415,19 +373,19 @@ Unique to the badelf workflows in the simmate app. Indicates whether the algorit
 
 ## fitness_field
 (advanced users only)
-For evolutionary searches, this is the value that should be optimized. Specifically, it should minimized this value (lower value = better fitness). The default is `energy_per_atom`, but you may want to set this to a custom column in a custom database table.
+For evolutionary searches, this is the value that should be optimized. Specifically, it should minimize this value (lower value = better fitness). The default is `energy_per_atom`, but you may want to set this to a custom column in a custom database table.
 
 --------------------------
 
 ## input_parameters
 (experimental feature)
-Unique to `customized.vasp.user-config`. This is a list of parameters to pass to `workflow_base`.
+Exclusive to `customized.vasp.user-config`. This is a list of parameters to pass to `workflow_base`.
 
 --------------------------
 
 ## is_restart
 (experimental feature)
-Whether the calculation is a restarted workflow run. Default is False. If set to true, the workflow will go through the given directory (which must be provided) and see where to pick up.
+This parameter indicates whether the calculation is a restarted workflow run. The default is False. If set to true, the workflow will go through the given directory (which must be provided) and determine where to resume.
 
 === "yaml"
     ``` yaml
@@ -466,7 +424,7 @@ For workflows that involve generating a supercell or random structure, this will
 --------------------------
 
 ## max_path_length
-For diffusion workflows, this the maximum length allowed for a single path.
+For diffusion workflows, this is the maximum length allowed for a single path.
 
 === "yaml"
     ``` yaml
@@ -484,9 +442,7 @@ For diffusion workflows, this the maximum length allowed for a single path.
 --------------------------
 
 ## max_stoich_factor
-The maximum stoichiometric ratio that will be analyzed. In a binary
-system evolutionary search, this only look at non-reduced compositions up to the max_stoich_factor. For example, this means Ca2N and max factor of 4 would only 
-look up to Ca8N4 and skip any compositions with more atoms (e.g. Ca10N5 is skipped)
+This is the maximum stoichiometric ratio that will be analyzed. In a binary system evolutionary search, this will only look at non-reduced compositions up to the max_stoich_factor. For example, this means Ca2N and max factor of 4 would only look up to Ca8N4 and skip any compositions with more atoms (e.g. Ca10N5 is skipped)
 
 === "yaml"
     ``` yaml
@@ -649,7 +605,6 @@ When generating a supercell, this is the minimum length for each lattice vector 
     ``` python
     min_supercell_vector_lengths = 7.5
     ```
-
 --------------------------
 
 ## nfirst_generation
@@ -693,7 +648,7 @@ The number of images (or structures) to use in the analysis. This does NOT inclu
 --------------------------
 
 ## nsteadystate
-The number of individual workflows to have scheduled at once. This therefore sets the queue size of an evolutionary search. Note, the number of workflows ran in parallel is determined by the number of `Workers` started (i.e. starting 3 workers will run 3 workflows in parallel, even if 100 workflows are in the queue). The steady-state does, however, set the **maximum** number of parallel runs because the queue size will never exceed the `nsteadystate` value. This parameter is closely tied with `steadystate_sources`, so be sure to read about that parameter as well.
+This parameter sets the number of individual workflows to be scheduled at once, effectively setting the queue size of an evolutionary search. The number of workflows run in parallel is determined by the number of `Workers` started. However, the `nsteadystate` value sets the **maximum** number of parallel runs as the queue size will never exceed this value. This parameter is closely tied with `steadystate_sources`.
 
 === "yaml"
     ``` yaml
@@ -711,7 +666,7 @@ The number of individual workflows to have scheduled at once. This therefore set
 --------------------------
 
 ## nsteps
-The total number of steps to run the calculation on. For example, in molecular dynamics workflows, this will stop the simulation after this many steps.
+This parameter sets the total number of steps for the calculation. For instance, in molecular dynamics workflows, the simulation will stop after this many steps.
 
 === "yaml"
     ``` yaml
@@ -729,9 +684,7 @@ The total number of steps to run the calculation on. For example, in molecular d
 --------------------------
 
 ## percolation_mode
-The percolating type to detect. The default is ">1d", which search for percolating
-paths up to the `max_path_length`. Alternatively, this can be set to "1d" in order
-to stop unique pathway finding when 1D percolation is achieved.
+This parameter sets the percolating type to detect. The default is ">1d", which searches for percolating paths up to the `max_path_length`. Alternatively, this can be set to "1d" to stop unique pathway finding when 1D percolation is achieved.
 
 === "yaml"
     ``` yaml
@@ -749,8 +702,7 @@ to stop unique pathway finding when 1D percolation is achieved.
 --------------------------
 
 ## relax_bulk
-Whether or not the bulk structure (typically the input structure) should be 
-relaxed before running the rest of the workflow.
+This parameter determines whether the bulk structure (typically the input structure) should be relaxed before running the rest of the workflow.
 
 === "yaml"
     ``` yaml
@@ -768,8 +720,7 @@ relaxed before running the rest of the workflow.
 --------------------------
 
 ## relax_endpoints
-Whether or not the endpoint structures for an NEB diffusion pathway should be 
-relaxed before running the rest of the workflow.
+This parameter determines whether the endpoint structures for an NEB diffusion pathway should be relaxed before running the rest of the workflow.
 
 === "yaml"
     ``` yaml
@@ -787,7 +738,7 @@ relaxed before running the rest of the workflow.
 --------------------------
 
 ## run_id
-The id assigned to a specific workflow run / calculation. If not provided this will be randomly generated, and we highly recommended leaving this at the default value. Note, this is based on unique-ids (UUID), so every id should be 100% unique and in a string format.
+This parameter is the id assigned to a specific workflow run/calculation. If not provided, this will be randomly generated. It is highly recommended to leave this at the default value. This id is based on unique-ids (UUID), so every id should be 100% unique and in a string format.
 
 === "yaml"
     ``` yaml
@@ -806,19 +757,19 @@ The id assigned to a specific workflow run / calculation. If not provided this w
 
 ## search_id
 (advanced users only)
-The evolutionary search that this individual is associated with. This allows us to determine which `Selector`, `Validator`, and `StopCondition` should be used when creating and evaluating the individual. When running a search, this is set automatically when submitting a new flow.
+This parameter is the evolutionary search that this individual is associated with. This allows us to determine which `Selector`, `Validator`, and `StopCondition` should be used when creating and evaluating the individual. When running a search, this is set automatically when submitting a new flow.
 
 --------------------------
 
 ## selector_kwargs
 (advanced users only)
-Extra conditions to use when initializing the selector class. `MySelector(**selector_kwargs)`. The input should be given as a dictionary. Note, for evolutionary searches, the composition kwarg is added automatically. This is closely tied with the `selector_name` parameter so be sure to read that section as well.
+This parameter is a dictionary of extra conditions to use when initializing the selector class. `MySelector(**selector_kwargs)`. This is closely tied with the `selector_name` parameter.
 
 --------------------------
 
 ## selector_name
 (experimental feature; advanced users only)
-The base selector class that should be used. The class will be initialized using `MySelector(**selector_kwargs)`. The input should be given as a string.
+This parameter is the base selector class that should be used. The class will be initialized using `MySelector(**selector_kwargs)`. The input should be given as a string.
 
 !!! warning
     Currently, we only support truncated selection, so this should be left at its default value.
@@ -827,14 +778,14 @@ The base selector class that should be used. The class will be initialized using
 
 ## singleshot_sources
 (experimental feature; advanced users only)
-A list of structure sources that run once and never again. This includes generating input structures from known structures (from third-party databases), prototypes, or substituiting known structures.
+This parameter is a list of structure sources that run once and never again. This includes generating input structures from known structures (from third-party databases), prototypes, or substituting known structures.
 
 In the current version of simmate, these features are not enabled and this input should be ignored.
 
 --------------------------
 
 ## sleep_step
-When there is a cycle within a workflow (such as iteratively checking the number of subworkflows submitted and updating results), this is the amount of time in seconds that the workflow will shutdown before restarting the cycle. For evolutionary searches, setting this to a larger value will save on computation resources and database load, so we recommend increasing it where possible.
+This parameter is the amount of time in seconds that the workflow will shutdown before restarting the cycle when there is a cycle within a workflow (such as iteratively checking the number of subworkflows submitted and updating results). For evolutionary searches, setting this to a larger value will save on computation resources and database load, so we recommend increasing it where possible.
 
 === "yaml"
     ``` yaml
@@ -853,12 +804,7 @@ When there is a cycle within a workflow (such as iteratively checking the number
 
 ## source
 (experimental feature; advanced users only)
-This column indicates where the input data (and other parameters) came from. The source could be a number of things including...
- - a third party id
- - a structure from a different Simmate datbase table
- - a transformation of another structure
- - a creation method
- - a custom submission by the user
+This parameter indicates where the input data (and other parameters) came from. The source could be a number of things including a third party id, a structure from a different Simmate database table, a transformation of another structure, a creation method, or a custom submission by the user.
 
 By default, this is a dictionary to account for the many different scenarios. Here are some examples of values used in this column:
 
@@ -893,9 +839,7 @@ Typically, the `source` is set automatically, and users do not need to update it
 --------------------------
 
 ## standardize_structure
-In some cases, we may want to standardize the structure during our setup().
-
-This means running symmetry analysis on the structure in order to reduce the symmetry and also convert it to some standardized form. There are three different forms to choose from and thus 3 different values that `standardize_structure` can be set to:
+This parameter determines whether to standardize the structure during our setup(). This means running symmetry analysis on the structure to reduce the symmetry and convert it to some standardized form. There are three different forms to choose from and thus 3 different values that `standardize_structure` can be set to:
 
 - `primitive`: for the standard primitive unitcell
 - `conventional`: for the standard conventional unitcell
@@ -927,13 +871,13 @@ By default, no standardization is applied.
 
 ## steadystate_source_id
 (advanced users only)
-The structure source that this individual is associated with. This allows us to determine how the new individual should be created. When running a search, this is set automatically when submitting a new flow.
+This parameter is the structure source that this individual is associated with. This allows us to determine how the new individual should be created. When running a search, this is set automatically when submitting a new flow.
 
 --------------------------
 
 ## steadystate_sources
 (experimental feature; advanced users only)
-The sources that will be scheduled at a "steady-state", meaning there will always be a set number of individuals scheduled/running for this type of structure source. This should be defined as a dictionary where each is `{"source_name": percent}`. The percent determines the number of steady stage calculations that will be running for this at any given time. It will be a percent of the `nsteadystate` parameter, which sets the total number of individuals to be scheduled/running. For example, if `nsteadystate=40` and we add a source of `{"RandomSymStructure": 0.30, ...}`, this means 0.25*40=10 randomly-created individuals will be running/submitted at all times. The source can be from either the `toolkit.creator` or `toolkit.transformations` modules.
+This parameter is a dictionary of sources that will be scheduled at a "steady-state", meaning there will always be a set number of individuals scheduled/running for this type of structure source. This should be defined as a dictionary where each is `{"source_name": percent}`. The percent determines the number of steady stage calculations that will be running for this at any given time. It will be a percent of the `nsteadystate` parameter, which sets the total number of individuals to be scheduled/running. For example, if `nsteadystate=40` and we add a source of `{"RandomSymStructure": 0.30, ...}`, this means 0.25*40=10 randomly-created individuals will be running/submitted at all times. The source can be from either the `toolkit.creator` or `toolkit.transformations` modules.
 
 === "yaml"
     ``` yaml
@@ -1101,7 +1045,7 @@ The crystal structure to be used for the analysis. The input can be anything com
 --------------------------
 
 ## subworkflow_kwargs
-Make sure you read about `subworkflow_name` parameter first. This is a dictionary of parameters to pass to each subworkflow run. For example, the workflow will be ran as `subworkflow.run(**subworkflow_kwargs)`. Note, many workflows that use this argument will automatically pass information that is unique to each call (such as `structure`).
+This parameter is a dictionary of parameters to pass to each subworkflow run. For example, the workflow will be ran as `subworkflow.run(**subworkflow_kwargs)`. Note, many workflows that use this argument will automatically pass information that is unique to each call (such as `structure`).
 
 === "yaml"
     ``` yaml
@@ -1126,7 +1070,7 @@ Make sure you read about `subworkflow_name` parameter first. This is a dictionar
 --------------------------
 
 ## subworkflow_name
-The name of workflow that used to evaluate structures generated. For example, in evolutionary searches, individuals are created and then relaxed using the `relaxation.vasp.staged` workflow. Any workflow that is registered and accessible via the `get_workflow` utility can be used instead. (note: in the future we will allow unregisterd flows as well). If you wish to submit extra arguments to each workflow run, you can use the `subworkflow_kwargs` parameter.
+This parameter is the name of workflow that used to evaluate structures generated. Any workflow that is registered and accessible via the `get_workflow` utility can be used instead. If you wish to submit extra arguments to each workflow run, you can use the `subworkflow_kwargs` parameter.
 
 === "yaml"
     ``` yaml
@@ -1144,18 +1088,17 @@ The name of workflow that used to evaluate structures generated. For example, in
 --------------------------
 
 ## supercell_end
-The endpoint image supercell to use. This is really just a `structure` parameter under a different name, so everything about the `structure` parameter also applies here.
+This parameter is the endpoint image supercell to use. This is really just a `structure` parameter under a different name, so everything about the `structure` parameter also applies here.
 
 --------------------------
 
 ## supercell_start
-The starting image supercell to use. This is really just a `structure` parameter under a different name, so everything about the `structure` parameter also applies here.
+This parameter is the starting image supercell to use. This is really just a `structure` parameter under a different name, so everything about the `structure` parameter also applies here.
 
 --------------------------
 
 ## symmetry_precision
-If standardize_structure=True, then this is the cutoff value used to determine
-if the sites are symmetrically equivalent. (in Angstroms)
+If standardize_structure=True, then this is the cutoff value used to determine if the sites are symmetrically equivalent. (in Angstroms)
 
 === "yaml"
     ``` yaml
@@ -1224,15 +1167,11 @@ To override these default tags, use the following:
 --------------------------
 
 ## temperature_end
-For molecular dynamics simulations, this is the temperature to end the simulation at (in Kelvin). This temperatue will be reached through a linear transition from the `temperature_start` parameter.
+For molecular dynamics simulations, this is the temperature to end the simulation at (in Kelvin). This temperature will be reached through a linear transition from the `temperature_start` parameter.
 
 === "yaml"
     ``` yaml
     temperature_end: 1000
-    ```
-=== "toml"
-    ``` python
-    temperature_end = 1000
     ```
 === "python"
     ``` python
@@ -1284,8 +1223,7 @@ Unique to `customized.vasp.user-config`. This is a list of parameters to update 
 --------------------------
 
 ## vacancy_mode
-For NEB and diffusion workfows, this determines whether vacancy or interstitial
-diffusion is analyzed. Default of True corresponds to vacancy-based diffusion.
+For NEB and diffusion workfows, this determines whether vacancy or interstitial diffusion is analyzed. Default of True corresponds to vacancy-based diffusion.
 
 === "yaml"
     ``` yaml
@@ -1304,13 +1242,13 @@ diffusion is analyzed. Default of True corresponds to vacancy-based diffusion.
 
 ## validator_kwargs
 (advanced users only)
-Extra conditions to use when initializing the validator class. `MyValidator(**validator_kwargs)`. The input should be given as a dictionary. Note, for evolutionary searches, the composition kwarg is added automatically. This is closely tied with the `validator_name` parameter so be sure to read that section as well.
+This parameter is a dictionary of extra conditions to use when initializing the validator class. `MyValidator(**validator_kwargs)`. This is closely tied with the `validator_name` parameter.
 
 --------------------------
 
 ## validator_name
 (experimental feature; advanced users only)
-The base validator class that should be used. The class will be initialized using `MyValidator(**validator_kwargs)`. The input should be given as a string.
+This parameter is the base validator class that should be used. The class will be initialized using `MyValidator(**validator_kwargs)`. The input should be given as a string.
 
 !!! warning
     Currently, we only support `CrystallNNFingerprint` validation, so this should be left at its default value.
@@ -1325,7 +1263,7 @@ Unique to `customized.vasp.user-config`. This is the base workflow to use when u
 
 ## write_summary_files
 
-Whether or not to write output files. For some workflows, writing output files can cause excessive load on the database and possibly make the calculation IO bound. In cases such as this, you can set this to `False`.
+This parameter determines whether or not to write output files. For some workflows, writing output files can cause excessive load on the database and possibly make the calculation IO bound. In cases such as this, you can set this to `False`.
 
 === "yaml"
     ``` yaml

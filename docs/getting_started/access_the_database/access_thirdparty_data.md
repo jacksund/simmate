@@ -1,48 +1,42 @@
+## Accessing External Data
 
-----------------------------------------------------------------------
+In order to perform calculations with Simmate, it's crucial to understand what calculations have already been performed by other researchers for a specific material. Numerous research teams globally have created databases consisting of over 100,000 structures, with calculations performed on each. In this section, we'll use Simmate to explore these databases.
 
-## Accessing third-party data
+## Loading a Database
 
-When running our own calculations with Simmate, it is also important to know what other researchers have already calculated for a given material. Many research teams around the world have built databases made of 100,000+ structures -- and many of these teams even ran calculations on all of them. Here, we will use Simmate to explore their data.
+We'll begin with one of the smaller databases: [JARVIS](https://jarvis.nist.gov/). Despite being smaller than others, it still contains approximately 56,000 structures. Simmate allows you to download all of these in under 0.01 GB.
 
-----------------------------------------------------------------------
-
-## Loading a table
-
-Let's start with one of the smaller databases out there: [JARVIS](https://jarvis.nist.gov/). It may be smaller than the others, but their dataset still includes ~56,000 structures! Simmate makes the download for all of these under 0.01 GB.
-
-In the previous section, we loaded our `DatabaseTable` from the workflow. But now we don't have a workflow... We just want to grab the table directly. To do this we run the following:
+Previously, we loaded our `DatabaseTable` from the workflow. However, in this case, we want to directly access the table. To do this, we execute the following:
 
 ```python
-# This line MUST be ran before any tables can be loaded
+# This line MUST be executed before any tables can be loaded
 from simmate.database import connect  # this connects to our database
 
-# This gives the database_table we were using in the previous section
+# This provides the database_table we used in the previous section
 from simmate.database.workflow_results import StaticEnergy
 
 # This loads the table where we store all of the JARVIS data.
 from simmate.database.third_parties import JarvisStructure
 ```
 
-`table` from the previous section (on accessing workflow data) and the `StaticEnergy` class here are the exact same class/table. These are just different ways of loading it. While loading a workflow sets up a database connection for us, we have the do that step manually here (with `from simmate.database import connect`). 
+The `table` from the previous section (on accessing workflow data) and the `StaticEnergy` class here refer to the same class/table. These are just different methods of loading it. While loading a workflow automatically sets up a database connection, we have to manually perform this step here (with `from simmate.database import connect`). 
 
 !!! warning 
-    When loading database tables directly from the `simmate.database` module, the most common error is forgetting to connect to your database. So don't forget to include `from simmate.database import connect`!
+    The most common error when loading database tables directly from the `simmate.database` module is forgetting to connect to your database. Don't forget to include `from simmate.database import connect`!
 
-----------------------------------------------------------------------
+## Populating Data
 
-## Filling data
-
-Now that we have our datatable class (`JarvisStructure`) loaded, let's check if there's any data in it:
+With our datatable class (`JarvisStructure`) loaded, let's check if it contains any data:
 
 ``` python
 JarvisStructure.objects.count()
 ```
 
 !!! note 
-    If you accepted the download during the `simmate database reset` command, then you should see that there are thousands of structures already in this database table! 
+    If you accepted the download during the `simmate database reset` command, you should see thousands of structures already in this database table! 
 
-If the count gives 0, then that means you still need to load data. We can quickly load all of the data using the `load_remote_archive` method. Behind the scenes, this is downloading the JARVIS data from simmate.org and moving it into your database. This can take ~10 minutes because we are actually saving all these structures to your computer -- that way, you can rapidly load these structures in under 1 second in the future.
+If the count returns 0, it means you still need to load data. You can quickly load all the data using the `load_remote_archive` method. This method downloads the JARVIS data from simmate.org and transfers it to your database. This process can take approximately 10 minutes as it saves all these structures to your computer, enabling you to load these structures in under a second in the future.
+
 ``` python
 # NOTE: This line is only needed if you did NOT accept the download
 # when running `simmate database reset`.
@@ -50,23 +44,21 @@ JarvisStructure.load_remote_archive()  # This may take ~10min to complete
 ```
 
 !!! warning
-    It is very important that you read the warnings printed by `load_remote_archive`. This data was NOT made by Simmate. We are just helping to distribute it on behalf of these other teams. Be sure to cite them for their work!
+    Please read the warnings printed by `load_remote_archive`. This data was NOT created by Simmate. We are merely distributing it on behalf of other teams. Please credit them for their work!
 
-Calling `load_remote_archive` loads ALL data to your computer and saves it. This data will not be updated unless you call `load_remote_archive` again. This should only be done every time we release a new archive version (typically once per year). To protect our servers from misuse, you can only call `load_remote_archive()` a few times per month -- no matter what. **Don't overuse this feature.**
+The `load_remote_archive` function downloads ALL data to your computer and saves it. This data will not be updated unless you call `load_remote_archive` again. This should only be done when we release a new archive version (usually once per year). **Avoid overusing this feature.**
 
-----------------------------------------------------------------------
+## Exploring the Data
 
-## Start exploring the data
-
-Now that we ensured our database if filled with data, we can start looking through:
+Now that our database is populated with data, we can start exploring it:
 
 ``` python
 # We use [:150] to just show the first 150 rows
 data = JarvisStructure.objects.to_dataframe()[:150]
 ```
 
+Let's test our filtering ability with this new data:
 
-Now let's really test out our filtering ability with this new data:
 ```python
 from simmate.database import connect  # this connects to our database
 from simmate.database.third_parties import JarvisStructure
@@ -88,14 +80,10 @@ df_1 = structures_1.to_dataframe()
 df_2 = structures_2.to_dataframe()
 ```
 
-----------------------------------------------------------------------
+## Advanced Data Manipulation
 
-## Advanced data manipulation
+There are numerous ways to search through your tables, and we've only covered the basics here. 
 
-There are many ways to search through your tables, and we only covered the basics here. 
+Advanced users should know that we use [Django's query api](https://docs.djangoproject.com/en/3.2/topics/db/queries/) under the hood. It can take a while to master, so we recommend going through [Django's full tutorial](https://docs.djangoproject.com/en/4.0/) only if you plan on joining our team or are a fully computational student. 
 
-Advanced users will benefit from knowing that we use [Django's query api](https://docs.djangoproject.com/en/3.2/topics/db/queries/) under the hood. It can take a long time to master, so we only recommend going through [Django's full tutorial](https://docs.djangoproject.com/en/4.0/) if you plan on joining our team or are a fully computational student. 
-
-Beginners can just ask for help. Figuring out the correct filter can take new users hours while it will only take our team a minute or two. Save your time and [post questions here](https://github.com/jacksund/simmate/discussions/categories/q-a).
-
-----------------------------------------------------------------------
+Beginners can simply ask for help. Determining the correct filter can take new users hours, while it will only take our team a minute or two. Save your time and [post questions here](https://github.com/jacksund/simmate/discussions/categories/q-a).

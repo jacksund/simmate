@@ -1,24 +1,22 @@
-
-# The Simmate Toolkit
+# Simmate Toolkit Overview
 
 !!! danger
-    Many classes in this module are highly experimental. We strongly recommend using [pymatgen](https://pymatgen.org/) and [ase](https://gitlab.com/ase/ase) for toolkit functionality until Simmate hits v1.0.0. For developers, this means many of the classes are undocumented and untested. This accelerates our testing without spending time on reformating tests and rewriting guides. We include this experimental code on our main branch because higher-level functions (e.g. workflows) rely on some of these features. Higher-level functions are well tested and documented, however, to account for ongoing low-level changes.
+    Please note that many classes within this module are still under development. We recommend using [pymatgen](https://pymatgen.org/) and [ase](https://gitlab.com/ase/ase) for toolkit functionality until Simmate reaches v1.0.0. For developers, this implies that numerous classes are currently undocumented and untested. This approach enables us to expedite our testing process without the need to reformat tests and rewrite guides. We include this developmental code in our main branch because some higher-level functions (e.g., workflows) depend on these features. However, we ensure that these higher-level functions are thoroughly tested and documented to counterbalance the ongoing changes at the lower level.
 
-The toolkit module is meant to be an extension of [pymatgen](https://pymatgen.org/) and [ase](https://gitlab.com/ase/ase). It includes low-level classes and functions, such as the `Structure` class and its associated methods. The toolkit module is written entirely in python and does not use third-party DFT programs. See the `simmate.apps` module for those.
+The toolkit module aims to extend [pymatgen](https://pymatgen.org/) and [ase](https://gitlab.com/ase/ase). It encompasses low-level classes and functions, such as the `Structure` class and its associated methods. The toolkit module is entirely Python-based and does not rely on third-party DFT programs. For those, please refer to the `simmate.apps` module.
 
-The most commonly used classes from this toolkit are the `Structure` and `Composition` classes. These classes can be imported with...
+The `Structure` and `Composition` classes are the most frequently used classes from this toolkit. You can import these classes using the following code:
 
 ``` python
 from simmate.toolkit import Structure, Composition
 ```
 
+## Submodules Overview
 
-## Outline of submodules
-
-- `base_data_types` = defines fundamental classes for materials science, including `Structure` and `Composition` classes. For convenience, these classes can be imported directly from `simmate.toolkit`, as noted above.
-- `creators` = creates structures, lattices, and periodic sites
-- `featurizers` = converts properties into numerical descriptors for machine-learning
-- `structure_prediction` = predicts crystal structures using an evolutionary algorithm
-- `symmetry` = contains tools and metadata for symmetry analyses, such as spacegroups and wyckoff sites
-- `transformations` = methods to transform or "mutate" `Structures`
-- `validators` = methods to check if a structure meets specific criteria
+- `base_data_types`: Defines core classes for materials science, including `Structure` and `Composition` classes. For ease of use, these classes can be directly imported from `simmate.toolkit`, as shown above.
+- `creators`: Aids in the creation of structures, lattices, and periodic sites.
+- `featurizers`: Transforms properties into numerical descriptors for machine learning applications.
+- `structure_prediction`: Predicts crystal structures using an evolutionary algorithm.
+- `symmetry`: Provides tools and metadata for symmetry analyses, such as space groups and Wyckoff sites.
+- `transformations`: Offers methods to transform or "mutate" `Structures`.
+- `validators`: Provides methods to verify if a structure meets specific criteria.

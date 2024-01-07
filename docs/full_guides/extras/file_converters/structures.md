@@ -1,10 +1,9 @@
-
 Structure Converters
 --------------------
 
-This module hosts converter classes for common structure file and object formats. All converters are linked directly for conversion into the `simmate.toolkit.base_data_types.structure.Structure` class. Note, in the majority of cases, you can have Simmate attempt to figure out the file/object format you have. Using these converters directly is really only needed for advanced use or speed optimization:
+This module comprises converter classes for various structure file and object formats. All converters are directly linked for conversion into the `simmate.toolkit.base_data_types.structure.Structure` class. Simmate can automatically identify the file/object format you're using in most instances. Direct use of these converters is generally reserved for advanced usage or speed optimization:
 
-Example dynamic use:
+Here's an example of dynamic use:
 
 ``` python
 from simmate.toolkit import Structure
@@ -18,7 +17,7 @@ structure3 = Structure.from_dynamic(
 )
 ```
 
-If you'd like to convert between formats (such as CIF --> POSCAR), you should treat this a two-step process:
+To convert between formats (for example, CIF to POSCAR), follow this two-step process:
 
 ``` python
 from simmate.toolkit import Structure
@@ -26,12 +25,12 @@ from simmate.toolkit import Structure
 # STEP 1: convert to simmate
 structure = Structure.from_dynamic("example.cif")
 
-# STEP 2: convert to desired format
+# STEP 2: convert to the desired format
 structure.to(fmt="poscar", filename="POSCAR")
 ```
 
-## Other Converters
+## Additional Converters
 
-This module does not host all file-converters that Simmate has. Others can be found in the `apps` module, where they are associated with a specific program. For example, the converter for POSCAR files is directly from the VASP software -- therefore, you can find the POSCAR converter in the `vasp.inputs.poscar` module. Here is a list of other structure converters for reference: 
+This module does not include all the file-converters available in Simmate. You can find other converters in the `apps` module, where they are associated with a specific program. For example, the converter for POSCAR files is derived from the VASP software, so the POSCAR converter is located in the `vasp.inputs.poscar` module. Here's a list of other structure converters for your reference: 
 
 - POSCAR (`simmate.apps.vasp.inputs.poscar`)

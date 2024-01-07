@@ -1,15 +1,13 @@
-
 # Contributing to Simmate
 
-In this guide, you will learn how to contribute new features to Simmate's code.
+This guide provides a step-by-step process for contributing new features to Simmate's code.
 
+## Understanding Core Dependencies
 
-## Learning about core dependencies
-
-When you first join our community, you may only be comfortable fixing typos and adding small utilities/functions. But if you would like to make larger changes/contributions, we highly recommend learning about our core dependencies. This includes...
+As a newcomer to our community, you might initially engage in minor tasks such as correcting typos or adding small utilities/functions. However, if you aim to contribute more substantially, we highly recommend getting acquainted with our core dependencies. These include...
 
 - [Django](https://docs.djangoproject.com/en/4.0/) for our database and website
 - [Prefect](https://docs.prefect.io/core/) for our workflows and scheduler
 - [Dask](https://docs.dask.org/en/stable/futures.html) for clusters and execution
 
-You don't need to be an expert -- just aware of these packages and their features.
+While you don't need to become an expert in these packages, a basic understanding of their functionalities will be advantageous.

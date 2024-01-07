@@ -1,9 +1,8 @@
+> :warning: This module is intended as a simpler alternative to Prefect. It offers a stable, quick-start solution, but lacks the scalability and comprehensive features of Prefect.
 
-> :warning: This module represents an alternative to Prefect. It is meant to be a stable quick-start alternative, but lacks the scaling and numerous features that Prefect offers.
+This module functions as an SQL executor, offering a streamlined version of FireWorks and Prefect. The scheduler is directly integrated with the Django database, removing the need to navigate firewalls or intricate setups. Any worker with database access can operate effectively. However, this configuration slows down the executor as each task requires multiple database calls and write operations. This trade-off between speed and stability is acceptable, as many Simmate workflows take longer than a minute, and the speed reduction is less than a second.
 
-This is an SQL executor that intends to be a stripped down version of FireWorks and Prefect. The scheduler is directly built into the django database, which makes it so you don't have to deal with firewalls or complex setups -- any worker that can connect to the database will work just fine. The downside is that the executor is slower because each task requires multiple database calls and also writing to the database. It's a trade off of speed for stability, but this is okay because many workflows in Simmate are >1min and the speed penality is well below 1 second.
-
-Example usage:
+Here's how to implement it:
 
 ```python
 from simmate.engine.execution.executor import SimmateExecutor
@@ -15,11 +14,9 @@ assert future.result() == 10
 # EXAMPLE 2
 import time
 
-
 def test():
     futures = [executor.submit(time.sleep, 5) for n in range(10)]
     return executor.wait(futures)
-
 
 test()
 

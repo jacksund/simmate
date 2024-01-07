@@ -1,52 +1,51 @@
-
-# Finally running our workflow!
+# Executing our Workflow!
 
 !!! warning
-    Unless you have VASP installed on your local computer, these next commands will fail. :sparkles: **That is okay!** :sparkles: Let's go ahead and try running these commands anyways. It will be helpful to see how Simmate workflows fail when VASP is not configured properly. If you don't have VASP installed, you'll see an error stating that the `vasp_std` command isn't known (such as `vasp_std: not found` on Linux). We'll switch to a remote computer with VASP installed in the next section.
+    The following commands will fail unless you have VASP installed on your local computer. :sparkles: **That's perfectly fine!** :sparkles: We'll attempt to run these commands regardless. This will demonstrate how Simmate workflows fail when VASP isn't configured correctly. If VASP isn't installed, you'll encounter an error stating that the `vasp_std` command is unrecognized (like `vasp_std: not found` on Linux). We'll transition to a remote computer with VASP installed in the subsequent section.
 
 ----------------------------------------------------------------------
 
-## Run a workflow with the command-line
+## Executing a Workflow via the Command-line
 
-The default Simmate settings will run everything immediately and locally on your desktop. When running the workflow, it will create a new folder, write the inputs in it, run the calculation, and save the results to your database.
+By default, Simmate runs everything immediately and locally on your desktop. When executing the workflow, it creates a new folder, writes the inputs, runs the calculation, and saves the results to your database.
 
-The command to do this with our POSCAR and static-energy/mit workflow is... 
+The command to execute our POSCAR and static-energy/mit workflow is... 
 
 ``` shell
 simmate workflows run-quick static-energy.vasp.mit --structure POSCAR
 ```
 
 !!! tip
-    You'll notice the commands in this section are long a pain to write out. Plus even more difficult to remember. Don't worry, this will go away once we learn how to submit using YAML files in the next section
+    The commands in this section may seem long and tedious to write out, and even more challenging to remember. Don't worry, this will become easier once we learn how to submit using YAML files in the next section.
 
 !!! tip
-    We call this command `run-quick` becuase it is (typically) only ever used in quick testing by advanced users. 99% of the time, you'll be using the `run` command, which we will cover below
+    We refer to this command as `run-quick` because it's typically used for quick testing by advanced users. Most of the time, you'll be using the `run` command, which we will cover below.
 
-By default, Simmate uses the command `vasp_std > vasp.out` and creates a new `simmate-task` folder with a unique identifier (ex: `simmate-task-j8djk3mn8`).
+By default, Simmate uses the command `vasp_std > vasp.out` and creates a new `simmate-task` folder with a unique identifier (e.g., `simmate-task-j8djk3mn8`).
 
-What if we wanted to change this command or the directory it's ran in? Recall the output from the `simmate workflows explore` command, which listed parameters for us. We can use any of these to update how our worklfow runs.
+What if we wanted to modify this command or the directory it's executed in? Remember the output from the `simmate workflows explore` command, which listed parameters for us. We can use any of these to modify how our workflow runs.
 
-For example, we can change our folder name (`--directory`) as well as the command used to run VASP (`--command`). Using these, we can update our command to this:
+For instance, we can change our folder name (`--directory`) and the command used to run VASP (`--command`). With these, we can update our command to:
 
 ``` shell
 simmate workflows run-quick static-energy.vasp.mit --structure POSCAR --command "mpirun -n 4 vasp_std > vasp.out" --directory my_custom_folder
 ```
 
-If any errors come up, please let our team know by [posting a question](https://github.com/jacksund/simmate/discussions/categories/q-a). 
+If you encounter any errors, please let our team know by [posting a question](https://github.com/jacksund/simmate/discussions/categories/q-a). 
 
-If not, congrats :partying_face: :partying_face: :partying_face: !!! You now know how to run workflows with a single command and understand what Simmate is doing behind the scenes.
+If not, congratulations :partying_face: :partying_face: :partying_face: !!! You now know how to execute workflows with a single command and understand what Simmate is doing behind the scenes.
 
 ----------------------------------------------------------------------
 
-## Run a workflow with a settings file
+## Executing a Workflow with a Settings File
 
-In the last section, you probably noticed that our `simmate workflows run` command was getting extremely long and will therefore be difficult to remember. Instead of writing out this long command every time, we can make a settings file that contains all of this information. Here, we will write our settings into a `YAML` file, which is just a simple text file. The name of our settings file doesn't matter, so here we'll just use `my_settings.yaml`. To create this file, complete the following:
+In the previous section, you may have noticed that our `simmate workflows run` command was becoming quite long and thus difficult to remember. Instead of typing out this lengthy command each time, we can create a settings file that contains all this information. We will write our settings into a `YAML` file, a simple text file. The name of our settings file doesn't matter, so we'll just use `my_settings.yaml`. To create this file, do the following:
 
 ``` bash
 nano my_settings.yaml
 ```
 
-... and write in the following information ...
+... and input the following information ...
 
 ``` yaml
 workflow_name: static-energy.vasp.mit
@@ -55,38 +54,36 @@ command: mpirun -n 4 vasp_std > vasp.out  # OPTIONAL
 directory: my_custom_folder  # OPTIONAL
 ```
 
-Note that this file contains all of the information that was in our `simmate workflows run-quick` command from above. But now we have it stored in a file that we can read/edit later on if we need to. To submit this file, we simply run...
+This file contains all the information from our `simmate workflows run-quick` command above. But now it's stored in a file that we can read/edit later if needed. To submit this file, we simply run...
 
 ``` bash
 simmate workflows run my_settings.yaml
 ```
 
-And your workflow will run the same as before. Note, it is entirely up to you whether workflows are ran submit using a yaml file or using the longer command.
+Your workflow will execute the same as before. It's entirely up to you whether workflows are submitted using a yaml file or the longer command.
 
 !!! tip
-    recall from earlier how the command `simmate workflows explore` printed out all of the parameters for us to use. These are all of your options when sumbitting the workflow. In the example command above, we decided to set two of the optional parameters
+    Remember how the command `simmate workflows explore` listed all the parameters for us to use. These are all your options when submitting the workflow. In the example command above, we decided to set two of the optional parameters.
 
 !!! tip 
-    Want to customize a specific setting (e.g. set ENCUT to a custom value)? Customizing workflow settings is covered in tutorial 6. However, try to resist jumping ahead! There are still several important steps to learn before customizing workflows.
+    Want to customize a specific setting (e.g., set ENCUT to a custom value)? Customizing workflow settings is covered in tutorial 6. However, try to resist jumping ahead! There are still several important steps to learn before customizing workflows.
 
 ----------------------------------------------------------------------
 
-## Mastering workflow options
+## Mastering Workflow Options
 
-Above, we gave our input structure as a `POSCAR` -- but what if we wanted to
-use a different format? Or even use a structure from a previous calculation or
-the Materials Project database?
+In the previous examples, we provided our input structure as a `POSCAR` -- but what if we wanted to use a different format? Or use a structure from a previous calculation or the Materials Project database?
 
-Recall from earlier, we can look at the [Parameters](/simmate/getting_started/run_a_workflow/running_the_workflow/) section of our documentation.
+Refer back to the [Parameters](/simmate/getting_started/run_a_workflow/running_the_workflow/) section of our documentation.
 
-When we scroll down to `structure`, we see that we can do...
+Under `structure`, we see that we can use...
 
 - [x] cif or poscar files 
 - [x] reference a database entry
 - [x] point to a third-party database
 - [x] use advanced python objects
 
-For example, you can try running the following workflow:
+For instance, you can try running the following workflow:
 
 ``` yaml
 workflow_name: static-energy.vasp.mit
@@ -97,7 +94,6 @@ command: mpirun -n 4 vasp_std > vasp.out  # OPTIONAL
 directory: my_custom_folder  # OPTIONAL
 ```
 
-Even though we didn't build a structure file, Simmate grabbed one for us from
-the Materials Project database.
+Even though we didn't create a structure file, Simmate fetched one for us from the Materials Project database.
 
 ----------------------------------------------------------------------
