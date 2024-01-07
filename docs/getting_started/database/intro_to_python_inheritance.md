@@ -7,7 +7,7 @@
 Before we proceed, let's quickly recap the main concepts we've covered so far...
 
 - [x] We've established our database and populated it with calculation results.
-- [x] We've delved into Python classes, focusing on the significance of the `Structure` class.
+- [x] We've introduced Python classes, focusing on the significance of the `Structure` class.
 - [x] We've explored how to navigate documentation and utilize new classes.
 
 Now, we'll integrate these concepts to navigate our database. 
@@ -29,13 +29,13 @@ class MyExampleTable(DatabaseTable):
 
 The corresponding table (populated with random data) would look like this:
 
-| column_01  | column_02 | column_03 |
-| ---------- | --------- | --------- |
-| jack  | True  | 3.1456  |
-| lauren  | False  | 299792458  |
-| siona  | True  | 1.6180  |
-| scott  | False  | 1.602e-19  |
-| ... | ... | ...  |
+| column_01 | column_02 | column_03 |
+| --------- | --------- | --------- |
+| jack      | True      | 3.1456    |
+| lauren    | False     | 299792458 |
+| siona     | True      | 1.6180    |
+| scott     | False     | 1.602e-19 |
+| ...       | ...       | ...       |
 
 Creating tables is as simple as defining a class, declaring it as a `DatabaseTable`, and specifying the desired columns.
 
@@ -66,13 +66,13 @@ class Student(Person):  # <--- note we have Person here instead of DatabaseTable
 
 The `Student` datatable now looks like this:
 
-| name  | age | height | year | gpa |
-| ----- | --- | ------ | ---- | ---|
-| jack  | 15  | 6.1  | 2020 | 3.6 |
-| lauren | 16  | 5.8  | 2019 | 4.0 |
-| siona  | 15  | 5.6  | 2020 | 3.7 |
-| scott  | 14  | 6.2  | 2021 | 3.2 |
-| ... | ... | ... | ... | ...|
+| name   | age | height | year | gpa |
+| ------ | --- | ------ | ---- | --- |
+| jack   | 15  | 6.1    | 2020 | 3.6 |
+| lauren | 16  | 5.8    | 2019 | 4.0 |
+| siona  | 15  | 5.6    | 2020 | 3.7 |
+| scott  | 14  | 6.2    | 2021 | 3.2 |
+| ...    | ... | ...    | ...  | ... |
 
 Simmate employs this concept with common materials science data, such as structures, thermodynamic data, site forces, and more. Our fundamental building blocks for tables are found in the `simmate.database.base_data_types` module ([covered here](/full_guides/database/custom_tables/)).
 

@@ -1,4 +1,4 @@
-## Accessing External Data
+## Accessing Third-Party Data
 
 In order to perform calculations with Simmate, it's crucial to understand what calculations have already been performed by other researchers for a specific material. Numerous research teams globally have created databases consisting of over 100,000 structures, with calculations performed on each. In this section, we'll use Simmate to explore these databases.
 
