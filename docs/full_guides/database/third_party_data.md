@@ -1,31 +1,30 @@
+# Accessing Third-party Data
 
-# Third-party database access
+This module simplifies the process of downloading data from external providers and storing it in your local database.
 
-This module downloads data from third-parties and stores it to your local database.
+Please be aware that this data is **NOT** provided by the Simmate team. The providers are separate entities and should be properly credited. All data is subject to the respective provider's terms and conditions.
 
-This data is **NOT** from the Simmate team. These providers are independent groups, and you should cite them appropriately. All data remain under the corresponding provider's terms and conditions.
-
-Currently, we support the following providers:
+We currently support data from these providers:
 
 - [x] [COD (Crystallography Open Database)](http://www.crystallography.net/cod/)
 - [x] [JARVIS (Joint Automated Repository for Various Integrated Simulations)](https://jarvis.nist.gov/)
 - [x] [Materials Project](https://materialsproject.org/)
 - [x] [OQMD (Open Quantum Materials Database)](http://oqmd.org/)
 
-These providers are configured, but our team is waiting for permission to redistribute their data:
+We have also configured the following provider, but are still awaiting permission to redistribute their data:
 
 - [ ] [AFLOW (Automatic FLOW for Materials Discovery)](http://www.aflowlib.org/)
 
 !!! tip
-    If your team would like to make your own data available via Simmate, please see the Contributing data module. Even if it is a single table, don't hesistate to make a contribution! We outline the benefits of contributing and how to package your data within the `for_providers` module.
+    If you're interested in making your data accessible via Simmate, please refer to the Contributing data module. We welcome contributions of any size! The `for_providers` module provides more information on the benefits of contributing and how to package your data.
 
 ----------------------------------------------------------------------
 
-## Downloading data
+## Downloading Data
 
-Make sure you have completed [our introductory tutorial](/simmate/getting_started/access_the_database/access_thirdparty_data/) for downloading data from these providers. Below we show example usage with `MatprojStructure`, but the same process can be done with all other tables in this module.
+Before proceeding, make sure you've completed [our introductory tutorial](/simmate/getting_started/access_the_database/access_thirdparty_data/) on downloading data from these providers. We use `MatprojStructure` as an example, but the same procedure applies to all other tables in this module.
 
-WARNING: The first time you load archives of data, it can take a long time, so we recommend running some things overnight. Once completed, we also recommend backing up your database (by making a copy of your ~/simmate/my_env-database.sqlite3 file). This ensures you don't have to repeat this long process.
+WARNING: The initial loading of the data archive can be time-consuming. We suggest running this process overnight. Once completed, we recommend backing up your database by duplicating your ~/simmate/my_env-database.sqlite3 file to avoid repeating this lengthy process.
 
 To download all data into your database:
 
@@ -33,50 +32,50 @@ To download all data into your database:
 simmate database load-remote-archives
 ```
 
-Or in python, you can download a specific table:
+Or in Python, you can download a specific table:
 
 ``` python
 from simmate.database.third_parties import MatprojStructure
 
-# This can take >1 hour for some providers. Optionally, you can
-# add `parallel=True` to speed up this process, but use caution when 
+# This process can take >1 hour for some providers. You can
+# add `parallel=True` to expedite this process, but exercise caution when 
 # parallelizing with SQLite (the default backend). We recommend 
 # avoiding the use of parallel=True, and instead running
 # this line overnight.
 MatprojStructure.load_remote_archive()
 
-# If you use this providers data, be sure to cite them!
+# Remember to cite the provider if you use their data!
 MatprojStructure.source_doi
 ```
 
 ----------------------------------------------------------------------
 
-## Populating energy fields
+## Updating Energy Fields
 
-Some database providers give a calculated energy, which can be used to populate stability information:
+Some database providers offer calculated energy, which can be used to update stability information:
 
 ``` python
 # updates ALL chemical systems.
-# Note, this can take over an hour for some providers. Try running 
+# This process can take over an hour for some providers. Consider running 
 # this overnight along with your call to load_remote_archive.
 MatprojStructure.update_all_stabilities()
 
 # updates ONE chemical system
-# This can be used if you quickly want to update a specific system
+# Use this if you need to quickly update a specific system
 MatprojStructure.update_chemical_system_stabilities("Y-C-F")
 ```
 
 ----------------------------------------------------------------------
 
-## Alternatives
+## Alternative Options
 
-This module can be viewed as an alternative to and/or an extension of the following codes:
+This module can be used as an alternative or in addition to the following codes:
 
 - [MPContribs](https://github.com/materialsproject/MPContribs)
 - [matminer.data_retrieval](https://matminer.readthedocs.io/en/latest/matminer.data_retrieval.html)
 - [pymatgen.ext](https://pymatgen.org/pymatgen.ext.html)
 - [OPTIMADE APIs](http://www.optimade.org/)
 
-This module stores data locally and then allows rapidly loading data to memory, whereas alternatives involve querying external APIs and loading data into memory. We choose to store data locally because it allows stability (i.e. no breaking changes in your source data) and fast loading accross python sessions. This is particullary useful for high-throughput studies.
+Unlike alternatives that query external APIs and load data into memory, this module stores data locally for quick loading in future Python sessions. This method ensures data stability (i.e., no unexpected changes in your source data) and fast loading, which is especially useful for high-throughput studies.
 
 ----------------------------------------------------------------------

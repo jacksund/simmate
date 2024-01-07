@@ -1,42 +1,40 @@
+# Guidelines for Naming Workflows
 
-# Workflow naming conventions
+## Structure for Naming Workflows
 
-## How we name workflows
+Every workflow name follows the `type.app.preset` format:
 
-All workflow names follow a specific format of `type.app.preset`:
+`type`: Defines the type of analysis the workflow carries out (relaxation, static-energy, dynamics, etc.)
 
-`type`: the type of analysis the workflow is doing (relaxation, static-energy, dynamics, ...)
+`app`: Denotes the third-party software used by the workflow (vasp, abinit, qe, deepmd, etc.)
 
-`app`: the third party software that the workflow uses to run (vasp, abinit, qe, deepmd, ...)
-
-`preset`: a unique name to identify the settings used (matproj, quality00, my-test-settings,...)
+`preset`: Gives a unique identifier for the settings applied (matproj, quality00, my-test-settings, etc.)
 
 !!! example
 
-    Using the workflow like `static-energy.vasp.matproj` this means that...
+    Take the workflow `static-energy.vasp.matproj` as an example...
     
-    - type = static energy (runs a single point energy)
-    - app = vasp (uses VASP to calculate the energy)
-    - preset = matproj  (uses "Materials Project" settings)
+    - type = static energy (performs a single point energy calculation)
+    - app = vasp (uses VASP for energy calculation)
+    - preset = matproj  (implements "Materials Project" settings)
 
 ------------------------------------------------------------
 
-## Class name vs. mini name
+## Workflow Class Name vs. Mini Name
 
-`type.app.preset` is what we see in most cases, but in python, the workflow class name translates to `Type__App__Preset`. All workflows follow this format.
+The `type.app.preset` format is standard, but in Python, the workflow class name is represented as `Type__App__Preset`. All workflows follow this structure.
 
 !!! example
 
-    `static-energy.vasp.matproj` --> `StaticEnergy__VASP__MatProj`
+    `static-energy.vasp.matproj` is represented as `StaticEnergy__VASP__MatProj` in Python.
 
-Note, when converting a workflow name in python, we need to replace periods with 2 underscores each (`__`) and convert our phrases to
-[pascal case](https://khalilstemmler.com/blogs/camel-case-snake-case-pascal-case/). Hyphen (`-`) placement is based off of capital letters.
+Note that when converting a workflow name in Python, periods should be replaced with double underscores (`__`) and phrases should be converted to [pascal case](https://khalilstemmler.com/blogs/camel-case-snake-case-pascal-case/). The placement of hyphens (`-`) is determined by capital letters.
 
 ------------------------------------------------------------
 
-## Location of a workflow in the website interface
+## Finding a Workflow on the Website Interface
 
-You can follow the naming conventions (described above) to find a workflow in the website interface:
+You can use the naming conventions described above to find a workflow on the website interface:
 
 === "Template URL"
     ```
@@ -46,6 +44,6 @@ You can follow the naming conventions (described above) to find a workflow in th
 === "Example"
     ```
     https://simmate.org/workflows/static-energy/vasp/matproj
-    ```
+    ``` 
 
 ------------------------------------------------------------

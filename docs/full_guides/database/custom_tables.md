@@ -1,47 +1,46 @@
+# Custom Database Tables Creation
 
-# Building custom database tables
-
-This module defines the fundamental building blocks for storing data. When building new and custom tables, you should inherit from one or more of these classes.
+This module offers key components for data storage. When creating new and custom tables, these classes should be inherited.
 
 ----------------------------------------------------------------------
 
 ## Table Types
 
-The tables that store data can be classified from low-level to high-level. High-level tables inherit basic functionality from low-level tables and from the data types that are stored in that table to create tables with enhanced functionality.  
+Data storage tables range from low-level to high-level. High-level tables inherit basic functionality from low-level tables and the data types stored in them, resulting in tables with enhanced functionality.  
 
 At the lowest level...
 
-- `base.DatabaseTable` : all tables inherit from this base type and this is where common functionality (like the `show_columns` method) is defined
+- `base.DatabaseTable` : All tables inherit from this base type, which defines common functionality (like the `show_columns` method)
 
-At a higher level, tables inherit the `base.DatabaseTable` to create a series of more specialized tables. These tables contain additional columns that are specific to the kinds of data stored in each. The new columns in each table are created using a special feature called a [mixin](https://stackoverflow.com/questions/533631/what-is-a-mixin-and-why-is-it-useful).  These mixins create the following tables:
+At a higher level, tables inherit the `base.DatabaseTable` to create more specialized tables. These tables contain additional columns specific to the data stored in each. The new columns in each table are created using a feature called a [mixin](https://stackoverflow.com/questions/533631/what-is-a-mixin-and-why-is-it-useful).  These mixins create the following tables:
 
-- `calculation` : holds information about a specific calculation run (corrections, timestamps, etc.)
-- `structure` : holds a periodic crystal structure
+- `calculation` : Stores information about a specific calculation run (corrections, timestamps, etc.)
+- `structure` : Stores a periodic crystal structure
 - `symmetry` : NOT a mixin. Defines symmetry relationships for `structure` to reference
-- `forces` : holds site forces and lattice stresses
-- `thermodynamics` : holds energy and stability information
-- `density_of_states`: holds results of a density of states calculation
-- `band_structure`: holds results of a band structure calculation
+- `forces` : Stores site forces and lattice stresses
+- `thermodynamics` : Stores energy and stability information
+- `density_of_states`: Stores results of a density of states calculation
+- `band_structure`: Stores results of a band structure calculation
 
-At an even higher level, we can combine several lower-level tables via their mixins. This allows us to easily create tables that can store complex calculations:
+At the highest level, several lower-level tables can be combined via their mixins. This allows for the creation of tables that can store complex calculations:
 
-- `static_energy` : holds results of single point energy calculation
-- `relaxation` : holds all steps of a structure geometry optimization
-- `nudged_elastic_band` : holds all results from trajectory calculations
-- `dynamics` : holds all steps of a molecular dynamics simmulation
-- `calculation_nested` : a special type of calculation that involves running a workflow made of smaller workflows
+- `static_energy` : Stores results of single point energy calculation
+- `relaxation` : Stores all steps of a structure geometry optimization
+- `nudged_elastic_band` : Stores all results from trajectory calculations
+- `dynamics` : Stores all steps of a molecular dynamics simulation
+- `calculation_nested` : A special type of calculation that involves running a workflow made of smaller workflows
 
 ----------------------------------------------------------------------
 
-## Building an example table
+## Custom Table Creation
 
-Creating a custom table involves the following steps:
+To create a custom table, follow these steps:
 
-1. defining the lower-level tables and data types used to create your new table
-2. registering the new table to your database
-3. saving data to your new table
+1. Define the lower-level tables and data types used to create your new table
+2. Register the new table to your database
+3. Save data to your new table
 
-All classes in this module are abstract and largely meant to be used as mix-ins. Each class will contain details on its specific use, but when combining multiple types, you can do the following:
+All classes in this module are abstract and are primarily used as mix-ins. Each class will contain details on its specific use, but when combining multiple types, you can do the following:
 
 ``` python
 
@@ -52,7 +51,7 @@ from simmate.database.base_data_types import (
 )
 
 # Inherit from all the types you'd like to store data on. All of the columns
-# define in each of these types will be incorporated into your table.
+# defined in each of these types will be incorporated into your table.
 class MyCustomTable(Structure, Thermodynamics):
     
     # ----- Table columns -----
@@ -98,7 +97,7 @@ class MyCustomTable(Structure, Thermodynamics):
 
 ----------------------------------------------------------------------
 
-## Loading data
+## Data Loading
 
 Once your table is created and registered, you can use the `from_toolkit` method to create and save your data to the database. Note, the information you pass to this method is entirely dependent on what you inherit from and define above.
 
@@ -108,7 +107,7 @@ from my.example.project import MyCustomTable
 
 new_row = MyCustomTable.from_toolkit(
     # Because we inherited from Structure, we must provide structure
-    structure=new_structure,  # provide a ToolkitStructure here
+    structure=new_structure,  // provide a ToolkitStructure here
     # 
     # All tables can optionally include a source too.
     source="made by jacksund",
@@ -126,9 +125,9 @@ new_row.save()
 
 ----------------------------------------------------------------------
 
-## Updating a column
+## Column Updating
 
-To modify a row, you can load it from your database, update the column, and then resave. Note, there are may more ways to do this, so consult the Django documentation for advanced usage.
+To modify a row, you can load it from your database, update the column, and then resave. Note, there are many more ways to do this, so consult the Django documentation for advanced usage.
 
 ``` python
 

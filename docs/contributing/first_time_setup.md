@@ -1,45 +1,43 @@
-
-# First-time setup
+# Getting Started
 
 !!! tip
-    If you are a student or teacher, we recommend using your Github account with [Github's free Student/Teacher packages](https://education.github.com/). This includes Github Pro and many other softwares that you may find useful. This is optional.
+    We recommend students and teachers to use their Github accounts with [Github's free Student/Teacher packages](https://education.github.com/). This includes Github Pro and other beneficial software. However, this step is not mandatory.
 
-1. Fork the Simmate repo to your Github profile (e.g. `yourname/simmate`)
+1. Fork the Simmate repository to your Github profile (e.g., `yourname/simmate`).
 
-2. Clone `yourname/simmate` to your local desktop. To do this, we recommend using [GitKraken](https://www.gitkraken.com/) and cloning to a folder named `~/Documents/github/`. Note, Gitkraken is free for public repos (which includes Simmate), but also available with [Github's free Student/Teacher packages](https://education.github.com/). Their [6 minute beginner video](https://www.youtube.com/watch?v=ub9GfRziCtU) will get you started.
+2. Clone `yourname/simmate` to your local desktop. We recommend using [GitKraken](https://www.gitkraken.com/) and cloning to a folder named `~/Documents/github/`. GitKraken is free for public repositories (including Simmate), but is also part of [Github's free Student/Teacher packages](https://education.github.com/). Their [6-minute beginner video](https://www.youtube.com/watch?v=ub9GfRziCtU) provides a quick start guide.
 
-3. Navigate to where you cloned the Simmate repo:
+3. Navigate to the cloned Simmate repository:
 ``` shell
 cd ~/Documents/github/simmate
 ```
 
-4. Create your conda env using our conda file. Note, this will install Spyder for you and name your new environment `simmate_dev`. We highly recommend you use Spyder as your IDE so that you have the same overall setup as the rest of the team.
+4. Create your conda environment using our conda file. This will install Spyder and name your new environment `simmate_dev`. We highly recommend using Spyder as your IDE for consistency with the rest of the team.
 ``` shell
 conda env update -f envs/conda/dev.yaml
 conda install -n simmate_dev -c conda-forge spyder -y
 conda activate simmate_dev
 ```
 
-5. Install Simmate in developmental mode to your `simmate_dev` env.
+5. Install Simmate in development mode to your `simmate_dev` environment.
 ``` shell
 pip install -e .
 ```
 
-6. When resetting your database, make sure you do **NOT** use the prebuilt database. Pre-builts are only made for new releases and the dev database may differ from the most recent release.
+6. When resetting your database, refrain from using the prebuilt database. Pre-builts are only created for new releases, and the development database may differ from the latest release.
 ``` bash
 simmate database reset --confirm-delete --no-use-prebuilt
 ```
 
-7. Make sure everything works properly by running our tests
+7. Confirm everything is functioning correctly by running our tests
 ``` shell
 # you can optionally run tests in parallel 
 # with a command such as "pytest -n 4"
 pytest
 ```
 
-8. In GitKraken, make sure you have the `main` branch of your repo (`yourname/simmate`) checked out.
+8. In GitKraken, make sure you have the `main` branch of your repository (`yourname/simmate`) checked out.
 
-9. In Spyder, go `Projects` > `New Project...`. Check `existing directory`, select your `~/Documents/github/simmate` directory, and then `create` your Project!
+9. In Spyder, navigate to `Projects` > `New Project...`. Select `existing directory`, choose your `~/Documents/github/simmate` directory, and then `create` your Project!
 
-10. You can now explore the source code and add/edit files! Move to the next section on how to format, test, and submit these changes to our team.
-
+10. You're now set to explore the source code and modify or add files! Continue to the next section for guidance on formatting, testing, and submitting your changes to our team.

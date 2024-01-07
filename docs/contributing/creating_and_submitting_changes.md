@@ -1,38 +1,36 @@
+# Changes Submission Guide
 
-# Creating and submitting changes
+1. Prior to making any changes, please engage with our team to discuss your proposed alterations. This ensures everyone is informed about ongoing work and allows for constructive feedback. You can submit feature requests, bug reports, and other issues on our [Issues page](https://github.com/jacksund/simmate/issues). For general ideas and queries, please use our [Discussions page](https://github.com/jacksund/simmate/discussions).
 
-1. Make sure you have contacted our team on the changes you wish to make. This lets everyone know what is being working on and allows other contributors to give feedback/advice. You can request features, report bugs, etc. in our [Issues page](https://github.com/jacksund/simmate/issues). General ideas and questions are better suited for our [Discussions page](https://github.com/jacksund/simmate/discussions).
+2. [Ensure your fork is up-to-date](https://support.gitkraken.com/working-with-repositories/pushing-and-pulling/) with our main code at `jacksund/simmate`. This is essential if it's been a while since your last update. If you've just finished the previous section, you're good to go.
 
-2. [Make sure your fork is up to date](https://support.gitkraken.com/working-with-repositories/pushing-and-pulling/) with our main code at `jacksund/simmate`. This is only important if it's been more than a couple days since your last update. So if you just completed the previous section, you should be good to go here.
+3. Access the Simmate directory in Spyder, as detailed in step 8 of the previous section.
 
-3. Have the Simmate directory open in Spyder. This was done in steo 8 of the previous section.
+4. Open the file you wish to edit in Spyder and make your changes.
 
-4. In Spyder, open the file you want and make your edits! :fire::fire::rocket:
+5. Don't forget to save all file changes in Spyder.
 
-5. Make sure you saved all file changes in Spyder.
-
-6. Simmate requires code to be nicely formatted and readable. To do this, we use the [`black`](https://github.com/psf/black) formatter and [isort](https://pycqa.github.io/isort/docs/configuration/github_action.html) for organzing imports. Make sure you are in the `~/Documents/github/simmate` directory when you run these two commands:
+6. Simmate demands clean, readable code. We utilize the [`black`](https://github.com/psf/black) formatter and [isort](https://pycqa.github.io/isort/docs/configuration/github_action.html) for managing imports. Execute these commands in the `~/Documents/github/simmate` directory:
 ``` shell
 isort .
 black .
 ```
 
-7. Simmate has test cases to make sure new changes don't break any of Simmate's existing features. These are written using [pytest](https://docs.pytest.org/en/6.2.x/). Run these to check your changes. Make sure you are in the `~/Documents/github/simmate` directory when you run this command:
+7. Simmate employs [pytest](https://docs.pytest.org/en/6.2.x/) test cases to ensure new changes don't interfere with existing features. Run these tests to validate your changes. Execute this command in the `~/Documents/github/simmate` directory:
 ``` shell
 # you can optionally run tests in parallel 
 # with a command such as "pytest -n 4"
 pytest
 ```
 
-8. If everything passes, your changes can be accepted into Simmate! :partying_face:
+8. If all tests are successful, your changes are ready for submission to Simmate!
 
-9. Open GitKraken, and you should then see your changes listed. For changes that you are happy with, `stage` and then `commit` them to the `main` branch of your repo (`yourname/simmate`). Feel free to [add an emoji](https://github.com/ikatyang/emoji-cheat-sheet/blob/master/README.md) to the start of your commit message. These icons simply tell us that you read the tutorial (and also emojis are a fun distraction).
+9. Use GitKraken to review your changes. If the changes are satisfactory, `stage` and `commit` them to the `main` branch of your repo (`yourname/simmate`). You can [add an emoji](https://github.com/ikatyang/emoji-cheat-sheet/blob/master/README.md) to your commit message to show you've read the tutorial.
 
-10. Now [open a pull-request](https://support.gitkraken.com/working-with-repositories/pull-requests/) to merge your changes into our main code (currently at `jacksund/simmate`). We will review your changes and merge them if they pass all of our checks.
+10. [Open a pull-request](https://support.gitkraken.com/working-with-repositories/pull-requests/) to merge your changes into our main code (`jacksund/simmate`). We'll review your changes and merge them if they meet our standards.
 
 !!! tip
-    you can optionally format files as you code with Spyder too. `Tools` -> `Preferences` -> `Completion and Linting` -> `Code Style and Formatting` > Under code formatting dropdown, select `black`. To format a file you have open in Spyder, use the the `Ctrl+Shift+I` shortcut.
+    You can also format files while coding with Spyder. Go to `Tools` -> `Preferences` -> `Completion and Linting` -> `Code Style and Formatting` > select `black` from the code formatting dropdown. To format an open file in Spyder, use the `Ctrl+Shift+I` shortcut.
 
 !!! note
-    Spyder does not yet have a plugin for pytest. We are still waiting on this feature to be built alongside their [Unittest plugin](https://www.spyder-ide.org/blog/introducing-unittest-plugin/).
-
+    Currently, Spyder does not have a plugin for pytest. We're eagerly awaiting the development of this feature along with their [Unittest plugin](https://www.spyder-ide.org/blog/introducing-unittest-plugin/).
