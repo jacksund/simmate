@@ -1,8 +1,6 @@
 # Transitioning to the Command-line
 
-While the Anaconda Navigator interface is user-friendly for beginners, using the command-line is faster and more efficient. Don't fret, it's simpler than it seems. Even if you're not familiar with coding, you can learn the command-line basics in a few minutes.
-
-Think of each command as a "button". For instance, the command `cd` stands for "change directory". When you use it, it opens a new folder to view its contents -- similar to double-clicking a folder to open it.
+While the Anaconda Navigator interface is user-friendly for beginners, using the command-line is faster and more efficient. Don't panic, it's simpler than it seems. Even if you're not familiar with coding, you can learn the command-line basics in a few minutes.
 
 ----------------------------------------------------------------------
 
@@ -30,6 +28,9 @@ cd Desktop
 ls
 ```
 
+!!! tip
+    Think of each command as a "button". For instance, the command `cd` stands for "change directory". When you use it, it opens a new folder to view its contents -- similar to double-clicking a folder to open it.
+
 ----------------------------------------------------------------------
 
 ## Mastering new commands
@@ -54,19 +55,8 @@ positional arguments:
   command
     clean        Remove unused packages and caches.
     compare      Compare packages between conda environments.
-    config       Modify configuration values in .condarc. This is modeled after the git config command. Writes to the user .condarc file (/home/jacksund/.condarc) by default.
-    create       Create a new conda environment from a list of specified packages.
-    info         Display information about current conda install.
-    init         Initialize conda for shell interaction. [Experimental]
-    install      Installs a list of packages into a specified conda environment.
-    list         List linked packages in a conda environment.
-    package      Low-level conda package utility. (EXPERIMENTAL)
-    remove       Remove a list of packages from a specified conda environment.
-    uninstall    Alias for conda remove.
-    run          Run an executable in a conda environment.
-    search       Search for packages and display associated information. The input is a MatchSpec, a query language for conda packages. See examples below.
-    update       Updates conda packages to the latest compatible version.
-    upgrade      Alias for conda update.
+    config       Modify configuration values in .condarc. This is modeled after the git config command. Writes to the user .
+    ...
 
 optional arguments:
   -h, --help     Show this help message and exit.
@@ -75,24 +65,10 @@ optional arguments:
 conda commands available from other packages:
   build
   content-trust
-  convert
-  debug
-  develop
-  env
-  index
-  inspect
-  metapackage
-  pack
-  render
-  repo
-  server
-  skeleton
-  token
-  verify
-
+  ...
 ```
 
-Don't be daunted by the volume of information displayed. Each line conveys a simple concept. 
+Don't get overwhelmed by the amount of information displayed. Each line conveys a simple concept. 
 
 For instance, the line `-h, --help     Show this help message and exit.` explains what the `conda --help` command does! It also indicates that we could have used `conda -h` for the same output.
 

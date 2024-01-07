@@ -36,13 +36,15 @@ Now, let's install Simmate.
 conda install -c conda-forge -n my_env simmate
 ```
 
-The installation may take a few minutes. Once completed, Simmate is successfully installed! If you encounter any errors with this command, please inform our team immediately by [posting a new issue here](https://github.com/jacksund/simmate/issues/).
+The installation may take a few minutes. Once completed, Simmate is successfully installed! 
+
+If you encounter any errors with this command, please inform our team immediately by [posting a new issue](https://github.com/jacksund/simmate/issues/).
 
 ----------------------------------------------------------------------
 
 ## 4. Spyder Installation
 
-Lastly, let's install [Spyder](https://www.spyder-ide.org/) using Anaconda. We'll use Spyder for writing Python in subsequent tutorials. With Anaconda set up, installing new programs is a one-line command:
+Lastly, let's install [Spyder](https://www.spyder-ide.org/) using Anaconda. We'll use Spyder for writing Python in later tutorials:
 
 ``` shell
 conda install -c conda-forge -n my_env spyder

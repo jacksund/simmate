@@ -81,17 +81,15 @@ nav:
         
         - Overview: getting_started/overview.md
         
-        - Installation:
+        - 1. Installation:
             - Quickstart: getting_started/installation/quick_start.md
-            - Intro to python terms: getting_started/installation/intro_to_python_terms.md
-            - Install Anaconda: getting_started/installation/install_anaconda.md
-            - Intro to the command line: getting_started/installation/command_line.md
-            - Create your environment: getting_started/installation/create_your_env.md
-            - Explore Simmate commands: getting_started/installation/explore_simmate_cli.md
-            - Set up a Local Server: getting_started/installation/local_server_setup.md
-            - Extra learning resources: getting_started/installation/extra.md
+            - a) Install Anaconda: getting_started/installation/install_anaconda.md
+            - b) Intro to the command line: getting_started/installation/command_line.md
+            - c) Create your environment: getting_started/installation/create_your_env.md
+            - d) Explore Simmate commands: getting_started/installation/explore_simmate_cli.md
+            - e) Set up a Local Server: getting_started/installation/local_server_setup.md
             
-        - Run a workflow:
+        - 2. Run a workflow:
             - Quickstart: getting_started/run_a_workflow/quick_start.md
             - Stages of a Workflow: getting_started/run_a_workflow/stages_of_a_workflow.md
             - Configure VASP potentials: getting_started/run_a_workflow/configure_potcars.md
@@ -103,7 +101,7 @@ nav:
             - Submit to a cluster: getting_started/run_a_workflow/submit_to_a_cluster.md
             - Viewing the results: getting_started/run_a_workflow/view_the_results.md
         
-        - Analyze & modify structures:
+        - 3. Toolkit:
             - Quickstart: getting_started/analyze_and_modify_structures/quick_start.md
             - Intro to Spyder (IDE): getting_started/analyze_and_modify_structures/intro_to_spyder.md
             - The structure class: getting_started/analyze_and_modify_structures/the_structure_class.md
@@ -112,37 +110,31 @@ nav:
             - Advanced classes: getting_started/analyze_and_modify_structures/advanced_classes.md
             - Extra learning resources: getting_started/analyze_and_modify_structures/extra_resources.md
         
-        - Explore the code:
-            - Quickstart: getting_started/explore_the_code/quick_start.md
-            - Hints in Spyder: getting_started/explore_the_code/getting_help_in_spyder.md
-            - Intro to Python modules: getting_started/explore_the_code/intro_to_python_modules.md
-            - Exploring Simmate modules: getting_started/explore_the_code/exploring_simmate_modules.md
-        
-        - Access the database:
+        - 4. Database:
             - Quickstart: getting_started/access_the_database/quick_start.md
             - Intro to Python inheritance: getting_started/access_the_database/intro_to_python_inheritance.md
             - Access workflow data: getting_started/access_the_database/access_workflow_data.md
             - Access third-party data: getting_started/access_the_database/access_thirdparty_data.md
         
-        - Build custom workflows:
+        - 5. Custom workflows:
             - Quickstart: getting_started/custom_workflows/quick_start.md
             - Update an existing workflow: getting_started/custom_workflows/update_an_existing_workflow.md
             - Name your new workflow: getting_started/custom_workflows/name_your_new_workflow.md
             - Creating your workflow: getting_started/custom_workflows/creating_your_workflow.md
             - Next steps: getting_started/custom_workflows/next_steps.md
         
-        - Build custom tables and apps:
+        - 6. Custom apps:
             - Quickstart: getting_started/custom_tables_and_apps/quick_start.md
             - Creating a custom project: getting_started/custom_tables_and_apps/create_a_custom_app.md
             - Creating a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
             - Using app workflows: getting_started/custom_tables_and_apps/using_app_workflows.md
         
-        - Use a cloud database:
+        - 7. Use a cloud database:
             - Quickstart: getting_started/use_a_cloud_database/quick_start.md
             - Private vs shared: getting_started/use_a_cloud_database/private_vs_collab.md
             - Building a database: getting_started/use_a_cloud_database/build_a_postgres_database.md
         
-        - Add computational resources:
+        - 8. Computational resources:
             - Quickstart: getting_started/add_computational_resources/quick_start.md
             - Intro to clusters: getting_started/add_computational_resources/intro_to_clusters.md
             - Should you set up workers?: getting_started/add_computational_resources/should_you_setup.md

@@ -1,8 +1,5 @@
 # Installation
 
-!!! danger
-    For those new to coding, **we recommend bypassing the quick-start tutorial** and proceeding directly to the comprehensive tutorial. Both tutorials cover the same essential steps, but the comprehensive tutorial provides additional insights into the software and its usage.
-
 ## Quick start
 
 1. Download and install [anaconda](https://www.anaconda.com/products/distribution)
