@@ -90,23 +90,22 @@ nav:
             - e) Set up a Local Server: getting_started/installation/local_server_setup.md
             
         - 2. Workflows:
-            - Quickstart: getting_started/run_a_workflow/quick_start.md
-            - a) Configure VASP potentials: getting_started/run_a_workflow/configure_potcars.md
-            - b) Configure the database: getting_started/run_a_workflow/configure_database.md
-            - c) Make a input structure: getting_started/run_a_workflow/make_a_structure.md
-            - d) View all workflows: getting_started/run_a_workflow/view_all_workflows.md
-            - e) Run a workflow: getting_started/run_a_workflow/running_the_workflow.md
-            - h) Viewing the results: getting_started/run_a_workflow/view_the_results.md
-            - (extra) Submit to a cluster: getting_started/run_a_workflow/submit_to_a_cluster.md
+            - Quickstart: getting_started/workflows/quick_start.md
+            - a) Configure VASP potentials: getting_started/workflows/configure_potcars.md
+            - b) Configure the database: getting_started/workflows/configure_database.md
+            - c) Make a input structure: getting_started/workflows/make_a_structure.md
+            - d) View all workflows: getting_started/workflows/view_all_workflows.md
+            - e) Run a workflow: getting_started/workflows/running_the_workflow.md
+            - h) Viewing the results: getting_started/workflows/view_the_results.md
+            - (extra) Submit to a cluster: getting_started/workflows/submit_to_a_cluster.md
         
         - 3. Toolkit:
-            - Quickstart: getting_started/analyze_and_modify_structures/quick_start.md
-            - Intro to Spyder (IDE): getting_started/analyze_and_modify_structures/intro_to_spyder.md
-            - The structure class: getting_started/analyze_and_modify_structures/the_structure_class.md
-            - Structure properties: getting_started/analyze_and_modify_structures/structure_properties.md
-            - Structure methods: getting_started/analyze_and_modify_structures/structure_methods.md
-            - Advanced classes: getting_started/analyze_and_modify_structures/advanced_classes.md
-            - Extra learning resources: getting_started/analyze_and_modify_structures/extra_resources.md
+            - Quickstart: getting_started/toolkit/quick_start.md
+            - a) Intro to Spyder IDE: getting_started/toolkit/intro_to_spyder.md
+            - b) The Structure class: getting_started/toolkit/the_structure_class.md
+            - c) Structure properties: getting_started/toolkit/structure_properties.md
+            - d) Structure methods: getting_started/toolkit/structure_methods.md
+            - e) Advanced classes: getting_started/toolkit/advanced_classes.md
         
         - 4. Database:
             - Quickstart: getting_started/access_the_database/quick_start.md

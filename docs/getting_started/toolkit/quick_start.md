@@ -1,28 +1,34 @@
-# Analyzing and Modifying Structures
+# Analyzing & Modifying Structures
 
-!!! note
-    Simmate is built on [pymatgen](https://pymatgen.org/). Therefore, this tutorial also serves as a guide to using their package. [Their guides](https://pymatgen.org/usage.html) are also helpful, but they are designed for those already familiar with python.
+## Quick Start
 
-# Quick Tutorial
+!!! tip
+    Simmate is built on [pymatgen](https://pymatgen.org/). Therefore, this tutorial also serves as a guide to using their package. Explore [their guides](https://pymatgen.org/usage.html) for extra help.
 
-1. In the python console of Spyder, run `import simmate` to ensure everything is properly set up.
-2. Ensure you have the `POSCAR` file of NaCl from the previous tutorial. 
-3. Now, let's delve into the toolkit and explore some of its features!
+1. Ensure you have the `POSCAR` file of NaCl from the previous tutorial.
 
-Load the structure into python and then convert it to another file format:
+2. You can load the structure into python and then convert it to another file format:
 ```python
 from simmate.toolkit import Structure
+
 structure = Structure.from_file("POSCAR")
 structure.to(filename="NaCl.cif", fmt="cif")
 ```
 
-The `Structure` class, also known as `ToolkitStructure`, offers numerous additional properties and methods. Almost all functions in Simmate use it as an input. This includes running workflows like we did in the previous tutorial. All available workflows can be loaded from the `simmate.workflows` module:
+3. You can run workflows by providing a filename or `Structure` object
 ```python
-from simmate.workflows.relaxation import mit_workflow
-result = mit_workflow.run(structure=structure)
+from simmate.workflows.utilities import get_workflow
+
+workflow = get_workflow("static-energy.vasp.mit")
+
+# option 1
+workflow.run(structure="POSCAR")
+
+# option 2
+workflow.run(structure=structure)  # uses var from previous step
 ```
 
-Access various properties of the structure, lattice, and composition:
+4. Access various properties of the structure, lattice, and composition:
 ```python
 # explore structure-based properties
 structure.density
@@ -42,14 +48,17 @@ lattice.matrix
 lattice.beta
 ```
 
-Create new structures using some transformation or analysis:
+5. Create new structures using some transformation or analysis:
 ```python
 structure.add_oxidation_state_by_guess()
 structure.make_supercell([2,2,2])
 new_structure = structure.get_primitive_structure()
 ```
 
+## Extra 
+
 Looking for advanced features? Simmate is gradually incorporating these into our toolkit module, but many more are available through [PyMatGen](https://pymatgen.org/) and [MatMiner](https://hackingmaterials.lbl.gov/matminer/) (which are preinstalled for you).
+
 ```python
 # Simmate is in the process of adding new features. One example
 # creating a random structure from a spacegroup and composition
