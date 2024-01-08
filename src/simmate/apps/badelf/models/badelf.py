@@ -11,6 +11,9 @@ class BadElf(Structure, Calculation):
     """
     This table contains results from a BadELF analysis.
     """
+    class Meta:
+        abstract = True
+        app_label = "workflows"
 
     oxidation_states = table_column.JSONField(blank=True, null=True)
     """
