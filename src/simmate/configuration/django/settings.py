@@ -6,34 +6,11 @@ database backend being used.
 """
 
 import os
-from pathlib import Path
 
-import dj_database_url  # needed for DigitalOcean database connection
 import yaml
 
-from simmate import website  # needed to specify location of built-in apps
-from simmate.utilities import get_conda_env, get_directory
-
-# --------------------------------------------------------------------------------------
-
-# SET MAIN DIRECTORIES
-
-# We check for extra django apps in the user's home directory and in a "hidden"
-# folder named "simmate/extra_applications".
-# For windows, this would be something like...
-#   C:\Users\exampleuser\simmate\extra_applications
-# Note, we use get_directory in order to create that folder if it does not exist.
-SIMMATE_DIRECTORY = get_directory(Path.home() / "simmate")
-
-# This directory is where simmate.website is located and helps us indicate
-# where things like our templates or static files are located. We find this
-# by looking at the import path to see where python installed it.
-DJANGO_DIRECTORY = Path(website.__file__).absolute().parent
-
-# Some settings below also depend on the conda env name. This makes switching
-# between different databases and settings as easy as activating different
-# conda environments
-CONDA_ENV = get_conda_env()
+from simmate.configuration import settings
+from simmate.utilities import get_directory
 
 # --------------------------------------------------------------------------------------
 
@@ -62,11 +39,6 @@ CSRF_TRUSTED_ORIGINS = os.getenv(
     "DJANGO_CSRF_TRUSTED_ORIGINS",
     "http://localhost",
 ).split(",")
-
-# This is for setting the database via an connection URL. This is done as
-# an environment variable to allow setup with DigitalOcean
-DATABASE_URL = os.getenv("DATABASE_URL", None)
-# this is not a typical Django setting
 
 # Keep the secret key used in production secret!
 # For DigitalOcean, we grab this secret key from an enviornment variable.
@@ -105,85 +77,12 @@ HOME_VIEW = os.getenv("HOME_VIEW", None)
 
 # --------------------------------------------------------------------------------------
 
-# DATBASE CONNECTION
-
-# Normally in Django, you can set the database like so: (using Postgres)
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "simmate-database-pool",  # default on DigitalOcean is defaultdb
-#         "USER": "doadmin",
-#         "PASSWORD": "dibi5n3varep5ad8",
-#         "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
-#         "PORT": 25061,
-#         "OPTIONS": {"sslmode": "require"},
-#         # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
-#     }
-# }
-# But this section instead determines the database through a series of checks.
-
-# There are three types of database files that we check for -- in order of priority:
-#   1. database.yaml
-#   2. my_env-database.yaml
-#   3. use a DATABASE_URL env variable
-#   4. my_env-database.sqlite3 <-- and create this if doesn't exist
-DATABASE_YAML = SIMMATE_DIRECTORY / "database.yaml"
-CONDA_DATABASE_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-database.yaml"
-CONDA_DATABASE_SQLITE3 = SIMMATE_DIRECTORY / f"{CONDA_ENV}-database.sqlite3".strip("-")
-# if the user is in the (base) env or not using conda, then we will have a
-# value of "-database.sqlite3". We remove the starting "-" here.
-
-
-# Our 1st priority is checking for a "simmate/database.yaml" file
-if DATABASE_YAML.exists():
-    with DATABASE_YAML.open() as file:
-        DATABASES = yaml.full_load(file)
-
-# Our 2nd priority is checking for a file like "/simmate/my_env-database.yaml
-elif CONDA_DATABASE_YAML.exists():
-    with CONDA_DATABASE_YAML.open() as file:
-        DATABASES = yaml.full_load(file)
-
-
-# Our 3rd prioirity is Digital Ocean setup or ENV variable. The connection
-# parameters were set as an env variable named DATABASE_URL.
-elif DATABASE_URL:
-    DATABASES = {
-        "default": dj_database_url.parse(DATABASE_URL),
-    }
-
-# Our final prioirity is a local sqlite database name "my_env-database.sqlite3".
-# This is the default setting used when simmate is first installed.
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": CONDA_DATABASE_SQLITE3,
-        }
-    }
-
-# As an extra, we keep a DATABASE_BACKEND variable for backend-specific methods
-if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
-    DATABASE_BACKEND = "sqlite3"
-elif DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql":
-    DATABASE_BACKEND = "postgresql"
-else:
-    DATABASE_BACKEND = "unknown"
-
-# --------------------------------------------------------------------------------------
-
-# INSTALLED APPS
-
-# OPTIMIZE: for now, I just load everything, but I will want to allow users to
-# to disable some apps from loading. This will allow faster import/setup times
-# when running small scripts. One idea is to have an applications_override.yaml
-# where the user specifies only what they want. Alternatively, I can use
-# a general DATABASE_ONLY keyword or something similar to limit what's loaded.
+# DATABASE CONNECTION
+DATABASES = {"default": settings.database}
 
 # List all applications that Django will initialize with. Write the full python
 # path to the app or it's config file. Note that relative python paths work too
-# if you are developing a new app. Advanced users can remove unnecessary apps
-# if you'd like to speed up django's start-up time.
+# if you are developing a new app.
 INSTALLED_APPS = [
     #
     # These are all apps that are built by Simmate
@@ -242,41 +141,15 @@ INSTALLED_APPS = [
     # try to avoid adding these as installed apps by default.
     #   "django_extensions",  # for development tools
     #   "debug_toolbar",  # django-debug-toolbar  # for debuging and profile-time info
+    #
+    # Simmate apps + user apps
+    *settings.apps,
 ]
-
-# We also check if the user has a "apps.yaml" file. In this file, the
-# user can provide extra apps to install for Django. We simply append these
-# to our list above. By default we include apps that are packaged with simmate,
-# such as the VASP workflows app.
-DEFAULT_SIMMATE_APPS = [
-    "simmate.workflows.configs.BaseWorkflowsConfig",
-    "simmate.apps.configs.QuantumEspressoConfig",
-    "simmate.apps.configs.VaspConfig",
-    "simmate.apps.configs.BaderConfig",
-    "simmate.apps.configs.EvolutionConfig",
-    "simmate.apps.configs.MaterialsProjectConfig",
-    # These apps may become defaults in the future:
-    # "simmate.apps.configs.BadelfConfig",
-    # "simmate.apps.configs.CleaseConfig",
-    # "simmate.apps.configs.WarrenLabConfig",
-]
-APPLICATIONS_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-apps.yaml"
-# create the file if it doesn't exist yet
-if not APPLICATIONS_YAML.exists():
-    with APPLICATIONS_YAML.open("w") as file:
-        content = yaml.dump(DEFAULT_SIMMATE_APPS)
-        file.write(content)
-
-# load apps that the user wants installed
-with APPLICATIONS_YAML.open() as file:
-    SIMMATE_APPS = yaml.full_load(file)
-    # We only load extra apps if the file isn't empty
-    if SIMMATE_APPS:
-        # now add each app to our list above so Django loads it.
-        for app in SIMMATE_APPS:
-            INSTALLED_APPS.append(app)
-    else:
-        SIMMATE_APPS = []
+# OPTIMIZE: for now, I just load everything, but I will want to allow users to
+# to disable some apps from loading. This will allow faster import/setup times
+# when running small scripts. One idea is to have an applications_override.yaml
+# where the user specifies only what they want. Alternatively, I can use
+# a general DATABASE_ONLY keyword or something similar to limit what's loaded.
 
 # --------------------------------------------------------------------------------------
 
@@ -294,7 +167,7 @@ DEFAULT_SIMMATE_DATA = [
     "simmate.database.third_parties.MatprojStructure",
     "simmate.database.third_parties.OqmdStructure",
 ]
-DATA_EXPLORER_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-data.yaml"
+DATA_EXPLORER_YAML = settings.config_directory / f"{settings.conda_env}-data.yaml"
 # create the file if it doesn't exist yet
 if not DATA_EXPLORER_YAML.exists():
     with DATA_EXPLORER_YAML.open("w") as file:
@@ -359,8 +232,8 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            SIMMATE_DIRECTORY / "templates",  # let's user easily override html
-            DJANGO_DIRECTORY / "templates",  # a single templates folder
+            settings.config_directory / "templates",  # let's user easily override html
+            settings.django_directory / "templates",  # a single templates folder
             # Then APP_DIRS are checked in order
         ],
         "APP_DIRS": True,
@@ -432,12 +305,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 # collect by running 'python manage.py collectstatic'
 STATIC_URL = "/static/"
-STATIC_ROOT = DJANGO_DIRECTORY / "static"
+STATIC_ROOT = settings.django_directory / "static"
 
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = [
-    get_directory(SIMMATE_DIRECTORY / "static_files"),  # let's user add their own files
-    DJANGO_DIRECTORY / "static_files",
+    get_directory(
+        settings.config_directory / "static_files"
+    ),  # let's user add their own files
+    settings.django_directory / "static_files",
 ]
 
 

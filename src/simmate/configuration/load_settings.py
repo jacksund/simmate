@@ -7,24 +7,105 @@ import yaml
 from simmate import website  # needed to specify location of built-in apps
 from simmate.utilities import get_conda_env, get_directory, str_to_datatype
 
-
+  
 class SimmateSettings:
-    # def __getattr__(self, name):
-    #     return self.config.get(name, None)
-    # TODO: grabs from all_settings
-
+    """
+    Configures Simmate settings
+    """
+    
     # -------------------------------------------------------------------------
 
     @cached_property
     def all_settings(self) -> dict:
+        """
+        The final settings built from user-supplied settings and all defaults
+        """
         settings = self.default_settings.copy()
         user_settings = self.user_settings.copy()
         settings.update(user_settings)
+
+        # clean variables
+        # TODO: handle database.url input
+        # TODO: use_docker inputs
+        
+        # Run compatibility checks (e.g. use_docker requires a 'docker run' cmd)
+        # TODO
+        
         return settings
+    
+    # -------------------------------------------------------------------------
+    
+    @cached_property
+    def default_settings(self) -> dict:
+        """
+        The default settings for Simmate. 
+        
+        Note that some of these settings (such as the database name) are 
+        determined dynamically, so default may vary across different 
+        simmate installations.
+        
+        Further, some settings update the default for others. An example of this
+        is `use_docker` for Quantum Espresso, which will also change the 
+        `default_command` for this app.
+        """
+        return {
+            "apps": [
+                "simmate.workflows.configs.BaseWorkflowsConfig",
+                "simmate.apps.configs.QuantumEspressoConfig",
+                "simmate.apps.configs.VaspConfig",
+                "simmate.apps.configs.BaderConfig",
+                "simmate.apps.configs.EvolutionConfig",
+                "simmate.apps.configs.MaterialsProjectConfig",
+                # These apps may become defaults in the future:
+                # "simmate.apps.configs.BadelfConfig",
+                # "simmate.apps.configs.CleaseConfig",
+                # "simmate.apps.configs.WarrenLabConfig",
+            ],
+            "database": self._default_database,
+            "website": {
+                "require_login": False,
+                "home_view": None,
+                "profile_view": None,
+                "data": [
+                    "simmate.database.third_parties.AflowPrototype",
+                    "simmate.database.third_parties.CodStructure",
+                    "simmate.database.third_parties.JarvisStructure",
+                    "simmate.database.third_parties.MatprojStructure",
+                    "simmate.database.third_parties.OqmdStructure",   
+                ],
+            },
+            # app-specific configs
+            # TODO: consider moving these to the respective apps
+            "vasp": {
+                "default_command": "vasp_std > vasp.out",
+            },
+            "quantum_espresso": {
+                # BUG: depends on use_docker
+                "default_command": "pw.x < pwscf.in > pw-scf.out",  
+                "use_docker": False,
+            },
+        }
 
     @cached_property
-    def default_settings(self):
-        return {}
+    def _default_database(self) -> Path:
+        # if the user is in the (base) env or not using conda, then we will have a
+        # value of "-database.sqlite3", which why we need strip() here.
+        db_filename = (
+            self.config_directory / f"{self.conda_env}-database.sqlite3".strip("-")
+        )
+        return {
+            "engine": "django.db.backends.sqlite3",
+            "name": db_filename,
+        }
+
+    @cached_property
+    def database_backend(self) -> str:  # was... DATABASE_BACKEND
+        if self.database.engine == "django.db.backends.sqlite3":
+            return "sqlite3"
+        elif self.database.engine == "django.db.backends.postgresql":
+            return "postgresql"
+        else:
+            return "unknown"
 
     # -------------------------------------------------------------------------
 
@@ -87,7 +168,7 @@ class SimmateSettings:
         """
         Parses all 'SIMMATE__' settings from available environment variables
         """
-        
+
         # grab all variables associated with simmate and break down the variables
         # into a "normal" dictionary with proper python types
         # For example:
@@ -126,6 +207,8 @@ class SimmateSettings:
         return user_settings
 
     # -------------------------------------------------------------------------
+    
+    # Fixed settings that are automatically set
 
     @cached_property
     def conda_env(self) -> str:
@@ -168,9 +251,5 @@ class SimmateSettings:
         "SIMMATE__WEBSITE__REQUIRE_LOGIN": bool,
     }
 
-
-# Usage example
+# initialize all settings
 settings = SimmateSettings()
-print(settings.settings_source)
-print(settings.user_settings)
-print(settings.all_settings)
