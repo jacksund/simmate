@@ -11,6 +11,7 @@ class BadElf(Structure, Calculation):
     """
     This table contains results from a BadELF analysis.
     """
+
     class Meta:
         abstract = True
         app_label = "workflows"
