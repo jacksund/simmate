@@ -88,28 +88,17 @@ INSTALLED_APPS = [
 
 # --------------------------------------------------------------------------------------
 
-# EMAILS
-
-# Settings for sending automated emails.
-# For example, this can be set up for GMail by...
-#   1. enabling IMAP (in gmail settings)
-#   2. Having 2-factor auth turned on
-#   3. Adding an App Password (in account settings)
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"  # this is the default
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")  # or outlook.office365.com
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", False) == "True"
-EMAIL_HOST_USER = os.environ.get("EMAIL_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_FROM", "simmate.team@gmail.com")
-EMAIL_SUBJECT_PREFIX = "[Simmate] "
-EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", 5))
-
-# These people get an email when DEBUG=False
-ADMINS = [
-    ("jacksund", "jacksundberg123@gmail.com"),
-    ("jacksund-corteva", "jack.sundberg@corteva.com"),
-]
+# EMAIL SETTINGS
+EMAIL_BACKEND = settings.website.email.backend
+EMAIL_HOST = settings.website.email.host
+EMAIL_PORT = settings.website.email.port
+EMAIL_USE_TLS = settings.website.email.use_tls
+EMAIL_HOST_USER = settings.website.email.host_user
+EMAIL_HOST_PASSWORD = settings.website.email.host_password
+DEFAULT_FROM_EMAIL = settings.website.email.from_email
+EMAIL_SUBJECT_PREFIX = settings.website.email.subject_prefix
+EMAIL_TIMEOUT = settings.website.email.timeout
+ADMINS = settings.website.admins
 
 # --------------------------------------------------------------------------------------
 
@@ -291,6 +280,8 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # simple setting required by allauth. not sure what it does...
+# I think this is if you are hosting several websites that all use the
+# same django backend for account sign-in
 SITE_ID = 1
 
 # We start with the providers as an empty dictionary and only fill them
@@ -301,33 +292,35 @@ SOCIALACCOUNT_PROVIDERS = {}
 # "allauth.socialaccount.providers.digitalocean"
 # "allauth.socialaccount.providers.orcid"
 
+_oauth = settings.website.social_oauth
+
 # Sign-in via Google accounts
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", None)
-GOOGLE_SECRET = os.getenv("GOOGLE_SECRET", None)
-if GOOGLE_CLIENT_ID and GOOGLE_SECRET:
+if _oauth.google.client_id and _oauth.google.secret:
     INSTALLED_APPS.append("allauth.socialaccount.providers.google")
     SOCIALACCOUNT_PROVIDERS["google"] = {
-        "APP": {"client_id": GOOGLE_CLIENT_ID, "secret": GOOGLE_SECRET}
+        "APP": {
+            "client_id": _oauth.google.client_id,
+            "secret": _oauth.google.secret,
+        },
     }
 
 # Sign-in via Github accounts
-GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID", None)
-GITHUB_SECRET = os.getenv("GITHUB_SECRET", None)
-if GITHUB_CLIENT_ID and GITHUB_SECRET:
+if _oauth.github.client_id and _oauth.github.secret:
     INSTALLED_APPS.append("allauth.socialaccount.providers.github")
     SOCIALACCOUNT_PROVIDERS["github"] = {
-        "APP": {"client_id": GITHUB_CLIENT_ID, "secret": GITHUB_SECRET}
+        "APP": {
+            "client_id": _oauth.github.client_id,
+            "secret": _oauth.github.secret,
+        },
     }
 
 # Sign-in via Microsoft accounts
-MICROSOFT_CLIENT_ID = os.getenv("MICROSOFT_CLIENT_ID", None)
-MICROSOFT_SECRET = os.getenv("MICROSOFT_SECRET", None)
-if MICROSOFT_CLIENT_ID and MICROSOFT_SECRET:
+if _oauth.microsoft.client_id and _oauth.microsoft.secret:
     INSTALLED_APPS.append("allauth.socialaccount.providers.microsoft")
     SOCIALACCOUNT_PROVIDERS["microsoft"] = {
         "APP": {
-            "client_id": MICROSOFT_CLIENT_ID,
-            "secret": MICROSOFT_SECRET,
+            "client_id": _oauth.microsoft.client_id,
+            "secret": _oauth.microsoft.client_id,
             "key": "",
         },
         "TENANT": "organizations",  # limits to internal use
@@ -351,10 +344,10 @@ ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "none")
 # Many auth endpoints require a https instead of http response:
 #   https://stackoverflow.com/questions/67726070/
 # We only use this in production
-if not DEBUG:
+if not settings.website.debug:
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
-if REQUIRE_LOGIN:
+if settings.website.require_login:
     MIDDLEWARE.append("simmate.website.require_login.RequireLoginMiddleware")
 
 LOGIN_REQUIRED_URLS = (r"/(.*)$",)
@@ -362,7 +355,7 @@ LOGIN_REQUIRED_URLS_EXCEPTIONS = (
     r"/accounts(.*)$",
     r"/admin(.*)$",
     r"/static(.*)$",
-    *REQUIRE_LOGIN_EXCEPTIONS,
+    *settings.website.require_login_exceptions,
 )
 
 # -----------------------------------------------------------------------------

@@ -5,13 +5,24 @@ from pathlib import Path
 import yaml
 
 from simmate import website  # needed to specify location of built-in apps
-from simmate.utilities import get_conda_env, get_directory, str_to_datatype
+from simmate.utilities import (
+    deep_update,
+    dotdict,
+    get_conda_env,
+    get_directory,
+    str_to_datatype,
+)
 
 
 class SimmateSettings:
     """
     Configures Simmate settings
     """
+
+    # TODO: consider using pydantic instead. I don't do this yet because of some
+    # default values are dynamic and co-dependent, but I should revisit in the
+    # future:
+    #   https://github.com/pydantic/pydantic/issues/866
 
     # -------------------------------------------------------------------------
 
@@ -20,13 +31,31 @@ class SimmateSettings:
         """
         The final settings built from user-supplied settings and all defaults
         """
-        settings = self.default_settings.copy()
-        user_settings = self.user_settings.copy()
-        settings.update(user_settings)
+        settings = deep_update(
+            default_dict=self.default_settings.copy(),
+            override_dict=self.user_settings.copy(),
+        )
 
         # clean variables
         # TODO: handle database.url input
         # TODO: use_docker inputs
+        # CSRF_TRUSTED_ORIGINS = .split(",")
+        # ALLOWED_HOSTS = .split(",")
+
+        # REQUIRE_LOGIN = os.getenv("REQUIRE_LOGIN", "False") == "True"
+        # # when setting REQUIRE_INTERNAL_LOGIN, set it to the allauth provider type
+        # # (such as "microsoft")
+        # REQUIRE_LOGIN_INTERNAL = os.getenv("REQUIRE_LOGIN_INTERNAL", "False")
+        # if REQUIRE_LOGIN_INTERNAL == "False":
+        #     REQUIRE_LOGIN_INTERNAL = False
+        # else:
+        #     assert REQUIRE_LOGIN_INTERNAL in ["microsoft", "google"]
+        #     REQUIRE_LOGIN = True
+        # # example: r'/apps/spotfire(.*)$'
+        # REQUIRE_LOGIN_EXCEPTIONS = [
+        #     e for e in os.getenv("REQUIRE_LOGIN_EXCEPTIONS", "").split(";") if e
+        # ]
+        # LOGIN_MESSAGE = os.getenv("LOGIN_MESSAGE", "")
 
         # Run compatibility checks (e.g. use_docker requires a 'docker run' cmd)
         # TODO
@@ -40,7 +69,17 @@ class SimmateSettings:
         This handles how `getattr(self, "example")` or `self.example` behaves
         when `example` is not actually defined.
         """
-        return self.final_settings.get(name, None)
+        if name not in self.final_settings.keys():
+            raise Exception(f"Unknown property or setting: {name}")
+
+        setting = self.final_settings.get(name, None)
+
+        # if the property accessed is a dictionary, then we make it a dotdict
+        # so that we can perform recursive dot access
+        if isinstance(setting, dict):
+            return dotdict(setting)
+        else:
+            return setting
 
     # -------------------------------------------------------------------------
 
@@ -73,6 +112,11 @@ class SimmateSettings:
             ],
             "database": self._default_database,
             "website": {
+                # Sometimes we lock down the website to registered/approved users.
+                # By default, we allow anonymous users to explore because this makes things like
+                # REST API calls much easier for them. In special cases, such as industry, we
+                # ONLY let users sign in via a specific allauth endpoint. An example of this
+                # is Corteva limiting users to those approved via their Microsoft auth.
                 "require_login": False,
                 "require_login_internal": False,
                 "require_login_exceptions": ["127.0.0.1,localhost"],
@@ -89,7 +133,7 @@ class SimmateSettings:
                     "simmate.database.third_parties.MatprojStructure",
                     "simmate.database.third_parties.OqmdStructure",
                 ],
-                "o_auth": {
+                "social_oauth": {
                     "google": {"client_id": None, "secret": None},
                     "microsoft": {"client_id": None, "secret": None},
                     "github": {"client_id": None, "secret": None},
@@ -97,8 +141,20 @@ class SimmateSettings:
                 # django extras
                 "debug": False,
                 "allowed_hosts": ["127.0.0.1,localhost"],
+                # BUG-FIX: Django-unicorn ajax requests sometimes come from the server-side
+                # ingress (url for k8s) or a nginx load balancer. To get past a 403 forbidden
+                # result, we need to sometimes specify allowed origins for csrf.
                 "csrf_trusted_origins": ["http://localhost"],
+                # Keep the secret key used in production secret!
+                # !!! I removed get_random_secret_key() so I don't have to sign out every time
+                # while testing my server. I may change this back in the future.
+                # from django.core.management.utils import get_random_secret_key
                 "secret_key": "pocj6cunub4zi31r02vr5*5a2c(+_a0+(zsswa7fmus^o78v)r",
+                # Settings for sending automated emails.
+                # For example, this can be set up for GMail by...
+                #   1. enabling IMAP (in gmail settings)
+                #   2. Having 2-factor auth turned on
+                #   3. Adding an App Password (in account settings)
                 "emails": {
                     "backend": "django.core.mail.backends.smtp.EmailBackend",  # this is the default
                     "host": "smtp.gmail.com",  # or outlook.office365.com
@@ -111,6 +167,7 @@ class SimmateSettings:
                     "subject_prefix": "[Simmate] ",
                     "account_verification": "none",  # when creating new accounts
                 },
+                # These people get an email when DEBUG=False
                 "admins": [
                     ("jacksund", "jacksundberg123@gmail.com"),
                     ("jacksund-corteva", "jack.sundberg@corteva.com"),
@@ -295,47 +352,3 @@ class SimmateSettings:
 
 # initialize all settings
 settings = SimmateSettings()
-
-
-# To make this compatible with DigitalOcean, we try to grab the allowed hosts
-# from an enviornment variable, which we then split into a list. If this
-# enviornment variable isn't set yet, then we just defaul to the localhost.
-# ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
-
-# Sometimes we lock down the website to registered/approved users.
-# By default, we allow anonymous users to explore because this makes things like
-# REST API calls much easier for them. In special cases, such as industry, we
-# ONLY let users sign in via a specific allauth endpoint. An example of this
-# is Corteva limiting users to those approved via their Microsoft auth.
-# REQUIRE_LOGIN = os.getenv("REQUIRE_LOGIN", "False") == "True"
-# # when setting REQUIRE_INTERNAL_LOGIN, set it to the allauth provider type
-# # (such as "microsoft")
-# REQUIRE_LOGIN_INTERNAL = os.getenv("REQUIRE_LOGIN_INTERNAL", "False")
-# if REQUIRE_LOGIN_INTERNAL == "False":
-#     REQUIRE_LOGIN_INTERNAL = False
-# else:
-#     assert REQUIRE_LOGIN_INTERNAL in ["microsoft", "google"]
-#     REQUIRE_LOGIN = True
-# # example: r'/apps/spotfire(.*)$'
-# REQUIRE_LOGIN_EXCEPTIONS = [
-#     e for e in os.getenv("REQUIRE_LOGIN_EXCEPTIONS", "").split(";") if e
-# ]
-# LOGIN_MESSAGE = os.getenv("LOGIN_MESSAGE", "")
-
-# BUG-FIX: Django-unicorn ajax requests sometimes come from the server-side
-# ingress (url for k8s) or a nginx load balancer. To get past a 403 forbidden
-# result, we need to sometimes specify allowed origins.
-CSRF_TRUSTED_ORIGINS = os.getenv(
-    "DJANGO_CSRF_TRUSTED_ORIGINS",
-    "http://localhost",
-).split(",")
-
-# Keep the secret key used in production secret!
-# For DigitalOcean, we grab this secret key from an enviornment variable.
-# If this variable isn't set, then we instead generate a random one.
-# SECRET_KEY = os.getenv(
-#     "DJANGO_SECRET_KEY", "pocj6cunub4zi31r02vr5*5a2c(+_a0+(zsswa7fmus^o78v)r"
-# )
-# !!! I removed get_random_secret_key() so I don't have to sign out every time
-# while testing my server. I may change this back in the future.
-# from django.core.management.utils import get_random_secret_key

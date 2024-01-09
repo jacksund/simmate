@@ -14,6 +14,8 @@ from .other import (
     bypass_nones,
     check_if_using_latest_version,
     chunk_list,
+    deep_update,
+    dotdict,
     get_app_submodule,
     get_chemical_subsystems,
     get_class,

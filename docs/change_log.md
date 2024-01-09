@@ -55,7 +55,19 @@ There is one significant exception to the above rules -- `MAJOR`=0 releases. Any
 !!! tip
     To view ongoing changes that haven't been finalized or merged yet, check our [active pull-requests](https://github.com/jacksund/simmate/pulls) on GitHub
 
-- No new changes have been merged into the `main` branch yet.
+<!-- (hidden message for maintainer to use between releases)
+- no new changes have been merged into the `main` branch yet
+**Enhancements**
+**Refactors**
+**Fixes**
+-->
+
+**Enhancements**
+- added `dotdict` utility for easy dot-access with nested dictionary objects
+- all settings can be added via environment variables for cloud-based deployments
+
+**Refactors**
+- Fully reimplemented how all settings are loaded
 
 --------------------------------------------------------------------------------
 
