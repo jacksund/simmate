@@ -7,73 +7,8 @@ database backend being used.
 
 import os
 
-import yaml
-
 from simmate.configuration import settings
 from simmate.utilities import get_directory
-
-# --------------------------------------------------------------------------------------
-
-# ENVIORNMENT VARIABLES
-
-# There are a number of settings that we let the user configure via enviornment
-# variables, which helps control things when we want to launch a website server.
-# We check for these variables in the enviornment, and if they are not set,
-# they fall back to a default.
-
-# Don't run with debug turned on in production!
-# For DigitalOcean, we try grabbing this from an enviornment variable. If that
-# variable isn't set, then we assume we are debugging. The == at the end converts
-# the string to a boolean for us.
-DEBUG = os.getenv("DEBUG", "False") == "True"
-
-# To make this compatible with DigitalOcean, we try to grab the allowed hosts
-# from an enviornment variable, which we then split into a list. If this
-# enviornment variable isn't set yet, then we just defaul to the localhost.
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
-
-# BUG-FIX: Django-unicorn ajax requests sometimes come from the server-side
-# ingress (url for k8s) or a nginx load balancer. To get past a 403 forbidden
-# result, we need to sometimes specify allowed origins.
-CSRF_TRUSTED_ORIGINS = os.getenv(
-    "DJANGO_CSRF_TRUSTED_ORIGINS",
-    "http://localhost",
-).split(",")
-
-# Keep the secret key used in production secret!
-# For DigitalOcean, we grab this secret key from an enviornment variable.
-# If this variable isn't set, then we instead generate a random one.
-SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY", "pocj6cunub4zi31r02vr5*5a2c(+_a0+(zsswa7fmus^o78v)r"
-)
-# !!! I removed get_random_secret_key() so I don't have to sign out every time
-# while testing my server. I may change this back in the future.
-# from django.core.management.utils import get_random_secret_key
-
-# Sometimes we lock down the website to registered/approved users.
-# By default, we allow anonymous users to explore because this makes things like
-# REST API calls much easier for them. In special cases, such as industry, we
-# ONLY let users sign in via a specific allauth endpoint. An example of this
-# is Corteva limiting users to those approved via their Microsoft auth.
-REQUIRE_LOGIN = os.getenv("REQUIRE_LOGIN", "False") == "True"
-# when setting REQUIRE_INTERNAL_LOGIN, set it to the allauth provider type
-# (such as "microsoft")
-REQUIRE_LOGIN_INTERNAL = os.getenv("REQUIRE_LOGIN_INTERNAL", "False")
-if REQUIRE_LOGIN_INTERNAL == "False":
-    REQUIRE_LOGIN_INTERNAL = False
-else:
-    assert REQUIRE_LOGIN_INTERNAL in ["microsoft", "google"]
-    REQUIRE_LOGIN = True
-# example: r'/apps/spotfire(.*)$'
-REQUIRE_LOGIN_EXCEPTIONS = [
-    e for e in os.getenv("REQUIRE_LOGIN_EXCEPTIONS", "").split(";") if e
-]
-LOGIN_MESSAGE = os.getenv("LOGIN_MESSAGE", "")
-
-# These allow server maintainers to override the homepage and profile views, which
-# is important if they involve loading custom apps/models for their templates.
-PROFILE_VIEW = os.getenv("PROFILE_VIEW", None)
-HOME_VIEW = os.getenv("HOME_VIEW", None)
 
 # --------------------------------------------------------------------------------------
 
@@ -150,36 +85,6 @@ INSTALLED_APPS = [
 # when running small scripts. One idea is to have an applications_override.yaml
 # where the user specifies only what they want. Alternatively, I can use
 # a general DATABASE_ONLY keyword or something similar to limit what's loaded.
-
-# --------------------------------------------------------------------------------------
-
-# DATBASE EXPLORER
-
-# We also check if the user has a "apps.yaml" file. In this file, the
-# user can provide extra apps to install for Django. We simply append these
-# to our list above. By default we include apps that are packaged with simmate,
-# such as the VASP workflows app.
-DEFAULT_SIMMATE_DATA = [
-    "simmate.database.third_parties.AflowPrototype",
-    # "simmate.database.third_parties.AflowStructure",  # Not allowed yet
-    "simmate.database.third_parties.CodStructure",
-    "simmate.database.third_parties.JarvisStructure",
-    "simmate.database.third_parties.MatprojStructure",
-    "simmate.database.third_parties.OqmdStructure",
-]
-DATA_EXPLORER_YAML = settings.config_directory / f"{settings.conda_env}-data.yaml"
-# create the file if it doesn't exist yet
-if not DATA_EXPLORER_YAML.exists():
-    with DATA_EXPLORER_YAML.open("w") as file:
-        content = yaml.dump(DEFAULT_SIMMATE_DATA)
-        file.write(content)
-
-# load apps that the user wants installed
-with DATA_EXPLORER_YAML.open() as file:
-    SIMMATE_DATA = yaml.full_load(file)
-    # If the file is empty, just keep our result as an empty list
-    if not SIMMATE_DATA:
-        SIMMATE_DATA = []
 
 # --------------------------------------------------------------------------------------
 
@@ -315,7 +220,6 @@ STATICFILES_DIRS = [
     settings.django_directory / "static_files",
 ]
 
-
 # For the dynamically-created structure files, we need to include the static
 # directory this to work during local testing. This is NOT allowed in a
 # production server, so we don't include it when DEBUG is set to False.
@@ -431,8 +335,8 @@ if MICROSOFT_CLIENT_ID and MICROSOFT_SECRET:
 
 # Initiate social login immediately -- rather than jumping to a separate
 # page and then posting.
-# SECURITY: consider removing per django-allauth's recommendation
 SOCIALACCOUNT_LOGIN_ON_GET = True
+# SECURITY: consider removing per django-allauth's recommendation
 
 # options for login/logoff views
 LOGIN_REDIRECT_URL = "/accounts/profile/"  # this is already the default
@@ -466,5 +370,5 @@ LOGIN_REQUIRED_URLS_EXCEPTIONS = (
 # BUG: To use Django ORM within IPython, Spyder, and Jupyter notebooks, which
 # are examples of async consoles, I need to allow unsafe.
 # Read more at...
-# https://docs.djangoproject.com/en/4.0/topics/async/#async-safety
+# https://docs.djangoproject.com/en/5.0/topics/async/#async-safety
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"

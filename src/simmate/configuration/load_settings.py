@@ -7,16 +7,16 @@ import yaml
 from simmate import website  # needed to specify location of built-in apps
 from simmate.utilities import get_conda_env, get_directory, str_to_datatype
 
-  
+
 class SimmateSettings:
     """
     Configures Simmate settings
     """
-    
+
     # -------------------------------------------------------------------------
 
     @cached_property
-    def all_settings(self) -> dict:
+    def final_settings(self) -> dict:
         """
         The final settings built from user-supplied settings and all defaults
         """
@@ -27,28 +27,38 @@ class SimmateSettings:
         # clean variables
         # TODO: handle database.url input
         # TODO: use_docker inputs
-        
+
         # Run compatibility checks (e.g. use_docker requires a 'docker run' cmd)
         # TODO
-        
+
         return settings
-    
+
+    def __getattr__(self, name: str):
+        """
+        Makes all settings accessible as properties.
+
+        This handles how `getattr(self, "example")` or `self.example` behaves
+        when `example` is not actually defined.
+        """
+        return self.final_settings.get(name, None)
+
     # -------------------------------------------------------------------------
-    
+
     @cached_property
     def default_settings(self) -> dict:
         """
-        The default settings for Simmate. 
-        
-        Note that some of these settings (such as the database name) are 
-        determined dynamically, so default may vary across different 
+        The default settings for Simmate.
+
+        Note that some of these settings (such as the database name) are
+        determined dynamically, so default may vary across different
         simmate installations.
-        
+
         Further, some settings update the default for others. An example of this
-        is `use_docker` for Quantum Espresso, which will also change the 
+        is `use_docker` for Quantum Espresso, which will also change the
         `default_command` for this app.
         """
         return {
+            "version": None,
             "apps": [
                 "simmate.workflows.configs.BaseWorkflowsConfig",
                 "simmate.apps.configs.QuantumEspressoConfig",
@@ -64,14 +74,46 @@ class SimmateSettings:
             "database": self._default_database,
             "website": {
                 "require_login": False,
+                "require_login_internal": False,
+                "require_login_exceptions": ["127.0.0.1,localhost"],
+                "login_message": None,
+                # These allow server maintainers to override the homepage and profile views, which
+                # is important if they involve loading custom apps/models for their templates.
                 "home_view": None,
                 "profile_view": None,
                 "data": [
                     "simmate.database.third_parties.AflowPrototype",
+                    # "simmate.database.third_parties.AflowStructure",  # Not allowed yet
                     "simmate.database.third_parties.CodStructure",
                     "simmate.database.third_parties.JarvisStructure",
                     "simmate.database.third_parties.MatprojStructure",
-                    "simmate.database.third_parties.OqmdStructure",   
+                    "simmate.database.third_parties.OqmdStructure",
+                ],
+                "o_auth": {
+                    "google": {"client_id": None, "secret": None},
+                    "microsoft": {"client_id": None, "secret": None},
+                    "github": {"client_id": None, "secret": None},
+                },
+                # django extras
+                "debug": False,
+                "allowed_hosts": ["127.0.0.1,localhost"],
+                "csrf_trusted_origins": ["http://localhost"],
+                "secret_key": "pocj6cunub4zi31r02vr5*5a2c(+_a0+(zsswa7fmus^o78v)r",
+                "emails": {
+                    "backend": "django.core.mail.backends.smtp.EmailBackend",  # this is the default
+                    "host": "smtp.gmail.com",  # or outlook.office365.com
+                    "port": 587,
+                    "use_tls": False,
+                    "host_user": "",
+                    "host_password": "",
+                    "from_email": "simmate.team@gmail.com",
+                    "timeout": 5,
+                    "subject_prefix": "[Simmate] ",
+                    "account_verification": "none",  # when creating new accounts
+                },
+                "admins": [
+                    ("jacksund", "jacksundberg123@gmail.com"),
+                    ("jacksund-corteva", "jack.sundberg@corteva.com"),
                 ],
             },
             # app-specific configs
@@ -80,8 +122,7 @@ class SimmateSettings:
                 "default_command": "vasp_std > vasp.out",
             },
             "quantum_espresso": {
-                # BUG: depends on use_docker
-                "default_command": "pw.x < pwscf.in > pw-scf.out",  
+                "default_command": "pw.x < pwscf.in > pw-scf.out",
                 "use_docker": False,
             },
         }
@@ -207,7 +248,7 @@ class SimmateSettings:
         return user_settings
 
     # -------------------------------------------------------------------------
-    
+
     # Fixed settings that are automatically set
 
     @cached_property
@@ -251,5 +292,50 @@ class SimmateSettings:
         "SIMMATE__WEBSITE__REQUIRE_LOGIN": bool,
     }
 
+
 # initialize all settings
 settings = SimmateSettings()
+
+
+# To make this compatible with DigitalOcean, we try to grab the allowed hosts
+# from an enviornment variable, which we then split into a list. If this
+# enviornment variable isn't set yet, then we just defaul to the localhost.
+# ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+
+# Sometimes we lock down the website to registered/approved users.
+# By default, we allow anonymous users to explore because this makes things like
+# REST API calls much easier for them. In special cases, such as industry, we
+# ONLY let users sign in via a specific allauth endpoint. An example of this
+# is Corteva limiting users to those approved via their Microsoft auth.
+# REQUIRE_LOGIN = os.getenv("REQUIRE_LOGIN", "False") == "True"
+# # when setting REQUIRE_INTERNAL_LOGIN, set it to the allauth provider type
+# # (such as "microsoft")
+# REQUIRE_LOGIN_INTERNAL = os.getenv("REQUIRE_LOGIN_INTERNAL", "False")
+# if REQUIRE_LOGIN_INTERNAL == "False":
+#     REQUIRE_LOGIN_INTERNAL = False
+# else:
+#     assert REQUIRE_LOGIN_INTERNAL in ["microsoft", "google"]
+#     REQUIRE_LOGIN = True
+# # example: r'/apps/spotfire(.*)$'
+# REQUIRE_LOGIN_EXCEPTIONS = [
+#     e for e in os.getenv("REQUIRE_LOGIN_EXCEPTIONS", "").split(";") if e
+# ]
+# LOGIN_MESSAGE = os.getenv("LOGIN_MESSAGE", "")
+
+# BUG-FIX: Django-unicorn ajax requests sometimes come from the server-side
+# ingress (url for k8s) or a nginx load balancer. To get past a 403 forbidden
+# result, we need to sometimes specify allowed origins.
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "DJANGO_CSRF_TRUSTED_ORIGINS",
+    "http://localhost",
+).split(",")
+
+# Keep the secret key used in production secret!
+# For DigitalOcean, we grab this secret key from an enviornment variable.
+# If this variable isn't set, then we instead generate a random one.
+# SECRET_KEY = os.getenv(
+#     "DJANGO_SECRET_KEY", "pocj6cunub4zi31r02vr5*5a2c(+_a0+(zsswa7fmus^o78v)r"
+# )
+# !!! I removed get_random_secret_key() so I don't have to sign out every time
+# while testing my server. I may change this back in the future.
+# from django.core.management.utils import get_random_secret_key
