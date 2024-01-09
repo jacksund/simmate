@@ -1,3 +1,4 @@
+import logging
 import os
 from functools import cached_property
 from pathlib import Path
@@ -61,12 +62,6 @@ class SimmateSettings:
         # Run compatibility checks (e.g. use_docker requires a 'docker run' cmd)
         # TODO
 
-        # write to file for user reference
-        # filename = self.config_directory / f"_{self.conda_env}-settings.yaml"
-        # with filename.open("w") as file:
-        #     content = yaml.dump(settings)
-        #     file.write(content)
-
         return settings
 
     def __getattr__(self, name: str):
@@ -87,6 +82,28 @@ class SimmateSettings:
             return dotdict(setting)
         else:
             return setting
+
+    def write_settings(self, filename: Path = None):
+        """
+        Writes the final simmate settings to yaml file
+        """
+        if not filename:
+            filename = (
+                settings.config_directory / f"_{settings.conda_env}-settings.yaml"
+            )
+
+        logging.info(f"Writing settings to: '{filename}'")
+        with filename.open("w") as file:
+            content = yaml.dump(settings.final_settings)
+            file.write(content)
+
+    def show_settings(self, user_only: bool = False):
+        """
+        Takes the final simmate settings and prints them in a yaml format that is
+        easier to read.
+        """
+        settings_to_print = self.final_settings if not user_only else self.user_settings
+        print(yaml.dump(settings_to_print))
 
     # -------------------------------------------------------------------------
 

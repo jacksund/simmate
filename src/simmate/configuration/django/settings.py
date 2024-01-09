@@ -13,7 +13,8 @@ from simmate.utilities import get_directory
 # --------------------------------------------------------------------------------------
 
 # DATABASE CONNECTION
-DATABASES = {"default": settings.database}
+_default_database = {k.upper(): v for k, v in settings.database.items()}
+DATABASES = {"default": _default_database}
 
 # List all applications that Django will initialize with. Write the full python
 # path to the app or it's config file. Note that relative python paths work too

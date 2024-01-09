@@ -9,6 +9,7 @@ from pathlib import Path
 
 import typer
 
+from simmate.command_line.config import config_app
 from simmate.command_line.database import database_app
 from simmate.command_line.engine import engine_app
 from simmate.command_line.utilities import utilities_app
@@ -128,6 +129,7 @@ def start_project():
 
 # # All commands are organized into other files, so we need to manually register
 # # them to our base "simmate" command here.
+simmate_app.add_typer(config_app, name="config")
 simmate_app.add_typer(database_app, name="database")
 simmate_app.add_typer(engine_app, name="engine")
 simmate_app.add_typer(workflows_app, name="workflows")
