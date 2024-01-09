@@ -143,7 +143,7 @@ class SimmateSettings:
                 # is Corteva limiting users to those approved via their Microsoft auth.
                 "require_login": False,
                 "require_login_internal": False,
-                "require_login_exceptions": ["127.0.0.1,localhost"],
+                "require_login_exceptions": [],
                 "login_message": None,
                 # These allow server maintainers to override the homepage and profile views, which
                 # is important if they involve loading custom apps/models for their templates.
@@ -164,7 +164,7 @@ class SimmateSettings:
                 },
                 # django extras
                 "debug": False,
-                "allowed_hosts": ["127.0.0.1,localhost"],
+                "allowed_hosts": ["127.0.0.1", "localhost"],
                 # BUG-FIX: Django-unicorn ajax requests sometimes come from the server-side
                 # ingress (url for k8s) or a nginx load balancer. To get past a 403 forbidden
                 # result, we need to sometimes specify allowed origins for csrf.
@@ -179,7 +179,7 @@ class SimmateSettings:
                 #   1. enabling IMAP (in gmail settings)
                 #   2. Having 2-factor auth turned on
                 #   3. Adding an App Password (in account settings)
-                "emails": {
+                "email": {
                     "backend": "django.core.mail.backends.smtp.EmailBackend",  # this is the default
                     "host": "smtp.gmail.com",  # or outlook.office365.com
                     "port": 587,

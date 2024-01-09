@@ -12,6 +12,16 @@ from simmate.utilities import get_directory
 
 # --------------------------------------------------------------------------------------
 
+DEBUG = settings.website.debug
+
+ALLOWED_HOSTS = settings.website.allowed_hosts
+
+CSRF_TRUSTED_ORIGINS = settings.website.csrf_trusted_origins
+
+SECRET_KEY = settings.website.secret_key
+
+# --------------------------------------------------------------------------------------
+
 # DATABASE CONNECTION
 _default_database = {k.upper(): v for k, v in settings.database.items()}
 DATABASES = {"default": _default_database}

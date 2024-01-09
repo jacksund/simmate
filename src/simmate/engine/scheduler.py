@@ -96,7 +96,7 @@ class SimmateScheduler(Scheduler):
     def _register_app_schedules(apps_to_search: list[str] = settings.apps):
         """
         Goes through a list of apps and imports the "schedules" module in each.
-        By default, this will grab all installed SIMMATE_APPs
+        By default, this will grab all installed 'settings.apps'
         """
         logging.info("Searching for registrations...")
         for app_name in apps_to_search:

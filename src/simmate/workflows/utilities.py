@@ -27,7 +27,7 @@ def get_all_workflows(
 ) -> list[Workflow]:
     """
     Goes through a list of apps and grabs all workflow objects available.
-    By default, this will grab all installed SIMMATE_APPs
+    By default, this will grab all installed 'settings.apps'
     """
     app_workflows = []
     for app_name in apps_to_search:
@@ -71,7 +71,7 @@ def get_all_workflows(
 
 
 def get_all_workflow_names(
-    apps_to_search: list[str] = SIMMATE_APPS,
+    apps_to_search: list[str] = settings.apps,
     exclude_subflows: bool = False,
 ) -> list[str]:
     """
@@ -236,7 +236,7 @@ def get_workflow(workflow_name: str) -> Workflow:
 
         return workflow
 
-    # otherwise the app should be registered and available in the SIMMATE_APPS
+    # otherwise the app should be registered and available in the settings.apps
     workflow_dict = get_all_workflows(as_dict=True)
     workflow = workflow_dict.get(workflow_name, None)
 
