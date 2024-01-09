@@ -9,7 +9,7 @@ from django.utils import timezone
 from rich import print
 from rich.progress import track
 
-from simmate.configuration.django.settings import DATABASE_BACKEND
+from simmate.configuration import settings
 from simmate.engine.execution.database import WorkItem
 
 
@@ -53,7 +53,7 @@ class SimmateExecutor:
         # Issue is discussed at https://github.com/jacksund/simmate/issues/475
         # Django discusses this issue in their docs as well:
         #   https://docs.djangoproject.com/en/4.2/ref/databases/#substring-matching-and-case-sensitivity
-        if tags and DATABASE_BACKEND == "sqlite3":
+        if tags and settings.database_backend == "sqlite3":
             for tag in tags:
                 if len(tag) != 7 or tag.lower() != tag:
                     raise Exception(

@@ -7,7 +7,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import F
 from django.shortcuts import render
 
-from simmate.configuration.django.settings import HOME_VIEW, PROFILE_VIEW, SIMMATE_APPS
+from simmate.configuration import settings
 from simmate.database.third_parties import (
     AflowStructure,
     CodStructure,
@@ -37,11 +37,11 @@ def profile_default_view(request):
 
 @login_required
 def profile(request):
-    if not PROFILE_VIEW:
+    if not settings.website.profile_view:
         return profile_default_view(request)  # This is the function above
     else:
         # we assume the view is named "profile" inside this module
-        profile_module = importlib.import_module(PROFILE_VIEW)
+        profile_module = importlib.import_module(settings.website.profile_view)
         profile_view = getattr(profile_module, "profile")
         return profile_view(request)
 
@@ -128,11 +128,11 @@ def home_default_view(request):
 
 
 def home(request):
-    if not HOME_VIEW:
+    if not settings.website.home_view:
         return home_default_view(request)  # This is the function above
     else:
         # we assume the view is named "home" inside this module
-        home_module = importlib.import_module(HOME_VIEW)
+        home_module = importlib.import_module(settings.website.home_view)
         home_view = getattr(home_module, "home")
         return home_view(request)
 
@@ -152,7 +152,7 @@ def permission_denied(request):
 
 def apps(request):
     extra_apps = []
-    for app_name in SIMMATE_APPS:
+    for app_name in settings.apps:
         urls_path = get_app_submodule(app_name, "urls")
         if urls_path:
             app_config = get_class(app_name)

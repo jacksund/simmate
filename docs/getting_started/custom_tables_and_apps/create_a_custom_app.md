@@ -106,25 +106,26 @@ this is where your database is stored, and it is located at...
 cd ~/simmate/
 ```
 
-2. Locate the file `~/simmate/my_env-apps.yaml`, which is named after your
+2. Locate the file `~/simmate/my_env-settings.yaml`, which is named after your
 conda environment. Open it and you'll see we have apps already installed
 with Simmate:
 ``` yaml
-- simmate.workflows.configs.BaseWorkflowsConfig
-- simmate.apps.VaspConfig
-- simmate.apps.BaderConfig
-- simmate.apps.EvoSearchConfig
+apps:
+    - simmate.workflows.configs.BaseWorkflowsConfig
+    - simmate.apps.VaspConfig
+    - simmate.apps.BaderConfig
+    - simmate.apps.EvoSearchConfig
 ```
 
-3. In this file, add the following line at the bottom
+3. In this section, add the following line:
 ``` yaml
 - example_app.apps.ExampleAppConfig
 ```
 
 4. Ensure Simmate can locate and load your app in Python
 ``` python
-from simmate.configuration.django.settings import SIMMATE_APPS
-print(SIMMATE_APPS)  # you should see your new app!
+from simmate.configuration import settings
+print(settings.apps)  # you should see your new app!
 ```
 
 5. Ensure Simmate can configure your new app and its tables properly

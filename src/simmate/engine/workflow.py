@@ -13,7 +13,7 @@ import yaml
 from django.utils import timezone
 
 import simmate
-from simmate.configuration.django.settings import DATABASE_BACKEND
+from simmate.configuration import settings
 from simmate.database.base_data_types import Calculation
 from simmate.engine.execution import SimmateExecutor, WorkItem
 from simmate.utilities import (
@@ -322,7 +322,7 @@ class Workflow:
         # that SQLite3 limits the default tag to just "simmate". The parameter
         # docs for `tags` explains this bug with SQLite
         if not tags:
-            tags = cls.tags if DATABASE_BACKEND != "sqlite3" else ["simmate"]
+            tags = cls.tags if settings.database_backend != "sqlite3" else ["simmate"]
 
         state = SimmateExecutor.submit(
             cls._run_full,  # should this be the run method...?

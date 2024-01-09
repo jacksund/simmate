@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import os
 
 from django.apps import apps
 from django.core.management import call_command
 from django.db.utils import DatabaseError
 
-from simmate.configuration.django.settings import DATABASE_BACKEND, DATABASES
+from simmate.configuration import settings
 
 # Lists off which apps to update/create. By default, I do all apps that are installed
 # so this list is grabbed directly from django. I also grab the CUSTOM_APPS to
@@ -96,16 +95,16 @@ def reset_database(
     #   django-admin reset_db --settings=simmate.configuration.django.settings
     # Note: this does not remove migration files or reapply migrating after
 
-    if DATABASE_BACKEND == "sqlite3":
+    if settings.database_backend == "sqlite3":
         # grab the location of the database file. I assume the default
         # database for now.
-        db_filename = DATABASES["default"]["NAME"]
+        db_filename = settings.database.name
 
         # delete the sqlite3 database file if it exists
         if db_filename.exists():
             db_filename.unlink()
 
-    elif DATABASE_BACKEND == "postgresql":
+    elif settings.database_backend == "postgresql":
         # We do this with an independent postgress connection, rather than through
         # django so that we can close everything down easily.
         import psycopg2
@@ -122,15 +121,15 @@ def reset_database(
         for maintenance_db_name in [
             "postgres",
             "defaultdb",
-            DATABASES["default"]["USER"],
+            settings.database.user,
         ]:
             try:
                 connection = psycopg2.connect(
-                    host=DATABASES["default"]["HOST"],
+                    host=settings.database.host,
                     database=maintenance_db_name,
-                    user=DATABASES["default"]["USER"],
-                    password=DATABASES["default"]["PASSWORD"],
-                    port=DATABASES["default"]["PORT"],
+                    user=settings.database.user,
+                    password=settings.database.password,
+                    port=settings.database.port,
                 )
             except psycopg2.OperationalError as error:
                 if f'"{maintenance_db_name}" does not exist' in str(error):
@@ -163,7 +162,7 @@ def reset_database(
         cursor = connection.cursor()
 
         # Build out database extensions and tables
-        db_name = DATABASES["default"]["NAME"]
+        db_name = settings.database.name
         cursor.execute(f'DROP DATABASE IF EXISTS "{db_name}";')
         # BUG: if others are connected I could add 'WITH (FORCE)' above.
         # For now, I don't use this but should consider adding it for convenience.
@@ -178,7 +177,7 @@ def reset_database(
         cursor.close()
         connection.close()
 
-    elif DATABASE_BACKEND not in ["postgresql", "sqlite3"]:
+    elif settings.database_backend not in ["postgresql", "sqlite3"]:
         logging.warning(
             "reseting your database is only supported for SQLite and Postgres."
             " Make sure you only use this function when initially building your "
@@ -187,7 +186,7 @@ def reset_database(
 
     # instead of building the database from scratch, we instead download a
     # prebuilt database file.
-    if DATABASE_BACKEND == "sqlite3" and use_prebuilt:
+    if settings.database_backend == "sqlite3" and use_prebuilt:
         from simmate.database.third_parties import load_default_sqlite3_build
 
         logging.info("Setting up prebuilt database...")

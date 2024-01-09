@@ -15,13 +15,13 @@ from pathlib import Path
 
 import yaml
 
-from simmate.configuration.django.settings import SIMMATE_APPS
+from simmate.configuration import settings
 from simmate.engine import Workflow
 from simmate.utilities import get_app_submodule, get_directory, make_archive
 
 
 def get_all_workflows(
-    apps_to_search: list[str] = SIMMATE_APPS,
+    apps_to_search: list[str] = settings.apps,
     as_dict: bool = False,
     exclude_subflows: bool = False,
 ) -> list[Workflow]:

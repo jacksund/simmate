@@ -4,6 +4,7 @@ from pathlib import Path
 
 import yaml
 
+import simmate
 from simmate import website  # needed to specify location of built-in apps
 from simmate.utilities import (
     deep_update,
@@ -60,6 +61,12 @@ class SimmateSettings:
         # Run compatibility checks (e.g. use_docker requires a 'docker run' cmd)
         # TODO
 
+        # write to file for user reference
+        # filename = self.config_directory / f"_{self.conda_env}-settings.yaml"
+        # with filename.open("w") as file:
+        #     content = yaml.dump(settings)
+        #     file.write(content)
+
         return settings
 
     def __getattr__(self, name: str):
@@ -97,7 +104,7 @@ class SimmateSettings:
         `default_command` for this app.
         """
         return {
-            "version": None,
+            "version": simmate.__version__,
             "apps": [
                 "simmate.workflows.configs.BaseWorkflowsConfig",
                 "simmate.apps.configs.QuantumEspressoConfig",
@@ -255,7 +262,7 @@ class SimmateSettings:
             return settings_file
 
         # 3. my_env-settings.yaml file
-        settings_file = self.config_directory / "{self.conda_env}-settings.yaml"
+        settings_file = self.config_directory / f"{self.conda_env}-settings.yaml"
         if settings_file.exists():
             return settings_file
 

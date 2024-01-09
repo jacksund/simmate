@@ -2,7 +2,7 @@
 
 from django.shortcuts import render
 
-from simmate.configuration.django.settings import SIMMATE_DATA
+from simmate.configuration import settings
 from simmate.database.base_data_types import DatabaseTable, Structure
 from simmate.website.core_components.base_api_view import SimmateAPIViewSet
 
@@ -15,7 +15,7 @@ except ModuleNotFoundError:
 
 ALL_PROVIDERS = {
     DatabaseTable.get_table(table_name).table_name: DatabaseTable.get_table(table_name)
-    for table_name in SIMMATE_DATA
+    for table_name in settings.website.data
 }
 
 

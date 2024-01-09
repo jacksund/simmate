@@ -28,7 +28,7 @@ from django_filters import rest_framework as django_api_filters
 from django_pandas.io import read_frame
 from rich.progress import track
 
-from simmate.configuration.django.settings import DATABASE_BACKEND
+from simmate.configuration import settings
 from simmate.database.utilities import check_db_conn
 
 # The "as table_column" line does NOTHING but rename a module.
@@ -209,9 +209,9 @@ class SearchResults(models.QuerySet):
         if tags:
             new_query = self
             for tag in tags:
-                if DATABASE_BACKEND == "postgresql":
+                if settings.database_backend == "postgresql":
                     new_query = new_query.filter(tags__contains=tag)
-                elif DATABASE_BACKEND == "sqlite3":
+                elif settings.database_backend == "sqlite3":
                     new_query = new_query.filter(tags__icontains=tag)
         else:
             new_query = self.filter(tags=[])
@@ -1220,9 +1220,11 @@ class DatabaseTable(models.Model):
         # Django and Dask can only handle so much for the parallelization
         # of database writing with SQLite. So if the user has SQLite as their
         # backend, we need to stop them from using this feature.
-        from simmate.configuration.django.settings import DATABASES
-
-        if parallel and not confirm_sqlite_parallel and "sqlite3" in str(DATABASES):
+        if (
+            parallel
+            and not confirm_sqlite_parallel
+            and "sqlite3" in str(settings.database_backend)
+        ):
             raise Exception(
                 "It looks like you are trying to run things in parallel but are "
                 "using the default database backend (sqlite3), which is not "

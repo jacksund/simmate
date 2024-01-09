@@ -4,7 +4,7 @@ import logging
 import shutil
 import urllib
 
-from simmate.configuration.django.settings import DATABASES, SIMMATE_DIRECTORY
+from simmate.configuration import settings
 from simmate.database.third_parties import (
     AflowPrototype,
     CodStructure,
@@ -62,10 +62,10 @@ def load_default_sqlite3_build():
     archive_filename = "prebuild-2023-12-20.zip"
 
     # Make sure the backend is using SQLite3 as this is the only allowed format
-    assert DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
+    assert settings.database.engine == "django.db.backends.sqlite3"
 
     # check if the prebuild directory exists, and create it if not
-    archive_dir = get_directory(SIMMATE_DIRECTORY / "sqlite-prebuilds")
+    archive_dir = get_directory(settings.config_directory / "sqlite-prebuilds")
 
     archive_filename_full = archive_dir / archive_filename
 
@@ -90,6 +90,6 @@ def load_default_sqlite3_build():
 
     # rename and move the sqlite file to be the new database
     db_filename_orig = archive_filename_full.with_suffix(".sqlite3")  # was .zip
-    db_filename_new = DATABASES["default"]["NAME"]
+    db_filename_new = settings.database.name
     shutil.move(db_filename_orig, db_filename_new)
     logging.info("Done unpacking.")

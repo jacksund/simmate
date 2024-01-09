@@ -31,20 +31,20 @@ def test(run_calcs: bool = False):
     import logging
     import shutil
 
-    from simmate.configuration.django.settings import APPLICATIONS_YAML, INSTALLED_APPS
+    from simmate.configuration import settings
 
     # true until proven otherwise
     passed_all = True
 
     # 1 - check that VASP Simmate app is registered
     app_name = "simmate.apps.configs.VaspConfig"
-    is_registered = app_name in INSTALLED_APPS
+    is_registered = app_name in settings.apps
     if is_registered:
         logging.info("VASP app is registered :heavy_check_mark:")
     else:
         logging.warning(
             "You must have the VASP app registered with Simmate. "
-            f"To do this, add '{app_name}' to {APPLICATIONS_YAML}"
+            f"To do this, add '{app_name}' to the 'apps' section in {settings.settings_source}"
         )
         passed_all = False
 
