@@ -370,7 +370,29 @@ class SimmateSettings:
     # OPTIMIZE: this is only used in the _get_env_settings method and should
     # depreciated in favor of type-inspecting
     _input_mappings: dict = {
+        "SIMMATE__APPS": list[str],
+        "SIMMATE__DATABASE__ENGINE": str,
+        "SIMMATE__DATABASE__HOST": str,
+        "SIMMATE__DATABASE__NAME": str,
+        "SIMMATE__DATABASE__USER": str,
+        "SIMMATE__DATABASE__PASSWORD": str,
+        "SIMMATE__DATABASE__PORT": int,
+        "SIMMATE__WEBSITE__ALLOWED_HOSTS": list[str],
+        "SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS": list[str],
+        "SIMMATE__WEBSITE__DATA": list[str],
+        "SIMMATE__WEBSITE__DEBUG": bool,
+        "SIMMATE__WEBSITE__EMAILS__FROM_EMAIL": str,
+        "SIMMATE__WEBSITE__EMAILS__HOST": str,
+        "SIMMATE__WEBSITE__EMAILS__PORT": int,
+        "SIMMATE__WEBSITE__EMAILS__TIMEOUT": int,  # or float...?
+        "SIMMATE__WEBSITE__HOME_VIEW": str,
+        "SIMMATE__WEBSITE__LOGIN_MESSAGE": str,
+        "SIMMATE__WEBSITE__PROFILE_VIEW": str,
         "SIMMATE__WEBSITE__REQUIRE_LOGIN": bool,
+        "SIMMATE__WEBSITE__REQUIRE_LOGIN_EXCEPTIONS": list[str],
+        "SIMMATE__WEBSITE__REQUIRE_LOGIN_INTERNAL": bool,
+        "SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__CLIENT_ID": str,
+        "SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__SECRET": str,
     }
 
 
