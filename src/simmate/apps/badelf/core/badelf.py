@@ -113,7 +113,8 @@ class BadElfToolkit:
 
         if self.find_electrides:
             electride_structure = ElectrideFinder(
-                self.partitioning_grid
+                self.partitioning_grid,
+                self.directory,
             ).get_electride_structure(
                 electride_finder_cutoff=self.electride_finder_cutoff
             )
@@ -157,8 +158,8 @@ class BadElfToolkit:
     @cached_property
     def partitioning(self):
         """
-        The partitioning planes for the structure as a dictionary. None if the
-        zero-flux method is selected
+        The partitioning planes for the structure as a dictionary of dataframes.
+        None if the zero-flux method is selected
         """
         return self._get_partitioning()
 
@@ -172,7 +173,7 @@ class BadElfToolkit:
         """
         # Get the partitioning grid
         partitioning_grid = self.partitioning_grid.copy()
-        partitioning_grid.regrid()
+        # partitioning_grid.regrid()
         # If the algorithm is badelf, we don't want to partition with the structure
         # containing electrides. We remove any electrides in case the provided
         # structure already had them.
@@ -577,7 +578,7 @@ class BadElfToolkit:
                 # We will have many excess electride sites that are in unit cells that
                 # don't border the one we're looking at. I'm not certain, but I don't
                 # think those are necessary. We cut them out here to save time from the
-                # get_partitioning_line function.
+                # get_partitioning_line_from_voxels function.
 
                 # Assume this neighbor is not more than one unit cell away
                 more_than_1_unit_cell_away = False
@@ -595,7 +596,7 @@ class BadElfToolkit:
                 # get the voxel coord for the connected electride site and get the ELF
                 # line between the site and this neighbor
                 neigh_pos = elf_grid.get_voxel_coords_from_neigh(neighbor)
-                pos, values = partitioning_tools.get_partitioning_line(
+                pos, values = partitioning_tools.get_partitioning_line_from_voxels(
                     site_pos, neigh_pos
                 )
                 # partitioning_lines.append([pos,values])
@@ -620,7 +621,7 @@ class BadElfToolkit:
 
         # Get the dimensionality from our StructureGraph. If more than one group of electrides
         # is found, it will default to the highest dimensionality.
-        return get_dimensionality_larsen(graph)  # , partitioning_lines
+        return get_dimensionality_larsen(graph)
 
     def _fix_BvAt(self, file_name):
         electride_structure = self.electride_structure
@@ -708,8 +709,8 @@ class BadElfToolkit:
                 else:
                     # Get dists from partitioning
                     radii = []
-                    for neighbor in self.partitioning[site].values():
-                        radii.append(neighbor["radius"])
+                    for neighbor_index, row in self.partitioning[site].iterrows():
+                        radii.append(row["radius"])
                     min_radii = min(radii)
                     min_dists[site] = min_radii
 
@@ -799,19 +800,6 @@ class BadElfToolkit:
         # Fill out columns unrelated to badelf alg
         structure = self.structure
         results["structure"] = structure
-        # results["nelements"] = len(structure.composition)
-        # results["elements"] = [str(e) for e in structure.composition.elements]
-        # results["chemical_system"] = structure.composition.chemical_system
-        # results["density"] = float(structure.density)
-        # results["density_volume"] = structure.num_sites / structure.volume
-        # results["volume"] = structure.volume
-        # results["volume_molar"] = (
-        #     (structure.volume / structure.num_sites) * Avogadro * 1e-27 * 1e3
-        # )
-        # results["spacegroup"] = structure.get_space_group_info(symprec=0.1)#[1]
-        # results["formula_full"] = structure.composition.formula
-        # results["formula_reduced"] = structure.composition.reduced_formula
-        # results["formula_anonymous"] = structure.composition.anonymized_formula
 
         return results
 
