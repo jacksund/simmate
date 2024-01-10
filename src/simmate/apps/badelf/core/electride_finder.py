@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import math
 from functools import cached_property
 from pathlib import Path
@@ -286,6 +287,7 @@ class ElectrideFinder:
         A structure object with the found electride sites labeled with "He"
         dummy atoms.
         """
+        logging.info("Finding electride sites")
         # Get the coordinates and values of each local maximum in the grid
         grid = self.grid.copy()
         if local_maxima_coords is None:
@@ -298,7 +300,7 @@ class ElectrideFinder:
             old_electride_sites = structure.indices_from_symbol("He")
             structure.remove_sites(old_electride_sites)
         elif "He" in structure.symbol_set and not remove_old_electrides:
-            print(
+            logging.warning(
                 """
                   Dummy atoms were found already in the structure. No new
                   electride sites will be added. To have the algorithm search
@@ -384,8 +386,10 @@ class ElectrideFinder:
         final_electride_structure = structure.copy()
         electride_sites = electride_structure.indices_from_symbol("He")
         if len(electride_sites) > 0:
+            logging.info(f"{len(electride_sites)} electride sites found")
             for site in electride_sites:
                 coord = electride_structure[site].coords
                 final_electride_structure.append("He", coord, coords_are_cartesian=True)
-
+        else:
+            logging.info("No electride sites found")
         return final_electride_structure

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import math
 from itertools import combinations
 
@@ -10,6 +11,7 @@ from pymatgen.analysis.local_env import CrystalNN
 from scipy.interpolate import RegularGridInterpolator
 from scipy.signal import savgol_filter
 from scipy.spatial import ConvexHull
+from tqdm import tqdm
 
 from simmate.apps.badelf.core.grid import Grid
 from simmate.toolkit import Structure
@@ -370,14 +372,10 @@ class PartitioningToolkit:
 
                 if min_pos == 4:
                     # Our line is centered and we can move on
-                    print("Partitioning minimum is centered.")
                     centered = True
                 else:
                     # Our line is not centered and we need to adjust it
                     amount_to_shift = min_pos - 4
-                    print(
-                        f"Rough partitioning minimum not centered. Shifting {amount_to_shift}"
-                    )
 
         if not centered:
             # The above sometimes fails because the linear fitting gives a guess
@@ -1084,20 +1082,20 @@ class PartitioningToolkit:
             are neighbor dictionaries containing information on the partitioning
             planes.
         """
+        logging.info("Beginning partitioning")
+        logging.info("Checking structure for covalency")
         if check_for_covalency:
             closest_neighbors = self.get_closest_neighbors()
             self.check_structure_for_covalency(closest_neighbors)
             self.check_closest_neighbor_for_same_type(closest_neighbors)
 
-        print("loading grid")
         grid = self.grid
         structure = grid.structure
 
-        print("getting nearest neighbors")
+        logging.info("Getting neighboring atoms for each site in structure")
         # the 50 nearest neighbors for each atom in the structure
         nearest_neighbors = self.get_set_number_of_neighbors(50)
 
-        print("building site neighbor pair dataframe")
         # Create a dataframe to store the important information about each site/neighbor pair
         site_neigh_pairs = pd.DataFrame(
             columns=[
@@ -1136,9 +1134,9 @@ class PartitioningToolkit:
             subset=["site_symbol", "neigh_symbol", "dist"]
         )
 
-        print("getting line fraction results")
+        logging.info("Finding partitioning planes")
         # Get partitioning frac for each unique site_neighbor pair
-        for index, row in unique_pairs.iterrows():
+        for index, row in tqdm(unique_pairs.iterrows()):
             # Check if we've already found the frac for this row
             if row["partitioning_frac"] is None:
                 # get coords of each site and its neighbor
@@ -1187,7 +1185,6 @@ class PartitioningToolkit:
                     reverse_condition1, ["partitioning_frac", "radius"]
                 ] = (reverse_frac, reverse_radius)
 
-        print("calculating partitioning planes")
         # Store site and neighbor coords in arrays
         site_coords = np.array(site_neigh_pairs["site_coords"].to_list())
         neigh_coords = np.array(site_neigh_pairs["neigh_coords"].to_list())
@@ -1206,7 +1203,7 @@ class PartitioningToolkit:
         planes = np.concatenate((plane_points, unit_vectors), axis=1)
         all_atom_planes = np.split(planes, len(structure))
 
-        print("reducing to important planes and saving partitioning")
+        logging.info("Reducing to necessary partitioning planes")
         partitioning_planes = []
         for atom_planes in all_atom_planes:
             important_planes = self.get_important_planes(atom_planes)[1]
@@ -1214,7 +1211,7 @@ class PartitioningToolkit:
 
         # Create a dict to store the final dataframe for each atom
         partitioning = {}
-        for site_index, important_planes in enumerate(partitioning_planes):
+        for site_index, important_planes in tqdm(enumerate(partitioning_planes)):
             partitioning_df = site_neigh_pairs.loc[
                 site_neigh_pairs["site_index"] == site_index
             ]
@@ -1238,7 +1235,7 @@ class PartitioningToolkit:
                 partitioning_df.index.isin(important_indices)
             ]
             partitioning[site_index] = partitioning_df
-
+        logging.info("Finished with partitioning")
         return partitioning
 
     def plot_partitioning_results(

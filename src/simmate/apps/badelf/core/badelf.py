@@ -2,6 +2,7 @@
 
 import csv
 import itertools
+import logging
 import math
 import warnings
 from functools import cached_property
@@ -215,6 +216,7 @@ class BadElfToolkit:
         Gets a dataframe of voxel assignments. The dataframe has columns
         [x, y, z, charge, sites]
         """
+        logging.info("Beginning voxel assignment (this can take a while)")
         algorithm = self.algorithm
         if algorithm == "zero-flux":
             print(
