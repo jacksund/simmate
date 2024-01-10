@@ -269,7 +269,10 @@ class VoxelAssignmentToolkit:
             return -2, None
         elif len(sites) == 1:
             # there is only one site found so we just return it.
-            return sites[0], translations[0]
+            if sites[0] == -1:
+                return -1, None
+            else:
+                return sites[0], translations[0]
         else:
             # there wasn't any site found so we don't return our site variable which
             # is None

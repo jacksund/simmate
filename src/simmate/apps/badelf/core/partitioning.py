@@ -341,12 +341,6 @@ class PartitioningToolkit:
 
         while centered == False:
             if attempts == 5:
-                print(
-                    """
-                          Failed to find minimum with quick method. Switching
-                          to intensive.
-                          """
-                )
                 break
             else:
                 attempts += 1
