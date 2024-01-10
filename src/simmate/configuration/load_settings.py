@@ -303,6 +303,12 @@ class SimmateSettings:
             if not key.startswith("SIMMATE__"):
                 continue
 
+            # skip simmate settings that are set via a helm chart or docker
+            # container, but not updated by user. All of these cloud deployments
+            # use "__skip__" as the default value
+            if value == "__skip__":
+                continue
+
             # Convert the value to the proper python type.
             value_cleaned = str_to_datatype(
                 parameter=key,
