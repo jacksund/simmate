@@ -1,13 +1,11 @@
--------------------------------------------------------------------------------
+# Creating New Project Files
 
-# Creating new project files
-
-1. To create a new project, navigate to a folder where you'd like to store your code and run...
+1. To initiate a new project, navigate to your desired folder for code storage and execute...
 ``` bash
 simmate start-project
 ```
 
-2. Doublecheck that you see a new folder named `my_new_project`. Open it up and you should see a series of new files:
+2. Verify the creation of a new folder named `my_new_project`. Upon opening, you should find a series of new files:
 ```
 my_new_project/
 ├── pyproject.toml
@@ -22,34 +20,33 @@ my_new_project/
     └── workflows.py
 ```
 
-3. Make note that we have a folder named `example_app`. This is where our code will go. You can have as many app folders as you'd like (and in **extreme** scenarios even have apps within other apps).
+3. Note the presence of a folder named `example_app`. This is where your code will reside. You can create as many app folders as needed, and in **extreme** cases, even nest apps within other apps.
 
 -------------------------------------------------------------------------------
 
-## Name our project and app
+## Naming Your Project and App
 
 !!! danger
-    Once you choose a name, stick with it. Changing your project name or app name after it has
-    been installed can lead your code failing with `ModuleNotFound` errors.
+    Once you've chosen a name, stick with it. Altering your project or app name post-installation can result in `ModuleNotFound` errors.
 
-** Name the project **
+**Naming the Project**
 
-1. Rename your folder from "my_new_project" to a name of your choosing. Try to follow python conventions and keep your project name all lowercase and connected with underscores. For example, `warren_lab` or `scotts_project` are good project names.
+1. Rename your folder from "my_new_project" to a name of your choice. Adhere to Python conventions by keeping your project name all lowercase and connected with underscores. For instance, `warren_lab` or `scotts_project` are suitable project names.
 
-2. Open the file `new_project_project/pyproject.toml` and change the name here as well.
+2. Open the file `new_project_project/pyproject.toml` and update the name here as well.
 ``` toml
 [project]
 name = "my_simmate_project"  # <--- update with your new name
 ```
 
-** Name the app **
+**Naming the App**
 
-1. Decide on how your code should be imported. For example, you may want your workflows to be loaded like so:
+1. Determine how your code should be imported. For instance, you may want your workflows to be loaded like so:
 ``` python
 from example_app.workflows import Example__Workflow__Settings
 ```
 
-2. Take the first part of this (`example_app`) and rename the `example_app` folder to match this. The python conventions (described above) also apply here. For example, `simmate_abinit` or `simmate_clease` are informative and good project names. These let the user know what's in your app and they're easy to remember. Here's how they would work:
+2. Use the first part of this (`example_app`) to rename the `example_app` folder. The Python conventions (described above) also apply here. For instance, `simmate_abinit` or `simmate_clease` are informative and memorable project names. Here's how they would work:
 ``` python
 from simmate_clease.workflows import ClusterExpansion__Clease__BasicSettings
 ```
@@ -63,25 +60,25 @@ class SimmateCleaseConfig(AppConfig):  # don't forget the class name
 ```
 
 !!! note
-    This file might seem silly, but it allows users to build complex apps that
-    include many other apps / subapps. Beginners will likely never look at this
-    file again.
+    While this file may seem trivial, it enables users to build complex apps that
+    include many other apps / subapps. Beginners will likely never revisit this
+    file.
 
 -------------------------------------------------------------------------------
 
-## Install our app
+## Installing Your App
 
-1. Open the `pyproject.toml` file. This file is what tells Python how to install your code. It doesn't take much to install a package :smile:. As you project gets larger and needs other programs installed, you'll make note of them here. For now, nothing needs to be changed.
+1. Open the `pyproject.toml` file. This file instructs Python on how to install your code. It doesn't require much to install a package :smile:. As your project expands and requires other programs to be installed, you'll note them here. For now, no changes are needed.
 
-2. While inside your new project folder, we want to "install" the project to
-your conda envirnment in "--editable" (-e) mode. This means you'll be make changes to your code and Python should automatically use your changes.
+2. While inside your new project folder, "install" the project to
+your conda environment in "--editable" (-e) mode. This allows you to make changes to your code, and Python will automatically incorporate your changes.
 ``` bash
 # replace "my_new_project" with the name of your project
 cd my_new_project
 pip install -e .
 ```
 
-3. Make sure this install worked by running these lines in python. You may need to restart your terminal/Spyder for this to work.
+3. Verify the installation by running these lines in Python. You may need to restart your terminal/Spyder for this to work.
 
 === "example 1"
     ``` python
@@ -95,23 +92,22 @@ pip install -e .
     from simmate_clease.apps import SimmateCleaseConfig
     ```
 
-You now have an installed app! But one issue remains: Simmate still doesn't know
-it exists yet. We need to tell Simmate to load it.
+You now have an installed app! However, Simmate is still unaware
+of its existence. We need to inform Simmate to load it.
 
 -------------------------------------------------------------------------------
 
-## Register your app with Simmate
+## Registering Your App with Simmate
 
-
-1. Go to your simmate configuration folder. Recall from earlier tutorials that
-this where your database is stored, and it is located at...
+1. Navigate to your Simmate configuration folder. Recall from earlier tutorials that
+this is where your database is stored, and it is located at...
 ```
 # in your home directory
 cd ~/simmate/
 ```
 
-2. Look for the file `~/simmate/my_env-apps.yaml`, which is named after your
-conda environment. Open it up and you'll see we have apps already installed
+2. Locate the file `~/simmate/my_env-apps.yaml`, which is named after your
+conda environment. Open it and you'll see we have apps already installed
 with Simmate:
 ``` yaml
 - simmate.workflows.configs.BaseWorkflowsConfig
@@ -125,19 +121,15 @@ with Simmate:
 - example_app.apps.ExampleAppConfig
 ```
 
-4. Make sure Simmate can find and load your app in python
+4. Ensure Simmate can locate and load your app in Python
 ``` python
 from simmate.configuration.django.settings import SIMMATE_APPS
 print(SIMMATE_APPS)  # you should see your new app!
 ```
 
-5. Make sure Simmate can configure your new app and it's tables properly
+5. Ensure Simmate can configure your new app and its tables properly
 ``` python
 from simmate.database import connect
 ```
-
-
-!!! tip
-    If you ever want to stop using this app, you can delete it from your `~/simmate/my_env-apps.yaml` file.
 
 -------------------------------------------------------------------------------

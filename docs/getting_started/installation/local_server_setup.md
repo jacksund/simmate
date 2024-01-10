@@ -1,34 +1,33 @@
+# Launching Your Local Test Server
 
-# Starting your local test server
-
-On our official website, you are able to explore all results from past workflows that we've ran. Even though you haven't ran any yet, you can do the same thing on your local computer too. All that's required are two simple commands.
+Our official website allows you to view all past workflow results. Even if you haven't run any workflows yet, you can replicate this on your local computer using two simple commands.
 
 ----------------------------------------------------------------------
 
-## 1. reset the database
+## 1. Reset the Database
 
-First, we need to setup our database. We'll explain what this is doing in the next tutorial, but for now, think of this as building an empty excel spreadsheet that we can later fill with data. This is done with...
+Firstly, we need to configure our database. We'll delve into the specifics in the next tutorial, but for now, consider this as creating an empty Excel spreadsheet that we'll populate with data later. This can be done with...
 
 ``` bash
 simmate database reset # (1)
 ```
 
-1. When prompted, you can confirm that you want to reset/delete your "old" database. Also agree to download and use a prebuilt database.
+1. When prompted, confirm that you wish to reset/delete your "old" database. Also, agree to download and utilize a prebuilt database.
 
 !!! tip
-    Unless you want to remove all of your data and start from scratch, you'll never have to run that command again.
+    You won't need to run this command again unless you want to erase all your data and start anew.
 
 ----------------------------------------------------------------------
 
-## 2. start the server
+## 2. Start the Server
 
-And then as our second step, we simply tell Simmate to start the server:
+For our second step, we simply instruct Simmate to launch the server:
 
 ``` bash
 simmate run-server
 ```
 
-... and after a few seconds, you should see the output ...
+... and after a few moments, you should see the following output ...
 
 ``` bash
 Watching for file changes with StatReloader
@@ -38,14 +37,14 @@ Starting development server at http://127.0.0.1:8000/
 Quit the server with CTRL-BREAK.
 ```
 
-Leave this command running in your terminal and open up the link [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your preferred browser (Chrome, Firefox, etc.). You should see what looks like the simmate.org website! 
+Keep this command running in your terminal and open the link [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your preferred browser (Chrome, Firefox, etc.). You should see a site that resembles the simmate.org website! 
 
 ----------------------------------------------------------------------
 
-## Can I share these links?
+## Can I Share These Links?
 
-**This website is running on your local computer**. No one can access it through the internet, and as soon as your close your terminal running the `simmate run-server`, this site will stop working.
+**This website is hosted on your local computer**. It's not accessible via the internet, and it will cease to function as soon as you close your terminal running the `simmate run-server` command.
 
-However, Simmate becomes especially powerful when we switch to a server that accessible through the internet -- that way, you can share results and computational resources with your entire team. Also, there are many more features in python and command-line than through the website interface. To explore these, you'll have to keep reading our tutorials! 
+However, Simmate's true potential is unleashed when we transition to a server that's accessible via the internet. This allows you to share results and computational resources with your entire team. Additionally, Python and command-line offer many more features than the website interface. To discover these, continue reading our tutorials! 
 
 ----------------------------------------------------------------------

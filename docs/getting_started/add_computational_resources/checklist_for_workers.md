@@ -1,26 +1,24 @@
+# Worker Setup Checklist
 
-# A check-list for your workers
+Now that you're familiar with the terms **scheduler**, **cluster**, and **worker**, let's walk through the checklist to set everything up:
 
-Now that we know the terms **scheduler**, **cluster**, and **worker** (and also know whether we need these), we can start going through a check list to set everything up:
-
-- [x] configure your scheduler
-- [x] connect a cloud database
-- [x] connect to the scheduler
-- [x] register all custom projects/apps
-
+- [x] Configure your scheduler
+- [x] Connect a cloud database
+- [x] Establish a connection to the scheduler
+- [x] Register all custom projects/apps
 
 ## 1. The Scheduler
-If you stick to the "SimmateExecutor", then you're already all good to go! Nothing needs to be done. This is because the queue of job submissions is really just a database table inside the simmate database. Workers will queue this table and grab the first result.
+If you're using the "SimmateExecutor", you're all set! No additional setup is required. This is because the job submission queue is essentially a database table within the simmate database. Workers will queue this table and pick up the first result.
 
 ## 2. Connecting to a Cloud Database
-We learned from previous tutorials that simmate (by default) writes results to a local file named `~/simmate/my_env-database.sqlite3`. We also learned that cloud databases let many different computers share data and access the database through an internet connection. Because SQLite3 (the default database engine) is not build for hundreds of connections and we often use separate computers to run workflows, you should build a cloud database. Therefore, don't skip tutorial 08 where we set up a cloud database!
+As we've learned from previous tutorials, simmate, by default, writes results to a local file named `~/simmate/my_env-database.sqlite3`. Cloud databases, on the other hand, allow multiple computers to share data and access the database via an internet connection. Since SQLite3 (the default database engine) isn't designed for hundreds of connections and we often use separate computers to run workflows, it's advisable to set up a cloud database. Don't miss tutorial 08 where we guide you through this process!
 
 ## 3. Connecting to the Scheduler
-Because we are using the "SimmateExecutor" all we need is a connection to the cloud database. All you need to do make sure ALL of your computational resources are connected to the cloud database you configured. If your workers aren't picking up any of your workflow submissions, it's probably because you didn't connect them properly.
+With the "SimmateExecutor", all you need is a connection to the cloud database. Ensure that ALL your computational resources are connected to the configured cloud database. If your workers aren't picking up any workflow submissions, it's likely due to an improper connection.
 
-## 4. Connecting custom projects
+## 4. Connecting Custom Projects
 
-If you have custom database tables or code, it's important that (a) the cloud database knows about these tables and (b) your remote resources can access your custom code. Therefore, your custom project/app should be installed and accessible by all of your computation resources. Be sure to `pip install your-cool-project` for all computers.
+If you have custom database tables or code, it's crucial that (a) the cloud database is aware of these tables and (b) your remote resources can access your custom code. Therefore, your custom project/app should be installed and accessible on all your computation resources. Remember to `pip install your-cool-project` on all computers.
 
 !!! tip
-    Because SimmateExecutor uses cloudpickle when submitting tasks, many custom workflows will work just fine without this step. Our team is still working out how to guide users and make this as easy as possible. For now, we suggest just trying out your workflow when you skip this step -- as most times it will work. If not, then the text above explains why.
+    The SimmateExecutor uses cloudpickle when submitting tasks, so many custom workflows will function without this step. We're still figuring out the best way to guide users through this process. For now, we recommend testing your workflow even if you skip this step -- it often works. If it doesn't, the above text explains why.

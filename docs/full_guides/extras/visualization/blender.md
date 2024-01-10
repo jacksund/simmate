@@ -1,13 +1,12 @@
+# Blender Setup
 
-# Blender setup
+At present, the most direct method to utilize Blender with Simmate involves a manual installation of Blender, which Simmate can then access via the command line. This process may necessitate additional steps for users who only wish to visualize structures without directly using Blender. In the future, we may explore the possibility of employing a Blender developer to facilitate the use of Blender as a bpy module, even if it's a minimal build specifically for Simmate.
 
-I spent a significant amount of trying to get blender working as a python module, but I don't know enough about makefiles to package this for general use. For now, it's actually easier to just install Blender manually and have Simmate call it from the command line. It's extra work for the user who will just want to vizualize structures and never use Blender directly, but that's just how it is right now... In the future, I may want to just pay a Blender dev to begin supporting blender as bpy module -- even if its a minimal build specifically for Simmate.
+# Previous Notes on Building bpy from Source
 
-# Past notes on making bpy from source
-
-## Making my own blender bpy module (on Ubuntu 18.04)
-Following directions from https://wiki.blender.org/wiki/Building_Blender
-1. First we need to install all dependencies used to build the final package
+## Building a Custom Blender bpy Module (on Ubuntu 18.04)
+Follow the instructions from https://wiki.blender.org/wiki/Building_Blender
+1. Install all necessary dependencies to build the final package:
 ```
 sudo apt install git;
 sudo apt install build-essential;
@@ -22,29 +21,29 @@ git submodule foreach git pull --rebase origin master;
 cd ~/blender-git/blender/build_files/build_environment;
 ./install_deps.sh;
 ```
-2. In the file bpy_module.cmake, we need to change the portable setting to 'ON':
+2. In the bpy_module.cmake file, set the portable setting to 'ON':
 ```
 nano /home/jacksund/blender-git/blender/build_files/cmake/config/bpy_module.cmake;
 ```
-manually edit this line:
+Modify this line:
 ```
 set(WITH_INSTALL_PORTABLE    ON CACHE BOOL "" FORCE)
 ```
-3. With our settings and dependencies all set up, we can now build blender as a python module. The result will be in /blender-git/build_linux_bpy/bin/
+3. With the settings and dependencies prepared, build Blender as a Python module. The result will be in /blender-git/build_linux_bpy/bin/
 ```
 cd ~/blender-git/blender;
 make bpy;
 ```
-4. Lastly, let's copy the created module into our Anaconda environment and remove all these build files.
+4. Transfer the created module into the Anaconda environment and delete all build files.
 ```
 cp -r /home/jacksund/blender-git/build_linux_bpy/bin/* /home/jacksund/anaconda3/envs/jacks_env/lib/python3.7/site-packages/;
 sudo rm -r /home/jacksund/blender-git;
 ```
-5. You can now 'import bpy' in your python environment! 
+5. You can now 'import bpy' in your Python environment! 
 
-## Making my own blender bpy module (on Ubuntu 19.10)
-Following directions from https://wiki.blender.org/wiki/Building_Blender/Linux/Ubuntu and also troubleshooting with https://devtalk.blender.org/t/problem-with-running-blender-as-a-python-module/7367
-1. First we need to install all dependencies used to build the final package
+## Building a Custom Blender bpy Module (on Ubuntu 19.10)
+Follow the instructions from https://wiki.blender.org/wiki/Building_Blender/Linux/Ubuntu and troubleshoot with https://devtalk.blender.org/t/problem-with-running-blender-as-a-python-module/7367
+1. Install all necessary dependencies to build the final package:
 ```
 sudo apt-get update;
 sudo apt-get install build-essential git subversion cmake libx11-dev libxxf86vm-dev libxcursor-dev libxi-dev libxrandr-dev libxinerama-dev;
@@ -56,15 +55,15 @@ make update;
 cd ~/blender-git
 ./blender/build_files/build_environment/install_deps.sh --with-all
 ```
-2. In the file bpy_module.cmake, we need to change the portable setting to 'ON':
+2. In the bpy_module.cmake file, set the portable setting to 'ON':
 ```
 nano /home/jacksund/blender-git/blender/build_files/cmake/config/bpy_module.cmake;
 ```
-manually edit this line:
+Modify this line:
 ```
 set(WITH_INSTALL_PORTABLE    ON CACHE BOOL "" FORCE)
 ```
-and add these lines: 
+Add these lines: 
 ```
 set(WITH_MEM_JEMALLOC OFF CACHE BOOL "" FORCE)
 set(WITH_MOD_OCEANSIM        OFF CACHE BOOL "" FORCE)
@@ -83,14 +82,14 @@ set(EMBREE_ROOT_DIR /opt/lib/embree CACHE STRING "" FORCE)
 set(OPENIMAGEDENOISE_ROOT_DIR /opt/lib/oidn CACHE STRING "" FORCE)
 set(ALEMBIC_ROOT_DIR /opt/lib/alembic CACHE STRING "" FORCE)
 ```
-3. With our settings and dependencies all set up, we can now build blender as a python module. The result will be in /blender-git/build_linux_bpy/bin/
+3. With the settings and dependencies prepared, build Blender as a Python module. The result will be in /blender-git/build_linux_bpy/bin/
 ```
 cd ~/blender-git/blender;
 make bpy;
 ```
-4. Lastly, let's copy the created module into our Anaconda environment and remove all these build files.
+4. Transfer the created module into the Anaconda environment and delete all build files.
 ```
 cp -r /home/jacksund/blender-git/build_linux_bpy/bin/* /home/jacksund/anaconda3/envs/jacks_env/lib/python3.7/site-packages/;
 sudo rm -r /home/jacksund/blender-git;
 ```
-5. You can now 'import bpy' in your python environment! 
+5. You can now 'import bpy' in your Python environment!

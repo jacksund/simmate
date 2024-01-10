@@ -1,29 +1,23 @@
+# Using Existing Workflows
 
-# Using existing workflows
+## Finding Available Workflows
 
-------------------------------------------------------------
-
-## Exploring available workflows
-
-All registered workflows can be printed at the command-line.
+To view all registered workflows, use the following command-line:
 ``` bash
 simmate workflows list-all
 ```
 
-You can also learn more about a workflow with the `explore` command:
+For detailed information about a specific workflow, use the `explore` command:
 ``` bash
 simmate workflows explore
 ```
 
 !!! tip
-    Read through the ["Workflow Names"](/simmate/full_guides/workflows/workflow_names/)
-    section for a better understanding of the different workflows available.    
+    For a thorough understanding of the various workflows, refer to the ["Workflow Names"](/simmate/full_guides/workflows/workflow_names/) section.    
 
-------------------------------------------------------------
+## Loading a Workflow
 
-## Loading a workflow
-
-Once you have a desired workflow name, you can load the workflow with:
+After identifying a workflow, you can load it as follows:
 
 === "yaml"
     ``` yaml
@@ -38,20 +32,13 @@ Once you have a desired workflow name, you can load the workflow with:
     workflow = get_workflow("static-energy.vasp.matproj")
     ```
 
-------------------------------------------------------------
+## Understanding Parameters & Options
 
-## Viewing parameters & options
+Parameters are essential for using Simmate. We've dedicated [a section in our documentation](/simmate/parameters) to them. Please familiarize yourself with this section for detailed parameter descriptions and examples.
 
-Because parameters are super important for using Simmate, we gave them [their own
-section in our documentation](/simmate/parameters). Make sure you read through that section of our
-documentation to view full parameter descriptions and examples for each.
+## Running a Workflow (Local)
 
-------------------------------------------------------------
-
-## Running a workflow (local)
-
-To run a workflow locally (i.e. directly on your current computer), you can
-use the `run` method. As a quick example:
+To execute a workflow on your local machine, use the `run` method. Here's an example:
 
 === "command line"
     ``` yaml
@@ -76,12 +63,9 @@ use the `run` method. As a quick example:
     )
     ```
 
-------------------------------------------------------------
+## Running a Workflow (Cloud)
 
-## Running a workflow (cloud)
-
-Workflows can also be submitted to a remote cluster. It is important to understand
-how local and cloud runs are different:
+Workflows can also be executed on a remote cluster. It's important to understand the differences between local and cloud runs:
 
 === "local (run)"
     ``` mermaid
@@ -99,10 +83,7 @@ how local and cloud runs are different:
       F[launch a worker with 'start-worker' command] --> D;
     ```
 
-Therefore, when you want to schedule a workflow to run elsewhere, you must first make sure
-you have your computational resources configured. You can then run workflows
-using the `run_cloud` method:
-
+To schedule a workflow to run on a remote cluster, ensure your computational resources are configured. Then, use the `run_cloud` method:
 
 === "command line"
     ``` yaml
@@ -132,43 +113,37 @@ using the `run_cloud` method:
     run until you add computational resources (or `Workers`). To do this, you
     must read through the ["Computational Resources"](/simmate/getting_started/add_computational_resources/quick_start/) documentation.
 
-------------------------------------------------------------
+## Accessing Results
 
-## Accessing results
-
-There are several ways to view the results of a workflow run, and some approaches
-are better than others.
+There are several methods to view the results of a workflow run, and some may be more suitable than others.
 
 !!! tip
-    If you'd like to run many workflows and get the results in an excel
-    spreedsheet, then go with option 3!
+    If you plan to run multiple workflows and want the results in an Excel
+    spreadsheet, then option 3 is for you!
 
+### Option 1: Output Files
 
-### Option 1: output files
+Navigate to the directory where the calculation was run. You'll find a few additional files in your output. One of them is `simmate_summary.yaml`, which 
+provides quick information.
 
-Simply go to the directory that the calculation ran in, and you may notice a 
-few extra files in your output. One of them is `simmate_summary.yaml`, which 
-contains some quick information for you.
-
-Simmate can also catch errors, correct them, and retry a calculation. If this 
+Simmate can also identify errors, correct them, and retry a calculation. If this 
 occurred during your workflow run, you'll see a file named 
-`simmate_corrections.csv` with all the errors that were incountered and how they
-were fixed.
+`simmate_corrections.csv` detailing the errors encountered and how they
+were resolved.
 
-Other workflows will also write out plots for you. For example, 
+Other workflows will also generate plots for you. For example, 
 `electronic-structure` workflows will calculate a band structure using Materials
 Project settings, and write an image of your final band structure to 
 `band_structure.png`. These extra files and plots vary for each workflow, 
-but they make checking your results nice and quick.
+but they make checking your results quick and easy.
 
 !!! tip
-    While the plots and summary files are nice for quick viewing, there is much 
+    While the plots and summary files are useful for quick viewing, there is much 
     more information available in the database. Furthermore, you can also use
     python toolkit objects to run a custom analysis. These are covered in the 
     next two sections.
 
-
-### Option 2: python objects
+### Option 2: Python Objects
 
 When running a workflow in python, a `State` object is returned. From this,
 you can access the results as `toolkit` objects. States allows you to
@@ -195,13 +170,11 @@ other workflow engines like Prefect.
     result = state.result()
     ```
 
-
 !!! tip
     This approach is best for users comfortable with python. If you want to use these
     features, we recommend reading through the `Toolkit` guides.
 
-
-### Option 3: the database
+### Option 3: The Database
 
 You can also view results database through the `database_table` attribute 
 (if one is available). This returns a Simmate database object for results of 
@@ -233,11 +206,10 @@ can use the `all_results` property:
     ```
 
 !!! tip
-    Guides for filtering and manulipating the data in this table is covered 
+    Guides for filtering and manipulating the data in this table is covered 
     in the `Database` guides.
 
-
-### Option 4: the website server
+### Option 4: The Website Server
 
 In the `simmate_summary.yaml` output file, there is the `_WEBSITE_URL_`. You can copy/paste this URL into your browser and view your results in an interactive format. Just make sure you are running your local server first:
 
@@ -254,9 +226,7 @@ http://127.0.0.1:8000/workflows/static-energy/vasp/mit/1
 !!! note
     Remember that the server and your database are limited to your local computer. Trying to access a URL on a computer that doesn't share the same database file will not work -- so you may need to copy your database file from the cluster to your local computer. Or even better -- if you would like to access results through the internet, then you have to switch to a cloud database.
 
-----------------------------------------------------------------------
-
-## Massively parallel workflows
+## Running Massively Parallel Workflows
 
 Some workflows submit many subworkflows. For example, evolutionary structure prediction does this by submitting hundreds of individual structure relaxations, analyzing the results, and submitting new structures based on the results.
 
@@ -275,12 +245,10 @@ graph TD
   G --> J[worker 3];
 ```
 
-
-
-So in order to run these types of workflows, you must...
+To run these types of workflows, you must:
 
 1. Start the main workflow with the `run` command
-2. Start at least one worker that will run the submitted the calculations
+2. Start at least one worker that will run the submitted calculations
 
 !!! tip
     Make sure you read through the ["Computational Resources"](/simmate/getting_started/add_computational_resources/quick_start/) documentation. There is also a 
@@ -289,11 +257,9 @@ So in order to run these types of workflows, you must...
     guides.
     
 !!! note
-    The number of workers will be how many jobs are run in parallel -- and this
+    The number of workers will determine how many jobs are run in parallel -- and this
     is only limited by the number of jobs queued. For example, if I submit 500
     workflows with `run-cloud` but only start 100 workers, then only 100 workflows
     will be run at a time. Further, if I submit 25 workflows but have 100 workers,
     then that means 75 of our workflows will be sitting idle without any job
     to run.
-
-----------------------------------------------------------------------    

@@ -1,10 +1,8 @@
-
 --------------------------------------------------------------------------------
 
 ## Check your installed version
 
-When you first import simmate and connect to the database, a warning is printed
-if you are not using the most current version available. You can also check this in the command-line:
+When importing simmate and establishing a connection to the database, a warning message will be displayed if your version is not the most recent one. You can also verify this via the command-line:
 
 ``` bash
 simmate version
@@ -18,62 +16,46 @@ Newest available: v0.11.1
 
 --------------------------------------------------------------------------------
 
-## Updating to a newer version
+## Upgrading to the Latest Version
 
-We highly recommended that you install simmate into a clean conda environment, rather than updating simmate within your existing one:
+We strongly advise installing simmate in a fresh conda environment instead of updating it within your current environment:
 ``` shell
 conda create -n my_env -c conda-forge python=3.11 simmate
 ```
 
-Make sure you check that the expected version is now installed:
+Ensure that the expected version is installed:
 ``` bash
 simmate version
 ```
 
-Rebuild your database with one compatible with the new installation:
+Update your database to be compatible with the new installation:
 ``` bash
 simmate database update
 ```
 
 !!! warning
-    `simmate database update` is only effective starting in `v0.15.0`. Earlier
-    versions of simmate require a fully database reset accross version updates.
-    Therefore, if you have `<=0.14.0` you must run `simmate database reset`.
-
-!!! tip
-    If you use the same environment name as an existing one, conda will ask if
-    you'd like to delete the existing environment before creating the new one.
-    This will save you time from having to delete the env in a separate command.
+    The command `simmate database update` is only effective from `v0.15.0` onwards. Earlier versions of simmate necessitate a complete database reset when updating versions. Hence, if your version is `<=0.14.0`, you must execute `simmate database reset`.
 
 --------------------------------------------------------------------------------
 
-## Version numbers & their meaning
+## Understanding Version Numbers
 
-Our releases follow [semantic versioning](https://semver.org/). This means versions (e.g. `v1.2.3`) correspond to `MAJOR.MINOR.PATCH`. Each version number increases after the following changes:
+Our releases adhere to [semantic versioning](https://semver.org/). This implies that versions (e.g., `v1.2.3`) correspond to `MAJOR.MINOR.PATCH`. Each version number increases following these changes:
 
   - `MAJOR` = incompatible API changes
-  - `MINOR` = new functionality is added (w/o API changes)
-  - `PATCH` = bug fixes and documentation updates (w/o API changes)
+  - `MINOR` = addition of new functionality (without API changes)
+  - `PATCH` = bug fixes and documentation updates (without API changes)
 
-There is one key exception to the rules above -- and that is with `MAJOR`=0 releases. Any v0.x.y release is considered developmental where APIs are subject to change and should not be considered stable. This is consistent with the semantic version spec (see [point 4](https://semver.org/#spec-item-4)).
-
+There is one significant exception to the above rules -- `MAJOR`=0 releases. Any v0.x.y release is considered developmental, with APIs subject to change and not deemed stable. This is in line with the semantic version specification (refer to [point 4](https://semver.org/#spec-item-4)).
 
 --------------------------------------------------------------------------------
-
 
 ## Upcoming Release
 
 !!! tip
-    For ongoing changes that have not been finalized/merged yet, view our [active pull-requests](https://github.com/jacksund/simmate/pulls) on github
+    To view ongoing changes that haven't been finalized or merged yet, check our [active pull-requests](https://github.com/jacksund/simmate/pulls) on GitHub
 
-<!-- (hidden message for maintainer to use between releases)
-- no new changes have been merged into the `main` branch yet
-**Enhancements**
-**Refactors**
-**Fixes**
--->
-
-- no new changes have been merged into the `main` branch yet
+- No new changes have been merged into the `main` branch yet.
 
 --------------------------------------------------------------------------------
 

@@ -1,46 +1,45 @@
 # Nudged Elastic Band (NEB)
 
-NEB is a method of finding the energy barrier for a specific migration pathway, such as atomic diffusion.
+NEB is a technique used to determine the energy barrier of a specific migration pathway, such as atomic diffusion.
 
-## Nudged elastic band is composed of the following stages
+## Components of Nudged Elastic Band
 
-** Note: Steps 3-5 are done for each individual pathway **
+** Note: Steps 3-5 are executed for each individual pathway **
 
-1. Relax the starting bulk structure
+1. Relax the initial bulk structure
 
 2. Identify all symmetrically unique pathways
 
 3. Relax the start/end supercell images 
-    (or only one of these if they are equivalent)
+    (or only one if they are equivalent)
 
-4. Interpolate the start/end supercell images and empirically relax these
+4. Interpolate the start/end supercell images and relax these
     using IDPP.
 
 5. Relax all images using NEB
 
 
-## Possible inputs
+## Potential Inputs
 
-For this overall workflow, a user may want to start at a different step. For example, they could have a specific start/end structure that they want to provide rather than using automatic detection of unique pathways. Therefore, we break this workflow in multiple smaller ones. We must account for the following input scenarios:
+Depending on the workflow, a user may wish to begin at a different step. For instance, they might have a specific start/end structure they want to use instead of automatically detecting unique pathways. Hence, we divide this workflow into several smaller ones. We need to consider the following input scenarios:
 
-1. `all_paths`: a bulk crystal + diffusing species is given and full analysis of all paths is requested
+1. `all_paths`: A bulk crystal and diffusing species are provided, and a full analysis of all paths is requested.
 
-2. `single_path`: a bulk crystal + diffusing species + pathway index is given, where index gives the specific pathway to be grabbed from DistinctPathFinder. For example, DistinctPathFinder would find 5 symmetrically unique paths, and you say "I want to run the pathway that is 4th in this list (aka the 4th shortest pathway)"
+2. `single_path`: A bulk crystal, diffusing species, and pathway index are provided. The index specifies the particular pathway to be extracted from DistinctPathFinder. For instance, if DistinctPathFinder finds 5 unique paths, you can specify "I want to run the 4th pathway in this list (i.e., the 4th shortest pathway)."
 
-3. `from_startend_sites`: a bulk crystal + start/end sites for the diffusing ion is given and that specific pathway should be analyzed. For example, this would allow a diffusion pathway that goes from a site at (0,0,0) to (1,1,1).
+3. `from_startend_sites`: A bulk crystal and start/end sites for the diffusing ion are provided, and that specific pathway should be analyzed. This would allow for a diffusion pathway that goes from a site at (0,0,0) to (1,1,1), for example.
 
-4. `from_endpoints`: two endpoint supercell structures are given and that specific pathway (from interpolated structures) should be analyzed
+4. `from_endpoints`: Two endpoint supercell structures are provided, and the specific pathway (from interpolated structures) should be analyzed.
 
-5. `from_images`: a series of images are given and analyzed
+5. `from_images`: A series of images are provided and analyzed.
+
+In addition to these five scenarios, we also consider...
+
+- Vacancy vs. interstitial diffusion
+- Plugins for CI-NEB (currently not implemented)
 
 
-In additon to these these 5 scenarios, we also consider...
-
-- vacancy vs. interstitial diffusion
-- plugins for CI-NEB (not implemented at the moment)
-
-
-## Helpful links
+## Useful Links
 
 - [Atomate NEB yaml](https://github.com/hackingmaterials/atomate/blob/main/atomate/vasp/workflows/base/library/neb.yaml)
 - [Atomate NEB py](https://github.com/hackingmaterials/atomate/blob/b9ad04e3ae892c51ba2e4d5c045db1c563f287f4/atomate/vasp/workflows/base/neb.py#L10)

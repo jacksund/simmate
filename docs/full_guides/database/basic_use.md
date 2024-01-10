@@ -1,19 +1,18 @@
-
 # Basic Database Access
 
 ----------------------------------------------------------------------
 
-## Outline of all steps
+## Overview
 
-Accessing and analyzing data typically involves the following steps:
+The process of accessing and analyzing data typically involves these steps:
 
-1. Connect to your database
+1. Establish a connection to your database
 2. Load a specific database table
-3. Filter data
-4. Convert data to a desired format
-5. Modify data via `simmate.toolkit` or [pandas.Dataframe](https://pandas.pydata.org/)
+3. Apply filters to the data
+4. Convert the data to a desired format
+5. Modify the data using `simmate.toolkit` or [pandas.Dataframe](https://pandas.pydata.org/)
 
-The sections below will guide you on performing each step. But to place everything up-front, your final script may look like this:
+The following sections will guide you through each of these steps. Here's an example of what your final script might look like:
 
 ``` python
 # Connect to your database
@@ -35,24 +34,24 @@ dataframe = results.to_dataframe()
 
 # Modify data
 for structure in structures:
-    # run your anaylsis/modifications here!
+    # run your analysis/modifications here!
 ```
 
 ----------------------------------------------------------------------
 
-## Connect to your database
+## Connecting to Your Database
 
-For interactive use, Django settings must be configured before any of these submodules can be imported. This can be done with...
+Before importing any submodules, you must configure Django settings for interactive use. Here's how to do it:
 
 ``` python
 # connect to the database
 from simmate.database import connect
 
-# and now you can import tables in this module
+# now you can import tables in this module
 from simmate.database.workflow_results import MITStaticEnergy
 ```
 
-If the `connect` step is not done, you will recieve the following error:
+If you forget the `connect` step, you'll encounter this error:
 
 ``` python
 ImproperlyConfigured: Requested setting INSTALLED_APPS, but settings are not
@@ -62,16 +61,16 @@ or call settings.configure() before accessing settings.
 
 ----------------------------------------------------------------------
 
-## Load your database table
+## Loading Your Database Table
 
-The name of your table will depend on the source you're trying to access. To see the available sources (Materials Project, OQMD, Jarvis, COD), you can explore the contents the [database/third_parties](https://github.com/jacksund/simmate/blob/main/src/simmate/database/third_parties/__init__.py) module.
+The name of your table depends on the source you're accessing. To see the available sources (Materials Project, OQMD, Jarvis, COD), explore the contents of the [database/third_parties](https://github.com/jacksund/simmate/blob/main/src/simmate/database/third_parties/__init__.py) module.
 
-Using Materials Project as an example, we can load the table using...
+For example, to load a table from the Materials Project, use:
 ``` python
 from simmate.database.third_parties import MatprojStructure
 ```
 
-Alternatively, if you intend to access data from a specific workflow, there are two methods to access the table. in addition to loading from the `workflow_results` module, most workflows have a `database_table` attribute that let you access the table as well:
+If you're accessing data from a specific workflow, you can access the table in two ways. Besides loading from the `workflow_results` module, most workflows have a `database_table` attribute that allows you to access the table:
 
 ``` python
 ########## METHOD 1 ########
@@ -86,28 +85,28 @@ table = mit_workflow.database_table
 from simmate.database import connect
 from simmate.database.workflow_results import MITStaticEnergy
 
-# The line below shows that these tables are the same! Therfore, use
+# The line below shows that these tables are the same! Therefore, use
 # whichever method you prefer.
 assert table == MITStaticEnergy
 ```
 
 ----------------------------------------------------------------------
 
-## Query and filter data
+## Querying and Filtering Data
 
-To query a table, Simmate inherits methods from Django, which is a web framework for quering massive datasets. It is powerful and efficient, and is therefore used to deliver data to many familiar websites, such as Instagram and Spotify. The key feature of Django that we use is its Object-Relational Mapper (ORM). The ORM allows us to use a simple language for making complex queries to our database. Below, we show some common queries. A full description of all query methods is discussed on [Django's query page](https://docs.djangoproject.com/en/4.0/topics/db/queries/).
+Simmate uses Django's methods for querying a table, leveraging its Object-Relational Mapper (ORM) to make complex queries to our database. Below are some common queries. For a full list of query methods, refer to [Django's query page](https://docs.djangoproject.com/en/4.0/topics/db/queries/).
 
-All rows of the database table are available via the `objects` attribute:
+Access all rows of the database table via the `objects` attribute:
 ``` python
 MITStaticEnergy.objects.all()
 ```
 
-All columns of the database table can be printed via the `show_columns` methods:
+Print all columns of the database table using the `show_columns` methods:
 ``` python
 MITStaticEnergy.show_columns()
 ```
 
-To filter rows with exact-value matches in a column:
+Filter rows with exact-value matches in a column:
 ``` python
 MITStaticEnergy.objects.filter(
     nsites=3,
@@ -116,7 +115,7 @@ MITStaticEnergy.objects.filter(
 ).all()
 ```
 
-To filter rows based on conditions, chain the column name with two underscores. Conditions supported are listed [here](https://docs.djangoproject.com/en/4.0/ref/models/querysets/#field-lookups), but the most commonly used ones are:
+Filter rows based on conditions by chaining the column name with two underscores. Supported conditions are listed [here](https://docs.djangoproject.com/en/4.0/ref/models/querysets/#field-lookups), but the most commonly used ones are:
 
 - `contains` = contains text, case-sensitive query
 - `icontains`= contains text, case-insensitive query
@@ -127,7 +126,7 @@ To filter rows based on conditions, chain the column name with two underscores. 
 - `range` = provides upper and lower bound of values
 - `isnull` = returns `True` if the entry does not exist
 
-An example query with conditional filters:
+Here's an example query with conditional filters:
 ``` python
 MITStaticEnergy.objects.filter(
     nsites__gte=3,  # greater or equal to 3 sites
@@ -138,13 +137,13 @@ MITStaticEnergy.objects.filter(
 ).all()
 ```
 
-Note, for the filtering condition `elements__icontains`, we used some odd quotations when querying for carbon: `'"C"'`. This is not a typo! The quotes ensure we don't accidentally grab Ca, Cs, Ce, Cl, and so on. This is an issue when you are using SQLite (the default datbase backend). If you are using Postgres, this line can change to the cleaner version `elements__contains="C"`.
+Note: For the filtering condition `elements__icontains`, we used quotations when querying for carbon: `'"C"'`. This is to avoid accidentally grabbing Ca, Cs, Ce, Cl, etc. This is necessary when using SQLite (the default database backend). If you're using Postgres, you can use the cleaner version `elements__contains="C"`.
 
 ----------------------------------------------------------------------
 
-## Convert data to desired format
+## Converting Data to Desired Format
 
-By default, Django returns your query results as a `queryset` (or `SearchResults` in simmate). This is a list of database objects. It is more useful to convert them to a pandas dataframe or to toolkit objects.
+By default, Django returns your query results as a `queryset` (or `SearchResults` in simmate), which is a list of database objects. It's often more useful to convert them to a pandas dataframe or to toolkit objects.
 ``` python
 # Gives a pandas dataframe.
 df = MITStaticEnergy.objects.filter(...).to_dataframe()
@@ -157,8 +156,8 @@ df = MITStaticEnergy.objects.filter(...).to_toolkit()
 
 ----------------------------------------------------------------------
 
-## Modify data
+## Modifying Data
 
-To modify and analyze data, see the [pandas](https://pandas.pydata.org/docs/) and `simmate.toolkit` documentation for more info.
+For information on how to modify and analyze data, refer to the [pandas](https://pandas.pydata.org/docs/) and `simmate.toolkit` documentation.
 
 ----------------------------------------------------------------------
