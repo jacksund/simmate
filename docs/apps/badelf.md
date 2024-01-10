@@ -2,9 +2,9 @@
 # The BadELF App
 
 !!! note
-    This app is currently maintained by [Sam Weaver](https://github.com/SWeav02)
+    The current application maintainer is [Sam Weaver](https://github.com/SWeav02)
 
-    Further, this app and its BadELF algorithm is based on the following study:
+    The BadELF algorithm and application are based on the following research:
     
     - ["Counting Electrons in Electrides"](https://pubs.acs.org/doi/abs/10.1021/jacs.3c10876) (JACS 2023)
 
@@ -12,15 +12,13 @@
 
 ## About BadELF
 
-Bader Charge Analysis (or "Bader" for short) is a process of partitioning charge density in order to predict oxidation states. Then the Electron Localization Function (ELF) is a popular scheme for visualizing chemically important features in molecules and solids.
-
-BadELF builds on top of these two ideas. The algorithm uses Bader segmentation of the ELF to find the electride electrons (if any) and Voronoi segmentation of the ELF to identify atoms. Thus BadELF is intended as an alternative method to run population analysis / predict oxidation states of electrides.
+BadELF is a method that combines Bader Charge Analysis and the Electron Localization Function (ELF) to predict oxidation states and perform population analysis of electrides. It uses Bader segmentation of the ELF to detect electride electrons and Voronoi segmentation of the ELF to identify atoms.
 
 --------------------------------------------------------------------------------
 
 ## About this app
 
-This app provides workflows and utilities to help with BadELF analysis.
+The BadELF application provides workflows and utilities to streamline BadELF analysis.
 
 --------------------------------------------------------------------------------
 
@@ -39,11 +37,11 @@ simmate database update
 
 ## Basic Use
 
-BadELF requires the outputs from VASP calculations (e.g. the CHGCAR, ELFCAR, etc.). You can either (a) generate these on your own or (b) run a simmate workflow that does it for you. 
+BadELF requires outputs from VASP calculations (e.g. the CHGCAR, ELFCAR, etc.). You can either (a) generate these on your own or (b) run a simmate workflow that does it for you. 
 
 ### (a) from VASP outputs
 
-The BadELF algorithm can be run in a folder with VASP results. Please note that your VASP settings must produce a CHGCAR and ELFCAR with the same grid size.
+The BadELF algorithm can be run in a folder with VASP results. Please ensure your VASP settings generate a CHGCAR and ELFCAR with matching grid sizes. 
 
 Create a yaml file:
 ``` yaml
@@ -67,8 +65,8 @@ simmate workflows run input.yaml
 
 ### (b) from structure
 
-If you would prefer to have Simmate handle the VASP calculation, there are workflows that will first run the required DFT and then BadELF. 
+If you would prefer to have Simmate handle the VASP calculation, workflows are available that will first run the required DFT and then BadELF. 
 
-These workflows are stored in the `Warren Lab` app because we use our lab's preferred VASP settings there. View the `Warren Lab` app for more information and to see the workflows available.
+These workflows are stored in the `Warren Lab` app, which contains our lab's preferred VASP settings. Refer to the `Warren Lab` app for more details and to view the available workflows.
 
 --------------------------------------------------------------------------------

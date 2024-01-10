@@ -1,15 +1,14 @@
-# User-contributed Example Scripts
+# Example Scripts from Users
 
-This section stores example python scripts of how Simmate can be used.
+This section contains example Python scripts demonstrating the use of Simmate.
 
 !!! warning
-    These examples are *NOT* fully encompassing of the many features Simmate has, but they do serve has helpful guides for beginners. 
+    These examples do *NOT* cover all the features of Simmate, but they can be useful for beginners. 
     
-    Be sure to first search for help/guides inside the the "[Full Guides](/simmate/full_guides/overview/)" and "[Apps](/simmate/apps/overview/)" sections before reading the examples here.
+    Before referring to these examples, make sure to check the "[Full Guides](/simmate/full_guides/overview/)" and "[Apps](/simmate/apps/overview/)" sections for help and guides.
 
 
 | Script Name | Description                                                                                                                     |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Example-001 | Performs relaxation, static-energy, and bandstruct/DOS calculations on a filtered set of structures from the Materials Project. |
-| Example-002 | Configures and runs a custom NEB workflow that borrows features of path finding, endpoint relaxations, and more.                |
-
+| Example-001 | Demonstrates relaxation, static-energy, and bandstruct/DOS calculations on a selected set of structures from the Materials Project. |
+| Example-002 | Illustrates how to set up and execute a custom NEB workflow incorporating features of path finding, endpoint relaxations, and more.                |

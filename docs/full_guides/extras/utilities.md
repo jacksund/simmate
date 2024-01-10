@@ -1,3 +1,3 @@
-This module hosts common functions that are used throughout Simmate. This includes things like grabbing the name of the active conda environment, creating a new directory, and compressing a folder to a zip file.
+This module comprises shared functions used throughout Simmate. These functions execute a range of tasks, including fetching the name of the active conda environment, creating a new directory, and compressing a folder into a zip file.
 
-Typically, you don't need to interact with any of the functions in this module unless you are creating new functionality or contributing to our code.
+Typically, you won't need to interact with the functions in this module unless you're developing new features or contributing to our codebase.

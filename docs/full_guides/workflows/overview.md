@@ -1,35 +1,31 @@
-# Simmate Workflows
+# Simmate Workflows Module
 
-This module brings together all predefined workflows and organizes them by application for convenience.
+This module organizes all predefined workflows by application for easy access.
 
-This module covers basic use, but more information is available in `simmate.engine.workflow`.
+While this module provides basic usage, you can find more information in `simmate.engine.workflow`.
 
-------------------------------------------------------------
+## Basic Usage
 
-## Basic use
-
-[The getting-started tutorials](/simmate/getting_started/overview/) will teach you how to run workflows and access their results. But as a review:
+[The getting-started tutorials](/simmate/getting_started/overview/) offer detailed instructions on running workflows and retrieving their results. Here's a brief summary:
 
 ``` python
 from simmate.workflows.static_energy import StaticEnergy__Vasp__Matproj as workflow
 
-# runs the workflow and returns a state
+# Run the workflow and return a state
 state = workflow.run(structure="my_structure.cif")
 result = state.result()
 
-# gives the DatabaseTable where ALL results are stored
-workflow.database_table  # --> gives all relaxation results
-workflow.all_results  # --> gives all results for this relaxation preset
+# Access the DatabaseTable where ALL results are stored
+workflow.database_table  # --> returns all relaxation results
+workflow.all_results  # --> returns all results for this relaxation preset
 df = workflow.all_results.to_dataframe()  # convert to pandas dataframe
 ```
 
-Further information on interacting with workflows can be found in the `simmate.engine` module as well -- particularly, the `simmate.engine.workflow` module.
+For more details on interacting with workflows, refer to the `simmate.engine` module, specifically the `simmate.engine.workflow` module.
 
-------------------------------------------------------------
+## Simplifying Import Paths
 
-## Avoiding long import paths
-
-If you are a regular python user, you'll notice the import path above is long and unfriendly. If you'd like to avoid importing this way, you can instead use the `get_workflow` utility:
+The import path above may seem lengthy and complex, especially for regular python users. To simplify this, you can use the `get_workflow` utility:
 
 ``` python
 from simmate.workflows.utilities import get_workflow
@@ -37,56 +33,47 @@ from simmate.workflows.utilities import get_workflow
 workflow = get_workflow("static-energy.vasp.matproj")
 ```
 
-------------------------------------------------------------
-
-## Overview of classes
-
-Here we try to give a birds-eye view of Simmate workflows and a commonly used subclass known as a "s3 workflow". This section is not meant to be an encompassing guide. Instead, beginners should refer to our tutorials and class-level API docs.
-
+## Overview of Classes
 
 ### What is a `Workflow`?
 
-Recall from Simmate's [getting-started tutorial](/simmate/getting_started/run_a_workflow/stages_of_a_workflow/), that a `Workflow` is made up of 4 stages:
+As explained in Simmate's [getting-started tutorial](/simmate/getting_started/run_a_workflow/stages_of_a_workflow/), a `Workflow` consists of 4 stages:
 
-- `configure`: chooses our desired settings for the calculation (such as VASP's INCAR settings)
-- `schedule`: decides whether to run the workflow immediately or send off to a job queue (e.g. SLURM, PBS, or remote computers)
-- `execute`: writes our input files, runs the calculation (e.g. VASP), and checks the results for errors
-- `save`: saves the results to our database
+- `configure`: Sets the calculation settings (like VASP's INCAR settings)
+- `schedule`: Determines whether to run the workflow immediately or queue it for later (e.g., SLURM, PBS, or remote computers)
+- `execute`: Writes input files, runs the calculation (e.g., VASP), and checks the results for errors
+- `save`: Stores the results in our database
 
-The `configure` step is simply how a workflow is defined. Pre-built workflows do this for you already, but you may want to create a custom workflow for more. By creating a new `Workflow` subclass, you've configured it.
+The `configure` step defines a workflow. Pre-built workflows are already configured, but you can create a custom workflow for more flexibility. 
 
-The `schedule` step is handled entirely by Simmate. All that you need to know is that `run` will carry out the workflow on your local computer, while `run_cloud` will schedule the workflow to run remotely.
+The `schedule` step is managed by Simmate. You only need to know that `run` executes the workflow on your local computer, while `run_cloud` schedules it to run remotely.
 
-The `execute` step is what we typically think of when we think "workflow". It can be anything and everything. The example given (writing inputs, calling a program, and reading output files) is the most common type of workflow in Simmate -- known as a "S3Workflow". This is explained more below.
+The `execute` step is the core of the workflow. It can include various tasks. The most common type of workflow in Simmate, known as a "S3Workflow", is explained below.
 
-The `save` step is simply taking the result of the `execute` and saving it to a SQL database. This is handled automatically for common workflows types like relaxations, dynamics, or static-energy calculations, but advanced users may want to customize their own methods.
+The `save` step takes the result of the `execute` step and saves it to a SQL database. This is automated for common workflows like relaxations, dynamics, or static-energy calculations. However, advanced users may want to customize their methods.
 
-All stages of a `Workflow` are done through the `run` or `run_cloud` methods. That is... `Workflow.run` = `configure` + `schedule` + `execute` + `save`.
+All stages of a `Workflow` are executed through the `run` or `run_cloud` methods. In other words, `Workflow.run` = `configure` + `schedule` + `execute` + `save`.
 
-To begin building custom workflows, make sure you have completed [the getting-started tutorials](/simmate/getting_started/) and then read through the `simmate.engine.workflow` documentation.
-
+To start building custom workflows, complete [the getting-started tutorials](/simmate/getting_started/) and review the `simmate.engine.workflow` documentation.
 
 ### What is a `NestedWorkflow`?
 
-Some workflows are "nested", which means it's a workflow made up multiple other workflows. An example of this is the `relaxation.vasp.staged` workflow, which involves a series of relaxations of increasing quality and then a final energy calculation.
-
+A "nested" workflow is a workflow composed of multiple other workflows. For instance, the `relaxation.vasp.staged` workflow includes a series of relaxations of increasing quality followed by a final energy calculation.
 
 ### What is an `S3Workflow`?
 
-Many workflows involve writing input files, calling some external program, and then reading through the output files. All workflows like this are known as "`S3Workflow`"s. S3 means the workflow is **Supervised**, **Staged**, and a **Shell** call. For shorthand, we call this a "S3" workflow. There is some history behind why it's named this way, but here is how the name breaks down:
+An `S3Workflow` involves writing input files, calling an external program, and reading the output files. The term "S3" stands for **Supervised**, **Staged**, and **Shell** call. Here's what each term means:
 
-- `Staged`: the overall calculation is made of three stages (each is a class method)
+- `Staged`: The calculation consists of three stages (each is a class method)
     1. `setup` = write input files
-    2. `run_command_and_monitor` = the actual running & monitoring of the program
-    3. `workup` = reading the output files
-- `Shell`: the program is called through the command-line (the actual `execution` call)
-- `Supervised`: once the shell command is started, Simmate runs in the background to monitor it for errors (occurs during the `execution` call)
+    2. `run_command_and_monitor` = run & monitor the program
+    3. `workup` = read the output files
+- `Shell`: The program is called through the command-line (the actual `execution` call)
+- `Supervised`: Simmate monitors the shell command for errors in the background (occurs during the `execution` call)
 
-All stages of this S3 workflow are packed into the `excute` step of a `Workflow`, where Simmate has a lot of functionality built for you already.
+All stages of an S3 workflow are included in the `execute` step of a `Workflow`, where Simmate provides extensive built-in functionality.
 
-If you would like to build a custom S3 workflow, we suggest going through:
+To build a custom S3 workflow, we recommend going through:
 1. [getting-started guides](/simmate/getting_started/overview/)
 2. `simmate.engine.workflow` documentation
 3. `simmate.engine.s3_workflow` documentation
-
-------------------------------------------------------------

@@ -1,51 +1,51 @@
+# Setting Up Your Environment and Installing Simmate
 
-# Creating our environment and installing Simmate
-
-For now, let's create a new environment that uses the [conda-forge](https://conda-forge.org/) channel. A channel is where anaconda downloads packages from -- and to keep things simple, we will ALWAYS use conda-forge (this is the standard in the python community). 
+To begin, we'll establish a new environment using the [conda-forge](https://conda-forge.org/) channel. Anaconda uses channels to download packages, and for simplicity, we'll consistently use conda-forge, a standard practice in the Python community.
 
 ----------------------------------------------------------------------
 
-## 1. Create the environment
+## 1. Environment Creation
 
-Now let's run this command below. Note you can switch out the name `my_env` for whatever you want here, just make sure you use underscores instead of spaces (`my_env` will work while `my env` will give an error).
+Execute the command below to create your environment. You can replace `my_env` with any name of your choice, but remember to use underscores instead of spaces (`my_env` is acceptable, `my env` will cause an error).
 
 ``` shell
 conda create -c conda-forge -n my_env python=3.11
 ```
 
-Say yes when the installation asks for confirmation. 
+Confirm the installation when prompted.
 
 ----------------------------------------------------------------------
 
-## 2. Activate the environment
-Next, switch to this new environment. To do that we use...
+## 2. Environment Activation
+
+Switch to the newly created environment using the following command:
 
 ``` shell
 conda activate my_env
 ```
 
-You'll see the start of your command line switch from `(base)` to `(my_env)` if this worked successfully. 
+If the operation is successful, the start of your command line will change from `(base)` to `(my_env)`.
 
 ----------------------------------------------------------------------
 
-## 3. Install Simmate
-Next, we want to install Simmate.
+## 3. Simmate Installation
+
+Now, let's install Simmate.
 
 ``` shell
 conda install -c conda-forge -n my_env simmate
 ```
 
-This may take a few minutes to run and install. But once it's done, you've now successfully installed Simmate! If you ran into any errors with this very last command, please let our team know immediately by [posting a new issue here](https://github.com/jacksund/simmate/issues/).
+The installation may take a few minutes. Once completed, Simmate is successfully installed! 
 
-!!! tip
-    If your installation is extremely slow (>20 minutes), you may want to read through
-    our ["Speed-up your installation" section](/simmate/getting_started/installation/quick_start/#speed-up-your-installation).
+If you encounter any errors with this command, please inform our team immediately by [posting a new issue](https://github.com/jacksund/simmate/issues/).
 
 ----------------------------------------------------------------------
 
-## 4. Install Spyder
+## 4. Spyder Installation
 
-As an extra, let's use Anaconda to install [Spyder](https://www.spyder-ide.org/). Spyder is what we will use to write python in later tutorials. But now that we have Anaconda set up, installing new programs can be done in just one line:
+Lastly, let's install [Spyder](https://www.spyder-ide.org/) using Anaconda. We'll use Spyder for writing Python in later tutorials:
+
 ``` shell
 conda install -c conda-forge -n my_env spyder
 ```

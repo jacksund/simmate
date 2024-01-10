@@ -1,51 +1,50 @@
-
-# The Warren Lab App
+# The Warren Lab Application
 
 !!! note
-    This app is currently maintained by [Sam Weaver](https://github.com/SWeav02)
+    The current maintainer of this application is [Sam Weaver](https://github.com/SWeav02)
 
 --------------------------------------------------------------------------------
 
-## About
+## Overview
 
-Scott Warren's Materials Discovery Lab at the University of North Carolina (Chapel Hill) lab specicializes in electrides, fluoride-ion batteries, and 2D materials. 
+The Warren Lab App is a product of Scott Warren's Materials Discovery Lab at the University of North Carolina (Chapel Hill). Our lab focuses on electrides, fluoride-ion batteries, and 2D materials. 
 
-This `Warren Lab` app contains workflows for our lab's preferred DFT settings and common analyses. By registering this app, you will add many new workflow presets that build on top of several other apps (VASP, Bader, BadELF, etc.).
+The `Warren Lab` application incorporates workflows for our lab's preferred DFT settings and common analyses. Registering this app will introduce numerous new workflow presets that enhance several other apps (VASP, Bader, BadELF, etc.).
 
 --------------------------------------------------------------------------------
 
-## Helpful links
+## Useful Resources
 
  - [Scott Warren](https://chem.unc.edu/faculty/warren-scott/) (UNC contact page)
- - [lab website](https://materials-lab.io/)
+ - [Lab Website](https://materials-lab.io/)
 
 --------------------------------------------------------------------------------
 
 ## Installation
 
-1. Make sure you have Simmate installed and a working database.
+1. Ensure that Simmate is installed and that you have a functioning database.
 
-2. Add the following apps to `~/simmate/my_env-apps.yaml`:
+2. Incorporate the following apps into `~/simmate/my_env-apps.yaml`:
 ``` yaml
-# Add app dependencies.
-# NOTE!!! some of these are already present by default. Do not add duplicates
+# Include app dependencies.
+# IMPORTANT: Some of these may already be present by default. Avoid adding duplicates
 - simmate.apps.configs.VaspConfig
 - simmate.apps.configs.BaderConfig
 - simmate.apps.configs.BadelfConfig
-# Add warren lab app.
+# Include the Warren Lab app.
 - simmate.workflows.configs.WarrenLabConfig
 ```
 
-3. Update your database to include custom tables:
+3. Update your database to incorporate custom tables:
 ``` bash
 simmate database update
 ```
 
 --------------------------------------------------------------------------------
 
-## Workflows provided
+## Included Workflows
 
-### VASP (relaxation)
+### VASP (Relaxation)
 
 ```
 relaxation.vasp.warren-lab-hse
@@ -58,7 +57,7 @@ relaxation.vasp.warren-lab-pbesol
 relaxation.vasp.warren-lab-scan
 ```
 
-### VASP (static energy)
+### VASP (Static Energy)
 
 ```
 static-energy.vasp.warren-lab-hse
