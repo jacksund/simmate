@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warren_lab.models import BadElfAnalysis
-from simmate.apps.warren_lab.workflows.badelf.base import BadElfBase
+from simmate.apps.badelf.models import BadElf
+from simmate.apps.badelf.workflows.base import BadElfBase
 from simmate.database import connect
 
 
-class BadElfAnalysis__Badelf__Badelf(BadElfBase):
+class BadElf__Badelf__Badelf(BadElfBase):
     """
     This class runs a Bader and BadELF analysis without running a static
     energy calculation. The directory it is run in must already have an
@@ -18,4 +18,4 @@ class BadElfAnalysis__Badelf__Badelf(BadElfBase):
     """
 
     use_database = True
-    database_table = BadElfAnalysis
+    database_table = BadElf

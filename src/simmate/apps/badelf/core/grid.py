@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+
 import itertools
+import logging
 import math
 from pathlib import Path
 
@@ -8,13 +10,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike
 from pymatgen.io.vasp import Poscar
-
-# import itertools
 from pyrho.pgrid import PGrid
 
 from simmate.toolkit import Structure
-
-# from typing import TYPE_CHECKING
 
 
 class Grid:
@@ -237,7 +235,7 @@ class Grid:
         Returns:
             Grid from the specified file.
         """
-
+        logging.info(f"Loading {grid_file} from file")
         # Create string to add structure to.
         structure_str = ""
         total_str = ""
@@ -350,6 +348,7 @@ class Grid:
             file_name (str | Path): Path to file
             vasp4_compatible: True if the format is vasp4 compatible.
         """
+        logging.info(f"Writing to {file_name}")
 
         def _print_fortran_float(flt):
             """Fortran codes print floats with a leading zero in scientific

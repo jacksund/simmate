@@ -170,13 +170,12 @@ class S3Workflow(Workflow):
         # workflow level, then we want to make it so the user can set it for
         # each unique task.run() call. Otherwise we grab the default from the
         # class attribute.
-        if not command:
-            command = cls.get_final_command(
-                # we pass everything and let the method decide what's needed
-                directory=directory,
-                is_restart=is_restart,
-                **kwargs,
-            )
+        command = cls.get_final_command(
+            # we pass everything and let the method decide what's needed
+            directory=directory,
+            is_restart=is_restart,
+            **kwargs,
+        )
 
         # establish the working directory
         directory = get_directory(directory)

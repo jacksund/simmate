@@ -1,4 +1,5 @@
-# BadELF Application
+
+# The BadELF App
 
 !!! note
     The current application maintainer is [Sam Weaver](https://github.com/SWeav02)
@@ -9,23 +10,23 @@
 
 --------------------------------------------------------------------------------
 
-## Overview of BadELF
+## About BadELF
 
 BadELF is a method that combines Bader Charge Analysis and the Electron Localization Function (ELF) to predict oxidation states and perform population analysis of electrides. It uses Bader segmentation of the ELF to detect electride electrons and Voronoi segmentation of the ELF to identify atoms.
 
 --------------------------------------------------------------------------------
 
-## Application Features
+## About this app
 
 The BadELF application provides workflows and utilities to streamline BadELF analysis.
 
 --------------------------------------------------------------------------------
 
-## Installation Steps
+## Installation
 
-1. Ensure Simmate is installed and your database is reset.
+1. Make sure you have Simmate installed and have reset your database.
 
-2. Register the warrenapp with simmate by adding `- warrenapp.apps.WarrenConfig` to `~/simmate/my_env-apps.yaml`
+2. Register the badelf app with simmate by adding `- simmate.apps.BadelfConfig` to `~/simmate/my_env-apps.yaml`
 
 3. Update your database to include custom tables from the warrenapp
 ``` shell
@@ -36,16 +37,16 @@ simmate database update
 
 ## Basic Use
 
-BadELF requires outputs from VASP calculations (like CHGCAR, ELFCAR, etc.). You can either generate these independently or use a simmate workflow to do it for you. 
+BadELF requires outputs from VASP calculations (e.g. the CHGCAR, ELFCAR, etc.). You can either (a) generate these on your own or (b) run a simmate workflow that does it for you. 
 
-### (a) From VASP Outputs
+### (a) from VASP outputs
 
-To use BadELF with VASP results, ensure your VASP settings generate a CHGCAR and ELFCAR with matching grid sizes. 
+The BadELF algorithm can be run in a folder with VASP results. Please ensure your VASP settings generate a CHGCAR and ELFCAR with matching grid sizes. 
 
 Create a yaml file:
 ``` yaml
 # inside input.yaml
-workflow_name: bad-elf-analysis.bad-elf.bad-elf
+workflow_name: bad-elf.badelf.badelf
 
 # all parameters below are optional
 directory: /path/to/folder
@@ -57,14 +58,14 @@ elf_connection_cutoff: 0
 check_for_covalency: true
 ```
 
-Then, execute the workflow:
+And run the workflow:
 ``` bash
 simmate workflows run input.yaml
 ```
 
-### (b) From Input Structure
+### (b) from structure
 
-If you want Simmate to handle the VASP calculation, workflows are available that will first perform the required DFT and then BadELF. 
+If you would prefer to have Simmate handle the VASP calculation, workflows are available that will first run the required DFT and then BadELF. 
 
 These workflows are stored in the `Warren Lab` app, which contains our lab's preferred VASP settings. Refer to the `Warren Lab` app for more details and to view the available workflows.
 
