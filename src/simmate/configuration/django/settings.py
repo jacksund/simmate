@@ -331,7 +331,7 @@ if _oauth.microsoft.client_id and _oauth.microsoft.secret:
     SOCIALACCOUNT_PROVIDERS["microsoft"] = {
         "APP": {
             "client_id": _oauth.microsoft.client_id,
-            "secret": _oauth.microsoft.client_id,
+            "secret": _oauth.microsoft.secret,
             "key": "",
         },
         "TENANT": "organizations",  # limits to internal use
