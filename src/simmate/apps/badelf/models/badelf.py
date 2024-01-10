@@ -13,7 +13,6 @@ class BadElf(Structure, Calculation):
     """
 
     class Meta:
-        abstract = True
         app_label = "workflows"
 
     oxidation_states = table_column.JSONField(blank=True, null=True)

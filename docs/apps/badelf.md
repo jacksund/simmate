@@ -69,6 +69,6 @@ simmate workflows run input.yaml
 
 If you would prefer to have Simmate handle the VASP calculation, there are workflows that will first run the required DFT and then BadELF. 
 
-These workflows are stored in the `Warren Lab` app because we are our lab's preferred VASP settings there. View the `Warren Lab` app for more information and to see the workflows available.
+These workflows are stored in the `Warren Lab` app because we use our lab's preferred VASP settings there. View the `Warren Lab` app for more information and to see the workflows available.
 
 --------------------------------------------------------------------------------

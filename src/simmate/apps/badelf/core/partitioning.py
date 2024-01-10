@@ -1156,13 +1156,16 @@ class PartitioningToolkit:
                 radius = frac * dist
                 reverse_frac = 1 - frac
                 reverse_radius = reverse_frac * dist
-                # assign this frac to the corresponding row of the unique_pairs
-                # create search to find rows with same symbol set and reverse symbol set
+
+                # create search to find rows with same symbol set and reverse symbol set.
                 reverse_condition = (
                     (unique_pairs["site_symbol"] == neigh_symbol)
                     & (unique_pairs["neigh_symbol"] == site_symbol)
                     & (unique_pairs["dist"] == dist)
                 )
+                # assign the fraction along the line and distance to each unique
+                # site neighbor pair. We do this in the loop so that the reverse
+                # assignments don't need to be repeated
                 unique_pairs.at[index, "partitioning_frac"] = frac
                 unique_pairs.loc[reverse_condition, "partitioning_frac"] = reverse_frac
 
@@ -1178,6 +1181,8 @@ class PartitioningToolkit:
                     & (site_neigh_pairs["dist"] == dist)
                 )
 
+                # Assign the fraction along the line and distance to ever
+                # site neighbor pair.
                 site_neigh_pairs.loc[
                     search_condition1, ["partitioning_frac", "radius"]
                 ] = (frac, radius)
@@ -1185,15 +1190,15 @@ class PartitioningToolkit:
                     reverse_condition1, ["partitioning_frac", "radius"]
                 ] = (reverse_frac, reverse_radius)
 
-        # Store site and neighbor coords in arrays
+        # Get the site and neighbor coords in arrays to make calculations easier
         site_coords = np.array(site_neigh_pairs["site_coords"].to_list())
         neigh_coords = np.array(site_neigh_pairs["neigh_coords"].to_list())
         fracs = site_neigh_pairs["partitioning_frac"].to_numpy()
 
+        # Calculate the plane points and vectors
         vectors = neigh_coords - site_coords
         magnitudes = np.linalg.norm(vectors, axis=1)
         unit_vectors = vectors / magnitudes[:, np.newaxis]
-
         plane_points = vectors * fracs[:, np.newaxis] + site_coords
 
         # Add plane points and vectors to full dataframe

@@ -309,7 +309,7 @@ class BadElfToolkit:
             voxel_assignments = self._get_multi_plane_voxel_assignment(
                 voxel_assignments
             )
-
+        logging.info("Finished voxel assignment")
         return voxel_assignments
 
     def write_electride_structure_files(
@@ -677,6 +677,7 @@ class BadElfToolkit:
             # get the desired data that will be saved to the dataframe
             #!!! I should rework the ACF.dat reader now that I have better
             # tools than pymatgen's reader
+            logging.info("Calculating additional useful information")
             results_dataframe, extra_data = ACF(directory)
             results = {
                 "oxidation_states": list(results_dataframe.oxidation_state.values),
@@ -690,6 +691,7 @@ class BadElfToolkit:
             # get the voxel assignments as a dataframe.
             voxel_assignments = self.voxel_assignments
             voxel_volume = self.charge_grid.voxel_volume
+            logging.info("Calculating additional useful information")
             # Create dictionaries to store the important results
             min_dists = {}
             charges = {}
