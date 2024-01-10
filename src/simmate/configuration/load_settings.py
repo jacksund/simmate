@@ -330,7 +330,7 @@ class SimmateSettings:
                 cleaned_setting = {sub_key: cleaned_setting}
 
             # add to final set
-            user_settings.update(cleaned_setting)
+            user_settings = deep_update(user_settings, cleaned_setting)
 
         return user_settings
 

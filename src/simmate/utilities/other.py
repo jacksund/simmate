@@ -191,6 +191,11 @@ def str_to_datatype(
     elif target_type == list[int]:
         return [int(item) for item in value.split()]
 
+    # BUG: I assume we want to split by spaces, but I don't know of a good
+    # way to override this on a per-variable basis.
+    elif target_type == list[str]:
+        return value.split()
+
     # These vectors are always 3x floats
     elif target_type == list[list[float]]:
         # convert a string of...
