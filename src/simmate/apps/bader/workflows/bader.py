@@ -22,5 +22,5 @@ class PopulationAnalysis__Bader__Bader(S3Workflow):
     There are cases where also use structures that contain "empty atoms" in them.
     This is to help with partitioning of electrides, which possess electron 
     density that is not associated with any atomic orbital. For these cases,
-    you will see files like "CHGCAR_empty" used in the command.
+    you will see files like "CHGCAR_w_empty_atoms" used in the command.
     """

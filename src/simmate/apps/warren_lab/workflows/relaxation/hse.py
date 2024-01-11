@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warren_lab.inputs.warren_potcar_mappings import HSE_POTCAR_MAPPINGS
+from simmate.apps.warren_lab.inputs.potcar_mappings import HSE_POTCAR_MAPPINGS
 from simmate.apps.warren_lab.workflows.relaxation.pbe import (
     Relaxation__Vasp__WarrenLabPbe,
 )

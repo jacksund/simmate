@@ -49,7 +49,7 @@ class PopulationAnalysis__Bader__BaderDev(S3Workflow):
 
         # Now go through the extra optional kwargs bader cli
         if partitioning_file:
-            command_final += f"-ref {partitioning_file}"
+            command_final += f" -ref {partitioning_file}"
 
         if atoms_to_print and species_to_print:
             raise Exception(
@@ -58,7 +58,7 @@ class PopulationAnalysis__Bader__BaderDev(S3Workflow):
             )
         elif atoms_to_print:
             indices_str = " ".join([str(i + 1) for i in atoms_to_print])
-            command_final += f"-p sel_atom {indices_str}"
+            command_final += f" -p sel_atom {indices_str}"
         elif species_to_print:
             if not structure:
                 raise Exception(
@@ -67,4 +67,5 @@ class PopulationAnalysis__Bader__BaderDev(S3Workflow):
                 # TODO: grab the structure from the CHGCAR
             atom_indices = structure.indices_from_symbol(species_to_print)
             indices_str = indices_str = " ".join([str(i + 1) for i in atom_indices])
-            command_final += f"-p sel_atom {indices_str}"
+            command_final += f" -p sum_atom {indices_str}"
+        return command_final

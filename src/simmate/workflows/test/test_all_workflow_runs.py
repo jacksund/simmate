@@ -141,8 +141,9 @@ def test_all_workflow_runs(tmp_path, sample_structures):
 
         # TEST BadELF FLOWS
         structure = sample_structures["Ca2N_mp-2686_primitive"]
-        workflow_name = "bad-elf-analysis.badelf.badelf-pbesol"
+        workflow_name = "bad-elf-analysis.badelf.badelf-test"
         workflow = get_workflow(workflow_name)
+
         # This workflow runs a static energy and then badelf calculation. The
         # hse version is identical, but uses a different static energy step
         # which is tested above. However, there are 3 different algorithms
@@ -153,6 +154,8 @@ def test_all_workflow_runs(tmp_path, sample_structures):
                 structure=structure,
                 command="mpirun -n 14 vasp_std > vasp.out",
                 algorithm=algorithm,
+                cores=14,
+                check_for_covalency=False,
             )
             state.result()
             if state.is_completed():

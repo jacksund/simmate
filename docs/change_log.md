@@ -100,6 +100,10 @@ There is one significant exception to the above rules -- `MAJOR`=0 releases. Any
 
 - fix bug where workers incorrectly grab substring tag matches (e.g. a worker submited with the tag `ex` would incorrectly grab jobs like `ex-01` or `ex-02`)
 
+**0.15.1 (2024.01.11)**
+
+- refactor & fix bugs for `warren_lab` and `badelf` apps
+
 --------------------------------------------------------------------------------
 
 ## v0.14.0 (2023.07.06)

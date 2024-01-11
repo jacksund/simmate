@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# from simmate.apps.warren_lab.workflows.badelf.prebadelf_dft import (
-#     StaticEnergy__Vasp__PrebadelfHse,
-# )
 from simmate.apps.warren_lab.workflows.badelf.prebadelf_dft import (
     StaticEnergy__Vasp__WarrenLabPrebadelfHse,
 )

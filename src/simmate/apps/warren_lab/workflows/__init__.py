@@ -3,9 +3,9 @@
 from simmate.database import connect
 
 from .badelf import (
-    BadElfAnalysis__Badelf__Badelf,
-    BadElfAnalysis__Badelf__BadelfHse,
-    BadElfAnalysis__Badelf__BadelfPbesol,
+    BadElf__Badelf__BadelfHse,
+    BadElf__Badelf__BadelfPbesol,
+    BadElf__Badelf__BadelfTest,
     StaticEnergy__Vasp__WarrenLabPrebadelfHse,
     StaticEnergy__Vasp__WarrenLabPrebadelfPbesol,
 )

@@ -58,11 +58,11 @@ def ACF(directory: Path = None, filename="ACF.dat"):
 
     potcar_filename = directory / "POTCAR"
     chgcar_filename = directory / "CHGCAR"
-    chgcar_empty_filename = directory / "CHGCAR_empty"  # SPECIAL CASE
+    CHGCAR_w_empty_atoms_filename = directory / "CHGCAR_w_empty_atoms"  # SPECIAL CASE
 
     # check if the required vasp files are present before doing the workup
     if potcar_filename.exists() and (
-        chgcar_filename.exists() or chgcar_empty_filename.exists()
+        chgcar_filename.exists() or CHGCAR_w_empty_atoms_filename.exists()
     ):
         # load the electron counts used by VASP from the POTCAR files
         # OPTIMIZE: this can be much faster if I have a reference file
@@ -78,8 +78,8 @@ def ACF(directory: Path = None, filename="ACF.dat"):
         # SPECIAL CASE: in scenarios where empty atoms are added to the structure,
         # we should grab that modified structure instead of the one from the POSCAR.
         # the empty file will always take preference
-        if chgcar_empty_filename.exists():
-            chgcar = Chgcar.from_file(chgcar_empty_filename)
+        if CHGCAR_w_empty_atoms_filename.exists():
+            chgcar = Chgcar.from_file(CHGCAR_w_empty_atoms_filename)
             structure = chgcar.structure
             # We typically use hydrogen ("H") as the empty atom, so we will
             # need to add this to our element list for oxidation analysis.

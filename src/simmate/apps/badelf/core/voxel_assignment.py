@@ -83,17 +83,14 @@ class VoxelAssignmentToolkit:
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         sites = []
         # Iterate over each site in the lattice
-        for site, neighs in partitioning.items():
+        for site, neighbor_df in partitioning.items():
             matched = True
             # Iterate through each neighbor
-            for neigh, values in neighs.items():
+            for neigh_index, row in neighbor_df.iterrows():
                 # get the minimum point and normal vector which define the plane
                 # seperating the sites.
-                try:
-                    point = values["real_min_point"]
-                except:
-                    breakpoint()
-                normal_vector = values["normal_vector"]
+                point = row["plane_points"]
+                normal_vector = row["plane_vectors"]
                 # If a voxel is on the same side of the plane as the site, then they
                 # should have the same sign when their coordinates are plugged into
                 # the plane equation (negative).
@@ -272,7 +269,10 @@ class VoxelAssignmentToolkit:
             return -2, None
         elif len(sites) == 1:
             # there is only one site found so we just return it.
-            return sites[0], translations[0]
+            if sites[0] == -1:
+                return -1, None
+            else:
+                return sites[0], translations[0]
         else:
             # there wasn't any site found so we don't return our site variable which
             # is None
@@ -444,12 +444,12 @@ class VoxelAssignmentToolkit:
         for site in sites["site"]:
             sites_to_search.remove(site)
             # iterate over each plane
-            for neighbor, values in partitioning[site].items():
-                neighbor_index = values["neigh_index"]
+            for neighbor_df_index, row in partitioning[site].iterrows():
+                neighbor_index = row["neigh_index"]
                 # if neighbor is in the list of sites, look at the plane
                 if neighbor_index in sites_to_search:
-                    plane_point = values["real_min_point"]
-                    plane_vector = values["normal_vector"]
+                    plane_point = row["plane_points"]
+                    plane_vector = row["plane_vectors"]
                     # iterate over each edge and find the points that intersect
                     intersections = []
                     for edge in edges:
@@ -471,7 +471,7 @@ class VoxelAssignmentToolkit:
                     if len(intersections) > 0:
                         # if we have any intersections we add the site index, its
                         # neighbors index, and the list of intersections to the df
-                        plane_row = [site, values["neigh_index"], intersections]
+                        plane_row = [site, row["neigh_index"], intersections]
                         intersections_df.loc[len(intersections_df)] = plane_row
         return intersections_df
 
