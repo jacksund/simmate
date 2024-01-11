@@ -8,8 +8,8 @@
     {% load static %}
     {% load account socialaccount %}
     {% load getsetting %}
-    {% getsetting "REQUIRE_LOGIN_INTERNAL" as REQUIRE_LOGIN_INTERNAL %}
-    {% getsetting "LOGIN_MESSAGE" as LOGIN_MESSAGE %}
+    {% simmate_setting "website.require_login_internal" as REQUIRE_LOGIN_INTERNAL %}
+    {% simmate_setting "website.login_message" as LOGIN_MESSAGE %}
     <div class="account-pages pt-2 pt-sm-5 pb-4 pb-sm-5">
         <div class="container">
             <div class="row justify-content-center">

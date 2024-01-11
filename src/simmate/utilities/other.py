@@ -191,6 +191,11 @@ def str_to_datatype(
     elif target_type == list[int]:
         return [int(item) for item in value.split()]
 
+    # BUG: I assume we want to split by spaces, but I don't know of a good
+    # way to override this on a per-variable basis.
+    elif target_type == list[str]:
+        return value.split()
+
     # These vectors are always 3x floats
     elif target_type == list[list[float]]:
         # convert a string of...
@@ -301,3 +306,54 @@ def bypass_nones(bypass_kwarg: str = None, multi_cols: bool = False):
         return wrapper
 
     return decorator
+
+
+class dotdict(dict):
+    """
+    Provides dot.notation access to dictionary attributes
+    """
+
+    # This class is modified from suggestions here:
+    # https://stackoverflow.com/questions/2352181/
+
+    # BUG: these two methods need to be updated to be recursive like I did
+    # with __getattr__ below
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+    def __getattr__(self, name: str):
+        if name not in self.keys():
+            raise Exception(f"Unknown property: {name}")
+
+        setting = self.get(name, None)
+
+        # if the property accessed is a dictionary, then we make it a dotdict
+        # so that we can perform recursive dot access
+        if isinstance(setting, dict):
+            return dotdict(setting)
+        else:
+            return setting
+
+
+def deep_update(default_dict: dict, override_dict: dict) -> dict:
+    """
+    Recursively update the default dictionary with values from the override dictionary.
+    """
+
+    # This fxn mirrors pydantic's deep_update util
+    # https://stackoverflow.com/questions/3232943/
+
+    final_dict = default_dict.copy()
+
+    for key, value in override_dict.items():
+        if (
+            isinstance(value, dict)
+            and key in final_dict
+            and isinstance(final_dict[key], dict)
+        ):
+            final_dict[key] = deep_update(final_dict[key], value)
+
+        else:
+            final_dict[key] = value
+
+    return final_dict

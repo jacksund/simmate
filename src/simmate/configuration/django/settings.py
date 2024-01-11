@@ -6,184 +6,29 @@ database backend being used.
 """
 
 import os
-from pathlib import Path
 
-import dj_database_url  # needed for DigitalOcean database connection
-import yaml
-
-from simmate import website  # needed to specify location of built-in apps
-from simmate.utilities import get_conda_env, get_directory
+from simmate.configuration import settings
+from simmate.utilities import get_directory
 
 # --------------------------------------------------------------------------------------
 
-# SET MAIN DIRECTORIES
+DEBUG = settings.website.debug
 
-# We check for extra django apps in the user's home directory and in a "hidden"
-# folder named "simmate/extra_applications".
-# For windows, this would be something like...
-#   C:\Users\exampleuser\simmate\extra_applications
-# Note, we use get_directory in order to create that folder if it does not exist.
-SIMMATE_DIRECTORY = get_directory(Path.home() / "simmate")
+ALLOWED_HOSTS = settings.website.allowed_hosts
 
-# This directory is where simmate.website is located and helps us indicate
-# where things like our templates or static files are located. We find this
-# by looking at the import path to see where python installed it.
-DJANGO_DIRECTORY = Path(website.__file__).absolute().parent
+CSRF_TRUSTED_ORIGINS = settings.website.csrf_trusted_origins
 
-# Some settings below also depend on the conda env name. This makes switching
-# between different databases and settings as easy as activating different
-# conda environments
-CONDA_ENV = get_conda_env()
+SECRET_KEY = settings.website.secret_key
 
 # --------------------------------------------------------------------------------------
 
-# ENVIORNMENT VARIABLES
-
-# There are a number of settings that we let the user configure via enviornment
-# variables, which helps control things when we want to launch a website server.
-# We check for these variables in the enviornment, and if they are not set,
-# they fall back to a default.
-
-# Don't run with debug turned on in production!
-# For DigitalOcean, we try grabbing this from an enviornment variable. If that
-# variable isn't set, then we assume we are debugging. The == at the end converts
-# the string to a boolean for us.
-DEBUG = os.getenv("DEBUG", "False") == "True"
-
-# To make this compatible with DigitalOcean, we try to grab the allowed hosts
-# from an enviornment variable, which we then split into a list. If this
-# enviornment variable isn't set yet, then we just defaul to the localhost.
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
-
-# BUG-FIX: Django-unicorn ajax requests sometimes come from the server-side
-# ingress (url for k8s) or a nginx load balancer. To get past a 403 forbidden
-# result, we need to sometimes specify allowed origins.
-CSRF_TRUSTED_ORIGINS = os.getenv(
-    "DJANGO_CSRF_TRUSTED_ORIGINS",
-    "http://localhost",
-).split(",")
-
-# This is for setting the database via an connection URL. This is done as
-# an environment variable to allow setup with DigitalOcean
-DATABASE_URL = os.getenv("DATABASE_URL", None)
-# this is not a typical Django setting
-
-# Keep the secret key used in production secret!
-# For DigitalOcean, we grab this secret key from an enviornment variable.
-# If this variable isn't set, then we instead generate a random one.
-SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY", "pocj6cunub4zi31r02vr5*5a2c(+_a0+(zsswa7fmus^o78v)r"
-)
-# !!! I removed get_random_secret_key() so I don't have to sign out every time
-# while testing my server. I may change this back in the future.
-# from django.core.management.utils import get_random_secret_key
-
-# Sometimes we lock down the website to registered/approved users.
-# By default, we allow anonymous users to explore because this makes things like
-# REST API calls much easier for them. In special cases, such as industry, we
-# ONLY let users sign in via a specific allauth endpoint. An example of this
-# is Corteva limiting users to those approved via their Microsoft auth.
-REQUIRE_LOGIN = os.getenv("REQUIRE_LOGIN", "False") == "True"
-# when setting REQUIRE_INTERNAL_LOGIN, set it to the allauth provider type
-# (such as "microsoft")
-REQUIRE_LOGIN_INTERNAL = os.getenv("REQUIRE_LOGIN_INTERNAL", "False")
-if REQUIRE_LOGIN_INTERNAL == "False":
-    REQUIRE_LOGIN_INTERNAL = False
-else:
-    assert REQUIRE_LOGIN_INTERNAL in ["microsoft", "google"]
-    REQUIRE_LOGIN = True
-# example: r'/apps/spotfire(.*)$'
-REQUIRE_LOGIN_EXCEPTIONS = [
-    e for e in os.getenv("REQUIRE_LOGIN_EXCEPTIONS", "").split(";") if e
-]
-LOGIN_MESSAGE = os.getenv("LOGIN_MESSAGE", "")
-
-# These allow server maintainers to override the homepage and profile views, which
-# is important if they involve loading custom apps/models for their templates.
-PROFILE_VIEW = os.getenv("PROFILE_VIEW", None)
-HOME_VIEW = os.getenv("HOME_VIEW", None)
-
-# --------------------------------------------------------------------------------------
-
-# DATBASE CONNECTION
-
-# Normally in Django, you can set the database like so: (using Postgres)
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "simmate-database-pool",  # default on DigitalOcean is defaultdb
-#         "USER": "doadmin",
-#         "PASSWORD": "dibi5n3varep5ad8",
-#         "HOST": "db-postgresql-nyc3-09114-do-user-8843535-0.b.db.ondigitalocean.com",
-#         "PORT": 25061,
-#         "OPTIONS": {"sslmode": "require"},
-#         # "CONN_MAX_AGE": 0,  # set this to higher value for production website server
-#     }
-# }
-# But this section instead determines the database through a series of checks.
-
-# There are three types of database files that we check for -- in order of priority:
-#   1. database.yaml
-#   2. my_env-database.yaml
-#   3. use a DATABASE_URL env variable
-#   4. my_env-database.sqlite3 <-- and create this if doesn't exist
-DATABASE_YAML = SIMMATE_DIRECTORY / "database.yaml"
-CONDA_DATABASE_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-database.yaml"
-CONDA_DATABASE_SQLITE3 = SIMMATE_DIRECTORY / f"{CONDA_ENV}-database.sqlite3".strip("-")
-# if the user is in the (base) env or not using conda, then we will have a
-# value of "-database.sqlite3". We remove the starting "-" here.
-
-
-# Our 1st priority is checking for a "simmate/database.yaml" file
-if DATABASE_YAML.exists():
-    with DATABASE_YAML.open() as file:
-        DATABASES = yaml.full_load(file)
-
-# Our 2nd priority is checking for a file like "/simmate/my_env-database.yaml
-elif CONDA_DATABASE_YAML.exists():
-    with CONDA_DATABASE_YAML.open() as file:
-        DATABASES = yaml.full_load(file)
-
-
-# Our 3rd prioirity is Digital Ocean setup or ENV variable. The connection
-# parameters were set as an env variable named DATABASE_URL.
-elif DATABASE_URL:
-    DATABASES = {
-        "default": dj_database_url.parse(DATABASE_URL),
-    }
-
-# Our final prioirity is a local sqlite database name "my_env-database.sqlite3".
-# This is the default setting used when simmate is first installed.
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": CONDA_DATABASE_SQLITE3,
-        }
-    }
-
-# As an extra, we keep a DATABASE_BACKEND variable for backend-specific methods
-if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
-    DATABASE_BACKEND = "sqlite3"
-elif DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql":
-    DATABASE_BACKEND = "postgresql"
-else:
-    DATABASE_BACKEND = "unknown"
-
-# --------------------------------------------------------------------------------------
-
-# INSTALLED APPS
-
-# OPTIMIZE: for now, I just load everything, but I will want to allow users to
-# to disable some apps from loading. This will allow faster import/setup times
-# when running small scripts. One idea is to have an applications_override.yaml
-# where the user specifies only what they want. Alternatively, I can use
-# a general DATABASE_ONLY keyword or something similar to limit what's loaded.
+# DATABASE CONNECTION
+_default_database = {k.upper(): v for k, v in settings.database.items()}
+DATABASES = {"default": _default_database}
 
 # List all applications that Django will initialize with. Write the full python
 # path to the app or it's config file. Note that relative python paths work too
-# if you are developing a new app. Advanced users can remove unnecessary apps
-# if you'd like to speed up django's start-up time.
+# if you are developing a new app.
 INSTALLED_APPS = [
     #
     # These are all apps that are built by Simmate
@@ -242,96 +87,29 @@ INSTALLED_APPS = [
     # try to avoid adding these as installed apps by default.
     #   "django_extensions",  # for development tools
     #   "debug_toolbar",  # django-debug-toolbar  # for debuging and profile-time info
+    #
+    # Simmate apps + user apps
+    *settings.apps,
 ]
-
-# We also check if the user has a "apps.yaml" file. In this file, the
-# user can provide extra apps to install for Django. We simply append these
-# to our list above. By default we include apps that are packaged with simmate,
-# such as the VASP workflows app.
-DEFAULT_SIMMATE_APPS = [
-    "simmate.workflows.configs.BaseWorkflowsConfig",
-    "simmate.apps.configs.QuantumEspressoConfig",
-    "simmate.apps.configs.VaspConfig",
-    "simmate.apps.configs.BaderConfig",
-    "simmate.apps.configs.EvolutionConfig",
-    "simmate.apps.configs.MaterialsProjectConfig",
-    # These apps may become defaults in the future:
-    # "simmate.apps.configs.BadelfConfig",
-    # "simmate.apps.configs.CleaseConfig",
-    # "simmate.apps.configs.WarrenLabConfig",
-]
-APPLICATIONS_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-apps.yaml"
-# create the file if it doesn't exist yet
-if not APPLICATIONS_YAML.exists():
-    with APPLICATIONS_YAML.open("w") as file:
-        content = yaml.dump(DEFAULT_SIMMATE_APPS)
-        file.write(content)
-
-# load apps that the user wants installed
-with APPLICATIONS_YAML.open() as file:
-    SIMMATE_APPS = yaml.full_load(file)
-    # We only load extra apps if the file isn't empty
-    if SIMMATE_APPS:
-        # now add each app to our list above so Django loads it.
-        for app in SIMMATE_APPS:
-            INSTALLED_APPS.append(app)
-    else:
-        SIMMATE_APPS = []
+# OPTIMIZE: for now, I just load everything, but I will want to allow users to
+# to disable some apps from loading. This will allow faster import/setup times
+# when running small scripts. One idea is to have an applications_override.yaml
+# where the user specifies only what they want. Alternatively, I can use
+# a general DATABASE_ONLY keyword or something similar to limit what's loaded.
 
 # --------------------------------------------------------------------------------------
 
-# DATBASE EXPLORER
-
-# We also check if the user has a "apps.yaml" file. In this file, the
-# user can provide extra apps to install for Django. We simply append these
-# to our list above. By default we include apps that are packaged with simmate,
-# such as the VASP workflows app.
-DEFAULT_SIMMATE_DATA = [
-    "simmate.database.third_parties.AflowPrototype",
-    # "simmate.database.third_parties.AflowStructure",  # Not allowed yet
-    "simmate.database.third_parties.CodStructure",
-    "simmate.database.third_parties.JarvisStructure",
-    "simmate.database.third_parties.MatprojStructure",
-    "simmate.database.third_parties.OqmdStructure",
-]
-DATA_EXPLORER_YAML = SIMMATE_DIRECTORY / f"{CONDA_ENV}-data.yaml"
-# create the file if it doesn't exist yet
-if not DATA_EXPLORER_YAML.exists():
-    with DATA_EXPLORER_YAML.open("w") as file:
-        content = yaml.dump(DEFAULT_SIMMATE_DATA)
-        file.write(content)
-
-# load apps that the user wants installed
-with DATA_EXPLORER_YAML.open() as file:
-    SIMMATE_DATA = yaml.full_load(file)
-    # If the file is empty, just keep our result as an empty list
-    if not SIMMATE_DATA:
-        SIMMATE_DATA = []
-
-# --------------------------------------------------------------------------------------
-
-# EMAILS
-
-# Settings for sending automated emails.
-# For example, this can be set up for GMail by...
-#   1. enabling IMAP (in gmail settings)
-#   2. Having 2-factor auth turned on
-#   3. Adding an App Password (in account settings)
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"  # this is the default
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")  # or outlook.office365.com
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", False) == "True"
-EMAIL_HOST_USER = os.environ.get("EMAIL_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_FROM", "simmate.team@gmail.com")
-EMAIL_SUBJECT_PREFIX = "[Simmate] "
-EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", 5))
-
-# These people get an email when DEBUG=False
-ADMINS = [
-    ("jacksund", "jacksundberg123@gmail.com"),
-    ("jacksund-corteva", "jack.sundberg@corteva.com"),
-]
+# EMAIL SETTINGS
+EMAIL_BACKEND = settings.website.email.backend
+EMAIL_HOST = settings.website.email.host
+EMAIL_PORT = settings.website.email.port
+EMAIL_USE_TLS = settings.website.email.use_tls
+EMAIL_HOST_USER = settings.website.email.host_user
+EMAIL_HOST_PASSWORD = settings.website.email.host_password
+DEFAULT_FROM_EMAIL = settings.website.email.from_email
+EMAIL_SUBJECT_PREFIX = settings.website.email.subject_prefix
+EMAIL_TIMEOUT = settings.website.email.timeout
+ADMINS = settings.website.admins
 
 # --------------------------------------------------------------------------------------
 
@@ -359,8 +137,8 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            SIMMATE_DIRECTORY / "templates",  # let's user easily override html
-            DJANGO_DIRECTORY / "templates",  # a single templates folder
+            settings.config_directory / "templates",  # let's user easily override html
+            settings.django_directory / "templates",  # a single templates folder
             # Then APP_DIRS are checked in order
         ],
         "APP_DIRS": True,
@@ -432,14 +210,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 # collect by running 'python manage.py collectstatic'
 STATIC_URL = "/static/"
-STATIC_ROOT = DJANGO_DIRECTORY / "static"
+STATIC_ROOT = settings.django_directory / "static"
 
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = [
-    get_directory(SIMMATE_DIRECTORY / "static_files"),  # let's user add their own files
-    DJANGO_DIRECTORY / "static_files",
+    get_directory(
+        settings.config_directory / "static_files"
+    ),  # let's user add their own files
+    settings.django_directory / "static_files",
 ]
-
 
 # For the dynamically-created structure files, we need to include the static
 # directory this to work during local testing. This is NOT allowed in a
@@ -512,6 +291,8 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # simple setting required by allauth. not sure what it does...
+# I think this is if you are hosting several websites that all use the
+# same django backend for account sign-in
 SITE_ID = 1
 
 # We start with the providers as an empty dictionary and only fill them
@@ -522,33 +303,35 @@ SOCIALACCOUNT_PROVIDERS = {}
 # "allauth.socialaccount.providers.digitalocean"
 # "allauth.socialaccount.providers.orcid"
 
+_oauth = settings.website.social_oauth
+
 # Sign-in via Google accounts
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", None)
-GOOGLE_SECRET = os.getenv("GOOGLE_SECRET", None)
-if GOOGLE_CLIENT_ID and GOOGLE_SECRET:
+if _oauth.google.client_id and _oauth.google.secret:
     INSTALLED_APPS.append("allauth.socialaccount.providers.google")
     SOCIALACCOUNT_PROVIDERS["google"] = {
-        "APP": {"client_id": GOOGLE_CLIENT_ID, "secret": GOOGLE_SECRET}
+        "APP": {
+            "client_id": _oauth.google.client_id,
+            "secret": _oauth.google.secret,
+        },
     }
 
 # Sign-in via Github accounts
-GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID", None)
-GITHUB_SECRET = os.getenv("GITHUB_SECRET", None)
-if GITHUB_CLIENT_ID and GITHUB_SECRET:
+if _oauth.github.client_id and _oauth.github.secret:
     INSTALLED_APPS.append("allauth.socialaccount.providers.github")
     SOCIALACCOUNT_PROVIDERS["github"] = {
-        "APP": {"client_id": GITHUB_CLIENT_ID, "secret": GITHUB_SECRET}
+        "APP": {
+            "client_id": _oauth.github.client_id,
+            "secret": _oauth.github.secret,
+        },
     }
 
 # Sign-in via Microsoft accounts
-MICROSOFT_CLIENT_ID = os.getenv("MICROSOFT_CLIENT_ID", None)
-MICROSOFT_SECRET = os.getenv("MICROSOFT_SECRET", None)
-if MICROSOFT_CLIENT_ID and MICROSOFT_SECRET:
+if _oauth.microsoft.client_id and _oauth.microsoft.secret:
     INSTALLED_APPS.append("allauth.socialaccount.providers.microsoft")
     SOCIALACCOUNT_PROVIDERS["microsoft"] = {
         "APP": {
-            "client_id": MICROSOFT_CLIENT_ID,
-            "secret": MICROSOFT_SECRET,
+            "client_id": _oauth.microsoft.client_id,
+            "secret": _oauth.microsoft.secret,
             "key": "",
         },
         "TENANT": "organizations",  # limits to internal use
@@ -556,8 +339,8 @@ if MICROSOFT_CLIENT_ID and MICROSOFT_SECRET:
 
 # Initiate social login immediately -- rather than jumping to a separate
 # page and then posting.
-# SECURITY: consider removing per django-allauth's recommendation
 SOCIALACCOUNT_LOGIN_ON_GET = True
+# SECURITY: consider removing per django-allauth's recommendation
 
 # options for login/logoff views
 LOGIN_REDIRECT_URL = "/accounts/profile/"  # this is already the default
@@ -572,10 +355,10 @@ ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "none")
 # Many auth endpoints require a https instead of http response:
 #   https://stackoverflow.com/questions/67726070/
 # We only use this in production
-if not DEBUG:
+if not settings.website.debug:
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
-if REQUIRE_LOGIN:
+if settings.website.require_login:
     MIDDLEWARE.append("simmate.website.require_login.RequireLoginMiddleware")
 
 LOGIN_REQUIRED_URLS = (r"/(.*)$",)
@@ -583,7 +366,7 @@ LOGIN_REQUIRED_URLS_EXCEPTIONS = (
     r"/accounts(.*)$",
     r"/admin(.*)$",
     r"/static(.*)$",
-    *REQUIRE_LOGIN_EXCEPTIONS,
+    *settings.website.require_login_exceptions,
 )
 
 # -----------------------------------------------------------------------------
@@ -591,5 +374,5 @@ LOGIN_REQUIRED_URLS_EXCEPTIONS = (
 # BUG: To use Django ORM within IPython, Spyder, and Jupyter notebooks, which
 # are examples of async consoles, I need to allow unsafe.
 # Read more at...
-# https://docs.djangoproject.com/en/4.0/topics/async/#async-safety
+# https://docs.djangoproject.com/en/5.0/topics/async/#async-safety
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"

@@ -15,19 +15,19 @@ from pathlib import Path
 
 import yaml
 
-from simmate.configuration.django.settings import SIMMATE_APPS
+from simmate.configuration import settings
 from simmate.engine import Workflow
 from simmate.utilities import get_app_submodule, get_directory, make_archive
 
 
 def get_all_workflows(
-    apps_to_search: list[str] = SIMMATE_APPS,
+    apps_to_search: list[str] = settings.apps,
     as_dict: bool = False,
     exclude_subflows: bool = False,
 ) -> list[Workflow]:
     """
     Goes through a list of apps and grabs all workflow objects available.
-    By default, this will grab all installed SIMMATE_APPs
+    By default, this will grab all installed 'settings.apps'
     """
     app_workflows = []
     for app_name in apps_to_search:
@@ -71,7 +71,7 @@ def get_all_workflows(
 
 
 def get_all_workflow_names(
-    apps_to_search: list[str] = SIMMATE_APPS,
+    apps_to_search: list[str] = settings.apps,
     exclude_subflows: bool = False,
 ) -> list[str]:
     """
@@ -236,7 +236,7 @@ def get_workflow(workflow_name: str) -> Workflow:
 
         return workflow
 
-    # otherwise the app should be registered and available in the SIMMATE_APPS
+    # otherwise the app should be registered and available in the settings.apps
     workflow_dict = get_all_workflows(as_dict=True)
     workflow = workflow_dict.get(workflow_name, None)
 

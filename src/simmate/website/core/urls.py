@@ -3,7 +3,7 @@
 from django.contrib import admin
 from django.urls import include, path
 
-from simmate.configuration.django.settings import REQUIRE_LOGIN_INTERNAL, SIMMATE_APPS
+from simmate.configuration import settings
 from simmate.utilities import get_app_submodule
 from simmate.website.core import views
 
@@ -14,7 +14,7 @@ def get_app_urls():
 
     extra_url_paths = []
 
-    for app_name in SIMMATE_APPS:
+    for app_name in settings.apps:
         urls_path = get_app_submodule(app_name, "urls")
         if urls_path:
             simple_name = urls_path.split(".")[-2]
@@ -38,7 +38,7 @@ def get_disabled_urls():
 
     # We want to turn off the new account signup form if we require all users
     # to sign in using their allauth (e.g. Microsoft login)
-    if REQUIRE_LOGIN_INTERNAL:
+    if settings.website.require_login_internal:
         new_path = path(route="accounts/signup/", view=views.permission_denied)
         disabled_url_paths.append(new_path)
 

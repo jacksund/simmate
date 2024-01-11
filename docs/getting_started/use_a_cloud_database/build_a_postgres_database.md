@@ -85,9 +85,9 @@ default:
 ```
 5. Verify that you can connect to this database on your local computer by running the following in Spyder:
 ``` python
-from simmate.configuration.django.settings import DATABASES
+from simmate.configuration import settings
 
-print(DATABASES)  # this should display your connect info!
+print(settings.database)  # this should display your connect info!
 ```
 
 ### (iv) Creating a separate database for testing (on the same server)

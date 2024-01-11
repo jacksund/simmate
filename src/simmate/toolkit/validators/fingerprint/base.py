@@ -264,9 +264,9 @@ class FingerprintValidator(Validator):
                 # fingerprints to the database. We add distinct to keep our
                 # query smaller and just grab one. Distinct is also not supported
                 # by sqlite
-                from simmate.configuration.django.settings import DATABASES
+                from simmate.configuration import settings
 
-                if DATABASES["default"]["ENGINE"] != "django.db.backends.sqlite3":
+                if settings.database.engine != "django.db.backends.sqlite3":
                     query = query.distinct("database_id")
 
                 all_results += list(query)

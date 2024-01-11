@@ -10,7 +10,7 @@ from django.core.mail import EmailMessage
 from rich import print
 from schedule import Scheduler
 
-from simmate.configuration.django.settings import ADMINS, SIMMATE_APPS
+from simmate.configuration import settings
 from simmate.utilities import get_app_submodule
 
 # This string is just something fancy to display in the console when the process
@@ -93,10 +93,10 @@ class SimmateScheduler(Scheduler):
             time.sleep(sleep_step)
 
     @staticmethod
-    def _register_app_schedules(apps_to_search: list[str] = SIMMATE_APPS):
+    def _register_app_schedules(apps_to_search: list[str] = settings.apps):
         """
         Goes through a list of apps and imports the "schedules" module in each.
-        By default, this will grab all installed SIMMATE_APPs
+        By default, this will grab all installed 'settings.apps'
         """
         logging.info("Searching for registrations...")
         for app_name in apps_to_search:
@@ -127,6 +127,6 @@ class SimmateScheduler(Scheduler):
             email = EmailMessage(
                 subject="[SIMMATE] Scheduled job failure",
                 body=error_msg,
-                to=[a[1] for a in ADMINS],  # get admin emails
+                to=[a[1] for a in settings.website.admins],  # get admin emails
             )
             email.send(fail_silently=True)
