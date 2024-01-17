@@ -5,6 +5,7 @@ import json
 import logging
 import re
 import uuid
+from functools import wraps
 from pathlib import Path
 
 import cloudpickle
@@ -1239,3 +1240,54 @@ class Workflow:
                 )
 
         return parameters_cleaned
+
+
+def workflow(
+    original_function: callable = None,
+    app_name: str = "Basic",
+    type_name: str = "Toolkit",
+    use_database: bool = False,
+):
+    """
+    A decorator that converts a function into a workflow class.
+
+    ## Example use:
+
+    ``` python
+    @workflow
+    def example(name, **kwargs):
+        print(f"Hello {name}!")
+        return 12345
+    ```
+    """
+
+    def decorator(original_function):
+        @wraps(original_function)
+        def wrapper(*args, **kwargs):
+            # Preset name example: 'example_fxn' --> 'ExampleFxn'
+            # code copied from https://stackoverflow.com/questions/4303492/
+            preset_name = "".join(
+                x.capitalize() or "_" for x in original_function.__name__.split("_")
+            )
+
+            # dynamically create the new Workflow subclass.
+            NewClass = type(
+                f"{app_name}__{type_name}__{preset_name}",
+                tuple([Workflow]),
+                {
+                    "run_config": staticmethod(original_function),
+                    "use_database": use_database,
+                },
+            )
+
+            return NewClass
+
+        # BUG-FIX: normally we don't call the wrapper here, but I do this
+        # to make sure the function immediately returns our new class.
+        return wrapper()
+
+    # Check if the decorator is used with or without arguments
+    if original_function is None:
+        return decorator
+    else:
+        return decorator(original_function)

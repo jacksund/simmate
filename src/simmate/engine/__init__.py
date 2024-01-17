@@ -23,7 +23,7 @@ from .error_handler import ErrorHandler
 from simmate.database import connect
 
 
-from .workflow import Workflow
+from .workflow import Workflow, workflow
 from .s3_workflow import S3Workflow
 from .web_api_workflow import WebApiWorkflow
 from .execution import SimmateWorker as Worker
