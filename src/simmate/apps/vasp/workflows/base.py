@@ -59,22 +59,44 @@ class VaspWorkflow(S3Workflow):
         used to determine the final settings given by this `incar` property.
         """
         # OPTIMIZE: I'd like this to be cached
-
         if not cls._incar_updates:
             return cls._incar
         else:
+            # grab the parent workflow to use as the base incar. The workflow
+            # may have multiple parent classes (mix-ins), so we grab __bases__
+            # instead of __base__
+            parent_flows = cls.__bases__
+            if len(parent_flows) == 1:
+                parent_incar = cls.__base__.incar
+            else:
+                parent_incars_found = 0
+                for parent_flow in parent_flows:
+                    if parent_flow.incar:
+                        parent_incar = parent_flow.incar
+                        parent_incars_found = +1
+                        # we do not break the loop in case there are errors, which
+                        # we check for below
+                if parent_incars_found > 1:
+                    raise Exception(
+                        "Your VaspWorkflow is inheriting from more than workflow "
+                        "with valid `incar` settings. Therefore, it is not clear "
+                        "which settings should be inherited in your subclass."
+                    )
+                elif parent_incars_found == 0:
+                    raise Exception(
+                        "Only use `_incar_updates` when the parent workflow has a "
+                        "valid `incar` config set."
+                    )
             # Note we always use copy() in the methods below because we
             # are modifying all values in-place
-            final_incar = super().incar.copy()  # grabs the parent's incar
             updates = cls._incar_updates.copy()
-            # BUG: What if there is more than one parent class?
-            #   See Diffusion__Vasp__NebFromImagesMit
+            final_incar = parent_incar.copy()
 
             for key, value in updates.items():
                 # Check if there is a modifier version of the key that
                 # needs removed.
                 # For example, a new "EDIFF" would replace "EDIFF__per_atom"
-                for original_key in final_incar.keys():
+                for original_key in parent_incar.keys():
                     if original_key.split("__")[0] == key.split("__")[0]:
                         final_incar.pop(original_key)
                 # OPIMIZE: maybe move this logic to the Incar class
