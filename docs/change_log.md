@@ -65,6 +65,7 @@ There is one significant exception to the above rules -- `MAJOR`=0 releases. Any
 **Enhancements**
 - added `dotdict` utility for easy dot-access with nested dictionary objects
 - all settings can be added via environment variables for cloud-based deployments
+- add `@workflow` decorator for easily creating basic workflows
 
 **Refactors**
 - Fully reimplemented how all settings are loaded
