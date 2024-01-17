@@ -29,7 +29,7 @@ class Relaxation__Vasp__Quality01(VaspWorkflow):
     standardize_structure = "primitive-LLL"
 
     # These are all input settings for this task.
-    incar = dict(
+    _incar = dict(
         # These settings are the same for all structures regardless of composition.
         PREC="Normal",
         EDIFF=1e-3,

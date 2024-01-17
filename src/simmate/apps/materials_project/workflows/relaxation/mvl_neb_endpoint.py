@@ -25,17 +25,14 @@ class Relaxation__Vasp__MvlNebEndpoint(Relaxation__Vasp__Mit):
 
     description_doc_short = "based on pymatgen's MVLCINEBEndPointSet"
 
-    incar = Relaxation__Vasp__Mit.incar.copy()
-    incar.update(
-        dict(
-            EDIFF=5e-5,
-            ISIF=2,  # hold lattice volume and shape constant
-            EDIFFG=-0.02,
-            ISMEAR=0,
-            ISYM=0,
-            LCHARG=False,
-            # LDAU=False,
-            NELMIN=4,
-        )
+    _incar_updates = dict(
+        EDIFF=5e-5,
+        ISIF=2,  # hold lattice volume and shape constant
+        EDIFFG=-0.02,
+        ISMEAR=0,
+        ISYM=0,
+        LCHARG=False,
+        # LDAU=False,
+        NELMIN=4,
+        multiple_keywords__smart_ldau="__remove__",
     )
-    incar.pop("multiple_keywords__smart_ldau")

@@ -20,8 +20,7 @@ class ElectronicStructure__Vasp__MatprojBandStructureHse(
     """
 
     parent_workflows = ["electronic-structure.vasp.matproj-hse-full"]
-    incar = Relaxation__Vasp__MatprojHse.incar.copy()
-    incar.update(
+    _incar_updates = dict(
         NSW=0,
         ISMEAR=0,
         SIGMA=0.05,

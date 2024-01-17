@@ -122,8 +122,7 @@ class StaticEnergy__Vasp__PrebadelfMatproj(StaticEnergy__Vasp__Matproj):
 
     # The key thing for bader analysis is that we need a very fine FFT mesh. Other
     # than that, it's the same as a static energy calculation.
-    incar = StaticEnergy__Vasp__Matproj.incar.copy()
-    incar.update(
+    _incar_updates = dict(
         LAECHG=True,  # write core charge density to AECCAR0 and valence to AECCAR2
         LELF=True,  # writes ELFCAR
         NPAR=1,  # must be set if LELF is set to True

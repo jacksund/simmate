@@ -12,5 +12,4 @@ class StaticEnergy__Vasp__WarrenLabPbeMetal(Relaxation__Vasp__WarrenLabPbeMetal)
     Metal relaxations using the PBE functional.
     """
 
-    incar = Relaxation__Vasp__WarrenLabPbeMetal.incar.copy()
-    incar.update(pbe_static_settings)
+    _incar_updates = pbe_static_settings

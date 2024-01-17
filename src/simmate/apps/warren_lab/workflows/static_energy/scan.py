@@ -12,5 +12,4 @@ class StaticEnergy__Vasp__WarrenLabScan(Relaxation__Vasp__WarrenLabScan):
     SCAN functional relaxation.
     """
 
-    incar = Relaxation__Vasp__WarrenLabScan.incar.copy()
-    incar.update(hse_static_settings)
+    _incar_updates = hse_static_settings

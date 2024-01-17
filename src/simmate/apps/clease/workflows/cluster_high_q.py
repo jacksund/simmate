@@ -6,7 +6,7 @@ class Relaxation__Vasp__ClusterHighQ(VaspWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS
 
-    incar = dict(
+    _incar = dict(
         IBRION=2,
         KSPACING=0.4,
         EDIFFG=-0.02,

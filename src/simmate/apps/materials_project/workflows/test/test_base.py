@@ -20,7 +20,7 @@ class Testing__Vasp__Dummy(VaspWorkflow):
     symmetry_tolerance = 0.1
     angle_tolerance = 10.0
 
-    incar = dict(
+    _incar = dict(
         PREC="Low",
         EDIFF__per_atom=2e-3,  # to ensure structure-specific kwargs
         KSPACING=0.75,

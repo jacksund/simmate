@@ -4,7 +4,7 @@ from simmate.apps.warren_lab.workflows.relaxation.pbe import (
     Relaxation__Vasp__WarrenLabPbe,
 )
 
-pbe_static_settings = dict(
+PBE_STATIC_SETTINGS = dict(
     IBRION=-1,  # (optional) locks everything between ionic steps
     NSW=0,  # this is the main static energy setting
     #            LAECHG=True, # currently only set in population analysis
@@ -24,5 +24,4 @@ class StaticEnergy__Vasp__WarrenLabPbe(Relaxation__Vasp__WarrenLabPbe):
     PBE.
     """
 
-    incar = Relaxation__Vasp__WarrenLabPbe.incar.copy()
-    incar.update(pbe_static_settings)
+    _incar_updates = PBE_STATIC_SETTINGS

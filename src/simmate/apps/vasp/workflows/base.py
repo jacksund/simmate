@@ -49,14 +49,62 @@ class VaspWorkflow(S3Workflow):
 
     # INCAR configuration
 
-    _incar: dict = None
+    @classmethod
+    @property
+    def incar(cls) -> dict:
+        """
+        The INCAR configuration settings that will be used for this workflow.
+
+        Note: do not confuse with `_incar` and `_incar_updates`, which are
+        used to determine the final settings given by this `incar` property.
+        """
+        # OPTIMIZE: I'd like this to be cached
+
+        if not cls._incar_updates:
+            return cls._incar
+        else:
+            # Note we always use copy() in the methods below because we
+            # are modifying all values in-place
+            final_incar = super().incar.copy()  # grabs the parent's incar
+            updates = cls._incar_updates.copy()
+            # BUG: What if there is more than one parent class?
+            #   See Diffusion__Vasp__NebFromImagesMit
+
+            for key, value in updates.items():
+                # Check if there is a modifier version of the key that
+                # needs removed.
+                # For example, a new "EDIFF" would replace "EDIFF__per_atom"
+                for original_key in final_incar.keys():
+                    if original_key.split("__")[0] == key.split("__")[0]:
+                        final_incar.pop(original_key)
+                # OPIMIZE: maybe move this logic to the Incar class
+
+                # now set the updated value
+                if value == "__remove__":
+                    final_incar.pop(value, None)
+                else:
+                    final_incar[key] = value
+
+            return final_incar
+
+    _incar: dict = {}
     """
-    This sets the default vasp settings from a dictionary. This is the one thing
+    This sets the base vasp settings from a dictionary. This is the one thing
     you *must* set when subclassing VaspWorkflow. An example is:
-        
+    
     ``` python
-      incar = dict(NSW=0, PREC="Accurate", KSPACING=0.5)
+      _incar = dict(NSW=0, PREC="Accurate", KSPACING=0.5)
     ```
+    
+    Note: you should refer to `incar` instead of this attribute for the final
+    workflow settings of this class.
+    """
+
+    _incar_updates: dict = {}
+    """
+    When subclassing a subclass of `VaspWorkflow` (i.e. inheriting INCAR settings),
+    this attribute helps to set which INCARs are changed relative to the parent
+    workflow.
     """
 
     # -------------------------------------------------------------------------

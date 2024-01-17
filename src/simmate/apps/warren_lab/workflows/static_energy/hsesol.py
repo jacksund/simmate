@@ -12,5 +12,4 @@ class StaticEnergy__Vasp__WarrenLabHsesol(Relaxation__Vasp__WarrenLabHsesol):
     HSEsol functional relaxation.
     """
 
-    incar = Relaxation__Vasp__WarrenLabHsesol.incar.copy()
-    incar.update(hse_static_settings)
+    _incar_updates = hse_static_settings

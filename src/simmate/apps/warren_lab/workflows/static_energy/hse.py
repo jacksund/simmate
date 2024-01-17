@@ -4,7 +4,7 @@ from simmate.apps.warren_lab.workflows.relaxation.hse import (
     Relaxation__Vasp__WarrenLabHse,
 )
 
-hse_static_settings = dict(
+HSE_STATIC_SETTINGS = dict(
     IBRION=-1,  # (optional) locks everything between ionic steps
     NSW=0,  # this is the main static energy setting
     #            LAECHG=True, # currently only set in population analysis
@@ -24,5 +24,4 @@ class StaticEnergy__Vasp__WarrenLabHse(Relaxation__Vasp__WarrenLabHse):
     HSE functional relaxation.
     """
 
-    incar = Relaxation__Vasp__WarrenLabHse.incar.copy()
-    incar.update(hse_static_settings)
+    _incar_updates = HSE_STATIC_SETTINGS

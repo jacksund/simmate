@@ -16,5 +16,5 @@ class Relaxation__Vasp__MatprojHsesol(Relaxation__Vasp__MatprojHse):
 
     description_doc_short = "based on pymatgen's MPHSERelaxSet"
 
-    incar = Relaxation__Vasp__MatprojHse.incar.copy()
-    incar.update(dict(GGA="PS"))  # Tells VASP to use PBEsol instead of base PBE
+    # Tell VASP to use PBEsol instead of base PBE
+    _incar_updates = dict(GGA="PS")

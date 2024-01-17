@@ -6,7 +6,7 @@ class StaticEnergy__Vasp__ClusterHighQe(VaspWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS
 
-    incar = dict(
+    _incar = dict(
         IBRION=-1,
         KSPACING=0.4,
         EDIFFG=-0.02,

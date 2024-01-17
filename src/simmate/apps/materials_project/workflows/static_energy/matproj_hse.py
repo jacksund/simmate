@@ -13,16 +13,13 @@ class StaticEnergy__Vasp__MatprojHse(Relaxation__Vasp__MatprojHse):
     not have an HSE static energy, so this is the make-shift alternative.
     """
 
-    incar = Relaxation__Vasp__MatprojHse.incar.copy()
-    incar.update(
-        dict(
-            IBRION=-1,  # (optional) locks everything between ionic steps
-            NSW=0,  # this is the main static energy setting
-            LAECHG=True,
-            LCHARG=True,
-            LORBIT=11,
-            LVHAR=True,
-            LWAVE=False,
-            ALGO="Normal",  # was "Fast" before
-        )
+    _incar_updates = dict(
+        IBRION=-1,  # (optional) locks everything between ionic steps
+        NSW=0,  # this is the main static energy setting
+        LAECHG=True,
+        LCHARG=True,
+        LORBIT=11,
+        LVHAR=True,
+        LWAVE=False,
+        ALGO="Normal",  # was "Fast" before
     )

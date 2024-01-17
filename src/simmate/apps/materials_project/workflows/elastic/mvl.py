@@ -11,12 +11,9 @@ class Elastic__Vasp__Mvl(Relaxation__Vasp__Matproj):
     [MVLElasticSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MVLElasticSet).
     """
 
-    incar = Relaxation__Vasp__Matproj.incar.copy()
-    incar.update(
-        dict(
-            IBRION=6,
-            NFREE=2,
-            POTIM=0.015,  # pymatgen uses this as a parameter
-        )
+    _incar_updates = dict(
+        IBRION=6,
+        NFREE=2,
+        POTIM=0.015,  # pymatgen uses this as a parameter
+        NPAR="__remove__",  # pymatgen forcibly removes NPAR
     )
-    # incar.pop("NPAR")  # pymatgen forcibly removes NPAR

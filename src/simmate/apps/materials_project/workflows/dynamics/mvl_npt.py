@@ -11,19 +11,16 @@ class Dynamics__Vasp__MvlNpt(Dynamics__Vasp__Mit):
     [MVLNPTMDSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MVLNPTMDSet).
     """
 
-    incar = Dynamics__Vasp__Mit.incar.copy()
-    incar.update(
-        dict(
-            ALGO="Fast",
-            ISIF=3,
-            LANGEVIN_GAMMA__smart_langevin=True,
-            LANGEVIN_GAMMA_L=1,
-            MDALGO=3,
-            PMASS=10,
-            PSTRESS=0,
-            SMASS=0,
-            ENCUT=450,  # pymatgen sets to 1.5 * max of all potcars
-        )
+    _incar_updates = dict(
+        ALGO="Fast",
+        ISIF=3,
+        LANGEVIN_GAMMA__smart_langevin=True,
+        LANGEVIN_GAMMA_L=1,
+        MDALGO=3,
+        PMASS=10,
+        PSTRESS=0,
+        SMASS=0,
+        ENCUT=450,  # pymatgen sets to 1.5 * max of all potcars
     )
 
 

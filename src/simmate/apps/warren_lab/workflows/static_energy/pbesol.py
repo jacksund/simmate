@@ -14,5 +14,4 @@ class StaticEnergy__Vasp__WarrenLabPbesol(Relaxation__Vasp__WarrenLabPbesol):
     (Phys. Rev. Lett. 102, 039902 (2009))
     """
 
-    incar = Relaxation__Vasp__WarrenLabPbesol.incar.copy()
-    incar.update(pbe_static_settings)
+    _incar_updates = pbe_static_settings

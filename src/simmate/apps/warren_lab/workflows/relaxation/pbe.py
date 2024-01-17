@@ -52,7 +52,7 @@ class Relaxation__Vasp__WarrenLabPbe(VaspWorkflow):
     # For now I'm keeping the matproj default element mappings, but I will likely
     # update these for future calculations.
 
-    incar = dict(
+    _incar = dict(
         ALGO="Fast",
         EDIFF__per_atom=5e-05,  # This is slightly higher quality than the settings in Simmate (5e-05)
         ENCUT=520,  # Should set dynamically in future

@@ -42,16 +42,10 @@ class StaticEnergy__Vasp__MyCustomPreset(original_workflow):
     # Assign a version to help you and your team track changes
     version = "2022.07.04"
 
-    incar = original_workflow.incar.copy()  # Always make a copy!
-    incar.update(
-        dict(
-            NPAR=1,
-            ENCUT=-1,
-        )
+    _incar_updates = dict(
+        NPAR=1,
+        ENCUT=-1,
     )
-
-# Ensure the new settings are updated and that the original remains unchanged
-assert original_workflow.incar != StaticEnergy__Vasp__MyCustomPreset
 ```
 
 !!! danger

@@ -51,7 +51,7 @@ class Relaxation__Vasp__MatprojScan(VaspWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS
 
-    incar = dict(
+    _incar = dict(
         ALGO="All",
         EDIFF=1.0e-05,
         EDIFFG=-0.02,
