@@ -3,7 +3,7 @@
 from simmate.apps.warren_lab.workflows.relaxation.scan import (
     Relaxation__Vasp__WarrenLabScan,
 )
-from simmate.apps.warren_lab.workflows.static_energy.hse import hse_static_settings
+from simmate.apps.warren_lab.workflows.static_energy.hse import HSE_STATIC_SETTINGS
 
 
 class StaticEnergy__Vasp__WarrenLabScan(Relaxation__Vasp__WarrenLabScan):
@@ -12,4 +12,4 @@ class StaticEnergy__Vasp__WarrenLabScan(Relaxation__Vasp__WarrenLabScan):
     SCAN functional relaxation.
     """
 
-    _incar_updates = hse_static_settings
+    _incar_updates = HSE_STATIC_SETTINGS
