@@ -161,7 +161,7 @@ For many apps, there are workflow classes that you can use as a starting point. 
         functional = "PBE"
         potcar_mappings = {"Y": "Y_sv", "C": "C"}
     
-        incar = dict(
+        _incar = dict(
             PREC="Normal",
             EDIFF=1e-4,
             ENCUT=450,
@@ -187,7 +187,7 @@ For many apps, there are workflow classes that you can use as a starting point. 
         functional = "PBE"
         potcar_mappings = PBE_POTCAR_MAPPINGS  # (1)
 
-        incar = dict(
+        _incar = dict(
             PREC="Normal",  # (2)
             EDIFF__per_atom=1e-5,  # (3)
             ENCUT=450,
@@ -241,7 +241,7 @@ For many apps, there are workflow classes that you can use as a starting point. 
     Incar.add_keyword_modifier(keyword_modifier_multiply_nsites)
     
     # STEP 3: use your new modifier with any parameter you'd like
-    incar = dict(
+    _incar = dict(
         "NSW__multiply_nsites": 2,
         "EXAMPLE__multiply_nsites": 123,
     )
@@ -264,22 +264,12 @@ class StaticEnergy__Vasp__MyCustomPreset(original_workflow):
 
     version = "2022.07.04"
 
-    incar = original_workflow.incar.copy()  # Make sure you copy!
-    incar.update(
-        dict(
-            NPAR=1,
-            ENCUT=-1,
-        )
+    _incar_updates = dict(
+        NPAR=1,
+        ENCUT=-1,
     )
-
-# make sure we have new settings updated
-# and that we didn't change the original
-assert original_workflow.incar != StaticEnergy__Vasp__MyCustomPreset
 ```
 
-!!! danger
-    Make sure you are making copies of the original workflow settings! If you modify them without making a copy, you'll actually be changing the original workflow settings. The `assert` check that we make in the example above is therefore **very** important.
-    
 !!! tip
     To gain more insight to workflows like this, you should read through **both**
     the "Creating S3 Workflows" and related "Apps" sections for more 

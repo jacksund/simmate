@@ -14,7 +14,7 @@ class StaticEnergy__Vasp__WarrenLabPrebadelfTest(StaticEnergy__Vasp__WarrenLabPb
     """
 
     error_handlers = []
-    settings = dict(
+    _incar_updates = dict(
         NGX=35,
         NGY=35,
         NGZ=35,
@@ -26,10 +26,6 @@ class StaticEnergy__Vasp__WarrenLabPrebadelfTest(StaticEnergy__Vasp__WarrenLabPb
         KSPACING=0.5,  # decreasing kpoint sampling for faster calculation
         ENCUT=300,  # decreasing energy cutoff for faster calculation
     )
-    # The key thing for bader analysis is that we need a very fine FFT mesh. Other
-    # than that, it's the same as a static energy calculation.
-    incar = StaticEnergy__Vasp__WarrenLabPbesol.incar.copy()
-    incar.update(settings)
 
 
 class BadElf__Badelf__BadelfTest(VaspBadElfBase):

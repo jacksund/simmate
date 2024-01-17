@@ -17,12 +17,7 @@ class StaticEnergy__Vasp__MvlNebEndpoint(Relaxation__Vasp__MvlNebEndpoint):
     diffusion/neb_from_endpoints), which call this workflow for you.
     """
 
-    # The settings used for this calculation are based on the MITRelaxation, but
-    # we are updating/adding new settings here.
-    incar = Relaxation__Vasp__MvlNebEndpoint.incar.copy()
-    incar.update(
-        dict(
-            IBRION=-1,  # (optional) locks everything between ionic steps
-            NSW=0,  # this is the main static energy setting
-        )
+    _incar_updates = dict(
+        IBRION=-1,  # (optional) locks everything between ionic steps
+        NSW=0,
     )

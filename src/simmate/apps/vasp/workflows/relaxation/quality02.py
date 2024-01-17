@@ -30,7 +30,7 @@ class Relaxation__Vasp__Quality02(VaspWorkflow):
     symmetry_tolerance = 0.1
 
     # These are all input settings for this task.
-    incar = dict(
+    _incar = dict(
         # These settings are the same for all structures regardless of composition.
         PREC="Normal",
         EDIFF=1e-3,

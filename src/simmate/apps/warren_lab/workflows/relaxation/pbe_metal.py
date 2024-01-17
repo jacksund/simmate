@@ -13,8 +13,7 @@ class Relaxation__Vasp__WarrenLabPbeMetal(Relaxation__Vasp__WarrenLabPbe):
 
     description_doc_short = "Warren Lab presets for metals"
 
-    incar = Relaxation__Vasp__WarrenLabPbe.incar.copy()
-    incar.update(
+    _incar_updates = dict(
         ISMEAR=1,
         SIGMA=0.2,
         KSPACING=0.3,

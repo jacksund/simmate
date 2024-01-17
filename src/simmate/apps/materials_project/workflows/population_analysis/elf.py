@@ -12,11 +12,10 @@ class PopulationAnalysis__Vasp__ElfMatproj(StaticEnergy__Vasp__Matproj):
     and also writes the electron localization function (to ELFCAR).
     """
 
-    incar = StaticEnergy__Vasp__Matproj.incar.copy()
-    incar.update(
+    _incar_updates = dict(
         LELF=True,  # writes ELFCAR
         NPAR=1,  # must be set if LELF is set to True
-        # BUG: if NPAR conflicts with INCAR_parallel_settings config this
+        # BUG: if NPAR conflicts with _incar_parallel_settings config this
         # fails and tells the user to specify a setting
     )
 

@@ -86,8 +86,7 @@ class StaticEnergy__Vasp__PrebaderMatproj(StaticEnergy__Vasp__Matproj):
 
     # The key thing for bader analysis is that we need a very fine FFT mesh. Other
     # than that, it's the same as a static energy calculation.
-    incar = StaticEnergy__Vasp__Matproj.incar.copy()
-    incar.update(
+    _incar_updates = dict(
         NGXF__density_a=20,
         NGYF__density_b=20,
         NGZF__density_c=20,

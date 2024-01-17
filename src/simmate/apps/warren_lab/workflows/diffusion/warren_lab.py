@@ -16,7 +16,7 @@ from simmate.apps.vasp.workflows.diffusion import (
 class Relaxation__Vasp__WarrenLab(VaspWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS
-    incar = dict(
+    _incar = dict(
         ALGO="Fast",
         EDIFF=1e-06,
         ENCUT=520,  # TODO: set dynamically to be 1.3x highest elemental ENMAX
@@ -50,7 +50,7 @@ class Relaxation__Vasp__WarrenLab(VaspWorkflow):
 class StaticEnergy__Vasp__WarrenLab(VaspWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS
-    incar = dict(
+    _incar = dict(
         ALGO="Fast",
         EDIFF=1e-06,
         ENCUT=520,  # TODO: set dynamically to be 1.3x highest elemental ENMAX
@@ -84,7 +84,7 @@ class StaticEnergy__Vasp__WarrenLab(VaspWorkflow):
 class Relaxation__Vasp__WarrenLabNebEndpoint(VaspWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS
-    incar = dict(
+    _incar = dict(
         ALGO="Fast",
         EDIFF=5e-05,
         EDIFFG=-0.01,
@@ -119,7 +119,7 @@ class Relaxation__Vasp__WarrenLabNebEndpoint(VaspWorkflow):
 class StaticEnergy__Vasp__WarrenLabNebEndpoint(VaspWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS
-    incar = dict(
+    _incar = dict(
         ALGO="Fast",
         EDIFF=5e-05,
         EDIFFG=-0.01,
@@ -154,7 +154,7 @@ class StaticEnergy__Vasp__WarrenLabNebEndpoint(VaspWorkflow):
 class Diffusion__Vasp__WarrenLabCiNebFromImages(VaspNebFromImagesWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS
-    incar = dict(
+    _incar = dict(
         ALGO="Fast",
         EDIFF=5e-05,
         EDIFFG=-0.01,

@@ -12,5 +12,5 @@ class Relaxation__Vasp__WarrenLabPbesol(Relaxation__Vasp__WarrenLabPbe):
 
     description_doc_short = "Warren Lab presets for HSE geometry optimization"
 
-    incar = Relaxation__Vasp__WarrenLabPbe.incar.copy()
-    incar.update(GGA="PS")  # Tells vasp to use PBEsol instead of PBE
+    # Tell vasp to use PBEsol instead of PBE
+    _incar_updates = dict(GGA="PS")

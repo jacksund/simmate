@@ -12,8 +12,7 @@ class Relaxation__Vasp__WarrenLabScan(Relaxation__Vasp__WarrenLabPbe):
 
     description_doc_short = "Warren Lab presets for SCAN geometry optimization"
 
-    incar = Relaxation__Vasp__WarrenLabPbe.incar.copy()
-    incar.update(
+    _incar_updates = dict(
         ALGO="All",
         EDIFF=1.0e-05,
         EDIFFG=-0.02,

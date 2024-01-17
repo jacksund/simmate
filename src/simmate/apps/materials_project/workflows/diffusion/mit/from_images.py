@@ -23,16 +23,12 @@ class Diffusion__Vasp__NebFromImagesMit(
     which call this workflow for you.
     """
 
-    incar = Relaxation__Vasp__Mit.incar.copy()
-    incar.update(
-        dict(
-            IBRION=1,
-            ISYM=0,
-            LCHARG=False,
-            IMAGES__auto=True,
-        )
+    _incar_updates = dict(
+        IBRION=1,
+        ISYM=0,
+        LCHARG=False,
+        IMAGES__auto=True,
     )
-    incar.pop("multiple_keywords__smart_ldau")
 
     # Because of NEB's unique folder structure, many error handlers are broken
     # and cannot be used. We go through the list that is broken and remove them

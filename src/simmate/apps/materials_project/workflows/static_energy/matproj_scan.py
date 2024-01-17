@@ -11,13 +11,10 @@ class StaticEnergy__Vasp__MatprojScan(Relaxation__Vasp__MatprojScan):
     [MPScanStaticSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPScanStaticSet).
     """
 
-    incar = Relaxation__Vasp__MatprojScan.incar.copy()
-    incar.update(
-        dict(
-            NSW=0,  # this is the main static energy setting
-            LREAL=False,
-            LORBIT=11,
-            LVHAR=True,
-            ISMEAR=-5,
-        )
+    _incar_updates = dict(
+        NSW=0,  # this is the main static energy setting
+        LREAL=False,
+        LORBIT=11,
+        LVHAR=True,
+        ISMEAR=-5,
     )

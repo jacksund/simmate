@@ -22,8 +22,7 @@ class Relaxation__Vasp__WarrenLabPbeWithWavecar(Relaxation__Vasp__WarrenLabPbeso
     nested workflows to increase the speed of the static energy calculation
     """
 
-    incar = Relaxation__Vasp__WarrenLabPbesol().incar.copy()
-    incar.update(dict(LWAVE=True))
+    _incar_updates = dict(LWAVE=True)
 
 
 class Nested__Vasp__WarrenLabRelaxationStaticPbeHse(RelaxationStaticBase):

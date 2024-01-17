@@ -12,18 +12,14 @@ class Nmr__Vasp__MatprojFieldGradient(StaticEnergy__Vasp__Matproj):
     with mode="efg" (Electric Field Gradient).
     """
 
-    incar = StaticEnergy__Vasp__Matproj.incar.copy()
-    incar.update(
-        dict(
-            ALGO="FAST",
-            EDIFF=-1.0e-10,
-            ISYM=0,
-            LCHARG=False,
-            LEFG=True,
-            QUAD_EFG__smart_quad_efg=True,
-            NELMIN=10,
-            PREC="ACCURATE",
-            SIGMA=0.01,
-        )
+    _incar_updates = dict(
+        ALGO="FAST",
+        EDIFF=-1.0e-10,
+        ISYM=0,
+        LCHARG=False,
+        LEFG=True,
+        QUAD_EFG__smart_quad_efg=True,
+        NELMIN=10,
+        PREC="ACCURATE",
+        SIGMA=0.01,
     )
-    incar.pop("EDIFF__per_atom")

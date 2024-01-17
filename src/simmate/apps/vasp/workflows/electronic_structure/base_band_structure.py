@@ -50,7 +50,7 @@ class VaspBandStructure(StaticEnergy__Vasp__Matproj):
 
         # Combine our base incar settings with those of our parallelization settings
         # and then write the incar file
-        incar = Incar(**cls.incar) + Incar(**cls.incar_parallel_settings)
+        incar = Incar(**cls.incar)
         incar.to_file(
             filename=directory / "INCAR",
             structure=structure_cleaned,

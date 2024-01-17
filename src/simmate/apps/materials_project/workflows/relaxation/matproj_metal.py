@@ -17,11 +17,8 @@ class Relaxation__Vasp__MatprojMetal(Relaxation__Vasp__Matproj):
 
     description_doc_short = "based on pymatgen's MPMetalRelaxSet"
 
-    incar = Relaxation__Vasp__Matproj.incar.copy()
-    incar.update(
-        dict(
-            ISMEAR=1,
-            SIGMA=0.2,
-            KSPACING=0.3,
-        )
+    _incar_updates = dict(
+        ISMEAR=1,
+        SIGMA=0.2,
+        KSPACING=0.3,
     )

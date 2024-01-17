@@ -201,6 +201,10 @@ class SimmateSettings:
             # TODO: consider moving these to the respective apps
             "vasp": {
                 "default_command": "vasp_std > vasp.out",
+                "parallelization": {
+                    "ncore": None,
+                    "kpar": None,
+                },
             },
             "quantum_espresso": {
                 "default_command": "pw.x < pwscf.in > pw-scf.out",

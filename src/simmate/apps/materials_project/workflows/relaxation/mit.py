@@ -64,7 +64,7 @@ class Relaxation__Vasp__Mit(VaspWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS_LOW_QUALITY
 
-    incar = dict(
+    _incar = dict(
         ALGO="Fast",
         EDIFF=1.0e-05,
         ENCUT=520,

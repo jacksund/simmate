@@ -25,44 +25,41 @@ class Dynamics__Vasp__Mit(DynamicsWorkflow, Relaxation__Vasp__Mit):
     calculation does not modify your input structure.
     """
 
-    incar = Relaxation__Vasp__Mit.incar.copy()
-    incar.update(
-        dict(
-            # Unique to this task, we want to allow users to set these temperatures
-            # but to keep with Simmate's strategy of showing all settings up-front,
-            # we set these messages here.
-            # TODO: consider making a "__user_input" incar tag that accepts a default
-            TEBEG="Defaults to 300 but can be set by the user",  # start temperature
-            TEEND="Defaults to 1200 but can be set by the user",  # end temperature
-            POTIM="Defaults to 2 but can be set by the user",  # time step (in fs)
-            NSW="Defaults to 10,000 but can be set by the user",  # number of steps
-            #
-            EDIFF__per_atom=1e-06,
-            LSCALU=False,
-            LCHARG=False,
-            LPLANE=False,
-            LWAVE=True,
-            ISMEAR=0,
-            NELMIN=4,
-            LREAL=True,
-            BMIX=1,
-            MAXMIX=20,
-            NELM=500,
-            NSIM=4,  # same as VASP default but pymatgen sets this
-            ISYM=0,  # turn off symmetry
-            ISIF=0,  # only update atom sites; lattice is fixed; no lattice stress
-            IBRION=0,  # turns on molecular dynamics
-            KBLOCK=100,
-            SMASS=0,
-            ISPIN=1,  # pymatgen makes this a kwarg but we fix it to pmg's default
-            PREC="Low",
-            NBLOCK=1,  # same as VASP default but pymatgen sets this
-        )
+    _incar_updates = dict(
+        # Unique to this task, we want to allow users to set these temperatures
+        # but to keep with Simmate's strategy of showing all settings up-front,
+        # we set these messages here.
+        # TODO: consider making a "__user_input" incar tag that accepts a default
+        TEBEG="Defaults to 300 but can be set by the user",  # start temperature
+        TEEND="Defaults to 1200 but can be set by the user",  # end temperature
+        POTIM="Defaults to 2 but can be set by the user",  # time step (in fs)
+        NSW="Defaults to 10,000 but can be set by the user",  # number of steps
+        #
+        EDIFF__per_atom=1e-06,
+        LSCALU=False,
+        LCHARG=False,
+        LPLANE=False,
+        LWAVE=True,
+        ISMEAR=0,
+        NELMIN=4,
+        LREAL=True,
+        BMIX=1,
+        MAXMIX=20,
+        NELM=500,
+        NSIM=4,  # same as VASP default but pymatgen sets this
+        ISYM=0,  # turn off symmetry
+        ISIF=0,  # only update atom sites; lattice is fixed; no lattice stress
+        IBRION=0,  # turns on molecular dynamics
+        KBLOCK=100,
+        SMASS=0,
+        ISPIN=1,  # pymatgen makes this a kwarg but we fix it to pmg's default
+        PREC="Low",
+        NBLOCK=1,  # same as VASP default but pymatgen sets this
+        # We no longer want these configs
+        ENCUT="__remove__",
+        MAGMOM__smart_magmom="__remove__",
+        multiple_keywords__smart_ldau="__remove__",
     )
-    incar.pop("MAGMOM__smart_magmom")
-    incar.pop("multiple_keywords__smart_ldau")
-    incar.pop("EDIFF")
-    incar.pop("ENCUT")
 
     # For now, I turn off all error handlers.
     # TODO

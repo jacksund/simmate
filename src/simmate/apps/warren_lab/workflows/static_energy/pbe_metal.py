@@ -3,7 +3,7 @@
 from simmate.apps.warren_lab.workflows.relaxation.pbe_metal import (
     Relaxation__Vasp__WarrenLabPbeMetal,
 )
-from simmate.apps.warren_lab.workflows.static_energy.pbe import pbe_static_settings
+from simmate.apps.warren_lab.workflows.static_energy.pbe import PBE_STATIC_SETTINGS
 
 
 class StaticEnergy__Vasp__WarrenLabPbeMetal(Relaxation__Vasp__WarrenLabPbeMetal):
@@ -12,5 +12,4 @@ class StaticEnergy__Vasp__WarrenLabPbeMetal(Relaxation__Vasp__WarrenLabPbeMetal)
     Metal relaxations using the PBE functional.
     """
 
-    incar = Relaxation__Vasp__WarrenLabPbeMetal.incar.copy()
-    incar.update(pbe_static_settings)
+    _incar_updates = PBE_STATIC_SETTINGS

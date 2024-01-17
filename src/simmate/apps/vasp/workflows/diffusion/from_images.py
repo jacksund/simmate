@@ -100,7 +100,7 @@ class VaspNebFromImagesWorkflow(VaspWorkflow):
 
         # Combine our base incar settings with those of our parallel settings
         # and then write the incar file
-        incar = Incar(**incar) + Incar(**cls.incar_parallel_settings)
+        incar = Incar(**incar)
         incar.to_file(
             filename=directory / "INCAR",
             # we can use the start image for our structure -- as all structures

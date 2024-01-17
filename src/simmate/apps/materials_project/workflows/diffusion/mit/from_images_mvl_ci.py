@@ -22,20 +22,17 @@ class Diffusion__Vasp__NebFromImagesMvlCi(Diffusion__Vasp__NebFromImagesMit):
     Henkelman group. See http://theory.cm.utexas.edu/vtsttools/
     """
 
-    incar = Diffusion__Vasp__NebFromImagesMit.incar.copy()
-    incar.update(
-        dict(
-            EDIFF=5e-5,
-            EDIFFG=-0.02,
-            IBRION=3,
-            ICHAIN=0,
-            IOPT=1,
-            ISIF=2,
-            ISMEAR=0,
-            LCLIMB=True,
-            LORBIT=0,
-            NSW=200,
-            POTIM=0,
-            SPRING=-5,
-        )
+    _incar_updates = dict(
+        EDIFF=5e-5,
+        EDIFFG=-0.02,
+        IBRION=3,
+        ICHAIN=0,
+        IOPT=1,
+        ISIF=2,
+        ISMEAR=0,
+        LCLIMB=True,
+        LORBIT=0,
+        NSW=200,
+        POTIM=0,
+        SPRING=-5,
     )
