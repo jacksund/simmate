@@ -71,6 +71,9 @@ There is one significant exception to the above rules -- `MAJOR`=0 releases. Any
 **Refactors**
 - Fully reimplemented how all settings are loaded
 
+**Fixes**
+- fix bug where user-provided `command` parameter is not properly loaded
+
 --------------------------------------------------------------------------------
 
 ## v0.15.0 (2024.01.04)
