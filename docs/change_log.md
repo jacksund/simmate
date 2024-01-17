@@ -66,6 +66,7 @@ There is one significant exception to the above rules -- `MAJOR`=0 releases. Any
 - added `dotdict` utility for easy dot-access with nested dictionary objects
 - all settings can be added via environment variables for cloud-based deployments
 - add `@workflow` decorator for easily creating basic workflows
+- add `_incar_updates` to `VaspWorkflow`s for cleaner inheritance & syntax
 
 **Refactors**
 - Fully reimplemented how all settings are loaded
