@@ -33,7 +33,7 @@ class DynamicsWorkflow(VaspWorkflow):
         incar["TEEND"] = temperature_end
         incar["NSW"] = nsteps
         incar["POTIM"] = time_step
-        incar = Incar(**incar) + Incar(**cls.incar_parallel_settings)
+        incar = Incar(**incar)
         incar.to_file(
             filename=directory / "INCAR",
             structure=structure,

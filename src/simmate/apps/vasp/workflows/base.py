@@ -7,19 +7,26 @@ from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 from simmate.apps.vasp.inputs import Incar, Kpoints, Poscar, Potcar
+from simmate.configuration import settings
 from simmate.engine import S3Workflow
 from simmate.toolkit import Structure
 
 
 def get_default_parallel_settings():
     """
-    We load the user's default parallel settings from
-        ~/simmate/vasp/INCAR_parallel_settings
-    If this file doesn't exist, then we just use an empty dictionary.
+    We load the user's default parallel settings for VASP, which optionally
+    configure NCORE and KPAR for all workflows.
+
+    These settings should not effect the calculation result in any way
+    (only how fast it completes), but they are still selected based on
+    the computer specs and what runs fastest on it.
     """
-    settings_filename = Path.home() / "simmate" / "vasp" / "INCAR_parallel_settings"
-    if settings_filename.exists():
-        return Incar.from_file(settings_filename)
+    parallel_settings = settings.vasp.parallelization
+
+    if parallel_settings.ncore is not None or parallel_settings.kpar is not None:
+        raise NotImplementedError(
+            "NCORE and KPAR configuration settings are still under development"
+        )
     else:
         return {}
 
@@ -38,7 +45,11 @@ class VaspWorkflow(S3Workflow):
     # TODO: add support for grabbing a user-set default from their configuration
     # TODO: add auto check for vasp.out ending
 
-    incar: dict = None
+    # -------------------------------------------------------------------------
+
+    # INCAR configuration
+
+    _incar: dict = None
     """
     This sets the default vasp settings from a dictionary. This is the one thing
     you *must* set when subclassing VaspWorkflow. An example is:
@@ -48,15 +59,7 @@ class VaspWorkflow(S3Workflow):
     ```
     """
 
-    incar_parallel_settings: dict = get_default_parallel_settings()
-    """
-    The parallel settings to add on to the base incar. These should not effect 
-    the calculation result in any way (only how fast it completes), but they 
-    are still selected based on the computer specs and what runs fastest on it.
-    Therefore, these settings are loaded from ~/simmate/vasp/INCAR_parallel_settings
-    by default and adding to this file should be the preferred method for updating
-    these settings.
-    """
+    # -------------------------------------------------------------------------
 
     # TODO: add options for poscar formation
     # add_selective_dynamics=False
@@ -216,7 +219,7 @@ class VaspWorkflow(S3Workflow):
 
         # Combine our base incar settings with those of our parallelization settings
         # and then write the incar file
-        incar = Incar(**cls.incar) + Incar(**cls.incar_parallel_settings)
+        incar = Incar(**cls.incar)
         incar.to_file(
             filename=directory / "INCAR",
             structure=structure_cleaned,
