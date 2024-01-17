@@ -41,7 +41,7 @@ class S3Workflow(Workflow):
     """
 
     @classmethod
-    def get_final_command(cls, **kwargs) -> str:
+    def get_final_command(cls, command: str = None, **kwargs) -> str:
         """
         Takes the `command` attribute and performs additional formatting on
         it if necessary. By default, the `command` is left unchanged, and this
@@ -54,14 +54,23 @@ class S3Workflow(Workflow):
 
         @classmethod
         def format_command(cls, custom_param, **kwargs) -> str:
-            return cls.command.format(custom_param)
+            return cls.command.format(custom_param=custom_param)
         ```
 
         The inputs for this function are dynamically pulled from the parameters
         passed to `workflow.run_config`, so this method should not be used directly.
         The default `run_config` of the `S3Workflow` class handles this for you.
         """
-        return cls.command  # default bahavior to be overwritten in some subclasses
+        # This is a default method, which is mention to be overwritten in
+        # some subclasses.
+
+        # The user might have overwritten the command via the `run(command=...)`
+        # method. Note also, that _load_input_and_register may also grab
+        # the default command and pass it to this method.
+        if command is not None:
+            return command
+        else:
+            return cls.command
 
     # -------------------------------------------------------------------------
 
@@ -170,8 +179,11 @@ class S3Workflow(Workflow):
         # workflow level, then we want to make it so the user can set it for
         # each unique task.run() call. Otherwise we grab the default from the
         # class attribute.
+        # Note: the default command might be already grabbed because the
+        # `_load_input_and_register` was called at a higher level (in _run_full)
         command = cls.get_final_command(
             # we pass everything and let the method decide what's needed
+            command=command,
             directory=directory,
             is_restart=is_restart,
             **kwargs,
