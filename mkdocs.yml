@@ -91,12 +91,11 @@ nav:
             
         - 2. Workflows:
             - Quick Start: getting_started/workflows/quick_start.md
-            - a) Configure VASP potentials: getting_started/workflows/configure_potcars.md
-            - b) Configure the database: getting_started/workflows/configure_database.md
-            - c) Make a input structure: getting_started/workflows/make_a_structure.md
-            - d) View all workflows: getting_started/workflows/view_all_workflows.md
+            - a) Configure the database: getting_started/workflows/configure_database.md
+            - b) Make a input structure: getting_started/workflows/make_a_structure.md
+            - c) View all workflows: getting_started/workflows/view_all_workflows.md
+            - d) Configure QE: getting_started/workflows/configure_qe.md
             - e) Run a workflow: getting_started/workflows/running_the_workflow.md
-            - h) Viewing the results: getting_started/workflows/view_the_results.md
             - (extra) Submit to a cluster: getting_started/workflows/submit_to_a_cluster.md
         
         - 3. Toolkit:

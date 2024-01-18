@@ -1,97 +1,138 @@
-# Executing our Workflow!
+# Running a Workflow
 
-!!! warning
-    The following commands will fail unless you have VASP installed on your local computer. :sparkles: **That's perfectly fine!** :sparkles: We'll attempt to run these commands regardless. This will demonstrate how Simmate workflows fail when VASP isn't configured correctly. If VASP isn't installed, you'll encounter an error stating that the `vasp_std` command is unrecognized (like `vasp_std: not found` on Linux). We'll transition to a remote computer with VASP installed in the subsequent section.
+!!! tip
+    This guide covers how to run workflows with a YAML file + the command line. But keep in mind, there are other ways to run your workflows -- such as using the website interface, a python script, or `run-quick` in the command line. 
 
 ----------------------------------------------------------------------
 
-## Executing a Workflow via the Command-line
+## 1. Recap
 
-By default, Simmate runs everything immediately and locally on your desktop. When executing the workflow, it creates a new folder, writes the inputs, runs the calculation, and saves the results to your database.
+In the previous sections, we accomplished the following prerequisites for running a workflow:
 
-The command to execute our POSCAR and static-energy/mit workflow is... 
+- [x] Configured our database for storing results
+- [x] Created a structure file to use as input
+- [x] Selected a workflow to use (`static-energy.quantum-espresso.quality00`)
+- [x] Selected QE as our DFT software & configured it 
 
-``` shell
-simmate workflows run-quick static-energy.vasp.mit --structure POSCAR
-```
-
-!!! tip
-    The commands in this section may seem long and tedious to write out, and even more challenging to remember. Don't worry, this will become easier once we learn how to submit using YAML files in the next section.
-
-!!! tip
-    We refer to this command as `run-quick` because it's typically used for quick testing by advanced users. Most of the time, you'll be using the `run` command, which we will cover below.
-
-By default, Simmate uses the command `vasp_std > vasp.out` and creates a new `simmate-task` folder with a unique identifier (e.g., `simmate-task-j8djk3mn8`).
-
-What if we wanted to modify this command or the directory it's executed in? Remember the output from the `simmate workflows explore` command, which listed parameters for us. We can use any of these to modify how our workflow runs.
-
-For instance, we can change our folder name (`--directory`) and the command used to run VASP (`--command`). With these, we can update our command to:
-
-``` shell
-simmate workflows run-quick static-energy.vasp.mit --structure POSCAR --command "mpirun -n 4 vasp_std > vasp.out" --directory my_custom_folder
-```
-
-If you encounter any errors, please let our team know by [posting a question](https://github.com/jacksund/simmate/discussions/categories/q-a). 
-
-If not, congratulations :partying_face: :partying_face: :partying_face: !!! You now know how to execute workflows with a single command and understand what Simmate is doing behind the scenes.
+Now let's run our workflow!
 
 ----------------------------------------------------------------------
 
-## Executing a Workflow with a Settings File
+## 2. Create a config file
 
-In the previous section, you may have noticed that our `simmate workflows run` command was becoming quite long and thus difficult to remember. Instead of typing out this lengthy command each time, we can create a settings file that contains all this information. We will write our settings into a `YAML` file, a simple text file. The name of our settings file doesn't matter, so we'll just use `my_settings.yaml`. To create this file, do the following:
+Rather than have super long command with all of our settings, we will write our settings into a `YAML` file. 
 
-``` bash
-nano my_settings.yaml
-```
-
-... and input the following information ...
+The name of our settings file doesn't matter, so we'll just use `example.yaml`. Create this file and add the following to it:
 
 ``` yaml
-workflow_name: static-energy.vasp.mit
+# in example.yaml
+workflow_name: static-energy.quantum-espresso.quality00
 structure: POSCAR
-command: mpirun -n 4 vasp_std > vasp.out  # OPTIONAL
+```
+
+----------------------------------------------------------------------
+
+## 3. Submit the workflow
+
+Make sure both your `POSCAR` file AND `example.yaml` files are in the same folder as your command-line's working directory. Then start your workflow run with the following command: 
+
+``` shell
+simmate workflows run example.yaml
+```
+
+When running the workflow, it creates a new folder (e.g., `simmate-task-abcd1234`), writes the inputs, runs the calculation, and saves the results to your database.
+
+!!! tip
+    Depending on your laptop specs, this calculation can take >1 minute to finish.
+
+----------------------------------------------------------------------
+
+### 4. View results
+
+Once you're workflow finishes, you will find additional files in your output folder (e.g., `simmate-task-abcd1234`). One such file is `simmate_summary.yaml`, which provides a brief summary of your results:
+
+``` yaml
+_DATABASE_TABLE_: StaticEnergy
+_TABLE_ID_: 1
+_WEBSITE_URL_: http://127.0.0.1:8000/workflows/static-energy/vasp/mit/1
+band_gap: 4.9924
+chemical_system: Cl-Na
+computer_system: digital-storm
+conduction_band_minimum: 4.306
+corrections: []
+created_at: 2022-09-10 14:32:35.857088+00:00
+density: 2.1053060843576104
+density_atomic: 0.04338757298280908
+directory: /home/jacksund/Documents/spyder_wd/simmate-task-e9tddsyw
+energy: -27.25515165
+energy_fermi: -0.63610593
+energy_per_atom: -3.40689395625
+formula_anonymous: AB
+formula_full: Na4 Cl4
+formula_reduced: NaCl
+id: 42
+is_gap_direct: true
+lattice_stress_norm: 8.428394235089161
+lattice_stress_norm_per_atom: 1.0535492793861452
+nelements: 2
+nsites: 8
+run_id: 3a1bd23f-705c-4947-96fa-3740865ed12d
+site_force_norm_max: 1.4907796617877505e-05
+site_forces_norm: 2.257345786537809e-05
+site_forces_norm_per_atom: 2.8216822331722614e-06
+spacegroup_id: 225
+updated_at: 2022-09-10 14:33:09.419637+00:00
+valence_band_maximum: -0.6864
+volume: 184.38459332974767
+volume_molar: 13.87987468758872
+workflow_name: static-energy.vasp.mit
+workflow_version: 0.10.0
+```
+
+Different workflows may generate additional files and plots. For instance, `electronic-structure` workflows compute a band structure and create an image of your final band structure named `band_structure.png`. These additional files and plots, which vary by workflow, facilitate a quick review of your results.
+
+In the next set of tutorials, we will explore our database and the other data stored in it.
+
+----------------------------------------------------------------------
+
+## 4. Mastering parameters
+
+### a. Basic
+
+What if we wanted to modify the directory the workflow is ran in? Don't forget about the `simmate workflows explore` command, which listed parameters for us. We can use any of these to modify how our workflow runs.
+
+For instance, we can change our folder name (`directory`). With this, we can update our `example.yaml` to:
+
+``` yaml
+workflow_name: static-energy.quantum-espresso.quality00
+structure: POSCAR
 directory: my_custom_folder  # OPTIONAL
 ```
 
-This file contains all the information from our `simmate workflows run-quick` command above. But now it's stored in a file that we can read/edit later if needed. To submit this file, we simply run...
+and re-run:
 
-``` bash
-simmate workflows run my_settings.yaml
+``` shell
+simmate workflows run example.yaml
 ```
 
-Your workflow will execute the same as before. It's entirely up to you whether workflows are submitted using a yaml file or the longer command.
-
-!!! tip
-    Remember how the command `simmate workflows explore` listed all the parameters for us to use. These are all your options when submitting the workflow. In the example command above, we decided to set two of the optional parameters.
-
-!!! tip 
-    Want to customize a specific setting (e.g., set ENCUT to a custom value)? Customizing workflow settings is covered in tutorial 6. However, try to resist jumping ahead! There are still several important steps to learn before customizing workflows.
-
-----------------------------------------------------------------------
-
-## Mastering Workflow Options
+### b. Advanced
 
 In the previous examples, we provided our input structure as a `POSCAR` -- but what if we wanted to use a different format? Or use a structure from a previous calculation or the Materials Project database?
 
-Refer back to the [Parameters](/simmate/getting_started/run_a_workflow/running_the_workflow/) section of our documentation.
-
-Under `structure`, we see that we can use...
+When we go to the `Parameters` documentation, we see that `structure` input accepts...
 
 - [x] cif or poscar files 
-- [x] reference a database entry
-- [x] point to a third-party database
-- [x] use advanced python objects
+- [x] pointers to a database entry
+- [x] pointers to a third-party database
+- [x] advanced python objects
 
 For instance, you can try running the following workflow:
 
 ``` yaml
-workflow_name: static-energy.vasp.mit
+workflow_name: tatic-energy.quantum-espresso.quality00
 structure:
     database_table: MatprojStructure
-    database_id: mp-123
-command: mpirun -n 4 vasp_std > vasp.out  # OPTIONAL
-directory: my_custom_folder  # OPTIONAL
+    database_id: mp-22862
 ```
 
 Even though we didn't create a structure file, Simmate fetched one for us from the Materials Project database.

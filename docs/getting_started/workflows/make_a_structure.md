@@ -1,21 +1,41 @@
 # Creating a Structure File
 
-Before initiating a workflow, a crystal structure is required. There are numerous ways to obtain a crystal structure, such as downloading one online or creating one from scratch. In this guide, we will create a structure file from scratch without using any software.
+----------------------------------------------------------------------
+
+Before running a workflow, we need a crystal structure. There are numerous ways to obtain a crystal structure, such as downloading one online or creating one from scratch. In this guide, we will create a structure file from scratch so that we understand the information it contains.
 
 ----------------------------------------------------------------------
 
-## Creating a Text (txt) File
+## Understanding File Extensions
 
-Firstly, create a new text file on your Desktop named `POSCAR.txt`. You can use any text editor of your choice (Notepad, Sublime, etc.). Alternatively, you can create the file using the command line:
+Most computer files you will interact with are text files, but have text organized with a specific pattern/format. This is where file extensions come in (`.txt`, `.cif`, `.csv`, `.pdf`, ...). 
 
-``` shell
+These extensions indicate the format we are using. For example, files named `example.cif` inform programs that we have a text file written in the CIF structure format. The `.cif` extension can tell us stuff like "the first line of the file represents the chemical formula" and so forth.
+
+One popular format in material's science is made by VASP. VASP is unique because it uses the name `POSCAR` (without *any* file extension) to indicate its format. This isn't best practice, but it is import to keep in mind when reading files.
+
+!!! Fun-fact
+    A Microsoft Word document is essentially a folder of text files. The .docx file extension tells Word that we have the folder in their desired format. Try renaming a word file from `my_file.docx` to `my_file.zip` and open it to explore. Most programs operate in a similar manner!
+
+----------------------------------------------------------------------
+
+## Creating a POSCAR File
+
+1. create a new text file named `POSCAR.txt`. You can use any text editor of your choice (Notepad, Sublime, etc.). Alternatively, you can create the file using the command line:
+``` bash
 nano POSCAR.txt
 ```
 
-Ensure that the `.txt` extension is visible by enabling "show file name extensions".
+2. Ensure that the `.txt` extension is visible by enabling "show file name extensions" in your File window.
 
-Next, copy and paste the following text into the file:
+    !!! example 
+        To do this on Windows 10:
 
+        1. Open File Explorer
+        2. Click the View tab in File Explorer
+        3. Click the box next to File name extensions to see file extensions
+
+3. copy and paste the following text into the file:
 ```
 Na1 Cl1
 1.0
@@ -28,15 +48,25 @@ direct
 0.000000 0.000000 0.000000 Na
 0.500000 0.500000 0.500000 Cl
 ```
-
 This text represents a structure, which consists of a lattice and a list of atomic sites. The lattice is defined by a 3x3 matrix (lines 3-5), and the sites are a list of xyz coordinates with an element (lines 8-9 show fractional coordinates). 
+
+1. Renaming Your File from `POSCAR.txt` file to `POSCAR`. If you're using the command-line to create/edit this file, you can use the copy (`cp`) command to rename it:
+``` bash
+cp POSCAR.txt POSCAR
+```
+
+    !!! note 
+        On Windows, you may receive a warning about changing the file extension. You can safely ignore this warning and change the extension.
+
+1. Your structure file is now ready to use!
 
 ----------------------------------------------------------------------
 
 ## Exploring a Different Format (cif)
 
-There are various ways to write structure information. The example above uses the VASP's "POSCAR" format. Another common format is CIF. Although it's not as neat as a POSCAR, it contains similar information. You can use either CIFs or POSCAR formats when using Simmate.
+There are various ways to write structure information. The example above uses the VASP's "POSCAR" format. Another common format is CIF (Crystallographic Information File). Although it's not as neat as a POSCAR, it contains similar information. You can use CIFs, POSCAR, and many other formats when using Simmate.
 
+For example, this would be a file named `NaCl.cif`:
 ``` cif
 data_NaCl
 _symmetry_space_group_name_H-M   'P 1'
@@ -66,33 +96,5 @@ loop_
   Na  Na0  1  0.00000000  0.00000000  0.00000000  1
   Cl  Cl1  1  0.50000000  0.50000000  0.50000000  1
 ```
-
-----------------------------------------------------------------------
-
-## Understanding File Extensions
-
-Most files you will interact with are text files, just in different formats. This is where file extensions come in (`.txt`, `.cif`, `.csv`, ...). 
-
-These extensions indicate the format we are using. Files named `something.cif` inform programs that we have a text file written in the CIF structure format. 
-
-VASP uses the name POSCAR (without any file extension) to indicate its format. If we rename our file from `POSCAR.txt` to `POSCAR`, all programs (VESTA, OVITO, and others) will recognize the structure. 
-
-!!! note 
-    In Windows, you may receive a warning about changing the file extension. You can safely ignore this warning and change the extension.
-
-!!! Fun-fact
-    A Microsoft Word document is essentially a folder of text files. The .docx file extension tells Word that we have the folder in their desired format. Try renaming a word file from `my_file.docx` to `my_file.zip` and open it to explore. Most programs operate in a similar manner!
-
-----------------------------------------------------------------------
-
-## Renaming Your File in the Command-Line
-
-If you're using the command-line to create/edit this file, you can use the copy (`cp`) command to rename your `POSCAR.txt` file to `POSCAR`:
-
-``` shell
-cp POSCAR.txt POSCAR
-```
-
-Your structure file is now ready to use!
 
 ----------------------------------------------------------------------
