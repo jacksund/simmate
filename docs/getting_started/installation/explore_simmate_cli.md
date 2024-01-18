@@ -1,12 +1,14 @@
 # Navigating Simmate's Command-Line Interface
 
-Just as we used `conda --help` earlier, we can also request assistance with Simmate. Begin by executing the command `simmate --help`. The following output should be displayed:
+Just as we used `conda --help` earlier, we can also use `--help` with Simmate. Begin by running the command:
 
-``` shell
+``` bash
 simmate --help
-```
+``` 
 
-```                                                                                                           
+The following output should be displayed:
+
+```                                                                                                       
  Usage: simmate [OPTIONS] COMMAND [ARGS]...                                                                     
                                                                                                                 
  This is the primary command from which all other Simmate commands originate. If you're new to the command line, we recommend starting with our tutorials. Below, you'll find a list of sub-commands to try. For instance, you can run `simmate database --help` to learn more about it.                  
@@ -27,4 +29,4 @@ utilities        A group of commands for various simple tasks (such as file hand
 workflows        A group of commands for running workflows or viewing their settings                         
 ```
 
-As you can see, there are numerous other commands like `simmate database` and `simmate workflows` that we will delve into in subsequent tutorials.
+As you can see, there are numerous other commands like `simmate database` and `simmate workflows` that we will delve into in later tutorials.

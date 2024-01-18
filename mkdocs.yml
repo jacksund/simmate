@@ -82,7 +82,7 @@ nav:
         - Overview: getting_started/overview.md
         
         - 1. Installation:
-            - Quickstart: getting_started/installation/quick_start.md
+            - Quick Start: getting_started/installation/quick_start.md
             - a) Install Anaconda: getting_started/installation/install_anaconda.md
             - b) Intro to the command line: getting_started/installation/command_line.md
             - c) Create your environment: getting_started/installation/create_your_env.md
@@ -90,7 +90,7 @@ nav:
             - e) Set up a Local Server: getting_started/installation/local_server_setup.md
             
         - 2. Workflows:
-            - Quickstart: getting_started/workflows/quick_start.md
+            - Quick Start: getting_started/workflows/quick_start.md
             - a) Configure VASP potentials: getting_started/workflows/configure_potcars.md
             - b) Configure the database: getting_started/workflows/configure_database.md
             - c) Make a input structure: getting_started/workflows/make_a_structure.md
@@ -100,7 +100,7 @@ nav:
             - (extra) Submit to a cluster: getting_started/workflows/submit_to_a_cluster.md
         
         - 3. Toolkit:
-            - Quickstart: getting_started/toolkit/quick_start.md
+            - Quick Start: getting_started/toolkit/quick_start.md
             - a) Intro to Spyder IDE: getting_started/toolkit/intro_to_spyder.md
             - b) The Structure class: getting_started/toolkit/the_structure_class.md
             - c) Structure properties: getting_started/toolkit/structure_properties.md
@@ -108,20 +108,20 @@ nav:
             - e) Advanced classes: getting_started/toolkit/advanced_classes.md
         
         - 4. Database:
-            - Quickstart: getting_started/database/quick_start.md
+            - Quick Start: getting_started/database/quick_start.md
             - a) Python inheritance: getting_started/database/intro_to_python_inheritance.md
             - b) Workflow data: getting_started/database/access_workflow_data.md
             - c) Third-party data: getting_started/database/access_thirdparty_data.md
             - d) Install DBeaver: getting_started/database/dbeaver.md
         
         - 5. Custom workflows:
-            - Quickstart: getting_started/custom_workflows/quick_start.md
+            - Quick Start: getting_started/custom_workflows/quick_start.md
             - a) Update an existing workflow: getting_started/custom_workflows/update_an_existing_workflow.md
             - b) Name your new workflow: getting_started/custom_workflows/name_your_new_workflow.md
             - c) Creating your workflow: getting_started/custom_workflows/creating_your_workflow.md
         
         - 6. Custom apps:
-            - Quickstart: getting_started/custom_tables_and_apps/quick_start.md
+            - Quick Start: getting_started/custom_tables_and_apps/quick_start.md
             - a) Creating a custom project: getting_started/custom_tables_and_apps/create_a_custom_app.md
             - b) Creating a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
             - c) Using app workflows: getting_started/custom_tables_and_apps/using_app_workflows.md

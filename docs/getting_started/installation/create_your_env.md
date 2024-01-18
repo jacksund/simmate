@@ -1,12 +1,12 @@
-# Setting Up Your Environment and Installing Simmate
+# Setting Up Your Env & Installing Simmate
 
-To begin, we'll establish a new environment using the [conda-forge](https://conda-forge.org/) channel. Anaconda uses channels to download packages, and for simplicity, we'll consistently use conda-forge, a standard practice in the Python community.
+To begin, we'll establish a new environment using the [conda-forge](https://conda-forge.org/) channel. Anaconda uses channels to download packages, and for simplicity, we'll consistently use conda-forge, which is a standard practice in the Python community.
 
 ----------------------------------------------------------------------
 
 ## 1. Environment Creation
 
-Execute the command below to create your environment. You can replace `my_env` with any name of your choice, but remember to use underscores instead of spaces (`my_env` is acceptable, `my env` will cause an error).
+Run the command below to create your environment. You can replace `my_env` with any name of your choice, but remember to use underscores instead of spaces (`my_env` is acceptable, `my env` will cause an error).
 
 ``` shell
 conda create -c conda-forge -n my_env python=3.11
