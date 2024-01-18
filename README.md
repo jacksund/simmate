@@ -47,6 +47,4 @@ This Github repo holds all of our source code. Before getting started here, you 
 
 ## Need help or have a suggestion?
 
-Post your question or feedback [here in our discussion section](https://github.com/jacksund/simmate/discussions/categories/q-a). 
-
-Even if it's a question like "_How do I download all structures with x, y, and z properties?_", let us help out and point you in the right direction!
+Post your questions and feedback [here in our discussion section](https://github.com/jacksund/simmate/discussions/categories/q-a). 
