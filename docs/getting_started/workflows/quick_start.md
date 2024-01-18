@@ -2,17 +2,15 @@
 
 ## Quick Start
 
-!!! danger
-    This tutorial assumes that you have VASP installed and that the `vasp_std` command is accessible in your path. 
-    
-    Simmate's next release (planned for spring 2024) will not require VASP.
+!!! tip
+    The majority of this guide covers initial setup for first-time users. For subsequent workflow runs, only steps 8-10 are necessary.
 
-1. Initialize your Simmate database before running a workflow. Your database will be created at `~/simmate/my_env-database.sqlite3`, where "my_env" is the name of your active conda environment:
+1. Initialize your Simmate database, which will be created at `~/simmate/my_env-database.sqlite3` and where `my_env` is the name of your active conda environment:
 ```bash
 simmate database reset
 ```
 
-2. Create a structure file for sodium chloride (NaCl) to practice calculations. Name it `POSCAR` and fill it with the following content...
+2. Create a structure file for sodium chloride, which we will use to practice calculations. Name it `POSCAR` and fill it with the following content:
 ```
 Na1 Cl1
 1.0
@@ -36,39 +34,42 @@ simmate workflows list-all
 simmate workflows explore
 ```
 
-5. Copy and paste VASP POTCAR files into the `~/simmate/vasp/Potentials` folder. Make sure to unpack the `tar.gz` files. This folder should contain the potentials that came with VASP, maintaining their original folder and file names:
-```
-# Located at /home/my_username (~)
-simmate/
-└── vasp
-    └── Potentials
-        ├── LDA
-        │   ├── potpaw_LDA
-        │   ├── potpaw_LDA.52
-        │   ├── potpaw_LDA.54
-        │   └── potUSPP_LDA
-        ├── PBE
-        │   ├── potpaw_PBE
-        │   ├── potpaw_PBE.52
-        │   └── potpaw_PBE.54
-        └── PW91
-            ├── potpaw_GGA
-            └── potUSPP_GGA
-```
+    !!! note
+        There are a variety of software options for QM, DFT, or other analyses (e.g., VASP, Abinit, QE, LAMMPS, etc.). In this tutorial, we will use Quantum Espresso because we have Docker images for those who don't have it installed. If you prefer another program, check the `Apps` section in our guides for specific instructions.
 
-6. Once everything is configured, you can submit your workflow using the website interface, command-line, or Python. Here, we'll use a settings file in YAML format. Create a file named `my_example.yaml` with the following content:
-``` yaml
-workflow_name: static-energy.vasp.mit
-structure: POSCAR
-command: mpirun -n 5 vasp_std > vasp.out  # OPTIONAL
-directory: my_new_folder  # OPTIONAL
-```
 
-7. Run the workflow configuration file we just created
+5. Make sure you have Quantum Espresso (QE) installed using one of two options:
+      - (*for beginners*) Install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). Then run the following command:
+          ``` bash
+          simmate-qe setup docker
+          ```
+      - (*for experts*) Install QE using [offical guides](https://www.quantum-espresso.org/) and make sure `pw.x` is in the path
+
+6. To run calculations with QE, we need psuedopotentials. Simmate helps load these from the popular [SSSP library](https://www.materialscloud.org/discover/sssp/):
 ``` bash
-simmate workflows run my_example.yaml
+simmate-qe setup sssp
 ```
 
-8. Once the workflow is complete, you'll find files named `simmate_metadata.yaml` and `simmate_summary.yaml` which contain some quick information. Other workflows (like `band-structure` calculations) will also generate plots for you.
+    !!! tip
+        Open the directory at `~/simmate` to see what these `setup` commands are doing. You'll see a `settings.yaml` file (if you're using Docker) and a `quantum_espresso` folder (+ SSSP potentials) all configured for you.
 
-9.     While the plots and summary files are useful for quick testing, more detailed information is stored in our database. We'll cover how to access your database in a subsequent tutorial.
+7. Make sure QE is fully configured and ready to use:
+``` bash
+simmate-qe test
+```
+
+8. With everything configured, you can submit your workflow using the website interface, command-line, or Python. Here, we'll use a settings file in YAML format. Create a file named `example.yaml` with the following content:
+``` yaml
+workflow_name: static-energy.quantum-espresso.quality00
+structure: POSCAR
+```
+
+9. Run the workflow configuration file we just created:
+``` bash
+simmate workflows run example.yaml
+```
+
+10. The run will create a new folder (e.g. `simmate-task-abcd1234`) for your run. Inside, you'll find files named `simmate_metadata.yaml` and `simmate_summary.yaml` which contain some quick information. Some workflows (like `band-structure` calculations) will also generate plots for you.
+
+    !!! tip
+        While the plots and summary files are useful for quick testing, more detailed information is stored in our database. We'll cover how to access your database in a subsequent tutorial.
