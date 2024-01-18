@@ -55,9 +55,9 @@ This website is your go-to resource for all our tutorials and guides. Before div
 
 Simmate, or the Simulated Materials Ecosystem, is a comprehensive toolbox and framework designed for computational materials research. It allows you to explore various crystal databases, predict new materials, and easily calculate properties such as electronic, elastic, thermodynamic, and more.
 
-Computational research can be intimidating because there are so many programs to choose from, and it's challenging to select and combine them for your specific project. Simmate is designed to bridge this gap, acting as the link between these diverse programs, databases, and utilities. We take on the heavy lifting and provide clear explanations of these programs along the way.
+Computational research can be intimidating because there are so many programs to choose from, and it's challenging to select and combine them for your specific project. Simmate is designed to bridge this gap, acting as the link between these diverse programs, databases, and utilities. We take on the heavy lifting and teach you these programs along the way.
 
-We also provide an extremely powerful toolbox and API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we operate under a different coding philosophy. **Our top priorities are usability and readability.** We therefore distribute Simmate as an "all-in-one" package, including a core material science toolkit, workflow management, database ORM, and a website interface. To learn more about the design choices in Simmate compared to other codes, visit our [comparisons and benchmarks page](https://github.com/jacksund/simmate/tree/main/benchmarks).
+We also provide an extremely powerful toolbox and API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we operate under a different coding philosophy. **Our top priorities are usability and readability.** We therefore distribute Simmate as an "all-in-one" package, including a core material science toolkit, workflow management, database ORM, and a website interface. To learn more about the design choices in Simmate compared to other codes, visit our [comparisons page](https://github.com/jacksund/simmate/tree/main/benchmarks).
 
 ## A Sneak-Peak of Features
 
@@ -90,15 +90,16 @@ Simmate comes with ready-to-use workflows for most common material properties, r
     ```
 
     ``` bash
-    simmate workflows run example.yaml
+    simmate workflows run example.toml
     ```
 
 === "python"
     ``` python
-    from simmate.workflows.relaxation import Relaxation__Vasp__Matproj as workflow
+    from simmate.workflows.utilities import get_workflow
     
-    state = workflow.run(structure="NaCl.cif")
-    result = state.result()
+    workflow = get_workflow("relaxation.vasp.matproj")
+    status = workflow.run(structure="NaCl.cif")
+    result = status.result()
     ```
 
 === "website"
@@ -111,12 +112,15 @@ Simmate adjusts to your project's scale, whether on a single computer or across 
 
 === "create workflow"
     ```python
-    from simmate.workflows import workflow
+    from simmate.engine import workflow
 
-    @workflow(name="example.basic.hello")
-    def hello(**kwargs):
-        print("Hello world!")
+    @workflow
+    def hello(name, **kwargs):  # (1)
+        print(f"Hello {name}!")
+        print(f"Extra parameters configured for you: {kwargs}")
     ```
+
+    1. We always use `**kwargs` because Simmate automatically provides extra variables at runtime, such as `run_id` and `directory`.
 
 === "schedule jobs"
     ```python
@@ -144,11 +148,8 @@ Simmate's database manages your private data while also integrating with third-p
     from simmate.database import connect # (1)
     from simmate.database.third_parties import MatprojStructure
 
-    # EXAMPLE 1
-    structures = MatprojStructure.objects.filter(nsites__lt=6).all() # (2)
-
-    # EXAMPLE 2
-    structures = MatprojStructure.objects.filter(  # (3)
+    # Query the database
+    structures = MatprojStructure.objects.filter(  # (2)
         nsites__gte=3,
         energy__isnull=False,
         density__range=(1,5),
@@ -156,14 +157,13 @@ Simmate's database manages your private data while also integrating with third-p
         spacegroup__number=167,
     ).all()
 
-    # Quickly convert to excel, a pandas dataframe, or toolkit structures.
+    # Convert to excel, a pandas dataframe, toolkit structures, etc.
     df = structures.to_dataframe()
     structures = structures.to_toolkit()
     ```
 
     1. Follow the database tutorial to build our initial database with the command `simmate database reset`
-    2. Retrieves all structures with less than 6 sites in their unit cell
-    3. This filter retrieves structures with: greater or equal to 3 sites, an energy value, density between 1 and 5, the element Carbon, and spacegroup number 167
+    2. This filter retrieves structures with: greater or equal to 3 sites, an energy value, density between 1 and 5, the element Carbon, and spacegroup number 167
 
 === "SQL"
     ``` postgres
@@ -188,10 +188,4 @@ Simmate's database manages your private data while also integrating with third-p
 
 ## Need help?
 
-Post your question [here in our discussion section](https://github.com/jacksund/simmate/discussions/categories/q-a). 
-
-## Extra resources
-
-- [Requesting a new feature](https://github.com/jacksund/simmate/discussions/categories/ideas)
-- [Exploring alternatives to Simmate](https://github.com/jacksund/simmate/tree/main/benchmarks)
-- [Citing Simmate](https://doi.org/10.21105/joss.04364)
+Post your questions and feedback [in our discussion section](https://github.com/jacksund/simmate/discussions/categories/q-a). 

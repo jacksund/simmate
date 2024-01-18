@@ -47,4 +47,4 @@ This Github repo holds all of our source code. Before getting started here, you 
 
 ## Need help or have a suggestion?
 
-Post your questions and feedback [here in our discussion section](https://github.com/jacksund/simmate/discussions/categories/q-a). 
+Post your questions and feedback [in our discussion section](https://github.com/jacksund/simmate/discussions/categories/q-a). 
