@@ -180,7 +180,7 @@ nav:
                 - Common Analyses: full_guides/toolkit/single_structure/analyses.md
                 # - API: full_guides/toolkit/single_structure/api.md
             - Many Structures: 
-                - Featurizers: full_guides/toolkit/many_structures/quick_start.md
+                - Featurizers: full_guides/toolkit/many_structures/featurizers.md
 
         - Extras:
             - File converters: 
