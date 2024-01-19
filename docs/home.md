@@ -78,7 +78,7 @@ Simmate comes with ready-to-use workflows for most common material properties, r
 
 === "command line"
     ``` bash
-    simmate workflows run relaxation.vasp.matproj --structure NaCl.cif
+    simmate workflows run-quick relaxation.vasp.matproj --structure NaCl.cif
     ```
 
 === "toml"
