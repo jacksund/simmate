@@ -171,7 +171,16 @@ nav:
             - Creating custom tables: full_guides/database/custom_tables.md
 
         - Toolkit:
-            - Overview: full_guides/toolkit.md
+            - Overview: full_guides/toolkit/overview.md
+            - Single Structure:
+                - Structure Loading: full_guides/toolkit/single_structure/loading.md
+                - Structure Exporting: full_guides/toolkit/single_structure/exporting.md
+                - Cleaning & Prep: full_guides/toolkit/single_structure/cleaning.md
+                - Common Properties: full_guides/toolkit/single_structure/properties.md
+                - Common Analyses: full_guides/toolkit/single_structure/analyses.md
+                # - API: full_guides/toolkit/single_structure/api.md
+            - Many Structures: 
+                - Featurizers: full_guides/toolkit/many_structures/quick_start.md
 
         - Extras:
             - File converters: 
