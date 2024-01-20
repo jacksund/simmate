@@ -1,5 +1,10 @@
 # Simmate Toolkit Overview
 
+!!! danger
+    The Simmate toolkit is still in early development and not ready for use. We therefore keep our toolkit guides hidden for the time being.
+
+    Stick to PyMatGen and our "PyMatgen Help" section for now.
+
 ## About
 
 The `Simmate Toolkit` serves as an alternative to [pymatgen](https://pymatgen.org/), [ase](https://gitlab.com/ase/ase), and other Python packages for cheminformatics.

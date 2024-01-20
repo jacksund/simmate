@@ -1,5 +1,8 @@
 # Exporting Structures
 
+!!! danger
+    The simmate toolkit is still in early development and not ready for use. Stick to the "PyMatgen Help" section for now.
+
 --------------------------------------------------------------------------------
 
 ## Introduction
@@ -77,9 +80,11 @@ Methods are available to convert to other popular python objects, such as those 
 molecule.to_rdkit()
 ```
 
-| TYPE                        | METHOD        |
-| --------------------------- | ------------- |
-| PyMatGen `Structure` object | `to_pymatgen` |
-| ASE `Atoms` object          | `to_ase`      |
+| TYPE                        | METHOD         |
+| --------------------------- | -------------- |
+| Python `dict`               | `to_dict`      |
+| Pandas `DataFrame`          | `to_dataframe` |
+| PyMatGen `Structure` object | `to_pymatgen`  |
+| ASE `Atoms` object          | `to_ase`       |
 
 --------------------------------------------------------------------------------

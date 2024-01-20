@@ -1,5 +1,8 @@
 # Common properties
 
+!!! danger
+    The simmate toolkit is still in early development and not ready for use. Stick to the "PyMatgen Help" section for now.
+
 !!! important
     This page provides a concise list of available properties, grouped by function. Detailed descriptions of each property can be found in the `API` section.
 

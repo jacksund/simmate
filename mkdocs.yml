@@ -172,15 +172,20 @@ nav:
 
         - Toolkit:
             - Overview: full_guides/toolkit/overview.md
-            - Single Structure:
-                - Structure Loading: full_guides/toolkit/single_structure/loading.md
-                - Structure Exporting: full_guides/toolkit/single_structure/exporting.md
-                - Cleaning & Prep: full_guides/toolkit/single_structure/cleaning.md
-                - Common Properties: full_guides/toolkit/single_structure/properties.md
-                - Common Analyses: full_guides/toolkit/single_structure/analyses.md
-                # - API: full_guides/toolkit/single_structure/api.md
-            - Many Structures: 
-                - Featurizers: full_guides/toolkit/many_structures/featurizers.md
+            - PyMatGen Help: 
+                - Structure: full_guides/toolkit/pymatgen/structure.md
+                - Lattice: full_guides/toolkit/pymatgen/lattice.md
+                - Sites: full_guides/toolkit/pymatgen/sites.md
+                - Composition: full_guides/toolkit/pymatgen/composition.md
+            # - Single Structure:
+            #    - Structure Loading: full_guides/toolkit/single_structure/loading.md
+            #    - Structure Exporting: full_guides/toolkit/single_structure/exporting.md
+            #    - Cleaning & Prep: full_guides/toolkit/single_structure/cleaning.md
+            #    - Common Properties: full_guides/toolkit/single_structure/properties.md
+            #    - Common Analyses: full_guides/toolkit/single_structure/analyses.md
+            #    # - API: full_guides/toolkit/single_structure/api.md
+            # - Many Structures: 
+            #    - Featurizers: full_guides/toolkit/many_structures/featurizers.md
 
         - Extras:
             - File converters: 
