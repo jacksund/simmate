@@ -188,9 +188,6 @@ nav:
             #    - Featurizers: full_guides/toolkit/many_structures/featurizers.md
 
         - Extras:
-            - File converters: 
-                - Overview: full_guides/extras/file_converters/overview.md
-                - Structures: full_guides/extras/file_converters/structures.md
             - Command line: full_guides/extras/command_line.md
             - Visualization:
                 - Overview: full_guides/extras/visualization/overview.md
