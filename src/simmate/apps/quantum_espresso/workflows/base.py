@@ -11,6 +11,7 @@ from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
 from simmate.configuration import settings
 from simmate.engine import S3Workflow
 from simmate.toolkit import Structure
+from simmate.utilities import get_docker_command
 
 
 # TODO: add StructureInputWorkflow mixin which can be made from VaspWorkflow class
@@ -128,11 +129,11 @@ class PwscfWorkflow(S3Workflow):
             rism=cls.rism,
         )
         input_config.to_file(directory / "pwscf.in")
-    
-    # -------------------------------------------------------------------------
-    
+
     @classmethod
-    def get_final_command(cls, command: str = None, directory: Path = None, **kwargs) -> str:
+    def get_final_command(
+        cls, command: str = None, directory: Path = None, **kwargs
+    ) -> str:
         # EXPERIMENTAL - some of this functionality will likely move to S3Workflow
         if settings.quantum_espresso.docker.use == True:
             final_command = get_docker_command(
@@ -145,24 +146,5 @@ class PwscfWorkflow(S3Workflow):
             )
         breakpoint()
         return final_command
-        
+
     # -------------------------------------------------------------------------
-
-
-# TODO: move to utils
-def get_docker_command(
-        image: str,
-        entrypoint: str = None,
-        volumes: list[str] = [],
-    ):
-    command = "docker run "
-    
-    if entrypoint:
-        command += f"--entrypoint {entrypoint} "
-    
-    for volume in volumes:
-        command += f"--volume {volume} "
-    
-    command += image
-    
-    return command

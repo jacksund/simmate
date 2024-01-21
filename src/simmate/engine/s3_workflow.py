@@ -63,11 +63,11 @@ class S3Workflow(Workflow):
         """
         # This is a default method, which is mention to be overwritten in
         # some subclasses.
-        
+
         # NOTE: _load_input_and_register grabs the default command and passes
         # it to this method. So there will ALWAYS be a command provided as input,
         # even if the user didn't set one.
-        
+
         # By default, the `command` is left unchanged
         return command
 
@@ -173,7 +173,7 @@ class S3Workflow(Workflow):
          - a dictionary of the result, corrections, and working directory used
          for this task run
         """
-        
+
         # because the command is something that is frequently changed at the
         # workflow level, then we want to make it so the user can set it for
         # each unique task.run() call. Otherwise we grab the default from the

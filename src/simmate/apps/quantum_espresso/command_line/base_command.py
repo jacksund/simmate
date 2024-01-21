@@ -47,18 +47,30 @@ def test(run_calcs: bool = False):
         )
         passed_all = False
 
-    # 2 - check for pw.x command
-    from simmate.apps.quantum_espresso.settings import SIMMATE_QE_DOCKER
+    # 2 - check for pw.x command (or docker)
+    from simmate.configuration import settings
 
-    command = "pw.x" if not SIMMATE_QE_DOCKER else "docker"
-    if shutil.which(command):
-        logging.info("PW-SCF command found ('pw.x') :heavy_check_mark:")
-    else:
-        logging.warning(
-            "You must have QE (PWSCF) installed and in the PATH, but "
-            "we were unable to detect the `pw.x` command."
-        )
-        passed_all = False
+    use_docker = settings.quantum_espresso.docker.enable
+    command = "pw.x" if not use_docker else "docker"
+    if command == "pw.x":
+        if shutil.which(command):
+            logging.info("PW-SCF command found ('pw.x') :heavy_check_mark:")
+        else:
+            logging.warning(
+                "You must have QE (PWSCF) installed and in the PATH, but "
+                "we were unable to detect the `pw.x` command."
+            )
+            passed_all = False
+    elif command == "docker":
+        # TODO: Move this to a utility
+        if shutil.which(command):
+            logging.info("Docker command found ('docker') :heavy_check_mark:")
+        else:
+            logging.warning(
+                "You must have Docker installed and in the PATH, but "
+                "we were unable to detect the `docker` command."
+            )
+            passed_all = False
 
     # 3 - check for psuedopotentials
     from simmate.apps.quantum_espresso.inputs.potentials_sssp import check_psuedo_setup
