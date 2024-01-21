@@ -11,8 +11,14 @@ on:
 
 jobs:
   push_to_registry:
-    name: Build and Push to Hub
+    name: Publish to DockerHub
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        image-name: ["simmate", "quantum_espresso"]
+
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -35,14 +41,14 @@ jobs:
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: |
-            jacksund/simmate
+            jacksund/${{ matrix.image-name }}
             ghcr.io/${{ github.repository }}
       
       - name: Build and push Docker images
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          file: ./envs/docker/web_server.dockerfile
+          file: ./envs/docker/${{ matrix.image-name }}.dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
