@@ -69,7 +69,7 @@ class S3Workflow(Workflow):
         # even if the user didn't set one.
 
         # By default, the `command` is left unchanged
-        return command
+        return command if command is not None else cls.command
 
     # -------------------------------------------------------------------------
 
@@ -187,6 +187,7 @@ class S3Workflow(Workflow):
             is_restart=is_restart,
             **kwargs,
         )
+        assert command is not None  # BUG-CHECK
 
         # establish the working directory
         directory = get_directory(directory)
@@ -403,12 +404,6 @@ class S3Workflow(Workflow):
         else:
             corrections = []
 
-        # BUG-FIX:
-        # Some commands need to call the current working directory via ${pwd},
-        # but this does not work when calling from python. We therefore
-        # expand out that part of the command first.
-        command_cleaned = command.replace("${pwd}", str(directory))
-
         # ------ start of main while loop ------
 
         # we can try running the shelltask up to max_corrections. Because only one
@@ -436,7 +431,7 @@ class S3Workflow(Workflow):
             logging.info(f"Using {directory}")
             logging.info(f"Running '{command}'")
             process = subprocess.Popen(
-                command_cleaned,
+                command,
                 cwd=directory,
                 shell=True,
                 preexec_fn=None if platform.system() == "Windows"
