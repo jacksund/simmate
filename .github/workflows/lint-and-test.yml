@@ -88,7 +88,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image-name: ["simmate", "quantum_espresso"]
+        image: ["simmate", "quantum_espresso"]
     permissions:
       contents: read
       packages: write
@@ -101,5 +101,5 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          file: ./envs/docker/${{ image-name }}.dockerfile
+          file: ./envs/docker/${{ image }}.dockerfile
           push: false
