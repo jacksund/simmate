@@ -21,7 +21,7 @@ jobs:
     # Establishes the combination of all OS and python versions
     # for us to test. The "steps" below will be ran for each
     # of these combinations.
-    name: Python (${{ matrix.python-version }}, ${{ matrix.os }})
+    name: Python ${{ matrix.python-version }} (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -83,7 +83,7 @@ jobs:
     # the 15 slowest ones.
 
   docker-build:
-    name: Test Docker Build
+    name: Docker
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
