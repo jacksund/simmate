@@ -43,7 +43,7 @@ class S3Workflow(Workflow):
     @classmethod
     def get_final_command(cls, command: str = None, **kwargs) -> str:
         """
-        Takes the `command` attribute and performs additional formatting on
+        Takes the `command` provided and performs additional formatting on
         it if necessary. By default, the `command` is left unchanged, and this
         method must be overwritten in a subclass to achieve desired formatting.
 
@@ -53,8 +53,8 @@ class S3Workflow(Workflow):
         command = "example -n {custom_param}"
 
         @classmethod
-        def format_command(cls, custom_param, **kwargs) -> str:
-            return cls.command.format(custom_param=custom_param)
+        def format_command(cls, command, custom_param, **kwargs) -> str:
+            return command.format(custom_param=custom_param)
         ```
 
         The inputs for this function are dynamically pulled from the parameters
@@ -64,13 +64,12 @@ class S3Workflow(Workflow):
         # This is a default method, which is mention to be overwritten in
         # some subclasses.
 
-        # The user might have overwritten the command via the `run(command=...)`
-        # method. Note also, that _load_input_and_register may also grab
-        # the default command and pass it to this method.
-        if command is not None:
-            return command
-        else:
-            return cls.command
+        # NOTE: _load_input_and_register grabs the default command and passes
+        # it to this method. So there will ALWAYS be a command provided as input,
+        # even if the user didn't set one.
+
+        # By default, the `command` is left unchanged
+        return command if command is not None else cls.command
 
     # -------------------------------------------------------------------------
 
@@ -188,6 +187,7 @@ class S3Workflow(Workflow):
             is_restart=is_restart,
             **kwargs,
         )
+        assert command is not None  # BUG-CHECK
 
         # establish the working directory
         directory = get_directory(directory)
@@ -404,12 +404,6 @@ class S3Workflow(Workflow):
         else:
             corrections = []
 
-        # BUG-FIX:
-        # Some commands need to call the current working directory via ${pwd},
-        # but this does not work when calling from python. We therefore
-        # expand out that part of the command first.
-        command_cleaned = command.replace("${pwd}", str(directory))
-
         # ------ start of main while loop ------
 
         # we can try running the shelltask up to max_corrections. Because only one
@@ -437,7 +431,7 @@ class S3Workflow(Workflow):
             logging.info(f"Using {directory}")
             logging.info(f"Running '{command}'")
             process = subprocess.Popen(
-                command_cleaned,
+                command,
                 cwd=directory,
                 shell=True,
                 preexec_fn=None if platform.system() == "Windows"

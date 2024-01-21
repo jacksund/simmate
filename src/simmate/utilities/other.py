@@ -357,3 +357,28 @@ def deep_update(default_dict: dict, override_dict: dict) -> dict:
             final_dict[key] = value
 
     return final_dict
+
+
+def get_docker_command(
+    image: str,
+    entrypoint: str = None,
+    volumes: list[str] = [],
+) -> str:
+    """
+    Given common input parameters, this util builds a `docker run` command
+    and returns it as a string.We then let other functionality
+    (such as S3Workflows) handle running the command.
+
+    For advanced docker cases, use the `docker-py` package instead.
+    """
+    command = "docker run "
+
+    if entrypoint:
+        command += f"--entrypoint {entrypoint} "
+
+    for volume in volumes:
+        command += f"--volume {volume} "
+
+    command += image
+
+    return command
