@@ -22,6 +22,8 @@ import tarfile
 import urllib
 
 from simmate.apps.quantum_espresso.settings import DEFAULT_PSUEDO_DIR, SIMMATE_QE_DIR
+# TODO:
+# settings.quantum_espresso.docker.use == True
 
 # -----------------------------------------------------------------------------
 

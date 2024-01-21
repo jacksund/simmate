@@ -208,7 +208,11 @@ class SimmateSettings:
             },
             "quantum_espresso": {
                 "default_command": "pw.x < pwscf.in > pw-scf.out",
-                "use_docker": False,
+                "psuedo_dir": self.config_directory / "quantum_espresso" / "potentials",
+                "docker": {
+                    "use": False,
+                    "image": f"jacksund/quantum-espresso:{simmate.__version__}",
+                },
             },
         }
 
