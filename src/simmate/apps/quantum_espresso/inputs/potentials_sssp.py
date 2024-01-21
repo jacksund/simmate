@@ -24,6 +24,7 @@ import urllib
 from simmate.configuration import settings
 from simmate.utilities import get_directory
 
+
 def setup_sssp() -> bool:
     """
     Downloads all of the SSSP potentials and mapping files needed for this app
@@ -36,10 +37,9 @@ def setup_sssp() -> bool:
 
 
 def _setup_sssp_single(file_type: str, psuedo_type: str):
-    
     # we use get_dir to create the folder if it doesn't exist yet
     qe_directory = get_directory(settings.config_directory / "quantum_espresso")
-    
+
     # determine which file we are trying to setup/download
     if file_type == "mappings" and psuedo_type == "precision":
         filename = "SSSP_1.3.0_PBE_precision.json"
