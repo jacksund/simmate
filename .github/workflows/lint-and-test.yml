@@ -5,7 +5,7 @@
 #   conda: https://github.com/marketplace/actions/setup-miniconda
 #   mamba: https://github.com/mamba-org/provision-with-micromamba
 
-name: Test lint, unittests, & builds
+name: Test
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
     # Establishes the combination of all OS and python versions
     # for us to test. The "steps" below will be ran for each
     # of these combinations.
-    name: Test (${{ matrix.python-version }}, ${{ matrix.os }})
+    name: Python (${{ matrix.python-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -85,6 +85,10 @@ jobs:
   docker-build:
     name: Test Docker Build
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image-name: ["simmate", "quantum_espresso"]
     permissions:
       contents: read
       packages: write
@@ -97,5 +101,5 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          file: ./envs/docker/web_server.dockerfile
+          file: ./envs/docker/${{ image-name }}.dockerfile
           push: false

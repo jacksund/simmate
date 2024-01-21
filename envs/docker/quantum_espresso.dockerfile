@@ -57,9 +57,6 @@ RUN cd qe-7.2 && \
     make pw && \
     make install
 
-# add pw.x (+ others) to path
-# ENV PATH="${PATH}:/qe-7.2/bin"
-
 # build a working directory to run calculations
 RUN mkdir qe_calc/
 WORKDIR qe_calc/
