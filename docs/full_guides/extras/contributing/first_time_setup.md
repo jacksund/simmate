@@ -1,9 +1,9 @@
 # Getting Started
 
 !!! tip
-    We recommend students and teachers to use their Github accounts with [Github's free Student/Teacher packages](https://education.github.com/). This includes Github Pro and other beneficial software. However, this step is not mandatory.
+    We recommend students and teachers to use their Github accounts with [Github's free Student/Teacher packages](https://education.github.com/). This includes Github Pro and other beneficial software. However, this is not mandatory.
 
-1. Fork the Simmate repository to your Github profile (e.g., `yourname/simmate`).
+1. Fork the Simmate repository to your Github profile (e.g., `yourname/simmate`). The button to fork is at the top right of [Simmate's home github page](https://github.com/jacksund/simmate), near the "star repo" button.
 
 2. Clone `yourname/simmate` to your local desktop. We recommend using [GitKraken](https://www.gitkraken.com/) and cloning to a folder named `~/Documents/github/`. GitKraken is free for public repositories (including Simmate), but is also part of [Github's free Student/Teacher packages](https://education.github.com/). Their [6-minute beginner video](https://www.youtube.com/watch?v=ub9GfRziCtU) provides a quick start guide.
 
@@ -24,7 +24,7 @@ conda activate simmate_dev
 pip install -e .
 ```
 
-6. When resetting your database, refrain from using the prebuilt database. Pre-builts are only created for new releases, and the development database may differ from the latest release.
+6. When resetting your database, refrain from using the prebuilt database. It is best practice to have an empty database when developing.
 ``` bash
 simmate database reset --confirm-delete --no-use-prebuilt
 ```
@@ -36,8 +36,8 @@ simmate database reset --confirm-delete --no-use-prebuilt
 pytest
 ```
 
-8. In GitKraken, make sure you have the `main` branch of your repository (`yourname/simmate`) checked out.
+8. In GitKraken, you will start with `main` branch of your repository (`yourname/simmate`) checked out. Create a new branch and name it according to the changes you will make (e.g. `fix-example-app`).
 
 9. In Spyder, navigate to `Projects` > `New Project...`. Select `existing directory`, choose your `~/Documents/github/simmate` directory, and then `create` your Project!
 
-10. You're now set to explore the source code and modify or add files! Continue to the next section for guidance on formatting, testing, and submitting your changes to our team.
+10.  You're now set to explore the source code and modify or add files! Continue to the next section for guidance on formatting, testing, and submitting your changes to our team.
