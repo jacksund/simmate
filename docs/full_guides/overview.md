@@ -1,18 +1,20 @@
 # Comprehensive Guides & API Reference for Simmate
 
+------------------------------------------------------------
+
 ## Before you begin
 
-Before diving in, ensure you've either completed our [introductory tutorials](/simmate/getting_started/overview/) or have a robust understanding of Python.
+Before diving in, ensure you've either completed our [introductory tutorials](/simmate/getting_started/overview/) or have a good understanding of Python.
 
 ------------------------------------------------------------
 
-## Guide and Code Structure
+## Organization Overview
 
 The structure of our guides and code may not always match. We've found that separating the two helps newcomers navigate Simmate without having to grasp all its components at once.
 
 ### Documentation
 
-Our guides are arranged in ascending order of complexity, mirroring the typical user journey with Simmate. Users generally start with high-level features (the website interface) and progressively delve into lower-level features (the toolkit and Python objects). The documentation mirrors this progression.
+Our guides are arranged in order to mirror the typical user journey with Simmate. Users generally start with high-level features (the website interface) and progressively delve into lower-level features (the toolkit and Python objects). The documentation mirrors this progression.
 
 ``` mermaid
 graph LR
@@ -27,9 +29,9 @@ graph LR
     getting-started guides, you do **not** need to complete a section before 
     proceeding to the next one.
 
-### Python Modules
+### Source Code
 
-`simmate` is the base module, housing all the code that our package operates on. Each subfolder (or Python "module") provides detailed information about its contents.
+For our python modules, `simmate` is the base module, housing all the code that our package operates on. Each subfolder (or Python "module") provides detailed information about its contents.
 
 These modules include:
 
