@@ -51,7 +51,8 @@ simmate-qe setup docker
     To see what this command did, take a look at `~/simmate/my_env-settings.yaml` and you'll see the following update:
     ``` yaml
     quantum_espresso:
-      use_docker: true
+      docker: true
+        enable: true
     ```
 
 ----------------------------------------------------------------------

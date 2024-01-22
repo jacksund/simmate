@@ -68,6 +68,11 @@ The `composition` property is also available for  `Molecule`, `Cluster`, `Interf
 
 ## Analysis Methods
 
+- `amount_tolerance`
+- `almost_equals`
+- `contains_element_type`
+- `is_element`
+- `valid`
 - `get_atomic_fraction`
 - `get_el_amt_dict`
 - `get_integer_formula_and_factor`
@@ -77,16 +82,6 @@ The `composition` property is also available for  `Molecule`, `Cluster`, `Interf
 - `oxi_prob`
 - `oxi_state_guesses`
 - `ranked_compositions_from_indeterminate_formula`
-
---------------------------------------------------------------------------------
-
-## Makeup Checks
-
-- `amount_tolerance`
-- `almost_equals`
-- `contains_element_type`
-- `is_element`
-- `valid`
 
 --------------------------------------------------------------------------------
 

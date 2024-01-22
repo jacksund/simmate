@@ -100,10 +100,8 @@ nav:
         
         - 3. Toolkit:
             - Quick Start: getting_started/toolkit/quick_start.md
-            - a) Intro to Spyder IDE: getting_started/toolkit/intro_to_spyder.md
+            - a) Intro to Python (& Spyder): getting_started/toolkit/intro_to_spyder.md
             - b) The Structure class: getting_started/toolkit/the_structure_class.md
-            - c) Structure properties: getting_started/toolkit/structure_properties.md
-            - d) Structure methods: getting_started/toolkit/structure_methods.md
             - e) Advanced classes: getting_started/toolkit/advanced_classes.md
         
         - 4. Database:
