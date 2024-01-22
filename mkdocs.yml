@@ -186,10 +186,10 @@ nav:
             #    - Featurizers: full_guides/toolkit/many_structures/featurizers.md
 
         - Contributing:
-            - First time setup: contributing/first_time_setup.md
-            - Creating & submitting changes: contributing/creating_and_submitting_changes.md
-            - Extra notes & tips: contributing/extra.md
-            - Maintainer notes: contributing/maintainer_notes.md
+            - First time setup: full_guides/contributing/first_time_setup.md
+            - Creating & submitting changes: full_guides/contributing/creating_and_submitting_changes.md
+            - Extra notes & tips: full_guides/contributing/extra.md
+            - Maintainer notes: full_guides/contributing/maintainer_notes.md
 
         # - Extras:
             # - Utilities: full_guides/extras/utilities.md
