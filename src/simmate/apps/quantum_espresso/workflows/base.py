@@ -8,16 +8,17 @@ from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
     SSSP_PBE_EFFICIENCY_MAPPINGS,
     SSSP_PBE_PRECISION_MAPPINGS,
 )
-from simmate.apps.quantum_espresso.settings import DEFAULT_PWSCF_COMMAND
+from simmate.configuration import settings
 from simmate.engine import S3Workflow
 from simmate.toolkit import Structure
+from simmate.utilities import get_docker_command
 
 
 # TODO: add StructureInputWorkflow mixin which can be made from VaspWorkflow class
 class PwscfWorkflow(S3Workflow):
     required_files = ["pwscf.in"]
 
-    command: str = DEFAULT_PWSCF_COMMAND
+    command: str = settings.quantum_espresso.default_command
     """
     The command to call PW-SCF, which is typically `pw.x`.
     
@@ -128,3 +129,22 @@ class PwscfWorkflow(S3Workflow):
             rism=cls.rism,
         )
         input_config.to_file(directory / "pwscf.in")
+
+    @classmethod
+    def get_final_command(
+        cls, command: str = None, directory: Path = None, **kwargs
+    ) -> str:
+        # EXPERIMENTAL - some of this functionality will likely move to S3Workflow
+        if settings.quantum_espresso.docker.use == True:
+            final_command = get_docker_command(
+                image=settings.quantum_espresso.docker.image,
+                entrypoint=command,
+                volumes=[
+                    f"{str(directory)}:/qe_calc",
+                    f"{str(settings.quantum_espresso.psuedo_dir)}:/potentials",
+                ],
+            )
+        breakpoint()
+        return final_command
+
+    # -------------------------------------------------------------------------

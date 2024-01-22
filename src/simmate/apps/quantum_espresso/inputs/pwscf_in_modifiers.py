@@ -6,7 +6,7 @@ from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
     SSSP_PBE_EFFICIENCY_MAPPINGS,
     SSSP_PBE_PRECISION_MAPPINGS,
 )
-from simmate.apps.quantum_espresso.settings import DEFAULT_PSUEDO_DIR, SIMMATE_QE_DOCKER
+from simmate.configuration import settings
 from simmate.toolkit import Structure
 
 
@@ -16,9 +16,10 @@ def keyword_modifier_pseudo_dir(structure: Structure, confirm_auto: bool) -> Pat
     for psuedopotentials
     """
     assert confirm_auto
-    if not SIMMATE_QE_DOCKER:  # used in the majority of cases
-        return DEFAULT_PSUEDO_DIR
+    if not settings.quantum_espresso.docker.enable:  # used in the majority of cases
+        return settings.quantum_espresso.psuedo_dir
     else:
+        # the docker image will have a volume mapped to here
         return "/potentials"
 
 

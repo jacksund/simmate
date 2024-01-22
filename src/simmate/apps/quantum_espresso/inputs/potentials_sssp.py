@@ -21,9 +21,8 @@ import logging
 import tarfile
 import urllib
 
-from simmate.apps.quantum_espresso.settings import DEFAULT_PSUEDO_DIR, SIMMATE_QE_DIR
-
-# -----------------------------------------------------------------------------
+from simmate.configuration import settings
+from simmate.utilities import get_directory
 
 
 def setup_sssp() -> bool:
@@ -38,6 +37,9 @@ def setup_sssp() -> bool:
 
 
 def _setup_sssp_single(file_type: str, psuedo_type: str):
+    # we use get_dir to create the folder if it doesn't exist yet
+    qe_directory = get_directory(settings.config_directory / "quantum_espresso")
+
     # determine which file we are trying to setup/download
     if file_type == "mappings" and psuedo_type == "precision":
         filename = "SSSP_1.3.0_PBE_precision.json"
@@ -51,7 +53,7 @@ def _setup_sssp_single(file_type: str, psuedo_type: str):
     # check if file is already present -- otherwise download it
     # TODO: I may need to switch these to a simmate CDN if I get blocked
     base_url = "https://archive.materialscloud.org/record/file?record_id=1732&filename="
-    file = SIMMATE_QE_DIR / filename
+    file = qe_directory / filename
     if not file.exists():
         logging.info(f"Downloading SSSP {psuedo_type} {file_type}...")
         urllib.request.urlretrieve(base_url + filename, file)
@@ -63,14 +65,11 @@ def _setup_sssp_single(file_type: str, psuedo_type: str):
     if file_type == "psuedos":
         with tarfile.open(file, "r:gz") as tar:
             # Extract all contents to the specified directory
-            tar.extractall(path=DEFAULT_PSUEDO_DIR)
-
-
-# -----------------------------------------------------------------------------
+            tar.extractall(path=settings.quantum_espresso.psuedo_dir)
 
 
 def _load_mappings(json_file: str):
-    filename = SIMMATE_QE_DIR / json_file
+    filename = settings.config_directory / "quantum_espresso" / json_file
     if not filename.exists():
         return {}
     with filename.open() as file:
@@ -80,8 +79,6 @@ def _load_mappings(json_file: str):
 
 SSSP_PBE_EFFICIENCY_MAPPINGS = _load_mappings("SSSP_1.3.0_PBE_efficiency.json")
 SSSP_PBE_PRECISION_MAPPINGS = _load_mappings("SSSP_1.3.0_PBE_precision.json")
-
-# -----------------------------------------------------------------------------
 
 
 def check_psuedo_setup() -> bool:
@@ -112,7 +109,7 @@ def check_psuedo_setup() -> bool:
     ]
 
     for file in files:
-        full_filename = DEFAULT_PSUEDO_DIR / file
+        full_filename = settings.quantum_espresso.psuedo_dir / file
         if not full_filename.exists():
             breakpoint()
             return False  # one missing is enough to exit
@@ -120,6 +117,3 @@ def check_psuedo_setup() -> bool:
 
     # if we made it to this point, then everything looks good!
     return True
-
-
-# -----------------------------------------------------------------------------

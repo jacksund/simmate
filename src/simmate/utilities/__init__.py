@@ -20,6 +20,7 @@ from .other import (
     get_chemical_subsystems,
     get_class,
     get_conda_env,
+    get_docker_command,
     get_latest_version,
     str_to_datatype,
 )

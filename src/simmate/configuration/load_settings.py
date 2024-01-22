@@ -83,20 +83,6 @@ class SimmateSettings:
         else:
             return setting
 
-    def write_settings(self, filename: Path = None):
-        """
-        Writes the final simmate settings to yaml file
-        """
-        if not filename:
-            filename = (
-                settings.config_directory / f"_{settings.conda_env}-settings.yaml"
-            )
-
-        logging.info(f"Writing settings to: '{filename}'")
-        with filename.open("w") as file:
-            content = yaml.dump(settings.final_settings)
-            file.write(content)
-
     def show_settings(self, user_only: bool = False):
         """
         Takes the final simmate settings and prints them in a yaml format that is
@@ -104,6 +90,58 @@ class SimmateSettings:
         """
         settings_to_print = self.final_settings if not user_only else self.user_settings
         print(yaml.dump(settings_to_print))
+
+    def write_settings(self, filename: Path = None, settings: dict = "final"):
+        """
+        Writes simmate settings to a yaml file.
+        Settings can be a dictionary, "final", or "user".
+        """
+        if not filename:
+            filename = (
+                settings.config_directory / f"_{settings.conda_env}-settings.yaml"
+            )
+
+        if settings == "final":
+            settings = self.final_settings
+        elif settings == "user":
+            settings = self.user_settings
+        else:
+            assert isinstance(settings, dict)  # bug check
+
+        logging.info(f"Writing settings to: '{filename}'")
+        with filename.open("w") as file:
+            content = yaml.dump(settings)
+            file.write(content)
+
+    def write_updated_settings(self, updates: dict):
+        """
+        For the convenience of beginners, some `simmate config` commands
+        are to update specific settings. This writes updates to the currently
+        used settings file
+        """
+        # TODO: Do I want to make a backup of the old settings...?
+
+        # updates are only allowed if we have yaml config. This is bc we dont
+        # want to set environment variables perminantly via Simmate.
+        if self.settings_source is None:
+            # default to most-specific config file
+            source = self.config_directory / f"{self.conda_env}-settings.yaml"
+        elif isinstance(self.settings_source, Path):
+            source = self.settings_source
+        else:
+            raise Exception(
+                "Updating your Simmate settings is only allowed when using"
+                f"a YAML configuration. You are using {self.settings_source}."
+            )
+
+        logging.info("Updating the following settings:\n")
+        print(yaml.dump(updates))
+
+        final_user_settings = deep_update(self.user_settings, updates)
+        self.write_settings(
+            filename=source,
+            settings=final_user_settings,
+        )
 
     # -------------------------------------------------------------------------
 
@@ -208,7 +246,11 @@ class SimmateSettings:
             },
             "quantum_espresso": {
                 "default_command": "pw.x < pwscf.in > pw-scf.out",
-                "use_docker": False,
+                "psuedo_dir": self.config_directory / "quantum_espresso" / "potentials",
+                "docker": {
+                    "enable": False,
+                    "image": f"jacksund/quantum-espresso:{simmate.__version__}",
+                },
             },
         }
 
@@ -254,7 +296,7 @@ class SimmateSettings:
             return self._get_env_settings()
 
     @cached_property
-    def settings_source(self):
+    def settings_source(self) -> str | Path:
         """
         Where the settings are being loading from.
 
