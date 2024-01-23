@@ -1,5 +1,5 @@
 !!! danger
-    This application is currently undergoing preliminary testing and is not intended for use outside of the Warren Lab.
+    This app is currently in early testing. It is not advised to use it outside of the Warren Lab.
 
 !!! danger
     :warning::warning: **Ensure you are using a cloud database if your workers are operating on separate machines or an HPC cluster.** :warning::warning:
@@ -8,13 +8,12 @@
     
     If you encounter the error `database is locked`, it means you have exceeded the capabilities of sqlite.
 
-!!! warning
-    A functioning VASP installation is required, as with previous tutorials.
+!!! danger
+    The default relaxation workflow requires VASP to be installed. This will soon be replaced with QE (+docker support)
 
 -------------------------------------------------------------------------------
 
-## Quick Tutorial
-
+## Quick Start
 
 ### Fixed-Composition Search
 
@@ -81,7 +80,7 @@ simmate engine error-summary
 
 7) Submit new workers or cancel stale workers as needed.
 
-### Binary-System Search
+### Chemical System Search
 
 1. Follow the steps from the `fixed-composition` search above. The only differences here are the input yaml and follow-up searches. **Ensure you read and understand the best practices as well**.
 

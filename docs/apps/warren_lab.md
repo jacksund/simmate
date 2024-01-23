@@ -5,39 +5,47 @@
 
 --------------------------------------------------------------------------------
 
-## Overview
+## About
 
 The Warren Lab App is a product of Scott Warren's Materials Discovery Lab at the University of North Carolina (Chapel Hill). Our lab focuses on electrides, fluoride-ion batteries, and 2D materials. 
 
-The `Warren Lab` application incorporates workflows for our lab's preferred DFT settings and common analyses. Registering this app will introduce numerous new workflow presets that enhance several other apps (VASP, Bader, BadELF, etc.).
-
---------------------------------------------------------------------------------
-
-## Useful Resources
-
- - [Scott Warren](https://chem.unc.edu/faculty/warren-scott/) (UNC contact page)
- - [Lab Website](https://materials-lab.io/)
+The `Warren Lab` application incorporates workflows for our lab's preferred DFT settings and common analyses. Registering this app will introduce numerous new workflow presets that build on several other apps (VASP, Bader, BadELF, etc.).
 
 --------------------------------------------------------------------------------
 
 ## Installation
 
-1. Ensure that Simmate is installed and that you have a functioning database.
-
-2. Incorporate the following apps into `~/simmate/my_env-apps.yaml`:
-``` yaml
-# Include app dependencies.
-# IMPORTANT: Some of these may already be present by default. Avoid adding duplicates
-- simmate.apps.configs.VaspConfig
-- simmate.apps.configs.BaderConfig
-- simmate.apps.configs.BadelfConfig
-# Include the Warren Lab app.
-- simmate.workflows.configs.WarrenLabConfig
+1. Add `warren_lab` (and it's dependencies) to the list of installed Simmate apps with:
+``` bash
+simmate-warren install
 ```
 
-3. Update your database to incorporate custom tables:
-``` bash
+2. For BadELF workflows, make sure you have the Bader command (from the Henkleman group) installed using one of two options:
+      - (*for beginners*) Install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). Then run the following command:
+          ``` bash
+          simmate-bader setup docker
+          ```
+      - (*for experts*) Install Bader using [offical guides](http://theory.cm.utexas.edu/henkelman/code/bader/) and make sure `bader` is in the path
+
+3. For VASP workflows, make sure you have the `vasp_std` command installed using one of two options:
+      - (*for beginners*) Install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). Then run the following command:
+          ``` bash
+          simmate-vasp setup docker --image example.com:vasp/latest
+          ```
+
+        !!! danger
+            VASP is a commercial software, so we cannot provide Docker images for it. This is why you must provide a private image via `--image example.com:vasp/latest`.
+
+      - (*for experts*) Install VASP using [offical guides](https://www.vasp.at/) and make sure `vasp_std` is in the path
+
+4. Update your database to include custom tables from the `badelf` app:
+``` shell
 simmate database update
+```
+
+5. Ensure everything is configured correctly:
+``` shell
+simmate-warren test
 ```
 
 --------------------------------------------------------------------------------
@@ -75,5 +83,12 @@ static-energy.vasp.warren-lab-scan
 ```
 bad-elf-analysis.badelf.badelf-pbesol
 ```
+
+--------------------------------------------------------------------------------
+
+## Helpful Resources
+
+ - [Scott Warren](https://chem.unc.edu/faculty/warren-scott/) (UNC contact page)
+ - [Lab Website](https://materials-lab.io/)
 
 --------------------------------------------------------------------------------
