@@ -196,18 +196,19 @@ nav:
             # - Configuration: full_guides/extras/configuration.md
             # - Testing: full_guides/extras/testing.md  # Move to contributing...?
 
-
     - Apps: 
         - Overview: apps/overview.md
-        - Bader + ELF ("bad elf"): apps/badelf.md
+        - BadELF: apps/badelf.md
         - Bader (henklman): apps/bader_henkelman.md
         - CLEASE: apps/clease.md
         - DeepMD: apps/deepmd.md
         - Evolutionary Searches: apps/evolution.md
+        - Materials Project: apps/materials_project.md
+        - Quantum Espresso: apps/quantum_espresso.md
         - VASP:
             - Overview: apps/vasp/overview.md
             - Installation: apps/vasp/installation.md
-            # - Workflows: apps/vasp/workflows.md
+            - Workflows: apps/vasp/workflows.md
             # - Inputs: apps/vasp/inputs.md
             # - Outputs: apps/vasp/outputs.md
             # - Error Handlers: apps/vasp/error_handlers.md

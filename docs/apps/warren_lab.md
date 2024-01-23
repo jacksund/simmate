@@ -20,7 +20,7 @@ The `Warren Lab` application incorporates workflows for our lab's preferred DFT 
 simmate-warren install
 ```
 
-2. For BadELF workflows, make sure you have the Bader command (from the Henkleman group) installed using one of two options:
+2. For Bader & BadELF workflows, make sure you have the Bader command (from the Henkleman group) installed using one of two options:
       - (*for beginners*) Install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). Then run the following command:
           ``` bash
           simmate-bader setup docker
