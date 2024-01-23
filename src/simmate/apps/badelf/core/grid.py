@@ -55,7 +55,16 @@ class Grid:
             The number of voxels along each unit cell vector
         """
         return np.array(self.total.shape)
-
+    
+    @property
+    def matrix(self):
+        """The matrix defining the lattice unit cell
+        
+        Returns:
+            A 3x3 matrix defining the a, b, and c sides of the unit cell
+        """
+        return self.structure.lattice.matrix
+    
     @property
     def a(self):
         """The cartesian coordinates for the lattice vector "a"
@@ -63,7 +72,7 @@ class Grid:
         Returns:
             The cartesian coordinates for the lattice vector "a"
         """
-        return self.structure.lattice.matrix[0]
+        return self.matrix[0]
 
     @property
     def b(self):
@@ -72,7 +81,7 @@ class Grid:
         Returns:
             The cartesian coordinates for the lattice vector "b"
         """
-        return self.structure.lattice.matrix[1]
+        return self.matrix[1]
 
     @property
     def c(self):
@@ -81,7 +90,7 @@ class Grid:
         Returns:
             The cartesian coordinates for the lattice vector "c"
         """
-        return self.structure.lattice.matrix[2]
+        return self.matrix[2]
 
     @property
     def frac_coords(self):
@@ -375,7 +384,7 @@ class Grid:
 
             lines = comment + "\n"
             lines += "   1.00000000000000\n"
-            for vec in self.structure.lattice.matrix:
+            for vec in self.matrix:
                 lines += f" {vec[0]:12.6f}{vec[1]:12.6f}{vec[2]:12.6f}\n"
             if not vasp4_compatible:
                 lines += "".join(f"{s:5}" for s in poscar.site_symbols) + "\n"
@@ -431,7 +440,7 @@ class Grid:
         diff = self.diff
 
         # Get the lattice unit vectors as a 3x3 array
-        lattice_array = self.structure.lattice.matrix
+        lattice_array = self.matrix
 
         # get the original grid size and lattice volume.
         grid_shape = self.grid_shape
@@ -586,7 +595,7 @@ class Grid:
         Returns:
             fractional coordinates as an Array
         """
-        lattice_matrix = self.structure.lattice.matrix
+        lattice_matrix = self.matrix
         inverse_matrix = np.linalg.inv(lattice_matrix)
         frac_coords = np.dot(cart_coords, inverse_matrix)
 
