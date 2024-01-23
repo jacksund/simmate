@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike
 from pymatgen.io.vasp import Poscar
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pyrho.pgrid import PGrid
 
 from simmate.toolkit import Structure
@@ -55,16 +56,16 @@ class Grid:
             The number of voxels along each unit cell vector
         """
         return np.array(self.total.shape)
-    
+
     @property
     def matrix(self):
         """The matrix defining the lattice unit cell
-        
+
         Returns:
             A 3x3 matrix defining the a, b, and c sides of the unit cell
         """
         return self.structure.lattice.matrix
-    
+
     @property
     def a(self):
         """The cartesian coordinates for the lattice vector "a"
@@ -193,6 +194,12 @@ class Grid:
         volume = self.structure.volume
         number_of_voxels = self.grid_shape.prod()
         return number_of_voxels / volume
+
+    @property
+    def equivalent_atoms(self):
+        return SpacegroupAnalyzer(self.structure).get_symmetry_dataset()[
+            "equivalent_atoms"
+        ]
 
     def get_grid_axes(self, padding: int = 0):
         """
@@ -628,6 +635,24 @@ class Grid:
         frac_coords = self.get_frac_coords_from_cart(cart_coords)
         voxel_coords = self.get_voxel_coords_from_frac(frac_coords)
         return voxel_coords
+
+    def get_cart_coords_from_frac_full_array(self, frac_coords: ArrayLike):
+        """
+        Takes in a 2D array of shape (N,3) representing fractional coordinates
+        at N points and calculates the equivalent cartesian coordinates.
+
+        Args:
+            frac_coords (ArrayLike): An (N,3) shaped array of fractional coordinates
+
+        Returns:
+            An (N,3) shaped array of cartesian coordinates
+        """
+        x, y, z = self.matrix
+        cart_x = np.dot(frac_coords, x)
+        cart_y = np.dot(frac_coords, y)
+        cart_z = np.dot(frac_coords, z)
+        cart_coords = np.column_stack([cart_x, cart_y, cart_z])
+        return cart_coords
 
     def _plot_points(self, points, ax, fig, color, size: int = 20):
         """
