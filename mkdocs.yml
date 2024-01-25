@@ -207,6 +207,7 @@ nav:
         - VASP:
             - Overview: apps/vasp/overview.md
             - Installation: apps/vasp/installation.md
+            - Quick Start:  apps/vasp/quick_start.md
             - Workflows: apps/vasp/workflows.md
             # - Inputs: apps/vasp/inputs.md
             # - Outputs: apps/vasp/outputs.md

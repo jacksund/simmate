@@ -46,7 +46,7 @@ simmate database update
 
 5. Ensure everything is configured correctly:
 ``` shell
-simmate config test vasp
+simmate config test warren_lab
 ```
 
 --------------------------------------------------------------------------------

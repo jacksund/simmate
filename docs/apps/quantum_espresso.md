@@ -32,7 +32,7 @@ simmate config add quantum_espresso
 simmate database update
 ```
 
-1. Ensure everything is configured correctly:
+4. Ensure everything is configured correctly:
 ``` shell
 simmate config test quantum_espresso
 ```
