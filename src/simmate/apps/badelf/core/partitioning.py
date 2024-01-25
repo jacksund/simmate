@@ -1549,7 +1549,6 @@ class PartitioningToolkit:
             # the site
             _, important_planes = self.get_important_planes(reduced_planes)
             important_planes = np.array(important_planes)
-            important_planes = reduced_planes
             # get the indices for the important planes and append them to our
             # dictionary
             indices = np.where((planes[:, None] == important_planes).all(axis=2))[1]
