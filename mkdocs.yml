@@ -129,10 +129,7 @@ nav:
         
         - 8. Computational resources:
             - Quickstart: getting_started/add_computational_resources/quick_start.md
-            - a) Intro to clusters: getting_started/add_computational_resources/intro_to_clusters.md
-            - b) Should you set up workers?: getting_started/add_computational_resources/should_you_setup.md
-            - c) Checklist for each worker: getting_started/add_computational_resources/checklist_for_workers.md
-            - d) Adding workers and clusters: getting_started/add_computational_resources/adding_clusters_and_workers.md
+            - a) Intro to workers: getting_started/add_computational_resources/intro_to_workers.md
         
         - Wrap up: getting_started/wrap_up.md
         
