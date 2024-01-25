@@ -14,19 +14,19 @@ Meanwhile, Simmate's Bader app builds workflows and utilities on top of the Bade
 
 1. Add `bader` to the list of installed Simmate apps with:
 ``` bash
-simmate-bader install
+simmate config add bader
 ```
 
 2. Make sure you have the Bader command installed using one of two options:
       - (*for beginners*) Install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). Then run the following command:
           ``` bash
-          simmate-bader setup docker
+          simmate config update "bader.docker.enable=True"
           ```
       - (*for experts*) Install Bader using [offical guides](http://theory.cm.utexas.edu/henkelman/code/bader/) and make sure `bader` is in the path
 
 3. Ensure everything is configured correctly:
 ``` shell
-simmate-badelf test
+simmate config test bader
 ```
 
 --------------------------------------------------------------------------------

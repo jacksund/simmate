@@ -22,13 +22,13 @@ Simmate's BadELF application provides workflows and utilities to streamline BadE
 
 1. Add `badelf` (and it's dependencies) to the list of installed Simmate apps with:
 ``` bash
-simmate-badelf install
+simmate config add badelf
 ```
 
 2. Make sure you have the Bader command (from the Henkleman group) installed using one of two options:
       - (*for beginners*) Install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). Then run the following command:
           ``` bash
-          simmate-bader setup docker
+          simmate config update "bader.docker.enable=True"
           ```
       - (*for experts*) Install Bader using [offical guides](http://theory.cm.utexas.edu/henkelman/code/bader/) and make sure `bader` is in the path
 
@@ -39,7 +39,7 @@ simmate database update
 
 4. Ensure everything is configured correctly:
 ``` shell
-simmate-badelf test
+simmate config test badelf
 ```
 
 --------------------------------------------------------------------------------

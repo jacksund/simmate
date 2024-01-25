@@ -17,35 +17,36 @@ The `Warren Lab` application incorporates workflows for our lab's preferred DFT 
 
 1. Add `warren_lab` (and it's dependencies) to the list of installed Simmate apps with:
 ``` bash
-simmate-warren install
+simmate config add warren_lab
 ```
 
 2. For Bader & BadELF workflows, make sure you have the Bader command (from the Henkleman group) installed using one of two options:
       - (*for beginners*) Install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). Then run the following command:
           ``` bash
-          simmate-bader setup docker
+          simmate config update "bader.docker.enable=True"
           ```
       - (*for experts*) Install Bader using [offical guides](http://theory.cm.utexas.edu/henkelman/code/bader/) and make sure `bader` is in the path
 
 3. For VASP workflows, make sure you have the `vasp_std` command installed using one of two options:
-      - (*for beginners*) Install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). Then run the following command:
+      - (*for beginners*) Install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). Then run the following commands:
           ``` bash
-          simmate-vasp setup docker --image example.com:vasp/latest
+          simmate config update "vasp.docker.enable=True"
+          simmate config update "vasp.docker.image=example.com:vasp/latest"
           ```
 
         !!! danger
-            VASP is a commercial software, so we cannot provide Docker images for it. This is why you must provide a private image via `--image example.com:vasp/latest`.
+            VASP is a commercial software, so we cannot provide Docker images for it. This is why you must provide a private image via `image=example.com:vasp/latest`.
 
       - (*for experts*) Install VASP using [offical guides](https://www.vasp.at/) and make sure `vasp_std` is in the path
 
-4. Update your database to include custom tables from the `badelf` app:
+4. Update your database to include custom tables from the app:
 ``` shell
 simmate database update
 ```
 
 5. Ensure everything is configured correctly:
 ``` shell
-simmate-warren test
+simmate config test vasp
 ```
 
 --------------------------------------------------------------------------------
