@@ -35,14 +35,11 @@ Nothing has changed with our workflow -- it just looks a little more complex. Wr
 
 We will demonstrate this in the `App-based Workflows` section. For now, let's focus on our crazy class name (`Math__Basic__Add`) and why we chose that.
 
-!!! note
-    This new `Workflow` format is all you need to understand about class-based workflows for now. Other details are not relevent to beginners, so please refer to the full guides for more information
-
 ----------------------------------------------------------------------
 
-## Workflow Naming Guidelines
+## Naming Your Workflows
 
-### Importance of Naming
+### Importance of naming
 
 In Simmate, the naming of your new workflow is a crucial step. 
 
@@ -68,7 +65,7 @@ Here's how a workflow name appears in different contexts:
 !!! example
     `Math__Basic__Add` becomes `math.basic.add`, and once placed in a custom app, this workflow can be found in the website at `http://localhost:8000/workflows/math/basic/add`
 
-### Understanding Naming Conventions
+### Understanding conventions
 
 Simmate's naming conventions consist of three components:
 
@@ -98,3 +95,91 @@ To convert this to our workflow name in python, we replace periods with two unde
     Be mindful of capitalization as it is crucial in this context. Always double-check your workflow names.
 
 ----------------------------------------------------------------------
+
+## Powerful App-based Workflows
+
+Using the `Workflow` organization instead `@workflow` decorator might seem silly at first, but class-based workflows make advanced features MUCH easier to implement. 
+
+Take for example making workflows using both Quantum Espresso and VASP, which can utilize subclasses of `Workflow`.
+
+For VASP, we provide a `VaspWorkflow` class. For Quantum Espresso, we provide a `PwscfWorkflow` (PW-SCF is a component of QE). Both of these classes make defining workflows much easier for users of that program.
+
+!!! note
+    Even if you don't know how to use VASP or QE, the key takeaway here should be that you can translate their software's inputs into a Simmate workflow with minimal effort.
+
+Here are some basic VASP and QE workflows written in Simmate:
+
+=== "VASP"
+    ``` python
+    from simmate.apps.vasp.workflows.base import VaspWorkflow
+
+    class Relaxation__Vasp__ExampleSettings(VaspWorkflow):
+
+        functional = "PBE"
+        potcar_mappings = {"Y": "Y_sv", "C": "C"}
+
+        _incar = dict(
+            PREC="Normal",
+            EDIFF=1e-4,
+            ENCUT=450,
+            NSW=100,
+            KSPACING=0.4,
+        )
+    ```
+
+=== "Quantum Espresso"
+    ``` python
+    from simmate.apps.quantum_espresso.workflows.base import PwscfWorkflow
+
+
+    class StaticEnergy__QuantumEspresso__ExampleSettings(PwscfWorkflow):
+
+        control = dict(
+            pseudo_dir__auto=True,
+            restart_mode="from_scratch",
+            calculation="scf",
+            tstress=True,
+            tprnfor=True,
+        )
+
+        system = dict(
+            ibrav=0,
+            nat__auto=True,
+            ntyp__auto=True,
+            ecutwfc__auto="efficiency",
+            ecutrho__auto="efficiency",
+        )
+
+        electrons = dict(
+            diagonalization="cg",
+            mixing_mode="plain",
+            mixing_beta=0.7,
+            conv_thr="1.0e-8",
+        )
+
+        psuedo_mappings_set = "SSSP_PBE_EFFICIENCY"
+
+        k_points = dict(
+            spacing=0.5,
+            gamma_centered=True,
+        )
+    ```
+
+There are many more workflows and base classes to explore. Be sure to look through both our `Apps` and `Full Guides`.
+
+----------------------------------------------------------------------
+
+## Advanced Workflow Features
+
+There are still many improvements that you may want to incorporate into your new workflow(s). For instance, you might want to:
+
+- [x] Modify a complex workflow (like `diffusion.vasp.neb-all-paths-mit`)
+- [x] Develop a custom workflow using a new program such as USPEX or ABINIT
+- [x] Utilize a custom database table to store your workflow results
+- [x] Access the workflow via the website interface
+- [x] Access your workflow from other scripts (and the `get_workflow` function)
+
+These topics will be addressed in the next tutorial, where we will simultaneously cover custom database tables.
+
+----------------------------------------------------------------------
+
