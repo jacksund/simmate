@@ -14,4 +14,6 @@ looking through other packges such as...
 
 from django.test import TestCase
 
-# Create your tests here.
+# Create your tests here. (optional for beginners & super small projects)
+
+# NOTE: You can delete this file if you decide not to use it.

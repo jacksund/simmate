@@ -71,19 +71,19 @@ sslmode = require
 conda install -n my_env -c conda-forge psycopg2
 ```
 
-4. We need to pass this information to Simmate (which connects using Django). To do this, add a file named `my_env-database.yaml` (using your conda env name) to your Simmate config directory (`~/simmate`) with the following content -- make sure to substitute in your connection information and note that ENGINE tells Django we are using Postgres:
+1. We need to pass this information to Simmate (which connects using Django). To do this, add a file named `my_env-settings.yaml` (using your conda env name) to your Simmate config directory (`~/simmate`) with the following content -- make sure to substitute in your connection information:
 ``` yaml
-default:
-  ENGINE: django.db.backends.postgresql
-  HOST: db-postgresql-nyc3-49797-do-user-8843535-0.b.db.ondigitalocean.com
-  NAME: defaultdb
-  USER: doadmin
-  PASSWORD: asd87a9sd867fasd
-  PORT: 25060
-  OPTIONS:
+database:
+  engine: django.db.backends.postgresql
+  host: db-postgresql-nyc3-49797-do-user-8843535-0.b.db.ondigitalocean.com
+  name: defaultdb
+  user: doadmin
+  password: asd87a9sd867fasd
+  port: 25060
+  options:
     sslmode: require
 ```
-5. Verify that you can connect to this database on your local computer by running the following in Spyder:
+1. Verify that you can connect to this database on your local computer by running the following in Spyder:
 ``` python
 from simmate.configuration import settings
 
@@ -117,16 +117,16 @@ When we have multiple calculations running simultaneously, we need to ensure our
 2. Name your pool `simmate-database-00-pool` and select `simmate-database-00` for the database
 3. Select "Transaction" for our mode (the default) and set our pool size to **10** (or adjust this value as needed)
 4. Create the pool when ready!
-5. You'll need to update your `my_env-database.yaml` file to these connection settings. At this point your file will look similar to this (note, our NAME and PORT values have changed):
+5. You'll need to update your `my_env-settings.yaml` file to these connection settings. At this point your file will look similar to this (note, our NAME and PORT values have changed):
 ``` yaml
-default:
-  ENGINE: django.db.backends.postgresql
-  HOST: db-postgresql-nyc3-49797-do-user-8843535-0.b.db.ondigitalocean.com
-  NAME: simmate-database-00-pool  # THIS LINE WAS UPDATED
-  USER: doadmin
-  PASSWORD: asd87a9sd867fasd
-  PORT: 25061
-  OPTIONS:
+database:
+  engine: django.db.backends.postgresql
+  host: db-postgresql-nyc3-49797-do-user-8843535-0.b.db.ondigitalocean.com
+  name: simmate-database-00-pool  # THIS LINE WAS UPDATED
+  user: doadmin
+  password: asd87a9sd867fasd
+  port: 25061
+  options:
     sslmode: require
 ```
 
@@ -153,6 +153,6 @@ simmate database load-remote-archives --parallel
 
 ### (viii) Sharing the database
 
-If you want to share this database with others, they simply need to copy your config file: `my_env-database.yaml`. They won't need to run `simmate database reset` because you did it for them.
+If you want to share this database with others, they simply need to copy your config file: `my_env-settings.yaml`. They won't need to run `simmate database reset` because you did it for them.
 
 -------------------------------------------------------------------------------

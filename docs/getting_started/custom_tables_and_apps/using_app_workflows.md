@@ -6,7 +6,7 @@
 
 Simmate automatically searches for a `workflows.py` (or `workflows` module) within your app and retrieves all Python classes within it, assuming they are workflows you want registered. However, if your scripts contain non-workflow classes or abstract base workflows, this can lead to unexpected errors. Therefore, you need to explicitly specify which workflows should be registered with your app.
 
-!!! note
+!!! tip
     If you encounter `AttributeError: '...' object has no attribute 'name_full'` or `Exception: Make sure you are following Simmate naming conventions`, it's likely that your workflows are misorganized.
 
 ### in workflows.py file
@@ -19,8 +19,8 @@ Upon creating your project/app, you'll find a single `workflows.py` file with th
 # -----------------------------------------------------------------------------
 
 __all__ = [
-    "Example__Python__MyExample1",
-    "Relaxation__Vasp__MyExample2",
+    "add",
+    "Example__Python__MyExample",
 ]
 ```
 
@@ -31,7 +31,6 @@ You must explicitly list all workflows you want registered if you stick with a s
 As your app expands, you might want to store your workflows in separate scripts or submodules. You can do this by replacing the `workflows.py` file with a `workflows` folder with the following structure:
 
 ``` bash
-# rest of example_app is organized the same as before
 example_app
 └── workflows
     ├── __init__.py   # <-- file used for registration
@@ -66,16 +65,7 @@ from .example_submodule.example_5 import Example__Python__MyExample5
 
 ## Basic use
 
-Our workflows behave the same as before. We can run them with a YAML file or directly in Python.
-
-``` yaml
-workflow_name: example_app/workflows:Example__Python__MyExample1
-structure: NaCl.cif
-input_01: 12345
-input_02: true
-```
-
-However, now that they are in a Simmate Project and we registered the App, we can access some extra features. We can use just the workflow name and also access our workflow with the command line and `get_workflow` utilities:
+Now that we have registered workflows within a Simmate app, we can access some extra features. We can run the workflow in the same way we run others distributed with Simmate (using a YAML file, Python, Web UI, etc):
 
 === "yaml"
     ``` yaml
@@ -115,7 +105,7 @@ To use a custom database table in a workflow, the following conditions must be m
 
 Note that our database tables and workflows already meet these conditions.
 
-For `MyCustomTable1`, we can see it is using the `Calculation` mix-in in our `models.py` file:
+For `MyCustomTable2`, we can see it is using the `Calculation` mix-in in our `models.py` file:
 ``` python
 class MyCustomTable1(Structure, Calculation):
     # ... custom columns hidden ...
@@ -123,8 +113,8 @@ class MyCustomTable1(Structure, Calculation):
 
 This table has already been linked to a workflow too. In our `workflows.py` file, we can see the following:
 ``` python
-class Example__Python__MyExample1(Workflow):
-    database_table = MyCustomTable1
+class Example__Python__MyExample(Workflow):
+    database_table = MyCustomTable2
 ```
 
 This completes our checklist -- so this database and workflow are already configured for us.
@@ -138,7 +128,7 @@ To store input parameters at the start of a calculation in a workflow, the follo
 - [x] the parameter must have been added as a column to the database
 - [x] a parameter **with the exact same name** must be an input option of `run_config`
 
-For our `MyCustomTable1` and `Example__Python__MyExample1`, we can see that the following inputs match both the `run_config` input AND are table columns:
+For our `MyCustomTable1` and `Example__Python__MyExample`, we can see that the following inputs match both the `run_config` input AND are table columns:
 
 1. input_01
 2. input_02
@@ -149,11 +139,11 @@ Here's the relevant code that sets this up:
 === "MyCustomTable1"
     ```python
     # structure --> through the Structure mix-in
-    input_01 = table_column.FloatField(null=True, blank=True)
-    input_02 = table_column.BooleanField(null=True, blank=True)
+    input_01 = table_column...
+    input_02 = table_column...
     ```
 
-=== "Example__Python__MyExample1"
+=== "Example__Python__MyExample"
     ```python
     def run_config(
         input_01,
@@ -173,7 +163,7 @@ To store outputs at the end of a calculation in a workflow, the following condit
 - [x] the `run_config` must return a dictionary of columns that need to be updated
 - [x] a key **with the exact same name** must be in this dictionary
 
-For our `MyCustomTable1` and `Example__Python__MyExample1`, we can see that the following outputs match both the `run_config`'s output dictionary AND are table columns:
+For our `MyCustomTable1` and `Example__Python__MyExample`, we can see that the following outputs match both the `run_config`'s output dictionary AND are table columns:
 
 1. output_01
 2. output_02
@@ -182,8 +172,8 @@ Here's the relevant code that sets this up:
 
 === "MyCustomTable1"
     ```python
-    output_01 = table_column.FloatField(null=True, blank=True)
-    output_02 = table_column.BooleanField(null=True, blank=True)
+    output_01 = table_column...
+    output_02 = table_column...
     ```
 
 === "Example__Python__MyExample1"

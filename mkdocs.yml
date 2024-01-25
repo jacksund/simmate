@@ -116,11 +116,11 @@ nav:
             - b) Chemistry workflows: getting_started/custom_workflows/chemistry_workflows.md
             - b) Class-based workflows: getting_started/custom_workflows/class_based_workflows.md
         
-        - 6. Custom apps:
-            - Quick Start: getting_started/custom_tables_and_apps/quick_start.md
-            - a) Creating a custom project: getting_started/custom_tables_and_apps/create_a_custom_app.md
-            - b) Creating a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
-            - c) Using app workflows: getting_started/custom_tables_and_apps/using_app_workflows.md
+        - 6. Custom apps & tables:
+            - a) Create an app: getting_started/custom_tables_and_apps/create_a_custom_app.md
+            - b) Create a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
+            - c) Adding app workflows: getting_started/custom_tables_and_apps/using_app_workflows.md
+            - d) Extra app features: getting_started/custom_tables_and_apps/extra_features.md
         
         - 7. Use a cloud database:
             - Quickstart: getting_started/use_a_cloud_database/quick_start.md

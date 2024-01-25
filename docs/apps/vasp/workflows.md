@@ -5,9 +5,7 @@
 ## Available Workflows
 
 !!! note
-    Many more VASP workflows are available in the `materials_project` and `warren_lab` apps.
-
-    Guides on how to submit these are in the `Getting Started` and `Full Guides` sections.
+    This app is meant more so for *building* VASP workflows, rather the *providing* presets. Therefore, many more VASP workflows are available in the `materials_project` and `warren_lab` apps.
 
 ```
 relaxation.vasp.quality00
@@ -23,6 +21,8 @@ static-energy.vasp.quality04
 
 ## Making New Workflows
 
-Instead of constructing these tasks from numerous lower-level functions, we simplify these classes into a single `VaspWorkflow` class for easier interaction.
+### `VaspWorkflow` base class 
+
+
 
 --------------------------------------------------------------------------------
