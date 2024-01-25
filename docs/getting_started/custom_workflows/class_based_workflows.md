@@ -100,14 +100,7 @@ To convert this to our workflow name in python, we replace periods with two unde
 
 Using the `Workflow` organization instead `@workflow` decorator might seem silly at first, but class-based workflows make advanced features MUCH easier to implement. 
 
-Take for example making workflows using both Quantum Espresso and VASP, which can utilize subclasses of `Workflow`.
-
-For VASP, we provide a `VaspWorkflow` class. For Quantum Espresso, we provide a `PwscfWorkflow` (PW-SCF is a component of QE). Both of these classes make defining workflows much easier for users of that program.
-
-!!! note
-    Even if you don't know how to use VASP or QE, the key takeaway here should be that you can translate their software's inputs into a Simmate workflow with minimal effort.
-
-Here are some basic VASP and QE workflows written in Simmate:
+For example, say we want to make a workflow that uses Quantum Espresso or VASP. For VASP, we provide a `VaspWorkflow` class. For Quantum Espresso, we provide a `PwscfWorkflow` (PW-SCF is a component of QE). Here are some basic VASP and QE workflows written in Simmate:
 
 === "VASP"
     ``` python
@@ -130,7 +123,6 @@ Here are some basic VASP and QE workflows written in Simmate:
 === "Quantum Espresso"
     ``` python
     from simmate.apps.quantum_espresso.workflows.base import PwscfWorkflow
-
 
     class StaticEnergy__QuantumEspresso__ExampleSettings(PwscfWorkflow):
 
@@ -166,6 +158,9 @@ Here are some basic VASP and QE workflows written in Simmate:
     ```
 
 There are many more workflows and base classes to explore. Be sure to look through both our `Apps` and `Full Guides`.
+
+!!! note
+    Even if you don't know how to use VASP or QE, the key takeaway here should be that you can translate their software's inputs into a Simmate workflow with minimal effort.
 
 ----------------------------------------------------------------------
 
