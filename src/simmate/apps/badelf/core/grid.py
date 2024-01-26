@@ -647,7 +647,7 @@ class Grid:
         Returns:
             An (N,3) shaped array of cartesian coordinates
         """
-        x, y, z = self.matrix
+        x, y, z = self.matrix.T
         cart_x = np.dot(frac_coords, x)
         cart_y = np.dot(frac_coords, y)
         cart_z = np.dot(frac_coords, z)
