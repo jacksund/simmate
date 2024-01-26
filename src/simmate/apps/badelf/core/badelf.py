@@ -254,13 +254,7 @@ class BadElfToolkit:
                     all_voxel_site_assignments
                 )
             )
-            voxel_assignment_tools = VoxelAssignmentToolkit(
-                charge_grid=charge_grid,
-                partitioning=self.partitioning,
-                electride_structure=self.electride_structure,
-                algorithm=self.algorithm,
-                directory=self.directory,
-            )
+            self._single_site_voxel_assignments = single_site_voxel_assignments
             # get assignments for voxels split by two or more sites
             (
                 two_site_voxel_assignments,
@@ -270,7 +264,6 @@ class BadElfToolkit:
                 single_site_voxel_assignments
             )
 
-            self._single_site_voxel_assignments = single_site_voxel_assignments
             self._two_site_voxel_assignments = two_site_voxel_assignments
             self._multi_site_voxel_assignments = multi_site_voxel_assignments
             self.voxel_assignments_array = voxel_assignments_array

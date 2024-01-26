@@ -201,6 +201,8 @@ class VoxelAssignmentToolkit:
         # Create an array that the results will be added to
         results_array = zeros_array.copy()
 
+        # create zeros array for any problems
+        # global_indices_to_zero = np.array([])
         # check every possible permutation
         for transformation in tqdm(
             unit_cell_permutations_frac, total=len(unit_cell_permutations_frac)
@@ -228,7 +230,7 @@ class VoxelAssignmentToolkit:
                 # Round the distances to within 5 decimals. Everything to this point has
                 # been based on lattice position from vasp which typically have 5-6
                 # decimal places (7 sig figs)
-                distances = np.round(distances, 6)
+                distances = np.round(distances, 12)
                 # We write over the distances with a more simplified boolean to save
                 # space. This is also where we filter if we're near a plane if desired
                 distances = da.where(distances <= -max_dist, True, False)
@@ -240,7 +242,7 @@ class VoxelAssignmentToolkit:
                 # Round the distances to within 5 decimals. Everything to this point has
                 # been based on lattice position from vasp which typically have 5-6
                 # decimal places (7 sig figs)
-                distances = np.round(distances, 6)
+                distances = np.round(distances, 12)
                 # We write over the distances with a more simplified boolean to save
                 # space. This is also where we filter if we're near a plane if desired
                 distances = np.where(distances <= -max_dist, True, False)
@@ -259,11 +261,24 @@ class VoxelAssignmentToolkit:
                 )
                 new_results_arrays.append(voxel_result)
 
-            # get a new array that contains the assignments for all of the atoms
+            # !!! sometimes a coordinate is found to be within more than one atoms
+            # partitioning planes. I believe this almost exclusively effects the
+            # vertices but I'm not entirely sure why it happens. This means the
+            # simple sum below can cause errors so instead I'm going to find only
+            # sites where no other site is also found. The voxels will be passed
+            # on to later steps in the algorithm
             new_results_array = np.sum(new_results_arrays, axis=0)
-
-            # add results to the results_array
+            # indices_to_zero = []
+            # new_results_array = np.zeros(len(new_results_arrays[0]))
+            # for i, sub_results_array in enumerate(new_results_arrays):
+            #     new_results_array = np.sum([new_results_array,sub_results_array],axis=0)
+            #     indices_to_zero.extend(np.where(new_results_array>i+1)[0])
+            # indices_to_zero = np.unique(indices_to_zero).astype(int)
+            # global_indices_to_zero = np.concatenate(
+            #     (global_indices_to_zero,indices_where_zero[indices_to_zero])).astype(int)
+            # # # add results to the results_array
             results_array[indices_where_zero] = new_results_array
+            # results_array[global_indices_to_zero] = 0
         return results_array
 
     def get_distance_from_voxels_to_planes_with_memory_handling(

@@ -1212,18 +1212,18 @@ class PartitioningToolkit:
             # append it to our list.
             if important_intercept:
                 # check if intercept is already in list. If it's not, continue
-                repeat_intercept = any(
-                    np.array_equal(intercept, arr) for arr in intercepts
-                )
-                if not repeat_intercept:
-                    intercepts.append(intercept)
-                    for plane in combination:
-                        repeat_plane = any(
-                            np.array_equal(plane, arr) for arr in important_planes
-                        )
-                        # If this isn't a repeat plane, add it to our important planes list
-                        if not repeat_plane:
-                            important_planes.append(plane)
+                # repeat_intercept = any(
+                #     np.array_equal(intercept, arr) for arr in intercepts
+                # )
+                # if not repeat_intercept:
+                intercepts.append(intercept)
+                for plane in combination:
+                    repeat_plane = any(
+                        np.array_equal(plane, arr) for arr in important_planes
+                    )
+                    # If this isn't a repeat plane, add it to our important planes list
+                    if not repeat_plane:
+                        important_planes.append(plane)
 
         return intercepts, important_planes
 
@@ -1297,9 +1297,9 @@ class PartitioningToolkit:
                 )
                 # Set frac to 2*frac or 1 whichever is larger
                 if 2 * frac >= 1:
-                    frac = 2 * frac
+                    frac = (2 * frac) + 0.1
                 else:
-                    frac = 1
+                    frac = 1.1
                 # get all of the planes at this distance
                 planes_at_dist = site_dataframe.loc[
                     site_dataframe["dist"] == shortest_dist
@@ -1488,6 +1488,38 @@ class PartitioningToolkit:
         possible_site_neigh_pairs["plane_vectors"] = list(unit_vectors)
         return possible_site_neigh_pairs
 
+    def reduce_to_symmetric_partitioning(self, initial_partitioning):
+        equivalent_atoms = self.grid.equivalent_atoms
+        unique_atoms = list(set(equivalent_atoms))
+
+        planes_to_keep = {}
+
+        for atom in unique_atoms:
+            partitioning_df = initial_partitioning[atom]
+            atom_planes_to_keep = []
+            # check each plane in the partitioning df
+            for i, row in partitioning_df.iterrows():
+                neigh_index = row["neigh_index"]
+                # get the partitioning to check against
+                equiv_neigh_index = equivalent_atoms[neigh_index]
+                # get the distance for this site neighbor pair
+                dist = row["dist"]
+                neigh_partitioning_df = initial_partitioning[equiv_neigh_index]
+                # if the reverse exists in the neighbors partitioning keep this
+                # plane.
+                if dist in neigh_partitioning_df["dist"].to_list():
+                    atom_planes_to_keep.append(i)
+            planes_to_keep[atom] = atom_planes_to_keep
+
+        new_partitioning = {}
+        for i, partitioning_df in initial_partitioning.items():
+            equivalent_atom = equivalent_atoms[i]
+            indices = planes_to_keep[equivalent_atom]
+            new_partitioning_df = partitioning_df.iloc[indices]
+            new_partitioning_df.sort_values(by=["dist"], inplace=True)
+            new_partitioning[i] = new_partitioning_df
+        return new_partitioning
+
     def get_partitioning(self, check_for_covalency: bool = True):
         """
         Gets the partitioning planes for each atom as well as some other useful
@@ -1544,6 +1576,7 @@ class PartitioningToolkit:
             reduced_planes = np.concatenate(
                 (reduced_plane_points, reduced_plane_vectors), axis=1
             )
+            important_planes = reduced_planes
             # Get the important planes more rigorously by checking which planes
             # contribute to the vertices of the polyhedral shape surrounding
             # the site
@@ -1556,13 +1589,16 @@ class PartitioningToolkit:
 
         # Go through each site, get the corresponding important planes using
         # the indices we just found, and add to a partitioning dataframe
-        partitioning = {}
+        initial_partitioning = {}
         for site_index, site_dataframe in enumerate(site_dataframes):
             equiv_atom = equivalent_atoms[site_index]
             important_plane_index = important_plane_indices[equiv_atom]
             site_dataframe = site_dataframe.iloc[important_plane_index]
-            partitioning[site_index] = site_dataframe
-        return partitioning
+            site_dataframe.sort_values(by=["dist"], inplace=True)
+            initial_partitioning[site_index] = site_dataframe
+
+        # partitioning = self.reduce_to_symmetric_partitioning(initial_partitioning)
+        return initial_partitioning
 
     def plot_partitioning_results(
         self,
