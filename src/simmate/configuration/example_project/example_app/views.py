@@ -18,4 +18,5 @@ def example_view(request):
     template = "path/to/my/template.html"
     return render(request, template, context)
 
+
 # NOTE: You can delete this file if you decide not to use it.

@@ -145,16 +145,15 @@ nav:
         - Overview: full_guides/overview.md
         
         - Website:
-            - Overview: full_guides/website/overview.md
+            - Setup & Config: full_guides/website/setup_and_config.md
             - REST API: full_guides/website/rest_api.md
 
         - Workflows:
-            - Overview: full_guides/workflows/overview.md
-            - Workflow Names: full_guides/workflows/workflow_names.md
-            - Using existing workflows: full_guides/workflows/using_existing_workflows.md
-            - Creating new workflows: full_guides/workflows/creating_new_workflows.md
-            - Creating nested workflows: full_guides/workflows/nested_workflows.md
-            - Creating S3 workflows: full_guides/workflows/s3_workflows.md
+            - Naming Conventions: full_guides/workflows/naming_conventions.md
+            - Basic Use: full_guides/workflows/basic_use.md
+            - Creating basic workflows: full_guides/workflows/creating_basic_workflows.md
+            - Creating nested workflows: full_guides/workflows/creating_nested_workflows.md
+            - Creating "S3" workflows: full_guides/workflows/creating_s3_workflows.md
 
         - Database:
             - Overview: full_guides/database/overview.md

@@ -3,6 +3,10 @@
 !!! warning
     This section is only for experts! If you're aiming to extract data from Simmate, we suggest using our Python client, as outlined in [the database guides](/full_guides/database/overview/). The REST API is mainly for teams that cannot use Python or Simmate's code but still need to extract data. Be aware that data extraction via our REST API is heavily throttled, making it unsuitable for large data retrievals.
 
+------------------------------------------------------------
+
+## About
+
 "REST API" stands for "**Re**presentational **S**tate **T**ransfer (REST) **A**pplication **P**rogramming **I**nterfaces (API)". In simpler terms, it's a way to access databases through a website URL.
 
 ------------------------------------------------------------
@@ -99,3 +103,5 @@ http://simmate.org/data/MatprojStructure/?ordering=density_atomic
 Simmate's REST API is built using the [django-rest-framework](https://www.django-rest-framework.org/) Python package, and filtering is implemented using [django-filter](https://django-filter.readthedocs.io/en/stable/). 
 
 Our endpoints are dynamically created for each request, thanks to our `SimmateAPIViewset` class in the `simmate.website.core_components` module, which automatically renders an API endpoint from a Simmate database table. The backend implementation of dynamic APIs is still experimental as we assess the pros and cons of this approach -- for example, it allows for quick Django configuration, but at the expense of increased CPU time per web request.
+
+------------------------------------------------------------

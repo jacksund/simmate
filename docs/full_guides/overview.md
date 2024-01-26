@@ -1,12 +1,7 @@
-# Comprehensive Guides & API Reference for Simmate
+# Full Guides
 
-------------------------------------------------------------
-
-## Before you begin
-
-Before diving in, ensure you've either completed our [introductory tutorials](/simmate/getting_started/overview/) or have a good understanding of Python.
-
-------------------------------------------------------------
+!!! note
+    Before using the full guides, ensure you have either completed our [introductory tutorials](/simmate/getting_started/overview/) or have a good understanding of Python.
 
 ## Organization Overview
 
@@ -23,11 +18,6 @@ graph LR
   C --> D[Toolkit];
   D --> E[Extras];
 ```
-
-!!! tip
-    Advanced topics are situated at the end of each section. Unlike the 
-    getting-started guides, you do **not** need to complete a section before 
-    proceeding to the next one.
 
 ### Source Code
 
@@ -50,5 +40,3 @@ These modules include:
 Additionally, there's one extra file:
 
 - `conftest`: Runs Simmate tests and is intended solely for contributing developers
-
-------------------------------------------------------------

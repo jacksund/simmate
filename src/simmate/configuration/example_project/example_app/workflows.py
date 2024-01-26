@@ -18,8 +18,8 @@ or
 [VaspWorkflow](https://jacksund.github.io/simmate/full_guides/workflows/third_party_software/vasp/overview/)
 """
 
-from simmate.toolkit import Structure
 from simmate.engine import Workflow, workflow
+from simmate.toolkit import Structure
 
 # Import our tables from the other files.
 from .models import MyCustomTable2
@@ -37,6 +37,7 @@ __all__ = [
 # Our first example shows off the basics
 # -----------------------------------------------------------------------------
 
+
 @workflow
 def add(x, y, **kwargs):
     """
@@ -48,11 +49,11 @@ def add(x, y, **kwargs):
 class Example__Python__MyExample(Workflow):
     """
     A basic workflow that returns a dictionary, which then updates a database table.
-    
+
     Once ran, note how the structure and inputs are saved at the start of the
     calculation. Plus the outputs are saved once it finishes
     """
-    
+
     database_table = MyCustomTable2  # tells the workflow to use this table
 
     @staticmethod

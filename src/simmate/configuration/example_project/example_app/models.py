@@ -16,7 +16,8 @@ from simmate.database.base_data_types import (
     table_column,
 )
 
-# OPTION 1: 
+
+# OPTION 1:
 # We can make a DatabaseTable from scratch. This table will only have the
 # columns we define, plus a few default ones: id, created_at, update_at, and source
 class MyCustomTable1(DatabaseTable):
@@ -33,6 +34,7 @@ class MyCustomTable2(Structure, Calculation):
     input_02 = table_column.BooleanField(null=True, blank=True)
     output_01 = table_column.FloatField(null=True, blank=True)
     output_02 = table_column.BooleanField(null=True, blank=True)
+
 
 # OPTION 3: (advanced users only)
 # You can build a table using django instead of simmate
