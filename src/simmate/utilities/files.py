@@ -186,9 +186,9 @@ def copy_directory(
         shutil.copytree(
             src=directory_old,
             dst=directory_new_cleaned,
-            ignore=shutil.ignore_patterns("simmate_*")
-            if ignore_simmate_files
-            else None,
+            ignore=(
+                shutil.ignore_patterns("simmate_*") if ignore_simmate_files else None
+            ),
             dirs_exist_ok=True,
         )
     elif directory_old.with_suffix(".zip").exists():
@@ -201,9 +201,9 @@ def copy_directory(
         shutil.copytree(
             src=directory_old,
             dst=directory_new_cleaned,
-            ignore=shutil.ignore_patterns("simmate_*")
-            if ignore_simmate_files
-            else None,
+            ignore=(
+                shutil.ignore_patterns("simmate_*") if ignore_simmate_files else None
+            ),
             dirs_exist_ok=True,
         )
         # Then remove the unpacked archive now that we copied it.
