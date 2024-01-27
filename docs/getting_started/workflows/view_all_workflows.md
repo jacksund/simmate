@@ -2,21 +2,9 @@
 
 ----------------------------------------------------------------------
 
-## Recap
-
-In the preceding sections, we accomplished the following prerequisites for running a workflow:
-
-- [x] Specified the location of our VASP files to Simmate
-- [x] Configured our database for result storage
-- [x] Selected a structure for our calculation
-
-Now, let's delve into the various workflows at our disposal and select one to execute.
-
-----------------------------------------------------------------------
-
 ## Accessing All Workflows
 
-Primarily, Simmate is used to compute a material's energy, structure, or properties. For each of these tasks, we have preconfigured workflows. You can access all of these via the `simmate workflows` command.
+Simmate can be used to compute a material's energy, structure, or properties. For each of these needs, we have preconfigured workflows. You can access all of these via the `simmate workflows` command.
 
 To view all available workflows, run:
 
@@ -40,6 +28,13 @@ These are the workflows that have been registered:
   ... << additional workflows truncated for brevity >>
 ```
 
+!!! note
+    All workflows are named using the format `{type}.{app}.{preset}`:
+
+    1. `type`: The type of property/analysis
+    2. `app`: The program(s) used in the workflow
+    3. `preset`: The name of settings/preset used
+
 ----------------------------------------------------------------------
 
 ## Understanding a Workflow
@@ -50,20 +45,20 @@ Next, use the `explore` command for a more interactive way to view the available
 simmate workflows explore
 ```
 
-When prompted, select a workflow type or a specific preset. A description of the chosen workflow will be displayed at the end. For instance, here's the output of the `relaxation.vasp.staged` workflow, frequently used in our evolutionary search algorithm. This output was obtained by running `simmate workflows explore`, selecting option `6` (relaxation), and then option `1` (matproj):
+When prompted, select a workflow type or a specific preset. A description of the chosen workflow will be displayed at the end.
+
+For example, here's the output of the `relaxation.vasp.staged` workflow, frequently used in our evolutionary search algorithm. This output was obtained by running `simmate workflows explore`, selecting `relaxation`, then `vasp`, and then `staged`:
 
 ```
-===================== relaxation.vasp.matproj =====================
+===================== relaxation.vasp.staged =====================
 
 
 Description:
 
-This task is a reimplementation of pymatgen's MPRelaxSet.                                                                                                                       
+Runs a series of increasing-quality relaxations and then finishes with a single static energy calculation.
 
-Runs a VASP geometry optimization using Materials Project settings.                                                                                                             
-
-Materials Project settings are often considered the minimum-required quality for publication and is sufficient for most applications. If you are looking at one structure in    
-detail (for electronic, vibrational, and other properties), you should still test for convergence using higher-quality settings.                                                
+This workflow is most useful for randomly-created structures or extremely large supercells. More precise relaxations+energy calcs should be done
+afterwards because ettings are still below MIT and Materials Project quality.
 
 
 Parameters:
@@ -74,19 +69,15 @@ REQUIRED PARAMETERS
 
 OPTIONAL PARAMETERS (+ their defaults):
 ---------------------------------------
+- command: null
+- source: null
 - directory: null
-- command: vasp_std > vasp.out
-- is_restart: false
 - run_id: null
 - compress_output: false
-- source: null
-- standardize_structure: false
-- symmetry_precision: 0.01
-- angle_tolerance: 0.5
 
 *** 'null' indicates the parameter is set with advanced logic
 
-To understand each parameter, you can read through our parameter docs, which give full descriptions and examples.                                                               
+To understand each parameter, you can read through our parameter docs, which give full descriptions and examples.
 
 
 ==================================================================
@@ -105,6 +96,8 @@ This page provides a comprehensive list of ALL parameters for ALL workflows. If 
 
 ## Choosing a Workflow for Practice
 
-For the remainder of this tutorial, we will use the `static-energy.vasp.mit` workflow, which performs a basic static energy calculation using MIT Project settings (these settings are based on pymatgen's [MITRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MITRelaxSet)).
+For the remainder of this tutorial, we will use the `static-energy.quantum-espresso.quality00` workflow, which performs a basic static energy calculation.
+
+Take a look at this workflow using `simmate workflows explore` before moving on.
 
 ----------------------------------------------------------------------

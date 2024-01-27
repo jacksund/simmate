@@ -2,7 +2,7 @@
 # The BadELF App
 
 !!! note
-    The current application maintainer is [Sam Weaver](https://github.com/SWeav02)
+    The current maintainer of this application is [Sam Weaver](https://github.com/SWeav02)
 
     The BadELF algorithm and application are based on the following research:
     
@@ -10,27 +10,36 @@
 
 --------------------------------------------------------------------------------
 
-## About BadELF
+## About
 
 BadELF is a method that combines Bader Charge Analysis and the Electron Localization Function (ELF) to predict oxidation states and perform population analysis of electrides. It uses Bader segmentation of the ELF to detect electride electrons and Voronoi segmentation of the ELF to identify atoms.
 
---------------------------------------------------------------------------------
-
-## About this app
-
-The BadELF application provides workflows and utilities to streamline BadELF analysis.
+Simmate's BadELF application provides workflows and utilities to streamline BadELF analysis.
 
 --------------------------------------------------------------------------------
 
 ## Installation
 
-1. Make sure you have Simmate installed and have reset your database.
+1. Add `badelf` (and it's dependencies) to the list of installed Simmate apps with:
+``` bash
+simmate config add badelf
+```
 
-2. Register the badelf app with simmate by adding `- simmate.apps.BadelfConfig` to `~/simmate/my_env-apps.yaml`
+2. Make sure you have the Bader command (from the Henkleman group) installed using one of two options:
+      - (*for beginners*) Install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). Then run the following command:
+          ``` bash
+          simmate config update "bader.docker.enable=True"
+          ```
+      - (*for experts*) Install Bader using [offical guides](http://theory.cm.utexas.edu/henkelman/code/bader/) and make sure `bader` is in the path
 
-3. Update your database to include custom tables from the warrenapp
+3. Update your database to include custom tables from the `badelf` app:
 ``` shell
 simmate database update
+```
+
+4. Ensure everything is configured correctly:
+``` shell
+simmate config test badelf
 ```
 
 --------------------------------------------------------------------------------
@@ -47,9 +56,9 @@ Create a yaml file:
 ``` yaml
 # inside input.yaml
 workflow_name: bad-elf.badelf.badelf
+directory: /path/to/folder
 
 # all parameters below are optional
-directory: /path/to/folder
 cores: 4
 find_electrides: true
 min_elf: 0.5

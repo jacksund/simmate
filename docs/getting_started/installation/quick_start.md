@@ -26,12 +26,13 @@ simmate database reset
 simmate run-server
 ```
 
-6. Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) to access your local server!
+6. Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) to access your local server
 
 !!! note
     While Simmate itself is less than 1MB, the total download size for Simmate and all its dependencies in a fresh conda environment is approximately 1GB. Additional storage space may be required for optional downloads, such as [third-party data](/full_guides/database/third_party_data/).
 
 !!! tip
-    If the environment takes more than 2 minutes to resolve, you might be using an outdated version of conda.
+    If the environment takes more than 2 minutes to resolve, you might be using an outdated version of conda. Ensure your conda version is updated ([>=23.10.0](https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community)) to utilize the new [libmamba solver](https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community).
 
-    Ensure your conda version is updated ([>=23.10.0](https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community)) to utilize the new [libmamba solver](https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community).
+!!! warning
+    Simmate is also available via `pip install simmate`, but because of our many dependencies, we recommend sticking with `conda`.

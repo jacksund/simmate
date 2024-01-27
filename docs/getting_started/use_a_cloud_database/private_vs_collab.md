@@ -31,9 +31,9 @@ In summary, only establish your own cloud database if:
 
 If you're collaborating with someone who has already set up a database, connecting to it will be straightforward. 
 
-Once you have your cloud database's connection parameters, create the file `~/simmate/my_env-database.yaml` and input the connection parameters provided by your point-person. For instance, this `my_env-database.yaml` file designates a `default` database:
+Once you have your cloud database's connection parameters, create the file `~/simmate/my_env-settings.yaml` (if it isn't there already) and input the connection parameters provided by your point-person. For example, the following can be added to your settings file:
 ``` yaml
-default:
+database:
   ENGINE: django.db.backends.postgresql
   HOST: simmate-database-do-user-8843535-0.b.db.ondigitalocean.com
   NAME: simmate-database-00-pool

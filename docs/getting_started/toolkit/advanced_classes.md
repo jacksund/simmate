@@ -7,7 +7,7 @@
 This section provides a glimpse into some advanced classes and functionalities. Please note that Simmate is still in its early development stages, and there are many more features available through the [PyMatGen](https://pymatgen.org/) and [MatMiner](https://hackingmaterials.lbl.gov/matminer/) packages, which were installed alongside Simmate.
 
 !!! tip
-    If you're attempting to follow a paper and analyze a structure, chances are there's a class/function already created for that analysis! Make sure to explore the documentation (the next tutorial will guide you on how to do this) or simply [post a question](https://github.com/jacksund/simmate/discussions/categories/q-a) and we'll direct you to the right path.
+    If you're attempting to follow a paper and analyze a structure, chances are there's a class/function already created for that analysis! Make sure to explore the full guides or simply [post a question](https://github.com/jacksund/simmate/discussions/categories/q-a) and we'll direct you to the right path.
 
 ----------------------------------------------------------------------
 
@@ -30,7 +30,7 @@ structure2 = creator.create_structure(spacegroup=225)
 
 ## Example 2: Fingerprint Analysis
 
-Matminer is especially useful for analyzing a structure's "features" and creating machine-learning inputs. A common analysis provides the structure's "fingerprint", which aids in characterizing bonding in the crystal. The most basic fingerprint is the radial distribution function (rdf) -- it displays the distance between all atoms. We can take any structure object and feed it to a matminer `Featurizer` object:
+Matminer is especially useful for analyzing a structure's features and creating machine-learning inputs. A common analysis provides the structure's fingerprint, which aids in characterizing bonding in the crystal. The most basic fingerprint is the radial distribution function (rdf) -- it displays the distance between all atoms. We can take any structure object and feed it to a matminer `Featurizer` object:
 
 ```python
 from matminer.featurizers.structure.rdf import RadialDistributionFunction

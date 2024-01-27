@@ -6,7 +6,7 @@ Our official website allows you to view all past workflow results. Even if you h
 
 ## 1. Reset the Database
 
-Firstly, we need to configure our database. We'll delve into the specifics in the next tutorial, but for now, consider this as creating an empty Excel spreadsheet that we'll populate with data later. This can be done with...
+Firstly, we need to configure our database. We'll delve into the specifics in a following tutorial, but for now, consider this as creating an empty Excel spreadsheet that we'll populate with data later. This can be done with...
 
 ``` bash
 simmate database reset # (1)
@@ -27,12 +27,9 @@ For our second step, we simply instruct Simmate to launch the server:
 simmate run-server
 ```
 
-... and after a few moments, you should see the following output ...
+... and after a few moments, you should see the following output:
 
-``` bash
-Watching for file changes with StatReloader
-April 05, 2022 - 00:06:54
-Django version 4.0.2, using settings 'simmate.configuration.django.settings'
+```
 Starting development server at http://127.0.0.1:8000/
 Quit the server with CTRL-BREAK.
 ```
@@ -41,10 +38,10 @@ Keep this command running in your terminal and open the link [http://127.0.0.1:8
 
 ----------------------------------------------------------------------
 
-## Can I Share These Links?
+## Final comments
 
-**This website is hosted on your local computer**. It's not accessible via the internet, and it will cease to function as soon as you close your terminal running the `simmate run-server` command.
+The server we just started is hosted on your local computer. It's not accessible via the internet, and it will cease to function as soon as you close your terminal running the `simmate run-server` command. However, when we transition to a server that's accessible via the internet, Simmate's full set of features become available. This allows you to share results and computational resources with your entire team & accross many computers.
 
-However, Simmate's true potential is unleashed when we transition to a server that's accessible via the internet. This allows you to share results and computational resources with your entire team. Additionally, Python and command-line offer many more features than the website interface. To discover these, continue reading our tutorials! 
+Additionally, keep in mind that Simmate's Python and command-line interfaces offer many more features than what is available in the website. To learn about these features, continue reading our tutorials!
 
 ----------------------------------------------------------------------

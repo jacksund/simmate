@@ -8,12 +8,6 @@ When importing simmate and establishing a connection to the database, a warning 
 simmate version
 ```
 
-``` yaml
-# example output
-Installed version: v0.10.0
-Newest available: v0.11.1
-```
-
 --------------------------------------------------------------------------------
 
 ## Upgrading to the Latest Version
@@ -34,19 +28,19 @@ simmate database update
 ```
 
 !!! warning
-    The command `simmate database update` is only effective from `v0.15.0` onwards. Earlier versions of simmate necessitate a complete database reset when updating versions. Hence, if your version is `<=0.14.0`, you must execute `simmate database reset`.
+    The command `simmate database update` is only effective from `v0.15.0` onwards. Earlier versions of simmate necessitate a complete database reset when updating versions. So, if your original database version is `v0.14.0` or earlier, you must run `simmate database reset`.
 
 --------------------------------------------------------------------------------
 
 ## Understanding Version Numbers
 
-Our releases adhere to [semantic versioning](https://semver.org/). This implies that versions (e.g., `v1.2.3`) correspond to `MAJOR.MINOR.PATCH`. Each version number increases following these changes:
+Our releases follow [semantic versioning](https://semver.org/). This implies that versions (e.g., `v1.2.3`) correspond to `MAJOR.MINOR.PATCH`. Each version number increases following these changes:
 
   - `MAJOR` = incompatible API changes
   - `MINOR` = addition of new functionality (without API changes)
   - `PATCH` = bug fixes and documentation updates (without API changes)
 
-There is one significant exception to the above rules -- `MAJOR`=0 releases. Any v0.x.y release is considered developmental, with APIs subject to change and not deemed stable. This is in line with the semantic version specification (refer to [point 4](https://semver.org/#spec-item-4)).
+There is one significant exception to the above rules -- `MAJOR=0` releases. Any `v0.x.y` release is considered developmental, where APIs are subject to change and are not deemed stable.
 
 --------------------------------------------------------------------------------
 
@@ -63,15 +57,20 @@ There is one significant exception to the above rules -- `MAJOR`=0 releases. Any
 -->
 
 **Enhancements**
+
 - added `dotdict` utility for easy dot-access with nested dictionary objects
 - all settings can be added via environment variables for cloud-based deployments
 - add `@workflow` decorator for easily creating basic workflows
 - add `_incar_updates` to `VaspWorkflow`s for cleaner inheritance & syntax
+- add Docker builds for Quantum Espresso to help new users
 
 **Refactors**
+
 - Fully reimplemented how all settings are loaded
+- Revised all documentation and tutorials
 
 **Fixes**
+
 - fix bug where user-provided `command` parameter is not properly loaded
 
 --------------------------------------------------------------------------------

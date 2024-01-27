@@ -4,27 +4,29 @@
 
 ## Recap of Key Concepts
 
-Before we proceed, let's quickly recap the main concepts we've covered so far...
+Before we proceed, let's quickly review the progress we've made so far...
 
-- [x] We've established our database and populated it with calculation results.
-- [x] We've introduced Python classes, focusing on the significance of the `Structure` class.
-- [x] We've explored how to navigate documentation and utilize new classes.
+- [x] We established our database at `~/simmate/my_env-database.sqlite`
+- [x] We ran a `quantum-espresso` workflow that stored results in our database
+- [x] We introduced Python classes, focusing on the significance of the `Structure` class
 
-Now, we'll integrate these concepts to navigate our database. 
+Next, we'll build on these elements and learn about the database. 
 
 ----------------------------------------------------------------------
 
-## Python Table Example
+## A Basic Table
 
-Let's start with the basics... All datatables are represented by a class, and the general format is as follows:
+Let's start with the basics: what does the table you saw in DBeaver actually look like in Simmate's Python code?
+
+All datatables are represented by a class, and the general format is as follows:
 
 ```python
 from simmate.database.base_data_types import DatabaseTable, table_column
 
 class MyExampleTable(DatabaseTable):
-   column_01 = table_columns.CharField()  # CharField --> text storage
-   column_02 = table_columns.BoolField()  # BoolField --> True/False storage
-   column_03 = table_columns.FloatField()  # FloatField --> number/decimal storage
+   column_01 = table_column.CharField()  # CharField --> text storage
+   column_02 = table_column.BoolField()  # BoolField --> True/False storage
+   column_03 = table_column.FloatField()  # FloatField --> number/decimal storage
 ```
 
 The corresponding table (populated with random data) would look like this:
@@ -37,13 +39,13 @@ The corresponding table (populated with random data) would look like this:
 | scott     | False     | 1.602e-19 |
 | ...       | ...       | ...       |
 
-Creating tables is as simple as defining a class, declaring it as a `DatabaseTable`, and specifying the desired columns.
+Creating tables is as simple as defining a class, declaring it as a `DatabaseTable`, and specifying the desired columns with `table_column`.
 
 ----------------------------------------------------------------------
 
-## Constructing Tables with Inheritance
+## A Table with Inheritance
 
-However, if we have multiple tables with similar data, this process can become repetitive. For instance, we might want to store structures in various tables, each with columns like density, number of sites, number of elements, etc. To streamline this process, we use Python "inheritance". Here's how it works:
+However, if we have multiple tables with similar data, this process can become repetitive. For instance, we might want to store structures in various tables, each with columns like density, number of sites, number of elements, etc. To streamline this process, we use Python "inheritance". Here's how it works...
 
 First, we define a table with common data (let's use `Person` as an example).
 
@@ -74,8 +76,37 @@ The `Student` datatable now looks like this:
 | scott  | 14  | 6.2    | 2021 | 3.2 |
 | ...    | ... | ...    | ...  | ... |
 
-Simmate employs this concept with common materials science data, such as structures, thermodynamic data, site forces, and more. Our fundamental building blocks for tables are found in the `simmate.database.base_data_types` module ([covered here](/full_guides/database/custom_tables/)).
+Note that the `Student` table includes both our newly defined columns (`year` + `gpa`) as well as all of the columns from `Person` (`name`, `age`, `height`). This is because `Student` inherits from `Person`.
 
-All our datatables are built upon these classes. Next, we'll examine an actual database table and learn how to use it to view data.
+----------------------------------------------------------------------
+
+## A full example in Simmate
+
+Simmate uses this concept of inheritance with common materials science data. This includes tables for structures, thermodynamic data, site forces, and more.
+
+Let's use the `workflows_staticenergy` table as an example. Open this table in DBeaver, and take a closer look at all of the columns. This table inherits from several others:
+
+- `Structure`
+- `Thermodynamics`
+- `Forces`
+- `Calculation`
+
+This is because the calculation involves the following information, respectively:
+
+- an input structure *(formula, num_sites, density, etc.)*
+- thermodynamic data *(final energy, energy per atom, stability, etc.)*
+- site forces and lattice stress *(available because we used DFT to calculate the energy)*
+- general calculation info *(e.g. calculation time, workflow name, dirctory name, etc.)*
+
+This builds out the massive table for us. Then, during analysis, you can go in and select which columns you actually are interested in from the many available.
+
+!!! tip
+    Experienced python users: take a look at our source code for the `StaticEnergy` table [here](https://github.com/jacksund/simmate/blob/main/src/simmate/database/base_data_types/static_energy.py). You'll see we just provide these data types as mix-ins.
+
+
+!!! warning
+    Do not confuse the database table `Structure` with the toolkit `Structure`. One represents structural data in a table, while the other helps with advanced analysis and manipulation of a structure. You can use the aliases `DatabaseStructure` and `ToolkitStructure` to help keep them separate if you wish.
+    
+    Note also, you can convert a `ToolkitStructure` into a single row for a `DatabaseStructure`. Simmate does this frequently behind the scenes in order to save information to your database.
 
 ----------------------------------------------------------------------

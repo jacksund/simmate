@@ -3,11 +3,16 @@
 !!! warning
     This section may be challenging for beginners. If possible, work through it with an experienced user or someone from your IT department. Don't be discouraged if it takes more than an hour -- there's a lot to learn!
 
-Up until now, you've been running Simmate on your local desktop or laptop. However, as we saw in the previous section, we need VASP (which requires Linux) for Simmate's workflows to run. Most of the time, you'll be using a University or Federal supercomputer (also known as "high performance computing (HPC) clusters"), which will already have VASP installed.
+!!! tip
+    Moving files around or transferring them between your local computer and the supercomputer can be challenging in the command line. It's much easier with a program like [FileZilla](https://filezilla-project.org/), [MobaXTerm](https://mobaxterm.mobatek.net/), or another file transfer program. We recommend MobaXTerm, but it's entirely optional and up to you.
 
 ----------------------------------------------------------------------
 
-## Cluster-Specific Guides
+## Overview
+
+Up until now, you've been running Simmate on your local desktop or laptop. However, as we saw in the previous sections, we need a DFT software (which often requires Linux) for Simmate's workflows to run. Most of the time, you'll be using a University or Federal supercomputer (also known as "high performance computing (HPC) clusters"), which will already have some of this software (VASP, QE, etc.) installed.
+
+### Cluster-Specific Guides
 
 For teams actively using Simmate, we provide additional notes and examples for submitting to specific clusters. This includes:
 
@@ -18,16 +23,13 @@ For teams actively using Simmate, we provide additional notes and examples for s
 !!! tip 
     If your cluster/university is not listed, contact your IT team for assistance in completing this tutorial.
 
-----------------------------------------------------------------------
-
-## A Checklist for Clusters
+### Prerequisites
 
 For workflows to run correctly, the following requirements must be met:
 
-- [x] A VASP license for your team ([purchased on their site](https://www.vasp.at/))
 - [x] A remote cluster that you have a profile with (e.g., UNC's [LongLeaf](https://its.unc.edu/research-computing/longleaf-cluster/))
-- [x] VASP installed on the remote cluster
 - [x] Anaconda installed on the remote cluster
+- [x] QE installed on the remote cluster
 
 Ensure these steps are completed before proceeding.
 
@@ -73,41 +75,7 @@ pwd
 
 ----------------------------------------------------------------------
 
-## 2. Load VASP
-
-To load VASP into your environment, you typically need to run a 'load module' command:
-
-=== "example"
-    ``` shell
-    module load vasp
-    ```
-=== "WarWulf"
-    ``` shell
-    module load vasp; source /opt/ohpc/pub/intel/bin/ifortvars.sh;
-    ```
-=== "LongLeaf"
-    ``` shell
-    module load vasp/5.4.4
-    ```
-=== "DogWood"
-    ``` shell
-    module load vasp/5.4.4
-    ```
-
-Then check that the VASP command is found. If the `vasp_std` command worked correctly, you will see the following output (because their command doesn't print help information like `simmate` or `conda`):
-
-``` shell
-vasp_std
-```
-
-``` shell
-# Error output may vary between different VASP versions
-Error reading item 'VCAIMAGES' from file INCAR.
-```
-
-----------------------------------------------------------------------
-
-## 3. Build Your Personal Simmate Environment
+## 2. Build Your Personal Simmate Environment
 
 Next, we need to ensure Simmate is installed. 
 
@@ -133,22 +101,44 @@ simmate database reset
 
 ----------------------------------------------------------------------
 
-## 4. Set up VASP Potentials
+## 3. Load & Configure QE
 
-!!! note
-    This step is already completed for you on the `WarWulf` cluster.
+To load QE into your environment, you typically need to run a 'load module' command:
 
-Next, copy your Potentials into `~/simmate/vasp/Potentials` and also copy the `POSCAR` file above onto your cluster. 
+=== "example"
+    ``` shell
+    module load qe
+    ```
+=== "WarWulf"
+    ``` shell
+    module load qe
+    ```
+=== "LongLeaf"
+    ``` shell
+    module load qe
+    ```
+=== "DogWood"
+    ``` shell
+    module load qe
+    ```
 
-Moving files around or transferring them between your local computer and the supercomputer can be challenging in the command line. It's much easier with a program like [FileZilla](https://filezilla-project.org/), [MobaXTerm](https://mobaxterm.mobatek.net/), or another file transfer program. We recommend FileZilla, but it's entirely optional and up to you.
+Then check that the `pw.x` command is found and QE configured correctly:
 
-Review [our POTCAR guide](/simmate/getting_started/run_a_workflow/configure_potcars/) from before if you need help on this step.
+``` bash
+simmate-qe test
+```
+
+If the potentials are missing, you have Simmate download and configure them:
+
+``` bash
+simmate-qe setup sssp
+```
 
 ----------------------------------------------------------------------
 
-## 5. Move to Your 'Scratch' Directory
+## 4. Move to Your 'Scratch' Directory
 
-Typically, clusters have a "scratch" directory that you should submit jobs from -- which is different from your home directory. Make sure you switch to that before submitting any workflows. (Note, your `POSCAR` and all input files should be in this directory too):
+Typically, clusters have a "scratch" directory that you should submit jobs from -- which is different from your home directory. Make sure you switch to that before submitting any workflows. Your `POSCAR` and all input files should be in this directory too:
 
 === "example"
     ``` shell
@@ -169,17 +159,18 @@ Typically, clusters have a "scratch" directory that you should submit jobs from 
 
 ----------------------------------------------------------------------
 
-## 6. Build Our Input Files
+## 5. Build Our Input Files
 
 Just like we did on our laptop, we need to make our input files. For now,
 let's use this sample YAML file:
 
 ``` yaml
-workflow_name: static-energy.vasp.mit
+workflow_name: static-energy.quantum-espresso.quality00
+# instead of POSCAR, we will use MatProj
 structure:
     database_table: MatprojStructure
     database_id: mp-22862
-command: mpirun -n 4 vasp_std > vasp.out  # OPTIONAL
+command: mpirun -n 4 pw.x < pwscf.in > pw-scf.out  # OPTIONAL
 directory: my_custom_folder  # OPTIONAL
 ```
 
@@ -187,12 +178,12 @@ Put this in a file named `my_settings.yaml` in your scratch directory.
 
 !!! danger
     Take note of the `-n 4` in our command. This is the number of cores that
-    we want our calculation to use. Make sure this number matches your 
+    we want our calculation to use in parallel. Make sure this number matches your 
     `cpus-per-task` setting in the next section.
 
 ----------------------------------------------------------------------
 
-## 7. Build Our Submit Script
+## 6. Build Our Submit Script
 
 Earlier in this tutorial, we called `simmate workflows run ...` directly in our terminal, but this should **NEVER** be done on a supercomputer. Instead, we should submit the workflow to the cluster's job queue. Typically, supercomputers use SLURM or PBS to submit jobs.
 
@@ -293,11 +284,11 @@ nano submit.sh
 
 ----------------------------------------------------------------------
 
-## 8. Double Check Everything 
+## 7. Double Check Everything 
 
 Let's go back through our checklist before we submit:
 
-- [x] Loaded the VASP module
+- [x] Loaded the Quantum Espresso module
 - [x] Activated your conda environment
 - [x] In the temporary working directory
 - [x] Have our `yaml` file (+ extra inputs like a POSCAR) in the directory
@@ -308,7 +299,7 @@ If all of these are set, you're good to go.
 
 ----------------------------------------------------------------------
 
-## 9. Submit a Workflow to the Queue
+## 8. Submit a Workflow to the Queue
 
 Finally, let's submit to our cluster! :fire::fire::fire::rocket:
 
@@ -318,7 +309,7 @@ sbatch submit.sh
 
 ----------------------------------------------------------------------
 
-## 10. Monitor Its Progress
+## 9. Monitor Its Progress
 
 You can then monitor your job's progress with:
 
@@ -346,7 +337,7 @@ You can then monitor your job's progress with:
 
 ----------------------------------------------------------------------
 
-## Success!
+## 10. Success!
 
 Congratulations! You've now submitted a Simmate workflow to a remote cluster :partying_face: :partying_face: :partying_face: !!! 
 

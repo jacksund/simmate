@@ -1,18 +1,15 @@
-# Comprehensive Guides & API Reference for Simmate
+# Full Guides
 
-## Before you begin
+!!! note
+    Before using the full guides, ensure you have either completed our [introductory tutorials](/simmate/getting_started/overview/) or have a good understanding of Python.
 
-Before diving in, ensure you've either completed our [introductory tutorials](/simmate/getting_started/overview/) or have a robust understanding of Python.
-
-------------------------------------------------------------
-
-## Guide and Code Structure
+## Organization Overview
 
 The structure of our guides and code may not always match. We've found that separating the two helps newcomers navigate Simmate without having to grasp all its components at once.
 
 ### Documentation
 
-Our guides are arranged in ascending order of complexity, mirroring the typical user journey with Simmate. Users generally start with high-level features (the website interface) and progressively delve into lower-level features (the toolkit and Python objects). The documentation mirrors this progression.
+Our guides are arranged in order to mirror the typical user journey with Simmate. Users generally start with high-level features (the website interface) and progressively delve into lower-level features (the toolkit and Python objects). The documentation mirrors this progression.
 
 ``` mermaid
 graph LR
@@ -22,14 +19,9 @@ graph LR
   D --> E[Extras];
 ```
 
-!!! tip
-    Advanced topics are situated at the end of each section. Unlike the 
-    getting-started guides, you do **not** need to complete a section before 
-    proceeding to the next one.
+### Source Code
 
-### Python Modules
-
-`simmate` is the base module, housing all the code that our package operates on. Each subfolder (or Python "module") provides detailed information about its contents.
+For our python modules, `simmate` is the base module, housing all the code that our package operates on. Each subfolder (or Python "module") provides detailed information about its contents.
 
 These modules include:
 
@@ -48,5 +40,3 @@ These modules include:
 Additionally, there's one extra file:
 
 - `conftest`: Runs Simmate tests and is intended solely for contributing developers
-
-------------------------------------------------------------

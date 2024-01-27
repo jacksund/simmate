@@ -38,14 +38,7 @@ structures = MatprojStructure.objects.filter(
     formula_reduced="ZnSnF6",
 ).all()
 
-# as an extra, you can make this a pandas dataframe that you can easily
-# view in spyder + write to a csv to open up in excel
-data = structures.to_dataframe()
-data.to_csv("mydata.csv")
-
-# now let's run some workflows in parallel. To do this,
-# make sure you are using a postgres database and
-# have submitted a bunch of workers.
+# submit relaxations to cluster
 relax_workflow = get_workflow("relaxation.vasp.matproj")
 relax_jobs = []
 for structure in structures:
@@ -55,28 +48,27 @@ for structure in structures:
     )
     relax_jobs.append(status)
 
-# once each job finishes, submit another workflow using the result
+# as jobs finish, submit a static-energy for each
 static_workflow = get_workflow("static-energy.vasp.matproj")
 static_jobs = []
 for job in relax_jobs:
-    # BUG: This assumes all jobs will complete successfully! You may want a
-    # try/except clause here that catched any jobs that failed.
     status = static_workflow.run_cloud(
-        structure=job.result(),  # result() here says to wait for the job before to finish
+        # BUG: This assumes all jobs will complete successfully!
+        structure=job.result(), 
         command="mpirun -n 8 vasp_std > vasp.out",
     )
     static_jobs.append(status)
 
-# and do the same thing again with a band structure + density of states
+# as jobs finish, submit a band structure + density of states
 elec_workflow = get_workflow("electronic-structure.vasp.matproj-full")
 elec_jobs = []
 for job in static_jobs:
     status = elec_workflow.run_cloud(
-        structure=job.result(),  # result() here says to wait for the job before to finish
+        structure=job.result(),
         command="mpirun -n 8 vasp_std > vasp.out",
     )
     elec_jobs.append(status)
 
-# then you can have the job sit and wait for all results to finish
+# wait for all results to finish
 results = [job.result() for job in elec_jobs]
 ```
