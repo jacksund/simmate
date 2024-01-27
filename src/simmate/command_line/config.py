@@ -130,23 +130,41 @@ def test(app_name: str):
     Tests whether an app is properly configured
     """
 
+    # OPTIMIZE: this code can be refactored and condensed. but it works for now
+
     if app_name == "badelf":
-        pass
+        from simmate.apps.bader.configuration import test_config
+
+        passed = test_config()
+
     elif app_name == "bader":
-        pass
-    elif app_name == "clease":
-        pass
-    elif app_name == "evolution":
-        pass
+        from simmate.apps.bader.configuration import test_config
+
+        passed = test_config()
+
     elif app_name == "materials_project":
-        pass
+        from simmate.apps.materials_project.configuration import test_config
+
+        passed = test_config()
+
     elif app_name == "quantum_espresso":
         from simmate.apps.quantum_espresso.configuration import test_config
 
-        test_config()
+        passed = test_config()
+
     elif app_name == "vasp":
-        pass
+        from simmate.apps.vasp.configuration import test_config
+
+        passed = test_config()
+
     elif app_name == "warren_lab":
-        pass
+        from simmate.apps.warren_lab.configuration import test_config
+
+        passed = test_config()
+
     else:
-        raise Exception(f"Unknown app (or no tests exist): {app_name}")
+        logging.warning(f"Unknown app (or no tests exist): {app_name}")
+        passed = False
+
+    if not passed:
+        raise typer.Exit(code=1)
