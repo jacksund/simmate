@@ -14,16 +14,6 @@ def setup():
 
 
 @setup_app.command()
-def docker():
-    """
-    Adds `quatum_espresso.docker.enable: true` to Simmate's QE settings
-    """
-    from simmate.apps.quantum_espresso.settings import setup_docker
-
-    setup_docker()
-
-
-@setup_app.command()
 def sssp():
     """
     Downloads and configures potentials from SSSP

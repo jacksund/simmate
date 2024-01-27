@@ -31,12 +31,6 @@ DATABASES = {"default": _default_database}
 # if you are developing a new app.
 INSTALLED_APPS = [
     #
-    # These are all apps that are built by Simmate
-    "simmate.website.configs.CoreComponentsConfig",
-    "simmate.website.configs.DataExplorerConfig",
-    "simmate.website.configs.WorkflowsConfig",
-    "simmate.website.configs.WorkflowEngineConfig",
-    #
     # These are built-in django apps that we use for extra features
     "django.contrib.admin",
     "django.contrib.auth",
@@ -89,6 +83,11 @@ INSTALLED_APPS = [
     #   "debug_toolbar",  # django-debug-toolbar  # for debuging and profile-time info
     #
     # Simmate apps + user apps
+    "simmate.website.configs.CoreComponentsConfig",
+    "simmate.website.configs.DataExplorerConfig",
+    "simmate.website.configs.WorkflowsConfig",
+    "simmate.website.configs.WorkflowEngineConfig",
+    "simmate.workflows.configs.BaseWorkflowsConfig",
     *settings.apps,
 ]
 # OPTIMIZE: for now, I just load everything, but I will want to allow users to
