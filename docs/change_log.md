@@ -69,6 +69,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - add `@workflow` decorator for easily creating basic workflows
 - add `_incar_updates` to `VaspWorkflow`s for cleaner inheritance & syntax
 - add Docker builds for Quantum Espresso to help new users
+- add Docker builds for Bader to help new users
 - add `simmate config` command to help inspect and update settings
 
 **Refactors**
