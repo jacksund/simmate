@@ -31,7 +31,7 @@ name="simmate"
 # Versions should comply with PEP 440:
 # https://www.python.org/dev/peps/pep-0440/
 # https://semver.org/
-version="0.15.1"
+version="0.16.0"
 
 # Maintainer info
 authors = [{name = "Jack D. Sundberg", email = "jacksund@live.unc.edu"}]

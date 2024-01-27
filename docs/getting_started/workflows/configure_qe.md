@@ -44,16 +44,8 @@ By default, Simmate assumes QE is installed on your computer. But here, we have 
 
 Run this command to tell Simmate to use Docker for QE-based workflows:
 ``` bash
-simmate-qe setup docker
+simmate config update "quantum_espresso.docker.enable=True"
 ```
-
-!!! tip
-    To see what this command did, take a look at `~/simmate/my_env-settings.yaml` and you'll see the following update:
-    ``` yaml
-    quantum_espresso:
-      docker: true
-        enable: true
-    ```
 
 ----------------------------------------------------------------------
 
@@ -90,7 +82,7 @@ Let's make sure we've done the following correctly:
 Run this command to check everything:
 
 ``` bash
-simmate-qe test
+simmate config test quantum_espresso
 ```
 
 If all the checks pass, you're ready to run workflows!
