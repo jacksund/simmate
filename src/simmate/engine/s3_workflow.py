@@ -434,9 +434,12 @@ class S3Workflow(Workflow):
                 command,
                 cwd=directory,
                 shell=True,
-                preexec_fn=None if platform.system() == "Windows"
-                # or "mpirun" not in command  # See bug/optimize comment above
-                else os.setsid,
+                preexec_fn=(
+                    None
+                    if platform.system() == "Windows"
+                    # or "mpirun" not in command  # See bug/optimize comment above
+                    else os.setsid
+                ),
                 stderr=subprocess.PIPE,
             )
 

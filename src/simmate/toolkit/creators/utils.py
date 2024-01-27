@@ -6,7 +6,6 @@ from abc import ABC, abstractmethod
 
 
 class FixIndicator(ABC):
-
     """
     This is an abstract base class for pointing to some class based on an
     input number of attempts. Note that these classes should be written to run

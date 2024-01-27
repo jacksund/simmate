@@ -106,7 +106,7 @@ DEV = [
     "pytest-django >=4.5.2, <=4.7.0",
     "pytest-mock >=3.7.0, <3.11.2",
     "pytest-xdist >=2.5.0, <3.4.0",
-    "black >=22.1.0, <23.13.0",
+    "black >=24.0.0, <24.1.0",
     "coverage >=6.2, <7.3.1",
     "isort >=5.10.1, <5.12.1",
     "mkdocs-material >=8.4.1, <9.4.15",
