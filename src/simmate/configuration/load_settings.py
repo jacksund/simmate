@@ -251,11 +251,22 @@ class SimmateSettings:
             },
             # app-specific configs
             # TODO: consider moving these to the respective apps
+            "bader": {
+                "default_command": "bader CHGCAR",
+                "docker": {
+                    "enable": False,
+                    "image": f"jacksund/bader:{simmate.__version__}",
+                },
+            },
             "vasp": {
                 "default_command": "vasp_std > vasp.out",
                 "parallelization": {
                     "ncore": None,
                     "kpar": None,
+                },
+                "docker": {
+                    "enable": False,
+                    "image": None,  # commercial license required
                 },
             },
             "quantum_espresso": {
