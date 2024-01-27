@@ -143,6 +143,20 @@ class SimmateSettings:
             settings=final_user_settings,
         )
 
+    def add_apps_and_update(self, apps: list):
+        """
+        Given a list of app names (via python path to Config), it adds these
+        the currently registered apps. This utility ensures no duplicates are
+        added, and that default settings are not lost.
+        """
+        current_apps = self.final_settings["apps"]
+        final_apps = current_apps.copy()
+        for app in apps:
+            if app not in final_apps:
+                final_apps.append(app)
+        # BUG: Is order of the apps important for some...?
+        self.write_updated_settings(updates={"apps": final_apps})
+
     # -------------------------------------------------------------------------
 
     @cached_property
@@ -161,7 +175,7 @@ class SimmateSettings:
         return {
             "version": simmate.__version__,
             "apps": [
-                "simmate.workflows.configs.BaseWorkflowsConfig",
+                "simmate.workflows.configs.BaseWorkflowsConfig",  # TODO - deprec
                 "simmate.apps.configs.QuantumEspressoConfig",
                 "simmate.apps.configs.VaspConfig",
                 "simmate.apps.configs.BaderConfig",
@@ -419,6 +433,37 @@ class SimmateSettings:
 
     # -------------------------------------------------------------------------
 
+    def _parse_input(self, input_str) -> str:
+        """
+        Converts something like
+          "bader.docker.enable=True"
+        into
+          {"bader": {"docker": {"enable": True}}}
+        """
+        keys, value = input_str.split("=")
+        keys = keys.split(".")
+
+        final_dict = {}
+        current_level = final_dict
+        for key in keys[:-1]:
+            current_level = current_level.setdefault(key, {})
+        last_key = keys[-1]
+
+        # convert value to the proper data type
+        env_name = "SIMMATE__" + input_str.split("=")[0].replace(".", "__").upper()
+        value_cleaned = str_to_datatype(
+            parameter=env_name,
+            value=value,
+            type_mappings=self._input_mappings,
+        )
+        # OPTIMIZE: There might be better ways to do this, such as
+        # inspecting the attribute. Example with 'conda_env':
+        #   SimmateSettings.conda_env.func.__annotations__["return"]
+
+        current_level[last_key] = value_cleaned
+
+        return final_dict
+
     # OPTIMIZE: this is only used in the _get_env_settings method and should
     # depreciated in favor of type-inspecting
     _input_mappings: dict = {
@@ -445,6 +490,9 @@ class SimmateSettings:
         "SIMMATE__WEBSITE__REQUIRE_LOGIN_INTERNAL": bool,
         "SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__CLIENT_ID": str,
         "SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__SECRET": str,
+        "SIMMATE__BADER__DOCKER__ENABLE": bool,
+        "SIMMATE__QUANTUM_ESPRESSO__DOCKER__ENABLE": bool,
+        "SIMMATE__VASP__DOCKER__ENABLE": bool,
     }
 
 
