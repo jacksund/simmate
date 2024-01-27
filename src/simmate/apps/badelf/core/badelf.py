@@ -296,14 +296,14 @@ class BadElfToolkit:
             self._write_voxel_errors()
 
             # Remove the site errors
-            voxel_assignments[
-                "site"
-            ] = np.where(  # assigns values based on boolean value. returns array
-                voxel_assignments.index.isin(
-                    error_indices
-                ),  # Is True where df index is in indices list
-                None,  # The value to be assigned
-                voxel_assignments["site"],
+            voxel_assignments["site"] = (
+                np.where(  # assigns values based on boolean value. returns array
+                    voxel_assignments.index.isin(
+                        error_indices
+                    ),  # Is True where df index is in indices list
+                    None,  # The value to be assigned
+                    voxel_assignments["site"],
+                )
             )  # Value to assign where condition is False
 
             voxel_assignments = self._get_multi_plane_voxel_assignment(
@@ -385,14 +385,14 @@ class BadElfToolkit:
                     electride_indices.append(index)
                     # results_charge[electride] += charge_density
             # Update all of the electride indices with the site dictionary
-            voxel_assignments[
-                "site"
-            ] = np.where(  # assigns values based on boolean value. returns array
-                voxel_assignments.index.isin(
-                    electride_indices
-                ),  # Is True where df index is in indices list
-                site_vol_frac,  # The value to be assigned
-                voxel_assignments["site"],
+            voxel_assignments["site"] = (
+                np.where(  # assigns values based on boolean value. returns array
+                    voxel_assignments.index.isin(
+                        electride_indices
+                    ),  # Is True where df index is in indices list
+                    site_vol_frac,  # The value to be assigned
+                    voxel_assignments["site"],
+                )
             )  # Value to assign where condition is False
 
         return voxel_assignments
@@ -438,12 +438,15 @@ class BadElfToolkit:
         elif total_voxels > 128000 * nworkers:
             npartitions = math.ceil(total_voxels / 128000)
 
-        with LocalCluster(
-            n_workers=nworkers,
-            threads_per_worker=2,
-            memory_limit="auto",
-            processes=True,
-        ) as cluster, Client(cluster) as client:
+        with (
+            LocalCluster(
+                n_workers=nworkers,
+                threads_per_worker=2,
+                memory_limit="auto",
+                processes=True,
+            ) as cluster,
+            Client(cluster) as client,
+        ):
             # put list of indices in dask dataframe. Partition with the same
             # number of partitions as workers
             ddf = dask.dataframe.from_pandas(

@@ -752,9 +752,11 @@ class FitnessConvergence(PlotlyFigure):
 
         figure.update_layout(
             xaxis_title="Date Completed",
-            yaxis_title="Energy (eV/atom)"
-            if search.fitness_field == "energy_per_atom"
-            else search.fitness_field,
+            yaxis_title=(
+                "Energy (eV/atom)"
+                if search.fitness_field == "energy_per_atom"
+                else search.fitness_field
+            ),
         )
 
         return figure
@@ -881,9 +883,11 @@ class FitnessDistribution(PlotlyFigure):
         figure = plotly_go.Figure(data=histogram)
 
         figure.update_layout(
-            xaxis_title="Energy (eV/atom)"
-            if search.fitness_field == "energy_per_atom"
-            else search.fitness_field,
+            xaxis_title=(
+                "Energy (eV/atom)"
+                if search.fitness_field == "energy_per_atom"
+                else search.fitness_field
+            ),
             yaxis_title="Individuals (#)",
         )
 

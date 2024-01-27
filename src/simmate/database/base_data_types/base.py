@@ -494,9 +494,11 @@ class DatabaseTable(models.Model):
         # Iterate through and grab the columns. Note we don't use get_column_names
         # here because we are attaching relation data as well.
         column_names = [
-            column.name + f" (relation to {column.related_model.table_name})"
-            if column.is_relation
-            else column.name
+            (
+                column.name + f" (relation to {column.related_model.table_name})"
+                if column.is_relation
+                else column.name
+            )
             for column in cls._meta.get_fields()
         ]
 

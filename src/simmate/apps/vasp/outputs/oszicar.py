@@ -152,9 +152,9 @@ class Oszicar:
                     "nhamiltonians": values[3],  # ncg
                     "wavefunctions_residuum_norm": values[4],  # rms
                     # Note not all electronic steps have this value so we need to doublecheck
-                    "charge_density_change": values[5]
-                    if len(values) == 6
-                    else None,  # rms(c)
+                    "charge_density_change": (
+                        values[5] if len(values) == 6 else None
+                    ),  # rms(c)
                 }
 
                 # add the electronic step to our results!

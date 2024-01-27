@@ -98,11 +98,11 @@ class Forces(DatabaseTable):
                     max([numpy.linalg.norm(f) for f in site_forces])
                 ),
                 site_forces_norm=float(numpy.linalg.norm(site_forces)),
-                site_forces_norm_per_atom=float(
-                    numpy.linalg.norm(site_forces) / structure.num_sites
-                )
-                if structure
-                else None,
+                site_forces_norm_per_atom=(
+                    float(numpy.linalg.norm(site_forces) / structure.num_sites)
+                    if structure
+                    else None
+                ),
             )
             if site_forces
             else {}
@@ -112,11 +112,11 @@ class Forces(DatabaseTable):
             dict(
                 lattice_stress=lattice_stress,
                 lattice_stress_norm=float(numpy.linalg.norm(lattice_stress)),
-                lattice_stress_norm_per_atom=float(
-                    numpy.linalg.norm(lattice_stress) / structure.num_sites
-                )
-                if structure
-                else None,
+                lattice_stress_norm_per_atom=(
+                    float(numpy.linalg.norm(lattice_stress) / structure.num_sites)
+                    if structure
+                    else None
+                ),
             )
             if lattice_stress
             else {}
