@@ -175,6 +175,7 @@ class SimmateSettings:
         return {
             "version": simmate.__version__,
             "apps": [
+                "simmate.workflows.configs.BaseWorkflowsConfig",  # TODO - deprec
                 "simmate.apps.configs.QuantumEspressoConfig",
                 "simmate.apps.configs.VaspConfig",
                 "simmate.apps.configs.BaderConfig",

@@ -87,7 +87,6 @@ INSTALLED_APPS = [
     "simmate.website.configs.DataExplorerConfig",
     "simmate.website.configs.WorkflowsConfig",
     "simmate.website.configs.WorkflowEngineConfig",
-    "simmate.workflows.configs.BaseWorkflowsConfig",
     *settings.apps,
 ]
 # OPTIMIZE: for now, I just load everything, but I will want to allow users to
