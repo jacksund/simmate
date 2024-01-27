@@ -11,11 +11,5 @@ export PATH=/home/jacksund/bader/:$PATH
 
 *(optional)* `chgsum.pl` and additional scripts:
 
-1. Download the scripts from [VTST-tools](http://theory.cm.utexas.edu/vtsttools/scripts.html)
-2. Unzip the folder (`vtstscripts-1033`) and move it to the directory where your bader executable is located.
-3. Run `nano ~/.bashrc` to modify your bash and add this line at the end:
-``` bash
-# Make sure to update the 'myname' part!
-export PATH=/home/myname/bader/vtstscripts-1033:$PATH
-```
+
 4. Restart your terminal and confirm the bader command works
