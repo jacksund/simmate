@@ -2,8 +2,10 @@
 
 from pathlib import Path
 
+from simmate.configuration import settings
 from simmate.engine import S3Workflow
 from simmate.toolkit import Structure
+from simmate.utilities import get_docker_command
 
 
 class PopulationAnalysis__Bader__BaderDev(S3Workflow):
@@ -19,6 +21,7 @@ class PopulationAnalysis__Bader__BaderDev(S3Workflow):
         atoms_to_print: list[int] = [],
         species_to_print: str = [],
         structure: Structure = None,
+        directory: Path = None,
         **kwargs,
     ) -> str:
         """
@@ -68,4 +71,14 @@ class PopulationAnalysis__Bader__BaderDev(S3Workflow):
             atom_indices = structure.indices_from_symbol(species_to_print)
             indices_str = indices_str = " ".join([str(i + 1) for i in atom_indices])
             command_final += f" -p sum_atom {indices_str}"
+
+        # We now have the final command, and as last check, need to see if we
+        # will run it directly in the shell OR via a docker container
+        if settings.bader.docker.enable == True:
+            command_final = get_docker_command(
+                image=settings.bader.docker.image,
+                inner_command=command_final,  # will be wrapped
+                volumes=[f"{str(directory)}:/bader_calc"],
+            )
+
         return command_final

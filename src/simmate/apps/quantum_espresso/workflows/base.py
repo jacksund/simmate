@@ -132,19 +132,23 @@ class PwscfWorkflow(S3Workflow):
 
     @classmethod
     def get_final_command(
-        cls, command: str = None, directory: Path = None, **kwargs
+        cls,
+        command: str = None,
+        directory: Path = None,
+        **kwargs,
     ) -> str:
-        # EXPERIMENTAL - some of this functionality will likely move to S3Workflow
-        if settings.quantum_espresso.docker.use == True:
+        input_command = command if command else cls.command
+        if settings.quantum_espresso.docker.enable == True:
             final_command = get_docker_command(
                 image=settings.quantum_espresso.docker.image,
-                entrypoint=command,
+                inner_command=input_command,
                 volumes=[
                     f"{str(directory)}:/qe_calc",
                     f"{str(settings.quantum_espresso.psuedo_dir)}:/potentials",
                 ],
             )
-        breakpoint()
-        return final_command
+            return final_command
+        else:
+            return input_command
 
     # -------------------------------------------------------------------------

@@ -48,7 +48,7 @@ ENV PATH="${PATH}:/bader_bin/"
 RUN mkdir bader_calc/
 WORKDIR bader_calc/
 
-# Command to call Bader.
-# This entrypoint must be overwritten when the user's actual command to run 
-# (assumes input files are provided by user via volumes)
-ENTRYPOINT bader CHGCAR
+# We do not provide a CMD or ENTRYPOINT in case the user 
+# wants to open the container interactively.
+# The command should look something like:
+#   bader CHGCAR
