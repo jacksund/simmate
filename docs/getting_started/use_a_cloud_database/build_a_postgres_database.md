@@ -141,7 +141,7 @@ This step is optional.
 
 With Sqlite, we could download a prebuilt database with data from third parties already in it. However, creating our Postgres database means our database is entirely empty.
 
-To load **ALL** third-party data (~5GB total), you can use the following command. We can also use Dask to run this in parallel and speed things up. Depending on your internet connection and CPU speed, this can take up to 24 hours.
+To load **ALL** third-party data (~10GB total), you can use the following command. We can also use Dask to run this in parallel and speed things up. Depending on your internet connection and CPU speed, this can take up to 24 hours.
 
 ``` shell
 simmate database load-remote-archives --parallel

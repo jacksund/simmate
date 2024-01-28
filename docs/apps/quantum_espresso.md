@@ -26,6 +26,10 @@ simmate config add quantum_espresso
           ```
       - (*for experts*) Install QE using [offical guides](https://www.quantum-espresso.org/) and make sure `pw.x` is in the path
 
+6. To run calculations with QE, we need psuedopotentials. Simmate helps load these from the popular [SSSP library](https://www.materialscloud.org/discover/sssp/):
+``` bash
+simmate-qe setup sssp
+```
 
 3. Update your database to include custom tables from the app:
 ``` shell

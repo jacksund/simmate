@@ -6,21 +6,19 @@
 # To run a container + a single QE calculation, the user must provide...
 #   (1) an pwscf.in file (the pw.x input)
 #   (2) all required psuedopotentials (*.usp files, typically in a single directory)
-# These are normally given as volumes. This image will run then calculation.
+#   (3) a command via "sh -c"
+# The input files are normally given as volumes. This image will run then calculation.
 
-# Command template:
-#   docker run jacksund/quantum-espresso:v0.0.0 -v $(pwd):/qe_calc/ -v /path/to/potentials:/potentials/
-# Command example:
-#   docker run -v ${pwd}:/qe_calc -v C:\Users\jacks\simmate\quantum_espresso\potentials:/potentials jacksund/quantum-espresso:v0.0.0
-# ** also consider running in detatched mode: --rm -it
+# Example:
+#   docker run --volume path/to/my/inputs:/qe_calc --volume path/to/potentials:/potentials jacksund/quantum-espresso:v0.0.0 sh -c "pw.x < pwscf.in > pw-scf.out"
 
 # -----------------------------------------------------------------------------
 
 # To build this image: (be sure to update version)
 #   cd ~/Documents/github/simmate/
 #   docker login -u jacksund
-#   docker build -t jacksund/quantum-espresso:v0.0.0 -f envs/docker/quantum_espresso.dockerfile .
-#   docker push jacksund/quantum-espresso:v0.0.0
+#   docker build -t jacksund/quantum_espresso:v0.0.0 -f envs/docker/quantum_espresso.dockerfile .
+#   docker push jacksund/quantum_espresso:v0.0.0
 
 # Consider trying cmake instead of make for builds outside of docker:
 #   https://gitlab.com/QEF/q-e/-/wikis/Developers/CMake-build-system
@@ -51,17 +49,20 @@ RUN wget https://archives.simmate.org/qe-7.2-ReleasePack.tar.gz -O qe-7.2.tar.xz
     tar -zxvf qe-7.2.tar.xz && \
     rm qe-7.2.tar.xz
 
-# Open of build files and install Quantum Espresso's pw.x module + command
+# Open of build files and install Quantum Espresso's pw.x
+# We remove all install/build files at the end too
 RUN cd qe-7.2 && \
     ./configure && \
     make pw && \
-    make install
+    make install && \
+    cd .. && \
+    rm -r qe-7.2
 
 # build a working directory to run calculations
 RUN mkdir qe_calc/
 WORKDIR qe_calc/
 
-# Command to call QE and run the PWscf calcualtion.
-# This entrypoint must be overwritten if the user wants parallel execution.  
-# (assumes pwscf.in + psuedopotentials are provided by user via volumes)
-ENTRYPOINT pw.x < pwscf.in > pwscf.out
+# We do not provide a CMD or ENTRYPOINT in case the user 
+# wants to open the container interactively.
+# The command should look something like:
+#   pw.x < pwscf.in > pwscf.out

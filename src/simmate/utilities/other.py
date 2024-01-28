@@ -361,7 +361,7 @@ def deep_update(default_dict: dict, override_dict: dict) -> dict:
 
 def get_docker_command(
     image: str,
-    entrypoint: str = None,
+    inner_command: str = None,
     volumes: list[str] = [],
 ) -> str:
     """
@@ -373,12 +373,15 @@ def get_docker_command(
     """
     command = "docker run "
 
-    if entrypoint:
-        command += f"--entrypoint {entrypoint} "
-
     for volume in volumes:
         command += f"--volume {volume} "
 
     command += image
+
+    if inner_command:
+        # This is a little hack to pass the command since "docker run" can't
+        # pass multi-part commands. We use "sh -c" to wrap the command that
+        # should be call when the image starts
+        command += f' sh -c "{inner_command}"'
 
     return command
