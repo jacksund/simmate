@@ -59,9 +59,7 @@ simmate-qe setup sssp
     To see what this command did, take a look at `~/simmate` and you'll see the following update:
     ``` bash
     # Located at ~ (e.g. /home/johnsmith)
-    simmate/
-    ├── my_env-database.sqlite3
-    ├── my_env-settings.yaml
+    simmate
     └── quantum_espresso
         └── potentials
             └── << all of your psuedo files! >>
@@ -73,7 +71,7 @@ simmate-qe setup sssp
 
 Let's make sure we've done the following correctly:
 
-1. Installed QE **-- or --** installed Docker + used `simmate-qe setup docker`
+1. Installed QE **-- or --** installed Docker + used `simmate config update`
 2. Used `simmate-qe setup sssp` to download our potentials
 
 Run this command to check everything:
