@@ -41,7 +41,7 @@ simmate workflows explore
 5. Make sure you have Quantum Espresso (QE) installed using one of two options:
       - (*for beginners*) Install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). Then run the following command:
           ``` bash
-          simmate-qe setup docker
+          simmate config update "quantum_espresso.docker.enable=True"
           ```
       - (*for experts*) Install QE using [offical guides](https://www.quantum-espresso.org/) and make sure `pw.x` is in the path
 
@@ -50,12 +50,9 @@ simmate workflows explore
 simmate-qe setup sssp
 ```
 
-    !!! tip
-        Open the directory at `~/simmate` to see what these `setup` commands are doing. You'll see a `settings.yaml` file (if you're using Docker) and a `quantum_espresso` folder (+ SSSP potentials) all configured for you.
-
 7. Make sure QE is fully configured and ready to use:
 ``` bash
-simmate-qe test
+simmate config test quantum_espresso
 ```
 
 8. With everything configured, you can submit your workflow using the website interface, command-line, or Python. Here, we'll use a settings file in YAML format. Create a file named `example.yaml` with the following content:

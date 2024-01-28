@@ -29,9 +29,6 @@ Most DFT programs can only be installed on Linux and are incompatible with Windo
 
 To get around this, we will use Docker. Docker simplifies the process for users without coding experience by eliminating complex setup procedures. Similar to Anaconda's isolated "environments" for Python packages, Docker employs isolated "containers" with everything necessary for a package to run, including the operating system.
 
-!!! note
-    All of Simmate's setup can be automated using Docker. However, Docker is not commonly used in academic chemistry research, so our tutorials try to minimize its use. But if you ever move from academia to industry, you will 100% need to be familiar with Docker when using services like AWS or Google Cloud. Might as well get a headstart on learning Docker here! :smile:
-
 ### ii. Install Docker-Desktop
 
 Download install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). You do not need to make an account.
