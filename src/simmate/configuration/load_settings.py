@@ -489,10 +489,10 @@ class SimmateSettings:
         "SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS": list[str],
         "SIMMATE__WEBSITE__DATA": list[str],
         "SIMMATE__WEBSITE__DEBUG": bool,
-        "SIMMATE__WEBSITE__EMAILS__FROM_EMAIL": str,
-        "SIMMATE__WEBSITE__EMAILS__HOST": str,
-        "SIMMATE__WEBSITE__EMAILS__PORT": int,
-        "SIMMATE__WEBSITE__EMAILS__TIMEOUT": int,  # or float...?
+        "SIMMATE__WEBSITE__EMAIL__FROM_EMAIL": str,
+        "SIMMATE__WEBSITE__EMAIL__HOST": str,
+        "SIMMATE__WEBSITE__EMAIL__PORT": int,
+        "SIMMATE__WEBSITE__EMAIL__TIMEOUT": int,  # or float...?
         "SIMMATE__WEBSITE__HOME_VIEW": str,
         "SIMMATE__WEBSITE__LOGIN_MESSAGE": str,
         "SIMMATE__WEBSITE__PROFILE_VIEW": str,
