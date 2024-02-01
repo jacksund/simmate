@@ -582,7 +582,7 @@ class BadElfToolkit:
                 )
                 total_volume = np.sum(first_site_fracs) + np.sum(second_site_fracs)
                 charges[site] += total_charge
-                atomic_volumes[site] += total_volume
+                atomic_volumes[site] += total_volume * voxel_volume
             # Get the charge and atomic volume of each site with multiple site
             # assignments. These are stored in a dictionary with the keys
             # "indices", "sites", and "fracs"

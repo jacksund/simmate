@@ -324,7 +324,7 @@ class VoxelAssignmentToolkit:
         voxel_results_array = np.array([])
         # for each split, calculate the results and add to the end of our results
         for chunk, split_voxel_array in enumerate(split_voxel_frac_coords):
-            logging.info(f"Calculating voxel chunk {chunk}/{split_num}")
+            logging.info(f"Calculating site assignments for voxel chunk {chunk}/{split_num}")
             split_result = self.get_distance_from_voxels_to_planes(
                 voxel_frac_coords=split_voxel_array, max_dist=max_dist, dask=dask
             )
