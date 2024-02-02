@@ -306,7 +306,7 @@ class VoxelAssignmentToolkit:
         # if plane_distances_to_calc > handleable_plane_distance_calcs_numpy:
         if plane_distances_to_calc > 7.8e8:
             dask = True
-            print("using dask")
+            # print("using dask")
             # calculate the number of chunks the voxel array should be split into to not
             # overload the memory. Then split the array by this number
             split_num = math.ceil(
@@ -314,7 +314,7 @@ class VoxelAssignmentToolkit:
             )
         else:
             dask = False
-            print("using numpy")
+            # print("using numpy")
             # split_num = 1
             split_num = math.ceil(
                 plane_distances_to_calc / handleable_plane_distance_calcs_numpy
@@ -515,6 +515,8 @@ class VoxelAssignmentToolkit:
         # To do this we need to track the two sites in the voxels split by two sites. We
         # also want to create lists for each voxel to store the important sites that will
         # contribute to our convex hull later
+        # This loop may be a slow down for very large voxel grids. There may
+        # be a creative solution that doesn't use for loops
         one_site_in_vertices = []
         one_site_in_vertices_indices = []
         two_sites_in_vertices = []
@@ -887,7 +889,6 @@ class VoxelAssignmentToolkit:
             all_voxel_assignments[index] = most_prevalent_site
             all_sites.append(unique_sites)
             all_fracs.append(fracs)
-        # print(f"Used {num_nearest_sites} nearest sites")
         results_dict = {"indices": indices, "sites": all_sites, "fracs": all_fracs}
         return results_dict, all_voxel_assignments
 
