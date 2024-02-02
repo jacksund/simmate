@@ -808,7 +808,7 @@ class BadElfToolkit:
             PartitioningToolkit(grid).plot_partitioning_results(partitioning)
         else:
             print(
-                f"""
+                """
                 Plotting of zero-flux partitioning surfaces is not currently
                 supported.
                 """

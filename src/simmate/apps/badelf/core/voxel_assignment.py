@@ -639,7 +639,10 @@ class VoxelAssignmentToolkit:
             # get the dot products between the edges and the plane vectors. This is a
             # 2D array with indices (i,j) where i is the edge index and j is the plane
             # index
-            edge_plane_dot_prods = self.calculate_t_den(plane_vectors)
+            try:
+                edge_plane_dot_prods = self.calculate_t_den(plane_vectors)
+            except:
+                breakpoint()
 
             # We want to make one large array of all possible edges and unit_cell_permutations_frac
             # for this set of vertices. Then we can calculate t for all of them at once.
@@ -675,7 +678,7 @@ class VoxelAssignmentToolkit:
             # vertex plane pair. The array will have plane indices as columns.
             # The rows will be the voxel index*edge_index*vertex_index
             #!!! I currently don't check for memory usage here. I may need to start
-            # doing this in chunks if there are memory issues
+            # doing this in chunks if there are memory issues for larger grids
             t_numerator = self.calculate_t_num(
                 all_vertex_cart_coords, plane_points, plane_vectors
             )
