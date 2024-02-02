@@ -1517,7 +1517,7 @@ class PartitioningToolkit:
             indices = planes_to_keep[equivalent_atom]
             new_partitioning_df = partitioning_df.iloc[indices]
             new_partitioning_df.sort_values(by=["dist"], inplace=True)
-            new_partitioning_df.reset_index(inplace=True)
+            new_partitioning_df.reset_index(inplace=True, drop=True)
             new_partitioning[i] = new_partitioning_df
         return new_partitioning
 
@@ -1596,10 +1596,11 @@ class PartitioningToolkit:
             important_plane_index = important_plane_indices[equiv_atom]
             site_dataframe = site_dataframe.iloc[important_plane_index]
             site_dataframe.sort_values(by=["dist"], inplace=True)
+            site_dataframe.reset_index(inplace=True, drop=True)
             initial_partitioning[site_index] = site_dataframe
 
-        # partitioning = self.reduce_to_symmetric_partitioning(initial_partitioning)
-        return initial_partitioning
+        partitioning = self.reduce_to_symmetric_partitioning(initial_partitioning)
+        return partitioning
 
     def plot_partitioning_results(
         self,
