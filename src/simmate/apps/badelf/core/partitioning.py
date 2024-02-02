@@ -1517,6 +1517,7 @@ class PartitioningToolkit:
             indices = planes_to_keep[equivalent_atom]
             new_partitioning_df = partitioning_df.iloc[indices]
             new_partitioning_df.sort_values(by=["dist"], inplace=True)
+            new_partitioning_df.reset_index(inplace=True)
             new_partitioning[i] = new_partitioning_df
         return new_partitioning
 
