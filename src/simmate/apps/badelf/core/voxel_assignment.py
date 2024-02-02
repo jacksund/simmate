@@ -324,7 +324,9 @@ class VoxelAssignmentToolkit:
         voxel_results_array = np.array([])
         # for each split, calculate the results and add to the end of our results
         for chunk, split_voxel_array in enumerate(split_voxel_frac_coords):
-            logging.info(f"Calculating site assignments for voxel chunk {chunk}/{split_num}")
+            logging.info(
+                f"Calculating site assignments for voxel chunk {chunk}/{split_num}"
+            )
             split_result = self.get_distance_from_voxels_to_planes(
                 voxel_frac_coords=split_voxel_array, max_dist=max_dist, dask=dask
             )
@@ -426,6 +428,9 @@ class VoxelAssignmentToolkit:
         return voxel_vertices_frac_coords_stack
 
     def get_vertices_site_assignments(self, voxel_vertices_frac_coords):
+        """
+        Finds the site each voxel vertex is assigned to.
+        """
         # Get transformations that will get the vertices of each voxel frac. The amount
         # to shift is 1/2 of a voxel in each direction
         voxel_vertices_frac_coords = voxel_vertices_frac_coords.copy()
@@ -443,6 +448,30 @@ class VoxelAssignmentToolkit:
         return vertices_sites_results_array
 
     def get_intersected_voxel_volume_ratio(self, all_voxel_assignments):
+        """
+        For voxels split by a plane, finds the ratio of the voxel that is assigned
+        to a given site.
+
+        Returns:
+            A tuple representing 3 different results.
+            The first is a 2D array
+            representing results for planes split by one plane. The columns are
+            the voxel index, the ratio belonging to the first site, the ratio
+            belonging to the second site, the first site index, and the second
+            site index.
+
+            The second result is a dictionary containing information about
+            voxels split by more than one plane. The keys are fracs, indices,
+            and sites. The indices are the indices of the voxel being split
+            and the fracs contains a list of arrays each representing the fraction
+            of the voxel belonging to the corresponding site in the sites key/value pair.
+
+            The third result is a 3D array that represents all of the voxel
+            assignments.This takes the site that is given the largest fraction
+            of a voxel as the only site. For voxels that are split 50-50 it
+            randomly assigns them.
+
+        """
         charge_grid = self.charge_grid
         partitioning = self.partitioning
         unit_cell_permutations_frac = self.unit_cell_permutations_frac
@@ -580,6 +609,7 @@ class VoxelAssignmentToolkit:
 
         # Now we want to loop over our unique plane pairs to only focus on planes of
         # interest
+        logging.info("Calculating voxel-plane intersections")
         for site_pair, original_indices, double_site_indices in zip(
             two_sites_in_vertices_unique,
             two_sites_in_vertices_unique_original_indices,
@@ -613,10 +643,6 @@ class VoxelAssignmentToolkit:
             # for this set of vertices. Then we can calculate t for all of them at once.
             # We also need to transform any intersections back to the original coords of
             # the voxel
-            #!!! These calculations could be reduced further I think by using the same
-            # starting vertex for as many edges as possible. Then the t_numerator array
-            # would need to be expanded afterwards
-
             all_vertex_frac_coords = []
             for transformation in unit_cell_permutations_frac:
                 # We iterate only through the first indices of the edges because the
