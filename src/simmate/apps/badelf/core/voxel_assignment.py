@@ -97,9 +97,9 @@ class VoxelAssignmentToolkit:
         a, b, c = charge_grid.grid_shape
         voxel_indices = np.indices(charge_grid.grid_shape).reshape(3, -1).T
         frac_coords = voxel_indices.copy().astype(float)
-        frac_coords[:, 0] /= a - 1
-        frac_coords[:, 1] /= b - 1
-        frac_coords[:, 2] /= c - 1
+        frac_coords[:, 0] /= a
+        frac_coords[:, 1] /= b
+        frac_coords[:, 2] /= c
         return frac_coords
 
     @cached_property
