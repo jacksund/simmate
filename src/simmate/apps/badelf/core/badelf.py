@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import csv
-import itertools
 import logging
 import math
 import warnings
 from functools import cached_property
 from pathlib import Path
 
-import dask.dataframe
 import numpy as np
-import pandas as pd
 import psutil
-from dask.distributed import Client, LocalCluster
 from numpy.typing import ArrayLike
 from pymatgen.analysis.dimensionality import get_dimensionality_larsen
 from pymatgen.analysis.graphs import StructureGraph
@@ -266,7 +262,7 @@ class BadElfToolkit:
 
             self._two_site_voxel_assignments = two_site_voxel_assignments
             self._multi_site_voxel_assignments = multi_site_voxel_assignments
-            self.voxel_assignments_array = voxel_assignments_array
+            self.voxel_assignments_array = voxel_assignments_array - 1
 
         logging.info("Finished voxel assignment")
         return (
@@ -284,17 +280,25 @@ class BadElfToolkit:
         Writes copies of the charge file and partitioning file (usually CHGCAR
         and ELFCAR) with electride sites. This is most frequently used for
         eventually running the Henkelman Bader code to get electride charges.
+
+        Args:
+            charge_file (str):
+                The name of the CHGCAR to write
+            partitioning_file (str):
+                The name of the ELFCAR to write
         """
+        # Get the directory
+        directory = self.directory
         # Write CHGCAR and ELFCAR files with the empty structure that was found
         electride_charge_grid = self.charge_grid.copy()
         electride_charge_grid.structure = self.electride_structure
-        electride_charge_grid.write_file(charge_file)
+        electride_charge_grid.write_file(directory / charge_file)
         electride_elf_grid = self.partitioning_grid.copy()
         # check that elf grid is same size as charge grid and if not, regrid
         if electride_charge_grid.voxel_num != electride_elf_grid.voxel_num:
             electride_elf_grid.regrid(new_grid_shape=electride_charge_grid.grid_shape)
         electride_elf_grid.structure = self.electride_structure
-        electride_elf_grid.write_file(partitioning_file)
+        electride_elf_grid.write_file(directory / partitioning_file)
 
     def _get_zero_flux_electride_assignment(
         self, all_voxel_site_assignments: ArrayLike
@@ -339,6 +343,21 @@ class BadElfToolkit:
         return all_voxel_site_assignments
 
     def get_electride_dimensionality(self, electride_connection_cutoff: float = 0):
+        """
+        Finds the dimensionality (e.g. 0D, 1D, etc.) of an electride based on
+        which voxels were assigned to the electride sites.
+
+        Args:
+            electride_connection_cutoff (float):
+                The ELF value to consider as the cutoff for when two electride
+                sites are not connected. 0 is the default, but another reasonable
+                selection is 0.5 which is often considered the cutoff at which
+                a site can be considered an electride.
+
+        Returns:
+            The dimensionality of the electride as an integer.
+        """
+
         electride_indices = self.electride_indices
         # If we have no electrides theres no reason to continue so we stop here
         if len(electride_indices) == 0:
@@ -454,6 +473,15 @@ class BadElfToolkit:
         return get_dimensionality_larsen(graph)
 
     def _fix_BvAt(self, file_name):
+        """
+        Adjusts the output BvAt files from the Henkelman group's bader algorithm's
+        print methods. In many cases, the atom labels are altered or removed.
+
+        Args:
+            file_name (str):
+                The name of the file to be fixed. Uses the default directory of
+                the BadElfToolkit instance.
+        """
         electride_structure = self.electride_structure
         symbols = electride_structure.types_of_species
         new_symbol_line = ""
@@ -476,6 +504,9 @@ class BadElfToolkit:
         return self._get_results()
 
     def _get_results(self):
+        """
+        Gets the results for a BadELF run and prints them to a .csv file.
+        """
         algorithm = self.algorithm
         directory = self.directory
         electride_num = len(self.electride_indices)
@@ -717,6 +748,9 @@ class BadElfToolkit:
             cores (int):
                 The number of computer cores (NOT threads) that will be used to
                 parallelize
+
+        Returns:
+            A BadElfToolkit instance.
         """
 
         partitioning_grid = Grid.from_file(directory / partitioning_file)
@@ -729,17 +763,33 @@ class BadElfToolkit:
             find_electrides=find_electrides,
         )
 
-    def write_species_file(self, file_type: str = "elf", species: str = "He"):
+    def write_species_file(self, file_type: str = "ELFCAR", species: str = "He"):
+        """
+        Writes an ELFCAR or CHGCAR for a given species. Writes to the default
+        directory provided to the BadelfToolkit class.
+
+        Args:
+            file_type (str):
+                The type of file that you want, either ELFCAR or CHGCAR
+            species (str):
+                The species to write data for.
+
+        Returns:
+            None
+        """
+        # Get directory
+        directory = self.directory
+        # Get voxel assignments and data
         voxel_assignment_array = self.voxel_assignments_array
-        if file_type == "elf":
+        if file_type == "ELFCAR":
             grid = self.partitioning_grid.copy()
             grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
-        elif file_type == "charge":
+        elif file_type == "CHGCAR":
             grid = self.charge_grid.copy()
         else:
             raise ValueError(
                 """
-                Invalid file_type. Options are "elf" or "charge".
+                Invalid file_type. Options are "ELFCAR" or "CHGCAR".
                 """
             )
         grid.structure = self.electride_structure
@@ -756,26 +806,42 @@ class BadElfToolkit:
 
         if species == "He":
             species = "e"
-        if file_type == "elf":
-            grid.write_file(f"ELFCAR_{species}")
-        elif file_type == "charge":
-            grid.write_file(f"CHGCAR_{species}")
+        if file_type == "ELFCAR":
+            grid.write_file(directory / f"ELFCAR_{species}")
+        elif file_type == "CHGCAR":
+            grid.write_file(directory / f"CHGCAR_{species}")
 
     def write_atom_file(
         self,
         atom_index: int,
-        file_type: str = "elf",
+        file_type: str = "ELFCAR",
     ):
+        """
+        Writes an ELFCAR or CHGCAR for a given atom. Writes to the default
+        directory provided to the BadelfToolkit class.
+
+        Args:
+            file_type (str):
+                The type of file that you want, either ELFCAR or CHGCAR
+            species (str):
+                The species to write data for.
+
+        Returns:
+            None
+        """
+        # Get directory
+        directory = self.directory
+        # Get voxel assignments and data
         voxel_assignment_array = self.voxel_assignments_array
-        if file_type == "elf":
+        if file_type == "ELFCAR":
             grid = self.partitioning_grid.copy()
             grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
-        elif file_type == "charge":
+        elif file_type == "CHGCAR":
             grid = self.charge_grid.copy()
         else:
             raise ValueError(
                 """
-                Invalid file_type. Options are "elf" or "charge".
+                Invalid file_type. Options are "ELFCAR" or "CHGCAR".
                 """
             )
         grid.structure = self.electride_structure
@@ -789,10 +855,10 @@ class BadElfToolkit:
             )
             grid.diff = diff_array
 
-        if file_type == "elf":
-            grid.write_file(f"ELFCAR_{atom_index}")
-        elif file_type == "charge":
-            grid.write_file(f"CHGCAR_{atom_index}")
+        if file_type == "ELFCAR":
+            grid.write_file(directory / f"ELFCAR_{atom_index}")
+        elif file_type == "CHGCAR":
+            grid.write_file(directory / f"CHGCAR_{atom_index}")
 
     def plot_partitioning(self):
         """
