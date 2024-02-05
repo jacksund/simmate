@@ -8,16 +8,13 @@ from pathlib import Path
 
 import dask.array as da
 import numpy as np
-import pandas as pd
 import psutil
 from numpy.typing import ArrayLike
 from scipy.spatial import ConvexHull
 from tqdm import tqdm
 
 from simmate.apps.badelf.core.grid import Grid
-from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.toolkit import Structure
-from simmate.workflows.utilities import get_workflow
 
 
 class VoxelAssignmentToolkit:
@@ -72,10 +69,18 @@ class VoxelAssignmentToolkit:
 
     @property
     def unit_cell_permutations_vox(self):
+        """
+        The permutations required to transform a unit cell to each of its neighbors.
+        Uses voxel coordinates.
+        """
         return self.charge_grid.permutations
 
     @property
     def unit_cell_permutations_frac(self):
+        """
+        The permutations required to transform a unit cell to each of its neighbors.
+        Uses fractional coordinates.
+        """
         unit_cell_permutations_frac = [
             (t, u, v)
             for t, u, v in itertools.product([-1, 0, 1], [-1, 0, 1], [-1, 0, 1])
@@ -86,13 +91,42 @@ class VoxelAssignmentToolkit:
 
     @property
     def unit_cell_permutations_cart(self):
+        """
+        The permutations required to transform a unit cell to each of its neighbors.
+        Uses cartesian coordinates.
+        """
         grid = self.charge_grid
         return grid.get_cart_coords_from_frac_full_array(
             self.unit_cell_permutations_frac
         )
 
     @property
+    def vertices_transforms_frac(self):
+        """
+        The transformations required to transform the center of a voxel to its
+        corners. Uses fractional coordinates.
+        """
+        a, b, c = self.charge_grid.grid_shape
+        a1, b1, c1 = 1 / (2 * a), 1 / (2 * b), 1 / (2 * c)
+        x, y, z = np.meshgrid([-a1, a1], [-b1, b1], [-c1, c1])
+        vertices_transforms_frac = np.column_stack((x.ravel(), y.ravel(), z.ravel()))
+        return vertices_transforms_frac
+
+    @property
+    def vertices_transforms_cart(self):
+        """
+        The transformations required to transform the center of a voxel to its
+        corners. Uses cartesian coordinates.
+        """
+        return self.charge_grid.get_cart_coords_from_frac_full_array(
+            self.vertices_transforms_frac
+        )
+
+    @cached_property
     def all_voxel_frac_coords(self):
+        """
+        The fractional coordinates for all of the voxels in the charge grid
+        """
         charge_grid = self.charge_grid.copy()
         a, b, c = charge_grid.grid_shape
         voxel_indices = np.indices(charge_grid.grid_shape).reshape(3, -1).T
@@ -104,6 +138,10 @@ class VoxelAssignmentToolkit:
 
     @cached_property
     def all_partitioning_plane_points_and_vectors(self):
+        """
+        The points and vectors for all of the partitioning planes stored as
+        two sets of N,3 shaped arrays.
+        """
         partitioning = self.partitioning
         plane_points = []
         plane_vectors = []
@@ -185,11 +223,29 @@ class VoxelAssignmentToolkit:
         edge_vectors = np.array(edge_vectors)
         return edge_vectors
 
-    def get_distance_from_voxels_to_planes(
+    def get_site_assignments_from_frac_coords(
         self,
-        voxel_frac_coords,
-        max_dist,
+        voxel_frac_coords: ArrayLike,
+        min_dist_from_plane: float,
     ):
+        """
+        Gets the site assignments for an arbitrary number of voxels described
+        by their fractional coordinates.
+
+        Args:
+            voxel_frac_coords (ArrayLike):
+                An N,3 array of fractional coordinates corresponding to the voxels
+                to assign sites to
+            min_dist_from_plane (float):
+                The minimum distance a point should be from the plane before
+                a site can be assigned. This is value usually corresponds to
+                the maximum distance the voxel center can be from the plane
+                while the voxel is still being intersected by the plane.
+
+        Returns:
+            A 1D array of atomic site assignments. Assignments start at 1 with
+            0 indicating no site was found for this coordinate.
+        """
         grid = self.charge_grid
         plane_equations = self.all_plane_equations
         number_of_planes_per_atom = self.number_of_planes_per_atom
@@ -243,7 +299,7 @@ class VoxelAssignmentToolkit:
                 distances = np.round(distances, 12)
                 # We write over the distances with a more simplified boolean to save
                 # space. This is also where we filter if we're near a plane if desired
-                distances = da.where(distances < -max_dist, True, False)
+                distances = da.where(distances < -min_dist_from_plane, True, False)
                 distances = distances.compute()
 
             else:
@@ -255,7 +311,7 @@ class VoxelAssignmentToolkit:
                 distances = np.round(distances, 12)
                 # We write over the distances with a more simplified boolean to save
                 # space. This is also where we filter if we're near a plane if desired
-                distances = np.where(distances < -max_dist, True, False)
+                distances = np.where(distances < -min_dist_from_plane, True, False)
 
             # split the array into the planes belonging to each atom. Again we write
             # over to save space
@@ -292,15 +348,29 @@ class VoxelAssignmentToolkit:
             # results_array[global_indices_to_zero] = 0
         return results_array
 
-    def get_distance_from_voxels_to_planes_with_memory_handling(
+    def get_site_assignments_from_frac_coords_with_memory_handling(
         self,
-        voxel_frac_coords,
-        max_dist,
+        voxel_frac_coords: ArrayLike,
+        min_dist_from_plane: float,
     ):
         """
-        Calculates the distance from each voxel to every partitioning plane. For
-        very large grids and partitioning planes lists, the voxels are calculated
-        in chunks relative to the available memory.
+        Gets the site assignments for an arbitrary number of voxels described
+        by their fractional coordinates. Takes available memory into account
+        and divides the voxels into chunks to perform operations.
+
+        Args:
+            voxel_frac_coords (ArrayLike):
+                An N,3 array of fractional coordinates corresponding to the voxels
+                to assign sites to
+            min_dist_from_plane (float):
+                The minimum distance a point should be from the plane before
+                a site can be assigned. This is value usually corresponds to
+                the maximum distance the voxel center can be from the plane
+                while the voxel is still being intersected by the plane.
+
+        Returns:
+            A 1D array of atomic site assignments. Assignments start at 1 with
+            0 indicating no site was found for this coordinate.
         """
         partitioning = self.partitioning
         # determine how much memory is available. Then calculate how many distance
@@ -335,18 +405,34 @@ class VoxelAssignmentToolkit:
             logging.info(
                 f"Calculating site assignments for voxel chunk {chunk}/{split_num}"
             )
-            split_result = self.get_distance_from_voxels_to_planes(
-                voxel_frac_coords=split_voxel_array, max_dist=max_dist
+            split_result = self.get_site_assignments_from_frac_coords(
+                voxel_frac_coords=split_voxel_array,
+                min_dist_from_plane=min_dist_from_plane,
             )
             voxel_results_array = np.concatenate([voxel_results_array, split_result])
         return voxel_results_array
 
     @staticmethod
-    def calculate_t_num(points, plane_points, plane_vectors):
+    def calculate_t_num(
+        points: ArrayLike, plane_points: ArrayLike, plane_vectors: ArrayLike
+    ):
         """
         Generalizes the calculation np.dot(plane_vector, (plane_point - point)) to
         an arbitrary number of planes and points. Returns a 2D array with index (i,j)
         with i as the point index and j as the plane index.
+
+        Args:
+            points (ArrayLike):
+                A (N,3) array representing the points in cartesian coordinates
+                to perform the operation for.
+            plane_points (ArrayLike):
+                The points on each plane to use for the calculation
+            plane_vectors (ArrayLike):
+                The vectors normal to each plane to use for the calculation
+
+        Returns:
+            A 2D array with indices (i,j) where i is the points index and j is
+            the plane index.
         """
         # Reshape arrays for broadcasting
         points_reshaped = points[:, np.newaxis, :].astype(float)
@@ -362,12 +448,20 @@ class VoxelAssignmentToolkit:
         )
         return result.compute()
 
-    def calculate_t_den(self, plane_vectors):
+    def calculate_t_den(self, plane_vectors: ArrayLike):
         """
         Each of the voxel edge vectors is identical across voxels. This function takes each
         edge vector and gets the dot product with each plane vector. The results is
         a 2D array with indices (i,j) where i is the edge index and j is the plane
-        index
+        index.
+
+        Args:
+            plane_vectors:
+                The vectors normal to the planes to use in the calculation
+
+        Returns:
+            A 2D array with indices (i,j) where i is the edge index and j is
+            the plane index.
         """
         edge_vectors = self.voxel_edge_vectors
 
@@ -379,9 +473,18 @@ class VoxelAssignmentToolkit:
         )
         return edge_plane_dot_prods
 
-    def get_single_site_voxel_assignments(self, all_site_voxel_assignments):
+    def get_single_site_voxel_assignments(self, all_site_voxel_assignments: ArrayLike):
         """
-        Gets the voxel assignments for voxels that are not split by a plane
+        Gets the voxel assignments for voxels that are not split by a plane.
+
+        Args:
+            all_site_voxel_assignments (ArrayLike):
+                A 1D array of integers representing the site assignments for
+                each voxel in the grid.
+
+        Returns:
+            A 1D array of the same length as the input with additional site
+            assignments.
         """
         all_voxel_assignments = all_site_voxel_assignments.copy()
         charge_grid = self.charge_grid
@@ -391,34 +494,28 @@ class VoxelAssignmentToolkit:
         unassigned_indices = np.where(all_voxel_assignments == 0)[0]
         all_voxel_frac_coords = self.all_voxel_frac_coords
         frac_coords_to_find = all_voxel_frac_coords[unassigned_indices]
-        max_dist = charge_grid.max_voxel_dist
+        min_dist_from_plane = charge_grid.max_voxel_dist
         single_site_voxel_assignments = (
-            self.get_distance_from_voxels_to_planes_with_memory_handling(
-                frac_coords_to_find, max_dist
+            self.get_site_assignments_from_frac_coords_with_memory_handling(
+                frac_coords_to_find, min_dist_from_plane
             )
         )
         all_voxel_assignments[unassigned_indices] = single_site_voxel_assignments
         return all_voxel_assignments
 
-    @property
-    def vertices_transforms_frac(self):
-        a, b, c = self.charge_grid.grid_shape
-        a1, b1, c1 = 1 / (2 * a), 1 / (2 * b), 1 / (2 * c)
-        x, y, z = np.meshgrid([-a1, a1], [-b1, b1], [-c1, c1])
-        vertices_transforms_frac = np.column_stack((x.ravel(), y.ravel(), z.ravel()))
-        return vertices_transforms_frac
-
-    @property
-    def vertices_transforms_cart(self):
-        return self.charge_grid.get_cart_coords_from_frac_full_array(
-            self.vertices_transforms_frac
-        )
-
-    def get_voxel_vertices_frac_coords_stack(self, voxel_indices):
+    def get_voxel_vertices_frac_coords_stack(self, voxel_indices: ArrayLike):
         """
         The fractional coordinates for the vertices of a given array of voxel
         coordinates. The coordinates are stacked in order of the transformations
-        applied to get from the voxel center to the vertices
+        applied to get from the voxel center to the vertices.
+
+        Args:
+            voxel_indices (ArrayLike):
+                The indices of the voxels to get the vertices for.
+
+        Returns:
+            A (8*N,3) shaped array where N is the number of voxels to find the
+            vertices for.
         """
         all_voxel_frac_coords = self.all_voxel_frac_coords
         multi_site_voxel_indices = voxel_indices
@@ -435,9 +532,18 @@ class VoxelAssignmentToolkit:
         voxel_vertices_frac_coords_stack = np.concatenate(voxel_vertices_frac_coords)
         return voxel_vertices_frac_coords_stack
 
-    def get_vertices_site_assignments(self, voxel_vertices_frac_coords):
+    def get_vertices_site_assignments(self, voxel_vertices_frac_coords: ArrayLike):
         """
         Finds the site each voxel vertex is assigned to.
+
+        Args:
+            voxel_vertices_frac_coords (ArrayLike):
+                The fractional coordinates of the voxels to get the vertex site
+                assignments for.
+
+        Returns:
+            An (N,M) shaped array with indices (i,j) where i is the voxel index
+            and j is the vertex index.
         """
         logging.info("Calculating voxel vertices' sites")
         # Get transformations that will get the vertices of each voxel frac. The amount
@@ -445,8 +551,8 @@ class VoxelAssignmentToolkit:
         voxel_vertices_frac_coords = voxel_vertices_frac_coords.copy()
         # Get the site assignments for each vertex
         vertices_sites_results_array = (
-            self.get_distance_from_voxels_to_planes_with_memory_handling(
-                voxel_frac_coords=voxel_vertices_frac_coords, max_dist=0
+            self.get_site_assignments_from_frac_coords_with_memory_handling(
+                voxel_frac_coords=voxel_vertices_frac_coords, min_dist_from_plane=0
             )
         )
         # split back into the 8 vertices
@@ -456,10 +562,15 @@ class VoxelAssignmentToolkit:
         vertices_sites_results_array = np.vstack(vertices_sites_results_array).T
         return vertices_sites_results_array
 
-    def get_intersected_voxel_volume_ratio(self, all_voxel_assignments):
+    def get_intersected_voxel_volume_ratio(self, all_voxel_assignments: ArrayLike):
         """
         For voxels split by a plane, finds the ratio of the voxel that is assigned
         to a given site.
+
+        Args:
+            all_voxel_assignments (ArrayLike):
+                A 1D array of integers representing the site assignments for
+                each voxel in the grid.
 
         Returns:
             A tuple representing 3 different results.
@@ -874,7 +985,20 @@ class VoxelAssignmentToolkit:
             all_site_voxel_assignments_grid,
         )
 
-    def get_voxels_multi_planes(self, all_voxel_assignments):
+    def get_voxels_multi_planes(self, all_voxel_assignments: ArrayLike):
+        """
+        Gets site assignments for voxels that are split by more than one plane.
+        Looks at each neighboring voxel and assigns the voxel to the most common
+        site assigned to these.
+
+        Args:
+            all_voxel_assignments (ArrayLike):
+                A 1D array of integers representing the site assignments for
+                each voxel in the grid.
+        Returns:
+            A 1D array of integers representing the site assignments for
+            each voxel in the grid.
+        """
         logging.info("Finding sites for voxels split by more than one plane.")
         charge_grid = self.charge_grid
         grid_shape = charge_grid.grid_shape
@@ -916,14 +1040,24 @@ class VoxelAssignmentToolkit:
 
     def get_voxels_site_nearest(
         self,
-        point_voxel_coords: ArrayLike | list,
+        point_cart_coords: ArrayLike | list,
     ):
+        """
+        Finds the site nearest to a point.
+
+        Args:
+            point_cart_coords (ArrayLike):
+                The cartesian coordinates of a point.
+
+        Returns:
+            The site the point is closest to.
+        """
         if self.algorithm == "badelf":
             structure = self.charge_grid.structure
         elif self.algorithm == "voronelf":
             structure = self.electride_structure
         structure_temp = structure.copy()
-        structure_temp.append("He", point_voxel_coords, coords_are_cartesian=True)
+        structure_temp.append("He", point_cart_coords, coords_are_cartesian=True)
         nearest_site = structure_temp.get_neighbors(structure_temp[-1], 5)[0].index
         nearest_site += 1
         # create dictionary for recording what fraction of a voxels volume should
