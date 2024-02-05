@@ -757,13 +757,15 @@ class VoxelAssignmentToolkit:
             # to the second site
             partitioning1 = partitioning[sites[0]]
             partitioning1 = partitioning1.loc[partitioning1["neigh_index"] == sites[1]]
-            plane_points.append(np.array(partitioning1["plane_points"].to_list()))
-            plane_vectors.append(np.array(partitioning1["plane_vectors"].to_list()))
+            if len(partitioning1) > 0:
+                plane_points.append(np.array(partitioning1["plane_points"].to_list()))
+                plane_vectors.append(np.array(partitioning1["plane_vectors"].to_list()))
             # Now we repeat for the second site
             partitioning2 = partitioning[sites[1]]
             partitioning2 = partitioning2.loc[partitioning2["neigh_index"] == sites[0]]
-            plane_points.append(np.array(partitioning1["plane_points"].to_list()))
-            plane_vectors.append(np.array(partitioning1["plane_vectors"].to_list()))
+            if len(partitioning2) > 0:
+                plane_points.append(np.array(partitioning2["plane_points"].to_list()))
+                plane_vectors.append(np.array(partitioning2["plane_vectors"].to_list()))
             plane_points = np.concatenate(plane_points)
             plane_vectors = np.concatenate(plane_vectors)
             # get the dot products between the edges and the plane vectors. This is a
@@ -907,6 +909,7 @@ class VoxelAssignmentToolkit:
         )
         frac = frac.round(12)
         inv_frac = 1 - frac
+        # breakpoint()
         # create an array for the results of planes split by two sites. The
         # columns represent the voxel index, fraction of voxel belonging to the
         # first site, frac of voxel belonging to second site, the first site index
