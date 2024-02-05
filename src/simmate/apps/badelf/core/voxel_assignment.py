@@ -204,10 +204,10 @@ class VoxelAssignmentToolkit:
         # global_indices_to_zero = np.array([])
         # check every possible permutation
         for transformation in tqdm(
-            unit_cell_permutations_frac, total=len(unit_cell_permutations_frac),
+            unit_cell_permutations_frac,
+            total=len(unit_cell_permutations_frac),
             ascii="░▒▓",
         ):
-            
             # Get the indices where voxels haven't been assigned. Get only these
             # frac coords
             indices_where_zero = np.where(results_array == 0)[0]
@@ -223,7 +223,7 @@ class VoxelAssignmentToolkit:
             ).astype(float)
             points = np.array(cart_coords).astype(float)
             planes = np.array(plane_equations).astype(float)
-            # There is a difference in the speed of dask vs numpy. Dask has a 
+            # There is a difference in the speed of dask vs numpy. Dask has a
             # lot of overhead, but at a certain point it is faster than numpy.
             # We check which one we should use here.
             plane_distances_to_calc = len(points) * len(planes)
@@ -231,7 +231,7 @@ class VoxelAssignmentToolkit:
                 dask = True
             else:
                 dask = False
-            
+
             if dask:
                 # DASK ARRAY VERSION
                 # points = da.from_array(points)
@@ -291,9 +291,7 @@ class VoxelAssignmentToolkit:
             results_array[indices_where_zero] = new_results_array
             # results_array[global_indices_to_zero] = 0
         return results_array
-    
-    
-    
+
     def get_distance_from_voxels_to_planes_with_memory_handling(
         self,
         voxel_frac_coords,
@@ -314,7 +312,7 @@ class VoxelAssignmentToolkit:
         plane_distances_to_calc = len(voxel_frac_coords) * sum(
             [len(i) for i in partitioning.values()]
         )
-        
+
         # I found there is a cutoff where Dask becomes faster than numpy. This
         # may vary with the number of cores available. It is largely due to Dask
         # having a large overhead.
@@ -622,7 +620,7 @@ class VoxelAssignmentToolkit:
 
         # Now we want to loop over our unique plane pairs to only focus on planes of
         # interest
-        
+
         #!!! I am getting an error in Ti2C where the vertices of a voxel are
         # assigned to two atoms that do not have a shared plane in the partitioning.
         # I've ruled out an issue with calculating the voxel vertices locations.
