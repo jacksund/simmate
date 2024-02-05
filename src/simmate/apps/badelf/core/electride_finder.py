@@ -39,16 +39,18 @@ class ElectrideFinder:
         """
         return self.find_local_maxima()
 
-    def find_local_maxima(self, neighborhood_size=1, threshold=None):
+    def find_local_maxima(self, neighborhood_size: int = 1, threshold: float = None):
         """
         Find local maxima in a 3D numpy array.
 
         Args:
-        - neighborhood_size: Size of the neighborhood for finding local maxima
-        - threshold: Threshold for considering a point as a local maximum
+            neighborhood_size (int):
+                Size of the neighborhood for finding local maxima
+            threshold (float):
+                Threshold for considering a point as a local maximum
 
         Returns:
-        - List of tuples containing the coordinates of local maxima
+            List of tuples containing the coordinates of local maxima
         """
         grid = self.grid.copy()
         grid.regrid(desired_resolution=1000)
@@ -93,7 +95,17 @@ class ElectrideFinder:
         return maxima_cart_coords, maxima_values
 
     @staticmethod
-    def to_number_from_roman_numeral(roman_num):
+    def to_number_from_roman_numeral(roman_num: str):
+        """
+        Converts from a roman numeral to an integer
+
+        Args:
+            roman_num (str):
+                The roman numeral to convert from
+
+        Returns:
+            The integer representation of the roman numeral
+        """
         lookup = {
             "X": 10,
             "V": 5,
@@ -121,6 +133,9 @@ class ElectrideFinder:
         """
         Gets the shannon crystal radii for each atom in the structure. The
         oxidation states are estimated using traditional bader.
+
+        Returns:
+            A dictionary connecting atomic sites to oxidation states
         """
         directory = self.directory
         structure = self.grid.structure
@@ -181,6 +196,9 @@ class ElectrideFinder:
     def elf_radii(self):
         """
         Gets the elf radius of each atom in the structure
+
+        Returns:
+            A dictionary connecting atomic sites to their elf ionic radii
         """
         grid = self.grid.copy()
         structure = grid.structure.copy()
@@ -220,14 +238,15 @@ class ElectrideFinder:
         """
         Gets the radius for each atom in the structure.
 
-        Parameters
-        ----------
+        Args:
+            method (str):
+                The method used to find the radii. Options are "elf" or "shannon".
+                elf will use the provided grid to find the radius of each atom and
+                shannon will use bader oxidation states and the closest available
+                tabulated shannon crystal radius.
 
-        method : str, optional
-            The method used to find the radii. Options are "elf" or "shannon".
-            elf will use the provided grid to find the radius of each atom and
-            shannon will use bader oxidation states and the closest available
-            tabulated shannon crystal radius.
+        Returns:
+            A dictionary of radii for each atom in the structure.
         """
         if method == "elf":
             atom_radii = self.elf_radii
@@ -255,37 +274,34 @@ class ElectrideFinder:
         """
         Finds the electrides in a structure using an ELF grid.
 
-        Parameters
-        ----------
+        Args:
+            electride_finder_cutoff (float):
+                The minimum elf value at the site to be considered a possible
+                electride. The default is 0.5.
+            min_electride_radius (float):
+                The minimum elf radius around the maximum for it to be considered
+                an electride. The default is 0.9 which is somewhat arbitrarily chosen.
+                An goold alternative is 1.19 which is the average radius of fluoride
+                in a 6 coordination environment.
+            atom_radius_method (str):
+                The method used to find the radii. Options are "elf" or "shannon".
+                elf will use the provided grid to find the radius of each atom and
+                shannon will use bader oxidation states and the closest available
+                tabulated shannon crystal radius.
+            local_maxima_coords (list):
+                The coordinates of all local maxima in the grid. This will be found
+                automatically if not set.
+            local_maxima_values (list):
+                The values at the local maxima. This will be found automatically if
+                not set.
+            remove_old_electrides (bool):
+                Whether or not to remove any other electrides already placed in
+                the system. It is generally recommended that structures without
+                electrides are provided.
 
-        electride_finder_cutoff : float, optional
-            The minimum elf value at the site to be considered a possible
-            electride. The default is 0.5.
-        min_electride_radius : float, optional
-            The minimum elf radius around the maximum for it to be considered
-            an electride. The default is 0.9 which is somewhat arbitrarily chosen.
-            An goold alternative is 1.19 which is the average radius of fluoride
-            in a 6 coordination environment.
-        atom_radius_method : str, optional
-            The method used to find the radii. Options are "elf" or "shannon".
-            elf will use the provided grid to find the radius of each atom and
-            shannon will use bader oxidation states and the closest available
-            tabulated shannon crystal radius.
-        local_maxima_coords : list, optional
-            The coordinates of all local maxima in the grid. This will be found
-            automatically if not set.
-        local_maxima_values : list, optional
-            The values at the local maxima. This will be found automatically if
-            not set.
-        remove_old_electrides : bool, optional
-            Whether or not to remove any other electrides already placed in
-            the system. It is generally recommended that structures without
-            electrides are provided.
-
-        Returns
-        -------
-        A structure object with the found electride sites labeled with "He"
-        dummy atoms.
+        Returns:
+            A structure object with the found electride sites labeled with "He"
+            dummy atoms.
         """
         logging.info("Finding electride sites")
         # Get the coordinates and values of each local maximum in the grid
