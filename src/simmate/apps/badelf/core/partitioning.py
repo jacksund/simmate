@@ -25,7 +25,8 @@ class PartitioningToolkit:
     VoronELF algorithms.
 
     Args:
-        grid (Grid): A BadELF app Grid type object.
+        grid (Grid):
+            A BadELF app Grid type object.
     """
 
     def __init__(self, grid: Grid):
@@ -44,10 +45,13 @@ class PartitioningToolkit:
         using an interpolation function defined using SciPy's RegularGridInterpeter.
 
         Args:
-            site_voxel_coord (ArrayLike): The voxel coordinates of an atomic site
-            neigh_voxel_coord (ArrayLike): The voxel coordinates of a neighboring
+            site_voxel_coord (ArrayLike):
+                The voxel coordinates of an atomic site
+            neigh_voxel_coord (ArrayLike):
+                The voxel coordinates of a neighboring
                 site
-            method (str): The method of interpolation. 'cubic' is more rigorous
+            method (str):
+                The method of interpolation. 'cubic' is more rigorous
                 than 'linear'
 
         Results:
@@ -110,9 +114,11 @@ class PartitioningToolkit:
         Gets the voxel positions and elf values for points between two sites in
         the structure.
 
-        Parameters:
-        - i: index of first site in the structure
-        - j: index of second site in the structure
+        Args:
+            i (int):
+                index of first site in the structure
+            j (int):
+                index of second site in the structure
 
         Returns:
         - Two lists, one of positions in voxel coordinates and another of elf
@@ -126,7 +132,9 @@ class PartitioningToolkit:
         )
 
     def get_partitioning_line_from_cart_coords(
-        self, site_cart_coords, neigh_cart_coords
+        self,
+        site_cart_coords: ArrayLike | list,
+        neigh_cart_coords: ArrayLike | list,
     ):
         """
         Gets the voxel positions and elf values for points between two sites in
@@ -134,13 +142,15 @@ class PartitioningToolkit:
         used to find the values in the ELF between two arbitrary points in the
         structure.
 
-        Parameters:
-        - site_cart_coords: cartesian coordinates of a site in the structure
-        - neigh_cart_coords: cartesian coordinates of a second site in the structure
+        Args:
+            site_cart_coords (ArrayLike):
+                cartesian coordinates of a site in the structure
+            neigh_cart_coords (ArrayLike):
+                cartesian coordinates of a second site in the structure
 
         Returns:
-        - Two lists, one of positions in voxel coordinates and another of elf
-        values
+            Two lists, one of positions in voxel coordinates and another of elf
+            values
         """
         grid = self.grid.copy()
         site_voxel_coord = grid.get_voxel_coords_from_cart(site_cart_coords)
@@ -154,12 +164,14 @@ class PartitioningToolkit:
         """
         Check if the values are roughly symmetric.
 
-        Parameters:
-        - values: List of numeric values
-        - tolerance: Tolerance level for symmetry check
+        Args:
+            values (list):
+                List of numeric values
+            tolerance (float):
+                Tolerance level for symmetry check
 
         Returns:
-        - True if roughly symmetric, False otherwise
+            True if roughly symmetric, False otherwise
         """
         n = len(values)
 
@@ -191,7 +203,8 @@ class PartitioningToolkit:
         at each as a list of form [[min_index1, min_value1], [min_index2, min_value2], ...]
 
         Args:
-            values (list): The list of values to find the minima of
+            values (list):
+                The list of values to find the minima of
 
         results:
             A list of minima represented by [index, value]
@@ -211,7 +224,8 @@ class PartitioningToolkit:
         at each as a list of form [[max_index1, max_value1], [max_index2, max_value2], ...]
 
         Args:
-            values (list): The list of values to find the minima of
+            values (list):
+                The list of values to find the minima of
 
         results:
             A list of maxima represented by [index, value]
@@ -234,8 +248,10 @@ class PartitioningToolkit:
         and finds which extrema is closest to the center of the line.
 
         Args:
-            values (list): A list of values
-            extrema (list): A list of extrema of form [index, value]
+            values (list):
+                A list of values
+            extrema (list):
+                A list of extrema of form [index, value]
 
         results:
             The global extreme of form [index, value]
@@ -322,7 +338,7 @@ class PartitioningToolkit:
                 The index along the line at which the linear interpolation estimated
                 the minimum.
 
-        results:
+        Returns:
             The global minimum of form [line_position, value, frac_position]
         """
         amount_to_pad = 10
@@ -416,11 +432,15 @@ class PartitioningToolkit:
         between two atoms. The minimum point is where the dividing plane should lie.
 
         Args:
-            global_min_frac (float): The global minimum fraction
-            site_voxel_coords (ArrayLike): The voxel coordinates of the site at
-                the start of the line.
-            neigh_voxel_coords (ArrayLike): The voxel coordinates of the neighbor
-                atom at the end of the line.
+            global_min_frac (float):
+                The global minimum fraction
+            site_voxel_coords (ArrayLike):
+                The voxel coordinates of the site at the start of the line.
+            neigh_voxel_coords (ArrayLike):
+                The voxel coordinates of the neighbor atom at the end of the line.
+
+        Returns:
+            The voxel coordinates of the minimum.
         """
 
         # get the vector that points between the site and its neighbor (in vox  coords)
@@ -442,12 +462,14 @@ class PartitioningToolkit:
         Gets the sign associated with a point compared with a plane.
 
         Args:
-            point (ArrayLike): A point in cartesian coordinates to compare with
-                a plane
-            plane_vector (ArrayLike): The vector normal to the plane of interest
-            plane_point (ArrayLike): A point on the plane of interest
+            point (ArrayLike):
+                A point in cartesian coordinates to compare with a plane
+            plane_vector (ArrayLike):
+                The vector normal to the plane of interest
+            plane_point (ArrayLike):
+                A point on the plane of interest
 
-        results:
+        Returns:
             The sign of the point compared with the plane and the distance of
             the point to the plane.
         """
@@ -474,12 +496,14 @@ class PartitioningToolkit:
         between it and another atom.
 
         Args:
-            minimum_point (ArrayLike): A point in cartesian coordinates where
-                there is a minimum along a line
-            site_voxel_coords (ArrayLike): The voxel coordinates of a site that
-                is at one end of the line that the minimum belongs to
+            minimum_point (ArrayLike):
+                A point in cartesian coordinates where there is a minimum along
+                a line
+            site_voxel_coords (ArrayLike):
+                The voxel coordinates of a site that is at one end of the line
+                that the minimum belongs to
 
-        results:
+        Returns:
             The distance from the site to the minimum
         """
         grid = self.grid.copy()
@@ -512,6 +536,9 @@ class PartitioningToolkit:
                 in the PartitioningToolkit instance
             site_is_electride (bool):
                 Whether the site in question is an electride site.
+
+        Returns:
+            The distance the ELF ionic radius of the site
         """
         if structure is None:
             structure = self.grid.structure.copy()
@@ -681,8 +708,9 @@ class PartitioningToolkit:
             site_cart_coords (ArrayLike):
                 The cartesian coordinates of the site
 
-        Returns three arrays corresponding to the indices of the reduced planes,
-        the reduced plane's points and the reduced plane's vectors
+        Returns:
+            Three arrays corresponding to the indices of the reduced planes,
+            the reduced plane's points and the reduced plane's vectors
         """
         # convert to arrays if not already
         all_plane_points = np.array(plane_points)
@@ -794,6 +822,11 @@ class PartitioningToolkit:
         class from pymatgen. This is intended to help quickly check for covalency
         in the structure and may eventually be removed.
 
+        Args:
+            structure (Structure):
+                The structure to get closest neighbors for. Defaults to the
+                base structure for this PartitioningToolkit instance
+
         Returns:
             A dictionary relating atomic sites to pymatgen neighbor objects
         """
@@ -815,7 +848,8 @@ class PartitioningToolkit:
         to 26, but if this is not large enough we automatically increase the amount.
 
         Args:
-            neighbor_num (int): The number of nearest neighbors to find
+            neighbor_num (int):
+                The number of nearest neighbors to find
 
         Results:
             A list of relating an atoms index to its  neighbors.
@@ -864,7 +898,8 @@ class PartitioningToolkit:
         maximum is closer, the bond is considered to have some covalent behavior.
 
         Args:
-            values (list): The list of values to check along
+            values (list):
+                The list of values to check along
 
         Returns:
             True if the bond has covalent behavior and False if not.
@@ -930,8 +965,9 @@ class PartitioningToolkit:
         they are.
 
         Args:
-            closest_neighbors (dict): A dictionary relating sites to pymatgen
-                Neigh objects determined from CrystalNN
+            closest_neighbors (dict):
+                A dictionary relating sites to pymatgen Neigh objects determined
+                from CrystalNN
         Returns:
             Nothing
         """
@@ -998,8 +1034,9 @@ class PartitioningToolkit:
         to the center of the bond than any minimum.
 
         Args:
-            closest_neighbors (dict): A dictionary relating sites to pymatgen
-                Neigh objects determined from CrystalNN
+            closest_neighbors (dict):
+                A dictionary relating sites to pymatgen Neigh objects determined
+                from CrystalNN
 
         Returns:
             Nothing
@@ -1081,7 +1118,7 @@ class PartitioningToolkit:
             neigh_cart_coords (Array | list):
                 The cartesian coordinates of the neighboring site.
 
-        returns:
+        Returns:
             The minimum point in the ELF between the two sites.
 
         """
@@ -1115,8 +1152,10 @@ class PartitioningToolkit:
         point on the plane
 
         Args:
-            plane_point (ArrayLike): A point on the plane
-            plane_vector (ArrayLike): A vector perpendicular to the plane
+            plane_point (ArrayLike):
+                A point on the plane
+            plane_vector (ArrayLike):
+                A vector perpendicular to the plane
 
         Returns:
             The four plane equation coefficients
@@ -1172,7 +1211,8 @@ class PartitioningToolkit:
         Gets a list of planes that make up a 3D polyhedral.
 
         Args:
-            planes (list): The list of planes to check
+            planes (list):
+                The list of planes to check
 
         Returns:
             A list of plane intercepts and a list of important planes as arrays
@@ -1492,7 +1532,20 @@ class PartitioningToolkit:
         possible_site_neigh_pairs["plane_vectors"] = list(unit_vectors)
         return possible_site_neigh_pairs
 
-    def reduce_to_symmetric_partitioning(self, initial_partitioning):
+    def reduce_to_symmetric_partitioning(self, initial_partitioning: dict):
+        """
+        Reduces a set of partitioning planes by checking that each plane has
+        an equivalent counterpart for the neighboring atom and removing it
+        if not.
+
+        Args:
+            initial_partitioning (dict):
+                A dictionary with site indices as keys and partitioning dataframes
+                as values
+
+        Returns:
+            A new dictionary of partitioning dataframes for each site.
+        """
         equivalent_atoms = self.grid.equivalent_atoms
         unique_atoms = list(set(equivalent_atoms))
 

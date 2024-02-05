@@ -309,7 +309,8 @@ class BadElfToolkit:
 
         Args:
             all_voxel_site_assignments (ArrayLike):
-                The array to add the voxel assignments to.
+                A 1D array of integers representing the site assignments for
+                each voxel in the grid.
 
         Returns:
             updated voxel_assignments dataframe
