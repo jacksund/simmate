@@ -189,7 +189,6 @@ class VoxelAssignmentToolkit:
         self,
         voxel_frac_coords,
         max_dist,
-        dask,
     ):
         grid = self.charge_grid
         plane_equations = self.all_plane_equations
@@ -205,8 +204,10 @@ class VoxelAssignmentToolkit:
         # global_indices_to_zero = np.array([])
         # check every possible permutation
         for transformation in tqdm(
-            unit_cell_permutations_frac, total=len(unit_cell_permutations_frac)
+            unit_cell_permutations_frac, total=len(unit_cell_permutations_frac),
+            ascii="░▒▓",
         ):
+            
             # Get the indices where voxels haven't been assigned. Get only these
             # frac coords
             indices_where_zero = np.where(results_array == 0)[0]
@@ -222,6 +223,15 @@ class VoxelAssignmentToolkit:
             ).astype(float)
             points = np.array(cart_coords).astype(float)
             planes = np.array(plane_equations).astype(float)
+            # There is a difference in the speed of dask vs numpy. Dask has a 
+            # lot of overhead, but at a certain point it is faster than numpy.
+            # We check which one we should use here.
+            plane_distances_to_calc = len(points) * len(planes)
+            if plane_distances_to_calc > 7.8e8:
+                dask = True
+            else:
+                dask = False
+            
             if dask:
                 # DASK ARRAY VERSION
                 # points = da.from_array(points)
@@ -233,7 +243,7 @@ class VoxelAssignmentToolkit:
                 distances = np.round(distances, 12)
                 # We write over the distances with a more simplified boolean to save
                 # space. This is also where we filter if we're near a plane if desired
-                distances = da.where(distances <= -max_dist, True, False)
+                distances = da.where(distances < -max_dist, True, False)
                 distances = distances.compute()
 
             else:
@@ -245,7 +255,7 @@ class VoxelAssignmentToolkit:
                 distances = np.round(distances, 12)
                 # We write over the distances with a more simplified boolean to save
                 # space. This is also where we filter if we're near a plane if desired
-                distances = np.where(distances <= -max_dist, True, False)
+                distances = np.where(distances < -max_dist, True, False)
 
             # split the array into the planes belonging to each atom. Again we write
             # over to save space
@@ -274,13 +284,16 @@ class VoxelAssignmentToolkit:
             #     new_results_array = np.sum([new_results_array,sub_results_array],axis=0)
             #     indices_to_zero.extend(np.where(new_results_array>i+1)[0])
             # indices_to_zero = np.unique(indices_to_zero).astype(int)
+            # print(len(indices_to_zero))
             # global_indices_to_zero = np.concatenate(
             #     (global_indices_to_zero,indices_where_zero[indices_to_zero])).astype(int)
             # # # add results to the results_array
             results_array[indices_where_zero] = new_results_array
             # results_array[global_indices_to_zero] = 0
         return results_array
-
+    
+    
+    
     def get_distance_from_voxels_to_planes_with_memory_handling(
         self,
         voxel_frac_coords,
@@ -294,8 +307,6 @@ class VoxelAssignmentToolkit:
         partitioning = self.partitioning
         # determine how much memory is available. Then calculate how many distance
         # calculations would be possible to do at once with this much memory.
-        #!!!! Is this necessary when using dask? Also I should add a size check to
-        # see at which point dask becomes faster than numpy
         available_memory = psutil.virtual_memory().available / (1024**2)
 
         handleable_plane_distance_calcs_numpy = available_memory / 0.00007
@@ -303,18 +314,17 @@ class VoxelAssignmentToolkit:
         plane_distances_to_calc = len(voxel_frac_coords) * sum(
             [len(i) for i in partitioning.values()]
         )
-        # if plane_distances_to_calc > handleable_plane_distance_calcs_numpy:
+        
+        # I found there is a cutoff where Dask becomes faster than numpy. This
+        # may vary with the number of cores available. It is largely due to Dask
+        # having a large overhead.
         if plane_distances_to_calc > 7.8e8:
-            dask = True
-            # print("using dask")
             # calculate the number of chunks the voxel array should be split into to not
             # overload the memory. Then split the array by this number
             split_num = math.ceil(
                 plane_distances_to_calc / handleable_plane_distance_calcs_dask
             )
         else:
-            dask = False
-            # print("using numpy")
             # split_num = 1
             split_num = math.ceil(
                 plane_distances_to_calc / handleable_plane_distance_calcs_numpy
@@ -328,7 +338,7 @@ class VoxelAssignmentToolkit:
                 f"Calculating site assignments for voxel chunk {chunk}/{split_num}"
             )
             split_result = self.get_distance_from_voxels_to_planes(
-                voxel_frac_coords=split_voxel_array, max_dist=max_dist, dask=dask
+                voxel_frac_coords=split_voxel_array, max_dist=max_dist
             )
             voxel_results_array = np.concatenate([voxel_results_array, split_result])
         return voxel_results_array
@@ -395,7 +405,7 @@ class VoxelAssignmentToolkit:
     @property
     def vertices_transforms_frac(self):
         a, b, c = self.charge_grid.grid_shape
-        a1, b1, c1 = 1 / (2 * (a)), 1 / (2 * (b)), 1 / (2 * (c))
+        a1, b1, c1 = 1 / (2 * a), 1 / (2 * b), 1 / (2 * c)
         x, y, z = np.meshgrid([-a1, a1], [-b1, b1], [-c1, c1])
         vertices_transforms_frac = np.column_stack((x.ravel(), y.ravel(), z.ravel()))
         return vertices_transforms_frac
@@ -431,6 +441,7 @@ class VoxelAssignmentToolkit:
         """
         Finds the site each voxel vertex is assigned to.
         """
+        logging.info("Calculating voxel vertices' sites")
         # Get transformations that will get the vertices of each voxel frac. The amount
         # to shift is 1/2 of a voxel in each direction
         voxel_vertices_frac_coords = voxel_vertices_frac_coords.copy()
@@ -581,7 +592,7 @@ class VoxelAssignmentToolkit:
         two_sites_in_vertices_unique = np.unique(two_sites_in_vertices, axis=0)
         least_prevalent_site_in_vertices = np.array(least_prevalent_site_in_vertices)
         most_prevalent_site_in_vertices = np.array(most_prevalent_site_in_vertices)
-        print(len(two_sites_in_vertices_indices))
+        # print(len(two_sites_in_vertices_indices))
         # get original voxel indices for each site split by two planes
         two_sites_in_vertices_original_indices = multi_site_voxel_indices[
             two_sites_in_vertices_indices
@@ -611,6 +622,16 @@ class VoxelAssignmentToolkit:
 
         # Now we want to loop over our unique plane pairs to only focus on planes of
         # interest
+        
+        #!!! I am getting an error in Ti2C where the vertices of a voxel are
+        # assigned to two atoms that do not have a shared plane in the partitioning.
+        # I've ruled out an issue with calculating the voxel vertices locations.
+        # This is particularly surprising because the two atoms involved (C1, C16)
+        # are not in spaces where I think it should be possible for a voxel to
+        # transform and be assigned. This implies to me that is not a rounding
+        # issue because if the vertex is within one set of planes it should be
+        # very far from the other. Maybe this is a partitioning issue? Try
+        # not removing all partitioning?
         logging.info("Calculating voxel-plane intersections")
         for site_pair, original_indices, double_site_indices in zip(
             two_sites_in_vertices_unique,
