@@ -1273,7 +1273,8 @@ class PartitioningToolkit:
         logging.info("Calculating maximum set of neighboring atoms")
         atom_potential_planes = {}
         for site_index, site_dataframe in tqdm(
-            unique_site_dataframes.items(), total=len(unique_site_dataframes)
+            unique_site_dataframes.items(), total=len(unique_site_dataframes),
+            ascii="░▒▓"
         ):
             # First we find the unique sets of atom neighbor pairs for this atom.
             unique_site_df = site_dataframe.drop_duplicates(
@@ -1416,7 +1417,8 @@ class PartitioningToolkit:
         logging.info("Calculating partitioning plane positions from ELF")
         # Get partitioning frac for each unique site_neighbor pair
         for index, row in tqdm(
-            possible_unique_pairs.iterrows(), total=len(possible_unique_pairs)
+            possible_unique_pairs.iterrows(), total=len(possible_unique_pairs),
+            ascii="░▒▓"
         ):
             # Check if we've already found the frac for this row
             if row["partitioning_frac"] is None:
@@ -1557,7 +1559,7 @@ class PartitioningToolkit:
         # atom and then we'll fill in the other atoms afterwards
         logging.info("Reducing to necessary partitioning planes")
         important_plane_indices = {}
-        for site_index in tqdm(unique_atoms, total=len(unique_atoms)):
+        for site_index in tqdm(unique_atoms, total=len(unique_atoms), ascii="░▒▓"):
             # get the plane dataframe for this site
             site_dataframe = site_dataframes[site_index]
             # get the plane points and vectors for this site
