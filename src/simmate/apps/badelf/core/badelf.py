@@ -278,6 +278,7 @@ class BadElfToolkit:
             charge_grid = self.charge_grid
             voxel_assignment_tools = VoxelAssignmentToolkit(
                 charge_grid=charge_grid,
+                electride_structure=self.electride_structure,
                 partitioning=self.partitioning,
                 algorithm=self.algorithm,
                 directory=self.directory,
