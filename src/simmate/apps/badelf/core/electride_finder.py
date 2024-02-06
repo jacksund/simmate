@@ -39,7 +39,7 @@ class ElectrideFinder:
         """
         return self.find_local_maxima()
 
-    def find_local_maxima(self, neighborhood_size: int = 1, threshold: float = None):
+    def find_local_maxima(self, neighborhood_size: int = 2, threshold: float = None):
         """
         Find local maxima in a 3D numpy array.
 
@@ -212,10 +212,11 @@ class ElectrideFinder:
         # structure if it exists (or itself if its the earliest equivalent one).
         # Now we want to get the ELF radius for each unique atom. We iterate over
         # each unique atom to get its radius and add it to a dictionary.
+        partitioning_toolkit = PartitioningToolkit(grid)
         unique_atoms = np.unique(equivalent_atoms)
         unique_atom_radii = {}
         for atom in unique_atoms:
-            radius = PartitioningToolkit(grid).get_elf_ionic_radius(
+            radius = partitioning_toolkit.get_elf_ionic_radius(
                 site_index=atom,
                 structure=structure,
             )
@@ -263,7 +264,7 @@ class ElectrideFinder:
     def get_electride_structure(
         self,
         electride_finder_cutoff: float = 0.5,
-        min_electride_radius: float = 0.9,
+        min_electride_radius: float = 0.0,
         atom_radius_method: str = "elf",
         remove_old_electrides: bool = False,
         local_maxima_coords: list = None,
@@ -280,8 +281,8 @@ class ElectrideFinder:
                 electride. The default is 0.5.
             min_electride_radius (float):
                 The minimum elf radius around the maximum for it to be considered
-                an electride. The default is 0.9 which is somewhat arbitrarily chosen.
-                An goold alternative is 1.19 which is the average radius of fluoride
+                an electride. The default is 0 allowing any possible site.
+                An good alternative is 1.19 which is the average radius of fluoride
                 in a 6 coordination environment.
             atom_radius_method (str):
                 The method used to find the radii. Options are "elf" or "shannon".

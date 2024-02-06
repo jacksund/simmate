@@ -456,6 +456,7 @@ class BadElfToolkit:
         # the list of neighbors we just defined.
         graph = StructureGraph.with_empty_graph(electride_structure)
         # partitioning_lines = []
+
         # iterate over each unique electride site.
         for index, neighbors in enumerate(nearest_neighbors):
             # get the voxel coords for the electride site
