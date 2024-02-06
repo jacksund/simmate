@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from numpy.typing import ArrayLike
 from pymatgen.analysis.local_env import CrystalNN
+from pymatgen.core import Species
 from scipy.interpolate import RegularGridInterpolator
 from scipy.signal import savgol_filter
 from scipy.spatial import ConvexHull
@@ -516,7 +517,6 @@ class PartitioningToolkit:
     def get_elf_ionic_radius(
         self,
         site_index: int,
-        method: str = "linear",
         structure: Structure = None,
         site_is_electride: bool = False,
     ):
@@ -540,51 +540,38 @@ class PartitioningToolkit:
         Returns:
             The distance the ELF ionic radius of the site
         """
+        grid = self.grid.copy()
         if structure is None:
-            structure = self.grid.structure.copy()
+            structure = grid.structure.copy()
         # get closest neighbor for the given site
-        neighbors = structure.get_neighbors(structure[site_index], 15)
+        # neighbors = structure.get_neighbors(structure[site_index], 15)
+        neighbors = self.all_site_neighbor_pairs
+        # get only this sites dataframe
+        site_df = neighbors.loc[neighbors["site_index"] == site_index]
+        site_df.reset_index(inplace=True, drop=True)
 
-        # Get the closest neighbor to the site. We put the nearest neighbors in
-        # a dataframe, sort by distance, and then select the nearest one.
-        site_df = pd.DataFrame(columns=["neighbor", "distance"])
-        for neigh in neighbors:
-            # get distance
-            distance = math.dist(neigh.coords, structure[site_index].coords)
-            # add neighbor, distance pair to df
-            site_df.loc[len(site_df)] = [neigh, distance]
-        # sort by distance and truncate to first 50
-        site_df = site_df.sort_values(by="distance")
+        # Get to the closest neighbor to the site that isn't a He dummy atom
         for i, row in site_df.iterrows():
-            neigh = row["neighbor"]
-            if neigh.species_string != "He":
-                closest_neighbor = neigh
-                bond_dist = row["distance"]
+            site_cart_coords = row["site_coords"]
+            neigh_cart_coords = row["neigh_coords"]
+            neighbor_string = row["neigh_symbol"]
+            if neighbor_string != "He":
+                bond_dist = row["dist"]
                 break
-            else:
-                continue
+        site_voxel_coord = grid.get_voxel_coords_from_cart(site_cart_coords)
+        neigh_voxel_coord = grid.get_voxel_coords_from_cart(neigh_cart_coords)
 
-        # Get site voxel coords from cartesian coordinates
-        site_voxel_coord = self.grid.get_voxel_coords_from_cart(
-            structure[site_index].coords
-        )
-        # Get neighbor voxel coords and then the line between the sites/voxels
-        neigh_voxel_coord = self.grid.get_voxel_coords_from_cart(
-            closest_neighbor.coords
-        )
-        elf_positions, elf_values = self.get_partitioning_line_from_voxels(
-            site_voxel_coord,
-            neigh_voxel_coord,
-            method,
+        elf_positions, elf_values = self.get_partitioning_line_from_cart_coords(
+            site_cart_coords,
+            neigh_cart_coords,
         )
 
         # Get site and neighbor strings
         site_string = self.grid.structure[site_index].species_string
-        neighbor_string = closest_neighbor.species_string
 
         max_bond_dist = (
             structure[site_index].specie.atomic_radius
-            + closest_neighbor.specie.atomic_radius
+            + Species(neighbor_string).atomic_radius
         )
         # If the bond is larger than the some of both atomic radii it is likely
         # that there is an electride between the atom and its closest neighbor.
@@ -599,9 +586,18 @@ class PartitioningToolkit:
             mid_point = len(elf_values) / 2
             dists_to_min = np.array([mid_point - x[0] for x in minima])
             dists_to_min = dists_to_min[dists_to_min >= 0]
-            min_pos = minima[np.argmin(dists_to_min)]
-            # Append the fractional distance to the minimum of the line.
-            min_pos.append(min_pos[0] / (len(elf_values) - 1))
+            # Sometimes a bond distance will be larger than the max_bond_dist
+            # when there is not an electride. In these cases, we want to use
+            # the normal method of finding a line minimum. !!! This may mean this
+            # method needs some work.
+            if len(dists_to_min) == 1:
+                min_pos = self.get_line_minimum_as_frac(
+                    elf_positions, elf_values, site_string, neighbor_string
+                )
+            else:
+                min_pos = minima[np.argmin(dists_to_min)]
+                # Append the fractional distance to the minimum of the line.
+                min_pos.append(min_pos[0] / (len(elf_values) - 1))
         else:
             # Get the min position along the line
             min_pos = self.get_line_minimum_as_frac(

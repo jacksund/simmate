@@ -308,12 +308,14 @@ class VoxelAssignmentToolkit:
                     voxel_result == True, atom_index + 1, voxel_result
                 )
                 new_results_arrays.append(voxel_result)
-            
+
             indices_to_zero = []
             new_results_array = np.zeros(len(new_results_arrays[0]))
             for i, sub_results_array in enumerate(new_results_arrays):
-                new_results_array = np.sum([new_results_array,sub_results_array],axis=0)
-                indices_to_zero.extend(np.where(new_results_array>i+1)[0])
+                new_results_array = np.sum(
+                    [new_results_array, sub_results_array], axis=0
+                )
+                indices_to_zero.extend(np.where(new_results_array > i + 1)[0])
             indices_to_zero = np.unique(indices_to_zero).astype(int)
             print(len(indices_to_zero))
             new_results_array[indices_to_zero] = 0
@@ -502,7 +504,7 @@ class VoxelAssignmentToolkit:
             # get a 1D array representing the voxel indices with the atom index where the
             # voxel is assigned to a site and 0s where they are not
             new_results_arrays = []
-            
+
             # For each atom, if the voxel is under all of the atoms planes, it
             # is assigned to this atom. We store this as a 1D numpy array and
             # append each atoms array to a list
@@ -510,19 +512,19 @@ class VoxelAssignmentToolkit:
                 voxel_result = np.all(atom_array, axis=1)
                 voxel_result = np.where(voxel_result == True, 1, voxel_result)
                 new_results_arrays.append(voxel_result)
-            
+
             # Add the assignments back to the full results array for each atom
             for i, new_array in enumerate(new_results_arrays):
                 indices_where_1 = np.where(new_array == 1)[0]
                 results_arrays[i][indices_where_1] = 1
-        
+
         # combine all of the atom results arrays into one array
         results_array = np.column_stack(results_arrays)
-        
+
         # Now we want to find sites that still weren't assigned and get assignments
         # for them. These will mostly be voxels with small charges. We simply
         # assign these using the closest site
-        still_unassigned_rows= np.all(results_array == 0, axis=1)
+        still_unassigned_rows = np.all(results_array == 0, axis=1)
         still_unassigned_indices = np.where(still_unassigned_rows)[0]
         # Loop over the unassigned voxels and assign them to the closest atom.
         # This could be made more rigorous by checking for more than one site
@@ -534,5 +536,5 @@ class VoxelAssignmentToolkit:
             structure_temp.append("He", frac_coord)
             nearest_site = structure_temp.get_neighbors(structure_temp[-1], 5)[0].index
             results_array[unassigned_voxel_index, nearest_site] = 1
-            
+
         return results_array
