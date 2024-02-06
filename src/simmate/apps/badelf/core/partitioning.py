@@ -1656,9 +1656,9 @@ class PartitioningToolkit:
             site_dataframe.reset_index(inplace=True, drop=True)
             initial_partitioning[site_index] = site_dataframe
 
-        # partitioning = self.reduce_to_symmetric_partitioning(initial_partitioning)
-        # return partitioning
-        return initial_partitioning
+        partitioning = self.reduce_to_symmetric_partitioning(initial_partitioning)
+        return partitioning
+        # return initial_partitioning
 
     def plot_partitioning_results(
         self,
