@@ -13,6 +13,7 @@ from numpy.typing import ArrayLike
 from tqdm import tqdm
 
 from simmate.apps.badelf.core.grid import Grid
+from simmate.toolkit import Structure
 
 
 class VoxelAssignmentToolkit:
@@ -29,12 +30,15 @@ class VoxelAssignmentToolkit:
         partitioning (dict):
             A partitioning dictionary generated from the BadELF app
             PartitioningToolkit. Will be generated from the grid if None.
+        electride_structure (Structure):
+            The structure with electride sites. Will be generated if not given.
 
     """
 
     def __init__(
         self,
         charge_grid: Grid,
+        electride_structure: Structure,
         algorithm: str,
         partitioning: dict,
         directory: Path,
@@ -43,6 +47,7 @@ class VoxelAssignmentToolkit:
         self.algorithm = algorithm
         # partitioning will contain electride sites for voronelf
         self.partitioning = partitioning
+        self.electride_structure = electride_structure
 
     @property
     def unit_cell_permutations_vox(self):
@@ -303,9 +308,17 @@ class VoxelAssignmentToolkit:
                     voxel_result == True, atom_index + 1, voxel_result
                 )
                 new_results_arrays.append(voxel_result)
-
+            
+            indices_to_zero = []
+            new_results_array = np.zeros(len(new_results_arrays[0]))
+            for i, sub_results_array in enumerate(new_results_arrays):
+                new_results_array = np.sum([new_results_array,sub_results_array],axis=0)
+                indices_to_zero.extend(np.where(new_results_array>i+1)[0])
+            indices_to_zero = np.unique(indices_to_zero).astype(int)
+            print(len(indices_to_zero))
+            new_results_array[indices_to_zero] = 0
             # Sum the results
-            new_results_array = np.sum(new_results_arrays, axis=0)
+            # new_results_array = np.sum(new_results_arrays, axis=0)
             # add results to the results_array
             results_array[indices_where_zero] = new_results_array
         return results_array
@@ -404,6 +417,10 @@ class VoxelAssignmentToolkit:
         return all_voxel_assignments
 
     def get_multi_site_voxel_assignments(self, all_site_voxel_assignments: ArrayLike):
+        """
+        Gets the voxel assignments for voxels that sit exactly on a plane. Also
+        assigns any planes that are not assigned
+        """
         all_voxel_assignments = all_site_voxel_assignments.copy()
         unassigned_indices = np.where(all_voxel_assignments == 0)[0]
         frac_coords_to_find = self.all_voxel_frac_coords[unassigned_indices]
@@ -411,6 +428,10 @@ class VoxelAssignmentToolkit:
         plane_equations = self.all_plane_equations
         number_of_planes_per_atom = self.number_of_planes_per_atom
         unit_cell_permutations_frac = self.unit_cell_permutations_frac
+        if self.algorithm == "badelf":
+            structure = grid.structure
+        elif self.algorithm == "voronelf":
+            structure = self.electride_structure
 
         # Create an array of zeros to map back to
         zeros_array = np.zeros(len(frac_coords_to_find))
@@ -481,15 +502,37 @@ class VoxelAssignmentToolkit:
             # get a 1D array representing the voxel indices with the atom index where the
             # voxel is assigned to a site and 0s where they are not
             new_results_arrays = []
-
+            
+            # For each atom, if the voxel is under all of the atoms planes, it
+            # is assigned to this atom. We store this as a 1D numpy array and
+            # append each atoms array to a list
             for atom_index, atom_array in enumerate(distances):
                 voxel_result = np.all(atom_array, axis=1)
                 voxel_result = np.where(voxel_result == True, 1, voxel_result)
                 new_results_arrays.append(voxel_result)
-
+            
+            # Add the assignments back to the full results array for each atom
             for i, new_array in enumerate(new_results_arrays):
                 indices_where_1 = np.where(new_array == 1)[0]
                 results_arrays[i][indices_where_1] = 1
-
+        
+        # combine all of the atom results arrays into one array
         results_array = np.column_stack(results_arrays)
+        
+        # Now we want to find sites that still weren't assigned and get assignments
+        # for them. These will mostly be voxels with small charges. We simply
+        # assign these using the closest site
+        still_unassigned_rows= np.all(results_array == 0, axis=1)
+        still_unassigned_indices = np.where(still_unassigned_rows)[0]
+        # Loop over the unassigned voxels and assign them to the closest atom.
+        # This could be made more rigorous by checking for more than one site
+        # in case multiple are the same distance, but for now I'm just using one
+        # since it's likely a small amount of voxels
+        for unassigned_voxel_index in still_unassigned_indices:
+            frac_coord = frac_coords_to_find[unassigned_voxel_index]
+            structure_temp = structure.copy()
+            structure_temp.append("He", frac_coord)
+            nearest_site = structure_temp.get_neighbors(structure_temp[-1], 5)[0].index
+            results_array[unassigned_voxel_index, nearest_site] = 1
+            
         return results_array
