@@ -524,7 +524,9 @@ class BadElfToolkit:
                 the BadElfToolkit instance.
         """
         electride_structure = self.electride_structure
-        symbols = electride_structure.types_of_species
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning, module="pymatgen")
+            symbols = electride_structure.types_of_species
         new_symbol_line = ""
         for symbol in symbols:
             new_symbol_line += f"{symbol.name}   "
