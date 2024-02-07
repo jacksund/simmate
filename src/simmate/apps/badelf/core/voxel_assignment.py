@@ -317,7 +317,6 @@ class VoxelAssignmentToolkit:
                 )
                 indices_to_zero.extend(np.where(new_results_array > i + 1)[0])
             indices_to_zero = np.unique(indices_to_zero).astype(int)
-            print(len(indices_to_zero))
             new_results_array[indices_to_zero] = 0
             # Sum the results
             # new_results_array = np.sum(new_results_arrays, axis=0)

@@ -31,7 +31,6 @@ class BadElfBase(Workflow):
         cls,
         source: dict = None,
         directory: Path = None,
-        cores: int = None,
         find_electrides: bool = True,
         electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
         algorithm: str = "badelf",
@@ -83,7 +82,6 @@ class VaspBadElfBase(Workflow):
         command: str = None,
         source: dict = None,
         directory: Path = None,  # we default to the current directory
-        cores: int = None,
         find_electrides: bool = True,
         electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
         algorithm: str = "badelf",
@@ -107,7 +105,6 @@ class VaspBadElfBase(Workflow):
         badelf_result = cls.badelf_workflow.run(
             source=source,
             directory=static_energy_directory,
-            cores=cores,
             find_electrides=find_electrides,
             electride_finder_cutoff=electride_finder_cutoff,
             algorithm=algorithm,
