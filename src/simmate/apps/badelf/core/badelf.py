@@ -22,9 +22,6 @@ from simmate.apps.badelf.core.voxel_assignment import VoxelAssignmentToolkit
 from simmate.apps.bader.outputs import ACF
 from simmate.workflows.utilities import get_workflow
 
-# BUG: we shouldn't fully turning off warnings. This should be used within a context.
-warnings.filterwarnings("ignore")
-
 
 class BadElfToolkit:
     """
@@ -147,7 +144,11 @@ class BadElfToolkit:
         # without electride sites. We then add one electride site at a time and
         # check its environment.
         for i, site in enumerate(self.electride_structure):
-            coord_envs.append(cnn.get_cn(structure=self.electride_structure, n=i))
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore", category=UserWarning, module="pymatgen"
+                )
+                coord_envs.append(cnn.get_cn(structure=self.electride_structure, n=i))
         return coord_envs
 
     @cached_property

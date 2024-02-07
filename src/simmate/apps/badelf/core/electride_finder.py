@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import math
+import warnings
 from functools import cached_property
 from pathlib import Path
 
@@ -163,7 +164,11 @@ class ElectrideFinder:
             # radius. For electrides we'll often get estimated oxidation states
             # that are far from accurate, so we get the closest available radius
             oxidation_state = oxidation_states[site_index]
-            coord_env = cnn.get_cn(structure, site_index)
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore", category=UserWarning, module="pymatgen"
+                )
+                coord_env = cnn.get_cn(structure, site_index)
 
             available_ox_state = species_dict.keys()
             # We find the closest oxidation state to the one we got from bader.
@@ -344,7 +349,11 @@ class ElectrideFinder:
             # Get the nearest neighbors of the electride. cnn will return a dict
             # with multiple keys. These might be different methods of finding neighbors?
             # I pick the one with the most neighbors
-            _, _, electride_neighbors = cnn.get_nn_data(electride_structure, n=-1)
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore", category=UserWarning, module="pymatgen"
+                )
+                _, _, electride_neighbors = cnn.get_nn_data(electride_structure, n=-1)
             most_neighbors = max(electride_neighbors)
             electride_neighbors = electride_neighbors[most_neighbors]
 

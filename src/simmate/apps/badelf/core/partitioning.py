@@ -2,6 +2,7 @@
 
 import logging
 import math
+import warnings
 from functools import cached_property
 from itertools import combinations
 
@@ -37,7 +38,6 @@ class PartitioningToolkit:
         self,
         site_voxel_coord: ArrayLike | list,
         neigh_voxel_coord: ArrayLike | list,
-        # method: str = "linear",
         method: str = "linear",
     ):
         """
@@ -831,7 +831,11 @@ class PartitioningToolkit:
         c = CrystalNN(search_cutoff=5)
         closest_neighbors = {}
         for i in range(len(structure)):
-            _, _, d = c.get_nn_data(structure, n=i)
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore", category=UserWarning, module="pymatgen"
+                )
+                _, _, d = c.get_nn_data(structure, n=i)
             biggest = max(d)
             closest_neighbors[i] = d[biggest]
         return closest_neighbors
@@ -1341,7 +1345,7 @@ class PartitioningToolkit:
                 # get all of the planes at this distance
                 planes_at_dist = site_dataframe.loc[
                     site_dataframe["dist"] == shortest_dist
-                ]
+                ].copy()
 
                 # Get the site and neighbor coords in arrays to make calculations easier
                 site_coords = np.array(planes_at_dist["site_coords"].to_list())
@@ -1421,7 +1425,7 @@ class PartitioningToolkit:
             plane_indices = atom_potential_planes[equivalent_atom]
             site_dataframe = all_site_neighbor_pairs.loc[
                 all_site_neighbor_pairs["site_index"] == site_index
-            ]
+            ].copy()
             site_dataframe.sort_values(by="dist", inplace=True)
             site_dataframe.reset_index(inplace=True, drop=True)
             reduced_site_dataframe = site_dataframe.iloc[plane_indices]
@@ -1488,9 +1492,9 @@ class PartitioningToolkit:
                 # site neighbor pair. We do this in the loop so that the reverse
                 # assignments don't need to be repeated
                 possible_unique_pairs.at[index, "partitioning_frac"] = frac
-                possible_unique_pairs.loc[
-                    reverse_condition, "partitioning_frac"
-                ] = reverse_frac
+                possible_unique_pairs.loc[reverse_condition, "partitioning_frac"] = (
+                    reverse_frac
+                )
 
                 # create another search condition for the full dataframe of site-neighbor pairs
                 search_condition1 = (
@@ -1568,7 +1572,7 @@ class PartitioningToolkit:
         for i, partitioning_df in initial_partitioning.items():
             equivalent_atom = equivalent_atoms[i]
             indices = planes_to_keep[equivalent_atom]
-            new_partitioning_df = partitioning_df.iloc[indices]
+            new_partitioning_df = partitioning_df.iloc[indices].copy()
             new_partitioning_df.sort_values(by=["dist"], inplace=True)
             new_partitioning_df.reset_index(inplace=True, drop=True)
             new_partitioning[i] = new_partitioning_df
@@ -1600,7 +1604,7 @@ class PartitioningToolkit:
         for site_index, site in enumerate(structure):
             site_dataframe = possible_site_neigh_pairs.loc[
                 possible_site_neigh_pairs["site_index"] == site_index
-            ]
+            ].copy()
             site_dataframe.sort_values(by="dist", inplace=True)
             site_dataframes.append(site_dataframe)
 
@@ -1647,7 +1651,7 @@ class PartitioningToolkit:
         for site_index, site_dataframe in enumerate(site_dataframes):
             equiv_atom = equivalent_atoms[site_index]
             important_plane_index = important_plane_indices[equiv_atom]
-            site_dataframe = site_dataframe.iloc[important_plane_index]
+            site_dataframe = site_dataframe.iloc[important_plane_index].copy()
             site_dataframe.sort_values(by=["dist"], inplace=True)
             site_dataframe.reset_index(inplace=True, drop=True)
             initial_partitioning[site_index] = site_dataframe
