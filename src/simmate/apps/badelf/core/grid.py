@@ -186,9 +186,8 @@ class Grid:
 
     @property
     def equivalent_atoms(self):
-        return SpacegroupAnalyzer(self.structure).get_symmetry_dataset()[
-            "equivalent_atoms"
-        ]
+        return SpacegroupAnalyzer(self.structure
+                                  ).get_symmetry_dataset()["equivalent_atoms"]
 
     def get_grid_axes(self, padding: int = 0):
         """

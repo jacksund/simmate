@@ -15,6 +15,8 @@ from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.apps.bader.outputs import ACF
 from simmate.workflows.utilities import get_workflow
 
+from scipy.interpolate import RegularGridInterpolator
+from scipy.optimize import minimize
 
 class ElectrideFinder:
     """
@@ -39,6 +41,7 @@ class ElectrideFinder:
         The local maxima in a 3D numpy array
         """
         return self.find_local_maxima()
+    
 
     def find_local_maxima(self, neighborhood_size: int = 2, threshold: float = None):
         """
@@ -92,9 +95,50 @@ class ElectrideFinder:
                         )
                         maxima_cart_coords.append(maxima_cart_coord)
                         maxima_values.append(elf_data[z_orig, y_orig, x_orig])
+        
 
         return maxima_cart_coords, maxima_values
-
+    
+    def refine_voxel_maxima(self, 
+                            maximum_voxel_coord,
+                            initial_guess,
+                            neighborhood_size=10,
+                            ):
+        
+        elf_data = self.grid.total
+        maximum_voxel_coord = np.array(maximum_voxel_coord)
+        padded_elf_data = np.pad(elf_data, neighborhood_size, mode="wrap")
+        padded_voxel_coords = maximum_voxel_coord+neighborhood_size
+        initial_guess = initial_guess-maximum_voxel_coord+neighborhood_size
+        x,y,z = padded_voxel_coords.astype(int)
+        # breakpoint()
+        neighborhood = padded_elf_data[
+            x - neighborhood_size:x + neighborhood_size + 1,
+            y - neighborhood_size:y + neighborhood_size + 1,
+            z - neighborhood_size:z + neighborhood_size + 1,
+            ]
+        
+        a,b,c = [
+            np.linspace(0,neighborhood_size*2,neighborhood_size*2+1),
+            np.linspace(0,neighborhood_size*2,neighborhood_size*2+1),
+            np.linspace(0,neighborhood_size*2,neighborhood_size*2+1)
+            ]
+        
+        fn = RegularGridInterpolator((a, b, c), neighborhood, method="cubic")
+        
+        def get_interpolated_position(x):
+            return -fn(x)
+        
+        # breakpoint()
+        results = minimize(get_interpolated_position, initial_guess, method='Nelder-Mead',
+                           tol=1e-06)
+        maximum_location = results.x
+        maximum_location_original_coords = maximum_location+maximum_voxel_coord-neighborhood_size
+        maximum_cart_coords = self.grid.get_cart_coords_from_vox(maximum_location_original_coords+1)
+        maximum_cart_coords = np.round(maximum_cart_coords,6)
+        return maximum_cart_coords
+    
+        
     @staticmethod
     def to_number_from_roman_numeral(roman_num: str):
         """
@@ -272,8 +316,6 @@ class ElectrideFinder:
         min_electride_radius: float = 0.0,
         atom_radius_method: str = "elf",
         remove_old_electrides: bool = False,
-        local_maxima_coords: list = None,
-        local_maxima_values: list = None,
     ):
         #!!! The min_electride_radius is based off of fluoride, but it feels
         # arbitrary. Is there a better way?
@@ -294,12 +336,6 @@ class ElectrideFinder:
                 elf will use the provided grid to find the radius of each atom and
                 shannon will use bader oxidation states and the closest available
                 tabulated shannon crystal radius.
-            local_maxima_coords (list):
-                The coordinates of all local maxima in the grid. This will be found
-                automatically if not set.
-            local_maxima_values (list):
-                The values at the local maxima. This will be found automatically if
-                not set.
             remove_old_electrides (bool):
                 Whether or not to remove any other electrides already placed in
                 the system. It is generally recommended that structures without
@@ -312,8 +348,8 @@ class ElectrideFinder:
         logging.info("Finding electride sites")
         # Get the coordinates and values of each local maximum in the grid
         grid = self.grid.copy()
-        if local_maxima_coords is None:
-            local_maxima_coords, local_maxima_values = self.local_maxima
+        (local_maxima_cart_coords, local_maxima_values
+         ) = self.local_maxima
 
         # If there are He atoms that have already been placed in the structure
         # that the user wants to remove, remove them now.
@@ -330,14 +366,14 @@ class ElectrideFinder:
                   """
             )
             return structure
-
+               
         # Create a list to store the electride coords.
         cnn = CrystalNN()
         electride_coords = []
         # get the estimated shannon radii of each of the sites in the structure.
         # These will be used to estimate electride radii
         shannon_radii = self.get_ionic_radii(atom_radius_method)
-        for i, maximum_coords in enumerate(local_maxima_coords):
+        for i, maximum_coords in enumerate(local_maxima_cart_coords):
             # Check if the elf value is below the cutoff
             if local_maxima_values[i] < electride_finder_cutoff:
                 continue
@@ -375,24 +411,22 @@ class ElectrideFinder:
 
             if min(max_electride_radii) < min_electride_radius:
                 continue
+            
+            # If the loop is still going, we consider this site an electride. We
+            # want to refine its position before we add it to our structure to
+            # avoid issues with voxelation. We want to fit a small area around
+            # the maximum
+            maximum_voxel_coord = grid.get_voxel_coords_from_cart(maximum_coords)-1
+            initial_guess = np.round(maximum_voxel_coord)
 
-            # The following code is another method for finding the radius of the
-            # electrides using ELF. It works well in many situations but is
-            # less lenient than using the atoms shannon radii. It is kept here
-            # in case it becomes more desirable in the future.
-            # # get distances to min along lines to closest atoms
-            # electride_grid = grid.copy()
-            # electride_grid.structure = electride_structure
-            # electride_radius = PartitioningToolkit(electride_grid).get_elf_ionic_radius(
-            #     site_index=len(electride_structure) - 1,
-            #     structure=electride_structure,
-            # )
-            # if electride_radius < min_electride_radius:
-            #     continue
+            refined_cart_coords = self.refine_voxel_maxima(
+                maximum_voxel_coord,
+                initial_guess)
+            electride_coords.append(refined_cart_coords)
 
             # If the loop is still going, we consider this site an electride. We
             # add it to the list of electride sites.
-            electride_coords.append(maximum_coords)
+            # electride_coords.append(refined_cart_coords)
             # electride_coordinations.append(cnn.get_cn(electride_structure, n=-1))
 
         # Add our potential electride sites to our structure
@@ -401,9 +435,11 @@ class ElectrideFinder:
             electride_structure.append("He", coord, coords_are_cartesian=True)
 
         # Often the algorithm will find several electride sites right next to
-        # eachother. This can be due to voxelation or because of oddly shaped
-        # electrides. We want to combine these into one electride site.
-        electride_structure.merge_sites(tol=0.5, mode="average")
+        # eachother. This can be due to voxelation. We want to combine these 
+        # into one electride site. We combine any electrides found within some
+        # amount of voxels (currently 2)
+        tol = grid.max_voxel_dist*2*2
+        electride_structure.merge_sites(tol=tol, mode="average")
 
         # The above pymatgen method often reorders the atoms in the structure which
         # causes issues down the line. We want to resort the atoms into their
