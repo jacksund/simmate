@@ -9,13 +9,13 @@
             data-toggle="select2"
             data-placeholder="Choose one ..."
             onchange="Unicorn.call('{{ unicorn_view }}', 'set_{{ name }}', $('#{{ name }}').val());">
-        {% if current_value %}
-            <option value="{{ current_value }}">
-                {% if current_display %}
-                    {{ current_display }}
+        {% if initial_value %}
+            <option value="{{ initial_value }}">
+                {% if initial_display %}
+                    {{ initial_display }}
                 {% else %}
                     {% for option in options %}
-                        {% if current_value == option.0 %}{{ option.1 }}{% endif %}
+                        {% if initial_value == option.0 %}{{ option.1 }}{% endif %}
                     {% endfor %}
                 {% endif %}
             </option>
