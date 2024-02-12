@@ -1492,9 +1492,9 @@ class PartitioningToolkit:
                 # site neighbor pair. We do this in the loop so that the reverse
                 # assignments don't need to be repeated
                 possible_unique_pairs.at[index, "partitioning_frac"] = frac
-                possible_unique_pairs.loc[
-                    reverse_condition, "partitioning_frac"
-                ] = reverse_frac
+                possible_unique_pairs.loc[reverse_condition, "partitioning_frac"] = (
+                    reverse_frac
+                )
 
                 # create another search condition for the full dataframe of site-neighbor pairs
                 search_condition1 = (
