@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import itertools
+import logging
+import math
+from functools import cached_property
+from pathlib import Path
 
+import dask.array as da
 import numpy as np
-import pandas as pd
+import psutil
 from numpy.typing import ArrayLike
-from scipy.spatial import ConvexHull
+from tqdm import tqdm
 
 from simmate.apps.badelf.core.grid import Grid
-from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.toolkit import Structure
 
 
@@ -34,12 +38,11 @@ class VoxelAssignmentToolkit:
     def __init__(
         self,
         charge_grid: Grid,
-        partitioning_grid: Grid,
-        algorithm: str,
         electride_structure: Structure,
+        algorithm: str,
         partitioning: dict,
+        directory: Path,
     ):
-        self.partitioning_grid = partitioning_grid.copy()
         self.charge_grid = charge_grid.copy()
         self.algorithm = algorithm
         # partitioning will contain electride sites for voronelf
@@ -47,787 +50,490 @@ class VoxelAssignmentToolkit:
         self.electride_structure = electride_structure
 
     @property
-    def permutations(self):
+    def unit_cell_permutations_vox(self):
+        """
+        The permutations required to transform a unit cell to each of its neighbors.
+        Uses voxel coordinates.
+        """
         return self.charge_grid.permutations
 
-    def get_matching_site(
-        self,
-        point_voxel_coord: ArrayLike | list,
-        check_near_plane: bool = True,
-    ):
+    @property
+    def unit_cell_permutations_frac(self):
         """
-        Determines which atomic site a point belongs to.
-
-        Args:
-            point_voxel_coord (ArrayLike): The voxel coordinate of the point of
-                interest.
-            check_near_plane (bool): Whether or not to return None if the voxel
-                might be intercepted by a plane.
-        Returns:
-            The site index that the point belongs to. Returns -1 if the point
-            could be assigned to multiple sites.
+        The permutations required to transform a unit cell to each of its neighbors.
+        Uses fractional coordinates.
         """
-        partitioning = self.partitioning
-        if check_near_plane:
-            max_distance = self.charge_grid.max_voxel_dist
-        else:
-            # We don't want to check if a voxel is close to a plane. We make
-            # the max distance negative so that when we check it's not possible
-            # for the distance to be less than it.
-            max_distance = -1
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # I've had a bug in the past where more than one site is found for a single
-        # voxel. As such, I'm going to temporarily make this function search all
-        # sites in case it finds more than one. This bug seemed to be due to incorrect
-        # plane selection.
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        sites = []
-        # Iterate over each site in the lattice
-        for site, neighbor_df in partitioning.items():
-            matched = True
-            # Iterate through each neighbor
-            for neigh_index, row in neighbor_df.iterrows():
-                # get the minimum point and normal vector which define the plane
-                # seperating the sites.
-                point = row["plane_points"]
-                normal_vector = row["plane_vectors"]
-                # If a voxel is on the same side of the plane as the site, then they
-                # should have the same sign when their coordinates are plugged into
-                # the plane equation (negative).
-                # expected_sign = values["sign"]
-
-                # use plane equation to find sign
-                site_real_coord = self.charge_grid.get_cart_coords_from_vox(
-                    point_voxel_coord
-                )
-                sign, distance = PartitioningToolkit.get_plane_sign(
-                    point, normal_vector, site_real_coord
-                )
-
-                # if the sign matches, move to next neighbor.
-                # if the sign ever doesn't match, then the site is wrong and we move
-                # on to the next one after setting matched to false. We also check
-                # to see if the voxel is possibly sliced by the plane. If it is we
-                # want to seperate that charge later so we leave it here.
-                if sign != "negative" or distance <= max_distance:
-                    matched = False
-                    break
-            if matched == True:
-                sites.append(site)
-                # return site
-        if len(sites) == 1:
-            return sites[0]
-        elif len(sites) == 0:
-            return
-        else:
-            # Multiple sites found for one location
-            return -1
+        unit_cell_permutations_frac = [
+            (t, u, v)
+            for t, u, v in itertools.product([-1, 0, 1], [-1, 0, 1], [-1, 0, 1])
+        ]
+        # move 0,0,0 transformation to front as it is the most likely to be important
+        unit_cell_permutations_frac.insert(0, unit_cell_permutations_frac.pop(13))
+        return unit_cell_permutations_frac
 
     @property
-    def electride_sites(self):
+    def unit_cell_permutations_cart(self):
         """
-        Function for getting the number of sites that are electrides
-
-        Returns:
-            A tuple of the indices corresponding to the electride sites in the
-            structure.
+        The permutations required to transform a unit cell to each of its neighbors.
+        Uses cartesian coordinates.
         """
-        structure = self.electride_structure
-        if self.algorithm == "badelf":
-            return structure.indices_from_symbol("He")
-        elif self.algorithm == "voronelf":
-            return []
+        grid = self.charge_grid
+        return grid.get_cart_coords_from_frac_full_array(
+            self.unit_cell_permutations_frac
+        )
 
-    def get_voxels_site_base(
-        self,
-        point_voxel_coord: ArrayLike | list,
-    ):
+    @property
+    def vertices_transforms_frac(self):
         """
-        Finds the site a voxel belongs to. Mostly does the same as the
-        get_matching_site function, but also checks other possible symmetric locations
-        of each site.
-
-        Args:
-            point_voxel_coord (ArrayLike): The voxel coordinates of the point
-                to find the associated site for.
-
-            site (int): A site index. It is None if the voxel has not already
-                been assigned to an electride.
-
-        Returns:
-            The site the voxel coordinate is associated with.
+        The transformations required to transform the center of a voxel to its
+        corners. Uses fractional coordinates.
         """
-        permutations = self.permutations
-        # partitioning = self.partitioning
-        x, y, z = point_voxel_coord
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # I've had a bug in the past where one voxel returns multiple sites after
-        # being translated. I'm going to make this function temporarily go through
-        # all sites in case the bug still exists. It will return -1 if the multiple
-        # sites are found at the same transformation and it will return -2 if multiple
-        # are found across different transformations. This bug seemed to be due to
-        # insufficient partitioning plane selection
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        sites = []
-        # create dictionary for recording what fraction of a voxels volume should
-        # be associated with a given site. We do this so that the format of the
-        # output matches the other ones.
-        site_vol_frac = {}
-        for site in range(len(self.electride_structure)):
-            site_vol_frac[site] = float(0)
+        a, b, c = self.charge_grid.grid_shape
+        a1, b1, c1 = 1 / (2 * a), 1 / (2 * b), 1 / (2 * c)
+        x, y, z = np.meshgrid([-a1, a1], [-b1, b1], [-c1, c1])
+        vertices_transforms_frac = np.column_stack((x.ravel(), y.ravel(), z.ravel()))
+        return vertices_transforms_frac
 
-        for t, u, v in permutations:
-            new_voxel_coord = [x + t, y + u, z + v]
-            site: int = self.get_matching_site(new_voxel_coord)
-            # site returns none if no match, otherwise gives a number
-            # The site can't return as an electride site as we don't include
-            # electride sites in the partitioning results
-            if site == -1:
-                # If the site returns -1, this means multiple sites were found
-                # at one transformation which should never happen. I want this
-                # function to return -1 so I can count how often this happens
-                # if at all.
-                sites = []
-                sites.append(-1)
-                break
-            elif site is not None:
-                sites.append(site)
-                # break
-        if len(sites) > 1:
-            # if the length of sites is greater than 1 that means it found more than
-            # one site at different transformations. I want to return -2 so I can
-            # keep track of how often this bug occurs.
-            site_vol_frac[-2] = float(0)
-            return site_vol_frac
-        elif len(sites) == 1:
-            # there is only one site found so we just return it.
-            site_vol_frac[sites[0]] = float(1)
-            return site_vol_frac
-        else:
-            site_vol_frac = None
-
-            # there wasn't any site found so we don't return our site variable which
-            # is None
-        return site_vol_frac
-
-    def _get_vertex_site(
-        self,
-        vertex_coords,
-    ):
+    @property
+    def vertices_transforms_cart(self):
         """
-        Finds the site a voxel vertex belongs to and returns the site and the
-        transformation that it was found at. Mostly does the same as the
-        get_voxels_site_base function, but also returns the transformation.
-
-        Args:
-            point_voxel_coord (ArrayLike): The voxel coordinates of the point
-                to find the associated site for.
-
-        Returns:
-            The site a voxel vertex is assigned to as well as the transformation.
+        The transformations required to transform the center of a voxel to its
+        corners. Uses cartesian coordinates.
         """
-        permutations = self.permutations
-        x, y, z = vertex_coords
+        return self.charge_grid.get_cart_coords_from_frac_full_array(
+            self.vertices_transforms_frac
+        )
 
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # I've noticed a bug where one voxel returns multiple sites after
-        # being translated. I'm going to make this function temporarily go through
-        # all sites in case the bug still exists. It will return -1 if the multiple
-        # sites are found at the same transformation and it will return -2 if multiple
-        # are found across different transformations. This typically effects only
-        # a small number of sites if the system is ionic. This bug seemed to be
-        # caused by insufficient partitioning plane selection
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        sites = []
-        translations = []
-        for t, u, v in permutations:
-            new_vert_coord = [x + t, y + u, z + v]
-            site: int = self.get_matching_site(
-                new_vert_coord,
-                check_near_plane=False,
-            )
-            # site returns none if no match, otherwise gives a number
-            # The site can't return as an electride site as we don't include
-            # electride sites in the partitioning results
-            if site == -1:
-                # If the site returns -1, this means multiple sites were found
-                # at one transformation which should never happen. I want this
-                # function to return -1 so I can count how often this happens
-                # if at all.
-                sites = []
-                sites.append(-1)
-                break
-            elif site is not None:
-                sites.append(site)
-                translations.append([t, u, v])
-                # break
-        if len(sites) > 1:
-            # if the length of sites is greater than 1 that means it found more than
-            # one site at different transformations. I want to return -2 so I can
-            # keep track of how often this bug occurs.
-            return -2, None
-        elif len(sites) == 1:
-            # there is only one site found so we just return it.
-            if sites[0] == -1:
-                return -1, None
-            else:
-                return sites[0], translations[0]
-        else:
-            # there wasn't any site found so we don't return our site variable which
-            # is None
-            return None, None
-        # return site
-
-    def get_voxel_vertices_sites(
-        self,
-        point_voxel_coord: ArrayLike | list,
-    ):
+    @cached_property
+    def all_voxel_frac_coords(self):
         """
-        Takes in the coordinates of a voxel and returns the coordinates of each
-        of its vertices and the sites they belong to.
-
-        Args:
-            point_voxel_coord (ArrayLike): The voxel coordinates of the point
-                to find the associated site for.
+        The fractional coordinates for all of the voxels in the charge grid
         """
-        # create a dictionary to store the vertices coordinates and the site results
-        vertices_coords = {}
-        keys = ["A0", "A1", "A2", "A3", "B0", "B1", "B2", "B3"]
-        # we need to transform the voxel coordinates to 8 different half coordinates
-        # that represent its corners
-        A0 = [-1 / 2, -1 / 2, -1 / 2]
-        A1 = [-1 / 2, 1 / 2, -1 / 2]
-        A2 = [1 / 2, 1 / 2, -1 / 2]
-        A3 = [1 / 2, -1 / 2, -1 / 2]
-        B0 = [-1 / 2, -1 / 2, 1 / 2]
-        B1 = [-1 / 2, 1 / 2, 1 / 2]
-        B2 = [1 / 2, 1 / 2, 1 / 2]
-        B3 = [1 / 2, -1 / 2, 1 / 2]
-        transforms = [A0, A1, A2, A3, B0, B1, B2, B3]
-        for key, transform in zip(keys, transforms):
-            vertices_coords[key] = [
-                x + x1 for x, x1 in zip(point_voxel_coord, transform)
-            ]
+        charge_grid = self.charge_grid.copy()
+        a, b, c = charge_grid.grid_shape
+        voxel_indices = np.indices(charge_grid.grid_shape).reshape(3, -1).T
+        frac_coords = voxel_indices.copy().astype(float)
+        frac_coords[:, 0] /= a
+        frac_coords[:, 1] /= b
+        frac_coords[:, 2] /= c
+        return frac_coords
 
-        # create a dataframe to store results in
-        vertices_sites = pd.DataFrame(columns=["id", "transform", "site"])
-
-        # now that we have the coordinates for each vertex, get the site and the
-        # transform required to get the site
-        for key, coord in vertices_coords.items():
-            # try:
-            site, transform = self._get_vertex_site(vertex_coords=coord)
-            vertex_row = [key, transform, site]
-            vertices_sites.loc[len(vertices_sites.index)] = vertex_row
-            # If we can't find a site, return an empty row for this key
-            # except:
-            #     vertex_row = [key, None, None]
-            #     vertices_sites.loc[len(vertices_sites.index)] = vertex_row
-        # return both the vertices coords and the information about their sites
-        return vertices_coords, vertices_sites
-
-    @staticmethod
-    def _get_vector_plane_intersection(
-        point0: ArrayLike | list,
-        point1: ArrayLike | list,
-        plane_point: ArrayLike | list,
-        plane_vector: ArrayLike | list,
-        allow_point_intercept: bool = False,
-    ):
+    @cached_property
+    def all_partitioning_plane_points_and_vectors(self):
         """
-        Takes in two points and the point/vector defining a plane and returns
-        the point where the line segment and plane intersect (if it exists)
-
-        Args:
-            point0 (ArrayLike): The first point of a line segment
-            point1 (ArrayLike): The second point of a line segment
-            plane_point (ArrayLike): A point on the plane
-            plane_vector (ArrayLike): The vector normal to the plane
-            allow_point_intercept (bool): Whether to count a point at the end
-                of the line segment touching the plane as an intercept.
-
-        Returns:
-            The point where the line segment intersects the plane or None if
-            there is no intersection.
-        """
-        # convert points to NumPy arrays
-        point0 = np.array(point0)
-        point1 = np.array(point1)
-        plane_point = np.array(plane_point)
-        plane_vector = np.array(plane_vector)
-
-        # get direction of line segment.
-        direction = point1 - point0
-        # get dot product of direction vector and dot_product
-        dot_product = np.dot(direction, plane_vector)
-        # check if line is parallel to plane
-        if np.abs(dot_product) < 1e-06:
-            return None
-
-        # get distance from the line segment point to the plane
-        distance = np.dot(plane_point - point0, plane_vector) / dot_product
-
-        # calculate intersection point
-        intersection_point = point0 + direction * distance
-        # round the intersection points
-
-        # check if intersection point is between the start and end points of our
-        # line segment. To do this, we would normally first check if the point
-        # is on the line, but it must be alredy because we defined it as such. Next
-        # we check the dot products
-        # Get the vector for the intersecting point and point1 assuming point0 is
-        # the origin
-        AB = point1 - point0
-        AC = intersection_point - point0
-        # Get the dot products of the intersecting point and point1
-        KAC = np.dot(AB, AC)
-        KAB = np.dot(AB, AB)
-        # There are five possible scenarios.
-        if KAC < -1e-8 or KAC > KAB + 1e-8:
-            # the point is outside the line
-            return None
-        elif KAC == 0 or KAC == KAB:
-            # The point is at point0 or point1
-            if allow_point_intercept:
-                return intersection_point
-            else:
-                return None
-        else:
-            # The point is between point0 and point1
-            return intersection_point
-
-    def _get_voxel_plane_intersections(
-        self,
-        sites: list,
-        vertices_coords: dict,
-        intersections_df: pd.DataFrame,
-    ):
-        """
-        Function for finding which planes intersect a voxel. Returns dataframe
-        with all planes and intersections.
-
-        Args:
-            sites (list): A list of sites that the vertices of a voxel are assigned to.
-
-            vertices_coords (dict): A dictionary relating the coordinates of a
-                voxels vertices to their label.
-
-            intersections_df (Dataframe): A dataframe of intersections that have
-                already been found.
-
-        Returns:
-            A dataframe of where planes intersect the edges of a voxel.
-
+        The points and vectors for all of the partitioning planes stored as
+        two sets of N,3 shaped arrays.
         """
         partitioning = self.partitioning
-        # Define the indices of the vertices making up the edges of the voxel.
-        edges = [
-            ["A0", "A1"],
-            ["A1", "A2"],
-            ["A2", "A3"],
-            ["A3", "A0"],
-            ["A0", "B0"],
-            ["A1", "B1"],
-            ["A2", "B2"],
-            ["A3", "B3"],
-            ["B0", "B1"],
-            ["B1", "B2"],
-            ["B2", "B3"],
-            ["B3", "B0"],
-        ]
-        # We create a list of sites that we want to allow in the plane intersections
-        # search. Each plane is stored twice: once for each atom in the pair. Because
-        # of this we remove each site after we've looked at its planes to remove
-        # redundancy
-        sites_to_search = sites["site"].to_list()
-        for site in sites["site"]:
-            sites_to_search.remove(site)
-            # iterate over each plane
-            for neighbor_df_index, row in partitioning[site].iterrows():
-                neighbor_index = row["neigh_index"]
-                # if neighbor is in the list of sites, look at the plane
-                if neighbor_index in sites_to_search:
-                    plane_point = row["plane_points"]
-                    plane_vector = row["plane_vectors"]
-                    # iterate over each edge and find the points that intersect
-                    intersections = []
-                    for edge in edges:
-                        point0 = vertices_coords[edge[0]]
-                        point1 = vertices_coords[edge[1]]
-                        intersection = self._get_vector_plane_intersection(
-                            point0, point1, plane_point, plane_vector
-                        )
-                        if intersection is not None:
-                            # we transform all intersections to be relative to A0 being
-                            # the origin. This is so planes from various transformations
-                            # can be treated at the same time
-                            # MUST ROUND!
-                            intersection = [
-                                round((x - x1), 12)
-                                for x, x1 in zip(intersection, vertices_coords["A0"])
-                            ]
-                            intersections.append(intersection)
-                    if len(intersections) > 0:
-                        # if we have any intersections we add the site index, its
-                        # neighbors index, and the list of intersections to the df
-                        plane_row = [site, row["neigh_index"], intersections]
-                        intersections_df.loc[len(intersections_df)] = plane_row
-        return intersections_df
+        plane_points = []
+        plane_vectors = []
+        for atom_index, partitioning_df in partitioning.items():
+            atom_plane_points = partitioning_df["plane_points"].to_list()
+            atom_plane_vectors = partitioning_df["plane_vectors"].to_list()
+            plane_points.extend(atom_plane_points)
+            plane_vectors.extend(atom_plane_vectors)
 
-    def get_intersected_voxel_volume_ratio(
-        self,
-        point_voxel_coord: ArrayLike | list,
-    ):
+        # convert plane points and vectors to arrays and then convert to the plane
+        # equation
+        plane_points = np.array(plane_points)
+        plane_vectors = np.array(plane_vectors)
+        return plane_points, plane_vectors
+
+    @cached_property
+    def all_plane_equations(self):
         """
-        Takes in the coordinates of a voxel and returns the ratio of the voxel
-        that belongs to the sites around it.
-
-        Args:
-            point_voxel_coord (ArrayLike): The voxel coordinates of the point
-                to find the associated site for.
+        A (N,4) array containing every partitioning plane equation
         """
-        grid = self.charge_grid.copy()
-        voxel_volume = grid.voxel_volume
-        vertices_coords, vertices_sites = self.get_voxel_vertices_sites(
-            point_voxel_coord
-        )
+        plane_points, plane_vectors = self.all_partitioning_plane_points_and_vectors
+        D = -np.sum(plane_points * plane_vectors, axis=1)
+        # convert to all coefficients
+        return np.column_stack((plane_vectors, D))
 
-        # create dictionary for recording what fraction of a voxels volume should
-        # be associated with a given site.
-        site_vol_frac = {}
-        for site in range(len(self.electride_structure)):
-            site_vol_frac[site] = float(0)
-
-        # shorten the lists to unique sites/planes
-        sites = vertices_sites.drop_duplicates(subset="site", ignore_index=True)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # I've made it so that if multiple sites are found for one vertex position,
-        # it returns as -1. If multiple sites are found for one vertex but at multiple
-        # transformed positions it returns -2.
-        # My best guess for what is happening is that these sites are very close to
-        # being exactly on a plane and are therefore returning as being part of
-        # more than one site.
-        # In a test with Na2S, returning these vertices as None and allowing the
-        # program to continue gave more even results.
-        if -1 in sites["site"].to_list() or -2 in sites["site"].to_list():
-            # If vertices are found to have multiple sites I've made it so that it
-            # records his information as a new site in the site_vol_frac dictionary.
-            # This should be searchable in post so that I can keep count of these
-            # without stopping the algorithm
-            if -1 in sites["site"].to_list():
-                site_vol_frac[-1] = float(0)
-            elif -2 in sites["site"].to_list():
-                site_vol_frac[-2] = float(0)
-            sites = sites.replace(-1, None)
-            sites = sites.replace(-2, None)
-            # sites.replace()
-            # breakpoint()
-        # find the most common site for cases where only one site exists
-        try:
-            most_common_site = sites["site"].value_counts().idxmax()
-        except:
-            most_common_site = None
-        #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        sites = sites.dropna(subset="site").reset_index()
-
-        # define the dataframe that we will store our plane information in
-        intersections_df = pd.DataFrame(columns=["site", "neighbor", "intersections"])
-
-        # Sometimes the voxel will be intersected only at certain transformations.
-        # Often this is the permutation where the original voxel was able to be
-        # assigned to an atomic site. We check this possibility first here. Sometimes,
-        # the vertices themselves are shifted to other permutations. We check these
-        # next.
-
-        # Get the transform for the original site:
-        # try:
-        voxel_site, transform = self._get_vertex_site(
-            point_voxel_coord,
-        )
-        # except:
-        #     voxel_site, transform = None, None
-
-        # If no intersections are found, check the other possible transforms
-        if len(intersections_df) == 0:
-            # Get the list of possible transforms for the dataframe of sites and
-            # transforms we found earlier
-            transforms = vertices_sites.drop_duplicates(subset="transform").dropna()
-            transforms = transforms["transform"].to_list()
-
-            # Now iterate over the remaining transforms to find locations where the
-            # edge is intersected.
-            for transform in transforms:
-                transformed_coords_real = {}
-                for key, coord in vertices_coords.items():
-                    # get the transformed coordinate, convert it to a real coordinate,
-                    # and add to our new dictionary of vertices
-                    new_coord = [x + t for x, t in zip(coord, transform)]
-                    real_coord = self.charge_grid.get_cart_coords_from_vox(new_coord)
-                    transformed_coords_real[key] = real_coord
-                # get any intersections between planes and voxel edges and add to
-                # our intersection dataframe
-                intersections_df = self._get_voxel_plane_intersections(
-                    sites, transformed_coords_real, intersections_df
-                )
-        # It's possible for the plane to intersect a vertex exactly causing there
-        # to be multiple instances of the same intersection. Remove any duplicates
-        # this may cause.
-        intersections_df = intersections_df.drop_duplicates(subset="intersections")
-
-        # We shift all intersections to the origin in case there are multiple
-        # planes intersecting at different transforms. We also need to shift all
-        # of the vertices so that they are relative to the origin.
-        vertices_coords_real_origin = {}
-        # convert coordinate to real for use later
-        for key, coord in vertices_coords.items():
-            # transform so that A0 is at origin
-            transformed_coord = [
-                x - x1 + 1 for x, x1 in zip(coord, vertices_coords["A0"])
-            ]
-            # add the real coord to our dictionary of vertices
-            vertices_coords_real_origin[key] = grid.get_cart_coords_from_vox(
-                transformed_coord
+    @cached_property
+    def number_of_planes_per_atom(self):
+        """
+        A list for splitting an array containing all of the partitioning planes
+        back into atom based sections.
+        """
+        partitioning = self.partitioning
+        number_of_planes_per_atom = [len(planes) for planes in partitioning.values()]
+        number_of_planes_per_atom.pop(-1)
+        number_of_planes_per_atom = np.array(number_of_planes_per_atom)
+        sum_number_of_planes_per_atom = []
+        for i, j in enumerate(number_of_planes_per_atom):
+            sum_number_of_planes_per_atom.append(
+                j + np.sum(number_of_planes_per_atom[:i])
             )
+        return sum_number_of_planes_per_atom
 
-        # Now that we have a list of plane intersections, we can find the what portion
-        # of the voxels should be applied to each site.
-        # If there is only one site in the list, return the site fraction dictionary
-        # with 1 for this site.
-        if len(sites) == 1:
-            if voxel_site is not None:
-                #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                # Sometimes the voxel center is returned as belonging to more than
-                # 1 site. I beleive this is because without the condition that the
-                # voxel needs to be some distance away from the plane (Which exists
-                # when we assign planes earlier in the code.) it is actually possible
-                # for a plane to exactly go through the site resulting in it
-                # being allowed to belong to two sites. In this situation I don't want
-                # to give the voxel to a -2 site, I want it to go to the most common
-                # site.
-                if voxel_site == -1 or voxel_site == -2:
-                    try:
-                        site_vol_frac[most_common_site] = 1.0
-                    except:
-                        site_vol_frac = None
-                #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                elif len(intersections_df) == 0 or len(intersections_df) == 1:
-                    site_vol_frac[voxel_site] = 1.0
-                else:
-                    site_vol_frac = None
-            else:
-                site_vol_frac = None
-        # If there are two sites, at least one plane is intersecting the voxel
-        elif len(sites) == 2:
-            # if there are not intersections found, then something is not working
-            if len(intersections_df) == 0:
-                #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                # I'm having this problem return as -3 so that I can keep track of it
-                site_vol_frac[-3] = float(0)
-            #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            # Check that there is only one plane that is close to all of the vertices.
-            # If so, our voxel is being split by a single plane.
-            elif len(intersections_df) == 1:
-                # get a list of the intersecting points
-                intersect_points = list(intersections_df["intersections"])[0]
+    @cached_property
+    def voxel_edge_vectors(self):
+        """
+        A (12,3) array consisting of the vectors that make up the edges of
+        a voxel in the grid
+        """
+        # Here we define the edges of each voxel in terms of vertex indices. these are
+        # not unique and other choices could be made. One potentially faster option is
+        # to arrange the edges so that the first index is as small of a set of indices
+        # as possible. Later when we calculate t in our line segments this would reduce
+        # the number of calculations needed for the numerator which only depends on
+        # the plane equation and the first vertex position
+        # Get the edge vectors in cartesian coordinates
+        vertices_transforms_cart = self.vertices_transforms_cart
+        edges = np.array(
+            [
+                [0, 1],
+                [0, 2],
+                [0, 4],
+                [3, 1],
+                [3, 2],
+                [3, 7],
+                [5, 1],
+                [5, 4],
+                [5, 7],
+                [6, 2],
+                [6, 4],
+                [6, 7],
+            ]
+        )
+        edge_vectors = []
+        for edge in edges:
+            edge_vector = (
+                vertices_transforms_cart[edge[1]] - vertices_transforms_cart[edge[0]]
+            )
+            edge_vectors.append(edge_vector)
+        edge_vectors = np.array(edge_vectors)
+        return edge_vectors
 
-                # If there are no intersect points, there is an error somewhere
-                # above and we want to stop the process.
-                if len(intersect_points) == 0:
-                    breakpoint()
-                else:
-                    # define a list to populate with the points that make up one section
-                    # of the voxel
-                    site_points = []
-                    # define the two sites that the voxel will be split into
-                    site1 = sites["site"].iloc[0]
-                    site2 = sites["site"].iloc[1]
-                    # iterate over the vertices and if they belong to the first site
-                    # append them to our site points list
-                    for row in vertices_sites.iterrows():
-                        if row[1]["site"] == site1 or row[1]["site"] is None:
-                            site_points.append(
-                                np.array(vertices_coords_real_origin[row[1]["id"]])
-                            )
-                        # otherwise we don't do anthing
-                    # combine the list of vertex coordinates with the list of intersections
-
-                    hull_points = []
-                    # Add all vertex points to the list
-                    for site_point in site_points:
-                        hull_points.append(np.array(site_point))
-                    # If intersect points are found very close to a vertex point, we
-                    # don't want to accidentally double count. Here we check each
-                    # point before adding it to the list of hull points.
-                    for intersect_point in intersect_points:
-                        intersect_array = np.array(intersect_point)
-                        repeat = False
-                        for site_point in site_points:
-                            site_array = np.array(site_point)
-                            if np.allclose(
-                                intersect_array, site_array, rtol=0, atol=1e-6
-                            ):
-                                repeat = True
-                                break
-                            else:
-                                pass
-                        if repeat == False:
-                            hull_points.append(intersect_array)
-
-                    # define a 3D convex hull for the first segment. Get its volume, then
-                    # use the ratio of its volume to the total voxel volume to find the
-                    # ratio of charge that should be applied to each voxel
-                    try:
-                        hull = ConvexHull(hull_points)
-                        seg1_vol = hull.volume
-                        seg1_ratio = round((seg1_vol / voxel_volume), 16)
-                        site_vol_frac[site1] = seg1_ratio
-                        site_vol_frac[site2] = round((1 - seg1_ratio), 16)
-                    except:
-                        print(f"Error with hull: {point_voxel_coord}")
-                        site_vol_frac = None
-
-            elif len(intersections_df) > 1:
-                # if there is more than one plane, the voxel is being split in
-                # multiple ways. For now we just return no site_vol_frac because
-                # we won't be handling this rigorously
-                site_vol_frac = None
-        # if there are more than two sites or more than one planes, the voxel is
-        # being split by more than one plane. For now I'm just passing these on
-        else:
-            site_vol_frac = None
-        return site_vol_frac
-
-    def get_voxels_multi_plane(
+    def get_site_assignments_from_frac_coords(
         self,
-        point_voxel_coords: ArrayLike | list,
-        site_vol_frac: dict,
-        voxel_assignments: pd.DataFrame,
+        voxel_frac_coords: ArrayLike,
+        min_dist_from_plane: float,
     ):
         """
-        This function finds what sites a voxel divided by more than one plane should
-        be applied to. It looks at nearby voxels and finds what sites they are applied
-        to and finds the ratio between these sites.
-        """
-        if site_vol_frac is None:
-            x, y, z = point_voxel_coords
-            grid_shape = self.charge_grid.grid_shape
-            electride_sites = self.electride_sites
-            # create dictionary for counting number of sites and for the fraction
-            # of sites
-            site_count = {}
-            site_vol_frac = {}
-            for site in range(len(self.electride_structure)):
-                site_count[site] = 0
-                site_vol_frac[site] = 0
-            # look at all neighbors around the voxel of interest
-            for t, u, v in itertools.product([-1, 0, 1], [-1, 0, 1], [-1, 0, 1]):
-                new_idx = [x - 1 + t, y - 1 + u, z - 1 + v]
-
-                # wrap around for voxels on edge of cell
-                new_idx = [a % b for a, b in zip(new_idx, grid_shape)]
-
-                # get site ditionary from the neighboring voxel using its row
-                # index. This is much faster than searching by values. To get the index
-                # we can utilize the fact that an increase in z will increase the index
-                # by 1, an increase in y will increase the index by (range of z),
-                # and an increase in x will increase the index by (range of z)*(range of y)
-                zrange = grid_shape[2]
-                yrange = grid_shape[1]
-                index = int(
-                    (new_idx[0]) * zrange * yrange + (new_idx[1]) * zrange + new_idx[2]
-                )
-                site_dict = voxel_assignments["site"].iloc[index]
-                # If the site dict exists, we want to look at each of its key/item
-                # pairs. -1,-2,-3 indicate some error in voxel assignment. We skip
-                # these for now. Also, if the algorithm is "badelf" we don't want to
-                # assign anything to electride sites so we also sip thee. Otherwise
-                # we add the fraction of each voxel to the voxel count
-                #!!! avoiding electrides is going to cause problems for voronelf
-                if site_dict is not None:
-                    for site_index, frac in site_dict.items():
-                        if site_index in [-3, -2, -1]:
-                            continue
-                        elif (
-                            site_index in electride_sites and self.algorithm == "badelf"
-                        ):
-                            continue
-                        else:
-                            site_count[site_index] += frac
-
-            if sum(site_count.values()) != 0:
-                # get the fraction of each site. This will allow us to split the
-                # charge of the voxel more evenly
-                for site_index in site_count:
-                    site_vol_frac[site_index] = site_count[site_index] / sum(
-                        site_count.values()
-                    )
-
-            else:
-                #  of the voxels nearby returned either None, as an error, or as
-                # an electride. To assign this voxel we just give it to the closest
-                # atom
-                site_vol_frac = self.get_voxels_site_nearest(point_voxel_coords)
-        return site_vol_frac
-
-    def get_voxels_site_nearest(
-        self,
-        point_voxel_coords: ArrayLike | list,
-    ):
-        if self.algorithm == "badelf":
-            structure = self.charge_grid.structure
-        elif self.algorithm == "voronelf":
-            structure = self.electride_structure
-        structure_temp = structure.copy()
-        structure_temp.append("He", point_voxel_coords, coords_are_cartesian=True)
-        nearest_site = structure_temp.get_neighbors(structure_temp[-1], 5)[0].index
-        # create dictionary for recording what fraction of a voxels volume should
-        # be associated with a given site.
-        site_vol_frac = {}
-        for site in range(len(self.electride_structure)):
-            site_vol_frac[site] = float(0)
-        site_vol_frac[nearest_site] = float(1)
-
-        return site_vol_frac
-
-    def get_voxels_site(
-        self,
-        point_voxel_coords: ArrayLike | list,
-        site_vol_frac,
-    ):
-        """
-        Combines methods of voxel assignment to guarantee that the voxel
-        site is returned.
-        """
-        if site_vol_frac is None:
-            site_vol_frac = self.get_voxels_site_base(point_voxel_coords)
-        if site_vol_frac is None:
-            site_vol_frac = self.get_intersected_voxel_volume_ratio(point_voxel_coords)
-
-        return site_vol_frac
-
-    def _get_voxels_site_dask(
-        self,
-        voxel_dataframe: pd.DataFrame,
-    ):
-        """
-        Applies the get_intersected_voxel_volume_ratio function across a Pandas
-        dataframe. This is the function that we give to dasks map_partitions
-        function to parallelize voxel assignment.
+        Gets the site assignments for an arbitrary number of voxels described
+        by their fractional coordinates.
 
         Args:
-            voxel_dataframe (pd.DataFrame): A dataframe consisting of columns
-            [x,y,z] representing the voxels of a system.
+            voxel_frac_coords (ArrayLike):
+                An N,3 array of fractional coordinates corresponding to the voxels
+                to assign sites to
+            min_dist_from_plane (float):
+                The minimum distance a point should be from the plane before
+                a site can be assigned. This is value usually corresponds to
+                the maximum distance the voxel center can be from the plane
+                while the voxel is still being intersected by the plane.
 
         Returns:
-            A series of dictionaries containing the ratio of each voxel assigned
-            to each site.
+            A 1D array of atomic site assignments. Assignments start at 1 with
+            0 indicating no site was found for this coordinate.
         """
-        return voxel_dataframe.apply(
-            lambda x: self.get_voxels_site(
-                [x["x"], x["y"], x["z"]],
-                x["site"],
-            ),
-            axis=1,
+        grid = self.charge_grid
+        plane_equations = self.all_plane_equations
+        number_of_planes_per_atom = self.number_of_planes_per_atom
+        unit_cell_permutations_frac = self.unit_cell_permutations_frac
+
+        # Create an array of zeros to map back to
+        zeros_array = np.zeros(len(voxel_frac_coords))
+        # Create an array that the results will be added to
+        results_array = zeros_array.copy()
+
+        # create zeros array for any problems
+        # global_indices_to_zero = np.array([])
+        # check every possible permutation
+        for transformation in tqdm(
+            unit_cell_permutations_frac,
+            total=len(unit_cell_permutations_frac),
+            ascii="░▒▓",
+        ):
+            # Get the indices where voxels haven't been assigned. Get only these
+            # frac coords
+            indices_where_zero = np.where(results_array == 0)[0]
+            new_frac_coords = voxel_frac_coords.copy()[indices_where_zero]
+            # transform the fractional coords to the next transformation
+            x1, y1, z1 = transformation
+            new_frac_coords[:, 0] += x1
+            new_frac_coords[:, 1] += y1
+            new_frac_coords[:, 2] += z1
+            # Convert the frac coords into cartesian coords
+            cart_coords = grid.get_cart_coords_from_frac_full_array(
+                new_frac_coords
+            ).astype(float)
+            points = np.array(cart_coords).astype(float)
+            planes = np.array(plane_equations).astype(float)
+            # There is a difference in the speed of dask vs numpy. Dask has a
+            # lot of overhead, but at a certain point it is faster than numpy.
+            # We check which one we should use here.
+            plane_distances_to_calc = len(points) * len(planes)
+            if plane_distances_to_calc > 7.8e8:
+                dask = True
+            else:
+                dask = False
+
+            if dask:
+                # DASK ARRAY VERSION
+                # points = da.from_array(points)
+                # planes = da.from_array(planes)
+                distances = da.dot(points, planes[:, :3].T) + planes[:, 3]
+                # Round the distances to within 5 decimals. Everything to this point has
+                # been based on lattice position from vasp which typically have 5-6
+                # decimal places (7 sig figs)
+                distances = np.round(distances, 12)
+                # We write over the distances with a more simplified boolean to save
+                # space. This is also where we filter if we're near a plane if desired
+                distances = da.where(distances < -min_dist_from_plane, True, False)
+                distances = distances.compute()
+
+            else:
+                # BASE NUMPY VERSION
+                distances = np.dot(points, planes[:, :3].T) + planes[:, 3]
+                # Round the distances to within 5 decimals. Everything to this point has
+                # been based on lattice position from vasp which typically have 5-6
+                # decimal places (7 sig figs)
+                distances = np.round(distances, 12)
+                # We write over the distances with a more simplified boolean to save
+                # space. This is also where we filter if we're near a plane if desired
+                distances = np.where(distances < -min_dist_from_plane, True, False)
+
+            # split the array into the planes belonging to each atom. Again we write
+            # over to save space
+            distances = np.array_split(distances, number_of_planes_per_atom, axis=1)
+            # get a 1D array representing the voxel indices with the atom index where the
+            # voxel is assigned to a site and 0s where they are not
+            new_results_arrays = []
+            # for atom_index, atom_array in enumerate(distances_split_by_atom):
+            for atom_index, atom_array in enumerate(distances):
+                voxel_result = np.all(atom_array, axis=1)
+                voxel_result = np.where(
+                    voxel_result == True, atom_index + 1, voxel_result
+                )
+                new_results_arrays.append(voxel_result)
+
+            indices_to_zero = []
+            new_results_array = np.zeros(len(new_results_arrays[0]))
+            for i, sub_results_array in enumerate(new_results_arrays):
+                new_results_array = np.sum(
+                    [new_results_array, sub_results_array], axis=0
+                )
+                indices_to_zero.extend(np.where(new_results_array > i + 1)[0])
+            indices_to_zero = np.unique(indices_to_zero).astype(int)
+            new_results_array[indices_to_zero] = 0
+            # Sum the results
+            # new_results_array = np.sum(new_results_arrays, axis=0)
+            # add results to the results_array
+            results_array[indices_where_zero] = new_results_array
+        return results_array
+
+    def get_site_assignments_from_frac_coords_with_memory_handling(
+        self,
+        voxel_frac_coords: ArrayLike,
+        min_dist_from_plane: float,
+    ):
+        """
+        Gets the site assignments for an arbitrary number of voxels described
+        by their fractional coordinates. Takes available memory into account
+        and divides the voxels into chunks to perform operations.
+
+        Args:
+            voxel_frac_coords (ArrayLike):
+                An N,3 array of fractional coordinates corresponding to the voxels
+                to assign sites to
+            min_dist_from_plane (float):
+                The minimum distance a point should be from the plane before
+                a site can be assigned. This is value usually corresponds to
+                the maximum distance the voxel center can be from the plane
+                while the voxel is still being intersected by the plane.
+
+        Returns:
+            A 1D array of atomic site assignments. Assignments start at 1 with
+            0 indicating no site was found for this coordinate.
+        """
+        partitioning = self.partitioning
+        # determine how much memory is available. Then calculate how many distance
+        # calculations would be possible to do at once with this much memory.
+        available_memory = psutil.virtual_memory().available / (1024**2)
+
+        handleable_plane_distance_calcs_numpy = available_memory / 0.00007
+        handleable_plane_distance_calcs_dask = available_memory / 0.000025
+        plane_distances_to_calc = len(voxel_frac_coords) * sum(
+            [len(i) for i in partitioning.values()]
         )
+
+        # I found there is a cutoff where Dask becomes faster than numpy. This
+        # may vary with the number of cores available. It is largely due to Dask
+        # having a large overhead.
+        if plane_distances_to_calc > 7.8e8:
+            # calculate the number of chunks the voxel array should be split into to not
+            # overload the memory. Then split the array by this number
+            split_num = math.ceil(
+                plane_distances_to_calc / handleable_plane_distance_calcs_dask
+            )
+        else:
+            split_num = math.ceil(
+                plane_distances_to_calc / handleable_plane_distance_calcs_numpy
+            )
+        split_voxel_frac_coords = np.array_split(voxel_frac_coords, split_num, axis=0)
+        # create an array to store results
+        voxel_results_array = np.array([])
+        # for each split, calculate the results and add to the end of our results
+        for chunk, split_voxel_array in enumerate(split_voxel_frac_coords):
+            logging.info(
+                f"Calculating site assignments for voxel chunk {chunk}/{split_num}"
+            )
+            split_result = self.get_site_assignments_from_frac_coords(
+                voxel_frac_coords=split_voxel_array,
+                min_dist_from_plane=min_dist_from_plane,
+            )
+            voxel_results_array = np.concatenate([voxel_results_array, split_result])
+        return voxel_results_array
+
+    def get_single_site_voxel_assignments(self, all_site_voxel_assignments: ArrayLike):
+        """
+        Gets the voxel assignments for voxels that are not split by a plane.
+
+        Args:
+            all_site_voxel_assignments (ArrayLike):
+                A 1D array of integers representing the site assignments for
+                each voxel in the grid.
+
+        Returns:
+            A 1D array of the same length as the input with additional site
+            assignments.
+        """
+        all_voxel_assignments = all_site_voxel_assignments.copy()
+        # charge_grid = self.charge_grid
+        # In the BadELF algorithm the electride sites will have already been
+        # assigned. In VoronELF they won't be. Here we search for unassigned
+        # voxels and then run the alg on the remaining ones
+        unassigned_indices = np.where(all_voxel_assignments == 0)[0]
+        all_voxel_frac_coords = self.all_voxel_frac_coords
+        frac_coords_to_find = all_voxel_frac_coords[unassigned_indices]
+        # min_dist_from_plane = charge_grid.max_voxel_dist
+        single_site_voxel_assignments = (
+            self.get_site_assignments_from_frac_coords_with_memory_handling(
+                frac_coords_to_find, min_dist_from_plane=0
+            )
+        )
+        all_voxel_assignments[unassigned_indices] = single_site_voxel_assignments
+        return all_voxel_assignments
+
+    def get_multi_site_voxel_assignments(self, all_site_voxel_assignments: ArrayLike):
+        """
+        Gets the voxel assignments for voxels that sit exactly on a plane. Also
+        assigns any planes that are not assigned
+        """
+        all_voxel_assignments = all_site_voxel_assignments.copy()
+        unassigned_indices = np.where(all_voxel_assignments == 0)[0]
+        frac_coords_to_find = self.all_voxel_frac_coords[unassigned_indices]
+        grid = self.charge_grid
+        plane_equations = self.all_plane_equations
+        number_of_planes_per_atom = self.number_of_planes_per_atom
+        unit_cell_permutations_frac = self.unit_cell_permutations_frac
+        if self.algorithm == "badelf":
+            structure = grid.structure
+        elif self.algorithm == "voronelf":
+            structure = self.electride_structure
+
+        # Create an array of zeros to map back to
+        zeros_array = np.zeros(len(frac_coords_to_find))
+        # Create an array that the results will be added to
+        results_arrays = []
+        for i in range(len(number_of_planes_per_atom) + 1):
+            results_arrays.append(zeros_array.copy())
+
+        # create zeros array for any problems
+        # global_indices_to_zero = np.array([])
+        # check every possible permutation
+        for transformation in tqdm(
+            unit_cell_permutations_frac,
+            total=len(unit_cell_permutations_frac),
+            ascii="░▒▓",
+        ):
+            # Get the indices where voxels haven't been assigned. Get only these
+            # frac coords
+            new_frac_coords = frac_coords_to_find.copy()
+            # transform the fractional coords to the next transformation
+            x1, y1, z1 = transformation
+            new_frac_coords[:, 0] += x1
+            new_frac_coords[:, 1] += y1
+            new_frac_coords[:, 2] += z1
+            # Convert the frac coords into cartesian coords
+            cart_coords = grid.get_cart_coords_from_frac_full_array(
+                new_frac_coords
+            ).astype(float)
+            points = np.array(cart_coords).astype(float)
+            planes = np.array(plane_equations).astype(float)
+            # There is a difference in the speed of dask vs numpy. Dask has a
+            # lot of overhead, but at a certain point it is faster than numpy.
+            # We check which one we should use here.
+            plane_distances_to_calc = len(points) * len(planes)
+            if plane_distances_to_calc > 7.8e8:
+                dask = True
+            else:
+                dask = False
+
+            if dask:
+                # DASK ARRAY VERSION
+                # points = da.from_array(points)
+                # planes = da.from_array(planes)
+                distances = da.dot(points, planes[:, :3].T) + planes[:, 3]
+                # Round the distances to within 5 decimals. Everything to this point has
+                # been based on lattice position from vasp which typically have 5-6
+                # decimal places (7 sig figs)
+                distances = np.round(distances, 12)
+                # We write over the distances with a more simplified boolean to save
+                # space. This is also where we filter if we're near a plane if desired
+                distances = da.where(distances <= 0, True, False)
+                distances = distances.compute()
+
+            else:
+                # BASE NUMPY VERSION
+                distances = np.dot(points, planes[:, :3].T) + planes[:, 3]
+                # Round the distances to within 5 decimals. Everything to this point has
+                # been based on lattice position from vasp which typically have 5-6
+                # decimal places (7 sig figs)
+                distances = np.round(distances, 12)
+                # We write over the distances with a more simplified boolean to save
+                # space. This is also where we filter if we're near a plane if desired
+                distances = np.where(distances <= 0, True, False)
+
+            # split the array into the planes belonging to each atom. Again we write
+            # over to save space
+            distances = np.array_split(distances, number_of_planes_per_atom, axis=1)
+            # get a 1D array representing the voxel indices with the atom index where the
+            # voxel is assigned to a site and 0s where they are not
+            new_results_arrays = []
+
+            # For each atom, if the voxel is under all of the atoms planes, it
+            # is assigned to this atom. We store this as a 1D numpy array and
+            # append each atoms array to a list
+            for atom_index, atom_array in enumerate(distances):
+                voxel_result = np.all(atom_array, axis=1)
+                voxel_result = np.where(voxel_result == True, 1, voxel_result)
+                new_results_arrays.append(voxel_result)
+
+            # Add the assignments back to the full results array for each atom
+            for i, new_array in enumerate(new_results_arrays):
+                indices_where_1 = np.where(new_array == 1)[0]
+                results_arrays[i][indices_where_1] = 1
+
+        # combine all of the atom results arrays into one array
+        results_array = np.column_stack(results_arrays)
+
+        # Now we want to find sites that still weren't assigned and get assignments
+        # for them. These will mostly be voxels with small charges. We simply
+        # assign these using the closest site
+        still_unassigned_rows = np.all(results_array == 0, axis=1)
+        still_unassigned_indices = np.where(still_unassigned_rows)[0]
+        # Loop over the unassigned voxels and assign them to the closest atom.
+        # This could be made more rigorous by checking for more than one site
+        # in case multiple are the same distance, but for now I'm just using one
+        # since it's likely a small amount of voxels
+        for unassigned_voxel_index in still_unassigned_indices:
+            frac_coord = frac_coords_to_find[unassigned_voxel_index]
+            structure_temp = structure.copy()
+            structure_temp.append("He", frac_coord)
+            nearest_site = structure_temp.get_neighbors(structure_temp[-1], 5)[0].index
+            results_array[unassigned_voxel_index, nearest_site] = 1
+
+        return results_array
