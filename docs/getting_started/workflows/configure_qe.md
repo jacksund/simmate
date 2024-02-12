@@ -35,6 +35,44 @@ Download install [Docker-Desktop](https://www.docker.com/products/docker-desktop
 
 This will install the `docker` command for you and let you monitor all running containers.
 
+To confirm docker is working properly, run the command:
+``` bash
+docker run hello-world
+```
+
+Read through the output of this command, you will see somewhere this text:
+```
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+```
+
+Seeing an error? Here are the two most common causes: 
+
+!!! troubeshooting
+    If you see an error such as...
+    ```
+    docker: error during connect: This error may indicate that the docker daemon is not running. ...
+    ```
+
+    ... then this means you don't have Docker-Desktop open & running. Open the app (and leave it open) when running `docker` commands.
+
+!!! troubeshooting
+    If you see an error such as...
+    
+    ```
+    docker: permission denied while trying to connect to the Docker daemon socket at unix: ...
+    ```
+    
+    ...then you are likely a Linux user and don't have `sudo` permissions yet. To give `sudo` permissions to `docker`, read the official guides [here](https://docs.docker.com/engine/install/linux-postinstall/#configure-docker-to-start-on-boot-with-systemd). For example, on Ubuntu, you can get docker set up and running using:
+    ```bash
+    sudo snap install docker
+    sudo groupadd docker
+    sudo usermod -aG docker $USER
+    # Then restart your computer
+    ```
+
+    If you are on a shared computer system & do not have `sudo` permissons (e.g. you are on a shared HPC cluster), then Docker likely isn't a good solution for you. Make sure you read the "Submit to a Cluster" section of this `Workflows` guide for more information.
+
 ### iii. Tell Simmate to use Docker
 
 By default, Simmate assumes QE is installed on your computer. But here, we have QE installed within a Docker container, so QE commands such as `pw.x` are only accessible *inside* a docker container. We therefore need tell Simmate that we are using Docker for QE.

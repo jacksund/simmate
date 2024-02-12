@@ -56,6 +56,7 @@ def add(app_name: str):
     if app_name == "badelf":
         settings.add_apps_and_update(
             [
+                "simmate.apps.configs.BadelfConfig",
                 "simmate.apps.configs.BaderConfig",
             ]
         )

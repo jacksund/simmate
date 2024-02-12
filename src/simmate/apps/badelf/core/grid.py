@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike
 from pymatgen.io.vasp import Poscar
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pyrho.pgrid import PGrid
 
 from simmate.toolkit import Structure
@@ -49,55 +50,50 @@ class Grid:
 
     @property
     def grid_shape(self):
-        """Data grid shape
-
-        Returns:
-            The number of voxels along each unit cell vector
+        """
+        The number of voxels along each unit cell vector
         """
         return np.array(self.total.shape)
 
     @property
-    def a(self):
-        """The cartesian coordinates for the lattice vector "a"
-
-        Returns:
-            The cartesian coordinates for the lattice vector "a"
+    def matrix(self):
         """
-        return self.structure.lattice.matrix[0]
+        A 3x3 matrix defining the a, b, and c sides of the unit cell
+        """
+        return self.structure.lattice.matrix
+
+    @property
+    def a(self):
+        """
+        The cartesian coordinates for the lattice vector "a"
+        """
+        return self.matrix[0]
 
     @property
     def b(self):
-        """The cartesian coordinates for the lattice vector "b"
-
-        Returns:
-            The cartesian coordinates for the lattice vector "b"
         """
-        return self.structure.lattice.matrix[1]
+        The cartesian coordinates for the lattice vector "b"
+        """
+        return self.matrix[1]
 
     @property
     def c(self):
-        """The cartesian coordinates for the lattice vector "c"
-
-        Returns:
-            The cartesian coordinates for the lattice vector "c"
         """
-        return self.structure.lattice.matrix[2]
+        The cartesian coordinates for the lattice vector "c"
+        """
+        return self.matrix[2]
 
     @property
     def frac_coords(self):
-        """The fractional coordinates of every atom in the structure
-
-        Returns:
-            Array of coordinates for each atom.
+        """
+        Array of fractional coordinates for each atom.
         """
         return self.structure.frac_coords
 
     @property
     def voxel_volume(self):
-        """The volume of each voxel in the grid
-
-        Returns:
-            The volume of a voxel
+        """
+        The volume of each voxel in the grid
         """
         volume = self.structure.volume
         voxel_num = np.prod(self.grid_shape)
@@ -105,6 +101,9 @@ class Grid:
 
     @property
     def voxel_num(self):
+        """
+        The number of voxels in the grid
+        """
         return self.grid_shape.prod()
 
     @property
@@ -185,6 +184,12 @@ class Grid:
         number_of_voxels = self.grid_shape.prod()
         return number_of_voxels / volume
 
+    @property
+    def equivalent_atoms(self):
+        return SpacegroupAnalyzer(self.structure).get_symmetry_dataset()[
+            "equivalent_atoms"
+        ]
+
     def get_grid_axes(self, padding: int = 0):
         """
         Gets the the possible indices for each dimension of a padded grid.
@@ -193,7 +198,8 @@ class Grid:
         arrays with integers from 0 to 21.
 
         Args:
-            padding (int): The amount the grid has been padded
+            padding (int):
+                The amount the grid has been padded
 
         Returns:
             three arrays with lengths the same as the grids shape
@@ -229,8 +235,9 @@ class Grid:
         """Create a grid instance using a CHGCAR or ELFCAR file
 
         Args:
-            grid_file (string): The file the instance should be made from. Should
-                be a VASP CHGCAR or ELFCAR type file.
+            grid_file (string):
+                The file the instance should be made from. Should be a VASP
+                CHGCAR or ELFCAR type file.
 
         Returns:
             Grid from the specified file.
@@ -357,10 +364,11 @@ class Grid:
             their input files as far as possible.
 
             Args:
-                flt (float): Float to print.
+                flt (float):
+                    Float to print.
 
             Returns:
-                str: String representation of float in Fortran format.
+                String representation of float in Fortran format.
             """
             s = f"{flt:.10E}"
             if flt >= 0:
@@ -375,7 +383,7 @@ class Grid:
 
             lines = comment + "\n"
             lines += "   1.00000000000000\n"
-            for vec in self.structure.lattice.matrix:
+            for vec in self.matrix:
                 lines += f" {vec[0]:12.6f}{vec[1]:12.6f}{vec[2]:12.6f}\n"
             if not vasp4_compatible:
                 lines += "".join(f"{s:5}" for s in poscar.site_symbols) + "\n"
@@ -419,9 +427,10 @@ class Grid:
         [PyRho](https://materialsproject.github.io/pyrho/)
 
         Args:
-            desired_resolution (int): The desired resolution in voxels/A^3.
-            new_grid_shape (ArrayLike): The new array shape. Takes precedence
-                over desired_resolution.
+            desired_resolution (int):
+                The desired resolution in voxels/A^3.
+            new_grid_shape (ArrayLike):
+                The new array shape. Takes precedence over desired_resolution.
 
         Returns:
             Changes the grid data in place.
@@ -431,7 +440,7 @@ class Grid:
         diff = self.diff
 
         # Get the lattice unit vectors as a 3x3 array
-        lattice_array = self.structure.lattice.matrix
+        lattice_array = self.matrix
 
         # get the original grid size and lattice volume.
         grid_shape = self.grid_shape
@@ -478,7 +487,8 @@ class Grid:
         Takes in a site index and returns the equivalent voxel grid index.
 
         Args:
-            site (int): the index of the site to find the grid index for
+            site (int):
+                the index of the site to find the grid index for
 
         Returns:
             A voxel grid index as an array.
@@ -497,7 +507,8 @@ class Grid:
         VoronoiNN
 
         Args:
-            neigh (Neigh): a neighbor type object from pymatgen
+            neigh (Neigh):
+                a neighbor type object from pymatgen
 
         Returns:
             A voxel grid index as an array.
@@ -514,7 +525,8 @@ class Grid:
         structure.get_neighbors class.
 
         Args:
-            neigh (dict): a neighbor dictionary from pymatgens structure.get_neighbors
+            neigh (dict):
+                a neighbor dictionary from pymatgens structure.get_neighbors
                 method.
 
         Returns:
@@ -531,7 +543,8 @@ class Grid:
         Takes in a fractional coordinate and returns the cartesian coordinate.
 
         Args:
-            frac_coords (ArrayLike): The fractional position to convert to cartesian coords.
+            frac_coords (ArrayLike):
+                The fractional position to convert to cartesian coords.
 
         Returns:
             A voxel grid index as an array.
@@ -548,7 +561,8 @@ class Grid:
         coordinates.
 
         Args:
-            voxel_coordsition (ArrayLike): A voxel grid index
+            voxel_coordsition (ArrayLike):
+                A voxel grid index
 
         Returns:
             A fractional coordinate as an array
@@ -563,7 +577,8 @@ class Grid:
         Takes in fractional coordinates and returns cartesian coordinates
 
         Args:
-            frac_coords (ArrayLike): The fractional position to convert to cartesian coords.
+            frac_coords (ArrayLike):
+                The fractional position to convert to cartesian coords.
 
         Returns:
             Cartesian coordinates as an array
@@ -581,12 +596,13 @@ class Grid:
         Takes in a cartesian coordinate and returns the fractional coordinates.
 
         Args:
-            cart_coords (ArrayLike): A cartesian coordinate.
+            cart_coords (ArrayLike):
+                A cartesian coordinate.
 
         Returns:
             fractional coordinates as an Array
         """
-        lattice_matrix = self.structure.lattice.matrix
+        lattice_matrix = self.matrix
         inverse_matrix = np.linalg.inv(lattice_matrix)
         frac_coords = np.dot(cart_coords, inverse_matrix)
 
@@ -597,7 +613,8 @@ class Grid:
         Takes in a voxel grid index and returns the cartesian coordinates.
 
         Args:
-            voxel_coords (ArrayLike): A voxel grid index
+            voxel_coords (ArrayLike):
+                A voxel grid index
 
         Returns:
             Cartesian coordinates as an array
@@ -619,6 +636,25 @@ class Grid:
         frac_coords = self.get_frac_coords_from_cart(cart_coords)
         voxel_coords = self.get_voxel_coords_from_frac(frac_coords)
         return voxel_coords
+
+    def get_cart_coords_from_frac_full_array(self, frac_coords: ArrayLike):
+        """
+        Takes in a 2D array of shape (N,3) representing fractional coordinates
+        at N points and calculates the equivalent cartesian coordinates.
+
+        Args:
+            frac_coords (ArrayLike):
+                An (N,3) shaped array of fractional coordinates
+
+        Returns:
+            An (N,3) shaped array of cartesian coordinates
+        """
+        x, y, z = self.matrix.T
+        cart_x = np.dot(frac_coords, x)
+        cart_y = np.dot(frac_coords, y)
+        cart_z = np.dot(frac_coords, z)
+        cart_coords = np.column_stack([cart_x, cart_y, cart_z])
+        return cart_coords
 
     def _plot_points(self, points, ax, fig, color, size: int = 20):
         """
