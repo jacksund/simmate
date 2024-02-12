@@ -59,7 +59,6 @@ workflow_name: bad-elf.badelf.badelf
 directory: /path/to/folder
 
 # all parameters below are optional
-cores: 4
 find_electrides: true
 min_elf: 0.5
 algorithm: badelf

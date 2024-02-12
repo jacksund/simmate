@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import csv
-import itertools
 import logging
 import math
 import warnings
 from functools import cached_property
 from pathlib import Path
 
-import dask.dataframe
 import numpy as np
-import pandas as pd
 import psutil
-from dask.distributed import Client, LocalCluster
+from numpy.typing import ArrayLike
 from pymatgen.analysis.dimensionality import get_dimensionality_larsen
 from pymatgen.analysis.graphs import StructureGraph
 from pymatgen.analysis.local_env import CrystalNN
@@ -24,9 +21,6 @@ from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.apps.badelf.core.voxel_assignment import VoxelAssignmentToolkit
 from simmate.apps.bader.outputs import ACF
 from simmate.workflows.utilities import get_workflow
-
-# BUG: we shouldn't fully turning off warnings. This should be used within a context.
-warnings.filterwarnings("ignore")
 
 
 class BadElfToolkit:
@@ -93,9 +87,6 @@ class BadElfToolkit:
         self.algorithm = algorithm
         self.find_electrides = find_electrides
 
-        self._voxel_errors = None  # Stores voxel coordinates that had errors when
-        # Being assigned. Only filled after badelf/vorelf have run
-
     @cached_property
     def structure(self):
         structure = self.partitioning_grid.structure.copy()
@@ -153,7 +144,11 @@ class BadElfToolkit:
         # without electride sites. We then add one electride site at a time and
         # check its environment.
         for i, site in enumerate(self.electride_structure):
-            coord_envs.append(cnn.get_cn(structure=self.electride_structure, n=i))
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore", category=UserWarning, module="pymatgen"
+                )
+                coord_envs.append(cnn.get_cn(structure=self.electride_structure, n=i))
         return coord_envs
 
     @cached_property
@@ -203,11 +198,63 @@ class BadElfToolkit:
             )
             return None
 
+    @property
+    def single_site_voxel_assignments(self):
+        """
+        A 1D array with site assignments for voxels not exactly on a partitioning
+        plane
+        """
+        return self.voxel_assignments[0]
+
+    @property
+    def multi_site_voxel_assignments(self):
+        """
+        An (N,M) shaped array with indices i,j where i is the voxel index
+        (these are sub indices, full indices are stored in multi_site_voxel_indices)
+        and j is the site. A 1 indicates that this voxel is partially shared by
+        this site
+        """
+        return self.voxel_assignments[1]
+
+    @property
+    def multi_site_voxel_indices(self):
+        """
+        The corresponding voxel indices for the multi_site_voxel_assignments
+        array.
+        """
+        return np.where(self.single_site_voxel_assignments == 0)[0]
+
+    @cached_property
+    def voxel_assignments_array(self):
+        """
+        A 3D array with the same shape as the charge grid indicating where
+        voxels are assigned
+        """
+        # Get multi site indices
+        split_voxel_indices = self.multi_site_voxel_indices
+        # create a list to store the randomly assigned voxels
+        random_voxel_assignments = []
+        # loop through the voxels belonging to multiple sites to pick one random
+        # site to assign to.
+        for split_voxel in self.multi_site_voxel_assignments:
+            # Get which sites this voxel is split by
+            possible_sites = np.where(split_voxel != 0)[0]
+            # Pick one randomly
+            site_choice = np.random.choice(possible_sites)
+            # append it to our list
+            random_voxel_assignments.append(site_choice)
+        # Get the single site assignments and subtract one to get to sites
+        # beginning at 0
+        all_site_assignments = self.single_site_voxel_assignments.copy() - 1
+        # Assign our randomly generated sites then return the array as a 3D grid
+        all_site_assignments[split_voxel_indices] = np.array(random_voxel_assignments)
+        return all_site_assignments.reshape(self.charge_grid.grid_shape)
+
     @cached_property
     def voxel_assignments(self):
         """
-        A dataframe with each voxel coordinate, charge, and dictionary of sites
-        that the voxel is assigned to.
+        Two arrays representing voxels assigned to only one site and voxels
+        assigned to multiple sites
         """
         return self._get_voxel_assignments()
 
@@ -229,88 +276,40 @@ class BadElfToolkit:
 
         # Get the objects that we'll need to assign voxels.
         elif algorithm in ["badelf", "voronelf"]:
-            a, b, c = self.charge_grid.grid_shape
-            charge_data = self.charge_grid.total
-
-            # Create lists that contain the coordinates of each voxel and their charges
-            voxel_coords = [
-                idx for idx in itertools.product(range(a), range(b), range(c))
-            ]
-            voxel_charges = [
-                float(charge_data[idx[0], idx[1], idx[2]]) for idx in voxel_coords
-            ]
-
-            # Create a dataframe that has each coordinate index and the charge as columns
-            # Later we'll remove voxels that belong to electrides from this dataframe
-            voxel_assignments = pd.DataFrame(voxel_coords, columns=["x", "y", "z"]).add(
-                1
+            charge_grid = self.charge_grid
+            voxel_assignment_tools = VoxelAssignmentToolkit(
+                charge_grid=charge_grid,
+                electride_structure=self.electride_structure,
+                partitioning=self.partitioning,
+                algorithm=self.algorithm,
+                directory=self.directory,
             )
-            # create columns for site and charge.
-            voxel_assignments["charge"] = voxel_charges
-            voxel_assignments["site"] = None
-
-            # If we are running BadELF we need to get the voxels assigned to electrides
-            # by the henkelman bader algorithm
+            # get an initial array of no site assignments
+            all_voxel_site_assignments = np.zeros(charge_grid.voxel_num)
             if algorithm == "badelf":
-                voxel_assignments = self._get_zero_flux_electride_assignment(
-                    voxel_assignments
+                # Get the voxel assignments for each electride site
+                all_voxel_site_assignments = self._get_zero_flux_electride_assignment(
+                    all_voxel_site_assignments
                 )
 
-            voxel_assignments = self._get_plane_seperated_voxels_assignment(
-                voxel_assignments
-            )
-
-            # get voxel assignment errors
-            vert_multi_site_same_trans = []
-            vert_multi_site = []
-            multi_site_no_plane = []
-            error_indices = []
-            for row in voxel_assignments.iterrows():
-                # Check each voxels site assignment (stored in row[1][4]). If
-                # -1, the vertices of the voxel were found to potentially belong
-                # to multiple sites even at the same transformation. If -2, they
-                # were found to potentially belong to multiple sites at different
-                # transformations. If -3, the vertices were found to have different
-                # sites, but no plane was found to intersect the voxel.
-
-                if row[1][4] is not None:
-                    for site in row[1][4].keys():
-                        if site == -1:
-                            vert_multi_site_same_trans.append(
-                                [row[1][0], row[1][1], row[1][2]]
-                            )
-                            error_indices.append(row[0])
-                        elif site == -2:
-                            vert_multi_site.append([row[1][0], row[1][1], row[1][2]])
-                            error_indices.append(row[0])
-                        elif site == -3:
-                            multi_site_no_plane.append(
-                                [row[1][0], row[1][1], row[1][2]]
-                            )
-                            error_indices.append(row[0])
-            self._voxel_errors = {
-                "vert_multi_site_same_trans": vert_multi_site_same_trans,
-                "vert_multi_site": vert_multi_site,
-                "multi_site_no_plane": multi_site_no_plane,
-            }
-            self._write_voxel_errors()
-
-            # Remove the site errors
-            voxel_assignments["site"] = (
-                np.where(  # assigns values based on boolean value. returns array
-                    voxel_assignments.index.isin(
-                        error_indices
-                    ),  # Is True where df index is in indices list
-                    None,  # The value to be assigned
-                    voxel_assignments["site"],
+            # get assignments for voxels belonging to single sites
+            single_site_voxel_assignments = (
+                voxel_assignment_tools.get_single_site_voxel_assignments(
+                    all_voxel_site_assignments
                 )
-            )  # Value to assign where condition is False
-
-            voxel_assignments = self._get_multi_plane_voxel_assignment(
-                voxel_assignments
             )
+            # get assignments for voxels split by two or more sites
+            multi_site_voxel_assignments = (
+                voxel_assignment_tools.get_multi_site_voxel_assignments(
+                    single_site_voxel_assignments.copy()
+                )
+            )
+
         logging.info("Finished voxel assignment")
-        return voxel_assignments
+        return (
+            single_site_voxel_assignments,
+            multi_site_voxel_assignments,
+        )
 
     def write_electride_structure_files(
         self,
@@ -321,26 +320,37 @@ class BadElfToolkit:
         Writes copies of the charge file and partitioning file (usually CHGCAR
         and ELFCAR) with electride sites. This is most frequently used for
         eventually running the Henkelman Bader code to get electride charges.
+
+        Args:
+            charge_file (str):
+                The name of the CHGCAR to write
+            partitioning_file (str):
+                The name of the ELFCAR to write
         """
+        # Get the directory
+        directory = self.directory
         # Write CHGCAR and ELFCAR files with the empty structure that was found
         electride_charge_grid = self.charge_grid.copy()
         electride_charge_grid.structure = self.electride_structure
-        electride_charge_grid.write_file(charge_file)
+        electride_charge_grid.write_file(directory / charge_file)
         electride_elf_grid = self.partitioning_grid.copy()
         # check that elf grid is same size as charge grid and if not, regrid
         if electride_charge_grid.voxel_num != electride_elf_grid.voxel_num:
             electride_elf_grid.regrid(new_grid_shape=electride_charge_grid.grid_shape)
         electride_elf_grid.structure = self.electride_structure
-        electride_elf_grid.write_file(partitioning_file)
+        electride_elf_grid.write_file(directory / partitioning_file)
 
-    def _get_zero_flux_electride_assignment(self, voxel_assignments: pd.DataFrame):
+    def _get_zero_flux_electride_assignment(
+        self, all_voxel_site_assignments: ArrayLike
+    ):
         """
         Gets the electride site assignments for voxels belonging to electride
         sites based on the Henkelman groups algorithm.
 
         Args:
-            voxel_assignments (DataFrame):
-                The dataframe to add the voxel assignments to.
+            all_voxel_site_assignments (ArrayLike):
+                A 1D array of integers representing the site assignments for
+                each voxel in the grid.
 
         Returns:
             updated voxel_assignments dataframe
@@ -361,159 +371,33 @@ class BadElfToolkit:
         )
 
         for electride in self.electride_indices:
-            # Create a dictionary with all sites to store the value in. We do
-            # this to have the same format for all sites including those that
-            # are shared by more than one atom
-            site_vol_frac = {}
-            for i, site in enumerate(self.electride_structure):
-                site_vol_frac[i] = float(0)
-            site_vol_frac[electride] = float(1)
             # Pull in electride charge density from bader output file (BvAt####.dat format)
             self._fix_BvAt(f"BvAt{str(electride+1).zfill(4)}.dat")
             electride_charge = Grid.from_file(
                 directory / f"BvAt{str(electride+1).zfill(4)}.dat"
             ).total
-            electride_indices = []
-            # For each voxel, check if the electride charge density file has any
-            # charge. If it does add its index to the electride_indices list
-            for index, row in voxel_assignments.iterrows():
-                charge_density = float(
-                    electride_charge[row["x"] - 1, row["y"] - 1, row["z"] - 1]
-                )
-                if charge_density != 0:
-                    # get indices of electride sites
-                    electride_indices.append(index)
-                    # results_charge[electride] += charge_density
-            # Update all of the electride indices with the site dictionary
-            voxel_assignments["site"] = (
-                np.where(  # assigns values based on boolean value. returns array
-                    voxel_assignments.index.isin(
-                        electride_indices
-                    ),  # Is True where df index is in indices list
-                    site_vol_frac,  # The value to be assigned
-                    voxel_assignments["site"],
-                )
-            )  # Value to assign where condition is False
+            electride_charge_1D = electride_charge.ravel()
+            electride_indices_1D = np.where(electride_charge_1D != 0)[0]
+            all_voxel_site_assignments[electride_indices_1D] = electride + 1
 
-        return voxel_assignments
-
-    def _get_plane_seperated_voxels_assignment(
-        self,
-        voxel_assignments: pd.DataFrame,
-    ):
-        """
-        Gets the electride site assignments for voxels based on partitioning.
-
-        Args:
-            voxel_assignments (DataFrame):
-                The dataframe to add the voxel assignments to.
-
-        Returns:
-            updated voxel_assignments dataframe
-        """
-        voxel_assignment_tools = VoxelAssignmentToolkit(
-            charge_grid=self.charge_grid,
-            partitioning_grid=self.partitioning_grid,
-            partitioning=self.partitioning,
-            electride_structure=self.electride_structure,
-            algorithm=self.algorithm,
-        )
-        # partitioning = self.partitioning
-        # permutations = self.charge_grid.permutations
-        cores = self.cores
-        # get the amount of memory available
-        memory_gb = psutil.virtual_memory()[1] / (1e9)
-        # Each worker needs at least 2GB of memory. We select either the number
-        # of workers that could have at least this much memory or the number
-        # of cores/threads, whichever is smaller
-        nworkers = min(math.floor(memory_gb / 2), cores)
-
-        # We need the total number of voxels so that we can make sure our partitions
-        # aren't too large. I did some light testing and found that 128000 was a
-        # good limit for the number of voxels that could be handled by a worker
-        # with 2GB of memory. Much larger and it could start having issues.
-        total_voxels = len(voxel_assignments)
-        if total_voxels <= 128000 * nworkers:
-            npartitions = nworkers
-        elif total_voxels > 128000 * nworkers:
-            npartitions = math.ceil(total_voxels / 128000)
-
-        with (
-            LocalCluster(
-                n_workers=nworkers,
-                threads_per_worker=2,
-                memory_limit="auto",
-                processes=True,
-            ) as cluster,
-            Client(cluster) as client,
-        ):
-            # put list of indices in dask dataframe. Partition with the same
-            # number of partitions as workers
-            ddf = dask.dataframe.from_pandas(
-                voxel_assignments,
-                npartitions=npartitions,
-            )
-
-            # site search for all voxel positions.
-            ddf["site"] = ddf.map_partitions(
-                voxel_assignment_tools._get_voxels_site_dask,
-            )
-            # run site search and save as pandas dataframe
-            pdf = ddf.compute()
-
-        return pdf
-
-    def _get_multi_plane_voxel_assignment(
-        self,
-        voxel_assignments: pd.DataFrame,
-    ):
-        voxel_assignment_tools = VoxelAssignmentToolkit(
-            charge_grid=self.charge_grid,
-            partitioning_grid=self.partitioning_grid,
-            partitioning=self.partitioning,
-            electride_structure=self.electride_structure,
-            algorithm=self.algorithm,
-        )
-        voxel_assignments["site"] = voxel_assignments.apply(
-            lambda x: voxel_assignment_tools.get_voxels_multi_plane(
-                point_voxel_coords=[x["x"], x["y"], x["z"]],
-                site_vol_frac=x["site"],
-                voxel_assignments=voxel_assignments,
-            ),
-            axis=1,
-        )
-        return voxel_assignments
-
-    def _write_voxel_errors(self):
-        """
-        Writes any voxel errors that were found to a csv file.
-        """
-
-        dataframe = pd.DataFrame.from_dict(
-            dict([(key, pd.Series(value)) for key, value in self._voxel_errors.items()])
-        )
-        dataframe.to_csv(self.directory / "same_site_voxels.csv")
-
-    @cached_property
-    def voxel_assignments_array(self):
-        """
-        An array that relates each voxel in the charge_grid to a site.
-        """
-        return self._get_voxel_assignments_array()
-
-    def _get_voxel_assignments_array(self):
-        voxel_assignments = self.voxel_assignments
-
-        # Make blank array
-        voxel_array = np.zeros_like(self.charge_grid.total)
-        for row in voxel_assignments.iterrows():
-            sites = row[1][4]
-            max_site_frac = max(sites.values())
-            max_site = list(sites.keys())[list(sites.values()).index(max_site_frac)]
-            voxel_array[row[1][0] - 1, row[1][1] - 1, row[1][2] - 1] = max_site
-        return voxel_array
+        return all_voxel_site_assignments
 
     def get_electride_dimensionality(self, electride_connection_cutoff: float = 0):
+        """
+        Finds the dimensionality (e.g. 0D, 1D, etc.) of an electride based on
+        which voxels were assigned to the electride sites.
+
+        Args:
+            electride_connection_cutoff (float):
+                The ELF value to consider as the cutoff for when two electride
+                sites are not connected. 0 is the default, but another reasonable
+                selection is 0.5 which is often considered the cutoff at which
+                a site can be considered an electride.
+
+        Returns:
+            The dimensionality of the electride as an integer.
+        """
+
         electride_indices = self.electride_indices
         # If we have no electrides theres no reason to continue so we stop here
         if len(electride_indices) == 0:
@@ -573,6 +457,7 @@ class BadElfToolkit:
         # the list of neighbors we just defined.
         graph = StructureGraph.with_empty_graph(electride_structure)
         # partitioning_lines = []
+
         # iterate over each unique electride site.
         for index, neighbors in enumerate(nearest_neighbors):
             # get the voxel coords for the electride site
@@ -629,8 +514,19 @@ class BadElfToolkit:
         return get_dimensionality_larsen(graph)
 
     def _fix_BvAt(self, file_name):
+        """
+        Adjusts the output BvAt files from the Henkelman group's bader algorithm's
+        print methods. In many cases, the atom labels are altered or removed.
+
+        Args:
+            file_name (str):
+                The name of the file to be fixed. Uses the default directory of
+                the BadElfToolkit instance.
+        """
         electride_structure = self.electride_structure
-        symbols = electride_structure.types_of_species
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning, module="pymatgen")
+            symbols = electride_structure.types_of_species
         new_symbol_line = ""
         for symbol in symbols:
             new_symbol_line += f"{symbol.name}   "
@@ -651,6 +547,9 @@ class BadElfToolkit:
         return self._get_results()
 
     def _get_results(self):
+        """
+        Gets the results for a BadELF run and prints them to a .csv file.
+        """
         algorithm = self.algorithm
         directory = self.directory
         electride_num = len(self.electride_indices)
@@ -691,14 +590,20 @@ class BadElfToolkit:
             }
 
         elif algorithm in ["badelf", "voronelf"]:
-            # get the voxel assignments as a dataframe.
-            voxel_assignments = self.voxel_assignments
+            # get the voxel assignments. Note that the convention here is to
+            # have indices starting at 1 rather than 0
+            (
+                single_site_assignments,
+                multi_site_assignments,
+            ) = self.voxel_assignments
             voxel_volume = self.charge_grid.voxel_volume
+            charge_array = self.charge_grid.total.ravel()
             logging.info("Calculating additional useful information")
             # Create dictionaries to store the important results
             min_dists = {}
             charges = {}
             atomic_volumes = {}
+            # Get min dists
             for site in range(len(electride_structure)):
                 charges[site] = 0
                 atomic_volumes[site] = 0
@@ -721,11 +626,31 @@ class BadElfToolkit:
                     min_radii = min(radii)
                     min_dists[site] = min_radii
 
-            # Get the charge and atomic volume of each site.
-            for row in voxel_assignments.iterrows():
-                for site in row[1][4]:
-                    charges[site] += row[1][4][site] * row[1][3]
-                    atomic_volumes[site] += row[1][4][site] * voxel_volume
+            # Get the charge and atomic volume of each site for sites with
+            # one assignment
+            for site in range(len(electride_structure)):
+                site1 = site + 1
+                voxel_indices = np.where(single_site_assignments == site1)[0]
+                site_charge = charge_array[voxel_indices]
+                charges[site] += np.sum(site_charge)
+                atomic_volumes[site] += len(voxel_indices) * voxel_volume
+
+            # Get the charge and atomic volume of each voxel with multiple site
+            # assignments. These are stored as a (N,M) shaped array where N
+            # is the number of split voxels and M is the number of atoms.
+            split_voxel_indices = self.multi_site_voxel_indices
+            split_voxel_charge = charge_array[split_voxel_indices]
+            # get how many sites each voxel is split by
+            split_voxel_ratio = 1 / np.sum(multi_site_assignments, axis=1)
+            for site_index, assignment_array in enumerate(multi_site_assignments.T):
+                indices_where_assigned = np.where(assignment_array == 1)[0]
+                site_charge = split_voxel_charge[indices_where_assigned]
+                site_charge = site_charge * split_voxel_ratio[indices_where_assigned]
+                charges[site_index] += np.sum(site_charge)
+                atomic_volumes[site] += (
+                    np.sum(split_voxel_ratio[indices_where_assigned]) * voxel_volume
+                )
+
             # Convert charges from VASP standard
             for site, charge in charges.items():
                 charges[site] = charge / (a * b * c)
@@ -849,6 +774,9 @@ class BadElfToolkit:
             cores (int):
                 The number of computer cores (NOT threads) that will be used to
                 parallelize
+
+        Returns:
+            A BadElfToolkit instance.
         """
 
         partitioning_grid = Grid.from_file(directory / partitioning_file)
@@ -861,17 +789,33 @@ class BadElfToolkit:
             find_electrides=find_electrides,
         )
 
-    def write_species_file(self, file_type: str = "elf", species: str = "He"):
+    def write_species_file(self, file_type: str = "ELFCAR", species: str = "He"):
+        """
+        Writes an ELFCAR or CHGCAR for a given species. Writes to the default
+        directory provided to the BadelfToolkit class.
+
+        Args:
+            file_type (str):
+                The type of file that you want, either ELFCAR or CHGCAR
+            species (str):
+                The species to write data for.
+
+        Returns:
+            None
+        """
+        # Get directory
+        directory = self.directory
+        # Get voxel assignments and data
         voxel_assignment_array = self.voxel_assignments_array
-        if file_type == "elf":
+        if file_type == "ELFCAR":
             grid = self.partitioning_grid.copy()
             grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
-        elif file_type == "charge":
+        elif file_type == "CHGCAR":
             grid = self.charge_grid.copy()
         else:
             raise ValueError(
                 """
-                Invalid file_type. Options are "elf" or "charge".
+                Invalid file_type. Options are "ELFCAR" or "CHGCAR".
                 """
             )
         grid.structure = self.electride_structure
@@ -888,26 +832,42 @@ class BadElfToolkit:
 
         if species == "He":
             species = "e"
-        if file_type == "elf":
-            grid.write_file(f"ELFCAR_{species}")
-        elif file_type == "charge":
-            grid.write_file(f"CHGCAR_{species}")
+        if file_type == "ELFCAR":
+            grid.write_file(directory / f"ELFCAR_{species}")
+        elif file_type == "CHGCAR":
+            grid.write_file(directory / f"CHGCAR_{species}")
 
     def write_atom_file(
         self,
         atom_index: int,
-        file_type: str = "elf",
+        file_type: str = "ELFCAR",
     ):
+        """
+        Writes an ELFCAR or CHGCAR for a given atom. Writes to the default
+        directory provided to the BadelfToolkit class.
+
+        Args:
+            file_type (str):
+                The type of file that you want, either ELFCAR or CHGCAR
+            species (str):
+                The species to write data for.
+
+        Returns:
+            None
+        """
+        # Get directory
+        directory = self.directory
+        # Get voxel assignments and data
         voxel_assignment_array = self.voxel_assignments_array
-        if file_type == "elf":
+        if file_type == "ELFCAR":
             grid = self.partitioning_grid.copy()
             grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
-        elif file_type == "charge":
+        elif file_type == "CHGCAR":
             grid = self.charge_grid.copy()
         else:
             raise ValueError(
                 """
-                Invalid file_type. Options are "elf" or "charge".
+                Invalid file_type. Options are "ELFCAR" or "CHGCAR".
                 """
             )
         grid.structure = self.electride_structure
@@ -921,10 +881,10 @@ class BadElfToolkit:
             )
             grid.diff = diff_array
 
-        if file_type == "elf":
-            grid.write_file(f"ELFCAR_{atom_index}")
-        elif file_type == "charge":
-            grid.write_file(f"CHGCAR_{atom_index}")
+        if file_type == "ELFCAR":
+            grid.write_file(directory / f"ELFCAR_{atom_index}")
+        elif file_type == "CHGCAR":
+            grid.write_file(directory / f"CHGCAR_{atom_index}")
 
     def plot_partitioning(self):
         """
@@ -940,7 +900,7 @@ class BadElfToolkit:
             PartitioningToolkit(grid).plot_partitioning_results(partitioning)
         else:
             print(
-                f"""
+                """
                 Plotting of zero-flux partitioning surfaces is not currently
                 supported.
                 """
