@@ -1,0 +1,22 @@
+{# EXAMPLE USE: include "basic_elements/range_slider.html" with label="Numer of atoms:" min=1 max=200 form_field=form.num_atoms__range only #}
+<div id="div_{{ form_field.html_name }}" class="form-group">
+    {{ form_field.errors }}
+    <label for="{{ form_field.id_for_label }}" class="pt-2">
+        {% if not label %}
+            {{ form_field.name }}
+        {% else %}
+            {{ label }}
+        {% endif %}
+    </label>
+    <input type="text"
+           name="{{ form_field.html_name }}"
+           id="{{ form_field.html_name }}"
+           data-plugin="range-slider"
+           data-min="{{ min }}"
+           data-max="{{ max }}"
+           data-input-values-separator=","
+           data-max_postfix="+"
+           {% if form_field.value %}data-from="{{ form_field.value.0 }}" data-to="{{ form_field.value.1 }}"{% endif %}
+           data-type="double"
+           data-grid="true">
+</div>
