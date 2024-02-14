@@ -1,11 +1,8 @@
 {% extends "core_components/site_base.html" %}
 {% block tabtitle %}Simmate{% endblock %}
-{% block banner %}
-    {% include "core_components/header.html" %}
-{% endblock %}
 {% block body %}
-    <!-- Header -->
-    <section class="pt-5 jumbotron text-center">
+    {# Header #}
+    <section class="jumbotron text-center">
         <div class="container">
             <h1 class="jumbotron-heading">Workflows</h1>
             <p class="lead text-muted">
@@ -20,7 +17,7 @@
             These web pages are still in early testing and some links may be broken. We expect that workflow submissions/views will go through many changes in the next few months.
         </div>
     </section>
-    <!-- List of Cards -->
+    {# List of Cards #}
     <div class="row pt-3">
         {% for workflow_type, workflow_description in workflows_metadata.items %}
             <div class="col-md-4">

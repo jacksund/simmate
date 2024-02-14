@@ -1,9 +1,7 @@
 {# EXAMPLE USE: include "basic_elements/dropdown_select.html" with label="Numer of atoms:" min=1 max=200 form_field=form.num_atoms__range only #}
 {# options should be a list of tuples: (value, display) #}
 <div unicorn:ignore class="my-2">
-    {% if label %}
-        <label class="form-label">{{ label }}</label>
-    {% endif %}
+    {% if label %}<label class="form-label">{{ label }}</label>{% endif %}
     <select id="{{ name }}"
             class="select2 form-control"
             data-toggle="select2"

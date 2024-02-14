@@ -3,8 +3,7 @@
 {% block banner %}
     {% include "core_components/header.html" %}
 {% endblock %}
-{% block body %}
-    {# Bread crumbs and page title #}
+{% block breadcrumbs %}
     <div class="row">
         <div class="col-12">
             <div class="page-title-box">
@@ -27,10 +26,11 @@
             </h4>
         </div>
     </div>
-</div>
-{% include "core_components/table_entry_header.html" %}
-{# Build views for the table entry's data #}
-{% block entrycontent %}
-    {% include "core_components/table_entry.html" %}
 {% endblock %}
+{% block body %}
+    {% include "core_components/table_entry_header.html" %}
+    {# Build views for the table entry's data #}
+    {% block entrycontent %}
+        {% include "core_components/table_entry.html" %}
+    {% endblock %}
 {% endblock %}

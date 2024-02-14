@@ -30,7 +30,7 @@ def profile_default_view(request):
     # !!! For future reference, you can grab user-associated data via...
     # data = request.user.relateddata.all()
 
-    context = {}
+    context = {"breadcrumb_active": request.user.username}
     template = "account/profile.html"
     return render(request, template, context)
 
@@ -122,6 +122,8 @@ def home_default_view(request):
         "chemical_system_form": form,
         "structures": structures,
         "nstructures_possible": nstructures_possible,
+        "page_title": "The Simmate Website",
+        "breadcrumb_active": "Home",
     }
     template = "home/home.html"
     return render(request, template, context)
@@ -141,7 +143,7 @@ def home(request):
 
 
 def loginstatus(request):
-    context = {}
+    context = {"breadcrumb_active": "Login Status"}
     template = "account/loginstatus.html"
     return render(request, template, context)
 
@@ -163,24 +165,27 @@ def apps(request):
                     "description_short": app_config.description_short,
                 }
             )
-    context = {"extra_apps": extra_apps}
+    context = {
+        "extra_apps": extra_apps,
+        "breadcrumb_active": "Apps",
+    }
     template = "core_components/apps.html"
     return render(request, template, context)
 
 
 def extras(request):
-    context = {}
+    context = {"breadcrumb_active": "Extras"}
     template = "core_components/extras.html"
     return render(request, template, context)
 
 
 def contact(request):
-    context = {}
+    context = {"breadcrumb_active": "Contact"}
     template = "core_components/contact.html"
     return render(request, template, context)
 
 
 def about(request):
-    context = {}
+    context = {"breadcrumb_active": "About"}
     template = "core_components/about.html"
     return render(request, template, context)

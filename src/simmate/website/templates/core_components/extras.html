@@ -4,8 +4,8 @@
     {% include "core_components/header.html" %}
 {% endblock %}
 {% block body %}
-    <!-- Header -->
-    <section class="pt-5 jumbotron text-center">
+    {# Header #}
+    <section class="jumbotron text-center">
         <div class="container">
             <h1 class="jumbotron-heading">Extras</h1>
             <p class="lead text-muted">
@@ -15,7 +15,7 @@
         </div>
     </section>
     <div class="row">
-        <!-- REST API card -->
+        {# REST API card #}
         <div class="col-md-4">
             <div class="card" style="width: 25rem;">
                 <div class="card-body">
@@ -43,8 +43,9 @@
                            class="btn btn-primary btn-sm"
                            href="{% url 'data_explorer:provider' 'MatprojStructure' %}?format=api"
                            target="_blank">View an example!</a>
-                    </div>
+                    </p>
                 </div>
             </div>
         </div>
-    {% endblock %}
+    </div>
+{% endblock %}
