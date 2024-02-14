@@ -797,7 +797,7 @@ class PartitioningToolkit:
 
         # Add the distances for each site-neighbor pair, then round them to 5 decimals
         site_neigh_pairs["dist"] = nearest_neighbors[3]
-        site_neigh_pairs["dist"] = site_neigh_pairs["dist"].round(5)
+        site_neigh_pairs["dist"] = site_neigh_pairs["dist"].round(4)
         # Add the site coordinates
         site_neigh_pairs["site_coords"] = site_cart_coords
         # Get the fractional coordinates for each neighbor atom. Then calculate the cartesian coords
@@ -1671,9 +1671,9 @@ class PartitioningToolkit:
             site_dataframe.reset_index(inplace=True, drop=True)
             initial_partitioning[site_index] = site_dataframe
 
-        # partitioning = self.reduce_to_symmetric_partitioning(initial_partitioning)
-        # return partitioning
-        return initial_partitioning
+        partitioning = self.reduce_to_symmetric_partitioning(initial_partitioning)
+        return partitioning
+        # return initial_partitioning
 
     def plot_partitioning_results(
         self,

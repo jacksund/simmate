@@ -34,7 +34,6 @@ class BadElfBase(Workflow):
         find_electrides: bool = True,
         electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
         algorithm: str = "badelf",
-        electride_connection_cutoff: float = 0,
         check_for_covalency: bool = True,
         **kwargs,
     ):
@@ -58,7 +57,6 @@ class BadElfBase(Workflow):
         if not check_for_covalency:
             badelf_tools.check_for_covalency = False
         badelf_tools.electride_finder_cutoff = electride_finder_cutoff
-        badelf_tools.electride_connection_cutoff = electride_connection_cutoff
         results = badelf_tools.results
         badelf_tools.write_results_csv()
         return results
@@ -85,7 +83,6 @@ class VaspBadElfBase(Workflow):
         find_electrides: bool = True,
         electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
         algorithm: str = "badelf",
-        electride_connection_cutoff: float = 0,
         check_for_covalency: bool = True,
         **kwargs,
     ):
@@ -108,7 +105,6 @@ class VaspBadElfBase(Workflow):
             find_electrides=find_electrides,
             electride_finder_cutoff=electride_finder_cutoff,
             algorithm=algorithm,
-            electride_connection_cutoff=electride_connection_cutoff,
             check_for_covalency=check_for_covalency,
             # copy_previous_directory=True,
         ).result()
