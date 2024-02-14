@@ -39,6 +39,7 @@ class PartitioningToolkit:
         site_voxel_coord: ArrayLike | list,
         neigh_voxel_coord: ArrayLike | list,
         method: str = "linear",
+        steps: int = 200
     ):
         """
         Finds a line of voxel positions between two atom sites and then finds the value
@@ -54,13 +55,14 @@ class PartitioningToolkit:
             method (str):
                 The method of interpolation. 'cubic' is more rigorous
                 than 'linear'
+            steps (int):
+                The number of voxel coordinates to interpolate. Default is 200
 
         Results:
             A list with 200 pairs of voxel coordinates and data values along
             a line between two positions.
         """
         grid_data = self.grid.copy().total
-        steps = 200
         slope = [b - a for a, b in zip(site_voxel_coord, neigh_voxel_coord)]
         slope_increment = [float(x) / steps for x in slope]
 
@@ -759,15 +761,22 @@ class PartitioningToolkit:
         A dataframe containing information about all site-neighbor pairs in a
         structure within 15A of each other.
         """
-        structure = self.grid.structure
+        grid = self.grid
+        structure = grid.structure
         logging.info("Getting all neighboring atoms for each site in structure")
         # Get all neighbors within 15 Angstrom
         nearest_neighbors = structure.get_neighbor_list(15)
+        # Get the equivalent atom index for each atom
+        equivalent_atoms = grid.equivalent_atoms
+        equiv_site_index = equivalent_atoms[nearest_neighbors[0]]
+        equiv_neigh_index = equivalent_atoms[nearest_neighbors[1]]
         # Create dataframe with important info about each site/neighbor pair
         site_neigh_pairs = pd.DataFrame()
         # Add sites and neighbors indices
         site_neigh_pairs["site_index"] = nearest_neighbors[0]
         site_neigh_pairs["neigh_index"] = nearest_neighbors[1]
+        site_neigh_pairs["equiv_site_index"] = equiv_site_index
+        site_neigh_pairs["equiv_neigh_index"] = equiv_neigh_index
         site_neigh_pairs["site_symbol"] = None
         site_neigh_pairs["neigh_symbol"] = None
 
@@ -797,7 +806,7 @@ class PartitioningToolkit:
         )
         neigh_cart_coords = []
         neigh_cart_coords.extend(
-            self.grid.get_cart_coords_from_frac_full_array(neigh_frac_coords)
+            grid.get_cart_coords_from_frac_full_array(neigh_frac_coords)
         )
         # Add the neighbors cartesian coordinates
         site_neigh_pairs["neigh_coords"] = neigh_cart_coords
@@ -1451,7 +1460,8 @@ class PartitioningToolkit:
             A dataframe of site neighbor pairs with plane information
         """
         possible_unique_pairs = possible_site_neigh_pairs.drop_duplicates(
-            subset=["site_symbol", "neigh_symbol", "dist"]
+            # subset=["site_symbol", "neigh_symbol", "dist"]
+            subset=["equiv_site_index", "equiv_neigh_index", "dist"]
         )
 
         # calculate fractions along each line in the ELF
@@ -1469,7 +1479,8 @@ class PartitioningToolkit:
                 # site_voxel_coords = grid.get_voxel_coords_from_cart(site_cart_coords)
                 neigh_cart_coords = row["neigh_coords"]
                 # neigh_voxel_coords = grid.get_voxel_coords_from_cart(neigh_cart_coords)
-
+                # Get the site symbols.
+                # needed to update the dataframe
                 site_symbol = row["site_symbol"]
                 neigh_symbol = row["neigh_symbol"]
                 dist = row["dist"]
@@ -1481,11 +1492,15 @@ class PartitioningToolkit:
                 radius = frac * dist
                 reverse_frac = 1 - frac
                 reverse_radius = reverse_frac * dist
-
+                
+                # Get the unique indices to search the dataframe with
+                equiv_site_index = row["equiv_site_index"]
+                equiv_neigh_index = row["equiv_neigh_index"]
+                
                 # create search to find rows with same symbol set and reverse symbol set.
                 reverse_condition = (
-                    (possible_unique_pairs["site_symbol"] == neigh_symbol)
-                    & (possible_unique_pairs["neigh_symbol"] == site_symbol)
+                    (possible_unique_pairs["equiv_site_index"] == equiv_neigh_index)
+                    & (possible_unique_pairs["equiv_neigh_index"] == equiv_site_index)
                     & (possible_unique_pairs["dist"] == dist)
                 )
                 # assign the fraction along the line and distance to each unique
@@ -1498,13 +1513,13 @@ class PartitioningToolkit:
 
                 # create another search condition for the full dataframe of site-neighbor pairs
                 search_condition1 = (
-                    (possible_site_neigh_pairs["site_symbol"] == site_symbol)
-                    & (possible_site_neigh_pairs["neigh_symbol"] == neigh_symbol)
+                    (possible_site_neigh_pairs["equiv_site_index"] == equiv_site_index)
+                    & (possible_site_neigh_pairs["equiv_neigh_index"] == equiv_neigh_index)
                     & (possible_site_neigh_pairs["dist"] == dist)
                 )
                 reverse_condition1 = (
-                    (possible_site_neigh_pairs["site_symbol"] == neigh_symbol)
-                    & (possible_site_neigh_pairs["neigh_symbol"] == site_symbol)
+                    (possible_site_neigh_pairs["equiv_site_index"] == equiv_neigh_index)
+                    & (possible_site_neigh_pairs["equiv_neigh_index"] == equiv_site_index)
                     & (possible_site_neigh_pairs["dist"] == dist)
                 )
 
@@ -1656,9 +1671,9 @@ class PartitioningToolkit:
             site_dataframe.reset_index(inplace=True, drop=True)
             initial_partitioning[site_index] = site_dataframe
 
-        partitioning = self.reduce_to_symmetric_partitioning(initial_partitioning)
-        return partitioning
-        # return initial_partitioning
+        # partitioning = self.reduce_to_symmetric_partitioning(initial_partitioning)
+        # return partitioning
+        return initial_partitioning
 
     def plot_partitioning_results(
         self,
