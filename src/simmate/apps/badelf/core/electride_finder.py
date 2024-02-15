@@ -89,7 +89,7 @@ class ElectrideFinder:
                     if elf_data[z_orig, y_orig, x_orig] == max_value and (
                         threshold is None or max_value > threshold
                     ):
-                        maxima_voxel_coord = (z_orig + 1, y_orig + 1, x_orig + 1)
+                        maxima_voxel_coord = (z_orig, y_orig, x_orig)
                         maxima_cart_coord = grid.get_cart_coords_from_vox(
                             maxima_voxel_coord
                         )
@@ -134,7 +134,7 @@ class ElectrideFinder:
                            tol=1e-06)
         maximum_location = results.x
         maximum_location_original_coords = maximum_location+maximum_voxel_coord-neighborhood_size
-        maximum_cart_coords = self.grid.get_cart_coords_from_vox(maximum_location_original_coords+1)
+        maximum_cart_coords = self.grid.get_cart_coords_from_vox(maximum_location_original_coords)
         maximum_cart_coords = np.round(maximum_cart_coords,6)
         return maximum_cart_coords
     
@@ -416,13 +416,15 @@ class ElectrideFinder:
             # want to refine its position before we add it to our structure to
             # avoid issues with voxelation. We want to fit a small area around
             # the maximum
-            maximum_voxel_coord = grid.get_voxel_coords_from_cart(maximum_coords)-1
+            maximum_voxel_coord = grid.get_voxel_coords_from_cart(maximum_coords)
             initial_guess = np.round(maximum_voxel_coord)
-
-            refined_cart_coords = self.refine_voxel_maxima(
-                maximum_voxel_coord,
-                initial_guess)
-            electride_coords.append(refined_cart_coords)
+            try:
+                refined_cart_coords = self.refine_voxel_maxima(
+                    maximum_voxel_coord,
+                    initial_guess)
+                electride_coords.append(refined_cart_coords)
+            except:
+                pass
 
             # If the loop is still going, we consider this site an electride. We
             # add it to the list of electride sites.

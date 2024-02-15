@@ -529,7 +529,7 @@ class BadElfToolkit:
             )
             # Get the refined minimum value
             _,new_min,_ = partitioning_tools.get_line_minimum_as_frac(
-                pos, values, "He", "H")
+                pos, values, 0,1)
             # Update values to new ones
             minimum_elf_values[min_elf_indices] = new_min
         # Update unique values

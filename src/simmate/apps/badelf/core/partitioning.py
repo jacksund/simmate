@@ -71,7 +71,7 @@ class PartitioningToolkit:
         position = site_voxel_coord
         line = [
             [
-                round((float(((a - 1) % b) + 1)), 12)
+                round(float(a % b), 12)
                 for a, b in zip(position, grid_data.shape)
             ]
         ]
@@ -84,7 +84,7 @@ class PartitioningToolkit:
             # normal grid, (0 to grid_max), then do the wrapping function (%), then
             # shift back onto the VASP voxel index.
             position = [
-                round((float(((a - 1) % b) + 1)), 12)
+                round(float(a % b), 12)
                 for a, b in zip(position, grid_data.shape)
             ]
 
@@ -162,42 +162,42 @@ class PartitioningToolkit:
             site_voxel_coord, neigh_voxel_coord
         )
 
-    @staticmethod
-    def _check_partitioning_line_for_symmetry(values: list, tolerance: float = 0.1):
-        """
-        Check if the values are roughly symmetric.
+    # @staticmethod
+    # def _check_partitioning_line_for_symmetry(values: list, tolerance: float = 0.1):
+    #     """
+    #     Check if the values are roughly symmetric.
 
-        Args:
-            values (list):
-                List of numeric values
-            tolerance (float):
-                Tolerance level for symmetry check
+    #     Args:
+    #         values (list):
+    #             List of numeric values
+    #         tolerance (float):
+    #             Tolerance level for symmetry check
 
-        Returns:
-            True if roughly symmetric, False otherwise
-        """
-        n = len(values)
+    #     Returns:
+    #         True if roughly symmetric, False otherwise
+    #     """
+    #     n = len(values)
 
-        # Check if the list has an even number of elements
-        if n % 2 != 0:
-            # remove the center if odd number
-            center_index = math.ceil(n / 2)
-            values.pop(center_index)
+    #     # Check if the list has an even number of elements
+    #     if n % 2 != 0:
+    #         # remove the center if odd number
+    #         center_index = math.ceil(n / 2)
+    #         values.pop(center_index)
 
-        # Split the list into two halves
-        half_size = n // 2
-        first_half = values[:half_size]
-        second_half = values[half_size:]
+    #     # Split the list into two halves
+    #     half_size = n // 2
+    #     first_half = values[:half_size]
+    #     second_half = values[half_size:]
 
-        # Reverse the second half
-        reversed_second_half = list(reversed(second_half))
+    #     # Reverse the second half
+    #     reversed_second_half = list(reversed(second_half))
 
-        # Check if the values are roughly equal within the given tolerance
-        for val1, val2 in zip(first_half, reversed_second_half):
-            if abs(val1 - val2) > tolerance:
-                return False
+    #     # Check if the values are roughly equal within the given tolerance
+    #     for val1, val2 in zip(first_half, reversed_second_half):
+    #         if abs(val1 - val2) > tolerance:
+    #             return False
 
-        return True
+    #     return True
 
     @staticmethod
     def find_minimum(values: list | ArrayLike):
@@ -272,8 +272,8 @@ class PartitioningToolkit:
         self,
         positions: list,
         values: list | ArrayLike,
-        site_string: str,
-        neigh_string: str,
+        site_equiv: int,
+        neigh_equiv: int,
     ):
         """
         Finds the minimum point of a list of values along a line, then returns the
@@ -285,27 +285,28 @@ class PartitioningToolkit:
                 of interest
             values (list):
                 A list of values to find the minimum of
-            site_string (str):
-                The symbol of the atom at the start of the line
-            neigh_string (str):
-                The symbol of the atom at the end of the line
+            site_equiv (int):
+                The index of the equivalent atom
+            neigh_equiv (int):
+                The index of the equivalent neighboring atom
 
         results:
             The global minimum of form [line_position, value, frac_position]
         """
 
-        if site_string == neigh_string:
-            list_values = list(values)
-            # We have the same type of atom on either side. We want to check
-            # if they are the same and if they are return a frac of 0.5. This
-            # is because usually there will be some slight covalency between
-            # atoms of the same type, but they should share the area equally
-            symmetric = self._check_partitioning_line_for_symmetry(list_values)
-        else:
-            symmetric = False
+        # if site_string == neigh_string:
+        if site_equiv == neigh_equiv:
+        #     list_values = list(values)
+        #     # We have the same type of atom on either side. We want to check
+        #     # if they are the same and if they are return a frac of 0.5. This
+        #     # is because usually there will be some slight covalency between
+        #     # atoms of the same type, but they should share the area equally
+        #     symmetric = self._check_partitioning_line_for_symmetry(list_values)
+        # else:
+        #     symmetric = False
 
-        # If we found symmetry, we return a global min exactly at the center
-        if symmetric:
+        # # If we found symmetry, we return a global min exactly at the center
+        # if symmetric:
             # 100 is the index directly at the center of the line
             elf_value = values[100]
             elf_min_frac = 0.5
@@ -375,7 +376,7 @@ class PartitioningToolkit:
                 values_fine = []
                 # Get the list of values from the interpolated grid
                 for pos in line_section:
-                    new_pos = [i + amount_to_pad - 1 for i in pos]
+                    new_pos = [i + amount_to_pad for i in pos]
                     value_fine = float(fn(new_pos))
                     values_fine.append(value_fine)
 
@@ -399,7 +400,7 @@ class PartitioningToolkit:
 
             # Get the ELF value for every position in the line.
             for pos in positions:
-                new_pos = [i + amount_to_pad - 1 for i in pos]
+                new_pos = [i + amount_to_pad for i in pos]
                 value = float(fn(new_pos))
                 values.append(value)
 
@@ -543,6 +544,7 @@ class PartitioningToolkit:
             The distance the ELF ionic radius of the site
         """
         grid = self.grid.copy()
+        equivalent_atoms = grid.equivalent_atoms
         if structure is None:
             structure = grid.structure.copy()
         # get closest neighbor for the given site
@@ -556,6 +558,7 @@ class PartitioningToolkit:
         for i, row in site_df.iterrows():
             site_cart_coords = row["site_coords"]
             neigh_cart_coords = row["neigh_coords"]
+            neighbor_equiv = row["equiv_neigh_index"]
             neighbor_string = row["neigh_symbol"]
             if neighbor_string != "He":
                 bond_dist = row["dist"]
@@ -569,7 +572,9 @@ class PartitioningToolkit:
         )
 
         # Get site and neighbor strings
-        site_string = self.grid.structure[site_index].species_string
+        # site_string = self.grid.structure[site_index].species_string
+        # Get site and neighbor equivalent atoms
+        site_equiv = equivalent_atoms[site_index]
 
         max_bond_dist = (
             structure[site_index].specie.atomic_radius
@@ -594,7 +599,7 @@ class PartitioningToolkit:
             # method needs some work.
             if len(dists_to_min) == 1:
                 min_pos = self.get_line_minimum_as_frac(
-                    elf_positions, elf_values, site_string, neighbor_string
+                    elf_positions, elf_values, site_equiv, neighbor_equiv
                 )
             else:
                 min_pos = minima[np.argmin(dists_to_min)]
@@ -603,7 +608,7 @@ class PartitioningToolkit:
         else:
             # Get the min position along the line
             min_pos = self.get_line_minimum_as_frac(
-                elf_positions, elf_values, site_string, neighbor_string
+                elf_positions, elf_values, site_equiv, neighbor_equiv
             )
         #!!! This is the only place some of these methods are used. Is this necessary
         # or could they be removed somehow with the new methods?
@@ -1114,8 +1119,8 @@ class PartitioningToolkit:
         self,
         site_cart_coords: ArrayLike,
         neigh_cart_coords: ArrayLike,
-        site_symbol: str,
-        neigh_symbol: str,
+        site_equiv: str,
+        neigh_equiv: str,
     ):
         """
         Function for getting the fraction of a line betwaeen two sites where
@@ -1146,8 +1151,8 @@ class PartitioningToolkit:
         elf_min_index, elf_min_value, elf_min_frac = self.get_line_minimum_as_frac(
             elf_coordinates,
             elf_values,
-            site_symbol,
-            neigh_symbol,
+            site_equiv,
+            neigh_equiv,
         )
         return elf_min_frac
 
@@ -1339,12 +1344,12 @@ class PartitioningToolkit:
                 site_cart_coords = row["site_coords"]
                 neigh_cart_coords = row["neigh_coords"]
                 # get the site and neighbor symbols
-                site_symbol = row["site_symbol"]
-                neigh_symbol = row["neigh_symbol"]
+                site_equiv = row["equiv_site_index"]
+                neigh_equiv = row["equiv_neigh_index"]
                 shortest_dist = row["dist"]
                 # get fraction along line where the min is located
                 frac = self.get_site_neighbor_frac(
-                    site_cart_coords, neigh_cart_coords, site_symbol, neigh_symbol
+                    site_cart_coords, neigh_cart_coords, site_equiv, neigh_equiv
                 )
                 # Set frac to 2*frac or 1 whichever is larger
                 if 2 * frac >= 1:
@@ -1481,13 +1486,13 @@ class PartitioningToolkit:
                 # neigh_voxel_coords = grid.get_voxel_coords_from_cart(neigh_cart_coords)
                 # Get the site symbols.
                 # needed to update the dataframe
-                site_symbol = row["site_symbol"]
-                neigh_symbol = row["neigh_symbol"]
+                site_equiv = row["equiv_site_index"]
+                neigh_equiv = row["equiv_neigh_index"]
                 dist = row["dist"]
 
                 # get fraction along line where the min is located
                 frac = self.get_site_neighbor_frac(
-                    site_cart_coords, neigh_cart_coords, site_symbol, neigh_symbol
+                    site_cart_coords, neigh_cart_coords, site_equiv, neigh_equiv
                 )
                 radius = frac * dist
                 reverse_frac = 1 - frac

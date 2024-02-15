@@ -394,24 +394,6 @@ Exclusive to the `restart.simmate.automatic` workflow, this is the original fold
 
 --------------------------
 
-## electride_connection_cutoff
-Exclusive to the badelf workflows in the simmate app. This is the ELF value cutoff to be allowed when determining the dimensionality of an electride. The default is 0, but a good option might be 0.5 which is the normal cutoff for what is considered an electride.
-
-=== "yaml"
-    ``` yaml
-    electride_connection_cutoff: 0.5
-    ```
-=== "toml"
-    ``` toml
-    electride_connection_cutoff = 0.5
-    ```
-=== "python"
-    ``` python
-    electride_connection_cutoff = 0.5
-    ```
-
---------------------------
-
 ## electride_finder_cutoff
 Exclusive to the badelf workflows in the simmate app. This is the minimum ELF value that the algorithm will consider an electride. Any maxima in the ELF below this will not be considered an electride site during the algorithm.
 
