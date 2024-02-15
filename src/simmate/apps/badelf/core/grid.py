@@ -664,7 +664,7 @@ class Grid:
         at N points and calculates the equivalent fractional coordinates.
 
         Args:
-            frac_coords (ArrayLike):
+            vox_coords (ArrayLike):
                 An (N,3) shaped array of voxel coordinates
 
         Returns:
@@ -676,6 +676,25 @@ class Grid:
         frac_z = vox_coords[:,2]/z
         frac_coords = np.column_stack([frac_x, frac_y, frac_z])
         return frac_coords
+    
+    def get_vox_coords_from_frac_full_array(self, frac_coords: ArrayLike):
+        """
+        Takes in a 2D array of shape (N,3) representing fractional coordinates
+        at N points and calculates the equivalent voxel coordinates.
+
+        Args:
+            frac_coords (ArrayLike):
+                An (N,3) shaped array of fractional coordinates
+
+        Returns:
+            An (N,3) shaped array of voxel coordinates
+        """
+        x,y,z = self.grid_shape
+        vox_x = frac_coords[:,0]*x
+        vox_y = frac_coords[:,1]*y
+        vox_z = frac_coords[:,2]*z
+        vox_coords = np.column_stack([vox_x, vox_y, vox_z])
+        return vox_coords
     
     def get_cart_coords_from_vox_full_array(self, vox_coords: ArrayLike):
         """
