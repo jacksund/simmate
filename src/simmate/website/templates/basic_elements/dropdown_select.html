@@ -2,11 +2,11 @@
 {# options should be a list of tuples: (value, display) #}
 <div unicorn:ignore class="my-2">
     {% if label %}<label class="form-label">{{ label }}</label>{% endif %}
-    <select id="{{ name }}"
+    <select id="{{ name }}{{ key }}"
             class="select2 form-control"
             data-toggle="select2"
             data-placeholder="Choose one ..."
-            onchange="Unicorn.call('{{ unicorn_view }}', 'set_{{ name }}', $('#{{ name }}').val());">
+            onchange="Unicorn.call('{{ unicorn_view }}', 'set_{{ name }}', $('#{{ name }}{{ key }}').val());">
         {% if initial_value %}
             <option value="{{ initial_value }}">
                 {% if initial_display %}
