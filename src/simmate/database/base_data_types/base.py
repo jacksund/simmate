@@ -1484,61 +1484,71 @@ class DatabaseTable(models.Model):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def populate_workflow_columns(cls, batch_size: int = 1000):
+    def populate_workflow_column(cls, column_name: str, batch_size: int = 1000):
         """
-        Uses the `workflow_columns` property to fill a column with data.
+        Populates a specific workflow column. The column must be present in the
+        `workflow_columns` attribute.
         """
         # local import to avoid circular dependency
         from simmate.workflows.utilities import get_workflow
 
-        for column_name, workflow_name in cls.workflow_columns.items():
-            workflow = get_workflow(workflow_name)
+        # grab the workflow mapped to this column
+        workflow_name = cls.workflow_columns[column_name]
+        workflow = get_workflow(workflow_name)
 
-            # BUG: I assume inputs are the common ones for now...
-            # but I need a way to specify this for more diverse workflows
-            # (I give one suggested fix to this in the while-loop below)
-            if "molecules" not in workflow.parameter_names:
-                raise Exception(
-                    "We are still at early stage testing for this method, so "
-                    "it only supports workflows that take 'molecules' as an "
-                    "input parameter. Reach out to our team if you'd like "
-                    "us to add additional support."
-                )
-
-            filters = {f"{column_name}__isnull": True}
-            nobjs_total = cls.objects.filter(**filters).count()
-            logging.info(
-                f"Updating '{column_name}' column using '{workflow_name}' "
-                f"for {nobjs_total} entries"
+        # BUG: I assume inputs are the common ones for now...
+        # but I need a way to specify this for more diverse workflows
+        # (I give one suggested fix to this in the while-loop below)
+        if "molecules" not in workflow.parameter_names:
+            raise Exception(
+                "We are still at early stage testing for this method, so "
+                "it only supports workflows that take 'molecules' as an "
+                "input parameter. Reach out to our team if you'd like "
+                "us to add additional support."
             )
 
-            # Continue the loop until
-            while True:
-                # grab the next set of objects to update
-                objs_to_update = cls.objects.filter(**filters).all()[:batch_size]
+        filters = {f"{column_name}__isnull": True}
+        nobjs_total = cls.objects.filter(**filters).count()
+        logging.info(
+            f"Updating '{column_name}' column using '{workflow_name}' "
+            f"for {nobjs_total} entries"
+        )
 
-                # exit the while loop if there aren't any entries left
-                if not objs_to_update:
-                    break
+        # Continue the loop until
+        while True:
+            # grab the next set of objects to update
+            objs_to_update = cls.objects.filter(**filters).all()[:batch_size]
 
-                # First check for a user-defined method.
-                predefined_method = f"_format_inputs_for__{column_name}"
-                if hasattr(cls, predefined_method):
-                    # method = getattr(cls, predefined_method)
-                    # method(workflow, objs_to_update)
-                    raise NotImplementedError("This feature is still being developed")
-                else:
-                    # OPTIMIZE: should I support run_cloud for parallelization?
-                    # BUG: see comment at start of for-loop where I say I assume
-                    # a 'molecules' input
-                    status = workflow.run(
-                        molecules=objs_to_update.to_toolkit(),
-                        compress_output=True,
-                    )
-                    results = status.result()
-                    logging.info("Saving results to db")
+            # exit the while loop if there aren't any entries left
+            if not objs_to_update:
+                break
 
-                    # update the column with the new value and save
-                    for entry, entry_result in zip(objs_to_update, results):
-                        setattr(entry, column_name, entry_result)
-                    cls.objects.bulk_update(objs_to_update, [column_name])
+            # First check for a user-defined method.
+            predefined_method = f"_format_inputs_for__{column_name}"
+            if hasattr(cls, predefined_method):
+                # method = getattr(cls, predefined_method)
+                # method(workflow, objs_to_update)
+                raise NotImplementedError("This feature is still being developed")
+            else:
+                # OPTIMIZE: should I support run_cloud for parallelization?
+                # BUG: see comment at start of for-loop where I say I assume
+                # a 'molecules' input
+                status = workflow.run(
+                    molecules=objs_to_update.to_toolkit(),
+                    compress_output=True,
+                )
+                results = status.result()
+                logging.info("Saving results to db")
+
+                # update the column with the new value and save
+                for entry, entry_result in zip(objs_to_update, results):
+                    setattr(entry, column_name, entry_result)
+                cls.objects.bulk_update(objs_to_update, [column_name])
+
+    @classmethod
+    def populate_workflow_columns(cls, batch_size: int = 1000):
+        """
+        Uses the `workflow_columns` property to fill columns with data.
+        """
+        for column_name in cls.workflow_columns.keys():
+            cls.populate_workflow_column(column_name, batch_size=batch_size)
