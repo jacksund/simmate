@@ -768,7 +768,7 @@ class PartitioningToolkit:
         """
         grid = self.grid
         structure = grid.structure
-        logging.info("Getting all neighboring atoms for each site in structure")
+        # logging.info("Getting all neighboring atoms for each site in structure")
         # Get all neighbors within 15 Angstrom
         nearest_neighbors = structure.get_neighbor_list(15)
         # Get the equivalent atom index for each atom
@@ -802,7 +802,7 @@ class PartitioningToolkit:
 
         # Add the distances for each site-neighbor pair, then round them to 5 decimals
         site_neigh_pairs["dist"] = nearest_neighbors[3]
-        site_neigh_pairs["dist"] = site_neigh_pairs["dist"].round(4)
+        site_neigh_pairs["dist"] = site_neigh_pairs["dist"].round(6)
         # Add the site coordinates
         site_neigh_pairs["site_coords"] = site_cart_coords
         # Get the fractional coordinates for each neighbor atom. Then calculate the cartesian coords
@@ -854,52 +854,26 @@ class PartitioningToolkit:
             closest_neighbors[i] = d[biggest]
         return closest_neighbors
 
-    def get_set_number_of_neighbors(self, neighbor_num: int = 26):
+    def get_set_number_of_neighbors(self,site_index, neighbor_num: int = 26):
         """
-        Function for getting the closest neighbors. This is necessary for partitioning
-        because the CrystalNN function from pymatgen will not always find the
-        correct set of atoms needed to create a full partitioning set. We default
-        to 26, but if this is not large enough we automatically increase the amount.
+        Function for getting the closest neighbors.
 
         Args:
+            site_index (int):
+                The atomic site of interest
             neighbor_num (int):
                 The number of nearest neighbors to find
 
         Results:
-            A list of relating an atoms index to its  neighbors.
+            A dataframe relating an atoms index to its  neighbors.
 
         """
-        structure = self.grid.structure.copy()
-
         # Get all possible neighbor atoms for each atom within 15 angstroms
-        all_neighbors = structure.get_all_neighbors(15)
-        neighbors = []
+        all_neighbors = self.all_site_neighbor_pairs.copy()
+        atom_neighbors = all_neighbors.loc[all_neighbors["site_index"]==site_index].copy()
+        set_neighbors = atom_neighbors.iloc[:neighbor_num]
 
-        for site, neighs in enumerate(all_neighbors):
-            # Get the coordinates for each site/neighbor pair and convert to numpy array
-            site_coords = []
-            neigh_coords = []
-            site_coord = structure[site].coords
-            for neigh in neighs:
-                neigh_coord = neigh.coords
-                site_coords.append(site_coord)
-                neigh_coords.append(neigh_coord)
-            site_coords = np.array(site_coords)
-            neigh_coords = np.array(neigh_coords)
-            # Calculate the distance between the site and each neighbor
-            distances = np.linalg.norm(neigh_coords - site_coords, axis=1)
-
-            # Create a dataframe of neighbors and distance
-            site_df = pd.DataFrame(columns=["neighbors", "distances"])
-            site_df["neighbors"] = neighs
-            site_df["distances"] = distances
-            # sort by distance and truncate to requested length
-            site_df = site_df.sort_values(by="distances")
-            site_df = site_df.iloc[0:neighbor_num]
-            # Append neighbors to our neighbor list
-            neighbors.append(site_df["neighbors"].to_list())
-
-        return neighbors
+        return set_neighbors
 
     @classmethod
     def check_bond_for_covalency(
@@ -1406,7 +1380,6 @@ class PartitioningToolkit:
                 neigh_cart_coords = row["neigh_coords"]
                 dist = row["dist"]
                 potential_bounding_plane = True
-                site_symbol = row["site_symbol"]
                 # Check each plane versus the intercept point. If we plug the point into
                 # the plane equation it should return as 0 or positive if it is within the
                 # shape?
@@ -1598,6 +1571,68 @@ class PartitioningToolkit:
             new_partitioning[i] = new_partitioning_df
         return new_partitioning
 
+    def increase_to_symmetric_partitioning(self, initial_partitioning: dict):
+        """
+        Adds to a set of partitioning planes by checking that each plane has
+        an equivalent counterpart for the neighboring atom and adding it
+        if not.
+   
+        Args:
+            initial_partitioning (dict):
+                A dictionary with site indices as keys and partitioning dataframes
+                as values
+   
+        Returns:
+            A new dictionary of partitioning dataframes for each site.
+        """
+        equivalent_atoms = self.grid.equivalent_atoms
+        site_indices = [i for i in range(len(self.grid.structure))]
+        new_partitioning = {}
+        for site in site_indices:
+            # Look through each other unique atom.
+            part_df = initial_partitioning[site]
+            site_coords = part_df.loc[0, "site_coords"]
+            for neigh in site_indices:
+                if neigh != site:
+                    neigh_part_df = initial_partitioning[neigh]
+                    # Get the planes connecting this neighbor to the site
+                    important_neigh_df = neigh_part_df.loc[neigh_part_df["neigh_index"]==site]
+                    # For each plane we want to do the following:
+                    # 1. Check if the original site has this plane
+                    # 2. Transform the coords of the neigh
+                    # 3. Flip the partitioning frac and radius
+                    # 4. transform plane point and flip plane vector
+                    for i, row in important_neigh_df.iterrows():
+                        dist = row["dist"]
+                        condition = (
+                            (part_df["dist"]==dist)
+                            & (part_df["neigh_index"] == neigh))
+                        if len(part_df.loc[condition]) == 0:
+                            # We want to add a new row
+                            transformation_vector = row["neigh_coords"] - site_coords
+                            new_row = {
+                            "site_index":site,
+                            "neigh_index":neigh,
+                            "equiv_site_index":equivalent_atoms[site],
+                            "equiv_neigh_index":equivalent_atoms[neigh],
+                            "site_symbol":row["neigh_symbol"],
+                            "neigh_symbol":row["site_symbol"],
+                            "dist":dist,
+                            "site_coords":site_coords,
+                            "neigh_coords":row["site_coords"] + transformation_vector,
+                            "partitioning_frac":1-row["partitioning_frac"],
+                            "radius":dist-row["radius"],
+                            "plane_points":row["plane_points"] + transformation_vector,
+                            "plane_vectors":row["plane_vectors"]*-1,
+                            }
+                            part_df.loc[len(part_df)] = new_row
+            part_df.sort_values(by=["dist"], inplace=True)
+            part_df.reset_index(inplace=True, drop=True)
+            new_partitioning[site] = part_df
+        return new_partitioning
+                        
+
+
     def get_partitioning(self, check_for_covalency: bool = True):
         """
         Gets the partitioning planes for each atom as well as some other useful
@@ -1676,9 +1711,10 @@ class PartitioningToolkit:
             site_dataframe.reset_index(inplace=True, drop=True)
             initial_partitioning[site_index] = site_dataframe
 
-        partitioning = self.reduce_to_symmetric_partitioning(initial_partitioning)
-        return partitioning
-        # return initial_partitioning
+        # partitioning = self.reduce_to_symmetric_partitioning(initial_partitioning)
+        # partitioning = self.increase_to_symmetric_partitioning(initial_partitioning)
+        # return partitioning
+        return initial_partitioning
 
     def plot_partitioning_results(
         self,

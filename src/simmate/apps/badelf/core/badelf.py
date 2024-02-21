@@ -395,8 +395,8 @@ class BadElfToolkit:
         
         electride_indices = self.electride_indices
         # If we have no electrides theres no reason to continue so we stop here
-        # if len(electride_indices) == 0:
-        #     return None
+        if len(electride_indices) == 0:
+            return None
         
         ###############################################################################
         # This section preps an ELF grid that only contains values from the electride
