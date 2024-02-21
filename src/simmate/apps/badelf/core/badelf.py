@@ -6,15 +6,15 @@ import math
 import warnings
 from functools import cached_property
 from pathlib import Path
-from tqdm import tqdm
 
 import numpy as np
-from numpy.typing import ArrayLike
 import psutil
+from numpy.typing import ArrayLike
 from pymatgen.analysis.dimensionality import get_dimensionality_larsen
 from pymatgen.analysis.graphs import StructureGraph
 from pymatgen.analysis.local_env import CrystalNN
 from pymatgen.io.vasp import Potcar
+from tqdm import tqdm
 
 from simmate.apps.badelf.core.electride_finder import ElectrideFinder
 from simmate.apps.badelf.core.grid import Grid
@@ -381,23 +381,23 @@ class BadElfToolkit:
             all_voxel_site_assignments[electride_indices_1D] = electride + 1
 
         return all_voxel_site_assignments
-    
+
     def get_electride_dimensionality(self):
         """
         Finds the dimensionality (e.g. 0D, 1D, etc.) of an electride by determining
-        which electride sites pairs are connected across a straight line in the ELF. 
+        which electride sites pairs are connected across a straight line in the ELF.
         Gives each dimensionality and the cutoff at which it switches.
-        
+
         Returns:
             A list of dimensionalities and a list of ELF cutoff values at which
             these dimensionalities are accessible.
         """
-        
+
         electride_indices = self.electride_indices
         # If we have no electrides theres no reason to continue so we stop here
         if len(electride_indices) == 0:
-            return None
-        
+            return None, None
+
         ###############################################################################
         # This section preps an ELF grid that only contains values from the electride
         # sites and is zero everywhere else.
@@ -437,32 +437,37 @@ class BadElfToolkit:
                 np.isin(voxel_assignment_array, electride_indices), elf_grid.total, 0
             )
             elf_grid.total = elf_array
-        
+
         ###############################################################################
         # This section removes all atoms from the structure that are not electride sites
         ###############################################################################
-        
+
         # read in structure and remove all atoms except dummy electride sites
         electride_structure = self.electride_structure.copy()
-        
+
         electride_structure.remove_species(self.structure.symbol_set)
-        
+
         elf_grid.structure = electride_structure
-        
+
         partitioning_tools = PartitioningToolkit(elf_grid)
-        
+
         ###########################################################################
         # This section checks all of the site-neighbor pairs withing 15A of eachother
         # to determine which are connected in the ELF.
         ###########################################################################
-     
+
         # get all site-neighbor pairs within 15 A.
-        (sites_indices, neigh_indices, neigh_images, neigh_dists
-         ) = elf_grid.structure.get_neighbor_list(15)
+        (
+            sites_indices,
+            neigh_indices,
+            neigh_images,
+            neigh_dists,
+        ) = elf_grid.structure.get_neighbor_list(15)
         neigh_images_array = np.array(neigh_images)
         # remove any that involve neighbors more than one unit cell away.
         within_neighboring_cells = np.all(
-            np.isin(neigh_images_array, [-1, 0, 1]), axis=1)
+            np.isin(neigh_images_array, [-1, 0, 1]), axis=1
+        )
         within_neighboring_cells_indices = np.where(within_neighboring_cells)[0]
         # Create lists to store which site neighbor pairs are connected and their
         # values.
@@ -472,19 +477,24 @@ class BadElfToolkit:
         # loop over each site neighbor pair. Check which ones are connected by a value
         # greater than 0. Add the index of this site neighbor pair and the minimum
         # value connecting it to our list above
-        for site_neigh_index in tqdm(within_neighboring_cells_indices, total=len(within_neighboring_cells_indices)):
+        for site_neigh_index in tqdm(
+            within_neighboring_cells_indices,
+            total=len(within_neighboring_cells_indices),
+        ):
             # Get the sites voxel coordinate
             site_index = sites_indices[site_neigh_index]
             site_vox_coords = elf_grid.get_voxel_coords_from_index(site_index)
             # Get the neighbors voxel coordinate
             neigh_index = neigh_indices[site_neigh_index]
             neigh_image = neigh_images[site_neigh_index]
-            neigh_frac_coords = electride_structure.frac_coords[neigh_index]+neigh_image
+            neigh_frac_coords = (
+                electride_structure.frac_coords[neigh_index] + neigh_image
+            )
             neigh_vox_coords = elf_grid.get_voxel_coords_from_frac(neigh_frac_coords)
             # Determine how many points need to be interpolated based on the distance
             # between the point and its neighbor
             distance = neigh_dists[site_neigh_index]
-            steps = math.ceil(distance*10)
+            steps = math.ceil(distance * 10)
             # interpolate the ELF values between the site and neighbor
             _, values = partitioning_tools.get_partitioning_line_from_voxels(
                 site_vox_coords, neigh_vox_coords, method="linear", steps=steps
@@ -494,7 +504,7 @@ class BadElfToolkit:
             if 0 not in values:
                 connected_indices.append(site_neigh_index)
                 minimum_elf_values.append(min(values))
-        
+
         # Convert connections and values to numpy arrays
         connected_indices = np.array(connected_indices)
         minimum_elf_values = np.array(minimum_elf_values)
@@ -504,16 +514,18 @@ class BadElfToolkit:
         # Get the neighbor images
         connecting_neigh_images = neigh_images[connected_indices]
         # Get the unique list of minima. We want to refine these using a more rigorous
-        # interpolation method 
+        # interpolation method
         minimum_elf_values = minimum_elf_values.round(6)
         unique_min_elf_val = np.unique(minimum_elf_values)
         # Loop through each unique min_elf_value. For each one, use the first site-neigh
         # pair to refine the value
-        logging.info("""Refining electride connection values. Depending on the size of
-                     your grid this can take several minutes.""")
+        logging.info(
+            """Refining electride connection values. Depending on the size of
+                     your grid this can take several minutes."""
+        )
         for min_elf_value in tqdm(unique_min_elf_val, total=len(unique_min_elf_val)):
             # Get the indices for site-neigh pairs with this minimum value
-            min_elf_indices = np.where(minimum_elf_values==min_elf_value)[0]
+            min_elf_indices = np.where(minimum_elf_values == min_elf_value)[0]
             first_index = min_elf_indices[0]
             site_index = connecting_site_indices[first_index]
             # Get the sites voxel coordinate
@@ -521,15 +533,18 @@ class BadElfToolkit:
             # Get the neighbors voxel coordinate
             neigh_index = connecting_neigh_indices[first_index]
             neigh_image = connecting_neigh_images[first_index]
-            neigh_frac_coords = electride_structure.frac_coords[neigh_index]+neigh_image
+            neigh_frac_coords = (
+                electride_structure.frac_coords[neigh_index] + neigh_image
+            )
             neigh_vox_coords = elf_grid.get_voxel_coords_from_frac(neigh_frac_coords)
             # Get a new interpolated line to refine from
             pos, values = partitioning_tools.get_partitioning_line_from_voxels(
                 site_vox_coords, neigh_vox_coords, method="linear", steps=200
             )
             # Get the refined minimum value
-            _,new_min,_ = partitioning_tools.get_line_minimum_as_frac(
-                pos, values, 0,1)
+            _, new_min, _ = partitioning_tools.get_line_minimum_as_frac(
+                pos, values, 0, 1
+            )
             # Update values to new ones
             minimum_elf_values[min_elf_indices] = new_min
         # Update unique values
@@ -543,7 +558,7 @@ class BadElfToolkit:
         cutoffs = []
         for min_elf_value in unique_min_elf_val:
             # Get the connections where the elf value is larger than the cutoff
-            site_pair_indices = np.where(minimum_elf_values>min_elf_value)
+            site_pair_indices = np.where(minimum_elf_values > min_elf_value)
             # Get the site and neighbor indices for these connections as well as
             # the neighbor images
             site_indices = connecting_site_indices[site_pair_indices]
@@ -552,7 +567,8 @@ class BadElfToolkit:
             # construct a pymatgen graph using these connections
             graph = StructureGraph.with_empty_graph(electride_structure)
             for site_index, neigh_index, neigh_image in zip(
-                    site_indices, neigh_indices, neigh_images):
+                site_indices, neigh_indices, neigh_images
+            ):
                 graph.add_edge(
                     from_index=site_index,  # The site index of the electride site of interest
                     from_jimage=(
@@ -716,7 +732,9 @@ class BadElfToolkit:
 
             # Convert charges from VASP standard
             for site, charge in charges.items():
-                charges[site] = charge / (a * b * c)
+                charges[site] = round((charge / (a * b * c)), 6)
+            for site, volume in atomic_volumes.items():
+                atomic_volumes[site] = round(volume, 6)
 
             # Get the number of electrons assigned by badelf.
             nelectrons = round(sum(charges.values()), 6)
@@ -750,12 +768,12 @@ class BadElfToolkit:
                 if element_str == "e":
                     oxi_state = -site_charge
                 else:
-                    oxi_state = nelectron_data[element_str] - site_charge
+                    oxi_state = round((nelectron_data[element_str] - site_charge), 6)
                 oxi_state_data.append(oxi_state)
                 # add the corresponding charge, distance, and atomic volume to the
                 # respective lits
                 charges_list.append(site_charge)
-                min_dists_list.append(min_dists[site_index])
+                min_dists_list.append(round(min_dists[site_index], 6))
                 atomic_volumes_list.append(atomic_volumes[site_index])
 
             # Calculate the "vacuum charge" or the charge not associated with any atom.
@@ -788,8 +806,10 @@ class BadElfToolkit:
         results["algorithm"] = algorithm
         results["element_list"] = elements
         results["coord_envs"] = self.coord_envs
-        (results["electride_dim"], results["dim_cutoffs"]
-         ) = self.get_electride_dimensionality()
+        (
+            results["electride_dim"],
+            results["dim_cutoffs"],
+        ) = self.get_electride_dimensionality()
         # Fill out columns unrelated to badelf alg
         structure = self.structure
         results["structure"] = structure

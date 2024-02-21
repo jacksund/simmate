@@ -186,8 +186,9 @@ class Grid:
 
     @property
     def equivalent_atoms(self):
-        return SpacegroupAnalyzer(self.structure
-                                  ).get_symmetry_dataset()["equivalent_atoms"]
+        return SpacegroupAnalyzer(self.structure).get_symmetry_dataset()[
+            "equivalent_atoms"
+        ]
 
     def get_grid_axes(self, padding: int = 0):
         """
@@ -497,9 +498,7 @@ class Grid:
 
         """
 
-        voxel_coords = [
-            a * b for a, b in zip(self.grid_shape, self.frac_coords[site])
-        ]
+        voxel_coords = [a * b for a, b in zip(self.grid_shape, self.frac_coords[site])]
         # voxel positions go from 1 to (grid_size + 0.9999)
         return np.array(voxel_coords)
 
@@ -657,7 +656,7 @@ class Grid:
         cart_z = np.dot(frac_coords, z)
         cart_coords = np.column_stack([cart_x, cart_y, cart_z])
         return cart_coords
-    
+
     def get_frac_coords_from_vox_full_array(self, vox_coords: ArrayLike):
         """
         Takes in a 2D array of shape (N,3) representing voxel coordinates
@@ -671,12 +670,12 @@ class Grid:
             An (N,3) shaped array of fractional coordinates
         """
         x, y, z = self.grid_shape
-        frac_x = vox_coords[:,0]/x
-        frac_y = vox_coords[:,1]/y
-        frac_z = vox_coords[:,2]/z
+        frac_x = vox_coords[:, 0] / x
+        frac_y = vox_coords[:, 1] / y
+        frac_z = vox_coords[:, 2] / z
         frac_coords = np.column_stack([frac_x, frac_y, frac_z])
         return frac_coords
-    
+
     def get_vox_coords_from_frac_full_array(self, frac_coords: ArrayLike):
         """
         Takes in a 2D array of shape (N,3) representing fractional coordinates
@@ -689,13 +688,13 @@ class Grid:
         Returns:
             An (N,3) shaped array of voxel coordinates
         """
-        x,y,z = self.grid_shape
-        vox_x = frac_coords[:,0]*x
-        vox_y = frac_coords[:,1]*y
-        vox_z = frac_coords[:,2]*z
+        x, y, z = self.grid_shape
+        vox_x = frac_coords[:, 0] * x
+        vox_y = frac_coords[:, 1] * y
+        vox_z = frac_coords[:, 2] * z
         vox_coords = np.column_stack([vox_x, vox_y, vox_z])
         return vox_coords
-    
+
     def get_cart_coords_from_vox_full_array(self, vox_coords: ArrayLike):
         """
         Takes in a 2D array of shape (N,3) representing voxel coordinates

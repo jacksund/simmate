@@ -39,7 +39,7 @@ class PartitioningToolkit:
         site_voxel_coord: ArrayLike | list,
         neigh_voxel_coord: ArrayLike | list,
         method: str = "linear",
-        steps: int = 200
+        steps: int = 200,
     ):
         """
         Finds a line of voxel positions between two atom sites and then finds the value
@@ -69,12 +69,7 @@ class PartitioningToolkit:
         # get a list of points along the connecting line. First add the original
         # site
         position = site_voxel_coord
-        line = [
-            [
-                round(float(a % b), 12)
-                for a, b in zip(position, grid_data.shape)
-            ]
-        ]
+        line = [[round(float(a % b), 12) for a, b in zip(position, grid_data.shape)]]
         for i in range(steps):
             # move position by slope_increment
             position = [float(a + b) for a, b in zip(position, slope_increment)]
@@ -84,8 +79,7 @@ class PartitioningToolkit:
             # normal grid, (0 to grid_max), then do the wrapping function (%), then
             # shift back onto the VASP voxel index.
             position = [
-                round(float(a % b), 12)
-                for a, b in zip(position, grid_data.shape)
+                round(float(a % b), 12) for a, b in zip(position, grid_data.shape)
             ]
 
             line.append(position)
@@ -296,17 +290,17 @@ class PartitioningToolkit:
 
         # if site_string == neigh_string:
         if site_equiv == neigh_equiv:
-        #     list_values = list(values)
-        #     # We have the same type of atom on either side. We want to check
-        #     # if they are the same and if they are return a frac of 0.5. This
-        #     # is because usually there will be some slight covalency between
-        #     # atoms of the same type, but they should share the area equally
-        #     symmetric = self._check_partitioning_line_for_symmetry(list_values)
-        # else:
-        #     symmetric = False
+            #     list_values = list(values)
+            #     # We have the same type of atom on either side. We want to check
+            #     # if they are the same and if they are return a frac of 0.5. This
+            #     # is because usually there will be some slight covalency between
+            #     # atoms of the same type, but they should share the area equally
+            #     symmetric = self._check_partitioning_line_for_symmetry(list_values)
+            # else:
+            #     symmetric = False
 
-        # # If we found symmetry, we return a global min exactly at the center
-        # if symmetric:
+            # # If we found symmetry, we return a global min exactly at the center
+            # if symmetric:
             # 100 is the index directly at the center of the line
             elf_value = values[100]
             elf_min_frac = 0.5
@@ -854,7 +848,7 @@ class PartitioningToolkit:
             closest_neighbors[i] = d[biggest]
         return closest_neighbors
 
-    def get_set_number_of_neighbors(self,site_index, neighbor_num: int = 26):
+    def get_set_number_of_neighbors(self, site_index, neighbor_num: int = 26):
         """
         Function for getting the closest neighbors.
 
@@ -870,7 +864,9 @@ class PartitioningToolkit:
         """
         # Get all possible neighbor atoms for each atom within 15 angstroms
         all_neighbors = self.all_site_neighbor_pairs.copy()
-        atom_neighbors = all_neighbors.loc[all_neighbors["site_index"]==site_index].copy()
+        atom_neighbors = all_neighbors.loc[
+            all_neighbors["site_index"] == site_index
+        ].copy()
         set_neighbors = atom_neighbors.iloc[:neighbor_num]
 
         return set_neighbors
@@ -1470,11 +1466,11 @@ class PartitioningToolkit:
                 radius = frac * dist
                 reverse_frac = 1 - frac
                 reverse_radius = reverse_frac * dist
-                
+
                 # Get the unique indices to search the dataframe with
                 equiv_site_index = row["equiv_site_index"]
                 equiv_neigh_index = row["equiv_neigh_index"]
-                
+
                 # create search to find rows with same symbol set and reverse symbol set.
                 reverse_condition = (
                     (possible_unique_pairs["equiv_site_index"] == equiv_neigh_index)
@@ -1485,19 +1481,25 @@ class PartitioningToolkit:
                 # site neighbor pair. We do this in the loop so that the reverse
                 # assignments don't need to be repeated
                 possible_unique_pairs.at[index, "partitioning_frac"] = frac
-                possible_unique_pairs.loc[
-                    reverse_condition, "partitioning_frac"
-                ] = reverse_frac
+                possible_unique_pairs.loc[reverse_condition, "partitioning_frac"] = (
+                    reverse_frac
+                )
 
                 # create another search condition for the full dataframe of site-neighbor pairs
                 search_condition1 = (
                     (possible_site_neigh_pairs["equiv_site_index"] == equiv_site_index)
-                    & (possible_site_neigh_pairs["equiv_neigh_index"] == equiv_neigh_index)
+                    & (
+                        possible_site_neigh_pairs["equiv_neigh_index"]
+                        == equiv_neigh_index
+                    )
                     & (possible_site_neigh_pairs["dist"] == dist)
                 )
                 reverse_condition1 = (
                     (possible_site_neigh_pairs["equiv_site_index"] == equiv_neigh_index)
-                    & (possible_site_neigh_pairs["equiv_neigh_index"] == equiv_site_index)
+                    & (
+                        possible_site_neigh_pairs["equiv_neigh_index"]
+                        == equiv_site_index
+                    )
                     & (possible_site_neigh_pairs["dist"] == dist)
                 )
 
@@ -1576,12 +1578,12 @@ class PartitioningToolkit:
         Adds to a set of partitioning planes by checking that each plane has
         an equivalent counterpart for the neighboring atom and adding it
         if not.
-   
+
         Args:
             initial_partitioning (dict):
                 A dictionary with site indices as keys and partitioning dataframes
                 as values
-   
+
         Returns:
             A new dictionary of partitioning dataframes for each site.
         """
@@ -1596,7 +1598,9 @@ class PartitioningToolkit:
                 if neigh != site:
                     neigh_part_df = initial_partitioning[neigh]
                     # Get the planes connecting this neighbor to the site
-                    important_neigh_df = neigh_part_df.loc[neigh_part_df["neigh_index"]==site]
+                    important_neigh_df = neigh_part_df.loc[
+                        neigh_part_df["neigh_index"] == site
+                    ]
                     # For each plane we want to do the following:
                     # 1. Check if the original site has this plane
                     # 2. Transform the coords of the neigh
@@ -1604,34 +1608,34 @@ class PartitioningToolkit:
                     # 4. transform plane point and flip plane vector
                     for i, row in important_neigh_df.iterrows():
                         dist = row["dist"]
-                        condition = (
-                            (part_df["dist"]==dist)
-                            & (part_df["neigh_index"] == neigh))
+                        condition = (part_df["dist"] == dist) & (
+                            part_df["neigh_index"] == neigh
+                        )
                         if len(part_df.loc[condition]) == 0:
                             # We want to add a new row
                             transformation_vector = row["neigh_coords"] - site_coords
                             new_row = {
-                            "site_index":site,
-                            "neigh_index":neigh,
-                            "equiv_site_index":equivalent_atoms[site],
-                            "equiv_neigh_index":equivalent_atoms[neigh],
-                            "site_symbol":row["neigh_symbol"],
-                            "neigh_symbol":row["site_symbol"],
-                            "dist":dist,
-                            "site_coords":site_coords,
-                            "neigh_coords":row["site_coords"] + transformation_vector,
-                            "partitioning_frac":1-row["partitioning_frac"],
-                            "radius":dist-row["radius"],
-                            "plane_points":row["plane_points"] + transformation_vector,
-                            "plane_vectors":row["plane_vectors"]*-1,
+                                "site_index": site,
+                                "neigh_index": neigh,
+                                "equiv_site_index": equivalent_atoms[site],
+                                "equiv_neigh_index": equivalent_atoms[neigh],
+                                "site_symbol": row["neigh_symbol"],
+                                "neigh_symbol": row["site_symbol"],
+                                "dist": dist,
+                                "site_coords": site_coords,
+                                "neigh_coords": row["site_coords"]
+                                + transformation_vector,
+                                "partitioning_frac": 1 - row["partitioning_frac"],
+                                "radius": dist - row["radius"],
+                                "plane_points": row["plane_points"]
+                                + transformation_vector,
+                                "plane_vectors": row["plane_vectors"] * -1,
                             }
                             part_df.loc[len(part_df)] = new_row
             part_df.sort_values(by=["dist"], inplace=True)
             part_df.reset_index(inplace=True, drop=True)
             new_partitioning[site] = part_df
         return new_partitioning
-                        
-
 
     def get_partitioning(self, check_for_covalency: bool = True):
         """

@@ -38,7 +38,6 @@ class ElectrideFinder:
         The local maxima in a 3D numpy array
         """
         return self.find_local_maxima()
-    
 
     def find_local_maxima(self, neighborhood_size: int = 2, threshold: float = 0.5):
         """
@@ -61,11 +60,11 @@ class ElectrideFinder:
         maxima_vox_coords = []
         maxima_values = []
         # Get voxel coords where the value is above the threshold
-        above_thresh_indices = np.where(elf_data>threshold)
+        above_thresh_indices = np.where(elf_data > threshold)
         above_thresh_data = elf_data[above_thresh_indices]
         # Convert to padded indices in an array to loop over
-        above_thresh_indices = np.column_stack(above_thresh_indices)+neighborhood_size
-        for (x,y,z), data_value in zip(above_thresh_indices, above_thresh_data):
+        above_thresh_indices = np.column_stack(above_thresh_indices) + neighborhood_size
+        for (x, y, z), data_value in zip(above_thresh_indices, above_thresh_data):
             # Get a section of the dataframe around the voxel
             neighborhood = padded_elf_data[
                 x - neighborhood_size : x + neighborhood_size + 1,
@@ -92,15 +91,17 @@ class ElectrideFinder:
         maxima_structure.remove_species(maxima_structure.symbol_set)
         for frac_coord in maxima_frac_coords:
             maxima_structure.append("He", frac_coord)
-        tol = grid.max_voxel_dist*2
+        tol = grid.max_voxel_dist * 2
         maxima_structure.merge_sites(tol=tol, mode="average")
         new_maxima_frac_coords = maxima_structure.frac_coords
         # sometimes the pymatgen merge_sites method will return 1 instead of zero
         # for a fractional coordinate. We convert these to 0 here.
-        new_maxima_frac_coords = np.where(new_maxima_frac_coords==1,0,new_maxima_frac_coords)
+        new_maxima_frac_coords = np.where(
+            new_maxima_frac_coords == 1, 0, new_maxima_frac_coords
+        )
         # maxima_cart_coords = grid.get_cart_coords_from_vox_full_array(maxima_vox_coords)
-        return new_maxima_frac_coords#, maxima_values
-        
+        return new_maxima_frac_coords  # , maxima_values
+
     @staticmethod
     def to_number_from_roman_numeral(roman_num: str):
         """
@@ -309,9 +310,12 @@ class ElectrideFinder:
         logging.info("Finding electride sites")
         # Get the coordinates and values of each local maximum in the grid
         grid = self.grid.copy()
-        (local_maxima_frac_coords#, local_maxima_values
-         ) = self.find_local_maxima(threshold=electride_finder_cutoff)
-        local_maxima_vox_coords = grid.get_vox_coords_from_frac_full_array(local_maxima_frac_coords)
+        (local_maxima_frac_coords) = self.find_local_maxima(  # , local_maxima_values
+            threshold=electride_finder_cutoff
+        )
+        local_maxima_vox_coords = grid.get_vox_coords_from_frac_full_array(
+            local_maxima_frac_coords
+        )
         # If there are He atoms that have already been placed in the structure
         # that the user wants to remove, remove them now.
         structure = grid.structure.copy()
@@ -327,7 +331,7 @@ class ElectrideFinder:
                   """
             )
             return structure
-               
+
         # Create a list to store the electride coords.
         electride_coords = []
         # get the estimated shannon radii of each of the sites in the structure.
@@ -342,14 +346,19 @@ class ElectrideFinder:
             electride_structure.append("He", maximum_frac_coords)
 
             # get all neighbors within 15 A
-            (site_indices, neigh_indices, neigh_images, dists
-             ) = electride_structure.get_neighbor_list(15)
+            (
+                site_indices,
+                neigh_indices,
+                neigh_images,
+                dists,
+            ) = electride_structure.get_neighbor_list(15)
             # get indices where the electride neighbors are stored
-            electride_index = len(electride_structure)-1
-            electride_site_neighs = np.where(site_indices==electride_index)[0]
+            electride_index = len(electride_structure) - 1
+            electride_site_neighs = np.where(site_indices == electride_index)[0]
             # get the subset of indices where the neighbor is not also the electride
             electride_site_neighs = electride_site_neighs[
-                neigh_indices[electride_site_neighs]!=electride_index]
+                neigh_indices[electride_site_neighs] != electride_index
+            ]
             # get the distances to these neighbors
             neigh_dists = dists[electride_site_neighs]
             # get the structure indices of these neighbors
@@ -370,7 +379,7 @@ class ElectrideFinder:
         electride_structure = structure.copy()
         for coord in electride_coords:
             electride_structure.append("He", coord)
-        
+
         # report whether any electrides were found
         electride_sites = electride_structure.indices_from_symbol("He")
         if len(electride_sites) > 0:

@@ -418,45 +418,66 @@ class VoxelAssignmentToolkit:
         return all_voxel_assignments
 
     def get_multi_site_voxel_assignments(self, all_site_voxel_assignments: ArrayLike):
-        
+        """
+        Gets the voxel assignments for voxels that are not within the partitioning
+        surface.
+
+        Args:
+            all_site_voxel_assignments (ArrayLike):
+                A 1D array of integers representing the site assignments for
+                each voxel in the grid.
+
+        Returns:
+            A 1D array of the same length as the input with additional site
+            assignments.
+        """
+        logging.info("Calculating voxel assignments outside partitioning")
         all_voxel_assignments = all_site_voxel_assignments.copy()
         # get unassigned voxels
-        unassigned_indices = np.where(all_voxel_assignments==0)[0]
+        unassigned_indices = np.where(all_voxel_assignments == 0)[0]
         frac_coords_to_find = self.all_voxel_frac_coords[unassigned_indices]
         # get the partitioning planes
         planes = self.all_plane_equations.astype(float)
         number_of_planes_per_atom = self.number_of_planes_per_atom
-        
+
         if self.algorithm == "badelf":
             structure = self.charge_grid.structure
         elif self.algorithm == "voronelf":
             structure = self.electride_structure
-        
+
         # get all possible permutations of fractional coords
         frac_coords_to_find_perm = []
         permutations = self.unit_cell_permutations_frac
-        for x,y,z in permutations:
+        for x, y, z in permutations:
             new_frac_coords = frac_coords_to_find.copy()
             new_frac_coords[:, 0] += x
             new_frac_coords[:, 1] += y
             new_frac_coords[:, 2] += z
             frac_coords_to_find_perm.append(new_frac_coords)
-        frac_coords_to_find_perm = np.concatenate(frac_coords_to_find_perm)  
-        cart_coords_to_find_perm = self.charge_grid.get_cart_coords_from_frac_full_array(
-            frac_coords_to_find_perm).astype(float)
+        frac_coords_to_find_perm = np.concatenate(frac_coords_to_find_perm)
+        cart_coords_to_find_perm = (
+            self.charge_grid.get_cart_coords_from_frac_full_array(
+                frac_coords_to_find_perm
+            ).astype(float)
+        )
         # calculate distances from each voxel to each partitioning plane
-        voxel_plane_distances = da.dot(cart_coords_to_find_perm, planes[:, :3].T) + planes[:, 3]
+        voxel_plane_distances = (
+            da.dot(cart_coords_to_find_perm, planes[:, :3].T) + planes[:, 3]
+        )
         # We are looking for voxels that are outside of the partitioning planes or
         # on a partitioning plane so we replace any distances that are below/inside
         # of a plane with a large number
         voxel_plane_distances = voxel_plane_distances.round(12)
-        voxel_plane_distances = da.where(voxel_plane_distances>=0, voxel_plane_distances, 50)
+        voxel_plane_distances = da.where(
+            voxel_plane_distances >= 0, voxel_plane_distances, 50
+        )
         voxel_plane_distances = voxel_plane_distances.compute()
-        # For each atom we only need the lowest distance from the voxel to one of 
+        # For each atom we only need the lowest distance from the voxel to one of
         # its planes. This can greatly decrease the size of the array. We do this
         # here
         voxel_plane_distances = np.array_split(
-            voxel_plane_distances, number_of_planes_per_atom, axis=1)
+            voxel_plane_distances, number_of_planes_per_atom, axis=1
+        )
         new_distances = []
         for distance in tqdm(voxel_plane_distances, total=len(voxel_plane_distances)):
             one_distance = np.min(distance, axis=1)
@@ -467,7 +488,7 @@ class VoxelAssignmentToolkit:
         # this we need to calculate the distance from the voxels to each of the atoms
         # at different translations. Our goal is a bool array with the same shape as
         # our distances array that we can use as a mask.
-        
+
         # First, we want to define what the maximum reasonable distance a voxel can
         # be from an atom and still have useful planes. This is chosen as the maximum
         # distance from an atom to one of its neighbors.
@@ -476,9 +497,9 @@ class VoxelAssignmentToolkit:
             dists = site_df["dist"]
             max_atom_dists.append(max(dists))
         max_atom_dists = np.array(max_atom_dists)
-        max_atom_dists = np.tile(max_atom_dists, (len(frac_coords_to_find),1))
+        max_atom_dists = np.tile(max_atom_dists, (len(frac_coords_to_find), 1))
         all_valid_atoms = []
-        for x,y,z in permutations:
+        for x, y, z in permutations:
             # get the new coords for this translation
             new_frac_coords = frac_coords_to_find.copy()
             new_frac_coords[:, 0] += x
@@ -486,16 +507,20 @@ class VoxelAssignmentToolkit:
             new_frac_coords[:, 2] += z
             # calculate the distances to each atom from each voxel
             cart_coords_to_find = self.charge_grid.get_cart_coords_from_frac_full_array(
-                new_frac_coords)
+                new_frac_coords
+            )
             site_carts = structure.cart_coords
-            voxel_atom_distances = np.sqrt(np.sum((
-                cart_coords_to_find[:, None, :] - site_carts) ** 2, axis=2))
-            
+            voxel_atom_distances = np.sqrt(
+                np.sum((cart_coords_to_find[:, None, :] - site_carts) ** 2, axis=2)
+            )
+
             # get which atoms should be considered for each translated voxel
-            potential_atoms = np.where(voxel_atom_distances<max_atom_dists,True, False)
+            potential_atoms = np.where(
+                voxel_atom_distances < max_atom_dists, True, False
+            )
             all_valid_atoms.append(potential_atoms)
         all_valid_atoms = np.concatenate(all_valid_atoms)
-        
+
         # Replace any distance values where the atom should not be considered with
         # a very high value
         voxel_plane_distances = np.where(all_valid_atoms, voxel_plane_distances, 50)
@@ -507,15 +532,19 @@ class VoxelAssignmentToolkit:
         # the array into a shape with the number of unassigned voxels by the
         # number of atoms.
         voxel_plane_distances_split = np.array_split(voxel_plane_distances, 27)
-        voxel_plane_distances_compressed = np.min(np.stack(voxel_plane_distances_split),axis=0)
+        voxel_plane_distances_compressed = np.min(
+            np.stack(voxel_plane_distances_split), axis=0
+        )
         # Now we want to find the minimum value in each row. The atoms that have
         # this distance will be assigned part of or all of the voxel
-        voxel_plane_min_distances = np.min(voxel_plane_distances_compressed,axis=1)
+        voxel_plane_min_distances = np.min(voxel_plane_distances_compressed, axis=1)
         # We tile to get the same shape as our voxel_plane_distances_compressed array
         voxel_plane_min_distances = np.tile(
-            voxel_plane_min_distances,(len(structure),1)).T
+            voxel_plane_min_distances, (len(structure), 1)
+        ).T
         # Now we assign each voxel by checking which distances match the relavent
         # values
         multi_site_assignments = np.where(
-            voxel_plane_distances_compressed == voxel_plane_min_distances, 1, 0)
+            voxel_plane_distances_compressed == voxel_plane_min_distances, 1, 0
+        )
         return multi_site_assignments
