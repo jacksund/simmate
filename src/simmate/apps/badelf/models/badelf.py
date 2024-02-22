@@ -12,9 +12,6 @@ class BadElf(Structure, Calculation):
     This table contains results from a BadELF analysis.
     """
 
-    class Meta:
-        app_label = "workflows"
-
     electride_structure = table_column.JSONField(blank=True, null=True)
     """
     The core electride structure information, which is written to a string and in a 
