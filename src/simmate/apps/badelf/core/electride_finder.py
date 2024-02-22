@@ -343,8 +343,8 @@ class ElectrideFinder:
             # Create a dummy structure. Add a dummy at the local maximum that
             # was found
             electride_structure = structure.copy()
-            electride_structure.append("He", maximum_frac_coords)
 
+            electride_structure.append("He", maximum_frac_coords)
             # get all neighbors within 15 A
             (
                 site_indices,
