@@ -508,6 +508,8 @@ class BadElfToolkit:
         # Convert connections and values to numpy arrays
         connected_indices = np.array(connected_indices)
         minimum_elf_values = np.array(minimum_elf_values)
+        if len(connected_indices) == 0:
+            return [0], [0]
         # Get the site and neighbor indices for each connection
         connecting_site_indices = sites_indices[connected_indices]
         connecting_neigh_indices = neigh_indices[connected_indices]
