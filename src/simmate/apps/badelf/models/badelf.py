@@ -2,21 +2,12 @@
 
 from pathlib import Path
 
-from pandas import DataFrame
-
 from simmate.database.base_data_types import Calculation, Structure, table_column
 
 
 class BadElf(Structure, Calculation):
     """
     This table contains results from a BadELF analysis.
-    """
-
-    electride_structure = table_column.JSONField(blank=True, null=True)
-    """
-    The core electride structure information, which is written to a string and in a 
-    compressed format using the `from_toolkit` method. To get back to our toolkit
-    structure object, use the `to_toolkit` method.
     """
 
     oxidation_states = table_column.JSONField(blank=True, null=True)
@@ -117,15 +108,7 @@ class BadElf(Structure, Calculation):
 
     def write_output_summary(self, directory: Path):
         super().write_output_summary(directory)
-        self.write_summary_dataframe(directory)
 
-    # def from_vasp_run(vasprun, as_dict):
-    #     """
-    #     The base workflow class will register the vasprun.xml and try and load
-    #     vasp data using a from_vasp_run method. We don't actually want to load
-    #     anything so this method just passes.
-    #     """
-    #     pass
     def update_from_directory(self, directory):
         """
         The base database workflow will try and register data from the local
@@ -135,30 +118,3 @@ class BadElf(Structure, Calculation):
         update_from_directory method here.
         """
         pass
-
-    def get_summary_dataframe(self):
-        """
-        Creates a dataframe containing the information that is most likely to
-        be useful to a user.
-        """
-        df = DataFrame(
-            {
-                "element": self.element_list,
-                "oxidation_state": self.oxidation_states,
-                "charge": self.charges,
-                "min_dist": self.min_dists,
-                "atomic_volume": self.atomic_volumes,
-                "nelectrons": self.nelectrons,
-                "nelectrides": self.nelectrides,
-                "electride_dim": self.electride_dim,
-            }
-        )
-        return df
-
-    def write_summary_dataframe(self, directory: Path):
-        """
-        writes the summary dataframe from above to a csv file.
-        """
-        df = self.get_summary_dataframe()
-        filename = directory / "badelf_summary.csv"
-        df.to_csv(filename)

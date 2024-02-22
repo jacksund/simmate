@@ -584,7 +584,7 @@ class BadElfToolkit:
                 )
             # find the dimensionality of this graph. If this dimension hasn't been
             # found, add it to the list. If the dimensionality is 0, stop.
-            dimensionality = get_dimensionality_larsen(graph)
+            dimensionality = float(get_dimensionality_larsen(graph))
             if dimensionality not in accessible_dimensions:
                 accessible_dimensions.append(dimensionality)
                 cutoffs.append(min_elf_value)
@@ -806,14 +806,12 @@ class BadElfToolkit:
         results["algorithm"] = algorithm
         results["element_list"] = elements
         results["coord_envs"] = self.coord_envs
-        (
-            results["electride_dim"],
-            results["dim_cutoffs"],
-        ) = self.get_electride_dimensionality()
+        electride_dim, dim_cutoffs = self.get_electride_dimensionality()
+        results["electride_dim"] = electride_dim
+        results["dim_cutoffs"] = dim_cutoffs
         # Fill out columns unrelated to badelf alg
         structure = self.structure
         results["structure"] = structure
-        results["electride_structure"] = self.electride_structure
 
         return results
 
