@@ -813,6 +813,7 @@ class BadElfToolkit:
         # Fill out columns unrelated to badelf alg
         structure = self.structure
         results["structure"] = structure
+        results["electride_structure"] = self.electride_structure
 
         return results
 
@@ -832,7 +833,6 @@ class BadElfToolkit:
         charge_file: str = "CHGCAR",
         algorithm: str = "badelf",
         find_electrides: bool = True,
-        cores: int = None,
     ):
         """
         Creates a BadElfToolkit instance from the requested partitioning file
@@ -852,9 +852,6 @@ class BadElfToolkit:
                 The algorithm to use. Options are "badelf", "voronelf", or "zero-flux"
             find_electrides (bool):
                 Whether or not to search for electrides in the system
-            cores (int):
-                The number of computer cores (NOT threads) that will be used to
-                parallelize
 
         Returns:
             A BadElfToolkit instance.

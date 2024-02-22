@@ -15,6 +15,13 @@ class BadElf(Structure, Calculation):
     class Meta:
         app_label = "workflows"
 
+    electride_structure = table_column.JSONField(blank=True, null=True)
+    """
+    The core electride structure information, which is written to a string and in a 
+    compressed format using the `from_toolkit` method. To get back to our toolkit
+    structure object, use the `to_toolkit` method.
+    """
+
     oxidation_states = table_column.JSONField(blank=True, null=True)
     """
     A list of calculated oxidation states for each site.
