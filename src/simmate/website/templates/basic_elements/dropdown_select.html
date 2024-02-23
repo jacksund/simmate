@@ -3,7 +3,7 @@
 <div unicorn:ignore class="my-2">
     {% if label %}<label class="form-label">{{ label }}</label>{% endif %}
     <select id="{{ name }}{{ key }}"
-            class="select2 form-control"
+            class="select2 form-control {% if allow_custom_input %}select2-dynamic{% endif %}"
             data-toggle="select2"
             data-placeholder="Choose one ..."
             onchange="Unicorn.call('{{ unicorn_view }}', 'set_{{ name }}', $('#{{ name }}{{ key }}').val());">
