@@ -82,6 +82,18 @@ class BadElf(Structure, Calculation):
     consistent and accurate count of valence electrons
     """
 
+    electrides_per_formula = table_column.FloatField(blank=True, null=True)
+    """
+    The total number of electrons assigned to electride sites for this structures
+    formula unit.
+    """
+
+    electrides_per_reduced_formula = table_column.FloatField(blank=True, null=True)
+    """
+    The total number of electrons assigned to electride sites for this structures
+    reduced formula unit.
+    """
+
     nelectrides = table_column.IntegerField(blank=True, null=True)
     """
     The total number of electrides that were found when searching the BCF.dat

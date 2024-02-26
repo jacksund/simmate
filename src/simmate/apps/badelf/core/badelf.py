@@ -802,7 +802,18 @@ class BadElfToolkit:
                 "vacuum_volume": vacuum_volume,
                 "nelectrons": nelectrons,
             }
-
+        # calculate the number of electride electrons per formula unit
+        if len(self.electride_indices) > 0:
+            electrides_per_unit = sum(
+                [results["charges"][i] for i in self.electride_indices]
+            )
+            (
+                _,
+                formula_reduction_factor,
+            ) = self.structure.composition.get_reduced_composition_and_factor()
+            electrides_per_reduced_unit = electrides_per_unit / formula_reduction_factor
+            results["electrides_per_formula"] = electrides_per_unit
+            results["electrides_per_reduced_formula"] = electrides_per_reduced_unit
         # set the results that are not algorithm dependent
         results["nelectrides"] = electride_num
         results["algorithm"] = algorithm

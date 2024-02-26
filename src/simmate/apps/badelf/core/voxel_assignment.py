@@ -317,6 +317,7 @@ class VoxelAssignmentToolkit:
                 )
                 indices_to_zero.extend(np.where(new_results_array > i + 1)[0])
             indices_to_zero = np.unique(indices_to_zero).astype(int)
+            # print(len(indices_to_zero))
             new_results_array[indices_to_zero] = 0
             # Sum the results
             # new_results_array = np.sum(new_results_arrays, axis=0)
@@ -378,7 +379,7 @@ class VoxelAssignmentToolkit:
         # for each split, calculate the results and add to the end of our results
         for chunk, split_voxel_array in enumerate(split_voxel_frac_coords):
             logging.info(
-                f"Calculating site assignments for voxel chunk {chunk}/{split_num}"
+                f"Calculating site assignments for voxel chunk {chunk+1}/{split_num}"
             )
             split_result = self.get_site_assignments_from_frac_coords(
                 voxel_frac_coords=split_voxel_array,
@@ -417,7 +418,9 @@ class VoxelAssignmentToolkit:
         all_voxel_assignments[unassigned_indices] = single_site_voxel_assignments
         return all_voxel_assignments
 
-    def get_multi_site_voxel_assignments(self, all_site_voxel_assignments: ArrayLike):
+    def get_multi_site_voxel_assignments_from_frac_coords(
+        self, voxel_frac_coords: ArrayLike
+    ):
         """
         Gets the voxel assignments for voxels that are not within the partitioning
         surface.
@@ -431,11 +434,6 @@ class VoxelAssignmentToolkit:
             A 1D array of the same length as the input with additional site
             assignments.
         """
-        logging.info("Calculating voxel assignments outside partitioning")
-        all_voxel_assignments = all_site_voxel_assignments.copy()
-        # get unassigned voxels
-        unassigned_indices = np.where(all_voxel_assignments == 0)[0]
-        frac_coords_to_find = self.all_voxel_frac_coords[unassigned_indices]
         # get the partitioning planes
         planes = self.all_plane_equations.astype(float)
         number_of_planes_per_atom = self.number_of_planes_per_atom
@@ -446,18 +444,18 @@ class VoxelAssignmentToolkit:
             structure = self.electride_structure
 
         # get all possible permutations of fractional coords
-        frac_coords_to_find_perm = []
+        voxel_frac_coords_perm = []
         permutations = self.unit_cell_permutations_frac
         for x, y, z in permutations:
-            new_frac_coords = frac_coords_to_find.copy()
+            new_frac_coords = voxel_frac_coords.copy()
             new_frac_coords[:, 0] += x
             new_frac_coords[:, 1] += y
             new_frac_coords[:, 2] += z
-            frac_coords_to_find_perm.append(new_frac_coords)
-        frac_coords_to_find_perm = np.concatenate(frac_coords_to_find_perm)
+            voxel_frac_coords_perm.append(new_frac_coords)
+        voxel_frac_coords_perm = np.concatenate(voxel_frac_coords_perm)
         cart_coords_to_find_perm = (
             self.charge_grid.get_cart_coords_from_frac_full_array(
-                frac_coords_to_find_perm
+                voxel_frac_coords_perm
             ).astype(float)
         )
         # calculate distances from each voxel to each partitioning plane
@@ -479,7 +477,7 @@ class VoxelAssignmentToolkit:
             voxel_plane_distances, number_of_planes_per_atom, axis=1
         )
         new_distances = []
-        for distance in tqdm(voxel_plane_distances, total=len(voxel_plane_distances)):
+        for distance in voxel_plane_distances:
             one_distance = np.min(distance, axis=1)
             new_distances.append(one_distance)
         voxel_plane_distances = np.column_stack(new_distances)
@@ -497,11 +495,11 @@ class VoxelAssignmentToolkit:
             dists = site_df["dist"]
             max_atom_dists.append(max(dists))
         max_atom_dists = np.array(max_atom_dists)
-        max_atom_dists = np.tile(max_atom_dists, (len(frac_coords_to_find), 1))
+        max_atom_dists = np.tile(max_atom_dists, (len(voxel_frac_coords), 1))
         all_valid_atoms = []
         for x, y, z in permutations:
             # get the new coords for this translation
-            new_frac_coords = frac_coords_to_find.copy()
+            new_frac_coords = voxel_frac_coords.copy()
             new_frac_coords[:, 0] += x
             new_frac_coords[:, 1] += y
             new_frac_coords[:, 2] += z
@@ -548,3 +546,79 @@ class VoxelAssignmentToolkit:
             voxel_plane_distances_compressed == voxel_plane_min_distances, 1, 0
         )
         return multi_site_assignments
+
+    def get_multi_site_assignments_from_frac_coords_with_memory_handling(
+        self,
+        voxel_frac_coords: ArrayLike,
+    ):
+        """
+        Gets the multi-site assignments for an arbitrary number of voxels described
+        by their fractional coordinates. Takes available memory into account
+        and divides the voxels into chunks to perform operations.
+
+        Args:
+            voxel_frac_coords (ArrayLike):
+                An N,3 array of fractional coordinates corresponding to the voxels
+                to assign sites to
+
+        Returns:
+            A 2D array of site assignments with indices (i,j) where i is the
+            voxel index and j is the site index.
+        """
+        logging.info("Calculating voxel assignments outside partitioning")
+        partitioning = self.partitioning
+        # determine how much memory is available. Then calculate how many distance
+        # calculations would be possible to do at once with this much memory.
+        available_memory = psutil.virtual_memory().available / (1024**2)
+
+        # 0.00084 is selected as being 10% larger than the maximum memory needed
+        handleable_plane_distance_calcs_dask = available_memory / 0.00084
+        plane_distances_to_calc = len(voxel_frac_coords) * sum(
+            [len(i) for i in partitioning.values()]
+        )
+
+        # calculate the number of chunks the voxel array should be split into to not
+        # overload the memory. Then split the array by this number
+        split_num = math.ceil(
+            plane_distances_to_calc / handleable_plane_distance_calcs_dask
+        )
+
+        split_voxel_frac_coords = np.array_split(voxel_frac_coords, split_num, axis=0)
+        # create an array to store results
+        voxel_results_array = []
+        # for each split, calculate the results and add to the end of our results
+        for chunk, split_voxel_array in enumerate(split_voxel_frac_coords):
+            logging.info(
+                f"Calculating multi-site assignments for voxel chunk {chunk+1}/{split_num}"
+            )
+            split_result = self.get_multi_site_voxel_assignments_from_frac_coords(
+                voxel_frac_coords=split_voxel_array,
+            )
+            voxel_results_array.append(split_result)
+        voxel_results_array = np.concatenate(voxel_results_array)
+        return voxel_results_array
+
+    def get_multi_site_voxel_assignments(self, all_site_voxel_assignments: ArrayLike):
+        """
+        Gets the voxel assignments for voxels that are not split by a plane.
+
+        Args:
+            all_site_voxel_assignments (ArrayLike):
+                A 1D array of integers representing the site assignments for
+                each voxel in the grid.
+
+        Returns:
+            A 2D array of site assignments with indices (i,j) where i is the
+            voxel index and j is the site index.
+        """
+        all_voxel_assignments = all_site_voxel_assignments.copy()
+        # Search for unassigned voxels
+        unassigned_indices = np.where(all_voxel_assignments == 0)[0]
+        all_voxel_frac_coords = self.all_voxel_frac_coords
+        frac_coords_to_find = all_voxel_frac_coords[unassigned_indices]
+        multi_site_voxel_assignments = (
+            self.get_multi_site_assignments_from_frac_coords_with_memory_handling(
+                frac_coords_to_find
+            )
+        )
+        return multi_site_voxel_assignments

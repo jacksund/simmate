@@ -277,7 +277,7 @@ class ElectrideFinder:
     def get_electride_structure(
         self,
         electride_finder_cutoff: float = 0.5,
-        min_electride_radius: float = 0.0,
+        min_electride_radius: float = 0.6,
         atom_radius_method: str = "elf",
         remove_old_electrides: bool = False,
     ):
@@ -290,7 +290,8 @@ class ElectrideFinder:
                 electride. The default is 0.5.
             min_electride_radius (float):
                 The minimum elf radius around the maximum for it to be considered
-                an electride. The default is 0 allowing any possible site.
+                an electride. The default is 0.6 which is based off of a small
+                set of tests.
                 An good alternative is 1.19 which is the average radius of fluoride
                 in a 6 coordination environment.
             atom_radius_method (str):
