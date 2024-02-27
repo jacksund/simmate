@@ -5,10 +5,17 @@
             <label for="{{ form_field.id_for_label }}" class="pt-2">
                 {{ label }}
                 {% if help_text %}
-                <p class="badge bg-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ help_text}}">?</p>
+                    <p class="badge bg-secondary rounded-pill"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       data-bs-title="{{ help_text }}">?</p>
                 {% endif %}
             </label>
         {% endif %}
-        <input type="text" id="{{ name }}{{ key }}" name="{{ name }}"class="js-range-slider" value="">
+        <input type="text"
+               id="{{ name }}{{ key }}"
+               name="{{ name }}"
+               class="js-range-slider"
+               value="">
     </div>
 </div>

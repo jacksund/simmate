@@ -5,7 +5,10 @@
             <label for="{{ form_field.id_for_label }}" class="pt-2">
                 {{ label }}
                 {% if help_text %}
-                <p class="badge bg-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ help_text}}">?</p>
+                    <p class="badge bg-secondary rounded-pill"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       data-bs-title="{{ help_text }}">?</p>
                 {% endif %}
             </label>
         {% endif %}
@@ -27,5 +30,5 @@
             {% if step %}data-step={{ step }}{% endif %}
             {# BUG: we ideally want this call to be for data-onFinish not onchange #}
             onchange="Unicorn.call('{{ unicorn_view }}', 'set_{{ name }}', $('#{{ name }}{{ key }}').val());">
+        </div>
     </div>
-</div>
