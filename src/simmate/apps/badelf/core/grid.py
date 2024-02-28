@@ -3,6 +3,7 @@
 import itertools
 import logging
 import math
+import warnings
 from pathlib import Path
 
 import matplotlib
@@ -376,7 +377,11 @@ class Grid:
             return f"-.{s[1]}{s[3:13]}E{int(s[14:]) + 1:+03}"
 
         with open(file_name, "wt") as file:
-            poscar = Poscar(self.structure)
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore", category=UserWarning, module="pymatgen"
+                )
+                poscar = Poscar(self.structure)
 
             # use original name if it's been set (e.g. from Chgcar)
             comment = getattr(self, "name", poscar.comment)

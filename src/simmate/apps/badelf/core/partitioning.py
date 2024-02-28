@@ -156,42 +156,45 @@ class PartitioningToolkit:
             site_voxel_coord, neigh_voxel_coord
         )
 
-    # @staticmethod
-    # def _check_partitioning_line_for_symmetry(values: list, tolerance: float = 0.1):
-    #     """
-    #     Check if the values are roughly symmetric.
+    @staticmethod
+    def _check_partitioning_line_for_symmetry(values: list, tolerance: float = 10):
+        """
+        Check if the values are roughly symmetric. Checks each value versus
+        the equivalent value of the other half to see if they are within the
+        requested percent diff.
 
-    #     Args:
-    #         values (list):
-    #             List of numeric values
-    #         tolerance (float):
-    #             Tolerance level for symmetry check
+        Args:
+            values (list):
+                List of numeric values
+            tolerance (float):
+                Tolerance level for symmetry check in percents.
 
-    #     Returns:
-    #         True if roughly symmetric, False otherwise
-    #     """
-    #     n = len(values)
+        Returns:
+            True if roughly symmetric, False otherwise
+        """
+        n = len(values)
 
-    #     # Check if the list has an even number of elements
-    #     if n % 2 != 0:
-    #         # remove the center if odd number
-    #         center_index = math.ceil(n / 2)
-    #         values.pop(center_index)
+        # Check if the list has an even number of elements
+        if n % 2 != 0:
+            # remove the center if odd number
+            center_index = math.ceil(n / 2)
+            values.pop(center_index)
 
-    #     # Split the list into two halves
-    #     half_size = n // 2
-    #     first_half = values[:half_size]
-    #     second_half = values[half_size:]
+        # Split the list into two halves
+        half_size = n // 2
+        first_half = values[:half_size]
+        second_half = values[half_size:]
 
-    #     # Reverse the second half
-    #     reversed_second_half = list(reversed(second_half))
+        # Reverse the second half
+        reversed_second_half = list(reversed(second_half))
 
-    #     # Check if the values are roughly equal within the given tolerance
-    #     for val1, val2 in zip(first_half, reversed_second_half):
-    #         if abs(val1 - val2) > tolerance:
-    #             return False
+        # Check if the values are roughly equal within the given tolerance
+        for val1, val2 in zip(first_half, reversed_second_half):
+            perc_diff = abs((val1 - val2) / (val1 + val2)) * 100
+            if perc_diff > tolerance:
+                return False
 
-    #     return True
+        return True
 
     @staticmethod
     def find_minimum(values: list | ArrayLike):
@@ -287,21 +290,34 @@ class PartitioningToolkit:
         results:
             The global minimum of form [line_position, value, frac_position]
         """
+        # get the string for the site and neigh. During the electride dimensionality
+        # search this can throw an error so we add a try/except clause here.
+        try:
+            site_string = self.grid.structure[site_equiv].species_string
+            neigh_string = self.grid.structure[neigh_equiv].species_string
+        except:
+            site_string = "He"
+            neigh_string = "H"
 
-        # if site_string == neigh_string:
         if site_equiv == neigh_equiv:
-            #     list_values = list(values)
-            #     # We have the same type of atom on either side. We want to check
-            #     # if they are the same and if they are return a frac of 0.5. This
-            #     # is because usually there will be some slight covalency between
-            #     # atoms of the same type, but they should share the area equally
-            #     symmetric = self._check_partitioning_line_for_symmetry(list_values)
-            # else:
-            #     symmetric = False
+            # We have an atom bonded to another atom that is symmetrically equivalent
+            # so the resulting elf line will be equivalent
+            symmetric = True
+        elif site_string == neigh_string:
+            list_values = list(values)
+            # We have two atoms of the same type that are not found as symmetric
+            # by pymatgen. However, it is still likely that the ELF between the
+            # two atoms is symmetric which can easily result in a covalent like
+            # behavior. To handle this, we check if the line is symmetric and
+            # if it is we place the frac at exactly the middle
+            symmetric = self._check_partitioning_line_for_symmetry(list_values)
+        else:
+            symmetric = False
 
-            # # If we found symmetry, we return a global min exactly at the center
-            # if symmetric:
-            # 100 is the index directly at the center of the line
+        # Now if our line is symmetric, we place our partitioning exactly at
+        # the middle of the line. Otherwise we interpolate to find where to
+        # place the line.
+        if symmetric:
             elf_value = values[100]
             elf_min_frac = 0.5
             global_min = [100, elf_value, elf_min_frac]

@@ -14,6 +14,7 @@ from pymatgen.analysis.dimensionality import get_dimensionality_larsen
 from pymatgen.analysis.graphs import StructureGraph
 from pymatgen.analysis.local_env import CrystalNN
 from pymatgen.io.vasp import Potcar
+from scipy.ndimage import label
 from tqdm import tqdm
 
 from simmate.apps.badelf.core.electride_finder import ElectrideFinder
@@ -382,17 +383,137 @@ class BadElfToolkit:
 
         return all_voxel_site_assignments
 
+    @staticmethod
+    def get_ELF_dimensionality(grid: Grid, cutoff: float):
+        """
+        This algorithm works by checking if the voxels with values above the cutoff
+        are connected to the equivalent voxel in the unit cell one transformation
+        over. This is done primarily using scipy.ndimage.label which determines
+        which voxels are connected. To do this rigorously, the unit cell is repeated
+        to make a (2,2,2) super cell and the connections are checked going from
+        the original unit cell to the unit cells connected at the faces, edges,
+        and corners. If a connection in that direction is found, the total number
+        of connections increases. Dimensionalities of 0,1,2, and 3 are represented
+        by 0,1,4,and 13 connections respectively.
+
+        Args:
+            cutoff (float):
+                The minimum elf value to consider as a connection.
+            grid (Grid):
+                The ELF Grid object with only values associated with electrides.
+        """
+        data = grid.total
+        voxel_indices = np.indices(grid.grid_shape).reshape(3, -1).T
+        # Remove data below our cutoff
+        thresholded_data = np.where(data < cutoff, 0, 1)
+        raveled_data = thresholded_data.ravel()
+        # Label connected components in the eroded data. We will check each distinct
+        # body to see if it connects in each direction
+        labels, num_features = label(thresholded_data)
+        if num_features == 0:
+            return None
+        # We need to get one voxel in each of the features that we can transpose
+        # later on
+        feature_indices = []
+        for feature in range(num_features):
+            feature_num = feature + 1
+            indices = np.where(labels == feature_num)
+            x, y, z = indices[0][0], indices[1][0], indices[2][0]
+            feature_indices.append(np.array([x, y, z]))
+        # We are going to need to translate the above voxels and the entire unit
+        # cell so we create a list of desired transformations
+        transformations = [
+            [0, 0, 0],  # -
+            [1, 0, 0],  # x
+            [0, 1, 0],  # y
+            [0, 0, 1],  # z
+            [1, 1, 0],  # xy
+            [1, 0, 1],  # xz
+            [0, 1, 1],  # yz
+            [1, 1, 1],  # xyz
+        ]
+        transformations = np.array(transformations)
+        transformations = grid.get_voxel_coords_from_frac(transformations.T).T
+        # create a new numpy array representing the data tiled once in each direction
+        # to get a corner
+        supercell_data = np.zeros(np.array(thresholded_data.shape) * 2)
+        for transformation in transformations:
+            transformed_indices = (voxel_indices + transformation).astype(int)
+            x = transformed_indices[:, 0]
+            y = transformed_indices[:, 1]
+            z = transformed_indices[:, 2]
+            supercell_data[x, y, z] = raveled_data
+        # convert data into labeled features
+        supercell_data, _ = label(supercell_data)
+        # The unit cell can be connected to neighboring unit cells in 26 directions.
+        # however, we only need to consider half of these as the others are symmetrical.
+        connections = [
+            # surfaces (3)
+            [0, 1],  # x
+            [0, 2],  # y
+            [0, 3],  # z
+            # edges (6)
+            [0, 4],  # xy
+            [0, 5],  # xz
+            [0, 6],  # yz
+            [3, 1],  # x-z
+            [3, 2],  # y-z
+            [1, 2],  # -xy
+            # corners (4)
+            [0, 7],  # x,y,z
+            [1, 6],  # -x,y,z
+            [2, 5],  # x,-y,z
+            [3, 4],  # x,y,-z
+        ]
+        # Using these connections we can determine the dimensionality of the system.
+        # 1 connection is 1D, 2-4 connections is 2D and 5-13 connections is 3D.
+        # !!! These may need to be updated if I'm wrong. The idea comes from
+        # the fact that the connections should be 1, 4, and 13, but sometimes
+        # voxelation issues result in a connection not working in one direction
+        # while it would in the reverse direction (which isn't possible with
+        # true symmetry). The range accounts for this possibility. The problem
+        # might be if its possible to have for example a 2D connecting structure
+        # with 5 connections. However, I'm pretty sure that immediately causes
+        # an increase to 3D dimensionality.
+        # First we create a list to store potential dimensionalites based off of
+        # each feature. We will take the highest dimensionality.
+        dimensionalities = []
+        for coord in feature_indices:
+            # create count for the number of connections
+            connections_num = 0
+            for connection in connections:
+                # Get voxel coordinates at the first transformation
+                x, y, z = (coord + transformations[connection[0]]).astype(int)
+                # get voxel coordinates at the second transformation
+                x1, y1, z1 = (coord + transformations[connection[1]]).astype(int)
+                # get the feature label at each voxel
+                label1 = supercell_data[x, y, z]
+                label2 = supercell_data[x1, y1, z1]
+                # If the labels are the same, the unit cell is connected in this
+                # direction
+                if label1 == label2:
+                    connections_num += 1
+            if connections_num == 0:
+                dimensionalities.append(0)
+            elif connections_num == 1:
+                dimensionalities.append(1)
+            elif 1 < connections_num <= 4:
+                dimensionalities.append(2)
+            elif 5 < connections_num <= 13:
+                dimensionalities.append(3)
+
+        return max(dimensionalities)
+
     def get_electride_dimensionality(self):
         """
-        Finds the dimensionality (e.g. 0D, 1D, etc.) of an electride by determining
-        which electride sites pairs are connected across a straight line in the ELF.
-        Gives each dimensionality and the cutoff at which it switches.
+        Finds the dimensionality (e.g. 0D, 1D, etc.) of an electride by labeling
+        features in the ELF at various cutoffs and determining if they are
+        connected to nearby unit cells.
 
-        Returns:
-            A list of dimensionalities and a list of ELF cutoff values at which
-            these dimensionalities are accessible.
+        Args:
+            grid (Grid):
+                The ELF Grid object with only values associated with electrides.
         """
-
         electride_indices = self.electride_indices
         # If we have no electrides theres no reason to continue so we stop here
         if len(electride_indices) == 0:
@@ -438,161 +559,42 @@ class BadElfToolkit:
             )
             elf_grid.total = elf_array
 
-        ###############################################################################
-        # This section removes all atoms from the structure that are not electride sites
-        ###############################################################################
-
-        # read in structure and remove all atoms except dummy electride sites
-        electride_structure = self.electride_structure.copy()
-
-        electride_structure.remove_species(self.structure.symbol_set)
-
-        elf_grid.structure = electride_structure
-
-        partitioning_tools = PartitioningToolkit(elf_grid)
-
-        ###########################################################################
-        # This section checks all of the site-neighbor pairs withing 15A of eachother
-        # to determine which are connected in the ELF.
-        ###########################################################################
-
-        # get all site-neighbor pairs within 15 A.
-        (
-            sites_indices,
-            neigh_indices,
-            neigh_images,
-            neigh_dists,
-        ) = elf_grid.structure.get_neighbor_list(15)
-        neigh_images_array = np.array(neigh_images)
-        # remove any that involve neighbors more than one unit cell away.
-        within_neighboring_cells = np.all(
-            np.isin(neigh_images_array, [-1, 0, 1]), axis=1
-        )
-        within_neighboring_cells_indices = np.where(within_neighboring_cells)[0]
-        # Create lists to store which site neighbor pairs are connected and their
-        # values.
-        connected_indices = []
-        minimum_elf_values = []
-        logging.info("Finding electride site connections")
-        # loop over each site neighbor pair. Check which ones are connected by a value
-        # greater than 0. Add the index of this site neighbor pair and the minimum
-        # value connecting it to our list above
-        for site_neigh_index in tqdm(
-            within_neighboring_cells_indices,
-            total=len(within_neighboring_cells_indices),
-        ):
-            # Get the sites voxel coordinate
-            site_index = sites_indices[site_neigh_index]
-            site_vox_coords = elf_grid.get_voxel_coords_from_index(site_index)
-            # Get the neighbors voxel coordinate
-            neigh_index = neigh_indices[site_neigh_index]
-            neigh_image = neigh_images[site_neigh_index]
-            neigh_frac_coords = (
-                electride_structure.frac_coords[neigh_index] + neigh_image
-            )
-            neigh_vox_coords = elf_grid.get_voxel_coords_from_frac(neigh_frac_coords)
-            # Determine how many points need to be interpolated based on the distance
-            # between the point and its neighbor
-            distance = neigh_dists[site_neigh_index]
-            steps = math.ceil(distance * 10)
-            # interpolate the ELF values between the site and neighbor
-            _, values = partitioning_tools.get_partitioning_line_from_voxels(
-                site_vox_coords, neigh_vox_coords, method="linear", steps=steps
-            )
-            # if the interpolated line never goes to 0 append this site-neighbor pair
-            # is connected at and ELF value of 0
-            if 0 not in values:
-                connected_indices.append(site_neigh_index)
-                minimum_elf_values.append(min(values))
-
-        # Convert connections and values to numpy arrays
-        connected_indices = np.array(connected_indices)
-        minimum_elf_values = np.array(minimum_elf_values)
-        if len(connected_indices) == 0:
-            return [0], [0]
-        # Get the site and neighbor indices for each connection
-        connecting_site_indices = sites_indices[connected_indices]
-        connecting_neigh_indices = neigh_indices[connected_indices]
-        # Get the neighbor images
-        connecting_neigh_images = neigh_images[connected_indices]
-        # Get the unique list of minima. We want to refine these using a more rigorous
-        # interpolation method
-        minimum_elf_values = minimum_elf_values.round(6)
-        unique_min_elf_val = np.unique(minimum_elf_values)
-        # Loop through each unique min_elf_value. For each one, use the first site-neigh
-        # pair to refine the value
-        logging.info(
-            """Refining electride connection values. Depending on the size of
-                     your grid this can take several minutes."""
-        )
-        for min_elf_value in tqdm(unique_min_elf_val, total=len(unique_min_elf_val)):
-            # Get the indices for site-neigh pairs with this minimum value
-            min_elf_indices = np.where(minimum_elf_values == min_elf_value)[0]
-            first_index = min_elf_indices[0]
-            site_index = connecting_site_indices[first_index]
-            # Get the sites voxel coordinate
-            site_vox_coords = elf_grid.get_voxel_coords_from_index(site_index)
-            # Get the neighbors voxel coordinate
-            neigh_index = connecting_neigh_indices[first_index]
-            neigh_image = connecting_neigh_images[first_index]
-            neigh_frac_coords = (
-                electride_structure.frac_coords[neigh_index] + neigh_image
-            )
-            neigh_vox_coords = elf_grid.get_voxel_coords_from_frac(neigh_frac_coords)
-            # Get a new interpolated line to refine from
-            pos, values = partitioning_tools.get_partitioning_line_from_voxels(
-                site_vox_coords, neigh_vox_coords, method="linear", steps=200
-            )
-            # Get the refined minimum value
-            _, new_min, _ = partitioning_tools.get_line_minimum_as_frac(
-                pos, values, 0, 1
-            )
-            # Update values to new ones
-            minimum_elf_values[min_elf_indices] = new_min
-        # Update unique values
-        minimum_elf_values = minimum_elf_values.round(6)
-        unique_min_elf_val = np.unique(minimum_elf_values)
-        # Add 0 as a potential cutoff
-        unique_min_elf_val = np.insert(unique_min_elf_val, 0, 0)
-        # Now we will loop over each of the potential cutoffs found above and store the
-        # dimensionality and the cutoff
-        accessible_dimensions = []
-        cutoffs = []
-        for min_elf_value in unique_min_elf_val:
-            # Get the connections where the elf value is larger than the cutoff
-            site_pair_indices = np.where(minimum_elf_values > min_elf_value)
-            # Get the site and neighbor indices for these connections as well as
-            # the neighbor images
-            site_indices = connecting_site_indices[site_pair_indices]
-            neigh_indices = connecting_neigh_indices[site_pair_indices]
-            neigh_images = connecting_neigh_images[site_pair_indices]
-            # construct a pymatgen graph using these connections
-            graph = StructureGraph.with_empty_graph(electride_structure)
-            for site_index, neigh_index, neigh_image in zip(
-                site_indices, neigh_indices, neigh_images
-            ):
-                graph.add_edge(
-                    from_index=site_index,  # The site index of the electride site of interest
-                    from_jimage=(
-                        0,
-                        0,
-                        0,
-                    ),  # The image the electride site is in. Always (0,0,0)
-                    to_index=neigh_index,  # The neighboring electrides site index
-                    to_jimage=neigh_image,  # The image that the neighbor is in.
-                    weight=None,  # The relative weight of the neighbor. We ignore this.
-                    edge_properties=None,
-                    warn_duplicates=False,  # Duplicates are fine for us.
-                )
-            # find the dimensionality of this graph. If this dimension hasn't been
-            # found, add it to the list. If the dimensionality is 0, stop.
-            dimensionality = float(get_dimensionality_larsen(graph))
-            if dimensionality not in accessible_dimensions:
-                accessible_dimensions.append(dimensionality)
-                cutoffs.append(min_elf_value)
-            if dimensionality == 0:
-                break
-        return accessible_dimensions, cutoffs
+        #######################################################################
+        # This section scans across different cutoffs to determine what dimensionalities
+        # exist in the electride ELF
+        #######################################################################
+        logging.info("Finding dimensionality cutoffs")
+        dimensions = [3, 2, 1, 0]
+        # Create lists for the refined dimensions
+        final_dimensions = []
+        final_connections = []
+        amounts_to_change = []
+        # We refine by guessing the cutoff is 0.5 then increasing or decreasing by
+        # 0.25, then 0.125 etc. down to 0.000015259.
+        for i in range(1, 16):
+            amounts_to_change.append(1 / (2 ** (i + 1)))
+        for dimension in dimensions:
+            guess = 0.5
+            # assume this dimension is not found
+            found_dimension = False
+            logging.info(f"Refining cutoff for dimension {dimension}")
+            for i in tqdm(amounts_to_change, total=len(amounts_to_change)):
+                # check what our current dimension is. If we are at a higher dimension
+                # we need to raise the cutoff. If we are at a lower dimension or at
+                # the dimension we need to lower it
+                current_dimension = self.get_ELF_dimensionality(elf_grid, guess)
+                if current_dimension > dimension:
+                    guess += i
+                elif current_dimension < dimension:
+                    guess -= i
+                elif current_dimension == dimension:
+                    # We have found the dimension so we add it to our lists.
+                    guess -= i
+                    found_dimension = True
+            if found_dimension:
+                final_connections.append(round(guess, 4))
+                final_dimensions.append(dimension)
+        return final_dimensions, final_connections
 
     def _fix_BvAt(self, file_name):
         """

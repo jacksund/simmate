@@ -1320,6 +1320,25 @@ Unique to `customized.vasp.user-config`. This is the base workflow to use when u
 
 --------------------------
 
+## write_electride_files
+
+This parameter is unique to badelf workflows. If set to True and ELFCAR and CHGCAR will be written containing only the values where the volume belongs to an electride and zero elsewhere.
+
+=== "yaml"
+    ``` yaml
+    write_electride_files: false
+    ```
+=== "toml"
+    ``` toml
+    write_electride_files = false
+    ```
+=== "python"
+    ``` python
+    write_electride_files = False
+    ```
+
+--------------------------
+
 ## write_summary_files
 
 This parameter determines whether or not to write output files. For some workflows, writing output files can cause excessive load on the database and possibly make the calculation IO bound. In cases such as this, you can set this to `False`.
