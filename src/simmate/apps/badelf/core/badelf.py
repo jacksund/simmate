@@ -10,8 +10,6 @@ from pathlib import Path
 import numpy as np
 import psutil
 from numpy.typing import ArrayLike
-from pymatgen.analysis.dimensionality import get_dimensionality_larsen
-from pymatgen.analysis.graphs import StructureGraph
 from pymatgen.analysis.local_env import CrystalNN
 from pymatgen.io.vasp import Potcar
 from scipy.ndimage import label
@@ -894,6 +892,17 @@ class BadElfToolkit:
         Returns:
             None
         """
+        if self.algorithm == "zero-flux":
+            warnings.warn(
+                """
+                There is currently no method to write files for 
+                assignments found using the zero-flux method. This method is
+                a wrap around for the Henkelman group's bader software. We
+                suggest using their software for more involved zero-flux
+                workflows.
+                """
+            )
+            return
         # Get directory
         directory = self.directory
         # Get voxel assignments and data
@@ -946,6 +955,16 @@ class BadElfToolkit:
         Returns:
             None
         """
+        if self.algorithm == "zero-flux":
+            warnings.warn(
+                """There is currently no method to write files for 
+                   assignments found using the zero-flux method. This method is
+                   a wrap around for the Henkelman group's bader software. We
+                   suggest using their software for more involved zero-flux
+                   workflows.
+                """
+            )
+            return
         # Get directory
         directory = self.directory
         # Get voxel assignments and data
@@ -990,7 +1009,7 @@ class BadElfToolkit:
             grid.structure = self.electride_structure
             PartitioningToolkit(grid).plot_partitioning_results(partitioning)
         else:
-            print(
+            warnings.warn(
                 """
                 Plotting of zero-flux partitioning surfaces is not currently
                 supported.
