@@ -409,7 +409,7 @@ class BadElfToolkit:
         # body to see if it connects in each direction
         labels, num_features = label(thresholded_data)
         if num_features == 0:
-            return None
+            return 0
         # We need to get one voxel in each of the features that we can transpose
         # later on
         feature_indices = []
