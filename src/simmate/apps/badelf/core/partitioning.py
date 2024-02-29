@@ -392,7 +392,11 @@ class PartitioningToolkit:
 
                 # Find the minimum value of this line as well as the index for this value's
                 # position.
-                minimum_value = min(values_fine)
+                try:
+                    minimum_value = min(values_fine)
+                except:
+                    attempts = 5
+                    continue
                 min_pos = values_fine.index(minimum_value)  # + global_min_pos[0]-5
 
                 if min_pos == 4:
@@ -583,9 +587,11 @@ class PartitioningToolkit:
             neigh_cart_coords,
         )
 
-        # Get site and neighbor strings
-        # site_string = self.grid.structure[site_index].species_string
-        # Get site and neighbor equivalent atoms
+        # Check if this bond has covalent behavior
+        covalency = self.check_bond_for_covalency(elf_values)
+        # # Get site and neighbor strings
+        # # site_string = self.grid.structure[site_index].species_string
+        # # Get site and neighbor equivalent atoms
         site_equiv = equivalent_atoms[site_index]
 
         max_bond_dist = (
@@ -595,8 +601,9 @@ class PartitioningToolkit:
         # If the bond is larger than the some of both atomic radii it is likely
         # that there is an electride between the atom and its closest neighbor.
         # We want to get the distance to the minimum closer to the atom than
-        # its neighbor.
-        if bond_dist > max_bond_dist:
+        # its neighbor. The same is true if the atom has covalent behavior!!!?
+        # if bond_dist > max_bond_dist:
+        if covalency or bond_dist > max_bond_dist:
             # We get all of the minima along  the line. We then find the distance
             # of each minima from the middle of the line, remove any that are
             # closer to the neighboring atom, and find the one closest to the
@@ -936,7 +943,8 @@ class PartitioningToolkit:
         # get the ELF values at the minimum and maximum. This is stored in the
         # second index of the extrema list
         min_elf = global_min[1]
-        max_elf = global_max[1]
+        # max_elf = global_max[1]
+        max_elf = max(values)
 
         # If the maximum is closer to the center of the line than the minimum, then
         # we consider this bond to have metallic or covalent behavior and return True
@@ -1061,25 +1069,20 @@ class PartitioningToolkit:
 
                 if site_species == neigh_species:
                     continue
-
-                # neigh_site_index = neigh["site_index"]
-                # if site_index == neigh_site_index:
-                #     continue
+                # He atoms represent electride sites. These "bonds" can be
+                # very shifted if the electride site is small
+                if site_species == "He" or neigh_species == "He":
+                    continue
 
                 neigh_voxel_coord = grid.get_voxel_coords_from_neigh_CrystalNN(neigh)
                 values = self.get_partitioning_line_from_voxels(
                     site_voxel_coord, neigh_voxel_coord
                 )[1]
-                # smooth line
-                # smoothed_values = savgol_filter(values,20,3)
 
                 # Now we check for any strong covalency in the bond as in the current version
                 # of BadELF, this will break the partitioning scheme
                 if self.check_bond_for_covalency(values) is True:
                     # report which atoms the bond was found between
-
-                    # import matplotlib.pyplot as plt
-                    # plt.plot(smoothed_values)
                     warnings.warn(
                         f"""
                         A maximum in the ELF line between atoms was found closer to the
