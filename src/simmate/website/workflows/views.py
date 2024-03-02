@@ -73,7 +73,10 @@ def workflows_all(request):
     #     --> use the __doc__ as the text.
 
     # now let's put the data and template together to send the user
-    context = {"workflows_metadata": TYPE_DESCRIPTIONS}
+    context = {
+        "workflows_metadata": TYPE_DESCRIPTIONS,
+        "breadcrumb_active": "Workflows",
+    }
     template = "workflows/all.html"
     return render(request, template, context)
 
@@ -97,6 +100,9 @@ def workflows_by_type(request, workflow_type):
         "workflow_type": workflow_type,
         "workflow_type_description": TYPE_DESCRIPTIONS.get(workflow_type, ""),
         "workflow_dict": workflow_dict,
+        "page_title": "Workflow Type",
+        "breadcrumbs": [("workflows", "Workflows")],
+        "breadcrumb_active": workflow_type,
     }
     template = "workflows/by_type.html"
     return render(request, template, context)
