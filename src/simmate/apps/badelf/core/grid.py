@@ -90,7 +90,20 @@ class Grid:
         Array of fractional coordinates for each atom.
         """
         return self.structure.frac_coords
-
+    
+    @property
+    def all_voxel_frac_coords(self):
+        """
+        The fractional coordinates for all of the voxels in the grid
+        """
+        a, b, c = self.grid_shape
+        voxel_indices = np.indices(self.grid_shape).reshape(3, -1).T
+        frac_coords = voxel_indices.copy().astype(float)
+        frac_coords[:, 0] /= a
+        frac_coords[:, 1] /= b
+        frac_coords[:, 2] /= c
+        return frac_coords
+    
     @property
     def voxel_volume(self):
         """

@@ -109,14 +109,7 @@ class VoxelAssignmentToolkit:
         """
         The fractional coordinates for all of the voxels in the charge grid
         """
-        charge_grid = self.charge_grid.copy()
-        a, b, c = charge_grid.grid_shape
-        voxel_indices = np.indices(charge_grid.grid_shape).reshape(3, -1).T
-        frac_coords = voxel_indices.copy().astype(float)
-        frac_coords[:, 0] /= a
-        frac_coords[:, 1] /= b
-        frac_coords[:, 2] /= c
-        return frac_coords
+        return self.charge_grid.all_voxel_frac_coords
 
     @cached_property
     def all_partitioning_plane_points_and_vectors(self):
