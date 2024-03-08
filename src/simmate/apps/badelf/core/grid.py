@@ -14,6 +14,7 @@ from pymatgen.io.vasp import Poscar
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.io.vasp import VolumetricData
 from pyrho.pgrid import PGrid
+from pybader.interface import Bader
 
 from simmate.toolkit import Structure
 
@@ -246,7 +247,21 @@ class Grid(VolumetricData):
         poscar, data, _ = cls.parse_file(grid_file)
 
         return Grid(poscar.structure, data)
+    
 
+    def to_pybader(self):
+        """
+        Returns a Bader object from pybader.
+        """
+        atoms = self.structure.cart_coords
+        lattice = self.matrix
+        density = {"charge":self.total}
+        file_info = {}
+        bader = Bader(density, lattice, atoms, file_info)
+        bader.load_config("speed")
+        return bader
+        
+    
     def regrid(
         self,
         desired_resolution: int = 130000,
