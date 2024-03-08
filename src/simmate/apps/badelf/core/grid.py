@@ -24,14 +24,15 @@ class Grid(VolumetricData):
     This class is a wraparound for Pymatgen's VolumetricData class with additional
     properties and methods useful to the badelf algorithm
     """
+
     @property
     def total(self):
         return self.data["total"]
-    
+
     @property
     def diff(self):
         return self.data["diff"]
-    
+
     @property
     def shape(self):
         return np.array(self.total.shape)
@@ -70,7 +71,7 @@ class Grid(VolumetricData):
         Array of fractional coordinates for each atom.
         """
         return self.structure.frac_coords
-    
+
     @property
     def all_voxel_frac_coords(self):
         """
@@ -83,15 +84,15 @@ class Grid(VolumetricData):
         frac_coords[:, 1] /= b
         frac_coords[:, 2] /= c
         return frac_coords
-    
+
     @property
     def voxel_dist_to_origin(self):
         frac_coords = self.all_voxel_frac_coords
         cart_coords = self.get_cart_coords_from_frac_full_array(frac_coords)
-        voxel_distances = np.linalg.norm(cart_coords,axis=1).round(6)
+        voxel_distances = np.linalg.norm(cart_coords, axis=1).round(6)
         voxel_distances = voxel_distances.reshape(self.shape)
         return voxel_distances
-    
+
     @property
     def voxel_volume(self):
         """
@@ -138,7 +139,17 @@ class Grid(VolumetricData):
         # Shift each point here so that the origin is the center of the
         # voxel.
         voxel_vertices = []
-        for vector in [center, end, vox_a, vox_b, vox_c, vox_a1, vox_b1, vox_c1, end]:
+        for vector in [
+            center,
+            end,
+            vox_a,
+            vox_b,
+            vox_c,
+            vox_a1,
+            vox_b1,
+            vox_c1,
+            end,
+        ]:
             new_vector = [(x - x1) for x, x1 in zip(vector, center)]
             voxel_vertices.append(new_vector)
 
@@ -146,7 +157,9 @@ class Grid(VolumetricData):
         # to one of its edges. This should be at one of the vertices.
         # We can't say for sure which one is the largest distance so we find all
         # of their distances and return the maximum
-        max_distance = max([np.linalg.norm(vector) for vector in voxel_vertices])
+        max_distance = max(
+            [np.linalg.norm(vector) for vector in voxel_vertices]
+        )
         return max_distance
 
     @property
@@ -162,7 +175,9 @@ class Grid(VolumetricData):
         a, b, c = self.shape
         permutations = [
             (t, u, v)
-            for t, u, v in itertools.product([-a, 0, a], [-b, 0, b], [-c, 0, c])
+            for t, u, v in itertools.product(
+                [-a, 0, a], [-b, 0, b], [-c, 0, c]
+            )
         ]
         # sort permutations. There may be a better way of sorting them. I
         # noticed that generally the correct site was found most commonly
@@ -191,7 +206,43 @@ class Grid(VolumetricData):
         return SpacegroupAnalyzer(self.structure).get_symmetry_dataset()[
             "equivalent_atoms"
         ]
-
+    
+    def get_2x_supercell(self, data: ArrayLike):
+        """
+        Duplicates data with the same dimensions as the grid to make a 2x2x2
+        supercell
+        
+        Args:
+            data (ArrayLike):
+                The data to duplicate. Must have the same dimensions as the
+                grid.
+        
+        Returns:
+            The duplicated data
+        """
+        raveled_data = data.ravel()
+        voxel_indices = np.indices(data.shape).reshape(3, -1).T
+        transformations = [
+            [0,0,0], #-
+            [1,0,0], #x
+            [0,1,0], #y
+            [0,0,1], #z
+            [1,1,0], #xy
+            [1,0,1], #xz
+            [0,1,1], #yz
+            [1,1,1], #xyz
+            ]
+        transformations = np.array(transformations)
+        transformations = self.get_voxel_coords_from_frac(transformations.T).T
+        supercell = np.zeros(np.array(data.shape)*2)
+        for transformation in transformations:
+            transformed_indices = (voxel_indices + transformation).astype(int)
+            x = transformed_indices[:,0]
+            y = transformed_indices[:,1]
+            z = transformed_indices[:,2]
+            supercell[x,y,z] = raveled_data
+        return supercell
+    
     def get_padded_grid_axes(self, padding: int = 0):
         """
         Gets the the possible indices for each dimension of a padded grid.
@@ -208,13 +259,19 @@ class Grid(VolumetricData):
         """
         grid = self.total
         a = np.linspace(
-            0, grid.shape[0] + (padding - 1) * 2 + 1, grid.shape[0] + padding * 2
+            0,
+            grid.shape[0] + (padding - 1) * 2 + 1,
+            grid.shape[0] + padding * 2,
         )
         b = np.linspace(
-            0, grid.shape[1] + (padding - 1) * 2 + 1, grid.shape[1] + padding * 2
+            0,
+            grid.shape[1] + (padding - 1) * 2 + 1,
+            grid.shape[1] + padding * 2,
         )
         c = np.linspace(
-            0, grid.shape[2] + (padding - 1) * 2 + 1, grid.shape[2] + padding * 2
+            0,
+            grid.shape[2] + (padding - 1) * 2 + 1,
+            grid.shape[2] + padding * 2,
         )
         return a, b, c
 
@@ -229,7 +286,7 @@ class Grid(VolumetricData):
             self.structure,
             self.data,
         )
-    
+
     @classmethod
     def from_file(cls, grid_file: str | Path):
         """Create a grid instance using a CHGCAR or ELFCAR file
@@ -247,7 +304,6 @@ class Grid(VolumetricData):
         poscar, data, _ = cls.parse_file(grid_file)
 
         return Grid(poscar.structure, data)
-    
 
     def to_pybader(self):
         """
@@ -255,13 +311,35 @@ class Grid(VolumetricData):
         """
         atoms = self.structure.cart_coords
         lattice = self.matrix
-        density = {"charge":self.total}
-        file_info = {}
+        density = {"charge": self.total}
+        file_info = {
+            "voxel_offset":np.array([0,0,0])
+            }
         bader = Bader(density, lattice, atoms, file_info)
-        bader.load_config("speed")
         return bader
-        
-    
+
+    def run_pybader(self, threads: int = 1):
+        """
+        Convenience class for running zero-flux voxel assignment using pybader. 
+        Returns a pybader Bader class object with the assigned voxels
+
+        Args:
+            cores (int):
+                The number of threads to use when running the Bader algorithm
+        """
+        logging.info("Running Bader")
+        bader = self.to_pybader()
+        bader.load_config("speed")
+        bader.threads = threads
+        bader.spin_flag = True  # loading speed config resets all config vars
+        bader.volumes_init()
+        bader.bader_calc()
+        bader.bader_to_atom_distance()
+        bader.refine_volumes(bader.atoms_volumes)
+        bader.threads = 1
+        bader.min_surface_distance()
+        return bader
+
     def regrid(
         self,
         desired_resolution: int = 130000,
@@ -319,12 +397,11 @@ class Grid(VolumetricData):
                 [[1, 0, 0], [0, 1, 0], [0, 0, 1]], new_shape
             )
             new_diff_data = new_diff_pgrid.grid_data
-        
-        data = {"total":new_total_data,"diff":new_diff_data}
-        
+
+        data = {"total": new_total_data, "diff": new_diff_data}
+
         return Grid(self.structure, data)
-        
-    
+
     ###########################################################################
     # The following is a series of methods that are useful for converting between
     # voxel coordinates, fractional coordinates, and cartesian coordinates.
@@ -345,7 +422,9 @@ class Grid(VolumetricData):
 
         """
 
-        voxel_coords = [a * b for a, b in zip(self.shape, self.frac_coords[site])]
+        voxel_coords = [
+            a * b for a, b in zip(self.shape, self.frac_coords[site])
+        ]
         # voxel positions go from 1 to (grid_size + 0.9999)
         return np.array(voxel_coords)
 

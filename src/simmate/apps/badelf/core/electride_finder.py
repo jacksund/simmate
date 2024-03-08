@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
 import logging
-import warnings
 from functools import cached_property
 from pathlib import Path
+from networkx.utils import UnionFind
+from tqdm import tqdm
 
 import numpy as np
-from pymatgen.analysis.local_env import CrystalNN
-from pymatgen.core.periodic_table import _pt_data as pt_data
+from scipy.ndimage import label
+
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 from simmate.apps.badelf.core.grid import Grid
 from simmate.apps.badelf.core.partitioning import PartitioningToolkit
-from simmate.apps.bader.outputs import ACF
-from simmate.workflows.utilities import get_workflow
-
 
 class ElectrideFinder:
     """
@@ -102,113 +100,11 @@ class ElectrideFinder:
         # maxima_cart_coords = grid.get_cart_coords_from_vox_full_array(maxima_vox_coords)
         return new_maxima_frac_coords  # , maxima_values
 
-    @staticmethod
-    def to_number_from_roman_numeral(roman_num: str):
-        """
-        Converts from a roman numeral to an integer
-
-        Args:
-            roman_num (str):
-                The roman numeral to convert from
-
-        Returns:
-            The integer representation of the roman numeral
-        """
-        lookup = {
-            "X": 10,
-            "V": 5,
-            "I": 1,
-        }
-        total = 0
-        i = 0
-        while i < len(roman_num):
-            # If this is the subtractive case.
-            if (
-                i + 1 < len(roman_num)
-                and lookup[roman_num[i]] < lookup[roman_num[i + 1]]
-            ):
-                total += lookup[roman_num[i + 1]] - lookup[roman_num[i]]
-                i += 2
-            # Else this is NOT the subtractive case.
-            else:
-                total += lookup[roman_num[i]]
-                i += 1
-
-        return total
-
-    @cached_property
-    def shannon_radii_estimate(self):
-        """
-        Gets the shannon crystal radii for each atom in the structure. The
-        oxidation states are estimated using traditional bader.
-
-        Returns:
-            A dictionary connecting atomic sites to oxidation states
-        """
-        directory = self.directory
-        structure = self.grid.structure
-        badelf_workflow = get_workflow("population-analysis.bader.bader-dev")
-        badelf_workflow.run(
-            directory=directory,
-        )
-
-        # Get oxidation states for each atom as a list
-        results_dataframe, extra_data = ACF(directory)
-        oxidation_states = results_dataframe.oxidation_state.values
-        oxidation_states = np.round(oxidation_states)
-        # add method to get coordination environments. This already exists in
-        # badelftoolkit but I don't want to repeat it for no reason.
-        cnn = CrystalNN()
-        shannon_radii = []
-        for site_index, site in enumerate(structure):
-            # We need the shannon radii data for the atom we're investigating.
-            # We get this from pymatgen's pt_data dictionary
-            site_species = structure[site_index].species_string
-            species_dict = pt_data[site_species]["Shannon radii"]
-
-            # Now we need the oxidation state and coordination environment of
-            # our atom of interest in order to get the closest matching shannon
-            # radius. For electrides we'll often get estimated oxidation states
-            # that are far from accurate, so we get the closest available radius
-            oxidation_state = oxidation_states[site_index]
-            with warnings.catch_warnings():
-                warnings.filterwarnings(
-                    "ignore", category=UserWarning, module="pymatgen"
-                )
-                coord_env = cnn.get_cn(structure, site_index)
-
-            available_ox_state = species_dict.keys()
-            # We find the closest oxidation state to the one we got from bader.
-            # The min function here is taking in the available oxidation values.
-            # It then looks at every available oxidation state (x) and calculates
-            # the difference between it and the bader ox value and stores it as
-            # a key. It then returns the available oxidation state with the lowest
-            # key value.
-            closest_ox_state = min(
-                available_ox_state, key=lambda x: abs(int(x) - oxidation_state)
-            )
-
-            available_coord_envs = species_dict[closest_ox_state].keys()
-            # We similarly find the closest coordination env. These are stored
-            # as roman numerals in the pymatgen pt_data so they must be converted
-            # to integers
-            closest_coord_env = min(
-                available_coord_envs,
-                key=lambda x: abs(self.to_number_from_roman_numeral(x) - coord_env),
-            )
-
-            # We now get the closest shannon prewitt crystal radius
-            shannon_radius = species_dict[closest_ox_state][closest_coord_env][""][
-                "crystal_radius"
-            ]
-            shannon_radii.append(shannon_radius)
-        shannon_radii = np.array(shannon_radii)
-        return shannon_radii
-
     @cached_property
     def elf_radii(self):
         """
-        Gets the elf radius of each atom in the structure
+        Gets the elf radius of each atom in the structure. This is no longer
+        used in this algorithm, but may be a useful method in the future.
 
         Returns:
             A dictionary connecting atomic sites to their elf ionic radii
@@ -245,40 +141,9 @@ class ElectrideFinder:
 
         return all_atom_radii
 
-    def get_ionic_radii(
-        self,
-        method="elf",
-    ):
-        """
-        Gets the radius for each atom in the structure.
-
-        Args:
-            method (str):
-                The method used to find the radii. Options are "elf" or "shannon".
-                elf will use the provided grid to find the radius of each atom and
-                shannon will use bader oxidation states and the closest available
-                tabulated shannon crystal radius.
-
-        Returns:
-            A dictionary of radii for each atom in the structure.
-        """
-        if method == "elf":
-            atom_radii = self.elf_radii
-        elif method == "shannon":
-            atom_radii = self.shannon_radii_estimate
-        else:
-            raise ValueError(
-                """Selected method for finding ionic radii does not exist. Available
-                methods are "elf" and "shannon"
-                """
-            )
-        return atom_radii
-
     def get_electride_structure(
         self,
         electride_finder_cutoff: float = 0.5,
-        min_electride_radius: float = 0.6,
-        atom_radius_method: str = "elf",
         remove_old_electrides: bool = False,
     ):
         """
@@ -288,17 +153,6 @@ class ElectrideFinder:
             electride_finder_cutoff (float):
                 The minimum elf value at the site to be considered a possible
                 electride. The default is 0.5.
-            min_electride_radius (float):
-                The minimum elf radius around the maximum for it to be considered
-                an electride. The default is 0.6 which is based off of a small
-                set of tests.
-                An good alternative is 1.19 which is the average radius of fluoride
-                in a 6 coordination environment.
-            atom_radius_method (str):
-                The method used to find the radii. Options are "elf" or "shannon".
-                elf will use the provided grid to find the radius of each atom and
-                shannon will use bader oxidation states and the closest available
-                tabulated shannon crystal radius.
             remove_old_electrides (bool):
                 Whether or not to remove any other electrides already placed in
                 the system. It is generally recommended that structures without
@@ -308,83 +162,264 @@ class ElectrideFinder:
             A structure object with the found electride sites labeled with "He"
             dummy atoms.
         """
-        logging.info("Finding electride sites")
-        # Get the coordinates and values of each local maximum in the grid
-        grid = self.grid.copy()
-        (local_maxima_frac_coords) = self.find_local_maxima(  # , local_maxima_values
-            threshold=electride_finder_cutoff
-        )
-        local_maxima_vox_coords = grid.get_vox_coords_from_frac_full_array(
-            local_maxima_frac_coords
-        )
-        # If there are He atoms that have already been placed in the structure
-        # that the user wants to remove, remove them now.
-        structure = grid.structure.copy()
-        if "He" in structure.symbol_set and remove_old_electrides:
-            old_electride_sites = structure.indices_from_symbol("He")
-            structure.remove_sites(old_electride_sites)
-        elif "He" in structure.symbol_set and not remove_old_electrides:
-            logging.warning(
-                """
-                  Dummy atoms were found already in the structure. No new
-                  electride sites will be added. To have the algorithm search
-                  for electride sites, remove all He dummy atoms in the structure.
-                  """
-            )
-            return structure
+        ###############################################################################
+        # This part of the code runs zero-flux partitioning on the ELF and records the
+        # basins
+        ###############################################################################
+        # Get the basins and assigned voxels
+        elf_grid = self.grid
+        local_maxima = self.local_maxima
+        bader = elf_grid.run_pybader(8)
 
-        # Create a list to store the electride coords.
-        electride_coords = []
-        # get the estimated shannon radii of each of the sites in the structure.
-        # These will be used to estimate electride radii
-        radii = self.get_ionic_radii(atom_radius_method)
-        for i, maximum_vox_coords in enumerate(local_maxima_vox_coords):
-            maximum_frac_coords = local_maxima_frac_coords[i]
-            # maximum_cart_coords = local_maxima_cart_coords[i]
-            # Create a dummy structure. Add a dummy at the local maximum that
-            # was found
-            electride_structure = structure.copy()
+        # Get the voxel indices for each found maxima
+        basin_maxima_vox_coords = elf_grid.get_vox_coords_from_frac_full_array(
+            bader.bader_maxima_fractional).astype(int)
+        # Get the ELF values for the maxima
+        basin_maxima = elf_grid.total[
+            basin_maxima_vox_coords[:,0],basin_maxima_vox_coords[:,1],basin_maxima_vox_coords[:,2]]
+        # Get the closest atom to each maxima
+        basin_closest_atom = bader.bader_atoms.copy()
+        # Get the voxel basin assignments
+        basin_labeled_voxels = bader.bader_volumes.copy()
+        # Get the structure
+        structure = elf_grid.structure
+        # Get the data array
+        elf_data = elf_grid.total
+        ###############################################################################
+        # This part of the code creates a supercell of the data so that it is easy to
+        # determine if different basins are connected in the next step 
+        ###############################################################################
+        logging.info("Making supercells")
+        supercell_elf_data = elf_grid.get_2x_supercell(elf_data)
+        supercell_label_data = elf_grid.get_2x_supercell(basin_labeled_voxels).astype(int)
 
-            electride_structure.append("He", maximum_frac_coords)
-            # get all neighbors within 15 A
-            (
-                site_indices,
-                neigh_indices,
-                neigh_images,
-                dists,
-            ) = electride_structure.get_neighbor_list(15)
-            # get indices where the electride neighbors are stored
-            electride_index = len(electride_structure) - 1
-            electride_site_neighs = np.where(site_indices == electride_index)[0]
-            # get the subset of indices where the neighbor is not also the electride
-            electride_site_neighs = electride_site_neighs[
-                neigh_indices[electride_site_neighs] != electride_index
-            ]
-            # get the distances to these neighbors
-            neigh_dists = dists[electride_site_neighs]
-            # get the structure indices of these neighbors
-            neigh_indices1 = neigh_indices[electride_site_neighs]
-            # get the radii for each of these neigbhors
-            neigh_radii = radii[neigh_indices1]
-            # calculate the maximum radius of the electride relative to each of these
-            # neighbors
-            max_electride_radii = neigh_dists - neigh_radii
-            # check if minimum distance is too close to an atom:
-            if min(max_electride_radii) < min_electride_radius:
+        ###############################################################################
+        # This part of the code isolates the basins that would be assigned to each atom.
+        # It checks what the ELF value at each maxima is. Then, starting from the highest
+        # value it checks if these maxima's isosurfaces would connect with a very slight
+        # decrease in the ELF value.
+        ###############################################################################
+        logging.info("connecting voxelated basins")
+        # Create a UnionFind class to keep track of each of our connections
+        connections = UnionFind()
+        # Get each unique maximum ELF value
+        unique_maxima = np.flip(np.unique(basin_maxima))
+        # We want to reduce the total number of maxima we need to scan through.
+        # To do this, we look at which maxima are found above a value slightly
+        # below the highest ELF. If any maxima other than those at the highest
+        # ELF are found we expand out search slightly lower and repeat until
+        # no new peaks are found. Then we continue to the next highest ELF value
+        # that hasn't been assigned.
+        maxima_to_search = []
+        for max_elf in unique_maxima:
+            all_maxima = False
+            # Get the number of maxima at this ELF value
+            num_of_maxima_values = len(np.where(basin_maxima==max_elf)[0])
+            while not all_maxima:
+                # Get the number of maxima slightly below this value then check
+                # if it is the same as our starting number of maxima
+                contained_maxima_values = basin_maxima[basin_maxima>=max_elf-0.05]
+                if len(contained_maxima_values) == num_of_maxima_values:
+                    all_maxima = True
+                else:
+                    # If the value has increased, we update our max_elf and the
+                    # number of maxima
+                    max_elf = contained_maxima_values.min()
+                    num_of_maxima_values = len(contained_maxima_values)
+            # Add the final maxima found to the maxima to search
+            maxima_to_search.append(max_elf)
+        maxima_to_search = np.flip(np.unique(maxima_to_search))
+        # Now we search through the reduced list of maxima we found above to
+        # see which basins connect slightly below their maximum ELF value
+        assigned_labels = []
+        for max_elf in tqdm(maxima_to_search, total=len(maxima_to_search)):
+            # get labels with max values above max_elf-0.05.
+            available_labels = np.where(basin_maxima>=max_elf-0.05)[0]
+            available_labels = available_labels[~np.isin(available_labels,assigned_labels)]
+            if len(available_labels) == 0:
                 continue
-            # If the loop is still going, we consider this site an electride. We
-            # add it to the list of electride sites.
-            electride_coords.append(maximum_frac_coords)
+            # We add the labels at this elf maxima to our assigned labels so that we don't
+            # double assign later.
+            assigned_labels.extend(np.where(basin_maxima>=max_elf)[0])
+            # Set conditions for what ELF to search for connections. The first condition
+            # removes data that has elf valuse below our cutoff of max_elf-0.05. The
+            # second condition removes data from basins we have already searched
+            # get ELF grid with only data at max_elf-0.01 and above.
+            condition1 = supercell_elf_data >= max_elf-0.05
+            condition2 = np.isin(supercell_label_data, available_labels)
+            # reduce the elf data to only data matching our conditions, then get a new
+            # array that is labeled with the number of features
+            reduced_elf_data = np.where(condition1 & condition2, supercell_elf_data, 0)
+            featured_data, num_features = label(reduced_elf_data)
+            # Now we look at each feature
+            for feature in range(num_features):
+                feature += 1
+                mask = (featured_data == feature)
+                connected_labels = np.unique(supercell_label_data[mask])
+                for basin_label in connected_labels[1:]:
+                    connections.union(connected_labels[0], basin_label)
 
-        # Add our potential electride sites to our structure
+        ###############################################################################
+        # We now have each of the basins connected after accounting for voxelation. This
+        # part of the algorithm combines the connected basins and relabels them
+        ###############################################################################
+        # Get the sets of basins that are connected to each other
+        connection_sets = list(connections.to_sets())
+        for label_set in connection_sets:
+            label_set = np.array(list(label_set))
+            # replace all of these labels with the lowest one
+            basin_labeled_voxels = np.where(np.isin(
+                basin_labeled_voxels,label_set),label_set[0],basin_labeled_voxels)
+        # Now we reduce the labels so that they start at 0 and increase by 1 each time,
+        # i.e. 0,1,2,3,etc.
+        for i, j in enumerate(np.unique(basin_labeled_voxels)):
+            basin_labeled_voxels = np.where(basin_labeled_voxels==j,i,basin_labeled_voxels)
+
+        ###############################################################################
+        # This section of the algorithm focuses on assigning atomic basins to atoms
+        ###############################################################################
+        logging.info("Finding all atomic basins")
+        atom_labels = {}
+        for i, site in enumerate(structure):
+            atom_labels[i] = []
+        # First we assign the basins that contain atoms directly
+        basin_labeled_voxels += len(structure)
+        for i, site in enumerate(structure):
+            # Get the voxel coordinate for this site, then get the basin it
+            # belongs to
+            voxel_coord = elf_grid.get_voxel_coords_from_frac(site.frac_coords).astype(int)
+            basin_label = basin_labeled_voxels[voxel_coord[0],voxel_coord[1],voxel_coord[2]]
+            # Assign this basin to the site
+            basin_labeled_voxels = np.where(
+                basin_labeled_voxels==basin_label,i,basin_labeled_voxels)
+        # Next we assign the basins where the maximum ELF value is less than
+        # the electride finder cutoff
+        basin_maxima_labels = basin_labeled_voxels[basin_maxima_vox_coords[:,0],basin_maxima_vox_coords[:,1],basin_maxima_vox_coords[:,2]]
+        for basin_label in np.unique(basin_labeled_voxels)[len(structure):]:
+            # Get the ELF value at the maximum in this basin
+            basin_elf_maxima = basin_maxima[np.where(basin_maxima_labels==basin_label)[0]]
+            # If the maximum is less than the cutoff (usually 0.5) assign it
+            # to the closest atom
+            if basin_elf_maxima.max() < electride_finder_cutoff:
+                basin_atom = basin_closest_atom[np.where(basin_maxima_labels==basin_label)[0]][0]
+                basin_labeled_voxels = np.where(basin_labeled_voxels==basin_label,basin_atom,basin_labeled_voxels)
+        # Next we check the basins to see if they completely surround an atom. This will
+        # only catch basins behaving like orbitals around an atom. Electrides and covalent
+        # bonds have distinct maxima that don't connect all the way around an atom, even
+        # if the sum of the maxima would
+        supercell_label_data = elf_grid.get_2x_supercell(basin_labeled_voxels)
+        for basin_label in np.unique(basin_labeled_voxels)[len(structure):]:
+            # create a super cell that is false at the basin and true elsewhere
+            label_supercell = (supercell_label_data != basin_label)
+            # find the features. If the basin surrounds an atom there should be a unique
+            # feature for that atom in each quadrant of the super cell
+            feature_supercell, _ = label(label_supercell)
+            # Get the transformations to transform the voxel representing an atom to
+            # each quadrant of the supercell
+            transformations = np.array([
+                [0,0,0], #-
+                [1,0,0], #x
+                [0,1,0], #y
+                [0,0,1], #z
+                [1,1,0], #xy
+                [1,0,1], #xz
+                [0,1,1], #yz
+                [1,1,1], #xyz
+                ])
+            for i, site in enumerate(structure):
+                # Get the voxel coords of each atom in their equivalent spots in each
+                # quadrant of the supercell
+                frac_coords = site.frac_coords
+                transformed_coords = transformations + frac_coords
+                voxel_coords = elf_grid.get_vox_coords_from_frac_full_array(
+                    transformed_coords).astype(int)
+                # Get the feature label at each transformation. If the atom is not surrounded
+                # by this basin, at least some of these feature labels will be the same
+                features = feature_supercell[voxel_coords[:,0],voxel_coords[:,1],voxel_coords[:,2]]
+                # print(features)
+                if len(np.unique(features)) == 8:
+                    # The atom is completely surrounded by this basin and the basin belongs
+                    # to this atom
+                    basin_labeled_voxels = np.where(basin_labeled_voxels==basin_label, i, basin_labeled_voxels)
+                    break
+
+        ###############################################################################
+        # This section focuses on assigning remaining basins to electrides or covalent
+        # bonds
+        ###############################################################################
+        # Create an empty structure to add potential electrides to
+        logging.info("Assigning remaining basins to electrides or covalent bonds")
+        # Create an empty structure with all of the proper lattice information
+        maxima_structure = structure.copy()
+        maxima_structure.remove_species(maxima_structure.symbol_set)
+        final_maxima_structure = maxima_structure.copy()
+        # Get the labels for each of the maxima found using pybader
+        basin_maxima_labels = basin_labeled_voxels[
+            basin_maxima_vox_coords[:,0],basin_maxima_vox_coords[:,1],basin_maxima_vox_coords[:,2]]
+        # Get the fractional coordinates of each maximum
+        basin_maxima_frac_coords = bader.bader_maxima_fractional
+        # Find which maximum coords have not been assigned yet and add them to
+        # our empty structure
+        basin_maxima_frac_coords = basin_maxima_frac_coords[
+            np.where(basin_maxima_labels>=len(structure))]
+        for frac_coord in basin_maxima_frac_coords:
+            maxima_structure.append("He", frac_coord)
+        # combine any maxima that may be very close to each other due to voxelation
+        if len(maxima_structure) > 1:
+            tol = elf_grid.max_voxel_dist * 2
+            maxima_structure.merge_sites(tol=tol, mode="average")
+        # reduce only to maxima found using peak finding alg
+        # !!! I'm not entirely sure why this needs to happen. pybader seems to find more
+        # electrides than the Henkelman group or my own algorithm.
+        for frac_coord in maxima_structure.frac_coords:
+            if np.any(np.all(frac_coord == local_maxima,axis=1)):
+                final_maxima_structure.append("He",frac_coord)
+        # Get the final cartesian coordinates for the reduced maxima
+        basin_maxima_cart_coords = final_maxima_structure.cart_coords
+        # Now we check if the maximum is an electride site or covalent bond
+        # For now the method I'm using for if a maxima is an electride or a covalent bond
+        # is simply if the maximum is along a bond between an atom and one of its closest
+        # neighbors. This could be easily made a bit more involved, though it would probably
+        # require running the bader algorithm again
+        # First, we get the coordinates of each site and its closest neighbors
+        all_neighbors = PartitioningToolkit(self.grid).all_site_neighbor_pairs.copy()
+        site_coords = []
+        neigh_coords = []
+        site_neigh_dists = []
+        for i, site in enumerate(structure):
+            site_df = all_neighbors.loc[all_neighbors["site_index"]==i].copy()
+            min_dist = min(site_df["dist"].to_list())
+            site_df = site_df.loc[site_df["dist"]==min_dist]
+            site_coords.append(np.array(site_df["site_coords"].to_list()))
+            neigh_coords.append(np.array(site_df["neigh_coords"].to_list()))
+            site_neigh_dists.append(np.array(site_df["dist"].to_list()))
+        # convert to arrays
+        site_coords = np.concatenate(site_coords)
+        neigh_coords = np.concatenate(neigh_coords)
+        site_neigh_dists = np.concatenate(site_neigh_dists)
+        # For each maximum we now check if it is along one of the site neighbor bonds.
+        # We do this by getting the distance from the maximum to the site and
+        # to the neighbor and summing the distances. If the maximum is on the line
+        # this will be the same as the distance between the site and its neighbor
         electride_structure = structure.copy()
-        for coord in electride_coords:
-            electride_structure.append("He", coord)
-
-        # report whether any electrides were found
-        electride_sites = electride_structure.indices_from_symbol("He")
-        if len(electride_sites) > 0:
-            logging.info(f"{len(electride_sites)} electride sites found")
-        else:
-            logging.info("No electride sites found")
+        for maximum_coord in basin_maxima_cart_coords:
+            # calculate the distance from the maximum to the site and to the
+            # neighbor
+            max_to_site_dist = np.linalg.norm(site_coords-maximum_coord,axis=1)
+            max_to_neigh_dist = np.linalg.norm(neigh_coords-maximum_coord,axis=1)
+            # calculate the total distance
+            total_dist = np.round(max_to_site_dist + max_to_neigh_dist,5)
+            # Check if the distances total from the maximum to the site and neighbor 
+            # are the same as the total distance from the site to the neighbor (within
+            # a tolerance of 0.1A)
+            condition_array1 = (site_neigh_dists-0.1 < total_dist)
+            condition_array2 = (total_dist < site_neigh_dists+0.1)
+            # If there is a covalent bond, throw an error.
+            if np.any(condition_array1 & condition_array2):
+                raise Exception(
+                    "Covalency found in structure"
+                    )
+            else:
+                electride_structure.append("He", maximum_coord, coords_are_cartesian=True)
+        # Return the electride structure
         return electride_structure
