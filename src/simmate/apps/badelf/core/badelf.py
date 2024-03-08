@@ -247,7 +247,7 @@ class BadElfToolkit:
         all_site_assignments = self.single_site_voxel_assignments.copy() - 1
         # Assign our randomly generated sites then return the array as a 3D grid
         all_site_assignments[split_voxel_indices] = np.array(random_voxel_assignments)
-        return all_site_assignments.reshape(self.charge_grid.grid_shape)
+        return all_site_assignments.reshape(self.charge_grid.shape)
 
     @cached_property
     def voxel_assignments(self):
@@ -335,7 +335,7 @@ class BadElfToolkit:
         electride_elf_grid = self.partitioning_grid.copy()
         # check that elf grid is same size as charge grid and if not, regrid
         if electride_charge_grid.voxel_num != electride_elf_grid.voxel_num:
-            electride_elf_grid.regrid(new_grid_shape=electride_charge_grid.grid_shape)
+            electride_elf_grid = electride_elf_grid.regrid(new_shape=electride_charge_grid.shape)
         electride_elf_grid.structure = self.electride_structure
         electride_elf_grid.write_file(directory / partitioning_file)
 
@@ -401,7 +401,7 @@ class BadElfToolkit:
                 The ELF Grid object with only values associated with electrides.
         """
         data = grid.total
-        voxel_indices = np.indices(grid.grid_shape).reshape(3, -1).T
+        voxel_indices = np.indices(grid.shape).reshape(3, -1).T
         # Remove data below our cutoff
         thresholded_data = np.where(data < cutoff, 0, 1)
         raveled_data = thresholded_data.ravel()
@@ -542,13 +542,13 @@ class BadElfToolkit:
             )
             self._fix_BvAt("BvAt_summed.dat")
             elf_grid = Grid.from_file(directory / "BvAt_summed.dat")
-            elf_grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
+            elf_grid = elf_grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
             pass
         elif self.algorithm in ["badelf", "voronelf"]:
             # read in ELF data and regrid so that it is the same size as the
             # charge grid
             elf_grid = self.partitioning_grid.copy()
-            elf_grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
+            elf_grid = elf_grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
             voxel_assignment_array = self.voxel_assignments_array
             # Get array where values are ELF values when voxels belong to electrides
             # and are 0 otherwise
@@ -636,7 +636,7 @@ class BadElfToolkit:
         electride_num = len(self.electride_indices)
         electride_structure = self.electride_structure
         electride_indices = self.electride_indices
-        a, b, c = self.charge_grid.grid_shape
+        a, b, c = self.charge_grid.shape
         elements = []
         for site in electride_structure:
             if site.species_string == "He":
@@ -909,7 +909,7 @@ class BadElfToolkit:
         voxel_assignment_array = self.voxel_assignments_array
         if file_type == "ELFCAR":
             grid = self.partitioning_grid.copy()
-            grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
+            grid = grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
         elif file_type == "CHGCAR":
             grid = self.charge_grid.copy()
         else:

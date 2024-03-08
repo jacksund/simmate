@@ -92,7 +92,7 @@ class PartitioningToolkit:
         # with a cruder interpolation here and then the area close to the minimum
         # is examened more closely with a more rigorous interpolation in
         # get_line_frac_min
-        a, b, c = self.grid.get_grid_axes(1)
+        a, b, c = self.grid.get_padded_grid_axes(1)
         fn = RegularGridInterpolator((a, b, c), padded_grid_data, method=method)
         # get a list of the ELF values along the line
         values = []
@@ -361,7 +361,7 @@ class PartitioningToolkit:
 
         # interpolate the grid with a more rigorous method to find more exact value
         # for the plane.
-        a, b, c = grid.get_grid_axes(10)
+        a, b, c = grid.get_padded_grid_axes(10)
         fn = RegularGridInterpolator((a, b, c), padded, method="cubic")
 
         # create variables for if the line needs to be shifted from what the
