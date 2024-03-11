@@ -382,7 +382,10 @@ class ElectrideFinder:
         # neighbors. This could be easily made a bit more involved, though it would probably
         # require running the bader algorithm again
         # First, we get the coordinates of each site and its closest neighbors
-        all_neighbors = PartitioningToolkit(self.grid).all_site_neighbor_pairs.copy()
+        all_neighbors = PartitioningToolkit(
+            self.grid,
+            bader,
+            ).all_site_neighbor_pairs.copy()
         site_coords = []
         neigh_coords = []
         site_neigh_dists = []
@@ -421,5 +424,6 @@ class ElectrideFinder:
                     )
             else:
                 electride_structure.append("He", maximum_coord, coords_are_cartesian=True)
+        logging.info(f"{len(electride_structure.indices_from_symbol('He'))} electride sites found.")
         # Return the electride structure
         return electride_structure

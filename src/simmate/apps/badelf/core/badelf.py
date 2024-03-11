@@ -119,7 +119,7 @@ class BadElfToolkit:
         """
         The indices of the structure that are electride sites.
         """
-        return self.electride_structure.indices_from_symbol("He")
+        return np.array(list(self.electride_structure.indices_from_symbol("He")))
 
     @cached_property
     def coord_envs(self):
@@ -175,8 +175,10 @@ class BadElfToolkit:
         if self.algorithm == "badelf":
             # remove electrides from grid structure and get
             partitioning_grid.structure.remove_species("He")
-            partitioning = PartitioningToolkit(partitioning_grid).get_partitioning(
-                check_for_covalency=self.check_for_covalency
+            partitioning = PartitioningToolkit(
+                partitioning_grid,
+                self.pybader
+                ).get_partitioning(
             )
             return partitioning
         elif self.algorithm == "voronelf":
@@ -184,8 +186,10 @@ class BadElfToolkit:
             # This will not be anything different from the base structure if there
             # are no electride sites.
             partitioning_grid.structure = self.electride_structure.copy()
-            partitioning = PartitioningToolkit(partitioning_grid).get_partitioning(
-                check_for_covalency=self.check_for_covalency
+            partitioning = PartitioningToolkit(
+                partitioning_grid,
+                self.pybader
+                ).get_partitioning(
             )
             return partitioning
         elif self.algorithm == "zero-flux":
@@ -248,7 +252,27 @@ class BadElfToolkit:
         # Assign our randomly generated sites then return the array as a 3D grid
         all_site_assignments[split_voxel_indices] = np.array(random_voxel_assignments)
         return all_site_assignments.reshape(self.charge_grid.shape)
-
+    
+    @cached_property
+    def pybader(self):
+        """
+        A pybader Bader object run on the PartitioningGrid
+        """
+        bader_grid = self.partitioning_grid.copy()
+        bader_grid.structure = self.electride_structure
+        #!!! I need to set a value for number of threads
+        bader = bader_grid.run_pybader()
+        return bader
+    
+    @cached_property
+    def zero_flux_voxel_assignments(self):
+        """
+        An array of the same size as the partitioning grid representing the site
+        assignments from the zero-flux partitioning method. This uses the
+        [pybader code](https://github.com/adam-kerrigan/pybader)
+        """
+        return self.pybader.atoms_volumes      
+        
     @cached_property
     def voxel_assignments(self):
         """
@@ -256,7 +280,7 @@ class BadElfToolkit:
         assigned to multiple sites
         """
         return self._get_voxel_assignments()
-
+    
     def _get_voxel_assignments(self):
         """
         Gets a dataframe of voxel assignments. The dataframe has columns
@@ -264,14 +288,14 @@ class BadElfToolkit:
         """
         logging.info("Beginning voxel assignment (this can take a while)")
         algorithm = self.algorithm
+        # Get the zero-flux voxel assignments
+        all_voxel_site_assignments = self.zero_flux_voxel_assignments.ravel()
+        # shift voxel assignments to convention where 0 is unassigned
+        all_voxel_site_assignments += 1
         if algorithm == "zero-flux":
-            print(
-                """
-                There is no voxel assignment for the zero-flux algorithm as
-                the assignment is handled by the [Henkelman Bader code](https://theory.cm.utexas.edu/henkelman/code/bader/)
-                """
-            )
-            return None
+            single_site_voxel_assignments = all_voxel_site_assignments
+            multi_site_voxel_assignments = np.array([])
+            #!!! Need to assign multi-site voxel assignments as empty array
 
         # Get the objects that we'll need to assign voxels.
         elif algorithm in ["badelf", "voronelf"]:
@@ -283,14 +307,13 @@ class BadElfToolkit:
                 algorithm=self.algorithm,
                 directory=self.directory,
             )
-            # get an initial array of no site assignments
-            all_voxel_site_assignments = np.zeros(charge_grid.voxel_num)
             if algorithm == "badelf":
                 # Get the voxel assignments for each electride site
-                all_voxel_site_assignments = self._get_zero_flux_electride_assignment(
-                    all_voxel_site_assignments
-                )
-
+                all_voxel_site_assignments = np.where(np.isin(
+                    all_voxel_site_assignments,self.electride_indices+1),all_voxel_site_assignments,0)
+            else:
+                # get an initial array of no site assignments
+                all_voxel_site_assignments = np.zeros(charge_grid.voxel_num)
             # get assignments for voxels belonging to single sites
             single_site_voxel_assignments = (
                 voxel_assignment_tools.get_single_site_voxel_assignments(
@@ -309,77 +332,6 @@ class BadElfToolkit:
             single_site_voxel_assignments,
             multi_site_voxel_assignments,
         )
-
-    def write_electride_structure_files(
-        self,
-        charge_file: str = "CHGCAR_w_empty_atoms",
-        partitioning_file: str = "ELFCAR_w_empty_atoms",
-    ):
-        """
-        Writes copies of the charge file and partitioning file (usually CHGCAR
-        and ELFCAR) with electride sites. This is most frequently used for
-        eventually running the Henkelman Bader code to get electride charges.
-
-        Args:
-            charge_file (str):
-                The name of the CHGCAR to write
-            partitioning_file (str):
-                The name of the ELFCAR to write
-        """
-        # Get the directory
-        directory = self.directory
-        # Write CHGCAR and ELFCAR files with the empty structure that was found
-        electride_charge_grid = self.charge_grid.copy()
-        electride_charge_grid.structure = self.electride_structure
-        electride_charge_grid.write_file(directory / charge_file)
-        electride_elf_grid = self.partitioning_grid.copy()
-        # check that elf grid is same size as charge grid and if not, regrid
-        if electride_charge_grid.voxel_num != electride_elf_grid.voxel_num:
-            electride_elf_grid = electride_elf_grid.regrid(new_shape=electride_charge_grid.shape)
-        electride_elf_grid.structure = self.electride_structure
-        electride_elf_grid.write_file(directory / partitioning_file)
-
-    def _get_zero_flux_electride_assignment(
-        self, all_voxel_site_assignments: ArrayLike
-    ):
-        """
-        Gets the electride site assignments for voxels belonging to electride
-        sites based on the Henkelman groups algorithm.
-
-        Args:
-            all_voxel_site_assignments (ArrayLike):
-                A 1D array of integers representing the site assignments for
-                each voxel in the grid.
-
-        Returns:
-            updated voxel_assignments dataframe
-        """
-
-        directory = self.directory
-        charge_file = directory / "CHGCAR_w_empty_atoms"
-        partitioning_file = directory / "ELFCAR_w_empty_atoms"
-        if not (directory / "CHGCAR_w_empty_atoms").exists():
-            self.write_electride_structure_files(charge_file, partitioning_file)
-        # Run the henkelman code to print out electride files
-        badelf_workflow = get_workflow("population-analysis.bader.bader-dev")
-        badelf_workflow.run(
-            directory=directory,
-            charge_file="CHGCAR_w_empty_atoms",
-            partitioning_file="ELFCAR_w_empty_atoms",
-            atoms_to_print=self.electride_indices,
-        )
-
-        for electride in self.electride_indices:
-            # Pull in electride charge density from bader output file (BvAt####.dat format)
-            self._fix_BvAt(f"BvAt{str(electride+1).zfill(4)}.dat")
-            electride_charge = Grid.from_file(
-                directory / f"BvAt{str(electride+1).zfill(4)}.dat"
-            ).total
-            electride_charge_1D = electride_charge.ravel()
-            electride_indices_1D = np.where(electride_charge_1D != 0)[0]
-            all_voxel_site_assignments[electride_indices_1D] = electride + 1
-
-        return all_voxel_site_assignments
 
     @staticmethod
     def get_ELF_dimensionality(grid: Grid, cutoff: float):
@@ -521,41 +473,18 @@ class BadElfToolkit:
         # This section preps an ELF grid that only contains values from the electride
         # sites and is zero everywhere else.
         ###############################################################################
-        if self.algorithm == "zero-flux":
-            # !!! read in electride only ELFCAR. Regrid to charge_grid size
-            # Get the necessary CHGCAR and ELFCAR files. Then run the
-            # Henkelman Bader code, printing the resulting electride voxels in
-            # one file for topology analysis.
-            directory = self.directory
-            partitioning_file = directory / "ELFCAR_w_empty_atoms"
-            if not partitioning_file.exists():
-                self.write_electride_structure_files(
-                    directory / "CHGCAR_w_empty_atoms", partitioning_file
-                )
-            badelf_workflow = get_workflow("population-analysis.bader.bader-dev")
-            badelf_workflow.run(
-                directory=directory,
-                charge_file="ELFCAR_w_empty_atoms",
-                partitioning_file="ELFCAR_w_empty_atoms",
-                species_to_print="He",
-                structure=self.electride_structure,
-            )
-            self._fix_BvAt("BvAt_summed.dat")
-            elf_grid = Grid.from_file(directory / "BvAt_summed.dat")
-            elf_grid = elf_grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
-            pass
-        elif self.algorithm in ["badelf", "voronelf"]:
-            # read in ELF data and regrid so that it is the same size as the
-            # charge grid
-            elf_grid = self.partitioning_grid.copy()
-            elf_grid = elf_grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
-            voxel_assignment_array = self.voxel_assignments_array
-            # Get array where values are ELF values when voxels belong to electrides
-            # and are 0 otherwise
-            elf_array = np.where(
-                np.isin(voxel_assignment_array, electride_indices), elf_grid.total, 0
-            )
-            elf_grid.total = elf_array
+
+        # read in ELF data and regrid so that it is the same size as the
+        # charge grid
+        elf_grid = self.partitioning_grid.copy()
+        # elf_grid = elf_grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
+        voxel_assignment_array = self.voxel_assignments_array
+        # Get array where values are ELF values when voxels belong to electrides
+        # and are 0 otherwise
+        elf_array = np.where(
+            np.isin(voxel_assignment_array, electride_indices), elf_grid.total, 0
+        )
+        elf_grid.total = elf_array
 
         #######################################################################
         # This section scans across different cutoffs to determine what dimensionalities
@@ -594,32 +523,6 @@ class BadElfToolkit:
                 final_dimensions.append(dimension)
         return final_dimensions, final_connections
 
-    def _fix_BvAt(self, file_name):
-        """
-        Adjusts the output BvAt files from the Henkelman group's bader algorithm's
-        print methods. In many cases, the atom labels are altered or removed.
-
-        Args:
-            file_name (str):
-                The name of the file to be fixed. Uses the default directory of
-                the BadElfToolkit instance.
-        """
-        electride_structure = self.electride_structure
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning, module="pymatgen")
-            symbols = electride_structure.types_of_species
-        new_symbol_line = ""
-        for symbol in symbols:
-            new_symbol_line += f"{symbol.name}   "
-        directory = self.directory
-        with open(directory / f"{file_name}", "r") as file:
-            content = file.readlines()
-        symbol_line = content[5]
-        if not all(symbol.name in symbol_line for symbol in symbols):
-            content[5] = new_symbol_line + "\n"
-            with open(directory / f"{file_name}", "w") as file:
-                file.writelines(content)
-
     @cached_property
     def results(self):
         """
@@ -644,61 +547,42 @@ class BadElfToolkit:
             else:
                 elements.append(site.species_string)
 
+        # get the voxel assignments. Note that the convention here is to
+        # have indices starting at 1 rather than 0
+        (
+            single_site_assignments,
+            multi_site_assignments,
+        ) = self.voxel_assignments
+        voxel_volume = self.charge_grid.voxel_volume
+        charge_array = self.charge_grid.total.ravel()
+        logging.info("Calculating additional useful information")
+        # Create dictionaries to store the important results
+        min_dists = {}
+        charges = {}
+        atomic_volumes = {}
+        # Get min dists
+        for site in range(len(electride_structure)):
+            charges[site] = 0
+            atomic_volumes[site] = 0
+        # Get the minimum distances from each atom the the partitioning
+        # surface. If the algorithm is "badelf" we need to acquire the
+        # radii for the electrides
+        if algorithm == "badelf":
+            bader = self.pybader
+            distances = bader.atoms_surface_distance
+            electride_min_dists = distances[self.electride_indices]
+        
         if algorithm == "zero-flux":
-            # Get the necessary CHGCAR and ELFCAR files. Then run the
-            # Henkelman Bader code, printing the resulting electride voxels in
-            # one file for topolgoy analysis.
-            charge_file = directory / "CHGCAR_w_empty_atoms"
-            partitioning_file = directory / "ELFCAR_w_empty_atoms"
-            self.write_electride_structure_files(charge_file, partitioning_file)
-            badelf_workflow = get_workflow("population-analysis.bader.bader-dev")
-            badelf_workflow.run(
-                directory=directory,
-                charge_file="CHGCAR_w_empty_atoms",
-                partitioning_file="ELFCAR_w_empty_atoms",
-            )
-            # get the desired data that will be saved to the dataframe
-            #!!! I should rework the ACF.dat reader now that I have better
-            # tools than pymatgen's reader
-            logging.info("Calculating additional useful information")
-            results_dataframe, extra_data = ACF(directory)
-            results = {
-                "oxidation_states": list(results_dataframe.oxidation_state.values),
-                "charges": list(results_dataframe.charge.values),
-                "min_dists": list(results_dataframe.min_dist.values),
-                "atomic_volumes": list(results_dataframe.atomic_vol.values),
-                **extra_data,
-            }
-
-        elif algorithm in ["badelf", "voronelf"]:
-            # get the voxel assignments. Note that the convention here is to
-            # have indices starting at 1 rather than 0
-            (
-                single_site_assignments,
-                multi_site_assignments,
-            ) = self.voxel_assignments
-            voxel_volume = self.charge_grid.voxel_volume
-            charge_array = self.charge_grid.total.ravel()
-            logging.info("Calculating additional useful information")
-            # Create dictionaries to store the important results
-            min_dists = {}
-            charges = {}
-            atomic_volumes = {}
-            # Get min dists
-            for site in range(len(electride_structure)):
-                charges[site] = 0
-                atomic_volumes[site] = 0
-            # Get the minimum distances from each atom the the partitioning
-            # surface. If the algorithm is "badelf" we need to acquire the
-            # radii for the electrides
-            if algorithm == "badelf":
-                results_dataframe, extra_data = ACF(directory)
-                electride_min_dists = results_dataframe.min_dist
+            bader = self.pybader
+            distances = bader.atoms_surface_distance
+            for i,distance in enumerate(distances):
+                min_dists[i] = distance
+        else:
             for site in range(len(electride_structure)):
                 # fill min_dist dictionary using the smallest partitioning radius
                 if site in electride_indices and algorithm == "badelf":
                     # Get dist from henkelman algorithm results
-                    min_dists[site] = electride_min_dists[site]
+                    min_dists[site] = electride_min_dists[site-len(self.structure)]
                 else:
                     # Get dists from partitioning
                     radii = []
@@ -707,101 +591,101 @@ class BadElfToolkit:
                     min_radii = min(radii)
                     min_dists[site] = min_radii
 
-            # Get the charge and atomic volume of each site for sites with
-            # one assignment
-            for site in range(len(electride_structure)):
-                site1 = site + 1
-                voxel_indices = np.where(single_site_assignments == site1)[0]
-                site_charge = charge_array[voxel_indices]
-                charges[site] += np.sum(site_charge)
-                atomic_volumes[site] += len(voxel_indices) * voxel_volume
+        # Get the charge and atomic volume of each site for sites with
+        # one assignment
+        for site in range(len(electride_structure)):
+            site1 = site + 1
+            voxel_indices = np.where(single_site_assignments == site1)[0]
+            site_charge = charge_array[voxel_indices]
+            charges[site] += np.sum(site_charge)
+            atomic_volumes[site] += len(voxel_indices) * voxel_volume
 
-            # Get the charge and atomic volume of each voxel with multiple site
-            # assignments. These are stored as a (N,M) shaped array where N
-            # is the number of split voxels and M is the number of atoms.
-            split_voxel_indices = self.multi_site_voxel_indices
-            split_voxel_charge = charge_array[split_voxel_indices]
-            # get how many sites each voxel is split by
-            split_voxel_ratio = 1 / np.sum(multi_site_assignments, axis=1)
-            for site_index, assignment_array in enumerate(multi_site_assignments.T):
-                indices_where_assigned = np.where(assignment_array == 1)[0]
-                site_charge = split_voxel_charge[indices_where_assigned]
-                site_charge = site_charge * split_voxel_ratio[indices_where_assigned]
-                charges[site_index] += np.sum(site_charge)
-                atomic_volumes[site] += (
-                    np.sum(split_voxel_ratio[indices_where_assigned]) * voxel_volume
-                )
-
-            # Convert charges from VASP standard
-            for site, charge in charges.items():
-                charges[site] = round((charge / (a * b * c)), 6)
-            for site, volume in atomic_volumes.items():
-                atomic_volumes[site] = round(volume, 6)
-
-            # Get the number of electrons assigned by badelf.
-            nelectrons = round(sum(charges.values()), 6)
-
-            # Get
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                potcars = Potcar.from_file(directory / "POTCAR")
-            nelectron_data = {}
-            # the result is a list because there can be multiple element potcars
-            # in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)
-            for potcar in potcars:
-                nelectron_data.update({potcar.element: potcar.nelectrons})
-
-            # create lists to store the element list, oxidation states, charges,
-            # minimum distances, and atomic volumes
-            oxi_state_data = []
-            charges_list = []
-            min_dists_list = []
-            atomic_volumes_list = []
-            # iterate over the charge results and add the results to each list
-            for site_index, site_charge in charges.items():
-                # get structure site
-                site = electride_structure[site_index]
-                # get element name
-                element_str = site.specie.name
-                # Change electride dummy atom name to e
-                if element_str == "He":
-                    element_str = "e"
-                # calculate oxidation state and add it to the oxidation state list
-                if element_str == "e":
-                    oxi_state = -site_charge
-                else:
-                    oxi_state = round((nelectron_data[element_str] - site_charge), 6)
-                oxi_state_data.append(oxi_state)
-                # add the corresponding charge, distance, and atomic volume to the
-                # respective lits
-                charges_list.append(site_charge)
-                min_dists_list.append(round(min_dists[site_index], 6))
-                atomic_volumes_list.append(atomic_volumes[site_index])
-
-            # Calculate the "vacuum charge" or the charge not associated with any atom.
-            # Idealy this should be 0.
-            total_electrons = 0
-            for site in self.structure:
-                site_valence_electrons = nelectron_data[site.species_string]
-                total_electrons += site_valence_electrons
-            vacuum_charge = round((total_electrons - nelectrons), 6)
-
-            # Calculate the "vacuum volume" or the volume not associated with any atom.
-            # Idealy this should be 0
-            vacuum_volume = round(
-                (self.structure.volume - sum(atomic_volumes.values())), 6
+        # Get the charge and atomic volume of each voxel with multiple site
+        # assignments. These are stored as a (N,M) shaped array where N
+        # is the number of split voxels and M is the number of atoms.
+        split_voxel_indices = self.multi_site_voxel_indices
+        split_voxel_charge = charge_array[split_voxel_indices]
+        # get how many sites each voxel is split by
+        split_voxel_ratio = 1 / np.sum(multi_site_assignments, axis=1)
+        for site_index, assignment_array in enumerate(multi_site_assignments.T):
+            indices_where_assigned = np.where(assignment_array == 1)[0]
+            site_charge = split_voxel_charge[indices_where_assigned]
+            site_charge = site_charge * split_voxel_ratio[indices_where_assigned]
+            charges[site_index] += np.sum(site_charge)
+            atomic_volumes[site] += (
+                np.sum(split_voxel_ratio[indices_where_assigned]) * voxel_volume
             )
 
-            # Save everything in a results dictionary
-            results = {
-                "oxidation_states": oxi_state_data,
-                "charges": charges_list,
-                "min_dists": min_dists_list,
-                "atomic_volumes": atomic_volumes_list,
-                "vacuum_charge": vacuum_charge,
-                "vacuum_volume": vacuum_volume,
-                "nelectrons": nelectrons,
-            }
+        # Convert charges from VASP standard
+        for site, charge in charges.items():
+            charges[site] = round((charge / (a * b * c)), 6)
+        for site, volume in atomic_volumes.items():
+            atomic_volumes[site] = round(volume, 6)
+
+        # Get the number of electrons assigned by badelf.
+        nelectrons = round(sum(charges.values()), 6)
+
+        # Get
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            potcars = Potcar.from_file(directory / "POTCAR")
+        nelectron_data = {}
+        # the result is a list because there can be multiple element potcars
+        # in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)
+        for potcar in potcars:
+            nelectron_data.update({potcar.element: potcar.nelectrons})
+
+        # create lists to store the element list, oxidation states, charges,
+        # minimum distances, and atomic volumes
+        oxi_state_data = []
+        charges_list = []
+        min_dists_list = []
+        atomic_volumes_list = []
+        # iterate over the charge results and add the results to each list
+        for site_index, site_charge in charges.items():
+            # get structure site
+            site = electride_structure[site_index]
+            # get element name
+            element_str = site.specie.name
+            # Change electride dummy atom name to e
+            if element_str == "He":
+                element_str = "e"
+            # calculate oxidation state and add it to the oxidation state list
+            if element_str == "e":
+                oxi_state = -site_charge
+            else:
+                oxi_state = round((nelectron_data[element_str] - site_charge), 6)
+            oxi_state_data.append(oxi_state)
+            # add the corresponding charge, distance, and atomic volume to the
+            # respective lits
+            charges_list.append(site_charge)
+            min_dists_list.append(round(min_dists[site_index], 6))
+            atomic_volumes_list.append(atomic_volumes[site_index])
+
+        # Calculate the "vacuum charge" or the charge not associated with any atom.
+        # Idealy this should be 0.
+        total_electrons = 0
+        for site in self.structure:
+            site_valence_electrons = nelectron_data[site.species_string]
+            total_electrons += site_valence_electrons
+        vacuum_charge = round((total_electrons - nelectrons), 6)
+
+        # Calculate the "vacuum volume" or the volume not associated with any atom.
+        # Idealy this should be 0
+        vacuum_volume = round(
+            (self.structure.volume - sum(atomic_volumes.values())), 6
+        )
+
+        # Save everything in a results dictionary
+        results = {
+            "oxidation_states": oxi_state_data,
+            "charges": charges_list,
+            "min_dists": min_dists_list,
+            "atomic_volumes": atomic_volumes_list,
+            "vacuum_charge": vacuum_charge,
+            "vacuum_volume": vacuum_volume,
+            "nelectrons": nelectrons,
+        }
         # calculate the number of electride electrons per formula unit
         if len(self.electride_indices) > 0:
             electrides_per_unit = sum(
@@ -1004,10 +888,16 @@ class BadElfToolkit:
         grid = self.partitioning_grid.copy()
         if self.algorithm == "badelf":
             grid.structure = self.structure
-            PartitioningToolkit(grid).plot_partitioning_results(partitioning)
+            PartitioningToolkit(
+                grid,
+                self.pybader
+                ).plot_partitioning_results(partitioning)
         elif self.algorithm == "voronelf":
             grid.structure = self.electride_structure
-            PartitioningToolkit(grid).plot_partitioning_results(partitioning)
+            PartitioningToolkit(
+                grid,
+                self.pybader
+                ).plot_partitioning_results(partitioning)
         else:
             warnings.warn(
                 """

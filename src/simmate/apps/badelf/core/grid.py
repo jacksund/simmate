@@ -2,21 +2,16 @@
 
 import itertools
 import logging
-import math
-import warnings
 from pathlib import Path
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike
-from pymatgen.io.vasp import Poscar
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.io.vasp import VolumetricData
 from pyrho.pgrid import PGrid
 from pybader.interface import Bader
-
-from simmate.toolkit import Structure
 
 
 class Grid(VolumetricData):
@@ -28,11 +23,19 @@ class Grid(VolumetricData):
     @property
     def total(self):
         return self.data["total"]
+    
+    @total.setter
+    def total(self, new_total):
+        self.data["total"] = new_total
 
     @property
     def diff(self):
         return self.data["diff"]
-
+    
+    @diff.setter
+    def diff(self, new_diff):
+        self.data["diff"] = new_diff
+    
     @property
     def shape(self):
         return np.array(self.total.shape)
