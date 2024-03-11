@@ -9,7 +9,6 @@ from pathlib import Path
 
 import numpy as np
 import psutil
-from numpy.typing import ArrayLike
 from pymatgen.analysis.local_env import CrystalNN
 from pymatgen.io.vasp import Potcar
 from scipy.ndimage import label
@@ -19,8 +18,6 @@ from simmate.apps.badelf.core.electride_finder import ElectrideFinder
 from simmate.apps.badelf.core.grid import Grid
 from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.apps.badelf.core.voxel_assignment import VoxelAssignmentToolkit
-from simmate.apps.bader.outputs import ACF
-from simmate.workflows.utilities import get_workflow
 
 
 class BadElfToolkit:
@@ -175,10 +172,8 @@ class BadElfToolkit:
             # remove electrides from grid structure and get
             partitioning_grid.structure.remove_species("He")
             partitioning = PartitioningToolkit(
-                partitioning_grid,
-                self.pybader
-                ).get_partitioning(
-            )
+                partitioning_grid, self.pybader
+            ).get_partitioning()
             return partitioning
         elif self.algorithm == "voronelf":
             # Use the structure with electrides as the partitioning structure.
@@ -186,10 +181,8 @@ class BadElfToolkit:
             # are no electride sites.
             partitioning_grid.structure = self.electride_structure.copy()
             partitioning = PartitioningToolkit(
-                partitioning_grid,
-                self.pybader
-                ).get_partitioning(
-            )
+                partitioning_grid, self.pybader
+            ).get_partitioning()
             return partitioning
         elif self.algorithm == "zero-flux":
             print(
@@ -251,7 +244,7 @@ class BadElfToolkit:
         # Assign our randomly generated sites then return the array as a 3D grid
         all_site_assignments[split_voxel_indices] = np.array(random_voxel_assignments)
         return all_site_assignments.reshape(self.charge_grid.shape)
-    
+
     @cached_property
     def pybader(self):
         """
@@ -262,7 +255,7 @@ class BadElfToolkit:
         #!!! I need to set a value for number of threads
         bader = bader_grid.run_pybader()
         return bader
-    
+
     @cached_property
     def zero_flux_voxel_assignments(self):
         """
@@ -271,7 +264,7 @@ class BadElfToolkit:
         [pybader code](https://github.com/adam-kerrigan/pybader)
         """
         return self.pybader.atoms_volumes.copy()
-        
+
     @cached_property
     def voxel_assignments(self):
         """
@@ -279,7 +272,7 @@ class BadElfToolkit:
         assigned to multiple sites
         """
         return self._get_voxel_assignments()
-    
+
     def _get_voxel_assignments(self):
         """
         Gets a dataframe of voxel assignments. The dataframe has columns
@@ -308,8 +301,11 @@ class BadElfToolkit:
             )
             if algorithm == "badelf":
                 # Get the voxel assignments for each electride site
-                all_voxel_site_assignments = np.where(np.isin(
-                    all_voxel_site_assignments,self.electride_indices+1),all_voxel_site_assignments,0)
+                all_voxel_site_assignments = np.where(
+                    np.isin(all_voxel_site_assignments, self.electride_indices + 1),
+                    all_voxel_site_assignments,
+                    0,
+                )
             else:
                 # get an initial array of no site assignments
                 all_voxel_site_assignments = np.zeros(charge_grid.voxel_num)
@@ -570,18 +566,18 @@ class BadElfToolkit:
             bader = self.pybader
             distances = bader.atoms_surface_distance
             electride_min_dists = distances[self.electride_indices]
-        
+
         if algorithm == "zero-flux":
             bader = self.pybader
             distances = bader.atoms_surface_distance
-            for i,distance in enumerate(distances):
+            for i, distance in enumerate(distances):
                 min_dists[i] = distance
         else:
             for site in range(len(electride_structure)):
                 # fill min_dist dictionary using the smallest partitioning radius
                 if site in electride_indices and algorithm == "badelf":
                     # Get dist from henkelman algorithm results
-                    min_dists[site] = electride_min_dists[site-len(self.structure)]
+                    min_dists[site] = electride_min_dists[site - len(self.structure)]
                 else:
                     # Get dists from partitioning
                     radii = []
@@ -672,9 +668,7 @@ class BadElfToolkit:
 
         # Calculate the "vacuum volume" or the volume not associated with any atom.
         # Idealy this should be 0
-        vacuum_volume = round(
-            (self.structure.volume - sum(atomic_volumes.values())), 6
-        )
+        vacuum_volume = round((self.structure.volume - sum(atomic_volumes.values())), 6)
 
         # Save everything in a results dictionary
         results = {
@@ -888,16 +882,14 @@ class BadElfToolkit:
         grid = self.partitioning_grid.copy()
         if self.algorithm == "badelf":
             grid.structure = self.structure
-            PartitioningToolkit(
-                grid,
-                self.pybader
-                ).plot_partitioning_results(partitioning)
+            PartitioningToolkit(grid, self.pybader).plot_partitioning_results(
+                partitioning
+            )
         elif self.algorithm == "voronelf":
             grid.structure = self.electride_structure
-            PartitioningToolkit(
-                grid,
-                self.pybader
-                ).plot_partitioning_results(partitioning)
+            PartitioningToolkit(grid, self.pybader).plot_partitioning_results(
+                partitioning
+            )
         else:
             warnings.warn(
                 """
