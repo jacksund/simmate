@@ -104,7 +104,7 @@ class BadElfToolkit:
 
         if self.find_electrides:
             electride_structure = ElectrideFinder(
-                self.partitioning_grid,
+                self.partitioning_grid.copy(),
                 self.directory,
             ).get_electride_structure(
                 electride_finder_cutoff=self.electride_finder_cutoff
@@ -168,7 +168,6 @@ class BadElfToolkit:
         """
         # Get the partitioning grid
         partitioning_grid = self.partitioning_grid.copy()
-        # partitioning_grid.regrid()
         # If the algorithm is badelf, we don't want to partition with the structure
         # containing electrides. We remove any electrides in case the provided
         # structure already had them.
@@ -271,7 +270,7 @@ class BadElfToolkit:
         assignments from the zero-flux partitioning method. This uses the
         [pybader code](https://github.com/adam-kerrigan/pybader)
         """
-        return self.pybader.atoms_volumes      
+        return self.pybader.atoms_volumes.copy()
         
     @cached_property
     def voxel_assignments(self):
@@ -567,7 +566,7 @@ class BadElfToolkit:
         # Get the minimum distances from each atom the the partitioning
         # surface. If the algorithm is "badelf" we need to acquire the
         # radii for the electrides
-        if algorithm == "badelf":
+        if algorithm == "badelf" and len(electride_indices > 0):
             bader = self.pybader
             distances = bader.atoms_surface_distance
             electride_min_dists = distances[self.electride_indices]
@@ -603,18 +602,19 @@ class BadElfToolkit:
         # Get the charge and atomic volume of each voxel with multiple site
         # assignments. These are stored as a (N,M) shaped array where N
         # is the number of split voxels and M is the number of atoms.
-        split_voxel_indices = self.multi_site_voxel_indices
-        split_voxel_charge = charge_array[split_voxel_indices]
-        # get how many sites each voxel is split by
-        split_voxel_ratio = 1 / np.sum(multi_site_assignments, axis=1)
-        for site_index, assignment_array in enumerate(multi_site_assignments.T):
-            indices_where_assigned = np.where(assignment_array == 1)[0]
-            site_charge = split_voxel_charge[indices_where_assigned]
-            site_charge = site_charge * split_voxel_ratio[indices_where_assigned]
-            charges[site_index] += np.sum(site_charge)
-            atomic_volumes[site] += (
-                np.sum(split_voxel_ratio[indices_where_assigned]) * voxel_volume
-            )
+        if len(self.multi_site_voxel_assignments) > 0:
+            split_voxel_indices = self.multi_site_voxel_indices
+            split_voxel_charge = charge_array[split_voxel_indices]
+            # get how many sites each voxel is split by
+            split_voxel_ratio = 1 / np.sum(multi_site_assignments, axis=1)
+            for site_index, assignment_array in enumerate(multi_site_assignments.T):
+                indices_where_assigned = np.where(assignment_array == 1)[0]
+                site_charge = split_voxel_charge[indices_where_assigned]
+                site_charge = site_charge * split_voxel_ratio[indices_where_assigned]
+                charges[site_index] += np.sum(site_charge)
+                atomic_volumes[site] += (
+                    np.sum(split_voxel_ratio[indices_where_assigned]) * voxel_volume
+                )
 
         # Convert charges from VASP standard
         for site, charge in charges.items():
