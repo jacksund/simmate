@@ -350,9 +350,25 @@ class PartitioningToolkit:
                 elf_min_index = np.where(np.array(labels)==site_index)[0].max()
                 extrema = "min"
             else:
+            # There is at least some section of the line that is assigned to an
+            # atom not in the bond. We want to assign the fraction as being at
+            # the maximum of this unrelated area. However, sometimes I've 
+            # found that there is no maximum in the range of this area which
+            # causes the assignment to be placed very far from what is reasonable.
+            # to handle this we check if there is a maximum in the unrelated area
+            # and if not we assign as above.
                 maxima = self.find_maximum(values)
-                elf_min_index = self.get_closest_extrema_to_center(values, maxima)[0]
-                extrema = "max"
+                unrelated_indices = np.where(~np.isin(labels, [site_index,neigh_index]))
+                new_maxima = []
+                for maximum in maxima:
+                    if np.isin(maximum[0], unrelated_indices):
+                        new_maxima.append(maximum)
+                if len(new_maxima) > 0:
+                    elf_min_index = self.get_closest_extrema_to_center(values, new_maxima)[0]
+                    extrema = "max"
+                else:
+                    elf_min_index = np.where(np.array(labels)==site_index)[0].max()
+                    extrema = "min" 
             
             global_min = self._refine_line_part_frac(
                 positions=positions, elf_min_index=elf_min_index, extrema=extrema
