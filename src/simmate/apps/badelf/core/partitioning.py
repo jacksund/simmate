@@ -10,13 +10,14 @@ import numpy as np
 import pandas as pd
 from numpy.typing import ArrayLike
 from pymatgen.analysis.local_env import CrystalNN
-from pymatgen.core import Species
 from scipy.interpolate import RegularGridInterpolator
 from scipy.spatial import ConvexHull
 from tqdm import tqdm
 
 from simmate.apps.badelf.core.grid import Grid
 from simmate.toolkit import Structure
+
+from pybader.interface import Bader
 
 
 class PartitioningToolkit:
@@ -28,10 +29,13 @@ class PartitioningToolkit:
     Args:
         grid (Grid):
             A BadELF app Grid type object.
+        pybader (Bader):
+            A bader Bader type object.
     """
 
-    def __init__(self, grid: Grid):
+    def __init__(self, grid: Grid, bader: Bader):
         self.grid = grid.copy()
+        self.bader = bader
 
     def get_partitioning_line_from_voxels(
         self,
@@ -62,6 +66,7 @@ class PartitioningToolkit:
             a line between two positions.
         """
         grid_data = self.grid.copy().total
+        label_data = self.bader.atoms_volumes
         slope = [b - a for a, b in zip(site_voxel_coord, neigh_voxel_coord)]
         slope_increment = [float(x) / steps for x in slope]
 
@@ -86,6 +91,7 @@ class PartitioningToolkit:
         # The partitioning uses a padded grid and grid interpolation to find the
         # location of dividing planes.
         padded_grid_data = np.pad(grid_data, 1, mode="wrap")
+        padded_label_data = np.pad(label_data, 1, mode="wrap")
 
         # interpolate grid to find values that lie between voxels. This is done
         # with a cruder interpolation here and then the area close to the minimum
@@ -93,19 +99,25 @@ class PartitioningToolkit:
         # get_line_frac_min
         a, b, c = self.grid.get_padded_grid_axes(1)
         fn = RegularGridInterpolator((a, b, c), padded_grid_data, method=method)
+        fn_label = RegularGridInterpolator((a,b,c), padded_label_data, "nearest")
         # get a list of the ELF values along the line
         values = []
+        label_values = []
 
         for pos in line:
-            adjusted_pos = [x for x in pos]
+            adjusted_pos = [x+1 for x in pos]
             value = float(fn(adjusted_pos))
+            label_value = int(fn_label(adjusted_pos))
             values.append(value)
+            label_values.append(label_value)
 
-        # smooth line with savgol filter
-        # values = savgol_filter(values, 20, 3)
-        return line, values
+        return line, values, label_values
 
-    def get_partitioning_line_from_indices(self, i: int, j: int):
+    def get_partitioning_line_from_indices(
+            self, 
+            i: int, 
+            j: int, 
+            method: str = "linear"):
         """
         Gets the voxel positions and elf values for points between two sites in
         the structure.
@@ -115,6 +127,9 @@ class PartitioningToolkit:
                 index of first site in the structure
             j (int):
                 index of second site in the structure
+            method (str):
+                The method of interpolation. 'cubic' is more rigorous
+                than 'linear'
 
         Returns:
         - Two lists, one of positions in voxel coordinates and another of elf
@@ -124,13 +139,14 @@ class PartitioningToolkit:
         site_voxel_coord = grid.get_voxel_coords_from_index(i)
         neigh_voxel_coord = grid.get_voxel_coords_from_index(j)
         return self.get_partitioning_line_from_voxels(
-            site_voxel_coord, neigh_voxel_coord
+            site_voxel_coord, neigh_voxel_coord, method = method
         )
 
     def get_partitioning_line_from_cart_coords(
         self,
         site_cart_coords: ArrayLike | list,
         neigh_cart_coords: ArrayLike | list,
+        method: str = "linear"
     ):
         """
         Gets the voxel positions and elf values for points between two sites in
@@ -143,6 +159,9 @@ class PartitioningToolkit:
                 cartesian coordinates of a site in the structure
             neigh_cart_coords (ArrayLike):
                 cartesian coordinates of a second site in the structure
+            method (str):
+                The method of interpolation. 'cubic' is more rigorous
+                than 'linear'
 
         Returns:
             Two lists, one of positions in voxel coordinates and another of elf
@@ -152,7 +171,7 @@ class PartitioningToolkit:
         site_voxel_coord = grid.get_voxel_coords_from_cart(site_cart_coords)
         neigh_voxel_coord = grid.get_voxel_coords_from_cart(neigh_cart_coords)
         return self.get_partitioning_line_from_voxels(
-            site_voxel_coord, neigh_voxel_coord
+            site_voxel_coord, neigh_voxel_coord, method = method
         )
 
     @staticmethod
@@ -268,8 +287,9 @@ class PartitioningToolkit:
         self,
         positions: list,
         values: list | ArrayLike,
-        site_equiv: int,
-        neigh_equiv: int,
+        labels: list | ArrayLike,
+        site_index: int,
+        neigh_index: int,
     ):
         """
         Finds the minimum point of a list of values along a line, then returns the
@@ -281,14 +301,16 @@ class PartitioningToolkit:
                 of interest
             values (list):
                 A list of values to find the minimum of
-            site_equiv (int):
-                The index of the equivalent atom
-            neigh_equiv (int):
-                The index of the equivalent neighboring atom
+            site_index (int):
+                The index of the atom
+            neigh_index (int):
+                The index of the neighboring atom
 
         results:
             The global minimum of form [line_position, value, frac_position]
         """
+        site_equiv = self.grid.equivalent_atoms[site_index]
+        neigh_equiv = self.grid.equivalent_atoms[neigh_index]
         # get the string for the site and neigh. During the electride dimensionality
         # search this can throw an error so we add a try/except clause here.
         try:
@@ -321,21 +343,29 @@ class PartitioningToolkit:
             elf_min_frac = 0.5
             global_min = [100, elf_value, elf_min_frac]
         else:
-            # We either don't have the same atoms, or the same atoms are not
-            # symmetric along the elf.
-            # minima function gives all local minima along the values
-            minima = self.find_minimum(values)
-            # maxima = find_maximum(values)
-
-            # then we grab the local minima closest to the midpoint of the values
-            global_min = self.get_closest_extrema_to_center(values, minima)
-            global_min = self._refine_line_min_frac(
-                positions=positions, elf_min_index=global_min[0]
+            # If the only assignments in our line are for the two atoms involved
+            # we guess that our initial partitioning frac will be at the furthest
+            # point still labeled as belonging to the site
+            if np.all(np.isin(labels, [site_index,neigh_index])):
+                elf_min_index = np.where(np.array(labels)==site_index)[0].max()
+                extrema = "min"
+            else:
+                maxima = self.find_maximum(values)
+                elf_min_index = self.get_closest_extrema_to_center(values, maxima)[0]
+                extrema = "max"
+            
+            global_min = self._refine_line_part_frac(
+                positions=positions, elf_min_index=elf_min_index, extrema=extrema
             )
 
         return global_min
 
-    def _refine_line_min_frac(self, positions, elf_min_index):
+    def _refine_line_part_frac(
+            self, 
+            positions: list, 
+            elf_min_index: int, 
+            extrema: str,
+            ):
         """
         Refines the location of the minimum along an ELF line between two sites.
         To do this, the initial estimate from a linear interpolation of the line
@@ -350,6 +380,8 @@ class PartitioningToolkit:
             elf_min_index (int):
                 The index along the line at which the linear interpolation estimated
                 the minimum.
+            extrema (str):
+                Which type of extrema to refine. Either max or min.
 
         Returns:
             The global minimum of form [line_position, value, frac_position]
@@ -392,7 +424,10 @@ class PartitioningToolkit:
                 # Find the minimum value of this line as well as the index for this value's
                 # position.
                 try:
-                    minimum_value = min(values_fine)
+                    if extrema == "min":
+                        minimum_value = min(values_fine)
+                    elif extrema == "max":
+                        minimum_value = max(values_fine)
                 except:
                     attempts = 5
                     continue
@@ -418,7 +453,10 @@ class PartitioningToolkit:
                 values.append(value)
 
             # Get a list of all of the minima along the line
-            minima = self.find_minimum(values)
+            if extrema == "min":
+                minima = self.find_minimum(values)
+            elif extrema == "max":
+                minima = self.find_maximum(values)
 
             # then we grab the local minima closest to the midpoint of the line
             global_min = self.get_closest_extrema_to_center(values, minima)
@@ -437,37 +475,6 @@ class PartitioningToolkit:
         elf_min_frac_new = elf_min_index_new / (len(positions) - 1)
 
         return [elf_min_index_new, elf_min_value_new, elf_min_frac_new]
-
-    @staticmethod
-    def get_voxel_coords_from_min_along_line(
-        global_min_frac: float,
-        site_voxel_coords: ArrayLike | list,
-        neigh_voxel_coords: ArrayLike | list,
-    ):
-        """
-        Gives the voxel position/coords for the minimum along a partitioning line
-        between two atoms. The minimum point is where the dividing plane should lie.
-
-        Args:
-            global_min_frac (float):
-                The global minimum fraction
-            site_voxel_coords (ArrayLike):
-                The voxel coordinates of the site at the start of the line.
-            neigh_voxel_coords (ArrayLike):
-                The voxel coordinates of the neighbor atom at the end of the line.
-
-        Returns:
-            The voxel coordinates of the minimum.
-        """
-
-        # get the vector that points between the site and its neighbor (in vox  coords)
-        difference = [b - a for a, b in zip(site_voxel_coords, neigh_voxel_coords)]
-        # get the vector that points from the site to the global_min_frac
-        min_pos = [x * global_min_frac for x in difference]
-        # add the vector components of the site and minimum point together to get
-        # the vector pointing directly to the minimum
-        min_pos = [(a + b) for a, b in zip(min_pos, site_voxel_coords)]
-        return np.array(min_pos)
 
     @staticmethod
     def get_plane_sign(
@@ -505,38 +512,9 @@ class PartitioningToolkit:
         else:
             return "zero", value_of_plane_equation
 
-    def get_distance_to_min(
-        self,
-        minimum_point: ArrayLike | list,
-        site_voxel_coords: ArrayLike | list,
-    ):
-        """
-        Gets the distance from an atom to the minimum point along partitioning line
-        between it and another atom.
-
-        Args:
-            minimum_point (ArrayLike):
-                A point in cartesian coordinates where there is a minimum along
-                a line
-            site_voxel_coords (ArrayLike):
-                The voxel coordinates of a site that is at one end of the line
-                that the minimum belongs to
-
-        Returns:
-            The distance from the site to the minimum
-        """
-        grid = self.grid.copy()
-        site_cart_coords = grid.get_cart_coords_from_vox(site_voxel_coords)
-        distance = sum(
-            [(b - a) ** 2 for a, b in zip(site_cart_coords, minimum_point)]
-        ) ** (0.5)
-        return distance
-
     def get_elf_ionic_radius(
         self,
         site_index: int,
-        structure: Structure = None,
-        site_is_electride: bool = False,
     ):
         """
         This method gets the ELF ionic radius. It interpolates the ELF values
@@ -547,23 +525,12 @@ class PartitioningToolkit:
         Args:
             site_index (int):
                 An integer value referencing an atom in the structure
-            method (str):
-                Whether to use linear or cubic interpolation
-            structure (Structure):
-                The structure to use if it is not the same as the one stored
-                in the PartitioningToolkit instance
-            site_is_electride (bool):
-                Whether the site in question is an electride site.
 
         Returns:
             The distance the ELF ionic radius of the site
         """
-        grid = self.grid.copy()
-        equivalent_atoms = grid.equivalent_atoms
-        if structure is None:
-            structure = grid.structure.copy()
         # get closest neighbor for the given site
-        # neighbors = structure.get_neighbors(structure[site_index], 15)
+
         neighbors = self.all_site_neighbor_pairs
         # get only this sites dataframe
         site_df = neighbors.loc[neighbors["site_index"] == site_index]
@@ -573,68 +540,19 @@ class PartitioningToolkit:
         for i, row in site_df.iterrows():
             site_cart_coords = row["site_coords"]
             neigh_cart_coords = row["neigh_coords"]
-            neighbor_equiv = row["equiv_neigh_index"]
             neighbor_string = row["neigh_symbol"]
             if neighbor_string != "He":
                 bond_dist = row["dist"]
                 break
-        site_voxel_coord = grid.get_voxel_coords_from_cart(site_cart_coords)
-        neigh_voxel_coord = grid.get_voxel_coords_from_cart(neigh_cart_coords)
 
-        elf_positions, elf_values = self.get_partitioning_line_from_cart_coords(
+        elf_positions, elf_values, label_values = self.get_partitioning_line_from_cart_coords(
             site_cart_coords,
             neigh_cart_coords,
         )
 
-        # Check if this bond has covalent behavior
-        covalency = self.check_bond_for_covalency(elf_values)
-        # # Get site and neighbor strings
-        # # site_string = self.grid.structure[site_index].species_string
-        # # Get site and neighbor equivalent atoms
-        site_equiv = equivalent_atoms[site_index]
-
-        max_bond_dist = (
-            structure[site_index].specie.atomic_radius
-            + Species(neighbor_string).atomic_radius
-        )
-        # If the bond is larger than the some of both atomic radii it is likely
-        # that there is an electride between the atom and its closest neighbor.
-        # We want to get the distance to the minimum closer to the atom than
-        # its neighbor. The same is true if the atom has covalent behavior!!!?
-        # if bond_dist > max_bond_dist:
-        if covalency or bond_dist > max_bond_dist:
-            # We get all of the minima along  the line. We then find the distance
-            # of each minima from the middle of the line, remove any that are
-            # closer to the neighboring atom, and find the one closest to the
-            # center of the bond.
-            minima = self.find_minimum(elf_values)
-            mid_point = len(elf_values) / 2
-            dists_to_min = np.array([mid_point - x[0] for x in minima])
-            dists_to_min = dists_to_min[dists_to_min >= 0]
-            # Sometimes a bond distance will be larger than the max_bond_dist
-            # when there is not an electride. In these cases, we want to use
-            # the normal method of finding a line minimum. !!! This may mean this
-            # method needs some work.
-            if len(dists_to_min) == 1:
-                min_pos = self.get_line_minimum_as_frac(
-                    elf_positions, elf_values, site_equiv, neighbor_equiv
-                )
-            else:
-                min_pos = minima[np.argmin(dists_to_min)]
-                # Append the fractional distance to the minimum of the line.
-                min_pos.append(min_pos[0] / (len(elf_values) - 1))
-        else:
-            # Get the min position along the line
-            min_pos = self.get_line_minimum_as_frac(
-                elf_positions, elf_values, site_equiv, neighbor_equiv
-            )
-        #!!! This is the only place some of these methods are used. Is this necessary
-        # or could they be removed somehow with the new methods?
-        min_voxel_coord = self.get_voxel_coords_from_min_along_line(
-            min_pos[2], site_voxel_coord, neigh_voxel_coord
-        )
-        min_cart_coord = self.grid.get_cart_coords_from_vox(min_voxel_coord)
-        distance_to_min = self.get_distance_to_min(min_cart_coord, site_voxel_coord)
+        elf_min_index = np.where(np.array(label_values)==site_index)[0].max()
+        refined_index = self._refine_line_part_frac(elf_positions, elf_min_index, "min")
+        distance_to_min = refined_index[2]*bond_dist
 
         return distance_to_min
 
@@ -899,8 +817,8 @@ class PartitioningToolkit:
         self,
         site_cart_coords: ArrayLike,
         neigh_cart_coords: ArrayLike,
-        site_equiv: str,
-        neigh_equiv: str,
+        site_index: int,
+        neigh_index: int,
     ):
         """
         Function for getting the fraction of a line betwaeen two sites where
@@ -922,7 +840,7 @@ class PartitioningToolkit:
         neigh_voxel_coord = grid.get_voxel_coords_from_cart(neigh_cart_coords)
 
         # we need a straight line between these two points.  get list of all ELF values
-        elf_coordinates, elf_values = self.get_partitioning_line_from_voxels(
+        elf_coordinates, elf_values, label_values = self.get_partitioning_line_from_voxels(
             site_voxel_coord, neigh_voxel_coord, method="linear"
         )
 
@@ -931,8 +849,9 @@ class PartitioningToolkit:
         elf_min_index, elf_min_value, elf_min_frac = self.get_line_minimum_as_frac(
             elf_coordinates,
             elf_values,
-            site_equiv,
-            neigh_equiv,
+            label_values,
+            site_index,
+            neigh_index,
         )
         return elf_min_frac
 
@@ -1129,15 +1048,14 @@ class PartitioningToolkit:
                 site_cart_coords = row["site_coords"]
                 neigh_cart_coords = row["neigh_coords"]
                 # get the site and neighbor symbols
-                site_equiv = row["equiv_site_index"]
-                neigh_equiv = row["equiv_neigh_index"]
+                neigh_index = row["neigh_index"]
                 shortest_dist = row["dist"]
                 # get fraction along line where the min is located
                 frac = self.get_site_neighbor_frac(
                     site_cart_coords,
                     neigh_cart_coords,
-                    site_equiv,
-                    neigh_equiv,
+                    site_index,
+                    neigh_index,
                 )
                 # Set frac to 2*frac or 1 whichever is larger
                 if 2 * frac >= 1:
@@ -1273,16 +1191,16 @@ class PartitioningToolkit:
                 # neigh_voxel_coords = grid.get_voxel_coords_from_cart(neigh_cart_coords)
                 # Get the site symbols.
                 # needed to update the dataframe
-                site_equiv = row["equiv_site_index"]
-                neigh_equiv = row["equiv_neigh_index"]
+                site_index = row["site_index"]
+                neigh_index = row["neigh_index"]
                 dist = row["dist"]
 
                 # get fraction along line where the min is located
                 frac = self.get_site_neighbor_frac(
                     site_cart_coords,
                     neigh_cart_coords,
-                    site_equiv,
-                    neigh_equiv,
+                    site_index,
+                    neigh_index,
                 )
                 radius = frac * dist
                 reverse_frac = 1 - frac
