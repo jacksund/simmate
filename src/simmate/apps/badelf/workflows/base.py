@@ -112,6 +112,6 @@ class VaspBadElfBase(Workflow):
             electride_finder_cutoff=electride_finder_cutoff,
             algorithm=algorithm,
             check_for_covalency=check_for_covalency,
-            write_electride_files=write_electride_files
+            write_electride_files=write_electride_files,
             # copy_previous_directory=True,
         ).result()

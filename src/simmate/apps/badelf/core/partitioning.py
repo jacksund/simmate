@@ -9,6 +9,7 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 from numpy.typing import ArrayLike
+from pybader.interface import Bader
 from pymatgen.analysis.local_env import CrystalNN
 from scipy.interpolate import RegularGridInterpolator
 from scipy.spatial import ConvexHull
@@ -16,8 +17,6 @@ from tqdm import tqdm
 
 from simmate.apps.badelf.core.grid import Grid
 from simmate.toolkit import Structure
-
-from pybader.interface import Bader
 
 
 class PartitioningToolkit:
@@ -99,13 +98,13 @@ class PartitioningToolkit:
         # get_line_frac_min
         a, b, c = self.grid.get_padded_grid_axes(1)
         fn = RegularGridInterpolator((a, b, c), padded_grid_data, method=method)
-        fn_label = RegularGridInterpolator((a,b,c), padded_label_data, "nearest")
+        fn_label = RegularGridInterpolator((a, b, c), padded_label_data, "nearest")
         # get a list of the ELF values along the line
         values = []
         label_values = []
 
         for pos in line:
-            adjusted_pos = [x+1 for x in pos]
+            adjusted_pos = [x + 1 for x in pos]
             value = float(fn(adjusted_pos))
             label_value = int(fn_label(adjusted_pos))
             values.append(value)
@@ -114,10 +113,8 @@ class PartitioningToolkit:
         return line, values, label_values
 
     def get_partitioning_line_from_indices(
-            self, 
-            i: int, 
-            j: int, 
-            method: str = "linear"):
+        self, i: int, j: int, method: str = "linear"
+    ):
         """
         Gets the voxel positions and elf values for points between two sites in
         the structure.
@@ -139,14 +136,14 @@ class PartitioningToolkit:
         site_voxel_coord = grid.get_voxel_coords_from_index(i)
         neigh_voxel_coord = grid.get_voxel_coords_from_index(j)
         return self.get_partitioning_line_from_voxels(
-            site_voxel_coord, neigh_voxel_coord, method = method
+            site_voxel_coord, neigh_voxel_coord, method=method
         )
 
     def get_partitioning_line_from_cart_coords(
         self,
         site_cart_coords: ArrayLike | list,
         neigh_cart_coords: ArrayLike | list,
-        method: str = "linear"
+        method: str = "linear",
     ):
         """
         Gets the voxel positions and elf values for points between two sites in
@@ -171,7 +168,7 @@ class PartitioningToolkit:
         site_voxel_coord = grid.get_voxel_coords_from_cart(site_cart_coords)
         neigh_voxel_coord = grid.get_voxel_coords_from_cart(neigh_cart_coords)
         return self.get_partitioning_line_from_voxels(
-            site_voxel_coord, neigh_voxel_coord, method = method
+            site_voxel_coord, neigh_voxel_coord, method=method
         )
 
     @staticmethod
@@ -346,30 +343,34 @@ class PartitioningToolkit:
             # If the only assignments in our line are for the two atoms involved
             # we guess that our initial partitioning frac will be at the furthest
             # point still labeled as belonging to the site
-            if np.all(np.isin(labels, [site_index,neigh_index])):
-                elf_min_index = np.where(np.array(labels)==site_index)[0].max()
+            if np.all(np.isin(labels, [site_index, neigh_index])):
+                elf_min_index = np.where(np.array(labels) == site_index)[0].max()
                 extrema = "min"
             else:
-            # There is at least some section of the line that is assigned to an
-            # atom not in the bond. We want to assign the fraction as being at
-            # the maximum of this unrelated area. However, sometimes I've 
-            # found that there is no maximum in the range of this area which
-            # causes the assignment to be placed very far from what is reasonable.
-            # to handle this we check if there is a maximum in the unrelated area
-            # and if not we assign as above.
+                # There is at least some section of the line that is assigned to an
+                # atom not in the bond. We want to assign the fraction as being at
+                # the maximum of this unrelated area. However, sometimes I've
+                # found that there is no maximum in the range of this area which
+                # causes the assignment to be placed very far from what is reasonable.
+                # to handle this we check if there is a maximum in the unrelated area
+                # and if not we assign as above.
                 maxima = self.find_maximum(values)
-                unrelated_indices = np.where(~np.isin(labels, [site_index,neigh_index]))
+                unrelated_indices = np.where(
+                    ~np.isin(labels, [site_index, neigh_index])
+                )
                 new_maxima = []
                 for maximum in maxima:
                     if np.isin(maximum[0], unrelated_indices):
                         new_maxima.append(maximum)
                 if len(new_maxima) > 0:
-                    elf_min_index = self.get_closest_extrema_to_center(values, new_maxima)[0]
+                    elf_min_index = self.get_closest_extrema_to_center(
+                        values, new_maxima
+                    )[0]
                     extrema = "max"
                 else:
-                    elf_min_index = np.where(np.array(labels)==site_index)[0].max()
-                    extrema = "min" 
-            
+                    elf_min_index = np.where(np.array(labels) == site_index)[0].max()
+                    extrema = "min"
+
             global_min = self._refine_line_part_frac(
                 positions=positions, elf_min_index=elf_min_index, extrema=extrema
             )
@@ -377,11 +378,11 @@ class PartitioningToolkit:
         return global_min
 
     def _refine_line_part_frac(
-            self, 
-            positions: list, 
-            elf_min_index: int, 
-            extrema: str,
-            ):
+        self,
+        positions: list,
+        elf_min_index: int,
+        extrema: str,
+    ):
         """
         Refines the location of the minimum along an ELF line between two sites.
         To do this, the initial estimate from a linear interpolation of the line
@@ -561,14 +562,16 @@ class PartitioningToolkit:
                 bond_dist = row["dist"]
                 break
 
-        elf_positions, elf_values, label_values = self.get_partitioning_line_from_cart_coords(
-            site_cart_coords,
-            neigh_cart_coords,
+        elf_positions, elf_values, label_values = (
+            self.get_partitioning_line_from_cart_coords(
+                site_cart_coords,
+                neigh_cart_coords,
+            )
         )
 
-        elf_min_index = np.where(np.array(label_values)==site_index)[0].max()
+        elf_min_index = np.where(np.array(label_values) == site_index)[0].max()
         refined_index = self._refine_line_part_frac(elf_positions, elf_min_index, "min")
-        distance_to_min = refined_index[2]*bond_dist
+        distance_to_min = refined_index[2] * bond_dist
 
         return distance_to_min
 
@@ -856,8 +859,10 @@ class PartitioningToolkit:
         neigh_voxel_coord = grid.get_voxel_coords_from_cart(neigh_cart_coords)
 
         # we need a straight line between these two points.  get list of all ELF values
-        elf_coordinates, elf_values, label_values = self.get_partitioning_line_from_voxels(
-            site_voxel_coord, neigh_voxel_coord, method="linear"
+        elf_coordinates, elf_values, label_values = (
+            self.get_partitioning_line_from_voxels(
+                site_voxel_coord, neigh_voxel_coord, method="linear"
+            )
         )
 
         # find the minimum position and value along the elf_line
@@ -1236,9 +1241,9 @@ class PartitioningToolkit:
                 # site neighbor pair. We do this in the loop so that the reverse
                 # assignments don't need to be repeated
                 possible_unique_pairs.at[index, "partitioning_frac"] = frac
-                possible_unique_pairs.loc[
-                    reverse_condition, "partitioning_frac"
-                ] = reverse_frac
+                possible_unique_pairs.loc[reverse_condition, "partitioning_frac"] = (
+                    reverse_frac
+                )
 
                 # create another search condition for the full dataframe of site-neighbor pairs
                 search_condition1 = (
