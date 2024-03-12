@@ -213,64 +213,71 @@ class ElectrideFinder:
         logging.info("connecting voxelated basins")
         # Create a UnionFind class to keep track of each of our connections
         connections = UnionFind()
-        # Get each unique maximum ELF value
-        unique_maxima = np.flip(np.unique(basin_maxima))
-        # We want to reduce the total number of maxima we need to scan through.
-        # To do this, we look at which maxima are found above a value slightly
-        # below the highest ELF. If any maxima other than those at the highest
-        # ELF are found we expand out search slightly lower and repeat until
-        # no new peaks are found. Then we continue to the next highest ELF value
-        # that hasn't been assigned.
-        maxima_to_search = []
-        for max_elf in unique_maxima:
-            all_maxima = False
-            # Get the number of maxima at this ELF value
-            num_of_maxima_values = len(np.where(basin_maxima == max_elf)[0])
-            while not all_maxima:
-                # Get the number of maxima slightly below this value then check
-                # if it is the same as our starting number of maxima
-                contained_maxima_values = basin_maxima[basin_maxima >= max_elf - 0.05]
-                if len(contained_maxima_values) == num_of_maxima_values:
-                    all_maxima = True
-                else:
-                    # If the value has increased, we update our max_elf and the
-                    # number of maxima
-                    max_elf = contained_maxima_values.min()
-                    num_of_maxima_values = len(contained_maxima_values)
-            # Add the final maxima found to the maxima to search
-            maxima_to_search.append(max_elf)
-        maxima_to_search = np.flip(np.unique(maxima_to_search))
-        # Now we search through the reduced list of maxima we found above to
-        # see which basins connect slightly below their maximum ELF value
-        assigned_labels = []
-        for max_elf in tqdm(maxima_to_search, total=len(maxima_to_search)):
-            # get labels with max values above max_elf-0.05.
-            available_labels = np.where(basin_maxima >= max_elf - 0.05)[0]
-            available_labels = available_labels[
-                ~np.isin(available_labels, assigned_labels)
-            ]
-            if len(available_labels) == 0:
-                continue
-            # We add the labels at this elf maxima to our assigned labels so that we don't
-            # double assign later.
-            assigned_labels.extend(np.where(basin_maxima >= max_elf)[0])
-            # Set conditions for what ELF to search for connections. The first condition
-            # removes data that has elf valuse below our cutoff of max_elf-0.05. The
-            # second condition removes data from basins we have already searched
-            # get ELF grid with only data at max_elf-0.01 and above.
-            condition1 = supercell_elf_data >= max_elf - 0.05
-            condition2 = np.isin(supercell_label_data, available_labels)
-            # reduce the elf data to only data matching our conditions, then get a new
-            # array that is labeled with the number of features
-            reduced_elf_data = np.where(condition1 & condition2, supercell_elf_data, 0)
-            featured_data, num_features = label(reduced_elf_data)
-            # Now we look at each feature
-            for feature in range(num_features):
-                feature += 1
-                mask = featured_data == feature
-                connected_labels = np.unique(supercell_label_data[mask])
-                for basin_label in connected_labels[1:]:
-                    connections.union(connected_labels[0], basin_label)
+        for i, site in tqdm(enumerate(structure), total=len(structure)):
+            site_maxima = np.where(basin_closest_atom==i)[0]
+            site_basin_maxima = basin_maxima[site_maxima]
+            # site_supercell_elf_data = np.where(np.isin(supercell_label_data,site_maxima),supercell_elf_data,0)
+            # Get each unique maximum ELF value
+            unique_maxima = np.flip(np.unique(site_basin_maxima))
+            # We want to reduce the total number of maxima we need to scan through.
+            # To do this, we look at which maxima are found above a value slightly
+            # below the highest ELF. If any maxima other than those at the highest
+            # ELF are found we expand out search slightly lower and repeat until
+            # no new peaks are found. Then we continue to the next highest ELF value
+            # that hasn't been assigned.
+            maxima_to_search = []
+            for max_elf in unique_maxima:
+                all_maxima = False
+                # Get the number of maxima at this ELF value
+                num_of_maxima_values = len(np.where(site_basin_maxima == max_elf)[0])
+                while not all_maxima:
+                    # Get the number of maxima slightly below this value then check
+                    # if it is the same as our starting number of maxima
+                    contained_maxima_values = site_basin_maxima[site_basin_maxima >= max_elf - 0.05]
+                    if len(contained_maxima_values) == num_of_maxima_values:
+                        all_maxima = True
+                    else:
+                        # If the value has increased, we update our max_elf and the
+                        # number of maxima
+                        max_elf = contained_maxima_values.min()
+                        num_of_maxima_values = len(contained_maxima_values)
+                # Add the final maxima found to the maxima to search
+                maxima_to_search.append(max_elf)
+            maxima_to_search = np.flip(np.unique(maxima_to_search))
+            # Now we search through the reduced list of maxima we found above to
+            # see which basins connect slightly below their maximum ELF value
+            assigned_labels = []
+            for max_elf in maxima_to_search:
+                # get labels with max values above max_elf-0.05.
+                available_labels = np.where(site_basin_maxima >= max_elf - 0.05)[0]
+                available_labels = available_labels[
+                    ~np.isin(available_labels, assigned_labels)
+                ]
+                # We have the available labels in terms of those available for this
+                # atom. We need those available from the total list of labels
+                available_labels = site_maxima[available_labels]
+                if len(available_labels) == 0:
+                    continue
+                # We add the labels at this elf maxima to our assigned labels so that we don't
+                # double assign later.
+                assigned_labels.extend(np.where(site_basin_maxima >= max_elf)[0])
+                # Set conditions for what ELF to search for connections. The first condition
+                # removes data that has elf valuse below our cutoff of max_elf-0.05. The
+                # second condition removes data from basins we have already searched
+                # get ELF grid with only data at max_elf-0.01 and above.
+                condition1 = supercell_elf_data >= max_elf - 0.05
+                condition2 = np.isin(supercell_label_data, available_labels)
+                # reduce the elf data to only data matching our conditions, then get a new
+                # array that is labeled with the number of features
+                reduced_elf_data = np.where(condition1 & condition2, supercell_elf_data, 0)
+                featured_data, num_features = label(reduced_elf_data)
+                # Now we look at each feature
+                for feature in range(num_features):
+                    feature += 1
+                    mask = (featured_data == feature)
+                    connected_labels = np.unique(supercell_label_data[mask])
+                    for basin_label in connected_labels[1:]:
+                        connections.union(connected_labels[0], basin_label)
 
         ###############################################################################
         # We now have each of the basins connected after accounting for voxelation. This

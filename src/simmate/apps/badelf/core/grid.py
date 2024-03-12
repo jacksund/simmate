@@ -3,6 +3,7 @@
 import itertools
 import logging
 from pathlib import Path
+from functools import cached_property
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -88,13 +89,27 @@ class Grid(VolumetricData):
         frac_coords[:, 2] /= c
         return frac_coords
 
-    @property
+    @cached_property
     def voxel_dist_to_origin(self):
         frac_coords = self.all_voxel_frac_coords
         cart_coords = self.get_cart_coords_from_frac_full_array(frac_coords)
-        voxel_distances = np.linalg.norm(cart_coords, axis=1).round(6)
-        voxel_distances = voxel_distances.reshape(self.shape)
-        return voxel_distances
+        corners = [
+            np.array([0,0,0]),
+            self.a,
+            self.b,
+            self.c,
+            self.a+self.b,
+            self.a+self.c,
+            self.b+self.c,
+            self.a+self.b+self.c
+            ]
+        distances = []
+        for corner in corners:
+            voxel_distances = np.linalg.norm(cart_coords-corner, axis=1).round(6)
+            distances.append(voxel_distances)
+        min_distances = np.min(np.column_stack(distances),axis=1)
+        min_distances = min_distances.reshape(self.shape)
+        return min_distances
 
     @property
     def voxel_volume(self):
@@ -248,19 +263,11 @@ class Grid(VolumetricData):
         voxel_distances = self.voxel_dist_to_origin
 
         # Get the indices that are within the radius
-        corner_indices = np.where(voxel_distances <= radius)
-        corner_indices = np.column_stack(corner_indices)
-        # Get the transformations to get the other sections of the sphere
-        corner_trans = list(itertools.product([-1, 1], repeat=3))
-        sphere_indices = []
-        for trans in corner_trans:
-            new_indices = corner_indices * trans
-            sphere_indices.append(new_indices)
-        sphere_indices = np.concatenate(sphere_indices)
+        sphere_indices = np.where(voxel_distances <= radius)
+        sphere_indices = np.column_stack(sphere_indices)
 
         # Get indices relative to the voxel
         sphere_indices = sphere_indices + voxel
-
         # adjust voxels to wrap around grid
         # line = [[round(float(a % b), 12) for a, b in zip(position, grid_data.shape)]]
         new_x = (sphere_indices[:, 0] % self.shape[0]).astype(int)
