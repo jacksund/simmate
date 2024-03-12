@@ -34,9 +34,9 @@ class BadElfToolkit:
             contains charge density.
         directory (Path):
             The Path to perform the analysis in.
-        cores (int):
-            The number of cores (NOT threads) to use for voxel assignment.
-            Defaults to 0.9*the total number of cores available.
+        threads (int):
+            The number of threads to use for voxel assignment.
+            Defaults to 0.9*the total number of threads available.
         algorithm (str):
             The algorithm to use for partitioning. Options are "badelf", "voronelf",
             or "zero-flux".
@@ -52,16 +52,16 @@ class BadElfToolkit:
         partitioning_grid: Grid,
         charge_grid: Grid,
         directory: Path,
-        cores: int = None,
+        threads: int = None,
         algorithm: str = "badelf",
         find_electrides: bool = True,
     ):
         if partitioning_grid.structure != charge_grid.structure:
             raise ValueError("Grid structures must be the same.")
-        if cores is None:
-            self.cores = math.floor(len(psutil.Process().cpu_affinity()) * 0.9 / 2)
+        if threads is None:
+            self.threads = math.floor(psutil.Process().num_threads() * 0.9 / 2)
         else:
-            self.cores = cores
+            self.threads = threads
 
         # Check if POTCAR exists in path. If not, throw warning
         if not (directory / "POTCAR").exists():
@@ -104,7 +104,9 @@ class BadElfToolkit:
                 self.partitioning_grid.copy(),
                 self.directory,
             ).get_electride_structure(
-                electride_finder_cutoff=self.electride_finder_cutoff
+                electride_finder_cutoff=self.electride_finder_cutoff,
+                check_for_covalency=self.check_for_covalency,
+                threads=self.threads,
             )
         else:
             electride_structure = self.structure
@@ -253,7 +255,7 @@ class BadElfToolkit:
         bader_grid = self.partitioning_grid.copy()
         bader_grid.structure = self.electride_structure
         #!!! I need to set a value for number of threads
-        bader = bader_grid.run_pybader()
+        bader = bader_grid.run_pybader(threads=self.cores)
         return bader
 
     @cached_property
@@ -787,7 +789,7 @@ class BadElfToolkit:
         voxel_assignment_array = self.voxel_assignments_array
         if file_type == "ELFCAR":
             grid = self.partitioning_grid.copy()
-            grid = grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
+            # grid = grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
         elif file_type == "CHGCAR":
             grid = self.charge_grid.copy()
         else:
@@ -849,7 +851,7 @@ class BadElfToolkit:
         voxel_assignment_array = self.voxel_assignments_array
         if file_type == "ELFCAR":
             grid = self.partitioning_grid.copy()
-            grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
+            # grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
         elif file_type == "CHGCAR":
             grid = self.charge_grid.copy()
         else:

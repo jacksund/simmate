@@ -242,6 +242,34 @@ class Grid(VolumetricData):
             supercell[x, y, z] = raveled_data
         return supercell
 
+    def get_voxels_in_radius(self, radius, voxel):
+        voxel = np.array(voxel)
+        # Get the distance from each voxel to the origin
+        voxel_distances = self.voxel_dist_to_origin
+
+        # Get the indices that are within the radius
+        corner_indices = np.where(voxel_distances <= radius)
+        corner_indices = np.column_stack(corner_indices)
+        # Get the transformations to get the other sections of the sphere
+        corner_trans = list(itertools.product([-1, 1], repeat=3))
+        sphere_indices = []
+        for trans in corner_trans:
+            new_indices = corner_indices * trans
+            sphere_indices.append(new_indices)
+        sphere_indices = np.concatenate(sphere_indices)
+
+        # Get indices relative to the voxel
+        sphere_indices = sphere_indices + voxel
+
+        # adjust voxels to wrap around grid
+        # line = [[round(float(a % b), 12) for a, b in zip(position, grid_data.shape)]]
+        new_x = (sphere_indices[:, 0] % self.shape[0]).astype(int)
+        new_y = (sphere_indices[:, 1] % self.shape[1]).astype(int)
+        new_z = (sphere_indices[:, 2] % self.shape[2]).astype(int)
+        sphere_indices = np.column_stack([new_x, new_y, new_z])
+        # return new_x, new_y, new_z
+        return sphere_indices
+
     def get_padded_grid_axes(self, padding: int = 0):
         """
         Gets the the possible indices for each dimension of a padded grid.

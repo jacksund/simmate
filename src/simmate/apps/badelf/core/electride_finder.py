@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
+import math
 from functools import cached_property
 from pathlib import Path
 
 import numpy as np
+import psutil
 from networkx.utils import UnionFind
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from scipy.ndimage import label
@@ -144,7 +146,8 @@ class ElectrideFinder:
     def get_electride_structure(
         self,
         electride_finder_cutoff: float = 0.5,
-        remove_old_electrides: bool = False,
+        threads: int = None,
+        check_for_covalency: bool = True,
     ):
         """
         Finds the electrides in a structure using an ELF grid.
@@ -153,10 +156,11 @@ class ElectrideFinder:
             electride_finder_cutoff (float):
                 The minimum elf value at the site to be considered a possible
                 electride. The default is 0.5.
-            remove_old_electrides (bool):
-                Whether or not to remove any other electrides already placed in
-                the system. It is generally recommended that structures without
-                electrides are provided.
+            check_for_covalency (bool):
+                Whether to prevent a structure from being found if covalency is
+                found in the structure. It is highly recommended to keep this as
+                True as there is currently no method implemented to handle
+                covalency.
 
         Returns:
             A structure object with the found electride sites labeled with "He"
@@ -169,7 +173,8 @@ class ElectrideFinder:
         # Get the basins and assigned voxels
         elf_grid = self.grid
         local_maxima = self.local_maxima
-        bader = elf_grid.run_pybader(8)
+        threads = math.floor(psutil.Process().num_threads() * 0.9 / 2)
+        bader = elf_grid.run_pybader(threads)
 
         # Get the voxel indices for each found maxima
         basin_maxima_vox_coords = elf_grid.get_vox_coords_from_frac_full_array(
@@ -300,16 +305,23 @@ class ElectrideFinder:
         for i, site in enumerate(structure):
             # Get the voxel coordinate for this site, then get the basin it
             # belongs to
-            voxel_coord = elf_grid.get_voxel_coords_from_frac(site.frac_coords).astype(
-                int
-            )
-            basin_label = basin_labeled_voxels[
-                voxel_coord[0], voxel_coord[1], voxel_coord[2]
-            ]
-            # Assign this basin to the site
-            basin_labeled_voxels = np.where(
-                basin_labeled_voxels == basin_label, i, basin_labeled_voxels
-            )
+            atom_voxel_coord = elf_grid.get_voxel_coords_from_frac(
+                site.frac_coords
+            ).astype(int)
+            # Get the voxels in a sphere around the atom
+            nearby_voxels = elf_grid.get_voxels_in_radius(0.3, atom_voxel_coord)
+            # get the label for each of these voxel coords
+            basin_labels = []
+            for voxel_coord in nearby_voxels:
+                basin_label = basin_labeled_voxels[
+                    voxel_coord[0], voxel_coord[1], voxel_coord[2]
+                ]
+                basin_labels.append(basin_label)
+            # Assign these basins to the site
+            for basin_label in np.unique(basin_labels):
+                basin_labeled_voxels = np.where(
+                    basin_labeled_voxels == basin_label, i, basin_labeled_voxels
+                )
         # Next we assign the basins where the maximum ELF value is less than
         # the electride finder cutoff
         basin_maxima_labels = basin_labeled_voxels[
@@ -379,6 +391,17 @@ class ElectrideFinder:
                         basin_labeled_voxels == basin_label, i, basin_labeled_voxels
                     )
                     break
+        # We want to check that every atom has some assigned volume. If not, there
+        # is likely covalency or a paw potential is used where there are no
+        # core electrons remaining on an atom.
+        if not np.all(
+            np.isin([i for i in range(len(structure))], np.unique(basin_labeled_voxels))
+        ):
+            if check_for_covalency:
+                raise Exception(
+                    """At least one atom was not assigned a zero-flux basin. This can result from covalency or from pseudo-potentials with only valence electrons 
+(e.g. Al, Si, B in VASP 5.X.X)."""
+                )
 
         ###############################################################################
         # This section focuses on assigning remaining basins to electrides or covalent
@@ -459,7 +482,7 @@ class ElectrideFinder:
             condition_array1 = site_neigh_dists - 0.1 < total_dist
             condition_array2 = total_dist < site_neigh_dists + 0.1
             # If there is a covalent bond, throw an error.
-            if np.any(condition_array1 & condition_array2):
+            if np.any(condition_array1 & condition_array2) and check_for_covalency:
                 raise Exception("Covalency found in structure")
             else:
                 electride_structure.append(

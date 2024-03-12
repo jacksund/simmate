@@ -1402,11 +1402,6 @@ class PartitioningToolkit:
         Gets the partitioning planes for each atom as well as some other useful
         information.
 
-        Args:
-            check_for_covalency (bool):
-                Whether to check the structure for signs of covalency. This can
-                be turned off, but it may give strange results!
-
         Returns:
             A dictionary where the keys are site indices and the values
             are neighbor dictionaries containing information on the partitioning
