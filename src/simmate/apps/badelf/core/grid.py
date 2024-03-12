@@ -2,8 +2,8 @@
 
 import itertools
 import logging
-from pathlib import Path
 from functools import cached_property
+from pathlib import Path
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -94,20 +94,20 @@ class Grid(VolumetricData):
         frac_coords = self.all_voxel_frac_coords
         cart_coords = self.get_cart_coords_from_frac_full_array(frac_coords)
         corners = [
-            np.array([0,0,0]),
+            np.array([0, 0, 0]),
             self.a,
             self.b,
             self.c,
-            self.a+self.b,
-            self.a+self.c,
-            self.b+self.c,
-            self.a+self.b+self.c
-            ]
+            self.a + self.b,
+            self.a + self.c,
+            self.b + self.c,
+            self.a + self.b + self.c,
+        ]
         distances = []
         for corner in corners:
-            voxel_distances = np.linalg.norm(cart_coords-corner, axis=1).round(6)
+            voxel_distances = np.linalg.norm(cart_coords - corner, axis=1).round(6)
             distances.append(voxel_distances)
-        min_distances = np.min(np.column_stack(distances),axis=1)
+        min_distances = np.min(np.column_stack(distances), axis=1)
         min_distances = min_distances.reshape(self.shape)
         return min_distances
 

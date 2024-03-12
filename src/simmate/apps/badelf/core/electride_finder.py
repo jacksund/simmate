@@ -214,7 +214,7 @@ class ElectrideFinder:
         # Create a UnionFind class to keep track of each of our connections
         connections = UnionFind()
         for i, site in tqdm(enumerate(structure), total=len(structure)):
-            site_maxima = np.where(basin_closest_atom==i)[0]
+            site_maxima = np.where(basin_closest_atom == i)[0]
             site_basin_maxima = basin_maxima[site_maxima]
             # site_supercell_elf_data = np.where(np.isin(supercell_label_data,site_maxima),supercell_elf_data,0)
             # Get each unique maximum ELF value
@@ -233,7 +233,9 @@ class ElectrideFinder:
                 while not all_maxima:
                     # Get the number of maxima slightly below this value then check
                     # if it is the same as our starting number of maxima
-                    contained_maxima_values = site_basin_maxima[site_basin_maxima >= max_elf - 0.05]
+                    contained_maxima_values = site_basin_maxima[
+                        site_basin_maxima >= max_elf - 0.05
+                    ]
                     if len(contained_maxima_values) == num_of_maxima_values:
                         all_maxima = True
                     else:
@@ -269,12 +271,14 @@ class ElectrideFinder:
                 condition2 = np.isin(supercell_label_data, available_labels)
                 # reduce the elf data to only data matching our conditions, then get a new
                 # array that is labeled with the number of features
-                reduced_elf_data = np.where(condition1 & condition2, supercell_elf_data, 0)
+                reduced_elf_data = np.where(
+                    condition1 & condition2, supercell_elf_data, 0
+                )
                 featured_data, num_features = label(reduced_elf_data)
                 # Now we look at each feature
                 for feature in range(num_features):
                     feature += 1
-                    mask = (featured_data == feature)
+                    mask = featured_data == feature
                     connected_labels = np.unique(supercell_label_data[mask])
                     for basin_label in connected_labels[1:]:
                         connections.union(connected_labels[0], basin_label)
