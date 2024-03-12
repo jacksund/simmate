@@ -255,7 +255,7 @@ class BadElfToolkit:
         bader_grid = self.partitioning_grid.copy()
         bader_grid.structure = self.electride_structure
         #!!! I need to set a value for number of threads
-        bader = bader_grid.run_pybader(threads=self.cores)
+        bader = bader_grid.run_pybader(threads=self.threads)
         return bader
 
     @cached_property

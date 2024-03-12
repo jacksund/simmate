@@ -562,11 +562,13 @@ class PartitioningToolkit:
                 bond_dist = row["dist"]
                 break
 
-        elf_positions, elf_values, label_values = (
-            self.get_partitioning_line_from_cart_coords(
-                site_cart_coords,
-                neigh_cart_coords,
-            )
+        (
+            elf_positions,
+            elf_values,
+            label_values,
+        ) = self.get_partitioning_line_from_cart_coords(
+            site_cart_coords,
+            neigh_cart_coords,
         )
 
         elf_min_index = np.where(np.array(label_values) == site_index)[0].max()
@@ -859,10 +861,12 @@ class PartitioningToolkit:
         neigh_voxel_coord = grid.get_voxel_coords_from_cart(neigh_cart_coords)
 
         # we need a straight line between these two points.  get list of all ELF values
-        elf_coordinates, elf_values, label_values = (
-            self.get_partitioning_line_from_voxels(
-                site_voxel_coord, neigh_voxel_coord, method="linear"
-            )
+        (
+            elf_coordinates,
+            elf_values,
+            label_values,
+        ) = self.get_partitioning_line_from_voxels(
+            site_voxel_coord, neigh_voxel_coord, method="linear"
         )
 
         # find the minimum position and value along the elf_line
@@ -1241,9 +1245,9 @@ class PartitioningToolkit:
                 # site neighbor pair. We do this in the loop so that the reverse
                 # assignments don't need to be repeated
                 possible_unique_pairs.at[index, "partitioning_frac"] = frac
-                possible_unique_pairs.loc[reverse_condition, "partitioning_frac"] = (
-                    reverse_frac
-                )
+                possible_unique_pairs.loc[
+                    reverse_condition, "partitioning_frac"
+                ] = reverse_frac
 
                 # create another search condition for the full dataframe of site-neighbor pairs
                 search_condition1 = (
