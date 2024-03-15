@@ -365,7 +365,10 @@ class PartitioningToolkit:
                 )
                 new_maxima = []
                 for maximum in maxima:
-                    if np.isin(maximum[0], unrelated_indices) and (maximum[1]-min(values))>0.01:
+                    if (
+                        np.isin(maximum[0], unrelated_indices)
+                        and (maximum[1] - min(values)) > 0.01
+                    ):
                         new_maxima.append(maximum)
                 if len(new_maxima) > 0:
                     elf_min_index = self.get_closest_extrema_to_center(
@@ -1250,9 +1253,9 @@ class PartitioningToolkit:
                 # site neighbor pair. We do this in the loop so that the reverse
                 # assignments don't need to be repeated
                 possible_unique_pairs.at[index, "partitioning_frac"] = frac
-                possible_unique_pairs.loc[
-                    reverse_condition, "partitioning_frac"
-                ] = reverse_frac
+                possible_unique_pairs.loc[reverse_condition, "partitioning_frac"] = (
+                    reverse_frac
+                )
 
                 # create another search condition for the full dataframe of site-neighbor pairs
                 search_condition1 = (
