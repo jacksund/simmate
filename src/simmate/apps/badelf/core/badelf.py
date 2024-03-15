@@ -488,7 +488,10 @@ class BadElfToolkit:
         # exist in the electride ELF
         #######################################################################
         logging.info("Finding dimensionality cutoffs")
-        dimensions = [3, 2, 1, 0]
+        #!!! This might need to be changed to something slightly above 1?
+        highest_dimension = self.get_ELF_dimensionality(elf_grid, 0)
+        dimensions = [i for i in range(0,highest_dimension+1)]
+        dimensions.reverse()
         # Create lists for the refined dimensions
         final_dimensions = []
         final_connections = []

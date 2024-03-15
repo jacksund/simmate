@@ -99,6 +99,7 @@ class ElectrideFinder:
         new_maxima_frac_coords = np.where(
             new_maxima_frac_coords == 1, 0, new_maxima_frac_coords
         )
+        new_maxima_frac_coords = new_maxima_frac_coords.round(5)
         # maxima_cart_coords = grid.get_cart_coords_from_vox_full_array(maxima_vox_coords)
         return new_maxima_frac_coords  # , maxima_values
 
@@ -171,8 +172,8 @@ class ElectrideFinder:
         # basins
         ###############################################################################
         # Get the basins and assigned voxels
-        elf_grid = self.grid
-        local_maxima = self.local_maxima
+        elf_grid = self.grid.copy()
+        local_maxima = self.find_local_maxima(threshold=electride_finder_cutoff)
         threads = math.floor(psutil.Process().num_threads() * 0.9 / 2)
         bader = elf_grid.run_pybader(threads)
 
@@ -447,6 +448,7 @@ class ElectrideFinder:
         # !!! I'm not entirely sure why this needs to happen. pybader seems to find more
         # electrides than the Henkelman group or my own algorithm.
         for frac_coord in maxima_structure.frac_coords:
+            frac_coord = frac_coord.round(5)
             if np.any(np.all(frac_coord == local_maxima, axis=1)):
                 final_maxima_structure.append("He", frac_coord)
         # Get the final cartesian coordinates for the reduced maxima

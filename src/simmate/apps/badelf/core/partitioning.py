@@ -354,13 +354,18 @@ class PartitioningToolkit:
                 # causes the assignment to be placed very far from what is reasonable.
                 # to handle this we check if there is a maximum in the unrelated area
                 # and if not we assign as above.
+                # There is a potential for a bug where a very small maximum is
+                # found using linear interpolation that is then removed with
+                # cubic interpolation. This actually happened with Ba2N. To deal
+                # with this, I've added a cutoff where the maximum must be at
+                # least 0.01 greater than the absolute minimum of the values
                 maxima = self.find_maximum(values)
                 unrelated_indices = np.where(
                     ~np.isin(labels, [site_index, neigh_index])
                 )
                 new_maxima = []
                 for maximum in maxima:
-                    if np.isin(maximum[0], unrelated_indices):
+                    if np.isin(maximum[0], unrelated_indices) and (maximum[1]-min(values))>0.01:
                         new_maxima.append(maximum)
                 if len(new_maxima) > 0:
                     elf_min_index = self.get_closest_extrema_to_center(
