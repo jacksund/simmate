@@ -41,7 +41,7 @@ class PartitioningToolkit:
         site_voxel_coord: ArrayLike | list,
         neigh_voxel_coord: ArrayLike | list,
         method: str = "linear",
-        steps: int = 200,
+        steps: int = 200,  #!!! This should be set dynamically in the future
     ):
         """
         Finds a line of voxel positions between two atom sites and then finds the value

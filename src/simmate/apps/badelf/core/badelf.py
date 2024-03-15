@@ -237,7 +237,11 @@ class BadElfToolkit:
             # Get which sites this voxel is split by
             possible_sites = np.where(split_voxel != 0)[0]
             # Pick one randomly
-            site_choice = np.random.choice(possible_sites)
+            # site_choice = np.random.choice(possible_sites)
+            # !!! For the purposes of electride dimensionality it is better to
+            # assign shared voxels to electrides which always have higher index
+            # values.
+            site_choice = possible_sites.max()
             # append it to our list
             random_voxel_assignments.append(site_choice)
         # Get the single site assignments and subtract one to get to sites
@@ -254,7 +258,6 @@ class BadElfToolkit:
         """
         bader_grid = self.partitioning_grid.copy()
         bader_grid.structure = self.electride_structure
-        #!!! I need to set a value for number of threads
         bader = bader_grid.run_pybader(threads=self.threads)
         return bader
 
@@ -289,7 +292,6 @@ class BadElfToolkit:
         if algorithm == "zero-flux":
             single_site_voxel_assignments = all_voxel_site_assignments
             multi_site_voxel_assignments = np.array([])
-            #!!! Need to assign multi-site voxel assignments as empty array
 
         # Get the objects that we'll need to assign voxels.
         elif algorithm in ["badelf", "voronelf"]:
@@ -352,11 +354,12 @@ class BadElfToolkit:
         data = grid.total
         voxel_indices = np.indices(grid.shape).reshape(3, -1).T
         # Remove data below our cutoff
-        thresholded_data = np.where(data < cutoff, 0, 1)
+        thresholded_data = np.where(data <= cutoff, 0, 1)
         raveled_data = thresholded_data.ravel()
         # Label connected components in the eroded data. We will check each distinct
         # body to see if it connects in each direction
-        labels, num_features = label(thresholded_data)
+        structure = np.ones([3, 3, 3])
+        labels, num_features = label(thresholded_data, structure=structure)
         if num_features == 0:
             return 0
         # We need to get one voxel in each of the features that we can transpose
@@ -488,13 +491,13 @@ class BadElfToolkit:
         # exist in the electride ELF
         #######################################################################
         logging.info("Finding dimensionality cutoffs")
-        #!!! This might need to be changed to something slightly above 1?
+        logging.info("Calculating dimensionality at 0 ELF")
         highest_dimension = self.get_ELF_dimensionality(elf_grid, 0)
-        dimensions = [i for i in range(0, highest_dimension + 1)]
+        dimensions = [i for i in range(0, highest_dimension)]
         dimensions.reverse()
         # Create lists for the refined dimensions
-        final_dimensions = []
-        final_connections = []
+        final_dimensions = [highest_dimension]
+        final_connections = [0]
         amounts_to_change = []
         # We refine by guessing the cutoff is 0.5 then increasing or decreasing by
         # 0.25, then 0.125 etc. down to 0.000015259.

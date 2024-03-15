@@ -275,7 +275,8 @@ class ElectrideFinder:
                 reduced_elf_data = np.where(
                     condition1 & condition2, supercell_elf_data, 0
                 )
-                featured_data, num_features = label(reduced_elf_data)
+                label_structure = np.ones([3, 3, 3])
+                featured_data, num_features = label(reduced_elf_data, label_structure)
                 # Now we look at each feature
                 for feature in range(num_features):
                     feature += 1

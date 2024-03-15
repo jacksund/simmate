@@ -482,12 +482,15 @@ class VoxelAssignmentToolkit:
 
         # First, we want to define what the maximum reasonable distance a voxel can
         # be from an atom and still have useful planes. This is chosen as the maximum
-        # distance from an atom to one of its neighbors. !!! This may be to large if
-        # I'm not reducing possible planes at all
+        # distance from an atom to one of its neighbors.
+        # !!! This may be too large if I'm not reducing possible planes at all.
+
         max_atom_dists = []
+        # breakpoint()
         for site_df in self.partitioning.values():
             dists = site_df["dist"]
             max_atom_dists.append(max(dists))
+
         max_atom_dists = np.array(max_atom_dists)
         max_atom_dists = np.tile(max_atom_dists, (len(voxel_frac_coords), 1))
         all_valid_atoms = []
