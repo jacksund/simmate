@@ -12,6 +12,7 @@ from numpy.typing import ArrayLike
 from pybader.interface import Bader
 from pymatgen.analysis.local_env import CrystalNN
 from scipy.interpolate import RegularGridInterpolator
+from scipy.signal import savgol_filter
 from scipy.spatial import ConvexHull
 from tqdm import tqdm
 
@@ -306,6 +307,12 @@ class PartitioningToolkit:
         results:
             The global minimum of form [line_position, value, frac_position]
         """
+        # In some cases I have found that linear interpolation near electride
+        # sites is wavy resulting in many maxima and causing problems with the
+        # partitioning. To deal with this I put the linear values through a
+        # savgol filter
+        values = savgol_filter(values, 20, 3)
+
         site_equiv = self.grid.equivalent_atoms[site_index]
         neigh_equiv = self.grid.equivalent_atoms[neigh_index]
         # get the string for the site and neigh. During the electride dimensionality
@@ -380,7 +387,10 @@ class PartitioningToolkit:
                     extrema = "min"
 
             global_min = self._refine_line_part_frac(
-                positions=positions, elf_min_index=elf_min_index, extrema=extrema
+                positions=positions,
+                elf_min_index=elf_min_index,
+                extrema=extrema,
+                labels=labels,
             )
 
         return global_min
@@ -390,6 +400,7 @@ class PartitioningToolkit:
         positions: list,
         elf_min_index: int,
         extrema: str,
+        labels: list,
     ):
         """
         Refines the location of the minimum along an ELF line between two sites.
@@ -493,11 +504,14 @@ class PartitioningToolkit:
         # now that we've found the values surrounding the minimum of our line,
         # we can fit these values to a 2nd degree polynomial and solve for its
         # minimum point
-        d, e, f = np.polyfit(line_section_x, values_fine, 2)
-        x = -e / (2 * d)
-        elf_min_index_new = x
-        elf_min_value_new = np.polyval(np.array([d, e, f]), x)
-        elf_min_frac_new = elf_min_index_new / (len(positions) - 1)
+        try:
+            d, e, f = np.polyfit(line_section_x, values_fine, 2)
+            x = -e / (2 * d)
+            elf_min_index_new = x
+            elf_min_value_new = np.polyval(np.array([d, e, f]), x)
+            elf_min_frac_new = elf_min_index_new / (len(positions) - 1)
+        except:
+            breakpoint()
 
         return [elf_min_index_new, elf_min_value_new, elf_min_frac_new]
 
