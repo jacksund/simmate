@@ -611,11 +611,15 @@ class VoxelAssignmentToolkit:
         all_voxel_assignments = all_site_voxel_assignments.copy()
         # Search for unassigned voxels
         unassigned_indices = np.where(all_voxel_assignments == 0)[0]
-        all_voxel_frac_coords = self.all_voxel_frac_coords
-        frac_coords_to_find = all_voxel_frac_coords[unassigned_indices]
-        multi_site_voxel_assignments = (
-            self.get_multi_site_assignments_from_frac_coords_with_memory_handling(
-                frac_coords_to_find
+        if len(unassigned_indices) > 0:
+            all_voxel_frac_coords = self.all_voxel_frac_coords
+            frac_coords_to_find = all_voxel_frac_coords[unassigned_indices]
+            multi_site_voxel_assignments = (
+                self.get_multi_site_assignments_from_frac_coords_with_memory_handling(
+                    frac_coords_to_find
+                )
             )
-        )
-        return multi_site_voxel_assignments
+            return multi_site_voxel_assignments
+        else:
+            logging.info("No sites found outside partitioning.")
+            return np.array([])
