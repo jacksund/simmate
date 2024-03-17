@@ -365,11 +365,17 @@ class BadElfToolkit:
         # We need to get one voxel in each of the features that we can transpose
         # later on
         feature_indices = []
-        for feature in range(num_features):
-            feature_num = feature + 1
-            indices = np.where(labels == feature_num)
-            x, y, z = indices[0][0], indices[1][0], indices[2][0]
-            feature_indices.append(np.array([x, y, z]))
+        for i, site in enumerate(grid.structure):
+            if site.species_string == "He":
+                frac_coords = site.frac_coords
+                voxel_coords = grid.get_voxel_coords_from_frac(frac_coords).astype(int)
+                # Make sure that the label is not 0
+                site_label = labels[voxel_coords[0],voxel_coords[1],voxel_coords[2]]
+                if site_label != 0:
+                    feature_indices.append(voxel_coords)
+        if len(feature_indices) == 0:
+            return 0
+
         # We are going to need to translate the above voxels and the entire unit
         # cell so we create a list of desired transformations
         transformations = [
@@ -485,6 +491,7 @@ class BadElfToolkit:
             np.isin(voxel_assignment_array, electride_indices), elf_grid.total, 0
         )
         elf_grid.total = elf_array
+        elf_grid.structure = self.electride_structure
 
         #######################################################################
         # This section scans across different cutoffs to determine what dimensionalities
