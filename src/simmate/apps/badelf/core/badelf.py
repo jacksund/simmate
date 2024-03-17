@@ -370,7 +370,7 @@ class BadElfToolkit:
                 frac_coords = site.frac_coords
                 voxel_coords = grid.get_voxel_coords_from_frac(frac_coords).astype(int)
                 # Make sure that the label is not 0
-                site_label = labels[voxel_coords[0],voxel_coords[1],voxel_coords[2]]
+                site_label = labels[voxel_coords[0], voxel_coords[1], voxel_coords[2]]
                 if site_label != 0:
                     feature_indices.append(voxel_coords)
         if len(feature_indices) == 0:
