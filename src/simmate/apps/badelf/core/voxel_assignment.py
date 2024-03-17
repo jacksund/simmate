@@ -489,7 +489,9 @@ class VoxelAssignmentToolkit:
         # breakpoint()
         for site_df in self.partitioning.values():
             dists = site_df["dist"]
-            max_atom_dists.append(max(dists))
+            neigh_site = site_df.loc[len(site_df)-1,"neigh_index"]
+            neigh_radius = self.partitioning[neigh_site].loc[0,"radius"]
+            max_atom_dists.append(max(dists)-neigh_radius)
 
         max_atom_dists = np.array(max_atom_dists)
         max_atom_dists = np.tile(max_atom_dists, (len(voxel_frac_coords), 1))
