@@ -1469,6 +1469,7 @@ class PartitioningToolkit:
             reduced_planes = np.concatenate(
                 (reduced_plane_points, reduced_plane_vectors), axis=1
             )
+            reduced_planes[np.where(reduced_planes == 0)] = 1e-12
             important_planes = reduced_planes.copy()
             # Get the important planes more rigorously by checking which planes
             # contribute to the vertices of the polyhedral shape surrounding
