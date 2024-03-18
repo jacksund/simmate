@@ -1457,6 +1457,7 @@ class PartitioningToolkit:
             planes = np.concatenate(
                 (np.array(plane_points), np.array(plane_vectors)), axis=1
             )
+            planes[np.where(planes == 0)] = 1e-12
             dists = site_dataframe["dist"]
             site_cart_coord = structure[site_index].coords
             # reduce the planes by checking if any of the line segments
@@ -1482,6 +1483,7 @@ class PartitioningToolkit:
             reduced_indices = np.where((planes[:, None] == reduced_planes).all(axis=2))[
                 1
             ]
+
             reduced_plane_indices[site_index] = reduced_indices
 
         # Go through each site, get the corresponding important planes using
