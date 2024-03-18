@@ -461,6 +461,111 @@ class VoxelAssignmentToolkit:
         all_voxel_assignments[unassigned_indices] = single_site_voxel_assignments
         return all_voxel_assignments
 
+    def get_plane_split_voxel_assignments(self, voxel_frac_coords):
+        """
+        Gets the voxel assignments for voxels that are exactly on a plane.
+
+        Args:
+            voxel_frac_coords (ArrayLike):
+                A 2D array representing the fractional coordinates of voxels
+                that haven't been assigned
+
+        Returns:
+            A 2D array of shape (N,M) where N is the length of the input array
+            and M is the number of atoms. A 1 means the atom is assigned this
+            voxel.
+        """
+        logging.info("Calculating assignments for voxels on planes")
+        if self.algorithm == "badelf":
+            structure = self.charge_grid.structure
+        elif self.algorithm == "voronelf":
+            structure = self.electride_structure
+        grid = self.charge_grid
+        plane_equations = self.all_plane_equations
+        number_of_planes_per_atom = self.number_of_planes_per_atom
+        unit_cell_permutations_frac = self.unit_cell_permutations_frac
+
+        # Create an array of zeros to map back to
+        zeros_array = np.zeros([len(voxel_frac_coords), len(structure)])
+        # Create an array that the results will be added to
+        results_array = zeros_array.copy()
+
+        # create zeros array for any problems
+        # global_indices_to_zero = np.array([])
+        # check every possible permutation
+        for transformation in tqdm(
+            unit_cell_permutations_frac,
+            total=len(unit_cell_permutations_frac),
+            ascii="░▒▓",
+        ):
+            # Get the indices where voxels haven't been assigned. Get only these
+            # frac coords
+            new_frac_coords = voxel_frac_coords.copy()
+            # transform the fractional coords to the next transformation
+            x1, y1, z1 = transformation
+            new_frac_coords[:, 0] += x1
+            new_frac_coords[:, 1] += y1
+            new_frac_coords[:, 2] += z1
+            # Convert the frac coords into cartesian coords
+            cart_coords = grid.get_cart_coords_from_frac_full_array(
+                new_frac_coords
+            ).astype(float)
+            points = np.array(cart_coords).astype(float)
+            planes = np.array(plane_equations).astype(float)
+            # There is a difference in the speed of dask vs numpy. Dask has a
+            # lot of overhead, but at a certain point it is faster than numpy.
+            # We check which one we should use here.
+            plane_distances_to_calc = len(points) * len(planes)
+            if plane_distances_to_calc > 7.8e8:
+                dask = True
+            else:
+                dask = False
+
+            if dask:
+                # DASK ARRAY VERSION
+                # points = da.from_array(points)
+                # planes = da.from_array(planes)
+                distances = da.dot(points, planes[:, :3].T) + planes[:, 3]
+                # Round the distances to within 5 decimals. Everything to this point has
+                # been based on lattice position from vasp which typically have 5-6
+                # decimal places (7 sig figs)
+                distances = np.round(distances, 12)
+                # We write over the distances with a more simplified boolean to save
+                # space. This is also where we filter if we're near a plane if desired
+                distances = da.where(distances <= 0, True, False)
+                distances = distances.compute()
+
+            else:
+                # BASE NUMPY VERSION
+                distances = np.dot(points, planes[:, :3].T) + planes[:, 3]
+                # Round the distances to within 5 decimals. Everything to this point has
+                # been based on lattice position from vasp which typically have 5-6
+                # decimal places (7 sig figs)
+                distances = np.round(distances, 12)
+                # We write over the distances with a more simplified boolean to save
+                # space. This is also where we filter if we're near a plane if desired
+                distances = np.where(distances <= 0, True, False)
+
+            # split the array into the planes belonging to each atom. Again we write
+            # over to save space
+            distances = np.array_split(distances, number_of_planes_per_atom, axis=1)
+            # get a 1D array representing the voxel indices with the atom index where the
+            # voxel is assigned to a site and 0s where they are not
+            new_results_arrays = []
+            # for atom_index, atom_array in enumerate(distances_split_by_atom):
+            for atom_index, atom_array in enumerate(distances):
+                voxel_result = np.all(atom_array, axis=1)
+                voxel_result = np.where(
+                    voxel_result == True, atom_index + 1, voxel_result
+                )
+                new_results_arrays.append(voxel_result)
+
+            # add results to the results_array
+            results_array += np.column_stack(new_results_arrays)
+
+        results_array = np.where(results_array > 0, 1, 0)
+        return results_array
+
     def get_multi_site_voxel_assignments_from_frac_coords(
         self, voxel_frac_coords: ArrayLike
     ):
@@ -469,14 +574,21 @@ class VoxelAssignmentToolkit:
         surface.
 
         Args:
-            all_site_voxel_assignments (ArrayLike):
-                A 1D array of integers representing the site assignments for
-                each voxel in the grid.
+            voxel_frac_coords (ArrayLike):
+                A 2D array representing the fractional coordinates of voxels
+                that haven't been assigned
 
         Returns:
-            A 1D array of the same length as the input with additional site
-            assignments.
+            A 2D array of shape (N,M) where N is the length of the input array
+            and M is the number of atoms. A 1 means the atom is assigned this
+            voxel.
         """
+        # get the 2 plane assignments
+        split_plane_result = self.get_plane_split_voxel_assignments(voxel_frac_coords)
+        # get the new voxel_frac_coords that haven't been assigned
+        still_unassigned = np.where(np.sum(split_plane_result, axis=1) == 0)[0]
+        voxel_frac_coords = voxel_frac_coords[still_unassigned]
+
         # get the partitioning planes
         planes = self.reduced_plane_equations.astype(float)
         number_of_planes_per_atom = self.reduced_number_of_planes_per_atom
@@ -532,27 +644,29 @@ class VoxelAssignmentToolkit:
 
         # First, we want to define what the maximum reasonable distance a voxel can
         # be from an atom and still have useful planes. This is chosen as the maximum
-        # distance from an atom to one of its neighbors.
-        # !!! This may be too large if I'm not reducing possible planes at all.
+        # radius between an atom and one of its neighbors.
+        # !!! I think this should guarantee that any unassigned voxels are in the
+        # range of at least one atom.
 
         max_atom_dists = []
         # breakpoint()
         for site_df in self.reduced_partitioning.values():
-            dists = site_df["dist"]
-            site_radius = site_df.loc[0,"radius"]
-            neigh_site = site_df.loc[len(site_df) - 1, "neigh_index"]
-            neigh_radius = self.reduced_partitioning[neigh_site].loc[0, "radius"]
-            max_atom_dist = max(dists) - neigh_radius
-            # In some cases, an atom's max distance is about the same as its
-            # radius which causes issues. To handle this, we multiply the radius
-            # by a certain amount
-            if abs(site_radius-max_atom_dist)/site_radius < 0.3:
-                max_atom_dists.append(max_atom_dist*1.2)
-            else:
-                max_atom_dists.append(max_atom_dist)
+            # dists = site_df["dist"]
+            dists = site_df["radius"]
+            # site_radius = site_df.loc[0,"radius"]
+            # neigh_site = site_df.loc[len(site_df) - 1, "neigh_index"]
+            # neigh_radius = self.reduced_partitioning[neigh_site].loc[0, "radius"]
+            # max_atom_dist = max(dists) - neigh_radius
+            # # In some cases, an atom's max distance is about the same as its
+            # # radius which causes issues. To handle this, we multiply the radius
+            # # by a certain amount
+            # if abs(site_radius-max_atom_dist)/site_radius < 0.3:
+            #     max_atom_dists.append(max_atom_dist*1.2)
+            # else:
+            #     max_atom_dists.append(max_atom_dist)
             # *1.1 for sites with
             # symmetry that results in subtracting neigh_radius always being their own radius
-            # max_atom_dists.append(max(dists))
+            max_atom_dists.append(max(dists))
 
         max_atom_dists = np.array(max_atom_dists)
         max_atom_dists = np.tile(max_atom_dists, (len(voxel_frac_coords), 1))
@@ -605,7 +719,11 @@ class VoxelAssignmentToolkit:
         multi_site_assignments = np.where(
             voxel_plane_distances_compressed == voxel_plane_min_distances, 1, 0
         )
-        return multi_site_assignments
+
+        # breakpoint()
+        split_plane_result[still_unassigned] = multi_site_assignments
+        # return multi_site_assignments
+        return split_plane_result
 
     def get_multi_site_assignments_from_frac_coords_with_memory_handling(
         self,
