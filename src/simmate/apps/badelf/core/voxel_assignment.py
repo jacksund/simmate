@@ -539,9 +539,20 @@ class VoxelAssignmentToolkit:
         # breakpoint()
         for site_df in self.reduced_partitioning.values():
             dists = site_df["dist"]
+            site_radius = site_df.loc[0,"radius"]
             neigh_site = site_df.loc[len(site_df) - 1, "neigh_index"]
             neigh_radius = self.reduced_partitioning[neigh_site].loc[0, "radius"]
-            max_atom_dists.append(max(dists) - neigh_radius)
+            max_atom_dist = max(dists) - neigh_radius
+            # In some cases, an atom's max distance is about the same as its
+            # radius which causes issues. To handle this, we multiply the radius
+            # by a certain amount
+            if abs(site_radius-max_atom_dist)/site_radius < 0.3:
+                max_atom_dists.append(max_atom_dist*1.2)
+            else:
+                max_atom_dists.append(max_atom_dist)
+            # *1.1 for sites with
+            # symmetry that results in subtracting neigh_radius always being their own radius
+            # max_atom_dists.append(max(dists))
 
         max_atom_dists = np.array(max_atom_dists)
         max_atom_dists = np.tile(max_atom_dists, (len(voxel_frac_coords), 1))
