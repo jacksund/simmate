@@ -1447,6 +1447,7 @@ class PartitioningToolkit:
         # atom and then we'll fill in the other atoms afterwards
         logging.info("Reducing to necessary partitioning planes")
         important_plane_indices = {}
+        reduced_plane_indices = {}
         for site_index in tqdm(unique_atoms, total=len(unique_atoms), ascii="░▒▓"):
             # get the plane dataframe for this site
             site_dataframe = site_dataframes[site_index]
@@ -1467,16 +1468,21 @@ class PartitioningToolkit:
             reduced_planes = np.concatenate(
                 (reduced_plane_points, reduced_plane_vectors), axis=1
             )
-            important_planes = reduced_planes
+            important_planes = reduced_planes.copy()
             # Get the important planes more rigorously by checking which planes
             # contribute to the vertices of the polyhedral shape surrounding
             # the site
-            _, important_planes = self.get_important_planes(reduced_planes)
-            important_planes = np.array(important_planes)
+            _, reduced_planes = self.get_important_planes(reduced_planes)
+            reduced_planes = np.array(reduced_planes)
             # get the indices for the important planes and append them to our
             # dictionary
             indices = np.where((planes[:, None] == important_planes).all(axis=2))[1]
             important_plane_indices[site_index] = indices
+            # Also get the reduced indices
+            reduced_indices = np.where((planes[:, None] == reduced_planes).all(axis=2))[
+                1
+            ]
+            reduced_plane_indices[site_index] = reduced_indices
 
         # Go through each site, get the corresponding important planes using
         # the indices we just found, and add to a partitioning dataframe
@@ -1489,12 +1495,20 @@ class PartitioningToolkit:
             site_dataframe.reset_index(inplace=True, drop=True)
             initial_partitioning[site_index] = site_dataframe
 
+        reduced_partitioning = {}
+        for site_index, site_dataframe in enumerate(site_dataframes):
+            equiv_atom = equivalent_atoms[site_index]
+            reduced_plane_index = reduced_plane_indices[equiv_atom]
+            site_dataframe = site_dataframe.iloc[reduced_plane_index].copy()
+            site_dataframe.sort_values(by=["dist"], inplace=True)
+            site_dataframe.reset_index(inplace=True, drop=True)
+            reduced_partitioning[site_index] = site_dataframe
         # partitioning = self.reduce_to_symmetric_partitioning(
         #     initial_partitioning
         # )
         # partitioning = self.increase_to_symmetric_partitioning(initial_partitioning)
         # return partitioning
-        return initial_partitioning
+        return initial_partitioning, reduced_partitioning
 
     def plot_partitioning_results(
         self,
@@ -1509,7 +1523,7 @@ class PartitioningToolkit:
                 algorithm
         """
         if partition_results is None:
-            partition_results = self.get_partitioning()
+            partition_results, _ = self.get_partitioning()
 
         # Create a matplotlib plot
         import matplotlib

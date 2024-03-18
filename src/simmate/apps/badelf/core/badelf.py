@@ -173,19 +173,19 @@ class BadElfToolkit:
         if self.algorithm == "badelf":
             # remove electrides from grid structure and get
             partitioning_grid.structure.remove_species("He")
-            partitioning = PartitioningToolkit(
+            partitioning, reduced_partitioning = PartitioningToolkit(
                 partitioning_grid, self.pybader
             ).get_partitioning()
-            return partitioning
+            return partitioning, reduced_partitioning
         elif self.algorithm == "voronelf":
             # Use the structure with electrides as the partitioning structure.
             # This will not be anything different from the base structure if there
             # are no electride sites.
             partitioning_grid.structure = self.electride_structure.copy()
-            partitioning = PartitioningToolkit(
+            partitioning, reduced_partitioning = PartitioningToolkit(
                 partitioning_grid, self.pybader
             ).get_partitioning()
-            return partitioning
+            return partitioning, reduced_partitioning
         elif self.algorithm == "zero-flux":
             print(
                 """
@@ -296,10 +296,12 @@ class BadElfToolkit:
         # Get the objects that we'll need to assign voxels.
         elif algorithm in ["badelf", "voronelf"]:
             charge_grid = self.charge_grid
+            partitioning, reduced_partitioning = self.partitioning
             voxel_assignment_tools = VoxelAssignmentToolkit(
                 charge_grid=charge_grid,
                 electride_structure=self.electride_structure,
-                partitioning=self.partitioning,
+                partitioning=partitioning,
+                reduced_partitioning=reduced_partitioning,
                 algorithm=self.algorithm,
                 directory=self.directory,
             )
@@ -596,7 +598,8 @@ class BadElfToolkit:
                 else:
                     # Get dists from partitioning
                     radii = []
-                    for neighbor_index, row in self.partitioning[site].iterrows():
+                    partitioning, _ = self.partitioning
+                    for neighbor_index, row in partitioning[site].iterrows():
                         radii.append(row["radius"])
                     min_radii = min(radii)
                     min_dists[site] = min_radii
@@ -893,7 +896,7 @@ class BadElfToolkit:
         """
         Plots the partitioning surface around each atom.
         """
-        partitioning = self.partitioning
+        partitioning, _ = self.partitioning
         grid = self.partitioning_grid.copy()
         if self.algorithm == "badelf":
             grid.structure = self.structure

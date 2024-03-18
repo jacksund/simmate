@@ -41,12 +41,14 @@ class VoxelAssignmentToolkit:
         electride_structure: Structure,
         algorithm: str,
         partitioning: dict,
+        reduced_partitioning: dict,
         directory: Path,
     ):
         self.charge_grid = charge_grid.copy()
         self.algorithm = algorithm
         # partitioning will contain electride sites for voronelf
         self.partitioning = partitioning
+        self.reduced_partitioning = reduced_partitioning
         self.electride_structure = electride_structure
 
     @property
@@ -133,11 +135,42 @@ class VoxelAssignmentToolkit:
         return plane_points, plane_vectors
 
     @cached_property
+    def reduced_partitioning_plane_points_and_vectors(self):
+        """
+        The points and vectors for all of the partitioning planes stored as
+        two sets of N,3 shaped arrays.
+        """
+        partitioning = self.reduced_partitioning
+        plane_points = []
+        plane_vectors = []
+        for atom_index, partitioning_df in partitioning.items():
+            atom_plane_points = partitioning_df["plane_points"].to_list()
+            atom_plane_vectors = partitioning_df["plane_vectors"].to_list()
+            plane_points.extend(atom_plane_points)
+            plane_vectors.extend(atom_plane_vectors)
+
+        # convert plane points and vectors to arrays and then convert to the plane
+        # equation
+        plane_points = np.array(plane_points)
+        plane_vectors = np.array(plane_vectors)
+        return plane_points, plane_vectors
+
+    @cached_property
     def all_plane_equations(self):
         """
         A (N,4) array containing every partitioning plane equation
         """
         plane_points, plane_vectors = self.all_partitioning_plane_points_and_vectors
+        D = -np.sum(plane_points * plane_vectors, axis=1)
+        # convert to all coefficients
+        return np.column_stack((plane_vectors, D))
+
+    @cached_property
+    def reduced_plane_equations(self):
+        """
+        A (N,4) array containing every partitioning plane equation
+        """
+        plane_points, plane_vectors = self.reduced_partitioning_plane_points_and_vectors
         D = -np.sum(plane_points * plane_vectors, axis=1)
         # convert to all coefficients
         return np.column_stack((plane_vectors, D))
@@ -149,6 +182,23 @@ class VoxelAssignmentToolkit:
         back into atom based sections.
         """
         partitioning = self.partitioning
+        number_of_planes_per_atom = [len(planes) for planes in partitioning.values()]
+        number_of_planes_per_atom.pop(-1)
+        number_of_planes_per_atom = np.array(number_of_planes_per_atom)
+        sum_number_of_planes_per_atom = []
+        for i, j in enumerate(number_of_planes_per_atom):
+            sum_number_of_planes_per_atom.append(
+                j + np.sum(number_of_planes_per_atom[:i])
+            )
+        return sum_number_of_planes_per_atom
+
+    @cached_property
+    def reduced_number_of_planes_per_atom(self):
+        """
+        A list for splitting an array containing all of the partitioning planes
+        back into atom based sections.
+        """
+        partitioning = self.reduced_partitioning
         number_of_planes_per_atom = [len(planes) for planes in partitioning.values()]
         number_of_planes_per_atom.pop(-1)
         number_of_planes_per_atom = np.array(number_of_planes_per_atom)
@@ -428,8 +478,8 @@ class VoxelAssignmentToolkit:
             assignments.
         """
         # get the partitioning planes
-        planes = self.all_plane_equations.astype(float)
-        number_of_planes_per_atom = self.number_of_planes_per_atom
+        planes = self.reduced_plane_equations.astype(float)
+        number_of_planes_per_atom = self.reduced_number_of_planes_per_atom
 
         if self.algorithm == "badelf":
             structure = self.charge_grid.structure
@@ -487,11 +537,11 @@ class VoxelAssignmentToolkit:
 
         max_atom_dists = []
         # breakpoint()
-        for site_df in self.partitioning.values():
+        for site_df in self.reduced_partitioning.values():
             dists = site_df["dist"]
-            neigh_site = site_df.loc[len(site_df)-1,"neigh_index"]
-            neigh_radius = self.partitioning[neigh_site].loc[0,"radius"]
-            max_atom_dists.append(max(dists)-neigh_radius)
+            neigh_site = site_df.loc[len(site_df) - 1, "neigh_index"]
+            neigh_radius = self.reduced_partitioning[neigh_site].loc[0, "radius"]
+            max_atom_dists.append(max(dists) - neigh_radius)
 
         max_atom_dists = np.array(max_atom_dists)
         max_atom_dists = np.tile(max_atom_dists, (len(voxel_frac_coords), 1))
@@ -565,7 +615,7 @@ class VoxelAssignmentToolkit:
             voxel index and j is the site index.
         """
         logging.info("Calculating voxel assignments outside partitioning")
-        partitioning = self.partitioning
+        partitioning = self.reduced_partitioning
         # determine how much memory is available. Then calculate how many distance
         # calculations would be possible to do at once with this much memory.
         available_memory = psutil.virtual_memory().available / (1024**2)
