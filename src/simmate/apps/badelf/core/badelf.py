@@ -173,19 +173,19 @@ class BadElfToolkit:
         if self.algorithm == "badelf":
             # remove electrides from grid structure and get
             partitioning_grid.structure.remove_species("He")
-            partitioning, reduced_partitioning = PartitioningToolkit(
+            partitioning = PartitioningToolkit(
                 partitioning_grid, self.pybader
             ).get_partitioning()
-            return partitioning, reduced_partitioning
+            return partitioning
         elif self.algorithm == "voronelf":
             # Use the structure with electrides as the partitioning structure.
             # This will not be anything different from the base structure if there
             # are no electride sites.
             partitioning_grid.structure = self.electride_structure.copy()
-            partitioning, reduced_partitioning = PartitioningToolkit(
+            partitioning = PartitioningToolkit(
                 partitioning_grid, self.pybader
             ).get_partitioning()
-            return partitioning, reduced_partitioning
+            return partitioning
         elif self.algorithm == "zero-flux":
             print(
                 """
@@ -234,16 +234,28 @@ class BadElfToolkit:
         # loop through the voxels belonging to multiple sites to pick one random
         # site to assign to.
         for split_voxel in self.multi_site_voxel_assignments:
-            # Get which sites this voxel is split by
-            possible_sites = np.where(split_voxel != 0)[0]
-            # Pick one randomly
-            # site_choice = np.random.choice(possible_sites)
-            # !!! For the purposes of electride dimensionality it is better to
-            # assign shared voxels to electrides which always have higher index
-            # values.
-            site_choice = possible_sites.max()
-            # append it to our list
-            random_voxel_assignments.append(site_choice)
+            # round the assignments
+            split_voxel = np.round(split_voxel, 2)
+            if len(np.unique(split_voxel)) == 2:
+                # There are several sites that share an equal part of this voxel.
+                # We want to randomly assign to one of these
+                # Get which sites this voxel is split by
+                possible_sites = np.where(split_voxel != 0)[0]
+                # Pick one randomly
+                # site_choice = np.random.choice(possible_sites)
+                # !!! For the purposes of electride dimensionality it is better to
+                # assign shared voxels to electrides which always have higher index
+                # values.
+                # !!! With new assignment method it may be better to assign to
+                # highest frac or random
+                site_choice = possible_sites.max()
+                # append it to our list
+                random_voxel_assignments.append(site_choice)
+            else:
+                # There are multiple ratios. We want to assign to the site with
+                # the most
+                site_choice = np.where(split_voxel == np.max(split_voxel))[0][0]
+                random_voxel_assignments.append(site_choice)
         # Get the single site assignments and subtract one to get to sites
         # beginning at 0
         all_site_assignments = self.single_site_voxel_assignments.copy() - 1
@@ -296,12 +308,11 @@ class BadElfToolkit:
         # Get the objects that we'll need to assign voxels.
         elif algorithm in ["badelf", "voronelf"]:
             charge_grid = self.charge_grid
-            partitioning, reduced_partitioning = self.partitioning
+            partitioning = self.partitioning
             voxel_assignment_tools = VoxelAssignmentToolkit(
                 charge_grid=charge_grid,
                 electride_structure=self.electride_structure,
                 partitioning=partitioning,
-                reduced_partitioning=reduced_partitioning,
                 algorithm=self.algorithm,
                 directory=self.directory,
             )
@@ -598,7 +609,7 @@ class BadElfToolkit:
                 else:
                     # Get dists from partitioning
                     radii = []
-                    partitioning, _ = self.partitioning
+                    partitioning = self.partitioning
                     for neighbor_index, row in partitioning[site].iterrows():
                         radii.append(row["radius"])
                     min_radii = min(radii)
@@ -620,24 +631,24 @@ class BadElfToolkit:
             split_voxel_indices = self.multi_site_voxel_indices
             split_voxel_charge = charge_array[split_voxel_indices]
             # get how many sites each voxel is split by
-            split_voxel_ratio = 1 / np.sum(multi_site_assignments, axis=1)
+            # split_voxel_ratio = 1 / np.sum(multi_site_assignments, axis=1)
             for site_index, assignment_array in enumerate(multi_site_assignments.T):
-                indices_where_assigned = np.where(assignment_array == 1)[0]
+                indices_where_assigned = np.where(assignment_array > 0)[0]
                 site_charge = split_voxel_charge[indices_where_assigned]
-                site_charge = site_charge * split_voxel_ratio[indices_where_assigned]
+                site_charge = site_charge * assignment_array[indices_where_assigned]
                 charges[site_index] += np.sum(site_charge)
                 atomic_volumes[site] += (
-                    np.sum(split_voxel_ratio[indices_where_assigned]) * voxel_volume
+                    np.sum(assignment_array[indices_where_assigned]) * voxel_volume
                 )
 
         # Convert charges from VASP standard
         for site, charge in charges.items():
-            charges[site] = round((charge / (a * b * c)), 6)
+            charges[site] = round((charge / (a * b * c)), 4)
         for site, volume in atomic_volumes.items():
-            atomic_volumes[site] = round(volume, 6)
+            atomic_volumes[site] = round(volume, 4)
 
         # Get the number of electrons assigned by badelf.
-        nelectrons = round(sum(charges.values()), 6)
+        nelectrons = round(sum(charges.values()), 4)
 
         # Get
         with warnings.catch_warnings():
@@ -668,12 +679,12 @@ class BadElfToolkit:
             if element_str == "e":
                 oxi_state = -site_charge
             else:
-                oxi_state = round((nelectron_data[element_str] - site_charge), 6)
+                oxi_state = round((nelectron_data[element_str] - site_charge), 4)
             oxi_state_data.append(oxi_state)
             # add the corresponding charge, distance, and atomic volume to the
             # respective lits
             charges_list.append(site_charge)
-            min_dists_list.append(round(min_dists[site_index], 6))
+            min_dists_list.append(round(min_dists[site_index], 4))
             atomic_volumes_list.append(atomic_volumes[site_index])
 
         # Calculate the "vacuum charge" or the charge not associated with any atom.
@@ -682,11 +693,11 @@ class BadElfToolkit:
         for site in self.structure:
             site_valence_electrons = nelectron_data[site.species_string]
             total_electrons += site_valence_electrons
-        vacuum_charge = round((total_electrons - nelectrons), 6)
+        vacuum_charge = round((total_electrons - nelectrons), 4)
 
         # Calculate the "vacuum volume" or the volume not associated with any atom.
         # Idealy this should be 0
-        vacuum_volume = round((self.structure.volume - sum(atomic_volumes.values())), 6)
+        vacuum_volume = round((self.structure.volume - sum(atomic_volumes.values())), 4)
 
         # Save everything in a results dictionary
         results = {

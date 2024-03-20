@@ -13,7 +13,8 @@ from pybader.interface import Bader
 from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pyrho.pgrid import PGrid
-from scipy.ndimage import binary_erosion
+
+# from scipy.ndimage import binary_erosion
 
 
 class Grid(VolumetricData):
@@ -258,7 +259,20 @@ class Grid(VolumetricData):
             supercell[x, y, z] = raveled_data
         return supercell
 
-    def get_voxels_in_radius(self, radius, voxel):
+    def get_voxels_in_radius(self, radius: float, voxel: ArrayLike):
+        """
+        Gets the indices of the voxels in a radius around a voxel
+
+        Args:
+            radius (float):
+                The radius in Angstroms around the voxel
+
+            voxel (ArrayLike):
+                The voxel coordinates of the voxel to find the sphere around
+
+        Returns:
+            The voxel indices of the voxels within the provided radius
+        """
         voxel = np.array(voxel)
         # Get the distance from each voxel to the origin
         voxel_distances = self.voxel_dist_to_origin
@@ -277,25 +291,38 @@ class Grid(VolumetricData):
         sphere_indices = np.column_stack([new_x, new_y, new_z])
         # return new_x, new_y, new_z
         return sphere_indices
-    
-    def get_voxels_transformations_to_radius(self, radius):
+
+    def get_voxels_transformations_to_radius(self, radius: float):
+        """
+        Gets the transformations required to move from a voxel to the voxels
+        surrounding it within the provided radius
+
+        Args:
+            radius (float):
+                The radius in Angstroms around the voxel
+
+        Returns:
+            An array of transformations to add to a voxel to get to each of the
+            voxels within the radius surrounding it
+        """
         # Get voxels around origin
         voxel_distances = self.voxel_dist_to_origin
-        sphere_grid = np.where(voxel_distances <= radius, True, False)
-        eroded_grid = binary_erosion(sphere_grid)
-        shell_indices = np.where(sphere_grid!=eroded_grid)
+        # sphere_grid = np.where(voxel_distances <= radius, True, False)
+        # eroded_grid = binary_erosion(sphere_grid)
+        # shell_indices = np.where(sphere_grid!=eroded_grid)
+        shell_indices = np.where(voxel_distances <= radius)
         # Now we want to translate these indices to next to the corner so that
         # we can use them as transformations to move a voxel to the edge
         final_shell_indices = []
         for a, x in zip(self.shape, shell_indices):
             new_x = x - a
             abs_new_x = np.abs(new_x)
-            new_x_filter = (abs_new_x < x)
+            new_x_filter = abs_new_x < x
             final_x = np.where(new_x_filter, new_x, x)
             final_shell_indices.append(final_x)
-            
+
         return np.column_stack(final_shell_indices)
-        
+
     def get_padded_grid_axes(self, padding: int = 0):
         """
         Gets the the possible indices for each dimension of a padded grid.
