@@ -13,6 +13,7 @@ from pybader.interface import Bader
 from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pyrho.pgrid import PGrid
+from scipy.ndimage import binary_erosion
 
 
 class Grid(VolumetricData):
@@ -276,7 +277,25 @@ class Grid(VolumetricData):
         sphere_indices = np.column_stack([new_x, new_y, new_z])
         # return new_x, new_y, new_z
         return sphere_indices
-
+    
+    def get_voxels_transformations_to_radius(self, radius):
+        # Get voxels around origin
+        voxel_distances = self.voxel_dist_to_origin
+        sphere_grid = np.where(voxel_distances <= radius, True, False)
+        eroded_grid = binary_erosion(sphere_grid)
+        shell_indices = np.where(sphere_grid!=eroded_grid)
+        # Now we want to translate these indices to next to the corner so that
+        # we can use them as transformations to move a voxel to the edge
+        final_shell_indices = []
+        for a, x in zip(self.shape, shell_indices):
+            new_x = x - a
+            abs_new_x = np.abs(new_x)
+            new_x_filter = (abs_new_x < x)
+            final_x = np.where(new_x_filter, new_x, x)
+            final_shell_indices.append(final_x)
+            
+        return np.column_stack(final_shell_indices)
+        
     def get_padded_grid_axes(self, padding: int = 0):
         """
         Gets the the possible indices for each dimension of a padded grid.
