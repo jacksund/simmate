@@ -413,7 +413,7 @@ class BadElfToolkit:
             z = transformed_indices[:, 2]
             supercell_data[x, y, z] = raveled_data
         # convert data into labeled features
-        supercell_data, _ = label(supercell_data)
+        supercell_data, _ = label(supercell_data, structure)
         # The unit cell can be connected to neighboring unit cells in 26 directions.
         # however, we only need to consider half of these as the others are symmetrical.
         connections = [
