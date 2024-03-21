@@ -532,6 +532,10 @@ class VoxelAssignmentToolkit:
         grid = self.charge_grid
         # Get all site assignments so far
         all_site_voxel_assignments = all_site_voxel_assignments.copy()
+        # Check that there are any unassigned voxels. If none, return an empty
+        # array
+        if len(np.where(all_site_voxel_assignments==0)[0]) == 0:
+            return np.array([])
         # The following lines are a more rigorous method of calculating the voxels
         # directly on planes. It takes longer so it's commented for now.
         # Now we want to get assignments for voxels directly on planes
