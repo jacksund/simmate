@@ -3,6 +3,7 @@
 import itertools
 import logging
 import math
+import warnings
 from pathlib import Path
 
 import matplotlib
@@ -376,7 +377,11 @@ class Grid:
             return f"-.{s[1]}{s[3:13]}E{int(s[14:]) + 1:+03}"
 
         with open(file_name, "wt") as file:
-            poscar = Poscar(self.structure)
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore", category=UserWarning, module="pymatgen"
+                )
+                poscar = Poscar(self.structure)
 
             # use original name if it's been set (e.g. from Chgcar)
             comment = getattr(self, "name", poscar.comment)
@@ -481,6 +486,9 @@ class Grid:
     ###########################################################################
     # The following is a series of methods that are useful for converting between
     # voxel coordinates, fractional coordinates, and cartesian coordinates.
+    # Voxel coordinates go from 0 to grid_size-1. Fractional coordinates go
+    # from 0 to 1. Cartesian coordinates convert to real space based on the
+    # crystal lattice.
     ###########################################################################
     def get_voxel_coords_from_index(self, site):
         """
@@ -495,9 +503,7 @@ class Grid:
 
         """
 
-        voxel_coords = [
-            a * b + 1 for a, b in zip(self.grid_shape, self.frac_coords[site])
-        ]
+        voxel_coords = [a * b for a, b in zip(self.grid_shape, self.frac_coords[site])]
         # voxel positions go from 1 to (grid_size + 0.9999)
         return np.array(voxel_coords)
 
@@ -515,7 +521,7 @@ class Grid:
         """
         grid_size = self.grid_shape
         frac = neigh["site"].frac_coords
-        voxel_coords = [a * b + 1 for a, b in zip(grid_size, frac)]
+        voxel_coords = [a * b for a, b in zip(grid_size, frac)]
         # voxel positions go from 1 to (grid_size + 0.9999)
         return np.array(voxel_coords)
 
@@ -534,7 +540,7 @@ class Grid:
         """
         grid_size = self.grid_shape
         frac_coords = neigh.frac_coords
-        voxel_coords = [a * b + 1 for a, b in zip(grid_size, frac_coords)]
+        voxel_coords = [a * b for a, b in zip(grid_size, frac_coords)]
         # voxel positions go from 1 to (grid_size + 0.9999)
         return np.array(voxel_coords)
 
@@ -551,24 +557,24 @@ class Grid:
 
         """
         grid_size = self.grid_shape
-        voxel_coords = [a * b + 1 for a, b in zip(grid_size, frac_coords)]
+        voxel_coords = [a * b for a, b in zip(grid_size, frac_coords)]
         # voxel positions go from 1 to (grid_size + 0.9999)
         return np.array(voxel_coords)
 
-    def get_frac_coords_from_vox(self, voxel_coordsition: ArrayLike | list):
+    def get_frac_coords_from_vox(self, voxel_coords: ArrayLike | list):
         """
         Takes in a voxel grid index and returns the fractional
         coordinates.
 
         Args:
-            voxel_coordsition (ArrayLike):
+            voxel_coords (ArrayLike):
                 A voxel grid index
 
         Returns:
             A fractional coordinate as an array
         """
         size = self.grid_shape
-        fa, fb, fc = [((a - 1) / b) for a, b in zip(voxel_coordsition, size)]
+        fa, fb, fc = [(a / b) for a, b in zip(voxel_coords, size)]
         frac_coords = np.array([fa, fb, fc])
         return frac_coords
 
@@ -608,7 +614,7 @@ class Grid:
 
         return frac_coords
 
-    def get_cart_coords_from_vox(self, voxel_coord: ArrayLike | list):
+    def get_cart_coords_from_vox(self, voxel_coords: ArrayLike | list):
         """
         Takes in a voxel grid index and returns the cartesian coordinates.
 
@@ -619,7 +625,7 @@ class Grid:
         Returns:
             Cartesian coordinates as an array
         """
-        frac_coords = self.get_frac_coords_from_vox(voxel_coord)
+        frac_coords = self.get_frac_coords_from_vox(voxel_coords)
         cart_coords = self.get_cart_coords_from_frac(frac_coords)
         return cart_coords
 
@@ -655,6 +661,59 @@ class Grid:
         cart_z = np.dot(frac_coords, z)
         cart_coords = np.column_stack([cart_x, cart_y, cart_z])
         return cart_coords
+
+    def get_frac_coords_from_vox_full_array(self, vox_coords: ArrayLike):
+        """
+        Takes in a 2D array of shape (N,3) representing voxel coordinates
+        at N points and calculates the equivalent fractional coordinates.
+
+        Args:
+            vox_coords (ArrayLike):
+                An (N,3) shaped array of voxel coordinates
+
+        Returns:
+            An (N,3) shaped array of fractional coordinates
+        """
+        x, y, z = self.grid_shape
+        frac_x = vox_coords[:, 0] / x
+        frac_y = vox_coords[:, 1] / y
+        frac_z = vox_coords[:, 2] / z
+        frac_coords = np.column_stack([frac_x, frac_y, frac_z])
+        return frac_coords
+
+    def get_vox_coords_from_frac_full_array(self, frac_coords: ArrayLike):
+        """
+        Takes in a 2D array of shape (N,3) representing fractional coordinates
+        at N points and calculates the equivalent voxel coordinates.
+
+        Args:
+            frac_coords (ArrayLike):
+                An (N,3) shaped array of fractional coordinates
+
+        Returns:
+            An (N,3) shaped array of voxel coordinates
+        """
+        x, y, z = self.grid_shape
+        vox_x = frac_coords[:, 0] * x
+        vox_y = frac_coords[:, 1] * y
+        vox_z = frac_coords[:, 2] * z
+        vox_coords = np.column_stack([vox_x, vox_y, vox_z])
+        return vox_coords
+
+    def get_cart_coords_from_vox_full_array(self, vox_coords: ArrayLike):
+        """
+        Takes in a 2D array of shape (N,3) representing voxel coordinates
+        at N points and calculates the equivalent cartesian coordinates.
+
+        Args:
+            frac_coords (ArrayLike):
+                An (N,3) shaped array of voxel coordinates
+
+        Returns:
+            An (N,3) shaped array of cartesian coordinates
+        """
+        frac_coords = self.get_frac_coords_from_vox_full_array(vox_coords)
+        return self.get_cart_coords_from_frac_full_array(frac_coords)
 
     def _plot_points(self, points, ax, fig, color, size: int = 20):
         """

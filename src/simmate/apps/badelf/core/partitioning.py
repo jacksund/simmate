@@ -39,6 +39,7 @@ class PartitioningToolkit:
         site_voxel_coord: ArrayLike | list,
         neigh_voxel_coord: ArrayLike | list,
         method: str = "linear",
+        steps: int = 200,
     ):
         """
         Finds a line of voxel positions between two atom sites and then finds the value
@@ -54,25 +55,21 @@ class PartitioningToolkit:
             method (str):
                 The method of interpolation. 'cubic' is more rigorous
                 than 'linear'
+            steps (int):
+                The number of voxel coordinates to interpolate. Default is 200
 
         Results:
             A list with 200 pairs of voxel coordinates and data values along
             a line between two positions.
         """
         grid_data = self.grid.copy().total
-        steps = 200
         slope = [b - a for a, b in zip(site_voxel_coord, neigh_voxel_coord)]
         slope_increment = [float(x) / steps for x in slope]
 
         # get a list of points along the connecting line. First add the original
         # site
         position = site_voxel_coord
-        line = [
-            [
-                round((float(((a - 1) % b) + 1)), 12)
-                for a, b in zip(position, grid_data.shape)
-            ]
-        ]
+        line = [[round(float(a % b), 12) for a, b in zip(position, grid_data.shape)]]
         for i in range(steps):
             # move position by slope_increment
             position = [float(a + b) for a, b in zip(position, slope_increment)]
@@ -82,8 +79,7 @@ class PartitioningToolkit:
             # normal grid, (0 to grid_max), then do the wrapping function (%), then
             # shift back onto the VASP voxel index.
             position = [
-                round((float(((a - 1) % b) + 1)), 12)
-                for a, b in zip(position, grid_data.shape)
+                round(float(a % b), 12) for a, b in zip(position, grid_data.shape)
             ]
 
             line.append(position)
@@ -161,15 +157,17 @@ class PartitioningToolkit:
         )
 
     @staticmethod
-    def _check_partitioning_line_for_symmetry(values: list, tolerance: float = 0.1):
+    def _check_partitioning_line_for_symmetry(values: list, tolerance: float = 10):
         """
-        Check if the values are roughly symmetric.
+        Check if the values are roughly symmetric. Checks each value versus
+        the equivalent value of the other half to see if they are within the
+        requested percent diff.
 
         Args:
             values (list):
                 List of numeric values
             tolerance (float):
-                Tolerance level for symmetry check
+                Tolerance level for symmetry check in percents.
 
         Returns:
             True if roughly symmetric, False otherwise
@@ -192,7 +190,8 @@ class PartitioningToolkit:
 
         # Check if the values are roughly equal within the given tolerance
         for val1, val2 in zip(first_half, reversed_second_half):
-            if abs(val1 - val2) > tolerance:
+            perc_diff = abs((val1 - val2) / (val1 + val2)) * 100
+            if perc_diff > tolerance:
                 return False
 
         return True
@@ -270,8 +269,8 @@ class PartitioningToolkit:
         self,
         positions: list,
         values: list | ArrayLike,
-        site_string: str,
-        neigh_string: str,
+        site_equiv: int,
+        neigh_equiv: int,
     ):
         """
         Finds the minimum point of a list of values along a line, then returns the
@@ -283,28 +282,42 @@ class PartitioningToolkit:
                 of interest
             values (list):
                 A list of values to find the minimum of
-            site_string (str):
-                The symbol of the atom at the start of the line
-            neigh_string (str):
-                The symbol of the atom at the end of the line
+            site_equiv (int):
+                The index of the equivalent atom
+            neigh_equiv (int):
+                The index of the equivalent neighboring atom
 
         results:
             The global minimum of form [line_position, value, frac_position]
         """
+        # get the string for the site and neigh. During the electride dimensionality
+        # search this can throw an error so we add a try/except clause here.
+        try:
+            site_string = self.grid.structure[site_equiv].species_string
+            neigh_string = self.grid.structure[neigh_equiv].species_string
+        except:
+            site_string = "He"
+            neigh_string = "H"
 
-        if site_string == neigh_string:
+        if site_equiv == neigh_equiv:
+            # We have an atom bonded to another atom that is symmetrically equivalent
+            # so the resulting elf line will be equivalent
+            symmetric = True
+        elif site_string == neigh_string:
             list_values = list(values)
-            # We have the same type of atom on either side. We want to check
-            # if they are the same and if they are return a frac of 0.5. This
-            # is because usually there will be some slight covalency between
-            # atoms of the same type, but they should share the area equally
+            # We have two atoms of the same type that are not found as symmetric
+            # by pymatgen. However, it is still likely that the ELF between the
+            # two atoms is symmetric which can easily result in a covalent like
+            # behavior. To handle this, we check if the line is symmetric and
+            # if it is we place the frac at exactly the middle
             symmetric = self._check_partitioning_line_for_symmetry(list_values)
         else:
             symmetric = False
 
-        # If we found symmetry, we return a global min exactly at the center
+        # Now if our line is symmetric, we place our partitioning exactly at
+        # the middle of the line. Otherwise we interpolate to find where to
+        # place the line.
         if symmetric:
-            # 100 is the index directly at the center of the line
             elf_value = values[100]
             elf_min_frac = 0.5
             global_min = [100, elf_value, elf_min_frac]
@@ -373,13 +386,17 @@ class PartitioningToolkit:
                 values_fine = []
                 # Get the list of values from the interpolated grid
                 for pos in line_section:
-                    new_pos = [i + amount_to_pad - 1 for i in pos]
+                    new_pos = [i + amount_to_pad for i in pos]
                     value_fine = float(fn(new_pos))
                     values_fine.append(value_fine)
 
                 # Find the minimum value of this line as well as the index for this value's
                 # position.
-                minimum_value = min(values_fine)
+                try:
+                    minimum_value = min(values_fine)
+                except:
+                    attempts = 5
+                    continue
                 min_pos = values_fine.index(minimum_value)  # + global_min_pos[0]-5
 
                 if min_pos == 4:
@@ -397,7 +414,7 @@ class PartitioningToolkit:
 
             # Get the ELF value for every position in the line.
             for pos in positions:
-                new_pos = [i + amount_to_pad - 1 for i in pos]
+                new_pos = [i + amount_to_pad for i in pos]
                 value = float(fn(new_pos))
                 values.append(value)
 
@@ -478,14 +495,16 @@ class PartitioningToolkit:
         x, y, z = plane_point
         a, b, c = plane_vector
         x1, y1, z1 = point
-        value_of_plane_equation = a * (x - x1) + b * (y - y1) + c * (z - z1)
+        value_of_plane_equation = round(
+            (a * (x - x1) + b * (y - y1) + c * (z - z1)), 12
+        )
         # get the distance of the point from the plane with some allowance of error.
-        if value_of_plane_equation > 1e-6:
-            return "positive", abs(value_of_plane_equation)
-        elif value_of_plane_equation < -1e-6:
-            return "negative", abs(value_of_plane_equation)
+        if value_of_plane_equation > 0:
+            return "positive", value_of_plane_equation
+        elif value_of_plane_equation < 0:
+            return "negative", value_of_plane_equation
         else:
-            return "zero", abs(value_of_plane_equation)
+            return "zero", value_of_plane_equation
 
     def get_distance_to_min(
         self,
@@ -541,6 +560,7 @@ class PartitioningToolkit:
             The distance the ELF ionic radius of the site
         """
         grid = self.grid.copy()
+        equivalent_atoms = grid.equivalent_atoms
         if structure is None:
             structure = grid.structure.copy()
         # get closest neighbor for the given site
@@ -554,6 +574,7 @@ class PartitioningToolkit:
         for i, row in site_df.iterrows():
             site_cart_coords = row["site_coords"]
             neigh_cart_coords = row["neigh_coords"]
+            neighbor_equiv = row["equiv_neigh_index"]
             neighbor_string = row["neigh_symbol"]
             if neighbor_string != "He":
                 bond_dist = row["dist"]
@@ -566,8 +587,12 @@ class PartitioningToolkit:
             neigh_cart_coords,
         )
 
-        # Get site and neighbor strings
-        site_string = self.grid.structure[site_index].species_string
+        # Check if this bond has covalent behavior
+        covalency = self.check_bond_for_covalency(elf_values)
+        # # Get site and neighbor strings
+        # # site_string = self.grid.structure[site_index].species_string
+        # # Get site and neighbor equivalent atoms
+        site_equiv = equivalent_atoms[site_index]
 
         max_bond_dist = (
             structure[site_index].specie.atomic_radius
@@ -576,8 +601,9 @@ class PartitioningToolkit:
         # If the bond is larger than the some of both atomic radii it is likely
         # that there is an electride between the atom and its closest neighbor.
         # We want to get the distance to the minimum closer to the atom than
-        # its neighbor.
-        if bond_dist > max_bond_dist:
+        # its neighbor. The same is true if the atom has covalent behavior!!!?
+        # if bond_dist > max_bond_dist:
+        if covalency or bond_dist > max_bond_dist:
             # We get all of the minima along  the line. We then find the distance
             # of each minima from the middle of the line, remove any that are
             # closer to the neighboring atom, and find the one closest to the
@@ -592,7 +618,7 @@ class PartitioningToolkit:
             # method needs some work.
             if len(dists_to_min) == 1:
                 min_pos = self.get_line_minimum_as_frac(
-                    elf_positions, elf_values, site_string, neighbor_string
+                    elf_positions, elf_values, site_equiv, neighbor_equiv
                 )
             else:
                 min_pos = minima[np.argmin(dists_to_min)]
@@ -601,7 +627,7 @@ class PartitioningToolkit:
         else:
             # Get the min position along the line
             min_pos = self.get_line_minimum_as_frac(
-                elf_positions, elf_values, site_string, neighbor_string
+                elf_positions, elf_values, site_equiv, neighbor_equiv
             )
         #!!! This is the only place some of these methods are used. Is this necessary
         # or could they be removed somehow with the new methods?
@@ -759,15 +785,22 @@ class PartitioningToolkit:
         A dataframe containing information about all site-neighbor pairs in a
         structure within 15A of each other.
         """
-        structure = self.grid.structure
-        logging.info("Getting all neighboring atoms for each site in structure")
+        grid = self.grid
+        structure = grid.structure
+        # logging.info("Getting all neighboring atoms for each site in structure")
         # Get all neighbors within 15 Angstrom
         nearest_neighbors = structure.get_neighbor_list(15)
+        # Get the equivalent atom index for each atom
+        equivalent_atoms = grid.equivalent_atoms
+        equiv_site_index = equivalent_atoms[nearest_neighbors[0]]
+        equiv_neigh_index = equivalent_atoms[nearest_neighbors[1]]
         # Create dataframe with important info about each site/neighbor pair
         site_neigh_pairs = pd.DataFrame()
         # Add sites and neighbors indices
         site_neigh_pairs["site_index"] = nearest_neighbors[0]
         site_neigh_pairs["neigh_index"] = nearest_neighbors[1]
+        site_neigh_pairs["equiv_site_index"] = equiv_site_index
+        site_neigh_pairs["equiv_neigh_index"] = equiv_neigh_index
         site_neigh_pairs["site_symbol"] = None
         site_neigh_pairs["neigh_symbol"] = None
 
@@ -797,7 +830,7 @@ class PartitioningToolkit:
         )
         neigh_cart_coords = []
         neigh_cart_coords.extend(
-            self.grid.get_cart_coords_from_frac_full_array(neigh_frac_coords)
+            grid.get_cart_coords_from_frac_full_array(neigh_frac_coords)
         )
         # Add the neighbors cartesian coordinates
         site_neigh_pairs["neigh_coords"] = neigh_cart_coords
@@ -840,52 +873,28 @@ class PartitioningToolkit:
             closest_neighbors[i] = d[biggest]
         return closest_neighbors
 
-    def get_set_number_of_neighbors(self, neighbor_num: int = 26):
+    def get_set_number_of_neighbors(self, site_index, neighbor_num: int = 26):
         """
-        Function for getting the closest neighbors. This is necessary for partitioning
-        because the CrystalNN function from pymatgen will not always find the
-        correct set of atoms needed to create a full partitioning set. We default
-        to 26, but if this is not large enough we automatically increase the amount.
+        Function for getting the closest neighbors.
 
         Args:
+            site_index (int):
+                The atomic site of interest
             neighbor_num (int):
                 The number of nearest neighbors to find
 
         Results:
-            A list of relating an atoms index to its  neighbors.
+            A dataframe relating an atoms index to its  neighbors.
 
         """
-        structure = self.grid.structure.copy()
-
         # Get all possible neighbor atoms for each atom within 15 angstroms
-        all_neighbors = structure.get_all_neighbors(15)
-        neighbors = []
+        all_neighbors = self.all_site_neighbor_pairs.copy()
+        atom_neighbors = all_neighbors.loc[
+            all_neighbors["site_index"] == site_index
+        ].copy()
+        set_neighbors = atom_neighbors.iloc[:neighbor_num]
 
-        for site, neighs in enumerate(all_neighbors):
-            # Get the coordinates for each site/neighbor pair and convert to numpy array
-            site_coords = []
-            neigh_coords = []
-            site_coord = structure[site].coords
-            for neigh in neighs:
-                neigh_coord = neigh.coords
-                site_coords.append(site_coord)
-                neigh_coords.append(neigh_coord)
-            site_coords = np.array(site_coords)
-            neigh_coords = np.array(neigh_coords)
-            # Calculate the distance between the site and each neighbor
-            distances = np.linalg.norm(neigh_coords - site_coords, axis=1)
-
-            # Create a dataframe of neighbors and distance
-            site_df = pd.DataFrame(columns=["neighbors", "distances"])
-            site_df["neighbors"] = neighs
-            site_df["distances"] = distances
-            # sort by distance and truncate to requested length
-            site_df = site_df.sort_values(by="distances")
-            site_df = site_df.iloc[0:neighbor_num]
-            # Append neighbors to our neighbor list
-            neighbors.append(site_df["neighbors"].to_list())
-
-        return neighbors
+        return set_neighbors
 
     @classmethod
     def check_bond_for_covalency(
@@ -934,7 +943,8 @@ class PartitioningToolkit:
         # get the ELF values at the minimum and maximum. This is stored in the
         # second index of the extrema list
         min_elf = global_min[1]
-        max_elf = global_max[1]
+        # max_elf = global_max[1]
+        max_elf = max(values)
 
         # If the maximum is closer to the center of the line than the minimum, then
         # we consider this bond to have metallic or covalent behavior and return True
@@ -1013,7 +1023,7 @@ class PartitioningToolkit:
                 break
         # if the same atom is found as the closest atom, we want to raise an error
         if same_atom_close:
-            raise Exception(
+            warnings.warn(
                 """
                 An atom's closest neighbor was found to be an atom of the same type.
                 This very likely indicates that these atoms are bonded covalently.
@@ -1021,8 +1031,8 @@ class PartitioningToolkit:
                 partition peaks in the ELF from covalency, though this will hopefully 
                 be implemented in a future version of the algorithm.
                 
-                You can ignore covalency by setting check_covalency = False. Don't
-                be surprised if the results are weird though!
+                You can ignore this message, but don't be surprised if the 
+                results are weird!
                 """
             )
 
@@ -1059,26 +1069,21 @@ class PartitioningToolkit:
 
                 if site_species == neigh_species:
                     continue
-
-                # neigh_site_index = neigh["site_index"]
-                # if site_index == neigh_site_index:
-                #     continue
+                # He atoms represent electride sites. These "bonds" can be
+                # very shifted if the electride site is small
+                if site_species == "He" or neigh_species == "He":
+                    continue
 
                 neigh_voxel_coord = grid.get_voxel_coords_from_neigh_CrystalNN(neigh)
                 values = self.get_partitioning_line_from_voxels(
                     site_voxel_coord, neigh_voxel_coord
                 )[1]
-                # smooth line
-                # smoothed_values = savgol_filter(values,20,3)
 
                 # Now we check for any strong covalency in the bond as in the current version
                 # of BadELF, this will break the partitioning scheme
                 if self.check_bond_for_covalency(values) is True:
                     # report which atoms the bond was found between
-
-                    # import matplotlib.pyplot as plt
-                    # plt.plot(smoothed_values)
-                    raise Exception(
+                    warnings.warn(
                         f"""
                         A maximum in the ELF line between atoms was found closer to the
                         center of the bond than any local minimum.
@@ -1096,8 +1101,9 @@ class PartitioningToolkit:
                         suitable pseudopotential with core electrons in VASP 5.X.X.
                         
                         The bond was found between {site_species} and {neigh_species}.
-                        You can ignore covalency by setting check_covalency = False. Don't
-                        be surprised if the results are weird though!
+                        
+                        You can ignore this message, but don't be surprised if the 
+                        results are weird!
                         """
                     )
 
@@ -1105,8 +1111,8 @@ class PartitioningToolkit:
         self,
         site_cart_coords: ArrayLike,
         neigh_cart_coords: ArrayLike,
-        site_symbol: str,
-        neigh_symbol: str,
+        site_equiv: str,
+        neigh_equiv: str,
     ):
         """
         Function for getting the fraction of a line betwaeen two sites where
@@ -1137,8 +1143,8 @@ class PartitioningToolkit:
         elf_min_index, elf_min_value, elf_min_frac = self.get_line_minimum_as_frac(
             elf_coordinates,
             elf_values,
-            site_symbol,
-            neigh_symbol,
+            site_equiv,
+            neigh_equiv,
         )
         return elf_min_frac
 
@@ -1241,12 +1247,17 @@ class PartitioningToolkit:
             # shape.
             for plane in planes:
                 sign, dist = cls.get_plane_sign(
-                    point=intercept, plane_vector=plane[3:], plane_point=plane[:3]
+                    point=intercept,
+                    plane_vector=plane[3:],
+                    plane_point=plane[:3],
                 )
-                if sign in ["positive", "zero"]:
+                # if sign in ["positive", "zero"]:
+                # print(dist)
+                if dist >= -1e-5:
                     pass
                 else:
                     important_intercept = False
+                    # print(dist)
                     break
             # If the point is bound by all planes, it is an important intercept.
             # append it to our list.
@@ -1330,12 +1341,15 @@ class PartitioningToolkit:
                 site_cart_coords = row["site_coords"]
                 neigh_cart_coords = row["neigh_coords"]
                 # get the site and neighbor symbols
-                site_symbol = row["site_symbol"]
-                neigh_symbol = row["neigh_symbol"]
+                site_equiv = row["equiv_site_index"]
+                neigh_equiv = row["equiv_neigh_index"]
                 shortest_dist = row["dist"]
                 # get fraction along line where the min is located
                 frac = self.get_site_neighbor_frac(
-                    site_cart_coords, neigh_cart_coords, site_symbol, neigh_symbol
+                    site_cart_coords,
+                    neigh_cart_coords,
+                    site_equiv,
+                    neigh_equiv,
                 )
                 # Set frac to 2*frac or 1 whichever is larger
                 if 2 * frac >= 1:
@@ -1392,7 +1406,6 @@ class PartitioningToolkit:
                 neigh_cart_coords = row["neigh_coords"]
                 dist = row["dist"]
                 potential_bounding_plane = True
-                site_symbol = row["site_symbol"]
                 # Check each plane versus the intercept point. If we plug the point into
                 # the plane equation it should return as 0 or positive if it is within the
                 # shape?
@@ -1451,7 +1464,8 @@ class PartitioningToolkit:
             A dataframe of site neighbor pairs with plane information
         """
         possible_unique_pairs = possible_site_neigh_pairs.drop_duplicates(
-            subset=["site_symbol", "neigh_symbol", "dist"]
+            # subset=["site_symbol", "neigh_symbol", "dist"]
+            subset=["equiv_site_index", "equiv_neigh_index", "dist"]
         )
 
         # calculate fractions along each line in the ELF
@@ -1469,42 +1483,56 @@ class PartitioningToolkit:
                 # site_voxel_coords = grid.get_voxel_coords_from_cart(site_cart_coords)
                 neigh_cart_coords = row["neigh_coords"]
                 # neigh_voxel_coords = grid.get_voxel_coords_from_cart(neigh_cart_coords)
-
-                site_symbol = row["site_symbol"]
-                neigh_symbol = row["neigh_symbol"]
+                # Get the site symbols.
+                # needed to update the dataframe
+                site_equiv = row["equiv_site_index"]
+                neigh_equiv = row["equiv_neigh_index"]
                 dist = row["dist"]
 
                 # get fraction along line where the min is located
                 frac = self.get_site_neighbor_frac(
-                    site_cart_coords, neigh_cart_coords, site_symbol, neigh_symbol
+                    site_cart_coords,
+                    neigh_cart_coords,
+                    site_equiv,
+                    neigh_equiv,
                 )
                 radius = frac * dist
                 reverse_frac = 1 - frac
                 reverse_radius = reverse_frac * dist
 
+                # Get the unique indices to search the dataframe with
+                equiv_site_index = row["equiv_site_index"]
+                equiv_neigh_index = row["equiv_neigh_index"]
+
                 # create search to find rows with same symbol set and reverse symbol set.
                 reverse_condition = (
-                    (possible_unique_pairs["site_symbol"] == neigh_symbol)
-                    & (possible_unique_pairs["neigh_symbol"] == site_symbol)
+                    (possible_unique_pairs["equiv_site_index"] == equiv_neigh_index)
+                    & (possible_unique_pairs["equiv_neigh_index"] == equiv_site_index)
                     & (possible_unique_pairs["dist"] == dist)
                 )
                 # assign the fraction along the line and distance to each unique
                 # site neighbor pair. We do this in the loop so that the reverse
                 # assignments don't need to be repeated
                 possible_unique_pairs.at[index, "partitioning_frac"] = frac
-                possible_unique_pairs.loc[reverse_condition, "partitioning_frac"] = (
-                    reverse_frac
-                )
+                possible_unique_pairs.loc[
+                    reverse_condition, "partitioning_frac"
+                ] = reverse_frac
 
                 # create another search condition for the full dataframe of site-neighbor pairs
                 search_condition1 = (
-                    (possible_site_neigh_pairs["site_symbol"] == site_symbol)
-                    & (possible_site_neigh_pairs["neigh_symbol"] == neigh_symbol)
+                    (possible_site_neigh_pairs["equiv_site_index"] == equiv_site_index)
+                    & (
+                        possible_site_neigh_pairs["equiv_neigh_index"]
+                        == equiv_neigh_index
+                    )
                     & (possible_site_neigh_pairs["dist"] == dist)
                 )
                 reverse_condition1 = (
-                    (possible_site_neigh_pairs["site_symbol"] == neigh_symbol)
-                    & (possible_site_neigh_pairs["neigh_symbol"] == site_symbol)
+                    (possible_site_neigh_pairs["equiv_site_index"] == equiv_neigh_index)
+                    & (
+                        possible_site_neigh_pairs["equiv_neigh_index"]
+                        == equiv_site_index
+                    )
                     & (possible_site_neigh_pairs["dist"] == dist)
                 )
 
@@ -1578,6 +1606,70 @@ class PartitioningToolkit:
             new_partitioning[i] = new_partitioning_df
         return new_partitioning
 
+    def increase_to_symmetric_partitioning(self, initial_partitioning: dict):
+        """
+        Adds to a set of partitioning planes by checking that each plane has
+        an equivalent counterpart for the neighboring atom and adding it
+        if not.
+
+        Args:
+            initial_partitioning (dict):
+                A dictionary with site indices as keys and partitioning dataframes
+                as values
+
+        Returns:
+            A new dictionary of partitioning dataframes for each site.
+        """
+        equivalent_atoms = self.grid.equivalent_atoms
+        site_indices = [i for i in range(len(self.grid.structure))]
+        new_partitioning = {}
+        for site in site_indices:
+            # Look through each other unique atom.
+            part_df = initial_partitioning[site]
+            site_coords = part_df.loc[0, "site_coords"]
+            for neigh in site_indices:
+                if neigh != site:
+                    neigh_part_df = initial_partitioning[neigh]
+                    # Get the planes connecting this neighbor to the site
+                    important_neigh_df = neigh_part_df.loc[
+                        neigh_part_df["neigh_index"] == site
+                    ]
+                    # For each plane we want to do the following:
+                    # 1. Check if the original site has this plane
+                    # 2. Transform the coords of the neigh
+                    # 3. Flip the partitioning frac and radius
+                    # 4. transform plane point and flip plane vector
+                    for i, row in important_neigh_df.iterrows():
+                        dist = row["dist"]
+                        condition = (part_df["dist"] == dist) & (
+                            part_df["neigh_index"] == neigh
+                        )
+                        if len(part_df.loc[condition]) == 0:
+                            # We want to add a new row
+                            transformation_vector = row["neigh_coords"] - site_coords
+                            new_row = {
+                                "site_index": site,
+                                "neigh_index": neigh,
+                                "equiv_site_index": equivalent_atoms[site],
+                                "equiv_neigh_index": equivalent_atoms[neigh],
+                                "site_symbol": row["neigh_symbol"],
+                                "neigh_symbol": row["site_symbol"],
+                                "dist": dist,
+                                "site_coords": site_coords,
+                                "neigh_coords": row["site_coords"]
+                                + transformation_vector,
+                                "partitioning_frac": 1 - row["partitioning_frac"],
+                                "radius": dist - row["radius"],
+                                "plane_points": row["plane_points"]
+                                + transformation_vector,
+                                "plane_vectors": row["plane_vectors"] * -1,
+                            }
+                            part_df.loc[len(part_df)] = new_row
+            part_df.sort_values(by=["dist"], inplace=True)
+            part_df.reset_index(inplace=True, drop=True)
+            new_partitioning[site] = part_df
+        return new_partitioning
+
     def get_partitioning(self, check_for_covalency: bool = True):
         """
         Gets the partitioning planes for each atom as well as some other useful
@@ -1638,8 +1730,8 @@ class PartitioningToolkit:
             # Get the important planes more rigorously by checking which planes
             # contribute to the vertices of the polyhedral shape surrounding
             # the site
-            _, important_planes = self.get_important_planes(reduced_planes)
-            important_planes = np.array(important_planes)
+            # _, important_planes = self.get_important_planes(reduced_planes)
+            # important_planes = np.array(important_planes)
             # get the indices for the important planes and append them to our
             # dictionary
             indices = np.where((planes[:, None] == important_planes).all(axis=2))[1]
@@ -1656,9 +1748,12 @@ class PartitioningToolkit:
             site_dataframe.reset_index(inplace=True, drop=True)
             initial_partitioning[site_index] = site_dataframe
 
-        partitioning = self.reduce_to_symmetric_partitioning(initial_partitioning)
-        return partitioning
-        # return initial_partitioning
+        # partitioning = self.reduce_to_symmetric_partitioning(
+        #     initial_partitioning
+        # )
+        # partitioning = self.increase_to_symmetric_partitioning(initial_partitioning)
+        # return partitioning
+        return initial_partitioning
 
     def plot_partitioning_results(
         self,

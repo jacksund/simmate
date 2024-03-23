@@ -394,24 +394,6 @@ Exclusive to the `restart.simmate.automatic` workflow, this is the original fold
 
 --------------------------
 
-## electride_connection_cutoff
-Exclusive to the badelf workflows in the simmate app. This is the ELF value cutoff to be allowed when determining the dimensionality of an electride. The default is 0, but a good option might be 0.5 which is the normal cutoff for what is considered an electride.
-
-=== "yaml"
-    ``` yaml
-    electride_connection_cutoff: 0.5
-    ```
-=== "toml"
-    ``` toml
-    electride_connection_cutoff = 0.5
-    ```
-=== "python"
-    ``` python
-    electride_connection_cutoff = 0.5
-    ```
-
---------------------------
-
 ## electride_finder_cutoff
 Exclusive to the badelf workflows in the simmate app. This is the minimum ELF value that the algorithm will consider an electride. Any maxima in the ELF below this will not be considered an electride site during the algorithm.
 
@@ -1335,6 +1317,25 @@ This parameter is the base validator class that should be used. The class will b
 ## workflow_base
 (experimental feature)
 Unique to `customized.vasp.user-config`. This is the base workflow to use when updating critical settings.
+
+--------------------------
+
+## write_electride_files
+
+This parameter is unique to badelf workflows. If set to True and ELFCAR and CHGCAR will be written containing only the values where the volume belongs to an electride and zero elsewhere.
+
+=== "yaml"
+    ``` yaml
+    write_electride_files: false
+    ```
+=== "toml"
+    ``` toml
+    write_electride_files = false
+    ```
+=== "python"
+    ``` python
+    write_electride_files = False
+    ```
 
 --------------------------
 

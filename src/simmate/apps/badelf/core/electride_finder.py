@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-import math
 import warnings
 from functools import cached_property
 from pathlib import Path
@@ -40,7 +39,7 @@ class ElectrideFinder:
         """
         return self.find_local_maxima()
 
-    def find_local_maxima(self, neighborhood_size: int = 2, threshold: float = None):
+    def find_local_maxima(self, neighborhood_size: int = 2, threshold: float = 0.5):
         """
         Find local maxima in a 3D numpy array.
 
@@ -51,49 +50,57 @@ class ElectrideFinder:
                 Threshold for considering a point as a local maximum
 
         Returns:
-            List of tuples containing the coordinates of local maxima
+            List of tuples containing the fractional coordinates of local maxima
         """
         grid = self.grid.copy()
-        grid.regrid(desired_resolution=1000)
+        # grid.regrid(desired_resolution=1000)
         elf_data = grid.total
         # Get padded data so that we can look at voxels at the edges
         padded_elf_data = np.pad(elf_data, neighborhood_size, mode="wrap")
-        maxima_cart_coords = []
+        maxima_vox_coords = []
         maxima_values = []
-
-        # Look across each voxel in the structure.
-        for z in range(neighborhood_size, padded_elf_data.shape[0] - neighborhood_size):
-            for y in range(
-                neighborhood_size, padded_elf_data.shape[1] - neighborhood_size
-            ):
-                for x in range(
-                    neighborhood_size, padded_elf_data.shape[2] - neighborhood_size
-                ):
-                    # Get a section of the dataframe around the voxel
-                    neighborhood = padded_elf_data[
-                        z - neighborhood_size : z + neighborhood_size + 1,
-                        y - neighborhood_size : y + neighborhood_size + 1,
-                        x - neighborhood_size : x + neighborhood_size + 1,
-                    ]
-                    # Get the max value in the neighborhood
-                    max_value = np.max(neighborhood)
-                    z_orig = z - neighborhood_size
-                    y_orig = y - neighborhood_size
-                    x_orig = x - neighborhood_size
-                    # If the maximum value is at the voxel we're looking at, this
-                    # is a maximum and we add the cartesian coordinates and value
-                    # to our list
-                    if elf_data[z_orig, y_orig, x_orig] == max_value and (
-                        threshold is None or max_value > threshold
-                    ):
-                        maxima_voxel_coord = (z_orig + 1, y_orig + 1, x_orig + 1)
-                        maxima_cart_coord = grid.get_cart_coords_from_vox(
-                            maxima_voxel_coord
-                        )
-                        maxima_cart_coords.append(maxima_cart_coord)
-                        maxima_values.append(elf_data[z_orig, y_orig, x_orig])
-
-        return maxima_cart_coords, maxima_values
+        # Get voxel coords where the value is above the threshold
+        above_thresh_indices = np.where(elf_data > threshold)
+        above_thresh_data = elf_data[above_thresh_indices]
+        # Convert to padded indices in an array to loop over
+        above_thresh_indices = np.column_stack(above_thresh_indices) + neighborhood_size
+        for (x, y, z), data_value in zip(above_thresh_indices, above_thresh_data):
+            # Get a section of the dataframe around the voxel
+            neighborhood = padded_elf_data[
+                x - neighborhood_size : x + neighborhood_size + 1,
+                y - neighborhood_size : y + neighborhood_size + 1,
+                z - neighborhood_size : z + neighborhood_size + 1,
+            ]
+            # Get the max value in the neighborhood
+            max_value = np.max(neighborhood)
+            # If the maximum value is at the voxel we're looking at, this
+            # is a maximum and we add the cartesian coordinates and value
+            # to our list
+            if data_value == max_value:
+                x_orig = x - neighborhood_size
+                y_orig = y - neighborhood_size
+                z_orig = z - neighborhood_size
+                maxima_voxel_coord = (x_orig, y_orig, z_orig)
+                maxima_vox_coords.append(maxima_voxel_coord)
+                maxima_values.append(elf_data[x_orig, y_orig, z_orig])
+        maxima_vox_coords = np.array(maxima_vox_coords)
+        # convert to fractional coords
+        maxima_frac_coords = grid.get_frac_coords_from_vox_full_array(maxima_vox_coords)
+        # create a dummy structure and merge nearby maxima
+        maxima_structure = grid.structure.copy()
+        maxima_structure.remove_species(maxima_structure.symbol_set)
+        for frac_coord in maxima_frac_coords:
+            maxima_structure.append("He", frac_coord)
+        tol = grid.max_voxel_dist * 2
+        maxima_structure.merge_sites(tol=tol, mode="average")
+        new_maxima_frac_coords = maxima_structure.frac_coords
+        # sometimes the pymatgen merge_sites method will return 1 instead of zero
+        # for a fractional coordinate. We convert these to 0 here.
+        new_maxima_frac_coords = np.where(
+            new_maxima_frac_coords == 1, 0, new_maxima_frac_coords
+        )
+        # maxima_cart_coords = grid.get_cart_coords_from_vox_full_array(maxima_vox_coords)
+        return new_maxima_frac_coords  # , maxima_values
 
     @staticmethod
     def to_number_from_roman_numeral(roman_num: str):
@@ -152,7 +159,7 @@ class ElectrideFinder:
         # add method to get coordination environments. This already exists in
         # badelftoolkit but I don't want to repeat it for no reason.
         cnn = CrystalNN()
-        shannon_radii = {}
+        shannon_radii = []
         for site_index, site in enumerate(structure):
             # We need the shannon radii data for the atom we're investigating.
             # We get this from pymatgen's pt_data dictionary
@@ -194,7 +201,8 @@ class ElectrideFinder:
             shannon_radius = species_dict[closest_ox_state][closest_coord_env][""][
                 "crystal_radius"
             ]
-            shannon_radii[site_index] = shannon_radius
+            shannon_radii.append(shannon_radius)
+        shannon_radii = np.array(shannon_radii)
         return shannon_radii
 
     @cached_property
@@ -227,13 +235,13 @@ class ElectrideFinder:
             )
             unique_atom_radii[atom] = radius
 
-        # We now construct a dictionary for all of the atoms in the structure
-        # that provides its radius
-        all_atom_radii = {}
+        # We now construct an array for all of the atoms in the structure
+        all_atom_radii = []
         for site_index, site in enumerate(structure):
             equiv_atom = equivalent_atoms[site_index]
             radius = unique_atom_radii[equiv_atom]
-            all_atom_radii[site_index] = radius
+            all_atom_radii.append(radius)
+        all_atom_radii = np.array(all_atom_radii)
 
         return all_atom_radii
 
@@ -269,14 +277,10 @@ class ElectrideFinder:
     def get_electride_structure(
         self,
         electride_finder_cutoff: float = 0.5,
-        min_electride_radius: float = 0.0,
+        min_electride_radius: float = 0.6,
         atom_radius_method: str = "elf",
         remove_old_electrides: bool = False,
-        local_maxima_coords: list = None,
-        local_maxima_values: list = None,
     ):
-        #!!! The min_electride_radius is based off of fluoride, but it feels
-        # arbitrary. Is there a better way?
         """
         Finds the electrides in a structure using an ELF grid.
 
@@ -286,7 +290,8 @@ class ElectrideFinder:
                 electride. The default is 0.5.
             min_electride_radius (float):
                 The minimum elf radius around the maximum for it to be considered
-                an electride. The default is 0 allowing any possible site.
+                an electride. The default is 0.6 which is based off of a small
+                set of tests.
                 An good alternative is 1.19 which is the average radius of fluoride
                 in a 6 coordination environment.
             atom_radius_method (str):
@@ -294,12 +299,6 @@ class ElectrideFinder:
                 elf will use the provided grid to find the radius of each atom and
                 shannon will use bader oxidation states and the closest available
                 tabulated shannon crystal radius.
-            local_maxima_coords (list):
-                The coordinates of all local maxima in the grid. This will be found
-                automatically if not set.
-            local_maxima_values (list):
-                The values at the local maxima. This will be found automatically if
-                not set.
             remove_old_electrides (bool):
                 Whether or not to remove any other electrides already placed in
                 the system. It is generally recommended that structures without
@@ -312,9 +311,12 @@ class ElectrideFinder:
         logging.info("Finding electride sites")
         # Get the coordinates and values of each local maximum in the grid
         grid = self.grid.copy()
-        if local_maxima_coords is None:
-            local_maxima_coords, local_maxima_values = self.local_maxima
-
+        (local_maxima_frac_coords) = self.find_local_maxima(  # , local_maxima_values
+            threshold=electride_finder_cutoff
+        )
+        local_maxima_vox_coords = grid.get_vox_coords_from_frac_full_array(
+            local_maxima_frac_coords
+        )
         # If there are He atoms that have already been placed in the structure
         # that the user wants to remove, remove them now.
         structure = grid.structure.copy()
@@ -332,90 +334,57 @@ class ElectrideFinder:
             return structure
 
         # Create a list to store the electride coords.
-        cnn = CrystalNN()
         electride_coords = []
         # get the estimated shannon radii of each of the sites in the structure.
         # These will be used to estimate electride radii
-        shannon_radii = self.get_ionic_radii(atom_radius_method)
-        for i, maximum_coords in enumerate(local_maxima_coords):
-            # Check if the elf value is below the cutoff
-            if local_maxima_values[i] < electride_finder_cutoff:
-                continue
-
+        radii = self.get_ionic_radii(atom_radius_method)
+        for i, maximum_vox_coords in enumerate(local_maxima_vox_coords):
+            maximum_frac_coords = local_maxima_frac_coords[i]
+            # maximum_cart_coords = local_maxima_cart_coords[i]
             # Create a dummy structure. Add a dummy at the local maximum that
             # was found
             electride_structure = structure.copy()
-            electride_structure.append("He", maximum_coords, coords_are_cartesian=True)
-            # Get the nearest neighbors of the electride. cnn will return a dict
-            # with multiple keys. These might be different methods of finding neighbors?
-            # I pick the one with the most neighbors
-            with warnings.catch_warnings():
-                warnings.filterwarnings(
-                    "ignore", category=UserWarning, module="pymatgen"
-                )
-                _, _, electride_neighbors = cnn.get_nn_data(electride_structure, n=-1)
-            most_neighbors = max(electride_neighbors)
-            electride_neighbors = electride_neighbors[most_neighbors]
 
-            # get the distance from the potential electride site to the edge
-            # of the atoms shannon radius. This is the maximum radius that the
-            # electride can have.
-            max_electride_radii = []
-            for neighbor in electride_neighbors:
-                neighbor_index = neighbor["site_index"]
-                neighbor_shann_rad = shannon_radii[neighbor_index]
-                if neighbor["site"].species_string != "He":
-                    distance_to_atom = math.dist(
-                        maximum_coords, neighbor["site"].coords
-                    )
-                    max_radius = distance_to_atom - neighbor_shann_rad
-                    max_electride_radii.append(max_radius)
-
+            electride_structure.append("He", maximum_frac_coords)
+            # get all neighbors within 15 A
+            (
+                site_indices,
+                neigh_indices,
+                neigh_images,
+                dists,
+            ) = electride_structure.get_neighbor_list(15)
+            # get indices where the electride neighbors are stored
+            electride_index = len(electride_structure) - 1
+            electride_site_neighs = np.where(site_indices == electride_index)[0]
+            # get the subset of indices where the neighbor is not also the electride
+            electride_site_neighs = electride_site_neighs[
+                neigh_indices[electride_site_neighs] != electride_index
+            ]
+            # get the distances to these neighbors
+            neigh_dists = dists[electride_site_neighs]
+            # get the structure indices of these neighbors
+            neigh_indices1 = neigh_indices[electride_site_neighs]
+            # get the radii for each of these neigbhors
+            neigh_radii = radii[neigh_indices1]
+            # calculate the maximum radius of the electride relative to each of these
+            # neighbors
+            max_electride_radii = neigh_dists - neigh_radii
             # check if minimum distance is too close to an atom:
-
             if min(max_electride_radii) < min_electride_radius:
                 continue
-
-            # The following code is another method for finding the radius of the
-            # electrides using ELF. It works well in many situations but is
-            # less lenient than using the atoms shannon radii. It is kept here
-            # in case it becomes more desirable in the future.
-            # # get distances to min along lines to closest atoms
-            # electride_grid = grid.copy()
-            # electride_grid.structure = electride_structure
-            # electride_radius = PartitioningToolkit(electride_grid).get_elf_ionic_radius(
-            #     site_index=len(electride_structure) - 1,
-            #     structure=electride_structure,
-            # )
-            # if electride_radius < min_electride_radius:
-            #     continue
-
             # If the loop is still going, we consider this site an electride. We
             # add it to the list of electride sites.
-            electride_coords.append(maximum_coords)
-            # electride_coordinations.append(cnn.get_cn(electride_structure, n=-1))
+            electride_coords.append(maximum_frac_coords)
 
         # Add our potential electride sites to our structure
         electride_structure = structure.copy()
         for coord in electride_coords:
-            electride_structure.append("He", coord, coords_are_cartesian=True)
+            electride_structure.append("He", coord)
 
-        # Often the algorithm will find several electride sites right next to
-        # eachother. This can be due to voxelation or because of oddly shaped
-        # electrides. We want to combine these into one electride site.
-        electride_structure.merge_sites(tol=0.5, mode="average")
-
-        # The above pymatgen method often reorders the atoms in the structure which
-        # causes issues down the line. We want to resort the atoms into their
-        # original order with electrides at the end. To do this, we create another
-        # copy of the original structure and add all of the final electride sites
-        final_electride_structure = structure.copy()
+        # report whether any electrides were found
         electride_sites = electride_structure.indices_from_symbol("He")
         if len(electride_sites) > 0:
             logging.info(f"{len(electride_sites)} electride sites found")
-            for site in electride_sites:
-                coord = electride_structure[site].coords
-                final_electride_structure.append("He", coord, coords_are_cartesian=True)
         else:
             logging.info("No electride sites found")
-        return final_electride_structure
+        return electride_structure

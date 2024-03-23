@@ -10,10 +10,10 @@ from pathlib import Path
 import numpy as np
 import psutil
 from numpy.typing import ArrayLike
-from pymatgen.analysis.dimensionality import get_dimensionality_larsen
-from pymatgen.analysis.graphs import StructureGraph
 from pymatgen.analysis.local_env import CrystalNN
 from pymatgen.io.vasp import Potcar
+from scipy.ndimage import label
+from tqdm import tqdm
 
 from simmate.apps.badelf.core.electride_finder import ElectrideFinder
 from simmate.apps.badelf.core.grid import Grid
@@ -49,7 +49,6 @@ class BadElfToolkit:
 
     check_for_covalency = True
     electride_finder_cutoff = 0.5
-    electride_connection_cutoff = 0
 
     def __init__(
         self,
@@ -382,32 +381,151 @@ class BadElfToolkit:
 
         return all_voxel_site_assignments
 
-    def get_electride_dimensionality(self, electride_connection_cutoff: float = 0):
+    @staticmethod
+    def get_ELF_dimensionality(grid: Grid, cutoff: float):
         """
-        Finds the dimensionality (e.g. 0D, 1D, etc.) of an electride based on
-        which voxels were assigned to the electride sites.
+        This algorithm works by checking if the voxels with values above the cutoff
+        are connected to the equivalent voxel in the unit cell one transformation
+        over. This is done primarily using scipy.ndimage.label which determines
+        which voxels are connected. To do this rigorously, the unit cell is repeated
+        to make a (2,2,2) super cell and the connections are checked going from
+        the original unit cell to the unit cells connected at the faces, edges,
+        and corners. If a connection in that direction is found, the total number
+        of connections increases. Dimensionalities of 0,1,2, and 3 are represented
+        by 0,1,4,and 13 connections respectively.
 
         Args:
-            electride_connection_cutoff (float):
-                The ELF value to consider as the cutoff for when two electride
-                sites are not connected. 0 is the default, but another reasonable
-                selection is 0.5 which is often considered the cutoff at which
-                a site can be considered an electride.
-
-        Returns:
-            The dimensionality of the electride as an integer.
+            cutoff (float):
+                The minimum elf value to consider as a connection.
+            grid (Grid):
+                The ELF Grid object with only values associated with electrides.
         """
+        data = grid.total
+        voxel_indices = np.indices(grid.grid_shape).reshape(3, -1).T
+        # Remove data below our cutoff
+        thresholded_data = np.where(data < cutoff, 0, 1)
+        raveled_data = thresholded_data.ravel()
+        # Label connected components in the eroded data. We will check each distinct
+        # body to see if it connects in each direction
+        labels, num_features = label(thresholded_data)
+        if num_features == 0:
+            return 0
+        # We need to get one voxel in each of the features that we can transpose
+        # later on
+        feature_indices = []
+        for feature in range(num_features):
+            feature_num = feature + 1
+            indices = np.where(labels == feature_num)
+            x, y, z = indices[0][0], indices[1][0], indices[2][0]
+            feature_indices.append(np.array([x, y, z]))
+        # We are going to need to translate the above voxels and the entire unit
+        # cell so we create a list of desired transformations
+        transformations = [
+            [0, 0, 0],  # -
+            [1, 0, 0],  # x
+            [0, 1, 0],  # y
+            [0, 0, 1],  # z
+            [1, 1, 0],  # xy
+            [1, 0, 1],  # xz
+            [0, 1, 1],  # yz
+            [1, 1, 1],  # xyz
+        ]
+        transformations = np.array(transformations)
+        transformations = grid.get_voxel_coords_from_frac(transformations.T).T
+        # create a new numpy array representing the data tiled once in each direction
+        # to get a corner
+        supercell_data = np.zeros(np.array(thresholded_data.shape) * 2)
+        for transformation in transformations:
+            transformed_indices = (voxel_indices + transformation).astype(int)
+            x = transformed_indices[:, 0]
+            y = transformed_indices[:, 1]
+            z = transformed_indices[:, 2]
+            supercell_data[x, y, z] = raveled_data
+        # convert data into labeled features
+        supercell_data, _ = label(supercell_data)
+        # The unit cell can be connected to neighboring unit cells in 26 directions.
+        # however, we only need to consider half of these as the others are symmetrical.
+        connections = [
+            # surfaces (3)
+            [0, 1],  # x
+            [0, 2],  # y
+            [0, 3],  # z
+            # edges (6)
+            [0, 4],  # xy
+            [0, 5],  # xz
+            [0, 6],  # yz
+            [3, 1],  # x-z
+            [3, 2],  # y-z
+            [1, 2],  # -xy
+            # corners (4)
+            [0, 7],  # x,y,z
+            [1, 6],  # -x,y,z
+            [2, 5],  # x,-y,z
+            [3, 4],  # x,y,-z
+        ]
+        # Using these connections we can determine the dimensionality of the system.
+        # 1 connection is 1D, 2-4 connections is 2D and 5-13 connections is 3D.
+        # !!! These may need to be updated if I'm wrong. The idea comes from
+        # the fact that the connections should be 1, 4, and 13, but sometimes
+        # voxelation issues result in a connection not working in one direction
+        # while it would in the reverse direction (which isn't possible with
+        # true symmetry). The range accounts for this possibility. The problem
+        # might be if its possible to have for example a 2D connecting structure
+        # with 5 connections. However, I'm pretty sure that immediately causes
+        # an increase to 3D dimensionality.
+        # First we create a list to store potential dimensionalites based off of
+        # each feature. We will take the highest dimensionality.
+        dimensionalities = []
+        for coord in feature_indices:
+            # create count for the number of connections
+            connections_num = 0
+            for connection in connections:
+                # Get voxel coordinates at the first transformation
+                x, y, z = (coord + transformations[connection[0]]).astype(int)
+                # get voxel coordinates at the second transformation
+                x1, y1, z1 = (coord + transformations[connection[1]]).astype(int)
+                # get the feature label at each voxel
+                label1 = supercell_data[x, y, z]
+                label2 = supercell_data[x1, y1, z1]
+                # If the labels are the same, the unit cell is connected in this
+                # direction
+                if label1 == label2:
+                    connections_num += 1
+            if connections_num == 0:
+                dimensionalities.append(0)
+            elif connections_num == 1:
+                dimensionalities.append(1)
+            elif 1 < connections_num <= 4:
+                dimensionalities.append(2)
+            elif 5 < connections_num <= 13:
+                dimensionalities.append(3)
 
+        return max(dimensionalities)
+
+    def get_electride_dimensionality(self):
+        """
+        Finds the dimensionality (e.g. 0D, 1D, etc.) of an electride by labeling
+        features in the ELF at various cutoffs and determining if they are
+        connected to nearby unit cells.
+
+        Args:
+            grid (Grid):
+                The ELF Grid object with only values associated with electrides.
+        """
         electride_indices = self.electride_indices
         # If we have no electrides theres no reason to continue so we stop here
         if len(electride_indices) == 0:
-            return None
+            return None, None
 
+        ###############################################################################
+        # This section preps an ELF grid that only contains values from the electride
+        # sites and is zero everywhere else.
+        ###############################################################################
         if self.algorithm == "zero-flux":
             # !!! read in electride only ELFCAR. Regrid to charge_grid size
             # Get the necessary CHGCAR and ELFCAR files. Then run the
             # Henkelman Bader code, printing the resulting electride voxels in
-            # one file for topolgoy analysis.
+            # one file for topology analysis.
             directory = self.directory
             partitioning_file = directory / "ELFCAR_w_empty_atoms"
             if not partitioning_file.exists():
@@ -439,79 +557,42 @@ class BadElfToolkit:
             )
             elf_grid.total = elf_array
 
-        # read in structure and remove all atoms except dummy electride sites
-        electride_structure = self.electride_structure.copy()
-
-        electride_structure.remove_species(self.structure.symbol_set)
-
-        elf_grid.structure = electride_structure
-
-        partitioning_tools = PartitioningToolkit(elf_grid)
-
-        # get the 50 nearest electride neighbors. We only do this because we need to make
-        # sure that electride sites that are very far away are thoroughly checked
-        nearest_neighbors = partitioning_tools.get_set_number_of_neighbors(50)
-
-        # create an empty StructureGraph object. This maps connections between different
-        # atoms, including those across unit cell boundaries. We will fill this out using
-        # the list of neighbors we just defined.
-        graph = StructureGraph.with_empty_graph(electride_structure)
-        # partitioning_lines = []
-
-        # iterate over each unique electride site.
-        for index, neighbors in enumerate(nearest_neighbors):
-            # get the voxel coords for the electride site
-            site_pos = elf_grid.get_voxel_coords_from_index(index)
-
-            # loop over the neighboring electride sites
-            for neighbor in neighbors:
-                # We will have many excess electride sites that are in unit cells that
-                # don't border the one we're looking at. I'm not certain, but I don't
-                # think those are necessary. We cut them out here to save time from the
-                # get_partitioning_line_from_voxels function.
-
-                # Assume this neighbor is not more than one unit cell away
-                more_than_1_unit_cell_away = False
-                for integer in neighbor.image:
-                    # Check if an integer other than -1, 1, or 0 is present. This indicates
-                    # we've been transformed more than one unit cell away.
-                    if integer not in [-1, 0, 1]:
-                        more_than_1_unit_cell_away = True
-                        break
-                # Check if we've moved more than one unit cell away. If we have, skip
-                # to the next neighbor
-                if more_than_1_unit_cell_away:
-                    continue
-
-                # get the voxel coord for the connected electride site and get the ELF
-                # line between the site and this neighbor
-                neigh_pos = elf_grid.get_voxel_coords_from_neigh(neighbor)
-                pos, values = partitioning_tools.get_partitioning_line_from_voxels(
-                    site_pos, neigh_pos
-                )
-                # partitioning_lines.append([pos,values])
-                # If a 0 is not found in the elf line these sites are connected and we
-                # want to add an edge to our graph.
-                #!!! create cutoff for how much space is allowed between sites
-                # for when vorelf cuts it off by a voxel or so?
-                if all(value > electride_connection_cutoff for value in values):
-                    graph.add_edge(
-                        from_index=index,  # The site index of the electride site of interest
-                        from_jimage=(
-                            0,
-                            0,
-                            0,
-                        ),  # The image the electride site is in. Always (0,0,0)
-                        to_index=neighbor.index,  # The neighboring electrides site index
-                        to_jimage=neighbor.image,  # The image that the neighbor is in.
-                        weight=None,  # The relative weight of the neighbor. We ignore this.
-                        edge_properties=None,
-                        warn_duplicates=False,  # Duplicates are fine for us.
-                    )
-
-        # Get the dimensionality from our StructureGraph. If more than one group of electrides
-        # is found, it will default to the highest dimensionality.
-        return get_dimensionality_larsen(graph)
+        #######################################################################
+        # This section scans across different cutoffs to determine what dimensionalities
+        # exist in the electride ELF
+        #######################################################################
+        logging.info("Finding dimensionality cutoffs")
+        dimensions = [3, 2, 1, 0]
+        # Create lists for the refined dimensions
+        final_dimensions = []
+        final_connections = []
+        amounts_to_change = []
+        # We refine by guessing the cutoff is 0.5 then increasing or decreasing by
+        # 0.25, then 0.125 etc. down to 0.000015259.
+        for i in range(1, 16):
+            amounts_to_change.append(1 / (2 ** (i + 1)))
+        for dimension in dimensions:
+            guess = 0.5
+            # assume this dimension is not found
+            found_dimension = False
+            logging.info(f"Refining cutoff for dimension {dimension}")
+            for i in tqdm(amounts_to_change, total=len(amounts_to_change)):
+                # check what our current dimension is. If we are at a higher dimension
+                # we need to raise the cutoff. If we are at a lower dimension or at
+                # the dimension we need to lower it
+                current_dimension = self.get_ELF_dimensionality(elf_grid, guess)
+                if current_dimension > dimension:
+                    guess += i
+                elif current_dimension < dimension:
+                    guess -= i
+                elif current_dimension == dimension:
+                    # We have found the dimension so we add it to our lists.
+                    guess -= i
+                    found_dimension = True
+            if found_dimension:
+                final_connections.append(round(guess, 4))
+                final_dimensions.append(dimension)
+        return final_dimensions, final_connections
 
     def _fix_BvAt(self, file_name):
         """
@@ -653,7 +734,9 @@ class BadElfToolkit:
 
             # Convert charges from VASP standard
             for site, charge in charges.items():
-                charges[site] = charge / (a * b * c)
+                charges[site] = round((charge / (a * b * c)), 6)
+            for site, volume in atomic_volumes.items():
+                atomic_volumes[site] = round(volume, 6)
 
             # Get the number of electrons assigned by badelf.
             nelectrons = round(sum(charges.values()), 6)
@@ -687,12 +770,12 @@ class BadElfToolkit:
                 if element_str == "e":
                     oxi_state = -site_charge
                 else:
-                    oxi_state = nelectron_data[element_str] - site_charge
+                    oxi_state = round((nelectron_data[element_str] - site_charge), 6)
                 oxi_state_data.append(oxi_state)
                 # add the corresponding charge, distance, and atomic volume to the
                 # respective lits
                 charges_list.append(site_charge)
-                min_dists_list.append(min_dists[site_index])
+                min_dists_list.append(round(min_dists[site_index], 6))
                 atomic_volumes_list.append(atomic_volumes[site_index])
 
             # Calculate the "vacuum charge" or the charge not associated with any atom.
@@ -719,16 +802,26 @@ class BadElfToolkit:
                 "vacuum_volume": vacuum_volume,
                 "nelectrons": nelectrons,
             }
-
+        # calculate the number of electride electrons per formula unit
+        if len(self.electride_indices) > 0:
+            electrides_per_unit = sum(
+                [results["charges"][i] for i in self.electride_indices]
+            )
+            (
+                _,
+                formula_reduction_factor,
+            ) = self.structure.composition.get_reduced_composition_and_factor()
+            electrides_per_reduced_unit = electrides_per_unit / formula_reduction_factor
+            results["electrides_per_formula"] = electrides_per_unit
+            results["electrides_per_reduced_formula"] = electrides_per_reduced_unit
         # set the results that are not algorithm dependent
         results["nelectrides"] = electride_num
         results["algorithm"] = algorithm
         results["element_list"] = elements
         results["coord_envs"] = self.coord_envs
-        results["electride_dim"] = self.get_electride_dimensionality(
-            electride_connection_cutoff=self.electride_connection_cutoff
-        )
-        results["elf_connect_cutoff"] = self.electride_connection_cutoff
+        electride_dim, dim_cutoffs = self.get_electride_dimensionality()
+        results["electride_dim"] = electride_dim
+        results["dim_cutoffs"] = dim_cutoffs
         # Fill out columns unrelated to badelf alg
         structure = self.structure
         results["structure"] = structure
@@ -751,7 +844,6 @@ class BadElfToolkit:
         charge_file: str = "CHGCAR",
         algorithm: str = "badelf",
         find_electrides: bool = True,
-        cores: int = None,
     ):
         """
         Creates a BadElfToolkit instance from the requested partitioning file
@@ -771,9 +863,6 @@ class BadElfToolkit:
                 The algorithm to use. Options are "badelf", "voronelf", or "zero-flux"
             find_electrides (bool):
                 Whether or not to search for electrides in the system
-            cores (int):
-                The number of computer cores (NOT threads) that will be used to
-                parallelize
 
         Returns:
             A BadElfToolkit instance.
@@ -803,6 +892,17 @@ class BadElfToolkit:
         Returns:
             None
         """
+        if self.algorithm == "zero-flux":
+            warnings.warn(
+                """
+                There is currently no method to write files for 
+                assignments found using the zero-flux method. This method is
+                a wrap around for the Henkelman group's bader software. We
+                suggest using their software for more involved zero-flux
+                workflows.
+                """
+            )
+            return
         # Get directory
         directory = self.directory
         # Get voxel assignments and data
@@ -855,6 +955,16 @@ class BadElfToolkit:
         Returns:
             None
         """
+        if self.algorithm == "zero-flux":
+            warnings.warn(
+                """There is currently no method to write files for 
+                   assignments found using the zero-flux method. This method is
+                   a wrap around for the Henkelman group's bader software. We
+                   suggest using their software for more involved zero-flux
+                   workflows.
+                """
+            )
+            return
         # Get directory
         directory = self.directory
         # Get voxel assignments and data
@@ -899,7 +1009,7 @@ class BadElfToolkit:
             grid.structure = self.electride_structure
             PartitioningToolkit(grid).plot_partitioning_results(partitioning)
         else:
-            print(
+            warnings.warn(
                 """
                 Plotting of zero-flux partitioning surfaces is not currently
                 supported.
