@@ -1,0 +1,28 @@
+{# EXAMPLE USE: include "basic_elements/dropdown_select.html" with label="Numer of atoms:" min=1 max=200 form_field=form.num_atoms__range only #}
+{# options should be a list of tuples: (value, display) #}
+<div unicorn:ignore class="my-2">
+    {% if label %}<label class="form-label">{{ label }}</label>{% endif %}
+    <select id="{{ name }}{{ key }}"
+            class="select2 select2-multiple form-control {% if allow_custom_input %}select2-dynamic{% endif %}"
+            data-toggle="select2"
+            multiple="multiple"
+            data-placeholder="Choose at least one ..."
+            onchange="Unicorn.call('{{ unicorn_view }}', 'set_{{ name }}', $('#{{ name }}{{ key }}').val().join('--and--'));">
+        {% if initial_value %}
+            <option value="{{ initial_value }}">
+                {% if initial_display %}
+                    {{ initial_display }}
+                {% else %}
+                    {% for option in options %}
+                        {% if initial_value == option.0 %}{{ option.1 }}{% endif %}
+                    {% endfor %}
+                {% endif %}
+            </option>
+        {% endif %}
+        {% for option in options %}
+            {% if option.0 != current_value and option.0 != first_value %}
+                <option value="{{ option.0 }}">{{ option.1 }}</option>
+            {% endif %}
+        {% endfor %}
+    </select>
+</div>
