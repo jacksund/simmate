@@ -502,11 +502,14 @@ class PartitioningToolkit:
         # now that we've found the values surrounding the minimum of our line,
         # we can fit these values to a 2nd degree polynomial and solve for its
         # minimum point
-        d, e, f = np.polyfit(line_section_x, values_fine, 2)
-        x = -e / (2 * d)
-        elf_min_index_new = x
-        elf_min_value_new = np.polyval(np.array([d, e, f]), x)
-        elf_min_frac_new = elf_min_index_new / (len(positions) - 1)
+        try:
+            d, e, f = np.polyfit(line_section_x, values_fine, 2)
+            x = -e / (2 * d)
+            elf_min_index_new = x
+            elf_min_value_new = np.polyval(np.array([d, e, f]), x)
+            elf_min_frac_new = elf_min_index_new / (len(positions) - 1)
+        except:
+            breakpoint()
 
         return [elf_min_index_new, elf_min_value_new, elf_min_frac_new]
 

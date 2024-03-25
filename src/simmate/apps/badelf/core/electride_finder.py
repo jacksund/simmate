@@ -502,6 +502,25 @@ class ElectrideFinder:
                 electride_structure.append(
                     "He", maximum_coord, coords_are_cartesian=True
                 )
+        # sometimes electride sites are found that are very small (i.e. < 0.1 A).
+        # These are usually features of the grid and not actual electride sites
+        # so we remove them. We update the elf grid with the new structure and
+        # run bader
+        elf_grid.structure = electride_structure
+        new_bader = elf_grid.run_pybader(threads)
+        # We get the voxels assigned to each site as well as the volume of a
+        # single voxel.
+        atoms_volumes = new_bader.atoms_volumes
+        voxel_volume = new_bader.voxel_volume
+        indices_to_remove = []
+        for i in range(len(electride_structure)):
+            # for each site, we calculate the volume assigned to them. If its
+            # less than 0.1 we remove the site.
+            num_voxels = len(np.where(atoms_volumes == i)[0])
+            volume = num_voxels * voxel_volume
+            if volume < 0.1:
+                indices_to_remove.append(i)
+        electride_structure.remove_sites(indices_to_remove)
         logging.info(
             f"{len(electride_structure.indices_from_symbol('He'))} electride sites found."
         )
