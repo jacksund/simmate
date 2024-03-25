@@ -2,6 +2,7 @@
 import logging
 import math
 from functools import cached_property
+from itertools import product
 from pathlib import Path
 
 import numpy as np
@@ -55,35 +56,34 @@ class ElectrideFinder:
         grid = self.grid.copy()
         # grid.regrid(desired_resolution=1000)
         elf_data = grid.total
+        # get the indices and values
+        voxel_coords = np.indices(elf_data.shape).reshape(3, -1).T
+        voxel_values = elf_data.ravel()
+        # get the transforms required to move the voxels to the voxels in a neighborhood
+        # around them
+        number_range = [i for i in range(-neighborhood_size, neighborhood_size + 1)]
+        transforms = list(product(number_range, repeat=3))
         # Get padded data so that we can look at voxels at the edges
         padded_elf_data = np.pad(elf_data, neighborhood_size, mode="wrap")
-        maxima_vox_coords = []
-        maxima_values = []
-        # Get voxel coords where the value is above the threshold
-        above_thresh_indices = np.where(elf_data > threshold)
-        above_thresh_data = elf_data[above_thresh_indices]
-        # Convert to padded indices in an array to loop over
-        above_thresh_indices = np.column_stack(above_thresh_indices) + neighborhood_size
-        for (x, y, z), data_value in zip(above_thresh_indices, above_thresh_data):
-            # Get a section of the dataframe around the voxel
-            neighborhood = padded_elf_data[
-                x - neighborhood_size : x + neighborhood_size + 1,
-                y - neighborhood_size : y + neighborhood_size + 1,
-                z - neighborhood_size : z + neighborhood_size + 1,
-            ]
-            # Get the max value in the neighborhood
-            max_value = np.max(neighborhood)
-            # If the maximum value is at the voxel we're looking at, this
-            # is a maximum and we add the cartesian coordinates and value
-            # to our list
-            if data_value == max_value:
-                x_orig = x - neighborhood_size
-                y_orig = y - neighborhood_size
-                z_orig = z - neighborhood_size
-                maxima_voxel_coord = (x_orig, y_orig, z_orig)
-                maxima_vox_coords.append(maxima_voxel_coord)
-                maxima_values.append(elf_data[x_orig, y_orig, z_orig])
-        maxima_vox_coords = np.array(maxima_vox_coords)
+        padded_voxel_coords = voxel_coords + neighborhood_size
+        # For each transformation, get the value of the neighboring voxel
+        surrounding_values = []
+        for trans in transforms:
+            trans = np.array(trans)
+            new_voxel_coords = padded_voxel_coords + trans
+            surrounding_values.append(
+                padded_elf_data[
+                    new_voxel_coords[:, 0],
+                    new_voxel_coords[:, 1],
+                    new_voxel_coords[:, 2],
+                ]
+            )
+        surrounding_values = np.column_stack(surrounding_values)
+        # find the maximum voxel in the surrounding area
+        max_values = np.max(surrounding_values, axis=1)
+        maxima_mask = np.where(voxel_values == max_values, voxel_values, 0)
+        maxima_mask = np.where(maxima_mask >= threshold, True, False)
+        maxima_vox_coords = voxel_coords[maxima_mask]
         # convert to fractional coords
         maxima_frac_coords = grid.get_frac_coords_from_vox_full_array(maxima_vox_coords)
         # create a dummy structure and merge nearby maxima
