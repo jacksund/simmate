@@ -1,0 +1,34 @@
+{# EXAMPLE USE: include "basic_elements/range_slider_single.html" with label="Numer of atoms:" min=1 max=200 form_field=form.num_atoms__range only #}
+<div unicorn:ignore>
+    <div class="form-group">
+        {% if label %}
+            <label for="{{ form_field.id_for_label }}" class="pt-2">
+                {{ label }}
+                {% if help_text %}
+                    <p class="badge bg-secondary rounded-pill"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       data-bs-title="{{ help_text }}">?</p>
+                {% endif %}
+            </label>
+        {% endif %}
+        <input type="text"
+            name="{{ name }}"
+            id="{{ name }}{{ key }}"
+            data-plugin="range-slider"
+            data-min="{{ min }}"
+            data-max="{{ max }}"
+            {% if postfix %}data-max_postfix="+"{% endif %}
+            {% if from_val %}data-from="{{ from_val }}"{% endif %}
+            {% if to_val %}data-to="{{ to_val }}"{% endif %}
+            {% if is_double %}
+                data-input-values-separator=","
+                data-type="double"
+            {% endif %}
+            {% if grid %}data-grid="true"{% endif %}
+            {% if grid_num %}data-grid-num="{{ grid_num }}"{% endif %}
+            {% if step %}data-step={{ step }}{% endif %}
+            {# BUG: we ideally want this call to be for data-onFinish not onchange #}
+            onchange="Unicorn.call('{{ unicorn_view }}', 'set_{{ name }}', $('#{{ name }}{{ key }}').val());">
+        </div>
+    </div>

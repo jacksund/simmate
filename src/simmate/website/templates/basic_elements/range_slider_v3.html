@@ -1,0 +1,21 @@
+{# EXAMPLE USE: include "basic_elements/range_slider_single.html" with label="Numer of atoms:" min=1 max=200 form_field=form.num_atoms__range only #}
+<div unicorn:ignore>
+    <div class="form-group">
+        {% if label %}
+            <label for="{{ form_field.id_for_label }}" class="pt-2">
+                {{ label }}
+                {% if help_text %}
+                    <p class="badge bg-secondary rounded-pill"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       data-bs-title="{{ help_text }}">?</p>
+                {% endif %}
+            </label>
+        {% endif %}
+        <input type="text"
+               id="{{ name }}{{ key }}"
+               name="{{ name }}"
+               class="js-range-slider"
+               value="">
+    </div>
+</div>

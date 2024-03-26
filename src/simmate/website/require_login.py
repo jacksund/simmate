@@ -13,6 +13,7 @@ import re
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from rest_framework.authentication import TokenAuthentication
 
 
 class RequireLoginMiddleware:
@@ -49,9 +50,24 @@ class RequireLoginMiddleware:
         return response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
+
         # No need to process URLs if user already logged in
         if request.user.is_authenticated:
             return
+
+        # Users can also authenticate via Tokens from Django REST Framework
+        # for programmatic access
+        token_auth = TokenAuthentication()
+        try:
+            # Returns None if not signed-in OR if no token was given
+            # Returns (user, token) if successful
+            # Raises an error if the token is invalid or improperly formatted
+            # TODO: redirect to helpful pages for failed token auth
+            if token_auth.authenticate(request):
+                return
+
+        except:  # any error corresponds to not authenticated
+            pass
 
         # An exception match should immediately return None
         for url in self.exceptions:
