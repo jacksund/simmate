@@ -495,7 +495,9 @@ class DatabaseTable(models.Model):
         # here because we are attaching relation data as well.
         column_names = [
             (
-                column.name + f" (relation to {column.related_model.table_name})"
+                # BUG: use __name__ instead of table_name to account for tables
+                # that only inherit from Django models (e.g. User model)
+                column.name + f" (relation to {column.related_model.__name__})"
                 if column.is_relation
                 else column.name
             )
