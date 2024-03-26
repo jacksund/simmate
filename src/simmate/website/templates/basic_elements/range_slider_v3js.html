@@ -1,0 +1,20 @@
+{# EXAMPLE USE: include "basic_elements/range_slider_single.html" with label="Numer of atoms:" min=1 max=200 form_field=form.num_atoms__range only #}
+<script>
+    $("#{{ name }}{{ key }}").ionRangeSlider({
+        {% if is_double %}
+            values_separator: ",",
+            type: "double",
+        {% endif %}
+        min: {{ min }},
+        max: {{ max }},
+        {% if from %}from: {{ from }},{% endif %}
+        {% if to %}to: {{ to }},{% endif %}
+        {% if grid %}grid: true,{% endif %}
+        {% if grid_num %}grid_num: {{ grid_num }},{% endif %}
+        {% if step %}step: {{ step }},{% endif %}
+        {% if postfix %}max_postfix: "+",{% endif %}    
+        onFinish: function (data) {
+            Unicorn.call('{{ unicorn_view }}', 'set_{{ name }}', $('#{{ name }}{{ key }}').val());
+        }
+    });
+</script>

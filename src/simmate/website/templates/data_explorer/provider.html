@@ -4,24 +4,6 @@
     {% include "core_components/header.html" %}
 {% endblock %}
 {% block body %}
-    {# Page title #}
-    <div class="row pt-3">
-        <div class="col-12">
-            <div class="page-title-box">
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item">
-                            <a href="{% url 'data_explorer:home' %}">Data</a>
-                        </li>
-                        <li class="breadcrumb-item active">{{ provider.source }}</li>
-                    </ol>
-                </div>
-                <h4 class="page-title">
-                    {{ provider.source }}  <i class="mdi mdi-database me-1"></i>
-                </h4>
-            </div>
-        </div>
-    </div>
     {# Table name, description, quick links #}
     <div class="row">
         {# Search Form #}
