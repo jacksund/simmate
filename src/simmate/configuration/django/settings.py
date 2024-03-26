@@ -83,6 +83,8 @@ INSTALLED_APPS = [
     #   "django_extensions",  # for development tools
     #   "debug_toolbar",  # django-debug-toolbar  # for debuging and profile-time info
     #
+    # Any extra apps from the user (such as django-table2 or some other package)
+    *settings.extra_django_apps,
     # Simmate apps + user apps
     "simmate.website.configs.CoreComponentsConfig",
     "simmate.website.configs.DataExplorerConfig",
@@ -376,3 +378,9 @@ LOGIN_REQUIRED_URLS_EXCEPTIONS = (
 # Read more at...
 # https://docs.djangoproject.com/en/5.0/topics/async/#async-safety
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
+# -----------------------------------------------------------------------------
+
+# For advanced users, we let them override Django settings directly.
+# But by default, nothing is changed.
+locals().update(settings.django_settings)

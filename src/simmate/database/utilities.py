@@ -139,6 +139,16 @@ def reset_database(
 
             # exit loop as soon as we have a working connection
             if connection:
+                # catch misuse where the user wants to "reset" the maintenence db
+                if maintenance_db_name == settings.database.name:
+                    raise Exception(
+                        "Postgres requires a 'maintenance database' that we connect to "
+                        "while we add/drop/reset the database that you'd like to use. "
+                        "That database can stay empty, but it's important to be present. "
+                        "Howeveer, it looks like your are trying to reset your maintenance "
+                        f"database ('{maintenance_db_name}') which is not allowed. "
+                        "Please update your 'settings.database.name' to something else."
+                    )
                 break
 
         # ensure the loop above found a working connection

@@ -101,7 +101,7 @@ your conda environment in "--editable" (-e) mode. This allows you to make change
 ``` bash
 # replace "my_new_project" with the name of your project
 cd my_new_project
-pip install -e .
+pip install -e .   # <-- don't forget the period!
 ```
 
 3. Verify the installation by running these lines in Python. You may need to restart your terminal/Spyder for this to work.
@@ -125,6 +125,20 @@ simmate config add 'example_app.apps.ExampleAppConfig'
 
     !!! note
         `ExampleAppConfig` is the python class that we defined in the `apps.py` file
+    
+    !!! tip
+        If your app has another third-party Django dependency, you must register that as well. To do this, use the `extra_django_apps` setting. All apps in this setting will be added to Django's `INSTALLED_APPS` setting. For example:
+        
+        ``` yaml
+        apps:
+            - example_app.apps.ExampleAppConfig
+        
+        extra_django_apps:
+          - django_tables2
+          - django_celery_results
+        ```
+        
+        `extra_django_apps` will be added to `INSTALLED_APPS` added *ahead of* any Simmate apps. If this does not work for your desired dependency, please contact our team for support.
 
 2. Ensure the new configuration includes your new app:
 ``` bash
@@ -160,5 +174,25 @@ We won't cover publishing packages in our guides (because it's an advanced topic
 
 !!! note
     Alternatively, you can request to merge your app into our Simmate repository, making it a default installation for all users. Whichever path you choose, your hard work will be more accessible to the community and new users!
+
+-------------------------------------------------------------------------------
+
+## Custom Django settings
+
+!!! danger
+    This section is only for experts. Try to avoid updating Django settings because you could unintentially break some Simmate apps/features.
+
+Advanced users may want to have full control over django settings. Before you mess with Simmate's default settings for Django, we highly recommend reading through our `settings.py` file located here:
+
+- https://github.com/jacksund/simmate/blob/main/src/simmate/configuration/django/settings.py
+
+You can update hard-coded django settings using the simmate setting file (`~/simmate/settings.yaml`) like so:
+
+``` yaml
+django_settings:
+    CRISPY_TEMPLATE_PACK: bootstrap4
+```
+
+If you need even more control (such as providing a custom `settings.py` entirely), please reach out to our team so that we can add support for your needs.
 
 -------------------------------------------------------------------------------

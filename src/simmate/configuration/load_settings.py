@@ -174,6 +174,7 @@ class SimmateSettings:
         """
         return {
             "version": simmate.__version__,
+            "django_settings": {},
             "apps": [
                 "simmate.workflows.configs.BaseWorkflowsConfig",  # TODO - deprec
                 "simmate.apps.configs.QuantumEspressoConfig",
@@ -186,6 +187,7 @@ class SimmateSettings:
                 # "simmate.apps.configs.CleaseConfig",
                 # "simmate.apps.configs.WarrenLabConfig",
             ],
+            "extra_django_apps": [],
             "database": self._default_database,
             "website": {
                 # Sometimes we lock down the website to registered/approved users.
