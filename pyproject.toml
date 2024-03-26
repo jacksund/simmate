@@ -107,7 +107,7 @@ DEV = [
     "pytest-mock >=3.7.0, <3.12.1",
     "pytest-xdist >=2.5.0, <3.4.0",
     "black >=24.0.0, <24.2.0",
-    "coverage >=6.2, <7.3.1",
+    "coverage >=6.2, <7.4.4",
     "isort >=5.10.1, <5.12.1",
     "mkdocs-material >=8.4.1, <9.4.15",
     "mkdocstrings >=0.19.0, <=0.24.0",
@@ -115,7 +115,7 @@ DEV = [
 ]
 
 EXE = [
-    "prefect >=2.0.0, <2.14.19",  # for extra workflow orchestration 
+    "prefect >=2.0.0, <2.16.2",  # for extra workflow orchestration 
     "dask-jobqueue >=0.7.3, <=0.8.2",  # for submitting on HPC clusters
     "anyio >=3.6.1",  # for async utilities when using Prefect
     "nest_asyncio >=1.5.5, <1.5.9",  # to allow async calls in Spyder/iPython/Jupyter
