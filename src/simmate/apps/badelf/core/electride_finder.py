@@ -450,6 +450,9 @@ class ElectrideFinder:
         # electrides than the Henkelman group or my own algorithm.
         for frac_coord in maxima_structure.frac_coords:
             frac_coord = frac_coord.round(5)
+            # sometimes the pymatgen merge_sites function returns a frac coord of
+            # 1 instead of 0. We fix that here
+            frac_coord = np.where(frac_coord == 1, 0, frac_coord)
             if np.any(np.all(frac_coord == local_maxima, axis=1)):
                 final_maxima_structure.append("He", frac_coord)
         # Get the final cartesian coordinates for the reduced maxima
