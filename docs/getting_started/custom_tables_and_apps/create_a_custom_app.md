@@ -73,12 +73,16 @@ from example_app.workflows import Example__Workflow__Settings
 from simmate_clease.workflows import ClusterExpansion__Clease__BasicSettings
 ```
 
-3. Open the file `example_app/apps.py` and rename the class AND name property to match your app name. For example:
+3. Open the file `example_app/apps.py` and rename the class AND name property to match your app name. We also add labels for the web ui to use. For example:
 ``` python
 from django.apps import AppConfig
 
-class SimmateCleaseConfig(AppConfig):  # don't forget the class name
+class SimmateCleaseConfig(AppConfig):
     name = "simmate_clease"
+    
+    # These settings determine in the web ui (if you add a urls.py to your app)
+    verbose_name = "CLEASE"  
+    description_short = "utilities for running cluster-expanison calcs using CLEASE"
 ```
 
     !!! note
