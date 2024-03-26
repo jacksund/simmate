@@ -1477,7 +1477,12 @@ class DatabaseTable(models.Model):
     @classmethod
     @property
     def extra_html_context(cls) -> dict:
-        return {}
+        return {
+            "page_title": cls.table_name,
+            "page_title_icon": "mdi-database",
+            "breadcrumbs": [("data_explorer:home", "Data")],
+            "breadcrumb_active": cls.table_name,
+        }
 
     # -------------------------------------------------------------------------
     # Methods that populate "workflow columns" of custom tables

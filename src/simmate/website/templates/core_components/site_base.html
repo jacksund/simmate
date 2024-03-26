@@ -77,6 +77,9 @@
                 {% include "core_components/sidebar_left.html" %}
                 <div class="content-page">
                     <div class="container-fluid">
+                        {% block breadcrumbs %}
+                            {% include "basic_elements/breadcrumbs.html" %}
+                        {% endblock %}
                         {% block body %}{% endblock %}
                     </div>
                     {% include "core_components/footerbar.html" %}

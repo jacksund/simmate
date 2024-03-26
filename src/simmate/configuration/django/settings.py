@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     # These are apps created by third-parties that give us extra features
     "crispy_forms",  # django-crispy-forms for HTML boostrap forms
     "rest_framework",  # djangorestframework for the REST API
+    "rest_framework.authtoken",  # for programmatic REST API access
     "django_filters",  # django-filter for filterable REST API urls
     #
     # Apps for django-allauth that allow sign-on using external accounts
@@ -237,6 +238,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
