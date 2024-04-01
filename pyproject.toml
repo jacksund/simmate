@@ -62,7 +62,7 @@ dependencies=[
     # Core dependencies
     "numpy >=1.22.0, <1.24.2",
     "pandas >=2.0.0, <2.1.4",
-    "dask >=2023.6.1, <2023.11.1",
+    "dask >=2023.6.1, <2024.3.2",
     "distributed >=2023.6.1, <2023.11.1",  # part of dask
     "django >=4.0.0, <4.2.8",
     "typer >=0.6.0, <0.7.1",
