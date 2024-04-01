@@ -75,7 +75,7 @@ dependencies=[
     "django-unicorn >=0.59.0, <=0.59.0",  # for responsive web UI (AJAX calls)
     "dj-database-url >=0.5.0, <1.4.0",  # for DigitalOcean URL conversion
     "django-simple-history >=3.3.0, <=3.3.0",  # for tracking changes to data
-    "djangorestframework >=3.13.1, <3.14.1",  # for our REST API
+    "djangorestframework >=3.13.1, <3.15.2",  # for our REST API
     "django-filter >=21.1, <=22.1",  # sets up automatic filters for our REST API
     "pyyaml >=6.0, <=6.0.1",  # for yaml configuration files
     "plotly >=5.4.0, <5.19.0",  # for interactive plots and visualization
