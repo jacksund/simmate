@@ -104,7 +104,7 @@ dependencies=[
 DEV = [
     "pytest >=6.2.5, <7.3.2",
     "pytest-django >=4.5.2, <=4.7.0",
-    "pytest-mock >=3.7.0, <3.12.1",
+    "pytest-mock >=3.7.0, <3.14.1",
     "pytest-xdist >=2.5.0, <3.4.0",
     "black >=24.0.0, <24.2.0",
     "coverage >=6.2, <7.4.4",
