@@ -1,0 +1,74 @@
+{% extends "core_components/site_base.html" %}
+{% block tabtitle %}Simmate{% endblock %}
+{% block breadcrumbs %}
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'data_explorer:home' %}">Data</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'data_explorer:provider' table_docs.name %}">{{ table_docs.name }}</a>
+                        </li>
+                        <li class="breadcrumb-item active">About</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">
+                    Table Info
+                </h4>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block body %}
+    {% load markdown_filter %}
+    <div class="row text-center py-2">
+        <h2>{{ table_docs.name }}</h2>
+    </div>
+
+    <div class="row py-2">
+        <h4>Table Description</h4>
+        <div>
+            <p>{{ table_docs.table_description|markdown }}</p>
+        </div>
+    </div>
+
+    {# Recently Updated #}
+    <div class="row py-2">
+        <h4 class="my-2">About</h4>
+        <div class="col-12 my-2">
+            <table class="table table-striped table-centered mb-0">
+                <tbody>
+                    <tr>
+                        <td>Python Class Name</td>
+                        <td>{{ table_docs.table_info.python_name }}</td>
+                    </tr>
+                    <tr>
+                        <td>Python Import Path</td>
+                        <td>{{ table_docs.table_info.python_path }}</td>
+                    </tr>
+                    <tr>
+                        <td>Table Name in SQL Database</td>
+                        <td>{{ table_docs.table_info.sql_name }}</td>
+                    </tr>
+                    <tr>
+                        <td>Website UI Location</td>
+                        <td>{{ table_docs.table_info.website_url }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+    <div>
+        <h4>Column Descriptions</h4>
+    </div>
+
+    <div>
+        {{ table_docs }}
+    </div>
+{% endblock %}

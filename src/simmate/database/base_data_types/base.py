@@ -536,9 +536,14 @@ class DatabaseTable(models.Model):
         """
         Grabs table metadata and column descriptions into a single dictionary
         """
+
+        # !!! source is kinda the verbose name for third-party
+        # data, but I should standardize how user-friendly names are set.
+        name = cls.source if isinstance(cls.source, str) else cls.table_name
+
         return {
+            "name": name,
             "table_info": {
-                "source": cls.source if isinstance(cls.source, str) else None,
                 "sql_name": cls._meta.db_table,
                 "python_name": cls.table_name,
                 "python_path": cls.__module__,
@@ -562,18 +567,11 @@ class DatabaseTable(models.Model):
         # we build the string before printing anything out
         final_str = ""
 
-        # !!! source is kind of the verbose name for third-party
-        # data, but I should standardize how user-friendly names are set.
-        name = (
-            docs["table_info"]["source"]
-            if docs["table_info"]
-            else docs["table_info"]["python_name"]
-        )
-        final_str += f"# {name}\n\n"
+        final_str += f"# {docs['name']}\n\n"
 
         final_str += (
             "## About\n\n"
-            f"\t- Python Class Name: {docs['table_info']['source']}\n"
+            f"\t- Python Class Name: {docs['table_info']['python_name']}\n"
             f"\t- Python Import Path: {docs['table_info']['python_path']}\n"
             f"\t- Table Name in SQL Database: {docs['table_info']['sql_name']}\n"
             f"\t- Website UI Location: {docs['table_info']['website_url']}\n\n"
@@ -1527,6 +1525,7 @@ class DatabaseTable(models.Model):
     # Methods that link to the website UI
     # -------------------------------------------------------------------------
 
+    html_template_about: str = None
     html_template_table: str = None
     html_template_entry: str = None
     # experimental override for templates using by the Data Explorer app
