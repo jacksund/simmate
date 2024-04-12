@@ -12,6 +12,7 @@ import inspect
 import json
 import logging
 import shutil
+import textwrap
 import urllib
 import warnings
 from functools import cache
@@ -30,6 +31,7 @@ from rich.progress import track
 
 from simmate.configuration import settings
 from simmate.database.utilities import check_db_conn
+from simmate.utilities import get_attributes_doc
 
 # The "as table_column" line does NOTHING but rename a module.
 # I have this because I want to use "table_column.CharField(...)" instead
@@ -506,6 +508,87 @@ class DatabaseTable(models.Model):
 
         # Then use yaml to make the printout pretty (no quotes and separate lines)
         print(yaml.dump(column_names))
+
+    @classmethod
+    def get_column_docs(cls) -> dict:
+        """
+        Gives all column names as well as their docstring descriptions
+        """
+
+        # OPTIMIZE: this is slow and should be cached. Or even use a more
+        # standard method approach like django's `help_text`.
+        # We opted for using attribute docstrings, which actually aren't
+        # officially supported by python and involve inspecting the source
+        # code file.
+
+        all_attr_docs = get_attributes_doc(cls)
+
+        column_docs = {
+            name: descr
+            for name, descr in all_attr_docs.items()
+            if name in cls.get_column_names()
+        }
+
+        return column_docs
+
+    @classmethod
+    def get_table_docs(cls) -> dict:
+        """
+        Grabs table metadata and column descriptions into a single dictionary
+        """
+        return {
+            "table_info": {
+                "source": cls.source if isinstance(cls.source, str) else None,
+                "sql_name": cls._meta.db_table,
+                "python_name": cls.table_name,
+                "python_path": cls.__module__,
+                "website_url": cls.url_table,
+            },
+            "table_description": textwrap.dedent(cls.__doc__).strip(),
+            "column_descriptions": cls.get_column_docs(),
+        }
+
+    @classmethod
+    def show_table_docs(cls, print_out: bool = True) -> str:
+        """
+        Prints all docs about this table. While a GUI is much better for exploring
+        table docs, this method is more useful for outputting text that LLM
+        chatbots can use.
+        """
+        # OPTIMIZE: still need to figure out what format works best with chatbots
+
+        docs = cls.get_table_docs()
+
+        # we build the string before printing anything out
+        final_str = ""
+
+        # !!! source is kind of the verbose name for third-party
+        # data, but I should standardize how user-friendly names are set.
+        name = (
+            docs["table_info"]["source"]
+            if docs["table_info"]
+            else docs["table_info"]["python_name"]
+        )
+        final_str += f"# {name}\n\n"
+
+        final_str += (
+            "## About\n\n"
+            f"\t- Python Class Name: {docs['table_info']['source']}\n"
+            f"\t- Python Import Path: {docs['table_info']['python_path']}\n"
+            f"\t- Table Name in SQL Database: {docs['table_info']['sql_name']}\n"
+            f"\t- Website UI Location: {docs['table_info']['website_url']}\n\n"
+        )
+
+        final_str += "## Table Description\n\n" f"{docs['table_description']}\n\n"
+
+        final_str += "## Column Descriptions\n\n"
+        for col_name, col_descr in docs["column_descriptions"].items():
+            final_str += f"### `{col_name}`\n{col_descr}\n\n"
+
+        if print_out:
+            print(final_str)
+        else:
+            return final_str
 
     @classmethod
     def get_mixins(cls) -> list:  # -> List[DatabaseTable]
