@@ -63,6 +63,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - allow custom django apps to be added to `INSTALLED_APPS` via `extra_django_apps`
 - allow override of django settings via `django_settings`
 - add several web UI components (e.g. select2 elements for forms)
+- add "Table Info" page and utils for dynamically building database docs 
 
 **Refactors**
 
