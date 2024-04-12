@@ -573,7 +573,7 @@ class DatabaseTable(models.Model):
             "## About\n\n"
             f"\t- Python Class Name: {docs['table_info']['python_name']}\n"
             f"\t- Python Import Path: {docs['table_info']['python_path']}\n"
-            f"\t- Table Name in SQL Database: {docs['table_info']['sql_name']}\n"
+            f"\t- SQL Table Name: {docs['table_info']['sql_name']}\n"
             f"\t- Website UI Location: {docs['table_info']['website_url']}\n\n"
         )
 

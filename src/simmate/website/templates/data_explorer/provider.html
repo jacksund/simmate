@@ -162,7 +162,8 @@
                     <i class="mdi mdi-filter py-1"></i>&nbsp;&nbsp;Filter
                 </button>
             {% endblock %}
-            <a href="{% url 'data_explorer:provider-about' provider.table_name %}" target="_blank" class="btn btn-primary my-1">
+            <a href="{% url 'data_explorer:provider-about' provider.table_name %}"
+               class="btn btn-primary my-1">
                 <i class="mdi mdi-information"></i>&nbsp;&nbsp;Table Info</a>
             <a href="{{ provider.homepage }}"
                target="_blank"
