@@ -263,7 +263,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "100/hour", "user": "1000/hr"},
+    "DEFAULT_THROTTLE_RATES": {"anon": "2500/hour", "user": "7500/hr"},
     # We use django-filter to automatically handle filtering from a REST url
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
