@@ -44,6 +44,7 @@ def providers_all(request):
 
 
 class ProviderAPIViewSet(SimmateAPIViewSet):
+    template_about = "data_explorer/about.html"
     template_list = "data_explorer/provider.html"
     template_retrieve = "data_explorer/entry_detail.html"
 

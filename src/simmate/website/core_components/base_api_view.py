@@ -26,7 +26,7 @@ class SimmateAPIViewSet(GenericViewSet):
         route="example-table",
         view=ExampleTableViewSet.list_view,
         name="example-list",
-    )
+    ),
     path(
         route="example-table/<int:id>",
         view=ExampleTableViewSet.retrieve_view,
@@ -37,11 +37,22 @@ class SimmateAPIViewSet(GenericViewSet):
 
     table: DatabaseTable = None
 
+    template_about: str = None
+
     template_list: str = None
 
     template_retrieve: str = None
 
     max_query_size: int = 10000
+
+    def get_about_response(self, request: HttpRequest, *args, **kwargs) -> Response:
+        # !!! we assume html format for now, but might want api/json formats in the future
+        table = self.get_table(request, *args, **kwargs)
+        data = {
+            "table_docs": table.get_table_docs(),
+            **self.get_about_context(request, **kwargs),
+        }
+        return Response(data)
 
     def get_list_response(self, request: HttpRequest, *args, **kwargs) -> Response:
         # This code is modified from the ListModelMixin, where instead of returning
@@ -184,12 +195,26 @@ class SimmateAPIViewSet(GenericViewSet):
                 else cls.template_retrieve
             )
             return NewViewSet.as_view({"get": "get_retrieve_response"})
+        elif view_type == "about":
+            NewViewSet.template_name = (
+                table.html_template_about
+                if table.html_template_about
+                else cls.template_about
+            )
+            return NewViewSet.as_view({"get": "get_about_response"})
         else:
-            raise Exception("Unknown view type. Must be 'list' or 'retrieve'.")
+            raise Exception(
+                "Unknown view type. Must be 'about', 'list', or 'retrieve'."
+            )
 
     # -------------------------------------------------------------------------
 
     # METHODS FOR STATIC VIEWS
+
+    @classmethod
+    def about_view(cls, request, **request_kwargs):
+        view = cls.from_table(table=cls.table, view_type="about")
+        return view(request, **request_kwargs)
 
     @classmethod
     def list_view(cls, request, **request_kwargs):
@@ -219,7 +244,7 @@ class SimmateAPIViewSet(GenericViewSet):
     #   2. making all APIViews up-front
 
     @classmethod
-    def get_table(cls, request: HttpRequest, *args, **kwargs) -> Response:
+    def get_table(cls, request: HttpRequest = None, *args, **kwargs) -> Response:
         if not cls.table:
             raise NotImplementedError(
                 "Either set a table attribute to your viewset or write a custom"
@@ -235,6 +260,12 @@ class SimmateAPIViewSet(GenericViewSet):
         # for a specific workflow and need to filter by workflow_name.
         # If you just return None, then 'objects.all()` will be used by default.
         return
+
+    @classmethod
+    def dynamic_about_view(cls, request, **request_kwargs):
+        table = cls.get_table(request, **request_kwargs)
+        view = cls.from_table(table=table, view_type="about")
+        return view(request, **request_kwargs)
 
     @classmethod
     def dynamic_list_view(cls, request, **request_kwargs):
@@ -256,6 +287,14 @@ class SimmateAPIViewSet(GenericViewSet):
     # -------------------------------------------------------------------------
 
     # OPTIONAL METHODS FOR SUPPLYING EXTRA CONTEXT TO HTML TEMPLATES
+
+    def get_about_context(self, request, **request_kwargs) -> dict:
+        """
+        This defines extra context that should be passed to the template when
+        using format=html when a list-view is requested. By default, no extra
+        context is returned.
+        """
+        return {}
 
     def get_list_context(self, request, **request_kwargs) -> dict:
         """

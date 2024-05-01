@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import ast
 import importlib
+import inspect
 import logging
 import os
 import sys
+import textwrap
 from functools import wraps
 
 import requests
@@ -385,3 +388,53 @@ def get_docker_command(
         command += f' sh -c "{inner_command}"'
 
     return command
+
+
+def get_attributes_doc(cls: type, dedent_and_strip: bool = True) -> dict[str, str]:
+    """
+    Grabs a dictionary of attribute names to docstrings for the given class.
+    However, if the class is locally defined and not within a package, the
+    dictionary will be empty.
+    """
+
+    # Turns out PEP 224 which sets Attribute Docstrings was never accepted!
+    # See also https://stackoverflow.com/questions/55672640/
+
+    # We therefore borrow some code from...
+    # https://github.com/tkukushkin/attributes-doc/
+    # Specifically this is a fork of their get_attributes_doc function
+
+    result = {}
+    for parent in reversed(cls.mro()):
+        if cls is object:
+            continue
+        try:
+            source = inspect.getsource(parent)
+        except (TypeError, OSError):
+            continue  # can't find the source-code file
+        source = textwrap.dedent(source)
+        module = ast.parse(source)
+        cls_ast = module.body[0]
+        for stmt1, stmt2 in zip(cls_ast.body, cls_ast.body[1:]):
+            if not isinstance(stmt1, (ast.Assign, ast.AnnAssign)) or not isinstance(
+                stmt2, ast.Expr
+            ):
+                continue
+            doc_expr_value = stmt2.value
+            if isinstance(doc_expr_value, ast.JoinedStr):
+                raise Exception("F-strings are not allowed for attribute docstrings")
+            if isinstance(doc_expr_value, ast.Constant):
+                if isinstance(stmt1, ast.AnnAssign):
+                    attr_names = [stmt1.target.id]  # type: ignore
+                else:
+                    attr_names = [target.id for target in stmt1.targets]  # type: ignore
+
+                attr_doc_value = doc_expr_value.value
+                if not isinstance(attr_doc_value, str):
+                    continue
+
+                for attr_name in attr_names:
+                    if dedent_and_strip:
+                        attr_doc_value = textwrap.dedent(attr_doc_value).strip()
+                    result[attr_name] = attr_doc_value
+    return result

@@ -18,12 +18,15 @@
                         <li class="breadcrumb-item active">{{ calculation.id }}</li>
                     </ol>
                 </div>
+                {# djlint:off #}
                 <h4 class="page-title">
                     Entry details <small>(see also:
                     <a href="?format=api" target="_blank">API</a>
-                    &
+                    &amp;
                     <a href="?format=json" target="_blank">JSON</a>)</small>
-            </h4>
+                </h4>
+                {# djlint:on #}
+            </div>
         </div>
     </div>
 {% endblock %}
