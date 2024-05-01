@@ -45,7 +45,7 @@ jobs:
       #   uses: isort/isort-action@master
 
       - name: Create conda env and install deps
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           environment-file: envs/conda/dev.yaml
