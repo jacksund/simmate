@@ -17,6 +17,7 @@ from .other import (
     deep_update,
     dotdict,
     get_app_submodule,
+    get_attributes_doc,
     get_chemical_subsystems,
     get_class,
     get_conda_env,

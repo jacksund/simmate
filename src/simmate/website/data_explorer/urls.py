@@ -16,6 +16,11 @@ urlpatterns = [
         name="provider",
     ),
     path(
+        route="<provider_name>/about/",
+        view=views.ProviderAPIViewSet.dynamic_about_view,
+        name="provider-about",
+    ),
+    path(
         route="<provider_name>/<pk>/",
         view=views.ProviderAPIViewSet.dynamic_retrieve_view,
         name="entry-detail",

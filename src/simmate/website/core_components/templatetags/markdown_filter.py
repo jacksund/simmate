@@ -21,7 +21,12 @@ def markdown_to_html(markdown_str):
     # We need to strip those idents away to render properly
     markdown_cleaned = dedent(markdown_str)
 
-    final_html = MarkdownConverter.markdown(markdown_cleaned)
+    final_html = MarkdownConverter.markdown(
+        markdown_cleaned,
+        # add exts for code syntax highlighting
+        # followed guide from https://realpython.com/django-markdown/
+        extensions=["fenced_code", "codehilite"],
+    )
 
     # Because we added new html to our script, we need to have Django check it
     # ensure it safe before returning. Read more about this here:
