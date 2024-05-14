@@ -109,14 +109,7 @@ class VoxelAssignmentToolkit:
         """
         The fractional coordinates for all of the voxels in the charge grid
         """
-        charge_grid = self.charge_grid.copy()
-        a, b, c = charge_grid.grid_shape
-        voxel_indices = np.indices(charge_grid.grid_shape).reshape(3, -1).T
-        frac_coords = voxel_indices.copy().astype(float)
-        frac_coords[:, 0] /= a
-        frac_coords[:, 1] /= b
-        frac_coords[:, 2] /= c
-        return frac_coords
+        return self.charge_grid.all_voxel_frac_coords
 
     @cached_property
     def all_partitioning_plane_points_and_vectors(self):
@@ -418,187 +411,112 @@ class VoxelAssignmentToolkit:
         all_voxel_assignments[unassigned_indices] = single_site_voxel_assignments
         return all_voxel_assignments
 
-    def get_multi_site_voxel_assignments_from_frac_coords(
-        self, voxel_frac_coords: ArrayLike
-    ):
+    def get_plane_split_voxel_assignments(self, voxel_frac_coords):
         """
-        Gets the voxel assignments for voxels that are not within the partitioning
-        surface.
+        Gets the voxel assignments for voxels that are exactly on a plane.
 
         Args:
-            all_site_voxel_assignments (ArrayLike):
-                A 1D array of integers representing the site assignments for
-                each voxel in the grid.
+            voxel_frac_coords (ArrayLike):
+                A 2D array representing the fractional coordinates of voxels
+                that haven't been assigned
 
         Returns:
-            A 1D array of the same length as the input with additional site
-            assignments.
+            A 2D array of shape (N,M) where N is the length of the input array
+            and M is the number of atoms. A 1 means the atom is assigned this
+            voxel.
         """
-        # get the partitioning planes
-        planes = self.all_plane_equations.astype(float)
-        number_of_planes_per_atom = self.number_of_planes_per_atom
-
+        logging.info("Calculating assignments for voxels on planes")
         if self.algorithm == "badelf":
             structure = self.charge_grid.structure
         elif self.algorithm == "voronelf":
             structure = self.electride_structure
+        grid = self.charge_grid
+        plane_equations = self.all_plane_equations
+        number_of_planes_per_atom = self.number_of_planes_per_atom
+        unit_cell_permutations_frac = self.unit_cell_permutations_frac
 
-        # get all possible permutations of fractional coords
-        voxel_frac_coords_perm = []
-        permutations = self.unit_cell_permutations_frac
-        for x, y, z in permutations:
-            new_frac_coords = voxel_frac_coords.copy()
-            new_frac_coords[:, 0] += x
-            new_frac_coords[:, 1] += y
-            new_frac_coords[:, 2] += z
-            voxel_frac_coords_perm.append(new_frac_coords)
-        voxel_frac_coords_perm = np.concatenate(voxel_frac_coords_perm)
-        cart_coords_to_find_perm = (
-            self.charge_grid.get_cart_coords_from_frac_full_array(
-                voxel_frac_coords_perm
-            ).astype(float)
-        )
-        # calculate distances from each voxel to each partitioning plane
-        voxel_plane_distances = (
-            da.dot(cart_coords_to_find_perm, planes[:, :3].T) + planes[:, 3]
-        )
-        # We are looking for voxels that are outside of the partitioning planes or
-        # on a partitioning plane so we replace any distances that are below/inside
-        # of a plane with a large number
-        voxel_plane_distances = voxel_plane_distances.round(12)
-        voxel_plane_distances = da.where(
-            voxel_plane_distances >= 0, voxel_plane_distances, 50
-        )
-        voxel_plane_distances = voxel_plane_distances.compute()
-        # For each atom we only need the lowest distance from the voxel to one of
-        # its planes. This can greatly decrease the size of the array. We do this
-        # here
-        voxel_plane_distances = np.array_split(
-            voxel_plane_distances, number_of_planes_per_atom, axis=1
-        )
-        new_distances = []
-        for distance in voxel_plane_distances:
-            one_distance = np.min(distance, axis=1)
-            new_distances.append(one_distance)
-        voxel_plane_distances = np.column_stack(new_distances)
-        # At each transformation, we only want to check if the voxel is close to
-        # planes belonging to atoms that are relatively close to the voxel. To do
-        # this we need to calculate the distance from the voxels to each of the atoms
-        # at different translations. Our goal is a bool array with the same shape as
-        # our distances array that we can use as a mask.
+        # Create an array of zeros to map back to
+        zeros_array = np.zeros([len(voxel_frac_coords), len(structure)])
+        # Create an array that the results will be added to
+        results_array = zeros_array.copy()
 
-        # First, we want to define what the maximum reasonable distance a voxel can
-        # be from an atom and still have useful planes. This is chosen as the maximum
-        # distance from an atom to one of its neighbors.
-        max_atom_dists = []
-        for site_df in self.partitioning.values():
-            dists = site_df["dist"]
-            max_atom_dists.append(max(dists))
-        max_atom_dists = np.array(max_atom_dists)
-        max_atom_dists = np.tile(max_atom_dists, (len(voxel_frac_coords), 1))
-        all_valid_atoms = []
-        for x, y, z in permutations:
-            # get the new coords for this translation
+        # create zeros array for any problems
+        # global_indices_to_zero = np.array([])
+        # check every possible permutation
+        for transformation in tqdm(
+            unit_cell_permutations_frac,
+            total=len(unit_cell_permutations_frac),
+            ascii="░▒▓",
+        ):
+            # Get the indices where voxels haven't been assigned. Get only these
+            # frac coords
             new_frac_coords = voxel_frac_coords.copy()
-            new_frac_coords[:, 0] += x
-            new_frac_coords[:, 1] += y
-            new_frac_coords[:, 2] += z
-            # calculate the distances to each atom from each voxel
-            cart_coords_to_find = self.charge_grid.get_cart_coords_from_frac_full_array(
+            # transform the fractional coords to the next transformation
+            x1, y1, z1 = transformation
+            new_frac_coords[:, 0] += x1
+            new_frac_coords[:, 1] += y1
+            new_frac_coords[:, 2] += z1
+            # Convert the frac coords into cartesian coords
+            cart_coords = grid.get_cart_coords_from_frac_full_array(
                 new_frac_coords
-            )
-            site_carts = structure.cart_coords
-            voxel_atom_distances = np.sqrt(
-                np.sum((cart_coords_to_find[:, None, :] - site_carts) ** 2, axis=2)
-            )
+            ).astype(float)
+            points = np.array(cart_coords).astype(float)
+            planes = np.array(plane_equations).astype(float)
+            # There is a difference in the speed of dask vs numpy. Dask has a
+            # lot of overhead, but at a certain point it is faster than numpy.
+            # We check which one we should use here.
+            plane_distances_to_calc = len(points) * len(planes)
+            if plane_distances_to_calc > 7.8e8:
+                dask = True
+            else:
+                dask = False
 
-            # get which atoms should be considered for each translated voxel
-            potential_atoms = np.where(
-                voxel_atom_distances < max_atom_dists, True, False
-            )
-            all_valid_atoms.append(potential_atoms)
-        all_valid_atoms = np.concatenate(all_valid_atoms)
+            if dask:
+                # DASK ARRAY VERSION
+                # points = da.from_array(points)
+                # planes = da.from_array(planes)
+                distances = da.dot(points, planes[:, :3].T) + planes[:, 3]
+                # Round the distances to within 5 decimals. Everything to this point has
+                # been based on lattice position from vasp which typically have 5-6
+                # decimal places (7 sig figs)
+                distances = np.round(distances, 12)
+                # We write over the distances with a more simplified boolean to save
+                # space. This is also where we filter if we're near a plane if desired
+                distances = da.where(distances <= 0, True, False)
+                distances = distances.compute()
 
-        # Replace any distance values where the atom should not be considered with
-        # a very high value
-        voxel_plane_distances = np.where(all_valid_atoms, voxel_plane_distances, 50)
-        # Currently, we have the shortest distance from a voxel to an atoms planes.
-        # We have this value for each translation of the voxel or 50, if the atom
-        # should not be considered at this translation. We want to consider any of
-        # the distances that aren't 50 for each voxel so we can take the shortest
-        # value to each atom plane regardless of the translation. This compresses
-        # the array into a shape with the number of unassigned voxels by the
-        # number of atoms.
-        voxel_plane_distances_split = np.array_split(voxel_plane_distances, 27)
-        voxel_plane_distances_compressed = np.min(
-            np.stack(voxel_plane_distances_split), axis=0
-        )
-        # Now we want to find the minimum value in each row. The atoms that have
-        # this distance will be assigned part of or all of the voxel
-        voxel_plane_min_distances = np.min(voxel_plane_distances_compressed, axis=1)
-        # We tile to get the same shape as our voxel_plane_distances_compressed array
-        voxel_plane_min_distances = np.tile(
-            voxel_plane_min_distances, (len(structure), 1)
-        ).T
-        # Now we assign each voxel by checking which distances match the relavent
-        # values
-        multi_site_assignments = np.where(
-            voxel_plane_distances_compressed == voxel_plane_min_distances, 1, 0
-        )
-        return multi_site_assignments
+            else:
+                # BASE NUMPY VERSION
+                distances = np.dot(points, planes[:, :3].T) + planes[:, 3]
+                # Round the distances to within 5 decimals. Everything to this point has
+                # been based on lattice position from vasp which typically have 5-6
+                # decimal places (7 sig figs)
+                distances = np.round(distances, 12)
+                # We write over the distances with a more simplified boolean to save
+                # space. This is also where we filter if we're near a plane if desired
+                distances = np.where(distances <= 0, True, False)
 
-    def get_multi_site_assignments_from_frac_coords_with_memory_handling(
-        self,
-        voxel_frac_coords: ArrayLike,
-    ):
-        """
-        Gets the multi-site assignments for an arbitrary number of voxels described
-        by their fractional coordinates. Takes available memory into account
-        and divides the voxels into chunks to perform operations.
+            # split the array into the planes belonging to each atom. Again we write
+            # over to save space
+            distances = np.array_split(distances, number_of_planes_per_atom, axis=1)
+            # get a 1D array representing the voxel indices with the atom index where the
+            # voxel is assigned to a site and 0s where they are not
+            new_results_arrays = []
+            # for atom_index, atom_array in enumerate(distances_split_by_atom):
+            for atom_index, atom_array in enumerate(distances):
+                voxel_result = np.all(atom_array, axis=1)
+                voxel_result = np.where(
+                    voxel_result == True, atom_index + 1, voxel_result
+                )
+                new_results_arrays.append(voxel_result)
 
-        Args:
-            voxel_frac_coords (ArrayLike):
-                An N,3 array of fractional coordinates corresponding to the voxels
-                to assign sites to
+            # add results to the results_array
+            results_array += np.column_stack(new_results_arrays)
 
-        Returns:
-            A 2D array of site assignments with indices (i,j) where i is the
-            voxel index and j is the site index.
-        """
-        logging.info("Calculating voxel assignments outside partitioning")
-        partitioning = self.partitioning
-        # determine how much memory is available. Then calculate how many distance
-        # calculations would be possible to do at once with this much memory.
-        available_memory = psutil.virtual_memory().available / (1024**2)
+        results_array = np.where(results_array > 0, 1, 0)
+        return results_array
 
-        # 0.00084 is selected as being 10% larger than the maximum memory needed
-        handleable_plane_distance_calcs_dask = available_memory / 0.00084
-        plane_distances_to_calc = len(voxel_frac_coords) * sum(
-            [len(i) for i in partitioning.values()]
-        )
-
-        # calculate the number of chunks the voxel array should be split into to not
-        # overload the memory. Then split the array by this number
-        split_num = math.ceil(
-            plane_distances_to_calc / handleable_plane_distance_calcs_dask
-        )
-
-        split_voxel_frac_coords = np.array_split(voxel_frac_coords, split_num, axis=0)
-        # create an array to store results
-        voxel_results_array = []
-        # for each split, calculate the results and add to the end of our results
-        for chunk, split_voxel_array in enumerate(split_voxel_frac_coords):
-            logging.info(
-                f"Calculating multi-site assignments for voxel chunk {chunk+1}/{split_num}"
-            )
-            split_result = self.get_multi_site_voxel_assignments_from_frac_coords(
-                voxel_frac_coords=split_voxel_array,
-            )
-            voxel_results_array.append(split_result)
-        voxel_results_array = np.concatenate(voxel_results_array)
-        return voxel_results_array
-
-    def get_multi_site_voxel_assignments(self, all_site_voxel_assignments: ArrayLike):
+    def get_multi_site_voxel_assignments(self, all_site_voxel_assignments):
         """
         Gets the voxel assignments for voxels that are not split by a plane.
 
@@ -608,17 +526,99 @@ class VoxelAssignmentToolkit:
                 each voxel in the grid.
 
         Returns:
-            A 2D array of site assignments with indices (i,j) where i is the
+            A 2D array of fractional site assignments with indices (i,j) where i is the
             voxel index and j is the site index.
         """
-        all_voxel_assignments = all_site_voxel_assignments.copy()
-        # Search for unassigned voxels
-        unassigned_indices = np.where(all_voxel_assignments == 0)[0]
-        all_voxel_frac_coords = self.all_voxel_frac_coords
-        frac_coords_to_find = all_voxel_frac_coords[unassigned_indices]
-        multi_site_voxel_assignments = (
-            self.get_multi_site_assignments_from_frac_coords_with_memory_handling(
-                frac_coords_to_find
-            )
+        grid = self.charge_grid
+        # Get all site assignments so far
+        all_site_voxel_assignments = all_site_voxel_assignments.copy()
+        # Check that there are any unassigned voxels. If none, return an empty
+        # array
+        if len(np.where(all_site_voxel_assignments == 0)[0]) == 0:
+            return np.array([])
+        # The following lines are a more rigorous method of calculating the voxels
+        # directly on planes. It takes longer so it's commented for now.
+        # Now we want to get assignments for voxels directly on planes
+        # all_frac_coords = grid.all_voxel_frac_coords
+        # unassigned_indices_1d = np.where(all_site_voxel_assignments==0)[0]
+        # unassigned_frac_coords = all_frac_coords[unassigned_indices_1d]
+        # on_plane_assignment = self.get_plane_split_voxel_assignments(unassigned_frac_coords)
+        # Some of the voxels will have been assigned. We want to store the indices of
+        # these so we can zero them out later
+
+        # Get as unassigned grid
+        assignment_array = all_site_voxel_assignments.reshape(grid.shape).astype(
+            np.int16
         )
-        return multi_site_voxel_assignments
+        unassigned_indices = np.column_stack(np.where(assignment_array == 0))
+        # If doing self we don't want assignments to go to electrides so we zero them
+        # here. We need to save them to put them back later though
+        if self.algorithm == "badelf":
+            electride_indices = (
+                np.array(self.electride_structure.indices_from_symbol("He")) + 1
+            )
+            assignment_array = np.where(
+                np.isin(assignment_array, electride_indices), 0, assignment_array
+            )
+            structure = grid.structure
+        elif self.algorithm == "voronelf":
+            structure = self.electride_structure
+        # Get smallest radius for a sphere
+        lattice = grid.structure.lattice
+
+        # Get the starting radius/min_radius and the maximum radius we could possibly
+        # go to
+        nearest_voxels = lattice.abc / grid.shape
+        min_radius = nearest_voxels.max()
+        test_radius = min_radius.copy()
+        max_radius = (np.array(lattice.abc) / 2).max()
+
+        # Get array to assign to
+        # new_assignment_array = on_plane_assignment.copy()
+        new_assignment_array = np.zeros([len(unassigned_indices), len(structure)])
+
+        while len(np.where(np.sum(new_assignment_array, axis=1) == 0)[0]) > 0:
+            if test_radius >= max_radius:
+                raise Exception()
+            # Get the transformations to get a sphere around a voxel
+            sphere_transforms = grid.get_voxels_transformations_to_radius(test_radius)
+            # Get the indices that still don't have an assignment
+            still_unassigned_1d_indices = np.where(
+                np.sum(new_assignment_array, axis=1) == 0
+            )[0]
+            # Get the voxel coords of the unassigned indices
+            unassigned_voxel_coords = unassigned_indices[still_unassigned_1d_indices]
+            possible_assignments = []
+            # for each voxel in the sphere around the voxel, get the site assignment
+            for transform in sphere_transforms:
+                new_indices = unassigned_voxel_coords + transform
+                # wrap around indices
+                new_x = (new_indices[:, 0] % grid.shape[0]).astype(int)
+                new_y = (new_indices[:, 1] % grid.shape[1]).astype(int)
+                new_z = (new_indices[:, 2] % grid.shape[2]).astype(int)
+                site_assignment = assignment_array[new_x, new_y, new_z]
+                possible_assignments.append(site_assignment)
+            possible_assignments = np.column_stack(possible_assignments)
+            # Get the assignments that are not still 0
+            non_zero_indices = np.where(np.sum(possible_assignments, axis=1) > 0)[0]
+            sub_possible_assignments = possible_assignments[non_zero_indices]
+            # iterate over these assignments and count how many there are of each.
+            # Update the corresponding row in the new assignments array with total
+            # count for each site.
+            for i, possible_label in enumerate(sub_possible_assignments):
+                sites, counts = np.unique(possible_label, return_counts=True)
+                for site, count in zip(sites[1:], counts[1:]):
+                    new_assignment_array[
+                        still_unassigned_1d_indices[non_zero_indices[i]], site - 1
+                    ] = count
+            # increase our test radius for the next round
+            test_radius += min_radius
+            # print(test_radius, len(np.where(np.sum(new_assignment_array,axis=1)==0)[0]))
+
+        # We need to rescale the assignment array to check for any that have assignments
+        # much higher than 0.5
+        new_assignment_array_sum = np.tile(
+            np.sum(new_assignment_array, axis=1), (len(new_assignment_array[0]), 1)
+        ).T
+        new_assignment_array = new_assignment_array / new_assignment_array_sum
+        return new_assignment_array

@@ -1257,6 +1257,24 @@ For molecular dynamics simulations, this is the temperature to begin the simulat
 
 --------------------------
 
+## threads
+For BadELF algorithms, determines how many threads will be used during pybader calculations. If None this will be automatically set to 90% of available threads.
+
+=== "yaml"
+    ``` yaml
+    threads: 8
+    ```
+=== "toml"
+    ``` toml
+    threads = 8
+    ```
+=== "python"
+    ``` python
+    threads = 8
+    ```
+
+--------------------------
+
 ## time_step
 For molecular dynamics simulations, this is time time between each ionic step (in femtoseconds).
 

@@ -2,58 +2,45 @@
 
 import itertools
 import logging
-import math
-import warnings
+from functools import cached_property
 from pathlib import Path
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike
-from pymatgen.io.vasp import Poscar
+from pybader.interface import Bader
+from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pyrho.pgrid import PGrid
 
-from simmate.toolkit import Structure
+# from scipy.ndimage import binary_erosion
 
 
-class Grid:
+class Grid(VolumetricData):
     """
-    A grid object. Contains information from a VASP CHGCAR or ELFCAR type file.
-    This class is used heavily during
-
-    Args:
-        total (ArrayLike): A 3D array of values corresponding to the total
-            charge density of a CHGCAR type file or the spin up portion of an
-            ELFCAR file.
-        diff: (ArrayLike): A 3D array of values corresponding to the
-            magnetization density of a CHGCAR type file or the spin down portion
-            of an ELFCAR file.
-        structure (Structure): a pymatgen Structure type object.
-        data_type (str): The type of data, either "elf" or "charge density"
+    This class is a wraparound for Pymatgen's VolumetricData class with additional
+    properties and methods useful to the badelf algorithm
     """
-
-    def __init__(
-        self,
-        total: ArrayLike,
-        diff: ArrayLike | None,
-        structure: Structure,
-        data_type: str,
-    ):
-        if diff is not None and diff.shape != total.shape:
-            raise ValueError("total and diff arrays must have the same shape.")
-        self.total = total
-        self.diff = diff
-        self.structure = structure
-        if data_type not in ["elf", "charge density", "unknown"]:
-            raise ValueError("data type must be 'elf', 'charge density', or 'unknown'")
-        self.data_type = data_type
 
     @property
-    def grid_shape(self):
-        """
-        The number of voxels along each unit cell vector
-        """
+    def total(self):
+        return self.data["total"]
+
+    @total.setter
+    def total(self, new_total):
+        self.data["total"] = new_total
+
+    @property
+    def diff(self):
+        return self.data["diff"]
+
+    @diff.setter
+    def diff(self, new_diff):
+        self.data["diff"] = new_diff
+
+    @property
+    def shape(self):
         return np.array(self.total.shape)
 
     @property
@@ -92,12 +79,47 @@ class Grid:
         return self.structure.frac_coords
 
     @property
+    def all_voxel_frac_coords(self):
+        """
+        The fractional coordinates for all of the voxels in the grid
+        """
+        a, b, c = self.shape
+        voxel_indices = np.indices(self.shape).reshape(3, -1).T
+        frac_coords = voxel_indices.copy().astype(float)
+        frac_coords[:, 0] /= a
+        frac_coords[:, 1] /= b
+        frac_coords[:, 2] /= c
+        return frac_coords
+
+    @cached_property
+    def voxel_dist_to_origin(self):
+        frac_coords = self.all_voxel_frac_coords
+        cart_coords = self.get_cart_coords_from_frac_full_array(frac_coords)
+        corners = [
+            np.array([0, 0, 0]),
+            self.a,
+            self.b,
+            self.c,
+            self.a + self.b,
+            self.a + self.c,
+            self.b + self.c,
+            self.a + self.b + self.c,
+        ]
+        distances = []
+        for corner in corners:
+            voxel_distances = np.linalg.norm(cart_coords - corner, axis=1).round(6)
+            distances.append(voxel_distances)
+        min_distances = np.min(np.column_stack(distances), axis=1)
+        min_distances = min_distances.reshape(self.shape)
+        return min_distances
+
+    @property
     def voxel_volume(self):
         """
         The volume of each voxel in the grid
         """
         volume = self.structure.volume
-        voxel_num = np.prod(self.grid_shape)
+        voxel_num = np.prod(self.shape)
         return volume / voxel_num
 
     @property
@@ -105,7 +127,7 @@ class Grid:
         """
         The number of voxels in the grid
         """
-        return self.grid_shape.prod()
+        return self.shape.prod()
 
     @property
     def max_voxel_dist(self):
@@ -121,9 +143,9 @@ class Grid:
         # is just the cartesian coordinates of the unit cell divided by
         # its grid size
         end = [0, 0, 0]
-        vox_a = [x / self.grid_shape[0] for x in self.a]
-        vox_b = [x / self.grid_shape[1] for x in self.b]
-        vox_c = [x / self.grid_shape[2] for x in self.c]
+        vox_a = [x / self.shape[0] for x in self.a]
+        vox_b = [x / self.shape[1] for x in self.b]
+        vox_c = [x / self.shape[2] for x in self.c]
         # We want the three other vertices on the other side of the voxel. These
         # can be found by adding the vectors in a cycle (e.g. a+b, b+c, c+a)
         vox_a1 = [x + x1 for x, x1 in zip(vox_a, vox_b)]
@@ -137,7 +159,17 @@ class Grid:
         # Shift each point here so that the origin is the center of the
         # voxel.
         voxel_vertices = []
-        for vector in [center, end, vox_a, vox_b, vox_c, vox_a1, vox_b1, vox_c1, end]:
+        for vector in [
+            center,
+            end,
+            vox_a,
+            vox_b,
+            vox_c,
+            vox_a1,
+            vox_b1,
+            vox_c1,
+            end,
+        ]:
             new_vector = [(x - x1) for x, x1 in zip(vector, center)]
             voxel_vertices.append(new_vector)
 
@@ -158,7 +190,7 @@ class Grid:
         Returns:
             A list of voxel permutations unique to the grid dimensions.
         """
-        a, b, c = self.grid_shape
+        a, b, c = self.shape
         permutations = [
             (t, u, v)
             for t, u, v in itertools.product([-a, 0, a], [-b, 0, b], [-c, 0, c])
@@ -182,7 +214,7 @@ class Grid:
     @property
     def voxel_resolution(self):
         volume = self.structure.volume
-        number_of_voxels = self.grid_shape.prod()
+        number_of_voxels = self.shape.prod()
         return number_of_voxels / volume
 
     @property
@@ -191,7 +223,107 @@ class Grid:
             "equivalent_atoms"
         ]
 
-    def get_grid_axes(self, padding: int = 0):
+    def get_2x_supercell(self, data: ArrayLike):
+        """
+        Duplicates data with the same dimensions as the grid to make a 2x2x2
+        supercell
+
+        Args:
+            data (ArrayLike):
+                The data to duplicate. Must have the same dimensions as the
+                grid.
+
+        Returns:
+            The duplicated data
+        """
+        raveled_data = data.ravel()
+        voxel_indices = np.indices(data.shape).reshape(3, -1).T
+        transformations = [
+            [0, 0, 0],  # -
+            [1, 0, 0],  # x
+            [0, 1, 0],  # y
+            [0, 0, 1],  # z
+            [1, 1, 0],  # xy
+            [1, 0, 1],  # xz
+            [0, 1, 1],  # yz
+            [1, 1, 1],  # xyz
+        ]
+        transformations = np.array(transformations)
+        transformations = self.get_voxel_coords_from_frac(transformations.T).T
+        supercell = np.zeros(np.array(data.shape) * 2)
+        for transformation in transformations:
+            transformed_indices = (voxel_indices + transformation).astype(int)
+            x = transformed_indices[:, 0]
+            y = transformed_indices[:, 1]
+            z = transformed_indices[:, 2]
+            supercell[x, y, z] = raveled_data
+        return supercell
+
+    def get_voxels_in_radius(self, radius: float, voxel: ArrayLike):
+        """
+        Gets the indices of the voxels in a radius around a voxel
+
+        Args:
+            radius (float):
+                The radius in Angstroms around the voxel
+
+            voxel (ArrayLike):
+                The voxel coordinates of the voxel to find the sphere around
+
+        Returns:
+            The voxel indices of the voxels within the provided radius
+        """
+        voxel = np.array(voxel)
+        # Get the distance from each voxel to the origin
+        voxel_distances = self.voxel_dist_to_origin
+
+        # Get the indices that are within the radius
+        sphere_indices = np.where(voxel_distances <= radius)
+        sphere_indices = np.column_stack(sphere_indices)
+
+        # Get indices relative to the voxel
+        sphere_indices = sphere_indices + voxel
+        # adjust voxels to wrap around grid
+        # line = [[round(float(a % b), 12) for a, b in zip(position, grid_data.shape)]]
+        new_x = (sphere_indices[:, 0] % self.shape[0]).astype(int)
+        new_y = (sphere_indices[:, 1] % self.shape[1]).astype(int)
+        new_z = (sphere_indices[:, 2] % self.shape[2]).astype(int)
+        sphere_indices = np.column_stack([new_x, new_y, new_z])
+        # return new_x, new_y, new_z
+        return sphere_indices
+
+    def get_voxels_transformations_to_radius(self, radius: float):
+        """
+        Gets the transformations required to move from a voxel to the voxels
+        surrounding it within the provided radius
+
+        Args:
+            radius (float):
+                The radius in Angstroms around the voxel
+
+        Returns:
+            An array of transformations to add to a voxel to get to each of the
+            voxels within the radius surrounding it
+        """
+        # Get voxels around origin
+        voxel_distances = self.voxel_dist_to_origin
+        # sphere_grid = np.where(voxel_distances <= radius, True, False)
+        # eroded_grid = binary_erosion(sphere_grid)
+        # shell_indices = np.where(sphere_grid!=eroded_grid)
+        shell_indices = np.where(voxel_distances <= radius)
+        # Now we want to translate these indices to next to the corner so that
+        # we can use them as transformations to move a voxel to the edge
+        final_shell_indices = []
+        for a, x in zip(self.shape, shell_indices):
+            new_x = x - a
+            abs_new_x = np.abs(new_x)
+            new_x_filter = abs_new_x < x
+            final_x = np.where(new_x_filter, new_x, x)
+            final_shell_indices.append(final_x)
+
+        return np.column_stack(final_shell_indices)
+
+    def get_padded_grid_axes(self, padding: int = 0):
         """
         Gets the the possible indices for each dimension of a padded grid.
         e.g. if the original charge density grid is 20x20x20, and is padded
@@ -207,13 +339,19 @@ class Grid:
         """
         grid = self.total
         a = np.linspace(
-            0, grid.shape[0] + (padding - 1) * 2 + 1, grid.shape[0] + padding * 2
+            0,
+            grid.shape[0] + (padding - 1) * 2 + 1,
+            grid.shape[0] + padding * 2,
         )
         b = np.linspace(
-            0, grid.shape[1] + (padding - 1) * 2 + 1, grid.shape[1] + padding * 2
+            0,
+            grid.shape[1] + (padding - 1) * 2 + 1,
+            grid.shape[1] + padding * 2,
         )
         c = np.linspace(
-            0, grid.shape[2] + (padding - 1) * 2 + 1, grid.shape[2] + padding * 2
+            0,
+            grid.shape[2] + (padding - 1) * 2 + 1,
+            grid.shape[2] + padding * 2,
         )
         return a, b, c
 
@@ -225,10 +363,8 @@ class Grid:
             A copy of the Grid.
         """
         return self.__class__(
-            self.total,
-            self.diff,
-            self.structure.copy(),
-            self.data_type,
+            self.structure,
+            self.data,
         )
 
     @classmethod
@@ -245,196 +381,56 @@ class Grid:
         """
         logging.info(f"Loading {grid_file} from file")
         # Create string to add structure to.
-        structure_str = ""
-        total_str = ""
-        diff_str = ""
+        poscar, data, _ = cls.parse_file(grid_file)
 
-        # Read the content of the file. We will need the number of atoms and the
-        # grid shape to read in the data.
-        with open(grid_file) as f:
-            content = f.readlines()
+        return Grid(poscar.structure, data)
 
-            # get the number of atoms in the structure
-            num_atoms = sum([int(x) for x in content[6].split()])
-            # get the grid shape of the data
-            grid_shape_str = content[9 + num_atoms]
-            grid_shape = [int(x) for x in grid_shape_str.split()]
-            # get the first row of data. This will be used to determine the
-            # format of the file.
-            first_data_row = content[10 + num_atoms]
-
-            # Get the structure as a string
-            for line in content[0 : 8 + num_atoms]:
-                structure_str += f"{line}"
-
-            # The format that VASP outputs for CHGCARs and ELFCARs can have several
-            # different forms. The data is effectively a long list of values going
-            # in order of array indices.
-            # Typically the CHGCAR will have 5 values per line while the
-            # ELFCAR will have 10 if they are directly from a VASP calculation.
-            # If they are outputted from pymatgen or this grid class they will both
-            # have 5 columns. This will effect the number of lines of data there are.
-            column_num = len(first_data_row.split())
-            line_num = math.ceil(np.product(grid_shape) / column_num)
-            skip_rows_total = 10 + num_atoms
-
-            # Get the total grid as a string.
-            for line in content[skip_rows_total : skip_rows_total + line_num]:
-                total_str += f"{line}"
-
-            # charge density file have a set of augmentation occupancies stored
-            # after the charge density. We can look for a line containing this
-            # to determine the data type. We also need to determine how many
-            # lines this data takes up.
-            aug_occ_lines_num = 0
-            try:
-                if "augmentation occupancies" in content[skip_rows_total + line_num]:
-                    data_type = "charge density"
-                    for line in content[skip_rows_total + line_num :]:
-                        # If we find the start of a new set of data or the end of
-                        # the file we end.
-                        if grid_shape_str in line:
-                            break
-                        else:
-                            aug_occ_lines_num += 1
-
-                else:
-                    data_type = "elf"
-
-                # If the VASP calculation was spin polarized there will be another
-                # set of data. We check this is true and then read in the data if
-                # it exists
-                skip_rows_diff = skip_rows_total + line_num + aug_occ_lines_num + 1
-                if grid_shape_str in content[skip_rows_diff - 1]:
-                    # there is a second set of data we need to load
-                    for line in content[skip_rows_diff : skip_rows_diff + line_num]:
-                        diff_str += f"{line}"
-            except:
-                # We've reached the end of the file without finding an
-                # augmentation occupancies or additional set of data. We either
-                # have a non-spin polarized ELF file or the output
-                # BvAt_.dat file from the Henkelman Bader code.
-                data_type = "unknown"
-
-        # Create the structure object
-        structure = Structure.from_str(structure_str, fmt="poscar")
-
-        # Load in the data for the first set of data (spin up in ELFCAR, total
-        # charge density in CHGCAR). Ravel moves the data from the original
-        # grid in the file to a long list. Reshape moves it into a 3D numpy array
-        # with the appropriate shape.
-        total = (
-            np.fromstring(
-                total_str,
-                sep=" ",
-            )
-            .ravel()
-            .reshape(grid_shape, order="F")
-        )
-
-        # Do the same for the second set of data (spin down in ELFCAR, magnetic
-        # moment in CHGCAR)
-        if len(diff_str) > 0:
-            diff = (
-                np.fromstring(
-                    diff_str,
-                    sep=" ",
-                )
-                .ravel()
-                .reshape(grid_shape, order="F")
-            )
-        else:
-            diff = None
-
-        return Grid(total, diff, structure, data_type)
-
-    def write_file(self, file_name: str | Path, vasp4_compatible=False):
+    def to_pybader(self):
         """
-        Writes a vasp compatible file. This is a reimplimentation of pymatgen's
-        [version](https://github.com/materialsproject/pymatgen/blob/v2023.10.4/pymatgen/io/vasp/outputs.py) without the required overhead.
+        Returns a Bader object from pybader.
+        """
+        atoms = self.structure.cart_coords
+        lattice = self.matrix
+        density = {"charge": self.total}
+        file_info = {"voxel_offset": np.array([0, 0, 0])}
+        bader = Bader(density, lattice, atoms, file_info)
+        return bader
+
+    def run_pybader(self, threads: int = 1):
+        """
+        Convenience class for running zero-flux voxel assignment using pybader.
+        Returns a pybader Bader class object with the assigned voxels
+
         Args:
-            file_name (str | Path): Path to file
-            vasp4_compatible: True if the format is vasp4 compatible.
+            cores (int):
+                The number of threads to use when running the Bader algorithm
         """
-        logging.info(f"Writing to {file_name}")
-
-        def _print_fortran_float(flt):
-            """Fortran codes print floats with a leading zero in scientific
-            notation. When writing CHGCAR files, we adopt this convention
-            to ensure written CHGCAR files are byte-to-byte identical to
-            their input files as far as possible.
-
-            Args:
-                flt (float):
-                    Float to print.
-
-            Returns:
-                String representation of float in Fortran format.
-            """
-            s = f"{flt:.10E}"
-            if flt >= 0:
-                return f"0.{s[0]}{s[2:12]}E{int(s[13:]) + 1:+03}"
-            return f"-.{s[1]}{s[3:13]}E{int(s[14:]) + 1:+03}"
-
-        with open(file_name, "wt") as file:
-            with warnings.catch_warnings():
-                warnings.filterwarnings(
-                    "ignore", category=UserWarning, module="pymatgen"
-                )
-                poscar = Poscar(self.structure)
-
-            # use original name if it's been set (e.g. from Chgcar)
-            comment = getattr(self, "name", poscar.comment)
-
-            lines = comment + "\n"
-            lines += "   1.00000000000000\n"
-            for vec in self.matrix:
-                lines += f" {vec[0]:12.6f}{vec[1]:12.6f}{vec[2]:12.6f}\n"
-            if not vasp4_compatible:
-                lines += "".join(f"{s:5}" for s in poscar.site_symbols) + "\n"
-            lines += "".join(f"{x:6}" for x in poscar.natoms) + "\n"
-            lines += "Direct\n"
-            for site in self.structure:
-                dim, b, c = site.frac_coords
-                lines += f"{dim:10.6f}{b:10.6f}{c:10.6f}\n"
-            lines += " \n"
-            file.write(lines)
-            dim = self.grid_shape
-
-            def write_spin(data):
-                lines = []
-                count = 0
-                file.write(f"   {dim[0]}   {dim[1]}   {dim[2]}\n")
-                for k, j, i in itertools.product(
-                    list(range(dim[2])), list(range(dim[1])), list(range(dim[0]))
-                ):
-                    lines.append(_print_fortran_float(data[i, j, k]))
-                    count += 1
-                    if count % 5 == 0:
-                        file.write(" " + "".join(lines) + "\n")
-                        lines = []
-                    else:
-                        lines.append(" ")
-                if count % 5 != 0:
-                    file.write(" " + "".join(lines) + " \n")
-
-            write_spin(self.total)
-            if self.diff is not None:
-                write_spin(self.diff)
+        logging.info("Running Bader")
+        bader = self.to_pybader()
+        bader.load_config("speed")
+        bader.threads = threads
+        bader.spin_flag = True  # loading speed config resets all config vars
+        bader.volumes_init()
+        bader.bader_calc()
+        bader.bader_to_atom_distance()
+        bader.refine_volumes(bader.atoms_volumes)
+        bader.threads = 1
+        bader.min_surface_distance()
+        return bader
 
     def regrid(
         self,
         desired_resolution: int = 130000,
-        new_grid_shape: np.array = None,
+        new_shape: np.array = None,
     ):
         """
-        Resizes the grid using Fourier interplation as implemented by
+        Returns a new grid resized using Fourier interplation as implemented by
         [PyRho](https://materialsproject.github.io/pyrho/)
 
         Args:
             desired_resolution (int):
                 The desired resolution in voxels/A^3.
-            new_grid_shape (ArrayLike):
+            new_shape (ArrayLike):
                 The new array shape. Takes precedence over desired_resolution.
 
         Returns:
@@ -448,40 +444,39 @@ class Grid:
         lattice_array = self.matrix
 
         # get the original grid size and lattice volume.
-        grid_shape = self.grid_shape
+        shape = self.shape
         volume = self.structure.volume
 
-        if new_grid_shape is None:
+        if new_shape is None:
             # calculate how much the number of voxels along each unit cell must be
             # multiplied to reach the desired resolution.
-            scale_factor = ((desired_resolution * volume) / grid_shape.prod()) ** (
-                1 / 3
-            )
+            scale_factor = ((desired_resolution * volume) / shape.prod()) ** (1 / 3)
 
             # calculate the new grid shape. round up to the nearest integer for each
             # side
-            new_grid_shape = np.around(grid_shape * scale_factor).astype(np.int32)
+            new_shape = np.around(shape * scale_factor).astype(np.int32)
 
         # create a pyrho pgrid instance.
         total_pgrid = PGrid(total, lattice_array)
 
         # regrid to the desired voxel resolution and get the data back out.
         new_total_pgrid = total_pgrid.get_transformed(
-            [[1, 0, 0], [0, 1, 0], [0, 0, 1]], new_grid_shape
+            [[1, 0, 0], [0, 1, 0], [0, 0, 1]], new_shape
         )
-        # new_data = pgrid.lossy_smooth_compression(new_grid_shape)
+        # new_data = pgrid.lossy_smooth_compression(new_shape)
         new_total_data = new_total_pgrid.grid_data
-        # update class total instance
-        self.total = new_total_data
 
         # repeat for diff if exists
         if diff is not None:
             diff_pgrid = PGrid(diff, lattice_array)
             new_diff_pgrid = diff_pgrid.get_transformed(
-                [[1, 0, 0], [0, 1, 0], [0, 0, 1]], new_grid_shape
+                [[1, 0, 0], [0, 1, 0], [0, 0, 1]], new_shape
             )
             new_diff_data = new_diff_pgrid.grid_data
-            self.diff = new_diff_data
+
+        data = {"total": new_total_data, "diff": new_diff_data}
+
+        return Grid(self.structure, data)
 
     ###########################################################################
     # The following is a series of methods that are useful for converting between
@@ -503,7 +498,7 @@ class Grid:
 
         """
 
-        voxel_coords = [a * b for a, b in zip(self.grid_shape, self.frac_coords[site])]
+        voxel_coords = [a * b for a, b in zip(self.shape, self.frac_coords[site])]
         # voxel positions go from 1 to (grid_size + 0.9999)
         return np.array(voxel_coords)
 
@@ -519,7 +514,7 @@ class Grid:
         Returns:
             A voxel grid index as an array.
         """
-        grid_size = self.grid_shape
+        grid_size = self.shape
         frac = neigh["site"].frac_coords
         voxel_coords = [a * b for a, b in zip(grid_size, frac)]
         # voxel positions go from 1 to (grid_size + 0.9999)
@@ -538,7 +533,7 @@ class Grid:
         Returns:
             A voxel grid index as an array.
         """
-        grid_size = self.grid_shape
+        grid_size = self.shape
         frac_coords = neigh.frac_coords
         voxel_coords = [a * b for a, b in zip(grid_size, frac_coords)]
         # voxel positions go from 1 to (grid_size + 0.9999)
@@ -556,7 +551,7 @@ class Grid:
             A voxel grid index as an array.
 
         """
-        grid_size = self.grid_shape
+        grid_size = self.shape
         voxel_coords = [a * b for a, b in zip(grid_size, frac_coords)]
         # voxel positions go from 1 to (grid_size + 0.9999)
         return np.array(voxel_coords)
@@ -573,7 +568,7 @@ class Grid:
         Returns:
             A fractional coordinate as an array
         """
-        size = self.grid_shape
+        size = self.shape
         fa, fb, fc = [(a / b) for a, b in zip(voxel_coords, size)]
         frac_coords = np.array([fa, fb, fc])
         return frac_coords
@@ -674,7 +669,7 @@ class Grid:
         Returns:
             An (N,3) shaped array of fractional coordinates
         """
-        x, y, z = self.grid_shape
+        x, y, z = self.shape
         frac_x = vox_coords[:, 0] / x
         frac_y = vox_coords[:, 1] / y
         frac_z = vox_coords[:, 2] / z
@@ -693,7 +688,7 @@ class Grid:
         Returns:
             An (N,3) shaped array of voxel coordinates
         """
-        x, y, z = self.grid_shape
+        x, y, z = self.shape
         vox_x = frac_coords[:, 0] * x
         vox_y = frac_coords[:, 1] * y
         vox_z = frac_coords[:, 2] * z

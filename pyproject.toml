@@ -95,6 +95,7 @@ dependencies=[
     "matminer >=0.7.6, <0.8.1",
     "ase >=3.22.1, <=3.22.1",
     "mp-pyrho >=0.3.0, <=0.3.0",  # for badelf app
+    "pybader >= 0.3.12" # for badelf app
 ]
 
 # optional dependencies that are not installed by default
