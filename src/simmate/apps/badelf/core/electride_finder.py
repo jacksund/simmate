@@ -147,6 +147,7 @@ class ElectrideFinder:
     def get_electride_structure(
         self,
         electride_finder_cutoff: float = 0.5,
+        electride_size_cutoff: float = 0.1,
         threads: int = None,
         check_for_covalency: bool = True,
     ):
@@ -157,6 +158,16 @@ class ElectrideFinder:
             electride_finder_cutoff (float):
                 The minimum elf value at the site to be considered a possible
                 electride. The default is 0.5.
+            
+            electride_size_cutoff (float):
+                The minimum size an electride site must be to be counted. This
+                mainly intended to remove any sites that are potentially just
+                features of the voxel grid and should be quite small.
+                
+            threads (int):
+                The number of threads to use to perform the bader/zero-flux
+                calculation.
+            
             check_for_covalency (bool):
                 Whether to prevent a structure from being found if covalency is
                 found in the structure. It is highly recommended to keep this as
@@ -521,7 +532,7 @@ class ElectrideFinder:
             # less than 0.1 we remove the site.
             num_voxels = len(np.where(atoms_volumes == i)[0])
             volume = num_voxels * voxel_volume
-            if volume < 0.1:
+            if volume < electride_size_cutoff:
                 indices_to_remove.append(i)
         electride_structure.remove_sites(indices_to_remove)
         logging.info(
