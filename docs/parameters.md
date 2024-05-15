@@ -527,7 +527,7 @@ For workflows that generate new structures (and potentially run calculations on 
     ```
 === "toml"
     ``` toml
-    max_structures = 100
+    max_structures = 100 
     ```
 === "python"
     ``` python
@@ -1378,5 +1378,3 @@ This parameter determines whether or not to write output files. For some workflo
     Beginners can often ignore this setting. This is typically only relevant
     in a setup where you have many computational resources and have many
     evolutionary searches (>10) running at the same time.
-
---------------------------

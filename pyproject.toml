@@ -62,7 +62,7 @@ dependencies=[
     # Core dependencies
     "numpy >=1.22.0, <1.24.2",
     "pandas >=2.0.0, <2.1.4",
-    "dask >=2023.6.1, <2023.11.1",
+    "dask >=2023.6.1, <2024.4.3",
     "distributed >=2023.6.1, <2023.11.1",  # part of dask
     "django >=4.0.0, <4.2.8",
     "typer >=0.6.0, <0.7.1",
@@ -72,10 +72,10 @@ dependencies=[
     "django-contrib-comments >=2.2.0, <=2.2.0",  # for tracking user comments in web
     "django-crispy-forms >=1.13.0, <=1.14.0",  # for formatting of online forms
     "django-pandas >=0.6.6, <=0.6.6",  # for converting QuerySets to PandasDataFrames
-    "django-unicorn >=0.50.0, <=0.55.0",  # for responsive web UI (AJAX calls)
+    "django-unicorn >=0.59.0, <=0.59.0",  # for responsive web UI (AJAX calls)
     "dj-database-url >=0.5.0, <1.4.0",  # for DigitalOcean URL conversion
     "django-simple-history >=3.3.0, <=3.3.0",  # for tracking changes to data
-    "djangorestframework >=3.13.1, <3.14.1",  # for our REST API
+    "djangorestframework >=3.13.1, <3.15.2",  # for our REST API
     "django-filter >=21.1, <=22.1",  # sets up automatic filters for our REST API
     "pyyaml >=6.0, <=6.0.1",  # for yaml configuration files
     "plotly >=5.4.0, <5.19.0",  # for interactive plots and visualization
@@ -105,18 +105,18 @@ dependencies=[
 DEV = [
     "pytest >=6.2.5, <7.3.2",
     "pytest-django >=4.5.2, <=4.7.0",
-    "pytest-mock >=3.7.0, <3.12.1",
+    "pytest-mock >=3.7.0, <3.14.1",
     "pytest-xdist >=2.5.0, <3.4.0",
     "black >=24.0.0, <24.2.0",
-    "coverage >=6.2, <7.3.1",
+    "coverage >=6.2, <7.4.4",
     "isort >=5.10.1, <5.12.1",
     "mkdocs-material >=8.4.1, <9.4.15",
     "mkdocstrings >=0.19.0, <=0.24.0",
-    "mkdocstrings-python >=0.7.1, <1.8.1",
+    "mkdocstrings-python >=0.7.1, <1.10.1",
 ]
 
 EXE = [
-    "prefect >=2.0.0, <2.14.19",  # for extra workflow orchestration 
+    "prefect >=2.0.0, <2.16.2",  # for extra workflow orchestration 
     "dask-jobqueue >=0.7.3, <=0.8.2",  # for submitting on HPC clusters
     "anyio >=3.6.1",  # for async utilities when using Prefect
     "nest_asyncio >=1.5.5, <1.5.9",  # to allow async calls in Spyder/iPython/Jupyter

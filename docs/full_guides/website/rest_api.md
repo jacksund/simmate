@@ -1,7 +1,7 @@
-# Grasping the REST API
+# Simmate REST API
 
 !!! warning
-    This section is only for experts! If you're aiming to extract data from Simmate, we suggest using our Python client, as outlined in [the database guides](/full_guides/database/overview/). The REST API is mainly for teams that cannot use Python or Simmate's code but still need to extract data. Be aware that data extraction via our REST API is heavily throttled, making it unsuitable for large data retrievals.
+    This section is only for experts! If you're aiming to extract data from Simmate, we suggest using our Python client, as outlined in [the database guides](/full_guides/database/overview/). The REST API is mainly for teams that cannot use Simmate's python package but still need to extract data. Be aware that data extraction via our REST API is heavily throttled, making it unsuitable for large data retrievals.
 
 ------------------------------------------------------------
 
@@ -13,7 +13,7 @@
 
 ## Example Endpoint
 
-To get a better grasp of our API, let's examine some examples. We'll concentrate on the Materials Project database (at [`/data/MatprojStructure/`](http://simmate.org/data/MatprojStructure/)), but keep in mind, nearly every URL within Simmate has REST API functionality! Our API endpoints are auto-generated from our database module, facilitating the introduction of new features and tables.
+To better understand our API, we'll use the Materials Project data as an example. You can view this data at [`/data/MatprojStructure/`](http://simmate.org/data/MatprojStructure/). Keep in mind, nearly every URL within Simmate's `Data` tab has REST API functionality and behaves the same as this dataset.
 
 ------------------------------------------------------------
 
@@ -24,7 +24,7 @@ Consider a typical URL and webpage:
 http://simmate.org/data/MatprojStructure/
 ```
 
-This link takes you to a webpage where you can browse all Materials Project structures. However, this URL also serves as a REST API! To access it, simply add `?format=api` to the URL. Try this link:
+This link takes you to a webpage where you can browse all Materials Project structures. However, this URL also serves as a REST API. To access it, simply add `?format=api` to the URL. Try this link:
 ```
 http://simmate.org/data/MatprojStructure/?format=api
 ```
@@ -76,7 +76,7 @@ Our URLs also support advanced filtering. For instance, to search for all struct
 http://simmate.org/data/MatprojStructure/?chemical_system=Cr-N&spacegroup__number=229
 ```
 
-Conditions are specified by adding a question mark (`?`) to the URL, followed by `example_key=desired_value`. Additional conditions are separated by `&`, resulting in `key1=value1&key2=value2&key3=value3`, etc. You can also add `format=api` to this!
+Conditions are specified by adding a question mark (`?`) to the URL, followed by `example_key=desired_value`. Additional conditions are separated by `&`, resulting in `key1=value1&key2=value2&key3=value3`, etc. You can also add `format=api` to this.
 
 However, for complex or advanced cases, we recommend using the `simmate.database` module, as it provides more robust filtering capabilities.
 
@@ -90,11 +90,63 @@ To avoid server overload, Simmate currently returns a maximum of 12 results at a
 
 ## Ordering Results
 
-For API and JSON formats, you can manually determine the order of returned data by adding `ordering=example_column` to your URL. To reverse the order, use `ordering=-example_column` (note the "`-`" before the column name). For example:
+You can set the order of returned data by adding `ordering=example_column` to your URL. To reverse the order, use `ordering=-example_column` (note the "`-`" before the column name). For example:
 
 ```
 http://simmate.org/data/MatprojStructure/?ordering=density_atomic
 ```
+
+------------------------------------------------------------
+
+## Programmer access & API Keys
+
+### Public Website
+The public Simmate website does not require you to be authenticated to access our API endpoints. You can therefore call API endpoints anonymously:
+
+=== "python requests"
+
+    ```python
+    import requests
+
+    url = 'http://simmate.org/data/MatprojStructure/?format=json'
+    response = requests.get(url)
+
+    print(response.text)
+    ```
+
+=== "curl"
+    ``` bash
+    curl -X GET http://localhost/data/CortevaTarget/?format=api
+    ```
+
+### Private Servers
+
+Some custom servers (such as Simmate's Corteva site), do require authenticated users to ensure data secuirity. For these, you can access endpoints by providing an API key.
+
+1. find your API key in the `Profile` page of the website and select the `View API Key` at the bottom of the page. The key will be something like...
+```
+59ced7225bb41d51b7bc78c1e269542eaa99c72f
+```
+
+2. make sure you provide the API as a header in your requests:
+
+    === "python requests"
+
+        ```python
+        import requests
+
+        url = 'http://simmate.org/data/MatprojStructure/?format=json'
+        headers = {'Authorization': 'Token 59ced7225bb41d51b7bc78c1e269542eaa99c72f'}
+
+        response = requests.get(url, headers=headers)
+
+        print(response.text)
+        ```
+
+    === "curl"
+        ``` bash
+        curl -X GET http://simmate.org/data/MatprojStructure/?format=json -H 'Authorization: Token 59ced7225bb41d51b7bc78c1e269542eaa99c72f'
+        ```
 
 ------------------------------------------------------------
 

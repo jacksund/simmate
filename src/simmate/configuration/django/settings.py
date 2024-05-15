@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     # These are apps created by third-parties that give us extra features
     "crispy_forms",  # django-crispy-forms for HTML boostrap forms
     "rest_framework",  # djangorestframework for the REST API
+    "rest_framework.authtoken",  # for programmatic REST API access
     "django_filters",  # django-filter for filterable REST API urls
     #
     # Apps for django-allauth that allow sign-on using external accounts
@@ -82,6 +83,8 @@ INSTALLED_APPS = [
     #   "django_extensions",  # for development tools
     #   "debug_toolbar",  # django-debug-toolbar  # for debuging and profile-time info
     #
+    # Any extra apps from the user (such as django-table2 or some other package)
+    *settings.extra_django_apps,
     # Simmate apps + user apps
     "simmate.website.configs.CoreComponentsConfig",
     "simmate.website.configs.DataExplorerConfig",
@@ -237,6 +240,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
@@ -259,7 +263,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "100/hour", "user": "1000/hr"},
+    "DEFAULT_THROTTLE_RATES": {"anon": "2500/hour", "user": "7500/hr"},
     # We use django-filter to automatically handle filtering from a REST url
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
@@ -374,3 +378,9 @@ LOGIN_REQUIRED_URLS_EXCEPTIONS = (
 # Read more at...
 # https://docs.djangoproject.com/en/5.0/topics/async/#async-safety
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
+# -----------------------------------------------------------------------------
+
+# For advanced users, we let them override Django settings directly.
+# But by default, nothing is changed.
+locals().update(settings.django_settings)

@@ -36,13 +36,15 @@ def providers_all(request):
             "Molecular": molecular_dbs,
             "Crystalline": crystal_dbs,
             "Other": other_dbs,
-        }
+        },
+        "breadcrumb_active": "Data",
     }
     template = "data_explorer/providers_all.html"
     return render(request, template, context)
 
 
 class ProviderAPIViewSet(SimmateAPIViewSet):
+    template_about = "data_explorer/about.html"
     template_list = "data_explorer/provider.html"
     template_retrieve = "data_explorer/entry_detail.html"
 

@@ -51,6 +51,9 @@ simmate config show --user-only
 simmate database update
 ```
 
+    !!! note
+        The `update` command attempts to add any changes to your current database. If you wish to start from a clean and empty database, you can use `reset` instead.
+
 4. Verify the output of your `update` command. You should see that your new app and tables have been added.
 ``` bash
 Migrations for 'example_app':
