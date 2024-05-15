@@ -14,7 +14,10 @@
 
 BadELF is a method that combines Bader Charge Analysis and the Electron Localization Function (ELF) to predict oxidation states and perform population analysis of electrides. It uses Bader segmentation of the ELF to detect electride electrons and Voronoi segmentation of the ELF to identify atoms.
 
-Simmate's BadELF application provides workflows and utilities to streamline BadELF analysis.
+Simmate's BadELF application provides workflows and utilities to streamline BadELF analysis. 
+
+!!! note
+    BadELF currently only works with VASP, but we are interested in expanding its use to other ab initio software. If you are interested in this, let us know, as that will help to make this a higher priority.
 
 --------------------------------------------------------------------------------
 
@@ -25,19 +28,12 @@ Simmate's BadELF application provides workflows and utilities to streamline BadE
 simmate config add badelf
 ```
 
-2. Make sure you have the Bader command (from the Henkleman group) installed using one of two options:
-      - (*for beginners*) Install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). Then run the following command:
-          ``` bash
-          simmate config update "bader.docker.enable=True"
-          ```
-      - (*for experts*) Install Bader using [offical guides](http://theory.cm.utexas.edu/henkelman/code/bader/) and make sure `bader` is in the path
-
-3. Update your database to include custom tables from the `badelf` app:
+2. Update your database to include custom tables from the `badelf` app:
 ``` shell
 simmate database update
 ```
 
-4. Ensure everything is configured correctly:
+3. Ensure everything is configured correctly:
 ``` shell
 simmate config test badelf
 ```
@@ -71,10 +67,72 @@ And run the workflow:
 simmate workflows run input.yaml
 ```
 
+Alternatively, the BadELF algorithm can be run from the command line without a yaml file:
+``` bash
+simmate workflows run-quick bad-elf.badelf.badelf --directory /path/to/folder
+```
+
 ### (b) from structure
 
 If you would prefer to have Simmate handle the VASP calculation, workflows are available that will first run the required DFT and then BadELF. 
 
 These workflows are stored in the `Warren Lab` app, which contains our lab's preferred VASP settings. Refer to the `Warren Lab` app for more details and to view the available workflows.
+
+--------------------------------------------------------------------------------
+## Use in python: the BadElfToolkit class
+
+In addition to workflows, the BadELF app also contains a suite of python modules to aid in BadELF analysis. These can be accessed under the 'simmate.apps.badelf.core' module. The most useful of these is the BadElfToolkit class which allows users to run BadELF directly. Running BadELF in this way involves two steps:
+
+### (1) Initializing the BadElfToolkit class
+
+The BadElfToolkit class can be initialized with the 'from_files' method:
+``` python
+from simmate.apps.badelf.core import BadElfToolkit
+
+badelf = BadElfToolkit.from_files(
+        directory = "/path/to/folder", # This is the directory where the files are located as well as the directory where BadELF will run
+        partitioning_file = "partitioning_filename", # e.g. ELFCAR
+        charge_file = "charge_filename", # e.g. CHGCAR
+        )
+```
+
+Alternatively, the BadElfToolkit can be initialized by providing the partitioning and charge density grids as Grid class objects. The Grid class inherits from pymatgen's VolumetricData class.
+``` python
+from simmate.apps.badelf.core import BadElfToolkit, Grid
+from pathlib import Path
+
+directory = Path("path/to/folder") # indicates the path to the folder where BadELF should run
+partitioning_grid = Grid.from_file("path/to/partitioning_file")
+charge_grid = Grid.from_file("path/to/partitioning_file")
+
+badelf = BadElfToolkit(
+        directory = directory,
+        partitioning_grid = partitioning_grid,
+        charge_grid = charge_grid        
+        )
+```
+### (2) Running BadELF and viewing results
+
+Once the BadElfToolkit class is initialized, the BadELF algorithm is run as follows:
+
+``` python
+badelf_results = badelf.results
+```
+
+This will return a dictionary object that includes useful information such as the oxidation states and volumes of each atom/electride electron. The volumes assigned to a given atom or species can also be written to a CHGCAR or ELFCAR type file for convenient visualization in programs such as VESTA or OVITO:
+
+```python
+# Write ELF or Charge Density for all atoms of a given type
+badelf.write_species_file(
+        file_type = "ELFCAR", # can also be CHGCAR
+        species = "He", # He is used as a placeholder for electride electrons
+        )
+
+# Write ELF or Charge Density for one atom
+badelf.write_atom_file(
+        file_type = "ELFCAR", # can also be CHGCAR
+        atom_index = 0, # The index of the atom to write the charge for
+        )
+```
 
 --------------------------------------------------------------------------------

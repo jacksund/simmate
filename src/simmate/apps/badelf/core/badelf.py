@@ -856,8 +856,8 @@ class BadElfToolkit:
         Args:
             file_type (str):
                 The type of file that you want, either ELFCAR or CHGCAR
-            species (str):
-                The species to write data for.
+            atom_index (str):
+                The index of the atom to write data for.
 
         Returns:
             None
