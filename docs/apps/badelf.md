@@ -81,11 +81,11 @@ These workflows are stored in the `Warren Lab` app, which contains our lab's pre
 --------------------------------------------------------------------------------
 ## Use in python: the BadElfToolkit class
 
-In addition to workflows, the BadELF app also contains a suite of python modules to aid in BadELF analysis. These can be accessed under the 'simmate.apps.badelf.core' module. The most useful of these is the BadElfToolkit class which allows users to run BadELF directly. Running BadELF in this way involves two steps:
+In addition to workflows, the BadELF app also contains a suite of python modules to aid in BadELF analysis. These can be accessed under the `simmate.apps.badelf.core` module. The most useful of these is the BadElfToolkit class which allows users to run BadELF directly. Running BadELF in this way involves two steps:
 
 ### (1) Initializing the BadElfToolkit class
 
-The BadElfToolkit class can be initialized with the 'from_files' method:
+The BadElfToolkit class can be initialized with the `from_files` method:
 ``` python
 from simmate.apps.badelf.core import BadElfToolkit
 
