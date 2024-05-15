@@ -11,7 +11,7 @@ ChemDoodle.DEFAULT_STYLES.atoms_useJMOLColors = true;
 ChemDoodle.ELEMENT['H'].jmolColor = 'black';
 // darkens the default JMol color of sulfur so it appears on white backgrounds
 ChemDoodle.ELEMENT['S'].jmolColor = '#B9A130';
-// A custom function to help with drawing molecules
+// draws molecules
 var doodle_molecule = function(sdf_str, canvas_id, size) {
     let myCanvas = new ChemDoodle.ViewerCanvas(canvas_id, size, size);
     // set this individually bc background color is important for some components
@@ -23,9 +23,23 @@ var doodle_molecule = function(sdf_str, canvas_id, size) {
     var canvas = document.getElementById(canvas_id);
     canvas.classList.remove("ChemDoodleWebComponent");
 };
-// function to grab value from sketcher and paste it into a target unicorn input
+// create a new sketching GUI
+var create_doodle_sketcher = function(sketcher_id) {
+    // when we init the SketcherCanvas, we store it in a global dict to access it elsewhere
+    window.sketcherCanvases = window.sketcherCanvases || {}; // Ensure the dict exists where we store all sketchers
+    window.sketcherCanvases[sketcher_id] = new ChemDoodle.SketcherCanvas(sketcher_id, 500, 300, {useServices:false, oneMolecule:true});
+    var sketcher = window.sketcherCanvases[sketcher_id];
+    // enables overlap clear widths, so that some depth is introduced to overlapping bonds
+    sketcher.styles.bonds_clearOverlaps_2D = true;
+    // sets the shape color to improve contrast when drawing figures
+    sketcher.styles.shapes_color = 'c10000';
+    // because we do not load any content, we need to repaint the sketcher, otherwise we would just see an empty area with the toolbar
+    // however, you can instead use one of the Canvas.load... functions to pre-populate the canvas with content, then you don't need to call repaint
+    sketcher.repaint();
+};
+// grab value from sketcher and paste it into a target unicorn input
 var get_mol_from_sketcher = function(
-    sketcher, 
+    sketcher_id, 
     textarea_id, 
     unicorn_view,
     unicorn_method,
@@ -38,13 +52,14 @@ var get_mol_from_sketcher = function(
     }
     // otherwise we pull what is in the sketcher and use that
     else {
+        var sketcher = window.sketcherCanvases[sketcher_id];
         let mol = sketcher.getMolecule();
         molStr = ChemDoodle.writeMOL(mol); // or .writeMOLV3(mol); ...?
     }
     // and then we call unicorn to update the value
     Unicorn.call(unicorn_view, unicorn_method, JSON.stringify(molStr));
 };
-// function to unhide + update a canvas for doodle molecules
+// unhide + update a canvas for doodle molecules
 var refresh_doodle = function(canvas_id, new_sdf_str) {
     // todo-- combine with doodle_molecule fxn above
     myCanvas = new ChemDoodle.ViewerCanvas(canvas_id);
