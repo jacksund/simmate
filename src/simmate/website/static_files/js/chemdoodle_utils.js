@@ -12,7 +12,7 @@ ChemDoodle.ELEMENT['H'].jmolColor = 'black';
 // darkens the default JMol color of sulfur so it appears on white backgrounds
 ChemDoodle.ELEMENT['S'].jmolColor = '#B9A130';
 // draws molecules
-var doodle_molecule = function(sdf_str, canvas_id, size) {
+var doodle_molecule = function(sdf_str, canvas_id, size) { // TODO: switch order of args & match id naming below
     let myCanvas = new ChemDoodle.ViewerCanvas(canvas_id, size, size);
     // set this individually bc background color is important for some components
     myCanvas.styles.backgroundColor = undefined;
@@ -38,12 +38,9 @@ var create_doodle_sketcher = function(sketcher_id) {
     sketcher.repaint();
 };
 // grab value from sketcher and paste it into a target unicorn input
-var get_mol_from_sketcher = function(
-    sketcher_id, 
-    textarea_id, 
-    unicorn_view,
-    unicorn_method,
-) {
+var get_mol_from_sketcher = function(id, unicorn_view, unicorn_method) {
+    var sketcher_id = "sketcher_" + id
+    var textarea_id = "textarea_" + id
     // priority is given to the text input
     var user_input = document.getElementById(textarea_id);
     var molStr;
@@ -60,7 +57,8 @@ var get_mol_from_sketcher = function(
     Unicorn.call(unicorn_view, unicorn_method, JSON.stringify(molStr));
 };
 // unhide + update a canvas for doodle molecules
-var refresh_doodle = function(canvas_id, new_sdf_str) {
+var refresh_doodle = function(id, new_sdf_str) {
+    var canvas_id = "canvas_" + id
     // todo-- combine with doodle_molecule fxn above
     myCanvas = new ChemDoodle.ViewerCanvas(canvas_id);
     myCanvas.styles.backgroundColor = undefined;
