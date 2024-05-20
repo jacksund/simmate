@@ -71,3 +71,11 @@ var refresh_doodle = function(id, new_sdf_str) {
     canvas.classList.remove("ChemDoodleWebComponent");
     canvas.classList.add("p-0"); // bug-fix for aspect ratio
 };
+// unsets the molecule and rehides the canvas
+var unset_doodle = function(id, new_sdf_str) {
+    var canvas_id = "canvas_" + id
+    // remove the current mol
+    refresh_doodle(id, "");
+    // hide the canvas
+    document.getElementById(canvas_id).hidden = true;
+};
