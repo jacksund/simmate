@@ -34,8 +34,8 @@ class BadElfBase(Workflow):
         find_electrides: bool = True,
         electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
         algorithm: str = "badelf",
-        electride_connection_cutoff: float = 0,
         check_for_covalency: bool = True,
+        write_electride_files: bool = False,
         **kwargs,
     ):
         # make a new directory to run badelf algorithm in and copy necessary files.
@@ -58,8 +58,11 @@ class BadElfBase(Workflow):
         if not check_for_covalency:
             badelf_tools.check_for_covalency = False
         badelf_tools.electride_finder_cutoff = electride_finder_cutoff
-        badelf_tools.electride_connection_cutoff = electride_connection_cutoff
         results = badelf_tools.results
+        # write results
+        if write_electride_files:
+            badelf_tools.write_species_file()
+            badelf_tools.write_species_file(file_type="CHGCAR")
         badelf_tools.write_results_csv()
         return results
 
@@ -85,8 +88,8 @@ class VaspBadElfBase(Workflow):
         find_electrides: bool = True,
         electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
         algorithm: str = "badelf",
-        electride_connection_cutoff: float = 0,
         check_for_covalency: bool = True,
+        write_electride_files: bool = False,
         **kwargs,
     ):
         # Run the dft calculation. This workflow should be set as something
@@ -108,7 +111,7 @@ class VaspBadElfBase(Workflow):
             find_electrides=find_electrides,
             electride_finder_cutoff=electride_finder_cutoff,
             algorithm=algorithm,
-            electride_connection_cutoff=electride_connection_cutoff,
             check_for_covalency=check_for_covalency,
+            write_electride_files=write_electride_files,
             # copy_previous_directory=True,
         ).result()

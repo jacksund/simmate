@@ -63,7 +63,8 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - allow custom django apps to be added to `INSTALLED_APPS` via `extra_django_apps`
 - allow override of django settings via `django_settings`
 - add several web UI components (e.g. select2 elements for forms)
-- add "Table Info" page and utils for dynamically building database docs 
+- add "Table Info" page and utils for dynamically building database docs
+- `badelf` app was reworked and now uses `pybader` for its core engine
 
 **Refactors**
 
@@ -74,7 +75,6 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - fix `show_columns` bug when there are relations to basic django models (like `User`)
 - catch incorrect use of `simmate database reset` when using the maintenance database
 - fix typo in setting email env vars
-
 
 --------------------------------------------------------------------------------
 

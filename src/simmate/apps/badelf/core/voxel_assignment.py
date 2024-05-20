@@ -109,14 +109,7 @@ class VoxelAssignmentToolkit:
         """
         The fractional coordinates for all of the voxels in the charge grid
         """
-        charge_grid = self.charge_grid.copy()
-        a, b, c = charge_grid.grid_shape
-        voxel_indices = np.indices(charge_grid.grid_shape).reshape(3, -1).T
-        frac_coords = voxel_indices.copy().astype(float)
-        frac_coords[:, 0] /= a
-        frac_coords[:, 1] /= b
-        frac_coords[:, 2] /= c
-        return frac_coords
+        return self.charge_grid.all_voxel_frac_coords
 
     @cached_property
     def all_partitioning_plane_points_and_vectors(self):
@@ -317,6 +310,7 @@ class VoxelAssignmentToolkit:
                 )
                 indices_to_zero.extend(np.where(new_results_array > i + 1)[0])
             indices_to_zero = np.unique(indices_to_zero).astype(int)
+            # print(len(indices_to_zero))
             new_results_array[indices_to_zero] = 0
             # Sum the results
             # new_results_array = np.sum(new_results_arrays, axis=0)
@@ -378,7 +372,7 @@ class VoxelAssignmentToolkit:
         # for each split, calculate the results and add to the end of our results
         for chunk, split_voxel_array in enumerate(split_voxel_frac_coords):
             logging.info(
-                f"Calculating site assignments for voxel chunk {chunk}/{split_num}"
+                f"Calculating site assignments for voxel chunk {chunk+1}/{split_num}"
             )
             split_result = self.get_site_assignments_from_frac_coords(
                 voxel_frac_coords=split_voxel_array,
@@ -417,29 +411,34 @@ class VoxelAssignmentToolkit:
         all_voxel_assignments[unassigned_indices] = single_site_voxel_assignments
         return all_voxel_assignments
 
-    def get_multi_site_voxel_assignments(self, all_site_voxel_assignments: ArrayLike):
+    def get_plane_split_voxel_assignments(self, voxel_frac_coords):
         """
-        Gets the voxel assignments for voxels that sit exactly on a plane. Also
-        assigns any planes that are not assigned
+        Gets the voxel assignments for voxels that are exactly on a plane.
+
+        Args:
+            voxel_frac_coords (ArrayLike):
+                A 2D array representing the fractional coordinates of voxels
+                that haven't been assigned
+
+        Returns:
+            A 2D array of shape (N,M) where N is the length of the input array
+            and M is the number of atoms. A 1 means the atom is assigned this
+            voxel.
         """
-        all_voxel_assignments = all_site_voxel_assignments.copy()
-        unassigned_indices = np.where(all_voxel_assignments == 0)[0]
-        frac_coords_to_find = self.all_voxel_frac_coords[unassigned_indices]
+        logging.info("Calculating assignments for voxels on planes")
+        if self.algorithm == "badelf":
+            structure = self.charge_grid.structure
+        elif self.algorithm == "voronelf":
+            structure = self.electride_structure
         grid = self.charge_grid
         plane_equations = self.all_plane_equations
         number_of_planes_per_atom = self.number_of_planes_per_atom
         unit_cell_permutations_frac = self.unit_cell_permutations_frac
-        if self.algorithm == "badelf":
-            structure = grid.structure
-        elif self.algorithm == "voronelf":
-            structure = self.electride_structure
 
         # Create an array of zeros to map back to
-        zeros_array = np.zeros(len(frac_coords_to_find))
+        zeros_array = np.zeros([len(voxel_frac_coords), len(structure)])
         # Create an array that the results will be added to
-        results_arrays = []
-        for i in range(len(number_of_planes_per_atom) + 1):
-            results_arrays.append(zeros_array.copy())
+        results_array = zeros_array.copy()
 
         # create zeros array for any problems
         # global_indices_to_zero = np.array([])
@@ -451,7 +450,7 @@ class VoxelAssignmentToolkit:
         ):
             # Get the indices where voxels haven't been assigned. Get only these
             # frac coords
-            new_frac_coords = frac_coords_to_find.copy()
+            new_frac_coords = voxel_frac_coords.copy()
             # transform the fractional coords to the next transformation
             x1, y1, z1 = transformation
             new_frac_coords[:, 0] += x1
@@ -503,37 +502,123 @@ class VoxelAssignmentToolkit:
             # get a 1D array representing the voxel indices with the atom index where the
             # voxel is assigned to a site and 0s where they are not
             new_results_arrays = []
-
-            # For each atom, if the voxel is under all of the atoms planes, it
-            # is assigned to this atom. We store this as a 1D numpy array and
-            # append each atoms array to a list
+            # for atom_index, atom_array in enumerate(distances_split_by_atom):
             for atom_index, atom_array in enumerate(distances):
                 voxel_result = np.all(atom_array, axis=1)
-                voxel_result = np.where(voxel_result == True, 1, voxel_result)
+                voxel_result = np.where(
+                    voxel_result == True, atom_index + 1, voxel_result
+                )
                 new_results_arrays.append(voxel_result)
 
-            # Add the assignments back to the full results array for each atom
-            for i, new_array in enumerate(new_results_arrays):
-                indices_where_1 = np.where(new_array == 1)[0]
-                results_arrays[i][indices_where_1] = 1
+            # add results to the results_array
+            results_array += np.column_stack(new_results_arrays)
 
-        # combine all of the atom results arrays into one array
-        results_array = np.column_stack(results_arrays)
-
-        # Now we want to find sites that still weren't assigned and get assignments
-        # for them. These will mostly be voxels with small charges. We simply
-        # assign these using the closest site
-        still_unassigned_rows = np.all(results_array == 0, axis=1)
-        still_unassigned_indices = np.where(still_unassigned_rows)[0]
-        # Loop over the unassigned voxels and assign them to the closest atom.
-        # This could be made more rigorous by checking for more than one site
-        # in case multiple are the same distance, but for now I'm just using one
-        # since it's likely a small amount of voxels
-        for unassigned_voxel_index in still_unassigned_indices:
-            frac_coord = frac_coords_to_find[unassigned_voxel_index]
-            structure_temp = structure.copy()
-            structure_temp.append("He", frac_coord)
-            nearest_site = structure_temp.get_neighbors(structure_temp[-1], 5)[0].index
-            results_array[unassigned_voxel_index, nearest_site] = 1
-
+        results_array = np.where(results_array > 0, 1, 0)
         return results_array
+
+    def get_multi_site_voxel_assignments(self, all_site_voxel_assignments):
+        """
+        Gets the voxel assignments for voxels that are not split by a plane.
+
+        Args:
+            all_site_voxel_assignments (ArrayLike):
+                A 1D array of integers representing the site assignments for
+                each voxel in the grid.
+
+        Returns:
+            A 2D array of fractional site assignments with indices (i,j) where i is the
+            voxel index and j is the site index.
+        """
+        grid = self.charge_grid
+        # Get all site assignments so far
+        all_site_voxel_assignments = all_site_voxel_assignments.copy()
+        # Check that there are any unassigned voxels. If none, return an empty
+        # array
+        if len(np.where(all_site_voxel_assignments == 0)[0]) == 0:
+            return np.array([])
+        # The following lines are a more rigorous method of calculating the voxels
+        # directly on planes. It takes longer so it's commented for now.
+        # Now we want to get assignments for voxels directly on planes
+        # all_frac_coords = grid.all_voxel_frac_coords
+        # unassigned_indices_1d = np.where(all_site_voxel_assignments==0)[0]
+        # unassigned_frac_coords = all_frac_coords[unassigned_indices_1d]
+        # on_plane_assignment = self.get_plane_split_voxel_assignments(unassigned_frac_coords)
+        # Some of the voxels will have been assigned. We want to store the indices of
+        # these so we can zero them out later
+
+        # Get as unassigned grid
+        assignment_array = all_site_voxel_assignments.reshape(grid.shape).astype(
+            np.int16
+        )
+        unassigned_indices = np.column_stack(np.where(assignment_array == 0))
+        # If doing self we don't want assignments to go to electrides so we zero them
+        # here. We need to save them to put them back later though
+        if self.algorithm == "badelf":
+            electride_indices = (
+                np.array(self.electride_structure.indices_from_symbol("He")) + 1
+            )
+            assignment_array = np.where(
+                np.isin(assignment_array, electride_indices), 0, assignment_array
+            )
+            structure = grid.structure
+        elif self.algorithm == "voronelf":
+            structure = self.electride_structure
+        # Get smallest radius for a sphere
+        lattice = grid.structure.lattice
+
+        # Get the starting radius/min_radius and the maximum radius we could possibly
+        # go to
+        nearest_voxels = lattice.abc / grid.shape
+        min_radius = nearest_voxels.max()
+        test_radius = min_radius.copy()
+        max_radius = (np.array(lattice.abc) / 2).max()
+
+        # Get array to assign to
+        # new_assignment_array = on_plane_assignment.copy()
+        new_assignment_array = np.zeros([len(unassigned_indices), len(structure)])
+
+        while len(np.where(np.sum(new_assignment_array, axis=1) == 0)[0]) > 0:
+            if test_radius >= max_radius:
+                raise Exception()
+            # Get the transformations to get a sphere around a voxel
+            sphere_transforms = grid.get_voxels_transformations_to_radius(test_radius)
+            # Get the indices that still don't have an assignment
+            still_unassigned_1d_indices = np.where(
+                np.sum(new_assignment_array, axis=1) == 0
+            )[0]
+            # Get the voxel coords of the unassigned indices
+            unassigned_voxel_coords = unassigned_indices[still_unassigned_1d_indices]
+            possible_assignments = []
+            # for each voxel in the sphere around the voxel, get the site assignment
+            for transform in sphere_transforms:
+                new_indices = unassigned_voxel_coords + transform
+                # wrap around indices
+                new_x = (new_indices[:, 0] % grid.shape[0]).astype(int)
+                new_y = (new_indices[:, 1] % grid.shape[1]).astype(int)
+                new_z = (new_indices[:, 2] % grid.shape[2]).astype(int)
+                site_assignment = assignment_array[new_x, new_y, new_z]
+                possible_assignments.append(site_assignment)
+            possible_assignments = np.column_stack(possible_assignments)
+            # Get the assignments that are not still 0
+            non_zero_indices = np.where(np.sum(possible_assignments, axis=1) > 0)[0]
+            sub_possible_assignments = possible_assignments[non_zero_indices]
+            # iterate over these assignments and count how many there are of each.
+            # Update the corresponding row in the new assignments array with total
+            # count for each site.
+            for i, possible_label in enumerate(sub_possible_assignments):
+                sites, counts = np.unique(possible_label, return_counts=True)
+                for site, count in zip(sites[1:], counts[1:]):
+                    new_assignment_array[
+                        still_unassigned_1d_indices[non_zero_indices[i]], site - 1
+                    ] = count
+            # increase our test radius for the next round
+            test_radius += min_radius
+            # print(test_radius, len(np.where(np.sum(new_assignment_array,axis=1)==0)[0]))
+
+        # We need to rescale the assignment array to check for any that have assignments
+        # much higher than 0.5
+        new_assignment_array_sum = np.tile(
+            np.sum(new_assignment_array, axis=1), (len(new_assignment_array[0]), 1)
+        ).T
+        new_assignment_array = new_assignment_array / new_assignment_array_sum
+        return new_assignment_array

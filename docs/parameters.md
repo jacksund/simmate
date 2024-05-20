@@ -394,24 +394,6 @@ Exclusive to the `restart.simmate.automatic` workflow, this is the original fold
 
 --------------------------
 
-## electride_connection_cutoff
-Exclusive to the badelf workflows in the simmate app. This is the ELF value cutoff to be allowed when determining the dimensionality of an electride. The default is 0, but a good option might be 0.5 which is the normal cutoff for what is considered an electride.
-
-=== "yaml"
-    ``` yaml
-    electride_connection_cutoff: 0.5
-    ```
-=== "toml"
-    ``` toml
-    electride_connection_cutoff = 0.5
-    ```
-=== "python"
-    ``` python
-    electride_connection_cutoff = 0.5
-    ```
-
---------------------------
-
 ## electride_finder_cutoff
 Exclusive to the badelf workflows in the simmate app. This is the minimum ELF value that the algorithm will consider an electride. Any maxima in the ELF below this will not be considered an electride site during the algorithm.
 
@@ -545,7 +527,7 @@ For workflows that generate new structures (and potentially run calculations on 
     ```
 === "toml"
     ``` toml
-    max_structures = 100
+    max_structures = 100 
     ```
 === "python"
     ``` python
@@ -1275,6 +1257,24 @@ For molecular dynamics simulations, this is the temperature to begin the simulat
 
 --------------------------
 
+## threads
+For BadELF algorithms, determines how many threads will be used during pybader calculations. If None this will be automatically set to 90% of available threads.
+
+=== "yaml"
+    ``` yaml
+    threads: 8
+    ```
+=== "toml"
+    ``` toml
+    threads = 8
+    ```
+=== "python"
+    ``` python
+    threads = 8
+    ```
+
+--------------------------
+
 ## time_step
 For molecular dynamics simulations, this is time time between each ionic step (in femtoseconds).
 
@@ -1338,6 +1338,25 @@ Unique to `customized.vasp.user-config`. This is the base workflow to use when u
 
 --------------------------
 
+## write_electride_files
+
+This parameter is unique to badelf workflows. If set to True and ELFCAR and CHGCAR will be written containing only the values where the volume belongs to an electride and zero elsewhere.
+
+=== "yaml"
+    ``` yaml
+    write_electride_files: false
+    ```
+=== "toml"
+    ``` toml
+    write_electride_files = false
+    ```
+=== "python"
+    ``` python
+    write_electride_files = False
+    ```
+
+--------------------------
+
 ## write_summary_files
 
 This parameter determines whether or not to write output files. For some workflows, writing output files can cause excessive load on the database and possibly make the calculation IO bound. In cases such as this, you can set this to `False`.
@@ -1359,5 +1378,3 @@ This parameter determines whether or not to write output files. For some workflo
     Beginners can often ignore this setting. This is typically only relevant
     in a setup where you have many computational resources and have many
     evolutionary searches (>10) running at the same time.
-
---------------------------
