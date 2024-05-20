@@ -146,7 +146,7 @@ DATA = [
 # Specific dependencies needed for optional simmate apps
 BADELF = [
     "mp-pyrho >=0.3.0, <=0.3.0",
-    "pybader >= 0.3.12 <=0.3.12",
+    "pybader >= 0.3.12, <=0.3.12",
 ]
 CLEASE = [
     "clease >=1.0.3, <=1.0.6",  # for cluster expansion calcs
