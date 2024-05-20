@@ -56,6 +56,12 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 **Fixes**
 -->
 
+- no new changes have been merged into the `main` branch yet
+
+--------------------------------------------------------------------------------
+
+## v0.17.0 (2024.05.20)
+
 **Enhancements**
 
 - add api authentication via tokens for private Simmate servers
