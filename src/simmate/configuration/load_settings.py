@@ -219,6 +219,8 @@ class SimmateSettings:
                 # django extras
                 "debug": False,
                 "allowed_hosts": ["127.0.0.1", "localhost"],
+                # sets STATICFILES_STORAGE to ManifestStaticFilesStorage for prod setups
+                "static_file_hashes": False,
                 # BUG-FIX: Django-unicorn ajax requests sometimes come from the server-side
                 # ingress (url for k8s) or a nginx load balancer. To get past a 403 forbidden
                 # result, we need to sometimes specify allowed origins for csrf.
