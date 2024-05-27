@@ -221,6 +221,14 @@ STATICFILES_DIRS = [
     settings.django_directory / "static_files",
 ]
 
+# Ensures users' caches are reset in production when a static file's content changes.
+# Note however that this requires 'collectstatic' to be ran before 'runserver'
+# when DEBUG=False -- otherwise the server will error.
+if settings.website.static_file_hashes:
+    STATICFILES_STORAGE = (
+        "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+    )
+
 # For the dynamically-created structure files, we need to include the static
 # directory this to work during local testing. This is NOT allowed in a
 # production server, so we don't include it when DEBUG is set to False.
