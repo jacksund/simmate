@@ -262,6 +262,13 @@ def load_database_from_json(filename: str = "database_dump.json"):
     )
 
 
+def get_all_table_names() -> list[str]:
+    """
+    Returns a list of all database table names as they appear in the SQL db
+    """
+    return [m._meta.db_table for c in apps.get_app_configs() for m in c.get_models()]
+
+
 # BUG: This function isn't working as intended
 # def graph_database(filename="database_graph.png"):
 #     # using django-extensions, we want to make an image of all the available
