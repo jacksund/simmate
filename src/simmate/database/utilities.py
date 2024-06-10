@@ -262,6 +262,47 @@ def load_database_from_json(filename: str = "database_dump.json"):
     )
 
 
+def get_all_table_names() -> list[str]:
+    """
+    Returns a list of all database table names as they appear in the SQL db
+    """
+    return [m._meta.db_table for c in apps.get_app_configs() for m in c.get_models()]
+
+
+def get_all_table_docs(extra_docs: dict = {}, include_empties: bool = True) -> dict:
+    """
+    Returns a diction of all django tables names and their corresponding documentation.
+    This is give as a dictionary where the keys are the SQL table name and values
+    are the details in markdown format.
+    """
+
+    # BUG: This util will miss separate ManyToMany tables
+
+    # TODO: consider adding "if as_text else m.get_table_docs()" for when I'd
+    # like to get things back as a dictionary instead of markdown.
+
+    # For third-party models (such as allauth), there isn't a doc util set up,
+    # so we provide predefined descriptions here.
+    extra_docs_defaults = {}
+    extra_docs.update(extra_docs_defaults)
+
+    all_docs = {}
+    for model in apps.get_models():
+        table_name = model._meta.db_table
+
+        if table_name in extra_docs.keys():
+            all_docs[table_name] = extra_docs[table_name]
+
+        elif not hasattr(model, "get_table_docs"):
+            if include_empties:
+                all_docs[table_name] = "( no docs available for this table )"
+
+        else:
+            all_docs[table_name] = model.show_table_docs(print_out=False)
+
+    return all_docs
+
+
 # BUG: This function isn't working as intended
 # def graph_database(filename="database_graph.png"):
 #     # using django-extensions, we want to make an image of all the available
