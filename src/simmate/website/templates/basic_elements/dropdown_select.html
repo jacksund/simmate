@@ -21,7 +21,7 @@
             <option value="NONE">Choose one...</option>
         {% endif %}
         {% for option in options %}
-            {% if option.0 != current_value and option.0 != first_value %}
+            {% if option.0 != initial_value and option.0 != first_value %}
                 <option value="{{ option.0 }}">{{ option.1 }}</option>
             {% endif %}
         {% endfor %}
