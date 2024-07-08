@@ -16,7 +16,6 @@ import textwrap
 import urllib
 import warnings
 from functools import cache
-from inspect import signature
 from pathlib import Path
 
 import pandas
@@ -24,7 +23,7 @@ import yaml
 from django.db import models  # see comment below
 from django.db import models as table_column
 from django.forms.models import model_to_dict
-from django.http import JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.module_loading import import_string
@@ -1351,7 +1350,6 @@ class DatabaseTable(models.Model):
             exclude=exclude,
         )
 
-    @classmethod
     @property
     def to_json_response(self) -> JsonResponse:
         """
@@ -1371,14 +1369,107 @@ class DatabaseTable(models.Model):
 
     # MULTI OBJECT APIs
 
-    # TODO: grab default args dynamically by inspecting all methods that start
-    # with `filter_`
-    # filter_methods = []
-    # filter_methods_args: str = []
-    # hasattr(cls, filter_name, "filter_{filter_name}")
+    @classmethod
+    @property
+    @cache
+    def filter_methods(cls) -> list[str]:
+        excluded_methods = [
+            "filter_from_config",
+            "filter_from_request",
+            "filter_methods",
+            "filter_methods_extra_args",
+        ]
+        return [
+            method
+            for method in dir(cls)
+            if method.startswith("filter_") and method not in excluded_methods
+        ]
+        # BUG: Inspect module seems to crash due to the @property dec
+        # return [
+        #     method[0]
+        #     for method in inspect.getmembers(cls, inspect.isfunction)
+        #     if method[0].startswith("filter_") and method[0] not in excluded_methods
+        # ]
 
     @classmethod
-    def filter_from_url(
+    @property
+    def filter_methods_extra_args(cls) -> list[str]:
+        column_names = cls.get_column_names()
+        extra_args = []
+        for method in cls.filter_methods:
+            sig = inspect.signature(getattr(cls, method))
+            for parameter in list(sig.parameters):
+                if parameter not in column_names and parameter not in [
+                    "self",
+                    "initial_queryset",
+                    "kwargs",
+                ]:
+                    extra_args.append(parameter)
+        return extra_args
+
+    @classmethod
+    def filter_from_request(cls, request: HttpRequest):
+        # In the past, this was handled by the django-filter package, but this
+        # became too verbose and tedious. You'd need to list out "gt", "gte", and
+        # any other field lookups allowed for EACH field... In practice, we want
+        # to just allow anything and trust the user follows the docs correctly.
+        # Worst case, the API call fails, which is no big deal.
+
+        # note, if a key is defined more than once, it will only use the last def
+        url_get_args = request.GET.dict()
+
+        def deserialize_value(value: str) -> any:
+            """
+            Converts the URL GET parameters to the correct data type
+            """
+            if value.startswith('"') and value.endswith('"'):
+                return value.strip('"')
+            elif value.startswith("'") and value.endswith("'"):
+                return value.strip("'")
+            elif value.lower() in ["true", "false"]:
+                return True if value.lower() == "true" else False
+            elif value.isnumeric():
+                return int(value)
+            elif value.replace(".", "").isnumeric():
+                return float(value)
+            else:
+                raise Exception(f"Unknown URL value type: {value}")
+
+        for key in url_get_args.keys():
+
+            # The "__in" field lookup is a special case where we need a list of values.
+            # Our go-to delimiter is ";", but there may be cases where this causes
+            # a bug -- specifically when an __in string should contain a ";"
+            if key.endswith("__in"):
+                url_get_args[key] = [
+                    deserialize_value(value) for value in url_get_args[key].split(";")
+                ]
+            # For ranges, we have a format of (123,321)
+            elif key.endswith("__range"):
+                values = url_get_args[key].split(",")
+                url_get_args[key] = (
+                    deserialize_value(values[0].strip("(")),
+                    deserialize_value(values[1].strip(")")),
+                )
+            # otherwise its a normal key-value pair
+            else:
+                url_get_args[key] = deserialize_value(url_get_args[key])
+
+        # we now break out the common filter kwargs so that we can use filter_from_config.
+        # We only pass these values if they are present as to avoid overwriting
+        # the defaults set elsewhere
+        filter_kwargs = {
+            key: url_get_args.pop(key)
+            for key in ["order_by", "limit", "page", "page_size"]
+            if key in url_get_args.keys()
+        }
+        return cls.filter_from_config(
+            filters=url_get_args,
+            **filter_kwargs,
+        )
+
+    @classmethod
+    def filter_from_config(
         cls,
         filters: dict,
         order_by: list[str] = ["id"],
@@ -1389,11 +1480,6 @@ class DatabaseTable(models.Model):
         """
         Converts URL kwargs into a queryset.
         """
-        # In the past, this was handled by the django-filter package, but this
-        # became too verbose and tedious. You'd need to list out "gt", "gte", and
-        # any other field lookups allowed for EACH field... In practice, we want
-        # to just allow anything and trust the user follows the docs correctly.
-        # Worst case, the API call fails, which is no big deal.
 
         # Some tables have "advanced" filtering logic. These want us to call
         # a filtering method, rather than just passing the kwarg to `objects.filter()`.
@@ -1405,8 +1491,6 @@ class DatabaseTable(models.Model):
         filter_methods = cls.filter_methods
         filter_methods_args = cls.filter_methods_args
 
-        # TODO: make sure all filters/filter_methods_args are the correct dtype
-
         queryset = cls.objects
         for filter_name in filters:
 
@@ -1415,7 +1499,7 @@ class DatabaseTable(models.Model):
                 method = getattr(cls, "filter_{filter_name}")
                 method_kwargs = {
                     arg: filters.get(arg)
-                    for arg in list(signature(method).parameters.keys())
+                    for arg in list(inspect.signature(method).parameters.keys())
                     if arg in filters.keys()
                 }
                 queryset = method(
