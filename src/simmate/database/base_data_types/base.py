@@ -20,6 +20,7 @@ from pathlib import Path
 
 import pandas
 import yaml
+from django.core.paginator import Page, Paginator
 from django.db import models  # see comment below
 from django.db import models as table_column
 from django.forms.models import model_to_dict
@@ -1373,6 +1374,9 @@ class DatabaseTable(models.Model):
     @property
     @cache
     def filter_methods(cls) -> list[str]:
+        """
+        All filtering methods that can be used to narrow a queryset
+        """
         excluded_methods = [
             "filter_from_config",
             "filter_from_request",
@@ -1383,17 +1387,15 @@ class DatabaseTable(models.Model):
             method
             for method in dir(cls)
             if method.startswith("filter_") and method not in excluded_methods
-        ]
-        # BUG: Inspect module seems to crash due to the @property dec
-        # return [
-        #     method[0]
-        #     for method in inspect.getmembers(cls, inspect.isfunction)
-        #     if method[0].startswith("filter_") and method[0] not in excluded_methods
-        # ]
+        ]  # dir() looks to be faster than inspect.getmembers
 
     @classmethod
     @property
+    @cache
     def filter_methods_extra_args(cls) -> list[str]:
+        """
+        Any unique parameters that are used as kwargs in `filter_methods`
+        """
         column_names = cls.get_column_names()
         extra_args = []
         for method in cls.filter_methods:
@@ -1408,7 +1410,15 @@ class DatabaseTable(models.Model):
         return extra_args
 
     @classmethod
-    def filter_from_request(cls, request: HttpRequest):
+    def filter_from_request(
+        cls,
+        request: HttpRequest,
+        paginate: bool = True,
+    ) -> SearchResults | Page:
+        """
+        Generates a filtered queryset from a django HttpRequest using the
+        request's GET parameters
+        """
         # In the past, this was handled by the django-filter package, but this
         # became too verbose and tedious. You'd need to list out "gt", "gte", and
         # any other field lookups allowed for EACH field... In practice, we want
@@ -1433,7 +1443,10 @@ class DatabaseTable(models.Model):
             elif value.replace(".", "").isnumeric():
                 return float(value)
             else:
-                raise Exception(f"Unknown URL value type: {value}")
+                # just return the string as-is for our last-ditch effort
+                return str(value)
+                # Raising an error via f-string might be an injection security risk
+                # raise Exception(f"Unknown URL value type: {value}")
 
         for key in url_get_args.keys():
 
@@ -1466,6 +1479,7 @@ class DatabaseTable(models.Model):
         return cls.filter_from_config(
             filters=url_get_args,
             **filter_kwargs,
+            paginate=paginate,
         )
 
     @classmethod
@@ -1476,7 +1490,8 @@ class DatabaseTable(models.Model):
         limit: int = 10_000,
         page: int = 1,
         page_size: int = 12,
-    ):
+        paginate: bool = True,
+    ) -> SearchResults | Page:
         """
         Converts URL kwargs into a queryset.
         """
@@ -1489,7 +1504,7 @@ class DatabaseTable(models.Model):
         # "include_subsystems".
         basic_filters = {}
         filter_methods = cls.filter_methods
-        filter_methods_args = cls.filter_methods_args
+        filter_methods_args = cls.filter_methods_extra_args
 
         queryset = cls.objects
         for filter_name in filters:
@@ -1521,10 +1536,13 @@ class DatabaseTable(models.Model):
         # and add in extras
         queryset = queryset.order_by(*order_by)[:limit]
 
-        # TODO: paginate
-        # TODO: grab desired page
-
-        return queryset
+        # if requested, split the results into pages and grab the requested one
+        if paginate:
+            paginator = Paginator(object_list=queryset, per_page=page_size)
+            page_obj = paginator.get_page(number=page)
+            return page_obj
+        else:
+            return queryset
 
     # DEPRECIATED
     @classmethod
