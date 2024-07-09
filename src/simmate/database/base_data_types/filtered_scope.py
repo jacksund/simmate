@@ -58,9 +58,9 @@ class FilteredScope(DatabaseTable):
     Model name that this scope's config should be applied to. For some subclasses,
     this is a constant / assumed.
     """
-    
+
     # -------------------------------------------------------------------------
-    
+
     # While a python programmer can write out the scope_config on their own,
     # a web UI needs more guidance. These configs below help populate forms in
     # a human-readbale way & also make sure the available filters make sense
