@@ -1409,22 +1409,8 @@ class DatabaseTable(models.Model):
                     extra_args.append(parameter)
         return extra_args
 
-    @classmethod
-    def filter_from_request(
-        cls,
-        request: HttpRequest,
-        paginate: bool = True,
-    ) -> SearchResults | Page:
-        """
-        Generates a filtered queryset from a django HttpRequest using the
-        request's GET parameters
-        """
-        # In the past, this was handled by the django-filter package, but this
-        # became too verbose and tedious. You'd need to list out "gt", "gte", and
-        # any other field lookups allowed for EACH field... In practice, we want
-        # to just allow anything and trust the user follows the docs correctly.
-        # Worst case, the API call fails, which is no big deal.
-
+    @staticmethod
+    def _parse_request_get(request: HttpRequest) -> dict:
         # note, if a key is defined more than once, it will only use the last def
         url_get_args = request.GET.dict()
 
@@ -1471,14 +1457,35 @@ class DatabaseTable(models.Model):
         # we now break out the common filter kwargs so that we can use filter_from_config.
         # We only pass these values if they are present as to avoid overwriting
         # the defaults set elsewhere
-        filter_kwargs = {
+        extra_kwargs = {
             key: url_get_args.pop(key)
             for key in ["order_by", "limit", "page", "page_size"]
             if key in url_get_args.keys()
         }
+
+        return {
+            "filters": url_get_args,
+            **extra_kwargs,
+        }
+
+    @classmethod
+    def filter_from_request(
+        cls,
+        request: HttpRequest,
+        paginate: bool = True,
+    ) -> SearchResults | Page:
+        """
+        Generates a filtered queryset from a django HttpRequest using the
+        request's GET parameters
+        """
+        # In the past, this was handled by the django-filter package, but this
+        # became too verbose and tedious. You'd need to list out "gt", "gte", and
+        # any other field lookups allowed for EACH field... In practice, we want
+        # to just allow anything and trust the user follows the docs correctly.
+        # Worst case, the API call fails, which is no big deal.
+        get_kwargs = cls._parse_request_get(request)
         return cls.filter_from_config(
-            filters=url_get_args,
-            **filter_kwargs,
+            **get_kwargs,
             paginate=paginate,
         )
 

@@ -6,108 +6,21 @@
 {% block body %}
     {# Table name, description, quick links #}
     <div class="row">
-        {# Search Form #}
+        {# Buttons & Sidebars #}
         <div class="col-8">
-            {% block sidebarfilters %}
-                {# Start of Sidebar-right #}
-                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilter">
-                    <div class="offcanvas-header bg-dark text-light">
-                        <h5>Basic Filters</h5>
-                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-                    </div>
-                    <div class="offcanvas-body">
-                        <div>
-                            Some text as placeholder. In real life you can have the elements you have chosen. Like, text,
-                            images, lists, etc. 123
-                        </div>
-                        <h5 class="mt-3">List</h5>
-                        <ul class="ps-3">
-                            <li class="">Nemo enim ipsam voluptatem quia aspernatur</li>
-                            <li class="">Neque porro quisquam est, qui dolorem</li>
-                            <li class="">Quis autem vel eum iure qui in ea</li>
-                        </ul>
-                        {# Search Forms #}
-                        <div class="accordion custom-accordion" id="accordionFilters">
-                            {# Full API Search Form #}
-                            <form method="get" enctype="multipart/form-data">
-                                {# Exact ID #}
-                                <div class="card mb-0">
-                                    <div class="card-header" id="headingExactID">
-                                        <h5>
-                                            <a class="custom-accordion-title d-block"
-                                                data-bs-toggle="collapse"
-                                                href="#collapseExactID"
-                                                aria-expanded="true"
-                                                aria-controls="collapseExactID">
-                                                Entry ID
-                                                <i class="mdi mdi-chevron-down accordion-arrow"></i>
-                                            </a>
-                                        </h5>
-                                    </div>
-                                    <div id="collapseExactID"
-                                            class="collapse"
-                                            aria-labelledby="headingExactID"
-                                            data-bs-parent="#accordionExample">
-                                        <div class="card-body">{{ form.id }}</div>
-                                    </div>
-                                </div>
-                                {# Date / Time #}
-                                <div class="card mb-0">
-                                    <div class="card-header" id="headingDateTime">
-                                        <h5>
-                                            <a class="custom-accordion-title d-block"
-                                                data-bs-toggle="collapse"
-                                                href="#collapseDateTime"
-                                                aria-expanded="true"
-                                                aria-controls="collapseDateTime">
-                                                Date / Time
-                                                <i class="mdi mdi-chevron-down accordion-arrow"></i>
-                                            </a>
-                                        </h5>
-                                    </div>
-                                    <div id="collapseDateTime"
-                                            class="collapse"
-                                            aria-labelledby="headingDateTime"
-                                            data-bs-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="alert alert-danger" role="alert">
-                                                <i class="mdi mdi-alert mx-2"></i>
-                                                calendar-based selection tool is coming soon
-                                            </div>
-                                            {{ form.created_at__range }}
-                                            {{ form.updated_at__range }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="p-3 text-center">
-                                    {# Search button #}
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="mdi mdi-magnify"></i>&nbsp;&nbsp;Update Search
-                                    </button>
-                                    {# Button to remove API arguments #}
-                                    <a href="." class="btn btn-secondary m-2">
-                                        <i class="mdi mdi-refresh"></i>&nbsp;&nbsp;Reset Filters
-                                    </a>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                {# Toggle sidebar #}
-                <button class="btn btn-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilter"><i class="mdi mdi-filter py-1"></i>&nbsp;&nbsp;Filter</button>
+            {# Filter Sidebar #}
+            {% block filters %}
+                {% include "data_explorer_dev/table_filters.html" %}
             {% endblock %}
-            {% block sidebarupdater %}
-                {# Start of Sidebar-right #}
+            {% block updater %}
+                {# Update Sidebar #}
                 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasUpdater">
                     <div class="offcanvas-header bg-dark text-light">
                         <h5>Update Selected</h5>
                         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
                     </div>
                     <div class="offcanvas-body">
-                        <div>
-                            Some text as placeholder. In real life you can have the elements you have chosen. Like, text,
-                            images, lists, etc. 123
-                        </div>
+                        <div> Only selected entries will be updated.</div>
                         <h5 class="mt-3">List</h5>
                         <ul class="ps-3">
                             <li class="">Nemo enim ipsam voluptatem quia aspernatur</li>
@@ -116,81 +29,6 @@
                         </ul>
                     </div>
                 </div>
-                {# Start of Sidebar-right #}
-                <div id="rightendbar" class="end-bar">
-
-                    {# sidebar content #}
-                    <div class="rightbar-content h-100" data-simplebar>
-                        <div>
-                            {# Search Forms #}
-                            <div class="accordion custom-accordion" id="accordionFilters">
-                                {# Full API Search Form #}
-                                <form method="get" enctype="multipart/form-data">
-                                    {# Exact ID #}
-                                    <div class="card mb-0">
-                                        <div class="card-header" id="headingExactID">
-                                            <h5>
-                                                <a class="custom-accordion-title d-block"
-                                                data-bs-toggle="collapse"
-                                                href="#collapseExactID"
-                                                aria-expanded="true"
-                                                aria-controls="collapseExactID">
-                                                    Entry ID
-                                                    <i class="mdi mdi-chevron-down accordion-arrow"></i>
-                                                </a>
-                                            </h5>
-                                        </div>
-                                        <div id="collapseExactID"
-                                            class="collapse"
-                                            aria-labelledby="headingExactID"
-                                            data-bs-parent="#accordionExample">
-                                            <div class="card-body">{{ form.id }}</div>
-                                        </div>
-                                    </div>
-                                    {# Date / Time #}
-                                    <div class="card mb-0">
-                                        <div class="card-header" id="headingDateTime">
-                                            <h5>
-                                                <a class="custom-accordion-title d-block"
-                                                data-bs-toggle="collapse"
-                                                href="#collapseDateTime"
-                                                aria-expanded="true"
-                                                aria-controls="collapseDateTime">
-                                                    Date / Time
-                                                    <i class="mdi mdi-chevron-down accordion-arrow"></i>
-                                                </a>
-                                            </h5>
-                                        </div>
-                                        <div id="collapseDateTime"
-                                            class="collapse"
-                                            aria-labelledby="headingDateTime"
-                                            data-bs-parent="#accordionExample">
-                                            <div class="card-body">
-                                                <div class="alert alert-danger" role="alert">
-                                                    <i class="mdi mdi-alert mx-2"></i>
-                                                    calendar-based selection tool is coming soon
-                                                </div>
-                                                {{ form.created_at__range }}
-                                                {{ form.updated_at__range }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="p-3 text-center">
-                                        {# Search button #}
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="mdi mdi-magnify"></i>&nbsp;&nbsp;Update Search
-                                        </button>
-                                        {# Button to remove API arguments #}
-                                        <a href="." class="btn btn-secondary m-2">
-                                            <i class="mdi mdi-refresh"></i>&nbsp;&nbsp;Reset Filters
-                                        </a>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {# Toggle sidebar #}
                 <button class="btn btn-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUpdater"><i class="mdi mdi-pencil py-1"></i>&nbsp;&nbsp;Update</button>
             {% endblock %}
             {# Extra Buttons/Links #}
@@ -203,11 +41,11 @@
                target="_blank"
                class="btn btn-outline-dark">Python</a>
         </div>
-        {# Extra links #}
+        {# Table Description #}
         <div class="col-4">
             <p class="lead text-muted">{{ table.source_long }}</p>
         </div>
     </div>
     {# Search Results #}
-    {% include "data_explorer/search_results.html" %}
+    {% include "data_explorer_dev/search_results.html" %}
 {% endblock %}
