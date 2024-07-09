@@ -1,20 +1,89 @@
 <div>
-    <form unicorn:submit.prevent="add">
-        <input type="text" unicorn:model.lazy="task" placeholder="New task" id="task"></input>
-    </form>
-    <button unicorn:click="add">Add</button>
-
-    <p>
-        {% if tasks %}
-        <ul>
-            {% for task in tasks %}
-            <li>{{ task }}</li>
-            {% endfor %}
-        </ul>
-
-        <button unicorn:click="$reset">Clear all tasks</button>
-        {% else %}
-        No tasks 🎉
-        {% endif %}
-    </p>
+    <div class="row">
+        <div class="col-sm">
+            <div class="my-2">
+                <table class="table table-centered mb-0">
+                    <thead>
+                        <tr>
+                            <th>
+                                <small>Column</small>
+                            </th>
+                            <th>
+                                <small>Metric</small>
+                            </th>
+                            <th>
+                                <small>Value(s)</small>
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in filter %}
+                            <tr>
+                                <td>
+                                    {% with id=forloop.counter0|stringformat:"i"|add:"sm_entry" %}
+                                        <div unicorn:ignore id="hacky-ignore-{{ id }}">{% include "rdkit/molecule_canvas.html" %}</div>
+                                    {% endwith %}
+                                    {{ entry.compound.label }}
+                                </td>
+                                <td>
+                                    {% if entry.is_limiting %}<i class="mdi mdi-check-circle"></i>{% endif %}
+                                </td>
+                                <td>{{ entry.amount }}</td>
+                                <td>
+                                    {{ entry.amount_units }}
+                                    {% if entry.amount_units == "equiv" and entry.equivalents_reference != "starting_material" %}
+                                        vs. {{ entry.equivalents_reference }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button unicorn:click="remove_starting_material({{ forloop.counter0 }})"
+                                            type="button"
+                                            class="btn btn-danger btn-sm">
+                                        <i class="mdi mdi-minus"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {# Add New Filter #}
+                        <tr>
+                            {# column path #}
+                            <td>
+                                {% include "basic_elements/dropdown_select.html" with name="new_sm_amount_units"  initial_value=new_sm_amount_units options=amount_units_options %}
+                            </td>
+                            {# metric #}
+                            <td>
+                                {% include "basic_elements/dropdown_select.html" with name="new_sm_amount_units"  initial_value=new_sm_amount_units options=amount_units_options %}
+                            </td>
+                            {# value #}
+                            <td>
+                                <input unicorn:model.defer="new_sm_amount"
+                                        type="number"
+                                        id="new_sm_amount"
+                                        class="form-control"
+                                        placeholder="0.123">
+                            </td>
+                            {# Add button #}
+                            <td>
+                                <div class="btn-group mb-2">
+                                    {# refresh button #}
+                                    <button unicorn:click="reset_new_starting_material"
+                                            type="button"
+                                            class="btn btn-warning btn-sm">
+                                        <i class="mdi mdi-refresh"></i>
+                                    </button>
+                                    {# add button #}
+                                    <button unicorn:click="add_new_starting_material"
+                                            type="button"
+                                            class="btn btn-success btn-sm">
+                                        <i class="mdi mdi-plus"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
