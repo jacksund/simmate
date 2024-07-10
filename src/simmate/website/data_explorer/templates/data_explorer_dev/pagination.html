@@ -1,0 +1,41 @@
+<ul class="pagination pagination-rounded">
+    {# previous button #}
+    {% if pagination_urls.previous is not None %}
+        <li class="paginate_button page-item previous"
+            id="basic-datatable_previous">
+            <a href="{{ pagination_urls.previous }}"
+               class="page-link"><i class="mdi mdi-chevron-left"></i></a>
+        </li>
+    {% else %}
+        <li class="paginate_button page-item previous disabled"
+            id="basic-datatable_previous">
+            <a href="#"
+               class="page-link">
+                <i class="mdi mdi-chevron-left"></i>
+            </a>
+        </li>
+    {% endif %}
+    {# numbered and elided buttons #}
+    {% for dispaly_value, page_link in pagination_urls.elided_pages %}
+        <li class="paginate_button page-item {% if dispaly_value == "..." %}disabled{% elif dispaly_value == page.number %}active{% endif %}">
+            <a href="{{ page_link }}"
+            class="page-link">{{ dispaly_value }}</a>
+        </li>
+    {% endfor %}
+    {# next button #}
+    {% if pagination_urls.next is not None %}
+        <li class="paginate_button page-item next" id="basic-datatable_next">
+            <a href="{{ pagination_urls.next }}"
+            class="page-link">
+                <i class="mdi mdi-chevron-right"></i></a>
+        </li>
+    {% else %}
+        <li class="paginate_button page-item next disabled"
+            id="basic-datatable_next">
+            <a href="#"
+                class="page-link">
+                <i class="mdi mdi-chevron-right"></i></a>
+            </a>
+        </li>
+    {% endif %}
+</ul>
