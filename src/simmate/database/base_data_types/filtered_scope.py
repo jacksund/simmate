@@ -68,7 +68,7 @@ class FilteredScope(DatabaseTable):
 
     # see https://docs.djangoproject.com/en/5.0/ref/models/querysets/#field-lookups
     field_lookups_config = {
-        "exact": "is exactly (aka equals)",
+        "exact": "is exactly",  # we just omit the lookup and use =
         "iexact": "is exactly (case insensitive)",
         "contains": "contains the text",
         "icontains": "contains the text (case insensitive)",
@@ -82,7 +82,11 @@ class FilteredScope(DatabaseTable):
         "endswith": "ends with the text",
         "iendswith": "ends with the text (case insensitive)",
         "range": "is within the range",
-        # year/month/day/etc need a 2nd modifier like exact or gte
+        "isnull": "is empty (null)",
+        "regex": "matches the regular expression",
+        "iregex": "matches the regular expression (case insensitive)",
+        # !!! year/month/day/etc need a 2nd modifier like exact or gte
+        # I might want to treat these as if they were a OneToOneField...
         "date": "has the datetime",
         "year": "where the year is",
         "month": "where the month is",
@@ -94,15 +98,24 @@ class FilteredScope(DatabaseTable):
         "hour": "where the hour is",
         "minute": "where the minute is",
         "second": "where the second is",
-        # iso_year + iso_week_day !!! -> not sure how this differs from year. I think its for
-        # cross-timezone comparisons
-        "isnull": "is empty (null)",
-        "regex": "matches the following regular expression",
-        "iregex": "matches the following regular expression (case insensitive)",
+        # iso_year + iso_week_day -> for cross-timezone comparisons...?
     }
+
     lookup_type_defaults = {
-        # TODO: change keys to classes (e.g. table_column.FloatField)
-        "FloatField": [
+        table_column.BooleanField: [
+            "exact",
+            "isnull",
+        ],
+        table_column.AutoField: [
+            "exact",
+            "in",
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "range",
+        ],
+        table_column.FloatField: [
             # !!! warning, no rounding done
             "exact",
             "in",
@@ -113,7 +126,7 @@ class FilteredScope(DatabaseTable):
             "range",
             "isnull",
         ],
-        "IntegerField": [
+        table_column.IntegerField: [
             "exact",
             "in",
             "gt",
@@ -123,17 +136,38 @@ class FilteredScope(DatabaseTable):
             "range",
             "isnull",
         ],
-        "TextField": [
+        table_column.CharField: [
             "exact",
-            "iexact",
+            # "iexact",
             "contains",
-            "icontains",
+            # "icontains",
             "startswith",
-            "istartswith",
+            # "istartswith",
             "endswith",
-            "iendswitch",
+            # "iendswith",
             "regex",
-            "iregex",
+            # "iregex",
+            "isnull",
+        ],
+        table_column.TextField: [
+            "exact",
+            # "iexact",
+            "contains",
+            # "icontains",
+            "startswith",
+            # "istartswith",
+            "endswith",
+            # "iendswith",
+            "regex",
+            # "iregex",
             "isnull",
         ],
     }
+
+    @classmethod
+    def get_field_lookup_choices(
+        cls,
+        lookup_type: str,
+        include_case_insensitive: bool = True,
+    ) -> tuple:
+        pass

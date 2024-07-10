@@ -5,13 +5,13 @@
                 <table class="table table-centered mb-0">
                     <thead>
                         <tr>
-                            <th>
+                            <th style="min-width:200px;">
                                 <small>Column</small>
                             </th>
-                            <th>
+                            <th style="min-width:200px;">
                                 <small>Metric</small>
                             </th>
-                            <th>
+                            <th style="min-width:200px;">
                                 <small>Value(s)</small>
                             </th>
                             <th></th>
@@ -49,11 +49,22 @@
                         <tr>
                             {# column path #}
                             <td>
-                                {% include "basic_elements/dropdown_select.html" with name="new_sm_amount_units"  initial_value=new_sm_amount_units options=amount_units_options %}
+                                {% if column_parents %}
+                                <ul>
+                                    {% for item in column_parents %}
+                                        <li>item</li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                                {% if column_options %}
+                                    {% include "basic_elements/dropdown_select.html" with name="column_selected" initial_value=column_selected options=column_options options_hash=column_options_hash %}
+                                {% endif %}
                             </td>
                             {# metric #}
                             <td>
-                                {% include "basic_elements/dropdown_select.html" with name="new_sm_amount_units"  initial_value=new_sm_amount_units options=amount_units_options %}
+                                {% if metric_options %}
+                                    {% include "basic_elements/dropdown_select.html" with name="metric_selected" initial_value=metric_selected options=metric_options options_hash=metric_options_hash %}
+                                {% endif %}
                             </td>
                             {# value #}
                             <td>
