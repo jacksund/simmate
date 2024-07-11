@@ -1,3 +1,4 @@
+from django.shortcuts import redirect
 from django_unicorn.components import UnicornView
 
 from simmate.configuration import settings
@@ -28,14 +29,23 @@ class ApiFilterView(UnicornView):
     #         # "required_fields",
     #     )
 
+    parent_url = None
+
     def mount(self):
+
+        # BUG: filters carry over across refreshes...?
+        self.filters = []
+
+        # needed for resubmission
+        self.parent_url = self.request.path
+
         # load table
         table = self._determine_table()
         self.table_name = table.table_name
 
         # load url args + starting filters
         url_config = table._parse_request_get(self.request)
-        self.filters = [f for f in url_config["filters"].items()]
+        self._load_filters(url_config.get("filters", {}))
 
         # populate rest of form starting fields
         self._set_column_options()
@@ -66,6 +76,11 @@ class ApiFilterView(UnicornView):
     column_parents = []
     column_options = []
     column_options_hash = None
+
+    def _get_column_type(self):
+        column = self._get_column()
+        column_type = type(column)
+        return column_type
 
     def _get_column(self):
         table = self._get_column_table()
@@ -101,16 +116,20 @@ class ApiFilterView(UnicornView):
         # reset downstream options
         self.column_selected = None
         self.reset_metric()
+        self.call("refresh_select2")
 
     def set_column_selected(self, column_selected):
 
         self.column_selected = column_selected
 
-        column = self._get_column()
-        column_type = type(column)
+        column_type = self._get_column_type()
 
-        # If we have a relation, the user must select a column on the related table
-        if column_type in [
+        if column_type in [table_column.DateField, table_column.DateTimeField]:
+            pass  # TODO
+
+        # If we have a relation, the user must select a column on the related table.
+        # Note, we removed and *_to_many relations in _set_column_options
+        elif column_type in [
             table_column.ForeignKey,
             table_column.OneToOneField,
             table_column.OneToOneRel,  # reverse for OneToOneField
@@ -120,10 +139,9 @@ class ApiFilterView(UnicornView):
 
         # If we have a column, we can move on to selecting the metric
         else:
-            metric_options = FilteredScope.lookup_type_defaults.get(column_type, None)
-
-            if not metric_options:
-                raise Exception(f"No options for {column_type}")
+            metric_options = list(
+                FilteredScope.lookup_type_defaults[column_type].keys()
+            )
 
             self.metric_selected = None
             self.metric_options = [
@@ -131,7 +149,15 @@ class ApiFilterView(UnicornView):
             ]
             self.metric_options_hash = hash_options(self.metric_options)
 
+        self.reset_filter_value()
         self.call("refresh_select2")
+
+    def _reset_column_selection(self):
+        self.column_selected = None
+        self.column_parents = []
+        self.column_options = []
+        self.column_options_hash = None
+        self._set_column_options()
 
     # -------------------------------------------------------------------------
 
@@ -142,26 +168,121 @@ class ApiFilterView(UnicornView):
     def set_metric_selected(self, metric_selected):
         self.metric_selected = metric_selected
 
+        self.reset_filter_value()
+
+        column_type = self._get_column_type()
+        self.filter_value_type = FilteredScope.lookup_type_defaults[column_type][
+            self.metric_selected
+        ]
+
     def reset_metric(self):
         self.metric_selected = None
         self.metric_options = []
         self.metric_options_hash = None
+        self.reset_filter_value()
 
     # -------------------------------------------------------------------------
 
-    # Value(s)
+    # Filter Value(s)
 
-    value = None  # data type depends on value_type
-    value_hint = None  # e.g. "1, 2, 3 (separate with commas)"
-    value_type = None  # e.g. "number" or "text"
+    filter_value = None  # data type depends on value_type
+    filter_value_type = None  # e.g. "number" or "text"
+
+    def reset_filter_value(self):
+        self.filter_value = None
+        self.filter_value_type = None
 
     # -------------------------------------------------------------------------
 
     filters = []
 
-    def add(self):
-        self.tasks.append(self.task)
-        self.task = ""
+    def reset_new_filter(self):  # just an alias
+        self._reset_column_selection()  # will cascade through metric/filter_value
+
+    def add_new_filter(self):
+
+        column_name = (
+            "__".join(self.column_parents) + "__" + self.column_selected
+            if self.column_parents
+            else self.column_selected
+        )
+
+        metric = self.metric_selected
+
+        # Convert value to proper python data type(s)
+        value = self.filter_value
+        vtype = self.filter_value_type
+        if vtype == "number":
+            filter_value = float(value) if "." in value else int(value)
+
+        elif vtype in ["number-range", "number-list"]:
+            filter_value = [float(v) if "." in v else int(v) for v in value.split(",")]
+
+        elif vtype == "text":
+            filter_value = str(value)
+
+        elif vtype == "text-list":
+            # BUG: we assume all of these are numeric for now
+            filter_value = [float(v) if "." in v else int(v) for v in value.split(",")]
+
+        elif vtype == "checkbox-isnull":
+            filter_value = self.filter_value
+
+        elif vtype == "checkbox-bool":
+            filter_value = self.filter_value
+
+        else:
+            raise Exception(f"Unknown filter value type {self.filter_value_type}")
+
+        new_filter = {
+            "column_name": column_name,
+            "metric": metric,
+            "metric_display": FilteredScope.field_lookups_config[metric],
+            "value": filter_value,
+        }
+        self.filters.append(new_filter)
+
+        self.reset_new_filter()
+
+    def remove_filter(self, remove_idx):
+        self.filters.pop(remove_idx)
+
+    def _load_filters(self, filters: dict):
+        for entry, filter_value in filters.items():
+            sections = entry.split("__")
+
+            if len(sections) == 1:
+                column_name = sections[0]
+                metric = "exact"
+            elif sections[-1] in FilteredScope.field_lookups_config.keys():
+                column_name = "__".join(sections[:-1])
+                metric = sections[:-1]
+            else:
+                column_name = "__".join(sections)
+                metric = "exact"
+
+            new_filter = {
+                "column_name": column_name,
+                "metric": metric,
+                "metric_display": FilteredScope.field_lookups_config[metric],
+                "value": filter_value,
+            }
+            self.filters.append(new_filter)
+
+    def apply_filters(self):  # send to a new URL
+
+        filters_new = {}
+        for entry in self.filters:
+            key = entry["column_name"]
+            if entry["metric"] != "exact":
+                key += entry["metric"]
+            filters_new[key] = entry["value"]
+        url_get_clause = "?" + "&".join([f"{k}={v}" for k, v in filters_new.items()])
+
+        # Note: page number, page size, limit, etc. are reset on a new filter query
+
+        final_url = self.parent_url + url_get_clause
+        return redirect(final_url)
 
     # -------------------------------------------------------------------------
 

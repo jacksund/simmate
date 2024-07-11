@@ -7,8 +7,7 @@
         <div class="alert alert-primary d-flex align-items-center mt-2">
             <div>
                 <small>
-                To understand what each column is and how it relates to other tables,
-                we recommend keeping the <a href="{% url 'data_explorer:provider-about' table.table_name %}" class="text-dark" target="_blank"><b>Table Info</b></a>
+                We recommend keeping the <a href="{% url 'data_explorer:provider-about' table.table_name %}" class="text-dark" target="_blank"><b>Table Info</b></a>
                 page open in a separate window while you complete this form.
                 </small>
             </div>
@@ -17,17 +16,6 @@
             {% load unicorn %}
             {% csrf_token %}
             {% unicorn 'api-filter' %}
-        </div>
-        {# Buttons #}
-        <div class="p-3 text-center">
-            {# Apply Filters #}
-            <button type="submit" class="btn btn-primary">
-                <i class="mdi mdi-magnify"></i>&nbsp;&nbsp;Search
-            </button>
-            {# Reset Filters #}
-            <a href="." class="btn btn-secondary m-2">
-                <i class="mdi mdi-refresh"></i>&nbsp;&nbsp;Reset Filters
-            </a>
         </div>
     </div>
 </div>

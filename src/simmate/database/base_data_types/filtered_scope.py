@@ -101,67 +101,72 @@ class FilteredScope(DatabaseTable):
         # iso_year + iso_week_day -> for cross-timezone comparisons...?
     }
 
+    # Follows format of {django_field_type: {django_field_lookup: html_input_type}}
+    # See data_explorer/api_filter.html for where html_input_types are used.
     lookup_type_defaults = {
-        table_column.BooleanField: [
-            "exact",
-            "isnull",
-        ],
-        table_column.AutoField: [
-            "exact",
-            "in",
-            "gt",
-            "gte",
-            "lt",
-            "lte",
-            "range",
-        ],
-        table_column.FloatField: [
+        table_column.BooleanField: {
+            "exact": "checkbox-bool",
+            "isnull": "checkbox-isnull",
+        },
+        table_column.AutoField: {
+            "exact": "number",
+            "in": "number-list",
+            "gt": "number",
+            "gte": "number",
+            "lt": "number",
+            "lte": "number",
+            "range": "number-range",
+        },
+        table_column.FloatField: {
             # !!! warning, no rounding done
-            "exact",
-            "in",
-            "gt",
-            "gte",
-            "lt",
-            "lte",
-            "range",
-            "isnull",
-        ],
-        table_column.IntegerField: [
-            "exact",
-            "in",
-            "gt",
-            "gte",
-            "lt",
-            "lte",
-            "range",
-            "isnull",
-        ],
-        table_column.CharField: [
-            "exact",
+            "exact": "number",
+            "in": "number-list",
+            "gt": "number",
+            "gte": "number",
+            "lt": "number",
+            "lte": "number",
+            "range": "number-range",
+            "isnull": "checkbox-isnull",
+        },
+        table_column.IntegerField: {
+            "exact": "number",
+            "in": "number-list",
+            "gt": "number",
+            "gte": "number",
+            "lt": "number",
+            "lte": "number",
+            "range": "number-range",
+            "isnull": "checkbox-isnull",
+        },
+        table_column.CharField: {
+            "exact": "text",
             # "iexact",
-            "contains",
+            "in": "text-list",
+            "contains": "text",
             # "icontains",
-            "startswith",
+            "startswith": "text",
             # "istartswith",
-            "endswith",
+            "endswith": "text",
             # "iendswith",
-            "regex",
+            "regex": "text",
             # "iregex",
-            "isnull",
-        ],
-        table_column.TextField: [
-            "exact",
+            "isnull": "checkbox-isnull",
+        },
+        table_column.TextField: {
+            "exact": "text",
             # "iexact",
-            "contains",
+            "in": "text-list",
+            "contains": "text",
             # "icontains",
-            "startswith",
+            "startswith": "text",
             # "istartswith",
-            "endswith",
+            "endswith": "text",
             # "iendswith",
-            "regex",
+            "regex": "text",
             # "iregex",
-            "isnull",
-        ],
+            "isnull": "checkbox-isnull",
+        },
+        # TODO: EmailField, DateTimeField, ChoiceField
     }
 
     # @classmethod

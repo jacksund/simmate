@@ -18,26 +18,13 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for entry in filter %}
+                        {% for entry in filters %}
                             <tr>
+                                <td><b>{{ entry.column_name }}</b></td>
+                                <td>{{ entry.metric_display }}</td>
+                                <td>{{ entry.value }}</td>
                                 <td>
-                                    {% with id=forloop.counter0|stringformat:"i"|add:"sm_entry" %}
-                                        <div unicorn:ignore id="hacky-ignore-{{ id }}">{% include "rdkit/molecule_canvas.html" %}</div>
-                                    {% endwith %}
-                                    {{ entry.compound.label }}
-                                </td>
-                                <td>
-                                    {% if entry.is_limiting %}<i class="mdi mdi-check-circle"></i>{% endif %}
-                                </td>
-                                <td>{{ entry.amount }}</td>
-                                <td>
-                                    {{ entry.amount_units }}
-                                    {% if entry.amount_units == "equiv" and entry.equivalents_reference != "starting_material" %}
-                                        vs. {{ entry.equivalents_reference }}
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <button unicorn:click="remove_starting_material({{ forloop.counter0 }})"
+                                    <button unicorn:click="remove_filter({{ forloop.counter0 }})"
                                             type="button"
                                             class="btn btn-danger btn-sm">
                                         <i class="mdi mdi-minus"></i>
@@ -66,27 +53,67 @@
                                     {% include "basic_elements/dropdown_select.html" with name="metric_selected" initial_value=metric_selected options=metric_options options_hash=metric_options_hash %}
                                 {% endif %}
                             </td>
-                            {# value #}
+                            {# filter_value #}
                             <td>
-                                {% if value_type %}
-                                    <input unicorn:model.defer="new_sm_amount"
+                                {% if filter_value_type == "number" %}
+                                    <input unicorn:model.defer="filter_value"
                                             type="number"
-                                            id="new_sm_amount"
+                                            id="filter_value"
                                             class="form-control"
                                             placeholder="0.123">
+                                {% elif filter_value_type == "number-range" %}
+                                    <input unicorn:model.defer="filter_value"
+                                        type="text"
+                                        id="new_reagent_input"
+                                        class="form-control"
+                                        placeholder="12, 34 (separate w. comma)">
+                                {% elif filter_value_type == "number-list" %}
+                                    <input unicorn:model.defer="filter_value"
+                                        type="text"
+                                        id="new_reagent_input"
+                                        class="form-control"
+                                        placeholder="1, 2, 3, ... (separate w. comma)">
+                                {% elif filter_value_type == "text" %}
+                                    <input unicorn:model.defer="filter_value"
+                                        type="text"
+                                        id="new_reagent_input"
+                                        class="form-control"
+                                        placeholder="Type value...">
+                                {% elif filter_value_type == "text-list" %}
+                                    <input unicorn:model.defer="filter_value"
+                                        type="text"
+                                        id="new_reagent_input"
+                                        class="form-control"
+                                        placeholder="value1, value2, etc. (separate w. comma)">
+                                {% elif filter_value_type == "checkbox-isnull" %}
+                                    <div>
+                                        <input unicorn:model="filter_value"
+                                            type="checkbox"
+                                            id="filter_value"
+                                            class="form-check-input">
+                                        <small>Is empty?</small>
+                                    </div>
+                                {% elif filter_value_type == "checkbox-bool" %}
+                                    <div>
+                                        <input unicorn:model="filter_value"
+                                            type="checkbox"
+                                            id="filter_value"
+                                            class="form-check-input">
+                                        <small>is True/Yes?</small>
+                                    </div>
                                 {% endif %}
                             </td>
                             {# Add button #}
                             <td>
                                 <div class="btn-group mb-2">
                                     {# refresh button #}
-                                    <button unicorn:click="reset_new_starting_material"
+                                    <button unicorn:click="reset_new_filter"
                                             type="button"
                                             class="btn btn-warning btn-sm">
                                         <i class="mdi mdi-refresh"></i>
                                     </button>
                                     {# add button #}
-                                    <button unicorn:click="add_new_starting_material"
+                                    <button unicorn:click="add_new_filter"
                                             type="button"
                                             class="btn btn-success btn-sm">
                                         <i class="mdi mdi-plus"></i>
@@ -98,5 +125,16 @@
                 </table>
             </div>
         </div>
+    </div>
+    {# Buttons #}
+    <div class="p-3 text-center">
+        {# Apply Filters #}
+        <button unicorn:click="apply_filters" type="submit" class="btn btn-primary">
+            <i class="mdi mdi-magnify"></i>&nbsp;&nbsp;Search
+        </button>
+        {# Reset Filters #}
+        <a href="." class="btn btn-secondary m-2">
+            <i class="mdi mdi-refresh"></i>&nbsp;&nbsp;Reset Filters
+        </a>
     </div>
 </div>
