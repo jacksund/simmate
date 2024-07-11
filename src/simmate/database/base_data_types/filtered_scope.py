@@ -164,10 +164,10 @@ class FilteredScope(DatabaseTable):
         ],
     }
 
-    @classmethod
-    def get_field_lookup_choices(
-        cls,
-        lookup_type: str,
-        include_case_insensitive: bool = True,
-    ) -> tuple:
-        pass
+    # @classmethod
+    # def get_field_lookup_choices(
+    #     cls,
+    #     lookup_type: str,
+    #     include_case_insensitive: bool = True,
+    # ) -> tuple:
+    #     pass

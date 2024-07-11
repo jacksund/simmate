@@ -52,7 +52,7 @@
                                 {% if column_parents %}
                                 <ul>
                                     {% for item in column_parents %}
-                                        <li>item</li>
+                                        <li><b>{{ item }}</b></li>
                                     {% endfor %}
                                 </ul>
                                 {% endif %}
@@ -68,11 +68,13 @@
                             </td>
                             {# value #}
                             <td>
-                                <input unicorn:model.defer="new_sm_amount"
-                                        type="number"
-                                        id="new_sm_amount"
-                                        class="form-control"
-                                        placeholder="0.123">
+                                {% if value_type %}
+                                    <input unicorn:model.defer="new_sm_amount"
+                                            type="number"
+                                            id="new_sm_amount"
+                                            class="form-control"
+                                            placeholder="0.123">
+                                {% endif %}
                             </td>
                             {# Add button #}
                             <td>
