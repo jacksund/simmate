@@ -17,10 +17,12 @@
                 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasUpdater">
                     <div class="offcanvas-header bg-dark text-light">
                         <h5>Update Selected</h5>
-                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+                        <button type="button"
+                                class="btn-close text-reset"
+                                data-bs-dismiss="offcanvas"></button>
                     </div>
                     <div class="offcanvas-body">
-                        <div> Only selected entries will be updated.</div>
+                        <div>Only selected entries will be updated.</div>
                         <h5 class="mt-3">List</h5>
                         <ul class="ps-3">
                             <li class="">Nemo enim ipsam voluptatem quia aspernatur</li>
@@ -29,7 +31,12 @@
                         </ul>
                     </div>
                 </div>
-                <button class="btn btn-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUpdater"><i class="mdi mdi-pencil py-1"></i>&nbsp;&nbsp;Update</button>
+                <button class="btn btn-dark"
+                        type="button"
+                        data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasUpdater">
+                    <i class="mdi mdi-pencil py-1"></i>&nbsp;&nbsp;Update
+                </button>
             {% endblock %}
             {# Extra Buttons/Links #}
             <a href="{% url 'data_explorer:provider-about' table.table_name %}"

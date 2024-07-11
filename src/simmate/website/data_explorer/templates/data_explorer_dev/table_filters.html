@@ -1,14 +1,18 @@
 <div class="offcanvas offcanvas-end w-75" id="offcanvasFilter">
     <div class="offcanvas-header bg-dark text-light">
         <h5>Advanced Filtering</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+        <button type="button"
+                class="btn-close text-reset"
+                data-bs-dismiss="offcanvas"></button>
     </div>
     <div class="offcanvas-body">
         <div class="alert alert-primary d-flex align-items-center mt-2">
             <div>
                 <small>
-                We recommend keeping the <a href="{% url 'data_explorer:provider-about' table.table_name %}" class="text-dark" target="_blank"><b>Table Info</b></a>
-                page open in a separate window while you complete this form.
+                    We recommend keeping the <a href="{% url 'data_explorer:provider-about' table.table_name %}"
+    class="text-dark"
+    target="_blank"><b>Table Info</b></a>
+                    page open in a separate window while you complete this form.
                 </small>
             </div>
         </div>
@@ -20,7 +24,12 @@
     </div>
 </div>
 {# Toggle sidebar button #}
-<button class="btn btn-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilter"><i class="mdi mdi-filter py-1"></i>&nbsp;&nbsp;Filter</button>
+<button class="btn btn-dark"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasFilter">
+    <i class="mdi mdi-filter py-1"></i>&nbsp;&nbsp;Filter
+</button>
 {% comment %}
     As much as I want pre-set filters & accordions... this is a lot to code out & doesn't work well with dj-unicorn
     <div class="accordion custom-accordion" id="accordionFilters">
@@ -30,29 +39,18 @@
             <div class="card mb-0">
                 <div class="card-header" id="headingExactID">
                     <h5>
-                        <a class="custom-accordion-title d-block"
-                            data-bs-toggle="collapse"
-                            href="#collapseExactID"
-                            aria-expanded="true"
-                            aria-controls="collapseExactID">
+                        <a class="custom-accordion-title d-block" data-bs-toggle="collapse" href="#collapseExactID" aria-expanded="true" aria-controls="collapseExactID">
                             Entry ID
                             <i class="mdi mdi-chevron-down accordion-arrow"></i>
                         </a>
                     </h5>
                 </div>
-                <div id="collapseExactID"
-                        class="collapse"
-                        aria-labelledby="headingExactID"
-                        data-bs-parent="#accordionExample">
+                <div id="collapseExactID" class="collapse" aria-labelledby="headingExactID" data-bs-parent="#accordionExample">
                     <div class="card-body">
                         {# Project #}
                         <div class="my-2">
                             <label class="form-label">Project</label>
-                            <input unicorn:model.defer="project"
-                                type="text"
-                                class="form-control"
-                                id="project"
-                                placeholder="FAA">
+                            <input unicorn:model.defer="project" type="text" class="form-control" id="project" placeholder="FAA">
                         </div>
                     </div>
                 </div>
@@ -61,20 +59,13 @@
             <div class="card mb-0">
                 <div class="card-header" id="headingDateTime">
                     <h5>
-                        <a class="custom-accordion-title d-block"
-                            data-bs-toggle="collapse"
-                            href="#collapseDateTime"
-                            aria-expanded="true"
-                            aria-controls="collapseDateTime">
+                        <a class="custom-accordion-title d-block" data-bs-toggle="collapse" href="#collapseDateTime" aria-expanded="true" aria-controls="collapseDateTime">
                             Date / Time
                             <i class="mdi mdi-chevron-down accordion-arrow"></i>
                         </a>
                     </h5>
                 </div>
-                <div id="collapseDateTime"
-                        class="collapse"
-                        aria-labelledby="headingDateTime"
-                        data-bs-parent="#accordionExample">
+                <div id="collapseDateTime" class="collapse" aria-labelledby="headingDateTime" data-bs-parent="#accordionExample">
                     <div class="card-body">
                         <div class="alert alert-danger" role="alert">
                             <i class="mdi mdi-alert mx-2"></i>
