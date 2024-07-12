@@ -18,17 +18,6 @@ class ApiFilterView(UnicornView):
 
     template_name = "data_explorer_dev/api_filter.html"
 
-    # class Meta:
-    #     javascript_exclude = (
-    #         # "page_title",
-    #         # "breadcrumbs",
-    #         # "breadcrumb_active",
-    #         # "user_options",
-    #         # "table",
-    #         # "column_table",
-    #         # "required_fields",
-    #     )
-
     parent_url = None
 
     def mount(self):
