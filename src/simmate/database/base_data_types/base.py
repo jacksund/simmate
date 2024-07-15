@@ -1519,12 +1519,14 @@ class DatabaseTable(models.Model):
             # if we have a filter method, we apply it to our queryset right away
             if f"filter_{filter_name}" in filter_methods:
                 method = getattr(queryset, f"filter_{filter_name}")
+                # method_args = filters.get(filter_name)
                 method_kwargs = {
                     arg: filters.get(arg)
                     for arg in list(inspect.signature(method).parameters.keys())
                     if arg in filters.keys()
                 }
-                queryset = method(**method_kwargs)
+                queryset = method(**method_kwargs)  # *method_args,
+                # BUG: need to figure out better approach for passing params
 
             # these are kwargs only needed in filter methods (e.g. `include_subsystems`)
             elif filter_name in filter_methods_args:
