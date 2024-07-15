@@ -1388,7 +1388,7 @@ class DatabaseTable(models.Model):
         ]
         return [
             method
-            for method in dir(cls)
+            for method in dir(cls.objects)
             if method.startswith("filter_") and method not in excluded_methods
         ]  # dir() looks to be faster than inspect.getmembers
 
@@ -1402,11 +1402,10 @@ class DatabaseTable(models.Model):
         column_names = cls.get_column_names()
         extra_args = []
         for method in cls.filter_methods:
-            sig = inspect.signature(getattr(cls, method))
+            sig = inspect.signature(getattr(cls.objects, method))
             for parameter in list(sig.parameters):
                 if parameter not in column_names and parameter not in [
                     "self",
-                    "initial_queryset",
                     "kwargs",
                 ]:
                     extra_args.append(parameter)
@@ -1505,7 +1504,6 @@ class DatabaseTable(models.Model):
         """
         Converts URL kwargs into a queryset.
         """
-
         # Some tables have "advanced" filtering logic. These want us to call
         # a filtering method, rather than just passing the kwarg to `objects.filter()`.
         # An example of this would be "chemical_system" for Structure, which
@@ -1518,19 +1516,15 @@ class DatabaseTable(models.Model):
 
         queryset = cls.objects
         for filter_name in filters:
-
             # if we have a filter method, we apply it to our queryset right away
-            if filter_name in filter_methods:
-                method = getattr(cls, "filter_{filter_name}")
+            if f"filter_{filter_name}" in filter_methods:
+                method = getattr(queryset, f"filter_{filter_name}")
                 method_kwargs = {
                     arg: filters.get(arg)
                     for arg in list(inspect.signature(method).parameters.keys())
                     if arg in filters.keys()
                 }
-                queryset = method(
-                    initial_queryset=queryset,
-                    **method_kwargs,
-                )
+                queryset = method(**method_kwargs)
 
             # these are kwargs only needed in filter methods (e.g. `include_subsystems`)
             elif filter_name in filter_methods_args:
