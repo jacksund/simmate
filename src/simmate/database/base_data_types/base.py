@@ -394,6 +394,9 @@ class DatabaseTable(models.Model):
     object. Using this, you can perform complex filtering and conversions on
     data from this table.
     """
+    # TODO: switch to...
+    # https://docs.djangoproject.com/en/5.0/topics/db/managers/#creating-a-manager-with-queryset-methods
+    # objects = SearchResults.as_manager()
 
     archive_fields: list[str] = []
     """
