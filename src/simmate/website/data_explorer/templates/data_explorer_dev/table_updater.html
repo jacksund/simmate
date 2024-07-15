@@ -13,12 +13,9 @@
             </div>
         </div>
         <div>
-            {% comment %}
-                TODO - The quick-search UI is made manually for each table. Maybe I can use mix-in to automate some of this
-                {% load unicorn %}
-                {% csrf_token %}
-                {% unicorn 'quick-search' %}
-            {% endcomment %}
+            {% load unicorn %}
+            {% csrf_token %}
+            {% unicorn updater_view %}
         </div>
     </div>
 </div>

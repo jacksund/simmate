@@ -48,13 +48,13 @@
                                     </ul>
                                 {% endif %}
                                 {% if column_options %}
-                                    {% include "basic_elements/dropdown_select.html" with name="column_selected" initial_value=column_selected options=column_options options_hash=column_options_hash %}
+                                    {% include "basic_elements/dropdown_select.html" with unicorn_view=view.component_name name="column_selected" initial_value=column_selected options=column_options options_hash=column_options_hash %}
                                 {% endif %}
                             </td>
                             {# metric #}
                             <td>
                                 {% if metric_options %}
-                                    {% include "basic_elements/dropdown_select.html" with name="metric_selected" initial_value=metric_selected options=metric_options options_hash=metric_options_hash %}
+                                    {% include "basic_elements/dropdown_select.html" with unicorn_view=view.component_name name="metric_selected" initial_value=metric_selected options=metric_options options_hash=metric_options_hash %}
                                 {% endif %}
                             </td>
                             {# filter_value #}
