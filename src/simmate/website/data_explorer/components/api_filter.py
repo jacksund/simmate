@@ -245,7 +245,7 @@ class ApiFilterView(UnicornView):
                 metric = "exact"
             elif sections[-1] in FilteredScope.field_lookups_config.keys():
                 column_name = "__".join(sections[:-1])
-                metric = sections[:-1]
+                metric = sections[-1]
             else:
                 column_name = "__".join(sections)
                 metric = "exact"
@@ -264,7 +264,7 @@ class ApiFilterView(UnicornView):
         for entry in self.filters:
             key = entry["column_name"]
             if entry["metric"] != "exact":
-                key += entry["metric"]
+                key += "__" + entry["metric"]
             filters_new[key] = entry["value"]
         url_get_clause = "?" + "&".join([f"{k}={v}" for k, v in filters_new.items()])
 
