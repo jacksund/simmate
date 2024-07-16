@@ -9,7 +9,8 @@
             data-placeholder="Choose at least one ..."
             onchange="Unicorn.call('{{ unicorn_view }}', 'set_{{ name }}', $('#{{ name }}{{ key }}').val().join('--and--'));">
         {% for option in options %}
-            <option value="{{ option.0 }}" {% if option.0 in initial_value %}selected{% endif %}>{{ option.1 }}</option>
+            <option value="{{ option.0 }}"
+                    {% if option.0 in initial_value %}selected{% endif %}>{{ option.1 }}</option>
         {% endfor %}
     </select>
 </div>

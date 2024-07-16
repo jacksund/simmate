@@ -20,8 +20,12 @@ from pathlib import Path
 
 import pandas
 import yaml
+from django.core.paginator import Page, Paginator
 from django.db import models  # see comment below
 from django.db import models as table_column
+from django.forms.models import model_to_dict
+from django.http import HttpRequest, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.module_loading import import_string
 from django.utils.timezone import datetime
@@ -390,6 +394,9 @@ class DatabaseTable(models.Model):
     object. Using this, you can perform complex filtering and conversions on
     data from this table.
     """
+    # TODO: switch to...
+    # https://docs.djangoproject.com/en/5.0/topics/db/managers/#creating-a-manager-with-queryset-methods
+    # objects = SearchResults.as_manager()
 
     archive_fields: list[str] = []
     """
@@ -1328,6 +1335,222 @@ class DatabaseTable(models.Model):
     # Methods that set up the REST API and filters that can be queried with
     # -------------------------------------------------------------------------
 
+    # !!! DEV -- This section is currently a mixture of depreciated and experimental
+    # methods. Users should avoid until these methods become stable
+
+    # SINGLE OBJECT APIs
+
+    def to_api_dict(self, fields: list[str] = None, exclude: list[str] = None) -> dict:
+        """
+        Converts a single instance (row) of this database table to a API dictionary.
+        This is used to generate the default API response and can be overwritten.
+        """
+        # See https://stackoverflow.com/questions/21925671/
+        # Consider forking model_to_dict or writing custom method.
+        # !!! Does not support columns accross relations such as "user__email"
+        return model_to_dict(
+            instance=self,
+            fields=self.get_column_names() if fields is None else fields,
+            exclude=exclude,
+        )
+
+    @property
+    def to_json_response(self) -> JsonResponse:
+        """
+        Takes the API dictionary (from `to_api_dict`) and converts it to a
+        Django JSON reponse
+        """
+        return JsonResponse(self.to_api_dict())
+
+    @classmethod
+    def get_json_response(cls, pk) -> JsonResponse:
+        """
+        Given the object id, will query and return the JSON response. This will
+        also give a 404 response if it is not found
+        """
+        obj = get_object_or_404(cls, pk=pk)
+        return obj.to_json_response()
+
+    # MULTI OBJECT APIs
+
+    @classmethod
+    @property
+    @cache
+    def filter_methods(cls) -> list[str]:
+        """
+        All filtering methods that can be used to narrow a queryset
+        """
+        excluded_methods = [
+            "filter_from_config",
+            "filter_from_request",
+            "filter_methods",
+            "filter_methods_extra_args",
+        ]
+        return [
+            method
+            for method in dir(cls.objects)
+            if method.startswith("filter_") and method not in excluded_methods
+        ]  # dir() looks to be faster than inspect.getmembers
+
+    @classmethod
+    @property
+    @cache
+    def filter_methods_extra_args(cls) -> list[str]:
+        """
+        Any unique parameters that are used as kwargs in `filter_methods`
+        """
+        column_names = cls.get_column_names()
+        extra_args = []
+        for method in cls.filter_methods:
+            sig = inspect.signature(getattr(cls.objects, method))
+            for parameter in list(sig.parameters):
+                if parameter not in column_names and parameter not in [
+                    "self",
+                    "kwargs",
+                ]:
+                    extra_args.append(parameter)
+        return extra_args
+
+    @staticmethod
+    def _parse_request_get(request: HttpRequest) -> dict:
+        # note, if a key is defined more than once, it will only use the last def
+        url_get_args = request.GET.dict()
+
+        def deserialize_value(value: str) -> any:
+            """
+            Converts the URL GET parameters to the correct data type
+            """
+            if value.startswith('"') and value.endswith('"'):
+                return value.strip('"')
+            elif value.startswith("'") and value.endswith("'"):
+                return value.strip("'")
+            elif value.lower() in ["true", "false"]:
+                return True if value.lower() == "true" else False
+            elif value.isnumeric():
+                return int(value)
+            elif value.replace(".", "").isnumeric():
+                return float(value)
+            else:
+                # just return the string as-is for our last-ditch effort
+                return str(value)
+                # Raising an error via f-string might be an injection security risk
+                # raise Exception(f"Unknown URL value type: {value}")
+
+        for key in url_get_args.keys():
+
+            # The "__in" field lookup is a special case where we need a list of values.
+            # Our go-to delimiter is ";", but there may be cases where this causes
+            # a bug -- specifically when an __in string should contain a ";"
+            if key.endswith("__in"):
+                url_get_args[key] = [
+                    deserialize_value(value) for value in url_get_args[key].split(";")
+                ]
+            # For ranges, we have a format of (123,321)
+            elif key.endswith("__range"):
+                values = url_get_args[key].split(",")
+                url_get_args[key] = (
+                    deserialize_value(values[0].strip("(")),
+                    deserialize_value(values[1].strip(")")),
+                )
+            # otherwise its a normal key-value pair
+            else:
+                url_get_args[key] = deserialize_value(url_get_args[key])
+
+        # we now break out the common filter kwargs so that we can use filter_from_config.
+        # We only pass these values if they are present as to avoid overwriting
+        # the defaults set elsewhere
+        extra_kwargs = {
+            key: url_get_args.pop(key)
+            for key in ["order_by", "limit", "page", "page_size"]
+            if key in url_get_args.keys()
+        }
+
+        return {
+            "filters": url_get_args,
+            **extra_kwargs,
+        }
+
+    @classmethod
+    def filter_from_request(
+        cls,
+        request: HttpRequest,
+        paginate: bool = True,
+    ) -> SearchResults | Page:
+        """
+        Generates a filtered queryset from a django HttpRequest using the
+        request's GET parameters
+        """
+        # In the past, this was handled by the django-filter package, but this
+        # became too verbose and tedious. You'd need to list out "gt", "gte", and
+        # any other field lookups allowed for EACH field... In practice, we want
+        # to just allow anything and trust the user follows the docs correctly.
+        # Worst case, the API call fails, which is no big deal.
+        get_kwargs = cls._parse_request_get(request)
+        return cls.filter_from_config(
+            **get_kwargs,
+            paginate=paginate,
+        )
+
+    @classmethod
+    def filter_from_config(
+        cls,
+        filters: dict,
+        order_by: list[str] = ["id"],
+        limit: int = 10_000,
+        page: int = 1,
+        page_size: int = 12,
+        paginate: bool = True,
+    ) -> SearchResults | Page:
+        """
+        Converts URL kwargs into a queryset.
+        """
+        # Some tables have "advanced" filtering logic. These want us to call
+        # a filtering method, rather than just passing the kwarg to `objects.filter()`.
+        # An example of this would be "chemical_system" for Structure, which
+        # needs to (a) clean the query by converting to the element order that
+        # db uses, and (b) base its filtering logic on other kwargs like
+        # "include_subsystems".
+        basic_filters = {}
+        filter_methods = cls.filter_methods
+        filter_methods_args = cls.filter_methods_extra_args
+
+        queryset = cls.objects
+        for filter_name in filters:
+            # if we have a filter method, we apply it to our queryset right away
+            if f"filter_{filter_name}" in filter_methods:
+                method = getattr(queryset, f"filter_{filter_name}")
+                # method_args = filters.get(filter_name)
+                method_kwargs = {
+                    arg: filters.get(arg)
+                    for arg in list(inspect.signature(method).parameters.keys())
+                    if arg in filters.keys()
+                }
+                queryset = method(**method_kwargs)  # *method_args,
+                # BUG: need to figure out better approach for passing params
+
+            # these are kwargs only needed in filter methods (e.g. `include_subsystems`)
+            elif filter_name in filter_methods_args:
+                continue  # these are only used via method_kwargs above
+
+            # otherwise we have a basic filter (e.g. `user__email__startswith`)
+            else:
+                basic_filters[filter_name] = filters[filter_name]
+
+        # now that all filter_methods have been applied, we now apply basic ones
+        queryset = queryset.filter(**basic_filters)
+
+        # and add in extras
+        queryset = queryset.order_by(*order_by)[:limit]
+
+        # if requested, split the results into pages and grab the requested one
+        if paginate:
+            paginator = Paginator(object_list=queryset, per_page=page_size)
+            page_obj = paginator.get_page(number=page)
+            return page_obj
+        else:
+            return queryset
+
+    # DEPRECIATED
     @classmethod
     @property
     @cache
@@ -1480,6 +1703,7 @@ class DatabaseTable(models.Model):
 
         return NewClass
 
+    # DEPRECIATED
     @classmethod
     @property
     @cache

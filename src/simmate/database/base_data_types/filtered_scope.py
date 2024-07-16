@@ -68,7 +68,7 @@ class FilteredScope(DatabaseTable):
 
     # see https://docs.djangoproject.com/en/5.0/ref/models/querysets/#field-lookups
     field_lookups_config = {
-        "exact": "is exactly (aka equals)",
+        "exact": "is exactly",  # we just omit the lookup and use =
         "iexact": "is exactly (case insensitive)",
         "contains": "contains the text",
         "icontains": "contains the text (case insensitive)",
@@ -82,7 +82,11 @@ class FilteredScope(DatabaseTable):
         "endswith": "ends with the text",
         "iendswith": "ends with the text (case insensitive)",
         "range": "is within the range",
-        # year/month/day/etc need a 2nd modifier like exact or gte
+        "isnull": "is empty (null)",
+        "regex": "matches the regular expression",
+        "iregex": "matches the regular expression (case insensitive)",
+        # !!! year/month/day/etc need a 2nd modifier like exact or gte
+        # I might want to treat these as if they were a OneToOneField...
         "date": "has the datetime",
         "year": "where the year is",
         "month": "where the month is",
@@ -94,46 +98,81 @@ class FilteredScope(DatabaseTable):
         "hour": "where the hour is",
         "minute": "where the minute is",
         "second": "where the second is",
-        # iso_year + iso_week_day !!! -> not sure how this differs from year. I think its for
-        # cross-timezone comparisons
-        "isnull": "is empty (null)",
-        "regex": "matches the following regular expression",
-        "iregex": "matches the following regular expression (case insensitive)",
+        # iso_year + iso_week_day -> for cross-timezone comparisons...?
     }
+
+    # Follows format of {django_field_type: {django_field_lookup: html_input_type}}
+    # See data_explorer/api_filter.html for where html_input_types are used.
     lookup_type_defaults = {
-        # TODO: change keys to classes (e.g. table_column.FloatField)
-        "FloatField": [
+        table_column.BooleanField: {
+            "exact": "checkbox-bool",
+            "isnull": "checkbox-isnull",
+        },
+        table_column.AutoField: {
+            "exact": "number",
+            "in": "number-list",
+            "gt": "number",
+            "gte": "number",
+            "lt": "number",
+            "lte": "number",
+            "range": "number-range",
+        },
+        table_column.FloatField: {
             # !!! warning, no rounding done
-            "exact",
-            "in",
-            "gt",
-            "gte",
-            "lt",
-            "lte",
-            "range",
-            "isnull",
-        ],
-        "IntegerField": [
-            "exact",
-            "in",
-            "gt",
-            "gte",
-            "lt",
-            "lte",
-            "range",
-            "isnull",
-        ],
-        "TextField": [
-            "exact",
-            "iexact",
-            "contains",
-            "icontains",
-            "startswith",
-            "istartswith",
-            "endswith",
-            "iendswitch",
-            "regex",
-            "iregex",
-            "isnull",
-        ],
+            "exact": "number",
+            "in": "number-list",
+            "gt": "number",
+            "gte": "number",
+            "lt": "number",
+            "lte": "number",
+            "range": "number-range",
+            "isnull": "checkbox-isnull",
+        },
+        table_column.IntegerField: {
+            "exact": "number",
+            "in": "number-list",
+            "gt": "number",
+            "gte": "number",
+            "lt": "number",
+            "lte": "number",
+            "range": "number-range",
+            "isnull": "checkbox-isnull",
+        },
+        table_column.CharField: {
+            "exact": "text",
+            # "iexact",
+            "in": "text-list",
+            "contains": "text",
+            # "icontains",
+            "startswith": "text",
+            # "istartswith",
+            "endswith": "text",
+            # "iendswith",
+            "regex": "text",
+            # "iregex",
+            "isnull": "checkbox-isnull",
+        },
+        table_column.TextField: {
+            "exact": "text",
+            # "iexact",
+            "in": "text-list",
+            "contains": "text",
+            # "icontains",
+            "startswith": "text",
+            # "istartswith",
+            "endswith": "text",
+            # "iendswith",
+            "regex": "text",
+            # "iregex",
+            "isnull": "checkbox-isnull",
+        },
+        # TODO: EmailField, DateTimeField, ChoiceField
     }
+
+    # @classmethod
+    # def get_field_lookup_choices(
+    #     cls,
+    #     lookup_type: str,
+    #     include_case_insensitive: bool = True,
+    # ) -> tuple:
+    #     pass
