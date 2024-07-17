@@ -1498,7 +1498,7 @@ class DatabaseTable(models.Model):
         order_by: list[str] = ["id"],
         limit: int = 10_000,
         page: int = 1,
-        page_size: int = 12,
+        page_size: int = 25,
         paginate: bool = True,
     ) -> SearchResults | Page:
         """
