@@ -445,6 +445,7 @@ class DatabaseTable(models.Model):
     To see all archive fields, see the `archive_fieldset` property.
     """
 
+    # DEPRECIATED
     api_filters: dict = {}
     """
     Configuration of fields that can be filtered in the REST API and website 
@@ -1798,10 +1799,17 @@ class DatabaseTable(models.Model):
     # Methods that link to the website UI
     # -------------------------------------------------------------------------
 
+    # experimental override for templates using by the Data Explorer app
+
     html_template_about: str = None
     html_template_table: str = None
     html_template_entry: str = None
-    # experimental override for templates using by the Data Explorer app
+
+    # Unicorn views (side panels in the table view of the Data Explorer app)
+    html_search_view: str = None
+    html_update_view: str = None
+    html_add_view: str = None
+    # TODO: distinguish between update/update-many and add/add-many views...?
 
     @classmethod
     @property
@@ -1827,19 +1835,24 @@ class DatabaseTable(models.Model):
         property easier to work with
         """
         return reverse(
-            "data_explorer:entry-detail",
+            "data_explorer:table-entry",
             kwargs={"provider_name": self.table_name, "pk": self.pk},
         )
 
     @classmethod
     @property
-    def extra_html_context(cls) -> dict:
+    def html_breadcrumb_context(cls) -> dict:
         return {
             "page_title": cls.table_name,
             "page_title_icon": "mdi-database",
             "breadcrumbs": [("data_explorer:home", "Data")],
             "breadcrumb_active": cls.table_name,
         }
+
+    @classmethod
+    @property
+    def html_extra_context(cls) -> dict:
+        return {}
 
     # -------------------------------------------------------------------------
     # Methods that populate "workflow columns" of custom tables

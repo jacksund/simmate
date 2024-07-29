@@ -12,19 +12,17 @@ urlpatterns = [
     ),
     path(
         route="<table_name>/",
-        view=views.DynamicDatabaseTableView.as_view(),
-        name="database_table",
+        view=views.DataExplorerView.list_view,
+        name="table",
     ),
     path(
         route="<provider_name>/about/",
-        # view=views.ProviderAPIViewSet.dynamic_about_view,
-        view=views.DynamicDatabaseTableView.as_view(),
-        name="database_table-about",
+        view=views.DataExplorerView.about_view,
+        name="table-about",
     ),
     path(
-        route="<provider_name>/<pk>/",
-        # view=views.ProviderAPIViewSet.dynamic_retrieve_view,
-        view=views.DynamicDatabaseTableView.as_view(),
-        name="entry-detail",
+        route="<provider_name>/<pk>/",  # BUG: if pk == "about"
+        view=views.DataExplorerView.entry_view,
+        name="table-entry",
     ),
 ]

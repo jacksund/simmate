@@ -30,7 +30,7 @@ def test_workflows_by_type_view(client, provider_name):
 
     # grabs f"/workflows/{workflow_type}/"
     url = reverse(
-        "data_explorer:database_table",
+        "data_explorer:table",
         kwargs={"provider_name": provider_name},
     )
 
@@ -40,7 +40,7 @@ def test_workflows_by_type_view(client, provider_name):
 
     # detail view
     url = reverse(
-        "data_explorer:entry-detail",
+        "data_explorer:table-entry",
         kwargs={
             "provider_name": provider_name,
             "pk": 999,

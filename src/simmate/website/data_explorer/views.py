@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 from simmate.configuration import settings
 from simmate.database.base_data_types import DatabaseTable, Structure
-from simmate.website.core_components.base_api_view_dev import DatabaseTableView
+from simmate.website.core_components.base_api_view_dev import DynamicApiView
 
 # closed-source data types. We can skip these if they aren't present
 try:
@@ -44,12 +44,7 @@ def home(request):
     return render(request, template, context)
 
 
-class DynamicDatabaseTableView(DatabaseTableView):
-
-    # TODO: these are not used. will move to base databasetable class
-    # template_about = "data_explorer/about.html"
-    # template_list = "data_explorer/provider.html"
-    # template_retrieve = "data_explorer/entry_detail.html"
+class DataExplorerView(DynamicApiView):
 
     @classmethod
     def get_table(cls, request, table_name: str) -> DatabaseTable:

@@ -13,7 +13,7 @@
                             <a href="{% url 'data_explorer:home' %}">Data</a>
                         </li>
                         <li class="breadcrumb-item">
-                            <a href="{% url 'data_explorer:database_table' calculation.table_name %}">{{ calculation.table_name }}</a>
+                            <a href="{% url 'data_explorer:table' calculation.table_name %}">{{ calculation.table_name }}</a>
                         </li>
                         <li class="breadcrumb-item active">{{ calculation.id }}</li>
                     </ol>
