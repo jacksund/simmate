@@ -7,35 +7,31 @@
     <div class="row">
         {# Buttons & Sidebars #}
         <div class="col-8">
+            <a href="{% url 'data_explorer:database_table-about' table.table_name %}"
+               class="btn btn-primary my-1">
+                <i class="mdi mdi-information"></i>&nbsp;&nbsp;Table Info</a>
             {# Quick Search Sidebar #}
             {% block quicksearch %}
                 {% if quick_search_view %}
-                    {% include "data_explorer_dev/table_quick_search.html" %}
+                    {% include "data_explorer/table_quick_search.html" %}
                 {% endif %}
             {% endblock %}
             {# Filter Sidebar #}
             {% block filters %}
-                {% include "data_explorer_dev/table_filters.html" %}
+                {% include "data_explorer/table_filters.html" %}
             {% endblock %}
-            {# Update Sidebar #}
-            {% block updater %}
-                {% if updater_view %}
-                    {% include "data_explorer_dev/table_updater.html" %}
-                {% endif %}
-            {% endblock %}
-            {# Extra Buttons/Links #}
-            <a href="{% url 'data_explorer:provider-about' table.table_name %}"
-               class="btn btn-primary my-1">
-                <i class="mdi mdi-information"></i>&nbsp;&nbsp;Table Info</a>
-            <a href="?format=api"
-               target="_blank"
-               class="btn btn-outline-dark my-1 disabled">API</a>
-            <a href="?format=json"
-               target="_blank"
-               class="btn btn-outline-dark my-1 disabled">JSON</a>
+            {# JSON + Python Buttons #}
+            <a href="?format=json" target="_blank" class="btn btn-outline-dark my-1">JSON</a>
             <a href="https://jacksund.github.io/simmate/getting_started/database/quick_start/"
                target="_blank"
                class="btn btn-outline-dark">Python</a>
+            {# Update Sidebar #}
+            {% block updater %}
+                {% if updater_view %}
+                    {% include "data_explorer/table_updater.html" %}
+                {% endif %}
+            {% endblock %}
+            {# Add New Sidebar #}
             {% block addnew %}
                 {% if add_new_view %}
                     {# for now this is a link, but it should be a unicorn view #}
@@ -75,7 +71,7 @@
                     </div>
                 </div>
                 {% block search_results_table %}12345{% endblock %}
-                {% include "data_explorer_dev/pagination.html" %}
+                {% include "data_explorer/pagination.html" %}
             {% else %}
                 <div class="alert alert-danger d-flex align-items-center p-2" role="alert">
                     <div>

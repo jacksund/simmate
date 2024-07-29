@@ -202,24 +202,29 @@ class SearchResults(models.QuerySet):
 
         # we can now delete the csv file
         csv_filename.unlink()
-    
+
     # -------------------------------------------------------------------------
-    
-    def to_api_dict(self, next_url: str = None, previous_url: str = None, **kwargs) -> dict:
+
+    def to_api_dict(
+        self, next_url: str = None, previous_url: str = None, **kwargs
+    ) -> dict:
         """
-        Converts the search results to a API dictionary. This is used to generate 
+        Converts the search results to a API dictionary. This is used to generate
         the default API response and can be overwritten.
-        
-        Note, this is typically called on the *page* object list, and not the 
+
+        Note, this is typically called on the *page* object list, and not the
         full query results.
         """
         # We follow the list api format that django rest_framework uses. The
         # next/previous is for pagination
         return {
+            # OPTIMIZE: counting can take ~20 sec for ~10 mil rows, which is
+            # terrible for a web UI. I tried a series of fixes but no luck:
+            #   https://stackoverflow.com/questions/55018986/
             "count": self.count(),
             "next": next_url,
             "previous": previous_url,
-            "results": [entry.to_api_dict(**kwargs) for entry in self.all()]
+            "results": [entry.to_api_dict(**kwargs) for entry in self.all()],
         }
 
     def to_json_response(self, **kwargs) -> JsonResponse:
@@ -228,9 +233,9 @@ class SearchResults(models.QuerySet):
         Django JSON reponse
         """
         return JsonResponse(self.to_api_dict(**kwargs))
-    
+
     # -------------------------------------------------------------------------
-    
+
     def filter_by_tags(self, tags: list[str]):
         """
         A utility filter() method that helps query the 'tags' column of a table.
@@ -1399,7 +1404,7 @@ class DatabaseTable(models.Model):
         return obj.to_json_response()
 
     # MULTI OBJECT APIs
-    
+
     # max_api_count: int = 10_000
     # NOTE: counting the total number of results in a query is MUCH
     # slower than just loading a single page! See...
@@ -1500,7 +1505,7 @@ class DatabaseTable(models.Model):
             for key in ["order_by", "limit", "page", "page_size"]
             if key in url_get_args.keys()
         }
-        
+
         # special case for "format", which is only used to determine how to
         # render the results. This is thrown out if it is not requested
         if include_format and "format" in url_get_args.keys():

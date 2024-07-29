@@ -1,22 +1,23 @@
 from django.shortcuts import redirect
 from django_unicorn.components import UnicornView
 
-from simmate.configuration import settings
+# from simmate.configuration import settings
 from simmate.database.base_data_types import DatabaseTable, FilteredScope, table_column
+from simmate.website.data_explorer.views import EXPLORABLE_TABLES
 
 # TODO: move to util and combine with var used in views.py
 # TODO: include all ORM models automatically
 # import django.apps
 # django.apps.apps.get_models()
-ALL_API_TABLES = {
-    DatabaseTable.get_table(table_name).table_name: DatabaseTable.get_table(table_name)
-    for table_name in settings.website.data
-}
+# ALL_API_TABLES = {
+#     DatabaseTable.get_table(table_name).table_name: DatabaseTable.get_table(table_name)
+#     for table_name in settings.website.data
+# }
 
 
 class ApiFilterView(UnicornView):
 
-    template_name = "data_explorer_dev/api_filter.html"
+    template_name = "data_explorer/api_filter.html"
 
     parent_url = None
 
@@ -29,8 +30,11 @@ class ApiFilterView(UnicornView):
         self.parent_url = self.request.path
 
         # load table
-        table = self._determine_table()
-        self.table_name = table.table_name
+        # BUG: kwargs isn't loading so we parse it directly from the url.
+        # We assume its the final value of the URL, but this may need to change
+        #   self.table_name = self.kwargs["table_name"]
+        self.table_name = [i for i in self.request.path.split("/") if i][-1]
+        table = self._get_base_table()
 
         # load url args + starting filters
         url_config = table._parse_request_get(self.request)
@@ -44,20 +48,7 @@ class ApiFilterView(UnicornView):
     table_name = None
 
     def _get_base_table(self):
-        return ALL_API_TABLES[self.table_name]
-
-    def _determine_table(self):
-        """
-        Given a request, this will return the database table that corresponds to
-        the webpage. For example, the request for "/data/MatprojStructure/"
-        would load & return the "MatprojStructure" class
-        """
-        # BUG: hardcoded for early testing
-        if self.request.path in ["/data/provider-dev/", "/apps/discovery_lab/dev_api/"]:
-            return ALL_API_TABLES["CortevaTarget"]
-        # TODO: once this is in the data_explorer app
-        # print(self.kwargs) --> should give table name
-        # table = ALL_API_TABLES[table_name]
+        return EXPLORABLE_TABLES[self.table_name]
 
     # -------------------------------------------------------------------------
 

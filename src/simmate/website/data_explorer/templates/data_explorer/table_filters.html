@@ -6,11 +6,20 @@
                 data-bs-dismiss="offcanvas"></button>
     </div>
     <div class="offcanvas-body">
+        <div class="alert alert-danger d-flex align-items-center mt-2">
+            <div>
+                <small>
+                    <b>WARNING:</b> use the 'Quick Search' form if you can. This
+                    form is still under development and meant only for advanced
+                    users.
+                </small>
+            </div>
+        </div>
         <div class="alert alert-primary d-flex align-items-center mt-2">
             <div>
                 <small>
                     We recommend keeping the
-                    <a href="{% url 'data_explorer:provider-about' table.table_name %}"
+                    <a href="{% url 'data_explorer:database_table-about' table.table_name %}"
                        class="text-dark"
                        target="_blank">
                         <b>Table Info</b>
