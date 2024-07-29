@@ -53,7 +53,7 @@ class ApiFilterView(UnicornView):
         would load & return the "MatprojStructure" class
         """
         # BUG: hardcoded for early testing
-        if self.request.path == "/apps/discovery_lab/dev_api/":
+        if self.request.path in ["/data/provider-dev/", "/apps/discovery_lab/dev_api/"]:
             return ALL_API_TABLES["CortevaTarget"]
         # TODO: once this is in the data_explorer app
         # print(self.kwargs) --> should give table name

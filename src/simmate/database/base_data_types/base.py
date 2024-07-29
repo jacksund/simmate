@@ -202,7 +202,35 @@ class SearchResults(models.QuerySet):
 
         # we can now delete the csv file
         csv_filename.unlink()
+    
+    # -------------------------------------------------------------------------
+    
+    def to_api_dict(self, next_url: str = None, previous_url: str = None, **kwargs) -> dict:
+        """
+        Converts the search results to a API dictionary. This is used to generate 
+        the default API response and can be overwritten.
+        
+        Note, this is typically called on the *page* object list, and not the 
+        full query results.
+        """
+        # We follow the list api format that django rest_framework uses. The
+        # next/previous is for pagination
+        return {
+            "count": self.count(),
+            "next": next_url,
+            "previous": previous_url,
+            "results": [entry.to_api_dict(**kwargs) for entry in self.all()]
+        }
 
+    def to_json_response(self, **kwargs) -> JsonResponse:
+        """
+        Takes the API dictionary (from `to_api_dict`) and converts it to a
+        Django JSON reponse
+        """
+        return JsonResponse(self.to_api_dict(**kwargs))
+    
+    # -------------------------------------------------------------------------
+    
     def filter_by_tags(self, tags: list[str]):
         """
         A utility filter() method that helps query the 'tags' column of a table.
@@ -1354,13 +1382,12 @@ class DatabaseTable(models.Model):
             exclude=exclude,
         )
 
-    @property
-    def to_json_response(self) -> JsonResponse:
+    def to_json_response(self, **kwargs) -> JsonResponse:
         """
         Takes the API dictionary (from `to_api_dict`) and converts it to a
         Django JSON reponse
         """
-        return JsonResponse(self.to_api_dict())
+        return JsonResponse(self.to_api_dict(**kwargs))
 
     @classmethod
     def get_json_response(cls, pk) -> JsonResponse:
@@ -1372,6 +1399,15 @@ class DatabaseTable(models.Model):
         return obj.to_json_response()
 
     # MULTI OBJECT APIs
+    
+    # max_api_count: int = 10_000
+    # NOTE: counting the total number of results in a query is MUCH
+    # slower than just loading a single page! See...
+    #   https://wiki.postgresql.org/wiki/Slow_Counting
+    # To address this, we limit the maximum queryset size to be 10k. This
+    # is a large number because counting queries really only becomes an
+    # issue with >1mil rows in the dataset.
+    # We still allow users to set "None" disable this feature.
 
     @classmethod
     @property
@@ -1412,7 +1448,7 @@ class DatabaseTable(models.Model):
         return extra_args
 
     @staticmethod
-    def _parse_request_get(request: HttpRequest) -> dict:
+    def _parse_request_get(request: HttpRequest, include_format: bool = True) -> dict:
         # note, if a key is defined more than once, it will only use the last def
         url_get_args = request.GET.dict()
 
@@ -1464,6 +1500,14 @@ class DatabaseTable(models.Model):
             for key in ["order_by", "limit", "page", "page_size"]
             if key in url_get_args.keys()
         }
+        
+        # special case for "format", which is only used to determine how to
+        # render the results. This is thrown out if it is not requested
+        if include_format and "format" in url_get_args.keys():
+            extra_kwargs["format"] = url_get_args.pop("format", "html")
+        else:
+            # try removing whether its there or not
+            url_get_args.pop("format", None)
 
         return {
             "filters": url_get_args,
@@ -1485,7 +1529,7 @@ class DatabaseTable(models.Model):
         # any other field lookups allowed for EACH field... In practice, we want
         # to just allow anything and trust the user follows the docs correctly.
         # Worst case, the API call fails, which is no big deal.
-        get_kwargs = cls._parse_request_get(request)
+        get_kwargs = cls._parse_request_get(request, include_format=False)
         return cls.filter_from_config(
             **get_kwargs,
             paginate=paginate,
