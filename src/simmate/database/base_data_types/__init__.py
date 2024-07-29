@@ -6,6 +6,8 @@
 
 from .base import DatabaseTable, table_column, SearchResults
 
+from .filtered_scope import FilteredScope
+
 from .symmetry import Spacegroup
 from .structure import Structure
 from .calculation import Calculation
