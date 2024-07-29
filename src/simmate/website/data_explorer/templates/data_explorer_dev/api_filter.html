@@ -1,0 +1,144 @@
+<div>
+    <div class="row">
+        <div class="col-sm">
+            <div class="my-2">
+                <table class="table table-centered mb-0">
+                    <thead>
+                        <tr>
+                            <th style="min-width:200px;">
+                                <small>Column</small>
+                            </th>
+                            <th style="min-width:200px;">
+                                <small>Metric</small>
+                            </th>
+                            <th style="min-width:200px;">
+                                <small>Value(s)</small>
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in filters %}
+                            <tr>
+                                <td>
+                                    <b>{{ entry.column_name }}</b>
+                                </td>
+                                <td>{{ entry.metric_display }}</td>
+                                <td>{{ entry.value }}</td>
+                                <td>
+                                    <button unicorn:click="remove_filter({{ forloop.counter0 }})"
+                                            type="button"
+                                            class="btn btn-danger btn-sm">
+                                        <i class="mdi mdi-minus"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {# Add New Filter #}
+                        <tr>
+                            {# column path #}
+                            <td>
+                                {% if column_parents %}
+                                    <ul>
+                                        {% for item in column_parents %}
+                                            <li>
+                                                <b>{{ item }}</b>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                                {% if column_options %}
+                                    {% include "basic_elements/dropdown_select.html" with unicorn_view=view.component_name name="column_selected" initial_value=column_selected options=column_options options_hash=column_options_hash %}
+                                {% endif %}
+                            </td>
+                            {# metric #}
+                            <td>
+                                {% if metric_options %}
+                                    {% include "basic_elements/dropdown_select.html" with unicorn_view=view.component_name name="metric_selected" initial_value=metric_selected options=metric_options options_hash=metric_options_hash %}
+                                {% endif %}
+                            </td>
+                            {# filter_value #}
+                            <td>
+                                {% if filter_value_type == "number" %}
+                                    <input unicorn:model.defer="filter_value"
+                                           type="number"
+                                           id="filter_value"
+                                           class="form-control"
+                                           placeholder="0.123">
+                                {% elif filter_value_type == "number-range" %}
+                                    <input unicorn:model.defer="filter_value"
+                                           type="text"
+                                           id="new_reagent_input"
+                                           class="form-control"
+                                           placeholder="12, 34 (separate w. comma)">
+                                {% elif filter_value_type == "number-list" %}
+                                    <input unicorn:model.defer="filter_value"
+                                           type="text"
+                                           id="new_reagent_input"
+                                           class="form-control"
+                                           placeholder="1, 2, 3, ... (separate w. comma)">
+                                {% elif filter_value_type == "text" %}
+                                    <input unicorn:model.defer="filter_value"
+                                           type="text"
+                                           id="new_reagent_input"
+                                           class="form-control"
+                                           placeholder="Type value...">
+                                {% elif filter_value_type == "text-list" %}
+                                    <input unicorn:model.defer="filter_value"
+                                           type="text"
+                                           id="new_reagent_input"
+                                           class="form-control"
+                                           placeholder="value1, value2, etc. (separate w. comma)">
+                                {% elif filter_value_type == "checkbox-isnull" %}
+                                    <div>
+                                        <input unicorn:model="filter_value"
+                                               type="checkbox"
+                                               id="filter_value"
+                                               class="form-check-input">
+                                        <small>Is empty?</small>
+                                    </div>
+                                {% elif filter_value_type == "checkbox-bool" %}
+                                    <div>
+                                        <input unicorn:model="filter_value"
+                                               type="checkbox"
+                                               id="filter_value"
+                                               class="form-check-input">
+                                        <small>is True/Yes?</small>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            {# Add button #}
+                            <td>
+                                <div class="btn-group mb-2">
+                                    {# refresh button #}
+                                    <button unicorn:click="reset_new_filter"
+                                            type="button"
+                                            class="btn btn-warning btn-sm">
+                                        <i class="mdi mdi-refresh"></i>
+                                    </button>
+                                    {# add button #}
+                                    <button unicorn:click="add_new_filter"
+                                            type="button"
+                                            class="btn btn-success btn-sm">
+                                        <i class="mdi mdi-plus"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {# Buttons #}
+    <div class="p-3 text-center">
+        {# Apply Filters #}
+        <button unicorn:click="apply_filters" type="submit" class="btn btn-primary">
+            <i class="mdi mdi-magnify"></i>&nbsp;&nbsp;Search
+        </button>
+        {# Reset Filters #}
+        <a href="." class="btn btn-secondary m-2">
+            <i class="mdi mdi-refresh"></i>&nbsp;&nbsp;Reset Filters
+        </a>
+    </div>
+</div>
