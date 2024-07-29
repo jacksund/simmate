@@ -1,0 +1,28 @@
+<div class="offcanvas offcanvas-end w-75" id="offcanvasQuickSearch">
+    <div class="offcanvas-header bg-dark text-light">
+        <h5>Quick Search</h5>
+        <button type="button"
+                class="btn-close text-reset"
+                data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="alert alert-primary d-flex align-items-center mt-2">
+            <div>
+                <small>
+                    This form only includes the most common filtering criteria. For more advanced queries, select the <b>Filters</b> tab.
+                </small>
+            </div>
+        </div>
+        <div>
+            {% load unicorn %}
+            {% csrf_token %}
+            {% unicorn quick_search_view %}
+        </div>
+    </div>
+</div>
+<button class="btn btn-dark"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasQuickSearch">
+    <i class="mdi mdi-magnify py-1"></i>&nbsp;&nbsp;Quick Search
+</button>

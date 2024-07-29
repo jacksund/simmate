@@ -1,0 +1,39 @@
+{% extends "core_components/site_base.html" %}
+{% block tabtitle %}Simmate{% endblock %}
+{% block banner %}
+    {% include "core_components/header.html" %}
+{% endblock %}
+{% block breadcrumbs %}
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'data_explorer:home' %}">Data</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'data_explorer:provider' calculation.table_name %}">{{ calculation.table_name }}</a>
+                        </li>
+                        <li class="breadcrumb-item active">{{ calculation.id }}</li>
+                    </ol>
+                </div>
+                {# djlint:off #}
+                <h4 class="page-title">
+                    Entry details <small>(see also:
+                    <a href="?format=api" target="_blank">API</a>
+                    &amp;
+                    <a href="?format=json" target="_blank">JSON</a>)</small>
+                </h4>
+                {# djlint:on #}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block body %}
+    {% include "core_components/table_entry_header.html" %}
+    {# Build views for the table entry's data #}
+    {% block entrycontent %}
+        {% include "core_components/table_entry.html" %}
+    {% endblock %}
+{% endblock %}
