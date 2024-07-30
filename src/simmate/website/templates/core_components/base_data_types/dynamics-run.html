@@ -6,18 +6,18 @@
         <h3>Dynamics detail:</h3>
         <ul>
             <li>
-                <b>Start Temperature:</b> {{ calculation.temperature_start }} K
+                <b>Start Temperature:</b> {{ table_entry.temperature_start }} K
             </li>
             <li>
-                <b>End Temperature:</b> {{ calculation.temperature_end }} K
+                <b>End Temperature:</b> {{ table_entry.temperature_end }} K
             </li>
             <li>
-                <b>Time per step:</b> {{ calculation.time_step }} picoseconds
+                <b>Time per step:</b> {{ table_entry.time_step }} picoseconds
             </li>
             <li>
-                <b>Total steps:</b> {{ calculation.nsteps }}
+                <b>Total steps:</b> {{ table_entry.nsteps }}
             </li>
         </ul>
-        {{ calculation.get_simmulation_detail_html_div | safe }}
+        {{ table_entry.get_simmulation_detail_html_div | safe }}
     </div>
 </div>

@@ -49,4 +49,4 @@ def test_workflows_by_type_view(client, provider_name):
 
     response = client.get(url)
     assert response.status_code == 404
-    # assertTemplateUsed(response, "data_explorer/entry_detail.html")
+    # assertTemplateUsed(response, "data_explorer/table_entry.html")

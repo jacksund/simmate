@@ -16,12 +16,12 @@ urlpatterns = [
         name="table",
     ),
     path(
-        route="<provider_name>/about/",
+        route="<table_name>/about/",
         view=views.DataExplorerView.about_view,
         name="table-about",
     ),
     path(
-        route="<provider_name>/<pk>/",  # BUG: if pk == "about"
+        route="<table_name>/<table_entry_id>/",  # BUG: if pk == "about"
         view=views.DataExplorerView.entry_view,
         name="table-entry",
     ),

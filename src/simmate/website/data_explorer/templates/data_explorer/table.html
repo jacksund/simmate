@@ -66,11 +66,13 @@
                             {% if total == 10000 %}
                                 We limit searches to 10k results for our Web UI and API. Switch to Python or SQL if you need the full dataset.
                             {% endif %}
-                            {# (total counts too slow) The full dataset has <b>{{ ncalculations_possible|intcomma }}</b> entries. #}
+                            {# (total counts too slow) The full dataset has <b>{{ nentries_possible|intcomma }}</b> entries. #}
                         {% endwith %}
                     </div>
                 </div>
-                {% block search_results_table %}12345{% endblock %}
+                {% block search_results_table %}
+                    {% include "data_explorer/table_entries.html" %}
+                {% endblock %}
                 {% include "data_explorer/pagination.html" %}
             {% else %}
                 <div class="alert alert-danger d-flex align-items-center p-2" role="alert">

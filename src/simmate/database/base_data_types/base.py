@@ -1801,9 +1801,9 @@ class DatabaseTable(models.Model):
 
     # experimental override for templates using by the Data Explorer app
 
-    html_template_about: str = None
-    html_template_table: str = None
-    html_template_entry: str = None
+    html_template_about: str = "data_explorer/table_about.html"
+    html_template_table: str = "data_explorer/table.html"
+    html_template_entry: str = "data_explorer/table_entry.html"
 
     # Unicorn views (side panels in the table view of the Data Explorer app)
     html_search_view: str = None

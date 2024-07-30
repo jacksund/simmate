@@ -2,7 +2,7 @@
 
 from django.shortcuts import render
 from django.views import View
-
+from django.shortcuts import get_object_or_404
 from simmate.database.base_data_types import DatabaseTable
 from simmate.website.utilities import get_pagination_urls
 
@@ -79,6 +79,8 @@ class DynamicApiView(View):
     
     Always use the `get_table` to grab the table, rather than this attribute.
     """
+    
+    _table_entry_kwarg: str = "table_entry_id"
 
     @classmethod
     def get_table(cls, request, *args, **kwargs) -> DatabaseTable:
@@ -95,6 +97,17 @@ class DynamicApiView(View):
                 f"No `_table` attribute set for {cls.__name__}. Either set "
                 "the table, or overwrite the `get_table` method."
             )
+            
+    @classmethod
+    def get_table_entry(cls, request, *args, **kwargs) -> DatabaseTable:
+        """
+        grabs the relevant table entry using the request.
+
+        By default, this uses the `_table_entry_kwarg` attribute in the URL
+        config as the `pk`
+        """
+        table = cls.get_table(request, *args, **kwargs)
+        return get_object_or_404(table, pk=kwargs[cls._table_entry_kwarg])
 
     # -------------------------------------------------------------------------
 
@@ -106,11 +119,13 @@ class DynamicApiView(View):
     def get_about_html_view(self, request, *args, **kwargs):
         # !!! we assume html format for now, but might want api/json formats in the future
         table = self.get_table(request, *args, **kwargs)
-        data = {
+        context = {
+            "table": table,
             "table_docs": table.get_table_docs(),
-            **self.get_about_context(request, **kwargs),
+            # TODO: **table.html_extra_about_context,
         }
-        return Response(data)
+        template = table.html_template_about
+        return render(request, template, context)
 
     # -------------------------------------------------------------------------
 
@@ -141,8 +156,7 @@ class DynamicApiView(View):
             **table.html_breadcrumb_context,
             **table.html_extra_context,
         }
-        # template = "data_explorer/table.html"
-        template = "discovery_lab/cortevatarget_full.html"
+        template = table.html_template_table
         return render(request, template, context)
 
     # -------------------------------------------------------------------------
@@ -150,9 +164,18 @@ class DynamicApiView(View):
     # The "entry" view for a single database table. Uses IDs to get the entry.
 
     def get_entry_json_view(self, request, *args, **kwargs):
-        raise NotImplementedError("to do")
+        table_entry = self.get_table_entry(request, *args, **kwargs)
+        return table_entry.to_json_response()
 
     def get_entry_html_view(self, request, *args, **kwargs):
-        raise NotImplementedError("to do")
+        table_entry = self.get_table_entry(request, *args, **kwargs)
+        context = {
+            "table_entry": table_entry,
+            # TODO:
+            # **table.html_entry_breadcrumb_context,
+            # **table.html_entry_extra_context,
+        }
+        template = table_entry.html_template_entry
+        return render(request, template, context)
 
     # -------------------------------------------------------------------------

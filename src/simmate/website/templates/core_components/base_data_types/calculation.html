@@ -6,11 +6,11 @@
     
     This block would query Prefect cloud using logic like...  
 
-        if calculation.flow_run_view:
-            name = calculation.prefect_flow_run_name # and link to calculation.prefect_cloud_link
-            id = calculation.run_id
-            state = calculation.prefect_state
-            # and then a button that links to calculation.prefect_cloud_link
+        if table_entry.flow_run_view:
+            name = table_entry.prefect_flow_run_name # and link to table_entry.prefect_cloud_link
+            id = table_entry.run_id
+            state = table_entry.prefect_state
+            # and then a button that links to table_entry.prefect_cloud_link
         else:
             message = "This workflow run was ran locally and not through Prefect Cloud"
 
@@ -28,34 +28,34 @@
     <h3>Calculation Information:</h3>
     <ul>
         <li>
-            <b>Computer system:</b> {{ calculation.computer_system }}
+            <b>Computer system:</b> {{ table_entry.computer_system }}
         </li>
         <li>
-            <b>File location:</b> {{ calculation.directory }}
+            <b>File location:</b> {{ table_entry.directory }}
         </li>
         <li>
-            <b>Workflow name:</b> {{ calculation.workflow_name }}
+            <b>Workflow name:</b> {{ table_entry.workflow_name }}
         </li>
         <li>
-            <b>Workflow version:</b> {{ calculation.workflow_version }}
+            <b>Workflow version:</b> {{ table_entry.workflow_version }}
         </li>
         <li>
-            <b>Run ID:</b> {{ calculation.run_id }}
+            <b>Run ID:</b> {{ table_entry.run_id }}
         </li>
         <li>
-            <b>Total calculation time (s):</b> {{ calculation.total_time |floatformat:-2 }}
+            <b>Total calculation time (s):</b> {{ table_entry.total_time |floatformat:-2 }}
         </li>
         <li>
-            <b>Total queue time (s):</b> {{ calculation.queue_time | floatformat:-2 }}
+            <b>Total queue time (s):</b> {{ table_entry.queue_time | floatformat:-2 }}
         </li>
         <li>
-            <b>Started at:</b> {{ calculation.started_at }}
+            <b>Started at:</b> {{ table_entry.started_at }}
         </li>
         <li>
-            <b>Finished at:</b> {{ calculation.finished_at }}
+            <b>Finished at:</b> {{ table_entry.finished_at }}
         </li>
         <li>
-            <b>Error corrections:</b> {{ calculation.corrections }}
+            <b>Error corrections:</b> {{ table_entry.corrections }}
         </li>
     </ul>
 </div>

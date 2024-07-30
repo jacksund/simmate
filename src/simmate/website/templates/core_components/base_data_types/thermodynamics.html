@@ -3,25 +3,25 @@
     <h3>Thermodynamics:</h3>
     <ul>
         <li>
-            <b>Final energy:</b> {{ calculation.energy }}
+            <b>Final energy:</b> {{ table_entry.energy }}
         </li>
         <li>
-            <b>Final energy per atom:</b> {{ calculation.energy_per_atom }}
+            <b>Final energy per atom:</b> {{ table_entry.energy_per_atom }}
         </li>
         <li>
-            <b>Energy above hull:</b> {{ calculation.energy_above_hull }}
+            <b>Energy above hull:</b> {{ table_entry.energy_above_hull }}
         </li>
         <li>
-            <b>Is thermodynamically stable?:</b> {{ calculation.is_stable }}
+            <b>Is thermodynamically stable?:</b> {{ table_entry.is_stable }}
         </li>
         <li>
-            <b>Decomposes to:</b> {{ calculation.decomposes_to }}
+            <b>Decomposes to:</b> {{ table_entry.decomposes_to }}
         </li>
         <li>
-            <b>Formation energy</b> {{ calculation.formation_energy }}
+            <b>Formation energy</b> {{ table_entry.formation_energy }}
         </li>
         <li>
-            <b>Formation energy per atom:</b> {{ calculation.formation_energy_per_atom }}
+            <b>Formation energy per atom:</b> {{ table_entry.formation_energy_per_atom }}
         </li>
     </ul>
     <a><em><b>Note:</b> stabilities and hull energies are updated on a running schedule, so newer

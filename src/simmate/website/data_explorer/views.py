@@ -47,7 +47,11 @@ def home(request):
 class DataExplorerView(DynamicApiView):
 
     @classmethod
-    def get_table(cls, request, table_name: str) -> DatabaseTable:
+    def get_table(cls, 
+                  request, 
+                  table_name: str, 
+                  table_entry_id: int | str = None,  # type depends on table's primary key column
+        ) -> DatabaseTable:
         """
         grabs the relevant database table using the URL request
         """
@@ -55,4 +59,4 @@ class DataExplorerView(DynamicApiView):
         return provider_table
 
 
-# entry_id: int | str = None,  # type depends on table's primary key column
+# entry_id: 
