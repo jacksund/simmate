@@ -15,11 +15,11 @@
         <div>
             {% load unicorn %}
             {% csrf_token %}
-            {% unicorn updater_view %}
+            {% unicorn table.html_update_view %}
         </div>
     </div>
 </div>
-<button class="btn btn-dark"
+<button class="btn btn-warning"
         type="button"
         data-bs-toggle="offcanvas"
         data-bs-target="#offcanvasUpdater">

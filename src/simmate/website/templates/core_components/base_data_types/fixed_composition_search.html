@@ -3,61 +3,61 @@
     <h3>Search Settings:</h3>
     <ul>
         <li>
-            <b>Composition:</b> {{ calculation.composition }}
+            <b>Composition:</b> {{ table_entry.composition }}
         </li>
         <li>
-            <b>Subworkflow name:</b> {{ calculation.subworkflow_name }}
+            <b>Subworkflow name:</b> {{ table_entry.subworkflow_name }}
         </li>
         <li>
-            <b>Subworkflow parameters:</b> {{ calculation.subworkflow_kwargs }}
+            <b>Subworkflow parameters:</b> {{ table_entry.subworkflow_kwargs }}
         </li>
         <li>
-            <b>Fitness field:</b> {{ calculation.fitness_field }}
+            <b>Fitness field:</b> {{ table_entry.fitness_field }}
         </li>
         <li>
-            <b>Minimum 'exact' structures:</b> {{ calculation.min_structures_exact }}
+            <b>Minimum 'exact' structures:</b> {{ table_entry.min_structures_exact }}
         </li>
         <li>
-            <b>Maximum structures:</b> {{ calculation.max_structures }}
+            <b>Maximum structures:</b> {{ table_entry.max_structures }}
         </li>
         <li>
-            <b>Best survival cutoff:</b> {{ calculation.best_survival_cutoff }}
+            <b>Best survival cutoff:</b> {{ table_entry.best_survival_cutoff }}
         </li>
         <li>
-            <b>First generation size:</b> {{ calculation.nfirst_generation }}
+            <b>First generation size:</b> {{ table_entry.nfirst_generation }}
         </li>
         <li>
-            <b>Total steady-state count:</b> {{ calculation.nsteadystate }}
+            <b>Total steady-state count:</b> {{ table_entry.nsteadystate }}
         </li>
         <li>
-            <b>Convergence cutoff:</b> {{ calculation.convergence_cutoff }} eV
+            <b>Convergence cutoff:</b> {{ table_entry.convergence_cutoff }} eV
         </li>
         <li>
-            <b>Parent selection method:</b> {{ calculation.selector_name }}
+            <b>Parent selection method:</b> {{ table_entry.selector_name }}
         </li>
         <li>
-            <b>Parent selection parameters:</b> {{ calculation.selector_kwargs }}
+            <b>Parent selection parameters:</b> {{ table_entry.selector_kwargs }}
         </li>
         <li>
-            <b>Validation method:</b> {{ calculation.validator_name }} eV
+            <b>Validation method:</b> {{ table_entry.validator_name }} eV
         </li>
         <li>
-            <b>Validation parameters:</b> {{ calculation.validator_kwargs }}
+            <b>Validation parameters:</b> {{ table_entry.validator_kwargs }}
         </li>
         <li>
-            <b>Single-shot sources:</b> {{ calculation.singleshot_sources }}
+            <b>Single-shot sources:</b> {{ table_entry.singleshot_sources }}
         </li>
         <li>
-            <b>Sleep step (s):</b> {{ calculation.sleep_step }}
+            <b>Sleep step (s):</b> {{ table_entry.sleep_step }}
         </li>
     </ul>
 </div>
 <div class="container p-4">
     <h3>Plots:</h3>
-    {{ calculation.get_fitness_convergence_html_div | safe }}
-    {{ calculation.get_fitness_distribution_html_div | safe }}
-    {{ calculation.get_staged_series_convergence_html_div | safe }}
-    {{ calculation.get_staged_series_histogram_html_div | safe }}
-    {{ calculation.get_staged_series_times_html_div | safe }}
-    {{ calculation.get_subworkflow_times_html_div | safe }}
+    {{ table_entry.get_fitness_convergence_html_div | safe }}
+    {{ table_entry.get_fitness_distribution_html_div | safe }}
+    {{ table_entry.get_staged_series_convergence_html_div | safe }}
+    {{ table_entry.get_staged_series_histogram_html_div | safe }}
+    {{ table_entry.get_staged_series_times_html_div | safe }}
+    {{ table_entry.get_subworkflow_times_html_div | safe }}
 </div>

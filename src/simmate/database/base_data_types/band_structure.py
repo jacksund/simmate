@@ -31,17 +31,6 @@ class BandStructure(DatabaseTable):
 
     archive_fields = ["band_structure_data"]
 
-    api_filters = dict(
-        nbands=["range"],
-        band_gap=["range"],
-        band_gap_direct=["range"],
-        is_gap_direct=["exact"],
-        energy_fermi=["range"],
-        conduction_band_minimum=["range"],
-        valence_band_maximum=["range"],
-        is_metal=["exact"],
-    )
-
     # kpt_path_type (setyawan_curtarolo, hinuma, latimer_munro)
     # Maybe set as an abstract property?
 

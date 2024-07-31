@@ -1,11 +1,11 @@
 <div class="container p-4">
     <h2>Search Results:</h2>
-    {% if calculations %}
+    {% if table_entrys %}
         {% load chemical_formula_filter %}
         <div class="alert alert-success" role="alert">
             <i class="dripicons-checkmark me-2"></i>
-            This table includes <b>{{ calculations | length }}</b> out of <b>{{ ncalculations_matching }}</b> results
-            that match your search criteria. These results were filtered from the <b>{{ ncalculations_possible }}</b>
+            This table includes <b>{{ table_entrys | length }}</b> out of <b>{{ nentrys_matching }}</b> results
+            that match your search criteria. These results were filtered from the <b>{{ ntable_entrys_possible }}</b>
             total possible results.
         </div>
         <table id="SearchResultsTable"
@@ -21,14 +21,14 @@
                 </tr>
             </thead>
             <tbody>
-                {% for calculation in calculations %}
+                {% for table_entry in table_entrys %}
                     <tr>
                         <!--
           This block would query Prefect cloud a bunch using logic like...  
 
-              if calculation.flow_run_view:
-                name = calculation.prefect_flow_run_name # and link to calculation.prefect_cloud_link
-                state = calculation.prefect_state
+              if table_entry.flow_run_view:
+                name = table_entry.prefect_flow_run_name # and link to table_entry.prefect_cloud_link
+                state = table_entry.prefect_state
               else:
                 name = None
                 state = None
@@ -42,12 +42,12 @@
                         <td>--</td>
                         <td>--</td>
                         <td>
-                            <a href="{% url 'workflow_run_detail' workflow.name_type workflow.name_app workflow.name_preset calculation.id %}">
-                                {{ calculation.id }}
+                            <a href="{% url 'workflow_run_detail' workflow.name_type workflow.name_app workflow.name_preset table_entry.id %}">
+                                {{ table_entry.id }}
                             </a>
                         </td>
-                        <td>{{ calculation.formula_full | chemical_formula }}</td>
-                        <td>{{ calculation.spacegroup.number }}</td>
+                        <td>{{ table_entry.formula_full | chemical_formula }}</td>
+                        <td>{{ table_entry.spacegroup.number }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

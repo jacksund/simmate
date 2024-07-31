@@ -2,27 +2,27 @@
 
 from django.urls import path
 
-from simmate.website.data_explorer import views
+from . import views
 
 urlpatterns = [
     path(
         route="",
-        view=views.providers_all,
+        view=views.home,
         name="home",
     ),
     path(
-        route="<provider_name>/",
-        view=views.ProviderAPIViewSet.dynamic_list_view,
-        name="provider",
+        route="<table_name>/",
+        view=views.DataExplorerView.list_view,
+        name="table",
     ),
     path(
-        route="<provider_name>/about/",
-        view=views.ProviderAPIViewSet.dynamic_about_view,
-        name="provider-about",
+        route="<table_name>/about/",
+        view=views.DataExplorerView.about_view,
+        name="table-about",
     ),
     path(
-        route="<provider_name>/<pk>/",
-        view=views.ProviderAPIViewSet.dynamic_retrieve_view,
-        name="entry-detail",
+        route="<table_name>/<table_entry_id>/",  # BUG: if pk == "about"
+        view=views.DataExplorerView.entry_view,
+        name="table-entry",
     ),
 ]

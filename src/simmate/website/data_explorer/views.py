@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 from simmate.configuration import settings
 from simmate.database.base_data_types import DatabaseTable, Structure
-from simmate.website.core_components.base_api_view import SimmateAPIViewSet
+from simmate.website.core_components.base_api_view_dev import DynamicApiView
 
 # closed-source data types. We can skip these if they aren't present
 try:
@@ -13,17 +13,18 @@ except ModuleNotFoundError:
     Molecule = None  # dummy class just for comparison below
 
 
-ALL_PROVIDERS = {
+# BUG: fails if tables from different apps have the same name
+EXPLORABLE_TABLES = {
     DatabaseTable.get_table(table_name).table_name: DatabaseTable.get_table(table_name)
     for table_name in settings.website.data
 }
 
 
-def providers_all(request):
+def home(request):
     crystal_dbs = []
     molecular_dbs = []
     other_dbs = []
-    for table in ALL_PROVIDERS.values():
+    for table in EXPLORABLE_TABLES.values():
         if issubclass(table, Structure):
             crystal_dbs.append(table)
         elif Molecule and issubclass(table, Molecule):
@@ -39,49 +40,24 @@ def providers_all(request):
         },
         "breadcrumb_active": "Data",
     }
-    template = "data_explorer/providers_all.html"
+    template = "data_explorer/home.html"
     return render(request, template, context)
 
 
-class ProviderAPIViewSet(SimmateAPIViewSet):
-    template_about = "data_explorer/about.html"
-    template_list = "data_explorer/provider.html"
-    template_retrieve = "data_explorer/entry_detail.html"
+class DataExplorerView(DynamicApiView):
 
     @classmethod
     def get_table(
         cls,
         request,
-        provider_name,
-        pk=None,
+        table_name: str,
+        table_entry_id: int | str = None,  # type depends on table's primary key column
     ) -> DatabaseTable:
         """
         grabs the relevant database table using the URL request
         """
-        # using the provider name (which is really just the table name), load
-        # the corresponding database table
-        #   provider_table = DatabaseTable.get_table(provider_name)
-        provider_table = ALL_PROVIDERS[provider_name]
+        provider_table = EXPLORABLE_TABLES[table_name]
         return provider_table
 
-    def get_list_context(
-        self,
-        request,
-        provider_name,
-    ) -> dict:
-        provider_table = ALL_PROVIDERS[provider_name]
-        return {
-            "provider": provider_table,
-            **provider_table.extra_html_context,
-        }
 
-    def get_retrieve_context(
-        self,
-        request,
-        provider_name,
-        pk,
-    ) -> dict:
-        return {
-            "provider_name": provider_name,
-            "entry_id": pk,
-        }
+# entry_id:

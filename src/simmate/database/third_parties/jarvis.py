@@ -15,9 +15,6 @@ class JarvisStructure(Structure):
         app_label = "data_explorer"
 
     archive_fields = ["energy_above_hull"]
-    api_filters = dict(
-        energy_above_hull=["range"],
-    )
     source = "JARVIS"
     source_long = "Joint Automated Repository for Various Integrated Simulations"
     homepage = "https://jarvis.nist.gov/"

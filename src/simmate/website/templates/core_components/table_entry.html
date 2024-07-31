@@ -1,18 +1,18 @@
 {% load getattribute %}
 <!-- Iterate through the main tables that we've prebuilt pages for -->
-{% if calculation.table_name == "StaticEnergy" %}
+{% if table_entry.table_name == "StaticEnergy" %}
     {% include "core_components/base_data_types/static-energy.html" %}
-{% elif calculation.table_name == "DiffusionAnalysis" %}
+{% elif table_entry.table_name == "DiffusionAnalysis" %}
     {% include "core_components/base_data_types/diffusion-analysis.html" %}
-{% elif calculation.table_name == "DensityofStatesCalc" %}
+{% elif table_entry.table_name == "DensityofStatesCalc" %}
     {% include "core_components/base_data_types/density-of-states-calc.html" %}
-{% elif calculation.table_name == "BandStructureCalc" %}
+{% elif table_entry.table_name == "BandStructureCalc" %}
     {% include "core_components/base_data_types/band-structure-calc.html" %}
-{% elif calculation.table_name == "Dynamics" %}
+{% elif table_entry.table_name == "Dynamics" %}
     {% include "core_components/base_data_types/dynamics-run.html" %}
-{% elif calculation.table_name == "Relaxation" %}
+{% elif table_entry.table_name == "Relaxation" %}
     {% include "core_components/base_data_types/relaxation.html" %}
-{% elif calculation.table_name == "FixedCompositionSearch" %}
+{% elif table_entry.table_name == "FixedCompositionSearch" %}
     {% include "core_components/base_data_types/fixed_composition_search.html" %}
 {% else %}
     <!-- If none of the pages above were used, then we iterate through the fundamental
@@ -47,7 +47,7 @@
         <ul>
             {% for extra_column in extra_columns %}
                 <li>
-                    <b>{{ extra_column }}:</b> {{ calculation|getattribute:extra_column }}
+                    <b>{{ extra_column }}:</b> {{ table_entry|getattribute:extra_column }}
                 </li>
             {% endfor %}
         </ul>
