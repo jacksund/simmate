@@ -1837,7 +1837,7 @@ class DatabaseTable(models.Model):
         """
         return reverse(
             "data_explorer:table-entry",
-            kwargs={"provider_name": self.table_name, "pk": self.pk},
+            kwargs={"table_name": self.table_name, "table_entry_id": self.pk},
         )
 
     @classmethod

@@ -11,12 +11,12 @@ def test_providers_view(client):
 
     response = client.get(url)
     assert response.status_code == 200
-    assertTemplateUsed(response, "data_explorer/providers_all.html")
+    assertTemplateUsed(response, "data_explorer/home.html")
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "provider_name",
+    "table_name",
     [
         "AflowPrototype",
         "MatprojStructure",
@@ -25,25 +25,25 @@ def test_providers_view(client):
         "OqmdStructure",
     ],
 )
-def test_workflows_by_type_view(client, provider_name):
+def test_workflows_by_type_view(client, table_name):
     # list view
 
     # grabs f"/workflows/{workflow_type}/"
     url = reverse(
         "data_explorer:table",
-        kwargs={"provider_name": provider_name},
+        kwargs={"table_name": table_name},
     )
 
     response = client.get(url)
     assert response.status_code == 200
-    assertTemplateUsed(response, "data_explorer/provider.html")
+    assertTemplateUsed(response, "data_explorer/table.html")
 
     # detail view
     url = reverse(
         "data_explorer:table-entry",
         kwargs={
-            "provider_name": provider_name,
-            "pk": 999,
+            "table_name": table_name,
+            "table_entry_id": 999,
         },
     )
 
