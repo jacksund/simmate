@@ -24,14 +24,6 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         "is_gap_direct",
     ]
 
-    api_filters = dict(
-        band_gap=["range"],
-        is_gap_direct=["exact"],
-        energy_fermi=["range"],
-        conduction_band_minimum=["range"],
-        valence_band_maximum=["range"],
-    )
-
     # OPTIMIZE: should I include this electronic data?
 
     band_gap = table_column.FloatField(blank=True, null=True)

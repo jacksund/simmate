@@ -21,15 +21,6 @@ class Thermodynamics(DatabaseTable):
 
     archive_fields = ["energy"]
 
-    api_filters = dict(
-        energy=["range"],
-        energy_per_atom=["range"],
-        energy_above_hull=["range"],
-        is_stable=["exact"],
-        formation_energy=["range"],
-        formation_energy_per_atom=["range"],
-    )
-
     energy = table_column.FloatField(blank=True, null=True)
     """
     The calculated total energy. Units are in eV.

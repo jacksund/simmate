@@ -29,13 +29,6 @@ class AflowPrototype(Structure):
         "strukturbericht_symbol",
         "nsites_wyckoff",
     ]
-    api_filters = dict(
-        mineral_name=["exact"],
-        aflow_id=["exact"],
-        pearson_symbol=["exact"],
-        strukturbericht_symbol=["exact"],
-        nsites_wyckoff=["range"],
-    )
     source = "AFLOW Prototypes"
     source_long = (
         "Encyclopedia of Crystallographic Prototypes from the Automatic-FLOW"

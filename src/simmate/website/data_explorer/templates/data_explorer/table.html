@@ -71,7 +71,7 @@
                     </div>
                 </div>
                 {% block search_results_table %}
-                    {% include "data_explorer/table_entries.html" %}
+                    {% include table.html_entries_template %}
                 {% endblock %}
                 {% include "data_explorer/pagination.html" %}
             {% else %}

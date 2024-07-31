@@ -51,4 +51,33 @@
             </div>
         </div>
     {% endfor %}
+{% else %}
+    <div class="alert alert-danger d-flex align-items-center">
+        <div>
+            <small>
+                <b>ALERT:</b> No default <em>`html_entries_template`</em> has been set for this table, which is why you only
+                see the ID column displayed below. Contact your admin to have this updated.
+            </small>
+        </div>
+    </div>
+    <table id="SearchResultsTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for table_entry in page.object_list %}
+                <tr>
+                    <td>{{ table_entry.id }}</td>
+                    <td>
+                        <a role="button"
+                           class="btn btn-outline-primary btn-sm"
+                           href="{{ table_entry.id }}"><i class="mdi mdi-open-in-new"></i></a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endif %}

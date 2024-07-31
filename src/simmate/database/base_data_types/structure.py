@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from django_filters import rest_framework as django_api_filters
 from scipy.constants import Avogadro
 
 from simmate.database.base_data_types import DatabaseTable, Spacegroup, table_column
@@ -16,36 +15,24 @@ class Structure(DatabaseTable):
 
     archive_fields = ["structure"]
 
-    api_filters = dict(
-        nsites=["range"],
-        nelements=["range"],
-        # elements=["contains"],
-        density=["range"],
-        density_atomic=["range"],
-        volume=["range"],
-        volume_molar=["range"],
-        formula_full=["exact"],
-        formula_reduced=["exact"],
-        formula_anonymous=["exact"],
-        spacegroup__number=["exact"],
-        spacegroup__symbol=["exact"],
-        spacegroup__crystal_system=["exact"],
-        spacegroup__point_group=["exact"],
-        # Whether to include subsystems of the given `chemical_system`. For
-        # example, the subsystems of Y-C-F would be Y, C, F, Y-C, Y-F, etc..
-        include_subsystems=django_api_filters.BooleanFilter(
-            field_name="include_subsystems",
-            label="Include chemical subsystems in results?",
-            method="skip_filter",
-        ),
-        # TODO: Supra-systems would include all the elements listed AND more. For example,
-        # searching Y-C-F would also return Y-C-F-Br, Y-Sc-C-F, etc.
-        # include_suprasystems = forms.BooleanField(label="Include Subsytems", required=False)
-        # The chemical system of the structure (e.g. "Y-C-F" or "Na-Cl")
-        chemical_system=django_api_filters.CharFilter(
-            method="filter_chemical_system",
-        ),
-    )
+    # NOTE: below is for legacy implementation of compositional API searches.
+    # This is kept for reference as we migrate to the new api
+    #
+    # from django_filters import rest_framework as django_api_filters
+    # # Whether to include subsystems of the given `chemical_system`. For
+    # # example, the subsystems of Y-C-F would be Y, C, F, Y-C, Y-F, etc..
+    # include_subsystems=django_api_filters.BooleanFilter(
+    #     field_name="include_subsystems",
+    #     label="Include chemical subsystems in results?",
+    #     method="skip_filter",
+    # ),
+    # # TODO: Supra-systems would include all the elements listed AND more. For example,
+    # # searching Y-C-F would also return Y-C-F-Br, Y-Sc-C-F, etc.
+    # # include_suprasystems = forms.BooleanField(label="Include Subsytems", required=False)
+    # # The chemical system of the structure (e.g. "Y-C-F" or "Na-Cl")
+    # chemical_system=django_api_filters.CharFilter(
+    #     method="filter_chemical_system",
+    # )
 
     structure = table_column.TextField(blank=True, null=True)
     """

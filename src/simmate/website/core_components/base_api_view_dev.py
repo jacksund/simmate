@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views import View
-from django.shortcuts import get_object_or_404
+
 from simmate.database.base_data_types import DatabaseTable
 from simmate.website.utilities import get_pagination_urls
 
@@ -79,7 +79,7 @@ class DynamicApiView(View):
     
     Always use the `get_table` to grab the table, rather than this attribute.
     """
-    
+
     _table_entry_kwarg: str = "table_entry_id"
 
     @classmethod
@@ -97,7 +97,7 @@ class DynamicApiView(View):
                 f"No `_table` attribute set for {cls.__name__}. Either set "
                 "the table, or overwrite the `get_table` method."
             )
-            
+
     @classmethod
     def get_table_entry(cls, request, *args, **kwargs) -> DatabaseTable:
         """
@@ -124,7 +124,7 @@ class DynamicApiView(View):
             "table_docs": table.get_table_docs(),
             # TODO: **table.html_extra_about_context,
         }
-        template = table.html_template_about
+        template = table.html_about_template
         return render(request, template, context)
 
     # -------------------------------------------------------------------------
@@ -156,7 +156,7 @@ class DynamicApiView(View):
             **table.html_breadcrumb_context,
             **table.html_extra_context,
         }
-        template = table.html_template_table
+        template = table.html_table_template
         return render(request, template, context)
 
     # -------------------------------------------------------------------------
@@ -175,7 +175,7 @@ class DynamicApiView(View):
             # **table.html_entry_breadcrumb_context,
             # **table.html_entry_extra_context,
         }
-        template = table_entry.html_template_entry
+        template = table_entry.html_entry_template
         return render(request, template, context)
 
     # -------------------------------------------------------------------------

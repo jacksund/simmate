@@ -1799,11 +1799,12 @@ class DatabaseTable(models.Model):
     # Methods that link to the website UI
     # -------------------------------------------------------------------------
 
-    # experimental override for templates using by the Data Explorer app
+    # experimental overrides for templates used by the Data Explorer app
 
-    html_template_about: str = "data_explorer/table_about.html"
-    html_template_table: str = "data_explorer/table.html"
-    html_template_entry: str = "data_explorer/table_entry.html"
+    html_about_template: str = "data_explorer/table_about.html"
+    html_table_template: str = "data_explorer/table.html"
+    html_entry_template: str = "data_explorer/table_entry.html"
+    html_entries_template: str = "data_explorer/table_entries.html"
 
     # Unicorn views (side panels in the table view of the Data Explorer app)
     html_search_view: str = None
