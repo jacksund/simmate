@@ -71,10 +71,11 @@ jobs:
         run: |
           conda info
           conda list
-      - name: Check dependencies
-        shell: bash -l {0}
-        run: |
-          pip check
+      # DISABLED BC OF https://github.com/jacksund/simmate/issues/669 
+      # - name: Check dependencies
+      #   shell: bash -l {0}
+      #   run: |
+      #     pip check
       
       - name: Run default tests
         shell: bash -l {0}
