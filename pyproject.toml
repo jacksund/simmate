@@ -135,7 +135,7 @@ EXTRAS = [
     "fabric >=2.6.0",  # for remote ssh connections
     "django-extensions >=3.1.5",  # simple tools to help with django development
     "bokeh >=2.1.1",  # for the dask dashboard
-    "h5py >=3.10.0, <=3.10.0",  # for reading QE's binary output files
+    "h5py >=3.10.0, <=3.11.0",  # for reading QE's binary output files
 ]
 
 # For downloading third-party data directly from source instead of Simmate
