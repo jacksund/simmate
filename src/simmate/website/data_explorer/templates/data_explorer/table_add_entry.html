@@ -1,0 +1,22 @@
+{# Update Sidebar #}
+<div class="offcanvas offcanvas-end w-75" id="offcanvasAddEntry">
+    <div class="offcanvas-header bg-dark text-light">
+        <h5>Add New Entry</h5>
+        <button type="button"
+                class="btn-close text-reset"
+                data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div>
+            {% load unicorn %}
+            {% csrf_token %}
+            {% unicorn table.html_add_view %}
+        </div>
+    </div>
+</div>
+<button class="btn btn-success"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasAddEntry">
+    <i class="mdi mdi-plus py-1"></i>&nbsp;&nbsp;Add
+</button>
