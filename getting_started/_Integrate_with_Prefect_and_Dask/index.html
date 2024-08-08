@@ -1,0 +1,3181 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://simmate.org/getting_started/_Integrate_with_Prefect_and_Dask/">
+      
+      
+      
+      
+      <link rel="icon" href="../../images/simmate-icon.svg">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.4.14">
+    
+    
+      
+        <title>Integrate with Prefect and Dask - Simmate Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.fad675c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#integrate-with-prefect-and-dask" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Simmate Documentation" class="md-header__button md-logo" aria-label="Simmate Documentation" data-md-component="logo">
+      
+  <img src="../../images/simmate-icon.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Simmate Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Integrate with Prefect and Dask
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jacksund/simmate" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../home/" class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../overview/" class="md-tabs__link">
+          
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../parameters/" class="md-tabs__link">
+        
+  
+    
+  
+  Parameters
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../full_guides/overview/" class="md-tabs__link">
+          
+  
+  Full Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../apps/overview/" class="md-tabs__link">
+          
+  
+  Apps
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../change_log/" class="md-tabs__link">
+        
+  
+    
+  
+  Updates
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Simmate Documentation" class="md-nav__button md-logo" aria-label="Simmate Documentation" data-md-component="logo">
+      
+  <img src="../../images/simmate-icon.svg" alt="logo">
+
+    </a>
+    Simmate Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jacksund/simmate" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../home/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    1. Installation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            1. Installation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/install_anaconda/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Install Anaconda
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/command_line/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) Intro to the command line
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/create_your_env/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    c) Create your environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/explore_simmate_cli/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    d) Explore Simmate commands
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/local_server_setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    e) Set up a Local Server
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    2. Workflows
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            2. Workflows
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workflows/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workflows/configure_database/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Configure the database
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workflows/make_a_structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) Make a input structure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workflows/view_all_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    c) View all workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workflows/configure_qe/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    d) Configure QE
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workflows/running_the_workflow/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    e) Run a workflow
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workflows/submit_to_a_cluster/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    (extra) Submit to a cluster
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    3. Toolkit
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            3. Toolkit
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../toolkit/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../toolkit/intro_to_spyder/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Intro to Python (& Spyder)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../toolkit/the_structure_class/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) The Structure class
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../toolkit/advanced_classes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    e) Advanced classes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    4. Database
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            4. Database
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/dbeaver/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) View data w. DBeaver
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/intro_to_python_inheritance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) How tables are built
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/access_workflow_data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    c) Workflow data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/access_thirdparty_data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    d) Third-party data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    5. Custom workflows
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            5. Custom workflows
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_workflows/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_workflows/basic_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Basic workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_workflows/chemistry_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) Chemistry workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_workflows/class_based_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) Class-based workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    6. Custom apps & tables
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            6. Custom apps & tables
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_tables_and_apps/create_a_custom_app/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Create an app
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_tables_and_apps/create_a_custom_table/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) Create a custom table
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_tables_and_apps/using_app_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    c) Adding app workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_tables_and_apps/extra_features.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    d) Extra app features
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    7. Use a cloud database
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            7. Use a cloud database
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../use_a_cloud_database/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quickstart
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../use_a_cloud_database/private_vs_collab/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Private vs shared
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../use_a_cloud_database/build_a_postgres_database/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) Building a database
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    8. Computational resources
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            8. Computational resources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../add_computational_resources/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quickstart
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../add_computational_resources/intro_to_workers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Intro to workers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wrap_up/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Wrap up
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Extra Examples
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            Extra Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../example_scripts/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../example_scripts/example-001/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Example-001
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../example_scripts/example-002/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Example-002
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../parameters/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parameters
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Full Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Full Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Website
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            Website
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/website/setup_and_config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Setup & Config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/website/rest_api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    REST API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Workflows
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Workflows
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/workflows/naming_conventions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Naming Conventions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/workflows/basic_use/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic Use
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/workflows/creating_basic_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating basic workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/workflows/creating_nested_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating nested workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/workflows/creating_s3_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating "S3" workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Database
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            Database
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/database/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/database/basic_use/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic use
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/database/workflow_data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workflow data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/database/third_party_data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Third-party data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/database/contributing_data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/database/custom_tables/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating custom tables
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Toolkit
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            Toolkit
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/toolkit/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5_2" id="__nav_4_5_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    PyMatGen Help
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            PyMatGen Help
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/toolkit/pymatgen/structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Structure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/toolkit/pymatgen/lattice/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Lattice
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/toolkit/pymatgen/sites/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sites
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/toolkit/pymatgen/composition/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Composition
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6" id="__nav_4_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6">
+            <span class="md-nav__icon md-icon"></span>
+            Contributing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/contributing/first_time_setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    First time setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/contributing/creating_and_submitting_changes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating & submitting changes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/contributing/extra/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Extra notes & tips
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../full_guides/contributing/maintainer_notes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Maintainer notes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Apps
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Apps
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/badelf/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    BadELF
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/bader_henkelman/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bader (henklman)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/clease/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CLEASE
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/deepmd/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DeepMD
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/evolution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Evolutionary Searches
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/materials_project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Materials Project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/quantum_espresso/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quantum Espresso
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_9" id="__nav_5_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    VASP
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_9">
+            <span class="md-nav__icon md-icon"></span>
+            VASP
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/vasp/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/vasp/installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/vasp/workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/warren_lab/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Warren Lab
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../change_log/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Updates
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="integrate-with-prefect-and-dask">Integrate with Prefect and Dask<a class="headerlink" href="#integrate-with-prefect-and-dask" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/26a0.svg" title=":warning:" /><img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/26a0.svg" title=":warning:" /><img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/26a0.svg" title=":warning:" /> We do not recommend this tutorial for users at the moment. This tutorial is for Prefect v1, but much of Simmate now depends on Prefect v2. As we adjust to the new backend, parts of this tutorial may be broken and recommended procedures are subject to change. <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/26a0.svg" title=":warning:" /><img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/26a0.svg" title=":warning:" /><img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/26a0.svg" title=":warning:" /> </p>
+</blockquote>
+<p>In this tutorial, you will learn how to run workflows on distributed computational resources -- with full scheduling and monitoring.</p>
+<ol>
+<li><a href="#the-quick-tutorial">The quick tutorial</a></li>
+<li><a href="#the-full-tutorial">The full tutorial</a><ul>
+<li><a href="#a-review-of-concepts">A review of concepts</a></li>
+<li><a href="#should-i-set-up-my-own-cluster">Should I set up my own cluster?</a></li>
+<li><a href="#setting-up-your-scheduler-with-prefect">Setting up your scheduler with Prefect</a></li>
+<li><a href="#setting-up-your-cluster-with-dask">Setting up your cluster with Dask</a></li>
+<li><a href="#connecting-others-to-your-scheduler">Connecting others to your scheduler</a></li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p><img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/26a0.svg" title=":warning:" /> For beginners, this will be the most difficult part of setting up Simmate -- but it is entirely optional. Be sure to read the section on <a href="#should-i-set-up-my-own-cluster">Should I set up my own cluster?</a>. There are many ways to set up your resources and caviats to each (especially if you are using university or federal supercomputers). While python experts should be able to learn Prefect and Dask quickly, we strongly urge beginners to get advice from our team. If you struggle to follow along with this tutorial, <a href="https://github.com/jacksund/simmate/discussions/categories/q-a">post a question</a> or email us directly (simmate.team@gmail.com).</p>
+</blockquote>
+<p><br/><br/></p>
+<h1 id="the-quick-tutorial">The quick tutorial<a class="headerlink" href="#the-quick-tutorial" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><img alt="💡" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4a1.svg" title=":bulb:" /> <a href="https://github.com/PrefectHQ/prefect">prefect</a>, <a href="https://github.com/dask/distributed">dask</a>, and <a href="https://github.com/dask/dask-jobqueue">dask_jobqueue</a> will be already installed for you because they are dependencies of Simmate</p>
+</blockquote>
+<ol>
+<li>Be aware that you can share a cloud database <em>without</em> sharing computational resources. This flexibility is very important for many collaborations. </li>
+<li>Just like with your cloud database, designate a point-person to manage your private computational resources. Everyone else can skip to step 9.</li>
+<li>Either sign in to <a href="https://universal.prefect.io/">Prefect Cloud</a> (recommended) or setup a <a href="https://docs.prefect.io/orchestration/server/overview.html">Prefect Server</a>.</li>
+<li>Connect to your server with the following steps (this is from <a href="https://docs.prefect.io/orchestration/getting-started/set-up.html">Prefect's tutorial</a>):<ul>
+<li>On Prefect Cloud's homepage, go to <code>User</code> -&gt; <code>Account Settings</code> -&gt; <code>API Keys</code> -&gt; <code>Create An API Key</code></li>
+<li>Copy the created key</li>
+<li>set your Prefect backend with the command <code>prefect backend cloud</code></li>
+<li>tell Prefect your key with the command <code>prefect auth login --key example_key_h123j2jfk</code></li>
+</ul>
+</li>
+<li>Register all Simmate workflows with Prefect using the command <code>simmate engine setup-cloud</code></li>
+<li>Test that Prefect is configured properly with the following steps (this will run the workflow locally):<ul>
+<li>run the command <code>prefect agent local start</code> (note that this will run endlessly and submit all workflows in parallel. use <code>crtl+C</code> to stop)</li>
+<li>in a separate terminal, rerun our workflow from tutorial 2 with <code>run-cloud</code> instead of <code>run</code> (so <code>simmate workflows run-cloud relaxation_mit POSCAR</code>)</li>
+</ul>
+</li>
+<li>Set up your computational resources using Dask (and if needed, Dask JobQueue). There are MANY options for this, which are covered in the <a href="https://github.com/jacksund/simmate/tree/main/src/simmate/engine"><code>simmate.engine</code></a> module. Take the time to read the documentation here. But as an example, we'll set up a SLURM cluster and then link it to a Prefect agent. Note, if you want to run workflows with commands like <code>mpirun -n 18 vasp_std &gt; vasp.out</code>, then limit the Dask worker to one core while having the SLURM job request more cores. The resulting python script will look something like this:
+<div class="highlight"><pre><span></span><code><span class="c1"># --------------------------------------------------------------------------------------</span>
+
+<span class="c1"># STEP 1: Configure our Dask Cluster.</span>
+
+<span class="kn">from</span> <span class="nn">dask_jobqueue</span> <span class="kn">import</span> <span class="n">SLURMCluster</span>
+
+<span class="n">cluster</span> <span class="o">=</span> <span class="n">SLURMCluster</span><span class="p">(</span>
+    <span class="c1">#</span>
+    <span class="c1"># General options</span>
+    <span class="n">scheduler_options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="mi">8786</span><span class="p">},</span>
+    <span class="n">local_directory</span><span class="o">=</span><span class="s2">&quot;~&quot;</span><span class="p">,</span>
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1"># Dask Worker Options</span>
+    <span class="n">cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">processes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">memory</span><span class="o">=</span><span class="s2">&quot;4GB&quot;</span><span class="p">,</span>
+    <span class="c1"># REQUIRED: Make sure you preload this script!</span>
+    <span class="n">extra</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--preload simmate.configuration.dask.connect_to_database&quot;</span><span class="p">],</span>  
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1"># SLURM Job Options</span>
+    <span class="n">job_cpu</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
+    <span class="n">job_mem</span><span class="o">=</span><span class="s2">&quot;50GB&quot;</span><span class="p">,</span>
+    <span class="n">job_extra</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;--output=slurm-%j.out&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;-N 1&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">walltime</span><span class="o">=</span><span class="s2">&quot;300-00:00:00&quot;</span><span class="p">,</span>
+    <span class="n">queue</span><span class="o">=</span><span class="s2">&quot;p1&quot;</span><span class="p">,</span>  <span class="c1"># this is the name of the SLURM queue/partition</span>
+    <span class="n">env_extra</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;module load vasp;&quot;</span><span class="p">],</span>  <span class="c1"># our workflow requires the vasp module to be loaded</span>
+<span class="p">)</span>
+
+<span class="c1"># Scale the cluster to the number of SLURM jobs that you&#39;d like</span>
+<span class="n">cluster</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># --------------------------------------------------------------------------------------</span>
+
+<span class="c1"># STEP 2: Configure our Prefect Agent and start submitting workflows!</span>
+
+<span class="kn">from</span> <span class="nn">prefect.agent.local</span> <span class="kn">import</span> <span class="n">LocalAgent</span>
+<span class="kn">from</span> <span class="nn">simmate.configuration.prefect.connect_to_dask</span> <span class="kn">import</span> <span class="n">set_default_executor</span>
+
+<span class="c1"># We want Prefect to use our Dask Cluster to run all of the workflow tasks. To</span>
+<span class="c1"># tell Prefect to do this, we wrote a helper function that ships with Simmate.</span>
+<span class="n">set_default_executor</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+
+<span class="c1"># Start our cluster! Our cluster&#39;s name is Warwulf, so we use that here.</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">LocalAgent</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WarWulf&quot;</span><span class="p">,</span>
+    <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;WarWulf&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="c1"># Now we can start the Prefect Agent which will run and search for jobs and then</span>
+<span class="c1"># submit them to our Dask cluster.</span>
+<span class="n">agent</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="c1"># NOTE: this line will run endlessly unless you set a timelimit in the LocalAgent above</span>
+
+<span class="c1"># --------------------------------------------------------------------------------------</span>
+</code></pre></div></li>
+<li>Test out your cluster by running <code>simmate workflows run-cloud relaxation_mit POSCAR</code> in a separate terminal (submit this a bunch if you'd like to). If you'd like to limit how many workflows of a given tag (e.g. "WarWulf" above) run in parallel, set the concurrency limit in Prefect cloud <a href="https://cloud.prefect.io/team/flow-concurrency">here</a>.</li>
+<li>To let others use your cluster, simply add them to your Prefect Cloud and give them an API key. They just need to do the following:<ul>
+<li>set your Prefect backend with the command <code>prefect backend cloud</code></li>
+<li>tell Prefect your key with the command <code>prefect auth login --key example_key_h123j2jfk</code></li>
+<li>try submitting a workflow with <code>simmate workflows run-cloud relaxation_mit POSCAR</code></li>
+</ul>
+</li>
+</ol>
+<p><br/><br/></p>
+<h1 id="the-full-tutorial">The full tutorial<a class="headerlink" href="#the-full-tutorial" title="Permanent link">&para;</a></h1>
+<p><br/></p>
+<h1 id="a-review-of-concepts">A review of concepts<a class="headerlink" href="#a-review-of-concepts" title="Permanent link">&para;</a></h1>
+<p>Recall from tutorial 2, there are 4 steps to a workflow:
+- <code>configure</code>: chooses our desired settings for the calculation (such as VASP's INCAR settings)
+- <code>schedule</code>: decides whether to run the workflow immediately or send off to a job queue (e.g. SLURM, PBS, or remote computers)
+- <code>execute</code>: writes our input files, runs the calculation (e.g. calling VASP), and checks the results for errors
+- <code>save</code>: saves the results to our database</p>
+<p>This tuturial will give an overview of how to modify the <code>schedule</code> and determine which computer <code>execute</code> is called on. Up until now, we have been using the default behavior for these two steps. But now we want to instead do the following:
+- <code>schedule</code>: submits the workflow to a scheduler queue of many other workflows
+- <code>execute</code>: run the calculation on a remote cluster</p>
+<p>A scheduler is something we submit workflows to and controls when to run them. As a bunch of workflows are submitted, our scheduler forms a queue and keeps track of which ones to run next. We will use <a href="https://www.prefect.io/">Prefect</a> as our scheduler. </p>
+<p>A cluster is a group of computational resources that actually run the workflows. So our scheduler will find whichever workflow should be ran next, and send it to our cluster to run. Clusters are often made up of "workers" -- where a worker is just a single resource and it works through one job at a time. For example, if we had a cluster made up of 10 desktop computers, each computer would run a workflow and once finished ask the scheduler for the next workflow to run. At any given time, 10 workflows will be running. We'll use Dask to set up our cluster, whether your resources are on the cloud, a supercomputer, or just simple desktops.</p>
+<p><br/></p>
+<h1 id="should-i-set-up-my-own-cluster">Should I set up my own cluster?<a class="headerlink" href="#should-i-set-up-my-own-cluster" title="Permanent link">&para;</a></h1>
+<p>Before we start... We understand that resource restrictions can be very stingent between labs and companies. So sharing resources is not possible, even in close collaborations. Simmate addresses this issue by making it easy to share a cloud database <em>without</em> sharing computational resources. In other words, you can contribute to a shared database without letting others see/access your computational resources.</p>
+<p>With that said, each team will likely need to handle their own computational resources, which can be any number of things:
+- a university or federal HPC cluster with SLURM, PBS, or some other queue system
+- a single node or even a Kubernetes cluster provided by a commercial service like DigitalOcean, GoogleCloud, etc.
+- a series of desktop computers that your lab shares
+- any combination of these resources</p>
+<p>The easiest way to use these resources is to sign on and run simmate directly on it. When this is done, the workflow runs directly on your resource and it will run there immediately. We've already see this with Tutorial 2 when we called <code>simmate workflows run ...</code>. Just use that on your new resource to start! (for help signing on to remote supercomputers and installing anaconda, be sure to ask the cluster's IT team).</p>
+<p>As another example, you can submit a workflow to a SLURM cluster with a submit.sh file like this:
+<div class="highlight"><pre><span></span><code>#!/bin/bash
+
+#SBATCH --output=slurm.out
+#SBATCH --nodes=1
+#SBATCH --ntasks=2
+
+# make sure you have you activated your conda enviornment 
+# and required modules before submitting
+
+simmate workflows run-cloud relaxation_mit POSCAR &gt; simmate.out
+</code></pre></div></p>
+<p><img alt="🔥" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f525.svg" title=":fire:" /><img alt="🔥" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f525.svg" title=":fire:" /><img alt="🔥" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f525.svg" title=":fire:" />
+If you are only running a few workflows per day (&lt;10), we recommend you stick to running workflows in this way. That is, just calling <code>simmate workflows run</code>. Don't overcomplicate things.
+<img alt="🔥" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f525.svg" title=":fire:" /><img alt="🔥" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f525.svg" title=":fire:" /><img alt="🔥" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f525.svg" title=":fire:" /></p>
+<p>Alternatively, if your team is submitting hundreds or thousands of workflows at a time, then it would be extremely useful to monitor and orchestrate these workflows. To do this, we will use Prefect and Dask. Just like with our cloud database in the previous tutorial, you only need ONE person to manage ALL of your computational resources. Once the resources have been set up, the other users can connect using API key (which is essentially a username+password).</p>
+<p></br></p>
+<h1 id="setting-up-your-scheduler-with-prefect">Setting up your scheduler with Prefect<a class="headerlink" href="#setting-up-your-scheduler-with-prefect" title="Permanent link">&para;</a></h1>
+<p>The first half of this section is just a replica of Prefect's tutorial, but rewritten in a condensed format. If you prefer, you can use their tutorial instead: <a href="https://docs.prefect.io/orchestration/getting-started/quick-start.html">Introduction to Prefect Orchestration</a></p>
+<p>With Prefect as our scheduler, we have two options on how to set this up: Prefect Cloud or Prefect Server. They give a guide on which to choose <a href="https://docs.prefect.io/orchestration/server/overview.html#prefect-server-vs-prefect-cloud-which-should-i-choose">here</a>, but to summarize:
+- Prefect Server is free and open-source, but it requires you set up a server and manage it independently
+- Prefect Cloud is free for your first 20,000 workflow tasks each month (here's <a href="https://www.prefect.io/pricing">their pricing page</a>) and all set up for you</p>
+<p>Our team uses Prefect Cloud and recommends that beginners do the same. Unless you are running dozens of [evolutionary searches] per month, you won't come close to the 20,000 workflow task-run limit. This tutorial will continue with Prefect Cloud, but if you decide on <a href="https://docs.prefect.io/orchestration/server/overview.html">Prefect Server</a>, you'll have to set that up before continuing.</p>
+<p>Go ahead and sign in to <a href="https://universal.prefect.io/">Prefect Cloud</a> (use your github account if you have one!). Everything will be empty to start, so we want to add all of Simmate's workflows to our interface here. To do this, we need an API key, which acts like a username and password. It's how we tell python that we now have a Prefect account.</p>
+<p>To get your API key, go to Prefect Cloud's homepage and navigate to <code>User</code> -&gt; <code>Account Settings</code> -&gt; <code>API Keys</code> -&gt; <code>Create An API Key</code>. Copy the created API key.</p>
+<p>On your computer, open a terminal and make sure you have your conda enviornment active. Prefect is already installed because the installation of Simmate did it for us. So run the command: <code>prefect backend cloud</code>. This just tells prefect that we decided to use their scheduler. Next, run the command <code>prefect auth login --key example_key_h123j2jfk</code> where you replace the end text with your copied API KEY. We can now use Simmate to access your cloud and submit workflows for us!</p>
+<p>To get started, we need to add all of our workflows to Prefect. This is done with <code>simmate engine setup-cloud</code>. After running this, you should see all of the workflow in your Prefect Cloud now! </p>
+<p>If you were to use the <code>simmate workflows run</code> command that we've been using, you'll notice it still runs directly on your computer. To instead submit it to Prefect Cloud, use the command  <code>simmate workflows run-cloud</code> instead. So for an example workflow, the full command would be... <code>simmate workflows run-cloud relaxation_mit POSCAR</code>. </p>
+<p>When you use <code>run-cloud</code>, the workflow run shows up in your Prefect Cloud, but it's not running. That is because we need a Prefect "Agent" -- an Agent simply checks for workflows that need to be ran and submits them to a cluster of computational resources. Let's start a Prefect Agent with all default settings (no cluster is attached yet), which means it will simply run the workflow on whichever computer the agent is on. To do this, run the command <code>prefect agent local start</code>. You'll see it pick up the workflow we submitted with <code>run-cloud</code> and run it. Even after the job completes, the agent will continue to run. So if you submit a new workflow, it will run it as well.</p>
+<p>We skimmed over a lot of the fundamentals for Prefect here, so we highly recommend going through <a href="https://docs.prefect.io/orchestration/getting-started/quick-start.html">Prefect's guides and tutorials</a>. Spending a day or two on this will save you a lot of headache down the road.</p>
+<p></br></p>
+<h1 id="setting-up-your-cluster-with-dask">Setting up your cluster with Dask<a class="headerlink" href="#setting-up-your-cluster-with-dask" title="Permanent link">&para;</a></h1>
+<p>Because there is such a diverse set of computational resources that teams can have, we can't cover all setup scenarios in this tutorial. Instead, we will go through some examples of submitting Simmate workflows to a Dask cluster. This will all be on your local computer. For switching to remote resources (and job queue clusters like SLURM), we can only point you to key tutorials and documentation on how to set up your cluster. You can <a href="https://github.com/jacksund/simmate/discussions/categories/q-a">ask our team</a> which setup is the best fit for your team, and we'll try to guide you through the process. Setting up your cluster shouldn't take longer than a hour, so post a question if you're struggling!</p>
+<p>Here are some useful resources for setting up a cluster with Dask. We recommend going through these before trying to use Dask with Simmate:
+- <a href="https://docs.dask.org/en/latest/futures.html">Introduction to Dask Futures</a>
+    - This is the best tutorial to start with! Then go through <a href="https://examples.dask.org/futures.html">their example</a>. Dask can do a lot, but Simmate only really uses this feature. If you understand how to use the <code>client.submit</code>, then you understand how Simmate is using Dask <img alt="😄" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f604.svg" title=":smile:" /> 
+- <a href="http://jobqueue.dask.org/en/latest/">Introduction to Dask Jobqueue</a>
+    - If you use a queue system like PBS, Slurm, MOAB, SGE, LSF, and HTCondor, then this will show you how to set up a cluster on your resource.</p>
+<p>Here's a simple example of using Dask to run a function that "sleeps" for 1 second
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># This loop will take 60 seconds to complete</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">):</span>  <span class="c1"># run this 60 times</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># sleeps 1 second</span>
+
+<span class="c1"># Now we switch to using Dask</span>
+<span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">Client</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+
+<span class="c1"># Futures are basically our &quot;job_id&quot;. They let us check the status and result</span>
+<span class="n">futures</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">):</span>  <span class="c1"># run this 60 times</span>
+    <span class="c1"># submits time.sleep(1) to Dask. pure=False tells Dask to rerun each instead</span>
+    <span class="c1"># of loading past results from each time.sleep(1). </span>
+    <span class="n">future</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pure</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> 
+    <span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+
+<span class="c1"># now wait for all the jobs to finish</span>
+<span class="c1"># This will take much less than 60 seconds!</span>
+<span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span> <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">futures</span><span class="p">]</span>
+</code></pre></div></p>
+<p>We'll now try using Dask to run our Simmate workflows.</p>
+<h3 id="in-serial-one-item-at-time">In serial (one item at time)<a class="headerlink" href="#in-serial-one-item-at-time" title="Permanent link">&para;</a></h3>
+<p>Let's start with how we've been submitting workflows: using <code>workflow.run</code>. This runs the workflow immediately and on your local computer. If we were to run a workflow of many structures, only one workflow would run at a time. Once a workflow completes, it moves on to the next one:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">simmate.workflows</span> <span class="kn">import</span> <span class="n">example_workflow</span>
+
+<span class="k">for</span> <span class="n">structure</span> <span class="ow">in</span> <span class="n">structures</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">example_workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="in-parallel-many-workflows-at-once">In parallel (many workflows at once)<a class="headerlink" href="#in-parallel-many-workflows-at-once" title="Permanent link">&para;</a></h3>
+<p>To use your entire computer and all of its CPUs, we can set up a Dask cluster. There's one added thing you need to do though -- and that's make sure all of Dask workers are able to connect to the Simmate database. This example let's you submit a bunch of workflows and multiple workflows can run at the same time. You can do this with...</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># first setup Dask so that it can connect to Simmate</span>
+<span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">Client</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">preload</span><span class="o">=</span><span class="s2">&quot;simmate.configuration.dask.connect_to_database&quot;</span><span class="p">)</span>
+
+<span class="c1"># now submit your workflows and </span>
+<span class="n">futures</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">structure</span> <span class="ow">in</span> <span class="n">structures</span><span class="p">:</span>
+    <span class="n">future</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">example_workflow</span><span class="o">.</span><span class="n">run</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+
+<span class="c1"># wait for all workflows to finish</span>
+<span class="c1"># you can monitor progress at http://localhost:8787/status</span>
+</code></pre></div>
+<h3 id="in-parallel-many-tasks-from-a-single-workflow-at-once">In parallel (many tasks from a single workflow at once)<a class="headerlink" href="#in-parallel-many-tasks-from-a-single-workflow-at-once" title="Permanent link">&para;</a></h3>
+<p>But what if you want to run a single workflow with all of it's tasks in parallel? To do that, we use...</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># first setup Dask so that it can connect to Simmate</span>
+<span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">Client</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">preload</span><span class="o">=</span><span class="s2">&quot;simmate.configuration.dask.connect_to_database&quot;</span><span class="p">)</span>
+
+<span class="c1"># Tell Prefect that we should submit each task to Dask</span>
+<span class="kn">from</span> <span class="nn">prefect.executors</span> <span class="kn">import</span> <span class="n">DaskExecutor</span>
+<span class="n">example_workflow</span><span class="o">.</span><span class="n">executor</span> <span class="o">=</span> <span class="n">DaskExecutor</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="n">client</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+
+<span class="c1"># now run your workflow and wait for it to finish</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">example_workflow</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="connecting-your-dask-cluster-to-your-prefect-agent">Connecting your Dask cluster to your Prefect Agent<a class="headerlink" href="#connecting-your-dask-cluster-to-your-prefect-agent" title="Permanent link">&para;</a></h3>
+<p>Once you learned how to set up your Dask cluster, the next step is tell Prefect where it is. You can always write your python script as two steps:</p>
+<ol>
+<li>Configure and then start your Dask Cluster.</li>
+<li>Configure and then start your Prefect Agent, which will start submitting workflows!</li>
+</ol>
+<p>In the future, we hope to have more convenient methods through the command-line, but these features are not complete yet. </p>
+<p></br></p>
+<h1 id="connecting-others-to-your-scheduler">Connecting others to your scheduler<a class="headerlink" href="#connecting-others-to-your-scheduler" title="Permanent link">&para;</a></h1>
+<p>Once you've set up your scheduler with Prefect and cluster with Dask, your team members simply need to connect to Prefect Cloud to submit their workflows. Generate an API key for them. Then they can complete step 9 of <a href="#the-quick-tutorial">the quick tutorial</a> (above).</p>
+<p>Just remember... <code>workflow.run()</code> in python and <code>simmate workflows run</code> in the command-line will still run the workflow locally and right away. <code>workflow.run_cloud()</code> in python and <code>simmate workflows run-cloud</code> in the command-line will submit your workflow to Prefect Cloud.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.cd18aaf1.min.js"></script>
+      
+    
+  </body>
+</html>
