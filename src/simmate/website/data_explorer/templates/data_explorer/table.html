@@ -34,10 +34,7 @@
             {# Add New Sidebar #}
             {% block addnew %}
                 {% if table.html_add_view %}
-                    {# for now this is a link, but it should be a unicorn view #}
-                    <a href="#" target="_blank" class="btn btn-success disabled">
-                        <i class="mdi mdi-plus"></i>&nbsp;&nbsp;New
-                    </a>
+                    {% include "data_explorer/table_add_entry.html" %}
                 {% endif %}
             {% endblock %}
         </div>
