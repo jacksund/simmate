@@ -35,7 +35,7 @@ from rich.progress import track
 
 from simmate.configuration import settings
 from simmate.database.utilities import check_db_conn
-from simmate.utilities import get_attributes_doc
+from simmate.utilities import chunk_list, get_attributes_doc
 
 # The "as table_column" line does NOTHING but rename a module.
 # I have this because I want to use "table_column.CharField(...)" instead
@@ -1860,11 +1860,24 @@ class DatabaseTable(models.Model):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def populate_workflow_column(cls, column_name: str, batch_size: int = 1000):
+    def populate_workflow_column(
+        cls,
+        column_name: str,
+        batch_size: int = 500,
+        update_only: bool = True,
+    ):
         """
         Populates a specific workflow column. The column must be present in the
         `workflow_columns` attribute.
         """
+
+        # BUG: using 'id__in' below might cause batches >1k to fail
+        if batch_size > 1000:
+            logging.info(
+                "This method uses a 'IN' clause to select batches of IDs, so "
+                "batches larger than 1k can cause performance issues and errors."
+            )
+
         # local import to avoid circular dependency
         from simmate.workflows.utilities import get_workflow
 
@@ -1883,21 +1896,17 @@ class DatabaseTable(models.Model):
                 "us to add additional support."
             )
 
-        filters = {f"{column_name}__isnull": True}
-        nobjs_total = cls.objects.filter(**filters).count()
+        filters = {f"{column_name}__isnull": True} if update_only else {}
+        ids_to_update = cls.objects.filter(**filters).values_list("id", flat=True).all()
+
         logging.info(
             f"Updating '{column_name}' column using '{workflow_name}' "
-            f"for {nobjs_total} entries"
+            f"for {len(ids_to_update)} entries"
         )
+        for ids_chunk in chunk_list(ids_to_update, batch_size):
 
-        # Continue the loop until
-        while True:
             # grab the next set of objects to update
-            objs_to_update = cls.objects.filter(**filters).all()[:batch_size]
-
-            # exit the while loop if there aren't any entries left
-            if not objs_to_update:
-                break
+            objs_to_update = cls.objects.filter(id__in=ids_chunk).all()
 
             # First check for a user-defined method.
             predefined_method = f"_format_inputs_for__{column_name}"
