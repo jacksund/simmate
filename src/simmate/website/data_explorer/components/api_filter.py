@@ -18,6 +18,7 @@ from simmate.website.data_explorer.views import EXPLORABLE_TABLES
 class ApiFilterView(UnicornView):
 
     template_name = "data_explorer/api_filter.html"
+    include_buttons = True
 
     parent_url = None
 
