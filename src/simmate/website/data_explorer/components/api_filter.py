@@ -203,8 +203,9 @@ class ApiFilterView(UnicornView):
             filter_value = str(value)
 
         elif vtype == "text-list":
-            # BUG: we assume all of these are numeric for now
-            filter_value = [float(v) if "." in v else int(v) for v in value.split(",")]
+            # BUG: what if a comma is within one of the entries? Maybe allow ";"
+            # and check for that first?
+            filter_value = [v.strip() for v in value.split(",")]
 
         elif vtype == "checkbox-isnull":
             filter_value = self.filter_value
