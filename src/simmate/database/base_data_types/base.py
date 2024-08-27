@@ -1590,7 +1590,8 @@ class DatabaseTable(models.Model):
         queryset = queryset.filter(**basic_filters)
 
         # and add in extras
-        queryset = queryset.order_by(*order_by)[:limit]
+        if order_by:
+            queryset = queryset.order_by(*order_by)[:limit]
 
         # if requested, split the results into pages and grab the requested one
         if paginate:
