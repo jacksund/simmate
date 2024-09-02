@@ -37,7 +37,8 @@
                     </div>
                     <div class="row text-center my-2">
                         <div class="col-12">
-                            <script>doodle_molecule('{{ table_entry.sdf_str }}', {{ table_entry.id }}, 100)</script>
+                            <script>add_mol_viewer('{{ table_entry.sdf_str }}', {{ table_entry.id }}, 100)</script>
+                            <div id='{{ calculation.id }}'></div>
                         </div>
                     </div>
                     <div class="row text-center">

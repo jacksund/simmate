@@ -40,7 +40,9 @@
         <link rel="stylesheet"
               type="text/css"
               href='{% static "/css/unicorn_errors.css" %}'>
-        {# Load ChemDoodle Javascript, CSS, default styling setting, and a custom drawing util #}
+        {# Load the RDKit JS file #}
+        <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
+        {# Load ChemDoodle JS and CSS #}
         <link rel="stylesheet"
               href="https://archives.simmate.org/assets/chemdoodle/ChemDoodleWeb.css"
               type="text/css">
@@ -51,6 +53,21 @@
               type="text/css">
         <script type="text/javascript"
                 src="https://archives.simmate.org/assets/chemdoodle/uis/ChemDoodleWeb-uis.js"></script>
+        {% comment %}
+            For customized servers that use ChemDraw instead of ChemDoodle, you can specify your ChemDraw
+            server like so (this is the official server as an example):
+                <script src="https://chemdrawdirect.perkinelmer.cloud/js/chemdrawweb/chemdrawweb.js"></script> 
+            All ChemDoodle JS/CSS code in the section above this can then be removed. In addition, the
+            custom simmate javascript "chemdoodle_utils" needs to be replaced with:
+                <script type="text/javascript" src="{% static "js/chemdraw_utils.2024_09_03.js" %}"></script>
+            NOTE: ChemDraw requires a license, which you can place in any app folder with the
+            following path: 
+                static/licenses/ChemDraw-JS-License.xml
+            Then set this in the header as well:
+                <script>var ChemDrawLicenseURL = '{% static "/licenses/ChemDraw-JS-License.xml" %}';</script>
+        {% endcomment %}
+        {# Custom Simmate Javascript for molecule sketching + images #}
+        <script type="text/javascript" src="{% static "js/rdkit_utils.2024_09_03.js" %}"></script>
         {# Custom Simmate Javascript #}
         <script type="text/javascript" src="{% static "js/chemdoodle_utils.2024_05_27.js" %}"></script>
         <script type="text/javascript" src="{% static "js/progress_bars.2024_05_27.js" %}"></script>
