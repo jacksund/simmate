@@ -1,35 +1,39 @@
-var chemdrawjs_failed = function (error) {
-    alert(error);
-};
+// API docs: https://usermanual.wiki/Pdf/ChemDraw20JS2017120API20Reference20Guide.1356440129.pdf
 
-var add_mol_sketcher = function (sketcher_id) {
+// Global dictionary to store sketcher instances
+var sketchers = {};
+
+// Creates a 2D molecule ChemDraw sketcher
+function add_mol_sketcher(sketcher_id) {
     perkinelmer.ChemdrawWebManager.attach({
         id: sketcher_id,
-        errorCallback: chemdrawjs_failed,
+        callback: function(chemdrawweb) {
+            sketchers[sketcher_id] = chemdrawweb;  // Save the sketcher instance with its ID
+        },
+        errorCallback: function(error) {
+            alert(error);  // Handle attachment failure
+        },
         licenseUrl: ChemDrawLicenseURL, // global var set in site_base.html
     });
-};
+}
 
-var get_mol_from_sketcher = function (
-    sketcher,
-    textarea_id,
-    unicorn_view,
-    unicorn_method,
-) {
-    console.log("HERE")
-};
-// NOTE: this code is how you'd pre-populate a sketcher. I hold on to
-// this for future reference.
-// perkinelmer.ChemdrawWebManager.attach({
-//     id: 'chemdrawjs-container2',
-//     callback: chemdrawjsAttached,
-//     errorCallback: chemdrawjsFailed,
-//     licenseUrl: '{% static "/licenses/ChemDraw-JS-License.xml" %}'
-// });
-// var chemdrawjsAttached = function (chemdraw) {
-//     chemdraw.loadSMILES('C1=CC=CC=C1', function (result, error) {
-//         if (error) {
-//             alert(error);
-//         }
-//         });
-// };
+// Retrieve and handle MOL data from a specific sketcher
+function get_mol_from_sketcher(sketcher_id, unicorn_view, unicorn_method) {
+
+    // Retrieve the sketcher from the global dictionary
+    var sketcher = sketchers[sketcher_id]; 
+    
+    // Pull out the molecule(s) as Mol strings (to keep orientation)
+    if (sketcher) {
+        sketcher.getMOL(function(mol, error) {
+            if (error) {
+                console.error("Error retrieving MOL: ", error);
+            } else {
+                // if success, then we call unicorn to update the value
+                Unicorn.call(unicorn_view, unicorn_method, JSON.stringify(mol));
+            }
+        });
+    } else {
+        console.error("Sketcher not found for ID: " + sketcher_id);
+    };
+}
