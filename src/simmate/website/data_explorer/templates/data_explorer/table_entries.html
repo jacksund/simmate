@@ -28,6 +28,7 @@
         </tbody>
     </table>
 {% elif "Molecule" in table.get_mixin_names %}
+    {% load draw_molecule %}
     {% for table_entry in page.object_list %}
         <div class="col-auto">
             <div class="card border-secondary border ribbon-box" style="width: 12rem;">
@@ -36,9 +37,7 @@
                         <div class="py-1 text-light bg-primary text-center fw-bold rounded col-12">id = {{ table_entry.id }}</div>
                     </div>
                     <div class="row text-center my-2">
-                        <div class="col-12">
-                            <script>doodle_molecule('{{ table_entry.sdf_str }}', {{ table_entry.id }}, 100)</script>
-                        </div>
+                        <div class="col-12">{% draw_molecule table_entry width=150 height=150 %}</div>
                     </div>
                     <div class="row text-center">
                         <div class="col">
