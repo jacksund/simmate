@@ -26,6 +26,9 @@ var add_mol_viewer = function (canvas_id, mol_str, width, height) {
             
             // sometimes the div starts as hidden and we unhide it to show the mol
             mol_canvas.removeAttribute("hidden");
+            
+            // if we are drawing from a div that was originally a sketcher, then
+            // we need to clear its styling
             mol_canvas.style.height = '';
             mol_canvas.style.width = '';
         })
@@ -35,11 +38,9 @@ var add_mol_viewer = function (canvas_id, mol_str, width, height) {
 };
 
 
-// unsets the molecule and rehides the canvas
-//var remove_mol_viewer = function(id, new_sdf_str) {
-//    var canvas_id = "canvas_" + id
-//   // remove the current mol
-//    refresh_doodle(id, "");
-//    // hide the canvas
-//    document.getElementById(canvas_id).hidden = true;
-// };
+// unsets the molecule SVG and rehides the canvas
+var remove_mol_viewer = function(canvas_id) {
+    var mol_canvas = document.getElementById(canvas_id);
+    mol_canvas.hidden = true;
+    mol_canvas.innerHTML = '';
+};
