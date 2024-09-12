@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import json
 from urllib import parse
 
+from django.http import HttpRequest
 from django.utils.encoding import force_str
 
 
@@ -78,3 +80,56 @@ def get_pagination_urls(request, current_page) -> dict:
         "next": next_url,  # just url str
         "elided_pages": elided_pages,  # list of (display, url str)
     }
+
+
+def parse_request_get(
+    request: HttpRequest,
+    include_format: bool = True,
+    group_filters: bool = False,
+) -> dict:
+    """
+    Given an request with GET parameters, this parses the parameters/values into
+    proper python types -- assuming each parameter's value is defined using JSON
+    """
+
+    def deserialize_value(value):
+        """
+        Converts the URL GET parameters to the correct data type
+        """
+        try:
+            # Attempt to parse the value as JSON
+            return json.loads(value)
+        except (json.JSONDecodeError, TypeError):
+            # If it's not JSON, return the original value
+            return value
+
+            # just return the string as-is for our last-ditch effort
+            return str(value)
+            # Raising an error via f-string might be an injection security risk
+            # raise Exception(f"Unknown URL value type: {value}")
+
+    # note, if a key is defined more than once, it will only use the last def
+    url_get_args = {k: deserialize_value(v) for k, v in request.GET.dict().items()}
+
+    # we now break out the common filter kwargs so that we can use filter_from_config.
+    # We only pass these values if they are present as to avoid overwriting
+    # the defaults set elsewhere
+    extra_kwargs = {
+        key: url_get_args.pop(key)
+        for key in ["order_by", "limit", "page", "page_size"]
+        if key in url_get_args.keys()
+    }
+
+    # special case for "format", which is only used to determine how to
+    # render the results. This is thrown out if it is not requested
+    if include_format and "format" in url_get_args.keys():
+        extra_kwargs["format"] = url_get_args.pop("format", "html")
+    else:
+        # try removing whether its there or not
+        url_get_args.pop("format", None)
+
+    return (
+        {"filters": url_get_args, **extra_kwargs}
+        if group_filters
+        else {**url_get_args, **extra_kwargs}
+    )

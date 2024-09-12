@@ -1453,73 +1453,6 @@ class DatabaseTable(models.Model):
                     extra_args.append(parameter)
         return extra_args
 
-    @staticmethod
-    def _parse_request_get(request: HttpRequest, include_format: bool = True) -> dict:
-        # note, if a key is defined more than once, it will only use the last def
-        url_get_args = request.GET.dict()
-
-        def deserialize_value(value: str) -> any:
-            """
-            Converts the URL GET parameters to the correct data type
-            """
-            if value.startswith('"') and value.endswith('"'):
-                return value.strip('"')
-            elif value.startswith("'") and value.endswith("'"):
-                return value.strip("'")
-            elif value.lower() in ["true", "false"]:
-                return True if value.lower() == "true" else False
-            elif value.isnumeric():
-                return int(value)
-            elif value.replace(".", "").isnumeric():
-                return float(value)
-            else:
-                # just return the string as-is for our last-ditch effort
-                return str(value)
-                # Raising an error via f-string might be an injection security risk
-                # raise Exception(f"Unknown URL value type: {value}")
-
-        for key in url_get_args.keys():
-
-            # The "__in" field lookup is a special case where we need a list of values.
-            # Our go-to delimiter is ";", but there may be cases where this causes
-            # a bug -- specifically when an __in string should contain a ";"
-            if key.endswith("__in"):
-                url_get_args[key] = [
-                    deserialize_value(value) for value in url_get_args[key].split(";")
-                ]
-            # For ranges, we have a format of (123,321)
-            elif key.endswith("__range"):
-                values = url_get_args[key].split(",")
-                url_get_args[key] = (
-                    deserialize_value(values[0].strip("(")),
-                    deserialize_value(values[1].strip(")")),
-                )
-            # otherwise its a normal key-value pair
-            else:
-                url_get_args[key] = deserialize_value(url_get_args[key])
-
-        # we now break out the common filter kwargs so that we can use filter_from_config.
-        # We only pass these values if they are present as to avoid overwriting
-        # the defaults set elsewhere
-        extra_kwargs = {
-            key: url_get_args.pop(key)
-            for key in ["order_by", "limit", "page", "page_size"]
-            if key in url_get_args.keys()
-        }
-
-        # special case for "format", which is only used to determine how to
-        # render the results. This is thrown out if it is not requested
-        if include_format and "format" in url_get_args.keys():
-            extra_kwargs["format"] = url_get_args.pop("format", "html")
-        else:
-            # try removing whether its there or not
-            url_get_args.pop("format", None)
-
-        return {
-            "filters": url_get_args,
-            **extra_kwargs,
-        }
-
     @classmethod
     def filter_from_request(
         cls,
@@ -1535,7 +1468,13 @@ class DatabaseTable(models.Model):
         # any other field lookups allowed for EACH field... In practice, we want
         # to just allow anything and trust the user follows the docs correctly.
         # Worst case, the API call fails, which is no big deal.
-        get_kwargs = cls._parse_request_get(request, include_format=False)
+        from simmate.website.utilities import parse_request_get
+
+        get_kwargs = parse_request_get(
+            request,
+            include_format=False,
+            group_filters=True,
+        )
         return cls.filter_from_config(
             **get_kwargs,
             paginate=paginate,
@@ -1545,7 +1484,7 @@ class DatabaseTable(models.Model):
     def filter_from_config(
         cls,
         filters: dict,
-        order_by: list[str] = ["id"],
+        order_by: str | list[str] = "id",  # could be ["created_at", "id", ...]
         limit: int = 10_000,
         page: int = 1,
         page_size: int = 25,
@@ -1591,6 +1530,9 @@ class DatabaseTable(models.Model):
 
         # and add in extras
         if order_by:
+            # in case only a single str was given, convert to list
+            if isinstance(order_by, str):
+                order_by = [order_by]
             queryset = queryset.order_by(*order_by)[:limit]
 
         # if requested, split the results into pages and grab the requested one

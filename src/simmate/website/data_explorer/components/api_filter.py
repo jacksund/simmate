@@ -4,6 +4,7 @@ from django_unicorn.components import UnicornView
 # from simmate.configuration import settings
 from simmate.database.base_data_types import DatabaseTable, FilteredScope, table_column
 from simmate.website.data_explorer.views import EXPLORABLE_TABLES
+from simmate.website.utilities import parse_request_get
 
 # TODO: move to util and combine with var used in views.py
 # TODO: include all ORM models automatically
@@ -38,7 +39,7 @@ class ApiFilterView(UnicornView):
         table = self._get_base_table()
 
         # load url args + starting filters
-        url_config = table._parse_request_get(self.request)
+        url_config = parse_request_get(self.request, group_filters=True)
         self._load_filters(url_config.get("filters", {}))
 
         # populate rest of form starting fields
