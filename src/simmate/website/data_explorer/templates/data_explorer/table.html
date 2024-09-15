@@ -68,7 +68,8 @@
                     </div>
                 </div>
                 {% block search_results_table %}
-                    {% include table.html_entries_template %}
+                    {# we assume that if enable_select is used, then there is a viable update_many view #}
+                    {% include table.html_entries_template with enable_select=True entries=page.object_list %}
                 {% endblock %}
                 {% include "data_explorer/pagination.html" %}
             {% else %}
