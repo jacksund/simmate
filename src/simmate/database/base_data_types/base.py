@@ -17,16 +17,17 @@ import urllib
 import warnings
 from functools import cache
 from pathlib import Path
-from django.apps import apps
+
 import pandas
 import yaml
+from django.apps import apps
 from django.core.paginator import Page, Paginator
 from django.db import models  # see comment below
 from django.db import models as table_column
 from django.forms.models import model_to_dict
 from django.http import HttpRequest, JsonResponse, QueryDict
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
+from django.urls import resolve, reverse
 from django.utils.module_loading import import_string
 from django.utils.timezone import datetime
 from django_filters import rest_framework as django_api_filters
@@ -810,22 +811,22 @@ class DatabaseTable(models.Model):
         return all_data_ordered
 
     @staticmethod
-    def get_table(table_name: str):  # returns subclass of DatabaseTable 
+    def get_table(table_name: str):  # returns subclass of DatabaseTable
         """
         Given a table name (e.g. "MaterialsProjectStructure") or a full import
         path of a table, this will load and return the corresponding table class.
         """
-        
+
         # "." in the name indicates an import path
         if "." in table_name:
             datatable = import_string(table_name)
-        
+
         # otherwise search all tables and see if there is a *single* match
         else:
             all_models = apps.get_models()
             matches = []
             for model in all_models:
-                if model.table_name == table_name:
+                if hasattr(model, "table_name") and model.table_name == table_name:
                     matches.append(model)
             if len(matches) == 1:
                 datatable = matches[0]
@@ -1469,21 +1470,39 @@ class DatabaseTable(models.Model):
         subclass (where it validates that you're using the correct subclass).
         """
 
-        # convert the URL into a request object
         url = urllib.parse.urlparse(url)
-        request = HttpRequest()
-        request.path = url.path
-        request.GET = QueryDict(url.query)
 
         # make sure the base URL is the simmate website
         if settings.website.debug == False and "simmate." not in url.netloc:
             raise Exception("This is not a Simmate website url")
-        
+
+        # convert the URL into a request object
+        request = HttpRequest()
+        request.path = url.path
+        request.GET = QueryDict(url.query)
+        request.resolver_match = resolve(url.path)
+
+        # make sure we are looking at a /data view in tables
+        if not (
+            request.resolver_match.namespaces[0] == "data_explorer"
+            and request.resolver_match.url_name == "table"
+        ):
+            raise Exception("This is not a Simmate `data_explorer.table` url")
+
         # grab the appropriate table
-        
-        
-        # if cls == DatabaseTable
-        breakpoint()
+        table_name = request.resolver_match.kwargs["table_name"]
+        expected_table = cls.get_table(table_name)
+
+        if cls != DatabaseTable and cls != expected_table:
+            raise Exception(
+                "The table indicated in the URL does not match the table class you are using. "
+                f"current table: {cls} ;  url table: {expected_table}"
+            )
+
+        return expected_table.filter_from_request(
+            request=request,
+            **kwargs,
+        )
 
     @classmethod
     def filter_from_request(
