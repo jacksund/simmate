@@ -1484,7 +1484,9 @@ class DatabaseTable(models.Model):
     def filter_from_config(
         cls,
         filters: dict,
-        order_by: str | list[str] = "id",  # could be ["created_at", "id", ...]
+        # True default is "id" when pagination is needed. Using "None" respects
+        # if there is ordering from any of the filters (e.g. filter_similarity_2d)
+        order_by: str | list[str] = None,  # could be "id" or ["created_at", "id", ...]
         limit: int = 10_000,
         page: int = 1,
         page_size: int = 25,
@@ -1528,12 +1530,20 @@ class DatabaseTable(models.Model):
         # now that all filter_methods have been applied, we now apply basic ones
         queryset = queryset.filter(**basic_filters)
 
-        # and add in extras
-        if order_by:
+        # Handle ordering
+        # the ordered_by kwarg takes priority, but in cases where none is set
+        # AND the queryset filters didn't give any, pagination still requires
+        # that we do some form of ordering, so we filter by id
+        if paginate and not order_by and not queryset.query.order_by:
+            order_by = "id"
+        if order_by or not queryset.query.order_by:
             # in case only a single str was given, convert to list
             if isinstance(order_by, str):
                 order_by = [order_by]
-            queryset = queryset.order_by(*order_by)[:limit]
+            queryset = queryset.order_by(*order_by)
+
+        if limit:
+            queryset = queryset[:limit]
 
         # if requested, split the results into pages and grab the requested one
         if paginate:
