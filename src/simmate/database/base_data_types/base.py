@@ -1536,7 +1536,7 @@ class DatabaseTable(models.Model):
         # that we do some form of ordering, so we filter by id
         if paginate and not order_by and not queryset.query.order_by:
             order_by = "id"
-        if order_by or not queryset.query.order_by:
+        if order_by:
             # in case only a single str was given, convert to list
             if isinstance(order_by, str):
                 order_by = [order_by]
