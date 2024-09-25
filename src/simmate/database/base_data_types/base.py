@@ -520,13 +520,17 @@ class DatabaseTable(models.Model):
         return cls.__name__
 
     @classmethod
-    def get_column_names(cls) -> list[str]:
+    def get_column_names(cls, include_relations: bool = True) -> list[str]:
         """
         Returns a list of all the column names for this table and indicates which
         columns are related to other tables. This is primarily used to help
         view what data is available.
         """
-        return [column.name for column in cls._meta.get_fields()]
+        return [
+            column.name
+            for column in cls._meta.get_fields()
+            if include_relations or not column.is_relation
+        ]
 
     @classmethod
     def show_columns(cls):
