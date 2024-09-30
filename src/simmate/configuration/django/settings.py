@@ -303,9 +303,15 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-# simple setting required by allauth. not sure what it does...
-# I think this is if you are hosting several websites that all use the
-# same django backend for account sign-in
+# TODO:
+# Set how long a user can stay signed-in for. When this cookie expires, the
+# user will be signed-out and asked to authenticate again. Django's default
+# is 1209600 (2 weeks, in seconds).
+# SESSION_COOKIE_AGE = 86400 # 24hrs, in seconds
+
+# simple setting required by allauth. This is intended for hosting several
+# websites that all use the same django backend for account sign-in, which
+# is not the case for simmate -- so we default to 1 (the main site)
 SITE_ID = 1
 
 # We start with the providers as an empty dictionary and only fill them
