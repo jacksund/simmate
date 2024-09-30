@@ -86,6 +86,7 @@ INSTALLED_APPS = [
     # Any extra apps from the user (such as django-table2 or some other package)
     *settings.extra_django_apps,
     # Simmate apps + user apps
+    "simmate.website.configs.UserTrackingConfig",
     "simmate.website.configs.CoreComponentsConfig",
     "simmate.website.configs.DataExplorerConfig",
     "simmate.website.configs.WorkflowsConfig",
