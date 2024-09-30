@@ -129,6 +129,8 @@ MIDDLEWARE = [
     "simple_history.middleware.HistoryRequestMiddleware",
     # adds specific authentication methods, such as login by email
     "allauth.account.middleware.AccountMiddleware",
+    # tracks page visits accross the website
+    "simmate.website.user_tracking.middleware.WebsitePageVisitMiddleware",
 ]
 
 # "core" here is based on the name of my main django folder
