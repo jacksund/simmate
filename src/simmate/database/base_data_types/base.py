@@ -29,7 +29,7 @@ from django.http import HttpRequest, JsonResponse, QueryDict
 from django.shortcuts import get_object_or_404
 from django.urls import resolve, reverse
 from django.utils.module_loading import import_string
-from django.utils.timezone import datetime
+from django.utils.timezone import datetime, now, timedelta
 from django_filters import rest_framework as django_api_filters
 from django_pandas.io import read_frame
 from rich.progress import track
@@ -273,6 +273,40 @@ class SearchResults(models.QuerySet):
         return super().bulk_update(*args, **kwargs)
 
     # -------------------------------------------------------------------------
+
+    # Misc utilities for common tasks
+
+    def filter_age(self, cutoff: str, age_column: str = "created_at"):
+        """
+        A convienience filter for date-based filters such as "created in the
+        last 24hrs". Uses the `created_at` column by default but can be
+        pointed to any datetime column.
+
+        Options for `cutoff` are 'hour', 'day', 'week', 'month', and 'year'
+        """
+        current_time = now()
+        if cutoff == "hour":
+            cutoff_date = current_time - timedelta(hours=1)
+        elif cutoff == "day":
+            cutoff_date = current_time - timedelta(days=1)
+        elif cutoff == "week":
+            cutoff_date = current_time - timedelta(days=7)
+        elif cutoff == "month":
+            cutoff_date = current_time - timedelta(days=30)
+        elif cutoff == "year":
+            cutoff_date = current_time - timedelta(days=365)
+        else:
+            raise Exception(f"Unknown age cutoff: {cutoff}")
+
+        return self.filter(**{f"{age_column}__gte": cutoff_date})
+
+    def count_by_column(self, column: str) -> dict:
+        """
+        Util to count the rows per column. Meant for ChoiceField columns such
+        as "status" where you want to know how many of each there are.
+        """
+        result = self.values(column).annotate(count=table_column.Count(column))
+        return {entry[column]: entry["count"] for entry in result}
 
 
 # Copied this line from...
