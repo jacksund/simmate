@@ -21,6 +21,7 @@ from simmate.website.core_components.templatetags.structure_serialize_filter imp
 #     # assertTemplateUsed("core_components/spacegroup.html")
 
 
+@pytest.mark.django_db
 def test_dummy_view(client):
     response = client.get("/core-components/test/")
     assert response.status_code == 200
