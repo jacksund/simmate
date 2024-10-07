@@ -78,7 +78,8 @@
     <body class="loading"
           data-layout-color="light"
           data-layout="detached"
-          data-rightbar-onstart="true">
+          data-rightbar-onstart="true"
+          {% if compact_sidebar %}data-leftbar-compact-mode="condensed"{% endif %}>
         {# token always required for Django-Unicorn #}
         {% csrf_token %}
         {# Pre-loader #}
