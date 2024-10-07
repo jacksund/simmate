@@ -155,6 +155,9 @@ class DynamicApiView(View):
             # TODO:
             **table.html_breadcrumb_context,
             **table.html_extra_context,
+            # make left sidebar compact (only icons) when there's a quick-search
+            # view, so that we can put the search form on the right side
+            # "compact_sidebar": True if table.html_search_view else False,
         }
         template = table.html_table_template
         return render(request, template, context)

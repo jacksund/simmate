@@ -14,17 +14,10 @@
             {% block quicksearch %}
                 {% if table.html_search_view %}
                     {% include "data_explorer/table_quick_search.html" %}
+                {% else %}
+                    {% include "data_explorer/table_filters.html" %}
                 {% endif %}
             {% endblock %}
-            {# Filter Sidebar #}
-            {% block filters %}
-                {% include "data_explorer/table_filters.html" %}
-            {% endblock %}
-            {# JSON + Python Buttons #}
-            <a href="?format=json" target="_blank" class="btn btn-outline-dark my-1">JSON</a>
-            <a href="https://jacksund.github.io/simmate/getting_started/database/quick_start/"
-               target="_blank"
-               class="btn btn-outline-dark">Python</a>
             {# Update Sidebar #}
             {% block updater %}
                 {% if table.html_update_view %}
