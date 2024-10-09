@@ -1584,6 +1584,7 @@ class DatabaseTable(models.Model):
         """
         Converts URL kwargs into a queryset.
         """
+
         # Some tables have "advanced" filtering logic. These want us to call
         # a filtering method, rather than just passing the kwarg to `objects.filter()`.
         # An example of this would be "chemical_system" for Structure, which
@@ -1596,17 +1597,25 @@ class DatabaseTable(models.Model):
 
         queryset = cls.objects
         for filter_name, filter_value in filters.items():
+
             # if we have a filter method, we apply it to our queryset right away
             if f"filter_{filter_name}" in filter_methods:
+                # The args can be given one of two ways:
+                #   1. a single arg
+                #   2. kwargs (a json dict with key-values)
+                # Here are examples for each approach to call the
+                # method `filter_age(cutoff, age_column)`, where 'cutoff' is
+                # required while age_column is an optional input
+                #   age="day"
+                #   age={"cutoff": "day", "age_column": "updated_at"}
+                # The latter is more explicit and robust to errors.
+                # BUG: if the first positional is supposed to be a dict,
+                # you must use the JSON approach instead.
                 method = getattr(queryset, f"filter_{filter_name}")
-                method_args = filter_value.split(",") if filter_value else []
-                method_kwargs = {
-                    arg: filters.get(arg)
-                    for arg in list(inspect.signature(method).parameters.keys())
-                    if arg in filters.keys()
-                }
-                queryset = method(*method_args, **method_kwargs)
-                # BUG: need to figure out better approach for passing params
+                if not isinstance(filter_value, dict):
+                    queryset = method(filter_value)
+                else:
+                    queryset = method(**filter_value)
 
             # these are kwargs only needed in filter methods (e.g. `include_subsystems`)
             elif filter_name in filter_methods_args:
