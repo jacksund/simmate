@@ -28,6 +28,7 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
     
     # Make the unitcell relatively cubic before relaxing
     standardize_structure = "primitive-LLL"
+    symmetry_precision = 0.1
     
     control = dict(
         pseudo_dir__auto=True, # uses the default directory for pseudopotentials
@@ -35,22 +36,22 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
         calculation="relax", # perform geometry relaxation with fixed cell
         tstress=True, # calculate stress
         tprnfor=True, # calculate forces
-        nstep=75, # maximum number of ionic steps
+        nstep=100, # maximum number of ionic steps
     )
 
     system = dict(
         ibrav=0, # indicates crystal axis is provided in input
         nat__auto=True, # automatically set number of atoms
         ntyp__auto=True, # automatically set number of types of atoms
-        ecutwfc__auto="efficiency_0.67", # automatically select energy cutoff for wavefunctions
-        ecutrho__auto="efficiency_0.67", # automatically select energy cutoff for charge density/potential
+        ecutwfc__auto="efficiency_1.2", # automatically select energy cutoff for wavefunctions
+        ecutrho__auto="efficiency_1.2", # automatically select energy cutoff for charge density/potential
         # We don't know if we have a metal or non-metal so we make a guess here.
         # !!! This guess could be dangerous without handlers
         multiple_keywords__smart_ismear={
             "metal": dict(
                 occupations="smearing", # use smearing
                 smearing="methfessel-paxton", # equivalent to ISMEAR=1
-                degauss=0.1, # equivalent to SIGMA
+                degauss=0.06, # equivalent to SIGMA
             ),
             "non-metal": dict(
                 occupations="smearing", # Should we still use smearing here like we would in vasp?
@@ -64,7 +65,7 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
         diagonalization="david", # equivalent to ALGO = Normal
         mixing_mode="plain", 
         mixing_beta=0.7, # mixing factor for self-consistency
-        conv_thr="2.0e-3", # convergence threshold for SCF cycle
+        conv_thr="1.0e-4", # convergence threshold for SCF cycle
     )
     
     ions = dict(
@@ -73,6 +74,8 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
 
 
     k_points = dict(
-        spacing=0.75,
+        spacing=0.5,
         gamma_centered=True,
     )
+
+
