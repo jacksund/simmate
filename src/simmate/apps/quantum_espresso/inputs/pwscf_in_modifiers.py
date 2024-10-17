@@ -75,3 +75,24 @@ def keyword_modifier_ecutrho(structure: Structure, mode: str) -> float:
     return max(
         [mappings[element.symbol]["cutoff_rho"] for element in structure.composition]
     )
+
+def keyword_modifier_smart_smear(structure: Structure, smear_config: dict):
+    """
+    The smearing value used here depends on if we have a semiconductor,
+    insulator, or metal. This modifier makes a "best-guess" on what the
+    material is and uses the proper smearing type. 
+    
+    """
+    #!!! It would be useful to have a handler similar to the IncorrectSmearing 
+    # error handler used in vasp workflows.
+    
+    # for now we just go through the structure and if all elements are
+    # metals, then we say it's a metal. Otherwise, we treat the structure
+    # as a semiconductor or insulator.
+    if all(element.is_metal for element in structure.composition):
+        smear_settings = smear_config.get("metal", {})
+
+    else:
+        smear_settings = smear_config.get("non-metal", {})
+
+    return smear_settings
