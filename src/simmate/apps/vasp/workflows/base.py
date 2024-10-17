@@ -357,7 +357,7 @@ class VaspWorkflow(S3Workflow):
             ]
         }
 
-
+# !!! This is used in quantum espresso methods as well. Move to utilities?
 def check_for_standardization_bugs(
     structure_original: Structure,
     structure_new: Structure,

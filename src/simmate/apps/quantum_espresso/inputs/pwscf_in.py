@@ -16,6 +16,7 @@ from simmate.apps.quantum_espresso.inputs.pwscf_in_modifiers import (
     keyword_modifier_nat,
     keyword_modifier_ntyp,
     keyword_modifier_pseudo_dir,
+    keyword_modifier_smart_smear,
 )
 from simmate.toolkit import Structure
 from simmate.utilities import str_to_datatype
@@ -819,5 +820,6 @@ for modifier in [
     keyword_modifier_ntyp,
     keyword_modifier_ecutwfc,
     keyword_modifier_ecutrho,
+    keyword_modifier_smart_smear,
 ]:
     PwscfInput.add_keyword_modifier(modifier)
