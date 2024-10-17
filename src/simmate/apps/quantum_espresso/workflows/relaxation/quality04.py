@@ -16,7 +16,7 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
     calculation as a first step.
     """
     
-    description_doc_short = "bare-bones settings for randomly-created structures"
+    description_doc_short = "much less bare-bones settings for randomly-created structures"
     
     # The settings are made to mirror the settings in relaxation.vasp.quality00.
     # Some settings do not have direct parallels or are implemented differently: 
