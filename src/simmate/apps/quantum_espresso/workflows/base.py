@@ -15,6 +15,8 @@ from simmate.utilities import get_docker_command
 
 # TODO: add StructureInputWorkflow mixin which can be made from VaspWorkflow class
 class PwscfWorkflow(S3Workflow, StructureWorkflow):
+    _parameter_methods = S3Workflow._parameter_methods + StructureWorkflow._parameter_methods
+
     required_files = ["pwscf.in"]
 
     command: str = settings.quantum_espresso.default_command

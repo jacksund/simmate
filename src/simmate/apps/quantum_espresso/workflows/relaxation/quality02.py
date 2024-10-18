@@ -52,6 +52,10 @@ class Relaxation__QuantumEspresso__Quality02(Relaxation__QuantumEspresso__Qualit
             ),
         },
     )
+    
+    cell = dict(
+    cell_dynamics="bfgs" # must be set for vc-relax with ion-dynamics="bgfs"
+    )
 
     k_points = dict(
         spacing=0.5,

@@ -29,7 +29,8 @@ def get_default_parallel_settings():
 
 
 class VaspWorkflow(S3Workflow, StructureWorkflow):
-
+    _parameter_methods = S3Workflow._parameter_methods + StructureWorkflow._parameter_methods
+    
     required_files = ["INCAR", "POTCAR", "POSCAR"]
     exclude_from_archives = ["POTCAR"]
 

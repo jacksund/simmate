@@ -137,6 +137,9 @@ class StagedWorkflow(Workflow):
         return all_value_series
 
 
+# BUG: These are exclusively for energy_per_atom, but this won't always be our
+# convergence criteria in the future. These will need to be updated when the
+# convergence crit is made dynamic
 class StagedSeriesConvergence(PlotlyFigure):
     method_type = "classmethod"
 

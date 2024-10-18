@@ -4,7 +4,10 @@ from django_filters import rest_framework as django_api_filters
 from scipy.constants import Avogadro
 
 from simmate.database.base_data_types import DatabaseTable, Spacegroup, table_column
+from simmate.configuration import settings
+from simmate.database.utilities import postgress_connect
 from simmate.toolkit import Structure as ToolkitStructure
+from simmate.toolkit.validators.fingerprint import PartialCrystalNNFingerprint
 from simmate.utilities import get_chemical_subsystems
 
 
@@ -149,6 +152,11 @@ class Structure(DatabaseTable):
     columns:
     `simmate.database.base_data_types.symmetry.Spacegroup`
     """
+    
+    fingerprint = table_column.JSONField(blank=True, null=True)
+    """
+    The fingerprint for the structure determined using a custom CrystalNN fingerprint
+    """
 
     # The AFLOW prototype that this structure maps to.
     # TODO: this will be a relationship in the future
@@ -231,7 +239,9 @@ class Structure(DatabaseTable):
         # prototype_name = prototype[0]["tags"]["mineral"] if prototype else None
         # Alternatively, add as a method to the table, similar to
         # the "update_all_stabilities" for thermodynamics
-
+        # Generate fingerprint
+        featurizer = PartialCrystalNNFingerprint.get_featurizer(composition=structure.composition)
+        fingerprint = featurizer.featurize(structure)        
         # Given a pymatgen structure object, this will return a database structure
         # object, but will NOT save it to the database yet. The kwargs input
         # is only if you inherit from this class and add extra fields.
@@ -259,6 +269,7 @@ class Structure(DatabaseTable):
             formula_full=structure.composition.formula,
             formula_reduced=structure.composition.reduced_formula,
             formula_anonymous=structure.composition.anonymized_formula,
+            fingerprint=fingerprint,
             # prototype=prototype_name,
             **kwargs,  # this allows subclasses to add fields with ease
         )
@@ -271,3 +282,51 @@ class Structure(DatabaseTable):
         Converts the database object to toolkit Structure object.
         """
         return ToolkitStructure.from_database_object(self)
+    
+    def filter_similarity(self, structure, method, cutoff):
+        """
+        Method for searching table for matching structures using the pgvector
+        extension in postgres databases
+        """
+        if settings.database_backend != 'postgresql':
+            raise Exception("This method is only available for PostgreSQL backends with the pgvector extension")
+        
+        # BUG: This doesn't check if pgvector is installed. Is there a way to do this?
+        # get new structure feature
+        featurizer = PartialCrystalNNFingerprint.get_featurizer(composition=structure.composition)
+        fingerprint = featurizer.featurize(structure)
+        fingerprint_str = str(fingerprint)
+        
+        # get distance metric string
+        if method == "L2":
+            method_str = "<->"
+        elif method == "inner product":
+            method_str = "<#>"
+        elif method == "cosine":
+            method_str = "<=>"
+        elif method == "L1":
+            method_str = "<+>"
+        elif method == "hamming":
+            method_str = "<~>"
+        elif method == "jaccard":
+            method_str = "<%>"
+        
+        # get table name to get structures from
+        table_name = self.get_table_docs()['table_info']['sql_name']
+        
+        # construct query for postgress
+        query = f"""
+        SELECT * FROM fingerprint WHERE embedding <-> '{fingerprint_str}' < {cutoff};
+        FROM {table_name}
+        """
+        
+        connection = postgress_connect()
+        cursor = connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchone()
+        
+        # !!! Should this return the matching structure?
+        if result:
+            return
+
+
