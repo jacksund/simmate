@@ -249,9 +249,12 @@ class PwscfWorkflow(S3Workflow):
             final_command = get_docker_command(
                 image=settings.quantum_espresso.docker.image,
                 inner_command=input_command,
+                # BUG FIX If the directory has a space (e.g. OneDrive - University...)
+                # docker will throw an error. wrapping with directory with
+                # "" solves the issue (but wrapping with '' doesn't)
                 volumes=[
-                    f"{str(directory)}:/qe_calc",
-                    f"{str(settings.quantum_espresso.psuedo_dir)}:/potentials",
+                    f'"{str(directory)}":/qe_calc',
+                    f'"{str(settings.quantum_espresso.psuedo_dir)}":/potentials',
                 ],
             )
             return final_command

@@ -14,7 +14,7 @@ Meanwhile, Simmate's QE app builds workflows and utilities on top of the QE code
 
 ## Installation
 
-1. Add `bader` to the list of installed Simmate apps with:
+1. Add `quantum_espresso` to the list of installed Simmate apps with:
 ``` bash
 simmate config add quantum_espresso
 ```

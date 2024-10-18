@@ -46,7 +46,7 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
         ecutrho__auto="efficiency_0.67", # automatically select energy cutoff for charge density/potential
         # We don't know if we have a metal or non-metal so we make a guess here.
         # !!! This guess could be dangerous without handlers
-        multiple_keywords__smart_ismear={
+        multiple_keywords__smart_smear={
             "metal": dict(
                 occupations="smearing", # use smearing
                 smearing="methfessel-paxton", # equivalent to ISMEAR=1

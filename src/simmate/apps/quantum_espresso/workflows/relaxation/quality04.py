@@ -3,17 +3,17 @@
 from simmate.apps.quantum_espresso.workflows.base import PwscfWorkflow
 
 
-class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
+class Relaxation__QuantumEspresso__Quality04(PwscfWorkflow):
     """
-    Runs a very rough Quantum Espresso geometry optimization with fixed lattice 
-    volume.`Quality 00` indicates these are absolute lowest quality settings 
+    Runs a somewhat rough Quantum Espresso geometry optimization with fixed lattice 
+    volume.`Quality 04` indicates these are absolute lowest quality settings 
     used in our available presets.
 
     Typically, you'd only want to run this relaxation on structures that were
     randomly created (and thus likely very unreasonable). More precise relaxations
     should be done afterwards. Therefore, instead of using this calculation,
     we recommend only using the relaxation/staged workflow, which uses this
-    calculation as a first step.
+    calculation as a fifth step.
     """
     
     description_doc_short = "much less bare-bones settings for randomly-created structures"
@@ -47,7 +47,7 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
         ecutrho__auto="efficiency_1.3", # automatically select energy cutoff for charge density/potential
         # We don't know if we have a metal or non-metal so we make a guess here.
         # !!! This guess could be dangerous without handlers
-        multiple_keywords__smart_ismear={
+        multiple_keywords__smart_smear={
             "metal": dict(
                 occupations="smearing", # use smearing
                 smearing="methfessel-paxton", # equivalent to ISMEAR=1
