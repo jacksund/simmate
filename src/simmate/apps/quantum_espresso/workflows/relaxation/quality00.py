@@ -42,8 +42,8 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
         ibrav=0, # indicates crystal axis is provided in input
         nat__auto=True, # automatically set number of atoms
         ntyp__auto=True, # automatically set number of types of atoms
-        ecutwfc__auto="efficiency_0.67", # automatically select energy cutoff for wavefunctions
-        ecutrho__auto="efficiency_0.67", # automatically select energy cutoff for charge density/potential
+        ecutwfc__auto="efficiency_0.8", # automatically select energy cutoff for wavefunctions
+        ecutrho__auto="efficiency_0.8", # automatically select energy cutoff for charge density/potential
         # We don't know if we have a metal or non-metal so we make a guess here.
         # !!! This guess could be dangerous without handlers
         multiple_keywords__smart_smear={
