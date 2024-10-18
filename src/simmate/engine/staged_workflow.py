@@ -20,7 +20,6 @@ class StagedWorkflow(Workflow):
     is meant to help build staged relaxations for evolutionary searches.
     """
 
-
     description_doc_short = "runs a series of dft calculations"
 
     subworkflow_names = []
