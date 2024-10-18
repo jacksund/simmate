@@ -46,7 +46,7 @@ def show(user_only: bool = False):
 
 
 @config_app.command()
-def add(app_name: str):
+def add(app_name: str, custom: bool = False):
     """
     Adds a specified Simmate app to the list of registered apps
     """
@@ -109,8 +109,13 @@ def add(app_name: str):
             ]
         )
     else:
-        # user is giving a custom app
-        settings.add_apps_and_update([app_name])
+        if not custom:
+            # The user may have mistyped. We don't want to add a line to the
+            # settings file only for them to have to figure out how to delete it
+            logging.warning(f"'{app_name}' is an unknown app. If you are using a custom app, please add the tag --custom")
+        else:
+            # user is giving a custom app
+            settings.add_apps_and_update([app_name])
 
 
 @config_app.command()
