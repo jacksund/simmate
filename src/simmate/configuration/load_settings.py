@@ -283,15 +283,43 @@ class SimmateSettings:
 
     @cached_property
     def _default_database(self) -> Path:
-        # if the user is in the (base) env or not using conda, then we will have a
-        # value of "-database.sqlite3", which why we need strip() here.
-        db_filename = (
-            self.config_directory / f"{self.conda_env}-database.sqlite3".strip("-")
-        )
-        return {
-            "engine": "django.db.backends.sqlite3",
-            "name": db_filename,
-        }
+        # !!! There may be a better way to do this, but this works for me
+        # We want to dynamically set the database backend in case the user is using
+        # a cloud database such as postgres
+        if Path(self.config_directory / f"{self.conda_env}-database.yaml").exists():
+            # if the user is in the (base) env or not using conda, then we will have a
+            # value of "-database.sqlite3", which is why we need strip() here.
+            db_filename = (
+                self.config_directory / f"{self.conda_env}-database.yaml".strip("-")
+            )
+            with open(self.config_directory / f"{self.conda_env}-database.yaml") as file:
+                yaml_file = yaml.safe_load(file)
+            default_db = {
+                "engine": yaml_file["default"]["ENGINE"],
+                "name": yaml_file["default"]["NAME"],
+                "user": yaml_file["default"]["USER"],
+                "password": yaml_file["default"]["PASSWORD"],
+                "port": yaml_file["default"]["PORT"],
+                "host": yaml_file["default"]["HOST"],
+            }
+            # try and add sslmode if it is there
+            try:
+                default_db["options"] = {"sslmode" : yaml_file["default"]["OPTIONS"]["sslmode"]}
+            except:
+                default_db["options"] = {"sslmode":"prefer"}
+            return default_db
+        
+        else:
+            # we want to use sqlite3 as our backend
+            # if the user is in the (base) env or not using conda, then we will have a
+            # value of "-database.sqlite3", which is why we need strip() here.
+            db_filename = (
+                self.config_directory / f"{self.conda_env}-database.sqlite3".strip("-")
+            )
+            return {
+                "engine": "django.db.backends.sqlite3",
+                "name": db_filename,
+            }
 
     @cached_property
     def database_backend(self) -> str:  # was... DATABASE_BACKEND

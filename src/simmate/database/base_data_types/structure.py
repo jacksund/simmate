@@ -2,6 +2,8 @@
 
 from django_filters import rest_framework as django_api_filters
 from scipy.constants import Avogadro
+from scipy.spatial.distance import cdist
+import numpy as np
 
 from simmate.database.base_data_types import DatabaseTable, Spacegroup, table_column
 from simmate.configuration import settings
@@ -269,7 +271,7 @@ class Structure(DatabaseTable):
             formula_full=structure.composition.formula,
             formula_reduced=structure.composition.reduced_formula,
             formula_anonymous=structure.composition.anonymized_formula,
-            fingerprint=fingerprint,
+            fingerprint=list(fingerprint),
             # prototype=prototype_name,
             **kwargs,  # this allows subclasses to add fields with ease
         )
@@ -283,50 +285,84 @@ class Structure(DatabaseTable):
         """
         return ToolkitStructure.from_database_object(self)
     
-    def filter_similarity(self, structure, method, cutoff):
+    @classmethod
+    def filter_similarity(cls, structure, method="L2", cutoff=0.8):
         """
         Method for searching table for matching structures using the pgvector
-        extension in postgres databases
+        extension in postgres databases. If another backend is used, the search
+        manually calculates the distance using scipy which is much slower for
+        methods running on parallel machines (i.e. evolutionary search) as it
+        must be run locally rather than on the host server (requiring the fingerprints
+        to be transferred to the local cpu).
         """
-        if settings.database_backend != 'postgresql':
-            raise Exception("This method is only available for PostgreSQL backends with the pgvector extension")
-        
-        # BUG: This doesn't check if pgvector is installed. Is there a way to do this?
-        # get new structure feature
-        featurizer = PartialCrystalNNFingerprint.get_featurizer(composition=structure.composition)
-        fingerprint = featurizer.featurize(structure)
-        fingerprint_str = str(fingerprint)
-        
         # get distance metric string
         if method == "L2":
-            method_str = "<->"
+            postgres_method_str = "<->"
+            scipy_method_str = "euclidean"
         elif method == "inner product":
-            method_str = "<#>"
+            postgres_method_str = "<#>"
+            scipy_method_str = "inner product" # This is easier to implement with numpy
         elif method == "cosine":
-            method_str = "<=>"
+            postgres_method_str = "<=>"
+            scipy_method_str = "cosine"
         elif method == "L1":
-            method_str = "<+>"
+            postgres_method_str = "<+>"
+            scipy_method_str = "cityblock"
         elif method == "hamming":
-            method_str = "<~>"
+            postgres_method_str = "<~>"
+            scipy_method_str = "hamming"
         elif method == "jaccard":
-            method_str = "<%>"
+            postgres_method_str = "<%>"
+            scipy_method_str = "jaccard"
+        else:
+            raise Exception(f"""
+                            {method} is not implemented as a distance metric.
+                            Available options are L2, inner product, cosine, L1, hamming, and jaccard.
+                            """)
         
-        # get table name to get structures from
-        table_name = self.get_table_docs()['table_info']['sql_name']
+        # get new structure feature
+        featurizer = PartialCrystalNNFingerprint.get_featurizer(composition=structure.composition)
+        new_fingerprint = featurizer.featurize(structure)
+        fingerprint_str = str(new_fingerprint)
         
-        # construct query for postgress
-        query = f"""
-        SELECT * FROM fingerprint WHERE embedding <-> '{fingerprint_str}' < {cutoff};
-        FROM {table_name}
-        """
-        
-        connection = postgress_connect()
-        cursor = connection.cursor()
-        cursor.execute(query)
-        result = cursor.fetchone()
-        
-        # !!! Should this return the matching structure?
-        if result:
-            return
-
+        if settings.database_backend == 'postgresql':
+            # BUG: This doesn't check if pgvector is installed. Is there a way to do this?
+            
+            # get table name to get structures from
+            table_name = cls.get_table_docs()['table_info']['sql_name']
+            
+            # construct query for postgress
+            query = f"""
+            SELECT * FROM fingerprint WHERE embedding {postgres_method_str} '{fingerprint_str}' < {cutoff};
+            FROM {table_name}
+            """
+            
+            connection = postgress_connect()
+            cursor = connection.cursor()
+            cursor.execute(query)
+            result = cursor.fetchone() # this should return all results rather than one
+            
+            # !!! Should this return the matching structures ids?
+            if result:
+                return True
+            
+        else:
+            # our database backend is not postgress. We calculate the distance
+            # locally using numpy/scipy instead of pgvector
+            fingerprints = cls.objects.values_list("fingerprint", flat=True)
+            fingerprints_array = np.vstack(fingerprints)
+            if scipy_method_str == "inner product": 
+                # no inner product method for cdist, but it's easy to do with numpy
+                # note this distance is higher for closer arrays and is dependent
+                # on magnitude of the vectors.
+                distances = -np.dot(fingerprints_array, new_fingerprint)
+            else:
+                reshaped_new_fingerprint = new_fingerprint.reshape(1,-1) # reshape because scipy requires 2D
+                distances = cdist(fingerprints_array, reshaped_new_fingerprint, metric=scipy_method_str)
+                
+            result_indices = np.where(distances<cutoff)[0]
+            if len(result_indices) > 0:
+                # return datatable id for structures that match
+                db_ids = [cls.objects.values_list("id", flat=True)[int(i)] for i in result_indices]
+                return db_ids
 
