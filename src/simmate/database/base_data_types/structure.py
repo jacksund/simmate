@@ -340,7 +340,9 @@ class Structure(DatabaseTable):
             connection = postgress_connect()
             cursor = connection.cursor()
             cursor.execute(query)
-            result = cursor.fetchone() # this should return all results rather than one
+            result = cursor.fetchall() # this should return all results rather than one
+            cursor.close()
+            connection.close()
             
             # !!! Should this return the matching structures ids?
             if result:
