@@ -103,6 +103,7 @@ def postgress_connect():
                 user=settings.database.user,
                 password=settings.database.password,
                 port=settings.database.port,
+                sslmode=settings.database.options.sslmode,
             )
         except psycopg2.OperationalError as error:
             if f'"{maintenance_db_name}" does not exist' in str(error):
@@ -123,10 +124,10 @@ def postgress_connect():
                     "Please update your 'settings.database.name' to something else."
                 )
             break
-        return connection
+        
 
     # ensure the loop above found a working connection
-    if not connection:
+    if connection is None:
         raise Exception(
             "Postgres requires a 'maintenance database' that we connect to "
             "while we add/drop/reset the database that you'd like to use. "
@@ -138,6 +139,8 @@ def postgress_connect():
             "postgres server with a SQL command such as 'CREATE DATABASE "
             "defaultdb' and then retry your simmate command."
         )
+    else:
+        return connection
 
 
 def reset_database(
@@ -180,6 +183,7 @@ def reset_database(
 
         # Build out database extensions and tables
         db_name = settings.database.name
+
         cursor.execute(f'DROP DATABASE IF EXISTS "{db_name}";')
         # BUG: if others are connected I could add 'WITH (FORCE)' above.
         # For now, I don't use this but should consider adding it for convenience.
