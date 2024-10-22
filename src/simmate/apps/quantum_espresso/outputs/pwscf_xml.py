@@ -67,6 +67,10 @@ class PwscfXml:
     def final_structure(self):
         struct_data = self.data["qes:espresso"]["output"]["atomic_structure"]
         site_data = struct_data["atomic_positions"]["atom"]
+        # if we only have one site, this returns a dict instead of a list. We
+        # check for this here
+        if type(site_data) == dict:
+            site_data = [site_data]
 
         # lattice
         lattice_matrix = []
@@ -138,5 +142,97 @@ class PwscfXml:
         # TODO: convert to differnt units...?
 
         return stress
+    
+    @cached_property
+    def band_data(self) -> dict:
+        # We need to the occuppied eigenstates and their energies at each kpoint
+        # to calculate properties such as the bandgap, CV minimum, VB max. This
+        # calculates these properties
 
+        highest_occupied_energies = []
+        lowest_unoccupied_energies = []
+        highest_occupied_idx = []
+        ks_energies = self.data["qes:espresso"]["output"]["band_structure"]["ks_energies"]
+        rydberg_to_ev = physical_constants["Rydberg constant times hc in eV"][0]
+        natoms = len(self.final_structure)
+        fermi_energy = self.energy_fermi
+        for ks_dict in ks_energies:
+            # get energies at this kpoint
+            energies = ks_dict["eigenvalues"]["#text"].split()
+            energies = numpy.array([float(i)*rydberg_to_ev*natoms for i in energies])
+            # find the highest eigenstate that is at least partially occupied,
+            # defined as the last non-zero occupancy
+            highest_occupied = numpy.where(energies <= fermi_energy)[0][-1]
+            highest_occupied_idx.append(highest_occupied)
+            # get the highest occupied energy and lowest unoccupied energy
+            highest_occupied_energy = energies[highest_occupied]
+            lowest_unoccupied_energy = energies[highest_occupied+1]
+            # add to our lists
+            highest_occupied_energies.append(highest_occupied_energy)
+            lowest_unoccupied_energies.append(lowest_unoccupied_energy)
+        
+        highest_occupied_energies = numpy.array(highest_occupied_energies)
+        lowest_unoccupied_energies = numpy.array(lowest_unoccupied_energies)
+        # get the indices for CV min and VB max
+        cb_min_idx = numpy.where(lowest_unoccupied_energies == lowest_unoccupied_energy.min())[0][0]
+        vb_max_idx = numpy.where(highest_occupied_energies == highest_occupied_energies.max())[0][0]
+        # get if bandgap is direct
+        if cb_min_idx == vb_max_idx:
+            is_gap_direct = True
+        else:
+            is_gap_direct = False
+        # get CB min and VB max and convert to eV for the system
+               
+        cb_min = lowest_unoccupied_energies[cb_min_idx]
+        vb_max = highest_occupied_energies[vb_max_idx]
+        # get bandgap
+        if len(numpy.unique(highest_occupied_idx)) == 1:
+            # All kpoints have the same number of populated bands indicating we
+            # don't have a metal
+            band_gap = cb_min - vb_max
+        else:
+            # our fermi level passes through a band. There is no meaning to
+            # the CB min and VB max so we set these to None
+            band_gap = 0
+            cb_min = None
+            vb_max = None
+            is_gap_direct = None
+
+        return {
+            "band_gap" : band_gap,
+            "conduction_band_minimum" : cb_min,
+            "valence_band_maximum" : vb_max,
+            "is_gap_direct" : is_gap_direct,
+            }
+    
+    @cached_property
+    def energy_fermi(self) -> float:
+        energy_fermi_ry = float(self.data["qes:espresso"]["output"]["band_structure"]["fermi_energy"])
+        # energies in .xml are in ry units and per atom. we convert here to get
+        # energy in eV for the total system
+        rydberg_to_ev = physical_constants["Rydberg constant times hc in eV"][0]
+
+        # BUG: something is off here... These values don't match what is in the
+        # pwscf.out file. Perhaps these here are per atom?
+        natoms = len(self.final_structure)
+
+        # convert to eV & total energy
+        return energy_fermi_ry * rydberg_to_ev * natoms
+    
+    @cached_property
+    def conduction_band_minimum(self) -> float:
+        return self.band_data["conduction_band_minimum"]
+    
+    @cached_property
+    def valence_band_maximum(self) -> float:
+        return self.band_data["valence_band_maximum"]
+    
+    @cached_property
+    def band_gap(self) -> float:
+        return self.band_data["band_gap"]
+    
+    @cached_property
+    def is_gap_direct(self) -> bool:
+        return self.band_data["is_gap_direct"]
+    
     # -------------------------------------------------------------------------

@@ -102,12 +102,11 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
             energy=pwscf_run.final_energy,
             site_forces=pwscf_run.site_forces.tolist(),
             lattice_stress=pwscf_run.lattice_stress.tolist(),
-            # TODO: I have not parsed this info out yet
-            # band_gap=None,
-            # is_gap_direct=None,
-            # energy_fermi=None,
-            # conduction_band_minimum=None,
-            # valence_band_maximum=None,
+            band_gap=pwscf_run.band_gap,
+            is_gap_direct=pwscf_run.is_gap_direct,
+            energy_fermi=pwscf_run.energy_fermi,
+            conduction_band_minimum=pwscf_run.conduction_band_minimum,
+            valence_band_maximum=pwscf_run.valence_band_maximum,
             as_dict=as_dict,
         )
 
