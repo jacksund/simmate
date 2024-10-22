@@ -337,7 +337,7 @@ class FixedCompositionSearch(Calculation):
         if self.individuals_completed.count() < self.nfirst_generation:
             logging.info(
                 "Search hasn't finished nfirst_generation yet "
-                f"({self.nfirst_generation} individuals). "
+                f"({self.individuals_completed.count()}/{self.nfirst_generation} individuals). "
                 "Skipping transformations."
             )
             ready_for_transformations = False
