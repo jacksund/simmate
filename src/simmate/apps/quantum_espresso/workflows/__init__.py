@@ -11,5 +11,9 @@ from .relaxation import (
     Relaxation__QuantumEspresso__Quality02,
     Relaxation__QuantumEspresso__Quality03,
     Relaxation__QuantumEspresso__Quality04,
-    Relaxation__QuantumEspresso__Staged
+    Relaxation__QuantumEspresso__Staged,
+    Relaxation__QuantumEspresso__Lda00,
+    Relaxation__QuantumEspresso__Lda01,
+    Relaxation__QuantumEspresso__EvoTutorial,
+    StaticEnergy__QuantumEspresso__Lda02,
     )

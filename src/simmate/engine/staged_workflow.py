@@ -3,6 +3,7 @@
 import math
 from functools import cache
 from pathlib import Path
+import inspect
 
 import numpy
 import plotly.graph_objects as plotly_go
@@ -11,7 +12,6 @@ from plotly.subplots import make_subplots
 from simmate.engine import Workflow
 from simmate.toolkit import Structure
 from simmate.visualization.plotting import PlotlyFigure
-from simmate.workflows.utilities import get_workflow
 
 
 class StagedWorkflow(Workflow):
@@ -41,7 +41,7 @@ class StagedWorkflow(Workflow):
             directory=directory / current_task.name_full,
         )
         result = state.result()
-
+        
         # The remaining tasks continue and use the past results as an input
         for i, current_task in enumerate(cls.subworkflows[1:]):
             state = current_task.run(
@@ -70,7 +70,28 @@ class StagedWorkflow(Workflow):
     @property
     @cache
     def subworkflows(cls):
-        return [get_workflow(name) for name in cls.subworkflow_names]
+        # import locally to avoid circular import
+        from simmate.workflows.utilities import get_workflow
+        
+        # Workflow names can be either the string name of the workflow or a workflow
+        # object
+        workflow_list = []
+        for name in cls.subworkflow_names:
+            if inspect.isclass(name):
+                # This object should already be a workflow
+                workflow_list.append(name)
+            else:
+                workflow_list.append(get_workflow(name))
+        # make sure all workflows use the relaxation or static-energy table
+        for workflow in workflow_list:
+            if workflow.name_type not in ["static-energy", "relaxation"]:
+                raise Exception(
+                    """
+                    Workflows inheriting from StagedWorkflow must use either the
+                    StaticEnergy or Relaxation table.
+                    """
+                    )
+        return workflow_list
 
     @classmethod
     def get_series(cls, value: str, **filter_kwargs):

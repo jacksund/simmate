@@ -34,7 +34,6 @@ class StaticEnergy__QuantumEspresso__Quality04(Relaxation__QuantumEspresso__Qual
         ntyp__auto=True, # automatically set number of types of atoms
         ecutwfc__auto="efficiency_1.2", # automatically select energy cutoff for wavefunctions
         ecutrho__auto="efficiency_1.2", # automatically select energy cutoff for charge density/potential
-        # We don't know if we have a metal or non-metal so we make a guess here.
         occupations="tetrahedra", # was "smearing - methfessel-paxton" for metals, "smearing - gaussian" for non-metals
         degauss=0.05, # Not sure this does anything with "tetrahedra". Was 0.05 for non-metals, 0.06 for metals
     )
