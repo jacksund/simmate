@@ -20,18 +20,23 @@ from pathlib import Path
 
 import pandas
 import yaml
+from django.apps import apps
+from django.core.paginator import Page, Paginator
 from django.db import models  # see comment below
 from django.db import models as table_column
-from django.urls import reverse
+from django.forms.models import model_to_dict
+from django.http import HttpRequest, JsonResponse, QueryDict
+from django.shortcuts import get_object_or_404
+from django.urls import resolve, reverse
 from django.utils.module_loading import import_string
-from django.utils.timezone import datetime
+from django.utils.timezone import datetime, now, timedelta
 from django_filters import rest_framework as django_api_filters
 from django_pandas.io import read_frame
 from rich.progress import track
 
 from simmate.configuration import settings
 from simmate.database.utilities import check_db_conn
-from simmate.utilities import get_attributes_doc
+from simmate.utilities import chunk_list, get_attributes_doc
 
 # The "as table_column" line does NOTHING but rename a module.
 # I have this because I want to use "table_column.CharField(...)" instead
@@ -199,6 +204,39 @@ class SearchResults(models.QuerySet):
         # we can now delete the csv file
         csv_filename.unlink()
 
+    # -------------------------------------------------------------------------
+
+    def to_api_dict(
+        self, next_url: str = None, previous_url: str = None, **kwargs
+    ) -> dict:
+        """
+        Converts the search results to a API dictionary. This is used to generate
+        the default API response and can be overwritten.
+
+        Note, this is typically called on the *page* object list, and not the
+        full query results.
+        """
+        # We follow the list api format that django rest_framework uses. The
+        # next/previous is for pagination
+        return {
+            # OPTIMIZE: counting can take ~20 sec for ~10 mil rows, which is
+            # terrible for a web UI. I tried a series of fixes but no luck:
+            #   https://stackoverflow.com/questions/55018986/
+            "count": self.count(),
+            "next": next_url,
+            "previous": previous_url,
+            "results": [entry.to_api_dict(**kwargs) for entry in self.all()],
+        }
+
+    def to_json_response(self, **kwargs) -> JsonResponse:
+        """
+        Takes the API dictionary (from `to_api_dict`) and converts it to a
+        Django JSON reponse
+        """
+        return JsonResponse(self.to_api_dict(**kwargs))
+
+    # -------------------------------------------------------------------------
+
     def filter_by_tags(self, tags: list[str]):
         """
         A utility filter() method that helps query the 'tags' column of a table.
@@ -235,6 +273,40 @@ class SearchResults(models.QuerySet):
         return super().bulk_update(*args, **kwargs)
 
     # -------------------------------------------------------------------------
+
+    # Misc utilities for common tasks
+
+    def filter_age(self, cutoff: str, age_column: str = "created_at"):
+        """
+        A convienience filter for date-based filters such as "created in the
+        last 24hrs". Uses the `created_at` column by default but can be
+        pointed to any datetime column.
+
+        Options for `cutoff` are 'hour', 'day', 'week', 'month', and 'year'
+        """
+        current_time = now()
+        if cutoff == "hour":
+            cutoff_date = current_time - timedelta(hours=1)
+        elif cutoff == "day":
+            cutoff_date = current_time - timedelta(days=1)
+        elif cutoff == "week":
+            cutoff_date = current_time - timedelta(days=7)
+        elif cutoff == "month":
+            cutoff_date = current_time - timedelta(days=30)
+        elif cutoff == "year":
+            cutoff_date = current_time - timedelta(days=365)
+        else:
+            raise Exception(f"Unknown age cutoff: {cutoff}")
+
+        return self.filter(**{f"{age_column}__gte": cutoff_date})
+
+    def count_by_column(self, column: str) -> dict:
+        """
+        Util to count the rows per column. Meant for ChoiceField columns such
+        as "status" where you want to know how many of each there are.
+        """
+        result = self.values(column).annotate(count=table_column.Count(column))
+        return {entry[column]: entry["count"] for entry in result}
 
 
 # Copied this line from...
@@ -390,6 +462,9 @@ class DatabaseTable(models.Model):
     object. Using this, you can perform complex filtering and conversions on
     data from this table.
     """
+    # TODO: switch to...
+    # https://docs.djangoproject.com/en/5.0/topics/db/managers/#creating-a-manager-with-queryset-methods
+    # objects = SearchResults.as_manager()
 
     archive_fields: list[str] = []
     """
@@ -405,6 +480,7 @@ class DatabaseTable(models.Model):
     To see all archive fields, see the `archive_fieldset` property.
     """
 
+    # DEPRECIATED
     api_filters: dict = {}
     """
     Configuration of fields that can be filtered in the REST API and website 
@@ -478,13 +554,17 @@ class DatabaseTable(models.Model):
         return cls.__name__
 
     @classmethod
-    def get_column_names(cls) -> list[str]:
+    def get_column_names(cls, include_relations: bool = True) -> list[str]:
         """
         Returns a list of all the column names for this table and indicates which
         columns are related to other tables. This is primarily used to help
         view what data is available.
         """
-        return [column.name for column in cls._meta.get_fields()]
+        return [
+            column.name
+            for column in cls._meta.get_fields()
+            if include_relations or not column.is_relation
+        ]
 
     @classmethod
     def show_columns(cls):
@@ -769,25 +849,32 @@ class DatabaseTable(models.Model):
         return all_data_ordered
 
     @staticmethod
-    def get_table(table_name: str):
-        # This method can be return ANY table, so we need to import all of them
-        # here. This is a local import to prevent circular import issues.
-        from simmate.website.data_explorer import models as third_party_datatables
-        from simmate.website.workflows import models as all_datatables
+    def get_table(table_name: str):  # returns subclass of DatabaseTable
+        """
+        Given a table name (e.g. "MaterialsProjectStructure") or a full import
+        path of a table, this will load and return the corresponding table class.
+        """
 
-        # Import the datatable class -- how this is done depends on if it
-        # is from a simmate supplied class, if the user supplied a full
-        # path to the class, or if the model is in a custom app
-        # OPTIMIZE: is there a better way to do this?
-        if hasattr(all_datatables, table_name):
-            datatable = getattr(all_datatables, table_name)
-        elif hasattr(third_party_datatables, table_name):
-            datatable = getattr(third_party_datatables, table_name)
-        elif "." in table_name:
-            # "." in the name indicates an import path
+        # "." in the name indicates an import path
+        if "." in table_name:
             datatable = import_string(table_name)
+
+        # otherwise search all tables and see if there is a *single* match
         else:
-            raise Exception("Unable to load database table by name")
+            all_models = apps.get_models()
+            matches = []
+            for model in all_models:
+                if hasattr(model, "table_name") and model.table_name == table_name:
+                    matches.append(model)
+            if len(matches) == 1:
+                datatable = matches[0]
+            elif len(matches) > 1:
+                raise Exception(
+                    f"More than one table has the name {table_name}."
+                    "Provide a full path to ensure the correct table is returned"
+                )
+            elif len(matches) == 0:
+                raise Exception(f"Unable to find database table with name {table_name}")
 
         return datatable
 
@@ -1328,6 +1415,243 @@ class DatabaseTable(models.Model):
     # Methods that set up the REST API and filters that can be queried with
     # -------------------------------------------------------------------------
 
+    # !!! DEV -- This section is currently a mixture of depreciated and experimental
+    # methods. Users should avoid until these methods become stable
+
+    # SINGLE OBJECT APIs
+
+    def to_api_dict(self, fields: list[str] = None, exclude: list[str] = None) -> dict:
+        """
+        Converts a single instance (row) of this database table to a API dictionary.
+        This is used to generate the default API response and can be overwritten.
+        """
+        # See https://stackoverflow.com/questions/21925671/
+        # Consider forking model_to_dict or writing custom method.
+        # !!! Does not support columns accross relations such as "user__email"
+        return model_to_dict(
+            instance=self,
+            fields=self.get_column_names() if fields is None else fields,
+            exclude=exclude,
+        )
+
+    def to_json_response(self, **kwargs) -> JsonResponse:
+        """
+        Takes the API dictionary (from `to_api_dict`) and converts it to a
+        Django JSON reponse
+        """
+        return JsonResponse(self.to_api_dict(**kwargs))
+
+    @classmethod
+    def get_json_response(cls, pk) -> JsonResponse:
+        """
+        Given the object id, will query and return the JSON response. This will
+        also give a 404 response if it is not found
+        """
+        obj = get_object_or_404(cls, pk=pk)
+        return obj.to_json_response()
+
+    # MULTI OBJECT APIs
+
+    # max_api_count: int = 10_000
+    # NOTE: counting the total number of results in a query is MUCH
+    # slower than just loading a single page! See...
+    #   https://wiki.postgresql.org/wiki/Slow_Counting
+    # To address this, we limit the maximum queryset size to be 10k. This
+    # is a large number because counting queries really only becomes an
+    # issue with >1mil rows in the dataset.
+    # We still allow users to set "None" disable this feature.
+
+    @classmethod
+    @property
+    @cache
+    def filter_methods(cls) -> list[str]:
+        """
+        All filtering methods that can be used to narrow a queryset
+        """
+        excluded_methods = [
+            "filter_from_config",
+            "filter_from_request",
+            "filter_methods",
+            "filter_methods_extra_args",
+        ]
+        return [
+            method
+            for method in dir(cls.objects)
+            if method.startswith("filter_") and method not in excluded_methods
+        ]  # dir() looks to be faster than inspect.getmembers
+
+    @classmethod
+    @property
+    @cache
+    def filter_methods_extra_args(cls) -> list[str]:
+        """
+        Any unique parameters that are used as kwargs in `filter_methods`
+        """
+        column_names = cls.get_column_names()
+        extra_args = []
+        for method in cls.filter_methods:
+            sig = inspect.signature(getattr(cls.objects, method))
+            for parameter in list(sig.parameters):
+                if parameter not in column_names and parameter not in [
+                    "self",
+                    "kwargs",
+                ]:
+                    extra_args.append(parameter)
+        return extra_args
+
+    @classmethod
+    def filter_from_url(cls, url: str, **kwargs) -> SearchResults | Page:
+        """
+        Given the full URL of a Simmate REST API endpoint (in the /data section),
+        this will return the queryset. This method can be used on the base
+        DataTable class (where it loads the proper table for you) or on a
+        subclass (where it validates that you're using the correct subclass).
+        """
+
+        url = urllib.parse.urlparse(url)
+
+        # make sure the base URL is the simmate website
+        if settings.website.debug == False and "simmate." not in url.netloc:
+            raise Exception("This is not a Simmate website url")
+
+        # convert the URL into a request object
+        request = HttpRequest()
+        request.path = url.path
+        request.GET = QueryDict(url.query)
+        request.resolver_match = resolve(url.path)
+
+        # make sure we are looking at a /data view in tables
+        if not (
+            request.resolver_match.namespaces[0] == "data_explorer"
+            and request.resolver_match.url_name == "table"
+        ):
+            raise Exception("This is not a Simmate `data_explorer.table` url")
+
+        # grab the appropriate table
+        table_name = request.resolver_match.kwargs["table_name"]
+        expected_table = cls.get_table(table_name)
+
+        if cls != DatabaseTable and cls != expected_table:
+            raise Exception(
+                "The table indicated in the URL does not match the table class you are using. "
+                f"current table: {cls} ;  url table: {expected_table}"
+            )
+
+        return expected_table.filter_from_request(
+            request=request,
+            **kwargs,
+        )
+
+    @classmethod
+    def filter_from_request(
+        cls,
+        request: HttpRequest,
+        paginate: bool = True,
+    ) -> SearchResults | Page:
+        """
+        Generates a filtered queryset from a django HttpRequest using the
+        request's GET parameters
+        """
+        # In the past, this was handled by the django-filter package, but this
+        # became too verbose and tedious. You'd need to list out "gt", "gte", and
+        # any other field lookups allowed for EACH field... In practice, we want
+        # to just allow anything and trust the user follows the docs correctly.
+        # Worst case, the API call fails, which is no big deal.
+        from simmate.website.utilities import parse_request_get
+
+        get_kwargs = parse_request_get(
+            request,
+            include_format=False,
+            group_filters=True,
+        )
+        return cls.filter_from_config(
+            **get_kwargs,
+            paginate=paginate,
+        )
+
+    @classmethod
+    def filter_from_config(
+        cls,
+        filters: dict,
+        # True default is "id" when pagination is needed. Using "None" respects
+        # if there is ordering from any of the filters (e.g. filter_similarity_2d)
+        order_by: str | list[str] = None,  # could be "id" or ["created_at", "id", ...]
+        limit: int = 10_000,
+        page: int = 1,
+        page_size: int = 25,
+        paginate: bool = True,
+    ) -> SearchResults | Page:
+        """
+        Converts URL kwargs into a queryset.
+        """
+
+        # Some tables have "advanced" filtering logic. These want us to call
+        # a filtering method, rather than just passing the kwarg to `objects.filter()`.
+        # An example of this would be "chemical_system" for Structure, which
+        # needs to (a) clean the query by converting to the element order that
+        # db uses, and (b) base its filtering logic on other kwargs like
+        # "include_subsystems".
+        basic_filters = {}
+        filter_methods = cls.filter_methods
+        filter_methods_args = cls.filter_methods_extra_args
+
+        queryset = cls.objects
+        for filter_name, filter_value in filters.items():
+
+            # if we have a filter method, we apply it to our queryset right away
+            if f"filter_{filter_name}" in filter_methods:
+                # The args can be given one of two ways:
+                #   1. a single arg
+                #   2. kwargs (a json dict with key-values)
+                # Here are examples for each approach to call the
+                # method `filter_age(cutoff, age_column)`, where 'cutoff' is
+                # required while age_column is an optional input
+                #   age="day"
+                #   age={"cutoff": "day", "age_column": "updated_at"}
+                # The latter is more explicit and robust to errors.
+                # BUG: if the first positional is supposed to be a dict,
+                # you must use the JSON approach instead.
+                method = getattr(queryset, f"filter_{filter_name}")
+                if not isinstance(filter_value, dict):
+                    queryset = method(filter_value)
+                else:
+                    queryset = method(**filter_value)
+
+            # these are kwargs only needed in filter methods (e.g. `include_subsystems`)
+            elif filter_name in filter_methods_args:
+                continue  # these are only used via method_kwargs above
+
+            # otherwise we have a basic filter (e.g. `user__email__startswith`)
+            else:
+                basic_filters[filter_name] = filter_value
+
+        # now that all filter_methods have been applied, we now apply basic ones
+        queryset = queryset.filter(**basic_filters)
+
+        # Handle ordering
+        # the ordered_by kwarg takes priority, but in cases where none is set
+        # AND the queryset filters didn't give any, pagination still requires
+        # that we do some form of ordering, so we filter by id
+        if paginate and not order_by and not queryset.query.order_by:
+            order_by = "id"
+        if order_by:
+            # in case only a single str was given, convert to list
+            if isinstance(order_by, str):
+                order_by = [order_by]
+            queryset = queryset.order_by(*order_by)
+
+        if limit:
+            queryset = queryset[:limit]
+
+        # if requested, split the results into pages and grab the requested one
+        if paginate:
+            paginator = Paginator(object_list=queryset, per_page=page_size)
+            page_obj = paginator.get_page(number=page)
+            return page_obj
+        else:
+            return queryset
+
+    # DEPRECIATED
     @classmethod
     @property
     @cache
@@ -1480,6 +1804,7 @@ class DatabaseTable(models.Model):
 
         return NewClass
 
+    # DEPRECIATED
     @classmethod
     @property
     @cache
@@ -1525,10 +1850,18 @@ class DatabaseTable(models.Model):
     # Methods that link to the website UI
     # -------------------------------------------------------------------------
 
-    html_template_about: str = None
-    html_template_table: str = None
-    html_template_entry: str = None
-    # experimental override for templates using by the Data Explorer app
+    # experimental overrides for templates used by the Data Explorer app
+
+    html_about_template: str = "data_explorer/table_about.html"
+    html_table_template: str = "data_explorer/table.html"
+    html_entry_template: str = "data_explorer/table_entry.html"
+    html_entries_template: str = "data_explorer/table_entries.html"
+
+    # Unicorn views (side panels in the table view of the Data Explorer app)
+    html_search_view: str = None
+    html_update_view: str = None
+    html_add_view: str = None
+    # TODO: distinguish between update/update-many and add/add-many views...?
 
     @classmethod
     @property
@@ -1554,13 +1887,13 @@ class DatabaseTable(models.Model):
         property easier to work with
         """
         return reverse(
-            "data_explorer:entry-detail",
-            kwargs={"provider_name": self.table_name, "pk": self.pk},
+            "data_explorer:table-entry",
+            kwargs={"table_name": self.table_name, "table_entry_id": self.pk},
         )
 
     @classmethod
     @property
-    def extra_html_context(cls) -> dict:
+    def html_breadcrumb_context(cls) -> dict:
         return {
             "page_title": cls.table_name,
             "page_title_icon": "mdi-database",
@@ -1568,16 +1901,34 @@ class DatabaseTable(models.Model):
             "breadcrumb_active": cls.table_name,
         }
 
+    @classmethod
+    @property
+    def html_extra_context(cls) -> dict:
+        return {}
+
     # -------------------------------------------------------------------------
     # Methods that populate "workflow columns" of custom tables
     # -------------------------------------------------------------------------
 
     @classmethod
-    def populate_workflow_column(cls, column_name: str, batch_size: int = 1000):
+    def populate_workflow_column(
+        cls,
+        column_name: str,
+        batch_size: int = 500,
+        update_only: bool = True,
+    ):
         """
         Populates a specific workflow column. The column must be present in the
         `workflow_columns` attribute.
         """
+
+        # BUG: using 'id__in' below might cause batches >1k to fail
+        if batch_size > 1000:
+            logging.info(
+                "This method uses a 'IN' clause to select batches of IDs, so "
+                "batches larger than 1k can cause performance issues and errors."
+            )
+
         # local import to avoid circular dependency
         from simmate.workflows.utilities import get_workflow
 
@@ -1596,21 +1947,17 @@ class DatabaseTable(models.Model):
                 "us to add additional support."
             )
 
-        filters = {f"{column_name}__isnull": True}
-        nobjs_total = cls.objects.filter(**filters).count()
+        filters = {f"{column_name}__isnull": True} if update_only else {}
+        ids_to_update = cls.objects.filter(**filters).values_list("id", flat=True).all()
+
         logging.info(
             f"Updating '{column_name}' column using '{workflow_name}' "
-            f"for {nobjs_total} entries"
+            f"for {len(ids_to_update)} entries"
         )
+        for ids_chunk in chunk_list(ids_to_update, batch_size):
 
-        # Continue the loop until
-        while True:
             # grab the next set of objects to update
-            objs_to_update = cls.objects.filter(**filters).all()[:batch_size]
-
-            # exit the while loop if there aren't any entries left
-            if not objs_to_update:
-                break
+            objs_to_update = cls.objects.filter(id__in=ids_chunk).all()
 
             # First check for a user-defined method.
             predefined_method = f"_format_inputs_for__{column_name}"

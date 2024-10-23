@@ -183,8 +183,8 @@ class SimmateAPIViewSet(GenericViewSet):
         # these two parameters depend on the view_type
         if view_type == "list":
             NewViewSet.template_name = (
-                table.html_template_table
-                if table.html_template_table
+                table.html_table_template
+                if table.html_table_template
                 else cls.template_list
             )
             return NewViewSet.as_view({"get": "get_list_response"})

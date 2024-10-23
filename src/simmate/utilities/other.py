@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import ast
+import hashlib
 import importlib
 import inspect
 import logging
@@ -438,3 +439,10 @@ def get_attributes_doc(cls: type, dedent_and_strip: bool = True) -> dict[str, st
                         attr_doc_value = textwrap.dedent(attr_doc_value).strip()
                     result[attr_name] = attr_doc_value
     return result
+
+
+def get_hash_key(text_to_hash: str) -> str:
+    """
+    Generates an MD5 hash key of a string
+    """
+    return hashlib.md5(text_to_hash.encode("utf-8")).hexdigest()

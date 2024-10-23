@@ -1,0 +1,32 @@
+<div class="offcanvas offcanvas-end w-75" id="offcanvasQuickSearch">
+    <div class="offcanvas-header bg-dark text-light">
+        <h5>Search</h5>
+        <button type="button"
+                class="btn-close text-reset"
+                data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="alert alert-primary d-flex align-items-center mt-2">
+            <div>
+                <small>
+                    This form only includes basic search criteria. For more advanced
+                    queries, we recommend using the
+                    <a href="https://jacksund.github.io/simmate/full_guides/database/basic_use/"
+                       target="_blank"
+                       class="text-dark"><b>Python ORM</b></a>.
+                </small>
+            </div>
+        </div>
+        <div>
+            {% load unicorn %}
+            {% csrf_token %}
+            {% unicorn table.html_search_view %}
+        </div>
+    </div>
+</div>
+<button class="btn btn-dark"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasQuickSearch">
+    <i class="mdi mdi-magnify py-1"></i>&nbsp;&nbsp;Search
+</button>

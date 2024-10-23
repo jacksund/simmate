@@ -23,18 +23,21 @@ def test_home_view(client):
     assert response.status_code == 200
 
 
+@pytest.mark.django_db
 def test_extras_view(client):
     response = client.get("/extras/")
     assert response.status_code == 200
     assertTemplateUsed(response, "core_components/extras.html")
 
 
+@pytest.mark.django_db
 def test_contact_view(client):
     response = client.get("/contact/")
     assert response.status_code == 200
     assertTemplateUsed(response, "core_components/contact.html")
 
 
+@pytest.mark.django_db
 def test_about_view(client):
     response = client.get("/about/")
     assert response.status_code == 200

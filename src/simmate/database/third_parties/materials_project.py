@@ -24,14 +24,6 @@ class MatprojStructure(Structure, Thermodynamics):
         "total_magnetization",
         "is_theoretical",
     ]
-    api_filters = dict(
-        energy_uncorrected=["range"],
-        band_gap=["range"],
-        is_gap_direct=["exact"],
-        is_magnetic=["exact"],
-        total_magnetization=["range"],
-        is_theoretical=["exact"],
-    )
     source = "Materials Project"
     source_long = "The Materials Project at Berkeley National Labs"
     homepage = "https://materialsproject.org/"

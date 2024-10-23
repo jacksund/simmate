@@ -17,10 +17,7 @@ class CodStructure(Structure):
         app_label = "data_explorer"
 
     archive_fields = ["is_ordered", "has_implicit_hydrogens"]
-    api_filters = dict(
-        is_ordered=["exact"],
-        has_implicit_hydrogens=["exact"],
-    )
+
     source = "COD"
     source_long = "The Crystallography Open Database"
     homepage = "https://www.crystallography.net/cod/"
