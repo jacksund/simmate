@@ -140,7 +140,7 @@ EXTRAS = [
     "fabric >=2.6.0",  # for remote ssh connections
     "django-extensions >=3.1.5",  # simple tools to help with django development
     "bokeh >=2.1.1",  # for the dask dashboard
-    "h5py >=3.10.0, <=3.10.0",  # for reading QE's binary output files
+    "h5py >=3.10.0, <=3.12.1",  # for reading QE's binary output files
     # OpenEye needs to point to a different source & a license is required
     #   pip install -i https://pypi.anaconda.org/OpenEye/simple OpenEye-toolkits
     "OpenEye-toolkits @ https://pypi.anaconda.org/OpenEye/simple",
