@@ -16,7 +16,7 @@ class Relaxation__Vasp__WarrenLabHse(Relaxation__Vasp__WarrenLabPbe):
     # in the hopes that they will work properly.
     potcar_mappings = HSE_POTCAR_MAPPINGS
 
-    _incar_updats = dict(
+    _incar_updates = dict(
         ALGO="Damped",  # We use Damped because it is the recommended setting by
         # by VASP (https://www.vasp.at/wiki/index.php/LHFCALC)
         HFSCREEN=0.2,

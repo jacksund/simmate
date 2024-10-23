@@ -130,15 +130,17 @@
             </div>
         </div>
     </div>
-    {# Buttons #}
-    <div class="p-3 text-center">
-        {# Apply Filters #}
-        <button unicorn:click="apply_filters" type="submit" class="btn btn-primary">
-            <i class="mdi mdi-magnify"></i>&nbsp;&nbsp;Search
-        </button>
-        {# Reset Filters #}
-        <a href="." class="btn btn-secondary m-2">
-            <i class="mdi mdi-refresh"></i>&nbsp;&nbsp;Reset Filters
-        </a>
-    </div>
+    {% if include_buttons %}
+        {# Buttons #}
+        <div class="p-3 text-center">
+            {# Apply Filters #}
+            <button unicorn:click="apply_filters" type="submit" class="btn btn-primary">
+                <i class="mdi mdi-magnify"></i>&nbsp;&nbsp;Search
+            </button>
+            {# Reset Filters #}
+            <a href="." class="btn btn-secondary m-2">
+                <i class="mdi mdi-refresh"></i>&nbsp;&nbsp;Reset Filters
+            </a>
+        </div>
+    {% endif %}
 </div>

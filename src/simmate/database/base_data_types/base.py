@@ -20,22 +20,23 @@ from pathlib import Path
 
 import pandas
 import yaml
+from django.apps import apps
 from django.core.paginator import Page, Paginator
 from django.db import models  # see comment below
 from django.db import models as table_column
 from django.forms.models import model_to_dict
-from django.http import HttpRequest, JsonResponse
+from django.http import HttpRequest, JsonResponse, QueryDict
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
+from django.urls import resolve, reverse
 from django.utils.module_loading import import_string
-from django.utils.timezone import datetime
+from django.utils.timezone import datetime, now, timedelta
 from django_filters import rest_framework as django_api_filters
 from django_pandas.io import read_frame
 from rich.progress import track
 
 from simmate.configuration import settings
 from simmate.database.utilities import check_db_conn
-from simmate.utilities import get_attributes_doc
+from simmate.utilities import chunk_list, get_attributes_doc
 
 # The "as table_column" line does NOTHING but rename a module.
 # I have this because I want to use "table_column.CharField(...)" instead
@@ -272,6 +273,40 @@ class SearchResults(models.QuerySet):
         return super().bulk_update(*args, **kwargs)
 
     # -------------------------------------------------------------------------
+
+    # Misc utilities for common tasks
+
+    def filter_age(self, cutoff: str, age_column: str = "created_at"):
+        """
+        A convienience filter for date-based filters such as "created in the
+        last 24hrs". Uses the `created_at` column by default but can be
+        pointed to any datetime column.
+
+        Options for `cutoff` are 'hour', 'day', 'week', 'month', and 'year'
+        """
+        current_time = now()
+        if cutoff == "hour":
+            cutoff_date = current_time - timedelta(hours=1)
+        elif cutoff == "day":
+            cutoff_date = current_time - timedelta(days=1)
+        elif cutoff == "week":
+            cutoff_date = current_time - timedelta(days=7)
+        elif cutoff == "month":
+            cutoff_date = current_time - timedelta(days=30)
+        elif cutoff == "year":
+            cutoff_date = current_time - timedelta(days=365)
+        else:
+            raise Exception(f"Unknown age cutoff: {cutoff}")
+
+        return self.filter(**{f"{age_column}__gte": cutoff_date})
+
+    def count_by_column(self, column: str) -> dict:
+        """
+        Util to count the rows per column. Meant for ChoiceField columns such
+        as "status" where you want to know how many of each there are.
+        """
+        result = self.values(column).annotate(count=table_column.Count(column))
+        return {entry[column]: entry["count"] for entry in result}
 
 
 # Copied this line from...
@@ -519,13 +554,17 @@ class DatabaseTable(models.Model):
         return cls.__name__
 
     @classmethod
-    def get_column_names(cls) -> list[str]:
+    def get_column_names(cls, include_relations: bool = True) -> list[str]:
         """
         Returns a list of all the column names for this table and indicates which
         columns are related to other tables. This is primarily used to help
         view what data is available.
         """
-        return [column.name for column in cls._meta.get_fields()]
+        return [
+            column.name
+            for column in cls._meta.get_fields()
+            if include_relations or not column.is_relation
+        ]
 
     @classmethod
     def show_columns(cls):
@@ -810,25 +849,32 @@ class DatabaseTable(models.Model):
         return all_data_ordered
 
     @staticmethod
-    def get_table(table_name: str):
-        # This method can be return ANY table, so we need to import all of them
-        # here. This is a local import to prevent circular import issues.
-        from simmate.website.data_explorer import models as third_party_datatables
-        from simmate.website.workflows import models as all_datatables
+    def get_table(table_name: str):  # returns subclass of DatabaseTable
+        """
+        Given a table name (e.g. "MaterialsProjectStructure") or a full import
+        path of a table, this will load and return the corresponding table class.
+        """
 
-        # Import the datatable class -- how this is done depends on if it
-        # is from a simmate supplied class, if the user supplied a full
-        # path to the class, or if the model is in a custom app
-        # OPTIMIZE: is there a better way to do this?
-        if hasattr(all_datatables, table_name):
-            datatable = getattr(all_datatables, table_name)
-        elif hasattr(third_party_datatables, table_name):
-            datatable = getattr(third_party_datatables, table_name)
-        elif "." in table_name:
-            # "." in the name indicates an import path
+        # "." in the name indicates an import path
+        if "." in table_name:
             datatable = import_string(table_name)
+
+        # otherwise search all tables and see if there is a *single* match
         else:
-            raise Exception("Unable to load database table by name")
+            all_models = apps.get_models()
+            matches = []
+            for model in all_models:
+                if hasattr(model, "table_name") and model.table_name == table_name:
+                    matches.append(model)
+            if len(matches) == 1:
+                datatable = matches[0]
+            elif len(matches) > 1:
+                raise Exception(
+                    f"More than one table has the name {table_name}."
+                    "Provide a full path to ensure the correct table is returned"
+                )
+            elif len(matches) == 0:
+                raise Exception(f"Unable to find database table with name {table_name}")
 
         return datatable
 
@@ -1453,72 +1499,48 @@ class DatabaseTable(models.Model):
                     extra_args.append(parameter)
         return extra_args
 
-    @staticmethod
-    def _parse_request_get(request: HttpRequest, include_format: bool = True) -> dict:
-        # note, if a key is defined more than once, it will only use the last def
-        url_get_args = request.GET.dict()
+    @classmethod
+    def filter_from_url(cls, url: str, **kwargs) -> SearchResults | Page:
+        """
+        Given the full URL of a Simmate REST API endpoint (in the /data section),
+        this will return the queryset. This method can be used on the base
+        DataTable class (where it loads the proper table for you) or on a
+        subclass (where it validates that you're using the correct subclass).
+        """
 
-        def deserialize_value(value: str) -> any:
-            """
-            Converts the URL GET parameters to the correct data type
-            """
-            if value.startswith('"') and value.endswith('"'):
-                return value.strip('"')
-            elif value.startswith("'") and value.endswith("'"):
-                return value.strip("'")
-            elif value.lower() in ["true", "false"]:
-                return True if value.lower() == "true" else False
-            elif value.isnumeric():
-                return int(value)
-            elif value.replace(".", "").isnumeric():
-                return float(value)
-            else:
-                # just return the string as-is for our last-ditch effort
-                return str(value)
-                # Raising an error via f-string might be an injection security risk
-                # raise Exception(f"Unknown URL value type: {value}")
+        url = urllib.parse.urlparse(url)
 
-        for key in url_get_args.keys():
+        # make sure the base URL is the simmate website
+        if settings.website.debug == False and "simmate." not in url.netloc:
+            raise Exception("This is not a Simmate website url")
 
-            # The "__in" field lookup is a special case where we need a list of values.
-            # Our go-to delimiter is ";", but there may be cases where this causes
-            # a bug -- specifically when an __in string should contain a ";"
-            if key.endswith("__in"):
-                url_get_args[key] = [
-                    deserialize_value(value) for value in url_get_args[key].split(";")
-                ]
-            # For ranges, we have a format of (123,321)
-            elif key.endswith("__range"):
-                values = url_get_args[key].split(",")
-                url_get_args[key] = (
-                    deserialize_value(values[0].strip("(")),
-                    deserialize_value(values[1].strip(")")),
-                )
-            # otherwise its a normal key-value pair
-            else:
-                url_get_args[key] = deserialize_value(url_get_args[key])
+        # convert the URL into a request object
+        request = HttpRequest()
+        request.path = url.path
+        request.GET = QueryDict(url.query)
+        request.resolver_match = resolve(url.path)
 
-        # we now break out the common filter kwargs so that we can use filter_from_config.
-        # We only pass these values if they are present as to avoid overwriting
-        # the defaults set elsewhere
-        extra_kwargs = {
-            key: url_get_args.pop(key)
-            for key in ["order_by", "limit", "page", "page_size"]
-            if key in url_get_args.keys()
-        }
+        # make sure we are looking at a /data view in tables
+        if not (
+            request.resolver_match.namespaces[0] == "data_explorer"
+            and request.resolver_match.url_name == "table"
+        ):
+            raise Exception("This is not a Simmate `data_explorer.table` url")
 
-        # special case for "format", which is only used to determine how to
-        # render the results. This is thrown out if it is not requested
-        if include_format and "format" in url_get_args.keys():
-            extra_kwargs["format"] = url_get_args.pop("format", "html")
-        else:
-            # try removing whether its there or not
-            url_get_args.pop("format", None)
+        # grab the appropriate table
+        table_name = request.resolver_match.kwargs["table_name"]
+        expected_table = cls.get_table(table_name)
 
-        return {
-            "filters": url_get_args,
-            **extra_kwargs,
-        }
+        if cls != DatabaseTable and cls != expected_table:
+            raise Exception(
+                "The table indicated in the URL does not match the table class you are using. "
+                f"current table: {cls} ;  url table: {expected_table}"
+            )
+
+        return expected_table.filter_from_request(
+            request=request,
+            **kwargs,
+        )
 
     @classmethod
     def filter_from_request(
@@ -1535,7 +1557,13 @@ class DatabaseTable(models.Model):
         # any other field lookups allowed for EACH field... In practice, we want
         # to just allow anything and trust the user follows the docs correctly.
         # Worst case, the API call fails, which is no big deal.
-        get_kwargs = cls._parse_request_get(request, include_format=False)
+        from simmate.website.utilities import parse_request_get
+
+        get_kwargs = parse_request_get(
+            request,
+            include_format=False,
+            group_filters=True,
+        )
         return cls.filter_from_config(
             **get_kwargs,
             paginate=paginate,
@@ -1545,7 +1573,9 @@ class DatabaseTable(models.Model):
     def filter_from_config(
         cls,
         filters: dict,
-        order_by: list[str] = ["id"],
+        # True default is "id" when pagination is needed. Using "None" respects
+        # if there is ordering from any of the filters (e.g. filter_similarity_2d)
+        order_by: str | list[str] = None,  # could be "id" or ["created_at", "id", ...]
         limit: int = 10_000,
         page: int = 1,
         page_size: int = 25,
@@ -1554,6 +1584,7 @@ class DatabaseTable(models.Model):
         """
         Converts URL kwargs into a queryset.
         """
+
         # Some tables have "advanced" filtering logic. These want us to call
         # a filtering method, rather than just passing the kwarg to `objects.filter()`.
         # An example of this would be "chemical_system" for Structure, which
@@ -1565,18 +1596,26 @@ class DatabaseTable(models.Model):
         filter_methods_args = cls.filter_methods_extra_args
 
         queryset = cls.objects
-        for filter_name in filters:
+        for filter_name, filter_value in filters.items():
+
             # if we have a filter method, we apply it to our queryset right away
             if f"filter_{filter_name}" in filter_methods:
+                # The args can be given one of two ways:
+                #   1. a single arg
+                #   2. kwargs (a json dict with key-values)
+                # Here are examples for each approach to call the
+                # method `filter_age(cutoff, age_column)`, where 'cutoff' is
+                # required while age_column is an optional input
+                #   age="day"
+                #   age={"cutoff": "day", "age_column": "updated_at"}
+                # The latter is more explicit and robust to errors.
+                # BUG: if the first positional is supposed to be a dict,
+                # you must use the JSON approach instead.
                 method = getattr(queryset, f"filter_{filter_name}")
-                # method_args = filters.get(filter_name)
-                method_kwargs = {
-                    arg: filters.get(arg)
-                    for arg in list(inspect.signature(method).parameters.keys())
-                    if arg in filters.keys()
-                }
-                queryset = method(**method_kwargs)  # *method_args,
-                # BUG: need to figure out better approach for passing params
+                if not isinstance(filter_value, dict):
+                    queryset = method(filter_value)
+                else:
+                    queryset = method(**filter_value)
 
             # these are kwargs only needed in filter methods (e.g. `include_subsystems`)
             elif filter_name in filter_methods_args:
@@ -1584,13 +1623,25 @@ class DatabaseTable(models.Model):
 
             # otherwise we have a basic filter (e.g. `user__email__startswith`)
             else:
-                basic_filters[filter_name] = filters[filter_name]
+                basic_filters[filter_name] = filter_value
 
         # now that all filter_methods have been applied, we now apply basic ones
         queryset = queryset.filter(**basic_filters)
 
-        # and add in extras
-        queryset = queryset.order_by(*order_by)[:limit]
+        # Handle ordering
+        # the ordered_by kwarg takes priority, but in cases where none is set
+        # AND the queryset filters didn't give any, pagination still requires
+        # that we do some form of ordering, so we filter by id
+        if paginate and not order_by and not queryset.query.order_by:
+            order_by = "id"
+        if order_by:
+            # in case only a single str was given, convert to list
+            if isinstance(order_by, str):
+                order_by = [order_by]
+            queryset = queryset.order_by(*order_by)
+
+        if limit:
+            queryset = queryset[:limit]
 
         # if requested, split the results into pages and grab the requested one
         if paginate:
@@ -1860,11 +1911,24 @@ class DatabaseTable(models.Model):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def populate_workflow_column(cls, column_name: str, batch_size: int = 1000):
+    def populate_workflow_column(
+        cls,
+        column_name: str,
+        batch_size: int = 500,
+        update_only: bool = True,
+    ):
         """
         Populates a specific workflow column. The column must be present in the
         `workflow_columns` attribute.
         """
+
+        # BUG: using 'id__in' below might cause batches >1k to fail
+        if batch_size > 1000:
+            logging.info(
+                "This method uses a 'IN' clause to select batches of IDs, so "
+                "batches larger than 1k can cause performance issues and errors."
+            )
+
         # local import to avoid circular dependency
         from simmate.workflows.utilities import get_workflow
 
@@ -1883,21 +1947,17 @@ class DatabaseTable(models.Model):
                 "us to add additional support."
             )
 
-        filters = {f"{column_name}__isnull": True}
-        nobjs_total = cls.objects.filter(**filters).count()
+        filters = {f"{column_name}__isnull": True} if update_only else {}
+        ids_to_update = cls.objects.filter(**filters).values_list("id", flat=True).all()
+
         logging.info(
             f"Updating '{column_name}' column using '{workflow_name}' "
-            f"for {nobjs_total} entries"
+            f"for {len(ids_to_update)} entries"
         )
+        for ids_chunk in chunk_list(ids_to_update, batch_size):
 
-        # Continue the loop until
-        while True:
             # grab the next set of objects to update
-            objs_to_update = cls.objects.filter(**filters).all()[:batch_size]
-
-            # exit the while loop if there aren't any entries left
-            if not objs_to_update:
-                break
+            objs_to_update = cls.objects.filter(id__in=ids_chunk).all()
 
             # First check for a user-defined method.
             predefined_method = f"_format_inputs_for__{column_name}"

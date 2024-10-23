@@ -14,37 +14,36 @@
             </tr>
         </thead>
         <tbody>
-            {% for table_entry in page.object_list %}
+            {% for entry in entries %}
                 <tr>
-                    <td>{{ table_entry.id }}</td>
+                    <td>{{ entry.id }}</td>
                     <td>
-                        <a href="{{ table_entry.id }}">simmate</a> / <a href="{{ table_entry.external_link }}" target="_blank">provider</a>
+                        <a href="{{ entry.id }}">simmate</a> / <a href="{{ entry.external_link }}" target="_blank">provider</a>
                     </td>
-                    <td>{{ table_entry.formula_full | chemical_formula }}</td>
-                    <td>{{ table_entry.spacegroup.number }}</td>
-                    <td>{{ table_entry.density | floatformat:3 }}</td>
+                    <td>{{ entry.formula_full | chemical_formula }}</td>
+                    <td>{{ entry.spacegroup.number }}</td>
+                    <td>{{ entry.density | floatformat:3 }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
 {% elif "Molecule" in table.get_mixin_names %}
-    {% for table_entry in page.object_list %}
+    {% load draw_molecule %}
+    {% for entry in entries %}
         <div class="col-auto">
             <div class="card border-secondary border ribbon-box" style="width: 12rem;">
                 <div class="card-body">
                     <div class="row">
-                        <div class="py-1 text-light bg-primary text-center fw-bold rounded col-12">id = {{ table_entry.id }}</div>
+                        <div class="py-1 text-light bg-primary text-center fw-bold rounded col-12">id = {{ entry.id }}</div>
                     </div>
                     <div class="row text-center my-2">
-                        <div class="col-12">
-                            <script>doodle_molecule('{{ table_entry.sdf_str }}', {{ table_entry.id }}, 100)</script>
-                        </div>
+                        <div class="col-12">{% draw_molecule entry width=150 height=150 %}</div>
                     </div>
                     <div class="row text-center">
                         <div class="col">
                             <a role="button"
                                class="btn btn-outline-primary btn-sm"
-                               href="{{ table_entry.id }}">View  <i class="mdi mdi-open-in-new"></i></a>
+                               href="{{ entry.id }}">View  <i class="mdi mdi-open-in-new"></i></a>
                         </div>
                     </div>
                 </div>
@@ -68,13 +67,13 @@
             </tr>
         </thead>
         <tbody>
-            {% for table_entry in page.object_list %}
+            {% for entry in entries %}
                 <tr>
-                    <td>{{ table_entry.id }}</td>
+                    <td>{{ entry.id }}</td>
                     <td>
                         <a role="button"
                            class="btn btn-outline-primary btn-sm"
-                           href="{{ table_entry.id }}"><i class="mdi mdi-open-in-new"></i></a>
+                           href="{{ entry.id }}"><i class="mdi mdi-open-in-new"></i></a>
                     </td>
                 </tr>
             {% endfor %}

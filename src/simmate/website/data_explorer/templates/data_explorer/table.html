@@ -14,17 +14,10 @@
             {% block quicksearch %}
                 {% if table.html_search_view %}
                     {% include "data_explorer/table_quick_search.html" %}
+                {% else %}
+                    {% include "data_explorer/table_filters.html" %}
                 {% endif %}
             {% endblock %}
-            {# Filter Sidebar #}
-            {% block filters %}
-                {% include "data_explorer/table_filters.html" %}
-            {% endblock %}
-            {# JSON + Python Buttons #}
-            <a href="?format=json" target="_blank" class="btn btn-outline-dark my-1">JSON</a>
-            <a href="https://jacksund.github.io/simmate/getting_started/database/quick_start/"
-               target="_blank"
-               class="btn btn-outline-dark">Python</a>
             {# Update Sidebar #}
             {% block updater %}
                 {% if table.html_update_view %}
@@ -34,10 +27,7 @@
             {# Add New Sidebar #}
             {% block addnew %}
                 {% if table.html_add_view %}
-                    {# for now this is a link, but it should be a unicorn view #}
-                    <a href="#" target="_blank" class="btn btn-success disabled">
-                        <i class="mdi mdi-plus"></i>&nbsp;&nbsp;New
-                    </a>
+                    {% include "data_explorer/table_add_entry.html" %}
                 {% endif %}
             {% endblock %}
         </div>
@@ -71,7 +61,8 @@
                     </div>
                 </div>
                 {% block search_results_table %}
-                    {% include table.html_entries_template %}
+                    {# we assume that if enable_select is used, then there is a viable update_many view #}
+                    {% include table.html_entries_template with enable_select=True entries=page.object_list %}
                 {% endblock %}
                 {% include "data_explorer/pagination.html" %}
             {% else %}

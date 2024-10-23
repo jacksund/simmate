@@ -5,6 +5,7 @@ from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
 
 
+@pytest.mark.django_db
 def test_providers_view(client):
     # grabs f"/data/"
     url = reverse("data_explorer:home")
