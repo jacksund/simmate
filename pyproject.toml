@@ -97,6 +97,7 @@ dependencies=[
     #
     # Molecule-based dependencies are broken with pip, so we limit them to conda installs
     # "rdkit",  # cheminformatics library  # BUG: install is broken on pypi
+    # "ipython",  # for rendering molecules in output
     # "umap-learn",  # for chemspace mapping
 ]
 
