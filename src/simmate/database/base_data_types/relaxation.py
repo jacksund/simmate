@@ -21,7 +21,8 @@ from pathlib import Path
 
 import plotly.graph_objects as plotly_go
 from plotly.subplots import make_subplots
-from pymatgen.io.vasp.outputs import Vasprun
+from simmate.apps.quantum_espresso.outputs import PwscfXml
+from simmate.apps.vasp.outputs import Vasprun
 
 from simmate.database.base_data_types import (
     Calculation,
@@ -159,20 +160,49 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
         relaxation.update_from_vasp_run(vasprun)
 
         return relaxation
+    
+    @classmethod
+    def from_pwscf_run(cls, pwscf_run: PwscfXml, as_dict: bool = False):
+        if as_dict:
+            raise NotImplementedError(
+                "Relaxation database entries cannot be loaded with as_dict=True. "
+                "Please contact the Simmate team if you need this feature."
+            )
+        # Make the relaxation entry. Note we need to save this to the database
+        # in order to link/save the ionic steps below. We save the structure
+        # as the final one in the calculation.
+        # Note, the information does not matter at this point because it will be
+        # populated below
+        relaxation = cls.from_toolkit(structure=pwscf_run.structures[-1])
+        
+        # Now we have the relaxation data all loaded and can save it to the database
+        relaxation.save()
+
+        # and we can populate the rest of the tables as if its the workup
+        relaxation.update_from_pwscf_run(pwscf_run)
+
+        return relaxation
 
     def update_from_directory(self, directory: Path):
-        # check if we have a VASP directory
         vasprun_filename = directory / "vasprun.xml"
-        if not vasprun_filename.exists():
+        pwscf_filename = directory / "pwscf.xml"
+        
+        # check if we have a VASP directory
+        if vasprun_filename.exists():
+            vasprun = Vasprun.from_directory(directory)
+            self.update_from_vasp_run(vasprun)
+
+        # check if we have a Quantum Espresso (PWscf) directory
+        elif pwscf_filename.exists():
+            pwscf_run = PwscfXml.from_directory(directory)
+            self.update_from_pwscf_run(pwscf_run)
+            
+        else:
             # raise Exception(
             #     "Only VASP output directories are supported at the moment"
             # )
             return  # just exit
 
-        from simmate.apps.vasp.outputs import Vasprun
-
-        vasprun = Vasprun.from_directory(directory)
-        self.update_from_vasp_run(vasprun)
 
     def update_from_vasp_run(self, vasprun: Vasprun):
         """
@@ -183,11 +213,6 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
 
         vasprun :
             The final Vasprun object from the relaxation outputs.
-        corrections :
-            List of errors and corrections applied to during the relaxation.
-        directory :
-            name of the directory that relaxation was ran in. This is only used
-            to reference the archive file if it's ever needed again.
         """
 
         # The data is actually easier to access as a dictionary and everything
@@ -199,7 +224,7 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
         structures = vasprun.structures
 
         # Now let's iterate through the ionic steps and save these to the database.
-        for number, (structure, ionic_step) in enumerate(
+        for number, (pymstructure, ionic_step) in enumerate(
             zip(structures, data["ionic_steps"])
         ):
             # first pull all the data together and save it to the database. We
@@ -207,7 +232,7 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
             # model, we look need to use "structures.model".
             structure = self.structures.model.from_toolkit(
                 number=number,
-                structure=structure,
+                structure=pymstructure,
                 energy=ionic_step["e_wo_entrp"],
                 site_forces=ionic_step["forces"],
                 lattice_stress=ionic_step["stress"],
@@ -240,7 +265,62 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
             conduction_band_minimum=data.get("cbm"),
             valence_band_maximum=data.get("vbm"),
         )
-
+    
+    def update_from_pwscf_run(self, pwscf_run: PwscfXml):
+        """
+        Given a Vasprun object from a finished relaxation, this will update the
+        Relaxation table entry and the corresponding IonicStep entries.
+    
+        #### Parameters
+    
+        pwscf_run :
+            The final PwscfXml object from the relaxation outputs.
+        """
+    
+        structures = pwscf_run.structures
+        energies = pwscf_run.energies
+        all_site_forces = pwscf_run.all_site_forces
+        lattice_stresses = pwscf_run.lattice_stresses
+    
+        # Now let's iterate through the ionic steps and save these to the database.
+        for number, pymstructure in enumerate(structures):
+            # first pull all the data together and save it to the database. We
+            # are saving this to an IonicStepStructure datatable. To access this
+            # model, we look need to use "structures.model".
+            structure = self.structures.model.from_toolkit(
+                number=number,
+                structure=pymstructure,
+                energy=energies[number],
+                site_forces=all_site_forces[number].tolist(),
+                lattice_stress=lattice_stresses[number].tolist(),
+                relaxation=self,  # this links the structure to this relaxation
+            )
+            structure.save()
+    
+            # If this is the first structure, we want to link it as such
+            if number == 0:
+                self.structure_start_id = structure.id
+            # and same for the final structure. Note, we can't use elif because
+            # there's a chance the start/end structure are the same, which occurs
+            # when the starting structure is found to be relaxed already.
+            if number == len(structures) - 1:
+                self.structure_final_id = structure.id
+        # update our relaxation entry with new data
+        self.update_from_toolkit(
+            # use the final ionic setup for the structure and energy
+            structure=structures[-1],
+            energy=energies[-1],
+            # calculate extra data for storing
+            volume_change=structures[-1].volume
+            - structures[0].volume / structures[0].volume,
+            # There is also extra data for the final structure that we save directly
+            # in the relaxation table.  We use .get() in case the key isn't provided.
+            band_gap=pwscf_run.band_gap,
+            is_gap_direct=pwscf_run.is_gap_direct,
+            energy_fermi=pwscf_run.energy_fermi,
+            conduction_band_minimum=pwscf_run.conduction_band_minimum,
+            valence_band_maximum=pwscf_run.valence_band_maximum,
+        )
 
 class IonicStep(Structure, Thermodynamics, Forces):
     """

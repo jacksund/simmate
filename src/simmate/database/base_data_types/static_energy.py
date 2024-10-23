@@ -100,8 +100,8 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         static_energy = cls.from_toolkit(
             structure=pwscf_run.final_structure,
             energy=pwscf_run.final_energy,
-            site_forces=pwscf_run.site_forces.tolist(),
-            lattice_stress=pwscf_run.lattice_stress.tolist(),
+            site_forces=pwscf_run.final_site_forces.tolist(),
+            lattice_stress=pwscf_run.final_lattice_stress.tolist(),
             band_gap=pwscf_run.band_gap,
             is_gap_direct=pwscf_run.is_gap_direct,
             energy_fermi=pwscf_run.energy_fermi,
