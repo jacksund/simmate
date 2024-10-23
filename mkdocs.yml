@@ -164,21 +164,42 @@ nav:
             - Creating custom tables: full_guides/database/custom_tables.md
 
         - Toolkit:
-            - Overview: full_guides/toolkit/overview.md
-            - PyMatGen Help: 
-                - Structure: full_guides/toolkit/pymatgen/structure.md
-                - Lattice: full_guides/toolkit/pymatgen/lattice.md
-                - Sites: full_guides/toolkit/pymatgen/sites.md
-                - Composition: full_guides/toolkit/pymatgen/composition.md
-            # - Single Structure:
-            #    - Structure Loading: full_guides/toolkit/single_structure/loading.md
-            #    - Structure Exporting: full_guides/toolkit/single_structure/exporting.md
-            #    - Cleaning & Prep: full_guides/toolkit/single_structure/cleaning.md
-            #    - Common Properties: full_guides/toolkit/single_structure/properties.md
-            #    - Common Analyses: full_guides/toolkit/single_structure/analyses.md
-            #    # - API: full_guides/toolkit/single_structure/api.md
-            # - Many Structures: 
-            #    - Featurizers: full_guides/toolkit/many_structures/featurizers.md
+            - Molecules:
+                - Overview: full_guides/toolkit/molecules/overview.md
+                - Single Molecule: 
+                    - Quick Start: full_guides/toolkit/molecules/single_molecule/quick_start.md
+                    - Molecule Loading: full_guides/toolkit/molecules/single_molecule/molecule_loading.md
+                    - Molecule Exporting: full_guides/toolkit/molecules/single_molecule/molecule_exporting.md
+                    - Cleaning & Prep: full_guides/toolkit/molecules/single_molecule/cleaning_and_prep.md
+                    - Common Properties: full_guides/toolkit/molecules/single_molecule/common_properties.md
+                    - Common Analyses: full_guides/toolkit/molecules/single_molecule/common_analyses.md
+                    - SMARTS sets: full_guides/toolkit/molecules/single_molecule/smarts_sets.md
+                    # - API: toolkit/molecules/single_molecule/api.md
+                - Many Molecules:
+                    # - Quick Start: full_guides/toolkit/molecules/many_molecules/quick_start.md
+                    # - Working with Pandas: full_guides/toolkit/molecules/many_molecules/pandas.md
+                    - Featurizers: full_guides/toolkit/molecules/many_molecules/featurizers.md
+                    # - Filters: full_guides/toolkit/molecules/many_molecules/filters.md
+                    - Clustering: full_guides/toolkit/molecules/many_molecules/clustering.md
+                    - ChemSpace Mapping: full_guides/toolkit/molecules/many_molecules/mapping.md
+                    - Similarity & Diversity: full_guides/toolkit/molecules/many_molecules/similarity.md
+                # - Database Molecules: full_guides/toolkit/molecules/database_molecules.md
+            - Crystal Structures:
+                - Overview: full_guides/toolkit/crystal_structures/overview.md
+                - PyMatGen Help: 
+                    - Structure: full_guides/toolkit/crystal_structures/pymatgen/structure.md
+                    - Lattice: full_guides/toolkit/crystal_structures/pymatgen/lattice.md
+                    - Sites: full_guides/toolkit/crystal_structures/pymatgen/sites.md
+                    - Composition: full_guides/toolkit/crystal_structures/pymatgen/composition.md
+                # - Single Structure:
+                #    - Structure Loading: full_guides/toolkit/crystal_structures/single_structure/loading.md
+                #    - Structure Exporting: full_guides/toolkit/crystal_structures/single_structure/exporting.md
+                #    - Cleaning & Prep: full_guides/toolkit/crystal_structures/single_structure/cleaning.md
+                #    - Common Properties: full_guides/toolkit/crystal_structures/single_structure/properties.md
+                #    - Common Analyses: full_guides/toolkit/crystal_structures/single_structure/analyses.md
+                #    # - API: full_guides/toolkit/crystal_structures/single_structure/api.md
+                # - Many Structures: 
+                #    - Featurizers: full_guides/toolkit/crystal_structures/many_structures/featurizers.md
 
         - Contributing:
             - First time setup: full_guides/contributing/first_time_setup.md

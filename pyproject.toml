@@ -94,6 +94,11 @@ dependencies=[
     "pymatgen-analysis-diffusion >=2021.4.29, <=2023.8.15",  # pymatgen-diffusion on conda
     "matminer >=0.7.6, <0.8.1",
     "ase >=3.22.1, <=3.23.0",
+    #
+    # Molecule-based dependencies are broken with pip, so we limit them to conda installs
+    # "rdkit",  # cheminformatics library  # BUG: install is broken on pypi
+    # "ipython",  # for rendering molecules in output
+    # "umap-learn",  # for chemspace mapping
 ]
 
 # optional dependencies that are not installed by default
@@ -136,6 +141,9 @@ EXTRAS = [
     "django-extensions >=3.1.5",  # simple tools to help with django development
     "bokeh >=2.1.1",  # for the dask dashboard
     "h5py >=3.10.0, <=3.10.0",  # for reading QE's binary output files
+    # OpenEye needs to point to a different source & a license is required
+    #   pip install -i https://pypi.anaconda.org/OpenEye/simple OpenEye-toolkits
+    "OpenEye-toolkits @ https://pypi.anaconda.org/OpenEye/simple",
 ]
 
 # For downloading third-party data directly from source instead of Simmate
