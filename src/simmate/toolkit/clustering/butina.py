@@ -3,8 +3,7 @@
 import numpy
 from rich.progress import track
 
-from simmate.toolkit.clustering.base import ClusteringEngine
-from simmate.toolkit.similarity.base import SimilarityEngine
+from .base import ClusteringEngine, SimilarityEngine
 
 
 class Butina(ClusteringEngine):
@@ -16,7 +15,7 @@ class Butina(ClusteringEngine):
         similarity_engine_kwargs: dict = {},
         similarity_cutoff: float = 0.50,
         reorder_after_new_cluster: bool = True,
-        progress_bar: bool = True,
+        progress_bar: bool = False,
         flat_output: bool = False,
     ):
         fingerprints = numpy.array(fingerprints)
