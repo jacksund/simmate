@@ -18,7 +18,9 @@ class Relaxation__Vasp__Quality02(VaspWorkflow):
     calculation as a third step.
     """
 
-    description_doc_short = "slightly less bare-bones settings for randomly-created structures"
+    description_doc_short = (
+        "slightly less bare-bones settings for randomly-created structures"
+    )
 
     # This uses the PBE functional with POTCARs that have lower electron counts
     # and convergence criteria when available.

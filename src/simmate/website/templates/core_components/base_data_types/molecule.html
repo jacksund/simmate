@@ -2,7 +2,7 @@
 <div class="row py-2">
     <div class="col-xl-4">
         <div class="border border-dark mt-4">
-            <script>doodle_molecule('{{ calculation.sdf_str }}', {{ calculation.id }}, 300)</script>
+            <script>doodle_molecule('{{ table_entry.sdf_str }}', {{ table_entry.id }}, 300)</script>
         </div>
     </div>
     <div class="col-xl-8">
@@ -58,7 +58,7 @@
             <div class="tab-pane show active" id="smiles">
                 <div class="row bg-light p-0 m-0 border border-secondary-lighten">
                     <div class="col-11 mt-1">
-                        <pre id="smiles_text" class="text-center">{{ calculation.smiles }}</pre>
+                        <pre id="smiles_text" class="text-center">{{ table_entry.smiles }}</pre>
                     </div>
                     <div class="col-1">
                         <button onclick="copyTextById('smiles_text')"
@@ -75,7 +75,7 @@
             <div class="tab-pane" id="inchi">
                 <div class="row bg-light p-0 m-0 border border-secondary-lighten">
                     <div class="col-11 mt-1">
-                        <pre id="inchi_text" class="text-center">{{ calculation.inchi }}</pre>
+                        <pre id="inchi_text" class="text-center">{{ table_entry.inchi }}</pre>
                     </div>
                     <div class="col-1">
                         <button onclick="copyTextById('inchi_text')"
@@ -92,7 +92,7 @@
             <div class="tab-pane" id="inchi_key">
                 <div class="row bg-light p-0 m-0 border border-secondary-lighten">
                     <div class="col-11 mt-1">
-                        <pre id="inchi_key_text" class="text-center">{{ calculation.inchi_key }}</pre>
+                        <pre id="inchi_key_text" class="text-center">{{ table_entry.inchi_key }}</pre>
                     </div>
                     <div class="col-1">
                         <button onclick="copyTextById('inchi_key_text')"
@@ -110,7 +110,7 @@
                 <div class="row bg-light p-0 m-0 border border-secondary-lighten">
                     <div class="col-11 mt-1">
                         <pre id="sdf_ctab_text">
-                            <small>{{ calculation.molecule }}</small>
+                            <small>{{ table_entry.molecule }}</small>
                         </pre>
                     </div>
                     <div class="col-1">
@@ -129,7 +129,7 @@
                 <div class="row bg-light p-0 m-0 border border-secondary-lighten">
                     <div class="col-11 mt-1">
                         <pre id="origmol_text">
-                            <small>{{ calculation.molecule_original }}</small>
+                            <small>{{ table_entry.molecule_original }}</small>
                         </pre>
                     </div>
                     <div class="col-1">
@@ -153,23 +153,23 @@
                     <tbody>
                         <tr>
                             <td>non-H Atoms</td>
-                            <td>{{ calculation.num_atoms }}</td>
+                            <td>{{ table_entry.num_atoms }}</td>
                         </tr>
                         <tr>
                             <td>Stereocenters</td>
-                            <td>{{ calculation.num_stereocenters }}</td>
+                            <td>{{ table_entry.num_stereocenters }}</td>
                         </tr>
                         <tr>
                             <td>Rings</td>
-                            <td>{{ calculation.num_rings }}</td>
+                            <td>{{ table_entry.num_rings }}</td>
                         </tr>
                         <tr>
                             <td>H acceptors</td>
-                            <td>{{ calculation.num_h_acceptors }}</td>
+                            <td>{{ table_entry.num_h_acceptors }}</td>
                         </tr>
                         <tr>
                             <td>H donors</td>
-                            <td>{{ calculation.num_h_donors }}</td>
+                            <td>{{ table_entry.num_h_donors }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -183,15 +183,15 @@
                             </br>
                             <small>(octanol-water)</small>
                         </td>
-                        <td>{{ calculation.log_p_rdkit|floatformat:1 }}</td>
+                        <td>{{ table_entry.log_p_rdkit|floatformat:1 }}</td>
                     </tr>
                     <tr>
                         <td>TPSA (predicted)</td>
-                        <td>{{ calculation.tpsa_rdkit|floatformat:1 }}</td>
+                        <td>{{ table_entry.tpsa_rdkit|floatformat:1 }}</td>
                     </tr>
                     <tr>
                         <td>SAS</td>
-                        <td>{{ calculation.synthetic_accessibility|floatformat:1 }}</td>
+                        <td>{{ table_entry.synthetic_accessibility|floatformat:1 }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -211,7 +211,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for key, value in calculation.functional_groups.items %}
+                {% for key, value in table_entry.functional_groups.items %}
                     <tr>
                         <td>{{ key }}</td>
                         <td>{{ value }}</td>

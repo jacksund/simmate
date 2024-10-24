@@ -12,6 +12,7 @@ class Relaxation__QuantumEspresso__Staged(StagedWorkflow):
     large supercells. More precise relaxations+energy calcs should be done
     afterwards because ettings are still below MIT and Materials Project quality.
     """
+
     # !!! Needs to be implemented
     exclude_from_archives = []
 
@@ -25,5 +26,3 @@ class Relaxation__QuantumEspresso__Staged(StagedWorkflow):
         "relaxation.quantum-espresso.quality04",
         "static-energy.quantum-espresso.quality04",
     ]
-
-

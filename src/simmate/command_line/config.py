@@ -112,7 +112,11 @@ def add(app_name: str, custom: bool = False):
         if not custom:
             # The user may have mistyped. We don't want to add a line to the
             # settings file only for them to have to figure out how to delete it
-            logging.warning(f"'{app_name}' is an unknown app. If you are using a custom app, please add the tag --custom")
+            logging.warning(
+                f"'{app_name}' is an unknown app. If you are using a custom app, "
+                "please add the tag '--custom'. If this message is unexpected, "
+                "check your command and app name for typos."
+            )
         else:
             # user is giving a custom app
             settings.add_apps_and_update([app_name])

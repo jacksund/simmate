@@ -3,29 +3,29 @@
     <h3>Band Structure:</h3>
     <ul>
         <li>
-            <b>Number of bands:</b> {{ calculation.nbands }}
+            <b>Number of bands:</b> {{ table_entry.nbands }}
         </li>
         <li>
-            <b>Band gap:</b> {{ calculation.band_gap }}
+            <b>Band gap:</b> {{ table_entry.band_gap }}
         </li>
         <li>
-            <b>Is gap direct:</b> {{ calculation.is_gap_direct }}
+            <b>Is gap direct:</b> {{ table_entry.is_gap_direct }}
         </li>
         <li>
-            <b>Direct band gap:</b> {{ calculation.band_gap_direct }}
+            <b>Direct band gap:</b> {{ table_entry.band_gap_direct }}
         </li>
         <li>
-            <b>Fermi energy:</b> {{ calculation.energy_fermi }}
+            <b>Fermi energy:</b> {{ table_entry.energy_fermi }}
         </li>
         <li>
-            <b>Conduction band minimum:</b> {{ calculation.conduction_band_minimum }}
+            <b>Conduction band minimum:</b> {{ table_entry.conduction_band_minimum }}
         </li>
         <li>
-            <b>Valence band maximum:</b> {{ calculation.valence_band_maximum }}
+            <b>Valence band maximum:</b> {{ table_entry.valence_band_maximum }}
         </li>
         <li>
-            <b>Is metal:</b> {{ calculation.is_metal }}
+            <b>Is metal:</b> {{ table_entry.is_metal }}
         </li>
     </ul>
-    {{ calculation.get_band_diagram_html_div }}
+    {{ table_entry.get_band_diagram_html_div }}
 </div>

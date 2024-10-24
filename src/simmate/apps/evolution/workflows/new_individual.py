@@ -38,8 +38,7 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
         # relaxation datatable with all of the individuals so far. We just need
         # a method in this relaxation table (defined in structure table) that
         # validates the new structure vs all structures in this table using pgvector
-        
-        
+
         # Check the stop condition of the search and see if this new individual
         # is even needed. This will catch when a search ends while a new
         # individual was waiting in the queue

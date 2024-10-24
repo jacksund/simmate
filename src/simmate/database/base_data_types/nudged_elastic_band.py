@@ -18,14 +18,6 @@ class DiffusionAnalysis(Structure, Calculation):
     class Meta:
         app_label = "workflows"
 
-    api_filters = dict(
-        migrating_specie=["exact"],
-        vacancy_mode=["exact"],
-        atomic_fraction=["range"],
-        barrier_cell=["range"],
-        npaths_involved=["range"],
-    )
-
     migrating_specie = table_column.CharField(max_length=4, blank=True, null=True)
     """
     The element of the diffusion atom (e.g. "Li")
@@ -166,16 +158,6 @@ class MigrationHop(Calculation):
         "index_end",
         "number",
     ]
-
-    api_filters = dict(
-        site_start=["exact"],
-        site_end=["exact"],
-        number=["range"],
-        length=["range"],
-        dimension_path=["range"],
-        dimension_host_lattice=["range"],
-        energy_barrier=["range"],
-    )
 
     # is_from_hop_obj = table_column.BooleanField(blank=True, null=True)
     # source = hop_obj / endpoints / images
@@ -428,13 +410,6 @@ class MigrationImage(Structure):
         "structure_distance",
         "energy",
     ]
-
-    api_filters = dict(
-        number=["exact"],
-        force_tangent=["range"],
-        energy=["range"],
-        structure_distance=["range"],
-    )
 
     number = table_column.IntegerField()
     """

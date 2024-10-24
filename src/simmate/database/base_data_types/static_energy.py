@@ -24,14 +24,6 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         "is_gap_direct",
     ]
 
-    api_filters = dict(
-        band_gap=["range"],
-        is_gap_direct=["exact"],
-        energy_fermi=["range"],
-        conduction_band_minimum=["range"],
-        valence_band_maximum=["range"],
-    )
-
     # OPTIMIZE: should I include this electronic data?
 
     band_gap = table_column.FloatField(blank=True, null=True)
@@ -100,13 +92,14 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
         static_energy = cls.from_toolkit(
             structure=pwscf_run.final_structure,
             energy=pwscf_run.final_energy,
-            site_forces=pwscf_run.final_site_forces.tolist(),
-            lattice_stress=pwscf_run.final_lattice_stress.tolist(),
-            band_gap=pwscf_run.band_gap,
-            is_gap_direct=pwscf_run.is_gap_direct,
-            energy_fermi=pwscf_run.energy_fermi,
-            conduction_band_minimum=pwscf_run.conduction_band_minimum,
-            valence_band_maximum=pwscf_run.valence_band_maximum,
+            # DISABLED FOR TESTING:
+            # site_forces=pwscf_run.final_site_forces.tolist(),
+            # lattice_stress=pwscf_run.final_lattice_stress.tolist(),
+            # band_gap=pwscf_run.band_gap,
+            # is_gap_direct=pwscf_run.is_gap_direct,
+            # energy_fermi=pwscf_run.energy_fermi,
+            # conduction_band_minimum=pwscf_run.conduction_band_minimum,
+            # valence_band_maximum=pwscf_run.valence_band_maximum,
             as_dict=as_dict,
         )
 

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import inspect
 import math
 from functools import cache
 from pathlib import Path
-import inspect
 
 import numpy
 import plotly.graph_objects as plotly_go
@@ -41,7 +41,7 @@ class StagedWorkflow(Workflow):
             directory=directory / current_task.name_full,
         )
         result = state.result()
-        
+
         # The remaining tasks continue and use the past results as an input
         for i, current_task in enumerate(cls.subworkflows[1:]):
             state = current_task.run(
@@ -72,7 +72,7 @@ class StagedWorkflow(Workflow):
     def subworkflows(cls):
         # import locally to avoid circular import
         from simmate.workflows.utilities import get_workflow
-        
+
         # Workflow names can be either the string name of the workflow or a workflow
         # object
         workflow_list = []
@@ -90,7 +90,7 @@ class StagedWorkflow(Workflow):
                     Workflows inheriting from StagedWorkflow must use either the
                     StaticEnergy or Relaxation table.
                     """
-                    )
+                )
         return workflow_list
 
     @classmethod
@@ -312,5 +312,3 @@ class StagedSeriesTimes(PlotlyFigure):
 # register all plotting methods to the database table
 for _plot in [StagedSeriesConvergence, StagedSeriesHistogram, StagedSeriesTimes]:
     _plot.register_to_class(StagedWorkflow)
-
-

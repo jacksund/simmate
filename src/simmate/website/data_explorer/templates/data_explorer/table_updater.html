@@ -1,0 +1,27 @@
+{# Update Sidebar #}
+<div class="offcanvas offcanvas-end w-75" id="offcanvasUpdater">
+    <div class="offcanvas-header bg-dark text-light">
+        <h5>Update Selected</h5>
+        <button type="button"
+                class="btn-close text-reset"
+                data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="alert alert-primary d-flex align-items-center mt-2">
+            <div>
+                <small>Only selected compounds will be updated.</small>
+            </div>
+        </div>
+        <div>
+            {% load unicorn %}
+            {% csrf_token %}
+            {% unicorn table.html_update_view %}
+        </div>
+    </div>
+</div>
+<button class="btn btn-warning"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasUpdater">
+    <i class="mdi mdi-pencil py-1"></i>&nbsp;&nbsp;Update
+</button>

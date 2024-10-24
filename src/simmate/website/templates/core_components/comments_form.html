@@ -13,7 +13,7 @@
     <div class="rightbar-content h-100" data-simplebar>
         <div class="p-3">
             {# Comment Thread #}
-            {% get_comment_list for calculation as comment_list %}
+            {% get_comment_list for table_entry as comment_list %}
             <hr>
             {% for comment in comment_list %}
                 <div class="text-primary">
@@ -25,7 +25,7 @@
             {% endfor %}
             {# Comment Form #}
             {% if user.is_authenticated %}
-                {% get_comment_form for calculation as form %}
+                {% get_comment_form for table_entry as form %}
                 <form action="{% comment_form_target %}" method="POST">
                     {% csrf_token %}
                     {# form.comment --> but wit custom rendering #}

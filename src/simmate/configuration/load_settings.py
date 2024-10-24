@@ -219,6 +219,8 @@ class SimmateSettings:
                 # django extras
                 "debug": False,
                 "allowed_hosts": ["127.0.0.1", "localhost"],
+                # sets STATICFILES_STORAGE to ManifestStaticFilesStorage for prod setups
+                "static_file_hashes": False,
                 # BUG-FIX: Django-unicorn ajax requests sometimes come from the server-side
                 # ingress (url for k8s) or a nginx load balancer. To get past a 403 forbidden
                 # result, we need to sometimes specify allowed origins for csrf.
@@ -283,7 +285,7 @@ class SimmateSettings:
 
     @cached_property
     def _default_database(self) -> Path:
-        # we want to use sqlite3 as our backend
+        # we want to use sqlite3 as our default backend
         # if the user is in the (base) env or not using conda, then we will have a
         # value of "-database.sqlite3", which is why we need strip() here.
         db_filename = (

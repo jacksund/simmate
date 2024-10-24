@@ -19,7 +19,7 @@
                             <div class="card-body">
                                 <h5 class="card-title text-primary">{{ dataset.source }}</h5>
                                 <p class="card-text">{{ dataset.source_long }}</p>
-                                <a href="{% url 'data_explorer:provider' dataset.table_name %}"
+                                <a href="{% url 'data_explorer:table' dataset.table_name %}"
                                    class="btn btn-primary btn-sm">Explore</a>
                                 <a href="{{ provider.homepage }}"
                                    target="_blank"

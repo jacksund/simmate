@@ -21,9 +21,9 @@ from pathlib import Path
 
 import plotly.graph_objects as plotly_go
 from plotly.subplots import make_subplots
+
 from simmate.apps.quantum_espresso.outputs import PwscfXml
 from simmate.apps.vasp.outputs import Vasprun
-
 from simmate.database.base_data_types import (
     Calculation,
     Forces,
@@ -59,15 +59,6 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
         "conduction_band_minimum",
         "valence_band_maximum",
     ]
-
-    api_filters = dict(
-        volume_change=["range"],
-        band_gap=["exact", "range"],
-        is_gap_direct=["exact"],
-        energy_fermi=["range"],
-        conduction_band_minimum=["range"],
-        valence_band_maximum=["range"],
-    )
 
     # OPTIMIZE: should I include this electronic data?
     # This data here is something we only get for the final structure, so it
@@ -160,7 +151,7 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
         relaxation.update_from_vasp_run(vasprun)
 
         return relaxation
-    
+
     @classmethod
     def from_pwscf_run(cls, pwscf_run: PwscfXml, as_dict: bool = False):
         if as_dict:
@@ -174,7 +165,7 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
         # Note, the information does not matter at this point because it will be
         # populated below
         relaxation = cls.from_toolkit(structure=pwscf_run.structures[-1])
-        
+
         # Now we have the relaxation data all loaded and can save it to the database
         relaxation.save()
 
@@ -186,7 +177,7 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
     def update_from_directory(self, directory: Path):
         vasprun_filename = directory / "vasprun.xml"
         pwscf_filename = directory / "pwscf.xml"
-        
+
         # check if we have a VASP directory
         if vasprun_filename.exists():
             vasprun = Vasprun.from_directory(directory)
@@ -196,13 +187,12 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
         elif pwscf_filename.exists():
             pwscf_run = PwscfXml.from_directory(directory)
             self.update_from_pwscf_run(pwscf_run)
-            
+
         else:
             # raise Exception(
             #     "Only VASP output directories are supported at the moment"
             # )
             return  # just exit
-
 
     def update_from_vasp_run(self, vasprun: Vasprun):
         """
@@ -265,23 +255,23 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
             conduction_band_minimum=data.get("cbm"),
             valence_band_maximum=data.get("vbm"),
         )
-    
+
     def update_from_pwscf_run(self, pwscf_run: PwscfXml):
         """
         Given a Vasprun object from a finished relaxation, this will update the
         Relaxation table entry and the corresponding IonicStep entries.
-    
+
         #### Parameters
-    
+
         pwscf_run :
             The final PwscfXml object from the relaxation outputs.
         """
-    
+
         structures = pwscf_run.structures
         energies = pwscf_run.energies
         all_site_forces = pwscf_run.all_site_forces
         lattice_stresses = pwscf_run.lattice_stresses
-    
+
         # Now let's iterate through the ionic steps and save these to the database.
         for number, pymstructure in enumerate(structures):
             # first pull all the data together and save it to the database. We
@@ -296,7 +286,7 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
                 relaxation=self,  # this links the structure to this relaxation
             )
             structure.save()
-    
+
             # If this is the first structure, we want to link it as such
             if number == 0:
                 self.structure_start_id = structure.id
@@ -321,6 +311,7 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
             conduction_band_minimum=pwscf_run.conduction_band_minimum,
             valence_band_maximum=pwscf_run.valence_band_maximum,
         )
+
 
 class IonicStep(Structure, Thermodynamics, Forces):
     """
@@ -357,10 +348,6 @@ class IonicStep(Structure, Thermodynamics, Forces):
         app_label = "workflows"
 
     archive_fields = ["number"]
-
-    api_filters = dict(
-        numer=["range"],
-    )
 
     number = table_column.IntegerField()
     """

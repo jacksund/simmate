@@ -3,17 +3,17 @@
     <h3>Density of States:</h3>
     <ul>
         <li>
-            <b>Band gap:</b> {{ calculation.band_gap }}
+            <b>Band gap:</b> {{ table_entry.band_gap }}
         </li>
         <li>
-            <b>Fermi energy:</b> {{ calculation.energy_fermi }}
+            <b>Fermi energy:</b> {{ table_entry.energy_fermi }}
         </li>
         <li>
-            <b>Conduction band minimum:</b> {{ calculation.conduction_band_minimum }}
+            <b>Conduction band minimum:</b> {{ table_entry.conduction_band_minimum }}
         </li>
         <li>
-            <b>Valence band maximum:</b> {{ calculation.valence_band_maximum }}
+            <b>Valence band maximum:</b> {{ table_entry.valence_band_maximum }}
         </li>
     </ul>
-    {{ calculation.get_dos_diagram_html_div }}
+    {{ table_entry.get_dos_diagram_html_div }}
 </div>

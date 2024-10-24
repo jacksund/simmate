@@ -16,7 +16,6 @@ class OqmdStructure(Structure):
         app_label = "data_explorer"
 
     archive_fields = ["formation_energy"]
-    api_filters = dict(formation_energy=["range"])
     source = "OQMD"
     source_long = "The Open Quantum Materials Database"
     homepage = "https://oqmd.org/"

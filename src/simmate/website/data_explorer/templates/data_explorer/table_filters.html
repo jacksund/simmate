@@ -1,0 +1,43 @@
+<div class="offcanvas offcanvas-end w-75" id="offcanvasFilter">
+    <div class="offcanvas-header bg-dark text-light">
+        <h5>Advanced Filtering</h5>
+        <button type="button"
+                class="btn-close text-reset"
+                data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="alert alert-danger d-flex align-items-center mt-2">
+            <div>
+                <small>
+                    <b>WARNING:</b> This form is under early development and
+                    only for advanced users.
+                </small>
+            </div>
+        </div>
+        <div class="alert alert-primary d-flex align-items-center mt-2">
+            <div>
+                <small>
+                    We recommend keeping the
+                    <a href="{% url 'data_explorer:table-about' table.table_name %}"
+                       class="text-dark"
+                       target="_blank">
+                        <b>Table Info</b>
+                    </a>
+                    page open in a separate window while you complete this form.
+                </small>
+            </div>
+        </div>
+        <div>
+            {% load unicorn %}
+            {% csrf_token %}
+            {% unicorn 'api-filter' %}
+        </div>
+    </div>
+</div>
+{# Toggle sidebar button #}
+<button class="btn btn-dark"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasFilter">
+    <i class="mdi mdi-filter py-1"></i>&nbsp;&nbsp;Filter
+</button>

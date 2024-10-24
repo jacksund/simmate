@@ -76,12 +76,20 @@ def update_database(
     if show_logs:
         logging.info("Success! Your database tables are now up to date. :sparkles:")
 
-def postgress_connect_maintenance():
+
+def postgres_connect_maintenance_db():
     """
     A convenience method to establish a connection to a hosted postgres database
     for adding and deleting tables
     """
     import psycopg2
+
+    # grab postges config parameters, *excluding* the database name and engine.
+    # Also anything in the OPTIONS is an extra kwarg that we flatten and add
+    config = settings.database
+    config.pop("name")
+    config.pop("engine")  # assumed to be postgres (checked elsewhere)
+    config.update(config.pop("options", {}))  # ex: sslmode would be here
 
     # Setup Postgres connection
     # Postgres requires a 'maintenance database' that we connect to while
@@ -99,12 +107,8 @@ def postgress_connect_maintenance():
     ]:
         try:
             connection = psycopg2.connect(
-                host=settings.database.host,
                 database=maintenance_db_name,
-                user=settings.database.user,
-                password=settings.database.password,
-                port=settings.database.port,
-                sslmode=settings.database.options.sslmode,
+                **config,
             )
         except psycopg2.OperationalError as error:
             if f'"{maintenance_db_name}" does not exist' in str(error):
@@ -125,7 +129,6 @@ def postgress_connect_maintenance():
                     "Please update your 'settings.database.name' to something else."
                 )
             break
-        
 
     # ensure the loop above found a working connection
     if connection is None:
@@ -142,24 +145,6 @@ def postgress_connect_maintenance():
         )
     else:
         return connection
-
-def postgress_connect():
-    """
-    A convenience method to establish a connection to a hosted postgres database
-    """
-    import psycopg2
-
-    # Setup Postgres connection
-
-    connection = psycopg2.connect(
-        host=settings.database.host,
-        database=settings.database.name,
-        user=settings.database.user,
-        password=settings.database.password,
-        port=settings.database.port,
-        sslmode=settings.database.options.sslmode,
-    )
-    return connection
 
 
 def reset_database(
@@ -192,7 +177,7 @@ def reset_database(
     elif settings.database_backend == "postgresql":
         # We do this with an independent postgress connection, rather than through
         # django so that we can close everything down easily.
-        connection = postgress_connect_maintenance()
+        connection = postgres_connect_maintenance_db()
 
         # In order to delete a full database, we need to isolate this call
         connection.set_isolation_level(0)
@@ -290,6 +275,47 @@ def load_database_from_json(filename: str = "database_dump.json"):
     logging.info(
         f"Success! You now have all the data from {filename} available in your database."
     )
+
+
+def get_all_table_names() -> list[str]:
+    """
+    Returns a list of all database table names as they appear in the SQL db
+    """
+    return [m._meta.db_table for c in apps.get_app_configs() for m in c.get_models()]
+
+
+def get_all_table_docs(extra_docs: dict = {}, include_empties: bool = True) -> dict:
+    """
+    Returns a diction of all django tables names and their corresponding documentation.
+    This is give as a dictionary where the keys are the SQL table name and values
+    are the details in markdown format.
+    """
+
+    # BUG: This util will miss separate ManyToMany tables
+
+    # TODO: consider adding "if as_text else m.get_table_docs()" for when I'd
+    # like to get things back as a dictionary instead of markdown.
+
+    # For third-party models (such as allauth), there isn't a doc util set up,
+    # so we provide predefined descriptions here.
+    extra_docs_defaults = {}
+    extra_docs.update(extra_docs_defaults)
+
+    all_docs = {}
+    for model in apps.get_models():
+        table_name = model._meta.db_table
+
+        if table_name in extra_docs.keys():
+            all_docs[table_name] = extra_docs[table_name]
+
+        elif not hasattr(model, "get_table_docs"):
+            if include_empties:
+                all_docs[table_name] = "( no docs available for this table )"
+
+        else:
+            all_docs[table_name] = model.show_table_docs(print_out=False)
+
+    return all_docs
 
 
 # BUG: This function isn't working as intended

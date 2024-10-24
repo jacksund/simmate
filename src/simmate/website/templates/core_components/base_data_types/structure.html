@@ -3,49 +3,49 @@
     <h3>Structure:</h3>
     <ul>
         <li>
-            <b>Number of sites:</b> {{ calculation.nsites }}
+            <b>Number of sites:</b> {{ table_entry.nsites }}
         </li>
         <li>
-            <b>Number of elements:</b> {{ calculation.nelements }}
+            <b>Number of elements:</b> {{ table_entry.nelements }}
         </li>
         <li>
-            <b>Element list:</b> {{ calculation.elements }}
+            <b>Element list:</b> {{ table_entry.elements }}
         </li>
         <li>
-            <b>Chemical System:</b> {{ calculation.chemical_system }}
+            <b>Chemical System:</b> {{ table_entry.chemical_system }}
         </li>
         <li>
-            <b>Density:</b> {{ calculation.density }}
+            <b>Density:</b> {{ table_entry.density }}
         </li>
         <li>
-            <b>Atomic Density:</b> {{ calculation.density_atomic }}
+            <b>Atomic Density:</b> {{ table_entry.density_atomic }}
         </li>
         <li>
-            <b>Unit Cell Volume:</b> {{ calculation.volume }}
+            <b>Unit Cell Volume:</b> {{ table_entry.volume }}
         </li>
         <li>
-            <b>Molar Volume:</b> {{ calculation.volume_molar }}
+            <b>Molar Volume:</b> {{ table_entry.volume_molar }}
         </li>
         <li>
-            <b>Full Formula:</b> {{ calculation.formula_full }}
+            <b>Full Formula:</b> {{ table_entry.formula_full }}
         </li>
         <li>
-            <b>Reduced Formula:</b> {{ calculation.formula_reduced }}
+            <b>Reduced Formula:</b> {{ table_entry.formula_reduced }}
         </li>
         <li>
-            <b>Formula Anonymous:</b> {{ calculation.formula_anonymous }}
+            <b>Formula Anonymous:</b> {{ table_entry.formula_anonymous }}
         </li>
         <li>
-            <b>Spacegroup Number:</b> {{ calculation.spacegroup.number }}
+            <b>Spacegroup Number:</b> {{ table_entry.spacegroup.number }}
         </li>
         <li>
-            <b>Spacegroup Symbol:</b> {{ calculation.spacegroup.symbol }}
+            <b>Spacegroup Symbol:</b> {{ table_entry.spacegroup.symbol }}
         </li>
         <li>
-            <b>Crystal System:</b> {{ calculation.spacegroup.crystal_system }}
+            <b>Crystal System:</b> {{ table_entry.spacegroup.crystal_system }}
         </li>
         <li>
-            <b>Pointgroup:</b> {{ calculation.spacegroup.point_group }}
+            <b>Pointgroup:</b> {{ table_entry.spacegroup.point_group }}
         </li>
     </ul>
     <!--
@@ -54,6 +54,6 @@
     code below works properly:
 
     {% load structure_serialize_filter %}
-    <iframe height="600" width="100%" src="{% url 'core_components:structure_viewer' %}?{{ calculation | structure_url }}" scrolling="no"></iframe>
+    <iframe height="600" width="100%" src="{% url 'core_components:structure_viewer' %}?{{ table_entry | structure_url }}" scrolling="no"></iframe>
 -->
 </div>
