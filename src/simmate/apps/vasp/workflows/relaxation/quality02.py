@@ -18,7 +18,9 @@ class Relaxation__Vasp__Quality02(VaspWorkflow):
     calculation as a third step.
     """
 
-    description_doc_short = "for randomly-created structures"
+    description_doc_short = (
+        "slightly less bare-bones settings for randomly-created structures"
+    )
 
     # This uses the PBE functional with POTCARs that have lower electron counts
     # and convergence criteria when available.
@@ -27,7 +29,7 @@ class Relaxation__Vasp__Quality02(VaspWorkflow):
 
     # Make the unitcell relatively cubic before relaxing
     standardize_structure = "primitive-LLL"
-    symmetry_tolerance = 0.1
+    symmetry_precision = 0.1
 
     # These are all input settings for this task.
     _incar = dict(

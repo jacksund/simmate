@@ -16,6 +16,7 @@ from simmate.apps.quantum_espresso.inputs.pwscf_in_modifiers import (
     keyword_modifier_nat,
     keyword_modifier_ntyp,
     keyword_modifier_pseudo_dir,
+    keyword_modifier_smart_smear,
 )
 from simmate.toolkit import Structure
 from simmate.utilities import str_to_datatype
@@ -646,6 +647,11 @@ class PwscfInput:
         final_str += f"ATOMIC_POSITIONS {site_mode}\n"
         for site in self.structure:
             final_str += f" {site.specie.symbol} {site.a} {site.b} {site.c}\n"
+        # TODO:
+        # final_str += "ATOMIC_POSITIONS angstrom\n"
+        # for site in self.structure:
+        #     final_str += f" {site.specie.symbol} {site.x} {site.y} {site.z}\n"
+
         final_str += "\n"  # extra empty line after final site
 
         # ----------------------
@@ -819,5 +825,6 @@ for modifier in [
     keyword_modifier_ntyp,
     keyword_modifier_ecutwfc,
     keyword_modifier_ecutrho,
+    keyword_modifier_smart_smear,
 ]:
     PwscfInput.add_keyword_modifier(modifier)

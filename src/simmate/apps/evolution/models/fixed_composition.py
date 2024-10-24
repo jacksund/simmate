@@ -337,7 +337,7 @@ class FixedCompositionSearch(Calculation):
         if self.individuals_completed.count() < self.nfirst_generation:
             logging.info(
                 "Search hasn't finished nfirst_generation yet "
-                f"({self.nfirst_generation} individuals). "
+                f"({self.individuals_completed.count()}/{self.nfirst_generation} individuals). "
                 "Skipping transformations."
             )
             ready_for_transformations = False
@@ -405,12 +405,7 @@ class FixedCompositionSearch(Calculation):
 
         # Initialize the workflow if a string was given.
         # Otherwise we should already have a workflow class.
-        if self.subworkflow_name == "relaxation.vasp.staged":
-            workflow = get_workflow(self.subworkflow_name)
-        else:
-            raise Exception(
-                "Only `relaxation.vasp.staged` is supported in early testing"
-            )
+        workflow = get_workflow(self.subworkflow_name)
 
         # BUG: I'll need to rewrite this in the future bc I don't really account
         # for other workflows yet. It would make sense that our workflow changes
@@ -542,6 +537,8 @@ class FixedCompositionSearch(Calculation):
 
             # BUG: This is only for "relaxation.vasp.staged", which the assumed
             # workflow for now.
+            # !!! Since I've transfered these to a StagedWorkflow base class, I
+            # think they should just work so long as the subworkflow inherits it
             self.write_staged_series_convergence_plot(directory=directory)
             self.write_staged_series_histogram_plot(directory=directory)
             self.write_staged_series_times_plot(directory=directory)

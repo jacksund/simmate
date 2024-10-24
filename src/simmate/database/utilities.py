@@ -77,6 +77,76 @@ def update_database(
         logging.info("Success! Your database tables are now up to date. :sparkles:")
 
 
+def postgres_connect_maintenance_db():
+    """
+    A convenience method to establish a connection to a hosted postgres database
+    for adding and deleting tables
+    """
+    import psycopg2
+
+    # grab postges config parameters, *excluding* the database name and engine.
+    # Also anything in the OPTIONS is an extra kwarg that we flatten and add
+    config = settings.database
+    config.pop("name")
+    config.pop("engine")  # assumed to be postgres (checked elsewhere)
+    config.update(config.pop("options", {}))  # ex: sslmode would be here
+
+    # Setup Postgres connection
+    # Postgres requires a 'maintenance database' that we connect to while
+    # we add/drop the table. For most cases, such as building a new database
+    # through PgAdmin or a Docker image, the maintenance database will be
+    # named "postgres". For Digitial Ocean, it will be named "defaultdb".
+    # As a last resort, we can also check if there is a database matching
+    # the name of the user. We iterate through these common cases until
+    # we find one that works, and then warn the user if things fail.
+    connection = None
+    for maintenance_db_name in [
+        "postgres",
+        "defaultdb",
+        settings.database.user,
+    ]:
+        try:
+            connection = psycopg2.connect(
+                database=maintenance_db_name,
+                **config,
+            )
+        except psycopg2.OperationalError as error:
+            if f'"{maintenance_db_name}" does not exist' in str(error):
+                continue  # just jump to trying the next db name
+            # otherwise we might a password auth issue or something else
+            raise error
+
+        # exit loop as soon as we have a working connection
+        if connection:
+            # catch misuse where the user wants to "reset" the maintenence db
+            if maintenance_db_name == settings.database.name:
+                raise Exception(
+                    "Postgres requires a 'maintenance database' that we connect to "
+                    "while we add/drop/reset the database that you'd like to use. "
+                    "That database can stay empty, but it's important to be present. "
+                    "Howeveer, it looks like your are trying to reset your maintenance "
+                    f"database ('{maintenance_db_name}') which is not allowed. "
+                    "Please update your 'settings.database.name' to something else."
+                )
+            break
+
+    # ensure the loop above found a working connection
+    if connection is None:
+        raise Exception(
+            "Postgres requires a 'maintenance database' that we connect to "
+            "while we add/drop/reset the database that you'd like to use. "
+            "That database can stay empty, but it's important to be present. "
+            "Simmate was unable to detect your maintenance database, which "
+            "is why you're seeing this error. To fix this, make sure you have "
+            "a database named either 'postgres', 'defaultdb', or one that has "
+            "an identical name to your username. Create this database on your "
+            "postgres server with a SQL command such as 'CREATE DATABASE "
+            "defaultdb' and then retry your simmate command."
+        )
+    else:
+        return connection
+
+
 def reset_database(
     apps_to_migrate: list[str] = APPS_TO_MIGRATE,
     use_prebuilt: bool = False,
@@ -107,63 +177,7 @@ def reset_database(
     elif settings.database_backend == "postgresql":
         # We do this with an independent postgress connection, rather than through
         # django so that we can close everything down easily.
-        import psycopg2
-
-        # Setup Postgres connection
-        # Postgres requires a 'maintenance database' that we connect to while
-        # we add/drop the table. For most cases, such as building a new database
-        # through PgAdmin or a Docker image, the maintenance database will be
-        # named "postgres". For Digitial Ocean, it will be named "defaultdb".
-        # As a last resort, we can also check if there is a database matching
-        # the name of the user. We iterate through these common cases until
-        # we find one that works, and then warn the user if things fail.
-        connection = None
-        for maintenance_db_name in [
-            "postgres",
-            "defaultdb",
-            settings.database.user,
-        ]:
-            try:
-                connection = psycopg2.connect(
-                    host=settings.database.host,
-                    database=maintenance_db_name,
-                    user=settings.database.user,
-                    password=settings.database.password,
-                    port=settings.database.port,
-                )
-            except psycopg2.OperationalError as error:
-                if f'"{maintenance_db_name}" does not exist' in str(error):
-                    continue  # just jump to trying the next db name
-                # otherwise we might a password auth issue or something else
-                raise error
-
-            # exit loop as soon as we have a working connection
-            if connection:
-                # catch misuse where the user wants to "reset" the maintenence db
-                if maintenance_db_name == settings.database.name:
-                    raise Exception(
-                        "Postgres requires a 'maintenance database' that we connect to "
-                        "while we add/drop/reset the database that you'd like to use. "
-                        "That database can stay empty, but it's important to be present. "
-                        "Howeveer, it looks like your are trying to reset your maintenance "
-                        f"database ('{maintenance_db_name}') which is not allowed. "
-                        "Please update your 'settings.database.name' to something else."
-                    )
-                break
-
-        # ensure the loop above found a working connection
-        if not connection:
-            raise Exception(
-                "Postgres requires a 'maintenance database' that we connect to "
-                "while we add/drop/reset the database that you'd like to use. "
-                "That database can stay empty, but it's important to be present. "
-                "Simmate was unable to detect your maintenance database, which "
-                "is why you're seeing this error. To fix this, make sure you have "
-                "a database named either 'postgres', 'defaultdb', or one that has "
-                "an identical name to your username. Create this database on your "
-                "postgres server with a SQL command such as 'CREATE DATABASE "
-                "defaultdb' and then retry your simmate command."
-            )
+        connection = postgres_connect_maintenance_db()
 
         # In order to delete a full database, we need to isolate this call
         connection.set_isolation_level(0)
@@ -173,6 +187,7 @@ def reset_database(
 
         # Build out database extensions and tables
         db_name = settings.database.name
+
         cursor.execute(f'DROP DATABASE IF EXISTS "{db_name}";')
         # BUG: if others are connected I could add 'WITH (FORCE)' above.
         # For now, I don't use this but should consider adding it for convenience.
