@@ -172,7 +172,7 @@ class PwscfXml:
         # We need to the occuppied eigenstates and their energies at each kpoint
         # to calculate properties such as the bandgap, CV minimum, VB max. This
         # calculates these properties
-
+        breakpoint()
         highest_occupied_energies = []
         lowest_unoccupied_energies = []
         highest_occupied_idx = []
@@ -190,7 +190,15 @@ class PwscfXml:
             highest_occupied_idx.append(highest_occupied)
             # get the highest occupied energy and lowest unoccupied energy
             highest_occupied_energy = energies[highest_occupied]
-            lowest_unoccupied_energy = energies[highest_occupied+1]
+            try:
+                lowest_unoccupied_energy = energies[highest_occupied+1]
+            # if all of the energy levels are occupied at this kpoint, the above
+            # line will throw an out of bounds error. We give a more useful
+            # error instead.
+            except:
+                raise Exception(
+                    "All energy levels fill at at least one kpoint. Increase nbnd."
+                    )
             # add to our lists
             highest_occupied_energies.append(highest_occupied_energy)
             lowest_unoccupied_energies.append(lowest_unoccupied_energy)
