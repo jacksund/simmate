@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from simmate.toolkit import Molecule
-from simmate.toolkit.filters.base import Filter
+
+from .base import Filter
 
 
 class ManySmarts(Filter):

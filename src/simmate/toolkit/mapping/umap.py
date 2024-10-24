@@ -2,6 +2,8 @@
 
 import warnings
 
+import numpy
+
 from simmate.toolkit.mapping.base import ChemSpaceMapper
 
 # BUG: Importing umap prints various deprec warnings, so we catch
@@ -12,20 +14,23 @@ with warnings.catch_warnings(record=True):
 
 class Umap(ChemSpaceMapper):
     @classmethod
-    def map_fingerprints(cls, fingerprints: list, n_outputs: int = 2):
+    def map_fingerprints(
+        cls,
+        fingerprints: list,
+        n_outputs: int = 2,
+        n_neighbors: int = 10,
+        min_dist: float = 0.01,
+        low_memory: bool = False,
+        **kwargs,
+    ):
         mapper = umap.UMAP(
-            n_components=n_outputs,  # we want an XY plot
+            n_components=n_outputs,  # 2 would mean we want an XY plot
             metric="jaccard",  # aka Tanimoto
             # next two parameters control tightness of the mapping
-            n_neighbors=25,
-            min_dist=0.25,
-            low_memory=False,
+            n_neighbors=n_neighbors,
+            min_dist=min_dist,
+            low_memory=low_memory,
+            **kwargs,
         )
         fit = mapper.fit_transform(fingerprints)
-
-        if n_outputs == 2:
-            fit_x, fit_y = fit[:, 0], fit[:, 1]
-            return fit_x, fit_y
-        elif n_outputs == 3:
-            fit_x, fit_y, fit_z = fit[:, 0], fit[:, 1], fit[:, 2]
-            return fit_x, fit_y, fit_z
+        return numpy.array([fit[:, n] for n in range(n_outputs)])

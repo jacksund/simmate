@@ -8,6 +8,10 @@ from simmate.toolkit import Molecule
 class Filter:
     """
     Abstract base class for filtering a list of molecules based on some criteria.
+
+    At a minimum, subclasses must define either...
+        1. a custom `check` method and set `is_atomic` True
+        2. a custom `_check_serial` method and keep `is_atomic` False
     """
 
     is_atomic: bool = False
@@ -27,7 +31,8 @@ class Filter:
     def check(cls, molecule: Molecule, **kwargs) -> bool:
         """
         "Filters" a single molecule which is really just a check that returns
-        a true or false.
+        a true or false. Where possible, use the `filter` method instead as it
+        is more robust and provides more features
         """
         # by default we assume there is a custom _check_serial method and call that
         if not cls.is_atomic:
@@ -42,7 +47,7 @@ class Filter:
         cls,
         molecules: list[Molecule],
         return_mode: str = "molecules",  # other options are "booleans" and "count"
-        return_type: str = "passed",  # other options are "failed" and "both"
+        inverse: bool = False,
         parallel: bool = False,
         **kwargs,
     ) -> list:
@@ -50,17 +55,36 @@ class Filter:
         Filters a list of molecules in a serial or parallel manner.
         """
         if not parallel:
-            return cls._check_serial(molecules, **kwargs)
+            keep_list = cls._check_serial(molecules, **kwargs)
         else:
-            if not cls.allow_parallel:
-                raise Exception("This filtering method cannot be ran in parallel")
-            return cls._check_parallel(molecules, **kwargs)
+            if not cls.is_atomic:
+                # !!! Is there an example algo where is_atomic=False, but it
+                # can be ran in parallel? If so, I'd need to add `allow_parallel`
+                raise Exception(
+                    "This filtering method is not atomic and cannot be ran in parallel"
+                )
+            keep_list = cls._check_parallel(molecules, **kwargs)
+
+        if inverse:
+            # flips each True/False in the keep_list
+            keep_list = [not k for k in keep_list]
+
+        if return_mode == "count":
+            # count num of True
+            return sum(keep_list)
+        elif return_mode == "booleans":
+            return keep_list
+        elif return_mode == "molecules":
+            # return only Molecules that are True in keep_list
+            return [mol for keep, mol in zip(keep_list, molecules) if keep]
+        else:
+            raise Exception(f"Unknown return mode: {return_mode}")
 
     @classmethod
     def _check_serial(
         cls,
         molecules: list[Molecule],
-        progress_bar: bool = True,
+        progress_bar: bool = False,
         **kwargs,
     ) -> list[bool]:
         """
