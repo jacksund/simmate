@@ -6,7 +6,6 @@ import numpy as np
 
 from simmate.database.base_data_types import DatabaseTable, Spacegroup, table_column
 from simmate.configuration import settings
-from simmate.database.utilities import postgress_connect
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.toolkit.validators.fingerprint import PartialCrystalNNFingerprint
 from simmate.utilities import get_chemical_subsystems

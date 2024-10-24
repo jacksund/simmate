@@ -76,12 +76,19 @@ def update_database(
     if show_logs:
         logging.info("Success! Your database tables are now up to date. :sparkles:")
 
-def postgress_connect_maintenance():
+def postgres_connect_maintenance_db():
     """
     A convenience method to establish a connection to a hosted postgres database
     for adding and deleting tables
     """
     import psycopg2
+    
+    # grab postges config parameters, *excluding* the database name and engine. 
+    # Also anything in the OPTIONS is an extra kwarg that we flatten and add
+    config = settings.database
+    config.pop("name")
+    config.pop("engine")  # assumed to be postgres (checked elsewhere)
+    config.update(config.pop("options", {})) # ex: sslmode would be here
 
     # Setup Postgres connection
     # Postgres requires a 'maintenance database' that we connect to while
@@ -99,12 +106,8 @@ def postgress_connect_maintenance():
     ]:
         try:
             connection = psycopg2.connect(
-                host=settings.database.host,
                 database=maintenance_db_name,
-                user=settings.database.user,
-                password=settings.database.password,
-                port=settings.database.port,
-                sslmode=settings.database.options.sslmode,
+                **config,
             )
         except psycopg2.OperationalError as error:
             if f'"{maintenance_db_name}" does not exist' in str(error):
@@ -143,24 +146,6 @@ def postgress_connect_maintenance():
     else:
         return connection
 
-def postgress_connect():
-    """
-    A convenience method to establish a connection to a hosted postgres database
-    """
-    import psycopg2
-
-    # Setup Postgres connection
-
-    connection = psycopg2.connect(
-        host=settings.database.host,
-        database=settings.database.name,
-        user=settings.database.user,
-        password=settings.database.password,
-        port=settings.database.port,
-        sslmode=settings.database.options.sslmode,
-    )
-    return connection
-
 
 def reset_database(
     apps_to_migrate: list[str] = APPS_TO_MIGRATE,
@@ -192,7 +177,7 @@ def reset_database(
     elif settings.database_backend == "postgresql":
         # We do this with an independent postgress connection, rather than through
         # django so that we can close everything down easily.
-        connection = postgress_connect_maintenance()
+        connection = postgres_connect_maintenance_db()
 
         # In order to delete a full database, we need to isolate this call
         connection.set_isolation_level(0)

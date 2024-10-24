@@ -97,9 +97,8 @@ class PwscfXml:
         rydberg_to_ev = physical_constants["Rydberg constant times hc in eV"][0]
         energy_ry = float(self.data["qes:espresso"]["output"]["total_energy"]["etot"])
 
-        # something is off here... These values don't match what is in the
-        # pwscf.out file. Perhaps these here are per atom?
-        # BUG Fix: The values in the pw-scf.out file are for the total system.
+        # Note: The values in the pw-scf.out file are for the total system, so
+        # they won't match what is here in the xml.
         # They also don't necessarily match the final structure if the system is
         # found to have more symmetry then in the input. For example, I ran a
         # calc with Im3m Fe (mp-13). The start file was a cif which included two
@@ -108,7 +107,7 @@ class PwscfXml:
         # is defined only by one atom which causes a mismatch
         # In pwscf.xml the values are conveniently per atom.
         natoms = len(self.final_structure)
-
+        
         # convert to eV & total energy
         return energy_ry * rydberg_to_ev * natoms
     
@@ -227,7 +226,7 @@ class PwscfXml:
             "conduction_band_minimum" : cb_min,
             "valence_band_maximum" : vb_max,
             "is_gap_direct" : is_gap_direct,
-            }
+        }
     
     @cached_property
     def energy_fermi(self) -> float:
@@ -306,11 +305,11 @@ class PwscfXml:
         Takes in float list in string format and converts to numpy array. Useful
         for a variety of values in the xml.
         """
-        site_forces = []
+        site_vectors = []
         sites = force_data.split("\n")
         for site in sites:
-            forces = [float(i) for i in site.split()]
-            site_forces.append(forces)
+            vector = [float(i) for i in site.split()]
+            site_vectors.append(vector)
 
-        site_forces = numpy.array(site_forces)
-        return site_forces
+        site_vectors = numpy.array(site_vectors)
+        return site_vectors

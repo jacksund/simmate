@@ -647,6 +647,11 @@ class PwscfInput:
         final_str += f"ATOMIC_POSITIONS {site_mode}\n"
         for site in self.structure:
             final_str += f" {site.specie.symbol} {site.a} {site.b} {site.c}\n"
+        # TODO:
+        # final_str += "ATOMIC_POSITIONS angstrom\n"
+        # for site in self.structure:
+        #     final_str += f" {site.specie.symbol} {site.x} {site.y} {site.z}\n"
+        
         final_str += "\n"  # extra empty line after final site
 
         # ----------------------

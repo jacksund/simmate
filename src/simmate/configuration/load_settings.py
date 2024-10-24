@@ -285,7 +285,7 @@ class SimmateSettings:
 
     @cached_property
     def _default_database(self) -> Path:
-        # we want to use sqlite3 as our backend
+        # we want to use sqlite3 as our default backend
         # if the user is in the (base) env or not using conda, then we will have a
         # value of "-database.sqlite3", which is why we need strip() here.
         db_filename = (
