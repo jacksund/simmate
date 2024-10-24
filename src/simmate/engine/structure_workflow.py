@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 
+from pymatgen.analysis.structure_matcher import StructureMatcher
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+
 from simmate.engine import Workflow
 from simmate.toolkit import Structure
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-from pymatgen.analysis.structure_matcher import StructureMatcher
+
 
 class StructureWorkflow(Workflow):
     """
     An abstract mix-in for workflows that take a structures as parameters in
     their run_config method
     """
-    
+
     _parameter_methods = Workflow._parameter_methods + ["_get_clean_structure"]
-    
+
     standardize_structure: str | bool = False
     """
     In some cases, we may want to standardize the structure during our setup().
@@ -51,7 +53,7 @@ class StructureWorkflow(Workflow):
     If standardize_structure=True, then this is the cutoff value used to determine
     if the angles between sites are symmetrically equivalent. (in Degrees)
     """
-    
+
     @classmethod
     def _get_clean_structure(
         cls,
@@ -116,6 +118,7 @@ class StructureWorkflow(Workflow):
         if standardize_mode == "conventional":
             structure_cleaned = sym_finder.get_conventional_standard_structure()
             return structure_cleaned
+
 
 def check_for_standardization_bugs(
     structure_original: Structure,

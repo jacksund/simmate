@@ -45,17 +45,17 @@ def keyword_modifier_ecutwfc(structure: Structure, mode: str) -> float:
     for wavefunctions) set automatically. To do this, we look at all elements
     and their mapped psuedos. The mappings indicate a suggested value and we use
     the maximum across all elements.
-    
+
     The mode can be either efficiency or precision. Additionally, a scale can
     be added to dynamically change the cutoff by a given factor, X, with the
-    syntax efficiency_X. X must be a float.    
+    syntax efficiency_X. X must be a float.
     """
     if "_" in mode:
-        mode, scale  = mode.split("_")
+        mode, scale = mode.split("_")
         scale = float(scale)
     else:
         mode, scale = mode, 1
-    
+
     if mode == "efficiency":
         mappings = SSSP_PBE_EFFICIENCY_MAPPINGS
     elif mode == "precision":
@@ -63,9 +63,15 @@ def keyword_modifier_ecutwfc(structure: Structure, mode: str) -> float:
     else:
         raise Exception(f"Unknown mode set for ecutwfc__auto: {mode}")
 
-    return max(
-        [mappings[element.symbol]["cutoff_wfc"] for element in structure.composition]
-    )*scale
+    return (
+        max(
+            [
+                mappings[element.symbol]["cutoff_wfc"]
+                for element in structure.composition
+            ]
+        )
+        * scale
+    )
 
 
 def keyword_modifier_ecutrho(structure: Structure, mode: str) -> float:
@@ -76,14 +82,14 @@ def keyword_modifier_ecutrho(structure: Structure, mode: str) -> float:
     value and we use the maximum across all elements.
     The mode can be either efficiency or precision. Additionally, a scale can
     be added to dynamically change the cutoff by a given factor, X, with the
-    syntax efficiency_X. X must be a float.    
+    syntax efficiency_X. X must be a float.
     """
     if "_" in mode:
-        mode, scale  = mode.split("_")
+        mode, scale = mode.split("_")
         scale = float(scale)
     else:
         mode, scale = mode, 1
-        
+
     if mode == "efficiency":
         mappings = SSSP_PBE_EFFICIENCY_MAPPINGS
     elif mode == "precision":
@@ -91,20 +97,27 @@ def keyword_modifier_ecutrho(structure: Structure, mode: str) -> float:
     else:
         raise Exception(f"Unknown mode set for ecutrho__auto: {mode}")
 
-    return max(
-        [mappings[element.symbol]["cutoff_rho"] for element in structure.composition]
-    )*scale
+    return (
+        max(
+            [
+                mappings[element.symbol]["cutoff_rho"]
+                for element in structure.composition
+            ]
+        )
+        * scale
+    )
+
 
 def keyword_modifier_smart_smear(structure: Structure, smear_config: dict):
     """
     The smearing value used here depends on if we have a semiconductor,
     insulator, or metal. This modifier makes a "best-guess" on what the
-    material is and uses the proper smearing type. 
-    
+    material is and uses the proper smearing type.
+
     """
-    #!!! It would be useful to have a handler similar to the IncorrectSmearing 
+    #!!! It would be useful to have a handler similar to the IncorrectSmearing
     # error handler used in vasp workflows.
-    
+
     # for now we just go through the structure and if all elements are
     # metals, then we say it's a metal. Otherwise, we treat the structure
     # as a semiconductor or insulator.

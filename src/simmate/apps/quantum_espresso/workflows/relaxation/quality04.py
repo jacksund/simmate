@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.quantum_espresso.workflows.relaxation.quality03 import Relaxation__QuantumEspresso__Quality03
+from simmate.apps.quantum_espresso.workflows.relaxation.quality03 import (
+    Relaxation__QuantumEspresso__Quality03,
+)
 
 
 class Relaxation__QuantumEspresso__Quality04(Relaxation__QuantumEspresso__Quality03):
     """
-    Runs a somewhat rough Quantum Espresso geometry optimization with fixed lattice 
+    Runs a somewhat rough Quantum Espresso geometry optimization with fixed lattice
     volume.
-    
+
     `Quality 04` indicates that on a scale from 00 to 04, these are ranked 04 in
     quality (with 04 being the highest quality).
 
@@ -17,40 +19,41 @@ class Relaxation__QuantumEspresso__Quality04(Relaxation__QuantumEspresso__Qualit
     we recommend only using the relaxation/staged workflow, which uses this
     calculation as a fifth step.
     """
-    
-    description_doc_short = "much less bare-bones settings for randomly-created structures"
+
+    description_doc_short = (
+        "much less bare-bones settings for randomly-created structures"
+    )
 
     system = dict(
-        ibrav=0, # indicates crystal axis is provided in input
-        nat__auto=True, # automatically set number of atoms
-        ntyp__auto=True, # automatically set number of types of atoms
-        ecutwfc__auto="efficiency_1.2", # automatically select energy cutoff for wavefunctions
-        ecutrho__auto="efficiency_1.2", # automatically select energy cutoff for charge density/potential
+        ibrav=0,  # indicates crystal axis is provided in input
+        nat__auto=True,  # automatically set number of atoms
+        ntyp__auto=True,  # automatically set number of types of atoms
+        ecutwfc__auto="efficiency_1.2",  # automatically select energy cutoff for wavefunctions
+        ecutrho__auto="efficiency_1.2",  # automatically select energy cutoff for charge density/potential
         # We don't know if we have a metal or non-metal so we make a guess here.
         # !!! This guess could be dangerous without handlers
         multiple_keywords__smart_smear={
             "metal": dict(
-                occupations="smearing", # use smearing
-                smearing="methfessel-paxton", # equivalent to ISMEAR=1
-                degauss=0.06, # equivalent to SIGMA
+                occupations="smearing",  # use smearing
+                smearing="methfessel-paxton",  # equivalent to ISMEAR=1
+                degauss=0.06,  # equivalent to SIGMA
             ),
             "non-metal": dict(
-                occupations="smearing", # Should we still use smearing here like we would in vasp?
-                smearing="gaussian", # equivalent to ISMEAR=0
+                occupations="smearing",  # Should we still use smearing here like we would in vasp?
+                smearing="gaussian",  # equivalent to ISMEAR=0
                 degauss=0.05,
             ),
         },
     )
 
     electrons = dict(
-        diagonalization="david", # equivalent to ALGO = Normal
-        mixing_mode="plain", 
-        mixing_beta=0.7, # mixing factor for self-consistency
-        conv_thr="1.0e-5", # convergence threshold for SCF cycle
+        diagonalization="david",  # equivalent to ALGO = Normal
+        mixing_mode="plain",
+        mixing_beta=0.7,  # mixing factor for self-consistency
+        conv_thr="1.0e-5",  # convergence threshold for SCF cycle
     )
 
     k_points = dict(
         spacing=0.4,
         gamma_centered=True,
     )
-

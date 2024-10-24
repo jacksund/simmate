@@ -13,9 +13,12 @@ from simmate.engine import S3Workflow, StructureWorkflow
 from simmate.toolkit import Structure
 from simmate.utilities import get_docker_command
 
+
 # TODO: add StructureInputWorkflow mixin which can be made from VaspWorkflow class
 class PwscfWorkflow(S3Workflow, StructureWorkflow):
-    _parameter_methods = S3Workflow._parameter_methods + StructureWorkflow._parameter_methods
+    _parameter_methods = (
+        S3Workflow._parameter_methods + StructureWorkflow._parameter_methods
+    )
 
     required_files = ["pwscf.in"]
 
@@ -65,7 +68,7 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
     """
     key-value pairs for the `&RISM` section of `pwscf.in`
     """
-    
+
     @classmethod
     @property
     def full_settings(cls) -> dict:
@@ -108,7 +111,7 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
     """
 
     # -------------------------------------------------------------------------
-    
+
     @classmethod
     def setup(cls, directory: Path, structure: Structure, **kwargs):
         # run cleaning and standardizing on structure (based on class attributes)
@@ -156,4 +159,3 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
             return input_command
 
     # -------------------------------------------------------------------------
-

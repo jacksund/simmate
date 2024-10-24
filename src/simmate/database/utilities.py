@@ -76,19 +76,20 @@ def update_database(
     if show_logs:
         logging.info("Success! Your database tables are now up to date. :sparkles:")
 
+
 def postgres_connect_maintenance_db():
     """
     A convenience method to establish a connection to a hosted postgres database
     for adding and deleting tables
     """
     import psycopg2
-    
-    # grab postges config parameters, *excluding* the database name and engine. 
+
+    # grab postges config parameters, *excluding* the database name and engine.
     # Also anything in the OPTIONS is an extra kwarg that we flatten and add
     config = settings.database
     config.pop("name")
     config.pop("engine")  # assumed to be postgres (checked elsewhere)
-    config.update(config.pop("options", {})) # ex: sslmode would be here
+    config.update(config.pop("options", {}))  # ex: sslmode would be here
 
     # Setup Postgres connection
     # Postgres requires a 'maintenance database' that we connect to while
@@ -128,7 +129,6 @@ def postgres_connect_maintenance_db():
                     "Please update your 'settings.database.name' to something else."
                 )
             break
-        
 
     # ensure the loop above found a working connection
     if connection is None:

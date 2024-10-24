@@ -38,5 +38,3 @@ class Relaxation__Vasp__Staged(StagedWorkflow):
         "relaxation.vasp.quality04",
         "static-energy.vasp.quality04",
     ]
-
-    
