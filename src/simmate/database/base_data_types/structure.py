@@ -15,6 +15,7 @@ from simmate.toolkit.validators.fingerprint import PartialCrystalNNFingerprint
 from simmate.utilities import get_chemical_subsystems
 
 
+# UNDER DEV -- Not used elsewhere yet
 class StructureSearchResults(SearchResults):
 
     def filter_similarity(
@@ -281,10 +282,11 @@ class Structure(DatabaseTable):
     `simmate.database.base_data_types.symmetry.Spacegroup`
     """
 
-    fingerprint_crystalnn = table_column.JSONField(blank=True, null=True)
-    """
-    The fingerprint for the structure determined using a custom CrystalNN fingerprint
-    """
+    # TODO:
+    # fingerprint_crystalnn = table_column.JSONField(blank=True, null=True)
+    # """
+    # The fingerprint for the structure determined using a custom CrystalNN fingerprint
+    # """
     # TODO: This should be a vector type column to be most efficient. Otherwise
     # the database will run conversions on the entire column before doing distance
     # comparisons -- which would be a clear bottleneck.
