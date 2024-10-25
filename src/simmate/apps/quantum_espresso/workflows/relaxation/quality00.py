@@ -38,9 +38,8 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
         nstep=75,  # maximum number of ionic steps
         # Unlike in VASP, QE uses both an energy and force cutoff. They are also set in
         # atomic units, Ry, instead of eV.
-        etot_conv_thr="1.5e-3", # Ionic step energy convergence threshold
-        forc_conv_thr="1.5e-2" # Ionic step force convergence threshhold
-        
+        etot_conv_thr="1.5e-3",  # Ionic step energy convergence threshold
+        forc_conv_thr="1.5e-2",  # Ionic step force convergence threshhold
     )
 
     system = dict(

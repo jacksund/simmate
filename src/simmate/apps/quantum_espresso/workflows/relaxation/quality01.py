@@ -21,7 +21,7 @@ class Relaxation__QuantumEspresso__Quality01(Relaxation__QuantumEspresso__Qualit
     """
 
     description_doc_short = "bare-bones settings for randomly-created structures"
-    
+
     control = dict(
         pseudo_dir__auto=True,  # uses the default directory for pseudopotentials
         restart_mode="from_scratch",  # start from new calc rather than restart
@@ -31,11 +31,10 @@ class Relaxation__QuantumEspresso__Quality01(Relaxation__QuantumEspresso__Qualit
         nstep=75,  # maximum number of ionic steps
         # Unlike in VASP, QE uses both an energy and force cutoff. They are also set in
         # atomic units, Ry, instead of eV.
-        etot_conv_thr="7.5e-4", # Ionic step energy convergence threshold
-        forc_conv_thr="7.5e-3" # Ionic step force convergence threshhold
-        
+        etot_conv_thr="7.5e-4",  # Ionic step energy convergence threshold
+        forc_conv_thr="7.5e-3",  # Ionic step force convergence threshhold
     )
-    
+
     system = dict(
         ibrav=0,  # indicates crystal axis is provided in input
         nat__auto=True,  # automatically set number of atoms

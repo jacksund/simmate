@@ -204,14 +204,14 @@ class PwscfXml:
             # get the highest occupied energy and lowest unoccupied energy
             highest_occupied_energy = energies[highest_occupied]
             try:
-                lowest_unoccupied_energy = energies[highest_occupied+1]
+                lowest_unoccupied_energy = energies[highest_occupied + 1]
             # if all of the energy levels are occupied at this kpoint, the above
             # line will throw an out of bounds error. We give a more useful
             # error instead.
             except:
                 raise Exception(
                     "All energy levels fill at at least one kpoint. Increase nbnd."
-                    )
+                )
             # add to our lists
             highest_occupied_energies.append(highest_occupied_energy)
             lowest_unoccupied_energies.append(lowest_unoccupied_energy)

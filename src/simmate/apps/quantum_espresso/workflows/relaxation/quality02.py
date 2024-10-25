@@ -33,8 +33,8 @@ class Relaxation__QuantumEspresso__Quality02(Relaxation__QuantumEspresso__Qualit
         tstress=True,  # calculate stress
         tprnfor=True,  # calculate forces
         nstep=100,  # maximum number of ionic steps
-        etot_conv_thr="7.5e-4", # Ionic step energy convergence threshold
-        forc_conv_thr="7.5e-3" # Ionic step force convergence threshhold
+        etot_conv_thr="7.5e-4",  # Ionic step energy convergence threshold
+        forc_conv_thr="7.5e-3",  # Ionic step force convergence threshhold
     )
 
     system = dict(
