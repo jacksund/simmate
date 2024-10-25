@@ -374,11 +374,14 @@ class Structure(DatabaseTable):
         # prototype_name = prototype[0]["tags"]["mineral"] if prototype else None
         # Alternatively, add as a method to the table, similar to
         # the "update_all_stabilities" for thermodynamics
+
+        # TODO:
         # Generate fingerprint
-        featurizer = PartialCrystalNNFingerprint.get_featurizer(
-            composition=structure.composition
-        )
-        fingerprint = featurizer.featurize(structure)
+        # featurizer = PartialCrystalNNFingerprint.get_featurizer(
+        #     composition=structure.composition
+        # )
+        # fingerprint = featurizer.featurize(structure)
+
         # Given a pymatgen structure object, this will return a database structure
         # object, but will NOT save it to the database yet. The kwargs input
         # is only if you inherit from this class and add extra fields.
@@ -406,7 +409,7 @@ class Structure(DatabaseTable):
             formula_full=structure.composition.formula,
             formula_reduced=structure.composition.reduced_formula,
             formula_anonymous=structure.composition.anonymized_formula,
-            fingerprint_crystalnn=list(fingerprint),
+            # fingerprint_crystalnn=list(fingerprint),
             # prototype=prototype_name,
             **kwargs,  # this allows subclasses to add fields with ease
         )
