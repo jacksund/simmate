@@ -1,0 +1,10 @@
+<div class="my-2">
+    {% include "core_components/basic_elements/label.html" %}
+    <div class="mt-1">
+        <input unicorn:model.defer="{{ name }}"
+               class="form-check-input"
+               id="{{ name }}{{ key }}"
+               type="checkbox">
+        {% if side_text %}<small>{{ side_text }}</small>{% endif %}
+    </div>
+</div>

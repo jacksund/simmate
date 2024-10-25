@@ -1156,7 +1156,7 @@ class Workflow:
         converts all parameters to appropriate python objects
         """
 
-        from simmate.toolkit import Composition, Structure, Molecule
+        from simmate.toolkit import Composition, Molecule, Structure
         from simmate.toolkit.diffusion import MigrationHop, MigrationImages
 
         parameters_cleaned = parameters.copy()
