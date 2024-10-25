@@ -21,7 +21,18 @@ class Relaxation__QuantumEspresso__Quality03(Relaxation__QuantumEspresso__Qualit
     """
 
     description_doc_short = "less bare-bones settings for randomly-created structures"
-
+    
+    control = dict(
+        pseudo_dir__auto=True,  # uses the default directory for pseudopotentials
+        restart_mode="from_scratch",  # start from new calc rather than restart
+        calculation="vc-relax",  # perform geometry relaxation with variable cell
+        tstress=True,  # calculate stress
+        tprnfor=True,  # calculate forces
+        nstep=100,  # maximum number of ionic steps
+        etot_conv_thr="7.5e-5", # Ionic step energy convergence threshold
+        forc_conv_thr="7.5e-4" # Ionic step force convergence threshhold
+    )
+    
     system = dict(
         ibrav=0,  # indicates crystal axis is provided in input
         nat__auto=True,  # automatically set number of atoms
@@ -48,5 +59,5 @@ class Relaxation__QuantumEspresso__Quality03(Relaxation__QuantumEspresso__Qualit
         diagonalization="david",  # equivalent to ALGO = Normal
         mixing_mode="plain",
         mixing_beta=0.7,  # mixing factor for self-consistency
-        conv_thr="1.0e-4",  # convergence threshold for SCF cycle
+        conv_thr="7.5e-6",  # convergence threshold for SCF cycle
     )

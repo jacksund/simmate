@@ -4,6 +4,7 @@ import logging
 import time
 from pathlib import Path
 
+from simmate.database import connect
 from simmate.apps.evolution.models import FixedCompositionSearch
 from simmate.engine import Workflow
 from simmate.toolkit import Composition

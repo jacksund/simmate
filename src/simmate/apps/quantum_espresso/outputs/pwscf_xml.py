@@ -181,7 +181,7 @@ class PwscfXml:
         # We need to the occuppied eigenstates and their energies at each kpoint
         # to calculate properties such as the bandgap, CV minimum, VB max. This
         # calculates these properties
-        breakpoint()
+        # breakpoint()
         highest_occupied_energies = []
         lowest_unoccupied_energies = []
         highest_occupied_idx = []
