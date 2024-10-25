@@ -94,7 +94,7 @@ def checkbox(
     side_text: str = "Yes/True",
 ):
     """
-    Display a numeric input widget.
+    Display a checkbox widget.
     """
     if not label:
         label = name.replace("_", " ").title()
