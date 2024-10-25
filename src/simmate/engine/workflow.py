@@ -1156,7 +1156,7 @@ class Workflow:
         converts all parameters to appropriate python objects
         """
 
-        from simmate.toolkit import Composition, Structure
+        from simmate.toolkit import Composition, Structure, Molecule
         from simmate.toolkit.diffusion import MigrationHop, MigrationImages
 
         parameters_cleaned = parameters.copy()
@@ -1200,19 +1200,9 @@ class Workflow:
             "migration_images": MigrationImages,
             "supercell_start": Structure,
             "supercell_end": Structure,
+            "molecule": Molecule,
+            "molecules": Molecule,
         }
-        # Add extra parameter mappings from internal code
-        try:
-            from simmate_corteva.toolkit import Molecule
-
-            parameter_mappings.update(
-                {
-                    "molecule": Molecule,
-                    "molecules": Molecule,
-                }
-            )
-        except:
-            pass  # just move on if there's no module present
 
         for parameter, target_class in parameter_mappings.items():
             if parameter in parameters.keys():

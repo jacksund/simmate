@@ -75,5 +75,24 @@ class ClusteringEngine:
             )
             return clusters
 
+        elif preset == "murko_scaffold":
+            from simmate.toolkit.clustering import Identity as ClusterIdentity
+            from simmate.toolkit.featurizers import PropertyGrabber
+            from simmate.toolkit.similarity import Identity
+
+            if method != "cluster_molecules":
+                raise Exception(
+                    "Only the 'cluster_molecules' method is supported for this preset"
+                )
+
+            cluster_method = getattr(ClusterIdentity, "cluster_molecules")
+            clusters = cluster_method(
+                featurizer=PropertyGrabber,
+                similarity_engine=Identity,
+                featurizer_kwargs={"properties": ["murko_scaffold"]},
+                **kwargs,
+            )
+            return clusters
+
         else:
-            raise Exception("Unknown preset provided")
+            raise Exception(f"Unknown preset provided: {preset}")

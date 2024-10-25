@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# The order that we import these different modules is important to prevent
-# circular imports errors, so we prevent isort from changing this file.
-# isort: skip_file
-
 from .base import Filter
-
+from .remove_duplicates import RemoveDuplicates
+from .remove_molecules import RemoveMolecules
 from .smarts import ManySmarts

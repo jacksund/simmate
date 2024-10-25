@@ -89,7 +89,19 @@ class SdfAdapter:
         return molecules if len(molecules) > 1 else molecules[0]
 
     @staticmethod
+    def to_str_from_toolkits(
+        molecules: list[Molecule],
+        **kwargs,
+    ):
+        final_str = ""
+        for molecule in track(molecules):
+            mol_str = molecule.to_sdf(**kwargs)
+            final_str += f"{mol_str}$$$$\n"
+        return final_str
+
+    @classmethod
     def to_file_from_toolkits(
+        cls,
         molecules: list[Molecule],
         filename: Path | str,
         **kwargs,
@@ -97,6 +109,8 @@ class SdfAdapter:
         filename = Path(filename)
 
         with filename.open("w") as file:
+            # NOTE: we do not use `to_str_from_toolkits` in case there are many
+            # molecules -- this saves on memory
             for molecule in track(molecules):
                 smi_str = molecule.to_sdf(**kwargs)
                 file.write(f"{smi_str}$$$$\n")

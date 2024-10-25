@@ -103,7 +103,7 @@ class Molecule:
 
     def __radd__(self, other):
         """
-        Defines behavior of sum(molecules). This combines all molecules and
+        Defines behavior of `sum(molecules)`. This combines all molecules and
         returns a new Molecule object
         """
         # Code is from...
@@ -112,6 +112,19 @@ class Molecule:
             return self
         else:
             return self.__add__(other)
+
+    def __eq__(self, other):
+        """
+        Defines behavior of `molecule1 == molecule2`. Note that is a very strict
+        definition that uses inchi keys to establish equivalence. 2D or 3D coordinates
+        as well as metadata are not taken into account.
+
+        For a more robust comparison, you may want to compare sdf strings:
+            self.to_sdf() == other.to_sdf()
+        """
+        if not isinstance(other, self.__class__):
+            return False  # catches things like `molecule == None`
+        return self.to_inchi_key() == other.to_inchi_key()
 
     @property
     def image(self):
@@ -1308,7 +1321,12 @@ class Molecule:
         Gives the Murko Scaffold of the molecule using RDKit:
             https://rdkit.org/docs/source/rdkit.Chem.Scaffolds.MurckoScaffold.html
         """
-        return self.__class__(MurckoScaffold.GetScaffoldForMol(self.rdkit_molecule))
+        rdkit_scaffold = MurckoScaffold.GetScaffoldForMol(self.rdkit_molecule)
+        try:
+            return self.__class__(rdkit_scaffold)
+        except:
+            # BUG: should I raise error for failed scaffolds? e.g. "CC(=O)O" gives ""
+            return None
 
     def get_fragments(
         self,
