@@ -61,12 +61,242 @@ class PwscfXml:
         # from_dict is synonmous with the default __init__ method
         return cls(data=data)
 
+    @classmethod
+    def as_dict(cls):
+        """
+        Returns the xml information as a dictionary
+        """
+        return cls.data
+
     # -------------------------------------------------------------------------
 
     @cached_property
     def final_structure(self):
         struct_data = self.data["qes:espresso"]["output"]["atomic_structure"]
+        return self._qeatom_to_structure(struct_data)
+
+    @cached_property
+    def structures(self) -> list:
+        # A relaxation calculation will return an additional key called "step"
+        # that contains a summary for each ionic step. We pull the structures
+        # from here
+        try:
+            structure_data = [
+                step["atomic_structure"] for step in self.data["qes:espresso"]["step"]
+            ]
+            structures = [
+                self._qeatom_to_structure(structure) for structure in structure_data
+            ]
+            # the step list does not contain the final scf calc, so this is
+            # appended
+            structures.append(self.final_structure)
+        except:
+            # If only one iteration was run, or the calculation is a static energy
+            # calc we want to return just the final structure as a list
+            structures = [self.final_structure]
+        return structures
+
+    @cached_property
+    def final_energy(self) -> float:
+        rydberg_to_ev = physical_constants["Rydberg constant times hc in eV"][0]
+        energy_ry = float(self.data["qes:espresso"]["output"]["total_energy"]["etot"])
+
+        # Note: The values in the pw-scf.out file are for the total system, so
+        # they won't match what is here in the xml.
+        # They also don't necessarily match the final structure if the system is
+        # found to have more symmetry then in the input. For example, I ran a
+        # calc with Im3m Fe (mp-13). The start file was a cif which included two
+        # atoms and assumed P1. The pw-scf.out file gave a total energy accounting
+        # for both atoms. However, these atoms are not unique and the final structure
+        # is defined only by one atom which causes a mismatch
+        # In pwscf.xml the values are conveniently per atom.
+        natoms = len(self.final_structure)
+
+        # convert to eV & total energy
+        return energy_ry * rydberg_to_ev * natoms
+
+    @cached_property
+    def energies(self) -> list:
+        # A relaxation calculation will return an additional key called "step"
+        # that contains a summary for each ionic step. We pull the energies
+        # from here
+        rydberg_to_ev = physical_constants["Rydberg constant times hc in eV"][0]
+        natoms = len(self.final_structure)
+        try:
+            energy_data = [
+                float(step["total_energy"]["etot"]) * rydberg_to_ev * natoms
+                for step in self.data["qes:espresso"]["step"]
+            ]
+            energy_data.append(self.final_energy)
+        except:
+            # If only one iteration was run, or the calculation is a static energy
+            # calc we want to return just the final energy
+            energy_data = [self.final_energy]
+        return energy_data
+
+    @cached_property
+    def final_site_forces(self) -> numpy.array:
+        force_data = self.data["qes:espresso"]["output"]["forces"]["#text"]
+        # TODO: convert to differnt units...?
+
+        return self._str_to_vector(force_data)
+
+    @cached_property
+    def all_site_forces(self) -> list:
+        try:
+            all_force_data = [
+                step["forces"]["#text"] for step in self.data["qes:espresso"]["step"]
+            ]
+            all_site_forces = [self._str_to_vector(force) for force in all_force_data]
+            all_site_forces.append(self.final_site_forces)
+        except:
+            # If only one iteration was run, or the calculation is a static energy
+            # calc we want to return just the site forces
+            all_site_forces = [self.final_site_forces]
+        return all_site_forces
+
+    @cached_property
+    def final_lattice_stress(self) -> numpy.array:
+        stress_data = self.data["qes:espresso"]["output"]["stress"]["#text"]
+        # TODO: convert to differnt units...?
+
+        return self._str_to_vector(stress_data)
+
+    @cached_property
+    def lattice_stresses(self) -> list:
+        try:
+            all_stress_data = [
+                step["stress"]["#text"] for step in self.data["qes:espresso"]["step"]
+            ]
+            all_stresses = [self._str_to_vector(stress) for stress in all_stress_data]
+            all_stresses.append(self.final_lattice_stress)
+        except:
+            # If only one iteration was run, or the calculation is a static energy
+            # calc we want to return just the lattice stresses
+            all_stresses = self.final_lattice_stress
+        return all_stresses
+
+    @cached_property
+    def band_data(self) -> dict:
+        # We need to the occuppied eigenstates and their energies at each kpoint
+        # to calculate properties such as the bandgap, CV minimum, VB max. This
+        # calculates these properties
+        # breakpoint()
+        highest_occupied_energies = []
+        lowest_unoccupied_energies = []
+        highest_occupied_idx = []
+        ks_energies = self.data["qes:espresso"]["output"]["band_structure"][
+            "ks_energies"
+        ]
+        rydberg_to_ev = physical_constants["Rydberg constant times hc in eV"][0]
+        natoms = len(self.final_structure)
+        fermi_energy = self.energy_fermi
+        for ks_dict in ks_energies:
+            # get energies at this kpoint
+            energies = ks_dict["eigenvalues"]["#text"].split()
+            energies = numpy.array(
+                [float(i) * rydberg_to_ev * natoms for i in energies]
+            )
+            # find the highest eigenstate that is at least partially occupied,
+            # defined as the last non-zero occupancy
+            highest_occupied = numpy.where(energies <= fermi_energy)[0][-1]
+            highest_occupied_idx.append(highest_occupied)
+            # get the highest occupied energy and lowest unoccupied energy
+            highest_occupied_energy = energies[highest_occupied]
+            try:
+                lowest_unoccupied_energy = energies[highest_occupied + 1]
+            # if all of the energy levels are occupied at this kpoint, the above
+            # line will throw an out of bounds error. We give a more useful
+            # error instead.
+            except:
+                raise Exception(
+                    "All energy levels fill at at least one kpoint. Increase nbnd."
+                )
+            # add to our lists
+            highest_occupied_energies.append(highest_occupied_energy)
+            lowest_unoccupied_energies.append(lowest_unoccupied_energy)
+
+        highest_occupied_energies = numpy.array(highest_occupied_energies)
+        lowest_unoccupied_energies = numpy.array(lowest_unoccupied_energies)
+        # get the indices for CV min and VB max
+        cb_min_idx = numpy.where(
+            lowest_unoccupied_energies == lowest_unoccupied_energies.min()
+        )[0][0]
+        vb_max_idx = numpy.where(
+            highest_occupied_energies == highest_occupied_energies.max()
+        )[0][0]
+        # get if bandgap is direct
+        if cb_min_idx == vb_max_idx:
+            is_gap_direct = True
+        else:
+            is_gap_direct = False
+        # get CB min and VB max and convert to eV for the system
+
+        cb_min = lowest_unoccupied_energies[cb_min_idx]
+        vb_max = highest_occupied_energies[vb_max_idx]
+        # get bandgap
+        if len(numpy.unique(highest_occupied_idx)) == 1:
+            # All kpoints have the same number of populated bands indicating we
+            # don't have a metal
+            band_gap = cb_min - vb_max
+        else:
+            # our fermi level passes through a band. There is no meaning to
+            # the CB min and VB max so we set these to None
+            band_gap = 0
+            cb_min = None
+            vb_max = None
+            is_gap_direct = None
+
+        return {
+            "band_gap": band_gap,
+            "conduction_band_minimum": cb_min,
+            "valence_band_maximum": vb_max,
+            "is_gap_direct": is_gap_direct,
+        }
+
+    @cached_property
+    def energy_fermi(self) -> float:
+        energy_fermi_ry = float(
+            self.data["qes:espresso"]["output"]["band_structure"]["fermi_energy"]
+        )
+        # energies in .xml are in ry units and per atom. we convert here to get
+        # energy in eV for the total system
+        rydberg_to_ev = physical_constants["Rydberg constant times hc in eV"][0]
+
+        # BUG: something is off here... These values don't match what is in the
+        # pwscf.out file. Perhaps these here are per atom?
+        natoms = len(self.final_structure)
+
+        # convert to eV & total energy
+        return energy_fermi_ry * rydberg_to_ev * natoms
+
+    @cached_property
+    def conduction_band_minimum(self) -> float:
+        return self.band_data["conduction_band_minimum"]
+
+    @cached_property
+    def valence_band_maximum(self) -> float:
+        return self.band_data["valence_band_maximum"]
+
+    @cached_property
+    def band_gap(self) -> float:
+        return self.band_data["band_gap"]
+
+    @cached_property
+    def is_gap_direct(self) -> bool:
+        return self.band_data["is_gap_direct"]
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def _qeatom_to_structure(struct_data):
+        """
+        Takes in raw qe atomic structure dict and transforms to structure object
+        """
         site_data = struct_data["atomic_positions"]["atom"]
+        # if we only have one site, this returns a dict instead of a list. We
+        # check for this here
+        if type(site_data) == dict:
+            site_data = [site_data]
 
         # lattice
         lattice_matrix = []
@@ -97,46 +327,17 @@ class PwscfXml:
             coords_are_cartesian=True,
         )
 
-    @cached_property
-    def final_energy(self) -> float:
-        rydberg_to_ev = physical_constants["Rydberg constant times hc in eV"][0]
-        energy_ry = float(self.data["qes:espresso"]["output"]["total_energy"]["etot"])
-
-        # BUG: something is off here... These values don't match what is in the
-        # pwscf.out file. Perhaps these here are per atom?
-        natoms = len(self.final_structure)
-
-        # convert to eV & total energy
-        return energy_ry * rydberg_to_ev * natoms
-
-    @cached_property
-    def site_forces(self) -> numpy.array:
-        force_data = self.data["qes:espresso"]["output"]["forces"]["#text"]
-
-        site_forces = []
+    @staticmethod
+    def _str_to_vector(force_data):
+        """
+        Takes in float list in string format and converts to numpy array. Useful
+        for a variety of values in the xml.
+        """
+        site_vectors = []
         sites = force_data.split("\n")
         for site in sites:
-            forces = [float(i) for i in site.split()]
-            site_forces.append(forces)
+            vector = [float(i) for i in site.split()]
+            site_vectors.append(vector)
 
-        site_forces = numpy.array(site_forces)
-        # TODO: convert to differnt units...?
-
-        return site_forces
-
-    @cached_property
-    def lattice_stress(self) -> numpy.array:
-        stress_data = self.data["qes:espresso"]["output"]["stress"]["#text"]
-
-        stress = []
-        vectors = stress_data.split("\n")
-        for vector in vectors:
-            stress_vector = [float(i) for i in vector.split()]
-            stress.append(stress_vector)
-
-        stress = numpy.array(stress)
-        # TODO: convert to differnt units...?
-
-        return stress
-
-    # -------------------------------------------------------------------------
+        site_vectors = numpy.array(site_vectors)
+        return site_vectors

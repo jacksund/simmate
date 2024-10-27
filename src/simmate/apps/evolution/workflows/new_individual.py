@@ -33,6 +33,11 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
         search_db = FixedCompositionSearch.objects.get(id=search_id)
         source_db = search_db.steadystate_sources.get(id=steadystate_source_id)
         validator = search_db.validator
+        #!!!
+        # The search db has a method .individuals_datatable that connects to a
+        # relaxation datatable with all of the individuals so far. We just need
+        # a method in this relaxation table (defined in structure table) that
+        # validates the new structure vs all structures in this table using pgvector
 
         # Check the stop condition of the search and see if this new individual
         # is even needed. This will catch when a search ends while a new

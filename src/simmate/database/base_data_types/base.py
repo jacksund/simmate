@@ -890,7 +890,7 @@ class DatabaseTable(models.Model):
         # If any of these files are present, then we immediately know which
         # program was used to write the output files
         vasprun_filename = directory / "vasprun.xml"
-        pwscf_filename = directory / "pwscf.out"
+        pwscf_filename = directory / "pwscf.xml"
 
         # check if we have a VASP directory
         if vasprun_filename.exists():
