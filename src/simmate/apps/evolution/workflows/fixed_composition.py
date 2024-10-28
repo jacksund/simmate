@@ -26,6 +26,8 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         subworkflow_name: str | Workflow = "relaxation.vasp.staged",
         subworkflow_kwargs: dict = {},
         fitness_field: str = "energy_per_atom",
+        fitness_function: str = "min", # other options: max, target_value
+        target_value: float = None,
         max_structures: int = None,
         min_structures_exact: int = None,
         best_survival_cutoff: int = None,

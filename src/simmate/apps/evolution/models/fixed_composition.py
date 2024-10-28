@@ -10,6 +10,7 @@ import pandas
 import plotly.express as plotly_express
 import plotly.graph_objects as plotly_go
 from rich.progress import track
+from django.db.models import F, functions
 
 from simmate.apps.evolution import selectors as selector_module
 from simmate.apps.evolution.models import SteadystateSource
@@ -38,6 +39,8 @@ class FixedCompositionSearch(Calculation):
     subworkflow_name = table_column.CharField(max_length=200, null=True, blank=True)
     subworkflow_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
     fitness_field = table_column.CharField(max_length=200, null=True, blank=True)
+    fitness_function = table_column.CharField(max_length=200, null=True, blank=True)
+    target_value = table_column.FloatField(null=True, blank=True) # Only set if fitness function is target_value
 
     # Other settings for the search
     min_structures_exact = table_column.IntegerField(null=True, blank=True)
@@ -118,11 +121,10 @@ class FixedCompositionSearch(Calculation):
         # "Exact" refers to the nsites of the structures. We want to ensure at
         # least N structures with the input/expected number of sites have been
         # calculated.
-        # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
         count_exact = self.individuals_datatable.objects.filter(
             formula_full=self.composition,
             workflow_name=self.subworkflow_name,
-            energy_per_atom__isnull=False,
+            **{f"{self.fitness_field}__isnull": False}
         ).count()
         if count_exact < self.min_structures_exact:
             return False
@@ -160,10 +162,21 @@ class FixedCompositionSearch(Calculation):
         # only counting completed calculations.
         # BUG: this filter needs to be updated to fitness_value and not
         # assume we are using energy_per_atom
-        num_new_structures_since_best = self.individuals.filter(
-            energy_per_atom__gt=best.energy_per_atom + self.convergence_cutoff,
-            finished_at__gte=best.finished_at,
-        ).count()
+        if self.fitness_function == "min":
+            num_new_structures_since_best = self.individuals.filter(
+                finished_at__gte=best.finished_at,
+                **{f"{self.fitness_field}__gt": best.fitness_field + self.convergence_cutoff},
+            ).count()
+            
+        elif self.fitness_function == "max":
+            num_new_structures_since_best = self.individuals.filter(
+                finished_at__gte=best.finished_at,
+                **{f"{self.fitness_field}__gt": best.fitness_field - self.convergence_cutoff},
+            ).count()
+        
+        elif self.fitness_funtion == "target_value":
+            pass # TODO
+
         if num_new_structures_since_best > self.best_survival_cutoff:
             logging.info(
                 "Best individual has not changed after "
@@ -441,23 +454,56 @@ class FixedCompositionSearch(Calculation):
 
     @property
     def individuals_completed(self):
-        # If there is an energy_per_atom, we can treat the calculation as completed
-        return self.individuals.filter(energy_per_atom__isnull=False)
+        # If there is a result for the fitness field, we can treat the calculation as completed
+        return self.individuals.filter(**{f"{self.fitness_field}__isnull": False})
         # OPTIMIZE: would it be better to check energy_per_atom or structure_final?
         # Ideally, I could make a relation to the prefect flow run table but this
         # would require a large amount of work to implement.
 
     @property
     def individuals_incomplete(self):
-        # If there is an energy_per_atom, we can treat the calculation as completed
-        return self.individuals.filter(energy_per_atom__isnull=True)
+        # If there is a result for the fitness field, we can treat the calculation as completed
+        return self.individuals.filter(**{f"{self.fitness_field}__isnull": True})
 
     @property
     def best_individual(self):
-        return self.individuals_completed.order_by(self.fitness_field).first()
-
-    def get_nbest_indiviudals(self, nbest: int):
-        return self.individuals_completed.order_by(self.fitness_field)[:nbest]
+        if self.fitness_function == "min":
+            # We use order_by to sort from lowest to highest and take the first
+            return self.individuals_completed.order_by(self.fitness_field).first()
+        if self.fitness_function == "max":
+            # We use order_by to order by the negative of our fitness field to
+            # get the highest to lowest order and take the first
+            return self.individuals_completed.annotate(
+                neg_fitness_field=(-F(f'{self.fitness_field}'))
+                ).order_by('neg_fitness_field').first()
+        if self.fitness_function == "target_value":
+            # We calculate the distance from our target value for each item in our
+            # fitness field. We use the annotate, Abs, and F methods to do these
+            # calculations on the SQL side rather than in python.
+            # essentially, annotate makes a temporary "distance" column populated
+            # by our absolute difference calculation, then orders it and returns
+            # the first value.
+            return self.individuals_completed.annotate(
+                distance=functions.Abs(F(f'{self.fitness_field}') - self.target_value)
+                ).order_by('distance').first()
+        
+    def get_nbest_individuals(self, nbest: int):
+        if self.fitness_function == "min":
+            # We use order_by to sort from lowest to highest and take the first
+            return self.individuals_completed.order_by(self.fitness_field)[:nbest]
+        if self.fitness_function == "max":
+            # We use order_by to order by the negative of our fitness field to
+            # get the highest to lowest order and take the first
+            return self.individuals_completed.annotate(
+                neg_fitness_field=(-F(f'{self.fitness_field}'))
+                ).order_by('neg_fitness_field')[:nbest]
+        if self.fitness_function == "target_value":
+            # We calculate the distance from our target value for each item in our
+            # fitness field. We use the annotate, Abs, and F methods to do these
+            # calculations on the SQL side rather than in python.
+            return self.individuals_completed.annotate(
+                distance=functions.Abs(F(f'{self.fitness_field}') - self.target_value)
+                ).order_by('distance')[:nbest]
 
     def get_unique_individuals(
         self,
@@ -505,10 +551,18 @@ class FixedCompositionSearch(Calculation):
         for individual in individuals:
             potential_new_value = getattr(individual, self.fitness_field)
 
-            # BUG: I assume lower is better, but this may change
-            if potential_new_value < best_value:
-                best_history.append(individual.id)
-                best_value = potential_new_value
+            if self.fitness_function == "min":
+                if potential_new_value < best_value:
+                    best_history.append(individual.id)
+                    best_value = potential_new_value
+            elif self.fitness_function == "max":
+                if potential_new_value > best_value:
+                    best_history.append(individual.id)
+                    best_value = potential_new_value
+            elif self.fitness_function == "target_value":
+                if abs(potential_new_value-self.target_value) < best_value:
+                    best_history.append(individual.id)
+                    best_value = potential_new_value
 
         return best_history
 
@@ -539,6 +593,8 @@ class FixedCompositionSearch(Calculation):
             # workflow for now.
             # !!! Since I've transfered these to a StagedWorkflow base class, I
             # think they should just work so long as the subworkflow inherits it
+            # BUG: These only write out energy right now. Need to adjsut to
+            # fitness_value
             self.write_staged_series_convergence_plot(directory=directory)
             self.write_staged_series_histogram_plot(directory=directory)
             self.write_staged_series_times_plot(directory=directory)
@@ -602,7 +658,7 @@ class FixedCompositionSearch(Calculation):
     # -------------------------------------------------------------------------
 
     def write_best_structures(self, nbest: int, directory: Path):
-        best = self.get_nbest_indiviudals(nbest)
+        best = self.get_nbest_individuals(nbest)
         structures = best.only("structure", "id").to_toolkit()
         self._write_structures(structures, directory)
 
@@ -644,7 +700,7 @@ class FixedCompositionSearch(Calculation):
     def write_individuals_completed(self, directory: Path):
         columns = [
             "id",
-            "energy_per_atom",
+            f"{self.fitness_field}",
             "finished_at",
             "source",
             "spacegroup__number",
@@ -684,7 +740,7 @@ class FixedCompositionSearch(Calculation):
         df.to_markdown(md_filename)
 
     def write_best_individuals_history(self, directory: Path):
-        columns = ["id", "energy_per_atom", "finished_at"]
+        columns = ["id", f"{self.fitness_field}", "finished_at"]
         best_history = self.get_best_individual_history()
         df = (
             self.individuals.filter(id__in=best_history)
@@ -828,6 +884,7 @@ class Correctness(PlotlyFigure):
             x=structures_dataframe["finished_at"],
             y=structures_dataframe["fingerprint_distance"],
             mode="markers",
+            # BUG: Does this need to be fitness_field instead of energy?
             marker_color=structures_dataframe["energy_per_atom"],
         )
         figure = plotly_go.Figure(data=scatter)
@@ -898,7 +955,8 @@ class StagedSeriesConvergence(PlotlyFigure):
             # See `individuals` method for why we use these filters
             formula_reduced=composition.reduced_formula,
             nsites__lte=composition.num_atoms,
-            energy_per_atom__isnull=False,
+            **{f"{search.fitness_field}__isnull": False},
+            fitness_field=search.fitness_field,
         )
         return plot
 
@@ -910,7 +968,8 @@ class StagedSeriesHistogram(PlotlyFigure):
             # See `individuals` method for why we use these filters
             formula_reduced=composition.reduced_formula,
             nsites__lte=composition.num_atoms,
-            energy_per_atom__isnull=False,
+            **{f"{search.fitness_field}__isnull": False},
+            fitness_field=search.fitness_field,
         )
         return plot
 
@@ -922,7 +981,7 @@ class StagedSeriesTimes(PlotlyFigure):
             # See `individuals` method for why we use these filters
             formula_reduced=composition.reduced_formula,
             nsites__lte=composition.num_atoms,
-            energy_per_atom__isnull=False,
+            **{f"{search.fitness_field}__isnull": False},
         )
         return plot
 

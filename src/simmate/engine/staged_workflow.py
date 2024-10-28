@@ -158,18 +158,16 @@ class StagedWorkflow(Workflow):
         return all_value_series
 
 
-# BUG: These are exclusively for energy_per_atom, but this won't always be our
-# convergence criteria in the future. These will need to be updated when the
-# convergence crit is made dynamic
 class StagedSeriesConvergence(PlotlyFigure):
     method_type = "classmethod"
 
     def get_plot(
         workflow,  # Relaxation__Vasp__Staged
+        fitness_field: str,
         **filter_kwargs,
     ):
         all_energy_series = workflow.get_series(
-            value="energy_per_atom",
+            value=fitness_field,
             **filter_kwargs,
         )
 
@@ -197,6 +195,19 @@ class StagedSeriesConvergence(PlotlyFigure):
                 row=row,
                 col=col,
             )
+            # add a line for y=x for added visualization
+            # Determine the min and max range for y=x line
+            x_min, x_max = min(xs + ys), max(xs + ys)
+            
+            # Plot the y=x line
+            y_equals_x_line = plotly_go.Scatter(
+                x=[x_min, x_max],
+                y=[x_min, x_max],
+                mode="lines",
+                line=dict(dash="dash", color="black"),
+                name="y=x"
+            )
+            figure.add_trace(y_equals_x_line, row=row, col=col)
 
             # Update xaxis properties
             figure.update_xaxes(
@@ -211,7 +222,7 @@ class StagedSeriesConvergence(PlotlyFigure):
             )
 
         figure.update_layout(
-            title="Energy per atom (eV) comparison for each stage",
+            title=f"{fitness_field} comparison for each stage",
             showlegend=False,
         )
         return figure
@@ -222,10 +233,11 @@ class StagedSeriesHistogram(PlotlyFigure):
 
     def get_plot(
         workflow,  # Relaxation__Vasp__Staged
+        fitness_field: str,
         **filter_kwargs,
     ):
         all_energy_series = workflow.get_series(
-            value="energy_per_atom",
+            value=fitness_field,
             **filter_kwargs,
         )
 
@@ -249,7 +261,7 @@ class StagedSeriesHistogram(PlotlyFigure):
 
         figure.update_layout(
             barmode="overlay",
-            xaxis_title_text="Energy per atom change (eV)",
+            xaxis_title_text=f"{fitness_field}",
             yaxis_title_text="Structures (#)",
             bargap=0.05,
             legend=dict(
