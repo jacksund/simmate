@@ -23,7 +23,7 @@ class DynamicFormComponent(UnicornView):
             "page_title",
             "breadcrumbs",
             "breadcrumb_active",
-            "required_fields",
+            "required_inputs",
         )
 
     # -------------------------------------------------------------------------

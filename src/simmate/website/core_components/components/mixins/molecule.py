@@ -8,17 +8,7 @@ from simmate.toolkit import Molecule
 class MoleculeInput(UnicornView):
 
     class Meta:
-        javascript_exclude = ("user_options",)
-
-    # -------------------------------------------------------------------------
-
-    # Requires extra config such as:
-
-    # requested_by_id = None
-
-    # def mount(self):
-    #     # set default starting values
-    #     self.requested_by_id = self.request.user.id
+        javascript_exclude = ("datasets_to_check",)
 
     # -------------------------------------------------------------------------
 
