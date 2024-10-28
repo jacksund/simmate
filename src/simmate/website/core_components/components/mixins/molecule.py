@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from django_unicorn.components import UnicornView
-
 from simmate.toolkit import Molecule
 
 
-class MoleculeInput(UnicornView):
+class MoleculeInput:
 
     class Meta:
         javascript_exclude = ("datasets_to_check",)

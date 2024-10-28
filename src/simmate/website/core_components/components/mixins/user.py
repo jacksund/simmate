@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from django.contrib.auth.models import User
-from django_unicorn.components import UnicornView
 
 
-class UserInput(UnicornView):
+class UserInput:
 
     class Meta:
         javascript_exclude = ("user_options",)

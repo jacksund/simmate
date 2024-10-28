@@ -28,25 +28,24 @@ class DynamicFormComponent(UnicornView):
 
     # -------------------------------------------------------------------------
 
-    # Options for UI elements
-    # Only used in full-page views
+    form_mode: str = None  # should be "create" or "update"
 
-    page_title: str = "The Bulk Synthesis App"
-    """
-    Title of the page (top left of page)
-    """
+    def mount(self):
+        view_name = self.request.resolver_match.url_name
 
-    breadcrumbs: list = [
-        ("apps", "Apps"),
-    ]
-    """
-    List of breadcrumb links (top right of page)
-    """
+        if view_name == "table-entry-new":
+            self.form_mode = "create"
+        elif view_name == "tably-entry-update":
+            self.form_mode = "update"
+        else:
+            raise Exception(f"Unknown view type for dynamic form: {view_name}")
 
-    breadcrumb_active: str = "Dynamic Form"
-    """
-    The active breadcrumb (top right of page)
-    """
+        # TODO: mount updatable entry
+
+        self.mount_hook()
+
+    def mount_hook(self):
+        return  # default is there's nothing extra to do
 
     # -------------------------------------------------------------------------
 

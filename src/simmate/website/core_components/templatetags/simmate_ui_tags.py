@@ -1,6 +1,17 @@
 # -*- coding: utf-8 -*-
 
+
+import uuid
+
 from django import template
+
+from simmate.toolkit import Molecule as ToolkitMolecule
+
+# Temporarily closed-source code
+try:
+    from simmate_corteva.rdkit.models import Molecule as DatabaseMolecule
+except:
+    DatabaseMolecule = None
 
 register = template.Library()
 
@@ -113,6 +124,7 @@ def button(
     show_label: bool = True,
     theme: str = "primary",
     icon: str = None,
+    small: bool = False,
 ):
     """
     Display a button widget.
@@ -159,7 +171,121 @@ def selectbox(
     return locals()
 
 
+@register.inclusion_tag(
+    filename="core_components/input_elements/molecule_input.html",
+    takes_context=True,
+)
+def molecule_input(
+    context: dict,
+    name: str,
+    label: str = None,
+    show_label: bool = True,
+    help_text: str = None,
+    load_button: bool = True,
+    allow_sketcher_input: bool = True,
+    # Mol text input (text_area)
+    allow_text_input: bool = False,
+    text_input_name: str = None,
+    # Custom input (text_input)
+    allow_custom_input: bool = False,
+    custom_input_name: str = None,
+    custom_input_label: str = None,
+    custom_input_placeholder: str = "12345",
+    # TODO:
+    # initial_value: bool = None,
+    # many_molecules: bool = False,
+):
+    """
+    Display a ChemDraw.js (or ChemDoodle.js) input widget.
+    """
+    if not label:
+        label = name.replace("_", " ").title()
+
+    if allow_text_input:
+        if not text_input_name:
+            text_input_name = f"{name}_textinput"
+
+    if allow_custom_input:
+        if not custom_input_name:
+            custom_input_name = f"{name}_custom_input"
+        if not custom_input_label:
+            custom_input_label = custom_input_name.replace("_", " ").title()
+        custom_input_label = f"Option 3: {custom_input_label}"
+
+    show_option_labels = (
+        True
+        if [allow_sketcher_input, allow_text_input, allow_custom_input].count(True) > 1
+        else False
+    )
+
+    return locals()
+
+
 def hash_options(options: list[tuple]) -> str:
     # for speed, we only hash the keys, which are shorter and should be
     # consistent with all their values anyways
     return str(hash(";".join([str(k) for k, _ in options])))
+
+
+# -----------------------------------------------------------------------------
+
+# basic elements (non-unicorn)
+
+
+@register.inclusion_tag(
+    filename="core_components/basic_elements/alert.html",
+    takes_context=True,
+)
+def alert(
+    context: dict,
+    message: str,
+    theme: str = "primary",
+    label: str = None,
+    icon: str = None,
+):
+    """
+    Display a alert widget with some message.
+    """
+    default_icon_mapping = {
+        "primary": "information",
+        "info": "information",
+        "secondary": "information",
+        "warning": "alert",
+        "danger": "alert",
+    }
+    if not icon:
+        icon = default_icon_mapping.get(theme, "information")
+
+    return locals()
+
+
+@register.inclusion_tag(
+    filename="core_components/basic_elements/draw_molecule.html",
+    takes_context=True,
+)
+def draw_molecule(
+    molecule: any,
+    div_id: str = None,
+    width: int = 150,
+    height: int = 150,
+):
+    """
+    Draw a molecule using Rdkit.js.
+    """
+
+    # TODO: auto scale width & height based on molecule size
+
+    # javascript requires unique ids
+    if not div_id:
+        div_id = uuid.uuid4().hex
+
+    # see what kind of molecule we were given and get its sdf string
+    if isinstance(molecule, DatabaseMolecule):
+        molecule = molecule.sdf_str
+    elif isinstance(molecule, ToolkitMolecule):
+        molecule = molecule.to_sdf().replace("\n", "\\n")
+    else:
+        # !!! Should I try from_dynamic? or just assume its a string that rdkitjs can read?
+        molecule = molecule.replace("\n", "\\n")
+
+    return locals()

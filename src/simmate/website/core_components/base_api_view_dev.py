@@ -230,7 +230,17 @@ class DynamicApiView(View):
         raise NotImplementedError("Entry-New views still under dev.")
 
     def get_entry_new_html_view(self, request, *args, **kwargs):
-        raise NotImplementedError("Entry-New views still under dev.")
+        table = self.get_table(request, *args, **kwargs)
+        if not table.html_form_view:
+            raise NotImplementedError(
+                "This model does not have an 'entry-new' view yet!"
+            )
+        context = {
+            "unicorn_component_name": table.html_form_view,
+            **table.html_breadcrumb_context,  # TODO: need to update crumbs
+        }
+        template = table.html_entry_form_template
+        return render(request, template, context)
 
     # -------------------------------------------------------------------------
 
@@ -240,6 +250,8 @@ class DynamicApiView(View):
         raise NotImplementedError("Entry-Update views still under dev.")
 
     def get_entry_update_html_view(self, request, *args, **kwargs):
-        raise NotImplementedError("Entry-Update views still under dev.")
+        # We can just use the entry-new view because our underlying unicorn
+        # view will dynamically determine if we have a new vs update.
+        self.get_entry_new_html_view(request, *args, **kwargs)
 
     # -------------------------------------------------------------------------
