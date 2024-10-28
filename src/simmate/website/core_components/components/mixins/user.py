@@ -25,13 +25,10 @@ class UserInput(UnicornView):
 
     # Requires extra config such as:
 
+    # requested_by_id = None
+
     # def mount(self):
     #     # set default starting values
     #     self.requested_by_id = self.request.user.id
-
-    # requested_by_id = None
-
-    # def set_requested_by_id(self, requested_by_id):
-    #     self.requested_by_id = requested_by_id
 
     # -------------------------------------------------------------------------

@@ -15,6 +15,8 @@ class DynamicFormComponent(UnicornView):
     """
     The location of the template to use for this component
     """
+    # TODO: Could there be a template that auto builds the form html? But this
+    # might get messy and not be worth it.
 
     class Meta:
         javascript_exclude = (
@@ -27,6 +29,7 @@ class DynamicFormComponent(UnicornView):
     # -------------------------------------------------------------------------
 
     # Options for UI elements
+    # Only used in full-page views
 
     page_title: str = "The Bulk Synthesis App"
     """
@@ -40,14 +43,21 @@ class DynamicFormComponent(UnicornView):
     List of breadcrumb links (top right of page)
     """
 
-    breadcrumb_active = "New Molecule"
+    breadcrumb_active: str = "Dynamic Form"
     """
     The active breadcrumb (top right of page)
     """
 
     # -------------------------------------------------------------------------
 
-    def set_property(self, property_name: str, new_value: any, *args, **kwargs):
+    def set_property(
+        self,
+        # BUG: for some reason, giving ": str" causes errors...?
+        property_name: any,
+        new_value: any,
+        *args,
+        **kwargs,
+    ):
         # check if there is a special defined method for this property
         method_name = f"set_{property_name}"
         if hasattr(self, method_name):
@@ -61,7 +71,7 @@ class DynamicFormComponent(UnicornView):
     # Model creation and update utils
 
     table_entry: DatabaseTable = None  # initialized object
-    target_table: DatabaseTable = None  # class object
+    table: DatabaseTable = None  # class object
 
     def get_config(self):
         pass  # TODO
@@ -128,14 +138,16 @@ class DynamicFormComponent(UnicornView):
 
         return redirect(
             "data_explorer:table",
-            self.target_table.table_name,
+            self.table.table_name,
         )
 
     def presave_to_db_hook(self):
-        return True  # default is there's nothing extra to do
+        return  # default is there's nothing extra to do
 
     def save_to_db_hook(self):
-        return True  # default is there's nothing extra to do
+        return  # default is there's nothing extra to do
 
     def postsave_to_db_hook(self):
-        return True  # default is there's nothing extra to do
+        return  # default is there's nothing extra to do
+
+    # -------------------------------------------------------------------------

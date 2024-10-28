@@ -100,3 +100,66 @@ def checkbox(
         label = name.replace("_", " ").title()
 
     return locals()
+
+
+@register.inclusion_tag(
+    filename="core_components/input_elements/button.html",
+    takes_context=True,
+)
+def button(
+    context: dict,
+    name: str,  # fxn_to_call
+    label: str = None,
+    show_label: bool = True,
+    theme: str = "primary",
+    icon: str = None,
+):
+    """
+    Display a button widget.
+    """
+    if not label:
+        label = name.replace("_", " ").title()
+
+    return locals()
+
+
+@register.inclusion_tag(
+    filename="core_components/input_elements/selectbox.html",
+    takes_context=True,
+)
+def selectbox(
+    context: dict,
+    name: str,
+    options: list[tuple[any, str]] = [],
+    label: str = None,
+    show_label: bool = True,
+    initial_value: bool = None,
+    dynamic_options: bool = False,
+    allow_custom_input: bool = False,
+):
+    """
+    Display a checkbox widget.
+    """
+    # options should be a list of tuples: (value, display)
+
+    if not label:
+        label = name.replace("_", " ").title()
+
+    if not options:
+        options = context.get(f"{name}_options", [])
+
+    if not initial_value:
+        initial_value = context.get(name)
+
+    # Needed because select2 is within an "ignore" div but we also want to
+    # replace the full select box if the options are changed at all
+    if dynamic_options:
+        options_hash = hash_options(options)
+
+    return locals()
+
+
+def hash_options(options: list[tuple]) -> str:
+    # for speed, we only hash the keys, which are shorter and should be
+    # consistent with all their values anyways
+    return str(hash(";".join([str(k) for k, _ in options])))

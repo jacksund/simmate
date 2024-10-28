@@ -1856,6 +1856,9 @@ class DatabaseTable(models.Model):
     html_table_template: str = "data_explorer/table.html"
     html_entry_template: str = "data_explorer/table_entry.html"
     html_entries_template: str = "data_explorer/table_entries.html"
+    html_search_template: str = "data_explorer/table_search.html"  # TODO
+    html_update_template: str = "data_explorer/table_entry_update.html"  # TODO
+    html_add_template: str = "data_explorer/table_entry_add.html"  # TODO
 
     # Unicorn views (side panels in the table view of the Data Explorer app)
     html_search_view: str = None
