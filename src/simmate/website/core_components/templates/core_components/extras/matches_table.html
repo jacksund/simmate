@@ -1,0 +1,26 @@
+{% load unicorn %}
+<table class="table table-hover table-centered table-sm mt-3">
+    <thead>
+        <tr>
+            <th>Database</th>
+            <th>Matches</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for match in matches %}
+            <tr>
+                <td>{{ match.table_name }}</td>
+                <td>
+                    {% for match_url in  match.urls %}
+                        <a type="button"
+                           class="btn btn-info btn-sm"
+                           href="{{ match_url }}"
+                           target="_blank">
+                            <i class="mdi mdi-open-in-new"></i>
+                        </a>
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -177,11 +177,12 @@ def selectbox(
 )
 def molecule_input(
     context: dict,
-    name: str,
+    name: str = "molecule",
     label: str = None,
     show_label: bool = True,
     help_text: str = None,
     load_button: bool = True,
+    set_molecule_method: str = None,
     allow_sketcher_input: bool = True,
     # Mol text input (text_area)
     allow_text_input: bool = False,
@@ -201,6 +202,9 @@ def molecule_input(
     if not label:
         label = name.replace("_", " ").title()
 
+    if not set_molecule_method:
+        set_molecule_method = f"set_{name}"
+
     if allow_text_input:
         if not text_input_name:
             text_input_name = f"{name}_textinput"
@@ -217,6 +221,8 @@ def molecule_input(
         if [allow_sketcher_input, allow_text_input, allow_custom_input].count(True) > 1
         else False
     )
+
+    molecule = context[name]
 
     return locals()
 
@@ -264,6 +270,7 @@ def alert(
     takes_context=True,
 )
 def draw_molecule(
+    context: dict,
     molecule: any,
     div_id: str = None,
     width: int = 150,
@@ -288,4 +295,24 @@ def draw_molecule(
         # !!! Should I try from_dynamic? or just assume its a string that rdkitjs can read?
         molecule = molecule.replace("\n", "\\n")
 
+    return locals()
+
+
+@register.inclusion_tag(
+    filename="core_components/basic_elements/canvas.html",
+    takes_context=True,
+)
+def canvas(
+    context: dict,
+    name: str,
+    width: int = 150,
+    height: int = 150,
+):
+    """
+    Place a canvas that will later be used to draw something, such as a
+    molecule using Rdkit.js.
+
+    This is separate from the `draw_molecule` tag because the JS call comes from
+    the DynamicFormComponent dynamically & *after* the page is loaded.
+    """
     return locals()

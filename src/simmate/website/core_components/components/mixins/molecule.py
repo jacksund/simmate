@@ -1,24 +1,29 @@
 # -*- coding: utf-8 -*-
 
+from simmate.database.base_data_types import DatabaseTable
 from simmate.toolkit import Molecule
 
 
 class MoleculeInput:
 
     class Meta:
-        javascript_exclude = ("datasets_to_check",)
+        javascript_exclude = ("molecule_match_tables",)
 
     # -------------------------------------------------------------------------
 
     molecule = None  # stored as str (smiles or sdf)
 
-    def set_molecule(self, mol_str):
+    def get_molecule_obj(self):
+        # OPTIMIZE: consider caching this
+        return Molecule.from_dynamic(self.molecule)
+
+    def set_molecule(self, mol_str: str):
         try:
             self.molecule = mol_str.strip('"')
-            molecule_obj = Molecule.from_dynamic(self.molecule)
+            molecule_obj = self.get_molecule_obj()
             self.call(
                 "add_mol_viewer",
-                "molecule_input",  # TODO: need to set this
+                "molecule",  # TODO: need to set this
                 molecule_obj.to_sdf(),
                 300,
                 300,
@@ -27,35 +32,47 @@ class MoleculeInput:
             self.molecule = False
 
         # check other datasets (see section below)
-        if self.molecule:
+        if self.molecule and self.molecule_match_tables:
             self.check_datasets()
 
     # -------------------------------------------------------------------------
 
     # Checking other datasets.
 
-    molecule_match_urls: dict = {}
-    datasets_to_check: list = ["__self_table__"]
+    molecule_matches: list[dict] = []
+    molecule_match_tables: list = []  # ["__self__"]
 
     def check_datasets(self):
 
-        # catch condition where no checks are needed
-        if not self.datasets_to_check:
-            return
-
-        # BUG: state of molecule obj is not saved so we recreate
-        # the object here. Ideally we could cache this...
-        molecule_obj = Molecule.from_dynamic(self.molecule)
-
-        if not molecule_obj:
-            return  # not ready for queries (consider raising error)
-
+        molecule_obj = self.get_molecule_obj()
         inchi_key = molecule_obj.to_inchi_key()
-        for dataset_name in self.datasets_to_check:
-            table, property_name = self.table_mappings[dataset_name]
+
+        all_matches = []
+        for table_name in self.molecule_match_tables:
+
+            if table_name == "__self__":
+                table = self.table
+            else:
+                table = DatabaseTable.get_table(table_name)
+
             matches = [
                 match.url for match in table.objects.filter(inchi_key=inchi_key).all()
             ]
-            setattr(self, property_name, matches)
+            if matches:
+                all_matches.append(
+                    {
+                        "table_name": table.table_name,
+                        "urls": matches,
+                    }
+                )
+
+        self.molecule_matches = all_matches
+
+    # TODO:
+    # allow_molecule_matches: bool = False
+    # if self.molecule_matches and not self.allow_molecule_matches:
+    #     self.errors.append(
+    #         f"This molecule has already been added to {table.table_name}"
+    #     )
 
     # -------------------------------------------------------------------------

@@ -252,6 +252,6 @@ class DynamicApiView(View):
     def get_entry_update_html_view(self, request, *args, **kwargs):
         # We can just use the entry-new view because our underlying unicorn
         # view will dynamically determine if we have a new vs update.
-        self.get_entry_new_html_view(request, *args, **kwargs)
+        return self.get_entry_new_html_view(request, *args, **kwargs)
 
     # -------------------------------------------------------------------------
