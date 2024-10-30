@@ -13,6 +13,9 @@ from simmate.engine import Workflow
 from simmate.toolkit import Structure
 from simmate.visualization.plotting import PlotlyFigure
 
+import os
+import shutil
+
 
 class StagedWorkflow(Workflow):
     """
@@ -25,7 +28,9 @@ class StagedWorkflow(Workflow):
 
     description_doc_short = "runs a series of dft calculations"
 
-    subworkflow_names = []
+    subworkflow_names = [] # The names of the workflows
+    
+    files_to_copy = [] # The files that should be copied from one run to the next
 
     @classmethod
     def run_config(
@@ -34,8 +39,17 @@ class StagedWorkflow(Workflow):
         command: str = None,
         source: dict = None,
         directory: Path = None,
+        # TODO: subworkflow_kwargs # Allow specific kwargs for each subworkflow
         **kwargs,
     ):
+        # TODO: The current implementation will not fill out the StagedCalculation
+        # table unless all calculations finish successfully. Instead it should
+        # dynamically update it
+        
+        # This workflow must return several things for the StagedCalculation
+        # table. This includes the workflow name and workflow id
+        subworkflow_names = []
+        subworkflow_ids = []
         # Our first relaxation is directly from our inputs.
         current_task = cls.subworkflows[0]
         state = current_task.run(
@@ -44,40 +58,44 @@ class StagedWorkflow(Workflow):
             directory=directory / current_task.name_full,
         )
         result = state.result()
-
-        # The remaining tasks continue and use the past results as an input
-        for i, current_task in enumerate(cls.subworkflows[1:]):
-            state = current_task.run(
-                structure=result,  # this is the result of the last run
-                command=command,
-                directory=directory / current_task.name_full,
-            )
-            result = state.result()
-
-        # when updating the original entry, we want to use the data from the
-        # final result. The model used in the last step can be anything, so we
-        # want to transfer all results that are not unique to the subworkflow
-        final_result = {}
-        for key, value in result.to_api_dict().items():
-            if key not in [
-            'id',
-             'created_at',
-             'updated_at',
-             'source',
-             'started_at',
-             'finished_at',
-             'total_time',
-             'queue_time',
-             'workflow_name',
-             'workflow_version',
-             'computer_system',
-             'directory',
-             'run_id',
-             'corrections'
-             ]:
-                final_result[key] = value
+        # append info to workflow lists
+        subworkflow_names.append(result.workflow_name)
+        subworkflow_ids.append(result.id)
         
+        # In some rare cases, we may want to only run one subworkflow here (such
+        # as when we are testing the evolutionary search) so if there is only
+        # one workflow we skip to the end
+        if len(cls.subworkflows) != 1:
+            # The remaining tasks continue and use the past results as an input
+            for i, current_task in enumerate(cls.subworkflows[1:]):
+                # Now we copy the requested files from one to the next
+                previous_directory = result.directory
+                new_directory = directory / current_task.name_full
+                os.makedirs(new_directory, exist_ok=True)
+                for file in cls.files_to_copy:
+                    shutil.copyfile(
+                        previous_directory / file, new_directory / file
+                    )
+                
+                state = current_task.run(
+                    structure=result,  # this is the result of the last run
+                    command=command,
+                    directory=new_directory,
+                )
+                result = state.result()
+                # append info to workflow lists
+                subworkflow_names.append(result.workflow_name)
+                subworkflow_ids.append(result.id)
+        
+        # save final result
+        final_result = dict(
+            structure=structure,
+            subworkflow_names=subworkflow_names,
+            subworkflow_ids=subworkflow_ids,
+            copied_files = cls.files_to_copy,
+            )
         return final_result
+
     
 
     @classmethod
@@ -86,7 +104,6 @@ class StagedWorkflow(Workflow):
     def subworkflows(cls):
         # import locally to avoid circular import
         from simmate.workflows.utilities import get_workflow
-
         # Workflow names can be either the string name of the workflow or a workflow
         # object
         workflow_list = []
@@ -111,15 +128,35 @@ class StagedWorkflow(Workflow):
     @property
     @cache
     def last_subworkflow(cls):
-        return cls.workflows[-1]
+        # This is just convenient for code clarity
+        return cls.subworkflows[-1]
+    
+    @classmethod
+    @property
+    @cache
+    def subworkflow_tables(cls):
+        tables = []
+        for subflow in cls.subworkflows:
+            if subflow.database_table not in tables:
+                tables.append(subflow.database_table)
+        return tables
 
     @classmethod
     def get_series(cls, value: str, **filter_kwargs):
+        # We pull the directories of all staged calculations where the final
+        # result has the given filter criteria
         directories = (
-            cls.all_results.filter(**filter_kwargs).values_list("directory", flat=True)
+            cls.last_subworkflow.all_results.filter(**filter_kwargs)
+            .values_list("directory", flat=True)
             # .order_by("?")[:1000]
             .all()
         )
+        # The above filter returns the subfolder for the final calculation. We
+        # just want the parent folder for this so we get it here
+        directories = [str(Path(directory).parent) for directory in directories]
+        # In case there are any duplicates (e.g. last workflow is also run earlier
+        # in the sequence) we remove them
+        directories = list(set(directories))
 
         # Note, this method is optimized to grab ALL data up front in as few
         # queries as possible. We grab all data rather than many smaller queries.
@@ -135,16 +172,19 @@ class StagedWorkflow(Workflow):
         #
         # Thererfore everything below is just minimizing the number of queries
         # and reformatting the data output of the complex query.
-
-        tables = []
-        for subflow in cls.subworkflows:
-            if subflow.database_table not in tables:
-                tables.append(subflow.database_table)
-
-        all_data = {w: {} for w in cls.subworkflow_names}
-        for table in tables:
+        subworkflow_names = []
+        for subworkflow in cls.subworkflow_names:
+            if inspect.isclass(subworkflow):
+                subworkflow_names.append(subworkflow.name_full)
+            else:
+                subworkflow_names.append(subworkflow)
+        
+        all_data = {w: {} for w in subworkflow_names}
+        for table in cls.subworkflow_tables:
+            # for each type of table, we filter for the provided kwargs. We then
+            # return a query with the requested value, directory, and workflow name
             query = table.objects.filter(
-                workflow_name__in=cls.subworkflow_names,
+                workflow_name__in=subworkflow_names,
                 **filter_kwargs,
             ).values_list(value, "directory", "workflow_name")
 
@@ -156,7 +196,10 @@ class StagedWorkflow(Workflow):
             #     _connector=dj_query.OR,
             # )
             # .filter(complex_filter)
-
+            
+            # For each result in our query we get the parent directory. We then
+            # add the result to our all_data dictionary witht he parent directory
+            # as the key and requested value as the value.
             for output, directory, workflow_name in query:
                 folder_base = str(Path(directory).parent)
 
@@ -168,11 +211,14 @@ class StagedWorkflow(Workflow):
                 all_data[workflow_name].update({folder_base: output})
 
         all_value_series = []
+        # We iterate over each staged workflow directory matching our criteria
         for directory in directories:
             value_series = []
             for subflow in cls.subworkflows:
+                # Get resulting value from each subworkflow for this staged workflow
                 new_value = all_data[subflow.name_full].get(directory, numpy.nan)
                 value_series.append(new_value)
+            # add all values for this staged workflow run to our all_value_series
             all_value_series.append(value_series)
 
         return all_value_series

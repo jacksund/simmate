@@ -15,6 +15,7 @@ from .fingerprint import FingerprintPool, Fingerprint
 from .forces import Forces
 from .thermodynamics import Thermodynamics
 
+from .staged import StagedCalculation
 from .static_energy import StaticEnergy
 from .relaxation import Relaxation, IonicStep
 from .dynamics import Dynamics, DynamicsIonicStep

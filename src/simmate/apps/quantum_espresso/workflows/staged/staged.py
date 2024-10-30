@@ -3,7 +3,7 @@
 from simmate.engine.staged_workflow import StagedWorkflow
 
 
-class Relaxation__QuantumEspresso__Staged(StagedWorkflow):
+class StagedCalculation__QuantumEspresso__Staged(StagedWorkflow):
     """
     Runs a series of increasing-quality relaxations and then finishes with a single
     static energy calculation.

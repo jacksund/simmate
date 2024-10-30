@@ -6,6 +6,6 @@ from .relaxation import (
     Relaxation__Vasp__Quality02,
     Relaxation__Vasp__Quality03,
     Relaxation__Vasp__Quality04,
-    Relaxation__Vasp__Staged,
 )
 from .static_energy import StaticEnergy__Vasp__Quality04
+from .staged import StagedCalculation__Vasp__Staged

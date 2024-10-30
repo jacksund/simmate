@@ -123,7 +123,7 @@ class FixedCompositionSearch(Calculation):
         # calculated.
         count_exact = self.individuals_datatable.objects.filter(
             formula_full=self.composition,
-            workflow_name=self.subworkflow_name,
+            workflow_name=self.deep_subworkflow_name,
             **{f"{self.fitness_field}__isnull": False}
         ).count()
         if count_exact < self.min_structures_exact:
@@ -426,6 +426,23 @@ class FixedCompositionSearch(Calculation):
         # ready)
 
         return workflow
+    
+    @property
+    def deep_subworkflow(self):
+        # If our subworkflow is staged, the results we want (e.g. energy) are
+        # stored in the database of the last run calculation. We check that
+        # the workflow is staged here, and if it is we return the last workflow.
+        # If it isn't we simply return the workflow
+        if self.subworkflow.name_type == 'staged-calculation':
+            return self.subworkflow.last_subworkflow
+        else:
+            return self.subworkflow
+    
+    @property
+    def deep_subworkflow_name(self):
+        # We filter results from the databse table of our deep subworkflow. To
+        # account for this we need the name of this workflow
+        return self.deep_subworkflow.name_full
 
     @property
     def individuals_datatable(self):
@@ -433,7 +450,7 @@ class FixedCompositionSearch(Calculation):
         # to the relevent individuals for this search. For that, use the
         # "individuals" property
         # we assume the table is registered in the local_calcs app
-        return self.subworkflow.database_table
+        return self.deep_subworkflow.database_table
 
     @property
     def individuals(self):
@@ -449,7 +466,7 @@ class FixedCompositionSearch(Calculation):
             # often what a user wants anyways during searches, so it works out.
             formula_reduced=composition.reduced_formula,
             nsites__lte=composition.num_atoms,
-            workflow_name=self.subworkflow_name,
+            workflow_name=self.deep_subworkflow_name,
         )
 
     @property
@@ -460,10 +477,23 @@ class FixedCompositionSearch(Calculation):
         # Ideally, I could make a relation to the prefect flow run table but this
         # would require a large amount of work to implement.
 
-    @property
-    def individuals_incomplete(self):
-        # If there is a result for the fitness field, we can treat the calculation as completed
-        return self.individuals.filter(**{f"{self.fitness_field}__isnull": True})
+    # @property
+    # def individuals_incomplete(self):
+    #     # Everywhere else we search the database from the last step of the
+    #     # subworkflow rather than the subworkflow itself. However, this would
+    #     # miss individuals that are still running earlier steps of the subworkflow.
+    #     # To account for this we instead filter the subworkflows table
+    #     # BUG: As a result of this searching the subworkflow and not "deep" subworkflow
+    #     # the returned individuals are from a different table than individuals
+    #     # complete. This might be confusing.
+    #     datatable = self.subworkflow.database_table
+    #     composition = Composition(self.composition)
+    #     return datatable.objects.filter(
+    #         formula_reduced=composition.reduced_formula,
+    #         nsites__lte=composition.num_atoms,
+    #         workflow_name=self.deep_subworkflow_name,
+    #         finished_at__isnull=True
+    #         )
 
     @property
     def best_individual(self):
@@ -593,8 +623,7 @@ class FixedCompositionSearch(Calculation):
             # workflow for now.
             # !!! Since I've transfered these to a StagedWorkflow base class, I
             # think they should just work so long as the subworkflow inherits it
-            # BUG: These only write out energy right now. Need to adjsut to
-            # fitness_value
+
             self.write_staged_series_convergence_plot(directory=directory)
             self.write_staged_series_histogram_plot(directory=directory)
             self.write_staged_series_times_plot(directory=directory)
