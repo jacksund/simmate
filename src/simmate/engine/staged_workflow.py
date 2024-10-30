@@ -18,6 +18,9 @@ class StagedWorkflow(Workflow):
     """
     An abstract class for running a series of DFT calculations. This workflow
     is meant to help build staged relaxations for evolutionary searches.
+    
+    When inheriting this mixin, the database table should be the same as the
+    final subworkflow.
     """
 
     description_doc_short = "runs a series of dft calculations"
@@ -52,19 +55,30 @@ class StagedWorkflow(Workflow):
             result = state.result()
 
         # when updating the original entry, we want to use the data from the
-        # final result.
-        final_result = {
-            "structure": result.to_toolkit(),
-            "energy": result.energy,
-            "band_gap": result.band_gap,
-            "is_gap_direct": result.is_gap_direct,
-            "energy_fermi": result.energy_fermi,
-            "conduction_band_minimum": result.conduction_band_minimum,
-            "valence_band_maximum": result.valence_band_maximum,
-            "site_forces": result.site_forces,
-            "lattice_stress": result.lattice_stress,
-        }
+        # final result. The model used in the last step can be anything, so we
+        # want to transfer all results that are not unique to the subworkflow
+        final_result = {}
+        for key, value in result.to_api_dict().items():
+            if key not in [
+            'id',
+             'created_at',
+             'updated_at',
+             'source',
+             'started_at',
+             'finished_at',
+             'total_time',
+             'queue_time',
+             'workflow_name',
+             'workflow_version',
+             'computer_system',
+             'directory',
+             'run_id',
+             'corrections'
+             ]:
+                final_result[key] = value
+        
         return final_result
+    
 
     @classmethod
     @property
@@ -92,6 +106,12 @@ class StagedWorkflow(Workflow):
                     """
                 )
         return workflow_list
+    
+    @classmethod
+    @property
+    @cache
+    def last_subworkflow(cls):
+        return cls.workflows[-1]
 
     @classmethod
     def get_series(cls, value: str, **filter_kwargs):
