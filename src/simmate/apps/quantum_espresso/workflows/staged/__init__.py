@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .staged import StagedCalculation__QuantumEspresso__Staged
+from .low_quality import StagedCalculation__QuantumEspresso__LowQuality
 from .tutorial import (
     StagedCalculation__QuantumEspresso__EvoTutorial,
     Relaxation__QuantumEspresso__Lda00,

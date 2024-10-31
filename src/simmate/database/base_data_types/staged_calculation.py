@@ -32,6 +32,13 @@ class StagedCalculation(Structure, Calculation):
     """
     A list of the files that were copied between calculations
     """
+    
+    failed_subworkflow = table_column.CharField(max_length=50, blank=True, null=True)
+    """
+    If the calculation fails sowhere along the way, this field will contain the
+    name of the subworkflow.
+    """
+    
     # TODO:
     # should this be a list of all modifications? It could maybe be used to
     # carry fixes (such as smearing) accross different calcs.

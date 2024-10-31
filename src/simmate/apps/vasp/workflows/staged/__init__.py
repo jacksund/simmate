@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from .staged import StagedCalculation__Vasp__Staged
+from .low_quality import StagedCalculation__Vasp__LowQuality

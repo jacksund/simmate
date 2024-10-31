@@ -15,6 +15,6 @@ from .staged import (
     Relaxation__QuantumEspresso__Lda00,
     Relaxation__QuantumEspresso__Lda01,
     StagedCalculation__QuantumEspresso__EvoTutorial,
-    StagedCalculation__QuantumEspresso__Staged,
+    StagedCalculation__QuantumEspresso__LowQuality,
     StaticEnergy__QuantumEspresso__Lda02,
     )

@@ -31,72 +31,109 @@ class StagedWorkflow(Workflow):
     subworkflow_names = [] # The names of the workflows
     
     files_to_copy = [] # The files that should be copied from one run to the next
+    
+    one_folder = False # In some cases we may want to use the same folder
+                       # (e.g. badelf workflows) so that we don't have to copy
+                       # large files. NOTE this should be used carefully
 
     @classmethod
     def run_config(
         cls,
         structure: Structure,
-        command: str = None,
+        # command: str = None, # !!! Ideally, the workflows can be anything using a structure
+                               # The command would instead be passed in kwargs
         source: dict = None,
         directory: Path = None,
-        # TODO: subworkflow_kwargs # Allow specific kwargs for each subworkflow
+        subworkflow_kwargs: dict = {},
         **kwargs,
+        
     ):
         # TODO: The current implementation will not fill out the StagedCalculation
-        # table unless all calculations finish successfully. Instead it should
-        # dynamically update it
+        # table unless all calculations finish successfully. It would be ideal to
+        # dynamically update it. (is that possible?)
         
         # This workflow must return several things for the StagedCalculation
         # table. This includes the workflow name and workflow id
-        subworkflow_names = []
         subworkflow_ids = []
-        # Our first relaxation is directly from our inputs.
-        current_task = cls.subworkflows[0]
-        state = current_task.run(
-            structure=structure,
-            command=command,
-            directory=directory / current_task.name_full,
-        )
-        result = state.result()
-        # append info to workflow lists
-        subworkflow_names.append(result.workflow_name)
-        subworkflow_ids.append(result.id)
+        failed_subworkflow = None     
+        error = None
+        
+        # Our first calculation is directly from our inputs.
+        try:
+            current_task = cls.subworkflows[0]
+            state = current_task.run(
+                structure=structure,
+                # command=command, # For default apps, the command has a default.
+                directory=directory / current_task.name_full,
+                **subworkflow_kwargs,
+            )
+            result = state.result()
+            # append info to workflow lists
+            subworkflow_ids.append(result.id)
+        except Exception as e:
+            print(str(e))
+            error = str(e)
+            failed_subworkflow = cls.subworkflow_strings[0]
         
         # In some rare cases, we may want to only run one subworkflow here (such
         # as when we are testing the evolutionary search) so if there is only
         # one workflow we skip to the end
-        if len(cls.subworkflows) != 1:
+        if len(cls.subworkflows) != 1 and error is None:
             # The remaining tasks continue and use the past results as an input
+            # If the one_folder is true, we want to run in the same directory
+            
             for i, current_task in enumerate(cls.subworkflows[1:]):
-                # Now we copy the requested files from one to the next
-                previous_directory = result.directory
-                new_directory = directory / current_task.name_full
-                os.makedirs(new_directory, exist_ok=True)
-                for file in cls.files_to_copy:
-                    shutil.copyfile(
-                        previous_directory / file, new_directory / file
+                if not cls.one_folder:
+                    # Now we copy the requested files from one to the next
+                    previous_directory = result.directory
+                    new_directory = directory / current_task.name_full
+                    os.makedirs(new_directory, exist_ok=True)
+                    for file in cls.files_to_copy:
+                        shutil.copyfile(
+                            previous_directory / file, new_directory / file
+                        )
+                elif cls.one_folder:
+                    new_directory=result.directory
+                try:
+                    state = current_task.run(
+                        structure=result,  # this is the result of the last run
+                        # command=command,
+                        directory=new_directory,
+                        **subworkflow_kwargs
                     )
-                
-                state = current_task.run(
-                    structure=result,  # this is the result of the last run
-                    command=command,
-                    directory=new_directory,
-                )
-                result = state.result()
-                # append info to workflow lists
-                subworkflow_names.append(result.workflow_name)
-                subworkflow_ids.append(result.id)
+                    result = state.result()
+                    # append info to workflow lists
+                    subworkflow_ids.append(result.id)
+                except:
+                    failed_subworkflow = cls.subworkflow_strings[i]
+                    break
         
         # save final result
         final_result = dict(
             structure=structure,
-            subworkflow_names=subworkflow_names,
+            subworkflow_names=cls.subworkflow_strings,
             subworkflow_ids=subworkflow_ids,
             copied_files = cls.files_to_copy,
+            failed_subworkflow = failed_subworkflow,
             )
         return final_result
 
-    
+    @classmethod
+    @property
+    @cache
+    def subworkflow_strings(cls):
+        # The input "subworkflow_names" can be either workflows or their string
+        # names. This is a convenience property to standardize them to strings
+        workflow_strings = []
+        for name in cls.subworkflow_names:
+            if inspect.isclass(name):
+                # This object should be a workflow
+                workflow_strings.append(name.name_full)
+            else:
+                # This object should already be a string
+                workflow_strings.append(name)
+        return workflow_strings
+        
 
     @classmethod
     @property
@@ -104,25 +141,8 @@ class StagedWorkflow(Workflow):
     def subworkflows(cls):
         # import locally to avoid circular import
         from simmate.workflows.utilities import get_workflow
-        # Workflow names can be either the string name of the workflow or a workflow
-        # object
-        workflow_list = []
-        for name in cls.subworkflow_names:
-            if inspect.isclass(name):
-                # This object should already be a workflow
-                workflow_list.append(name)
-            else:
-                workflow_list.append(get_workflow(name))
-        # make sure all workflows use the relaxation or static-energy table
-        for workflow in workflow_list:
-            if workflow.name_type not in ["static-energy", "relaxation"]:
-                raise Exception(
-                    """
-                    Workflows inheriting from StagedWorkflow must use either the
-                    StaticEnergy or Relaxation table.
-                    """
-                )
-        return workflow_list
+        return [get_workflow(name) for name in cls.subworkflow_strings]
+    
     
     @classmethod
     @property

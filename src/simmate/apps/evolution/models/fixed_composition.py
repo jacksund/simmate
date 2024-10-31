@@ -476,7 +476,8 @@ class FixedCompositionSearch(Calculation):
         # OPTIMIZE: would it be better to check energy_per_atom or structure_final?
         # Ideally, I could make a relation to the prefect flow run table but this
         # would require a large amount of work to implement.
-
+    
+    # !!! This is not used anywhere
     # @property
     # def individuals_incomplete(self):
     #     # Everywhere else we search the database from the last step of the

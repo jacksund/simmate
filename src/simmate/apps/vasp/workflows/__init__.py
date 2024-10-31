@@ -8,4 +8,4 @@ from .relaxation import (
     Relaxation__Vasp__Quality04,
 )
 from .static_energy import StaticEnergy__Vasp__Quality04
-from .staged import StagedCalculation__Vasp__Staged
+from .staged import StagedCalculation__Vasp__LowQuality
