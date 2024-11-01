@@ -10,6 +10,7 @@ import simmate.toolkit.transformations.from_ase as ase_transform_module
 from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.engine.execution import WorkItem
 from simmate.toolkit import Composition
+from django.utils import timezone
 
 
 class SteadystateSource(DatabaseTable):
@@ -20,12 +21,27 @@ class SteadystateSource(DatabaseTable):
     kwargs = table_column.JSONField(default=dict)
 
     nsteadystate_target = table_column.FloatField(null=True, blank=True)
+    
+    # This list is the times when the steady state target number changed. This
+    # is time since the start of the run
+    target_time_history = table_column.JSONField(default=list)
+    
+    # This list is the nsteadystate_target that existed after each change
+    target_history = table_column.JSONField(default=list)
 
     is_creator = table_column.BooleanField()
     is_transformation = table_column.BooleanField()
 
-    # This list limits to ids that are submitted or running
+    # This list is all workitem ids ever submitted by this source
     workitem_ids = table_column.JSONField(default=list)
+    
+    # This list is the index in the workitem ids at which the nsteadystate_target
+    # went through a change. This is useful so that we can observe if further
+    # changes need to be made
+    workitem_ids_history = table_column.JSONField(default=list)
+    
+    # This list limits to ids that are submitted or running
+    active_workitem_ids = table_column.JSONField(default=list)
 
     search = table_column.ForeignKey(
         "FixedCompositionSearch",
@@ -79,18 +95,75 @@ class SteadystateSource(DatabaseTable):
         still_running_ids = self._check_still_running_ids(self.workitem_ids)
 
         # we now have our new list of IDs! Let's update it to the database
-        self.workitem_ids = still_running_ids
+        self.active_workitem_ids = still_running_ids
         self.save()
 
         return still_running_ids
+    
+    def update_flow_target(self, value):
+        """
+        Updates nsteadystate_target to new value and records the change
+        """
+        # check that target history lists exists and if not generate them
+        if self.target_history is None:
+            self._init_history
+        # update target history with previous value
+        self.target_history.append(self.nsteadystate_target)
+        
+        # update to new value
+        self.nsteadystate_target = value       
+        
+        # update target time history
+        current_time = timezone.now()
+        start_time = self.created_at()
+        time_diff = current_time - start_time
+        self.target_time_history.append(time_diff.total_seconds())
+        
+        # update workitem id history
+        self.workitem_ids_history.append(len(self.workitem_ids))
+        self.save()
 
     @property
     def nflow_runs(self):
+        # This gives us all currently running jobs
         # update our ids before we report how many there are.
         runs = self.update_flow_workitem_ids()
         # now the currently running ones is just the length of ids!
         return len(runs)
-
+    
+    @property
+    def recent_finished_runs(self):
+        # This returns the workitem ids of finished runs submitted since the last time
+        # update_flow_target was run
+        
+        # check that target history lists exist and if not create them
+        if self.target_history is None:
+            self._init_history
+        # First we get the list of workitem ids that have been submitted since
+        # the last update
+        workitem_ids = self.workitem_ids[self.workitem_ids_history[-1]:]
+        # Now we filter for those that have completed
+        finished_ids = WorkItem.objects.filter(
+            id__in=workitem_ids,
+            status__in=["F"],
+        ).values_list("id", flat=True)
+        return finished_ids
+    
+    @property
+    def finished_runs(self):
+        # This returns the workitem ids of all finished runs
+        return WorkItem.objects.filter(
+            id__in=self.workitem_ids,
+            status__in=["F"],
+        ).values_list("id", flat=True)
+    
+    def _init_history(self, value):
+        # create history items
+        self.target_history = [self.nsteadystate_target]
+        self.target_time_history = [self.created_at]
+        self.workitem_ids_history = [0]
+        self.save()
+    
     @staticmethod
     def _check_still_running_ids(workitem_ids):
         """
