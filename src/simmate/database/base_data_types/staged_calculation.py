@@ -2,6 +2,7 @@
 
 from simmate.database.base_data_types import Calculation, Structure , table_column
 from pathlib import Path
+import logging
 
 
 class StagedCalculation(Structure, Calculation):
@@ -69,6 +70,9 @@ class StagedCalculation(Structure, Calculation):
     @property
     def subworkflow_results(self):
         results = []
+        if len(self.subworkflow_ids) != len(self.database_tables):
+            logging.warning("This staged workflow did not complete. No results will be returned.")
+            return results
         for sub_id, table in zip(self.subworkflow_ids, self.database_tables):
             if table.objects.filter(id=sub_id).exists():
                 results.append(table.objects.get(id=sub_id))
