@@ -286,19 +286,26 @@ class FixedCompositionSearch(Calculation):
             steadystate_source_proportions = [
                 p / sum_proportions for p in steadystate_source_proportions
             ]
-        # While these are percent values, we want specific counts. We convert to
-        # those here.
-        steadystate_source_counts = [
-            int(p * self.nsteadystate) for p in steadystate_source_proportions
-        ]
+        
+        # BUG-FIX: Using specific counts could lead to biases towards a given
+        # steady-state source if it's generated structures take less time to
+        # relax. We revert to proportions.
+        # # While these are percent values, we want specific counts. We convert to
+        # # those here.
+        # steadystate_source_counts = [
+        #     int(p * self.nsteadystate) for p in steadystate_source_proportions
+        # ]
 
         # Throughout our search, we want to keep track of which workflows we've
         # submitted for each source as well as how long we were holding a
         # steady-state of submissions. We therefore keep a log of Sources in
         # our database.
         steadystate_sources_db = []
-        for source_name, ntarget_jobs in zip(
-            steadystate_sources_cleaned, steadystate_source_counts
+        # for source_name, ntarget_jobs in zip(
+        #     steadystate_sources_cleaned, steadystate_source_counts
+        # ):
+        for source_name, target_proportion in zip(
+            steadystate_sources_cleaned, steadystate_source_proportions
         ):
             # before saving, we want to record whether we have a creator or transformation
             # !!! Is there a way to dynamically determine this from a string?
@@ -328,7 +335,7 @@ class FixedCompositionSearch(Calculation):
                 name=source_name,
                 is_creator=is_creator,
                 is_transformation=is_transformation,
-                nsteadystate_target=ntarget_jobs,
+                nsteadystate_target=target_proportion,
                 search=self,
             )
             source_db.save()
@@ -357,23 +364,91 @@ class FixedCompositionSearch(Calculation):
         else:
             ready_for_transformations = True
 
-        # we iterate through each steady-state source and check to see how many
-        # jobs are still running for it. If it's less than the target steady-state,
-        # then we need to submit more!
+        # BUG-FIX: If one steady-state source results in structures that relax
+        # much faster than others, and we submit up to a set integer,
+        # we will get more than our desired ratio of this steady-state source. 
+        # Instead, we first check how many structures
+        # below our target we are. We then check how many jobs from each source
+        # is pending, running, or finished (not failed). Then, for each source we
+        # check how far we are from the desired ratio and submit jobs to get to
+        # the closest match we can.
         steadystate_sources_db = self.steadystate_sources.all()
+        # Get our target number of runs
+        target_nsteadystate = self.nsteadystate
+        # prepare objects to store the total number of runs, list of current
+        # desired proportions, and list of submitted/finished runs for each source
+        active_nsteadystate = 0
+        nsteadystate_proportions = []
+        nsteadystate_totals = []
+        sources_to_add = []
         for source_db in steadystate_sources_db:
-            # skip if we have a transformation but aren't ready for it yet
             if source_db.is_transformation and not ready_for_transformations:
+                continue # We continue so that we don't consider this source
+                       
+            # In this loop we want to get the total number of active runs to
+            # compare with our target. We also want to get the number of runs
+            # that have been submitted for each source (pending, running or finished)
+            
+            not_failed = source_db.nflow_not_failed_runs
+            still_active = source_db.nflow_active_runs
+            active_nsteadystate += still_active
+            # Check that the active number of runs is not greater then the max
+            # allowed for this source. This largely helps prevent a large number
+            # of non-transformations at the beginning of a search
+            active_max = round(source_db.nsteadystate_target*target_nsteadystate)
+            if still_active >= active_max:
                 continue
-
-            # This loop says for the number of steady state runs we are short,
-            # create that many new individuals! max(x,0) ensure we don't get a
-            # negative value. A value of 0 means we are at steady-state and can
-            # just skip this loop.
-            nflows_to_submit = max(
-                int(source_db.nsteadystate_target - source_db.nflow_runs), 0
-            )
-
+            else:
+                # We want to set the max number of sources we can add
+                # BUG: This results in the queue having to wait for this source
+                # to finish its current runs before adding more. This introduces
+                # a similar problem as before. Since this part is just meant to
+                # fix the start of the run loading a ton of creators, we should
+                # fix this.
+                max_to_add = active_max - still_active
+            nsteadystate_proportions.append(source_db.nsteadystate_target)
+            nsteadystate_totals.append(not_failed)
+            # list corresponds to source database, number to submit, and the
+            # maximum number allowed to submit.
+            sources_to_add.append([source_db, 0, max_to_add])
+        # We need to normalize our proportions in case we are not ready for
+        # transformations. We also normalize the steadystate totals from each
+        # source to compare to our ideal proportions.
+        nsteadystate_proportions = numpy.array(nsteadystate_proportions)
+        nsteadystate_proportions /= nsteadystate_proportions.sum()
+        nsteadystate_totals = numpy.array(nsteadystate_totals)
+        if nsteadystate_totals.sum() != 0:
+            nsteadystate_current_proportions = nsteadystate_totals/nsteadystate_totals.sum()
+        else:
+            nsteadystate_current_proportions = nsteadystate_totals
+        
+        # Now, for each desired new submissions, we want to make a submission
+        # such that it adjusts our current proportions as close to the ideal as
+        # possible. To do this, we see which proportion is the farthest below
+        # ideal and add one submission to it.
+        # NOTE: this is easy, but won't always be the addition that improves the
+        # proportion the most. Additions to smaller proportions will have a
+        # larger effect then greater. However, it should converge over time
+        if len(sources_to_add) > 0:
+            for i in range(target_nsteadystate-active_nsteadystate):
+                # get difference from ideal
+                proportion_diff = nsteadystate_current_proportions - nsteadystate_proportions
+                # get the index of the minimum value which represents the source
+                # farthest from ideal
+                source_idx = numpy.where(proportion_diff==proportion_diff.min())[0][0]
+                # adjust our would be steadystate totals and get new proportions
+                nsteadystate_totals[source_idx] += 1
+                nsteadystate_current_proportions = nsteadystate_totals/nsteadystate_totals.sum()
+                # add one for this source in our sources_to_add dict
+                sources_to_add[source_idx][1] += 1
+            
+            
+        # We now have the desired number of individuals to add for each source
+        # and can add them.
+        for source_db, nflows_to_submit, max_to_add in sources_to_add:
+            if nflows_to_submit > max_to_add:
+                # we only want to add up to the max
+                nflows_to_submit = max_to_add
             if nflows_to_submit > 0:
                 logging.info(
                     f"Submitting {nflows_to_submit} new individuals for "
@@ -406,7 +481,16 @@ class FixedCompositionSearch(Calculation):
 
             # reactivate logging
             logger.disabled = False
-
+            
+    def _adjust_steadystate_sources_by_time(self):
+        """
+        This function adjusts the steadystate sources based on how fast/slow
+        their related jobs tend to finish. If all sources take about the same
+        amount of time per structure, the ratio of sources will match the requested.
+        However, if one is significantly faster, then over time it will submit
+        more structures then the requested ratio. This is because when checking
+        to submit additional structures, we only 
+        """
     # -------------------------------------------------------------------------
     # Core methods that help grab key information about the search
     # -------------------------------------------------------------------------
@@ -794,11 +878,11 @@ class FixedCompositionSearch(Calculation):
         statuses = []
         created_at = []
         for source in structure_sources:
-            workitem_ids += source.workitem_ids
+            workitem_ids += source.active_workitem_ids
             # as an extra, keep a list of the source names
-            sources += [source.name] * len(source.workitem_ids)
+            sources += [source.name] * len(source.active_workitem_ids)
 
-            for workitem_id in source.workitem_ids:
+            for workitem_id in source.active_workitem_ids:
                 work_item = WorkItem.objects.get(id=workitem_id)
                 statuses.append(work_item.get_status_display())
                 created_at.append(work_item.created_at.strftime("%Y-%m-%d %H:%M:%S"))

@@ -40,7 +40,11 @@ class SteadystateSource(DatabaseTable):
     # changes need to be made
     workitem_ids_history = table_column.JSONField(default=list)
     
-    # This list limits to ids that are submitted or running
+    # # This list is limits to ids that were submitted after the most recent update
+    # # and have not failed. Includes submitted, running, and completed jobs.
+    # recent_workitem_ids = table_column.JSONField(default=list)
+    
+    # This list limits to ids that are submitted or running, but not complete
     active_workitem_ids = table_column.JSONField(default=list)
 
     search = table_column.ForeignKey(
@@ -55,12 +59,15 @@ class SteadystateSource(DatabaseTable):
         or pending state from the list of run ids that are associate with this
         structure source.
         """
+        # check that target history lists exists and if not generate them
+        if len(self.target_history) == 0:
+            self._init_history()
 
         # Before updating our run ids, we first want to see if any of them
         # failed (or "E" for ERRORED) -- so that we can warn the use to
         # check their logs.
         failed_ids = WorkItem.objects.filter(
-            id__in=self.workitem_ids,
+            id__in=self.active_workitem_ids,
             status__in=["E", "C"],
         ).values_list("id", flat=True)
 
@@ -92,21 +99,31 @@ class SteadystateSource(DatabaseTable):
 
         # check which ids are still running. Note, this is a separate
         # method in case it's an async call to Prefect client
-        still_running_ids = self._check_still_running_ids(self.workitem_ids)
+        workitem_ids = self.workitem_ids
+        recent_workitem_ids = workitem_ids[self.workitem_ids_history[-1]:]
+        still_running_ids = self._check_still_running_ids(recent_workitem_ids)
+        not_failed_ids = self._check_recent_ids(recent_workitem_ids)
+        # BUG: The first of the above searches will not return all running jobs,
+        # just those submitted since the last steadystate target update. This
+        # allows us to more easily keep track of what has been generated since we
+        # updated so that we can get the correct ratio of submissions from each
+        # flow, but it is confusing as it doesn't correspond to the true list
+        # of still running jobs.
 
         # we now have our new list of IDs! Let's update it to the database
         self.active_workitem_ids = still_running_ids
+        # self.recent_workitem_ids = not_failed_ids
         self.save()
 
-        return still_running_ids
+        return [not_failed_ids, still_running_ids]
     
     def update_flow_target(self, value):
         """
         Updates nsteadystate_target to new value and records the change
         """
         # check that target history lists exists and if not generate them
-        if self.target_history is None:
-            self._init_history
+        if len(self.target_history) == 0:
+            self._init_history()
         # update target history with previous value
         self.target_history.append(self.nsteadystate_target)
         
@@ -124,43 +141,25 @@ class SteadystateSource(DatabaseTable):
         self.save()
 
     @property
-    def nflow_runs(self):
-        # This gives us all currently running jobs
+    def nflow_active_runs(self):
+        # This gives us all currently running jobs submitted since the last
+        # steadystate target update
         # update our ids before we report how many there are.
-        runs = self.update_flow_workitem_ids()
+        runs = self.update_flow_workitem_ids()[1]
         # now the currently running ones is just the length of ids!
         return len(runs)
     
     @property
-    def recent_finished_runs(self):
-        # This returns the workitem ids of finished runs submitted since the last time
-        # update_flow_target was run
-        
-        # check that target history lists exist and if not create them
-        if self.target_history is None:
-            self._init_history
-        # First we get the list of workitem ids that have been submitted since
-        # the last update
-        workitem_ids = self.workitem_ids[self.workitem_ids_history[-1]:]
-        # Now we filter for those that have completed
-        finished_ids = WorkItem.objects.filter(
-            id__in=workitem_ids,
-            status__in=["F"],
-        ).values_list("id", flat=True)
-        return finished_ids
+    def nflow_not_failed_runs(self):
+        #This gives all jobs, running or finished, since the last steadystate
+        # target update. Excludes jobs that failed
+        runs = self.update_flow_workitem_ids()[0]
+        return len(runs)
     
-    @property
-    def finished_runs(self):
-        # This returns the workitem ids of all finished runs
-        return WorkItem.objects.filter(
-            id__in=self.workitem_ids,
-            status__in=["F"],
-        ).values_list("id", flat=True)
-    
-    def _init_history(self, value):
+    def _init_history(self):
         # create history items
         self.target_history = [self.nsteadystate_target]
-        self.target_time_history = [self.created_at]
+        self.target_time_history = [0]
         self.workitem_ids_history = [0]
         self.save()
     
@@ -183,7 +182,23 @@ class SteadystateSource(DatabaseTable):
             status__in=["P", "R"],
         ).values_list("id", flat=True)
         return list(still_running_ids)
-
+    
+    @staticmethod
+    def _check_recent_ids(workitem_ids):
+        """
+        Queries Prefect to see check on a list of flow run ids and determines
+        which ones have not failed.
+        From the list of ids given, it will return a list of the ones that
+        are pending, running, or finished, but have not failed.
+        This is normally used within `update_flow_workitem_ids` and shouldn't
+        be called directly.
+        """
+        not_failed_ids = WorkItem.objects.filter(
+            id__in=workitem_ids,
+            status__in=["P", "R", "F"],
+        ).values_list("id", flat=True)
+        return list(not_failed_ids)
+        
     def to_toolkit(self):
         if self.is_transformation:
             return self._init_transformation()
