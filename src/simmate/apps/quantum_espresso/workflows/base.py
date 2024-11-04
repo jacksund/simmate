@@ -9,13 +9,17 @@ from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
     SSSP_PBE_PRECISION_MAPPINGS,
 )
 from simmate.configuration import settings
-from simmate.engine import S3Workflow
+from simmate.engine import S3Workflow, StructureWorkflow
 from simmate.toolkit import Structure
 from simmate.utilities import get_docker_command
 
 
 # TODO: add StructureInputWorkflow mixin which can be made from VaspWorkflow class
-class PwscfWorkflow(S3Workflow):
+class PwscfWorkflow(S3Workflow, StructureWorkflow):
+    _parameter_methods = (
+        S3Workflow._parameter_methods + StructureWorkflow._parameter_methods
+    )
+
     required_files = ["pwscf.in"]
 
     command: str = settings.quantum_espresso.default_command
@@ -111,10 +115,10 @@ class PwscfWorkflow(S3Workflow):
     @classmethod
     def setup(cls, directory: Path, structure: Structure, **kwargs):
         # run cleaning and standardizing on structure (based on class attributes)
-        # TODO: structure_cleaned = cls._get_clean_structure(structure, **kwargs)
+        structure_cleaned = cls._get_clean_structure(structure, **kwargs)
 
         input_config = PwscfInput(
-            structure=structure,
+            structure=structure_cleaned,
             kpoints=Kpoints.from_dynamic(
                 k_points=cls.k_points,
                 structure=structure,
@@ -142,9 +146,12 @@ class PwscfWorkflow(S3Workflow):
             final_command = get_docker_command(
                 image=settings.quantum_espresso.docker.image,
                 inner_command=input_command,
+                # BUG FIX If the directory has a space (e.g. OneDrive - University...)
+                # docker will throw an error. wrapping with directory with
+                # "" solves the issue (but wrapping with '' doesn't)
                 volumes=[
-                    f"{str(directory)}:/qe_calc",
-                    f"{str(settings.quantum_espresso.psuedo_dir)}:/potentials",
+                    f'"{str(directory)}":/qe_calc',
+                    f'"{str(settings.quantum_espresso.psuedo_dir)}":/potentials',
                 ],
             )
             return final_command

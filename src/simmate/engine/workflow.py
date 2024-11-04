@@ -85,7 +85,7 @@ class Workflow:
     `**kwargs` are passed and let's us gather the inputs in one place.
     """
 
-    exlcude_from_archives: list[str] = []
+    exclude_from_archives: list[str] = []
     """
     List of filenames that should be deleted when compressing the output files
     to a zip file (i.e. when compress_output=True). Any file name is searched
@@ -269,7 +269,7 @@ class Workflow:
             logging.info("Compressing result to a ZIP file.")
             make_archive(
                 directory=kwargs_cleaned["directory"],
-                files_to_exclude=cls.exlcude_from_archives,
+                files_to_exclude=cls.exclude_from_archives,
             )
 
         # If we made it this far, we successfully completed the workflow run
