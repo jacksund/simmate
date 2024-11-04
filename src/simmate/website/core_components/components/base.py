@@ -5,6 +5,7 @@ from django_unicorn.components import UnicornView
 
 from simmate.database.base_data_types import DatabaseTable
 from simmate.toolkit import Molecule, Structure
+from simmate.website.utilities import parse_request_get
 
 
 class DynamicFormComponent(UnicornView):
@@ -45,7 +46,13 @@ class DynamicFormComponent(UnicornView):
         else:
             raise Exception(f"Unknown view type for dynamic form: {view_name}")
 
+        self.mount_get_kwargs()
         self.mount_extra()
+
+    def mount_get_kwargs(self):
+        get_kwargs = parse_request_get(self.request)
+        for field, value in get_kwargs.items():
+            setattr(self, field, value)
 
     def mount_extra(self):
         return  # default is there's nothing extra to do
@@ -118,7 +125,6 @@ class DynamicFormComponent(UnicornView):
                 elif form_attr == "structure":
                     config["structure_original"] = current_val
                     config["structure"] = Structure.from_dynamic(current_val)
-
         return config
 
     # -------------------------------------------------------------------------

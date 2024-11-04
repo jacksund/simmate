@@ -31,6 +31,7 @@ def text_input(
     help_text: str = None,
     placeholder: str = "Type value...",
     max_length: int = None,
+    disabled: bool = False,
 ):
     """
     Display a single-line text input widget.
