@@ -16,13 +16,14 @@ class CodStructure(Structure):
     class Meta:
         app_label = "data_explorer"
 
-    archive_fields = ["is_ordered", "has_implicit_hydrogens"]
+    html_display_name = "COD"
+    html_description_short = "The Crystallography Open Database"
 
-    source = "COD"
-    source_long = "The Crystallography Open Database"
-    homepage = "https://www.crystallography.net/cod/"
+    external_website = "https://www.crystallography.net/cod/"
     source_doi = "https://doi.org/10.1107/S0021889809016690"
+
     remote_archive_link = "https://archives.simmate.org/CodStructure-2023-07-10.zip"
+    archive_fields = ["is_ordered", "has_implicit_hydrogens"]
 
     # These fields overwrite the default Structure fields due to a bug.
     chemical_system = table_column.TextField()

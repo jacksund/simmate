@@ -180,16 +180,7 @@ class DynamicFormComponent(UnicornView):
         self.save_to_db()
         self.postsave_to_db()
 
-        return redirect(
-            "data_explorer:table-entry",
-            self.table.table_name,
-            self.table_entry.id,
-        )
-        # TODO: give option to return to the table view...?
-        # return redirect(
-        #     "data_explorer:table",
-        #     self.table.table_name,
-        # )
+        return self.get_submission_redirect()
 
     def unmount_for_create(self):
         self.table_entry = self.table.from_toolkit(**self.to_db_dict())
@@ -214,6 +205,18 @@ class DynamicFormComponent(UnicornView):
 
     def postsave_to_db(self):
         return  # default is there's nothing extra to do
+
+    def get_submission_redirect(self):
+        return redirect(
+            "data_explorer:table-entry",
+            self.table.table_name,
+            self.table_entry.id,
+        )
+        # TODO: give option to return to the table view...?
+        # return redirect(
+        #     "data_explorer:table",
+        #     self.table.table_name,
+        # )
 
     # BUG: race condition if user double-clicks button, triggering 2 calls to
     # the 'submit_form' method, which can create multiple instances of the

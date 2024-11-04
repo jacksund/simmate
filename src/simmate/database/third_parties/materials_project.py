@@ -16,6 +16,13 @@ class MatprojStructure(Structure, Thermodynamics):
     class Meta:
         app_label = "data_explorer"
 
+    html_display_name = "Materials Project"
+    html_description_short = "The Materials Project at Berkeley National Labs"
+
+    external_website = "https://materialsproject.org/"
+    source_doi = "https://doi.org/10.1063/1.4812323"
+
+    remote_archive_link = "https://archives.simmate.org/MatprojStructure-2023-07-07.zip"
     archive_fields = [
         "energy_uncorrected",
         "band_gap",
@@ -24,11 +31,6 @@ class MatprojStructure(Structure, Thermodynamics):
         "total_magnetization",
         "is_theoretical",
     ]
-    source = "Materials Project"
-    source_long = "The Materials Project at Berkeley National Labs"
-    homepage = "https://materialsproject.org/"
-    source_doi = "https://doi.org/10.1063/1.4812323"
-    remote_archive_link = "https://archives.simmate.org/MatprojStructure-2023-07-07.zip"
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """

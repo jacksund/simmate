@@ -15,12 +15,14 @@ class OqmdStructure(Structure):
     class Meta:
         app_label = "data_explorer"
 
-    archive_fields = ["formation_energy"]
-    source = "OQMD"
-    source_long = "The Open Quantum Materials Database"
-    homepage = "https://oqmd.org/"
+    html_display_name = "OQMD"
+    hmtl_description_short = "The Open Quantum Materials Database"
+
+    external_website = "https://oqmd.org/"
     source_doi = "https://doi.org/10.1007/s11837-013-0755-4"
+
     remote_archive_link = "https://archives.simmate.org/OqmdStructure-2023-07-21.zip"
+    archive_fields = ["formation_energy"]
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """

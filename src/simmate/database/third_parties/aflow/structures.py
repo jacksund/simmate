@@ -16,9 +16,10 @@ class AflowStructure(Structure, Thermodynamics):
     class Meta:
         app_label = "data_explorer"
 
-    source = "AFLOW"
-    source_long = "The Automatic-FLOW for Materials Discovery"
-    homepage = "http://www.aflowlib.org/"
+    html_display_name = "AFLOW"
+    html_description_short = "The Automatic-FLOW for Materials Discovery"
+
+    external_website = "http://www.aflowlib.org/"
     source_doi = "https://doi.org/10.1016/j.commatsci.2012.02.005"
 
     id = table_column.CharField(max_length=25, primary_key=True)

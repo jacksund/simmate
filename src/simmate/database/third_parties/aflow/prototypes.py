@@ -22,6 +22,16 @@ class AflowPrototype(Structure):
     class Meta:
         app_label = "data_explorer"
 
+    html_display_name = "AFLOW Prototypes"
+    html_description_short = (
+        "Encyclopedia of Crystallographic Prototypes from the Automatic-FLOW"
+        " for Materials Discovery"
+    )
+
+    external_website = "http://www.aflowlib.org/prototype-encyclopedia/"
+    source_doi = "https://doi.org/10.1016/j.commatsci.2017.01.017"
+
+    remote_archive_link = "https://archives.simmate.org/AflowPrototype-2023-07-06.zip"
     archive_fields = [
         "mineral_name",
         "aflow_id",
@@ -29,14 +39,6 @@ class AflowPrototype(Structure):
         "strukturbericht_symbol",
         "nsites_wyckoff",
     ]
-    source = "AFLOW Prototypes"
-    source_long = (
-        "Encyclopedia of Crystallographic Prototypes from the Automatic-FLOW"
-        " for Materials Discovery"
-    )
-    homepage = "http://www.aflowlib.org/prototype-encyclopedia/"
-    source_doi = "https://doi.org/10.1016/j.commatsci.2017.01.017"
-    remote_archive_link = "https://archives.simmate.org/AflowPrototype-2023-07-06.zip"
 
     mineral_name = table_column.CharField(max_length=75, blank=True, null=True)
     """

@@ -31,7 +31,8 @@ urlpatterns = [
         name="table-search",
     ),
     path(
-        route="<table_name>/<table_entry_id>/",  # BUG: if pk == "about"
+        # BUG: if table_entry_id in ["about", "new", "search"]
+        route="<table_name>/<table_entry_id>/",
         view=views.DataExplorerView.entry_view,
         name="table-entry",
     ),
