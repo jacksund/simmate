@@ -17,13 +17,15 @@
                     <div class="col-md-4">
                         <div class="card border-primary border" style="height: 90%">
                             <div class="card-body">
-                                <h5 class="card-title text-primary">{{ dataset.source }}</h5>
-                                <p class="card-text">{{ dataset.source_long }}</p>
+                                <h5 class="card-title text-primary">{{ dataset.html_display_name }}</h5>
+                                <p class="card-text">{{ dataset.html_description_short }}</p>
                                 <a href="{% url 'data_explorer:table' dataset.table_name %}"
                                    class="btn btn-primary btn-sm">Explore</a>
-                                <a href="{{ provider.homepage }}"
-                                   target="_blank"
-                                   class="btn btn-secondary btn-sm">Source Website</a>
+                                {% if dataset.external_website %}
+                                    <a href="{{ dataset.external_website }}"
+                                       target="_blank"
+                                       class="btn btn-secondary btn-sm">Source Website</a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

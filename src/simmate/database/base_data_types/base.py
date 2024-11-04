@@ -446,6 +446,11 @@ class DatabaseTable(models.Model):
     reference.
     """
 
+    external_website: str = None
+    """
+    The homepage of the source website, if the data is loaded from a third-party
+    """
+
     remote_archive_link: str = None
     """
     The URL that is used to download the archive and then populate this table.
@@ -1852,15 +1857,23 @@ class DatabaseTable(models.Model):
 
     # experimental overrides for templates used by the Data Explorer app
 
+    html_display_name: str = None
+    html_description_short: str = None
+
     html_about_template: str = "data_explorer/table_about.html"
     html_table_template: str = "data_explorer/table.html"
     html_entry_template: str = "data_explorer/table_entry.html"
     html_entries_template: str = "data_explorer/table_entries.html"
 
+    # This take the views below and just put them within the main body
+    html_search_template: str = "core_components/unicorn_full_page.html"
+    html_entry_form_template: str = "core_components/unicorn_full_page.html"
+
     # Unicorn views (side panels in the table view of the Data Explorer app)
     html_search_view: str = None
     html_update_view: str = None
     html_add_view: str = None
+    html_form_view: str = None
     # TODO: distinguish between update/update-many and add/add-many views...?
 
     @classmethod

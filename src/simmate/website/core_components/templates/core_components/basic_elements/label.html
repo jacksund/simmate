@@ -1,0 +1,9 @@
+{% if show_label %}
+    <label class="form-label">{{ label }}</label>
+    {% if help_text %}
+        <p class="badge bg-secondary rounded-pill mb-1"
+           data-bs-toggle="tooltip"
+           data-bs-placement="top"
+           data-bs-title="{{ help_text }}">?</p>
+    {% endif %}
+{% endif %}
