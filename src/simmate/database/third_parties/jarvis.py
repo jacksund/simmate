@@ -14,6 +14,9 @@ class JarvisStructure(Structure):
     class Meta:
         app_label = "data_explorer"
 
+    # disable cols
+    source = None
+
     html_display_name = "JARVIS"
     html_description_short = (
         "Joint Automated Repository for Various Integrated Simulations"

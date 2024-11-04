@@ -15,8 +15,11 @@ class OqmdStructure(Structure):
     class Meta:
         app_label = "data_explorer"
 
+    # disable cols
+    source = None
+
     html_display_name = "OQMD"
-    hmtl_description_short = "The Open Quantum Materials Database"
+    html_description_short = "The Open Quantum Materials Database"
 
     external_website = "https://oqmd.org/"
     source_doi = "https://doi.org/10.1007/s11837-013-0755-4"

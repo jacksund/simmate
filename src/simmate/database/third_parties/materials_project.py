@@ -16,6 +16,9 @@ class MatprojStructure(Structure, Thermodynamics):
     class Meta:
         app_label = "data_explorer"
 
+    # disable cols
+    source = None
+
     html_display_name = "Materials Project"
     html_description_short = "The Materials Project at Berkeley National Labs"
 

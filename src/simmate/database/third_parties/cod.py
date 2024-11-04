@@ -16,6 +16,9 @@ class CodStructure(Structure):
     class Meta:
         app_label = "data_explorer"
 
+    # disable cols
+    source = None
+
     html_display_name = "COD"
     html_description_short = "The Crystallography Open Database"
 

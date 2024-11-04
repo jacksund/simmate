@@ -22,6 +22,9 @@ class AflowPrototype(Structure):
     class Meta:
         app_label = "data_explorer"
 
+    # disable cols
+    source = None
+
     html_display_name = "AFLOW Prototypes"
     html_description_short = (
         "Encyclopedia of Crystallographic Prototypes from the Automatic-FLOW"

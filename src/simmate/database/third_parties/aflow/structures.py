@@ -16,6 +16,9 @@ class AflowStructure(Structure, Thermodynamics):
     class Meta:
         app_label = "data_explorer"
 
+    # disable cols
+    source = None
+
     html_display_name = "AFLOW"
     html_description_short = "The Automatic-FLOW for Materials Discovery"
 
