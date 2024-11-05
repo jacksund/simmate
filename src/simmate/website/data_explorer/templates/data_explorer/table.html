@@ -20,13 +20,13 @@
             {% endblock %}
             {# Update Sidebar #}
             {% block updater %}
-                {% if table.html_update_view %}
-                    {% include "data_explorer/table_updater.html" %}
+                {% if table.html_update_many_view %}
+                    {% include "data_explorer/table_update_many.html" %}
                 {% endif %}
             {% endblock %}
             {# Add New Sidebar #}
             {% block addnew %}
-                {% if table.html_add_view %}
+                {% if table.html_form_view %}
                     {% include "data_explorer/table_add_entry.html" %}
                 {% endif %}
             {% endblock %}
