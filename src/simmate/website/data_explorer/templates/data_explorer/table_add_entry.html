@@ -10,7 +10,7 @@
         <div>
             {% load unicorn %}
             {% csrf_token %}
-            {% unicorn table.html_form_view form_mode="create" %}
+            {% unicorn table.html_form_view form_mode="create" key="createkey" %}
         </div>
     </div>
 </div>

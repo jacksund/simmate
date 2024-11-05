@@ -2,7 +2,7 @@
     {% include "core_components/basic_elements/label.html" %}
     <input unicorn:model.defer="{{ name }}"
            class="form-control"
-           id="{{ name }}{{ unicorn.component_key }}"
+           id="{{ name }}{{ context.unicorn.component_key }}"
            type="number"
            placeholder="{{ placeholder }}"
            {% if maximum %}max="{{ maximum }}"{% endif %}

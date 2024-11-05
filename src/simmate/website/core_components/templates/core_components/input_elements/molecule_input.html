@@ -7,10 +7,10 @@
             <div class="px-3 py-1">
                 {% if show_option_labels %}<label class="form-label">Option 1: Draw Molecule</label>{% endif %}
                 <div unicorn:ignore
-                     id="{{ name }}{{ unicorn.component_key }}"
+                     id="{{ name }}{{ context.unicorn.component_key }}"
                      style="width: 600px;
                             height: 400px"></div>
-                <script>add_mol_sketcher("{{ name }}{{ unicorn.component_key }}");</script>
+                <script>add_mol_sketcher("{{ name }}{{ context.unicorn.component_key }}");</script>
             </div>
         {% endif %}
         {% if allow_text_input %}
@@ -31,7 +31,7 @@
                     class="btn btn-primary"
                     {# modal_dismiss used only if this is in a popout modal #}
                     {% if modal_dismiss %}data-bs-dismiss="modal"{% endif %}
-                    onclick="get_mol_from_sketcher('{{ name }}{{ unicorn.component_key }}', '{{ context.unicorn.component_name }}', '{{ set_molecule_method }}')">
+                    onclick="get_mol_from_sketcher('{{ name }}{{ context.unicorn.component_key }}', '{% if not context.unicorn.component_key %}{{ context.unicorn.component_name }}{% else %}{{ context.unicorn.component_key }}{% endif %}', '{{ set_molecule_method }}')">
                     Load Molecule
                 </button>
             </div>

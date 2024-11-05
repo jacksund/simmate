@@ -15,7 +15,7 @@
         <div>
             {% load unicorn %}
             {% csrf_token %}
-            {% unicorn table.html_form_view form_mode="update-many" %}
+            {% unicorn table.html_form_view form_mode="update-many" key="updatemanykey" %}
         </div>
     </div>
 </div>

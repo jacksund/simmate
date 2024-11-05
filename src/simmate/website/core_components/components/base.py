@@ -17,7 +17,7 @@ class DynamicFormComponent(UnicornView):
 
     class Meta:
         javascript_exclude = (
-            "template_name",
+            # "template_name",  # included by parent class
             "table",
             "required_inputs",
             "ignore_on_update",
@@ -52,6 +52,12 @@ class DynamicFormComponent(UnicornView):
     List of columns/fields to allow when the form_mode = "update-many"
     """
 
+    n_ids_to_update_max: int = 25
+    """
+    The max number of entries that can be editted at one time when
+    form_mode = "update-many"
+    """
+
     # -------------------------------------------------------------------------
 
     # These are dynamic and part of the form, so they are included in the AJAX json
@@ -82,6 +88,17 @@ class DynamicFormComponent(UnicornView):
     
     In some cases this does not need to be set because it can be inferred from
     the parent_url
+    """
+
+    is_update_many_confirmed: bool = False
+    """
+    Whether the user accepted the warning that there is no undo button
+    """
+
+    entry_ids_to_update: list = []
+    """
+    The list of selected ids that will be updated. Only applies when the
+    form_mode = "update-many"
     """
 
     # -------------------------------------------------------------------------
@@ -279,10 +296,6 @@ class DynamicFormComponent(UnicornView):
 
     # Extra utils for form_mode="update-many"
 
-    is_update_many_confirmed: bool = False
-    n_ids_to_update_max: int = 25
-    entry_ids_to_update: list = []
-
     def check_max_update_many(self):
         if len(self.entry_ids_to_update) > self.n_ids_to_update_max:
             message = f"You are only allowed to update a maximum of '{self.n_ids_to_update_max}' at a time."
@@ -330,6 +343,9 @@ class DynamicFormComponent(UnicornView):
         if self.form_mode in ["create", "update"]:
             self.table_entry.save()
         elif self.form_mode == "update-many":
+
+            # Special cases! Comments should be appended so nothing is lost
+
             self.table.objects.filter(id__in=self.entry_ids_to_update).update(
                 **self.final_updates
             )
