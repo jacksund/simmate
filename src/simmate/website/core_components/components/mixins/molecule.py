@@ -76,3 +76,48 @@ class MoleculeInput:
     #     )
 
     # -------------------------------------------------------------------------
+
+    # Molecule searching
+
+    # molecule = None  # moleclue_query
+    # molecule_query_textinput = None
+    # molecule_query_type = "similarity_2d"
+    # # options: substructure, similarity, molecule_exact, similarity_2d
+
+    # def unset_molecule(self):
+    #     self.molecule = None
+    #     self.call(
+    #         "add_mol_sketcher",
+    #         "molecule_query",
+    #     )
+
+    # def set_molecule(self, mol_str, render: bool = True):
+    #     try:
+    #         # text input takes priority
+    #         if self.molecule_query_textinput:
+    #             mol_str = self.molecule_query_textinput
+
+    #         # This is an example mol_str given when *NOTHING* is in the chemdraw image
+    #         # '"ACS Document 1996\r\n  ChemDraw09172414502D\r\n\r\n  0  0  0  0  0  0  0  0  0  0999 V2000\r\nM  END\r\n"'
+    #         # It will cause the from_dynamic to fail
+    #         if mol_str.startswith(
+    #             '"ACS Document 1996\r\n  ChemDraw'
+    #         ) and mol_str.endswith(
+    #             '2D\r\n\r\n  0  0  0  0  0  0  0  0  0  0999 V2000\r\nM  END\r\n"'
+    #         ):
+    #             return  # there is no molecule to load
+
+    #         molecule_obj = Molecule.from_dynamic(mol_str.strip('"'))
+    #         self.molecule = molecule_obj.to_smiles()
+    #         if render:
+    #             self.call(
+    #                 "add_mol_viewer",
+    #                 "molecule_query",
+    #                 molecule_obj.to_sdf(),
+    #                 300,
+    #                 300,
+    #             )
+    #     except:
+    #         self.molecule = False
+
+    # -------------------------------------------------------------------------

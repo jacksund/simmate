@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import urllib
 
 from django.shortcuts import redirect
 from django_unicorn.components import UnicornView
@@ -22,6 +23,9 @@ class DynamicFormComponent(UnicornView):
             "required_inputs",
             "ignore_on_update",
             "update_many_inputs",
+            "n_ids_to_update_max",
+            "page_size_options",
+            "order_by_options",
         )
 
     template_name: str = None
@@ -31,16 +35,56 @@ class DynamicFormComponent(UnicornView):
     # TODO: Could there be a template that auto builds the form html? But this
     # might get messy and not be worth it.
 
+    form_mode: str = None
+    """
+    The mode the form is currently in. Options are "create", "update", 
+    "update-many", "create-many", and "search".
+    
+    In some cases this does not need to be set because it can be inferred from
+    the parent_url
+    """
+
     table: DatabaseTable = None  # class object
     """
     The database table that this form is intended to create/update rows for
     """
+
+    table_entry: DatabaseTable = None  # initialized object
+    """
+    If form_mode is "create" or "update", this is the single table entry that
+    is being created or updated. This is set dynamically by the class.
+    """
+
+    # -------------------------------------------------------------------------
+
+    # To help with page redirects after submission
+
+    redirect_mode: str = "table_entry"
+    """
+    Controls which page the user is redirected to after form submission. 
+    Options are "table_entry", "table", and "refresh"
+    """
+
+    parent_url: str = None
+    """
+    The original URL where this form is embeded. This attr is primarily for
+    the data "table" view where there are many forms, and after the form is
+    submitted, we'd want to refresh the parent url (including any GET kwargs)
+    """
+
+    # -------------------------------------------------------------------------
+
+    # for form_mode "create" and "update"
 
     required_inputs: list[str] = []
     """
     For update and create form modes, these are the list of attributes that must
     be completed, otherwise the form will not submit.
     """
+
+    # -------------------------------------------------------------------------
+
+    # for form_mode "update-many"
 
     ignore_on_update: list[str] = []
     """
@@ -58,38 +102,6 @@ class DynamicFormComponent(UnicornView):
     form_mode = "update-many"
     """
 
-    # -------------------------------------------------------------------------
-
-    # These are dynamic and part of the form, so they are included in the AJAX json
-
-    parent_url: str = None
-    """
-    The original URL where this form is embeded. This attr is primarily for
-    the data "table" view where there are many forms, and after the form is
-    submitted, we'd want to refresh the parent url (including any GET kwargs)
-    """
-
-    redirect_mode: str = "table_entry"
-    """
-    Controls which page the user is redirected to after form submission. 
-    Options are "table_entry", "table", and "refresh"
-    """
-
-    table_entry: DatabaseTable = None  # initialized object
-    """
-    If form_mode is "create" or "update", this is the single table entry that
-    is being created or updated. This is set dynamically by the class.
-    """
-
-    form_mode: str = None
-    """
-    The mode the form is currently in. Options are "create", "update", 
-    "update-many", and "create-many".
-    
-    In some cases this does not need to be set because it can be inferred from
-    the parent_url
-    """
-
     is_update_many_confirmed: bool = False
     """
     Whether the user accepted the warning that there is no undo button
@@ -100,6 +112,30 @@ class DynamicFormComponent(UnicornView):
     The list of selected ids that will be updated. Only applies when the
     form_mode = "update-many"
     """
+
+    # -------------------------------------------------------------------------
+
+    # for form_mode "search"
+
+    # assumed filters from DatabaseTable
+    id__in = None
+
+    page_size = None
+    page_size_options = (
+        (25, "25"),
+        (50, "50"),
+        (100, "100"),
+    )
+
+    order_by = None
+    reverse_order_by = False
+
+    @property
+    def order_by_options(self):
+        # reformat into tuple of (value, display)
+        return [(col, col) for col in self.table.get_column_names()]
+
+    search_inputs = []
 
     # -------------------------------------------------------------------------
 
@@ -157,6 +193,31 @@ class DynamicFormComponent(UnicornView):
         for field in self.update_many_inputs:
             setattr(self, field, None)
 
+    def mount_for_search(self):
+        raise NotImplementedError("")
+
+        # apply current GET args to this form
+        url_config = parse_request_get(self.request)
+        for key, value in url_config.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+            if key == "order_by" and value.startswith("-"):
+                self.order_by = value[1:]
+                self.reverse_order_by = True
+
+            # special case of mounting the molecule query
+            if key in [
+                "substructure",
+                "similarity",
+                "molecule_exact",
+                "molecule_list_exact",
+                "similarity_2d",
+            ]:
+                self.molecule_query_type = key
+                self.molecule_query_textinput = value
+                # self.set_molecule(value)
+
     def mount_extra(self):
         return  # default is there's nothing extra to do
 
@@ -213,6 +274,30 @@ class DynamicFormComponent(UnicornView):
             "flat_updates": flat_updates,
             "append_updates": append_updates,
         }
+
+    def unmount_for_search(self):
+        raise NotImplementedError("")
+        # has all filters except the molecule
+        config = {
+            field: getattr(self, field)
+            for field in filter_fields
+            # BUG: the select2 dropdowns return None as a string
+            if getattr(self, field, None) not in [None, "None", ""]
+        }
+        # moleculequery's key depends on its type
+        if self.molecule:
+            config[self.molecule_query_type] = self.molecule
+        # comments should be a contains search
+        if "comments" in config.keys():
+            config["comments__contains"] = config.pop("comments")
+        # reformat __in to python list
+        if "id__in" in config.keys():
+            # BUG: check to see it was input correctly?
+            config["id__in"] = [int(i) for i in config["id__in"].split(";")]
+        if "order_by" in config.keys() and self.reverse_order_by:
+            config["order_by"] = "-" + config["order_by"]
+
+        return config
 
     def unmount_extra(self):
         return  # default is there's nothing extra to do
@@ -391,6 +476,7 @@ class DynamicFormComponent(UnicornView):
         return  # default is there's nothing extra to do
 
     def get_submission_redirect(self):
+
         if self.redirect_mode == "table_entry":
             return redirect(
                 "data_explorer:table-entry",
@@ -425,5 +511,24 @@ class DynamicFormComponent(UnicornView):
     #         **self.to_db_dict(),
     #     ),
     # )
+
+    # -------------------------------------------------------------------------
+
+    def search_db(self, moleclue_query: str):
+        raise NotImplementedError("")
+
+        self.set_molecule(moleclue_query, render=False)
+
+        # grab all metadata filters and convert to url GET params
+        filters = self.get_config()
+
+        # convert all values to json serialized strings
+        filters_serialized = {k: json.dumps(v) for k, v in filters.items()}
+
+        # encode any special characters for the url
+        url_get_clause = urllib.parse.urlencode(filters_serialized)
+
+        final_url = self.parent_url + "?" + url_get_clause
+        return redirect(final_url)
 
     # -------------------------------------------------------------------------
