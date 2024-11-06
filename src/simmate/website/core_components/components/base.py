@@ -146,7 +146,7 @@ class DynamicFormComponent(UnicornView):
     def mount_for_update(self):
         # set initial data using the database and applying its values to
         # the form fields.
-        config = self.to_db_dict()
+        config = self.to_db_dict(include_empties=True)
         for field in config:
             current_val = getattr(self.table_entry, field)
             setattr(self, field, current_val)
@@ -239,10 +239,14 @@ class DynamicFormComponent(UnicornView):
 
     # Model creation and update utils
 
-    def to_db_dict(self) -> dict:
-        return self._get_default_db_dict()
+    def to_db_dict(self, **kwargs) -> dict:
+        return self._get_default_db_dict(**kwargs)
 
-    def _get_default_db_dict(self, load_toolkits: bool = True) -> dict:
+    def _get_default_db_dict(
+        self,
+        load_toolkits: bool = True,
+        include_empties: bool = False,
+    ) -> dict:
         # I don't like calling super() in overwrites for `to_db_dict`, so
         # I use this method instead.
 
@@ -258,15 +262,18 @@ class DynamicFormComponent(UnicornView):
         ]
 
         config = {}
+        empties = [None, "None", "NONE", ""]  # TODO: improve parsing
         for form_attr in matching_fields:
             current_val = getattr(self, form_attr)
-            if current_val in [None, "None", "NONE", ""]:
+
+            if not include_empties and current_val in empties:
                 continue
+
             config[form_attr] = current_val
 
             # special data types and common field names. Note, variations
             # of this should be handled by overriding the `to_db_dict`
-            if load_toolkits:
+            if load_toolkits and current_val not in empties:
                 if form_attr == "molecule":
                     config["molecule_original"] = current_val
                     config["molecule"] = Molecule.from_dynamic(current_val)
