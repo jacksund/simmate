@@ -72,7 +72,7 @@ class DynamicFormComponent(UnicornView):
     redirect_mode: str = "table_entry"
     """
     Controls which page the user is redirected to after form submission. 
-    Options are "table_entry", "table", and "parent_url"
+    Options are "table_entry", "table", and "refresh"
     """
 
     table_entry: DatabaseTable = None  # initialized object
@@ -191,12 +191,27 @@ class DynamicFormComponent(UnicornView):
 
     def unmount_for_update_many(self):
         config = self.to_db_dict()
-        self.final_updates = {
+
+        all_updates = {
             field: value
-            for value, field in config.items()
-            if not hasattr(self, field)
-            or field in self.ignore_on_update
-            or field not in self.update_many_inputs
+            for field, value in config.items()
+            if field not in self.ignore_on_update and field in self.update_many_inputs
+        }
+
+        # Special cases! Comments should be appended so nothing is lost, whereas
+        # flat updates replace the col value entirely
+        flat_updates = {}
+        append_updates = {}
+        for field, value in all_updates.items():
+            if field == "comments" or field.endswith("_comments"):
+                # TODO: allow other cols to be append type
+                append_updates[field] = value
+            else:
+                flat_updates[field] = value
+
+        self.final_updates = {
+            "flat_updates": flat_updates,
+            "append_updates": append_updates,
         }
 
     def unmount_extra(self):
@@ -245,11 +260,13 @@ class DynamicFormComponent(UnicornView):
         config = {}
         for form_attr in matching_fields:
             current_val = getattr(self, form_attr)
+            if current_val in [None, "None", "NONE", ""]:
+                continue
             config[form_attr] = current_val
 
             # special data types and common field names. Note, variations
             # of this should be handled by overriding the `to_db_dict`
-            if load_toolkits and current_val not in [None, "None", "NONE", ""]:
+            if load_toolkits:
                 if form_attr == "molecule":
                     config["molecule_original"] = current_val
                     config["molecule"] = Molecule.from_dynamic(current_val)
@@ -344,11 +361,24 @@ class DynamicFormComponent(UnicornView):
             self.table_entry.save()
         elif self.form_mode == "update-many":
 
-            # Special cases! Comments should be appended so nothing is lost
+            flat_updates = self.final_updates["flat_updates"]
+            append_updates = self.final_updates["append_updates"]
 
-            self.table.objects.filter(id__in=self.entry_ids_to_update).update(
-                **self.final_updates
-            )
+            # TODO: put this all within a single db transaction...?
+
+            entries = self.table.objects.filter(id__in=self.entry_ids_to_update)
+
+            if flat_updates:
+                entries.update(**flat_updates)
+
+            if append_updates:
+                for entry in entries.all():
+                    for field, append_value in append_updates.items():
+                        current_value = getattr(entry, field)
+                        new_value = current_value + "\n\n" + append_value
+                        setattr(entry, field, new_value)
+                        entry.save()
+                        # OPTIMIZE: consider doing a bulk update at the end
 
     def postsave_to_db(self):
         return  # default is there's nothing extra to do
@@ -365,7 +395,7 @@ class DynamicFormComponent(UnicornView):
                 "data_explorer:table",
                 self.table.table_name,
             )
-        elif self.redirect_mode == "parent_url":
+        elif self.redirect_mode == "refresh":
             # Refresh current page (which could be the table view + a query)
             return redirect(self.parent_url)
         else:
