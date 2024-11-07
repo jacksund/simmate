@@ -12,21 +12,21 @@
                 <i class="mdi mdi-information"></i>&nbsp;&nbsp;Table Info</a>
             {# Quick Search Sidebar #}
             {% block quicksearch %}
-                {% if table.html_search_view %}
-                    {% include "data_explorer/table_quick_search.html" %}
+                {% if table.html_form_view %}
+                    {% include "data_explorer/table_search.html" %}
                 {% else %}
                     {% include "data_explorer/table_filters.html" %}
                 {% endif %}
             {% endblock %}
             {# Update Sidebar #}
             {% block updater %}
-                {% if table.html_form_view %}
+                {% if table.html_form_view and table.html_enable_edit_forms %}
                     {% include "data_explorer/table_update_many.html" %}
                 {% endif %}
             {% endblock %}
             {# Add New Sidebar #}
             {% block addnew %}
-                {% if table.html_form_view %}
+                {% if table.html_form_view and table.html_enable_edit_forms %}
                     {% include "data_explorer/table_add_entry.html" %}
                 {% endif %}
             {% endblock %}

@@ -1870,10 +1870,8 @@ class DatabaseTable(models.Model):
     html_entry_form_template: str = "core_components/unicorn_full_page.html"
 
     # Unicorn views (side panels in the table view of the Data Explorer app)
-    html_search_view: str = None
-    html_update_view: str = None
-    html_add_view: str = None
     html_form_view: str = None
+    html_enable_edit_forms: bool = False
     # TODO: distinguish between update/update-many and add/add-many views...?
 
     @classmethod

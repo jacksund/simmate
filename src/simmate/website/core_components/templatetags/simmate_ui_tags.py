@@ -173,6 +173,35 @@ def selectbox(
 
 
 @register.inclusion_tag(
+    filename="core_components/input_elements/radio.html",
+    takes_context=True,
+)
+def radio(
+    context: dict,
+    name: str,
+    options: list[tuple[any, str]] = [],
+    label: str = None,
+    show_label: bool = True,
+    initial_value: bool = None,
+):
+    """
+    Display a checkbox widget.
+    """
+    # options should be a list of tuples: (value, display)
+
+    if not label:
+        label = name.replace("_", " ").title()
+
+    if not options:
+        options = context.get(f"{name}_options", [])
+
+    if not initial_value:
+        initial_value = context.get(name)
+
+    return locals()
+
+
+@register.inclusion_tag(
     filename="core_components/input_elements/molecule_input.html",
     takes_context=True,
 )

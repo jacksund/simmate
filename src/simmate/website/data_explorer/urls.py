@@ -26,6 +26,11 @@ urlpatterns = [
         name="table-entry-new",
     ),
     path(
+        route="<table_name>/new-many/",
+        view=views.DataExplorerView.entry_new_many_view,
+        name="table-entry-new-many",
+    ),
+    path(
         route="<table_name>/search/",
         view=views.DataExplorerView.search_view,
         name="table-search",

@@ -58,6 +58,3 @@ class DataExplorerView(DynamicApiView):
         """
         provider_table = EXPLORABLE_TABLES[table_name]
         return provider_table
-
-
-# entry_id:

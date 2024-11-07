@@ -135,17 +135,26 @@ class DynamicFormComponent(UnicornView):
         # reformat into tuple of (value, display)
         return [(col, col) for col in self.table.get_column_names()]
 
-    search_inputs = []
+    def set_order_by(self, value):
+        if value.startswith("-"):
+            self.order_by = value[1:]
+            self.reverse_order_by = True
+        else:
+            self.order_by = value
+            self.reverse_order_by = False
+
+    search_inputs = [
+        "id__in",
+        "page_size",
+        "order_by",
+        # "reverse_order_by",
+    ]
 
     # -------------------------------------------------------------------------
 
     def mount(self):
-        # needed for resubmission
-        self.parent_url = self.request.get_full_path()
 
         view_name = self.request.resolver_match.url_name
-        view_kwargs = self.request.resolver_match.kwargs
-        # !!! I could set the self.table attr using these kwargs
 
         # Dynamically determine form_mode using the view name if it is not
         # specified in the html template directly
@@ -154,69 +163,80 @@ class DynamicFormComponent(UnicornView):
                 self.form_mode = "create"
             elif view_name == "table-entry-update":
                 self.form_mode = "update"
+            elif view_name == "table-entry-update-many":
+                self.form_mode = "update-many"
+            elif view_name == "table-entry-new-many":
+                self.form_mode = "create-many"
+            elif view_name == "table-entry-search":
+                self.form_mode = "search"
             else:
                 raise Exception(f"Unknown view type for dynamic form: {view_name}")
+
+        # check that editting is actually allowed
+        if not self.table.html_enable_edit_forms and self.form_mode in [
+            "create",
+            "update",
+            "update-many",
+            "create-many",
+        ]:
+            return Exception("Denied permissions to create/update data for this table.")
 
         # Call the corresponding mount() method based on our mode
         if self.form_mode == "create":
             self.mount_for_create()
+        elif self.form_mode == "create-many":
+            self.mount_for_create_many()
         elif self.form_mode == "update":
-            self.table_entry = self.table.objects.get(id=view_kwargs["table_entry_id"])
             self.mount_for_update()
         elif self.form_mode == "update-many":
             self.mount_for_update_many()
+        elif self.form_mode == "search":
+            self.mount_for_search()
         else:
-            raise Exception(f"Unknown view type for dynamic form: {view_name}")
+            raise Exception(f"Unknown form_mode is set: {self.form_mode}")
 
-        self.mount_get_kwargs()
+        self.mount_url_info()
         self.mount_extra()
 
-    def mount_get_kwargs(self):
+    def mount_url_info(self):
+        # grab parent url for resubmission. We include GET params unless the
+        # mode is search, in which case we only want the base path.
+        self.parent_url = (
+            self.request.path
+            if self.form_mode == "search"
+            else self.request.get_full_path()
+        )
+        # and then GET params
         get_kwargs = parse_request_get(self.request)
         for field, value in get_kwargs.items():
-            setattr(self, field, value)
+            if hasattr(self, field):
+                self.set_property(field, value)
 
     def mount_for_create(self):
         return  # default is there's nothing extra to do
 
+    def mount_for_create_many(self):
+        return  # default is there's nothing extra to do
+
     def mount_for_update(self):
+        view_kwargs = self.request.resolver_match.kwargs
+        self.table_entry = self.table.objects.get(id=view_kwargs["table_entry_id"])
         # set initial data using the database and applying its values to
         # the form fields.
         config = self.to_db_dict(include_empties=True)
         for field in config:
             current_val = getattr(self.table_entry, field)
-            setattr(self, field, current_val)
+            self.set_property(field, current_val)
 
     def mount_for_update_many(self):
         # default is we want everything to be set to None, which includes
         # overriding default values
         for field in self.update_many_inputs:
+            # opt for setattr instead of self.set_property since this is unsetting
             setattr(self, field, None)
 
     def mount_for_search(self):
-        raise NotImplementedError("")
-
-        # apply current GET args to this form
-        url_config = parse_request_get(self.request)
-        for key, value in url_config.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
-
-            if key == "order_by" and value.startswith("-"):
-                self.order_by = value[1:]
-                self.reverse_order_by = True
-
-            # special case of mounting the molecule query
-            if key in [
-                "substructure",
-                "similarity",
-                "molecule_exact",
-                "molecule_list_exact",
-                "similarity_2d",
-            ]:
-                self.molecule_query_type = key
-                self.molecule_query_textinput = value
-                # self.set_molecule(value)
+        return  # default is there's nothing extra to do
 
     def mount_extra(self):
         return  # default is there's nothing extra to do
@@ -226,10 +246,14 @@ class DynamicFormComponent(UnicornView):
     def unmount(self):
         if self.form_mode == "create":
             self.unmount_for_create()
+        elif self.form_mode == "create-many":
+            self.unmount_for_create_many()
         elif self.form_mode == "update":
             self.unmount_for_update()
         elif self.form_mode == "update-many":
             self.unmount_for_update_many()
+        elif self.form_mode == "search":
+            self.unmount_for_search()
         else:
             raise Exception(f"Unknown form_mode for dynamic form: {self.form_mode}")
 
@@ -276,28 +300,7 @@ class DynamicFormComponent(UnicornView):
         }
 
     def unmount_for_search(self):
-        raise NotImplementedError("")
-        # has all filters except the molecule
-        config = {
-            field: getattr(self, field)
-            for field in filter_fields
-            # BUG: the select2 dropdowns return None as a string
-            if getattr(self, field, None) not in [None, "None", ""]
-        }
-        # moleculequery's key depends on its type
-        if self.molecule:
-            config[self.molecule_query_type] = self.molecule
-        # comments should be a contains search
-        if "comments" in config.keys():
-            config["comments__contains"] = config.pop("comments")
-        # reformat __in to python list
-        if "id__in" in config.keys():
-            # BUG: check to see it was input correctly?
-            config["id__in"] = [int(i) for i in config["id__in"].split(";")]
-        if "order_by" in config.keys() and self.reverse_order_by:
-            config["order_by"] = "-" + config["order_by"]
-
-        return config
+        return  # default is there's nothing extra to do
 
     def unmount_extra(self):
         return  # default is there's nothing extra to do
@@ -312,6 +315,12 @@ class DynamicFormComponent(UnicornView):
         *args,
         **kwargs,
     ):
+        # attempt casting to correct type
+        new_value = parse_value(new_value)
+        # buggy
+        # from django_unicorn.typer import cast_attribute_value
+        # new_value = cast_attribute_value(self, property_name, new_value)
+
         # check if there is a special defined method for this property
         method_name = f"set_{property_name}"
         if hasattr(self, method_name):
@@ -319,6 +328,39 @@ class DynamicFormComponent(UnicornView):
             method(new_value, *args, **kwargs)
         else:
             setattr(self, property_name, new_value)
+
+    # -------------------------------------------------------------------------
+
+    def to_search_dict(self, **kwargs) -> dict:
+        return self._get_default_search_dict(**kwargs)
+
+    def _get_default_search_dict(self, include_empties: bool = False):
+        # !!! consider merging functionality with _get_default_db_dict
+        config = {}
+        for form_attr in self.search_inputs:
+            current_val = getattr(self, form_attr)
+            current_val = parse_value(current_val)
+            if not include_empties and current_val is None:
+                continue
+            config[form_attr] = current_val
+
+        # comments should be a contains search
+        if "comments" in config.keys():
+            config["comments__contains"] = config.pop("comments")
+        # reformat __in to python list
+        if "id__in" in config.keys():
+            # BUG: check to see it was input correctly?
+            config["id__in"] = [int(i) for i in config["id__in"].split(";")]
+        if "order_by" in config.keys() and self.reverse_order_by:
+            config["order_by"] = "-" + config["order_by"]
+
+        # TODO: should prob be in mol mixin
+        # moleculequery's key depends on its type
+        if "molecule" in config.keys():
+            config[self.molecule_query_type] = self.get_molecule_obj().to_smiles()
+            config.pop("molecule")
+
+        return config
 
     # -------------------------------------------------------------------------
 
@@ -347,18 +389,18 @@ class DynamicFormComponent(UnicornView):
         ]
 
         config = {}
-        empties = [None, "None", "NONE", ""]  # TODO: improve parsing
         for form_attr in matching_fields:
             current_val = getattr(self, form_attr)
+            current_val = parse_value(current_val)
 
-            if not include_empties and current_val in empties:
+            if not include_empties and current_val is None:
                 continue
 
             config[form_attr] = current_val
 
             # special data types and common field names. Note, variations
             # of this should be handled by overriding the `to_db_dict`
-            if load_toolkits and current_val not in empties:
+            if load_toolkits and current_val is not None:
                 if form_attr == "molecule":
                     config["molecule_original"] = current_val
                     config["molecule"] = Molecule.from_dynamic(current_val)
@@ -438,12 +480,14 @@ class DynamicFormComponent(UnicornView):
 
         # then call series of final hooks
         self.unmount()
-        self.presave_to_db()
-        self.save_to_db()
-        self.postsave_to_db()
 
-        # and provide final url
-        return self.get_submission_redirect()
+        if self.form_mode == "search":
+            return self.get_search_redirect()  # has its own redirect
+        else:
+            self.presave_to_db()
+            self.save_to_db()
+            self.postsave_to_db()
+            return self.get_submission_redirect()
 
     def presave_to_db(self):
         return  # default is there's nothing extra to do
@@ -514,13 +558,13 @@ class DynamicFormComponent(UnicornView):
 
     # -------------------------------------------------------------------------
 
-    def search_db(self, moleclue_query: str):
-        raise NotImplementedError("")
+    def get_search_redirect(self):  # *args, **kwargs
 
-        self.set_molecule(moleclue_query, render=False)
+        # moleclue_query: str
+        # self.set_molecule(moleclue_query, render=False)
 
         # grab all metadata filters and convert to url GET params
-        filters = self.get_config()
+        filters = self.to_search_dict()
 
         # convert all values to json serialized strings
         filters_serialized = {k: json.dumps(v) for k, v in filters.items()}
@@ -532,3 +576,37 @@ class DynamicFormComponent(UnicornView):
         return redirect(final_url)
 
     # -------------------------------------------------------------------------
+
+    is_editting = False
+    entries_for_create_many = []
+
+    def apply_to_children(self):
+
+        breakpoint()
+        config = self.to_db_dict(
+            include_empties=False,
+            load_toolkits=False,
+        )
+
+        for attribute in self.attributes_to_apply:
+            value = getattr(self, attribute)
+            for child in self.children:
+                print(str(child))
+                if hasattr(child, attribute):
+                    setattr(child, attribute, value)
+                    print(f"{attribute}: {value}")
+        # self.parent.force_render = True
+
+    # -------------------------------------------------------------------------
+
+
+def parse_value(value: str):
+    # attempt casting to correct type bc AJAX/JSON always gives a string
+    if isinstance(value, str):
+        if value.isdigit():
+            value = int(value)
+        elif value.replace(".", "", 1).isdigit():
+            value = float(value)
+        elif value in ["None", "NONE", ""]:
+            value = None
+    return value
