@@ -50,6 +50,8 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             "from_ase.CoordinatePerturbation": 0.05,
             # "ExtremeSymmetry": 0.05,
         },
+        steadystate_update_generation: int = 5,
+        steadystate_update_min_prop: float = 0.01,
         selector_name: str = "TournamentSelection",
         selector_kwargs: dict = {},
         validator_name: str = "PartialCrystalNNFingerprint",
@@ -144,7 +146,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             # Write the output summary if there is at least one structure completed
             if write_summary_files and sleep_counter >= sleep_frequency:
                 sleep_counter = 0  # reset the cycle
-                if search_datatable.individuals_completed.count() >= 1:
+                if search_datatable.deep_individuals_completed.count() >= 1:
                     search_datatable.write_output_summary(directory)
                 else:
                     search_datatable.write_individuals_incomplete(directory)
@@ -164,7 +166,10 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             # TODO: Go through triggered actions that would update the database
             # table -- e.g. the workflow to run, the validators, etc.
             # self._check_triggered_actions()
-
+            search_datatable._adjust_steadystate_sources(
+                min_generation = steadystate_update_generation,
+                min_proportion = steadystate_update_min_prop,
+                )
             # Go through the running workflows and see if we need to submit
             # new ones to meet our steadystate target(s)
             search_datatable._check_steadystate_workflows()

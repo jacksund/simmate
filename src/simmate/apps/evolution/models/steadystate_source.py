@@ -11,9 +11,11 @@ from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.engine.execution import WorkItem
 from simmate.toolkit import Composition
 from django.utils import timezone
+import numpy
 
 
 class SteadystateSource(DatabaseTable):
+    
     class Meta:
         app_label = "workflows"
 
@@ -22,9 +24,9 @@ class SteadystateSource(DatabaseTable):
 
     nsteadystate_target = table_column.FloatField(null=True, blank=True)
     
-    # This list is the times when the steady state target number changed. This
+    # This is the most recent time when the steady state target number changed. This
     # is time since the start of the run
-    target_time_history = table_column.JSONField(default=list)
+    target_time_history = table_column.DateTimeField(null=True, blank=True)
     
     # This list is the nsteadystate_target that existed after each change
     target_history = table_column.JSONField(default=list)
@@ -53,15 +55,12 @@ class SteadystateSource(DatabaseTable):
         related_name="steadystate_sources",
     )
 
-    def update_flow_workitem_ids(self):
+    def update_active_workitem_ids(self):
         """
         Queries Prefect to see how many workflows are in a scheduled, running,
         or pending state from the list of run ids that are associate with this
         structure source.
         """
-        # check that target history lists exists and if not generate them
-        if len(self.target_history) == 0:
-            self._init_history()
 
         # Before updating our run ids, we first want to see if any of them
         # failed (or "E" for ERRORED) -- so that we can warn the use to
@@ -100,69 +99,77 @@ class SteadystateSource(DatabaseTable):
         # check which ids are still running. Note, this is a separate
         # method in case it's an async call to Prefect client
         workitem_ids = self.workitem_ids
-        recent_workitem_ids = workitem_ids[self.workitem_ids_history[-1]:]
-        still_running_ids = self._check_still_running_ids(recent_workitem_ids)
-        not_failed_ids = self._check_recent_ids(recent_workitem_ids)
-        # BUG: The first of the above searches will not return all running jobs,
-        # just those submitted since the last steadystate target update. This
-        # allows us to more easily keep track of what has been generated since we
-        # updated so that we can get the correct ratio of submissions from each
-        # flow, but it is confusing as it doesn't correspond to the true list
-        # of still running jobs.
+        still_running_ids = self._check_still_running_ids(workitem_ids)
 
         # we now have our new list of IDs! Let's update it to the database
         self.active_workitem_ids = still_running_ids
-        # self.recent_workitem_ids = not_failed_ids
         self.save()
 
-        return [not_failed_ids, still_running_ids]
+        return still_running_ids
     
     def update_flow_target(self, value):
         """
         Updates nsteadystate_target to new value and records the change
         """
-        # check that target history lists exists and if not generate them
-        if len(self.target_history) == 0:
-            self._init_history()
         # update target history with previous value
         self.target_history.append(self.nsteadystate_target)
         
         # update to new value
         self.nsteadystate_target = value       
         
-        # update target time history
-        current_time = timezone.now()
-        start_time = self.created_at()
-        time_diff = current_time - start_time
-        self.target_time_history.append(time_diff.total_seconds())
+        # add time to history
+        self.target_time_history = timezone.now()
         
         # update workitem id history
         self.workitem_ids_history.append(len(self.workitem_ids))
         self.save()
 
     @property
-    def nflow_active_runs(self):
-        # This gives us all currently running jobs submitted since the last
-        # steadystate target update
+    def n_active_workitems(self):
+        # This gives us the number of currently running jobs 
         # update our ids before we report how many there are.
-        runs = self.update_flow_workitem_ids()[1]
+        active_runs = self.update_active_workitem_ids()
         # now the currently running ones is just the length of ids!
-        return len(runs)
+        return len(active_runs)
     
     @property
-    def nflow_not_failed_runs(self):
+    def n_recent_active_workitems(self):
+        # This is the same as above, but ignores any items that were submitted
+        # prior to the last update
+        active_runs = self.update_active_workitem_ids()
+        recent_workitem_ids = self.workitem_ids[self.workitem_ids_history[-1]:]
+        recent_runs = numpy.isin(active_runs, recent_workitem_ids)
+        return len(numpy.where(recent_runs)[0])
+    
+    @property
+    # def nflow_not_failed_runs(self):
+    def n_recent_not_failed_workitems(self):
         #This gives all jobs, running or finished, since the last steadystate
         # target update. Excludes jobs that failed
-        runs = self.update_flow_workitem_ids()[0]
-        return len(runs)
+        recent_workitem_ids = self.workitem_ids[self.workitem_ids_history[-1]:]
+        not_failed_ids = self._check_not_failed_ids(recent_workitem_ids)
+        return len(not_failed_ids)
     
-    def _init_history(self):
-        # create history items
-        self.target_history = [self.nsteadystate_target]
-        self.target_time_history = [0]
-        self.workitem_ids_history = [0]
-        self.save()
+    @property
+    def n_not_failed_workitems(self):
+        # This gives us all jobs, running or finished, since the start of the
+        # calculation
+        not_failed_ids = self._check_not_failed_ids(self.workitem_ids)
+        return len(not_failed_ids)
     
+    def _cancel_pending_workitems(self):
+        """
+        Cancels any pending workitems. Usually this is used if a steady state
+        source is removed. Note that workitems currently running cannot be
+        canceled
+        """
+        workitems_to_cancel = WorkItem.objects.filter(
+            id__in=self.active_workitem_ids,
+            status__in=["P"],
+        ).all()
+        for workitem in workitems_to_cancel:
+            workitem.cancel()
+           
     @staticmethod
     def _check_still_running_ids(workitem_ids):
         """
@@ -184,7 +191,7 @@ class SteadystateSource(DatabaseTable):
         return list(still_running_ids)
     
     @staticmethod
-    def _check_recent_ids(workitem_ids):
+    def _check_not_failed_ids(workitem_ids):
         """
         Queries Prefect to see check on a list of flow run ids and determines
         which ones have not failed.

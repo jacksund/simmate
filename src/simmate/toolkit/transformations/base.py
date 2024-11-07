@@ -104,21 +104,11 @@ class Transformation:
         selector,
         datatable,
         select_kwargs: dict = {},
-        max_attempts: int = 100,
+        max_attempts: int = 10,
         **kwargs,  # for apply_transformation_with_validation
     ):
         logging.info(f"Creating a transformed structure with '{self.name}'")
         logging.info(f"Parent(s) will be selected using '{selector.name}'")
-
-        # grab parent structures using the selection method
-        parent_ids, parent_structures = selector.select_from_datatable(
-            nselect=self.ninput,
-            datatable=datatable,
-            **select_kwargs,
-        )
-
-        logging.info(f"Selected parents: {parent_ids}")
-
         # Until we get a new valid structure (or run out of attempts), keep trying
         # with our given source. Assume we don't have a valid structure until
         # proven otherwise
@@ -127,7 +117,17 @@ class Transformation:
         while not new_structure and attempt <= max_attempts:
             # add an attempt
             attempt += 1
+            # BUG-FIX: previously new parents were not selected resulting in
+            # the transformation always failing until max attempts were up.
 
+            # grab parent structures using the selection method
+            parent_ids, parent_structures = selector.select_from_datatable(
+                nselect=self.ninput,
+                datatable=datatable,
+                **select_kwargs,
+            )
+
+            logging.info(f"Selected parents: {parent_ids}")
             # make a new structure
             new_structure = self.apply_transformation_with_validation(
                 parent_structures,
