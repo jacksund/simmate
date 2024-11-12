@@ -47,6 +47,10 @@ class MoleculeInput:
         if self.form_mode == "create" and self.molecule and self.molecule_match_tables:
             self.check_datasets()
 
+    def load_many_molecules(self, mol_str: str):
+        self.entries_for_create_many = [1, 2, 3, 4, 5]
+        self.call("refresh_select2")
+
     # def set_molecule(self, mol_str, render: bool = True):
     #     try:
     #         # text input takes priority

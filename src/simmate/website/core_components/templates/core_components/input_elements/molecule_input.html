@@ -47,3 +47,15 @@
         {# TODO: button name="unset_molecule" theme="secondary" icon="refresh" #}
     {% endif %}
 </div>
+{% comment %}
+    <div class="alert alert-success" role="alert">
+        <i class="mdi mdi-information mx-2"></i>
+        Molecules successfully loaded! Refresh this page if you wish to restart.
+    </div>
+    {% if found_duplicates %}
+        <div class="alert alert-danger" role="alert">
+            <i class="mdi mdi-alert mx-2"></i>
+            At least one duplicate was found! You can still continue the form because we removed all duplicates. However, if this message is unexpected, make sure you double check things.
+        </div>
+    {% endif %}
+{% endcomment %}

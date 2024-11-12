@@ -19,6 +19,7 @@ class DynamicFormComponent(UnicornView):
     class Meta:
         javascript_exclude = (
             # "template_name",  # included by parent class
+            "template_names",
             "table",
             "required_inputs",
             "ignore_on_update",
@@ -28,17 +29,29 @@ class DynamicFormComponent(UnicornView):
             "order_by_options",
         )
 
-    template_name: str = None
+    # -------------------------------------------------------------------------
+
+    template_names: dict = {}
     """
-    The location of the template to use for this component
+    The location of the templates to use for this component. The keys should
+    be form modes (with an option to have a 'default' key) and the values
+    should be the template name.
     """
-    # TODO: Could there be a template that auto builds the form html? But this
-    # might get messy and not be worth it.
+
+    @property
+    def template_name(self):
+        return (
+            self.template_names.get(self.form_mode)
+            if self.form_mode in self.template_names
+            else self.template_names["default"]
+        )
+
+    # -------------------------------------------------------------------------
 
     form_mode: str = None
     """
     The mode the form is currently in. Options are "create", "update", 
-    "update-many", "create-many", and "search".
+    "update_many", "create_many", "create_many_entry, and "search".
     
     In some cases this does not need to be set because it can be inferred from
     the parent_url
@@ -74,7 +87,7 @@ class DynamicFormComponent(UnicornView):
 
     # -------------------------------------------------------------------------
 
-    # for form_mode "create" and "update"
+    # for form_mode "create"
 
     required_inputs: list[str] = []
     """
@@ -84,22 +97,70 @@ class DynamicFormComponent(UnicornView):
 
     # -------------------------------------------------------------------------
 
-    # for form_mode "update-many"
+    # for form_mode "create_many"
+
+    applied_create_many_defaults: bool = False
+    entries_for_create_many: list = []
+
+    is_editting: bool = True
+
+    def toggle_is_editting(self):
+        self.is_editting = not self.is_editting
+        if self.is_editting:
+            self.call("refresh_select2")
+        # self.parent.project = "BLU22"
+        # self.parent.force_render = True
+
+    def apply_to_children(self):
+        for child in self.children:
+            child.project = self.project
+            # BUG-FIX: see https://github.com/adamghill/django-unicorn/issues/666
+            # Applying to children only works when is_editting is disabled
+            child.is_editting = False
+            if not hasattr(child, "update_caches"):
+                print("incorrect! only a pointer!")
+            # child._cache_component()
+
+        # self.entries_for_create_many = [0]
+
+        # BUG-FIX:
+        # self._cache_component()
+
+        # config = self.to_db_dict(
+        #     include_empties=False,
+        #     load_toolkits=False,
+        # )
+        # for attribute in self.attributes_to_apply:
+        #     value = getattr(self, attribute)
+        #     for child in self.children:
+        #         print(str(child))
+        #         if hasattr(child, attribute):
+        #             setattr(child, attribute, value)
+        #             print(f"{attribute}: {value}")
+        # self.parent.force_render = True
+
+    # -------------------------------------------------------------------------
+
+    # for form_mode "update"
 
     ignore_on_update: list[str] = []
     """
     List of columns/fields to ignore when the form_mode = "update"
     """
 
+    # -------------------------------------------------------------------------
+
+    # for form_mode "update_many"
+
     update_many_inputs: list[str] = []
     """
-    List of columns/fields to allow when the form_mode = "update-many"
+    List of columns/fields to allow when the form_mode = "update_many"
     """
 
     n_ids_to_update_max: int = 25
     """
     The max number of entries that can be editted at one time when
-    form_mode = "update-many"
+    form_mode = "update_many"
     """
 
     is_update_many_confirmed: bool = False
@@ -110,8 +171,29 @@ class DynamicFormComponent(UnicornView):
     entry_ids_to_update: list = []
     """
     The list of selected ids that will be updated. Only applies when the
-    form_mode = "update-many"
+    form_mode = "update_many"
     """
+
+    def check_max_update_many(self):
+        if len(self.entry_ids_to_update) > self.n_ids_to_update_max:
+            message = f"You are only allowed to update a maximum of '{self.n_ids_to_update_max}' at a time."
+            self.form_errors.append(message)
+
+    def confirm_update_many(self, select_form_data):
+        # Example of how the data will look:
+        # {
+        #     "1": "on",
+        #     "2": "on",
+        #     "4": "on",
+        #     "csrfmiddlewaretoken": "LTJaJf5gz6fUKUZaN0p6gMyVnLQGM7LGjPRVohe3pVgR5M0UpepNokgePN3pQ4dI"
+        # }
+        data = json.loads(select_form_data)
+        data.pop("csrfmiddlewaretoken", None)
+        data.pop("cortevatarget_select_all", None)
+        self.entry_ids_to_update = [int(key) for key, value in data.items()]
+
+        if self.entry_ids_to_update:
+            self.is_update_many_confirmed = True
 
     # -------------------------------------------------------------------------
 
@@ -150,9 +232,58 @@ class DynamicFormComponent(UnicornView):
         # "reverse_order_by",
     ]
 
+    def to_search_dict(self, **kwargs) -> dict:
+        return self._get_default_search_dict(**kwargs)
+
+    def _get_default_search_dict(self, include_empties: bool = False):
+        # !!! consider merging functionality with _get_default_db_dict
+        config = {}
+        for form_attr in self.search_inputs:
+            current_val = getattr(self, form_attr)
+            current_val = parse_value(current_val)
+            if not include_empties and current_val is None:
+                continue
+            config[form_attr] = current_val
+
+        # comments should be a contains search
+        if "comments" in config.keys():
+            config["comments__contains"] = config.pop("comments")
+        # reformat __in to python list
+        if "id__in" in config.keys():
+            # BUG: check to see it was input correctly?
+            config["id__in"] = [int(i) for i in config["id__in"].split(";")]
+        if "order_by" in config.keys() and self.reverse_order_by:
+            config["order_by"] = "-" + config["order_by"]
+
+        # TODO: should prob be in mol mixin
+        # moleculequery's key depends on its type
+        if "molecule" in config.keys():
+            config[self.molecule_query_type] = self.get_molecule_obj().to_smiles()
+            config.pop("molecule")
+
+        return config
+
+    def get_search_redirect(self):  # *args, **kwargs
+
+        # moleclue_query: str
+        # self.set_molecule(moleclue_query, render=False)
+
+        # grab all metadata filters and convert to url GET params
+        filters = self.to_search_dict()
+
+        # convert all values to json serialized strings
+        filters_serialized = {k: json.dumps(v) for k, v in filters.items()}
+
+        # encode any special characters for the url
+        url_get_clause = urllib.parse.urlencode(filters_serialized)
+
+        final_url = self.parent_url + "?" + url_get_clause
+        return redirect(final_url)
+
     # -------------------------------------------------------------------------
 
     def mount(self):
+        print("mount")
 
         view_name = self.request.resolver_match.url_name
 
@@ -164,31 +295,31 @@ class DynamicFormComponent(UnicornView):
             elif view_name == "table-entry-update":
                 self.form_mode = "update"
             elif view_name == "table-entry-update-many":
-                self.form_mode = "update-many"
+                self.form_mode = "update_many"
             elif view_name == "table-entry-new-many":
-                self.form_mode = "create-many"
+                self.form_mode = "create_many"
             elif view_name == "table-entry-search":
                 self.form_mode = "search"
             else:
                 raise Exception(f"Unknown view type for dynamic form: {view_name}")
 
         # check that editting is actually allowed
-        if not self.table.html_enable_edit_forms and self.form_mode in [
-            "create",
-            "update",
-            "update-many",
-            "create-many",
-        ]:
-            return Exception("Denied permissions to create/update data for this table.")
+        if self.form_mode not in self.table.html_enabled_forms:
+            raise Exception(
+                f"The form mode '({self.form_mode}' is disabled for this table."
+            )
 
         # Call the corresponding mount() method based on our mode
         if self.form_mode == "create":
             self.mount_for_create()
-        elif self.form_mode == "create-many":
+        elif self.form_mode == "create_many":
             self.mount_for_create_many()
+        elif self.form_mode == "create_many_entry":
+            self.mount_for_create()
+            self.is_editting = False
         elif self.form_mode == "update":
             self.mount_for_update()
-        elif self.form_mode == "update-many":
+        elif self.form_mode == "update_many":
             self.mount_for_update_many()
         elif self.form_mode == "search":
             self.mount_for_search()
@@ -246,11 +377,11 @@ class DynamicFormComponent(UnicornView):
     def unmount(self):
         if self.form_mode == "create":
             self.unmount_for_create()
-        elif self.form_mode == "create-many":
+        elif self.form_mode == "create_many":
             self.unmount_for_create_many()
         elif self.form_mode == "update":
             self.unmount_for_update()
-        elif self.form_mode == "update-many":
+        elif self.form_mode == "update_many":
             self.unmount_for_update_many()
         elif self.form_mode == "search":
             self.unmount_for_search()
@@ -331,39 +462,6 @@ class DynamicFormComponent(UnicornView):
 
     # -------------------------------------------------------------------------
 
-    def to_search_dict(self, **kwargs) -> dict:
-        return self._get_default_search_dict(**kwargs)
-
-    def _get_default_search_dict(self, include_empties: bool = False):
-        # !!! consider merging functionality with _get_default_db_dict
-        config = {}
-        for form_attr in self.search_inputs:
-            current_val = getattr(self, form_attr)
-            current_val = parse_value(current_val)
-            if not include_empties and current_val is None:
-                continue
-            config[form_attr] = current_val
-
-        # comments should be a contains search
-        if "comments" in config.keys():
-            config["comments__contains"] = config.pop("comments")
-        # reformat __in to python list
-        if "id__in" in config.keys():
-            # BUG: check to see it was input correctly?
-            config["id__in"] = [int(i) for i in config["id__in"].split(";")]
-        if "order_by" in config.keys() and self.reverse_order_by:
-            config["order_by"] = "-" + config["order_by"]
-
-        # TODO: should prob be in mol mixin
-        # moleculequery's key depends on its type
-        if "molecule" in config.keys():
-            config[self.molecule_query_type] = self.get_molecule_obj().to_smiles()
-            config.pop("molecule")
-
-        return config
-
-    # -------------------------------------------------------------------------
-
     # Model creation and update utils
 
     def to_db_dict(self, **kwargs) -> dict:
@@ -433,7 +531,7 @@ class DynamicFormComponent(UnicornView):
 
         if self.form_mode in ["create", "update"]:
             self.check_required_inputs()
-        elif self.form_mode == "update-many":
+        elif self.form_mode == "update_many":
             self.check_max_update_many()
 
         self.check_form_hook()
@@ -442,31 +540,6 @@ class DynamicFormComponent(UnicornView):
 
     def check_form_hook(self) -> bool:
         return True  # default is there's nothing extra to check
-
-    # -------------------------------------------------------------------------
-
-    # Extra utils for form_mode="update-many"
-
-    def check_max_update_many(self):
-        if len(self.entry_ids_to_update) > self.n_ids_to_update_max:
-            message = f"You are only allowed to update a maximum of '{self.n_ids_to_update_max}' at a time."
-            self.form_errors.append(message)
-
-    def confirm_update_many(self, select_form_data):
-        # Example of how the data will look:
-        # {
-        #     "1": "on",
-        #     "2": "on",
-        #     "4": "on",
-        #     "csrfmiddlewaretoken": "LTJaJf5gz6fUKUZaN0p6gMyVnLQGM7LGjPRVohe3pVgR5M0UpepNokgePN3pQ4dI"
-        # }
-        data = json.loads(select_form_data)
-        data.pop("csrfmiddlewaretoken", None)
-        data.pop("cortevatarget_select_all", None)
-        self.entry_ids_to_update = [int(key) for key, value in data.items()]
-
-        if self.entry_ids_to_update:
-            self.is_update_many_confirmed = True
 
     # -------------------------------------------------------------------------
 
@@ -495,7 +568,7 @@ class DynamicFormComponent(UnicornView):
     def save_to_db(self):
         if self.form_mode in ["create", "update"]:
             self.table_entry.save()
-        elif self.form_mode == "update-many":
+        elif self.form_mode == "update_many":
 
             flat_updates = self.final_updates["flat_updates"]
             append_updates = self.final_updates["append_updates"]
@@ -555,47 +628,6 @@ class DynamicFormComponent(UnicornView):
     #         **self.to_db_dict(),
     #     ),
     # )
-
-    # -------------------------------------------------------------------------
-
-    def get_search_redirect(self):  # *args, **kwargs
-
-        # moleclue_query: str
-        # self.set_molecule(moleclue_query, render=False)
-
-        # grab all metadata filters and convert to url GET params
-        filters = self.to_search_dict()
-
-        # convert all values to json serialized strings
-        filters_serialized = {k: json.dumps(v) for k, v in filters.items()}
-
-        # encode any special characters for the url
-        url_get_clause = urllib.parse.urlencode(filters_serialized)
-
-        final_url = self.parent_url + "?" + url_get_clause
-        return redirect(final_url)
-
-    # -------------------------------------------------------------------------
-
-    is_editting = False
-    entries_for_create_many = []
-
-    def apply_to_children(self):
-
-        breakpoint()
-        config = self.to_db_dict(
-            include_empties=False,
-            load_toolkits=False,
-        )
-
-        for attribute in self.attributes_to_apply:
-            value = getattr(self, attribute)
-            for child in self.children:
-                print(str(child))
-                if hasattr(child, attribute):
-                    setattr(child, attribute, value)
-                    print(f"{attribute}: {value}")
-        # self.parent.force_render = True
 
     # -------------------------------------------------------------------------
 
