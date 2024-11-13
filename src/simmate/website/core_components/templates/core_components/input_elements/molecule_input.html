@@ -1,7 +1,10 @@
 {% load simmate_ui_tags %}
 <div class="my-2">
-    {% include "core_components/basic_elements/label.html" %}
+    {% include "core_components/basic_elements/label.html" %}    
     {% if molecule is None %}
+        {% if many_molecules %}
+            {% alert theme="danger" message="This section assumes all individual components are their own molecule, which means it will incorrectly split up salts and make things like Na+ or Cl- their own entries. Until this is fixed, avoid using the create_many form for such compounds." %}
+        {% endif %}
         {% if allow_sketcher_input %}
             {# Molecule Sketcher (ChemDraw.js or ChemDoodle.js) #}
             <div class="px-3 py-1">
@@ -32,7 +35,7 @@
                     {# modal_dismiss used only if this is in a popout modal #}
                     {% if modal_dismiss %}data-bs-dismiss="modal"{% endif %}
                     onclick="get_mol_from_sketcher('{{ name }}{{ context.unicorn.component_key }}', '{% if not context.unicorn.component_key %}{{ context.unicorn.component_name }}{% else %}{{ context.unicorn.component_key }}{% endif %}', '{{ set_molecule_method }}')">
-                    Load Molecule{% if set_molecule_method == "load_many_molecules" %}s{% endif %}
+                    Load Molecule{% if many_molecules %}s{% endif %}
                 </button>
             </div>
         {% endif %}
@@ -42,8 +45,28 @@
             <b>Refresh the page to restart the form</b>
         </div>
     {% else %}
-        {% alert theme="success" message="Molecule successfully loaded! Refresh this page if you wish to restart." %}
-        {% canvas name=name %}
+        {% if many_molecules %}
+            {% alert theme="success" message="Molecules successfully loaded! Refresh this page if you wish to restart." %}
+        {% else %}
+            {% alert theme="success" message="Molecule successfully loaded! Refresh this page if you wish to restart." %}
+            {% canvas name=name %}
+            {% if molecule_matches %}
+                <div>
+                    <div class="alert alert-danger" role="alert">
+                        <i class="mdi mdi-alert mx-2"></i>
+                        <p>This compound is already registered! Jump to that entry to edit:</p>
+                        {% for match in molecule_matches %}
+                            <a type="button"
+                               class="btn btn-info btn-sm"
+                               href="{{ match.table_entry_url }}"
+                               target="_blank">
+                               {{ match.table_name }} {{ match.table_entry_id }}<i class="mdi mdi-open-in-new"></i>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
         {# TODO: button name="unset_molecule" theme="secondary" icon="refresh" #}
     {% endif %}
 </div>

@@ -27,6 +27,8 @@ class DynamicFormComponent(UnicornView):
             "n_ids_to_update_max",
             "page_size_options",
             "order_by_options",
+            "search_inputs",
+            "apply_to_children_inputs",
         )
 
     # -------------------------------------------------------------------------
@@ -100,6 +102,8 @@ class DynamicFormComponent(UnicornView):
     # for form_mode "create_many"
 
     applied_create_many_defaults: bool = False
+    apply_to_children_inputs: list = []
+
     entries_for_create_many: list = []
 
     is_editting: bool = True
@@ -108,36 +112,22 @@ class DynamicFormComponent(UnicornView):
         self.is_editting = not self.is_editting
         if self.is_editting:
             self.call("refresh_select2")
-        # self.parent.project = "BLU22"
-        # self.parent.force_render = True
 
     def apply_to_children(self):
+
+        # BUG-FIX: see https://github.com/adamghill/django-unicorn/issues/666
+        # Applying to children only works when is_editting is disabled
         for child in self.children:
-            child.project = self.project
-            # BUG-FIX: see https://github.com/adamghill/django-unicorn/issues/666
-            # Applying to children only works when is_editting is disabled
             child.is_editting = False
-            if not hasattr(child, "update_caches"):
-                print("incorrect! only a pointer!")
-            # child._cache_component()
 
-        # self.entries_for_create_many = [0]
+        for form_attr in self.apply_to_children_inputs:
+            parent_val = getattr(self, form_attr)
+            if parent_val is None:
+                continue
+            for child in self.children:
+                child.set_property(form_attr, parent_val)
 
-        # BUG-FIX:
-        # self._cache_component()
-
-        # config = self.to_db_dict(
-        #     include_empties=False,
-        #     load_toolkits=False,
-        # )
-        # for attribute in self.attributes_to_apply:
-        #     value = getattr(self, attribute)
-        #     for child in self.children:
-        #         print(str(child))
-        #         if hasattr(child, attribute):
-        #             setattr(child, attribute, value)
-        #             print(f"{attribute}: {value}")
-        # self.parent.force_render = True
+        self.applied_create_many_defaults = True
 
     # -------------------------------------------------------------------------
 
@@ -199,6 +189,13 @@ class DynamicFormComponent(UnicornView):
 
     # for form_mode "search"
 
+    search_inputs = [
+        "id__in",
+        "page_size",
+        "order_by",
+        # "reverse_order_by",
+    ]
+
     # assumed filters from DatabaseTable
     id__in = None
 
@@ -224,13 +221,6 @@ class DynamicFormComponent(UnicornView):
         else:
             self.order_by = value
             self.reverse_order_by = False
-
-    search_inputs = [
-        "id__in",
-        "page_size",
-        "order_by",
-        # "reverse_order_by",
-    ]
 
     def to_search_dict(self, **kwargs) -> dict:
         return self._get_default_search_dict(**kwargs)
@@ -258,7 +248,7 @@ class DynamicFormComponent(UnicornView):
         # TODO: should prob be in mol mixin
         # moleculequery's key depends on its type
         if "molecule" in config.keys():
-            config[self.molecule_query_type] = self.get_molecule_obj().to_smiles()
+            config[self.molecule_query_type] = self._molecule_obj.to_smiles()
             config.pop("molecule")
 
         return config
@@ -283,7 +273,6 @@ class DynamicFormComponent(UnicornView):
     # -------------------------------------------------------------------------
 
     def mount(self):
-        print("mount")
 
         view_name = self.request.resolver_match.url_name
 
@@ -393,6 +382,10 @@ class DynamicFormComponent(UnicornView):
     def unmount_for_create(self):
         self.table_entry = self.table.from_toolkit(**self.to_db_dict())
 
+    def unmount_for_create_many(self):
+        for child in self.children:
+            child.unmount_for_create()
+
     def unmount_for_update(self):
         # set initial data using the form fields and applying its values to
         # the table entry (this is the reverse of mount_for_update)
@@ -478,11 +471,10 @@ class DynamicFormComponent(UnicornView):
         # By default, we say the form maps to columns of the model with same name.
         # We also check for direct relations, which would end in "_id"
         # (e.g. 'created_by_id' for users where col is technically 'created_by')
-        form_attrs = self._attribute_names_cache
         table_cols = self.table.get_column_names()
         matching_fields = [
             attr
-            for attr in form_attrs
+            for attr in self._attribute_names
             if attr in table_cols or (attr.endswith("_id") and attr[:-3] in table_cols)
         ]
 
@@ -533,6 +525,12 @@ class DynamicFormComponent(UnicornView):
             self.check_required_inputs()
         elif self.form_mode == "update_many":
             self.check_max_update_many()
+        elif self.form_mode == "create_many":
+            for child in self.children:
+                if not child.check_form():
+                    for error in child.form_errors:
+                        if error not in self.form_errors:
+                            self.form_errors.append(error)
 
         self.check_form_hook()
 
@@ -545,6 +543,8 @@ class DynamicFormComponent(UnicornView):
 
     # Submission Hooks
 
+    skip_db_save: bool = False
+
     def submit_form(self):
 
         # check form is valid
@@ -553,19 +553,21 @@ class DynamicFormComponent(UnicornView):
 
         # then call series of final hooks
         self.unmount()
+        self.presave_to_db()
+        self.save_to_db()
+        self.postsave_to_db()
 
-        if self.form_mode == "search":
-            return self.get_search_redirect()  # has its own redirect
-        else:
-            self.presave_to_db()
-            self.save_to_db()
-            self.postsave_to_db()
-            return self.get_submission_redirect()
+        return self.get_submission_redirect()
 
     def presave_to_db(self):
         return  # default is there's nothing extra to do
 
     def save_to_db(self):
+        if self.skip_db_save:
+            return
+
+        if self.form_mode == "search":
+            pass  # nothing to save
         if self.form_mode in ["create", "update"]:
             self.table_entry.save()
         elif self.form_mode == "update_many":
@@ -588,11 +590,20 @@ class DynamicFormComponent(UnicornView):
                         setattr(entry, field, new_value)
                         entry.save()
                         # OPTIMIZE: consider doing a bulk update at the end
+        elif self.form_mode == "create_many":
+            for child in self.children:
+                child.presave_to_db()
+                child.save_to_db()
+                child.postsave_to_db()
 
     def postsave_to_db(self):
         return  # default is there's nothing extra to do
 
     def get_submission_redirect(self):
+
+        if self.form_mode == "search":
+            # has its own unique redirect that takes priority
+            return self.get_search_redirect()
 
         if self.redirect_mode == "table_entry":
             return redirect(

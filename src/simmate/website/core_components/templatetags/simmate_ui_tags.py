@@ -224,7 +224,7 @@ def molecule_input(
     custom_input_placeholder: str = "12345",
     # TODO:
     # initial_value: bool = None,
-    # many_molecules: bool = False,
+    many_molecules: bool = False,
 ):
     """
     Display a ChemDraw.js (or ChemDoodle.js) input widget.
@@ -233,11 +233,13 @@ def molecule_input(
         label = name.replace("_", " ").title()
 
     if not set_molecule_method:
-        set_molecule_method = f"set_{name}"
+        set_molecule_method = (
+            f"set_{name}" if not many_molecules else "load_many_molecules"
+        )
 
     if allow_text_input:
         if not text_input_name:
-            text_input_name = f"{name}_textinput"
+            text_input_name = f"{name}_text_input"
 
     if allow_custom_input:
         if not custom_input_name:
@@ -253,6 +255,7 @@ def molecule_input(
     )
 
     molecule = context[name]
+    molecule_matches = context["molecule_matches"]
 
     return locals()
 
