@@ -1,4 +1,3 @@
-
 # order of imports is important to prevent circular deps
 from .base import FrontendAction
 from .hash_update import HashUpdate

@@ -1,4 +1,3 @@
-
 from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.components import Component
 
@@ -14,7 +13,7 @@ class SetAttribute(BackendAction):
     def apply(
         self,
         component: Component,
-        request, # : ComponentRequest,
+        request,  # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
 
         set_property_value(

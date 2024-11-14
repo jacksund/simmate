@@ -1,9 +1,7 @@
-
 import copy
 
 from bs4 import BeautifulSoup, Tag
 from django.http import JsonResponse
-
 from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.components import Component
 from django_unicorn.components.unicorn_template_response import get_root_element
@@ -70,7 +68,7 @@ class ComponentResponse:
             request=request.request,  # gives the original HttpRequest
         )
 
-        # hook 
+        # hook
         # !!! also called in UnicornTemplateResponse
         # component.rendered(component_html)
 
@@ -116,7 +114,10 @@ class ComponentResponse:
 
             if (
                 request.hash == component_html_hash
-                and (not any(request.action_results) or not response_data.get("return", {}).get("value", None))
+                and (
+                    not any(request.action_results)
+                    or not response_data.get("return", {}).get("value", None)
+                )
                 and not component.calls
             ):
                 if not component.parent and component.force_render is False:

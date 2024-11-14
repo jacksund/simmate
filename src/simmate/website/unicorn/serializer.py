@@ -23,7 +23,6 @@ from django.utils.dateparse import (
     parse_time,
 )
 from django.utils.duration import duration_string
-
 from django_unicorn.utils import is_int, is_non_string_sequence
 
 try:
@@ -138,7 +137,11 @@ def _handle_inherited_models(model: Model, model_json: Dict):
 
     if model._meta.get_parent_list():
         for field in model._meta.get_fields():
-            if field.name not in model_json and hasattr(field, "primary_key") and not field.primary_key:
+            if (
+                field.name not in model_json
+                and hasattr(field, "primary_key")
+                and not field.primary_key
+            ):
                 if field.is_relation:
                     # We already serialized the m2m fields above, so we can skip them, but need to handle FKs
                     if not field.many_to_many:
@@ -160,7 +163,11 @@ def _handle_inherited_models(model: Model, model_json: Dict):
                         value = django_json_encoder.encode(value)
 
                         # The DjangoJSONEncoder has extra double-quotes for strings so remove them
-                        if isinstance(value, str) and value.startswith('"') and value.endswith('"'):
+                        if (
+                            isinstance(value, str)
+                            and value.startswith('"')
+                            and value.endswith('"')
+                        ):
                             value = value[1:-1]
 
                     model_json[field.name] = value
@@ -251,7 +258,9 @@ def _json_serializer(obj):
     raise TypeError
 
 
-def _fix_floats(current: Dict, data: Optional[Dict] = None, paths: Optional[List] = None) -> None:
+def _fix_floats(
+    current: Dict, data: Optional[Dict] = None, paths: Optional[List] = None
+) -> None:
     """
     Recursively change any Python floats to a string so that JavaScript
     won't convert the float to an integer when deserializing.
@@ -315,7 +324,9 @@ def _sort_dict(data: Dict) -> Dict:
     return dict(items)
 
 
-def _exclude_field_attributes(dict_data: Dict[Any, Any], exclude_field_attributes: Optional[Tuple[str]] = None) -> None:
+def _exclude_field_attributes(
+    dict_data: Dict[Any, Any], exclude_field_attributes: Optional[Tuple[str]] = None
+) -> None:
     """
     Remove the field attribute from `dict_data`. Handles nested attributes with a dot.
 
@@ -333,7 +344,9 @@ def _exclude_field_attributes(dict_data: Dict[Any, Any], exclude_field_attribute
                 remaining_field_attributes = field[next_attribute_index:]
                 remaining_dict_data = dict_data[field_splits[0]]
 
-                return _exclude_field_attributes(remaining_dict_data, (remaining_field_attributes,))
+                return _exclude_field_attributes(
+                    remaining_dict_data, (remaining_field_attributes,)
+                )
             elif len(field_splits) == nested_attribute_split_count:
                 (field_name, field_attr) = field_splits
 
@@ -342,7 +355,9 @@ def _exclude_field_attributes(dict_data: Dict[Any, Any], exclude_field_attribute
 
                 if dict_data[field_name] is not None:
                     if field_attr not in dict_data[field_name]:
-                        raise InvalidFieldAttributeError(field_name=field_name, field_attr=field_attr, data=dict_data)
+                        raise InvalidFieldAttributeError(
+                            field_name=field_name, field_attr=field_attr, data=dict_data
+                        )
 
                     del dict_data[field_name][field_attr]
 
@@ -407,7 +422,9 @@ def dumps(
     Returns a `str` instead of `bytes` (which deviates from `orjson.dumps`), but seems more useful.
     """
 
-    if exclude_field_attributes is not None and not is_non_string_sequence(exclude_field_attributes):
+    if exclude_field_attributes is not None and not is_non_string_sequence(
+        exclude_field_attributes
+    ):
         raise AssertionError("exclude_field_attributes type needs to be a sequence")
 
     # Call `dumps` to make sure that complex objects are serialized correctly

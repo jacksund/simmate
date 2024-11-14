@@ -1,4 +1,3 @@
-
 from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.call_method_parser import parse_call_method_name
 from django_unicorn.components import Component
@@ -15,7 +14,7 @@ class Toggle(BackendAction):
     def apply(
         self,
         component: Component,
-        request, # : ComponentRequest,
+        request,  # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
         for property_name in self.properties_to_toggle:
             property_value = component._get_property(property_name)

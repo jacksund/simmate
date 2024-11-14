@@ -1,7 +1,6 @@
 from typing import Any, Dict, Optional
 
 from django.db.models import QuerySet
-
 from django_unicorn.components import UnicornView
 from django_unicorn.decorators import timed
 
@@ -12,6 +11,7 @@ from django_unicorn.decorators import timed
 # safe, I leave the data kwarg here for now - @jacksund
 
 # TODO: convert set_property_value util to a Component method
+
 
 @timed
 def set_property_value(
@@ -88,10 +88,14 @@ def set_property_value(
                                 related_name = field.name
 
                                 if field.auto_created:
-                                    related_name = field.related_name or f"{field.name}_set"
+                                    related_name = (
+                                        field.related_name or f"{field.name}_set"
+                                    )
 
                                 if related_name == property_name_part:
-                                    related_descriptor = getattr(component_or_field, related_name)
+                                    related_descriptor = getattr(
+                                        component_or_field, related_name
+                                    )
                                     related_descriptor.set(property_value)
                                     is_relation_field = True
                                     break

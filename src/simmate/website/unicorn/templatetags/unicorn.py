@@ -4,7 +4,6 @@ import shortuuid
 from django import template
 from django.conf import settings
 from django.template.base import FilterExpression
-
 from django_unicorn.call_method_parser import InvalidKwargError, parse_kwarg
 from django_unicorn.errors import ComponentNotValidError
 from django_unicorn.settings import get_morpher_settings
@@ -46,7 +45,9 @@ def unicorn(parser, token):
     contents = token.split_contents()
 
     if len(contents) < MINIMUM_ARGUMENT_COUNT:
-        raise template.TemplateSyntaxError("%r tag requires at least a single argument" % token.contents.split()[0])
+        raise template.TemplateSyntaxError(
+            "%r tag requires at least a single argument" % token.contents.split()[0]
+        )
 
     component_name = parser.compile_filter(contents[1])
 
@@ -80,7 +81,9 @@ class UnicornNode(template.Node):
         self.component_name = component_name
         self.args = args if args is not None else []
         self.kwargs = kwargs if kwargs is not None else {}
-        self.unparseable_kwargs = unparseable_kwargs if unparseable_kwargs is not None else {}
+        self.unparseable_kwargs = (
+            unparseable_kwargs if unparseable_kwargs is not None else {}
+        )
         self.component_key = ""
         self.parent = None
 
@@ -104,11 +107,17 @@ class UnicornNode(template.Node):
             try:
                 resolved_value = template.Variable(value).resolve(context)
 
-                if key == "parent" and value == "view" and not isinstance(resolved_value, UnicornView):
+                if (
+                    key == "parent"
+                    and value == "view"
+                    and not isinstance(resolved_value, UnicornView)
+                ):
                     # Handle rendering a parent component from a template that is called from
                     # a `TemplateView`; for some reason `view` is clobbered in this instance, but
                     # the `unicorn` dictionary has enough data to instantiate a `UnicornView`
-                    parent_component_data = template.Variable("unicorn").resolve(context)
+                    parent_component_data = template.Variable("unicorn").resolve(
+                        context
+                    )
 
                     resolved_value = UnicornView(
                         component_name=parent_component_data.get("component_name"),
@@ -123,7 +132,9 @@ class UnicornNode(template.Node):
                     pk_val = value.replace(".id", ".pk")
 
                     try:
-                        resolved_kwargs.update({key: template.Variable(pk_val).resolve(context)})
+                        resolved_kwargs.update(
+                            {key: template.Variable(pk_val).resolve(context)}
+                        )
                     except TypeError:
                         resolved_kwargs.update({key: value})
                     except template.VariableDoesNotExist:
@@ -138,7 +149,9 @@ class UnicornNode(template.Node):
             # if there is no explicit parent, but this node is rendering under an existing
             # unicorn template, set that as the parent
             try:
-                implicit_parent = template.Variable("unicorn.component").resolve(context)
+                implicit_parent = template.Variable("unicorn.component").resolve(
+                    context
+                )
                 if implicit_parent:
                     self.parent = implicit_parent
             except template.VariableDoesNotExist:
@@ -149,7 +162,9 @@ class UnicornNode(template.Node):
         try:
             component_name = self.component_name.resolve(context)
         except AttributeError as e:
-            raise ComponentNotValidError(f"Component template is not valid: {self.component_name}.") from e
+            raise ComponentNotValidError(
+                f"Component template is not valid: {self.component_name}."
+            ) from e
 
         if self.parent:
             # Child components use the parent for part of the `component_id`
@@ -171,8 +186,11 @@ class UnicornNode(template.Node):
                 elif hasattr(model, "id"):
                     component_id = f"{component_id}:{model.id}"
 
-        
-        component_id = shortuuid.uuid(name=component_id)[:8] if component_id else shortuuid.uuid()[:8]
+        component_id = (
+            shortuuid.uuid(name=component_id)[:8]
+            if component_id
+            else shortuuid.uuid()[:8]
+        )
 
         # Useful for unit test
         self.component_id = component_id

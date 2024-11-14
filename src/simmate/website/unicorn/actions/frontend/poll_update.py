@@ -1,4 +1,3 @@
-
 from .base import FrontendAction
 
 
@@ -8,12 +7,12 @@ class PollUpdate(FrontendAction):
     """
 
     def __init__(
-            self,
-            *,
-            timing: int | None = None,
-            method: str | None = None,
-            disable: bool = False,
-        ):
+        self,
+        *,
+        timing: int | None = None,
+        method: str | None = None,
+        disable: bool = False,
+    ):
         """
         Args:
             param timing: The timing that should be used for the poll. Optional. Defaults to `None`

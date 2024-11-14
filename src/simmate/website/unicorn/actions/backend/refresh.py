@@ -1,4 +1,3 @@
-
 from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.components import Component
 from django_unicorn.views.utils import set_property_from_data
@@ -14,7 +13,7 @@ class Refresh(BackendAction):
     def apply(
         self,
         component: Component,
-        request, # : ComponentRequest,
+        request,  # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
 
         # grab a clean object - can be from cache

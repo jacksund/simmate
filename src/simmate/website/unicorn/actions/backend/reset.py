@@ -1,4 +1,3 @@
-
 from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.components import Component
 
@@ -13,7 +12,7 @@ class Reset(BackendAction):
     def apply(
         self,
         component: Component,
-        request, # : ComponentRequest,
+        request,  # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
 
         # create a clean object -- ignore cache

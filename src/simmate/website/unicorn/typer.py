@@ -25,7 +25,6 @@ from django.utils.dateparse import (
     parse_duration,
     parse_time,
 )
-
 from django_unicorn.typing import QuerySetType
 
 try:
@@ -138,7 +137,9 @@ def cast_value(type_hint, value):
                 value = caster(value)
                 break
             except TypeError:
-                if (type_hint is datetime or type_hint is date) and (isinstance(value, (float, int))):
+                if (type_hint is datetime or type_hint is date) and (
+                    isinstance(value, (float, int))
+                ):
                     try:
                         value = datetime.fromtimestamp(value, tz=timezone.utc)
 
@@ -203,7 +204,10 @@ def is_queryset(obj, type_hint, value):
     component or the type hint."""
 
     return (
-        (isinstance(obj, QuerySet) or (type_hint and get_origin(type_hint) is QuerySetType))
+        (
+            isinstance(obj, QuerySet)
+            or (type_hint and get_origin(type_hint) is QuerySetType)
+        )
         and isinstance(value, list)
         or isinstance(value, QuerySet)
     )

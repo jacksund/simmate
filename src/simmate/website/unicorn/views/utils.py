@@ -3,13 +3,18 @@ from dataclasses import is_dataclass
 from typing import Any, Union
 
 from django.db.models import Model
-
 from django_unicorn.components import UnicornField, UnicornView
 from django_unicorn.decorators import timed
-from django_unicorn.typer import cast_value, create_queryset, get_type_hints, is_queryset
+from django_unicorn.typer import (
+    cast_value,
+    create_queryset,
+    get_type_hints,
+    is_queryset,
+)
 from django_unicorn.utils import is_int
 
 logger = logging.getLogger(__name__)
+
 
 def sort_dict(d):
     items = [
@@ -24,6 +29,7 @@ def sort_dict(d):
             item[1] = sort_dict(item[1])
 
     return dict(items)
+
 
 @timed
 def set_property_from_data(
@@ -44,7 +50,9 @@ def set_property_from_data(
         return
 
     field = getattr(component_or_field, name)
-    component_field_is_model_or_unicorn_field = _is_component_field_model_or_unicorn_field(component_or_field, name)
+    component_field_is_model_or_unicorn_field = (
+        _is_component_field_model_or_unicorn_field(component_or_field, name)
+    )
 
     # UnicornField and Models are always a dictionary (can be nested)
     if component_field_is_model_or_unicorn_field:
@@ -79,7 +87,9 @@ def set_property_from_data(
 
         if hasattr(component_or_field, "_set_property"):
             # Can assume that `component_or_field` is a component
-            component_or_field._set_property(name, value, call_updating_method=True, call_updated_method=False)
+            component_or_field._set_property(
+                name, value, call_updating_method=True, call_updated_method=False
+            )
         else:
             setattr(component_or_field, name, value)
 
@@ -119,7 +129,9 @@ def _is_component_field_model_or_unicorn_field(
             is_subclass_of_model = issubclass(component_type_hints[name], Model)
 
             if not is_subclass_of_model:
-                is_subclass_of_unicorn_field = issubclass(component_type_hints[name], UnicornField)
+                is_subclass_of_unicorn_field = issubclass(
+                    component_type_hints[name], UnicornField
+                )
 
             # Construct a new class if the field is None and there is a type hint available
             if field is None:

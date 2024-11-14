@@ -14,5 +14,4 @@ class QuerySetType(Generic[M_co], QuerySet):
     # although https://github.com/typeddjango/django-stubs/blob/2a732fd/django-stubs/db/models/manager.pyi#L28
     # might be a better long-term solution.
 
-    def __iter__(self) -> Iterator[M_co]:
-        ...
+    def __iter__(self) -> Iterator[M_co]: ...

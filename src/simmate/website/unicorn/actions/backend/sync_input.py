@@ -1,4 +1,3 @@
-
 from django_unicorn.actions.backend.utils import set_property_value
 from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.components import Component
@@ -13,7 +12,7 @@ class SyncInput(BackendAction):
     def apply(
         self,
         component: Component,
-        request, # : ComponentRequest,
+        request,  # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
 
         property_name = self.payload["name"]

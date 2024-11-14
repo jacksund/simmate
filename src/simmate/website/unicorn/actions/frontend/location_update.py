@@ -1,4 +1,3 @@
-
 from django.http import HttpResponseRedirect
 
 from .base import FrontendAction

@@ -2,10 +2,9 @@ import logging
 import pickle
 from typing import List
 
+import django_unicorn
 from django.core.cache import caches
 from django.http import HttpRequest
-
-import django_unicorn
 from django_unicorn.errors import UnicornCacheError
 from django_unicorn.settings import get_cache_alias
 
@@ -59,11 +58,15 @@ class CacheableComponent:
 
             if component.parent:
                 components.append(component.parent)
-                component.parent = PointerUnicornView(component.parent.component_cache_key)
+                component.parent = PointerUnicornView(
+                    component.parent.component_cache_key
+                )
 
             for index, child in enumerate(component.children):
                 components.append(child)
-                component.children[index] = PointerUnicornView(child.component_cache_key)
+                component.children[index] = PointerUnicornView(
+                    child.component_cache_key
+                )
 
         for component, *_ in self._state.values():
             try:
@@ -106,7 +109,9 @@ def cache_full_tree(component: "django_unicorn.views.UnicornView"):
             cache.set(component.component_cache_key, component)
 
 
-def restore_from_cache(component_cache_key: str, request: HttpRequest = None) -> "django_unicorn.views.UnicornView":
+def restore_from_cache(
+    component_cache_key: str, request: HttpRequest = None
+) -> "django_unicorn.views.UnicornView":
     """
     Gets a cached unicorn view by key, restoring and getting cached parents and children
     and setting the request.

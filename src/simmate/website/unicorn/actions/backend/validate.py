@@ -1,4 +1,3 @@
-
 from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.components import Component
 
@@ -13,7 +12,7 @@ class Validate(BackendAction):
     def apply(
         self,
         component: Component,
-        request, # : ComponentRequest,
+        request,  # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
         # !!! This duplicates work done in ComponentResponse.from_context
         component.validate()

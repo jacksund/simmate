@@ -1,4 +1,3 @@
-
 from abc import ABC, abstractmethod
 
 from django_unicorn.actions.frontend import FrontendAction
@@ -8,9 +7,9 @@ from django_unicorn.components import Component
 class BackendAction(ABC):
     """
     Abstract base class for Unicorn Actions that get queued & applied to components
-    in the backend (via python). This base class also has helper methods for 
+    in the backend (via python). This base class also has helper methods for
     dynamically loading various Action types.
-    
+
     This class and its methods are typically handled by the FrontendAction class
     """
 
@@ -23,10 +22,10 @@ class BackendAction(ABC):
 
     @abstractmethod
     def apply(
-            self,
-            component: Component,
-            request, # : ComponentRequest,
-        ) -> tuple[Component, FrontendAction]:
+        self,
+        component: Component,
+        request,  # : ComponentRequest,
+    ) -> tuple[Component, FrontendAction]:
         """
         Applies the update to the component and returns the ActionResult if
         there is one. Must be defined in all subclasses.
@@ -65,8 +64,8 @@ class BackendAction(ABC):
                 f"was provided, but class only accepts '{cls.action_type}'"
             )
         return cls(
-            payload = data.get("payload", {}),
-            partials = data.get("partials", []),
+            payload=data.get("payload", {}),
+            partials=data.get("partials", []),
         )
 
     # --- Utility methods that help interact with *all* Action subclasses ---
@@ -76,7 +75,7 @@ class BackendAction(ABC):
         """
         Given a list of config dictionaries, this will create and return
         a list Action objects in the proper Action subclass.
-        
+
         This input is typically grabbed directly from `request.body.actionQueue`
         """
 
@@ -95,7 +94,6 @@ class BackendAction(ABC):
 
         return actions
 
-
     def get_action_type_mappings() -> dict:
         """
         Gives a mapping of action_type to the Action subclass that should be
@@ -105,10 +103,7 @@ class BackendAction(ABC):
         # support customer user Actions.
 
         # local import to prevent circular deps
-        from django_unicorn.actions.backend import (
-            CallMethod,
-            SyncInput,
-        )
+        from django_unicorn.actions.backend import CallMethod, SyncInput
 
         return {
             action.action_type: action

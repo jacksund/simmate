@@ -55,8 +55,12 @@ def dicts_equal(dictionary_one: Dict, dictionary_two: Dict) -> bool:
     Return True if all keys and values are the same between two dictionaries.
     """
 
-    is_valid = all(k in dictionary_two and dictionary_one[k] == dictionary_two[k] for k in dictionary_one) and all(
-        k in dictionary_one and dictionary_one[k] == dictionary_two[k] for k in dictionary_two
+    is_valid = all(
+        k in dictionary_two and dictionary_one[k] == dictionary_two[k]
+        for k in dictionary_one
+    ) and all(
+        k in dictionary_one and dictionary_one[k] == dictionary_two[k]
+        for k in dictionary_two
     )
 
     if not is_valid:
@@ -105,9 +109,9 @@ def is_non_string_sequence(obj):
     Helpful when you expect to loop over `obj`, but explicitly don't want to allow `str`.
     """
 
-    if (isinstance(obj, (collections.abc.Sequence, collections.abc.Set))) and not isinstance(
-        obj, (str, bytes, bytearray)
-    ):
+    if (
+        isinstance(obj, (collections.abc.Sequence, collections.abc.Set))
+    ) and not isinstance(obj, (str, bytes, bytearray)):
         return True
 
     return False

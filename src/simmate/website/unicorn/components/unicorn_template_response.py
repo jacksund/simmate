@@ -8,7 +8,6 @@ from bs4.dammit import EntitySubstitution
 from bs4.element import Tag
 from bs4.formatter import HTMLFormatter
 from django.template.response import TemplateResponse
-
 from django_unicorn.decorators import timed
 from django_unicorn.errors import (
     MissingComponentElementError,
@@ -90,7 +89,9 @@ def assert_has_single_wrapper_element(root_element: Tag, component_name: str) ->
 
 
 def _get_direct_view(tag: Tag):
-    return tag.find_next(attrs={"unicorn:view": True}) or tag.find_next(attrs={"u:view": True})
+    return tag.find_next(attrs={"unicorn:view": True}) or tag.find_next(
+        attrs={"u:view": True}
+    )
 
 
 def get_root_element(soup: BeautifulSoup) -> Tag:
@@ -185,7 +186,9 @@ potentially cause errors in Unicorn."
         root_element = get_root_element(soup)
 
         try:
-            assert_has_single_wrapper_element(root_element, self.component.component_name)
+            assert_has_single_wrapper_element(
+                root_element, self.component.component_name
+            )
         except (NoRootComponentElementError, MultipleRootComponentElementError) as ex:
             logger.warning(ex)
 
@@ -194,7 +197,9 @@ potentially cause errors in Unicorn."
         root_element["unicorn:key"] = self.component.component_key
         root_element["unicorn:checksum"] = checksum
         root_element["unicorn:data"] = frontend_context_variables
-        root_element["unicorn:calls"] = orjson.dumps(self.component.calls).decode("utf-8")
+        root_element["unicorn:calls"] = orjson.dumps(self.component.calls).decode(
+            "utf-8"
+        )
 
         # Generate the checksum based on the rendered content (without script tag)
         content_hash = generate_checksum(UnicornTemplateResponse._desoupify(soup))
@@ -210,9 +215,7 @@ potentially cause errors in Unicorn."
             }
             init = orjson.dumps(init).decode("utf-8")
             json_element_id = f"unicorn:data:{self.component.component_id}"
-            init_script = (
-                f"Unicorn.componentInit(JSON.parse(document.getElementById('{json_element_id}').textContent));"
-            )
+            init_script = f"Unicorn.componentInit(JSON.parse(document.getElementById('{json_element_id}').textContent));"
 
             json_tag = soup.new_tag("script")
             json_tag["type"] = "application/json"
@@ -251,7 +254,7 @@ need {{% load unicorn %}} or {{% unicorn_scripts %}}?') }} else {{ {init_script}
                         root_element.insert_after(t)
 
         rendered_template = UnicornTemplateResponse._desoupify(soup)
-        
+
         # !!! should rendered be called here instead of in the ComponentResponse
         # class (see comment there)
         self.component.rendered(rendered_template)

@@ -1,4 +1,3 @@
-
 import copy
 
 from django_unicorn.actions.backend import (
@@ -111,9 +110,7 @@ class ComponentRequest:
 
     @property
     def partials(self) -> list:
-        return [
-            partial for action in self.action_queue for partial in action.partials
-        ]
+        return [partial for action in self.action_queue for partial in action.partials]
 
     # OPTIMIZE: consider using @cached_property
     @property
@@ -145,10 +142,10 @@ class ComponentRequest:
         return SyncInput in self.action_types
 
     def apply_to_component(
-            self,
-            component: Component,
-            inplace: bool = True,
-        ) -> Component:
+        self,
+        component: Component,
+        inplace: bool = True,
+    ) -> Component:
         """
         Updates properties and applies all actions to the component, and
         then returns the updated component
@@ -166,7 +163,10 @@ class ComponentRequest:
         # will help avoid complex bugs in the future.
 
         # updates all component properties using data sent by request
-        if hasattr(updated_component, "is_editting") and not updated_component.is_editting:
+        if (
+            hasattr(updated_component, "is_editting")
+            and not updated_component.is_editting
+        ):
             # BUG-FIX: after child elements are modified by a parent message + method,
             # they fail to update in the frontend. We therefore say that such methods
             # require child methods to have "is_editting=False" set. This lets us

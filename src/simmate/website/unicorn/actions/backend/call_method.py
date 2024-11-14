@@ -3,7 +3,6 @@ from typing import Union
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.db.models import Model
 from django.http.response import HttpResponseRedirect
-
 from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.call_method_parser import parse_call_method_name
 from django_unicorn.components import Component
@@ -20,7 +19,9 @@ except ImportError:
         if hasattr(type_hint, "__origin__"):
             return type_hint.__origin__
 
+
 MIN_VALIDATION_ERROR_ARGS = 2
+
 
 class CallMethod(BackendAction):
 
@@ -74,7 +75,7 @@ class CallMethod(BackendAction):
     def apply(
         self,
         component: Component,
-        request, # : ComponentRequest,
+        request,  # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
 
         # Get all information needed for us to apply the method
@@ -200,9 +201,7 @@ class CallMethod(BackendAction):
         elif hasattr(e, "message_dict"):
             for field, message in e.message_dict.items():
                 if not e.args[1]:
-                    raise AssertionError(
-                        "Error code must be specified"
-                    ) from e
+                    raise AssertionError("Error code must be specified") from e
 
                 error_code = e.args[1]
 
@@ -211,18 +210,16 @@ class CallMethod(BackendAction):
                         {"code": error_code, "message": message}
                     )
                 else:
-                    component.errors[field] = [
-                        {"code": error_code, "message": message}
-                    ]
+                    component.errors[field] = [{"code": error_code, "message": message}]
 
     # TODO: refactor and consider moving to a method of Component
     @staticmethod
     def _call_method_name(
-            component: Component,
-            method_name: str,
-            args: tuple[any],
-            kwargs: dict[str, any],
-        ) -> any:
+        component: Component,
+        method_name: str,
+        args: tuple[any],
+        kwargs: dict[str, any],
+    ) -> any:
         """
         Calls the method name with parameters.
 
@@ -248,7 +245,10 @@ class CallMethod(BackendAction):
                     # Check that the type hint is a regular class or Union
                     # (which will also include Optional)
                     # TODO: Use types.UnionType to handle `|` for newer unions
-                    if not isinstance(type_hint, type) and get_origin(type_hint) is not Union:
+                    if (
+                        not isinstance(type_hint, type)
+                        and get_origin(type_hint) is not Union
+                    ):
                         continue
 
                     is_model = False
@@ -268,12 +268,18 @@ class CallMethod(BackendAction):
                             parsed_args.append(DbModel.objects.get(**{key: value}))
                         else:
                             value = kwargs.get("pk")
-                            parsed_kwargs[argument] = DbModel.objects.get(**{key: value})
+                            parsed_kwargs[argument] = DbModel.objects.get(
+                                **{key: value}
+                            )
 
                     elif argument in kwargs:
-                        parsed_kwargs[argument] = cast_value(type_hint, kwargs[argument])
+                        parsed_kwargs[argument] = cast_value(
+                            type_hint, kwargs[argument]
+                        )
                     elif len(args) > len(parsed_args):
-                        parsed_args.append(cast_value(type_hint, args[len(parsed_args)]))
+                        parsed_args.append(
+                            cast_value(type_hint, args[len(parsed_args)])
+                        )
                 elif argument in kwargs:
                     parsed_kwargs[argument] = kwargs[argument]
                 else:
