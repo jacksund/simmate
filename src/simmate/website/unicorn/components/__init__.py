@@ -1,8 +1,16 @@
 # for depreciated imports. These classes are now in the 'actions.frontend' module
-from django_unicorn.actions.frontend import HashUpdate, LocationUpdate, PollUpdate
-from django_unicorn.components.mixins import ModelValueMixin
-from django_unicorn.components.unicorn_view import Component, UnicornField, UnicornView
-from django_unicorn.typing import QuerySetType
+from simmate.website.unicorn.actions.frontend import (
+    HashUpdate,
+    LocationUpdate,
+    PollUpdate,
+)
+from simmate.website.unicorn.components.mixins import ModelValueMixin
+from simmate.website.unicorn.components.unicorn_view import (
+    Component,
+    UnicornField,
+    UnicornView,
+)
+from simmate.website.unicorn.typing import QuerySetType
 
 __all__ = [
     "Component",

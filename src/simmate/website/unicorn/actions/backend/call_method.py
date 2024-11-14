@@ -3,11 +3,12 @@ from typing import Union
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.db.models import Model
 from django.http.response import HttpResponseRedirect
-from django_unicorn.actions.frontend import FrontendAction
-from django_unicorn.call_method_parser import parse_call_method_name
-from django_unicorn.components import Component
-from django_unicorn.typer import cast_value, get_type_hints
-from django_unicorn.utils import get_method_arguments
+
+from simmate.website.unicorn.actions.frontend import FrontendAction
+from simmate.website.unicorn.call_method_parser import parse_call_method_name
+from simmate.website.unicorn.components import Component
+from simmate.website.unicorn.typer import cast_value, get_type_hints
+from simmate.website.unicorn.utils import get_method_arguments
 
 from .base import BackendAction
 
@@ -40,7 +41,7 @@ class CallMethod(BackendAction):
         # decide whether to "punt" it to another Action type.
 
         # local import to prevent circular deps
-        from django_unicorn.actions.backend import (
+        from simmate.website.unicorn.actions.backend import (
             Refresh,
             Reset,
             SetAttribute,
@@ -112,7 +113,10 @@ class CallMethod(BackendAction):
             if not isinstance(method_return_value, FrontendAction):
 
                 # local import to prevent circular deps
-                from django_unicorn.actions.frontend import MethodResult, Redirect
+                from simmate.website.unicorn.actions.frontend import (
+                    MethodResult,
+                    Redirect,
+                )
 
                 # special case: redirect objects need are converted to Redirect
                 if isinstance(method_return_value, HttpResponseRedirect):

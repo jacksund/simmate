@@ -2,11 +2,12 @@ import logging
 import pickle
 from typing import List
 
-import django_unicorn
 from django.core.cache import caches
 from django.http import HttpRequest
-from django_unicorn.errors import UnicornCacheError
-from django_unicorn.settings import get_cache_alias
+
+import simmate.website.unicorn as unicorn
+from simmate.website.unicorn.errors import UnicornCacheError
+from simmate.website.unicorn.settings import get_cache_alias
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,7 @@ class CacheableComponent:
     on exit.
     """
 
-    def __init__(self, component: "django_unicorn.views.UnicornView"):
+    def __init__(self, component):
         self._state = {}
         self.cacheable_component = component
 
@@ -92,11 +93,11 @@ class CacheableComponent:
             if extra_context:
                 component.extra_context = extra_context
 
-    def components(self) -> List["django_unicorn.views.UnicornView"]:
+    def components(self):
         return [component for component, *_ in self._state.values()]
 
 
-def cache_full_tree(component: "django_unicorn.views.UnicornView"):
+def cache_full_tree(component):
     root = component
 
     while root.parent:
@@ -109,9 +110,7 @@ def cache_full_tree(component: "django_unicorn.views.UnicornView"):
             cache.set(component.component_cache_key, component)
 
 
-def restore_from_cache(
-    component_cache_key: str, request: HttpRequest = None
-) -> "django_unicorn.views.UnicornView":
+def restore_from_cache(component_cache_key: str, request: HttpRequest = None):
     """
     Gets a cached unicorn view by key, restoring and getting cached parents and children
     and setting the request.
@@ -122,14 +121,14 @@ def restore_from_cache(
 
     if cached_component:
         roots = {}
-        root: "django_unicorn.views.UnicornView" = cached_component
+        root = cached_component
         roots[root.component_cache_key] = root
 
         while root.parent:
             root = cache.get(root.parent.component_cache_key)
             roots[root.component_cache_key] = root
 
-        to_traverse: List["django_unicorn.views.UnicornView"] = []
+        to_traverse = []
         to_traverse.append(root)
 
         while to_traverse:

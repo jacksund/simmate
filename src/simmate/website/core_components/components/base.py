@@ -4,10 +4,10 @@ import json
 import urllib
 
 from django.shortcuts import redirect
-from django_unicorn.components import UnicornView
 
 from simmate.database.base_data_types import DatabaseTable
 from simmate.toolkit import Molecule, Structure
+from simmate.website.unicorn.components import UnicornView
 from simmate.website.utilities import parse_request_get
 
 
@@ -442,7 +442,7 @@ class DynamicFormComponent(UnicornView):
         # attempt casting to correct type
         new_value = parse_value(new_value)
         # buggy
-        # from django_unicorn.typer import cast_attribute_value
+        # from simmate.website.unicorn.typer import cast_attribute_value
         # new_value = cast_attribute_value(self, property_name, new_value)
 
         # check if there is a special defined method for this property

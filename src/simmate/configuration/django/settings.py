@@ -60,7 +60,8 @@ INSTALLED_APPS = [
     #
     # Django unicorn acts as a frontend framework for making dyanmic webpages
     # (i.e. AJAX calls can be made to update the views)
-    "django_unicorn",
+    # "django_unicorn",
+    "simmate.website.configs.UnicornConfig",  # fork of django_unicorn
     #
     # Django simple history lets you track history of changes (and who made
     # those changes) for a given model. This is important for models that users

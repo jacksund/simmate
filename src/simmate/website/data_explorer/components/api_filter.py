@@ -1,9 +1,9 @@
 from django.shortcuts import redirect
-from django_unicorn.components import UnicornView
 
 # from simmate.configuration import settings
 from simmate.database.base_data_types import DatabaseTable, FilteredScope, table_column
 from simmate.website.data_explorer.views import EXPLORABLE_TABLES
+from simmate.website.unicorn.components import UnicornView
 from simmate.website.utilities import parse_request_get
 
 # TODO: move to util and combine with var used in views.py

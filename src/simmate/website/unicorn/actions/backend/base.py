@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from django_unicorn.actions.frontend import FrontendAction
-from django_unicorn.components import Component
+from simmate.website.unicorn.actions.frontend import FrontendAction
+from simmate.website.unicorn.components import Component
 
 
 class BackendAction(ABC):
@@ -97,13 +97,13 @@ class BackendAction(ABC):
     def get_action_type_mappings() -> dict:
         """
         Gives a mapping of action_type to the Action subclass that should be
-        used. For example: {"callMethod": django_unicorn.actions.backend.CallMethod}
+        used. For example: {"callMethod": simmate.website.unicorn.actions.backend.CallMethod}
         """
         # TODO: We assume only internal Actions for now, but we may want to
         # support customer user Actions.
 
         # local import to prevent circular deps
-        from django_unicorn.actions.backend import CallMethod, SyncInput
+        from simmate.website.unicorn.actions.backend import CallMethod, SyncInput
 
         return {
             action.action_type: action

@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 
-from django_unicorn.serializer import dumps, loads
+from simmate.website.unicorn.serializer import dumps, loads
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,5 @@
-from django_unicorn.actions.frontend import FrontendAction
-from django_unicorn.components import Component
+from simmate.website.unicorn.actions.frontend import FrontendAction
+from simmate.website.unicorn.components import Component
 
 from .base import BackendAction
 from .utils import set_property_value

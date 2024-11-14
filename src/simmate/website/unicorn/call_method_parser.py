@@ -4,7 +4,7 @@ from functools import lru_cache
 from types import MappingProxyType
 from typing import Any, Dict, List, Mapping, Tuple
 
-from django_unicorn.typer import CASTERS
+from simmate.website.unicorn.typer import CASTERS
 
 logger = logging.getLogger(__name__)
 

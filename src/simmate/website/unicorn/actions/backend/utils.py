@@ -1,8 +1,9 @@
 from typing import Any, Dict, Optional
 
 from django.db.models import QuerySet
-from django_unicorn.components import UnicornView
-from django_unicorn.decorators import timed
+
+from simmate.website.unicorn.components import UnicornView
+from simmate.website.unicorn.decorators import timed
 
 # BUG: request data should never be updated. Making it immutible
 # lets us look backwards and see the original request data and run checks along

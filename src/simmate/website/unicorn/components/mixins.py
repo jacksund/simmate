@@ -1,4 +1,4 @@
-from django_unicorn.serializer import model_value
+from simmate.website.unicorn.serializer import model_value
 
 
 class ModelValueMixin:

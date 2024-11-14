@@ -7,15 +7,15 @@ from django.views.decorators.http import require_POST
 # !!! I think use of "View" and "Component" needs cleaned up accross classes + vars
 # I'd vote for this renaming so that it matches other class names in django_unicorn
 # This is a big change to core so I only demo it here for now.
-from django_unicorn.components import UnicornView as Component
-from django_unicorn.settings import get_serial_enabled
-from django_unicorn.views.request import ComponentRequest
-from django_unicorn.views.response import ComponentResponse
+from simmate.website.unicorn.components import UnicornView as Component
+from simmate.website.unicorn.settings import get_serial_enabled
+from simmate.website.unicorn.views.request import ComponentRequest
+from simmate.website.unicorn.views.response import ComponentResponse
 
 
 @method_decorator(
     [
-        # TODO: timed, handle_error, -> from django_unicorn.decorators import timed, handle_error
+        # TODO: timed, handle_error, -> from simmate.website.unicorn.decorators import timed, handle_error
         ensure_csrf_cookie,
         csrf_protect,
         require_POST,
@@ -28,6 +28,7 @@ class UnicornMessageHandler(View):
         request: HttpRequest,
         component_name: str,
     ) -> JsonResponse:
+
         # OPTMIZE: consider making a middleware class that gives a
         # ComponentRequest input/subclass, rather than an HttpRequest.
         # (django-htmx can be used by example on how to do this)
@@ -42,8 +43,7 @@ class UnicornMessageHandler(View):
             # TEMP DISABLE
             raise NotImplementedError(
                 "Queuing is temporarily disabled in django_unicorn as we undergo "
-                "a larger refactor of our codebase. See issue #___ in our github "
-                "repo to track the status of this feature."
+                "a larger refactor of our codebase."
             )
             # handle via queue
             return self._handle_queued_request(component_request)
@@ -86,7 +86,7 @@ class UnicornMessageHandler(View):
 
     # -------------------------------------------------------------------------
 
-    # from django_unicorn.settings import (
+    # from simmate.website.unicorn.settings import (
     #     get_cache_alias,
     #     get_serial_enabled,
     #     get_serial_timeout,

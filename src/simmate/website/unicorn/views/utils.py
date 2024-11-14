@@ -3,15 +3,16 @@ from dataclasses import is_dataclass
 from typing import Any, Union
 
 from django.db.models import Model
-from django_unicorn.components import UnicornField, UnicornView
-from django_unicorn.decorators import timed
-from django_unicorn.typer import (
+
+from simmate.website.unicorn.components import UnicornField, UnicornView
+from simmate.website.unicorn.decorators import timed
+from simmate.website.unicorn.typer import (
     cast_value,
     create_queryset,
     get_type_hints,
     is_queryset,
 )
-from django_unicorn.utils import is_int
+from simmate.website.unicorn.utils import is_int
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +70,7 @@ def set_property_from_data(
         # Use `related_val` to check for many-to-many
         field.set(value)
     else:
-        # TODO: Call django_unicorn.typing.cast_attribute_value?
+        # TODO: Call simmate.website.unicorn.typing.cast_attribute_value?
         type_hints = get_type_hints(component_or_field)
         type_hint = type_hints.get(name)
 

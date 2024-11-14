@@ -2,13 +2,16 @@ import copy
 
 from bs4 import BeautifulSoup, Tag
 from django.http import JsonResponse
-from django_unicorn.actions.frontend import FrontendAction
-from django_unicorn.components import Component
-from django_unicorn.components.unicorn_template_response import get_root_element
-from django_unicorn.errors import RenderNotModifiedError
-from django_unicorn.serializer import loads
-from django_unicorn.utils import generate_checksum
-from django_unicorn.views.request import ComponentRequest
+
+from simmate.website.unicorn.actions.frontend import FrontendAction
+from simmate.website.unicorn.components import Component
+from simmate.website.unicorn.components.unicorn_template_response import (
+    get_root_element,
+)
+from simmate.website.unicorn.errors import RenderNotModifiedError
+from simmate.website.unicorn.serializer import loads
+from simmate.website.unicorn.utils import generate_checksum
+from simmate.website.unicorn.views.request import ComponentRequest
 
 
 class ComponentResponse:

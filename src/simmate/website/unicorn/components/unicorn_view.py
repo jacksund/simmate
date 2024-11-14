@@ -14,13 +14,16 @@ from django.http import HttpRequest
 from django.utils.decorators import classonlymethod
 from django.utils.safestring import mark_safe
 from django.views.generic.base import TemplateView
-from django_unicorn import serializer
-from django_unicorn.cacher import cache_full_tree, restore_from_cache
-from django_unicorn.components.fields import UnicornField
-from django_unicorn.components.unicorn_template_response import UnicornTemplateResponse
-from django_unicorn.decorators import timed
-from django_unicorn.typer import cast_attribute_value, get_type_hints
-from django_unicorn.utils import is_non_string_sequence
+
+from simmate.website.unicorn import serializer
+from simmate.website.unicorn.cacher import cache_full_tree, restore_from_cache
+from simmate.website.unicorn.components.fields import UnicornField
+from simmate.website.unicorn.components.unicorn_template_response import (
+    UnicornTemplateResponse,
+)
+from simmate.website.unicorn.decorators import timed
+from simmate.website.unicorn.typer import cast_attribute_value, get_type_hints
+from simmate.website.unicorn.utils import is_non_string_sequence
 
 try:
     from cachetools.lru import LRUCache

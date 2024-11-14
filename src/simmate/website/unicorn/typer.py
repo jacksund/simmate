@@ -25,7 +25,8 @@ from django.utils.dateparse import (
     parse_duration,
     parse_time,
 )
-from django_unicorn.typing import QuerySetType
+
+from simmate.website.unicorn.typing import QuerySetType
 
 try:
     from typing import get_args, get_origin
@@ -98,7 +99,7 @@ def get_type_hints(obj) -> Dict:
 
 def cast_value(type_hint, value):
     """Try to cast the value based on the type hint and
-    `django_unicorn.call_method_parser.CASTERS`.
+    `simmate.website.unicorn.call_method_parser.CASTERS`.
 
     Additional features:
     - convert `int`/`float` epoch to `datetime` or `date`

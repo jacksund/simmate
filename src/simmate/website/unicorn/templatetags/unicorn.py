@@ -4,9 +4,10 @@ import shortuuid
 from django import template
 from django.conf import settings
 from django.template.base import FilterExpression
-from django_unicorn.call_method_parser import InvalidKwargError, parse_kwarg
-from django_unicorn.errors import ComponentNotValidError
-from django_unicorn.settings import get_morpher_settings
+
+from simmate.website.unicorn.call_method_parser import InvalidKwargError, parse_kwarg
+from simmate.website.unicorn.errors import ComponentNotValidError
+from simmate.website.unicorn.settings import get_morpher_settings
 
 register = template.Library()
 
@@ -17,7 +18,7 @@ MINIMUM_ARGUMENT_COUNT = 2
 @register.inclusion_tag("unicorn/scripts.html")
 def unicorn_scripts():
     # Import here to prevent the potential of this loading before Django settings
-    from django_unicorn.settings import get_setting
+    from simmate.website.unicorn.settings import get_setting
 
     csrf_header_name = settings.CSRF_HEADER_NAME
 
@@ -93,7 +94,7 @@ class UnicornNode(template.Node):
         if hasattr(context, "request"):
             request = context.request
 
-        from django_unicorn.components import UnicornView
+        from simmate.website.unicorn.components import UnicornView
 
         resolved_args = []
 

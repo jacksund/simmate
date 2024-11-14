@@ -1,6 +1,6 @@
-from django_unicorn.actions.frontend import FrontendAction
-from django_unicorn.call_method_parser import parse_call_method_name
-from django_unicorn.components import Component
+from simmate.website.unicorn.actions.frontend import FrontendAction
+from simmate.website.unicorn.call_method_parser import parse_call_method_name
+from simmate.website.unicorn.components import Component
 
 from .base import BackendAction
 from .utils import set_property_value

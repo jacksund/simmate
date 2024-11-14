@@ -8,15 +8,19 @@ from bs4.dammit import EntitySubstitution
 from bs4.element import Tag
 from bs4.formatter import HTMLFormatter
 from django.template.response import TemplateResponse
-from django_unicorn.decorators import timed
-from django_unicorn.errors import (
+
+from simmate.website.unicorn.decorators import timed
+from simmate.website.unicorn.errors import (
     MissingComponentElementError,
     MissingComponentViewElementError,
     MultipleRootComponentElementError,
     NoRootComponentElementError,
 )
-from django_unicorn.settings import get_minify_html_enabled, get_script_location
-from django_unicorn.utils import generate_checksum, sanitize_html
+from simmate.website.unicorn.settings import (
+    get_minify_html_enabled,
+    get_script_location,
+)
+from simmate.website.unicorn.utils import generate_checksum, sanitize_html
 
 logger = logging.getLogger(__name__)
 

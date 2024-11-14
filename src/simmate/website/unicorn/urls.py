@@ -1,7 +1,8 @@
 from django.urls import path, re_path
-from django_unicorn.views import UnicornMessageHandler
 
-app_name = "django_unicorn"
+from simmate.website.unicorn.views import UnicornMessageHandler
+
+# app_name = "django_unicorn"
 
 urlpatterns = (
     re_path(

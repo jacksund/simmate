@@ -23,7 +23,8 @@ from django.utils.dateparse import (
     parse_time,
 )
 from django.utils.duration import duration_string
-from django_unicorn.utils import is_int, is_non_string_sequence
+
+from simmate.website.unicorn.utils import is_int, is_non_string_sequence
 
 try:
     from pydantic import BaseModel as PydanticBaseModel
@@ -218,7 +219,7 @@ def _json_serializer(obj):
     TODO: Investigate other ways to serialize objects automatically.
     e.g. Using DRF serializer: https://www.django-rest-framework.org/api-guide/serializers/#serializing-objects
     """
-    from django_unicorn.components import UnicornView
+    from simmate.website.unicorn.components import UnicornView
 
     try:
         if isinstance(obj, UnicornView):

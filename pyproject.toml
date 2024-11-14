@@ -72,7 +72,6 @@ dependencies=[
     "django-contrib-comments >=2.2.0, <=2.2.0",  # for tracking user comments in web
     "django-crispy-forms >=1.13.0, <=1.14.0",  # for formatting of online forms
     "django-pandas >=0.6.6, <=0.6.6",  # for converting QuerySets to PandasDataFrames
-    "django-unicorn >=0.59.0, <=0.59.0",  # for responsive web UI (AJAX calls)
     "dj-database-url >=0.5.0, <1.4.0",  # for DigitalOcean URL conversion
     "django-simple-history >=3.3.0, <=3.3.0",  # for tracking changes to data
     "djangorestframework >=3.13.1, <3.15.2",  # for our REST API
@@ -99,6 +98,16 @@ dependencies=[
     # "rdkit",  # cheminformatics library  # BUG: install is broken on pypi
     # "ipython",  # for rendering molecules in output
     # "umap-learn",  # for chemspace mapping
+    #
+    # A fork of django-unicorn was made, which we now use + its deps
+    # "django-unicorn >=0.59.0, <=0.59.0",  # for responsive web UI (AJAX calls)
+    "python >=3.8,<4",
+    "django >=2.2",
+    "beautifulsoup4 >=4.8.0",
+    "orjson >=3.6.0",
+    "shortuuid >=1.0.1",
+    "cachetools >=4.1.1",
+    "decorator >=4.4.2",
 ]
 
 # optional dependencies that are not installed by default

@@ -1,6 +1,6 @@
 import copy
 
-from django_unicorn.actions.backend import (
+from simmate.website.unicorn.actions.backend import (
     BackendAction,
     CallMethod,
     Refresh,
@@ -9,12 +9,12 @@ from django_unicorn.actions.backend import (
     Toggle,
     Validate,
 )
-from django_unicorn.actions.frontend import FrontendAction
-from django_unicorn.components import Component
-from django_unicorn.errors import UnicornViewError
-from django_unicorn.serializer import JSONDecodeError, loads
-from django_unicorn.utils import generate_checksum
-from django_unicorn.views.utils import set_property_from_data
+from simmate.website.unicorn.actions.frontend import FrontendAction
+from simmate.website.unicorn.components import Component
+from simmate.website.unicorn.errors import UnicornViewError
+from simmate.website.unicorn.serializer import JSONDecodeError, loads
+from simmate.website.unicorn.utils import generate_checksum
+from simmate.website.unicorn.views.utils import set_property_from_data
 
 
 class ComponentRequest:
