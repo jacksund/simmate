@@ -1,6 +1,6 @@
 {% load simmate_ui_tags %}
 <div class="my-2">
-    {% include "core_components/basic_elements/label.html" %}    
+    {% include "core_components/basic_elements/label.html" %}
     {% if molecule is None %}
         {% if many_molecules %}
             {% alert theme="danger" message="This section assumes all individual components are their own molecule, which means it will incorrectly split up salts and make things like Na+ or Cl- their own entries. Until this is fixed, avoid using the create_many form for such compounds." %}
@@ -35,7 +35,9 @@
                     {# modal_dismiss used only if this is in a popout modal #}
                     {% if modal_dismiss %}data-bs-dismiss="modal"{% endif %}
                     onclick="get_mol_from_sketcher('{{ name }}{{ context.unicorn.component_key }}', '{% if not context.unicorn.component_key %}{{ context.unicorn.component_name }}{% else %}{{ context.unicorn.component_key }}{% endif %}', '{{ set_molecule_method }}')">
+                    {# djlint:off #}
                     Load Molecule{% if many_molecules %}s{% endif %}
+                    {# djlint:on #}
                 </button>
             </div>
         {% endif %}
@@ -60,7 +62,7 @@
                                class="btn btn-info btn-sm"
                                href="{{ match.table_entry_url }}"
                                target="_blank">
-                               {{ match.table_name }} {{ match.table_entry_id }}<i class="mdi mdi-open-in-new"></i>
+                                {{ match.table_name }} {{ match.table_entry_id }}<i class="mdi mdi-open-in-new"></i>
                             </a>
                         {% endfor %}
                     </div>
@@ -70,15 +72,3 @@
         {# TODO: button name="unset_molecule" theme="secondary" icon="refresh" #}
     {% endif %}
 </div>
-{% comment %}
-    <div class="alert alert-success" role="alert">
-        <i class="mdi mdi-information mx-2"></i>
-        Molecules successfully loaded! Refresh this page if you wish to restart.
-    </div>
-    {% if found_duplicates %}
-        <div class="alert alert-danger" role="alert">
-            <i class="mdi mdi-alert mx-2"></i>
-            At least one duplicate was found! You can still continue the form because we removed all duplicates. However, if this message is unexpected, make sure you double check things.
-        </div>
-    {% endif %}
-{% endcomment %}

@@ -336,7 +336,7 @@ class DynamicFormComponent(UnicornView):
         return  # default is there's nothing extra to do
 
     def mount_for_create_many(self):
-        return  # default is there's nothing extra to do
+        self.redirect_mode = "table"
 
     def mount_for_update(self):
         view_kwargs = self.request.resolver_match.kwargs
@@ -521,7 +521,10 @@ class DynamicFormComponent(UnicornView):
         # reset errors for this new check
         self.form_errors = []
 
-        if self.form_mode in ["create", "update"]:
+        if self.skip_db_save:
+            return True
+
+        if self.form_mode in ["create", "update", "create_many_entry"]:
             self.check_required_inputs()
         elif self.form_mode == "update_many":
             self.check_max_update_many()
@@ -568,7 +571,7 @@ class DynamicFormComponent(UnicornView):
 
         if self.form_mode == "search":
             pass  # nothing to save
-        if self.form_mode in ["create", "update"]:
+        if self.form_mode in ["create", "update", "create_many_entry"]:
             self.table_entry.save()
         elif self.form_mode == "update_many":
 

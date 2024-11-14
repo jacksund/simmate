@@ -75,7 +75,6 @@ class MoleculeInput:
                 if self.form_mode == "create_many" and self.molecule_match_tables:
                     entry["molecule_matches"] = self.check_datasets(molecule)
                     entry["skip_db_save"] = True if entry["molecule_matches"] else False
-
                 self.entries_for_create_many.append(entry)
 
             # draw molecules in ui
