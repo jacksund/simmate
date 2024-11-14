@@ -9,13 +9,6 @@ from .badelf import (
     StaticEnergy__Vasp__WarrenLabPrebadelfHse,
     StaticEnergy__Vasp__WarrenLabPrebadelfPbesol,
 )
-from .staged import (
-    StagedCalculation__Vasp__WarrenLabRelaxationStaticHseHse,
-    StagedCalculation__Vasp__WarrenLabRelaxationStaticPbeHse,
-    StagedCalculation__Vasp__WarrenLabRelaxationStaticPbePbe,
-    Relaxation__Vasp__WarrenLabHseWithWavecar,
-    Relaxation__Vasp__WarrenLabPbesolWithWavecar,
-)
 from .relaxation import (
     Relaxation__Vasp__WarrenLabHse,
     Relaxation__Vasp__WarrenLabHsesol,
@@ -23,6 +16,13 @@ from .relaxation import (
     Relaxation__Vasp__WarrenLabPbeMetal,
     Relaxation__Vasp__WarrenLabPbesol,
     Relaxation__Vasp__WarrenLabScan,
+)
+from .staged import (
+    Relaxation__Vasp__WarrenLabHseWithWavecar,
+    Relaxation__Vasp__WarrenLabPbesolWithWavecar,
+    StagedCalculation__Vasp__WarrenLabRelaxationStaticHseHse,
+    StagedCalculation__Vasp__WarrenLabRelaxationStaticPbeHse,
+    StagedCalculation__Vasp__WarrenLabRelaxationStaticPbePbe,
 )
 from .static_energy import (
     StaticEnergy__Vasp__WarrenLabHse,

@@ -13,6 +13,6 @@ class StagedCalculation__Badelf__BadelfHse(StagedWorkflow):
     subworkflow_names = [
         "static-energy.vasp.warren-lab-prebadelf-hse",
         "bad-elf.badelf.badelf",
-        ]
-    
+    ]
+
     one_folder = True

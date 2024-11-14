@@ -5,6 +5,7 @@ from simmate.apps.warren_lab.workflows.relaxation.pbesol import (
 )
 from simmate.engine import StagedWorkflow
 
+
 # We want to run a PBE relaxation followed by an HSE static energy calculation.
 # Copying the WAVECAR will make this much faster, but this requires that a
 # WAVECAR exists. However, we generally don't want all relaxation calculations
@@ -25,11 +26,11 @@ class StagedCalculation__Vasp__WarrenLabRelaxationStaticPbeHse(StagedWorkflow):
     calculation.This method will also write the ELFCAR and CHGCAR files
     necessary for population analysis (i.e. oxidation state and electron count)
     """
-    
+
     subworkflow_names = [
         "relaxation.vasp.warren-lab-pbesol-with-wavecar",
-        "static-energy.vasp.warren-lab-prebadelf-hse",    
-        ]
+        "static-energy.vasp.warren-lab-prebadelf-hse",
+    ]
     files_to_copy = ["WAVECAR"]
     # We use pbesol as our default relaxation functional because it doesn't take
     # much more time than pbe and is considered to be more accurate for solids

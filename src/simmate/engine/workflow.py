@@ -227,6 +227,12 @@ class Workflow:
         # This method is isolated only because we want to wrap it as a prefect
         # workflow in some cases.
         logging.info(f"Starting '{cls.name_full}'")
+        # We may have repeats in our kwargs if trying to submit a subworkflow
+        # using the same kwargs given to the run_config method of the parent
+        # workflow. This will throw an error, so we remove them here
+        for key in ["run_id", "directory", "compress_output", "source", "started_at"]:
+            if key in kwargs.keys():
+                del kwargs[key]
         kwargs_cleaned = cls._load_input_and_register(
             run_id=run_id,
             directory=directory,
@@ -235,7 +241,6 @@ class Workflow:
             started_at=timezone.now(),
             **kwargs,
         )
-
         # Finally run the core part of the workflow. This should return a
         # dictionary object if we have "use_database=True", but can be
         # any python object if "use_database=False"
@@ -477,6 +482,7 @@ class Workflow:
                 return DiffusionAnalysis
         elif flow_type == "staged-calculation":
             from simmate.database.base_data_types import StagedCalculation
+
             return StagedCalculation
 
         raise NotImplementedError(
@@ -1159,7 +1165,7 @@ class Workflow:
         converts all parameters to appropriate python objects
         """
 
-        from simmate.toolkit import Composition, Structure, Molecule
+        from simmate.toolkit import Composition, Molecule, Structure
         from simmate.toolkit.diffusion import MigrationHop, MigrationImages
 
         parameters_cleaned = parameters.copy()

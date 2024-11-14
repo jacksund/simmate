@@ -3,7 +3,6 @@
 from simmate.engine.staged_workflow import StagedWorkflow
 
 
-
 class StagedCalculation__Vasp__EvoTutorial(StagedWorkflow):
     """
     Runs a series of increasing-quality relaxations and then finishes with a single
@@ -36,5 +35,3 @@ class StagedCalculation__Vasp__EvoTutorial(StagedWorkflow):
         "relaxation.vasp.quality01",
         "relaxation.vasp.quality02",
     ]
-
-

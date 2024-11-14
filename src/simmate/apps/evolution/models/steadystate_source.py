@@ -2,6 +2,8 @@
 
 import logging
 
+import numpy
+from django.utils import timezone
 from rich import print
 
 import simmate.toolkit.creators as creation_module
@@ -10,12 +12,10 @@ import simmate.toolkit.transformations.from_ase as ase_transform_module
 from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.engine.execution import WorkItem
 from simmate.toolkit import Composition
-from django.utils import timezone
-import numpy
 
 
 class SteadystateSource(DatabaseTable):
-    
+
     class Meta:
         app_label = "workflows"
 
@@ -23,11 +23,11 @@ class SteadystateSource(DatabaseTable):
     kwargs = table_column.JSONField(default=dict)
 
     nsteadystate_target = table_column.FloatField(null=True, blank=True)
-    
+
     # This is the most recent time when the steady state target number changed. This
     # is time since the start of the run
     target_time_history = table_column.DateTimeField(null=True, blank=True)
-    
+
     # This list is the nsteadystate_target that existed after each change
     target_history = table_column.JSONField(default=list)
 
@@ -36,16 +36,16 @@ class SteadystateSource(DatabaseTable):
 
     # This list is all workitem ids ever submitted by this source
     workitem_ids = table_column.JSONField(default=list)
-    
+
     # This list is the index in the workitem ids at which the nsteadystate_target
     # went through a change. This is useful so that we can observe if further
     # changes need to be made
     workitem_ids_history = table_column.JSONField(default=list)
-    
+
     # # This list is limits to ids that were submitted after the most recent update
     # # and have not failed. Includes submitted, running, and completed jobs.
     # recent_workitem_ids = table_column.JSONField(default=list)
-    
+
     # This list limits to ids that are submitted or running, but not complete
     active_workitem_ids = table_column.JSONField(default=list)
 
@@ -106,57 +106,57 @@ class SteadystateSource(DatabaseTable):
         self.save()
 
         return still_running_ids
-    
+
     def update_flow_target(self, value):
         """
         Updates nsteadystate_target to new value and records the change
         """
         # update target history with previous value
         self.target_history.append(self.nsteadystate_target)
-        
+
         # update to new value
-        self.nsteadystate_target = value       
-        
+        self.nsteadystate_target = value
+
         # add time to history
         self.target_time_history = timezone.now()
-        
+
         # update workitem id history
         self.workitem_ids_history.append(len(self.workitem_ids))
         self.save()
 
     @property
     def n_active_workitems(self):
-        # This gives us the number of currently running jobs 
+        # This gives us the number of currently running jobs
         # update our ids before we report how many there are.
         active_runs = self.update_active_workitem_ids()
         # now the currently running ones is just the length of ids!
         return len(active_runs)
-    
+
     @property
     def n_recent_active_workitems(self):
         # This is the same as above, but ignores any items that were submitted
         # prior to the last update
         active_runs = self.update_active_workitem_ids()
-        recent_workitem_ids = self.workitem_ids[self.workitem_ids_history[-1]:]
+        recent_workitem_ids = self.workitem_ids[self.workitem_ids_history[-1] :]
         recent_runs = numpy.isin(active_runs, recent_workitem_ids)
         return len(numpy.where(recent_runs)[0])
-    
+
     @property
     # def nflow_not_failed_runs(self):
     def n_recent_not_failed_workitems(self):
-        #This gives all jobs, running or finished, since the last steadystate
+        # This gives all jobs, running or finished, since the last steadystate
         # target update. Excludes jobs that failed
-        recent_workitem_ids = self.workitem_ids[self.workitem_ids_history[-1]:]
+        recent_workitem_ids = self.workitem_ids[self.workitem_ids_history[-1] :]
         not_failed_ids = self._check_not_failed_ids(recent_workitem_ids)
         return len(not_failed_ids)
-    
+
     @property
     def n_not_failed_workitems(self):
         # This gives us all jobs, running or finished, since the start of the
         # calculation
         not_failed_ids = self._check_not_failed_ids(self.workitem_ids)
         return len(not_failed_ids)
-    
+
     def _cancel_pending_workitems(self):
         """
         Cancels any pending workitems. Usually this is used if a steady state
@@ -169,7 +169,7 @@ class SteadystateSource(DatabaseTable):
         ).all()
         for workitem in workitems_to_cancel:
             workitem.cancel()
-           
+
     @staticmethod
     def _check_still_running_ids(workitem_ids):
         """
@@ -189,7 +189,7 @@ class SteadystateSource(DatabaseTable):
             status__in=["P", "R"],
         ).values_list("id", flat=True)
         return list(still_running_ids)
-    
+
     @staticmethod
     def _check_not_failed_ids(workitem_ids):
         """
@@ -205,7 +205,7 @@ class SteadystateSource(DatabaseTable):
             status__in=["P", "R", "F"],
         ).values_list("id", flat=True)
         return list(not_failed_ids)
-        
+
     def to_toolkit(self):
         if self.is_transformation:
             return self._init_transformation()

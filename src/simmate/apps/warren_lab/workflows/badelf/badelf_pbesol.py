@@ -2,6 +2,7 @@
 
 from simmate.engine import StagedWorkflow
 
+
 class StagedCalculation__Badelf__BadelfPbesol(StagedWorkflow):
     """
     Runs a static energy calculation using an extra-fine FFT grid using vasp
@@ -12,6 +13,6 @@ class StagedCalculation__Badelf__BadelfPbesol(StagedWorkflow):
     subworkflow_names = [
         "static-energy.vasp.warren-lab-prebadelf-pbesol",
         "bad-elf.badelf.badelf",
-        ]
-    
+    ]
+
     one_folder = True

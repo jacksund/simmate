@@ -33,9 +33,10 @@ class StagedCalculation__Badelf__BadelfTest(StagedWorkflow):
     badelf run. This is intended for testing only and is not recommended for
     general use.
     """
+
     subworkflow_names = [
         "static-energy.vasp.warren-lab-prebadelf-test",
         "bad-elf.badelf.badelf",
-        ]
-    
+    ]
+
     one_folder = True

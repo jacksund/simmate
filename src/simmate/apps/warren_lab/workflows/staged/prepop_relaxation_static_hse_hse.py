@@ -5,6 +5,7 @@ from simmate.apps.warren_lab.workflows.relaxation.hse import (
 )
 from simmate.engine import StagedWorkflow
 
+
 class Relaxation__Vasp__WarrenLabHseWithWavecar(Relaxation__Vasp__WarrenLabHse):
     """
     This workflow is the same as the typical HSE relaxation but with the added
@@ -22,14 +23,13 @@ class StagedCalculation__Vasp__WarrenLabRelaxationStaticHseHse(StagedWorkflow):
     and CHGCAR files necessary for population analysis (i.e. oxidation state and
     electron count)
     """
-    
+
     subworkflow_names = [
         "relaxation.vasp.warren-lab-pbesol-with-wavecar",
-        "relaxation.vasp.warren-lab-hse-with-wavecar",      
-        "static-energy.vasp.warren-lab-prebadelf-hse"
-        ]
+        "relaxation.vasp.warren-lab-hse-with-wavecar",
+        "static-energy.vasp.warren-lab-prebadelf-hse",
+    ]
     files_to_copy = ["WAVECAR"]
     # We use pbesol as our default relaxation functional because it doesn't take
     # much more time than pbe and is considered to be more accurate for solids
     # (Phys. Rev. Lett. 102, 039902 (2009))
-

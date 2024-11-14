@@ -65,4 +65,3 @@ class BadElfBase(Workflow):
             badelf_tools.write_species_file(file_type="CHGCAR")
         badelf_tools.write_results_csv()
         return results
-

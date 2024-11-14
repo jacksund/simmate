@@ -218,7 +218,8 @@ class Thermodynamics(DatabaseTable):
             # https://github.com/materialsproject/pymatgen/blob/de17dd84ba90dbf7a8ed709a33d894a4edb82d02/pymatgen/analysis/phase_diagram.py#L2926
             pde.entry_id = f"id={entry.id}"
             entries_pmg.append(pde)
-
+        # pymatgen fails to get elements properly. We do it manually here to
+        # avoid an error.
         phase_diagram = PhaseDiagram(entries_pmg)
 
         return (

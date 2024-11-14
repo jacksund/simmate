@@ -2,6 +2,8 @@
 
 import inspect
 import math
+import os
+import shutil
 from functools import cache
 from pathlib import Path
 
@@ -13,51 +15,47 @@ from simmate.engine import Workflow
 from simmate.toolkit import Structure
 from simmate.visualization.plotting import PlotlyFigure
 
-import os
-import shutil
-
 
 class StagedWorkflow(Workflow):
     """
     An abstract class for running a series of DFT calculations. This workflow
     is meant to help build staged relaxations for evolutionary searches.
-    
+
     When inheriting this mixin, the database table should be the same as the
     final subworkflow.
     """
 
     description_doc_short = "runs a series of dft calculations"
 
-    subworkflow_names = [] # The names of the workflows
-    
-    files_to_copy = [] # The files that should be copied from one run to the next
-    
-    one_folder = False # In some cases we may want to use the same folder
-                       # (e.g. badelf workflows) so that we don't have to copy
-                       # large files. NOTE this should be used carefully
+    subworkflow_names = []  # The names of the workflows
+
+    files_to_copy = []  # The files that should be copied from one run to the next
+
+    one_folder = False  # In some cases we may want to use the same folder
+    # (e.g. badelf workflows) so that we don't have to copy
+    # large files. NOTE this should be used carefully
 
     @classmethod
     def run_config(
         cls,
         structure: Structure,
         # command: str = None, # !!! Ideally, the workflows can be anything using a structure
-                               # The command would instead be passed in kwargs
+        # The command would instead be passed in kwargs
         source: dict = None,
         directory: Path = None,
         subworkflow_kwargs: dict = {},
         **kwargs,
-        
     ):
         # TODO: The current implementation will not fill out the StagedCalculation
         # table unless all calculations finish successfully. It would be ideal to
         # dynamically update it. (is that possible?)
-        
+
         # This workflow must return several things for the StagedCalculation
         # table. This includes the workflow name and workflow id
         subworkflow_ids = []
-        failed_subworkflow = None     
+        failed_subworkflow = None
         error = None
-        
+
         # Our first calculation is directly from our inputs.
         try:
             current_task = cls.subworkflows[0]
@@ -74,14 +72,14 @@ class StagedWorkflow(Workflow):
             print(str(e))
             error = str(e)
             failed_subworkflow = cls.subworkflow_strings[0]
-        
+
         # In some rare cases, we may want to only run one subworkflow here (such
         # as when we are testing the evolutionary search) so if there is only
         # one workflow we skip to the end
         if len(cls.subworkflows) != 1 and error is None:
             # The remaining tasks continue and use the past results as an input
             # If the one_folder is true, we want to run in the same directory
-            
+
             for i, current_task in enumerate(cls.subworkflows[1:]):
                 if not cls.one_folder:
                     # Now we copy the requested files from one to the next
@@ -89,17 +87,15 @@ class StagedWorkflow(Workflow):
                     new_directory = directory / current_task.name_full
                     os.makedirs(new_directory, exist_ok=True)
                     for file in cls.files_to_copy:
-                        shutil.copyfile(
-                            previous_directory / file, new_directory / file
-                        )
+                        shutil.copyfile(previous_directory / file, new_directory / file)
                 elif cls.one_folder:
-                    new_directory=result.directory
+                    new_directory = result.directory
                 try:
                     state = current_task.run(
                         structure=result,  # this is the result of the last run
                         # command=command,
                         directory=new_directory,
-                        **subworkflow_kwargs
+                        **subworkflow_kwargs,
                     )
                     result = state.result()
                     # append info to workflow lists
@@ -107,15 +103,15 @@ class StagedWorkflow(Workflow):
                 except:
                     failed_subworkflow = cls.subworkflow_strings[i]
                     break
-        
+
         # save final result
         final_result = dict(
             structure=structure,
             subworkflow_names=cls.subworkflow_strings,
             subworkflow_ids=subworkflow_ids,
-            copied_files = cls.files_to_copy,
-            failed_subworkflow = failed_subworkflow,
-            )
+            copied_files=cls.files_to_copy,
+            failed_subworkflow=failed_subworkflow,
+        )
         return final_result
 
     @classmethod
@@ -133,7 +129,6 @@ class StagedWorkflow(Workflow):
                 # This object should already be a string
                 workflow_strings.append(name)
         return workflow_strings
-        
 
     @classmethod
     @property
@@ -141,16 +136,16 @@ class StagedWorkflow(Workflow):
     def subworkflows(cls):
         # import locally to avoid circular import
         from simmate.workflows.utilities import get_workflow
+
         return [get_workflow(name) for name in cls.subworkflow_strings]
-    
-    
+
     @classmethod
     @property
     @cache
     def last_subworkflow(cls):
         # This is just convenient for code clarity
         return cls.subworkflows[-1]
-    
+
     @classmethod
     @property
     @cache
@@ -166,8 +161,9 @@ class StagedWorkflow(Workflow):
         # We pull the directories of all staged calculations where the final
         # result has the given filter criteria
         directories = (
-            cls.last_subworkflow.all_results.filter(**filter_kwargs)
-            .values_list("directory", flat=True)
+            cls.last_subworkflow.all_results.filter(**filter_kwargs).values_list(
+                "directory", flat=True
+            )
             # .order_by("?")[:1000]
             .all()
         )
@@ -198,7 +194,7 @@ class StagedWorkflow(Workflow):
                 subworkflow_names.append(subworkflow.name_full)
             else:
                 subworkflow_names.append(subworkflow)
-        
+
         all_data = {w: {} for w in subworkflow_names}
         for table in cls.subworkflow_tables:
             # for each type of table, we filter for the provided kwargs. We then
@@ -216,7 +212,7 @@ class StagedWorkflow(Workflow):
             #     _connector=dj_query.OR,
             # )
             # .filter(complex_filter)
-            
+
             # For each result in our query we get the parent directory. We then
             # add the result to our all_data dictionary witht he parent directory
             # as the key and requested value as the value.
@@ -284,14 +280,14 @@ class StagedSeriesConvergence(PlotlyFigure):
             # add a line for y=x for added visualization
             # Determine the min and max range for y=x line
             x_min, x_max = min(xs + ys), max(xs + ys)
-            
+
             # Plot the y=x line
             y_equals_x_line = plotly_go.Scatter(
                 x=[x_min, x_max],
                 y=[x_min, x_max],
                 mode="lines",
                 line=dict(dash="dash", color="black"),
-                name="y=x"
+                name="y=x",
             )
             figure.add_trace(y_equals_x_line, row=row, col=col)
 

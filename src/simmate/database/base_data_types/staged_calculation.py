@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import Calculation, Structure , table_column
-from pathlib import Path
 import logging
+from pathlib import Path
+
+from simmate.database.base_data_types import Calculation, Structure, table_column
 
 
 class StagedCalculation(Structure, Calculation):
@@ -17,29 +18,28 @@ class StagedCalculation(Structure, Calculation):
     class Meta:
         app_label = "workflows"
 
-    
     subworkflow_names = table_column.JSONField(blank=True, null=True)
     """
     A list of subworkflow string names
     """
-    
+
     subworkflow_ids = table_column.JSONField(blank=True, null=True)
     """
     A list of the id pointing to each workflow result's location in their
     respective databases
     """
-    
+
     copied_files = table_column.JSONField(blank=True, null=True)
     """
     A list of the files that were copied between calculations
     """
-    
+
     failed_subworkflow = table_column.CharField(max_length=50, blank=True, null=True)
     """
     If the calculation fails sowhere along the way, this field will contain the
     name of the subworkflow.
     """
-    
+
     # TODO:
     # should this be a list of all modifications? It could maybe be used to
     # carry fixes (such as smearing) accross different calcs.
@@ -51,27 +51,30 @@ class StagedCalculation(Structure, Calculation):
     # that the involved calculations are structure calculations and remove some
     # versatility, but it would be convenient and is likely the main way this
     # table will be used.
-    
+
     # !!! There may be a more direct way to store this information using
     # one-to-one keys or other. Ideally this would directly connect items in
     # this table to the subworkflow tables.
-    
+
     @property
     def subworkflows(self):
         from simmate.workflows.utilities import get_workflow
+
         subworkflow_names = self.subworkflow_names
         return [get_workflow(name) for name in subworkflow_names]
-        
+
     @property
     def database_tables(self):
         subworkflows = self.subworkflows
         return [subworkflow.database_table for subworkflow in subworkflows]
-    
+
     @property
     def subworkflow_results(self):
         results = []
         if len(self.subworkflow_ids) != len(self.database_tables):
-            logging.warning("This staged workflow did not complete. No results will be returned.")
+            logging.warning(
+                "This staged workflow did not complete. No results will be returned."
+            )
             return results
         for sub_id, table in zip(self.subworkflow_ids, self.database_tables):
             if table.objects.filter(id=sub_id).exists():
@@ -92,6 +95,3 @@ class StagedCalculation(Structure, Calculation):
         update_from_directory method here.
         """
         pass
-            
-            
-            
