@@ -108,7 +108,17 @@ urlpatterns = [
     path(route="about/", view=views.about, name="about"),
     #
     # Django-unicorn urls
-    path("unicorn/", include("django_unicorn.urls")),
+    path(
+        route="unicorn/",
+        view=include(
+            (
+                "simmate.website.unicorn.urls",
+                "simmate.website.unicorn",
+            ),
+            namespace="unicorn",
+        ),
+        name="unicorn",
+    ),
     #
     # Django-contrib-comments urls
     path("comments/", include("django_comments.urls")),
