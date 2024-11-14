@@ -3,7 +3,7 @@
     <div class="mt-1">
         <input unicorn:model.defer="{{ name }}"
                class="form-check-input"
-               id="{{ name }}{{ unicorn.component_key }}"
+               id="{{ name }}{{ context.unicorn.component_key }}"
                type="checkbox">
         {% if side_text %}<small>{{ side_text }}</small>{% endif %}
     </div>

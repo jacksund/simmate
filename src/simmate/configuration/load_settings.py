@@ -218,7 +218,7 @@ class SimmateSettings:
                 },
                 # django extras
                 "debug": False,
-                "allowed_hosts": ["127.0.0.1", "localhost"],
+                "allowed_hosts": ["127.0.0.1", "localhost", "testserver"],
                 # sets STATICFILES_STORAGE to ManifestStaticFilesStorage for prod setups
                 "static_file_hashes": False,
                 # BUG-FIX: Django-unicorn ajax requests sometimes come from the server-side

@@ -15,7 +15,7 @@
         <div>
             {% load unicorn %}
             {% csrf_token %}
-            {% unicorn table.html_update_view %}
+            {% unicorn table.html_form_view key="updatemanypopout" form_mode="update_many" redirect_mode="refresh" %}
         </div>
     </div>
 </div>

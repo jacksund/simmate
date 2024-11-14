@@ -1,11 +1,12 @@
 <div {% if dynamic_options %}id="{{ options_hash }}"{% endif %}>
     <div unicorn:ignore class="my-2">
         {% include "core_components/basic_elements/label.html" %}
-        <select id="{{ name }}{{ unicorn.component_key }}"
+        {# BUG: 'status' id is taken (by preloader div), and to avoid other issues like this, we add '-input' to the end of the div id #}
+        <select id="{{ name }}{{ context.unicorn.component_key }}-input"
                 class="select2 form-control {% if allow_custom_input %}select2-dynamic{% endif %}"
                 data-toggle="select2"
                 data-placeholder="Choose one ..."
-                onchange="Unicorn.call('{{ context.unicorn.component_name }}', 'set_property', '{{ name }}', $('#{{ name }}{{ unicorn.component_key }}').val());">
+                onchange="Unicorn.call('{% if not context.unicorn.component_key %}{{ context.unicorn.component_name }}{% else %}{{ context.unicorn.component_key }}{% endif %}', 'set_property', '{{ name }}', $('#{{ name }}{{ context.unicorn.component_key }}-input').val());">
             {% if initial_value %}
                 <option value="{{ initial_value }}">
                     {% for option in options %}

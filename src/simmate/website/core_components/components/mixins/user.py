@@ -8,6 +8,8 @@ class UserInput:
     class Meta:
         javascript_exclude = ("user_options",)
 
+    search_inputs = []
+
     @property
     def user_options(self):
         # query for all user names

@@ -2,6 +2,7 @@
 
 import os
 import sys
+from functools import cached_property
 from pathlib import Path
 
 import pandas
@@ -778,40 +779,25 @@ class Molecule:
         if not keep_hydrogen:
             self.remove_hydrogens()
 
-    def get_largest_fragment(self):  # -> Molecule
+    @cached_property
+    def components(self):
+        components_rdkit = rdmolops.GetMolFrags(self.rdkit_molecule, asMols=True)
+        return [self.__class__(mol) for mol in components_rdkit]
+
+    @property
+    def largest_component(self):  # -> Molecule
         """
         If the `Molecule` object contains a mixture / several molecules, this
         will return the largest fragment / component in the mixture.
         """
-        from rdkit.Chem.MolStandardize.rdMolStandardize import LargestFragmentChooser
-
-        largest_fragment = LargestFragmentChooser().choose(self.rdkit_molecule)
-        return self.__class__(largest_fragment)
-
-    def _largest_component(self, prefer_organic: bool = True) -> AllChem.Mol:
-        """
-        This is given by Yannick, but I am unsure of how it differs from my
-        `get_largest_fragment`. Need to test out both... For now, I make this
-        an internal and hidden method
-        """
-        mol_frags = rdmolops.GetMolFrags(self.rdkit_molecule, asMols=True)
-        if prefer_organic:
-            mol_frags = tuple(
-                [
-                    mol
-                    for mol in mol_frags
-                    if len(
-                        mol.GetAtomsMatchingQuery(rdqueries.AtomNumEqualsQueryAtom(6))
-                    )
-                    > 0
-                ]
-            )
-        largest_component = max(
-            mol_frags,
-            default=self.rdkit_molecule,
-            key=lambda m: m.GetNumAtoms(),
-        )
-        return largest_component
+        # If using rdkit entirely:
+        # from rdkit.Chem.MolStandardize.rdMolStandardize import LargestFragmentChooser
+        # largest_fragment = LargestFragmentChooser().choose(self.rdkit_molecule)
+        # return self.__class__(largest_fragment)
+        all_components = self.components
+        all_counts = [c.num_atoms for c in all_components]
+        largest_idx = all_counts.index(max(all_counts))
+        return all_components[largest_idx]
 
     # -------------------------------------------------------------------------
 

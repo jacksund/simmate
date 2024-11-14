@@ -19,7 +19,15 @@ class DynamicApiView(View):
     """
 
     mode: str = None
-    # options: 'list', 'entry', 'about', 'search', 'entry-new', and 'entry-update'
+    # options:
+    # 'list',
+    # 'entry',
+    # 'about',
+    # 'search',
+    # 'entry-new',
+    # 'entry-update',
+    # 'entry-new-many',
+    # 'entry-update-many',
 
     @classmethod
     @property
@@ -45,6 +53,11 @@ class DynamicApiView(View):
     @property
     def entry_new_view(cls):
         return cls.as_view(mode="entry-new")
+
+    @classmethod
+    @property
+    def entry_new_many_view(cls):
+        return cls.as_view(mode="entry-new-many")
 
     @classmethod
     @property
@@ -77,6 +90,9 @@ class DynamicApiView(View):
         elif self.mode == "entry-new":
             html_view = self.get_entry_new_html_view
             json_view = self.get_entry_new_json_view
+        elif self.mode == "entry-new-many":
+            html_view = self.get_entry_new_many_html_view
+            json_view = self.get_entry_new_many_json_view
         elif self.mode == "entry-update":
             html_view = self.get_entry_update_html_view
             json_view = self.get_entry_update_json_view
@@ -214,16 +230,6 @@ class DynamicApiView(View):
     # ORM is preferred + using admin permissions.
     # -------------------------------------------------------------------------
 
-    # The "search" views, which build a search form for the table
-
-    def get_search_json_view(self, request, *args, **kwargs):
-        raise NotImplementedError("Search views still under dev.")
-
-    def get_search_html_view(self, request, *args, **kwargs):
-        raise NotImplementedError("Search views still under dev.")
-
-    # -------------------------------------------------------------------------
-
     # The "entry-new" views, which are for creating one or more new rows
 
     def get_entry_new_json_view(self, request, *args, **kwargs):
@@ -253,5 +259,27 @@ class DynamicApiView(View):
         # We can just use the entry-new view because our underlying unicorn
         # view will dynamically determine if we have a new vs update.
         return self.get_entry_new_html_view(request, *args, **kwargs)
+
+    # -------------------------------------------------------------------------
+
+    # The "entry-new-many" views, which build a entry_new_many form for the table
+
+    def get_entry_new_many_json_view(self, request, *args, **kwargs):
+        raise NotImplementedError("entry_new_many views still under dev.")
+
+    def get_entry_new_many_html_view(self, request, *args, **kwargs):
+        # We can just use the entry-new view because our underlying unicorn
+        # view will dynamically determine if we have a new vs update.
+        return self.get_entry_new_html_view(request, *args, **kwargs)
+
+    # -------------------------------------------------------------------------
+
+    # The "search" views, which build a search form for the table
+
+    def get_search_json_view(self, request, *args, **kwargs):
+        raise NotImplementedError("Search views still under dev.")
+
+    def get_search_html_view(self, request, *args, **kwargs):
+        raise NotImplementedError("Search views still under dev.")
 
     # -------------------------------------------------------------------------
