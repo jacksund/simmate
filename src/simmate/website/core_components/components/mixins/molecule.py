@@ -23,7 +23,7 @@ class MoleculeInput:
 
     is_molecule_ref = False
     molecule_ref_table = None
-    molecule_id = None
+    molecule_ref_id = None
 
     molecule = None  # stored as str (smiles or sdf)
     _molecule_obj = None
@@ -47,12 +47,12 @@ class MoleculeInput:
             self.load_molecule_sketcher_input(mol_str)
 
         # if this is a relation field, we need to ensure the pointer id is set
-        if self.molecule and self.is_molecule_ref and not self.molecule_id:
+        if self.molecule and self.is_molecule_ref and not self.molecule_ref_id:
             try:
                 db_mol = self.molecule_ref_table.objects.get(
                     inchi_key=self._molecule_obj.to_inchi_key()
                 )
-                self.molecule_id = db_mol.id
+                self.molecule_ref_id = db_mol.id
             except:
                 self.molecule = False
 
@@ -148,7 +148,7 @@ class MoleculeInput:
 
         try:
             db_mol = self.molecule_ref_table.objects.get(id=self.molecule_custom_input)
-            self.molecule_id = db_mol.id  # should equal the custom input val
+            self.molecule_ref_id = db_mol.id  # should equal the custom input val
             self.molecule = db_mol.molecule  # sdf string
             self._molecule_obj = db_mol.to_toolkit()
         except:

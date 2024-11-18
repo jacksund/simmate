@@ -3,7 +3,7 @@ from dataclasses import is_dataclass
 from typing import Any, Union
 
 from django.db.models import Model
-
+import copy
 from simmate.website.unicorn.components import UnicornField, UnicornView
 from simmate.website.unicorn.decorators import timed
 from simmate.website.unicorn.typer import (
@@ -70,16 +70,23 @@ def set_property_from_data(
         # Use `related_val` to check for many-to-many
         field.set(value)
     else:
+
         # TODO: Call simmate.website.unicorn.typing.cast_attribute_value?
         type_hints = get_type_hints(component_or_field)
         type_hint = type_hints.get(name)
 
         if is_queryset(field, type_hint, value):
             value = create_queryset(field, type_hint, value)
+        # BUG-FIX: data needs to be separate obj because component.data is mutable.
+        # That way request.data != component.data when we do things like append
+        # to this list
+        elif isinstance(value, list) or isinstance(value, dict):
+            value = copy.deepcopy(value)
         elif type_hint:
             if is_dataclass(type_hint):
                 value = type_hint(**value)
             else:
+                
                 try:
                     value = cast_value(type_hint, value)
                 except TypeError:
