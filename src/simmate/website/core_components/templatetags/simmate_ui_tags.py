@@ -157,6 +157,8 @@ def selectbox(
 
     if not label:
         label = name.replace("_", " ").title()
+        if label.endswith(" Id"):
+            label = label[:-3]
 
     if not options:
         options = context.get(f"{name}_options", [])
@@ -214,13 +216,15 @@ def molecule_input(
     load_button: bool = True,
     set_molecule_method: str = None,
     allow_sketcher_input: bool = True,
+    sketcher_input_label: str = "Draw Molecule",
     # Mol text input (text_area)
     allow_text_input: bool = False,
     text_input_name: str = None,
+    text_input_label: str = "Paste Molecule Text",
     # Custom input (text_input)
     allow_custom_input: bool = False,
     custom_input_name: str = None,
-    custom_input_label: str = None,
+    custom_input_label: str = "Custom Input",
     custom_input_placeholder: str = "12345",
     # TODO:
     # initial_value: bool = None,
@@ -237,22 +241,28 @@ def molecule_input(
             f"set_{name}" if not many_molecules else "load_many_molecules"
         )
 
-    if allow_text_input:
-        if not text_input_name:
-            text_input_name = f"{name}_text_input"
+    if allow_text_input and not text_input_name:
+        text_input_name = f"{name}_text_input"
 
-    if allow_custom_input:
-        if not custom_input_name:
-            custom_input_name = f"{name}_custom_input"
-        if not custom_input_label:
-            custom_input_label = custom_input_name.replace("_", " ").title()
-        custom_input_label = f"Option 3: {custom_input_label}"
+    if allow_custom_input and not custom_input_name:
+        custom_input_name = f"{name}_custom_input"
 
     show_option_labels = (
         True
         if [allow_sketcher_input, allow_text_input, allow_custom_input].count(True) > 1
         else False
     )
+    if show_option_labels:
+        noption = 1
+        if allow_custom_input:
+            custom_input_label = f"Option {noption}: {custom_input_label}"
+            noption += 1
+        if allow_text_input:
+            text_input_label = f"Option {noption}: {text_input_label}"
+            noption += 1
+        if allow_sketcher_input:
+            sketcher_input_label = f"Option {noption}: {sketcher_input_label}"
+            noption += 1
 
     molecule = context[name]
     molecule_matches = context["molecule_matches"]
