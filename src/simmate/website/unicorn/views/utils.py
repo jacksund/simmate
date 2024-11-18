@@ -1,9 +1,10 @@
+import copy
 import logging
 from dataclasses import is_dataclass
 from typing import Any, Union
 
 from django.db.models import Model
-import copy
+
 from simmate.website.unicorn.components import UnicornField, UnicornView
 from simmate.website.unicorn.decorators import timed
 from simmate.website.unicorn.typer import (
@@ -86,7 +87,7 @@ def set_property_from_data(
             if is_dataclass(type_hint):
                 value = type_hint(**value)
             else:
-                
+
                 try:
                     value = cast_value(type_hint, value)
                 except TypeError:

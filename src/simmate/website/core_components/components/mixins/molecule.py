@@ -49,6 +49,7 @@ class MoleculeInput:
         # if this is a relation field, we need to ensure the pointer id is set
         if self.molecule and self.is_molecule_ref and not self.molecule_ref_id:
             try:
+                # BUG: what if there is more than one match below?
                 db_mol = self.molecule_ref_table.objects.get(
                     inchi_key=self._molecule_obj.to_inchi_key()
                 )

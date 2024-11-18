@@ -75,7 +75,7 @@ def number_input(
     label: str = None,
     show_label: bool = True,
     help_text: str = None,
-    placeholder: str = "0.123",
+    placeholder: str = None,
     maximum: float | int = None,
     minimum: float | int = None,
     is_int: bool = False,
@@ -89,6 +89,9 @@ def number_input(
 
     if not step_size:
         step_size = 1 if is_int else "any"
+
+    if not placeholder:
+        placeholder = "123" if is_int else "0.123"
 
     return locals()
 
