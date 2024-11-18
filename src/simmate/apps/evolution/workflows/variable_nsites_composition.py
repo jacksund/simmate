@@ -33,6 +33,7 @@ class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):
         composition: str | Composition,
         directory: Path = None,
         singleshot_sources: list[str] = [],
+        compress_output: bool = False,
         **kwargs,  # passed to fixed_comp_workflow
     ):
         # Start by submitting the singleshot sources for each factor size.
@@ -56,7 +57,6 @@ class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):
         # fixed_comp_workflow for that composition.
         for factor in range(1, max_factor + 1):
             composition_current = composition_reduced * factor
-
             # logging.info(f"Beginning composition {composition_current}")
             cls.fixed_comp_workflow.run(
                 composition=composition_current,
@@ -66,6 +66,7 @@ class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):
                 # Because we submitted all steady states above, we don't
                 # need the other workflows to do these anymore.
                 singleshot_sources=[],
+                compress_output=compress_output,
                 **kwargs,
             )
 
