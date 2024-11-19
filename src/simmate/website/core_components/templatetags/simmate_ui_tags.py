@@ -273,6 +273,47 @@ def molecule_input(
     return locals()
 
 
+@register.inclusion_tag(
+    filename="core_components/input_elements/search_box.html",
+    takes_context=True,
+)
+def search_box(
+    context: dict,
+    name: str,  # text input
+    label: str = None,
+    show_label: bool = True,
+    help_text: str = None,
+    placeholder: str = "Type value...",
+    max_length: int = None,
+    disabled: bool = False,
+    # for button
+    button_name: str = None,
+    button_theme: str = "primary",
+    button_icon: str = "magnify",
+    # for selectbox
+    show_selectbox: bool = True,
+    selectbox_name: str = None,
+    selectbox_options: list = None,
+):
+    """
+    Display a input group that includes a drop down menu (optional),
+    a text input, and a button all together.
+    """
+    if not label:
+        label = name.replace("_", " ").title()
+
+    if not selectbox_options:
+        show_selectbox = False
+
+    if show_selectbox and not selectbox_name:
+        selectbox_name = f"{name}_type"
+
+    if not button_name:
+        button_name = f"set_{name}"
+
+    return locals()
+
+
 def hash_options(options: list[tuple]) -> str:
     # for speed, we only hash the keys, which are shorter and should be
     # consistent with all their values anyways

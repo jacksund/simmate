@@ -1,0 +1,34 @@
+{% load simmate_ui_tags %}
+<div class="my-2">
+    {% include "core_components/basic_elements/label.html" %}
+    <div unicorn:loading.remove class="input-group">
+        {% if show_selectbox %}
+            {# unlike the normal selectbox.html, this does not use select2 #}
+            <select class="btn btn-light" unicorn:model.defer="{{ selectbox_name }}">
+                {% for option in selectbox_options %}<option value="{{ option.0 }}">{{ option.1 }}</option>{% endfor %}
+            </select>
+        {% endif %}
+        {# this is a modified version of text_input.html #}
+        <input unicorn:model.defer="{{ name }}"
+               class="form-control"
+               id="{{ name }}{{ context.unicorn.component_key }}"
+               type="text"
+               placeholder="{{ placeholder }}"
+               {% if max_length %}maxlength="{{ max_length }}"{% endif %}
+               {% if disabled %}disabled{% endif %}>
+        {# this is a modified version of button.html #}
+        <button unicorn:click="{{ button_name }}" class="btn btn-{{ button_theme }}">
+            <i class="mdi mdi-{{ button_icon }}"></i>
+        </button>
+    </div>
+    <div unicorn:loading>
+        <div class="progress">
+            <div id="autofill_search_progress"
+                 class="progress-bar progress-bar-striped progress-bar-animated"
+                 role="progressbar"
+                 aria-valuemin="0"
+                 aria-valuemax="100"
+                 style="width: 100%"></div>
+        </div>
+    </div>
+</div>
