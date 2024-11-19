@@ -107,6 +107,7 @@ def checkbox(
     show_label: bool = True,
     help_text: str = None,
     side_text: str = "Yes/True",
+    defer: bool = True,
 ):
     """
     Display a checkbox widget.
@@ -154,7 +155,7 @@ def selectbox(
     allow_custom_input: bool = False,
 ):
     """
-    Display a checkbox widget.
+    Display a selectbox widget.
     """
     # options should be a list of tuples: (value, display)
 
@@ -291,7 +292,7 @@ def search_box(
     button_theme: str = "primary",
     button_icon: str = "magnify",
     # for selectbox
-    show_selectbox: bool = True,
+    show_selectbox: bool = False,
     selectbox_name: str = None,
     selectbox_options: list = None,
 ):
@@ -302,11 +303,11 @@ def search_box(
     if not label:
         label = name.replace("_", " ").title()
 
-    if not selectbox_options:
-        show_selectbox = False
-
     if show_selectbox and not selectbox_name:
         selectbox_name = f"{name}_type"
+
+    if show_selectbox and not selectbox_options:
+        selectbox_options = context.get(f"{selectbox_name}_options", [])
 
     if not button_name:
         button_name = f"set_{name}"
