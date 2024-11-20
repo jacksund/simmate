@@ -21,14 +21,12 @@
             <i class="mdi mdi-{{ button_icon }}"></i>
         </button>
     </div>
-    <div unicorn:loading>
-        <div class="progress">
-            <div id="autofill_search_progress"
-                 class="progress-bar progress-bar-striped progress-bar-animated"
-                 role="progressbar"
-                 aria-valuemin="0"
-                 aria-valuemax="100"
-                 style="width: 100%"></div>
+    {% comment %}
+        BUG: child components don't remove this after loading correctly...
+        <div unicorn:loading>
+            <div class="progress">
+                <div id="autofill_search_progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+            </div>
         </div>
-    </div>
+    {% endcomment %}
 </div>
