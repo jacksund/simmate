@@ -77,7 +77,7 @@ class DynamicFormComponent(UnicornView):
     redirect_mode: str = "table_entry"
     """
     Controls which page the user is redirected to after form submission. 
-    Options are "table_entry", "table", and "refresh"
+    Options are "table_entry", "table", "refresh", and "no_redirect"
     """
 
     parent_url: str = None
@@ -471,7 +471,14 @@ class DynamicFormComponent(UnicornView):
         # By default, we say the form maps to columns of the model with same name.
         # We also check for direct relations, which would end in "_id"
         # (e.g. 'created_by_id' for users where col is technically 'created_by')
-        table_cols = self.table.get_column_names()
+        # We also ignore *_to_many relations because these are saved using
+        # child components
+        table_cols = [
+            column.name
+            for column in self.table.columns
+            if not column.one_to_many and not column.many_to_many
+        ]
+
         matching_fields = [
             attr
             for attr in self._attribute_names
@@ -507,7 +514,7 @@ class DynamicFormComponent(UnicornView):
         # Check that all basic inputs are filled out
         for input_name in self.required_inputs:
             input_value = getattr(self, input_name)
-            if not input_value:
+            if input_value in [None, ""]:
                 message = f"'{input_name}' is a required input."
                 self.form_errors.append(message)
 
@@ -622,6 +629,8 @@ class DynamicFormComponent(UnicornView):
         elif self.redirect_mode == "refresh":
             # Refresh current page (which could be the table view + a query)
             return redirect(self.parent_url)
+        elif self.redirect_mode == "no_redirect":
+            return None
         else:
             raise Exception(
                 f"Unknown redirect_mode for dynamic form: {self.redirect_mode}"

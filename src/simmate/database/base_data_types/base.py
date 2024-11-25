@@ -559,7 +559,16 @@ class DatabaseTable(models.Model):
         return cls.__name__
 
     @classmethod
-    def get_column_names(cls, include_relations: bool = True) -> list[str]:
+    @property
+    def columns(cls):
+        return cls._meta.get_fields()
+
+    @classmethod
+    def get_column_names(
+        cls,
+        include_relations: bool = True,
+        include_parents: bool = True,
+    ) -> list[str]:
         """
         Returns a list of all the column names for this table and indicates which
         columns are related to other tables. This is primarily used to help
@@ -567,7 +576,7 @@ class DatabaseTable(models.Model):
         """
         return [
             column.name
-            for column in cls._meta.get_fields()
+            for column in cls._meta.get_fields(include_parents)
             if include_relations or not column.is_relation
         ]
 
