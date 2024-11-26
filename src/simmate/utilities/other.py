@@ -264,7 +264,6 @@ def bypass_nones(bypass_kwarg: str = None, multi_cols: bool = False):
     def decorator(function_to_wrap):
         @wraps(function_to_wrap)
         def wrapper(*args, **kwargs):
-            # breakpoint()
 
             # grab the list of original inputs
             entries = kwargs.pop(bypass_kwarg)
@@ -280,12 +279,8 @@ def bypass_nones(bypass_kwarg: str = None, multi_cols: bool = False):
                     failed_idxs.append(idx)
             kwargs[bypass_kwarg] = passed_entries
 
-            # breakpoint()
-
             # RUN THE ORIGINAL METHOD
             results_orig = function_to_wrap(*args, **kwargs)
-
-            # breakpoint()
 
             if not multi_cols:
                 results_orig = [results_orig]

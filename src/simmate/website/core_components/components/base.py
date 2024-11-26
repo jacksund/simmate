@@ -29,6 +29,7 @@ class DynamicFormComponent(UnicornView):
             "order_by_options",
             "search_inputs",
             "apply_to_children_inputs",
+            "is_subform",
         )
 
     # -------------------------------------------------------------------------
@@ -272,6 +273,16 @@ class DynamicFormComponent(UnicornView):
 
     # -------------------------------------------------------------------------
 
+    # For many_to_one type child components
+
+    is_subform: bool = False
+
+    # is_editting: bool = True  ( this is set in create_many section ^^^)
+    uuid: str = None
+    is_confirmed: bool = False
+
+    # -------------------------------------------------------------------------
+
     def mount(self):
 
         view_name = self.request.resolver_match.url_name
@@ -339,10 +350,40 @@ class DynamicFormComponent(UnicornView):
         self.redirect_mode = "table"
 
     def mount_for_update(self):
-        view_kwargs = self.request.resolver_match.kwargs
-        self.table_entry = self.table.objects.get(id=view_kwargs["table_entry_id"])
-        # set initial data using the database and applying its values to
-        # the form fields.
+
+        # This section is entered when we have many_to_one child components.
+        if self.is_subform:
+            if not self.parent or not self.uuid:
+                breakpoint()
+                raise Exception("A UUID and parent component are required")
+
+            # the parent component is in update mode, but this still might be a
+            # new reagent (meaning it should be create mode)
+            # we therefore use the uuid to see check if its a new entry
+
+            # catch if this should actually be a create method, so we pivot
+            if not self.table.objects.filter(uuid=self.uuid).exists():
+                self.form_mode = "create"
+                self.mount_for_create()
+                return
+
+            # otherwise, we do in fact have an update, and can grab the existing
+            # object using the uuid
+            self.table_entry = self.table.objects.get(uuid=self.uuid)
+
+            # defaults
+            self.is_editting = False
+            self.is_confirmed = True
+            self.redirect_mode = "no_redirect"
+
+        # This section is entered on typical behavior -- it is the main component
+        # and the ID is pulled from the url
+        else:
+            view_kwargs = self.request.resolver_match.kwargs
+            self.table_entry = self.table.objects.get(id=view_kwargs["table_entry_id"])
+
+        # With the table_entry set above, we can now set initial data using the
+        # database and applying its values to the form fields.
         config = self.to_db_dict(include_empties=True)
         for field in config:
             current_val = getattr(self.table_entry, field)
