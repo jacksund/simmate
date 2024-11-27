@@ -617,6 +617,16 @@ class DynamicFormComponent(UnicornView):
         if self.skip_db_save:
             return
 
+        if self.is_subform:
+
+            # ensure the parent obj has been saved and has an id
+            if not (
+                self.parent and self.parent.table_entry and self.parent.table_entry.id
+            ):
+                raise Exception("parent object must be saved first")
+
+            self.table_entry.request_id = self.parent.table_entry.id
+
         if self.form_mode == "search":
             pass  # nothing to save
         if self.form_mode in ["create", "update", "create_many_entry"]:
