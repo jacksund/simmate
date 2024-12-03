@@ -5,14 +5,14 @@
     <section class="jumbotron text-center">
         <div class="container">
             <h1 class="jumbotron-heading">Data Explorer</h1>
-            <p class="lead text-muted">Explore some of the most popular molecular and crystal databases</p>
+            <p class="lead text-muted">explore and maintain various datasets</p>
         </div>
     </section>
     {# List of Cards #}
     <div class="row">
-        {% for data_type, datasets in all_datasets.items %}
-            {% if datasets %}
-                <h3 class="mt-4">{{ data_type }}</h3>
+        {% for section_name, datasets in data_config.items %}
+            {% if datasets and section_name != "HIDDEN" %}
+                <h3 class="mt-4">{{ section_name }}</h3>
                 {% for dataset in datasets %}
                     <div class="col-md-4">
                         <div class="card border-primary border" style="height: 90%">

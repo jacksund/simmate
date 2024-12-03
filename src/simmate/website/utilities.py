@@ -7,6 +7,15 @@ from django.http import HttpRequest
 from django.utils.encoding import force_str
 
 
+def hash_options(options: list[tuple]) -> str:
+    """
+    Given a list of UI selectbox options, it returns a hash of the listed options
+    """
+    # for speed, we only hash the keys, which are shorter and should be
+    # consistent with all their values anyways
+    return str(hash(";".join([str(k) for k, _ in options])))
+
+
 def replace_query_param(url: str, key: str, val: any) -> str:
     """
     Given a URL and a key/val pair, set or replace an item in the query

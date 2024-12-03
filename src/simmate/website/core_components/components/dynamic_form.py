@@ -306,7 +306,7 @@ class DynamicFormComponent(UnicornView):
         # check that editting is actually allowed
         if self.form_mode not in self.table.html_enabled_forms:
             raise Exception(
-                f"The form mode '({self.form_mode}' is disabled for this table."
+                f"The form mode '{self.form_mode}' is disabled for this table."
             )
 
         # Call the corresponding mount() method based on our mode
@@ -354,7 +354,6 @@ class DynamicFormComponent(UnicornView):
         # This section is entered when we have many_to_one child components.
         if self.is_subform:
             if not self.parent or not self.uuid:
-                breakpoint()
                 raise Exception("A UUID and parent component are required")
 
             # the parent component is in update mode, but this still might be a

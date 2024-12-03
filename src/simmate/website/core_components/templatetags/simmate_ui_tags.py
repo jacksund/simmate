@@ -6,6 +6,7 @@ import uuid
 from django import template
 
 from simmate.toolkit import Molecule as ToolkitMolecule
+from simmate.website.utilities import hash_options
 
 # Temporarily closed-source code
 try:
@@ -313,12 +314,6 @@ def search_box(
         button_name = f"set_{name}"
 
     return locals()
-
-
-def hash_options(options: list[tuple]) -> str:
-    # for speed, we only hash the keys, which are shorter and should be
-    # consistent with all their values anyways
-    return str(hash(";".join([str(k) for k, _ in options])))
 
 
 # -----------------------------------------------------------------------------
