@@ -154,6 +154,7 @@ def selectbox(
     initial_value: bool = None,
     dynamic_options: bool = False,
     allow_custom_input: bool = False,
+    multiselect: bool = False,
 ):
     """
     Display a selectbox widget.
@@ -164,6 +165,8 @@ def selectbox(
         label = name.replace("_", " ").title()
         if label.endswith(" Id"):
             label = label[:-3]
+        elif label.endswith(" Ids"):
+            label = label[:-4]
 
     if not options:
         options = context.get(f"{name}_options", [])
