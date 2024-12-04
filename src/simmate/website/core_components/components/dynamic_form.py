@@ -23,6 +23,7 @@ class DynamicFormComponent(UnicornView):
             "table",
             "required_inputs",
             "ignore_on_update",
+            "mount_for_update_columns",
             "update_many_inputs",
             "n_ids_to_update_max",
             "page_size_options",
@@ -30,6 +31,7 @@ class DynamicFormComponent(UnicornView):
             "search_inputs",
             "apply_to_children_inputs",
             "is_subform",
+            "subform_pointer",
         )
 
     # -------------------------------------------------------------------------
@@ -138,6 +140,19 @@ class DynamicFormComponent(UnicornView):
     """
     List of columns/fields to ignore when the form_mode = "update"
     """
+
+    @property
+    def mount_for_update_columns(self) -> list:
+        """
+        Columns that (in order!) should be mounted when preparing for an update.
+        By default, this is all keys output by the to_db_dict method, in no
+        particular order.
+        """
+        # This is rarely overwritten and only ever used within mount_for_update.
+        # We allow it to be overwritten because sometimes the order in
+        # which cols are listed here is important (e.g. col1 and its set_col1
+        # method MUST be called before col2 and set_col2)
+        return list(self.to_db_dict(include_empties=True).keys())
 
     # -------------------------------------------------------------------------
 
@@ -276,6 +291,7 @@ class DynamicFormComponent(UnicornView):
     # For many_to_one type child components
 
     is_subform: bool = False
+    subform_pointer: str = None  # e.g. parent_id
 
     # is_editting: bool = True  ( this is set in create_many section ^^^)
     uuid: str = None
@@ -350,7 +366,6 @@ class DynamicFormComponent(UnicornView):
         self.redirect_mode = "table"
 
     def mount_for_update(self):
-
         # This section is entered when we have many_to_one child components.
         if self.is_subform:
             if not self.parent or not self.uuid:
@@ -383,8 +398,7 @@ class DynamicFormComponent(UnicornView):
 
         # With the table_entry set above, we can now set initial data using the
         # database and applying its values to the form fields.
-        config = self.to_db_dict(include_empties=True)
-        for field in config:
+        for field in self.mount_for_update_columns:
             current_val = getattr(self.table_entry, field)
             self.set_property(field, current_val)
 
@@ -497,16 +511,11 @@ class DynamicFormComponent(UnicornView):
 
     # Model creation and update utils
 
-    def to_db_dict(self, **kwargs) -> dict:
-        return self._get_default_db_dict(**kwargs)
-
-    def _get_default_db_dict(
+    def to_db_dict(
         self,
         load_toolkits: bool = True,
         include_empties: bool = False,
     ) -> dict:
-        # I don't like calling super() in overwrites for `to_db_dict`, so
-        # I use this method instead.
 
         # By default, we say the form maps to columns of the model with same name.
         # We also check for direct relations, which would end in "_id"
@@ -623,8 +632,7 @@ class DynamicFormComponent(UnicornView):
                 self.parent and self.parent.table_entry and self.parent.table_entry.id
             ):
                 raise Exception("parent object must be saved first")
-
-            self.table_entry.request_id = self.parent.table_entry.id
+            setattr(self.table_entry, self.subform_pointer, self.parent.table_entry.id)
 
         if self.form_mode == "search":
             pass  # nothing to save
