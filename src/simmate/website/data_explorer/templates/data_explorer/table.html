@@ -14,8 +14,7 @@
             {% block quicksearch %}
                 {% if table.html_form_view and "search" in table.html_enabled_forms %}
                     {% include "data_explorer/table_search.html" %}
-                {% else %}
-                    {% include "data_explorer/table_filters.html" %}
+                    {# ELSE: include "data_explorer/table_filters.html" (disabled for now) #}
                 {% endif %}
             {% endblock %}
             {# Update Sidebar #}

@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 
-from .base import DynamicFormComponent
+from .dynamic_form import DynamicFormComponent
 from .mixins import MoleculeInput, UserInput

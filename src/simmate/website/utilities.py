@@ -7,6 +7,33 @@ from django.http import HttpRequest
 from django.utils.encoding import force_str
 
 
+def hash_options(options: list[tuple]) -> str:
+    """
+    Given a list of UI selectbox options, it returns a hash of the listed options
+    """
+    # for speed, we only hash the keys, which are shorter and should be
+    # consistent with all their values anyways
+    return str(hash(";".join([str(k) for k, _ in options])))
+
+
+def parse_multiselect(select_list: any) -> list:
+    """
+    The multiselect returns all selected choices as a string like:
+    'option1--and--option2--and--option3'
+
+    This splits up and returns the string in a proper list.
+    """
+    if isinstance(select_list, str) and "--and--" in select_list:
+        select_list = select_list.split("--and--")
+        # Its common to have a list of IDs (integers)
+        if all([i.isnumeric() for i in select_list]):
+            select_list = [int(i) for i in select_list]
+
+    else:
+        select_list = [select_list]  # lone id that needs placed in list
+    return select_list
+
+
 def replace_query_param(url: str, key: str, val: any) -> str:
     """
     Given a URL and a key/val pair, set or replace an item in the query

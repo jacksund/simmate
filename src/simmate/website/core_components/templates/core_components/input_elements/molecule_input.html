@@ -5,27 +5,27 @@
         {% if many_molecules %}
             {% alert theme="danger" message="This section assumes all individual components are their own molecule, which means it will incorrectly split up salts and make things like Na+ or Cl- their own entries. Until this is fixed, avoid using the create_many form for such compounds." %}
         {% endif %}
-        {% if allow_sketcher_input %}
-            {# Molecule Sketcher (ChemDraw.js or ChemDoodle.js) #}
+        {% if allow_custom_input %}
+            {# Custom Text input (e.g. searching by ID or CAS number) #}
             <div class="px-3 py-1">
-                {% if show_option_labels %}<label class="form-label">Option 1: Draw Molecule</label>{% endif %}
-                <div unicorn:ignore
-                     id="{{ name }}{{ context.unicorn.component_key }}"
-                     style="width: 600px;
-                            height: 400px"></div>
-                <script>add_mol_sketcher("{{ name }}{{ context.unicorn.component_key }}");</script>
+                {% text_input name=custom_input_name show_label=show_option_labels label=custom_input_label placeholder=custom_input_placeholder %}
             </div>
         {% endif %}
         {% if allow_text_input %}
             {# Text-based input for smiles/sdf/ichi/etc... #}
             <div class="px-3 py-1">
-                {% text_area name=name_text_input show_label=show_option_labels label="Option 2: Paste Molecule Text" placeholder="Paste in SMILES, INCHI, MOL text, or any other supported format." %}
+                {% text_area name=text_input_name show_label=show_option_labels label=text_input_label placeholder="Paste in SMILES, INCHI, MOL text, or any other supported format." %}
             </div>
         {% endif %}
-        {% if allow_custom_input %}
-            {# Custom Text input (e.g. searching by ID or CAS number) #}
+        {% if allow_sketcher_input %}
+            {# Molecule Sketcher (ChemDraw.js or ChemDoodle.js) #}
             <div class="px-3 py-1">
-                {% text_input name=name_text_input show_label=show_option_labels label=custom_input_label placeholder=custom_input_placeholder %}
+                {% if show_option_labels %}<label class="form-label">{{ sketcher_input_label }}</label>{% endif %}
+                <div unicorn:ignore
+                     id="{{ name }}{{ context.unicorn.component_key }}"
+                     style="width: 600px;
+                            height: 400px"></div>
+                <script>add_mol_sketcher("{{ name }}{{ context.unicorn.component_key }}");</script>
             </div>
         {% endif %}
         {% if load_button %}

@@ -74,9 +74,6 @@ class UnicornMessageHandler(View):
         )
 
         # returns either Component or ComponentReponse depending on 'return_response'
-        # import pprint
-        # print = pprint.pprint
-        # breakpoint()
         return component_response.to_json_response()
 
     # -------------------------------------------------------------------------

@@ -6,6 +6,7 @@ import uuid
 from django import template
 
 from simmate.toolkit import Molecule as ToolkitMolecule
+from simmate.website.utilities import hash_options
 
 # Temporarily closed-source code
 try:
@@ -75,7 +76,7 @@ def number_input(
     label: str = None,
     show_label: bool = True,
     help_text: str = None,
-    placeholder: str = "0.123",
+    placeholder: str = None,
     maximum: float | int = None,
     minimum: float | int = None,
     is_int: bool = False,
@@ -89,6 +90,9 @@ def number_input(
 
     if not step_size:
         step_size = 1 if is_int else "any"
+
+    if not placeholder:
+        placeholder = "123" if is_int else "0.123"
 
     return locals()
 
@@ -104,6 +108,7 @@ def checkbox(
     show_label: bool = True,
     help_text: str = None,
     side_text: str = "Yes/True",
+    defer: bool = True,
 ):
     """
     Display a checkbox widget.
@@ -149,14 +154,19 @@ def selectbox(
     initial_value: bool = None,
     dynamic_options: bool = False,
     allow_custom_input: bool = False,
+    multiselect: bool = False,
 ):
     """
-    Display a checkbox widget.
+    Display a selectbox widget.
     """
     # options should be a list of tuples: (value, display)
 
     if not label:
         label = name.replace("_", " ").title()
+        if label.endswith(" Id"):
+            label = label[:-3]
+        elif label.endswith(" Ids"):
+            label = label[:-4]
 
     if not options:
         options = context.get(f"{name}_options", [])
@@ -214,13 +224,15 @@ def molecule_input(
     load_button: bool = True,
     set_molecule_method: str = None,
     allow_sketcher_input: bool = True,
+    sketcher_input_label: str = "Draw Molecule",
     # Mol text input (text_area)
     allow_text_input: bool = False,
     text_input_name: str = None,
+    text_input_label: str = "Paste Molecule Text",
     # Custom input (text_input)
     allow_custom_input: bool = False,
     custom_input_name: str = None,
-    custom_input_label: str = None,
+    custom_input_label: str = "Custom Input",
     custom_input_placeholder: str = "12345",
     # TODO:
     # initial_value: bool = None,
@@ -237,22 +249,28 @@ def molecule_input(
             f"set_{name}" if not many_molecules else "load_many_molecules"
         )
 
-    if allow_text_input:
-        if not text_input_name:
-            text_input_name = f"{name}_text_input"
+    if allow_text_input and not text_input_name:
+        text_input_name = f"{name}_text_input"
 
-    if allow_custom_input:
-        if not custom_input_name:
-            custom_input_name = f"{name}_custom_input"
-        if not custom_input_label:
-            custom_input_label = custom_input_name.replace("_", " ").title()
-        custom_input_label = f"Option 3: {custom_input_label}"
+    if allow_custom_input and not custom_input_name:
+        custom_input_name = f"{name}_custom_input"
 
     show_option_labels = (
         True
         if [allow_sketcher_input, allow_text_input, allow_custom_input].count(True) > 1
         else False
     )
+    if show_option_labels:
+        noption = 1
+        if allow_custom_input:
+            custom_input_label = f"Option {noption}: {custom_input_label}"
+            noption += 1
+        if allow_text_input:
+            text_input_label = f"Option {noption}: {text_input_label}"
+            noption += 1
+        if allow_sketcher_input:
+            sketcher_input_label = f"Option {noption}: {sketcher_input_label}"
+            noption += 1
 
     molecule = context[name]
     molecule_matches = context["molecule_matches"]
@@ -260,10 +278,45 @@ def molecule_input(
     return locals()
 
 
-def hash_options(options: list[tuple]) -> str:
-    # for speed, we only hash the keys, which are shorter and should be
-    # consistent with all their values anyways
-    return str(hash(";".join([str(k) for k, _ in options])))
+@register.inclusion_tag(
+    filename="core_components/input_elements/search_box.html",
+    takes_context=True,
+)
+def search_box(
+    context: dict,
+    name: str,  # text input
+    label: str = None,
+    show_label: bool = True,
+    help_text: str = None,
+    placeholder: str = "Type value...",
+    max_length: int = None,
+    disabled: bool = False,
+    # for button
+    button_name: str = None,
+    button_theme: str = "primary",
+    button_icon: str = "magnify",
+    # for selectbox
+    show_selectbox: bool = False,
+    selectbox_name: str = None,
+    selectbox_options: list = None,
+):
+    """
+    Display a input group that includes a drop down menu (optional),
+    a text input, and a button all together.
+    """
+    if not label:
+        label = name.replace("_", " ").title()
+
+    if show_selectbox and not selectbox_name:
+        selectbox_name = f"{name}_type"
+
+    if show_selectbox and not selectbox_options:
+        selectbox_options = context.get(f"{selectbox_name}_options", [])
+
+    if not button_name:
+        button_name = f"set_{name}"
+
+    return locals()
 
 
 # -----------------------------------------------------------------------------
