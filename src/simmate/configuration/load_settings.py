@@ -458,6 +458,8 @@ class SimmateSettings:
           "bader.docker.enable=True"
         into
           {"bader": {"docker": {"enable": True}}}
+
+        ** Used only in the command line util
         """
         keys, value = input_str.split("=")
         keys = keys.split(".")
@@ -495,7 +497,7 @@ class SimmateSettings:
         "SIMMATE__DATABASE__PORT": int,
         "SIMMATE__WEBSITE__ALLOWED_HOSTS": list[str],
         "SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS": list[str],
-        "SIMMATE__WEBSITE__DATA": list[str],
+        "SIMMATE__WEBSITE__DATA": dict,
         "SIMMATE__WEBSITE__DEBUG": bool,
         "SIMMATE__WEBSITE__EMAIL__FROM_EMAIL": str,
         "SIMMATE__WEBSITE__EMAIL__HOST": str,

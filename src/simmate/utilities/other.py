@@ -4,6 +4,7 @@ import ast
 import hashlib
 import importlib
 import inspect
+import json
 import logging
 import os
 import sys
@@ -210,6 +211,10 @@ def str_to_datatype(
         #   [[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]
         value = [float(item) for item in value.split()]
         return [value[i : i + 3] for i in range(0, len(value), 3)]
+
+    # If we have a dictionary, the value should be a JSON string
+    elif target_type == dict:
+        return json.loads(value)
 
     # If it is not in the common keys listed, just leave it as a string.
     else:
