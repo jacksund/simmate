@@ -1,8 +1,8 @@
 <div unicorn:loading.remove class="text-center">
     <button unicorn:click="{{ name }}"
             class="my-2 btn btn-{{ theme }} {% if small %}btn-sm{% endif %}">
+        {% if icon %}<i class="mdi mdi-{{ icon }}"></i>&nbsp;&nbsp;{% endif %}
         {% if show_label %}{{ label }}{% endif %}
-        {% if icon %}<i class="mdi mdi-{{ icon }}"></i>{% endif %}
     </button>
 </div>
 <div unicorn:loading>

@@ -23,12 +23,15 @@ class DynamicFormComponent(UnicornView):
             "table",
             "required_inputs",
             "ignore_on_update",
+            "mount_for_update_columns",
             "update_many_inputs",
             "n_ids_to_update_max",
             "page_size_options",
             "order_by_options",
             "search_inputs",
             "apply_to_children_inputs",
+            "is_subform",
+            "subform_pointer",
         )
 
     # -------------------------------------------------------------------------
@@ -77,7 +80,7 @@ class DynamicFormComponent(UnicornView):
     redirect_mode: str = "table_entry"
     """
     Controls which page the user is redirected to after form submission. 
-    Options are "table_entry", "table", and "refresh"
+    Options are "table_entry", "table", "refresh", and "no_redirect"
     """
 
     parent_url: str = None
@@ -137,6 +140,19 @@ class DynamicFormComponent(UnicornView):
     """
     List of columns/fields to ignore when the form_mode = "update"
     """
+
+    @property
+    def mount_for_update_columns(self) -> list:
+        """
+        Columns that (in order!) should be mounted when preparing for an update.
+        By default, this is all keys output by the to_db_dict method, in no
+        particular order.
+        """
+        # This is rarely overwritten and only ever used within mount_for_update.
+        # We allow it to be overwritten because sometimes the order in
+        # which cols are listed here is important (e.g. col1 and its set_col1
+        # method MUST be called before col2 and set_col2)
+        return list(self.to_db_dict(include_empties=True).keys())
 
     # -------------------------------------------------------------------------
 
@@ -272,6 +288,17 @@ class DynamicFormComponent(UnicornView):
 
     # -------------------------------------------------------------------------
 
+    # For many_to_one type child components
+
+    is_subform: bool = False
+    subform_pointer: str = None  # e.g. parent_id
+
+    # is_editting: bool = True  ( this is set in create_many section ^^^)
+    uuid: str = None
+    is_confirmed: bool = False
+
+    # -------------------------------------------------------------------------
+
     def mount(self):
 
         view_name = self.request.resolver_match.url_name
@@ -295,7 +322,7 @@ class DynamicFormComponent(UnicornView):
         # check that editting is actually allowed
         if self.form_mode not in self.table.html_enabled_forms:
             raise Exception(
-                f"The form mode '({self.form_mode}' is disabled for this table."
+                f"The form mode '{self.form_mode}' is disabled for this table."
             )
 
         # Call the corresponding mount() method based on our mode
@@ -339,12 +366,39 @@ class DynamicFormComponent(UnicornView):
         self.redirect_mode = "table"
 
     def mount_for_update(self):
-        view_kwargs = self.request.resolver_match.kwargs
-        self.table_entry = self.table.objects.get(id=view_kwargs["table_entry_id"])
-        # set initial data using the database and applying its values to
-        # the form fields.
-        config = self.to_db_dict(include_empties=True)
-        for field in config:
+        # This section is entered when we have many_to_one child components.
+        if self.is_subform:
+            if not self.parent or not self.uuid:
+                raise Exception("A UUID and parent component are required")
+
+            # the parent component is in update mode, but this still might be a
+            # new reagent (meaning it should be create mode)
+            # we therefore use the uuid to see check if its a new entry
+
+            # catch if this should actually be a create method, so we pivot
+            if not self.table.objects.filter(uuid=self.uuid).exists():
+                self.form_mode = "create"
+                self.mount_for_create()
+                return
+
+            # otherwise, we do in fact have an update, and can grab the existing
+            # object using the uuid
+            self.table_entry = self.table.objects.get(uuid=self.uuid)
+
+            # defaults
+            self.is_editting = False
+            self.is_confirmed = True
+            self.redirect_mode = "no_redirect"
+
+        # This section is entered on typical behavior -- it is the main component
+        # and the ID is pulled from the url
+        else:
+            view_kwargs = self.request.resolver_match.kwargs
+            self.table_entry = self.table.objects.get(id=view_kwargs["table_entry_id"])
+
+        # With the table_entry set above, we can now set initial data using the
+        # database and applying its values to the form fields.
+        for field in self.mount_for_update_columns:
             current_val = getattr(self.table_entry, field)
             self.set_property(field, current_val)
 
@@ -457,21 +511,23 @@ class DynamicFormComponent(UnicornView):
 
     # Model creation and update utils
 
-    def to_db_dict(self, **kwargs) -> dict:
-        return self._get_default_db_dict(**kwargs)
-
-    def _get_default_db_dict(
+    def to_db_dict(
         self,
         load_toolkits: bool = True,
         include_empties: bool = False,
     ) -> dict:
-        # I don't like calling super() in overwrites for `to_db_dict`, so
-        # I use this method instead.
 
         # By default, we say the form maps to columns of the model with same name.
         # We also check for direct relations, which would end in "_id"
         # (e.g. 'created_by_id' for users where col is technically 'created_by')
-        table_cols = self.table.get_column_names()
+        # We also ignore *_to_many relations because these are saved using
+        # child components
+        table_cols = [
+            column.name
+            for column in self.table.columns
+            if not column.one_to_many and not column.many_to_many
+        ]
+
         matching_fields = [
             attr
             for attr in self._attribute_names
@@ -507,7 +563,7 @@ class DynamicFormComponent(UnicornView):
         # Check that all basic inputs are filled out
         for input_name in self.required_inputs:
             input_value = getattr(self, input_name)
-            if not input_value:
+            if input_value in [None, ""]:
                 message = f"'{input_name}' is a required input."
                 self.form_errors.append(message)
 
@@ -569,6 +625,15 @@ class DynamicFormComponent(UnicornView):
         if self.skip_db_save:
             return
 
+        if self.is_subform:
+
+            # ensure the parent obj has been saved and has an id
+            if not (
+                self.parent and self.parent.table_entry and self.parent.table_entry.id
+            ):
+                raise Exception("parent object must be saved first")
+            setattr(self.table_entry, self.subform_pointer, self.parent.table_entry.id)
+
         if self.form_mode == "search":
             pass  # nothing to save
         if self.form_mode in ["create", "update", "create_many_entry"]:
@@ -622,6 +687,8 @@ class DynamicFormComponent(UnicornView):
         elif self.redirect_mode == "refresh":
             # Refresh current page (which could be the table view + a query)
             return redirect(self.parent_url)
+        elif self.redirect_mode == "no_redirect":
+            return None
         else:
             raise Exception(
                 f"Unknown redirect_mode for dynamic form: {self.redirect_mode}"
