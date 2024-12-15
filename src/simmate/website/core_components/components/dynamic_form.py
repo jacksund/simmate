@@ -546,7 +546,11 @@ class DynamicFormComponent(UnicornView):
 
             # special data types and common field names. Note, variations
             # of this should be handled by overriding the `to_db_dict`
-            if load_toolkits and current_val is not None:
+            if (
+                load_toolkits
+                and current_val is not None
+                and self.form_mode != "create_many"
+            ):
                 if form_attr == "molecule":
                     config["molecule_original"] = current_val
                     config["molecule"] = Molecule.from_dynamic(current_val)
