@@ -83,8 +83,10 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
                     "Failed to create new individual with steady-state "
                     f"source {source_db.name}. Removing steady-state."
                 )
-                source_db.nsteadystate_target = 0
-                source_db.save()
+                # BUG-FIX: This should use the update function for the sourcedb
+                # and also cancel any jobs in the queue from this source.
+                source_db.update_flow_target(0)
+                source_db._cancel_pending_workitems()
                 shutil.rmtree(directory)
                 return
 
