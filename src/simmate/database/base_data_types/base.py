@@ -1645,9 +1645,9 @@ class DatabaseTable(models.Model):
         # Handle ordering
         # the ordered_by kwarg takes priority, but in cases where none is set
         # AND the queryset filters didn't give any, pagination still requires
-        # that we do some form of ordering, so we filter by id
+        # that we do some form of ordering, so we filter by id in reverse
         if paginate and not order_by and not queryset.query.order_by:
-            order_by = "id"
+            order_by = "-id"
         if order_by:
             # in case only a single str was given, convert to list
             if isinstance(order_by, str):
