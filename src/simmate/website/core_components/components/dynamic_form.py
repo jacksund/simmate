@@ -21,6 +21,7 @@ class DynamicFormComponent(UnicornView):
             # "template_name",  # included by parent class
             "template_names",
             "table",
+            "table_entry",
             "required_inputs",
             "ignore_on_update",
             "mount_for_update_columns",

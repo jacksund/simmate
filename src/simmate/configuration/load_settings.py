@@ -219,6 +219,7 @@ class SimmateSettings:
                     "microsoft": {"client_id": None, "secret": None},
                     "github": {"client_id": None, "secret": None},
                 },
+                "log_sql": False,
                 # django extras
                 "debug": False,
                 "allowed_hosts": ["127.0.0.1", "localhost", "testserver"],
