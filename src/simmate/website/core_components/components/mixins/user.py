@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from functools import cached_property
+
 from django.contrib.auth.models import User
 
 
@@ -10,7 +12,7 @@ class UserInput:
 
     search_inputs = []
 
-    @property
+    @cached_property
     def user_options(self):
         # query for all user names
         users = (
