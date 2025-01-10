@@ -2,6 +2,7 @@
 
 import os
 import sys
+import urllib.parse
 from functools import cached_property
 from pathlib import Path
 
@@ -669,6 +670,30 @@ class Molecule:
         write the image directly to a file.
         """
         return Draw.MolToImage(self.rdkit_molecule)
+
+    def to_svg(self, url_encode: bool = False, size=(300, 300)):
+        """
+        Generates a PIL image object. Use `to_png_file` if you instead want to
+        write the image directly to a file.
+        """
+        if not url_encode:
+            return Draw.MolToImage(
+                self.rdkit_molecule,
+                size=size,
+                useSVG=True,
+            )  # gives a PIL obj
+        else:
+            # Faster method for generating SVGs pulled from their tutorials:
+            # https://github.com/rdkit/rdkit-tutorials/blob/master/notebooks/006_save_rdkit_mol_as_image.ipynb
+            mol = Draw.rdMolDraw2D.PrepareMolForDrawing(self.rdkit_molecule)
+            drawer = Draw.rdMolDraw2D.MolDraw2DSVG(size[0], size[1])
+            drawer.DrawMolecule(mol)
+            drawer.FinishDrawing()
+            svg = drawer.GetDrawingText()
+            # This is the format that programs like streamlit's ImageCol expect:
+            # https://docs.streamlit.io/develop/api-reference/data/st.column_config/st.column_config.imagecolumn
+            svg_encoded = f"data:image/svg+xml;utf8,{urllib.parse.quote(svg)}"
+            return svg_encoded
 
     def to_xyz(self):
         """
