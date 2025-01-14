@@ -253,7 +253,7 @@ class SearchResults(models.QuerySet):
 
         # now convert these objects to a pandas dataframe, again using just
         # the archive columns
-        df = base_objs.to_dataframe(fieldnames=fieldset)
+        df = base_objs.to_dataframe(columns=fieldset)
 
         # Write the data to a csv file
         # OPTIMIZE: is there a better format that pandas can write to?
