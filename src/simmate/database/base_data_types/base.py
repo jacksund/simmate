@@ -244,16 +244,9 @@ class SearchResults(models.QuerySet):
         # convert to path obj
         filename = Path(filename)
 
-        # grab the list of fields that we want to store
-        fieldset = self.model.archive_fieldset
-
-        # We want to load the entire table, but only grab the fields that
-        # we will be storing in the archive.
-        base_objs = self.only(*fieldset)
-
-        # now convert these objects to a pandas dataframe, again using just
-        # the archive columns
-        df = base_objs.to_dataframe(columns=fieldset)
+        # now convert these objects to a pandas dataframe, using just
+        # the archive columns that are being stored
+        df = self.to_dataframe(columns=self.model.archive_fieldset)
 
         # Write the data to a csv file
         # OPTIMIZE: is there a better format that pandas can write to?
@@ -1186,6 +1179,9 @@ class DatabaseTable(models.Model):
         # the entire table comes from a fixed source (e.g. JARVIS or the
         # MatProj). We check this with all default columns, just in case.
         all_fields = [f for f in all_fields if f in cls.get_column_names()]
+
+        # and remove accidental duplicate cols if any
+        all_fields = list(set(all_fields))
 
         return all_fields
 
