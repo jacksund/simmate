@@ -55,10 +55,10 @@ JarvisStructure.load_remote_archive()
 Now that our database is populated with data, we can start exploring it:
 
 ``` python
-data = JarvisStructure.objects.to_dataframe()[:150]  # (1)
+data = JarvisStructure.objects.to_dataframe(limit=150)  # (1)
 ```
 
-1. We use [:150] to just show the first 150 rows
+1. We use limit=150 to just show the first 150 rows
 
 Let's test our filtering ability with this new data:
 
