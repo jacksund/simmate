@@ -83,7 +83,7 @@ class StagedWorkflow(Workflow):
             for i, current_task in enumerate(cls.subworkflows[1:]):
                 if not cls.one_folder:
                     # Now we copy the requested files from one to the next
-                    previous_directory = result.directory
+                    previous_directory = Path(f"{result.directory}")
                     new_directory = directory / current_task.name_full
                     os.makedirs(new_directory, exist_ok=True)
                     for file in cls.files_to_copy:
