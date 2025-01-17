@@ -36,6 +36,8 @@ class BadElfBase(Workflow):
         algorithm: str = "badelf",
         check_for_covalency: bool = True,
         write_electride_files: bool = False,
+        write_ion_radii: bool = True,
+        run_id: str = None,
         **kwargs,
     ):
         # make a new directory to run badelf algorithm in and copy necessary files.
@@ -63,5 +65,12 @@ class BadElfBase(Workflow):
         if write_electride_files:
             badelf_tools.write_species_file()
             badelf_tools.write_species_file(file_type="CHGCAR")
+        # grab the calculation table linked to this workflow run and save ionic
+        # radii
+        search_datatable = cls.database_table.objects.get(run_id=run_id)
+        search_datatable.update_ionic_radii(badelf_tools.all_atom_elf_radii)
+        # write ionic radii
+        if write_ion_radii:
+            badelf_tools.write_atom_elf_radii()
         badelf_tools.write_results_csv()
         return results

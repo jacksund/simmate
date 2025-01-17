@@ -8,6 +8,7 @@ from functools import cached_property
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import psutil
 from pymatgen.analysis.local_env import CrystalNN
 from pymatgen.io.vasp import Potcar
@@ -194,6 +195,47 @@ class BadElfToolkit:
                 """
             )
             return None
+    
+    @cached_property
+    def all_atom_elf_radii(self):
+        """
+        The elf radii for all atoms-neighbor pairs in the structure. Atom neighbor
+        pairs are obtained using CrystalNN while the radii are obtained during
+        the partitioning process.
+        """
+        return self._get_all_atom_elf_radii()
+    
+    def _get_all_atom_elf_radii(self):
+        """
+        Gets the elf radii for all atom-neighbor pairs in the structure. 
+        """
+        if self.algorithm == "zero-flux":
+            logging.warn("Elf ionic radii are not calculated when using zero-flux partitioning.")
+            return None
+        atom_elf_radii = pd.DataFrame(columns=[
+            "site_index", 
+            "neigh_index", 
+            "radius",
+            ])
+        for i, site in enumerate(self.structure):
+            coordination = self.coord_envs[i]
+            neighbors_df = self.partitioning[i]
+            for j in range(coordination):
+                neigh_index = neighbors_df.iloc[j]["neigh_index"]
+                radius = neighbors_df.iloc[j]["radius"]
+                atom_elf_radii.loc[len(atom_elf_radii)] = [i,neigh_index,radius]
+        return atom_elf_radii
+    
+    def write_atom_elf_radii(self, filename: str = "elf_radii.csv"):
+        """
+        Writes atomic elf radii to a csv.
+        """
+        if ".csv" not in filename:
+            filename += ".csv"
+        if self.all_atom_elf_radii is not None:
+            self.all_atom_elf_radii.to_csv(self.directory / filename)
+        else:
+            logging.warn("Elf ionic radii could not be found (likely due to zero-flux partitioning). No radii will be written.")
 
     @property
     def single_site_voxel_assignments(self):
@@ -344,7 +386,14 @@ class BadElfToolkit:
             single_site_voxel_assignments,
             multi_site_voxel_assignments,
         )
-
+    
+    def get_ELF_maxima(self):
+        """
+        Gets the ELF maxima at each atom center or bare electron site
+        """
+        frac_coords = self.electride_structure.frac_coords
+        return self.partitioning_grid.interpolate_value_at_frac_coords(frac_coords, "cubic")
+    
     @staticmethod
     def get_ELF_dimensionality(grid: Grid, cutoff: float):
         """
@@ -729,6 +778,7 @@ class BadElfToolkit:
         electride_dim, dim_cutoffs = self.get_electride_dimensionality()
         results["electride_dim"] = electride_dim
         results["dim_cutoffs"] = dim_cutoffs
+        results["elf_maxima"] = self.get_ELF_maxima()
         # Fill out columns unrelated to badelf alg
         structure = self.structure
         results["structure"] = structure
