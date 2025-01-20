@@ -1,0 +1,181 @@
+material_id,primitive_formula,full_formula,pretty_formula,nsites,spacegroup,nelements,elements_list,CrystalSystem,category
+mp-2334,DyCu,DyCu,DyCu,2,221,2,Cu Dy,Cubic,binary_easy
+mp-2226,DyPd,DyPd,DyPd,2,221,2,Dy Pd,Cubic,binary_easy
+mp-1121,GaCo,GaCo,GaCo,2,221,2,Co Ga,Cubic,binary_easy
+mp-20132,InHg,InHg,InHg,2,166,2,Hg In,Trigonal,binary_medium
+mp-2735,PaO,PaO,PaO,2,225,2,O Pa,Cubic,binary_easy
+mp-1169,ScCu,ScCu,ScCu,2,221,2,Cu Sc,Cubic,binary_easy
+mp-30746,YIr,YIr,YIr,2,221,2,Ir Y,Cubic,binary_easy
+mp-13452,BePd2,BePd2,BePd2,3,139,2,Be Pd,Tetragonal,binary_hard
+mp-2209,CeGa2,CeGa2,CeGa2,3,191,2,Ce Ga,Hexagonal,binary_medium
+mp-11359,Ga2Cu,Ga2Cu,Ga2Cu,3,123,2,Cu Ga,Tetragonal,binary_hard
+mp-11390,LiGaSi,LiGaSi,LiGaSi,3,216,3,Ga Li Si,Cubic,ternary_easy
+mp-1995,PrC2,PrC2,PrC2,3,139,2,C Pr,Tetragonal,binary_hard
+mp-24658,SmH2,SmH2,SmH2,3,225,2,H Sm,Cubic,binary_easy
+mp-30497,TbCd2,TbCd2,TbCd2,3,191,2,Cd Tb,Hexagonal,binary_medium
+mp-30501,Ti2Cd,Ti2Cd,Ti2Cd,3,139,2,Cd Ti,Tetragonal,binary_hard
+mp-30789,U2Mo,U2Mo,U2Mo,3,139,2,Mo U,Tetragonal,binary_hard
+mp-30725,YHg2,YHg2,YHg2,3,191,2,Hg Y,Hexagonal,binary_medium
+mp-20225,CePb3,CePb3,CePb3,4,221,2,Ce Pb,Cubic,binary_easy
+mp-788,Co2Te2,Co2Te2,CoTe,4,194,2,Co Te,Hexagonal,binary_easy
+mp-1213726,CrFeCoSi,CrFeCoSi,CrFeCoSi,4,216,4,Co Cr Fe Si,Cubic,quaternary_easy
+mp-20176,DyPb3,DyPb3,DyPb3,4,221,2,Dy Pb,Cubic,binary_easy
+mp-4552,ErInCu2,ErInCu2,ErInCu2,4,225,3,Cu Er In,Cubic,ternary_easy
+mp-8882,Ga2P2,Ga2P2,GaP,4,186,2,Ga P,Hexagonal,polymorph_binary
+mp-20730,HfCo2Sn,HfCo2Sn,HfCo2Sn,4,225,3,Co Hf Sn,Cubic,ternary_easy
+mp-21211,InFeCo2,InFeCo2,InFeCo2,4,225,3,Co Fe In,Cubic,ternary_easy
+mp-4326,KErS2,KErS2,KErS2,4,166,3,Er K S,Trigonal,ternary_medium
+mp-13181,LaF3,LaF3,LaF3,4,225,2,F La,Cubic,polymorph_binary
+mp-30591,Li2CuSn,Li2CuSn,Li2CuSn,4,216,3,Cu Li Sn,Cubic,ternary_easy
+mp-30648,LiMg2Ga,LiMg2Ga,LiMg2Ga,4,225,3,Ga Li Mg,Cubic,ternary_easy
+mp-7554,LiMgSnAu,LiMgSnAu,LiMgSnAu,4,216,4,Au Li Mg Sn,Cubic,quaternary_easy
+mp-11806,LiMgSnPt,LiMgSnPt,LiMgSnPt,4,216,4,Li Mg Pt Sn,Cubic,quaternary_easy
+mp-4972,LuInCu2,LuInCu2,LuInCu2,4,225,3,Cu In Lu,Cubic,ternary_easy
+mp-5181,LuSnPd2,LuSnPd2,LuSnPd2,4,225,3,Lu Pd Sn,Cubic,ternary_easy
+mp-568382,Mn2Bi2,Mn2Bi2,MnBi,4,194,2,Mn Bi,Hexagonal,polymorph_binary
+mp-20389,Na2CdPb,Na2CdPb,Na2CdPb,4,216,3,Cd Na Pb,Cubic,ternary_easy
+mp-1004,Nb3Si,Nb3Si,Nb3Si,4,221,2,Nb Si,Cubic,polymorph_binary
+mp-30580,SrGaCu2,SrGaCu2,SrGaCu2,4,166,3,Cu Ga Sr,Trigonal,ternary_medium
+mp-30555,TaGaCo2,TaGaCo2,TaGaCo2,4,225,3,Co Ga Ta,Cubic,ternary_easy
+mp-2731,TiGa3,TiGa3,TiGa3,4,139,2,Ga Ti,Tetragonal,binary_medium
+mp-30493,ZnCdPt2,ZnCdPt2,ZnCdPt2,4,123,3,Cd Pt Zn,Tetragonal,ternary_medium
+mp-2510,ZrHg,ZrHg,ZrHg,4,123,2,Hg Zr,Tetragonal,binary_medium
+mp-552674,ZrTaNO,ZrTaNO,ZrTaNO,4,187,4,N O Ta Zr,Hexagonal,quaternary_easy
+mp-29241,Ca3SnO,Ca3SnO,Ca3SnO,5,221,3,Ca O Sn,Cubic,ternary_easy
+mp-9570,CaCd2P2,CaCd2P2,CaCd2P2,5,164,3,Ca Cd P,Trigonal,ternary_medium
+mp-5452,CeCu2Si2,CeCu2Si2,CeCu2Si2,5,139,3,Ce Cu Si,Tetragonal,ternary_medium
+mp-3147,ErSi2Au2,ErSi2Au2,ErSi2Au2,5,139,3,Au Er Si,Tetragonal,ternary_medium
+mp-19183,Li2NiO2,Li2NiO2,Li2NiO2,5,71,3,Li Ni O,Orthorhombic,polymorph_ternary
+mp-13405,LuMn2Ge2,LuMn2Ge2,LuMn2Ge2,5,139,3,Ge Lu Mn,Tetragonal,ternary_medium
+mp-454,NaGa4,NaGa4,NaGa4,5,139,2,Ga Na,Tetragonal,binary_hard
+mp-1827,SrGa4,SrGa4,SrGa4,5,139,2,Ga Sr,Tetragonal,binary_hard
+mp-30805,SrNiSn3,SrNiSn3,SrNiSn3,5,107,3,Ni Sn Sr,Tetragonal,ternary_medium
+mp-1071272,CeAl2BRu2,CeAl2BRu2,CeAl2BRu2,6,123,4,Al B Ce Ru,Tetragonal,quaternary_easy
+mp-6258,CeCr2Si2C,CeCr2Si2C,CeCr2Si2C,6,123,4,C Ce Cr Si,Tetragonal,quartenary_medium
+mp-20237,Co2Ni2Sn2,Co2Ni2Sn2,CoNiSn,6,194,3,Co Ni Sn,Hexagonal,ternary_easy
+mp-12743,CrTe4Au,CrTe4Au,CrTe4Au,6,10,3,Au Cr Te,Monoclinic,ternary_hard
+mp-1071835,Dy2Cu4,Dy2Cu4,DyCu2,6,74,2,Cu Dy,Orthorhombic,template-based_binary
+mp-2740,ErCo5,ErCo5,ErCo5,6,191,2,Co Er,Hexagonal,binary_medium
+mp-570875,Ga4Os2,Ga4Os2,Ga2Os,6,70,2,Ga Os,Orthorhombic,binary_medium
+mp-861,Hf4Ni2,Hf4Ni2,Hf2Ni,6,140,2,Hf Ni,Tetragonal,binary_medium
+mp-6794,LaB2Rh2C,LaB2Rh2C,LaB2Rh2C,6,139,4,B C La Rh,Tetragonal,quartenary_medium
+mp-3676,MgCu4Sn,MgCu4Sn,MgCu4Sn,6,216,3,Cu Mg Sn,Cubic,ternary_hard
+mp-30587,MgInCu4,MgInCu4,MgInCu4,6,216,3,Cu In Mg,Cubic,ternary_hard
+mp-7524,Nb2P2Se2,Nb2P2Se2,NbPSe,6,71,3,Nb P Se,Orthorhombic,ternary_hard
+mp-2129,Nd2Ge4,Nd2Ge4,NdGe2,6,141,2,Ge Nd,Tetragonal,binary_hard
+mp-6140,PrNi2B2C,PrNi2B2C,PrNi2B2C,6,139,4,B C Ni Pr,Tetragonal,quartenary_medium
+mp-1566,SmFe5,SmFe5,SmFe5,6,191,2,Fe Sm,Hexagonal,binary_medium
+mp-2067,Th2Ga4,Th2Ga4,ThGa2,6,141,2,Ga Th,Tetragonal,non-polymorph_binary
+mp-2387,Th4Zn2,Th4Zn2,Th2Zn,6,140,2,Th Zn,Tetragonal,binary_medium
+mp-2178,Yb2Ga4,Yb2Ga4,YbGa2,6,194,2,Ga Yb,Hexagonal,non-polymorph_binary
+mp-1607,YbCu5,YbCu5,YbCu5,6,191,2,Cu Yb,Hexagonal,binary_medium
+mp-11533,ZrZnNi4,ZrZnNi4,ZrZnNi4,6,216,3,Ni Zn Zr,Cubic,ternary_hard
+mp-545788,Ba3ZnN2O,Ba3ZnN2O,Ba3ZnN2O,7,123,4,Ba N O Zn,Tetragonal,quartenary_hard
+mp-11435,ErTi2Ga4,ErTi2Ga4,ErTi2Ga4,7,139,3,Er Ga Ti,Tetragonal,ternary_hard
+mp-13287,Ba2Cu2Te2F2,Ba2Cu2Te2F2,BaCuTeF,8,129,4,Ba Cu F Te,Tetragonal,quaternary_easy
+mp-7095,Ce2Co2Si4,Ce2Co2Si4,CeCoSi2,8,63,3,Ce Co Si,Orthorhombic,ternary_hard
+mp-1231,Cr6Ga2,Cr6Ga2,Cr3Ga,8,223,2,Cr Ga,Cubic,binary_easy
+mp-7489,CsUF6,CsUF6,CsUF6,8,148,3,Cs F U,Trigonal,ternary_hard
+mp-546790,La2Cu2Te2O2,La2Cu2Te2O2,LaCuTeO,8,129,4,Cu La O Te,Tetragonal,quartenary_medium
+mp-18745,La2Mn2Sb2O2,La2Mn2Sb2O2,LaMnSbO,8,129,4,La Mn O Sb,Tetragonal,quartenary_hard
+mp-12515,La2Zn2Sb2O2,La2Zn2Sb2O2,LaZnSbO,8,129,4,La O Sb Zn,Tetragonal,quartenary_hard
+mp-11251,Mg6Au2,Mg6Au2,Mg3Au,8,194,2,Au Mg,Hexagonal,polymorph_binary
+mp-11396,Nd2Ga4Ni2,Nd2Ga4Ni2,NdGa2Ni,8,65,3,Ga Nd Ni,Orthorhombic,ternary_hard
+mp-9761,Re2O6,Re2O6,ReO3,8,182,2,O Re,Hexagonal,polymorph_binary
+mp-20349,Sm2Fe2As2O2,Sm2Fe2As2O2,SmFeAsO,8,129,4,As Fe O Sm,Tetragonal,quartenary_hard
+mp-2231,Sn4S4,Sn4S4,SnS,8,62,2,S Sn,Orthorhombic,polymorph_binary
+mp-12444,Sr2Cu2S2F2,Sr2Cu2S2F2,SrCuSF,8,129,4,Cu F S Sr,Tetragonal,quaternary_easy
+mp-20807,Sr2Fe2As2F2,Sr2Fe2As2F2,SrFeAsF,8,129,4,As F Fe Sr,Tetragonal,quartenary_medium
+mp-30682,ZrGa,Zr4Ga4,ZrGa,8,141,2,Ga Zr,Tetragonal,binary_hard
+mp-19118,BaNd2CoO5,BaNd2CoO5,BaNd2CoO5,9,71,4,Ba Co Nd O,Orthorhombic,quartenary_hard
+mp-5615,Ca3Ag3As3,Ca3Ag3As3,CaAgAs,9,189,3,Ag As Ca,Hexagonal,ternary_medium
+mp-30733,Ho3Sn3Pt3,Ho3Sn3Pt3,HoSnPt,9,189,3,Ho Pt Sn,Hexagonal,ternary_medium
+mp-16747,Lu3Ag3Pb3,Lu3Ag3Pb3,LuAgPb,9,189,3,Ag Lu Pb,Hexagonal,ternary_medium
+mp-13171,Y3Mg3Cu3,Y3Mg3Cu3,YMgCu,9,189,3,Cu Mg Y,Hexagonal,polymorph_ternary
+mp-23127,Ba2BiSbO6,Ba2BiSbO6,Ba2BiSbO6,10,12,4,Ba Bi O Sb,Monoclinic,polymorph_quartenary
+mp-6231,Ba2ErSbO6,Ba2ErSbO6,Ba2ErSbO6,10,225,4,Ba Er O Sb,Cubic,quartenary_medium
+mp-21348,Ba2EuTaO6,Ba2EuTaO6,Ba2EuTaO6,10,87,4,Ba Eu O Ta,Tetragonal,quartenary_hard
+mp-10731,Ba2PrSbO6,Ba2PrSbO6,Ba2PrSbO6,10,225,4,Ba O Pr Sb,Cubic,polymorph_quartenary
+mp-13356,Ba2SrTeO6,Ba2SrTeO6,Ba2SrTeO6,10,148,4,Ba O Sr Te,Trigonal,quartenary_hard
+mp-19093,Ba2UNiO6,Ba2UNiO6,Ba2UNiO6,10,225,4,Ba Ni O U,Cubic,quaternary_easy
+mp-19751,Ba2YbNbO6,Ba2YbNbO6,Ba2YbNbO6,10,225,4,Ba Nb O Yb,Cubic,quartenary_medium
+mp-15888,Ba2YIrO6,Ba2YIrO6,Ba2YIrO6,10,225,4,Ba Ir O Y,Cubic,quartenary_medium
+mp-6428,Ba2YRuO6,Ba2YRuO6,Ba2YRuO6,10,225,4,Ba O Ru Y,Cubic,quartenary_medium
+mp-19274,BaPrMn2O6,BaPrMn2O6,BaPrMn2O6,10,123,4,Ba Mn O Pr,Tetragonal,quartenary_medium
+mp-1111927,K2LiCrF6,K2LiCrF6,K2LiCrF6,10,225,4,Cr F K Li,Cubic,template-based_quartenary
+mp-1111671,K2LiInF6,K2LiInF6,K2LiInF6,10,225,4,F In K Li,Cubic,quaternary_easy
+mp-6586,K2NaAlF6,K2NaAlF6,K2NaAlF6,10,225,4,Al F K Na,Cubic,quartenary_medium
+mp-24412,K2NaAlH6,K2NaAlH6,K2NaAlH6,10,225,4,Al H K Na,Cubic,quartenary_medium
+mp-6686,K2NaInF6,K2NaInF6,K2NaInF6,10,225,4,F In K Na,Cubic,quaternary_easy
+mp-9349,KRb2ScF6,KRb2ScF6,KRb2ScF6,10,225,4,F K Rb Sc,Cubic,polymorph_quartenary
+mp-1080753,NaPb2IO6,NaPb2IO6,NaPb2IO6,10,225,4,I Na O Pb,Cubic,polymorph_quartenary
+mp-1114630,Rb3PrCl6,Rb3PrCl6,Rb3PrCl6,10,225,3,Cl Pr Rb,Cubic,template-based_ternary
+mp-2128,Sn8Pd2,Sn8Pd2,Sn4Pd,10,68,2,Pd Sn,Orthorhombic,binary_hard
+mp-16307,Sr2MgIrO6,Sr2MgIrO6,Sr2MgIrO6,10,225,4,Ir Mg O Sr,Cubic,quaternary_easy
+mp-1208467,Tb8Al2,Tb8Al2,Tb4Al,10,227,2,Al Tb,Cubic,binary_hard
+mp-19227,Y2Mn2O6,Y2Mn2O6,YMnO3,10,194,3,Mn O Y,Hexagonal,polymorph_ternary
+mp-9812,Zn2C2O6,Zn2C2O6,ZnCO3,10,167,3,C O Zn,Trigonal,ternary_medium
+mp-550722,Ba2Tl2CuO6,Ba2Tl2CuO6,Ba2Tl2CuO6,11,139,4,Ba Cu O Tl,Tetragonal,polymorph_quartenary
+mp-6628,CsCdN3O6,CsCdN3O6,CsCdN3O6,11,146,4,Cd Cs N O,Trigonal,polymorph_quartenary
+mp-7550,Ce2Nb2O8,Ce2Nb2O8,CeNbO4,12,15,3,Ce Nb O,Monoclinic,polymorph_ternary
+mp-11658,Cu4Sn2Se6,Cu4Sn2Se6,Cu2SnSe3,12,9,3,Cu Se Sn,Monoclinic,non-polymorph_ternary
+mp-11449,Hf4Mn8,Hf4Mn8,HfMn2,12,194,2,Hf Mn,Hexagonal,polymorph_binary
+mp-23550,K2Br2F8,K2Br2F8,KBrF4,12,140,3,Br F K,Tetragonal,polymorph_ternary
+mp-9666,K4Na2Ga2P4,K4Na2Ga2P4,K2NaGaP2,12,72,4,Ga K Na P,Orthorhombic,quartenary_hard
+mp-23126,KAs4IO6,KAs4IO6,KAs4IO6,12,191,4,As I K O,Hexagonal,quartenary_hard
+mp-1095437,Lu2Se2O6F2,Lu2Se2O6F2,LuSeO3F,12,11,4,F Lu O Se,Monoclinic,polymorph_quartenary
+mp-640079,Mn9Au3,Mn9Au3,Mn3Au,12,123,2,Au Mn,Tetragonal,binary_hard
+mp-1102067,Pu4Sn8,Pu4Sn8,PuSn2,12,141,2,Pu Sn,Tetragonal,template-based_binary
+mp-12931,Sm2Ta2O8,Sm2Ta2O8,SmTaO4,12,13,3,O Sm Ta,Monoclinic,polymorph_ternary
+mp-1102049,Ta3Be9,Ta3Be9,TaBe3,12,166,2,Be Ta,Trigonal,template-based_binary
+mp-1102936,Ta8Fe4,Ta8Fe4,Ta2Fe,12,193,2,Fe Ta,Hexagonal,template-based_binary
+mp-1095641,Tb5S7,Tb5S7,Tb5S7,12,12,2,S Tb,Monoclinic,template-based_binary
+mp-19418,V2Cr2O8,V2Cr2O8,VCrO4,12,63,3,Cr O V,Orthorhombic,polymorph_ternary
+mp-2451,Y3Al9,Y3Al9,YAl3,12,166,2,Al Y,Trigonal,polymorph_binary
+mp-29225,Al4Cu2O7,Al4Cu2O7,Al4Cu2O7,13,216,3,Al Cu O,Cubic,ternary_hard
+mp-1104454,Ta4GaTe4Se4,Ta4GaTe4Se4,Ta4GaTe4Se4,13,216,4,Ga Se Ta Te,Cubic,template-based_quartenary
+mp-12570,ThB12,ThB12,ThB12,13,225,2,B Th,Cubic,binary_easy
+mp-1103888,YbB12,YbB12,YbB12,13,225,2,B Yb,Cubic,template-based_binary
+mp-9705,Ba4NaB3N6,Ba4NaB3N6,Ba4NaB3N6,14,229,4,B Ba N Na,Cubic,quaternary_easy
+mp-476,Ge6N8,Ge6N8,Ge3N4,14,227,2,Ge N,Cubic,polymorph_binary
+mp-14466,KLi6IrO6,KLi6IrO6,KLi6IrO6,14,166,4,Ir K Li O,Trigonal,quartenary_hard
+mp-1105001,Tm6Pt8,Tm6Pt8,Tm3Pt4,14,148,2,Pt Tm,Trigonal,template-based_binary
+mp-1104457,Eu9Au6,Eu9Au6,Eu3Au2,15,148,2,Au Eu,Trigonal,template-based_binary
+mp-1104286,Ge12Rh3,Ge12Rh3,Ge4Rh,15,152,2,Ge Rh,Trigonal,template-based_binary
+mp-726253,RbLi3S2O9,RbLi3S2O9,RbLi3S2O9,15,1,4,Li O Rb S,Triclinic,polymorph_quartenary
+mp-7913,Be4Si4N8,Be4Si4N8,BeSiN2,16,33,3,Be N Si,Orthorhombic,non-polymorph_ternary
+mp-1105802,Ca4Ge8Pt4,Ca4Ge8Pt4,CaGe2Pt,16,71,3,Ca Ge Pt,Orthorhombic,template-based_ternary
+mp-1106406,Ce4Sn2S10,Ce4Sn2S10,Ce2SnS5,16,55,3,Ce S Sn,Orthorhombic,template-based_ternary
+mp-1106310,Cu4Si2Hg2S8,Cu4Si2Hg2S8,Cu2SiHgS4,16,31,4,Cu Hg S Si,Orthorhombic,template-based_quartenary
+mp-23520,In2Pb4I10,In2Pb4I10,InPb2I5,16,140,3,I In Pb,Tetragonal,ternary_hard
+mp-1106395,Pr12Ir4,Pr12Ir4,Pr3Ir,16,62,2,Ir Pr,Orthorhombic,template-based_binary
+mp-23667,Rb2P2H4O8,Rb2P2H4O8,RbPH2O4,16,43,4,H O P Rb,Orthorhombic,polymorph_quartenary
+mp-1106349,Sm2Pd6S8,Sm2Pd6S8,SmPd3S4,16,223,3,Pd S Sm,Cubic,template-based_ternary
+mp-1105958,Yb12Co4,Yb12Co4,Yb3Co,16,62,2,Co Yb,Orthorhombic,template-based_binary
+mp-1105386,Yb2H6C2N6,Yb2H6C2N6,YbH3CN3,16,176,4,C H N Yb,Hexagonal,template-based_quartenary
+mp-1106327,Co4NiSb12,Co4NiSb12,Co4NiSb12,17,204,3,Co Ni Sb,Cubic,template-based_ternary
+mp-651268,Fe2Cu6SnS8,Fe2Cu6SnS8,Fe2Cu6SnS8,17,115,4,Cu Fe S Sn,Tetragonal,quartenary_hard
+mp-1106064,Ho4Ga12Ni,Ho4Ga12Ni,Ho4Ga12Ni,17,229,3,Ga Ho Ni,Cubic,template-based_ternary
+mp-1106196,Lu4Ga12Ni,Lu4Ga12Ni,Lu4Ga12Ni,17,229,3,Ga Lu Ni,Cubic,template-based_ternary
+mp-1106117,La10Ag2Pb6,La10Ag2Pb6,La5AgPb3,18,193,3,Ag La Pb,Hexagonal,template-based_ternary
+mp-2233097,MgV4SnO12,MgV4SnO12,MgV4SnO12,18,5,4,Mg O Sn V,Monoclinic,polymorph_quartenary
+mp-1106402,Rb4Ti2O2F10,Rb4Ti2O2F10,Rb2TiOF5,18,63,4,F O Rb Ti,Orthorhombic,template-based_quartenary
+mp-1105110,Sr4Bi4Se6O4,Sr4Bi4Se6O4,Sr2Bi2Se3O2,18,14,4,Bi O Se Sr,Monoclinic,non-polymorph_quartenary
+mp-1106245,Zr10Al2Sb6,Zr10Al2Sb6,Zr5AlSb3,18,193,3,Al Sb Zr,Hexagonal,template-based_ternary
+mp-557997,Ca4Se4O12,Ca4Se4O12,CaSeO3,20,14,3,Ca O Se,Monoclinic,polymorph_ternary
+mp-1106325,CaCu3Pt4O12,CaCu3Pt4O12,CaCu3Pt4O12,20,204,4,Ca Cu O Pt,Cubic,template-based_quartenary
+mp-1106150,CeMn4Cu3O12,CeMn4Cu3O12,CeMn4Cu3O12,20,204,4,Ce Cu Mn O,Cubic,template-based_quartenary
+mp-1105955,Er6Cu6Sb8,Er6Cu6Sb8,Er3Cu3Sb4,20,220,3,Cu Er Sb,Cubic,template-based_ternary
+mp-1106004,HoFe4Cu3O12,HoFe4Cu3O12,HoFe4Cu3O12,20,204,4,Cu Fe Ho O,Cubic,template-based_quartenary
+mp-27450,K4Cu4Cl12,K4Cu4Cl12,KCuCl3,20,14,3,Cl Cu K,Monoclinic,polymorph_ternary
+mp-1105893,La6Cu6Bi8,La6Cu6Bi8,La3Cu3Bi4,20,220,3,Bi Cu La,Cubic,template-based_ternary
+mp-1106068,LaCr4Cu3O12,LaCr4Cu3O12,LaCr4Cu3O12,20,204,4,Cr Cu La O,Cubic,template-based_quartenary
+mp-1105674,Mg4Be2B4Ir10,Mg4Be2B4Ir10,Mg2BeB2Ir5,20,127,4,B Be Ir Mg,Tetragonal,template-based_quartenary
+mp-1105109,PrCu3Ru4O12,PrCu3Ru4O12,PrCu3Ru4O12,20,204,4,Cu O Pr Ru,Cubic,template-based_quartenary
+mp-1190213,Re4B16,Re4B16,ReB4,20,194,2,B Re,Hexagonal,template-based_binary
+mp-13383,Sc2Ag2P4Se12,Sc2Ag2P4Se12,ScAgP2Se6,20,163,4,Ag P Sc Se,Trigonal,quartenary_hard
+mp-1105777,U6Sb8Ir6,U6Sb8Ir6,U3Sb4Ir3,20,220,3,Ir Sb U,Cubic,template-based_ternary
+mp-23125,K6Na2Fe2Cl12,K6Na2Fe2Cl12,K3NaFeCl6,22,167,4,Cl Fe K Na,Trigonal,polymorph_quartenary
+mp-5126,Zn4S4O16,Zn4S4O16,ZnSO4,24,62,3,O S Zn,Orthorhombic,non-polymorph_ternary
+mp-19140,K3MnO4,K12Mn4O16,K3MnO4,32,121,3,K Mn O,Tetragonal,ternary_hard
+mp-1105290,Co3Sb4O6F6,Co6Sb8O12F12,Co3Sb4O6F6,38,217,4,Co F O Sb,Cubic,template-based_quartenary

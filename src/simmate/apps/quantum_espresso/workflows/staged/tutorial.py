@@ -116,7 +116,7 @@ class StaticEnergy__QuantumEspresso__Lda02(Relaxation__QuantumEspresso__Lda01):
     )
 
 
-class Relaxation__QuantumEspresso__EvoTutorial(StagedWorkflow):
+class StagedCalculation__QuantumEspresso__EvoTutorial(StagedWorkflow):
     """
     Runs a series of increasing-quality relaxations and then finishes with a single
     static energy calculation.
