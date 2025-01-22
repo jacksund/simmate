@@ -195,7 +195,7 @@ class BadElfToolkit:
                 """
             )
             return None
-    
+
     @cached_property
     def all_atom_elf_radii(self):
         """
@@ -204,28 +204,32 @@ class BadElfToolkit:
         the partitioning process.
         """
         return self._get_all_atom_elf_radii()
-    
+
     def _get_all_atom_elf_radii(self):
         """
-        Gets the elf radii for all atom-neighbor pairs in the structure. 
+        Gets the elf radii for all atom-neighbor pairs in the structure.
         """
         if self.algorithm == "zero-flux":
-            logging.warn("Elf ionic radii are not calculated when using zero-flux partitioning.")
+            logging.warn(
+                "Elf ionic radii are not calculated when using zero-flux partitioning."
+            )
             return None
-        atom_elf_radii = pd.DataFrame(columns=[
-            "site_index", 
-            "neigh_index", 
-            "radius",
-            ])
+        atom_elf_radii = pd.DataFrame(
+            columns=[
+                "site_index",
+                "neigh_index",
+                "radius",
+            ]
+        )
         for i, site in enumerate(self.structure):
             coordination = self.coord_envs[i]
             neighbors_df = self.partitioning[i]
             for j in range(coordination):
                 neigh_index = neighbors_df.iloc[j]["neigh_index"]
                 radius = neighbors_df.iloc[j]["radius"]
-                atom_elf_radii.loc[len(atom_elf_radii)] = [i,neigh_index,radius]
+                atom_elf_radii.loc[len(atom_elf_radii)] = [i, neigh_index, radius]
         return atom_elf_radii
-    
+
     def write_atom_elf_radii(self, filename: str = "elf_radii.csv"):
         """
         Writes atomic elf radii to a csv.
@@ -235,7 +239,9 @@ class BadElfToolkit:
         if self.all_atom_elf_radii is not None:
             self.all_atom_elf_radii.to_csv(self.directory / filename)
         else:
-            logging.warn("Elf ionic radii could not be found (likely due to zero-flux partitioning). No radii will be written.")
+            logging.warn(
+                "Elf ionic radii could not be found (likely due to zero-flux partitioning). No radii will be written."
+            )
 
     @property
     def single_site_voxel_assignments(self):
@@ -386,14 +392,16 @@ class BadElfToolkit:
             single_site_voxel_assignments,
             multi_site_voxel_assignments,
         )
-    
+
     def get_ELF_maxima(self):
         """
         Gets the ELF maxima at each atom center or bare electron site
         """
         frac_coords = self.electride_structure.frac_coords
-        return self.partitioning_grid.interpolate_value_at_frac_coords(frac_coords, "cubic")
-    
+        return self.partitioning_grid.interpolate_value_at_frac_coords(
+            frac_coords, "cubic"
+        )
+
     @staticmethod
     def get_ELF_dimensionality(grid: Grid, cutoff: float):
         """

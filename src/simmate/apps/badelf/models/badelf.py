@@ -2,8 +2,15 @@
 
 from pathlib import Path
 
-from simmate.database.base_data_types import Calculation, Structure, table_column, DatabaseTable
 import pandas as pd
+
+from simmate.database.base_data_types import (
+    Calculation,
+    DatabaseTable,
+    Structure,
+    table_column,
+)
+
 
 class BadElf(Structure, Calculation):
     """
@@ -117,7 +124,7 @@ class BadElf(Structure, Calculation):
     A list of coordination environments for the atoms and electrides in the
     structure
     """
-    
+
     elf_maxima = table_column.JSONField(blank=True, null=True)
     """
     A list of ELF maxima found at the location of each atom/electride site
@@ -135,7 +142,7 @@ class BadElf(Structure, Calculation):
         update_from_directory method here.
         """
         pass
-    
+
     def update_ionic_radii(self, radii: pd.DataFrame):
         # pull all the data together and save it to the database. We
         # are saving this to an ElfIonicRadii datatable. To access this
@@ -147,20 +154,22 @@ class BadElf(Structure, Calculation):
             neigh_index = row["neigh_index"]
             radius = row["radius"]
             new_row = radius_model(
-                site_index=site_index, 
-                neigh_index=neigh_index, 
+                site_index=site_index,
+                neigh_index=neigh_index,
                 radius=radius,
-                bad_elf=self, # links to this badelf calc
-                )
+                bad_elf=self,  # links to this badelf calc
+            )
             new_row.save()
+
 
 class ElfIonicRadii(DatabaseTable):
     """
     This table contains the elf ionic radii calculated during a badelf calculation
     """
+
     # class Meta:
     #     app_label = "workflows"
-        
+
     site_index = table_column.IntegerField()
     """
     The index of the central atom that the radius is for
@@ -177,7 +186,7 @@ class ElfIonicRadii(DatabaseTable):
     """ Relationships """
     # each of these will map to a BadELF calculation, so you should typically access this
     # data through that class.
-    
+
     # All radii in this table come from a BadELF calculation. There will be
     # many ionic radii linked to a single calculation and they will all be
     # stored together here.
@@ -188,5 +197,3 @@ class ElfIonicRadii(DatabaseTable):
         on_delete=table_column.CASCADE,
         related_name="ionic_radii",
     )
-    
-    

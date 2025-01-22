@@ -12,8 +12,8 @@ from numpy.typing import ArrayLike
 from pybader.interface import Bader
 from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-from scipy.interpolate import RegularGridInterpolator
 from pyrho.pgrid import PGrid
+from scipy.interpolate import RegularGridInterpolator
 
 # from scipy.ndimage import binary_erosion
 
@@ -223,8 +223,10 @@ class Grid(VolumetricData):
         return SpacegroupAnalyzer(self.structure).get_symmetry_dataset()[
             "equivalent_atoms"
         ]
-    
-    def interpolate_value_at_frac_coords(self, frac_coords, method: str = "linear") -> list[float]:
+
+    def interpolate_value_at_frac_coords(
+        self, frac_coords, method: str = "linear"
+    ) -> list[float]:
         coords = self.get_vox_coords_from_frac_full_array(np.array(frac_coords))
         padded_data = np.pad(self.total, 10, mode="wrap")
 
