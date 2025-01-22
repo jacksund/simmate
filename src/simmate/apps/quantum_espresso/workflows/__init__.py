@@ -16,3 +16,10 @@ from .static_energy import (
     StaticEnergy__QuantumEspresso__Quality00,
     StaticEnergy__QuantumEspresso__Quality04,
 )
+from .staged import (
+    StaticEnergy__QuantumEspresso__EvoTutorial,
+    StaticEnergy__QuantumEspresso__LowQuality,
+    Relaxation__QuantumEspresso__Lda00,
+    Relaxation__QuantumEspresso__Lda01,
+    StaticEnergy__QuantumEspresso__Lda02,
+    )
