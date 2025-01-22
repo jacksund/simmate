@@ -24,7 +24,7 @@ class StagedWorkflow(Workflow):
     calculation.
 
     When inheriting this mixin, the database table should be the same as the
-    final subworkflow.
+    final subworkflow or a custom table combining 
     """
 
     description_doc_short = "runs a series of dft calculations"
@@ -51,6 +51,7 @@ class StagedWorkflow(Workflow):
 
         # Our first calculation is directly from our inputs.
         try:
+            
             current_task = cls.subworkflows[0]
             state = current_task.run(
                 structure=structure,
@@ -100,7 +101,7 @@ class StagedWorkflow(Workflow):
             subworkflow_ids=subworkflow_ids,
             copied_files=cls.files_to_copy,
             failed_subworkflow=failed_subworkflow,
-        )
+        ) | result # combine results
         return final_result
 
     @classmethod
