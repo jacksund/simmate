@@ -4,6 +4,7 @@ import ast
 import hashlib
 import importlib
 import inspect
+import json
 import logging
 import os
 import sys
@@ -211,6 +212,10 @@ def str_to_datatype(
         value = [float(item) for item in value.split()]
         return [value[i : i + 3] for i in range(0, len(value), 3)]
 
+    # If we have a dictionary, the value should be a JSON string
+    elif target_type == dict:
+        return json.loads(value)
+
     # If it is not in the common keys listed, just leave it as a string.
     else:
         logging.warning(
@@ -264,7 +269,6 @@ def bypass_nones(bypass_kwarg: str = None, multi_cols: bool = False):
     def decorator(function_to_wrap):
         @wraps(function_to_wrap)
         def wrapper(*args, **kwargs):
-            # breakpoint()
 
             # grab the list of original inputs
             entries = kwargs.pop(bypass_kwarg)
@@ -280,12 +284,8 @@ def bypass_nones(bypass_kwarg: str = None, multi_cols: bool = False):
                     failed_idxs.append(idx)
             kwargs[bypass_kwarg] = passed_entries
 
-            # breakpoint()
-
             # RUN THE ORIGINAL METHOD
             results_orig = function_to_wrap(*args, **kwargs)
-
-            # breakpoint()
 
             if not multi_cols:
                 results_orig = [results_orig]

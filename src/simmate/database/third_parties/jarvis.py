@@ -14,12 +14,19 @@ class JarvisStructure(Structure):
     class Meta:
         app_label = "data_explorer"
 
-    archive_fields = ["energy_above_hull"]
-    source = "JARVIS"
-    source_long = "Joint Automated Repository for Various Integrated Simulations"
-    homepage = "https://jarvis.nist.gov/"
+    # disable cols
+    source = None
+
+    html_display_name = "JARVIS"
+    html_description_short = (
+        "Joint Automated Repository for Various Integrated Simulations"
+    )
+
+    external_website = "https://jarvis.nist.gov/"
     source_doi = "https://doi.org/10.1038/s41524-020-00440-1"
+
     remote_archive_link = "https://archives.simmate.org/JarvisStructure-2023-07-07.zip"
+    archive_fields = ["energy_above_hull"]
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """

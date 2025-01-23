@@ -12,28 +12,27 @@
                 <i class="mdi mdi-information"></i>&nbsp;&nbsp;Table Info</a>
             {# Quick Search Sidebar #}
             {% block quicksearch %}
-                {% if table.html_search_view %}
-                    {% include "data_explorer/table_quick_search.html" %}
-                {% else %}
-                    {% include "data_explorer/table_filters.html" %}
+                {% if table.html_form_view and "search" in table.html_enabled_forms %}
+                    {% include "data_explorer/table_search.html" %}
+                    {# ELSE: include "data_explorer/table_filters.html" (disabled for now) #}
                 {% endif %}
             {% endblock %}
             {# Update Sidebar #}
             {% block updater %}
-                {% if table.html_update_view %}
-                    {% include "data_explorer/table_updater.html" %}
+                {% if table.html_form_view and "update_many" in table.html_enabled_forms %}
+                    {% include "data_explorer/table_update_many.html" %}
                 {% endif %}
             {% endblock %}
             {# Add New Sidebar #}
             {% block addnew %}
-                {% if table.html_add_view %}
+                {% if table.html_form_view and "create" in table.html_enabled_forms %}
                     {% include "data_explorer/table_add_entry.html" %}
                 {% endif %}
             {% endblock %}
         </div>
         {# Table Description #}
         <div class="col-4">
-            <p class="lead text-muted">{{ table.source_long }}</p>
+            <p class="lead text-muted">{{ table.html_description_short }}</p>
         </div>
     </div>
     {# Search Results #}

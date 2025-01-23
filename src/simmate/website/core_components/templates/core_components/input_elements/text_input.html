@@ -1,0 +1,10 @@
+<div class="my-2">
+    {% include "core_components/basic_elements/label.html" %}
+    <input unicorn:model.defer="{{ name }}"
+           class="form-control"
+           id="{{ name }}{{ context.unicorn.component_key }}"
+           type="text"
+           placeholder="{{ placeholder }}"
+           {% if max_length %}maxlength="{{ max_length }}"{% endif %}
+           {% if disabled %}disabled{% endif %}>
+</div>

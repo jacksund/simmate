@@ -284,9 +284,8 @@ from simmate.database.third_parties import ExampleProviderData
 # Check that the number of rows matches your source data.
 total_entries = ExampleProviderData.objects.count()
 
-# View the data!
-# The [:100] limits this to your first 100 results
-my_table = ExampleProviderData.objects.to_dataframe()[:100]
+# View the data! (limited to your first 100 results)
+my_table = ExampleProviderData.objects.to_dataframe(limit=100)
 ```
 
 And that's it for writing new code! All that's left is making your data available for others.
