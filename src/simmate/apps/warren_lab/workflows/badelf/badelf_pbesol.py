@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from simmate.apps.badelf.models import BadElf
+from simmate.database import connect
 from simmate.engine import StagedWorkflow
 
 
@@ -16,3 +18,5 @@ class BadElf__Badelf__BadelfPbesol(StagedWorkflow):
     ]
 
     files_to_copy = ["CHGCAR", "ELFCAR", "POTCAR"]
+
+    database_table = BadElf

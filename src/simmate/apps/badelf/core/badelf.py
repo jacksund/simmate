@@ -857,17 +857,6 @@ class BadElfToolkit:
         Returns:
             None
         """
-        if self.algorithm == "zero-flux":
-            warnings.warn(
-                """
-                There is currently no method to write files for 
-                assignments found using the zero-flux method. This method is
-                a wrap around for the Henkelman group's bader software. We
-                suggest using their software for more involved zero-flux
-                workflows.
-                """
-            )
-            return
         # Get directory
         directory = self.directory
         # Get voxel assignments and data
@@ -889,11 +878,14 @@ class BadElfToolkit:
         # and are 0 otherwise
         array = np.where(np.isin(voxel_assignment_array, indices), grid.total, 0)
         grid.total = array
-        if grid.diff is not None:
-            diff_array = np.where(
-                np.isin(voxel_assignment_array, indices), grid.diff, 0
-            )
-            grid.diff = diff_array
+        try:
+            if grid.diff is not None:
+                diff_array = np.where(
+                    np.isin(voxel_assignment_array, indices), grid.diff, 0
+                )
+                grid.diff = diff_array
+        except:
+            pass
 
         if species == "He":
             species = "e"
@@ -920,16 +912,6 @@ class BadElfToolkit:
         Returns:
             None
         """
-        if self.algorithm == "zero-flux":
-            warnings.warn(
-                """There is currently no method to write files for 
-                   assignments found using the zero-flux method. This method is
-                   a wrap around for the Henkelman group's bader software. We
-                   suggest using their software for more involved zero-flux
-                   workflows.
-                """
-            )
-            return
         # Get directory
         directory = self.directory
         # Get voxel assignments and data
@@ -950,11 +932,14 @@ class BadElfToolkit:
         # and are 0 otherwise
         array = np.where(np.isin(voxel_assignment_array, atom_index), grid.total, 0)
         grid.total = array
-        if grid.diff is not None:
-            diff_array = np.where(
-                np.isin(voxel_assignment_array, atom_index), grid.diff, 0
-            )
-            grid.diff = diff_array
+        try:
+            if grid.diff is not None:
+                diff_array = np.where(
+                    np.isin(voxel_assignment_array, atom_index), grid.diff, 0
+                )
+                grid.diff = diff_array
+        except:
+            pass
 
         if file_type == "ELFCAR":
             grid.write_file(directory / f"ELFCAR_{atom_index}")

@@ -11,6 +11,8 @@ import numpy
 import plotly.graph_objects as plotly_go
 from plotly.subplots import make_subplots
 
+from simmate.database import connect
+from simmate.database.base_data_types import Calculation
 from simmate.engine import Workflow
 from simmate.toolkit import Structure
 from simmate.visualization.plotting import PlotlyFigure
@@ -39,7 +41,7 @@ class StagedWorkflow(Workflow):
         structure: Structure,
         source: dict = None,
         directory: Path = None,
-        subworkflow_kwargs: list[dict] = [],
+        subworkflow_kwargs: dict = {},
         **kwargs,
     ):
 
@@ -51,12 +53,13 @@ class StagedWorkflow(Workflow):
 
         # Our first calculation is directly from our inputs.
         try:
+            # get kwargs if they exist
 
             current_task = cls.subworkflows[0]
             state = current_task.run(
                 structure=structure,
                 directory=directory / current_task.name_full,
-                **subworkflow_kwargs[0],
+                **subworkflow_kwargs,
             )
             result = state.result()
             # append info to workflow lists
@@ -85,7 +88,7 @@ class StagedWorkflow(Workflow):
                     state = current_task.run(
                         structure=result,  # this is the result of the last run
                         directory=new_directory,
-                        **subworkflow_kwargs[i + 1],
+                        **subworkflow_kwargs,
                     )
                     result = state.result()
                     # append info to workflow lists
@@ -93,7 +96,6 @@ class StagedWorkflow(Workflow):
                 except:
                     failed_subworkflow = cls.subworkflow_strings[i]
                     break
-
         # save final result
         final_result = (
             dict(
@@ -103,8 +105,22 @@ class StagedWorkflow(Workflow):
                 copied_files=cls.files_to_copy,
                 failed_subworkflow=failed_subworkflow,
             )
-            | result
+            | result.to_api_dict()
         )  # combine results
+
+        # remove results that will conflict with the base calculation.
+        # For example, we don't want to return a directory value because this
+        # will be different from the base workflow. We also don't want to send
+        # columns from the structure mixin because these are calculated directly
+        # from the structure
+        mixin_names = result.get_mixin_names()
+        mixins = result.get_mixins()
+        for name, mixin in zip(mixin_names, mixins):
+            if name == "Structure" or name == "Calculation":
+                for calc_data in mixin.get_column_names():
+                    if calc_data in final_result.keys():
+                        del final_result[calc_data]
+        # breakpoint()
         return final_result
 
     @classmethod
