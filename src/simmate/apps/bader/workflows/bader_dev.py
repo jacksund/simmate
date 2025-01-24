@@ -2,11 +2,11 @@
 
 from pathlib import Path
 
+from simmate.apps.badelf.core import Grid
 from simmate.configuration import settings
 from simmate.engine import S3Workflow
 from simmate.toolkit import Structure
 from simmate.utilities import get_docker_command
-from simmate.apps.badelf.core import Grid
 
 
 class PopulationAnalysis__Bader__BaderDev(S3Workflow):
@@ -85,7 +85,7 @@ class PopulationAnalysis__Bader__BaderDev(S3Workflow):
         return command_final
 
     @staticmethod
-    def setup(directory):
+    def setup(directory, **kwargs):
         """
         The henkelman bader algorithm uses the total charge density as a reference
         file. VASP returns the core electrons and valence electrons in seperate

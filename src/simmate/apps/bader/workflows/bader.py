@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from simmate.engine import S3Workflow
 from simmate.apps.badelf.core import Grid
+from simmate.engine import S3Workflow
 
 
 class PopulationAnalysis__Bader__Bader(S3Workflow):
@@ -25,9 +25,9 @@ class PopulationAnalysis__Bader__Bader(S3Workflow):
     density that is not associated with any atomic orbital. For these cases,
     you will see files like "CHGCAR_w_empty_atoms" used in the command.
     """
-    
+
     @staticmethod
-    def setup(directory):
+    def setup(directory, **kwargs):
         """
         The henkelman bader algorithm uses the total charge density as a reference
         file. VASP returns the core electrons and valence electrons in seperate
