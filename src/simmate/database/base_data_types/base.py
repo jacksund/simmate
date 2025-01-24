@@ -31,7 +31,6 @@ from django.urls import resolve, reverse
 from django.utils.module_loading import import_string
 from django.utils.timezone import datetime, now, timedelta
 from django_filters import rest_framework as django_api_filters
-from django_pandas.io import read_frame
 from rich.progress import track
 
 from simmate.configuration import settings
@@ -70,50 +69,121 @@ class SearchResults(models.QuerySet):
 
     def to_dataframe(
         self,
-        fieldnames: list[str] = (),
-        verbose: bool = True,
-        index: str = None,
-        coerce_float: str = False,
-        datetime_index: str = False,
+        columns: list[str] = (),
+        exclude_columns: list[str] = (),
+        limit: int = None,
+        use_cache: bool = True,
     ) -> pandas.DataFrame:
         """
         Returns a Pandas DataFrame of the search results
 
-        This method is coppied from django_pandas'
-        [manager.py](https://github.com/chrisdev/django-pandas/blob/master/django_pandas/managers.py)
-
         Paramaters
         -----------
-        - `fieldnames`:
-            The model field names(columns) to utilise in creating the DataFrame.
+        - `columns`:
+            The model field names (columns) to utilise in creating the DataFrame.
             You can span a relationships in the usual Django ORM way by using
             the foreign key field name separated by double underscores and refer
             to a field in a related model.
-        - `index`:
-            specify the field to use  for the index. If the index field is not
-            in fieldnames it will be appended. This is mandatory for timeseries.
-        - `verbose`:
-            If  this is `True` then populate the DataFrame with the human
-            readable versions for foreign key fields else use the actual values
-            set in the model
-        - `coerce_float`:
-            Attempt to convert values to non-string, non-numeric objects (like
-            decimal.Decimal) to floating point.
-        - `datetime_index`: bool
-            specify whether index should be converted to a DateTimeIndex.
+        - `exclude_columns`:
+            If columns is left as None (meaning use all cols), this is the
+            list of cols that will be ignored from the full default list.
+        - `limit`:
+            whether to limit the total number of rows. This is the equivalent
+            of `.all()[:limit].to_dataframe()`
+        - `use_cache`:
+            whether to use django's result cache if the query has been executed
+            already
         """
 
-        # BUG: read_frame runs a NEW query, so it may be a different length from
-        # the original queryset.
-        # See https://github.com/chrisdev/django-pandas/issues/138 for issue
-        return read_frame(
-            self,
-            fieldnames=fieldnames,
-            verbose=verbose,
-            index_col=index,
-            coerce_float=coerce_float,
-            datetime_index=datetime_index,
+        # This method originally used `django_pandas` but we since decided to
+        # implement our own method that is optimized for our own use cases and avoids
+        # cases where the queryset is accidentally ran twice:
+        # https://github.com/chrisdev/django-pandas/blob/master/django_pandas/
+        # https://github.com/chrisdev/django-pandas/issues/138
+
+        if not columns:
+            has_user_cols = False
+            # TODO: I'd like to include foreign keys or other relations by default
+            columns = [
+                c
+                for c in self.model.get_column_names(include_relations=False)
+                if c not in exclude_columns
+            ]
+        else:
+            has_user_cols = True
+
+        values_list = None  # set dynamically
+
+        # check if the query has been executed already. If so, we use those cached
+        # results to get our values_list. (unless the query gave back an
+        # incomplete values_list)
+        if use_cache and self._result_cache is not None:
+
+            # check if we have a list of models or values
+            if self._iterable_class == models.query.ValuesListIterable:
+
+                # if the user has a `values_list` call to the queryset, and didn't
+                # set columns for `to_dataframe`, we'll use those cols for the df
+                if not has_user_cols:
+                    columns = list(self._fields)
+                    values_list = list(self)
+
+                # otherwise, we need to make sure that we have all the values
+                # needed for the dataframe If not, another query is needed
+                else:
+                    cache_columns = list(self._fields)
+                    has_all_cols = all([c in cache_columns for c in columns])
+                    if has_all_cols:
+                        i_map = [cache_columns.index(c) for c in columns]
+                        values_list = [
+                            tuple([entry[i] for i in i_map]) for entry in self
+                        ]
+                    # else:
+                    #     logging.warning(
+                    #         "Cached values list is incompatible with the requested "
+                    #         "dataframe columns list. A new db query will be ran "
+                    #         "to fix this. "
+                    #     )
+                    #     # we leave values_list=None so we get new query below
+
+            # otherwise we have a list of models. We'll have to trust that
+            # the user properly used `select_related` and `only` ahead of time.
+            # Optimization falls on them since the query was already executed
+            else:
+                # logging.warning(
+                #     "You are using the query cache to generate a dataframe. "
+                #     "Make sure you used `select_related` and `only` on your queryset "
+                #     "to properly optimize your query. Otherwise this next call "
+                #     "will be extremely slow: "
+                # )
+                values_list = [
+                    tuple([getattr(entry, col) for col in columns]) for entry in self
+                ]
+
+            # limit if it was requested
+            if values_list and limit:
+                values_list = values_list[:limit]
+
+        # if the query hasn't been ran yet, we can make sure we run an optimized
+        # query -- one were we only grab the relevent columns and skip object
+        # generation
+        if not values_list:
+            query = (
+                self.values_list(*columns)
+                if not limit
+                else self.values_list(*columns)[:limit]
+            )
+            values_list = list(query)
+
+        df = pandas.DataFrame.from_records(
+            data=values_list,
+            columns=columns,
         )
+
+        # TODO: change choice fields to verbose
+        # TODO: add toolkit col
+
+        return df
 
     def to_toolkit(
         self,
@@ -174,16 +244,9 @@ class SearchResults(models.QuerySet):
         # convert to path obj
         filename = Path(filename)
 
-        # grab the list of fields that we want to store
-        fieldset = self.model.archive_fieldset
-
-        # We want to load the entire table, but only grab the fields that
-        # we will be storing in the archive.
-        base_objs = self.only(*fieldset)
-
-        # now convert these objects to a pandas dataframe, again using just
-        # the archive columns
-        df = base_objs.to_dataframe(fieldnames=fieldset)
+        # now convert these objects to a pandas dataframe, using just
+        # the archive columns that are being stored
+        df = self.to_dataframe(columns=self.model.archive_fieldset)
 
         # Write the data to a csv file
         # OPTIMIZE: is there a better format that pandas can write to?
@@ -446,6 +509,11 @@ class DatabaseTable(models.Model):
     reference.
     """
 
+    external_website: str = None
+    """
+    The homepage of the source website, if the data is loaded from a third-party
+    """
+
     remote_archive_link: str = None
     """
     The URL that is used to download the archive and then populate this table.
@@ -554,7 +622,16 @@ class DatabaseTable(models.Model):
         return cls.__name__
 
     @classmethod
-    def get_column_names(cls, include_relations: bool = True) -> list[str]:
+    @property
+    def columns(cls):
+        return cls._meta.get_fields()
+
+    @classmethod
+    def get_column_names(
+        cls,
+        include_relations: bool = True,
+        include_parents: bool = True,
+    ) -> list[str]:
         """
         Returns a list of all the column names for this table and indicates which
         columns are related to other tables. This is primarily used to help
@@ -562,7 +639,7 @@ class DatabaseTable(models.Model):
         """
         return [
             column.name
-            for column in cls._meta.get_fields()
+            for column in cls._meta.get_fields(include_parents)
             if include_relations or not column.is_relation
         ]
 
@@ -1103,6 +1180,9 @@ class DatabaseTable(models.Model):
         # MatProj). We check this with all default columns, just in case.
         all_fields = [f for f in all_fields if f in cls.get_column_names()]
 
+        # and remove accidental duplicate cols if any
+        all_fields = list(set(all_fields))
+
         return all_fields
 
     # -------------------------------------------------------------------------
@@ -1631,9 +1711,9 @@ class DatabaseTable(models.Model):
         # Handle ordering
         # the ordered_by kwarg takes priority, but in cases where none is set
         # AND the queryset filters didn't give any, pagination still requires
-        # that we do some form of ordering, so we filter by id
+        # that we do some form of ordering, so we filter by id in reverse
         if paginate and not order_by and not queryset.query.order_by:
-            order_by = "id"
+            order_by = "-id"
         if order_by:
             # in case only a single str was given, convert to list
             if isinstance(order_by, str):
@@ -1852,16 +1932,22 @@ class DatabaseTable(models.Model):
 
     # experimental overrides for templates used by the Data Explorer app
 
+    html_display_name: str = None
+    html_description_short: str = None
+
     html_about_template: str = "data_explorer/table_about.html"
     html_table_template: str = "data_explorer/table.html"
     html_entry_template: str = "data_explorer/table_entry.html"
     html_entries_template: str = "data_explorer/table_entries.html"
 
+    # This take the views below and just put them within the main body
+    html_search_template: str = "core_components/unicorn_full_page.html"
+    html_entry_form_template: str = "core_components/unicorn_full_page.html"
+
     # Unicorn views (side panels in the table view of the Data Explorer app)
-    html_search_view: str = None
-    html_update_view: str = None
-    html_add_view: str = None
-    # TODO: distinguish between update/update-many and add/add-many views...?
+    html_form_view: str = None
+    html_enabled_forms: list[str] = []
+    # options: "search", "create", "update", "create_many", "create_many_entry", "update_many"
 
     @classmethod
     @property

@@ -60,7 +60,8 @@ INSTALLED_APPS = [
     #
     # Django unicorn acts as a frontend framework for making dyanmic webpages
     # (i.e. AJAX calls can be made to update the views)
-    "django_unicorn",
+    # "django_unicorn",
+    "simmate.website.configs.UnicornConfig",  # fork of django_unicorn
     #
     # Django simple history lets you track history of changes (and who made
     # those changes) for a given model. This is important for models that users
@@ -401,3 +402,29 @@ os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 # For advanced users, we let them override Django settings directly.
 # But by default, nothing is changed.
 locals().update(settings.django_settings)
+
+# To print out all SQL queries. Also consider switching to use Silk:
+#   https://github.com/jazzband/django-silk
+# https://stackoverflow.com/questions/4375784/how-to-log-all-sql-queries-in-django
+if settings.website.log_sql:
+    LOGGING = {
+        "version": 1,
+        "filters": {
+            "require_debug_true": {
+                "()": "django.utils.log.RequireDebugTrue",
+            }
+        },
+        "handlers": {
+            "console": {
+                "level": "DEBUG",
+                "filters": ["require_debug_true"],
+                "class": "logging.StreamHandler",
+            }
+        },
+        "loggers": {
+            "django.db.backends": {
+                "level": "DEBUG",
+                "handlers": ["console"],
+            }
+        },
+    }

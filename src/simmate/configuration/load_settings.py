@@ -203,22 +203,26 @@ class SimmateSettings:
                 # is important if they involve loading custom apps/models for their templates.
                 "home_view": None,
                 "profile_view": None,
-                "data": [
-                    "simmate.database.third_parties.AflowPrototype",
-                    # "simmate.database.third_parties.AflowStructure",  # Not allowed yet
-                    "simmate.database.third_parties.CodStructure",
-                    "simmate.database.third_parties.JarvisStructure",
-                    "simmate.database.third_parties.MatprojStructure",
-                    "simmate.database.third_parties.OqmdStructure",
-                ],
+                "data": {
+                    # TODO: set to empty default once these are in their own apps
+                    "Crystalline": [
+                        "simmate.database.third_parties.AflowPrototype",
+                        # "simmate.database.third_parties.AflowStructure",  # Not allowed yet
+                        "simmate.database.third_parties.CodStructure",
+                        "simmate.database.third_parties.JarvisStructure",
+                        "simmate.database.third_parties.MatprojStructure",
+                        "simmate.database.third_parties.OqmdStructure",
+                    ],
+                },
                 "social_oauth": {
                     "google": {"client_id": None, "secret": None},
                     "microsoft": {"client_id": None, "secret": None},
                     "github": {"client_id": None, "secret": None},
                 },
+                "log_sql": False,
                 # django extras
                 "debug": False,
-                "allowed_hosts": ["127.0.0.1", "localhost"],
+                "allowed_hosts": ["127.0.0.1", "localhost", "testserver"],
                 # sets STATICFILES_STORAGE to ManifestStaticFilesStorage for prod setups
                 "static_file_hashes": False,
                 # BUG-FIX: Django-unicorn ajax requests sometimes come from the server-side
@@ -455,6 +459,8 @@ class SimmateSettings:
           "bader.docker.enable=True"
         into
           {"bader": {"docker": {"enable": True}}}
+
+        ** Used only in the command line util
         """
         keys, value = input_str.split("=")
         keys = keys.split(".")
@@ -492,7 +498,7 @@ class SimmateSettings:
         "SIMMATE__DATABASE__PORT": int,
         "SIMMATE__WEBSITE__ALLOWED_HOSTS": list[str],
         "SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS": list[str],
-        "SIMMATE__WEBSITE__DATA": list[str],
+        "SIMMATE__WEBSITE__DATA": dict,
         "SIMMATE__WEBSITE__DEBUG": bool,
         "SIMMATE__WEBSITE__EMAIL__FROM_EMAIL": str,
         "SIMMATE__WEBSITE__EMAIL__HOST": str,

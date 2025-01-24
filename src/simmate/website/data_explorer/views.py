@@ -3,7 +3,7 @@
 from django.shortcuts import render
 
 from simmate.configuration import settings
-from simmate.database.base_data_types import DatabaseTable, Structure
+from simmate.database.base_data_types import DatabaseTable
 from simmate.website.core_components.base_api_view_dev import DynamicApiView
 
 # closed-source data types. We can skip these if they aren't present
@@ -12,32 +12,30 @@ try:
 except ModuleNotFoundError:
     Molecule = None  # dummy class just for comparison below
 
-
 # BUG: fails if tables from different apps have the same name
 EXPLORABLE_TABLES = {
     DatabaseTable.get_table(table_name).table_name: DatabaseTable.get_table(table_name)
-    for table_name in settings.website.data
+    for section_name, table_names in settings.website.data.items()
+    for table_name in table_names
 }
 
 
-def home(request):
-    crystal_dbs = []
-    molecular_dbs = []
-    other_dbs = []
-    for table in EXPLORABLE_TABLES.values():
-        if issubclass(table, Structure):
-            crystal_dbs.append(table)
-        elif Molecule and issubclass(table, Molecule):
-            molecular_dbs.append(table)
-        else:
-            other_dbs.append(table)
+def get_data_config():
+    # keeps dict organizization, but replaces strings with the actual db table
+    data_config = {}
+    for section_name, table_list in settings.website.data.items():
+        data_config[section_name] = [
+            DatabaseTable.get_table(table_name) for table_name in table_list
+        ]
+    return data_config
 
+
+DATA_CONFIG = get_data_config()
+
+
+def home(request):
     context = {
-        "all_datasets": {
-            "Molecular": molecular_dbs,
-            "Crystalline": crystal_dbs,
-            "Other": other_dbs,
-        },
+        "data_config": DATA_CONFIG,
         "breadcrumb_active": "Data",
     }
     template = "data_explorer/home.html"
@@ -58,6 +56,3 @@ class DataExplorerView(DynamicApiView):
         """
         provider_table = EXPLORABLE_TABLES[table_name]
         return provider_table
-
-
-# entry_id:

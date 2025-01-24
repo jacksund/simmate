@@ -18,7 +18,16 @@ class DynamicApiView(View):
     better integration with Simmate database tables.
     """
 
-    mode: str = None  # options: 'list', 'entry', and 'about'
+    mode: str = None
+    # options:
+    # 'list',
+    # 'entry',
+    # 'about',
+    # 'search',
+    # 'entry-new',
+    # 'entry-update',
+    # 'entry-new-many',
+    # 'entry-update-many',
 
     @classmethod
     @property
@@ -32,8 +41,28 @@ class DynamicApiView(View):
 
     @classmethod
     @property
+    def search_view(cls):
+        return cls.as_view(mode="search")
+
+    @classmethod
+    @property
     def entry_view(cls):
         return cls.as_view(mode="entry")
+
+    @classmethod
+    @property
+    def entry_new_view(cls):
+        return cls.as_view(mode="entry-new")
+
+    @classmethod
+    @property
+    def entry_new_many_view(cls):
+        return cls.as_view(mode="entry-new-many")
+
+    @classmethod
+    @property
+    def entry_update_view(cls):
+        return cls.as_view(mode="entry-update")
 
     def get(self, request, *args, **kwargs):
         """
@@ -55,6 +84,18 @@ class DynamicApiView(View):
         elif self.mode == "entry":
             html_view = self.get_entry_html_view
             json_view = self.get_entry_json_view
+        elif self.mode == "search":
+            html_view = self.get_search_html_view
+            json_view = self.get_search_json_view
+        elif self.mode == "entry-new":
+            html_view = self.get_entry_new_html_view
+            json_view = self.get_entry_new_json_view
+        elif self.mode == "entry-new-many":
+            html_view = self.get_entry_new_many_html_view
+            json_view = self.get_entry_new_many_json_view
+        elif self.mode == "entry-update":
+            html_view = self.get_entry_update_html_view
+            json_view = self.get_entry_update_json_view
         elif self.mode == "about":
             html_view = self.get_about_html_view
             json_view = self.get_about_json_view
@@ -66,6 +107,7 @@ class DynamicApiView(View):
         if view_format == "html":
             return html_view(request, *args, **kwargs)
         elif view_format == "json":
+            # BUG: new/update/search should be POST, not GET
             return json_view(request, *args, **kwargs)
         else:
             raise Exception(f"Unknown 'format' GET arg given: {view_format}")
@@ -117,7 +159,6 @@ class DynamicApiView(View):
         raise NotImplementedError("JSON responses for tables is still under dev.")
 
     def get_about_html_view(self, request, *args, **kwargs):
-        # !!! we assume html format for now, but might want api/json formats in the future
         table = self.get_table(request, *args, **kwargs)
         context = {
             "table": table,
@@ -180,5 +221,65 @@ class DynamicApiView(View):
         }
         template = table_entry.html_entry_template
         return render(request, template, context)
+
+    # -------------------------------------------------------------------------
+    # Below are HTML Form views -- typically these are POST, but we use
+    # django-unicorn which contains any POSTs within a component.
+    # TODO: in the future, I may want to allow JSON post requests so that
+    # rows can be added/updated via API calls. I don't do this yet because the
+    # ORM is preferred + using admin permissions.
+    # -------------------------------------------------------------------------
+
+    # The "entry-new" views, which are for creating one or more new rows
+
+    def get_entry_new_json_view(self, request, *args, **kwargs):
+        raise NotImplementedError("Entry-New views still under dev.")
+
+    def get_entry_new_html_view(self, request, *args, **kwargs):
+        table = self.get_table(request, *args, **kwargs)
+        if not table.html_form_view:
+            raise NotImplementedError(
+                "This model does not have an 'entry-new' view yet!"
+            )
+        context = {
+            "unicorn_component_name": table.html_form_view,
+            **table.html_breadcrumb_context,  # TODO: need to update crumbs
+        }
+        template = table.html_entry_form_template
+        return render(request, template, context)
+
+    # -------------------------------------------------------------------------
+
+    # The "entry-update" views, which are for editting one or more existing rows
+
+    def get_entry_update_json_view(self, request, *args, **kwargs):
+        raise NotImplementedError("Entry-Update views still under dev.")
+
+    def get_entry_update_html_view(self, request, *args, **kwargs):
+        # We can just use the entry-new view because our underlying unicorn
+        # view will dynamically determine if we have a new vs update.
+        return self.get_entry_new_html_view(request, *args, **kwargs)
+
+    # -------------------------------------------------------------------------
+
+    # The "entry-new-many" views, which build a entry_new_many form for the table
+
+    def get_entry_new_many_json_view(self, request, *args, **kwargs):
+        raise NotImplementedError("entry_new_many views still under dev.")
+
+    def get_entry_new_many_html_view(self, request, *args, **kwargs):
+        # We can just use the entry-new view because our underlying unicorn
+        # view will dynamically determine if we have a new vs update.
+        return self.get_entry_new_html_view(request, *args, **kwargs)
+
+    # -------------------------------------------------------------------------
+
+    # The "search" views, which build a search form for the table
+
+    def get_search_json_view(self, request, *args, **kwargs):
+        raise NotImplementedError("Search views still under dev.")
+
+    def get_search_html_view(self, request, *args, **kwargs):
+        raise NotImplementedError("Search views still under dev.")
 
     # -------------------------------------------------------------------------

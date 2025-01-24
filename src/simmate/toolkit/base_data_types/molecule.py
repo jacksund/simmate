@@ -2,6 +2,8 @@
 
 import os
 import sys
+import urllib.parse
+from functools import cached_property
 from pathlib import Path
 
 import pandas
@@ -669,6 +671,30 @@ class Molecule:
         """
         return Draw.MolToImage(self.rdkit_molecule)
 
+    def to_svg(self, url_encode: bool = False, size=(300, 300)):
+        """
+        Generates a PIL image object. Use `to_png_file` if you instead want to
+        write the image directly to a file.
+        """
+        if not url_encode:
+            return Draw.MolToImage(
+                self.rdkit_molecule,
+                size=size,
+                useSVG=True,
+            )  # gives a PIL obj
+        else:
+            # Faster method for generating SVGs pulled from their tutorials:
+            # https://github.com/rdkit/rdkit-tutorials/blob/master/notebooks/006_save_rdkit_mol_as_image.ipynb
+            mol = Draw.rdMolDraw2D.PrepareMolForDrawing(self.rdkit_molecule)
+            drawer = Draw.rdMolDraw2D.MolDraw2DSVG(size[0], size[1])
+            drawer.DrawMolecule(mol)
+            drawer.FinishDrawing()
+            svg = drawer.GetDrawingText()
+            # This is the format that programs like streamlit's ImageCol expect:
+            # https://docs.streamlit.io/develop/api-reference/data/st.column_config/st.column_config.imagecolumn
+            svg_encoded = f"data:image/svg+xml;utf8,{urllib.parse.quote(svg)}"
+            return svg_encoded
+
     def to_xyz(self):
         """
         Outputs the `Molecule` object to a XYZ file (*.xyz)
@@ -778,40 +804,25 @@ class Molecule:
         if not keep_hydrogen:
             self.remove_hydrogens()
 
-    def get_largest_fragment(self):  # -> Molecule
+    @cached_property
+    def components(self):
+        components_rdkit = rdmolops.GetMolFrags(self.rdkit_molecule, asMols=True)
+        return [self.__class__(mol) for mol in components_rdkit]
+
+    @property
+    def largest_component(self):  # -> Molecule
         """
         If the `Molecule` object contains a mixture / several molecules, this
         will return the largest fragment / component in the mixture.
         """
-        from rdkit.Chem.MolStandardize.rdMolStandardize import LargestFragmentChooser
-
-        largest_fragment = LargestFragmentChooser().choose(self.rdkit_molecule)
-        return self.__class__(largest_fragment)
-
-    def _largest_component(self, prefer_organic: bool = True) -> AllChem.Mol:
-        """
-        This is given by Yannick, but I am unsure of how it differs from my
-        `get_largest_fragment`. Need to test out both... For now, I make this
-        an internal and hidden method
-        """
-        mol_frags = rdmolops.GetMolFrags(self.rdkit_molecule, asMols=True)
-        if prefer_organic:
-            mol_frags = tuple(
-                [
-                    mol
-                    for mol in mol_frags
-                    if len(
-                        mol.GetAtomsMatchingQuery(rdqueries.AtomNumEqualsQueryAtom(6))
-                    )
-                    > 0
-                ]
-            )
-        largest_component = max(
-            mol_frags,
-            default=self.rdkit_molecule,
-            key=lambda m: m.GetNumAtoms(),
-        )
-        return largest_component
+        # If using rdkit entirely:
+        # from rdkit.Chem.MolStandardize.rdMolStandardize import LargestFragmentChooser
+        # largest_fragment = LargestFragmentChooser().choose(self.rdkit_molecule)
+        # return self.__class__(largest_fragment)
+        all_components = self.components
+        all_counts = [c.num_atoms for c in all_components]
+        largest_idx = all_counts.index(max(all_counts))
+        return all_components[largest_idx]
 
     # -------------------------------------------------------------------------
 

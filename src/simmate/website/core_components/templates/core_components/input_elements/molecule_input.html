@@ -1,0 +1,74 @@
+{% load simmate_ui_tags %}
+<div class="my-2">
+    {% include "core_components/basic_elements/label.html" %}
+    {% if molecule is None %}
+        {% if many_molecules %}
+            {% alert theme="danger" message="This section assumes all individual components are their own molecule, which means it will incorrectly split up salts and make things like Na+ or Cl- their own entries. Until this is fixed, avoid using the create_many form for such compounds." %}
+        {% endif %}
+        {% if allow_custom_input %}
+            {# Custom Text input (e.g. searching by ID or CAS number) #}
+            <div class="px-3 py-1">
+                {% text_input name=custom_input_name show_label=show_option_labels label=custom_input_label placeholder=custom_input_placeholder %}
+            </div>
+        {% endif %}
+        {% if allow_text_input %}
+            {# Text-based input for smiles/sdf/ichi/etc... #}
+            <div class="px-3 py-1">
+                {% text_area name=text_input_name show_label=show_option_labels label=text_input_label placeholder="Paste in SMILES, INCHI, MOL text, or any other supported format." %}
+            </div>
+        {% endif %}
+        {% if allow_sketcher_input %}
+            {# Molecule Sketcher (ChemDraw.js or ChemDoodle.js) #}
+            <div class="px-3 py-1">
+                {% if show_option_labels %}<label class="form-label">{{ sketcher_input_label }}</label>{% endif %}
+                <div unicorn:ignore
+                     id="{{ name }}{{ context.unicorn.component_key }}"
+                     style="width: 600px;
+                            height: 400px"></div>
+                <script>add_mol_sketcher("{{ name }}{{ context.unicorn.component_key }}");</script>
+            </div>
+        {% endif %}
+        {% if load_button %}
+            <div class="text-center pt-3">
+                <button type="button"
+                    class="btn btn-primary"
+                    {# modal_dismiss used only if this is in a popout modal #}
+                    {% if modal_dismiss %}data-bs-dismiss="modal"{% endif %}
+                    onclick="get_mol_from_sketcher('{{ name }}{{ context.unicorn.component_key }}', '{% if not context.unicorn.component_key %}{{ context.unicorn.component_name }}{% else %}{{ context.unicorn.component_key }}{% endif %}', '{{ set_molecule_method }}')">
+                    {# djlint:off #}
+                    Load Molecule{% if many_molecules %}s{% endif %}
+                    {# djlint:on #}
+                </button>
+            </div>
+        {% endif %}
+    {% elif molecule == False %}
+        {% alert theme="danger" message="Failed to load the Molecule. This typically happens due invalid chemistry, such as missing formal charges. Contact our team with your molecule so that we can help troubleshoot and prevent errors like this in the future." %}
+        <div class="text-center">
+            <b>Refresh the page to restart the form</b>
+        </div>
+    {% else %}
+        {% if many_molecules %}
+            {% alert theme="success" message="Molecules successfully loaded! Refresh this page if you wish to restart." %}
+        {% else %}
+            {% alert theme="success" message="Molecule successfully loaded! Refresh this page if you wish to restart." %}
+            {% canvas name=name %}
+            {% if molecule_matches %}
+                <div>
+                    <div class="alert alert-danger" role="alert">
+                        <i class="mdi mdi-alert mx-2"></i>
+                        <p>This compound is already registered! Jump to that entry to edit:</p>
+                        {% for match in molecule_matches %}
+                            <a type="button"
+                               class="btn btn-info btn-sm"
+                               href="{{ match.table_entry_url }}"
+                               target="_blank">
+                                {{ match.table_name }} {{ match.table_entry_id }}<i class="mdi mdi-open-in-new"></i>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+        {# TODO: button name="unset_molecule" theme="secondary" icon="refresh" #}
+    {% endif %}
+</div>

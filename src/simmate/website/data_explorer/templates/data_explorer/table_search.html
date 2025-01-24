@@ -20,7 +20,7 @@
         <div>
             {% load unicorn %}
             {% csrf_token %}
-            {% unicorn table.html_search_view %}
+            {% unicorn table.html_form_view key="searchpopout" form_mode="search" %}
         </div>
     </div>
 </div>
