@@ -6,6 +6,7 @@ from simmate.configuration import settings
 from simmate.engine import S3Workflow
 from simmate.toolkit import Structure
 from simmate.utilities import get_docker_command
+from simmate.apps.badelf.core import Grid
 
 
 class PopulationAnalysis__Bader__BaderDev(S3Workflow):
@@ -82,3 +83,16 @@ class PopulationAnalysis__Bader__BaderDev(S3Workflow):
             )
 
         return command_final
+
+    @staticmethod
+    def setup(directory):
+        """
+        The henkelman bader algorithm uses the total charge density as a reference
+        file. VASP returns the core electrons and valence electrons in seperate
+        files which must be summed together to create this reference file. This
+        setup method performs this action and writes the necessary file
+        """
+        aeccar0 = Grid.from_file(directory / "AECCAR0")
+        aeccar2 = Grid.from_file(directory / "AECCAR2")
+        chgcar_sum = Grid.sum_grids(aeccar0, aeccar2)
+        chgcar_sum.write_file(directory / "CHGCAR_sum")

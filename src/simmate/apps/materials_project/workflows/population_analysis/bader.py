@@ -4,7 +4,7 @@ from pathlib import Path
 
 from simmate.apps.bader.workflows import (
     PopulationAnalysis__Bader__Bader,
-    PopulationAnalysis__Bader__CombineChgcars,
+    # PopulationAnalysis__Bader__CombineChgcars,
 )
 from simmate.apps.materials_project.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
@@ -37,18 +37,19 @@ class PopulationAnalysis__VaspBader__BaderMatproj(Workflow):
             directory=prebader_dir,
         ).result()
 
-        # Setup chargecars for the bader analysis and wait until complete
-        chgcomb_dir = directory / PopulationAnalysis__Bader__CombineChgcars.name_full
-        PopulationAnalysis__Bader__CombineChgcars.run(
-            directory=chgcomb_dir,
-            previous_directory=prebader_dir,
-        ).result()
+        # # Setup chargecars for the bader analysis and wait until complete
+        # chgcomb_dir = directory / PopulationAnalysis__Bader__CombineChgcars.name_full
+        # PopulationAnalysis__Bader__CombineChgcars.run(
+        #     directory=chgcomb_dir,
+        #     previous_directory=prebader_dir,
+        # ).result()
 
         # And run the bader analysis on the resulting chg denisty
         bader_dir = directory / PopulationAnalysis__Bader__Bader.name_full
         PopulationAnalysis__Bader__Bader.run(
             directory=bader_dir,
-            previous_directory=chgcomb_dir,
+            # previous_directory=chgcomb_dir,
+            previous_directory = prebader_dir,
         ).result()
 
         # The from_vasp_directory method that loads results into the database
