@@ -33,7 +33,10 @@ class Grid(VolumetricData):
 
     @property
     def diff(self):
-        return self.data["diff"]
+        if "diff" in self.data.keys():
+            return self.data["diff"]
+        else:
+            return
 
     @diff.setter
     def diff(self, new_diff):
@@ -478,6 +481,44 @@ class Grid(VolumetricData):
 
         return Grid(self.structure, data)
 
+    @classmethod
+    def sum_grids(cls, grid1, grid2):
+        """
+        Takes in two grids and returns a single grid summing their values.
+
+        Args:
+            grid1 (Grid):
+                The first grid to sum
+
+            grid2 (Grid):
+                The second grid to sum
+
+        Returns:
+            A Grid object with both the total and diff parts summed
+
+        """
+        if not np.all(grid1.shape == grid2.shape):
+            logging.exception("Grids must have the same size.")
+        total1 = grid1.total
+        diff1 = grid1.diff
+
+        total2 = grid2.total
+        diff2 = grid2.diff
+
+        total = total1 + total2
+        if diff1 is not None and diff2 is not None:
+            diff = diff1 + diff2
+            data = {"total": total, "diff": diff}
+        else:
+            data = {"total": total, "diff": None}
+
+        # Note that we copy the first grid here rather than making a new grid
+        # instance because we want to keep any useful information such as whether
+        # the grid is spin polarized or not.
+        new_grid = grid1.copy()
+        new_grid.data = data
+        return new_grid
+
     ###########################################################################
     # The following is a series of methods that are useful for converting between
     # voxel coordinates, fractional coordinates, and cartesian coordinates.
@@ -676,7 +717,7 @@ class Grid(VolumetricData):
         frac_coords = np.column_stack([frac_x, frac_y, frac_z])
         return frac_coords
 
-    def get_vox_coords_from_frac_full_array(self, frac_coords: ArrayLike):
+    def get_voxel_coords_from_frac_full_array(self, frac_coords: ArrayLike):
         """
         Takes in a 2D array of shape (N,3) representing fractional coordinates
         at N points and calculates the equivalent voxel coordinates.
