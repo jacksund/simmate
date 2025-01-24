@@ -11,8 +11,6 @@ import numpy
 import plotly.graph_objects as plotly_go
 from plotly.subplots import make_subplots
 
-from simmate.database import connect
-from simmate.database.base_data_types import Calculation
 from simmate.engine import Workflow
 from simmate.toolkit import Structure
 from simmate.visualization.plotting import PlotlyFigure
