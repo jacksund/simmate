@@ -13,6 +13,7 @@ from pybader.interface import Bader
 from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pyrho.pgrid import PGrid
+from scipy.interpolate import RegularGridInterpolator
 
 # from scipy.ndimage import binary_erosion
 
@@ -222,6 +223,25 @@ class Grid(VolumetricData):
         return SpacegroupAnalyzer(self.structure).get_symmetry_dataset()[
             "equivalent_atoms"
         ]
+
+    def interpolate_value_at_frac_coords(
+        self, frac_coords, method: str = "linear"
+    ) -> list[float]:
+        coords = self.get_vox_coords_from_frac_full_array(np.array(frac_coords))
+        padded_data = np.pad(self.total, 10, mode="wrap")
+
+        # interpolate grid to find values that lie between voxels. This is done
+        # with a cruder interpolation here and then the area close to the minimum
+        # is examened more closely with a more rigorous interpolation in
+        # get_line_frac_min
+        a, b, c = self.get_padded_grid_axes(10)
+        fn = RegularGridInterpolator((a, b, c), padded_data, method=method)
+        values = []
+        for pos in coords:
+            adjusted_pos = [x + 10 for x in pos]
+            value = float(fn(adjusted_pos))
+            values.append(value)
+        return values
 
     def get_2x_supercell(self, data: ArrayLike):
         """

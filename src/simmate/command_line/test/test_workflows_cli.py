@@ -84,7 +84,7 @@ def test_workflows_setup_only(command_line_runner, structure, mocker, tmp_path):
     # ensure failure when a nested workflow is given
     result = command_line_runner.invoke(
         workflows_app,
-        ["setup-only", "relaxation.vasp.staged", cif_filename],
+        ["setup-only", "static-energy.vasp.low-quality", cif_filename],
     )
     assert result.exit_code == 2
 

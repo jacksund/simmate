@@ -40,7 +40,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         cls,
         chemical_system: str,
         max_atoms: int = 10,
-        subworkflow_name: str = "relaxation.vasp.staged",
+        subworkflow_name: str = "static-energy.vasp.low-quality",
         subworkflow_kwargs: dict = {},
         max_stoich_factor: int = 4,
         nfirst_generation: int = 15,

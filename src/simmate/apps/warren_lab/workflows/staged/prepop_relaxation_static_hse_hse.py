@@ -1,17 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warren_lab.workflows.badelf.prebadelf_dft import (
-    StaticEnergy__Vasp__WarrenLabPrebadelfHse,
-)
-from simmate.apps.warren_lab.workflows.nested_dft.prepop_relaxation_static_pbesol_hse import (
-    Relaxation__Vasp__WarrenLabPbeWithWavecar,
-)
-from simmate.apps.warren_lab.workflows.nested_dft.relaxation_static_base import (
-    RelaxationRelaxationStaticBase,
-)
 from simmate.apps.warren_lab.workflows.relaxation.hse import (
     Relaxation__Vasp__WarrenLabHse,
 )
+from simmate.engine import StagedWorkflow
 
 
 class Relaxation__Vasp__WarrenLabHseWithWavecar(Relaxation__Vasp__WarrenLabHse):
@@ -24,7 +16,7 @@ class Relaxation__Vasp__WarrenLabHseWithWavecar(Relaxation__Vasp__WarrenLabHse):
     _incar_updates = dict(LWAVE=True)
 
 
-class Nested__Vasp__WarrenLabRelaxationStaticHseHse(RelaxationRelaxationStaticBase):
+class StaticEnergy__Vasp__WarrenLabRelaxationStaticHseHse(StagedWorkflow):
     """
     Runs a PBEsol quality structure relaxation, an HSE quality relaxation, and
     an HSE static energy calculation. This method will also write the ELFCAR
@@ -32,9 +24,12 @@ class Nested__Vasp__WarrenLabRelaxationStaticHseHse(RelaxationRelaxationStaticBa
     electron count)
     """
 
-    static_energy_workflow = StaticEnergy__Vasp__WarrenLabPrebadelfHse
+    subworkflow_names = [
+        "relaxation.vasp.warren-lab-pbesol-with-wavecar",
+        "relaxation.vasp.warren-lab-hse-with-wavecar",
+        "static-energy.vasp.warren-lab-prebadelf-hse",
+    ]
+    files_to_copy = ["WAVECAR"]
     # We use pbesol as our default relaxation functional because it doesn't take
     # much more time than pbe and is considered to be more accurate for solids
     # (Phys. Rev. Lett. 102, 039902 (2009))
-    low_quality_relaxation_workflow = Relaxation__Vasp__WarrenLabPbeWithWavecar
-    high_quality_relaxation_workflow = Relaxation__Vasp__WarrenLabHseWithWavecar
