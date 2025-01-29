@@ -23,7 +23,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
     def run_config(
         cls,
         composition: str | Composition,
-        subworkflow_name: str | Workflow = "relaxation.vasp.staged",
+        subworkflow_name: str | Workflow = "static-energy.vasp.low-quality",
         subworkflow_kwargs: dict = {},
         fitness_field: str = "energy_per_atom",
         max_structures: int = None,

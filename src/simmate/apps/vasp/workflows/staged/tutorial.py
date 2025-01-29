@@ -3,14 +3,14 @@
 from simmate.engine.staged_workflow import StagedWorkflow
 
 
-class Relaxation__Vasp__Staged(StagedWorkflow):
+class StaticEnergy__Vasp__EvoTutorial(StagedWorkflow):
     """
     Runs a series of increasing-quality relaxations and then finishes with a single
     static energy calculation.
 
-    This workflow is most useful for randomly-created structures or extremely
-    large supercells. More precise relaxations+energy calcs should be done
-    afterwards because ettings are still below MIT and Materials Project quality.
+    This workflow is designed exclusively for testing/tutorials where it is
+    desireable to have calculations take very little time. The results
+    will be VERY unreasonable.
     """
 
     exclude_from_archives = [
@@ -28,13 +28,10 @@ class Relaxation__Vasp__Staged(StagedWorkflow):
         "XDATCAR",
     ]
 
-    description_doc_short = "runs a series of relaxations (00-04 quality)"
+    description_doc_short = "runs a series of relaxations (00-01 quality)"
 
     subworkflow_names = [
         "relaxation.vasp.quality00",
         "relaxation.vasp.quality01",
         "relaxation.vasp.quality02",
-        "relaxation.vasp.quality03",
-        "relaxation.vasp.quality04",
-        "static-energy.vasp.quality04",
     ]
