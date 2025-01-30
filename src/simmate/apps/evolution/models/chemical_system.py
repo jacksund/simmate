@@ -63,9 +63,9 @@ class ChemicalSystemSearch(Calculation):
             )
 
     def to_toolkit(self) -> PhaseDiagram:
-        phase_diagram = self.deep_individuals_datatable.get_phase_diagram(
+        phase_diagram = self.individuals_datatable.get_phase_diagram(
             chemical_system=self.chemical_system,
-            workflow_name=self.deep_subworkflow.name_full,
+            workflow_name=self.subworkflow.name_full,
         )
         return phase_diagram
 
@@ -107,31 +107,6 @@ class ChemicalSystemSearch(Calculation):
         return workflow
 
     @property
-    def deep_subworkflow(self):
-        # If our subworkflow is staged, the results we want (e.g. energy) are
-        # stored in the database of the last run calculation. We check that
-        # the workflow is staged here, and if it is we return the last workflow.
-        # If it isn't we simply return the workflow
-        if self.subworkflow.name_type == "staged-calculation":
-            return self.subworkflow.last_subworkflow
-        else:
-            return self.subworkflow
-
-    @property
-    def deep_subworkflow_name(self):
-        # We filter results from the databse table of our deep subworkflow. To
-        # account for this we need the name of this workflow
-        return self.deep_subworkflow.name_full
-
-    @property
-    def deep_individuals_datatable(self):
-        # NOTE: this table just gives the class back and doesn't filter down
-        # to the relevent individuals for this search. For that, use the
-        # "individuals" property
-        # we assume the table is registered in the local_calcs app
-        return self.deep_subworkflow.database_table
-
-    @property
     def individuals_datatable(self):
         # NOTE: this table just gives the class back and doesn't filter down
         # to the relevent individuals for this search. For that, use the
@@ -139,20 +114,6 @@ class ChemicalSystemSearch(Calculation):
         # we assume the table is registered in the local_calcs app
         return self.subworkflow.database_table
 
-    @property
-    def deep_individuals(self):
-        # note we don't call "all()" on this queryset yet becuase this property
-        # it often used as a "base" queryset (and additional filters are added)
-        return self.deep_individuals_datatable.objects.filter(
-            # You'd expect this filter to be...
-            #   formula_full=self.composition
-            # However, this misses structures that are reduced to a smaller
-            # unitcells during relaxation. Therefore, by default, we need to
-            # include all individuals that have fewer nsites. This is
-            # often what a user wants anyways during searches, so it works out.
-            chemical_system__in=self.chemical_subsystems,
-            workflow_name=self.deep_subworkflow_name,
-        )
 
     @property
     def individuals(self):
@@ -168,14 +129,6 @@ class ChemicalSystemSearch(Calculation):
             chemical_system__in=self.chemical_subsystems,
             workflow_name=self.subworkflow_name,
         )
-
-    @property
-    def deep_individuals_completed(self):
-        # If there is a result for the fitness field, we can treat the calculation as completed
-        return self.deep_individuals.filter(**{f"{self.fitness_field}__isnull": False})
-        # OPTIMIZE: would it be better to check energy_per_atom or structure_final?
-        # Ideally, I could make a relation to the prefect flow run table but this
-        # would require a large amount of work to implement.
 
     @property
     def individuals_completed(self):
@@ -202,12 +155,12 @@ class ChemicalSystemSearch(Calculation):
     #     return datatable.objects.filter(
     #         formula_reduced=composition.reduced_formula,
     #         nsites__lte=composition.num_atoms,
-    #         workflow_name=self.deep_subworkflow_name,
+    #         workflow_name=self.subworkflow_name,
     #         finished_at__isnull=True
     #         )
     @property
     def stable_structures(self):
-        structures = self.deep_individuals_completed.filter(
+        structures = self.individuals_completed.filter(
             energy_above_hull=0
         ).to_toolkit()
         return structures
@@ -225,15 +178,15 @@ class ChemicalSystemSearch(Calculation):
         phase_diagram = self.to_toolkit()
 
         structures = [
-            self.deep_individuals.get(id=int(e.entry_id.split("=")[-1]))
+            self.individuals.get(id=int(e.entry_id.split("=")[-1]))
             for e in phase_diagram.qhull_entries
         ]
         return [s.to_toolkit() for s in structures]
 
     def update_stabilities(self):
-        self.deep_individuals_datatable.update_chemical_system_stabilities(
+        self.individuals_datatable.update_chemical_system_stabilities(
             chemical_system=self.chemical_system_cleaned,
-            workflow_name=self.deep_subworkflow.name_full,
+            workflow_name=self.subworkflow.name_full,
         )
 
     # -------------------------------------------------------------------------
@@ -245,7 +198,7 @@ class ChemicalSystemSearch(Calculation):
         # doesn't affect the search. We therefore don't want to raise an
         # error here -- but instead warn the user and then continue the search
         try:
-            if not self.deep_individuals_completed.exists():
+            if not self.individuals_completed.exists():
                 logging.info("No structures completed yet. Skipping output writing.")
                 return
 
@@ -256,9 +209,9 @@ class ChemicalSystemSearch(Calculation):
             # update all chemical stabilites before creating the output files
             self.update_stabilities()
 
-            self.deep_individuals_datatable.write_hull_diagram_plot(
+            self.individuals_datatable.write_hull_diagram_plot(
                 chemical_system=self.chemical_system_cleaned,
-                workflow_name=self.deep_subworkflow.name_full,
+                workflow_name=self.subworkflow.name_full,
                 directory=directory,
                 show_unstable_up_to=5,
             )
@@ -328,9 +281,9 @@ class ChemicalSystemSearch(Calculation):
             structure.to(filename=str(structure_filename), fmt="cif")
 
     def write_individuals_completed_full(self, directory: Path):
-        columns = self.deep_individuals_datatable.get_column_names()
+        columns = self.individuals_datatable.get_column_names()
         columns.remove("structure")
-        df = self.deep_individuals_completed.defer("structure").to_dataframe(columns)
+        df = self.individuals_completed.defer("structure").to_dataframe(columns)
         csv_filename = directory / "individuals_completed__ALLDATA.csv"
         df.to_csv(csv_filename)
 
@@ -343,7 +296,7 @@ class ChemicalSystemSearch(Calculation):
             "spacegroup__number",
         ]
         df = (
-            self.deep_individuals_completed.order_by(self.fitness_field)
+            self.individuals_completed.order_by(self.fitness_field)
             .only(*columns)
             .to_dataframe(columns)
         )

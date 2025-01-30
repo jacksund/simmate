@@ -166,7 +166,9 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             # TODO: Go through triggered actions that would update the database
             # table -- e.g. the workflow to run, the validators, etc.
             # self._check_triggered_actions()
-
+            
+            # TODO: Check steadystate sources and adjust based on how successful
+            # they are
             # search_datatable._adjust_steadystate_sources(
             #     min_generation=steadystate_update_generation,
             #     min_proportion=steadystate_update_min_prop,
