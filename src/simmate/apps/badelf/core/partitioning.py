@@ -9,6 +9,7 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 from numpy.typing import ArrayLike
+from pybader.interface import Bader
 from pymatgen.analysis.local_env import CrystalNN
 from scipy.interpolate import RegularGridInterpolator
 from scipy.signal import savgol_filter
@@ -17,14 +18,6 @@ from tqdm import tqdm
 
 from simmate.apps.badelf.toolkit import Grid
 from simmate.toolkit import Structure
-
-try:
-    from pybader.interface import Bader
-except:
-    raise Exception(
-        "The PartitioningToolkit requires the pybader package."
-        "Install this with `conda install -c conda-forge pybader`"
-    )
 
 
 class PartitioningToolkit:
