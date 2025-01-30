@@ -414,11 +414,10 @@ class Grid(VolumetricData):
         try:
             from pybader.interface import Bader
         except:
-            raise Warning(
-                "This method requires the pybader module and will return None."
+            raise Exception(
+                "This method requires the pybader module."
                 "Install this with `conda install -c conda-forge pybader`"
             )
-            return
         atoms = self.structure.cart_coords
         lattice = self.matrix
         density = {"charge": self.total}
@@ -470,8 +469,8 @@ class Grid(VolumetricData):
         try:
             from pyrho.pgrid import PGrid
         except:
-            raise Warning(
-                "This method requires the mp-pyrho module and will return None."
+            raise Exception(
+                "This method requires the mp-pyrho module."
                 "Install this with `conda install -c conda-forge mp-pyrho`"
             )
             return
