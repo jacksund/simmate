@@ -40,7 +40,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         cls,
         chemical_system: str,
         max_atoms: int = 10,
-        subworkflow_name: str = "staged-calculation.vasp.low-quality",
+        subworkflow_name: str = "static-energy.vasp.low-quality",
         subworkflow_kwargs: dict = {},
         fitness_field: str = "energy_per_atom",
         fitness_function: str = "min",  # other options: max, target_value
