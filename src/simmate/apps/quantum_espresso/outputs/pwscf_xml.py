@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 from functools import cached_property
 from pathlib import Path
 
@@ -209,9 +210,15 @@ class PwscfXml:
             # line will throw an out of bounds error. We give a more useful
             # error instead.
             except:
-                raise Exception(
+                logging.warn(
                     "All energy levels fill at at least one kpoint. Increase nbnd."
                 )
+                return {
+                    "band_gap": None,
+                    "conduction_band_minimum": None,
+                    "valence_band_maximum": None,
+                    "is_gap_direct": None,
+                }
             # add to our lists
             highest_occupied_energies.append(highest_occupied_energy)
             lowest_unoccupied_energies.append(lowest_unoccupied_energy)
