@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.badelf.core import Grid
+from simmate.apps.badelf.toolkit import Grid
 from simmate.engine import S3Workflow
 
 

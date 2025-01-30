@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from simmate.apps.badelf.core import Grid
+from simmate.apps.badelf.toolkit import Grid
 from simmate.configuration import settings
 from simmate.engine import S3Workflow
 from simmate.toolkit import Structure
