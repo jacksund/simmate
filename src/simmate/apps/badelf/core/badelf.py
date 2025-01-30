@@ -18,7 +18,7 @@ from tqdm import tqdm
 from simmate.apps.badelf.core.electride_finder import ElectrideFinder
 from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.apps.badelf.core.voxel_assignment import VoxelAssignmentToolkit
-from simmate.apps.badelf.toolkit import Grid
+from simmate.apps.bader.toolkit import Grid
 
 
 class BadElfToolkit:

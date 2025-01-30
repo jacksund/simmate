@@ -16,7 +16,7 @@ from scipy.signal import savgol_filter
 from scipy.spatial import ConvexHull
 from tqdm import tqdm
 
-from simmate.apps.badelf.toolkit import Grid
+from simmate.apps.bader.toolkit import Grid
 from simmate.toolkit import Structure
 
 

@@ -13,7 +13,7 @@ from scipy.ndimage import label
 from tqdm import tqdm
 
 from simmate.apps.badelf.core.partitioning import PartitioningToolkit
-from simmate.apps.badelf.toolkit import Grid
+from simmate.apps.bader.toolkit import Grid
 
 
 class ElectrideFinder:
