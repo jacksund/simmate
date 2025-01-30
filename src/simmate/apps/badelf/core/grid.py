@@ -9,10 +9,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike
-from pybader.interface import Bader
 from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-from pyrho.pgrid import PGrid
 from scipy.interpolate import RegularGridInterpolator
 
 # from scipy.ndimage import binary_erosion
@@ -412,6 +410,15 @@ class Grid(VolumetricData):
         """
         Returns a Bader object from pybader.
         """
+        # make sure the pybader package is present
+        try:
+            from pybader.interface import Bader
+        except:
+            raise Warning(
+                "This method requires the pybader module and will return None."
+                "Install this with `conda install -c conda-forge pybader`"
+            )
+            return
         atoms = self.structure.cart_coords
         lattice = self.matrix
         density = {"charge": self.total}
@@ -459,6 +466,15 @@ class Grid(VolumetricData):
         Returns:
             Changes the grid data in place.
         """
+        # Make sure the pyrho package is present
+        try:
+            from pyrho.pgrid import PGrid
+        except:
+            raise Warning(
+                "This method requires the mp-pyrho module and will return None."
+                "Install this with `conda install -c conda-forge mp-pyrho`"
+            )
+            return
         # Get data
         total = self.total
         diff = self.diff
