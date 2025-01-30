@@ -9,6 +9,8 @@ import numpy
 import pandas
 import plotly.express as plotly_express
 import plotly.graph_objects as plotly_go
+from django.db.models import F, functions
+from django.utils import timezone
 from rich.progress import track
 
 from simmate.apps.evolution import selectors as selector_module
@@ -38,6 +40,10 @@ class FixedCompositionSearch(Calculation):
     subworkflow_name = table_column.CharField(max_length=200, null=True, blank=True)
     subworkflow_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
     fitness_field = table_column.CharField(max_length=200, null=True, blank=True)
+    fitness_function = table_column.CharField(max_length=200, null=True, blank=True)
+    target_value = table_column.FloatField(
+        null=True, blank=True
+    )  # Only set if fitness function is target_value
 
     # Other settings for the search
     min_structures_exact = table_column.IntegerField(null=True, blank=True)
@@ -118,11 +124,10 @@ class FixedCompositionSearch(Calculation):
         # "Exact" refers to the nsites of the structures. We want to ensure at
         # least N structures with the input/expected number of sites have been
         # calculated.
-        # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
-        count_exact = self.individuals_datatable.objects.filter(
+        count_exact = self.deep_individuals_datatable.objects.filter(
             formula_full=self.composition,
-            workflow_name=self.subworkflow_name,
-            energy_per_atom__isnull=False,
+            workflow_name=self.deep_subworkflow_name,
+            **{f"{self.fitness_field}__isnull": False},
         ).count()
         if count_exact < self.min_structures_exact:
             return False
@@ -133,7 +138,7 @@ class FixedCompositionSearch(Calculation):
         # Nothing is done to stop those that are still running or to count
         # structures that failed to be calculated
         # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
-        if self.individuals_completed.count() > self.max_structures:
+        if self.deep_individuals_completed.count() > self.max_structures:
             logging.info(
                 "Maximum number of completed calculations hit "
                 f"(n={self.max_structures})."
@@ -160,10 +165,22 @@ class FixedCompositionSearch(Calculation):
         # only counting completed calculations.
         # BUG: this filter needs to be updated to fitness_value and not
         # assume we are using energy_per_atom
-        num_new_structures_since_best = self.individuals.filter(
-            energy_per_atom__gt=best.energy_per_atom + self.convergence_cutoff,
-            finished_at__gte=best.finished_at,
-        ).count()
+        best_value = getattr(best, self.fitness_field)
+        if self.fitness_function == "min":
+            num_new_structures_since_best = self.deep_individuals.filter(
+                finished_at__gte=best.finished_at,
+                **{f"{self.fitness_field}__gt": best_value + self.convergence_cutoff},
+            ).count()
+
+        elif self.fitness_function == "max":
+            num_new_structures_since_best = self.deep_individuals.filter(
+                finished_at__gte=best.finished_at,
+                **{f"{self.fitness_field}__gt": best_value - self.convergence_cutoff},
+            ).count()
+
+        elif self.fitness_funtion == "target_value":
+            pass  # TODO
+
         if num_new_structures_since_best > self.best_survival_cutoff:
             logging.info(
                 "Best individual has not changed after "
@@ -273,19 +290,26 @@ class FixedCompositionSearch(Calculation):
             steadystate_source_proportions = [
                 p / sum_proportions for p in steadystate_source_proportions
             ]
-        # While these are percent values, we want specific counts. We convert to
-        # those here.
-        steadystate_source_counts = [
-            int(p * self.nsteadystate) for p in steadystate_source_proportions
-        ]
+
+        # BUG-FIX: Using specific counts could lead to biases towards a given
+        # steady-state source if it's generated structures take less time to
+        # relax. We revert to proportions.
+        # # While these are percent values, we want specific counts. We convert to
+        # # those here.
+        # steadystate_source_counts = [
+        #     int(p * self.nsteadystate) for p in steadystate_source_proportions
+        # ]
 
         # Throughout our search, we want to keep track of which workflows we've
         # submitted for each source as well as how long we were holding a
         # steady-state of submissions. We therefore keep a log of Sources in
         # our database.
         steadystate_sources_db = []
-        for source_name, ntarget_jobs in zip(
-            steadystate_sources_cleaned, steadystate_source_counts
+        # for source_name, ntarget_jobs in zip(
+        #     steadystate_sources_cleaned, steadystate_source_counts
+        # ):
+        for source_name, target_proportion in zip(
+            steadystate_sources_cleaned, steadystate_source_proportions
         ):
             # before saving, we want to record whether we have a creator or transformation
             # !!! Is there a way to dynamically determine this from a string?
@@ -315,8 +339,11 @@ class FixedCompositionSearch(Calculation):
                 name=source_name,
                 is_creator=is_creator,
                 is_transformation=is_transformation,
-                nsteadystate_target=ntarget_jobs,
+                nsteadystate_target=target_proportion,
                 search=self,
+                target_history=[target_proportion],
+                target_time_history=timezone.now(),
+                workitem_ids_history=[0],
             )
             source_db.save()
             steadystate_sources_db.append(source_db)
@@ -334,33 +361,96 @@ class FixedCompositionSearch(Calculation):
         # transformations from a database table require that we have
         # completed structures in the database. We want to wait until there's
         # a set amount before we start mutating the best. We check that here.
-        if self.individuals_completed.count() < self.nfirst_generation:
+        if self.deep_individuals_completed.count() < self.nfirst_generation:
             logging.info(
                 "Search hasn't finished nfirst_generation yet "
-                f"({self.individuals_completed.count()}/{self.nfirst_generation} individuals). "
+                f"({self.deep_individuals_completed.count()}/{self.nfirst_generation} individuals). "
                 "Skipping transformations."
             )
             ready_for_transformations = False
         else:
             ready_for_transformations = True
 
-        # we iterate through each steady-state source and check to see how many
-        # jobs are still running for it. If it's less than the target steady-state,
-        # then we need to submit more!
+        # BUG-FIX: If one steady-state source results in structures that relax
+        # much faster than others, and we submit up to a set integer,
+        # we will get more than our desired ratio of this steady-state source over
+        # the course of the run.
+        # Instead, we first check how many structures
+        # below our target we are. We then check how many jobs from each source
+        # is pending, running, or finished (not failed). Then, for each source we
+        # check how far we are from the desired ratio and submit jobs to get to
+        # the closest match we can.
+        # NOTE: At the beginning of a run, we allow creators to submit up to the
+        # target steadystate number. This will still bias the beginning of the
+        # calculation towards creators over transformations, but over time it
+        # will balance out.
         steadystate_sources_db = self.steadystate_sources.all()
+        # Get our target number of runs
+        target_nsteadystate = self.nsteadystate
+        # prepare objects to store the total number of runs, list of current
+        # desired proportions, and list of submitted/finished runs for each source
+        active_nsteadystate = 0
+        nsteadystate_proportions = []
+        nsteadystate_totals = []
+        sources_to_add = []
         for source_db in steadystate_sources_db:
-            # skip if we have a transformation but aren't ready for it yet
             if source_db.is_transformation and not ready_for_transformations:
-                continue
+                continue  # We continue so that we don't consider this source
 
-            # This loop says for the number of steady state runs we are short,
-            # create that many new individuals! max(x,0) ensure we don't get a
-            # negative value. A value of 0 means we are at steady-state and can
-            # just skip this loop.
-            nflows_to_submit = max(
-                int(source_db.nsteadystate_target - source_db.nflow_runs), 0
+            # In this loop we want to get the total number of active runs to
+            # compare with our target. We also want to get the number of runs
+            # that have been submitted for each source (pending, running or finished)
+
+            not_failed = source_db.n_recent_not_failed_workitems
+            # NOTE we include all active workitems, even those from before the
+            # last source update. This prevents us from submitting a large
+            # number of new jobs if there are still some left to run.
+            still_active = source_db.n_active_workitems
+            active_nsteadystate += still_active
+            nsteadystate_proportions.append(source_db.nsteadystate_target)
+            nsteadystate_totals.append(not_failed)
+            # list corresponds to source database, number to submit
+            sources_to_add.append([source_db, 0])
+
+        # We need to normalize our proportions in case we are not ready for
+        # transformations.
+        nsteadystate_proportions = numpy.array(nsteadystate_proportions)
+        nsteadystate_proportions /= nsteadystate_proportions.sum()
+        nsteadystate_totals = numpy.array(nsteadystate_totals)
+        if nsteadystate_totals.sum() != 0:
+            nsteadystate_current_proportions = (
+                nsteadystate_totals / nsteadystate_totals.sum()
             )
+        else:
+            nsteadystate_current_proportions = nsteadystate_totals
 
+        # Now, for each desired new submissions, we want to make a submission
+        # such that it adjusts our current proportions as close to the ideal as
+        # possible. To do this, we see which proportion is the farthest below
+        # ideal and add one submission to it.
+        # NOTE: this is easy, but won't always be the addition that improves the
+        # proportion the most. Additions to smaller proportions will have a
+        # larger effect then greater. However, it should converge over time
+        if len(sources_to_add) > 0:
+            for i in range(target_nsteadystate - active_nsteadystate):
+                # get difference from ideal
+                proportion_diff = (
+                    nsteadystate_current_proportions - nsteadystate_proportions
+                )
+                # get the index of the minimum value which represents the source
+                # farthest from ideal
+                source_idx = numpy.where(proportion_diff == proportion_diff.min())[0][0]
+                # adjust our would be steadystate totals and get new proportions
+                nsteadystate_totals[source_idx] += 1
+                nsteadystate_current_proportions = (
+                    nsteadystate_totals / nsteadystate_totals.sum()
+                )
+                # add one for this source in our sources_to_add dict
+                sources_to_add[source_idx][1] += 1
+
+        # We now have the desired number of individuals to add for each source
+        # and can add them.
+        for source_db, nflows_to_submit in sources_to_add:
             if nflows_to_submit > 0:
                 logging.info(
                     f"Submitting {nflows_to_submit} new individuals for "
@@ -394,10 +484,172 @@ class FixedCompositionSearch(Calculation):
             # reactivate logging
             logger.disabled = False
 
+    def _adjust_steadystate_sources(
+        self,
+        min_generation: float = 5,
+        min_proportion: float = 0.01,
+    ):
+        """
+        This function adjusts the target proportions for each steadystate. The
+        quality of each steadystate source is ranked based on the energy of new
+        structures relative to their parents.The target proportions are then
+        increased for structures will a high success rate and decreased for
+        others.
+        Note that the quality is only checked for jobs finished since the last
+        time the proportions were adjusted. This is done in case a source
+        starts to be better or worse at different stages of the search.
+
+        Creators such as RandomSymStructure are not included.
+
+        If triggered actions are implemented, this should be moved there.
+        """
+        # Possible implementations:
+        # Use frequency of structure being better than parent
+        # Use average of energy difference of structure from parent
+        # !!! Once we settle on one, the following code could be much more
+        # concise
+        # Should sources be allowed to go to zero? I think probably not
+        # Steps:
+        # 1. Check if its time to update steadystate sources.
+        # 2. For each source, pull the finished runs and their parents
+        # 3. Calculate energy differences
+        # 4. Rank
+        # To get the results and parent results we can sort the subworkflow table
+        # by time (since the last update for the table) and source. Then we will
+        # need to iterate over each row, get the fitness field from the last
+        # workflow in the subworkflow, and the fitness field(s) from the source
+        # parent id(s).
+        # First we check if we have met our condition for when to update steadystate
+        # sources. This is done by checking that we have finished a set number
+        # of runs since our last update
+        steadystate_sources_db = self.steadystate_sources.all()
+        # Create metric for if condition is met. We will check that all sources
+        # have generated at least the required number of runs
+        condition_met = True
+        for source_db in steadystate_sources_db:
+            if source_db.nsteadystate_target == 0:
+                # This source was either removed or is not desired so we skip
+                continue
+            # We specifically want to check that we have finished enough runs
+            # from this source since the last time we updated
+            not_failed = source_db.n_recent_not_failed_workitems
+            still_active = source_db.n_recent_active_workitems
+            finished = not_failed - still_active
+            if finished < min_generation:
+                condition_met = False
+                break
+        # if our condition is not met we simply exit
+        if not condition_met:
+            return
+        logging.info("Updating steadystate source proportions")
+        # Now we need the results for each source database. Lets set up a dictionary
+        transformation_source_results = {}
+        transformation_idxs = []
+        creator_proportions = 0
+        for i, source_db in enumerate(steadystate_sources_db):
+            if source_db.is_creator:
+                # We don't want to consider creators as these should stay the
+                # same to encourage diversity. However, we do want to update
+                # them so that our _check_steadystate_workflows method is
+                # updating properly
+                source_db.update_flow_target(source_db.nsteadystate_target)
+                creator_proportions += source_db.nsteadystate_target
+                continue
+            elif source_db.is_transformation and source_db.nsteadystate_target == 0:
+                # This source has been set to 0 and we don't want to consider it
+                continue
+            transformation_source_results[source_db.name] = {
+                "child_results": [],
+                "parent_results": [],
+            }
+            transformation_idxs.append(i)
+        # Now we want to go through our results table and pull the energies for
+        # each finished individual
+        for individual in self.individuals_completed.all():
+            if "transformation" in individual.source.keys():
+                transformation = individual.source["transformation"]
+                # check if parent transformation exists in our transformation
+                # source dict. If not, we skip.
+                if transformation not in transformation_source_results.keys():
+                    continue
+                parent_ids = individual.source["parent_ids"]
+                if type(parent_ids) == int:
+                    # when there is only one parent it is stored as an int
+                    # rather than a list
+                    parent_ids = [parent_ids]
+            else:
+                # we have a creator and just want to continue
+                continue
+            # get the deep subworkflow's results
+            child_result = individual.subworkflow_results[-1]
+            child_value = getattr(child_result, self.fitness_field)
+            for parent_id in parent_ids:
+                parent_result = self.deep_individuals_datatable.objects.filter(
+                    id=parent_id
+                ).first()
+                parent_value = getattr(parent_result, self.fitness_field)
+                # add child and parent to lists. We add the child for each parent
+                transformation_source_results[transformation]["child_results"].append(
+                    child_value
+                )
+                transformation_source_results[transformation]["parent_results"].append(
+                    parent_value
+                )
+        # We now have a dictionary containing the information for each parent
+        # and child. Lets get the difference between each to get a metric for
+        # how well each source is performing
+        source_fitness_averages = []
+        source_fitness_stddev = []
+        for source_name, results_dict in transformation_source_results.items():
+            child_results = numpy.array(results_dict["child_results"])
+            parent_results = numpy.array(results_dict["parent_results"])
+            # For all fitness functions, we want the best result to have the
+            # highest value
+            if self.fitness_function == "min":
+                # if the child is much better than the parent, this will return
+                # a higher value
+                improvement = parent_results - child_results
+            elif self.fitness_function == "max":
+                # In this case we flip the subtractrion so that higher values for
+                # children give higher values in the difference
+                improvement = child_results - parent_results
+            elif self.fitness_function == "target_value":
+                # In this case we want to see if we are closer to the target
+                # value than the parent.
+                parent_dist = numpy.abs(parent_results - self.target_value)
+                child_dist = numpy.abs(child_results - self.target_value)
+                # We want the value to be higher when the child_dist is smaller
+                # than the parent dist so we subtract as follows
+                improvement = parent_dist - child_dist
+            source_fitness_averages.append(numpy.average(improvement))
+            source_fitness_stddev.append(numpy.std(improvement))
+        # Now that we have the averages, we want to use them in some way to
+        # adjust the steadystate proportions.
+        # BUG: There may be a better way to do this
+        source_fitness_averages = numpy.array(source_fitness_averages)
+        # adjust to worst source
+        adjusted_averages = source_fitness_averages - source_fitness_averages.min()
+        # normalize to proper range
+        new_props = (adjusted_averages / (adjusted_averages.sum())) * (
+            1 - creator_proportions - min_proportion
+        ) + min_proportion
+
+        # Now, for each transformation source we want to adjust the proportions
+        for db_idx, new_prop in zip(transformation_idxs, new_props):
+            source_db = steadystate_sources_db[db_idx]
+            # BUG: proportions are much lower than they should be.
+            logging.info(
+                f"Adjusting target proportion for {source_db.name} to {new_prop}"
+            )
+            source_db.update_flow_target(new_prop)
+        logging.info("Finished updating sources")
+
     # -------------------------------------------------------------------------
     # Core methods that help grab key information about the search
     # -------------------------------------------------------------------------
-
+    # !!! In the following workflows, "deep" refers to the last workflow in the
+    # provided subworkflow. These methods are used more frequently as what we
+    # really want is the fitness fields saved in that workflows table
     @property
     def subworkflow(self):
         # local import to prevent circular import issues
@@ -415,12 +667,54 @@ class FixedCompositionSearch(Calculation):
         return workflow
 
     @property
+    def deep_subworkflow(self):
+        # If our subworkflow is staged, the results we want (e.g. energy) are
+        # stored in the database of the last run calculation. We check that
+        # the workflow is staged here, and if it is we return the last workflow.
+        # If it isn't we simply return the workflow
+        if self.subworkflow.name_type == "staged-calculation":
+            return self.subworkflow.last_subworkflow
+        else:
+            return self.subworkflow
+
+    @property
+    def deep_subworkflow_name(self):
+        # We filter results from the databse table of our deep subworkflow. To
+        # account for this we need the name of this workflow
+        return self.deep_subworkflow.name_full
+
+    @property
+    def deep_individuals_datatable(self):
+        # NOTE: this table just gives the class back and doesn't filter down
+        # to the relevent individuals for this search. For that, use the
+        # "individuals" property
+        # we assume the table is registered in the local_calcs app
+        return self.deep_subworkflow.database_table
+
+    @property
     def individuals_datatable(self):
         # NOTE: this table just gives the class back and doesn't filter down
         # to the relevent individuals for this search. For that, use the
         # "individuals" property
         # we assume the table is registered in the local_calcs app
         return self.subworkflow.database_table
+
+    @property
+    def deep_individuals(self):
+        # note we don't call "all()" on this queryset yet becuase this property
+        # it often used as a "base" queryset (and additional filters are added)
+        composition = Composition(self.composition)
+        return self.deep_individuals_datatable.objects.filter(
+            # You'd expect this filter to be...
+            #   formula_full=self.composition
+            # However, this misses structures that are reduced to a smaller
+            # unitcells during relaxation. Therefore, by default, we need to
+            # include all individuals that have fewer nsites. This is
+            # often what a user wants anyways during searches, so it works out.
+            formula_reduced=composition.reduced_formula,
+            nsites__lte=composition.num_atoms,
+            workflow_name=self.deep_subworkflow_name,
+        )
 
     @property
     def individuals(self):
@@ -440,24 +734,91 @@ class FixedCompositionSearch(Calculation):
         )
 
     @property
-    def individuals_completed(self):
-        # If there is an energy_per_atom, we can treat the calculation as completed
-        return self.individuals.filter(energy_per_atom__isnull=False)
+    def deep_individuals_completed(self):
+        # If there is a result for the fitness field, we can treat the calculation as completed
+        return self.deep_individuals.filter(**{f"{self.fitness_field}__isnull": False})
         # OPTIMIZE: would it be better to check energy_per_atom or structure_final?
         # Ideally, I could make a relation to the prefect flow run table but this
         # would require a large amount of work to implement.
 
     @property
-    def individuals_incomplete(self):
-        # If there is an energy_per_atom, we can treat the calculation as completed
-        return self.individuals.filter(energy_per_atom__isnull=True)
+    def individuals_completed(self):
+        # If there is a result for the fitness field, we can treat the calculation as completed
+        return self.individuals.filter(
+            finished_at__isnull=False, failed_subworkflow__isnull=True
+        )
+        # OPTIMIZE: would it be better to check energy_per_atom or structure_final?
+        # Ideally, I could make a relation to the prefect flow run table but this
+        # would require a large amount of work to implement.
+
+    # !!! This is not used anywhere
+    # @property
+    # def individuals_incomplete(self):
+    #     # Everywhere else we search the database from the last step of the
+    #     # subworkflow rather than the subworkflow itself. However, this would
+    #     # miss individuals that are still running earlier steps of the subworkflow.
+    #     # To account for this we instead filter the subworkflows table
+    #     # BUG: As a result of this searching the subworkflow and not "deep" subworkflow
+    #     # the returned individuals are from a different table than individuals
+    #     # complete. This might be confusing.
+    #     datatable = self.subworkflow.database_table
+    #     composition = Composition(self.composition)
+    #     return datatable.objects.filter(
+    #         formula_reduced=composition.reduced_formula,
+    #         nsites__lte=composition.num_atoms,
+    #         workflow_name=self.deep_subworkflow_name,
+    #         finished_at__isnull=True
+    #         )
 
     @property
     def best_individual(self):
-        return self.individuals_completed.order_by(self.fitness_field).first()
+        if self.fitness_function == "min":
+            # We use order_by to sort from lowest to highest and take the first
+            return self.deep_individuals_completed.order_by(self.fitness_field).first()
+        if self.fitness_function == "max":
+            # We use order_by to order by the negative of our fitness field to
+            # get the highest to lowest order and take the first
+            return (
+                self.deep_individuals_completed.annotate(
+                    neg_fitness_field=(-F(f"{self.fitness_field}"))
+                )
+                .order_by("neg_fitness_field")
+                .first()
+            )
+        if self.fitness_function == "target_value":
+            # We calculate the distance from our target value for each item in our
+            # fitness field. We use the annotate, Abs, and F methods to do these
+            # calculations on the SQL side rather than in python.
+            # essentially, annotate makes a temporary "distance" column populated
+            # by our absolute difference calculation, then orders it and returns
+            # the first value.
+            return (
+                self.deep_individuals_completed.annotate(
+                    distance=functions.Abs(
+                        F(f"{self.fitness_field}") - self.target_value
+                    )
+                )
+                .order_by("distance")
+                .first()
+            )
 
-    def get_nbest_indiviudals(self, nbest: int):
-        return self.individuals_completed.order_by(self.fitness_field)[:nbest]
+    def get_nbest_individuals(self, nbest: int):
+        if self.fitness_function == "min":
+            # We use order_by to sort from lowest to highest and take the first
+            return self.deep_individuals_completed.order_by(self.fitness_field)[:nbest]
+        if self.fitness_function == "max":
+            # We use order_by to order by the negative of our fitness field to
+            # get the highest to lowest order and take the first
+            return self.deep_individuals_completed.annotate(
+                neg_fitness_field=(-F(f"{self.fitness_field}"))
+            ).order_by("neg_fitness_field")[:nbest]
+        if self.fitness_function == "target_value":
+            # We calculate the distance from our target value for each item in our
+            # fitness field. We use the annotate, Abs, and F methods to do these
+            # calculations on the SQL side rather than in python.
+            return self.deep_individuals_completed.annotate(
+                distance=functions.Abs(F(f"{self.fitness_field}") - self.target_value)
+            ).order_by("distance")[:nbest]
 
     def get_unique_individuals(
         self,
@@ -476,7 +837,9 @@ class FixedCompositionSearch(Calculation):
         # another database query.
         if as_queryset or use_cache:
             unique = (
-                self.individuals_completed.filter(id__in=self.unique_individuals_ids)
+                self.deep_individuals_completed.filter(
+                    id__in=self.unique_individuals_ids
+                )
                 .order_by(self.fitness_field)
                 .all()
             )
@@ -493,7 +856,7 @@ class FixedCompositionSearch(Calculation):
         """
 
         individuals = (
-            self.individuals_completed.order_by("finished_at")
+            self.deep_individuals_completed.order_by("finished_at")
             .only("id", self.fitness_field)
             .all()
         )
@@ -505,10 +868,18 @@ class FixedCompositionSearch(Calculation):
         for individual in individuals:
             potential_new_value = getattr(individual, self.fitness_field)
 
-            # BUG: I assume lower is better, but this may change
-            if potential_new_value < best_value:
-                best_history.append(individual.id)
-                best_value = potential_new_value
+            if self.fitness_function == "min":
+                if potential_new_value < best_value:
+                    best_history.append(individual.id)
+                    best_value = potential_new_value
+            elif self.fitness_function == "max":
+                if potential_new_value > best_value:
+                    best_history.append(individual.id)
+                    best_value = potential_new_value
+            elif self.fitness_function == "target_value":
+                if abs(potential_new_value - self.target_value) < best_value:
+                    best_history.append(individual.id)
+                    best_value = potential_new_value
 
         return best_history
 
@@ -539,6 +910,7 @@ class FixedCompositionSearch(Calculation):
             # workflow for now.
             # !!! Since I've transfered these to a StagedWorkflow base class, I
             # think they should just work so long as the subworkflow inherits it
+
             self.write_staged_series_convergence_plot(directory=directory)
             self.write_staged_series_histogram_plot(directory=directory)
             self.write_staged_series_times_plot(directory=directory)
@@ -583,7 +955,7 @@ class FixedCompositionSearch(Calculation):
         logging.info("Generating fingerprints for past structures...")
         fingerprint_validator = validator_class(
             composition=Composition(self.composition),
-            structure_pool=self.individuals_completed.order_by(self.fitness_field),
+            structure_pool=self.deep_individuals_completed.order_by(self.fitness_field),
             **self.validator_kwargs,
         )
         logging.info("Done generating fingerprints.")
@@ -602,7 +974,7 @@ class FixedCompositionSearch(Calculation):
     # -------------------------------------------------------------------------
 
     def write_best_structures(self, nbest: int, directory: Path):
-        best = self.get_nbest_indiviudals(nbest)
+        best = self.get_nbest_individuals(nbest)
         structures = best.only("structure", "id").to_toolkit()
         self._write_structures(structures, directory)
 
@@ -635,22 +1007,22 @@ class FixedCompositionSearch(Calculation):
             structure.to(filename=str(structure_filename), fmt="cif")
 
     def write_individuals_completed_full(self, directory: Path):
-        columns = self.individuals_datatable.get_column_names()
+        columns = self.deep_individuals_datatable.get_column_names()
         columns.remove("structure")
-        df = self.individuals_completed.defer("structure").to_dataframe(columns)
+        df = self.deep_individuals_completed.defer("structure").to_dataframe(columns)
         csv_filename = directory / "individuals_completed__ALLDATA.csv"
         df.to_csv(csv_filename)
 
     def write_individuals_completed(self, directory: Path):
         columns = [
             "id",
-            "energy_per_atom",
+            f"{self.fitness_field}",
             "finished_at",
             "source",
             "spacegroup__number",
         ]
         df = (
-            self.individuals_completed.order_by(self.fitness_field)
+            self.deep_individuals_completed.order_by(self.fitness_field)
             .only(*columns)
             .to_dataframe(columns)
         )
@@ -684,10 +1056,10 @@ class FixedCompositionSearch(Calculation):
         df.to_markdown(md_filename)
 
     def write_best_individuals_history(self, directory: Path):
-        columns = ["id", "energy_per_atom", "finished_at"]
+        columns = ["id", f"{self.fitness_field}", "finished_at"]
         best_history = self.get_best_individual_history()
         df = (
-            self.individuals.filter(id__in=best_history)
+            self.deep_individuals.filter(id__in=best_history)
             .order_by("-finished_at")
             .only(*columns)
             .to_dataframe(columns)
@@ -708,11 +1080,11 @@ class FixedCompositionSearch(Calculation):
         statuses = []
         created_at = []
         for source in structure_sources:
-            workitem_ids += source.workitem_ids
+            workitem_ids += source.active_workitem_ids
             # as an extra, keep a list of the source names
-            sources += [source.name] * len(source.workitem_ids)
+            sources += [source.name] * len(source.active_workitem_ids)
 
-            for workitem_id in source.workitem_ids:
+            for workitem_id in source.active_workitem_ids:
                 work_item = WorkItem.objects.get(id=workitem_id)
                 statuses.append(work_item.get_status_display())
                 created_at.append(work_item.created_at.strftime("%Y-%m-%d %H:%M:%S"))
@@ -734,9 +1106,9 @@ class FitnessConvergence(PlotlyFigure):
     def get_plot(search: FixedCompositionSearch):
         # Grab the calculation's structure and convert it to a dataframe
         columns = ["finished_at", search.fitness_field]
-        structures_dataframe = search.individuals_completed.only(*columns).to_dataframe(
-            columns
-        )
+        structures_dataframe = search.deep_individuals_completed.only(
+            *columns
+        ).to_dataframe(columns)
 
         # There's only one plot here, no subplot. So we make the scatter
         # object and just pass it directly to a Figure object
@@ -768,7 +1140,7 @@ class Correctness(PlotlyFigure):
         featurizer = search.validator.featurizer
 
         # Grab the calculation's structure and convert it to a dataframe
-        structures_dataframe = search.individuals_completed.to_dataframe()
+        structures_dataframe = search.deep_individuals_completed.to_dataframe()
 
         # because we are using the database model, we first want to convert to
         # pymatgen structures objects and add a column to the dataframe for these
@@ -828,6 +1200,7 @@ class Correctness(PlotlyFigure):
             x=structures_dataframe["finished_at"],
             y=structures_dataframe["fingerprint_distance"],
             mode="markers",
+            # BUG: Does this need to be fitness_field instead of energy?
             marker_color=structures_dataframe["energy_per_atom"],
         )
         figure = plotly_go.Figure(data=scatter)
@@ -843,7 +1216,7 @@ class Correctness(PlotlyFigure):
 class SubworkflowTimes(PlotlyFigure):
     def get_plot(search: FixedCompositionSearch):
         # Grab the calculation's structure and convert it to a dataframe
-        data = search.individuals_completed.values_list(
+        data = search.deep_individuals_completed.values_list(
             "total_time", "queue_time"
         ).all()
 
@@ -868,7 +1241,7 @@ class SubworkflowTimes(PlotlyFigure):
 class FitnessDistribution(PlotlyFigure):
     def get_plot(search: FixedCompositionSearch):
         # Grab the calculation's structure and convert it to a dataframe
-        structures_dataframe = search.individuals_completed.only(
+        structures_dataframe = search.deep_individuals_completed.only(
             search.fitness_field
         ).to_dataframe(search.fitness_field)
 
@@ -898,7 +1271,8 @@ class StagedSeriesConvergence(PlotlyFigure):
             # See `individuals` method for why we use these filters
             formula_reduced=composition.reduced_formula,
             nsites__lte=composition.num_atoms,
-            energy_per_atom__isnull=False,
+            **{f"{search.fitness_field}__isnull": False},
+            fitness_field=search.fitness_field,
         )
         return plot
 
@@ -910,7 +1284,8 @@ class StagedSeriesHistogram(PlotlyFigure):
             # See `individuals` method for why we use these filters
             formula_reduced=composition.reduced_formula,
             nsites__lte=composition.num_atoms,
-            energy_per_atom__isnull=False,
+            **{f"{search.fitness_field}__isnull": False},
+            fitness_field=search.fitness_field,
         )
         return plot
 
@@ -922,7 +1297,7 @@ class StagedSeriesTimes(PlotlyFigure):
             # See `individuals` method for why we use these filters
             formula_reduced=composition.reduced_formula,
             nsites__lte=composition.num_atoms,
-            energy_per_atom__isnull=False,
+            **{f"{search.fitness_field}__isnull": False},
         )
         return plot
 
