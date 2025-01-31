@@ -16,9 +16,9 @@ from scipy.ndimage import label
 from tqdm import tqdm
 
 from simmate.apps.badelf.core.electride_finder import ElectrideFinder
-from simmate.apps.badelf.core.grid import Grid
 from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.apps.badelf.core.voxel_assignment import VoxelAssignmentToolkit
+from simmate.apps.bader.toolkit import Grid
 
 
 class BadElfToolkit:
