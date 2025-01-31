@@ -32,10 +32,7 @@ class Grid(VolumetricData):
 
     @property
     def diff(self):
-        if "diff" in self.data.keys():
-            return self.data["diff"]
-        else:
-            return
+        return self.data.get("diff")
 
     @diff.setter
     def diff(self, new_diff):
@@ -473,7 +470,6 @@ class Grid(VolumetricData):
                 "This method requires the mp-pyrho module."
                 "Install this with `conda install -c conda-forge mp-pyrho`"
             )
-            return
         # Get data
         total = self.total
         diff = self.diff

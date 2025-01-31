@@ -38,7 +38,6 @@ class PopulationAnalysis__VaspBader__BaderMatproj(Workflow):
         bader_dir = directory / PopulationAnalysis__Bader__Bader.name_full
         PopulationAnalysis__Bader__Bader.run(
             directory=bader_dir,
-            # previous_directory=chgcomb_dir,
             previous_directory=prebader_dir,
         ).result()
 
