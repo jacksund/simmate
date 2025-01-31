@@ -475,6 +475,10 @@ class Workflow:
                 from simmate.database.base_data_types import DiffusionAnalysis
 
                 return DiffusionAnalysis
+        elif flow_type == "nested-calculation":
+            from simmate.database.base_data_types import NestedCalculation
+
+            return NestedCalculation
 
         raise NotImplementedError(
             "Unable to detect proper database table. Are you sure your workflow "

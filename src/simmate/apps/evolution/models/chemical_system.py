@@ -25,12 +25,42 @@ class ChemicalSystemSearch(Calculation):
     max_stoich_factor = table_column.IntegerField(null=True, blank=True)
     singleshot_sources = table_column.JSONField(default=list, null=True, blank=True)
 
+    fitness_field = table_column.CharField(max_length=200, null=True, blank=True)
+    fitness_function = table_column.CharField(max_length=200, null=True, blank=True)
+    target_value = table_column.FloatField(
+        null=True, blank=True
+    )  # Only set if fitness function is target_value
+
     # DEV NOTE: many of the methods below are copy/pasted from the fixed
     # composition table and functionality should be merged in the future.
 
     # -------------------------------------------------------------------------
     # Core methods that help grab key information about the search
     # -------------------------------------------------------------------------
+
+    @classmethod
+    def from_toolkit(
+        cls,
+        steadystate_sources: dict = None,
+        as_dict: bool = False,
+        **kwargs,
+    ):
+        # Initialize the steady state sources by saving their config information
+        # to the database.
+        if steadystate_sources and not as_dict:
+            search = cls(**kwargs)
+            search.save()  # we must save up front because of relations
+            search._init_steadystate_sources_to_db(steadystate_sources)
+            return search
+
+        elif not steadystate_sources:
+            return kwargs if as_dict else cls(**kwargs)
+
+        if steadystate_sources and as_dict:
+            raise Exception(
+                "steadystate_sources cannot be set in an as_dict mannor because"
+                "it points to a related database table"
+            )
 
     def to_toolkit(self) -> PhaseDiagram:
         phase_diagram = self.individuals_datatable.get_phase_diagram(
@@ -62,35 +92,69 @@ class ChemicalSystemSearch(Calculation):
 
     @property
     def subworkflow(self):
+        # local import to prevent circular import issues
         from simmate.workflows.utilities import get_workflow
 
-        if self.subworkflow_name == "relaxation.vasp.staged":
-            return get_workflow(self.subworkflow_name)
-        else:
-            raise Exception(
-                "Only `relaxation.vasp.staged` is supported in early testing"
-            )
+        # Initialize the workflow if a string was given.
+        # Otherwise we should already have a workflow class.
+        workflow = get_workflow(self.subworkflow_name)
+
+        # BUG: I'll need to rewrite this in the future bc I don't really account
+        # for other workflows yet. It would make sense that our workflow changes
+        # as the search progresses (e.g. we incorporate DeePMD relaxation once
+        # ready)
+
+        return workflow
 
     @property
     def individuals_datatable(self):
+        # NOTE: this table just gives the class back and doesn't filter down
+        # to the relevent individuals for this search. For that, use the
+        # "individuals" property
+        # we assume the table is registered in the local_calcs app
         return self.subworkflow.database_table
 
     @property
     def individuals(self):
+        # note we don't call "all()" on this queryset yet becuase this property
+        # it often used as a "base" queryset (and additional filters are added)
         return self.individuals_datatable.objects.filter(
+            # You'd expect this filter to be...
+            #   formula_full=self.composition
+            # However, this misses structures that are reduced to a smaller
+            # unitcells during relaxation. Therefore, by default, we need to
+            # include all individuals that have fewer nsites. This is
+            # often what a user wants anyways during searches, so it works out.
             chemical_system__in=self.chemical_subsystems,
             workflow_name=self.subworkflow_name,
         )
 
     @property
     def individuals_completed(self):
-        return self.individuals.filter(energy_per_atom__isnull=False)
+        # If there is a result for the fitness field, we can treat the calculation as completed
+        return self.individuals.filter(**{f"{self.fitness_field}__isnull": False})
+        # OPTIMIZE: would it be better to check energy_per_atom or structure_final?
+        # Ideally, I could make a relation to the prefect flow run table but this
+        # would require a large amount of work to implement.
 
-    @property
-    def individuals_incomplete(self):
-        # If there is an energy_per_atom, we can treat the calculation as completed
-        return self.individuals.filter(energy_per_atom__isnull=True)
-
+    # !!! This is not used anywhere
+    # @property
+    # def individuals_incomplete(self):
+    #     # Everywhere else we search the database from the last step of the
+    #     # subworkflow rather than the subworkflow itself. However, this would
+    #     # miss individuals that are still running earlier steps of the subworkflow.
+    #     # To account for this we instead filter the subworkflows table
+    #     # BUG: As a result of this searching the subworkflow and not "deep" subworkflow
+    #     # the returned individuals are from a different table than individuals
+    #     # complete. This might be confusing.
+    #     datatable = self.subworkflow.database_table
+    #     composition = Composition(self.composition)
+    #     return datatable.objects.filter(
+    #         formula_reduced=composition.reduced_formula,
+    #         nsites__lte=composition.num_atoms,
+    #         workflow_name=self.subworkflow_name,
+    #         finished_at__isnull=True
+    #         )
     @property
     def stable_structures(self):
         structures = self.individuals_completed.filter(energy_above_hull=0).to_toolkit()

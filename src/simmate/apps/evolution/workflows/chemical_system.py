@@ -42,6 +42,9 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         max_atoms: int = 10,
         subworkflow_name: str = "static-energy.vasp.low-quality",
         subworkflow_kwargs: dict = {},
+        fitness_field: str = "energy_per_atom",
+        fitness_function: str = "min",  # other options: max, target_value
+        target_value: float = None,
         max_stoich_factor: int = 4,
         nfirst_generation: int = 15,
         nsteadystate: int = 40,
@@ -283,9 +286,12 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
                 # OPTIMIZE: Should I just skip single-element compositions?
                 # BUG: I do skip these for now because compositions like "N1"
                 # are failing in vasp for me.
-                if len(composition.elements) == 1:
-                    logging.warn(f"Skipping single-element composition {composition}")
-                    continue
+                # BUG-FIX: If an element from this composition has no entries
+                # we will be unable to make a phase diagram later. I'm removing
+                # this continue line for now - S. Weaver
+                # if len(composition.elements) == 1:
+                #     logging.warn(f"Skipping single-element composition {composition}")
+                #     continue
 
                 # For this first cycle, we only look at non-reduced compositions
                 # up to the max_stoich_factor. This means Ca2N and max factor

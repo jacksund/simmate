@@ -241,6 +241,14 @@ class HullDiagram(PlotlyFigure):
         workflow_name: str = None,
         show_unstable_up_to: float = float("inf"),
     ):
+        subsystems = get_chemical_subsystems(chemical_system)
+        if len(subsystems) == 1:
+            logging.warn(
+                "Phase diagrams with one element are currently not supported."
+                "No plot will be returned"
+            )
+            return
+
         phase_diagram = table.get_phase_diagram(chemical_system, workflow_name)
 
         # alternatively use backend="matplotlib"
