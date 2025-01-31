@@ -146,7 +146,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             # Write the output summary if there is at least one structure completed
             if write_summary_files and sleep_counter >= sleep_frequency:
                 sleep_counter = 0  # reset the cycle
-                if search_datatable.deep_individuals_completed.count() >= 1:
+                if search_datatable.individuals_completed.count() >= 1:
                     search_datatable.write_output_summary(directory)
                 else:
                     search_datatable.write_individuals_incomplete(directory)

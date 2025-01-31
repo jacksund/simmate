@@ -39,6 +39,7 @@ class StagedWorkflow(Workflow):
         structure: Structure,
         source: dict = None,
         directory: Path = None,
+        command: str = None,
         subworkflow_kwargs: dict = {},
         **kwargs,
     ):
@@ -48,7 +49,7 @@ class StagedWorkflow(Workflow):
         subworkflow_ids = []
         failed_subworkflow = None
         error = None
-
+        result = None
         # Our first calculation is directly from our inputs.
         try:
             # get kwargs if they exist
@@ -57,6 +58,7 @@ class StagedWorkflow(Workflow):
             state = current_task.run(
                 structure=structure,
                 directory=directory / current_task.name_full,
+                command=command,
                 **subworkflow_kwargs,
             )
             result = state.result()
@@ -86,38 +88,53 @@ class StagedWorkflow(Workflow):
                     state = current_task.run(
                         structure=result,  # this is the result of the last run
                         directory=new_directory,
+                        command=command,
                         **subworkflow_kwargs,
                     )
                     result = state.result()
                     # append info to workflow lists
                     subworkflow_ids.append(result.id)
-                except:
+                except Exception as e:
+                    print(str(e))
+                    error = str(e)
                     failed_subworkflow = cls.subworkflow_strings[i]
                     break
+        
         # save final result
-        final_result = (
-            dict(
-                structure=structure,
-                subworkflow_names=cls.subworkflow_strings,
-                subworkflow_ids=subworkflow_ids,
-                copied_files=cls.files_to_copy,
-                failed_subworkflow=failed_subworkflow,
+        if result is not None:
+            final_result = (
+                dict(
+                    structure=structure,
+                    subworkflow_names=cls.subworkflow_strings,
+                    subworkflow_ids=subworkflow_ids,
+                    copied_files=cls.files_to_copy,
+                    failed_subworkflow=failed_subworkflow,
+                )
+                | result.to_api_dict()
+            )  # combine results
+            # remove results that will conflict with the base calculation.
+            # For example, we don't want to return a directory value because this
+            # will be different from the base workflow. We also don't want to send
+            # columns from the structure mixin because these are calculated directly
+            # from the structure
+            mixin_names = result.get_mixin_names()
+            mixins = result.get_mixins()
+            for name, mixin in zip(mixin_names, mixins):
+                if name == "Structure" or name == "Calculation":
+                    for calc_data in mixin.get_column_names():
+                        if calc_data in final_result.keys():
+                            del final_result[calc_data]
+                        
+        else:
+            final_result = (
+                dict(
+                    structure=structure,
+                    subworkflow_names=cls.subworkflow_strings,
+                    subworkflow_ids=subworkflow_ids,
+                    copied_files=cls.files_to_copy,
+                    failed_subworkflow=failed_subworkflow,
+                )
             )
-            | result.to_api_dict()
-        )  # combine results
-
-        # remove results that will conflict with the base calculation.
-        # For example, we don't want to return a directory value because this
-        # will be different from the base workflow. We also don't want to send
-        # columns from the structure mixin because these are calculated directly
-        # from the structure
-        mixin_names = result.get_mixin_names()
-        mixins = result.get_mixins()
-        for name, mixin in zip(mixin_names, mixins):
-            if name == "Structure" or name == "Calculation":
-                for calc_data in mixin.get_column_names():
-                    if calc_data in final_result.keys():
-                        del final_result[calc_data]
         # breakpoint()
         return final_result
 

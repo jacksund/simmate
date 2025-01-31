@@ -133,9 +133,7 @@ class ChemicalSystemSearch(Calculation):
     @property
     def individuals_completed(self):
         # If there is a result for the fitness field, we can treat the calculation as completed
-        return self.individuals.filter(
-            finished_at__isnull=False, failed_subworkflow__isnull=True
-        )
+        return self.individuals.filter(**{f"{self.fitness_field}__isnull":False})
         # OPTIMIZE: would it be better to check energy_per_atom or structure_final?
         # Ideally, I could make a relation to the prefect flow run table but this
         # would require a large amount of work to implement.

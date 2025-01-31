@@ -124,9 +124,9 @@ class FixedCompositionSearch(Calculation):
         # "Exact" refers to the nsites of the structures. We want to ensure at
         # least N structures with the input/expected number of sites have been
         # calculated.
-        count_exact = self.deep_individuals_datatable.objects.filter(
+        count_exact = self.individuals_datatable.objects.filter(
             formula_full=self.composition,
-            workflow_name=self.deep_subworkflow_name,
+            workflow_name=self.subworkflow_name,
             **{f"{self.fitness_field}__isnull": False},
         ).count()
         if count_exact < self.min_structures_exact:
@@ -138,7 +138,7 @@ class FixedCompositionSearch(Calculation):
         # Nothing is done to stop those that are still running or to count
         # structures that failed to be calculated
         # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
-        if self.deep_individuals_completed.count() > self.max_structures:
+        if self.individuals_completed.count() > self.max_structures:
             logging.info(
                 "Maximum number of completed calculations hit "
                 f"(n={self.max_structures})."
@@ -167,13 +167,13 @@ class FixedCompositionSearch(Calculation):
         # assume we are using energy_per_atom
         best_value = getattr(best, self.fitness_field)
         if self.fitness_function == "min":
-            num_new_structures_since_best = self.deep_individuals.filter(
+            num_new_structures_since_best = self.individuals.filter(
                 finished_at__gte=best.finished_at,
                 **{f"{self.fitness_field}__gt": best_value + self.convergence_cutoff},
             ).count()
 
         elif self.fitness_function == "max":
-            num_new_structures_since_best = self.deep_individuals.filter(
+            num_new_structures_since_best = self.individuals.filter(
                 finished_at__gte=best.finished_at,
                 **{f"{self.fitness_field}__gt": best_value - self.convergence_cutoff},
             ).count()
@@ -272,13 +272,22 @@ class FixedCompositionSearch(Calculation):
                     " This is being removed from your steadystate_sources."
                 )
                 continue  # skips to next source
-
+            
+            # There are also transformations that don't work for single-atom
+            # structures.
+            if composition.num_atoms == 1 and source_name in [
+                "from_ase.Heredity"
+            ]:
+                logging.warning(
+                    f"{source_name} is not possible with single-atom structures."
+                    " This is being removed from your steadystate_sources."
+                )
+                continue  # skips to next source
             # Store proportion value and name of source. We do NOT initialize
             # the source because it will be called elsewhere (within the submitted
             # workflow and therefore a separate thread.
             steadystate_sources_cleaned.append(source_name)
             steadystate_source_proportions.append(proportion)
-
         # Make sure the proportions sum to 1, otherwise scale them. We then convert
         # these to steady-state integers (and round to the nearest integer)
         sum_proportions = sum(steadystate_source_proportions)
@@ -361,10 +370,10 @@ class FixedCompositionSearch(Calculation):
         # transformations from a database table require that we have
         # completed structures in the database. We want to wait until there's
         # a set amount before we start mutating the best. We check that here.
-        if self.deep_individuals_completed.count() < self.nfirst_generation:
+        if self.individuals_completed.count() < self.nfirst_generation:
             logging.info(
                 "Search hasn't finished nfirst_generation yet "
-                f"({self.deep_individuals_completed.count()}/{self.nfirst_generation} individuals). "
+                f"({self.individuals_completed.count()}/{self.nfirst_generation} individuals). "
                 "Skipping transformations."
             )
             ready_for_transformations = False
@@ -584,7 +593,7 @@ class FixedCompositionSearch(Calculation):
             child_result = individual.subworkflow_results[-1]
             child_value = getattr(child_result, self.fitness_field)
             for parent_id in parent_ids:
-                parent_result = self.deep_individuals_datatable.objects.filter(
+                parent_result = self.individuals_datatable.objects.filter(
                     id=parent_id
                 ).first()
                 parent_value = getattr(parent_result, self.fitness_field)
@@ -667,54 +676,12 @@ class FixedCompositionSearch(Calculation):
         return workflow
 
     @property
-    def deep_subworkflow(self):
-        # If our subworkflow is staged, the results we want (e.g. energy) are
-        # stored in the database of the last run calculation. We check that
-        # the workflow is staged here, and if it is we return the last workflow.
-        # If it isn't we simply return the workflow
-        if self.subworkflow.name_type == "staged-calculation":
-            return self.subworkflow.last_subworkflow
-        else:
-            return self.subworkflow
-
-    @property
-    def deep_subworkflow_name(self):
-        # We filter results from the databse table of our deep subworkflow. To
-        # account for this we need the name of this workflow
-        return self.deep_subworkflow.name_full
-
-    @property
-    def deep_individuals_datatable(self):
-        # NOTE: this table just gives the class back and doesn't filter down
-        # to the relevent individuals for this search. For that, use the
-        # "individuals" property
-        # we assume the table is registered in the local_calcs app
-        return self.deep_subworkflow.database_table
-
-    @property
     def individuals_datatable(self):
         # NOTE: this table just gives the class back and doesn't filter down
         # to the relevent individuals for this search. For that, use the
         # "individuals" property
         # we assume the table is registered in the local_calcs app
         return self.subworkflow.database_table
-
-    @property
-    def deep_individuals(self):
-        # note we don't call "all()" on this queryset yet becuase this property
-        # it often used as a "base" queryset (and additional filters are added)
-        composition = Composition(self.composition)
-        return self.deep_individuals_datatable.objects.filter(
-            # You'd expect this filter to be...
-            #   formula_full=self.composition
-            # However, this misses structures that are reduced to a smaller
-            # unitcells during relaxation. Therefore, by default, we need to
-            # include all individuals that have fewer nsites. This is
-            # often what a user wants anyways during searches, so it works out.
-            formula_reduced=composition.reduced_formula,
-            nsites__lte=composition.num_atoms,
-            workflow_name=self.deep_subworkflow_name,
-        )
 
     @property
     def individuals(self):
@@ -734,39 +701,23 @@ class FixedCompositionSearch(Calculation):
         )
 
     @property
-    def deep_individuals_completed(self):
-        # If there is a result for the fitness field, we can treat the calculation as completed
-        return self.deep_individuals.filter(**{f"{self.fitness_field}__isnull": False})
-        # OPTIMIZE: would it be better to check energy_per_atom or structure_final?
-        # Ideally, I could make a relation to the prefect flow run table but this
-        # would require a large amount of work to implement.
-
-    @property
     def individuals_completed(self):
         # If there is a result for the fitness field, we can treat the calculation as completed
-        return self.individuals.filter(
-            finished_at__isnull=False, failed_subworkflow__isnull=True
-        )
+        return self.individuals.filter(**{f"{self.fitness_field}__isnull":False})
         # OPTIMIZE: would it be better to check energy_per_atom or structure_final?
         # Ideally, I could make a relation to the prefect flow run table but this
         # would require a large amount of work to implement.
 
-    # !!! This is not used anywhere
+    
+# This isn't used anywere
     # @property
     # def individuals_incomplete(self):
-    #     # Everywhere else we search the database from the last step of the
-    #     # subworkflow rather than the subworkflow itself. However, this would
-    #     # miss individuals that are still running earlier steps of the subworkflow.
-    #     # To account for this we instead filter the subworkflows table
-    #     # BUG: As a result of this searching the subworkflow and not "deep" subworkflow
-    #     # the returned individuals are from a different table than individuals
-    #     # complete. This might be confusing.
     #     datatable = self.subworkflow.database_table
     #     composition = Composition(self.composition)
     #     return datatable.objects.filter(
     #         formula_reduced=composition.reduced_formula,
     #         nsites__lte=composition.num_atoms,
-    #         workflow_name=self.deep_subworkflow_name,
+    #         workflow_name=self.subworkflow_name,
     #         finished_at__isnull=True
     #         )
 
@@ -774,12 +725,12 @@ class FixedCompositionSearch(Calculation):
     def best_individual(self):
         if self.fitness_function == "min":
             # We use order_by to sort from lowest to highest and take the first
-            return self.deep_individuals_completed.order_by(self.fitness_field).first()
+            return self.individuals_completed.order_by(self.fitness_field).first()
         if self.fitness_function == "max":
             # We use order_by to order by the negative of our fitness field to
             # get the highest to lowest order and take the first
             return (
-                self.deep_individuals_completed.annotate(
+                self.individuals_completed.annotate(
                     neg_fitness_field=(-F(f"{self.fitness_field}"))
                 )
                 .order_by("neg_fitness_field")
@@ -793,7 +744,7 @@ class FixedCompositionSearch(Calculation):
             # by our absolute difference calculation, then orders it and returns
             # the first value.
             return (
-                self.deep_individuals_completed.annotate(
+                self.individuals_completed.annotate(
                     distance=functions.Abs(
                         F(f"{self.fitness_field}") - self.target_value
                     )
@@ -805,18 +756,18 @@ class FixedCompositionSearch(Calculation):
     def get_nbest_individuals(self, nbest: int):
         if self.fitness_function == "min":
             # We use order_by to sort from lowest to highest and take the first
-            return self.deep_individuals_completed.order_by(self.fitness_field)[:nbest]
+            return self.individuals_completed.order_by(self.fitness_field)[:nbest]
         if self.fitness_function == "max":
             # We use order_by to order by the negative of our fitness field to
             # get the highest to lowest order and take the first
-            return self.deep_individuals_completed.annotate(
+            return self.individuals_completed.annotate(
                 neg_fitness_field=(-F(f"{self.fitness_field}"))
             ).order_by("neg_fitness_field")[:nbest]
         if self.fitness_function == "target_value":
             # We calculate the distance from our target value for each item in our
             # fitness field. We use the annotate, Abs, and F methods to do these
             # calculations on the SQL side rather than in python.
-            return self.deep_individuals_completed.annotate(
+            return self.individuals_completed.annotate(
                 distance=functions.Abs(F(f"{self.fitness_field}") - self.target_value)
             ).order_by("distance")[:nbest]
 
@@ -837,7 +788,7 @@ class FixedCompositionSearch(Calculation):
         # another database query.
         if as_queryset or use_cache:
             unique = (
-                self.deep_individuals_completed.filter(
+                self.individuals_completed.filter(
                     id__in=self.unique_individuals_ids
                 )
                 .order_by(self.fitness_field)
@@ -856,7 +807,7 @@ class FixedCompositionSearch(Calculation):
         """
 
         individuals = (
-            self.deep_individuals_completed.order_by("finished_at")
+            self.individuals_completed.order_by("finished_at")
             .only("id", self.fitness_field)
             .all()
         )
@@ -955,7 +906,7 @@ class FixedCompositionSearch(Calculation):
         logging.info("Generating fingerprints for past structures...")
         fingerprint_validator = validator_class(
             composition=Composition(self.composition),
-            structure_pool=self.deep_individuals_completed.order_by(self.fitness_field),
+            structure_pool=self.individuals_completed.order_by(self.fitness_field),
             **self.validator_kwargs,
         )
         logging.info("Done generating fingerprints.")
@@ -1007,9 +958,9 @@ class FixedCompositionSearch(Calculation):
             structure.to(filename=str(structure_filename), fmt="cif")
 
     def write_individuals_completed_full(self, directory: Path):
-        columns = self.deep_individuals_datatable.get_column_names()
+        columns = self.individuals_datatable.get_column_names()
         columns.remove("structure")
-        df = self.deep_individuals_completed.defer("structure").to_dataframe(columns)
+        df = self.individuals_completed.defer("structure").to_dataframe(columns)
         csv_filename = directory / "individuals_completed__ALLDATA.csv"
         df.to_csv(csv_filename)
 
@@ -1022,7 +973,7 @@ class FixedCompositionSearch(Calculation):
             "spacegroup__number",
         ]
         df = (
-            self.deep_individuals_completed.order_by(self.fitness_field)
+            self.individuals_completed.order_by(self.fitness_field)
             .only(*columns)
             .to_dataframe(columns)
         )
@@ -1059,7 +1010,7 @@ class FixedCompositionSearch(Calculation):
         columns = ["id", f"{self.fitness_field}", "finished_at"]
         best_history = self.get_best_individual_history()
         df = (
-            self.deep_individuals.filter(id__in=best_history)
+            self.individuals.filter(id__in=best_history)
             .order_by("-finished_at")
             .only(*columns)
             .to_dataframe(columns)
@@ -1106,7 +1057,7 @@ class FitnessConvergence(PlotlyFigure):
     def get_plot(search: FixedCompositionSearch):
         # Grab the calculation's structure and convert it to a dataframe
         columns = ["finished_at", search.fitness_field]
-        structures_dataframe = search.deep_individuals_completed.only(
+        structures_dataframe = search.individuals_completed.only(
             *columns
         ).to_dataframe(columns)
 
@@ -1140,7 +1091,7 @@ class Correctness(PlotlyFigure):
         featurizer = search.validator.featurizer
 
         # Grab the calculation's structure and convert it to a dataframe
-        structures_dataframe = search.deep_individuals_completed.to_dataframe()
+        structures_dataframe = search.individuals_completed.to_dataframe()
 
         # because we are using the database model, we first want to convert to
         # pymatgen structures objects and add a column to the dataframe for these
@@ -1216,7 +1167,7 @@ class Correctness(PlotlyFigure):
 class SubworkflowTimes(PlotlyFigure):
     def get_plot(search: FixedCompositionSearch):
         # Grab the calculation's structure and convert it to a dataframe
-        data = search.deep_individuals_completed.values_list(
+        data = search.individuals_completed.values_list(
             "total_time", "queue_time"
         ).all()
 
@@ -1241,9 +1192,9 @@ class SubworkflowTimes(PlotlyFigure):
 class FitnessDistribution(PlotlyFigure):
     def get_plot(search: FixedCompositionSearch):
         # Grab the calculation's structure and convert it to a dataframe
-        structures_dataframe = search.deep_individuals_completed.only(
+        structures_dataframe = search.individuals_completed.only(
             search.fitness_field
-        ).to_dataframe(search.fitness_field)
+        ).to_dataframe([search.fitness_field])
 
         # There's only one plot here, no subplot. So we make the scatter
         # object and just pass it directly to a Figure object
