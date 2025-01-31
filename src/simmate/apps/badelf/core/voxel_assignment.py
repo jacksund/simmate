@@ -12,7 +12,7 @@ import psutil
 from numpy.typing import ArrayLike
 from tqdm import tqdm
 
-from simmate.apps.badelf.core.grid import Grid
+from simmate.apps.bader.toolkit import Grid
 from simmate.toolkit import Structure
 
 
