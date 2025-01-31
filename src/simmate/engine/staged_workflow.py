@@ -99,7 +99,7 @@ class StagedWorkflow(Workflow):
                     error = str(e)
                     failed_subworkflow = cls.subworkflow_strings[i]
                     break
-        
+
         # save final result
         if result is not None:
             final_result = (
@@ -124,16 +124,14 @@ class StagedWorkflow(Workflow):
                     for calc_data in mixin.get_column_names():
                         if calc_data in final_result.keys():
                             del final_result[calc_data]
-                        
+
         else:
-            final_result = (
-                dict(
-                    structure=structure,
-                    subworkflow_names=cls.subworkflow_strings,
-                    subworkflow_ids=subworkflow_ids,
-                    copied_files=cls.files_to_copy,
-                    failed_subworkflow=failed_subworkflow,
-                )
+            final_result = dict(
+                structure=structure,
+                subworkflow_names=cls.subworkflow_strings,
+                subworkflow_ids=subworkflow_ids,
+                copied_files=cls.files_to_copy,
+                failed_subworkflow=failed_subworkflow,
             )
         # breakpoint()
         return final_result

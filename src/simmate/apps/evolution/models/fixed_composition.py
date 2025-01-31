@@ -272,12 +272,10 @@ class FixedCompositionSearch(Calculation):
                     " This is being removed from your steadystate_sources."
                 )
                 continue  # skips to next source
-            
+
             # There are also transformations that don't work for single-atom
             # structures.
-            if composition.num_atoms == 1 and source_name in [
-                "from_ase.Heredity"
-            ]:
+            if composition.num_atoms == 1 and source_name in ["from_ase.Heredity"]:
                 logging.warning(
                     f"{source_name} is not possible with single-atom structures."
                     " This is being removed from your steadystate_sources."
@@ -703,13 +701,12 @@ class FixedCompositionSearch(Calculation):
     @property
     def individuals_completed(self):
         # If there is a result for the fitness field, we can treat the calculation as completed
-        return self.individuals.filter(**{f"{self.fitness_field}__isnull":False})
+        return self.individuals.filter(**{f"{self.fitness_field}__isnull": False})
         # OPTIMIZE: would it be better to check energy_per_atom or structure_final?
         # Ideally, I could make a relation to the prefect flow run table but this
         # would require a large amount of work to implement.
 
-    
-# This isn't used anywere
+    # This isn't used anywere
     # @property
     # def individuals_incomplete(self):
     #     datatable = self.subworkflow.database_table
@@ -788,9 +785,7 @@ class FixedCompositionSearch(Calculation):
         # another database query.
         if as_queryset or use_cache:
             unique = (
-                self.individuals_completed.filter(
-                    id__in=self.unique_individuals_ids
-                )
+                self.individuals_completed.filter(id__in=self.unique_individuals_ids)
                 .order_by(self.fitness_field)
                 .all()
             )
@@ -1057,9 +1052,9 @@ class FitnessConvergence(PlotlyFigure):
     def get_plot(search: FixedCompositionSearch):
         # Grab the calculation's structure and convert it to a dataframe
         columns = ["finished_at", search.fitness_field]
-        structures_dataframe = search.individuals_completed.only(
-            *columns
-        ).to_dataframe(columns)
+        structures_dataframe = search.individuals_completed.only(*columns).to_dataframe(
+            columns
+        )
 
         # There's only one plot here, no subplot. So we make the scatter
         # object and just pass it directly to a Figure object

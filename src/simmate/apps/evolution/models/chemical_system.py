@@ -114,7 +114,6 @@ class ChemicalSystemSearch(Calculation):
         # we assume the table is registered in the local_calcs app
         return self.subworkflow.database_table
 
-
     @property
     def individuals(self):
         # note we don't call "all()" on this queryset yet becuase this property
@@ -133,7 +132,7 @@ class ChemicalSystemSearch(Calculation):
     @property
     def individuals_completed(self):
         # If there is a result for the fitness field, we can treat the calculation as completed
-        return self.individuals.filter(**{f"{self.fitness_field}__isnull":False})
+        return self.individuals.filter(**{f"{self.fitness_field}__isnull": False})
         # OPTIMIZE: would it be better to check energy_per_atom or structure_final?
         # Ideally, I could make a relation to the prefect flow run table but this
         # would require a large amount of work to implement.
@@ -158,9 +157,7 @@ class ChemicalSystemSearch(Calculation):
     #         )
     @property
     def stable_structures(self):
-        structures = self.individuals_completed.filter(
-            energy_above_hull=0
-        ).to_toolkit()
+        structures = self.individuals_completed.filter(energy_above_hull=0).to_toolkit()
         return structures
 
     @property
