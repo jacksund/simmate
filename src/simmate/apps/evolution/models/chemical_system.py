@@ -63,6 +63,7 @@ class ChemicalSystemSearch(Calculation):
     @property
     def subworkflow(self):
         from simmate.workflows.utilities import get_workflow
+
         return get_workflow(self.subworkflow_name)
 
     @property

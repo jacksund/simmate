@@ -143,8 +143,8 @@ class Transformation:
         self,
         structures,  # either a structure or list of structures. Depends on ninput.
         validators=[],
-        max_attempts=10000, # This will typically be greater than the time cutoff
-        max_time_per_atom=60, # time in seconds transformation is allowed to try
+        max_attempts=10000,  # This will typically be greater than the time cutoff
+        max_time_per_atom=60,  # time in seconds transformation is allowed to try
     ):
         # Until we get a new valid structure (or run out of attempts), keep trying
         # with our given source. Assume we don't have a valid structure until
@@ -154,8 +154,8 @@ class Transformation:
         # our stop time depends on the number of atoms in the structure we're
         # generating so we get a length here
         num_atoms = len(structures[0]) if type(structures) == list else len(structures)
-        stop_time = time.time() + num_atoms*max_time_per_atom
-        
+        stop_time = time.time() + num_atoms * max_time_per_atom
+
         while not new_structure and attempt <= max_attempts:
             current_time = time.time()
             if current_time >= stop_time:
