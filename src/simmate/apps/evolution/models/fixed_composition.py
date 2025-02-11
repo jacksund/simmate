@@ -870,7 +870,7 @@ class FitnessDistribution(PlotlyFigure):
         # Grab the calculation's structure and convert it to a dataframe
         structures_dataframe = search.individuals_completed.only(
             search.fitness_field
-        ).to_dataframe(search.fitness_field)
+        ).to_dataframe([search.fitness_field])
 
         # There's only one plot here, no subplot. So we make the scatter
         # object and just pass it directly to a Figure object
