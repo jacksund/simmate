@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import time
 
 from simmate.toolkit import Structure
 
@@ -104,7 +105,6 @@ class Transformation:
         selector,
         datatable,
         select_kwargs: dict = {},
-        max_attempts: int = 100,
         **kwargs,  # for apply_transformation_with_validation
     ):
         logging.info(f"Creating a transformed structure with '{self.name}'")
@@ -123,24 +123,15 @@ class Transformation:
         # with our given source. Assume we don't have a valid structure until
         # proven otherwise
         new_structure = False
-        attempt = 0
-        while not new_structure and attempt <= max_attempts:
-            # add an attempt
-            attempt += 1
-
-            # make a new structure
-            new_structure = self.apply_transformation_with_validation(
-                parent_structures,
-                **kwargs,
-            )
+        # make a new structure
+        new_structure = self.apply_transformation_with_validation(
+            parent_structures,
+            **kwargs,
+        )
 
         # see if we got a structure or if we hit the max attempts and there's
         # a serious problem!
         if not new_structure:
-            logging.warning(
-                f"Failed to create a structure after {max_attempts} different"
-                "parent combinations. Giving up."
-            )
             return False
 
         # Otherwise we were successful
@@ -152,14 +143,23 @@ class Transformation:
         self,
         structures,  # either a structure or list of structures. Depends on ninput.
         validators=[],
-        max_attempts=100,
+        max_attempts=10000,  # This will typically be greater than the time cutoff
+        max_time_per_atom=15,  # time in seconds transformation is allowed to try
     ):
         # Until we get a new valid structure (or run out of attempts), keep trying
         # with our given source. Assume we don't have a valid structure until
         # proven otherwise
         new_structure = False
         attempt = 0
+        # our stop time depends on the number of atoms in the structure we're
+        # generating so we get a length here
+        num_atoms = len(structures[0]) if type(structures) == list else len(structures)
+        stop_time = time.time() + num_atoms * max_time_per_atom
+
         while not new_structure and attempt <= max_attempts:
+            current_time = time.time()
+            if current_time >= stop_time:
+                break
             # add an attempt
             attempt += 1
 
@@ -186,12 +186,17 @@ class Transformation:
 
         # see if we got a structure or if we hit the max attempts and there's
         # a serious problem!
-        if not new_structure:
+        if not new_structure and attempt > max_attempts:
             logging.warning(
-                "Failed to create a structure from input after "
-                f"{max_attempts} attempts"
+                f"Failed to create a structure after {max_attempts} attempts."
+                "Giving up."
             )
             return False
-
+        elif not new_structure and current_time >= stop_time:
+            logging.warning(
+                f"Failed to create a structure after {num_atoms*max_time_per_atom} seconds."
+                "Giving up."
+            )
+            return False
         # return the structure and its parents
         return new_structure

@@ -225,7 +225,7 @@ class Grid(VolumetricData):
     def interpolate_value_at_frac_coords(
         self, frac_coords, method: str = "linear"
     ) -> list[float]:
-        coords = self.get_vox_coords_from_frac_full_array(np.array(frac_coords))
+        coords = self.get_voxel_coords_from_frac_full_array(np.array(frac_coords))
         padded_data = np.pad(self.total, 10, mode="wrap")
 
         # interpolate grid to find values that lie between voxels. This is done

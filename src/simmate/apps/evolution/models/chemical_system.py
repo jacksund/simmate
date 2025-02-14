@@ -64,12 +64,7 @@ class ChemicalSystemSearch(Calculation):
     def subworkflow(self):
         from simmate.workflows.utilities import get_workflow
 
-        if self.subworkflow_name == "relaxation.vasp.staged":
-            return get_workflow(self.subworkflow_name)
-        else:
-            raise Exception(
-                "Only `relaxation.vasp.staged` is supported in early testing"
-            )
+        return get_workflow(self.subworkflow_name)
 
     @property
     def individuals_datatable(self):

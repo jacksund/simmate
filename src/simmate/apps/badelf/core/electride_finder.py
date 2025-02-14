@@ -189,7 +189,7 @@ class ElectrideFinder:
         bader = elf_grid.run_pybader(threads)
 
         # Get the voxel indices for each found maxima
-        basin_maxima_vox_coords = elf_grid.get_vox_coords_from_frac_full_array(
+        basin_maxima_vox_coords = elf_grid.get_voxel_coords_from_frac_full_array(
             bader.bader_maxima_fractional
         ).astype(int)
         # Get the ELF values for the maxima
@@ -399,7 +399,7 @@ class ElectrideFinder:
                 # quadrant of the supercell
                 frac_coords = site.frac_coords
                 transformed_coords = transformations + frac_coords
-                voxel_coords = elf_grid.get_vox_coords_from_frac_full_array(
+                voxel_coords = elf_grid.get_voxel_coords_from_frac_full_array(
                     transformed_coords
                 ).astype(int)
                 # Get the feature label at each transformation. If the atom is not surrounded
