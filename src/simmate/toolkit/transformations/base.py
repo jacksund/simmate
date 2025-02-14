@@ -144,7 +144,7 @@ class Transformation:
         structures,  # either a structure or list of structures. Depends on ninput.
         validators=[],
         max_attempts=10000,  # This will typically be greater than the time cutoff
-        max_time_per_atom=60,  # time in seconds transformation is allowed to try
+        max_time_per_atom=15,  # time in seconds transformation is allowed to try
     ):
         # Until we get a new valid structure (or run out of attempts), keep trying
         # with our given source. Assume we don't have a valid structure until
