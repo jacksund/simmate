@@ -102,23 +102,11 @@ class PwscfXml:
         rydberg_to_ev = physical_constants["Rydberg constant times hc in eV"][0]
         energy_ry = float(self.data["qes:espresso"]["output"]["total_energy"]["etot"])
 
-        # Note: The values in the pw-scf.out file are for the total system, so
-        # they won't match what is here in the xml.
-        # They also don't necessarily match the final structure if the system is
-        # found to have more symmetry then in the input. For example, I ran a
-        # calc with Im3m Fe (mp-13). The start file was a cif which included two
-        # atoms and assumed P1. The pw-scf.out file gave a total energy accounting
-        # for both atoms. However, these atoms are not unique and the final structure
-        # is defined only by one atom which causes a mismatch
-        # In pwscf.xml the values are conveniently per atom.
-        # BUG-FIX: The values are NOT conveniently per atom. As far as I can
-        # tell, they are just total energy divided by 2. I got this result with
-        # a variety of structures including primitive NaCl, conventional NaCl,
-        # the P1 structure AgBrO2(mp-1096805) and simple cubic Po (which has 1 atom).
-        # natoms = len(self.final_structure)
+        # Note: The values in the pw-scf.out file are in Ry units while the
+        # xml file is in hartree atomic units. We need to multiply by two to
+        # get to rydberg units.
 
-        # convert to eV & total energy
-        return energy_ry * rydberg_to_ev * 2  # natoms
+        return energy_ry * rydberg_to_ev * 2
 
     @cached_property
     def energies(self) -> list:
