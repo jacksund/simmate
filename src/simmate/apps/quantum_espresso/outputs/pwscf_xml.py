@@ -111,10 +111,14 @@ class PwscfXml:
         # for both atoms. However, these atoms are not unique and the final structure
         # is defined only by one atom which causes a mismatch
         # In pwscf.xml the values are conveniently per atom.
-        natoms = len(self.final_structure)
+        # BUG-FIX: The values are NOT conveniently per atom. As far as I can
+        # tell, they are just total energy divided by 2. I got this result with
+        # a variety of structures including primitive NaCl, conventional NaCl,
+        # the P1 structure AgBrO2(mp-1096805) and simple cubic Po (which has 1 atom).
+        #natoms = len(self.final_structure)
 
         # convert to eV & total energy
-        return energy_ry * rydberg_to_ev * natoms
+        return energy_ry * rydberg_to_ev * 2#natoms
 
     @cached_property
     def energies(self) -> list:
