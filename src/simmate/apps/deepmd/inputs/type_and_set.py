@@ -13,9 +13,12 @@ from simmate.utilities import get_directory
 class DeepmdDataset:
     """
     This class works simply as a converter. You provide it a list of
-    IonicStepStructures that have forces and energies, and it will create a
+    database entries that have forces and energies, and it will create a
     deepmd input for you.
-
+    
+    There are two types of input formats for DeepMD:
+    
+    1) System:
     The input consists of 2 "type" files and then a subfolder made of 4 files for
     the actaul data. An example folder looks like this:
         type.raw
@@ -54,9 +57,34 @@ class DeepmdDataset:
         Co2O4_train
         Co2O4_test
         << etc. >>
+    
+    2) Mixed Type
+    This input is similar to the System format, but is designed for when there
+    are many different compositions with varying elements. Compositions are
+    organized by number of atoms, then each composition has it's own subfolder.
+    The head of the folder will look like this:
 
-    All data required is available from an IonicStepStructure in our database, so
-    this is our current input format.
+    train
+        [num_atom]
+            sys.xxxx
+    valid
+        [num_atom]
+            sys.xxxx
+    
+    With each sys.xxxx being a unique composition with the same format as in
+    the System format.
+    
+    The type_map.raw for each sys.xxxx folder will be the same and include all of
+    the elements in the training data. The type.raw file that is normally used,
+    implies that the structures have the same type order for all frames in the
+    sys.xxxx. This is not necessarily true, so we follow the convention used to
+    train DPA-1 and fake the input with all 0s. Then instead, each set.xxxx has
+    an additional real_atom_types.npy file. This is an array of shape Nframes*Natoms
+    with integers describing atom types in each frame.
+
+
+    All data required is available from Relaxation or StaticEnergy tables in our
+    database, so this is our current input format.
     """
 
     # TODO: currently we use the IonicStepStructure from our relaxation database
