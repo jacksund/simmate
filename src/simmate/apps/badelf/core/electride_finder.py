@@ -527,13 +527,14 @@ class ElectrideFinder:
         atoms_volumes = new_bader.atoms_volumes
         voxel_volume = new_bader.voxel_volume
         indices_to_remove = []
-        for i in range(len(electride_structure)):
+        for i, site in enumerate(electride_structure):
             # for each site, we calculate the volume assigned to them. If its
             # less than 0.1 we remove the site.
-            num_voxels = len(np.where(atoms_volumes == i)[0])
-            volume = num_voxels * voxel_volume
-            if volume < electride_size_cutoff:
-                indices_to_remove.append(i)
+            if site.species_string == "He":
+                num_voxels = len(np.where(atoms_volumes == i)[0])
+                volume = num_voxels * voxel_volume
+                if volume < electride_size_cutoff:
+                    indices_to_remove.append(i)
         electride_structure.remove_sites(indices_to_remove)
         logging.info(
             f"{len(electride_structure.indices_from_symbol('He'))} electride sites found."
