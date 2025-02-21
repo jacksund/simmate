@@ -94,25 +94,36 @@
         </div>
         {# The navigation bar is the same for every webpage #}
         {% include "core_components/navbar.html" %}
-        {# This is the main portion of the webpage. The sidebar and footbar are always present, and the remainder of the page varies. #}
-        <div class="container-fluid">
-            <div class="wrapper">
-                {% include "core_components/sidebar_left.html" %}
-                <div class="content-page">
-                    <div class="container-fluid">
-                        {% block breadcrumbs %}
-                            {% include "basic_elements/breadcrumbs.html" %}
-                        {% endblock %}
-                        {% block body %}{% endblock %}
+        {% if not fullpage_dashboard %}
+            {# This is the main portion of the webpage. The sidebar and footbar are always present, and the remainder of the page varies. #}
+            <div class="container-fluid">
+                <div class="wrapper">
+                    {% include "core_components/sidebar_left.html" %}
+                    <div class="content-page">
+                        <div class="container-fluid">
+                            {% block breadcrumbs %}
+                                {% include "basic_elements/breadcrumbs.html" %}
+                            {% endblock %}
+                            {% block body %}{% endblock %}
+                        </div>
+                        {% include "core_components/footerbar.html" %}
                     </div>
-                    {% include "core_components/footerbar.html" %}
                 </div>
             </div>
-        </div>
+        {% else %}
+            {# Some streamlit dashboards are best displayed as a full page. This setup is rare and more rigid #}
+            <div class="px-5">{% include "basic_elements/breadcrumbs.html" %}</div>
+            <div class="row justify-content-center">
+                <iframe src="{{ dashboard_url }}?embed=true&user_id={{ request.user.id }}"
+                        style="height:150vh;
+                               width:100%;
+                               border:none"></iframe>
+            </div>
+            <div class="pt-5">{% include "core_components/footerbar.html" %}</div>
+        {% endif %}
         {# Many packages for JS libraries should be loaded last #}
         {% include "core_components/footer.html" %}
         {# Sometimes we load extra javascript at the bottom of the page #}
-        {% block extrafooter %}
-        {% endblock %}
+        {% block extrafooter %}{% endblock %}
     </body>
 </html>
