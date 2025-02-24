@@ -17,7 +17,11 @@ class DeepmdDataset:
     database entries that have forces and energies, and it will create a
     deepmd input for you.
     
-    There are two types of input formats for DeepMD:
+    There are two types of input formats for DeepMD: System and Mixed Type.
+    System is appropriate for models with a limited number of elements and
+    each provided structure should have the same set of elements. Mixed Type
+    is appropriate for larger models (DPA-1 and DPA-2) and the structures can
+    have any number of elements.
     
     1) System:
     The input consists of 2 "type" files and then a subfolder made of 4 files for
@@ -153,7 +157,11 @@ class DeepmdDataset:
         
         # Create training and validation dataframes
         dataframe_train, dataframe_valid = self.get_train_valid_dataframes(test_size)
-
+        
+        # The System format is assumed to have the same set of elements with the same
+        # type mapping in every system folder. We find the type_map based on
+        # the first structure in the data
+        type_map = [str(i)+"\n" for i in dataframe_train["chemical_system"][0].split("-")]
         # The process for creating files is the same for both the test and training
         # sets, where the only difference is the folder ending we add to each. Other
         # methods (such as creating the input.json for DeePMD) require the names
@@ -255,7 +263,7 @@ class DeepmdDataset:
                         numpy.lib.format.write_array(fp=file, array=filedata)
 
         # all of the folders have been created and we return a list of where
-        return folders_train, folders_valid
+        return folders_train, folders_valid, type_map
 
     def to_mixed_type(
         self,
@@ -377,7 +385,7 @@ class DeepmdDataset:
                         numpy.lib.format.write_array(fp=file, array=filedata)
                         
         # all of the folders have been created and we return a list of where
-        return folders_train, folders_valid
+        return folders_train, folders_valid, type_map
             
             
 
