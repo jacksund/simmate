@@ -19,6 +19,7 @@ class MorganFingerprint(Featurizer):
         nbits: int = 1024,
         **kwargs,
     ) -> numpy.array:
+        # molecule.get_morgan_fingerprint()  # <-- new method to switch to
         fp = AllChem.GetMorganFingerprintAsBitVect(
             molecule.rdkit_molecule,
             radius=radius,
