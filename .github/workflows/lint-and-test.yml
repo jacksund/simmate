@@ -26,8 +26,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # setup-miniconda not compatible with macos-latest
-        # https://github.com/conda-incubator/setup-miniconda/issues/344
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
         python-version: ["3.10", "3.11"]
 
