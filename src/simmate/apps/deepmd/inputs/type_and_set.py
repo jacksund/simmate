@@ -16,13 +16,13 @@ class DeepmdDataset:
     This class works simply as a converter. You provide it a list of
     database entries that have forces and energies, and it will create a
     deepmd input for you.
-    
+
     There are two types of input formats for DeepMD: System and Mixed Type.
     System is appropriate for models with a limited number of elements and
     each provided structure should have the same set of elements. Mixed Type
     is appropriate for larger models (DPA-1 and DPA-2) and the structures can
     have any number of elements.
-    
+
     1) System:
     The input consists of 2 "type" files and then a subfolder made of 4 files for
     the actaul data. An example folder looks like this:
@@ -62,7 +62,7 @@ class DeepmdDataset:
         Co2O4_train
         Co2O4_test
         << etc. >>
-    
+
     2) Mixed Type
     This input is similar to the System format, but is designed for when there
     are many different compositions with varying elements. In these situations,
@@ -76,16 +76,16 @@ class DeepmdDataset:
     valid
         [num_atom]
             sys.xxxx
-    
+
     With each sys.xxxx having he same format as the System format with some
     differences.
-    
+
     The type_map.raw for each sys.xxxx folder will be the same and includes all of
     the elements in the training data. The type.raw file that is normally used,
     implies that the structures have the same atom indices for all frames in the
     sys.xxxx. In this format, this file is filled with 0s and we instead include
-    an additional real_atom_types.npy file in each set.xxxx folder. 
-    This is an array of shape Nframes*Natoms with integers describing atom types 
+    an additional real_atom_types.npy file in each set.xxxx folder.
+    This is an array of shape Nframes*Natoms with integers describing atom types
     in each frame.
 
 
@@ -108,14 +108,14 @@ class DeepmdDataset:
     # DeepmdSet.to_folder(ionic_step_structures)
     #
     def __init__(
-            self,
-            structure_entries,
-            ):
+        self,
+        structure_entries,
+    ):
         self.structure_entries = structure_entries
-    
+
     def get_train_valid_dataframes(
-            self,
-            test_size: float = 0.2,
+        self,
+        test_size: float = 0.2,
     ):
         ionic_step_structures = self.structure_entries
 
@@ -145,7 +145,6 @@ class DeepmdDataset:
             test_size=test_size,
         )
         return dataframe_train, dataframe_valid
-        
 
     def to_system(
         self,
@@ -154,14 +153,16 @@ class DeepmdDataset:
     ):
         # Grab the path to the desired directory and create it if it doesn't exist
         directory = get_directory(directory)
-        
+
         # Create training and validation dataframes
         dataframe_train, dataframe_valid = self.get_train_valid_dataframes(test_size)
-        
+
         # The System format is assumed to have the same set of elements with the same
         # type mapping in every system folder. We find the type_map based on
         # the first structure in the data
-        type_map = [str(i)+"\n" for i in dataframe_train["chemical_system"][0].split("-")]
+        type_map = [
+            str(i) + "\n" for i in dataframe_train["chemical_system"][0].split("-")
+        ]
         # The process for creating files is the same for both the test and training
         # sets, where the only difference is the folder ending we add to each. Other
         # methods (such as creating the input.json for DeePMD) require the names
@@ -272,10 +273,10 @@ class DeepmdDataset:
     ):
         # Grab the path to the desired directory and create it if it doesn't exist
         directory = get_directory(directory)
-        
+
         # Create training and validation dataframes
         dataframe_train, dataframe_valid = self.get_train_valid_dataframes(test_size)
-        
+
         type_map = []
         # We need the type map for the elements in our data. To do this,
         # we need to create a list of all unique elements in the structures.
@@ -288,7 +289,7 @@ class DeepmdDataset:
         # and sort alphabetically
         type_map = pandas.Series(type_map)
         type_map = type_map.drop_duplicates().sort_values().reset_index(drop=True)
-        
+
         # The process for creating files is the same for both the test and training
         # sets, where the only difference is which folder we add to. Other
         # methods (such as creating the input.json for DeePMD) require the names
@@ -312,7 +313,7 @@ class DeepmdDataset:
                 folder_list.append(length_directory)
                 # this creates the directory or grabs the full path
                 length_directory = get_directory(length_directory)
-                 
+
                 # Now let's write the type_map file, which is just a list of elements
                 mapping_filename = length_directory / "type_map.raw"
                 with mapping_filename.open("w") as file:
@@ -321,16 +322,14 @@ class DeepmdDataset:
 
                 # Now we can write the type file which is just a set of 0s for
                 # this format.
-                type_filename = (
-                    length_directory / "type.raw"
-                )
+                type_filename = length_directory / "type.raw"
                 with type_filename.open("w") as file:
                     for i in range(length):
                         file.write("0" + "\n")
-                
+
                 # Now lets filter the dataframe for all structures of this length
-                dataframe_subset = dataframe_set.loc[dataframe_set["nsites"]==length]
-                
+                dataframe_subset = dataframe_set.loc[dataframe_set["nsites"] == length]
+
                 # We iterate through each structure (and its data) to compile everything
                 # into the deepmd list format.
                 lattices = []
@@ -357,17 +356,22 @@ class DeepmdDataset:
 
                     # the energy is just single value so we can add it to our list
                     energies.append(structure_data.energy)
-                    
+
                     # the atom types are converted to the element map indices
-                    atom_types.append([type_map[type_map==i.name].index[0] for i in structure.species])
-                    
+                    atom_types.append(
+                        [
+                            type_map[type_map == i.name].index[0]
+                            for i in structure.species
+                        ]
+                    )
+
                 # Now we want to convert all lists to numpy.
                 lattices = numpy.array(lattices)
                 coordinates = numpy.array(coordinates)
                 forces = numpy.array(forces)
                 energies = numpy.array(energies)
                 atom_types = numpy.array(atom_types)
-                
+
                 # for now we assume the dataset is written to set.000, so we
                 # make that folder first.
                 set_directory = length_directory / "set.000"
@@ -383,9 +387,6 @@ class DeepmdDataset:
                     filename_full = set_directory / filename
                     with filename_full.open("wb") as file:
                         numpy.lib.format.write_array(fp=file, array=filedata)
-                        
+
         # all of the folders have been created and we return a list of where
         return folders_train, folders_valid, type_map
-            
-            
-
