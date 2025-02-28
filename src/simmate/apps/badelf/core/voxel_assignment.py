@@ -42,7 +42,7 @@ class VoxelAssignmentToolkit:
         algorithm: str,
         partitioning: dict,
         directory: Path,
-        covalent_bond_alg: str = "zero-flux", # other option is "voronoi"
+        covalent_bond_alg: str = "zero-flux",  # other option is "voronoi"
     ):
         self.charge_grid = charge_grid.copy()
         self.algorithm = algorithm
@@ -557,9 +557,20 @@ class VoxelAssignmentToolkit:
         # using the bader method. We need to zero them here
         # !!! This may change for covalent bonds
         if self.algorithm == "badelf":
-            electride_indices = np.array(list(self.electride_structure.indices_from_symbol("X")),dtype=int) + 1
+            electride_indices = (
+                np.array(
+                    list(self.electride_structure.indices_from_symbol("X")), dtype=int
+                )
+                + 1
+            )
             if self.covalent_bond_alg == "zero-flux":
-                covalent_indices = np.array(list(self.electride_structure.indices_from_symbol("Z")),dtype=int) + 1
+                covalent_indices = (
+                    np.array(
+                        list(self.electride_structure.indices_from_symbol("Z")),
+                        dtype=int,
+                    )
+                    + 1
+                )
             else:
                 covalent_indices = np.array([])
             non_atom_indices = np.concatenate([electride_indices, covalent_indices])

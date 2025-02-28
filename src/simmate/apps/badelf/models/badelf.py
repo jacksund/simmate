@@ -32,7 +32,7 @@ class BadElf(Structure, Calculation):
     https://pubs.acs.org/doi/10.1021/jacs.3c10876
     However, a more traditional Zero-flux surface type algorithm can be used as well.
     """
-    
+
     covalent_algorithm = table_column.CharField(
         blank=True,
         null=True,
@@ -116,7 +116,7 @@ class BadElf(Structure, Calculation):
     The total number of electrides that were found when searching the maxima
     found using pybader.
     """
-    
+
     ncovalent_bonds = table_column.FloatField(blank=True, null=True)
     """
     The total number of covalent bonds that were found when searching the maxima
@@ -145,7 +145,7 @@ class BadElf(Structure, Calculation):
     """
     A list of ELF maxima found at the location of each atom/electride site
     """
-    
+
     covalent_atom_pairs = table_column.JSONField(blank=True, null=True)
     """
     A list of atom pairs corresponding to any covalent bonds in the structure

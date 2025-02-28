@@ -63,6 +63,7 @@ directory: /path/to/folder
 find_electrides: true
 electride_finder_cutoff: 0.5
 algorithm: badelf
+covalent_bond_alg: zero-flux
 ignore_low_pseudopotentials: false
 ```
 
@@ -132,7 +133,7 @@ This will return a dictionary object that includes useful information such as th
 # Write ELF or Charge Density for all atoms of a given type
 badelf.write_species_file(
     file_type="ELFCAR", # can also be CHGCAR
-    species="He", # He is used as a placeholder for electride electrons
+    species="X", # X is used as a placeholder for electride electrons
 )
 
 # Write ELF or Charge Density for one atom

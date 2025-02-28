@@ -56,7 +56,7 @@ class BadElfToolkit:
         threads: int = None,
         algorithm: str = "badelf",
         find_electrides: bool = True,
-        covalent_bond_alg: str = "zero-flux", # other option is "voronoi"
+        covalent_bond_alg: str = "zero-flux",  # other option is "voronoi"
     ):
         if partitioning_grid.structure != charge_grid.structure:
             raise ValueError("Grid structures must be the same.")
@@ -85,17 +85,17 @@ class BadElfToolkit:
         self.algorithm = algorithm
         self.find_electrides = find_electrides
         self.covalent_bond_alg = covalent_bond_alg
-    
+
     @cached_property
     def _find_electrides_and_covalent_bonds(self):
         """
-        Searches the partitioning grid for potential electride sites and 
-        covalent bondsand returns a structure with the found sites. 
-        Also returns the covalent atom pairs that are bonded by the covalent 
+        Searches the partitioning grid for potential electride sites and
+        covalent bondsand returns a structure with the found sites.
+        Also returns the covalent atom pairs that are bonded by the covalent
         bonds
 
         Returns:
-            A tuple with a Structure object with electride sites as "X" 
+            A tuple with a Structure object with electride sites as "X"
             atoms and covalent bonds as "Z" atoms, along with the pairs of
             atoms connected by any covalent bonds.
         """
@@ -113,7 +113,7 @@ class BadElfToolkit:
             electride_structure = self.partitioning_grid.structure.copy()
 
         return electride_structure, covalent_atom_pairs
-    
+
     @cached_property
     def electride_structure(self):
         """
@@ -125,7 +125,7 @@ class BadElfToolkit:
         """
 
         return self._find_electrides_and_covalent_bonds[0]
-    
+
     @cached_property
     def structure(self):
         structure = self.electride_structure.copy()
@@ -134,7 +134,7 @@ class BadElfToolkit:
         else:
             structure.remove_species(["X"])
         return structure
-    
+
     @cached_property
     def covalent_atom_pairs(self):
         """
@@ -148,22 +148,28 @@ class BadElfToolkit:
         """
         The indices of the structure that are electride sites.
         """
-        return np.array(list(self.electride_structure.indices_from_symbol("X")),dtype=int)
-    
+        return np.array(
+            list(self.electride_structure.indices_from_symbol("X")), dtype=int
+        )
+
     @cached_property
     def covalent_indices(self) -> np.array:
         """
         The indices of the structure that are covalent bonds.
         """
-        return np.array(list(self.electride_structure.indices_from_symbol("Z")),dtype=int)
-    
+        return np.array(
+            list(self.electride_structure.indices_from_symbol("Z")), dtype=int
+        )
+
     @cached_property
     def non_atom_indices(self) -> np.array:
         """
         The indices of the structure that are either electrides or covalent bonds
         """
         if self.covalent_bond_alg == "zero-flux":
-            all_non_atoms_indices = np.concatenate([self.electride_indices, self.covalent_indices])
+            all_non_atoms_indices = np.concatenate(
+                [self.electride_indices, self.covalent_indices]
+            )
             all_non_atoms_indices.sort()
             return all_non_atoms_indices
         else:
@@ -188,11 +194,11 @@ class BadElfToolkit:
         cnn = CrystalNN()
         coord_envs = []
         # For each site in the structure, we add the coordination environment.
-        
+
         # We first need to replace any dummy atoms (X or Y) with an atom CrystalNN
         # will recognize. We default to He since it is virtually never in a solid
         electride_structure = self.electride_structure.copy()
-        electride_structure.replace_species({"X":"He", "Z":"He"})
+        electride_structure.replace_species({"X": "He", "Z": "He"})
         for i, site in enumerate(electride_structure):
             with warnings.catch_warnings():
                 warnings.filterwarnings(

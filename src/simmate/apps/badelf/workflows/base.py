@@ -33,6 +33,7 @@ class BadElfBase(Workflow):
         find_electrides: bool = True,
         electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
         algorithm: str = "badelf",
+        covalent_bond_alg: str = "zero-flux",  # other option is "voronoi"
         ignore_low_pseudopotentials: bool = False,
         write_electride_files: bool = False,
         write_ion_radii: bool = True,
@@ -54,6 +55,7 @@ class BadElfBase(Workflow):
             directory=badelf_directory,
             find_electrides=find_electrides,
             algorithm=algorithm,
+            covalent_bond_alg=covalent_bond_alg,
         )
         # Set options and run badelf.
         if not ignore_low_pseudopotentials:

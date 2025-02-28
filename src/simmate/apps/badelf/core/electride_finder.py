@@ -552,7 +552,9 @@ class ElectrideFinder:
         logging.info(
             f"{len(electride_structure.indices_from_symbol('X'))} electride sites found."
         )
-        if len(electride_structure.indices_from_symbol('Z')) > 0:
-            logging.warning(f"{len(electride_structure.indices_from_symbol('Y'))} covalent bonds found. Covalent bonds will be seperated using zero-flux surface and oxidation states won't make sense")
+        if len(electride_structure.indices_from_symbol("Z")) > 0:
+            logging.warning(
+                f"{len(electride_structure.indices_from_symbol('Y'))} covalent bonds found. Covalent bonds will be seperated using zero-flux surface and oxidation states won't make sense"
+            )
         # Return the electride structure
         return electride_structure, np.array(covalent_bond_atoms)
