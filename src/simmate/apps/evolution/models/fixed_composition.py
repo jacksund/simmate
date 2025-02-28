@@ -896,6 +896,7 @@ class StagedSeriesConvergence(PlotlyFigure):
         composition = Composition(search.composition)
         plot = search.subworkflow.get_staged_series_convergence_plot(
             # See `individuals` method for why we use these filters
+            fitness_field=search.fitness_field,
             formula_reduced=composition.reduced_formula,
             nsites__lte=composition.num_atoms,
             energy_per_atom__isnull=False,
@@ -908,6 +909,7 @@ class StagedSeriesHistogram(PlotlyFigure):
         composition = Composition(search.composition)
         plot = search.subworkflow.get_staged_series_histogram_plot(
             # See `individuals` method for why we use these filters
+            fitness_field=search.fitness_field,
             formula_reduced=composition.reduced_formula,
             nsites__lte=composition.num_atoms,
             energy_per_atom__isnull=False,
