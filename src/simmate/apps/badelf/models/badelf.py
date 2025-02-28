@@ -32,6 +32,16 @@ class BadElf(Structure, Calculation):
     https://pubs.acs.org/doi/10.1021/jacs.3c10876
     However, a more traditional Zero-flux surface type algorithm can be used as well.
     """
+    
+    covalent_algorithm = table_column.CharField(
+        blank=True,
+        null=True,
+        max_length=75,
+    )
+    """
+    The selected algorithm for handling covalent bonds. The defalut is 'zero-flux'
+    similar to BadELF's handling of electrides, but 'voronoi' can also be selected
+    """
 
     charges = table_column.JSONField(blank=True, null=True)
     """
@@ -103,8 +113,14 @@ class BadElf(Structure, Calculation):
 
     nelectrides = table_column.IntegerField(blank=True, null=True)
     """
-    The total number of electrides that were found when searching the BCF.dat
-    file in some BadELF or Bader workflows.
+    The total number of electrides that were found when searching the maxima
+    found using pybader.
+    """
+    
+    ncovalent_bonds = table_column.FloatField(blank=True, null=True)
+    """
+    The total number of covalent bonds that were found when searching the maxima
+    found using pybader.
     """
 
     electride_dim = table_column.JSONField(blank=True, null=True)
@@ -128,6 +144,11 @@ class BadElf(Structure, Calculation):
     elf_maxima = table_column.JSONField(blank=True, null=True)
     """
     A list of ELF maxima found at the location of each atom/electride site
+    """
+    
+    covalent_atom_pairs = table_column.JSONField(blank=True, null=True)
+    """
+    A list of atom pairs corresponding to any covalent bonds in the structure
     """
 
     def write_output_summary(self, directory: Path):

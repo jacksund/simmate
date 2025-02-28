@@ -172,20 +172,20 @@ To account for similar structures (e.g., identical structures with minor energy 
 
 --------------------------
 
-## check_for_covalency
-This parameter is unique to the badelf workflows of the warrenapp. It indicates whether the algorithm should search the structure for covalency features. It is generally recommended to leave this as True. Covalency is not currently handled by the BadELF algorithm and covalency features in the ELF can heavily throw off the partitioning scheme, causing nonsense results.
+## ignore_low_pseudopotentials
+This parameter is unique to the badelf workflows of the warrenapp. It indicates whether the algorithm should throw an exception when the used pseudopotential didn't contain enough valence electrons. It is generally recommended to leave this as True as the results may be nonsense.
 
 === "yaml"
     ``` yaml
-    check_for_covalence: true
+    ignore_low_pseudopotentials: false
     ```
 === "toml"
     ``` yaml
-    check_for_covalence = true
+    ignore_low_pseudopotentials = false
     ```
 === "python"
     ``` python
-    check_for_covalence = True
+    ignore_low_pseudopotentials = False
     ```
 
 --------------------------

@@ -61,10 +61,9 @@ directory: /path/to/folder
 
 # all parameters below are optional
 find_electrides: true
-min_elf: 0.5
+electride_finder_cutoff: 0.5
 algorithm: badelf
-elf_connection_cutoff: 0
-check_for_covalency: true
+ignore_low_pseudopotentials: false
 ```
 
 And run the workflow:

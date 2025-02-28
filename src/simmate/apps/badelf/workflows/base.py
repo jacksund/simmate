@@ -33,7 +33,7 @@ class BadElfBase(Workflow):
         find_electrides: bool = True,
         electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
         algorithm: str = "badelf",
-        check_for_covalency: bool = True,
+        ignore_low_pseudopotentials: bool = False,
         write_electride_files: bool = False,
         write_ion_radii: bool = True,
         run_id: str = None,
@@ -56,8 +56,8 @@ class BadElfBase(Workflow):
             algorithm=algorithm,
         )
         # Set options and run badelf.
-        if not check_for_covalency:
-            badelf_tools.check_for_covalency = False
+        if not ignore_low_pseudopotentials:
+            badelf_tools.ignore_low_pseudopotentials = False
         badelf_tools.electride_finder_cutoff = electride_finder_cutoff
         results = badelf_tools.results
         # write results

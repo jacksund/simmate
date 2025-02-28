@@ -45,7 +45,7 @@ class BadElfToolkit:
             Whether or not to search for electride sites. Usually set to true.
     """
 
-    check_for_covalency = True
+    ignore_low_pseudopotentials = False
     electride_finder_cutoff = 0.5
 
     def __init__(
@@ -56,6 +56,7 @@ class BadElfToolkit:
         threads: int = None,
         algorithm: str = "badelf",
         find_electrides: bool = True,
+        covalent_bond_alg: str = "zero-flux", # other option is "voronoi"
     ):
         if partitioning_grid.structure != charge_grid.structure:
             raise ValueError("Grid structures must be the same.")
@@ -83,13 +84,36 @@ class BadElfToolkit:
         self.directory = directory
         self.algorithm = algorithm
         self.find_electrides = find_electrides
-
+        self.covalent_bond_alg = covalent_bond_alg
+    
     @cached_property
-    def structure(self):
-        structure = self.partitioning_grid.structure.copy()
-        structure.remove_species(["He"])
-        return structure
+    def _find_electrides_and_covalent_bonds(self):
+        """
+        Searches the partitioning grid for potential electride sites and 
+        covalent bondsand returns a structure with the found sites. 
+        Also returns the covalent atom pairs that are bonded by the covalent 
+        bonds
 
+        Returns:
+            A tuple with a Structure object with electride sites as "X" 
+            atoms and covalent bonds as "Z" atoms, along with the pairs of
+            atoms connected by any covalent bonds.
+        """
+
+        if self.find_electrides:
+            electride_structure, covalent_atom_pairs = ElectrideFinder(
+                self.partitioning_grid.copy(),
+                self.directory,
+            ).get_electride_structure(
+                electride_finder_cutoff=self.electride_finder_cutoff,
+                ignore_low_pseudopotentials=self.ignore_low_pseudopotentials,
+                threads=self.threads,
+            )
+        else:
+            electride_structure = self.partitioning_grid.structure.copy()
+
+        return electride_structure, covalent_atom_pairs
+    
     @cached_property
     def electride_structure(self):
         """
@@ -97,29 +121,53 @@ class BadElfToolkit:
         a structure with the found sites.
 
         Returns:
-            A Structure object with electride sites as "He" atoms.
+            A Structure object with electride sites as "X" atoms.
         """
 
-        if self.find_electrides:
-            electride_structure = ElectrideFinder(
-                self.partitioning_grid.copy(),
-                self.directory,
-            ).get_electride_structure(
-                electride_finder_cutoff=self.electride_finder_cutoff,
-                check_for_covalency=self.check_for_covalency,
-                threads=self.threads,
-            )
+        return self._find_electrides_and_covalent_bonds[0]
+    
+    @cached_property
+    def structure(self):
+        structure = self.electride_structure.copy()
+        if self.covalent_bond_alg == "zero-flux":
+            structure.remove_species(["X", "Z"])
         else:
-            electride_structure = self.structure
-
-        return electride_structure
+            structure.remove_species(["X"])
+        return structure
+    
+    @cached_property
+    def covalent_atom_pairs(self):
+        """
+        Searches the partitioning grid for covalent bonds and returns the atoms
+        bonded through each covalent bond.
+        """
+        return self._find_electrides_and_covalent_bonds[1]
 
     @cached_property
-    def electride_indices(self):
+    def electride_indices(self) -> np.array:
         """
         The indices of the structure that are electride sites.
         """
-        return np.array(list(self.electride_structure.indices_from_symbol("He")))
+        return np.array(list(self.electride_structure.indices_from_symbol("X")),dtype=int)
+    
+    @cached_property
+    def covalent_indices(self) -> np.array:
+        """
+        The indices of the structure that are covalent bonds.
+        """
+        return np.array(list(self.electride_structure.indices_from_symbol("Z")),dtype=int)
+    
+    @cached_property
+    def non_atom_indices(self) -> np.array:
+        """
+        The indices of the structure that are either electrides or covalent bonds
+        """
+        if self.covalent_bond_alg == "zero-flux":
+            all_non_atoms_indices = np.concatenate([self.electride_indices, self.covalent_indices])
+            all_non_atoms_indices.sort()
+            return all_non_atoms_indices
+        else:
+            return self.electride_indices
 
     @cached_property
     def coord_envs(self):
@@ -139,15 +187,18 @@ class BadElfToolkit:
         # create a CrystalNN loop
         cnn = CrystalNN()
         coord_envs = []
-        # For each electride in the structure, we make a new temporary structure
-        # without electride sites. We then add one electride site at a time and
-        # check its environment.
-        for i, site in enumerate(self.electride_structure):
+        # For each site in the structure, we add the coordination environment.
+        
+        # We first need to replace any dummy atoms (X or Y) with an atom CrystalNN
+        # will recognize. We default to He since it is virtually never in a solid
+        electride_structure = self.electride_structure.copy()
+        electride_structure.replace_species({"X":"He", "Z":"He"})
+        for i, site in enumerate(electride_structure):
             with warnings.catch_warnings():
                 warnings.filterwarnings(
                     "ignore", category=UserWarning, module="pymatgen"
                 )
-                coord_envs.append(cnn.get_cn(structure=self.electride_structure, n=i))
+                coord_envs.append(cnn.get_cn(structure=electride_structure, n=i))
         return coord_envs
 
     @cached_property
@@ -173,7 +224,7 @@ class BadElfToolkit:
         # structure already had them.
         if self.algorithm == "badelf":
             # remove electrides from grid structure and get
-            partitioning_grid.structure.remove_species("He")
+            partitioning_grid.structure = self.structure
             partitioning = PartitioningToolkit(
                 partitioning_grid, self.pybader
             ).get_partitioning()
@@ -356,6 +407,7 @@ class BadElfToolkit:
         # Get the objects that we'll need to assign voxels.
         elif algorithm in ["badelf", "voronelf"]:
             charge_grid = self.charge_grid
+            charge_grid.structure = self.structure
             partitioning = self.partitioning
             voxel_assignment_tools = VoxelAssignmentToolkit(
                 charge_grid=charge_grid,
@@ -363,11 +415,14 @@ class BadElfToolkit:
                 partitioning=partitioning,
                 algorithm=self.algorithm,
                 directory=self.directory,
+                covalent_bond_alg=self.covalent_bond_alg,
             )
             if algorithm == "badelf":
-                # Get the voxel assignments for each electride site
+                # Get the voxel assignments for each electride or covalent site
+                # !!! Here we assume that covalent bonds should be treated with
+                # zero-flux surfaces. This may change later or be an option
                 all_voxel_site_assignments = np.where(
-                    np.isin(all_voxel_site_assignments, self.electride_indices + 1),
+                    np.isin(all_voxel_site_assignments, self.non_atom_indices + 1),
                     all_voxel_site_assignments,
                     0,
                 )
@@ -436,7 +491,7 @@ class BadElfToolkit:
         # later on
         feature_indices = []
         for i, site in enumerate(grid.structure):
-            if site.species_string == "He":
+            if site.species_string == "X":
                 frac_coords = site.frac_coords
                 voxel_coords = grid.get_voxel_coords_from_frac(frac_coords).astype(int)
                 # Make sure that the label is not 0
@@ -617,13 +672,18 @@ class BadElfToolkit:
         algorithm = self.algorithm
         directory = self.directory
         electride_num = len(self.electride_indices)
+        covalent_num = len(self.covalent_indices)
         electride_structure = self.electride_structure
         electride_indices = self.electride_indices
+        covalent_indices = self.covalent_indices
+        non_atom_indices = self.non_atom_indices
         a, b, c = self.charge_grid.shape
         elements = []
         for site in electride_structure:
-            if site.species_string == "He":
+            if site.specie.symbol == "X":
                 elements.append("e")
+            elif site.specie.symbol == "Z":
+                elements.append("c")
             else:
                 elements.append(site.species_string)
 
@@ -647,10 +707,10 @@ class BadElfToolkit:
         # Get the minimum distances from each atom the the partitioning
         # surface. If the algorithm is "badelf" we need to acquire the
         # radii for the electrides
-        if algorithm == "badelf" and len(electride_indices > 0):
+        if algorithm == "badelf" and len(non_atom_indices) > 0:
             bader = self.pybader
             distances = bader.atoms_surface_distance
-            electride_min_dists = distances[self.electride_indices]
+            electride_min_dists = distances[self.non_atom_indices]
 
         if algorithm == "zero-flux":
             bader = self.pybader
@@ -660,7 +720,7 @@ class BadElfToolkit:
         else:
             for site in range(len(electride_structure)):
                 # fill min_dist dictionary using the smallest partitioning radius
-                if site in electride_indices and algorithm == "badelf":
+                if site in non_atom_indices and algorithm == "badelf":
                     # Get dist from henkelman algorithm results
                     min_dists[site] = electride_min_dists[site - len(self.structure)]
                 else:
@@ -728,12 +788,14 @@ class BadElfToolkit:
             # get structure site
             site = electride_structure[site_index]
             # get element name
-            element_str = site.specie.name
+            element_str = site.specie.symbol
             # Change electride dummy atom name to e
-            if element_str == "He":
+            if element_str == "X":
                 element_str = "e"
+            elif element_str == "Z":
+                element_str = "c"
             # calculate oxidation state and add it to the oxidation state list
-            if element_str == "e":
+            if element_str in ["e", "c"]:
                 oxi_state = -site_charge
             else:
                 oxi_state = round((nelectron_data[element_str] - site_charge), 4)
@@ -748,8 +810,9 @@ class BadElfToolkit:
         # Idealy this should be 0.
         total_electrons = 0
         for site in self.structure:
-            site_valence_electrons = nelectron_data[site.species_string]
-            total_electrons += site_valence_electrons
+            if site.specie.symbol != "Z":
+                site_valence_electrons = nelectron_data[site.species_string]
+                total_electrons += site_valence_electrons
         vacuum_charge = round((total_electrons - nelectrons), 4)
 
         # Calculate the "vacuum volume" or the volume not associated with any atom.
@@ -780,7 +843,10 @@ class BadElfToolkit:
             results["electrides_per_reduced_formula"] = electrides_per_reduced_unit
         # set the results that are not algorithm dependent
         results["nelectrides"] = electride_num
+        results["ncovalent_bonds"] = covalent_num
+        results["covalent_atom_pairs"] = self.covalent_atom_pairs
         results["algorithm"] = algorithm
+        results["covalent_algorithm"] = self.covalent_bond_alg
         results["element_list"] = elements
         results["coord_envs"] = self.coord_envs
         electride_dim, dim_cutoffs = self.get_electride_dimensionality()
@@ -843,7 +909,7 @@ class BadElfToolkit:
             find_electrides=find_electrides,
         )
 
-    def write_species_file(self, file_type: str = "ELFCAR", species: str = "He"):
+    def write_species_file(self, file_type: str = "ELFCAR", species: str = "X"):
         """
         Writes an ELFCAR or CHGCAR for a given species. Writes to the default
         directory provided to the BadelfToolkit class.
@@ -887,7 +953,7 @@ class BadElfToolkit:
         except:
             pass
 
-        if species == "He":
+        if species == "X":
             species = "e"
         if file_type == "ELFCAR":
             grid.write_file(directory / f"ELFCAR_{species}")

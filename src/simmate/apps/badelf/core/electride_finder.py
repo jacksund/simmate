@@ -90,7 +90,7 @@ class ElectrideFinder:
         maxima_structure = grid.structure.copy()
         maxima_structure.remove_species(maxima_structure.symbol_set)
         for frac_coord in maxima_frac_coords:
-            maxima_structure.append("He", frac_coord)
+            maxima_structure.append("X", frac_coord)
         tol = grid.max_voxel_dist * 2
         maxima_structure.merge_sites(tol=tol, mode="average")
         new_maxima_frac_coords = maxima_structure.frac_coords
@@ -149,7 +149,7 @@ class ElectrideFinder:
         electride_finder_cutoff: float = 0.5,
         electride_size_cutoff: float = 0.1,
         threads: int = None,
-        check_for_covalency: bool = True,
+        ignore_low_pseudopotentials: bool = False,
     ):
         """
         Finds the electrides in a structure using an ELF grid.
@@ -168,14 +168,14 @@ class ElectrideFinder:
                 The number of threads to use to perform the bader/zero-flux
                 calculation.
 
-            check_for_covalency (bool):
+            ignore_low_pseudopotentials (bool):
                 Whether to prevent a structure from being found if covalency is
                 found in the structure. It is highly recommended to keep this as
                 True as there is currently no method implemented to handle
                 covalency.
 
         Returns:
-            A structure object with the found electride sites labeled with "He"
+            A structure object with the found electride sites labeled with "X"
             dummy atoms.
         """
         ###############################################################################
@@ -421,9 +421,9 @@ class ElectrideFinder:
         if not np.all(
             np.isin([i for i in range(len(structure))], np.unique(basin_labeled_voxels))
         ):
-            if check_for_covalency:
+            if not ignore_low_pseudopotentials:
                 raise Exception(
-                    """At least one atom was not assigned a zero-flux basin. This can result from covalency or from pseudo-potentials with only valence electrons 
+                    """At least one atom was not assigned a zero-flux basin. This can result from pseudo-potentials with only valence electrons 
 (e.g. Al, Si, B in VASP 5.X.X)."""
                 )
 
@@ -451,7 +451,7 @@ class ElectrideFinder:
             np.where(basin_maxima_labels >= len(structure))
         ]
         for frac_coord in basin_maxima_frac_coords:
-            maxima_structure.append("He", frac_coord)
+            maxima_structure.append("X", frac_coord)
         # combine any maxima that may be very close to each other due to voxelation
         if len(maxima_structure) > 1:
             tol = elf_grid.max_voxel_dist * 2
@@ -465,7 +465,7 @@ class ElectrideFinder:
             # 1 instead of 0. We fix that here
             frac_coord = np.where(frac_coord == 1, 0, frac_coord)
             if np.any(np.all(frac_coord == local_maxima, axis=1)):
-                final_maxima_structure.append("He", frac_coord)
+                final_maxima_structure.append("X", frac_coord)
         # Get the final cartesian coordinates for the reduced maxima
         basin_maxima_cart_coords = final_maxima_structure.cart_coords
         # Now we check if the maximum is an electride site or covalent bond
@@ -478,6 +478,8 @@ class ElectrideFinder:
             self.grid,
             bader,
         ).all_site_neighbor_pairs.copy()
+        site_indices = []
+        neigh_indices = []
         site_coords = []
         neigh_coords = []
         site_neigh_dists = []
@@ -485,18 +487,24 @@ class ElectrideFinder:
             site_df = all_neighbors.loc[all_neighbors["site_index"] == i].copy()
             min_dist = min(site_df["dist"].to_list())
             site_df = site_df.loc[site_df["dist"] == min_dist]
+            site_indices.append(np.array(site_df["site_index"].to_list()))
+            neigh_indices.append(np.array(site_df["neigh_index"].to_list()))
             site_coords.append(np.array(site_df["site_coords"].to_list()))
             neigh_coords.append(np.array(site_df["neigh_coords"].to_list()))
             site_neigh_dists.append(np.array(site_df["dist"].to_list()))
         # convert to arrays
+        site_indices = np.concatenate(site_indices)
+        neigh_indices = np.concatenate(neigh_indices)
         site_coords = np.concatenate(site_coords)
         neigh_coords = np.concatenate(neigh_coords)
         site_neigh_dists = np.concatenate(site_neigh_dists)
         # For each maximum we now check if it is along one of the site neighbor bonds.
         # We do this by getting the distance from the maximum to the site and
         # to the neighbor and summing the distances. If the maximum is on the line
-        # this will be the same as the distance between the site and its neighbor
+        # this will be the same as the distance between the site and its neighbor.
+        # We also keep track of which atoms the covalent bond is between
         electride_structure = structure.copy()
+        covalent_bond_atoms = []
         for maximum_coord in basin_maxima_cart_coords:
             # calculate the distance from the maximum to the site and to the
             # neighbor
@@ -509,12 +517,17 @@ class ElectrideFinder:
             # a tolerance of 0.1A)
             condition_array1 = site_neigh_dists - 0.1 < total_dist
             condition_array2 = total_dist < site_neigh_dists + 0.1
-            # If there is a covalent bond, throw an error.
-            if np.any(condition_array1 & condition_array2) and check_for_covalency:
-                raise Exception("Covalency found in structure")
-            else:
+            if np.any(condition_array1 & condition_array2):
+                # We have a covalent bond. Add it to our structure
                 electride_structure.append(
-                    "He", maximum_coord, coords_are_cartesian=True
+                    "Z", maximum_coord, coords_are_cartesian=True
+                )
+                index = np.where(condition_array1 & condition_array2)[0][0]
+                covalent_bond_atoms.append([site_indices[index], neigh_indices[index]])
+            else:
+                # We have an electride. Add it to our structure
+                electride_structure.append(
+                    "X", maximum_coord, coords_are_cartesian=True
                 )
         # sometimes electride sites are found that are very small (i.e. < 0.1 A).
         # These are usually features of the grid and not actual electride sites
@@ -530,14 +543,16 @@ class ElectrideFinder:
         for i, site in enumerate(electride_structure):
             # for each site, we calculate the volume assigned to them. If its
             # less than 0.1 we remove the site.
-            if site.species_string == "He":
+            if site.species_string == "X" or site.species_string == "Z":
                 num_voxels = len(np.where(atoms_volumes == i)[0])
                 volume = num_voxels * voxel_volume
                 if volume < electride_size_cutoff:
                     indices_to_remove.append(i)
         electride_structure.remove_sites(indices_to_remove)
         logging.info(
-            f"{len(electride_structure.indices_from_symbol('He'))} electride sites found."
+            f"{len(electride_structure.indices_from_symbol('X'))} electride sites found."
         )
+        if len(electride_structure.indices_from_symbol('Z')) > 0:
+            logging.warning(f"{len(electride_structure.indices_from_symbol('Y'))} covalent bonds found. Covalent bonds will be seperated using zero-flux surface and oxidation states won't make sense")
         # Return the electride structure
-        return electride_structure
+        return electride_structure, np.array(covalent_bond_atoms)
