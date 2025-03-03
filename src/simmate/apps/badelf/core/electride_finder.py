@@ -169,10 +169,9 @@ class ElectrideFinder:
                 calculation.
 
             ignore_low_pseudopotentials (bool):
-                Whether to prevent a structure from being found if covalency is
-                found in the structure. It is highly recommended to keep this as
-                True as there is currently no method implemented to handle
-                covalency.
+                Whether to raise an Exception if not enough valence electrons
+                are found. It is highly recommended to keep this as
+                False as the results can be very unrealistic
 
         Returns:
             A structure object with the found electride sites labeled with "X"

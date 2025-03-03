@@ -6,6 +6,7 @@ import shutil
 # This will be added back once I go through and handle warnings within context
 # import warnings
 from pathlib import Path
+from typing import Literal
 
 from simmate.apps.badelf.core.badelf import BadElfToolkit
 from simmate.engine import Workflow
@@ -32,8 +33,10 @@ class BadElfBase(Workflow):
         directory: Path = None,
         find_electrides: bool = True,
         electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
-        algorithm: str = "badelf",
-        covalent_bond_alg: str = "zero-flux",  # other option is "voronoi"
+        algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
+        covalent_bond_alg: Literal[
+            "zero-flux", "voronoi"
+        ] = "zero-flux",  # other option is "voronoi"
         ignore_low_pseudopotentials: bool = False,
         write_electride_files: bool = False,
         write_ion_radii: bool = True,

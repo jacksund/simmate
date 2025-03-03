@@ -6,6 +6,7 @@ import math
 import warnings
 from functools import cached_property
 from pathlib import Path
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -43,6 +44,9 @@ class BadElfToolkit:
             or "zero-flux".
         find_electrides (bool):
             Whether or not to search for electride sites. Usually set to true.
+        covalent_bond_alg: (str):
+            The algorithm used to partition covalent bonds found in the
+            structure.
     """
 
     ignore_low_pseudopotentials = False
@@ -54,9 +58,11 @@ class BadElfToolkit:
         charge_grid: Grid,
         directory: Path,
         threads: int = None,
-        algorithm: str = "badelf",
+        algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
         find_electrides: bool = True,
-        covalent_bond_alg: str = "zero-flux",  # other option is "voronoi"
+        covalent_bond_alg: Literal[
+            "badelf", "voronelf"
+        ] = "zero-flux",  # other option is "voronoi"
     ):
         if partitioning_grid.structure != charge_grid.structure:
             raise ValueError("Grid structures must be the same.")
@@ -198,7 +204,7 @@ class BadElfToolkit:
         # We first need to replace any dummy atoms (X or Y) with an atom CrystalNN
         # will recognize. We default to He since it is virtually never in a solid
         electride_structure = self.electride_structure.copy()
-        electride_structure.replace_species({"X": "He", "Z": "He"})
+        electride_structure.replace_species({"X": "H1-", "Z": "H1-"})
         for i, site in enumerate(electride_structure):
             with warnings.catch_warnings():
                 warnings.filterwarnings(
