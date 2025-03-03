@@ -111,7 +111,7 @@ class StagedWorkflow(Workflow):
                 )
                 | result.to_api_dict()
             )  # combine results
-    
+
             # remove results that will conflict with the base calculation.
             # For example, we don't want to return a directory value because this
             # will be different from the base workflow. We also don't want to send
@@ -126,12 +126,12 @@ class StagedWorkflow(Workflow):
                             del final_result[calc_data]
         else:
             final_result = dict(
-                    structure=structure,
-                    subworkflow_names=cls.subworkflow_strings,
-                    subworkflow_ids=subworkflow_ids,
-                    copied_files=cls.files_to_copy,
-                    failed_subworkflow=failed_subworkflow,
-                )
+                structure=structure,
+                subworkflow_names=cls.subworkflow_strings,
+                subworkflow_ids=subworkflow_ids,
+                copied_files=cls.files_to_copy,
+                failed_subworkflow=failed_subworkflow,
+            )
         return final_result
 
     @classmethod
