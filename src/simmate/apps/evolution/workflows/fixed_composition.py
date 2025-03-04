@@ -55,6 +55,10 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             "distance_tolerance": 0.2,  # much stricter than default 0.9
             "use_database": True,
         },
+        stop_conditions: dict = {
+            "BasicStopConditions": {}  # include any required kwargs
+        },
+        expected_structure=None,
         sleep_step: int = 10,
         directory: Path = None,
         write_summary_files: bool = True,

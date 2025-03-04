@@ -12,7 +12,8 @@ class StopCondition:
     def __init__(
         self,
     ):
-        # add any unchanging variables or settings here
+        # Inheriting classes can add any required kwargs here. These will then
+        # need to be defined in the input settings
         pass
 
     def check(self, search):
@@ -96,17 +97,27 @@ class ExpectedStructure(StopCondition):
     Stops the search if the provided expected structure has been found.
     """
 
-    def __init__(self, expected_structure: Structure):
-        self.expected_structure = expected_structure
-
     def check(self, search):
         # !!! Here we compare individuals using pymatgen's StructureMatcher. An
         # alternative would be to use the searches validator property like we
         # do to find unique individuals in the search itself. Depending on how
         # slow the following for loop is, that may be necessary
-
+        # get expected structure and make sure it is a pymatgen Structure object
+        expected_structure_dynamic = search.expected_structure
+        # make sure we have an expected structure. If not we won't use this stop condition
+        if not expected_structure_dynamic:
+            logging.warning(
+                "No expected_structure was provided. The ExpectedStructure stop condition will be ignored"
+            )
+            return False
+        expected_structure = Structure.from_dynamic(expected_structure_dynamic)
         # get completed individuals
         individuals = search.individuals_completed.order_by("finished_at").all()
+        # make sure we have some individuals to compare to. If not, we haven't
+        # finished any structures yet and immedieately return False
+        if len(individuals) == 0:
+            return False
+
         structures = individuals.to_toolkit()
 
         # create instance of structure matcher
@@ -115,7 +126,7 @@ class ExpectedStructure(StopCondition):
         # for each structure, check if it matches the expected structure
         for n, structure in track(list(enumerate(structures))):
 
-            is_match = matcher.fit(self.expected_structure, structure)
+            is_match = matcher.fit(expected_structure, structure)
             if is_match:
                 # structure.to("cif", d / "match.cif")
                 # We've found our structure and can immediately move on
