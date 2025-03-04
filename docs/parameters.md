@@ -412,6 +412,22 @@ Exclusive to the badelf workflows in the simmate app. This is the minimum ELF va
 
 --------------------------
 
+## expected_structure
+Exclusive to the fixed composition evolutionary searches. This is an optional parameter that provides a target structure, usually for benchmarking. Similar to the Structure parameter, the object can be a number of different inputs. See the Structure parameter for more options.
+
+=== "yaml"
+    ``` yaml
+    expected_structure: NaCl.cif
+    ```
+=== "toml"
+    ``` toml
+    expected_structure = NaCl.cif
+    ```
+=== "python"
+    ``` python
+    expected_structure="NaCl.cif"
+    ```
+--------------------------
 ## find_electrides
 Exclusive to the badelf workflows in the simmate app. This parameter indicates whether the algorithm should search for electrides. Reasons to set this as false may be that the user knows there is no electride character in the structure of interest or if the user has manually placed electride sites.
 
@@ -950,8 +966,8 @@ This parameter is a dictionary of sources that will be scheduled at a "steady-st
         from_ase.AtomicPermutation: 0.05
         from_ase.CoordinatePerturbation: 0.05
     ```
-=== "yaml"
-    ``` yaml
+=== "toml"
+    ``` toml
     [singleshot_sources]
     "RandomSymStructure": 0.30
     "from_ase.Heredity": 0.30
@@ -990,6 +1006,33 @@ We are moving towards accepting kwargs or class objects as well, but this is not
 
 --------------------------
 
+## stop_conditions
+(experimental feature; advanced users only)
+This parameter is a dictionary of top conditions that will be checked periodically to determine if a FixedComposition evolutionary search should be stopped. It should be defined as a dictionary where each key is the string name of a StopCondition and the value is any kwargs that are needed to instantiate the class.
+
+=== "yaml"
+    ``` yaml
+    stop_conditions:
+        BasicStopConditions: {}
+        ExpectedStructure: {}
+    ```
+=== "toml"
+    ``` toml
+    [stop_conditions.BasicStopConditions]
+    [stop_conditions.ExpectedStructure]
+    [stop_conditions.OtherStopCondition]
+    key1 = "value1"
+    ```
+=== "python"
+    ``` python
+    stop_conditions = {
+        "BasicStopConditions": {},
+        "ExpectedStructure": {},
+    }
+    ```
+
+
+--------------------------
 ## structure
 The crystal structure to be used for the analysis. The input can be anything compatible with the `Structure` toolkit class. Accepted inputs include:
 
