@@ -56,7 +56,15 @@ class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):
         # fixed_comp_workflow for that composition.
         for factor in range(1, max_factor + 1):
             composition_current = composition_reduced * factor
-
+            
+            # BUG: The workflow.run method for this parent workflow will add a 
+            # started_at kwarg which will cause a multiple keywords error. I
+            # just remove the started_at kwarg here, but this could also be fixed
+            # by changing to fixed_composition_kwargs = {} or by adding a check
+            # for this to the Workflow class itself.
+            if "started_at" in kwargs.keys():
+                del(kwargs["started_at"])
+            
             # logging.info(f"Beginning composition {composition_current}")
             cls.fixed_comp_workflow.run(
                 composition=composition_current,

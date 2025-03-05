@@ -155,7 +155,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         # ---------------------------------------------------------------------
         # Submitting known structures
         # ---------------------------------------------------------------------
-
+        states_known = []
         if "third_parties" in singleshot_sources:
             logging.info("Generating input structures from third-party databases")
             structures_known = []
@@ -180,7 +180,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         # ---------------------------------------------------------------------
         # Submitting structures from prototypes
         # ---------------------------------------------------------------------
-
+        states_prototype = []
         if "prototypes" in singleshot_sources:
             # Start by generating the singleshot sources for each factor size.
             logging.info("Generating input structures from prototypes")
@@ -207,7 +207,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         # ---------------------------------------------------------------------
         # Wait for singlshot submissions if there are many of them
         # ---------------------------------------------------------------------
-
+        
         all_submissions = states_prototype + states_known
         if len(all_submissions) > (nsteadystate * 2):
             number_to_wait_for = len(all_submissions) - nsteadystate - 20
@@ -307,11 +307,15 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
                     composition=composition,
                     subworkflow_name=subworkflow_name,
                     subworkflow_kwargs=subworkflow_kwargs,
-                    min_structures_exact=min_structures_exact,
-                    best_survival_cutoff=best_survival_cutoff,
-                    max_structures=max_structures,
+                    stop_conditions=dict(
+                        BasicStopConditions=dict(
+                            max_structures=max_structures,
+                            min_structures_exact=min_structures_exact,
+                            convergence_cutoff=convergence_cutoff,
+                            best_survival_cutoff=best_survival_cutoff,
+                            )
+                        ),
                     directory=directory / composition.reduced_formula,
-                    convergence_cutoff=convergence_cutoff,
                     nfirst_generation=nfirst_generation,
                     nsteadystate=nsteadystate,
                     sleep_step=sleep_step,
