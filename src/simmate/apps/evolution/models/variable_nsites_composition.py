@@ -23,4 +23,3 @@ class VariableNsitesCompositionSearch(Calculation):
     validator_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
     stop_conditions = table_column.JSONField(default=dict, null=True, blank=True)
     sleep_step = table_column.FloatField(null=True, blank=True)
-    

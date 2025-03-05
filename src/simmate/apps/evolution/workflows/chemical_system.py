@@ -207,7 +207,7 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
         # ---------------------------------------------------------------------
         # Wait for singlshot submissions if there are many of them
         # ---------------------------------------------------------------------
-        
+
         all_submissions = states_prototype + states_known
         if len(all_submissions) > (nsteadystate * 2):
             number_to_wait_for = len(all_submissions) - nsteadystate - 20
@@ -313,8 +313,8 @@ class StructurePrediction__Toolkit__ChemicalSystem(Workflow):
                             min_structures_exact=min_structures_exact,
                             convergence_cutoff=convergence_cutoff,
                             best_survival_cutoff=best_survival_cutoff,
-                            )
-                        ),
+                        )
+                    ),
                     directory=directory / composition.reduced_formula,
                     nfirst_generation=nfirst_generation,
                     nsteadystate=nsteadystate,
