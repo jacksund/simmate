@@ -152,26 +152,6 @@ This parameter is used to determine if the angles between sites are symmetricall
 
 --------------------------
 
-## best_survival_cutoff
-In evolutionary searches, fixed compositions will stop when the best individual remains unbeaten for this number of new individuals. 
-
-To account for similar structures (e.g., identical structures with minor energy differences), structures within the `convergence_cutoff` parameter (e.g., +1meV) are not considered when counting historical structures. This helps to prevent the search from continuing in cases where the search is likely already converged but making <0.1meV improvements. The default is typically set based on the number of atoms in the composition.
-
-=== "yaml"
-    ``` yaml
-    best_survival_cutoff: 100
-    ```
-=== "toml"
-    ``` toml
-    best_survival_cutoff = 100
-    ```
-=== "python"
-    ``` python
-    best_survival_cutoff = 100
-    ```
-
---------------------------
-
 ## check_for_covalency
 This parameter is unique to the badelf workflows of the warrenapp. It indicates whether the algorithm should search the structure for covalency features. It is generally recommended to leave this as True. Covalency is not currently handled by the BadELF algorithm and covalency features in the ELF can heavily throw off the partitioning scheme, causing nonsense results.
 
@@ -303,24 +283,6 @@ This parameter determines whether to compress the `directory` to a zip file at t
 
 --------------------------
 
-## convergence_cutoff
-For evolutionary searches, the search will be considered converged when the best structure is not changing by this amount (in eV). In order to officially signal the end of the search, the best structure must survive within this convergence limit for a specific number of new individuals -- this is controlled by the `best_survival_cutoff`. The default of 1meV is typically sufficient and does not need to be changed. More often, users should update `best_survival_cutoff` instead.
-
-=== "yaml"
-    ``` yaml
-    convergence_cutoff: 0.005
-    ```
-=== "toml"
-    ``` toml
-    convergence_cutoff = 0.005
-    ```
-=== "python"
-    ``` python
-    convergence_cutoff = 0.005
-    ```
-
---------------------------
-
 ## copy_previous_directory
 This parameter determines whether to copy the directory from the previous calculation (if one exists) and use it as a starting point for the new calculation. This is only possible if you provided an input that points to a previous calculation. For instance, `structure` would need to use a database-like input:
 
@@ -412,22 +374,6 @@ Exclusive to the badelf workflows in the simmate app. This is the minimum ELF va
 
 --------------------------
 
-## expected_structure
-Exclusive to the fixed composition evolutionary searches. This is an optional parameter that provides a target structure, usually for benchmarking. Similar to the Structure parameter, the object can be a number of different inputs. See the Structure parameter for more options.
-
-=== "yaml"
-    ``` yaml
-    expected_structure: NaCl.cif
-    ```
-=== "toml"
-    ``` toml
-    expected_structure = NaCl.cif
-    ```
-=== "python"
-    ``` python
-    expected_structure="NaCl.cif"
-    ```
---------------------------
 ## find_electrides
 Exclusive to the badelf workflows in the simmate app. This parameter indicates whether the algorithm should search for electrides. Reasons to set this as false may be that the user knows there is no electride character in the structure of interest or if the user has manually placed electride sites.
 
@@ -534,30 +480,6 @@ This is the maximum stoichiometric ratio that will be analyzed. In a binary syst
 
 --------------------------
 
-## max_structures
-For workflows that generate new structures (and potentially run calculations on them), this will be the maximum number of structures allowed. The workflow will end at this number of structures regardless of whether the calculation/search is converged or not.
-
-=== "yaml"
-    ``` yaml
-    max_structures: 100
-    ```
-=== "toml"
-    ``` toml
-    max_structures = 100 
-    ```
-=== "python"
-    ``` python
-    max_structures = 100
-    ```
-
-!!! warning
-    In `structure-prediction` workflows, `min_structure_exact` takes priority 
-    over this setting, so it is possible for your search to exceed your 
-    maximum number of structures. If you want `max_structures` to have absolute
-    control, you can set `min_structure_exact` to 0.
-
---------------------------
-
 ## max_supercell_atoms
 For workflows that involve generating a supercell, this will be the maximum number of sites to allow in the generated structure(s). For example, NEB workflows would set this value to something like 100 atoms to limit their supercell image sizes.
 
@@ -572,6 +494,24 @@ For workflows that involve generating a supercell, this will be the maximum numb
 === "python"
     ``` python
     max_supercell_atoms = 100
+    ```
+
+--------------------------
+
+## max_structures
+For workflows that generate new structures (and potentially run calculations on them), this will be the maximum number of structures allowed. The workflow will end at this number of structures regardless of whether the calculation/search is converged or not.
+
+=== "yaml"
+    ``` yaml
+    max_structures: 100
+    ```
+=== "toml"
+    ``` toml
+    max_structures = 100
+    ```
+=== "python"
+    ``` python
+    max_structures = 100
     ```
 
 --------------------------
@@ -648,13 +588,6 @@ The full set of images (including endpoint images) that should be analyzed. Inpu
 
 ## min_atoms
 This is the opposite of `max_atoms` as this will be the minimum number of sites allowed in the generate structure(s). See `max_atoms` for details.
-
---------------------------
-
-## min_structures_exact
-
-(experimental) The minimum number of structures that must be calculated with exactly
-matching nsites as specified in the fixed-composition.
 
 --------------------------
 
@@ -1008,29 +941,73 @@ We are moving towards accepting kwargs or class objects as well, but this is not
 
 ## stop_conditions
 (experimental feature; advanced users only)
-This parameter is a dictionary of top conditions that will be checked periodically to determine if a FixedComposition evolutionary search should be stopped. It should be defined as a dictionary where each key is the string name of a StopCondition and the value is any kwargs that are needed to instantiate the class.
+This parameter provides a set of stop conditions that will be checked periodically to determine if a FixedComposition evolutionary search should be stopped. It should be defined as a dictionary where each key is the string name of a StopCondition and the value is any kwargs that are needed to instantiate the class.
 
 === "yaml"
     ``` yaml
     stop_conditions:
-        BasicStopConditions: {}
-        ExpectedStructure: {}
+        BasicStopConditions:
+            max_structures: 1000
+            min_structures_exact: 100
+            convergence_cutoff: 0.001
+            best_survival_cutoff: 100
+        ExpectedStructure:
+            structure: NaCl.cif
     ```
 === "toml"
     ``` toml
     [stop_conditions.BasicStopConditions]
+    max_structures = 1000
+    min_structures_exact = 100
+    convergence_cutoff = 0.001
+    best_survival_cutoff = 100
     [stop_conditions.ExpectedStructure]
-    [stop_conditions.OtherStopCondition]
-    key1 = "value1"
+    structure: NaCl.cif
     ```
 === "python"
     ``` python
     stop_conditions = {
-        "BasicStopConditions": {},
-        "ExpectedStructure": {},
+        "BasicStopConditions": {
+        "max_structures": 1000,
+        "min_structures_exact": 100,
+        "convergence_cutoff": 0.001
+        "best_survival_cutoff": 100
+        },
+        "ExpectedStructure": {
+        "structure": "NaCl.cif"
+        },
     }
     ```
+Currently, only the BasicStopConditions and ExpectedStructure stop conditions are supported. They each have the following subparameters
 
+**BasicStopConditions**
+The `BasicStopConditions` are those that are important to all searches. If this `StopCondition` is not provided, defaults will be constructed.
+
+### max_structures
+The maximum number of structures generated. The search will end at this number of structures regardless of if the search has converged. If not provided, the workflow estimates a reasonable value based on the number of atoms.
+
+!!! warning
+    `min_structure_exact` takes priority over this setting, so it is possible 
+    for your search to exceed your maximum number of structures. If you want 
+    `max_structures` to have absolute control, you can set `min_structure_exact` 
+    to 0.
+
+### min_structures_exact
+The minimum number of structures that must be calculated with exactly matching nsites as specified in fixed-composition. If not provided, the workflow estimates a reasonable value based on the number of atoms.
+
+### convergence_cutoff
+The search will be considered converged when the best structure is not changing by this amount (in eV). In order to officially signal the end of the search, the best structure must survive within this convergence limit for a specific number of new individuals -- this is controlled by the best_survival_cutoff. The default of 1meV is typically sufficient and does not need to be changed. More often, users should update best_survival_cutoff instead.
+
+### best_survival_cutoff
+The search will stop when the best individual remains unbeaten for this number of new individuals.
+
+To account for similar structures (e.g., identical structures with minor energy differences), structures within the convergence_cutoff parameter (e.g., +1meV) are not considered when counting historical structures. This helps to prevent the search from continuing in cases where the search is likely already converged but making <0.1meV improvements. If not provided, the workflow estimates a reasonable value based on the number of atoms.
+
+**ExpectedStructure**
+The `ExpectedStructure` stop condition will compare all structures generated in the search to a provided structure and immediately halt the search if there is a match.
+
+### expected_structure
+When a structure is found in the search that matches this structure, the search will be stopped. The allowed inputs follow the same scheme as in the Structure parameter.
 
 --------------------------
 ## structure

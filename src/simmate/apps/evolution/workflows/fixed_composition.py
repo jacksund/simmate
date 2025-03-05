@@ -57,7 +57,7 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
                 "min_structures_exact": None,
                 "convergence_cutoff": 0.001,
                 "best_survival_cutoff": None,
-            }  # include any required kwargs
+            }
         },
         sleep_step: int = 10,
         directory: Path = None,
