@@ -26,10 +26,6 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         subworkflow_name: str | Workflow = "static-energy.vasp.low-quality",
         subworkflow_kwargs: dict = {},
         fitness_field: str = "energy_per_atom",
-        max_structures: int = None,
-        min_structures_exact: int = None,
-        best_survival_cutoff: int = None,
-        convergence_cutoff: float = 0.001,
         nfirst_generation: int = 15,
         nsteadystate: int = 40,
         singleshot_sources: list[str] = [
@@ -56,9 +52,13 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
             "use_database": True,
         },
         stop_conditions: dict = {
-            "BasicStopConditions": {}  # include any required kwargs
+            "BasicStopConditions": {
+                "max_structures": None,
+                "min_structures_exact": None,
+                "convergence_cutoff": 0.001,
+                "best_survival_cutoff": None,
+            }  # include any required kwargs
         },
-        expected_structure=None,
         sleep_step: int = 10,
         directory: Path = None,
         write_summary_files: bool = True,
@@ -94,19 +94,8 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
         # grab the calculation table linked to this workflow run
         search_datatable = cls.database_table.objects.get(run_id=run_id)
 
-        # Convergence criteria and stop conditions can be set based on the
-        # number of atoms in the composition. Here we try to set reasonable criteria
-        # for these if a user-input was not given. Note we are using max(..., N)
-        # to set an absolute minimum for these.
-        n = composition.num_atoms
-        min_structures_exact = min_structures_exact or max([int(30 * n), 100])
-        max_structures = max_structures or max([int(n * 250 + n**2.75), 1500])
-        best_survival_cutoff = best_survival_cutoff or max([int(30 * n + n**2), 100])
-        search_datatable.update_from_fields(
-            min_structures_exact=min_structures_exact,
-            max_structures=max_structures,
-            best_survival_cutoff=best_survival_cutoff,
-        )
+        # initialize our stop conditions
+        search_datatable._init_stop_conditions()
 
         # sometimes the conditions are already met by a previous search so we
         # check for this up front.

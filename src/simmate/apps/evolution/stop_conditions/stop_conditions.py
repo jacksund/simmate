@@ -5,20 +5,22 @@ import logging
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from rich.progress import track
 
-from simmate.toolkit import Structure
+from simmate.toolkit import Composition, Structure
 
 
 class StopCondition:
     def __init__(
         self,
+        search,
     ):
         # Inheriting classes can add any required kwargs here. These will then
-        # need to be defined in the input settings
+        # need to be defined in the input settings. The only required kwarg is
+        # the search.
         pass
 
-    def check(self, search):
-        # The select method should take in one argument:
-        # search = this is the main Search object seen in search.py
+    def check(self):
+        # The check method should take no arguments and instead use any instance
+        # variables defined in the __init__ function
         # The StopCondition can run any analysis on the Search object WITHOUT
         # making any changes to it. Then you should return True if the
         # stopping condition(s) has been met and False if the calculation should
@@ -31,18 +33,47 @@ class BasicStopConditions:
     Basic stop condition used in all searches.
     """
 
-    def check(self, search):
+    def __init__(
+        self,
+        search,
+        max_structures: int = None,
+        min_structures_exact: int = None,
+        convergence_cutoff: float = 0.001,
+        best_survival_cutoff: int = None,
+    ):
+        # Convergence criteria and stop conditions can be set based on the
+        # number of atoms in the composition. Here we try to set reasonable criteria
+        # for these if a user-input was not given. Note we are using max(..., N)
+        # to set an absolute minimum for these.
+        n = Composition(search.composition).num_atoms
+        min_structures_exact = min_structures_exact or max([int(30 * n), 100])
+        max_structures = max_structures or max([int(n * 250 + n**2.75), 1500])
+        best_survival_cutoff = best_survival_cutoff or max([int(30 * n + n**2), 100])
+        # update the search fields related to these settings
+        search.update_from_fields(
+            min_structures_exact=min_structures_exact,
+            max_structures=max_structures,
+            best_survival_cutoff=best_survival_cutoff,
+        )
+        # add instance variables
+        self.search = search
+        self.max_structures = max_structures
+        self.min_structures_exact = min_structures_exact
+        self.convergence_cutoff = convergence_cutoff
+        self.best_survival_cutoff = best_survival_cutoff
+
+    def check(self):
         # First, see if we have at least our minimum limit for *exact* structures.
         # "Exact" refers to the nsites of the structures. We want to ensure at
         # least N structures with the input/expected number of sites have been
         # calculated.
         # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
-        count_exact = search.individuals_datatable.objects.filter(
-            formula_full=search.composition,
-            workflow_name=search.subworkflow_name,
+        count_exact = self.search.individuals_datatable.objects.filter(
+            formula_full=self.search.composition,
+            workflow_name=self.search.subworkflow_name,
             energy_per_atom__isnull=False,
         ).count()
-        if count_exact < search.min_structures_exact:
+        if count_exact < self.min_structures_exact:
             return False
 
         # Next, see if we've hit our maximum limit for structures.
@@ -51,7 +82,7 @@ class BasicStopConditions:
         # Nothing is done to stop those that are still running or to count
         # structures that failed to be calculated
         # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
-        if search.individuals_completed.count() > search.max_structures:
+        if self.search.individuals_completed.count() > self.max_structures:
             logging.info(
                 "Maximum number of completed calculations hit "
                 f"(n={self.max_structures})."
@@ -63,7 +94,7 @@ class BasicStopConditions:
         # any becoming the new "best") is greater than best_survival_cutoff, then
         # we can stop the search.
         # grab the best individual for reference
-        best = search.best_individual
+        best = self.search.best_individual
 
         # We need this if-statement in case no structures have completed yet.
         if not best:
@@ -78,11 +109,11 @@ class BasicStopConditions:
         # only counting completed calculations.
         # BUG: this filter needs to be updated to fitness_value and not
         # assume we are using energy_per_atom
-        num_new_structures_since_best = search.individuals.filter(
-            energy_per_atom__gt=best.energy_per_atom + search.convergence_cutoff,
+        num_new_structures_since_best = self.search.individuals.filter(
+            energy_per_atom__gt=best.energy_per_atom + self.convergence_cutoff,
             finished_at__gte=best.finished_at,
         ).count()
-        if num_new_structures_since_best > search.best_survival_cutoff:
+        if num_new_structures_since_best > self.best_survival_cutoff:
             logging.info(
                 "Best individual has not changed after "
                 f"{self.best_survival_cutoff} new individuals added."
@@ -97,22 +128,24 @@ class ExpectedStructure(StopCondition):
     Stops the search if the provided expected structure has been found.
     """
 
-    def check(self, search):
+    def __init__(
+        self,
+        search,
+        expected_structure: Structure,
+    ):
+        # get expected structure and make sure it is a pymatgen Structure object
+        self.expected_structure = Structure.from_dynamic(expected_structure)
+        self.search = search
+
+    def check(self):
         # !!! Here we compare individuals using pymatgen's StructureMatcher. An
         # alternative would be to use the searches validator property like we
         # do to find unique individuals in the search itself. Depending on how
         # slow the following for loop is, that may be necessary
-        # get expected structure and make sure it is a pymatgen Structure object
-        expected_structure_dynamic = search.expected_structure
-        # make sure we have an expected structure. If not we won't use this stop condition
-        if not expected_structure_dynamic:
-            logging.warning(
-                "No expected_structure was provided. The ExpectedStructure stop condition will be ignored"
-            )
-            return False
-        expected_structure = Structure.from_dynamic(expected_structure_dynamic)
+
+        expected_structure = self.expected_structure
         # get completed individuals
-        individuals = search.individuals_completed.order_by("finished_at").all()
+        individuals = self.search.individuals_completed.order_by("finished_at").all()
         # make sure we have some individuals to compare to. If not, we haven't
         # finished any structures yet and immedieately return False
         if len(individuals) == 0:
@@ -133,8 +166,8 @@ class ExpectedStructure(StopCondition):
                 break
 
         if not is_match:
-            logging.info("Search has not found groundstate yet")
+            logging.info("Search has not found expected structure yet")
             return False
         else:
-            logging.info("Found groundstate!")
+            logging.info("Found expected structure!")
             return True

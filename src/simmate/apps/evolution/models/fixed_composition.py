@@ -41,12 +41,8 @@ class FixedCompositionSearch(Calculation):
     fitness_field = table_column.CharField(max_length=200, null=True, blank=True)
 
     # Other settings for the search
-    min_structures_exact = table_column.IntegerField(null=True, blank=True)
-    max_structures = table_column.IntegerField(null=True, blank=True)
-    best_survival_cutoff = table_column.IntegerField(null=True, blank=True)
     nfirst_generation = table_column.IntegerField(null=True, blank=True)
     nsteadystate = table_column.IntegerField(null=True, blank=True)
-    convergence_cutoff = table_column.FloatField(null=True, blank=True)
 
     # Key classes to use during the search
     selector_name = table_column.CharField(max_length=200, null=True, blank=True)
@@ -69,18 +65,14 @@ class FixedCompositionSearch(Calculation):
         blank=True,
     )
 
-    # This is an optional an input for an expected structure in order to allow
-    # creation of plots that show convergence vs. the expected. This is very
-    # useful benchmarking and when the user has a target structure that they
-    # hope to see. For now, this MUST a dictionary input (either pymatgen.as_dict()
-    # that points to another table entry because we don't want to use the
-    # Structure mix-in on this table (too many unecessary columns)
-    expected_structure = table_column.JSONField(default=dict)
-
     # TODO:
     #   parent_variable_nsite_searches
     #   parent_binary_searches
     #   parent_ternary_searches
+
+    # define a class variable for the stop conditions so they don't need to be
+    # initialized every time
+    stop_conditions_init = []
 
     # -------------------------------------------------------------------------
     # Setup of the database tables at the beginning of a new search
@@ -91,30 +83,29 @@ class FixedCompositionSearch(Calculation):
         cls,
         steadystate_sources: dict = None,
         stop_conditions: dict = None,
-        expected_structure=None,
         as_dict: bool = False,
         **kwargs,
     ):
-        # There is an optional expected_structure parameter. This must be a
-        # pymatgen structure dictionary for now, so we convert it here
-        if expected_structure:
-            expected_structure = Structure.from_dynamic(expected_structure)
-            expected_structure = expected_structure.as_dict()
-            kwargs["expected_structure"] = expected_structure
-
         if stop_conditions is not None:
             # We require that the BasicStopConditions are part of our
             # stop_conditions. We add them here if they aren't
             if "BasicStopConditions" not in stop_conditions.keys():
-                stop_conditions["BasicStopConditions"] = {}
-            # Add stop condition to kwargs
+                stop_conditions["BasicStopConditions"] = dict(
+                    max_structures=None,
+                    min_structures_exact=None,
+                    convergence_cutoff=0.001,
+                    best_survival_cutoff=None,
+                )
+
+            # Some stop conditions might take a Structure object as an input, but
+            # this is not serializable. We convert them to a pymatgen dict here
+            for stop_name, stop_kwargs in stop_conditions.items():
+                for parameter, inputs in stop_kwargs.items():
+                    if isinstance(inputs, Structure):
+                        stop_conditions[stop_name][parameter] = inputs.as_dict()
+
+            # add updated stop conditions to kwargs
             kwargs["stop_conditions"] = stop_conditions
-            # The code below is for if we ever have stop conditions that include
-            # Structure objects as inputs (or if we remove the expected_structure input)
-            # for stop_name, stop_kwargs in stop_conditions.items():
-            #     for parameter, inputs in stop_kwargs.items():
-            #         if isinstance(inputs, Structure):
-            #             stop_conditions[stop_name][parameter] = inputs.as_dict()
 
         # Initialize the steady state sources by saving their config information
         # to the database.
@@ -141,11 +132,10 @@ class FixedCompositionSearch(Calculation):
         if len(self.stop_conditions) == 0:
             raise Exception("No stop conditions were set.")
 
-        for stop_condition_name, kwargs in self.stop_conditions.items():
-            # Get the stop condition class
-            stop_condition_class = getattr(stop_conditions_module, stop_condition_name)
-            stop_condition = stop_condition_class(**kwargs)
-            if stop_condition.check(self):
+        # loop over our stop conditions and check if they are met
+        for stop_condition in self.stop_conditions_init:
+            result = stop_condition.check()
+            if result:
                 return True
 
         # If we've reached this point without returning True, we haven't reached
@@ -303,6 +293,17 @@ class FixedCompositionSearch(Calculation):
         # being ran elsewhere? Do we still want new entries for each?
 
         return steadystate_sources_db
+
+    def _init_stop_conditions(self):
+        # Initialize our stop conditions and add them to our
+        # stop_conditions_init list to loop over later
+        for stop_condition_name, kwargs in self.stop_conditions.items():
+            # Get the stop condition class
+            stop_condition_class = getattr(stop_conditions_module, stop_condition_name)
+            # initialize the stop condition, passing it this search and any kwargs
+            stop_condition = stop_condition_class(search=self, **kwargs)
+            # add the stop condition to our list of initialized stop conditions
+            self.stop_conditions_init.append(stop_condition)
 
     def _check_steadystate_workflows(self):
         # local import to prevent circular import issues
