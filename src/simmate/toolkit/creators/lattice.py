@@ -179,7 +179,7 @@ class RSLSmartVolume:
         vector_gen_options=dict(),
         angle_generation_method=UniformlyDistributedVectors,
         angle_gen_options=dict(min_value=60, max_value=120),
-        packing_factor: int = 0.74,
+        **kwargs,
     ):
         # make a list of spacegroups that we are allowed to choose from
         self.spacegroup_options = [
@@ -192,7 +192,7 @@ class RSLSmartVolume:
             # note this represents the volume of the primitive cell
             # Conventional cells may be larger
             # This assumes user wants ionic radius estimation
-            volume = composition.volume_estimate(packing_factor=packing_factor)
+            volume = composition.volume_estimate(**kwargs)
 
         # find the respective volume for each spacegroup's conventional unit cell
         # to do this, we need to know the ratio between MultiplicityPrimitive

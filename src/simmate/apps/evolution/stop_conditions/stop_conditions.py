@@ -144,8 +144,15 @@ class ExpectedStructure(StopCondition):
         # slow the following for loop is, that may be necessary
 
         expected_structure = self.expected_structure
-        # get completed individuals
-        individuals = self.search.individuals_completed.order_by("finished_at").all()
+        # get completed individuals since the last check. If this is our first
+        # check we instead use the start time.
+        if self.search.last_check_timestamp is None:
+            last_time = self.search.started_at
+        else:
+            last_time = self.search.last_check_timestamp
+        individuals = self.search.individuals_completed.filter(
+            finished_at__gte=last_time
+        ).all()
         # make sure we have some individuals to compare to. If not, we haven't
         # finished any structures yet and immedieately return False
         if len(individuals) == 0:

@@ -9,6 +9,7 @@ import numpy
 import pandas
 import plotly.express as plotly_express
 import plotly.graph_objects as plotly_go
+from django.utils.timezone import now
 from rich.progress import track
 
 from simmate.apps.evolution import selectors as selector_module
@@ -73,6 +74,8 @@ class FixedCompositionSearch(Calculation):
     # define a class variable for the stop conditions so they don't need to be
     # initialized every time
     stop_conditions_init = []
+    # class variable to keep track of most recent stop condition check
+    last_check_timestamp = None
 
     # -------------------------------------------------------------------------
     # Setup of the database tables at the beginning of a new search
@@ -137,6 +140,9 @@ class FixedCompositionSearch(Calculation):
             result = stop_condition.check()
             if result:
                 return True
+
+        # update time since last check
+        self.last_check_timestamp = now()
 
         # If we've reached this point without returning True, we haven't reached
         # our conditions so we return False
