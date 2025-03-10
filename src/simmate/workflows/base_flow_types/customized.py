@@ -25,7 +25,7 @@ base_workflow: static-energy/mit
 # These would update the class attributes for the single workflow run
 # The "custom_" start indicates we are updating some attribute
 updated_settings:
-    incar: 
+    incar:
         - ENCUT: 600
         - KPOINTS: 0.25
     potcar_mappings:

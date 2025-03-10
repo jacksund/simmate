@@ -1,5 +1,5 @@
 """
-This module provides conversion between the Simmate ToolkitStructure object and 
+This module provides conversion between the Simmate ToolkitStructure object and
 pymatgen Structure objects. Because our toolkit class inherits from pymatgen,
 this feature should rarely (if ever) be used.
 

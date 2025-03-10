@@ -2,8 +2,8 @@
 
 """
 Simmate will build interfaces for your workflows and tables. However, if you
-want to add extra webpages for your app, then you'll need to build "views" in 
-this file out. 
+want to add extra webpages for your app, then you'll need to build "views" in
+this file out.
 
 If you ever venture to this level, we STRONGLY recommend you go through the
 django tutorials first: https://docs.djangoproject.com/en/3.2/

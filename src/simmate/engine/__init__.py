@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-This module defines the base class for all workflows in Simmate. When learning 
-how use workflows, make sure you have gone through our intro 
+This module defines the base class for all workflows in Simmate. When learning
+how use workflows, make sure you have gone through our intro
 [tutorials](https://github.com/jacksund/simmate/tree/main/tutorials). You
 can then read through these guides for more features.
 """

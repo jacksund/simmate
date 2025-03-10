@@ -11,7 +11,7 @@ We can't use the biblao server for our wyckoff data.
 This is because a number of spacegroups are written based off of the wrong lattice.
 
 For example, spacegroup 166 is written with the hexagonal lattice vectors, which
-makes the smallest multiplicity 3 among all wy_sites. This in turn makes it so 
+makes the smallest multiplicity 3 among all wy_sites. This in turn makes it so
 there is no possible wyckoff group combination that gives 2:1 stoich -- this is
 misleading because we know that Ca2N has the spacegroup 166
 
