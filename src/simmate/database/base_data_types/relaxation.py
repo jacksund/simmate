@@ -5,7 +5,7 @@ Structure Relaxations are made up of a series of ionic steps -- where each
 ionic step can be thought of as a single energy calculation. This yields
 energy, forces, and lattice stress for a given structure. In many cases,
 users won't need all of this data because they're only after the final
-structure. However, all ionic steps are useful in the case of confirming 
+structure. However, all ionic steps are useful in the case of confirming
 convergence as well as machine learning applications. We therefore store these
 here.
 

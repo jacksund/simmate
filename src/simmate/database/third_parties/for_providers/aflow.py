@@ -5,7 +5,7 @@
 > :warning: This file is only for use by the Simmate team. Users should instead
 access data via the load_remote_archive method.
 
-This file is for pulling AFLOW data into the Simmate database. 
+This file is for pulling AFLOW data into the Simmate database.
 
 AFLOW's supported REST API can be accessed via "AFLUX API". This is a separate
 python package, which is maintained at https://github.com/rosenbrockc/aflow.

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-This defines commands for managing your Simmate workflow engine. All commands are 
+This defines commands for managing your Simmate workflow engine. All commands are
 accessible through the "simmate engine" command.
 
 WARNING: This module is experimental and not used in the final CLI at the moment.

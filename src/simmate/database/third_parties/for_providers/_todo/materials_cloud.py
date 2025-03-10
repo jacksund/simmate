@@ -2,13 +2,13 @@
 
 """
 
-This file is for pulling AFLOW data into the Simmate database. 
+This file is for pulling AFLOW data into the Simmate database.
 
 Materials Cloud looks to be composed of smaller databases, which makes this tricky.
 After reading through their website, I don't see an easy way to access all of their
 data. It does look like there is an easier OPTIMADE endpoint here though:
     https://www.optimade.org/providers-dashboard/providers/mcloud.html
-OPTIMADE isn't super clear on how to query these subdatabases though. I need to 
+OPTIMADE isn't super clear on how to query these subdatabases though. I need to
 do some more digging. I can get a single page of structures from this REST endpoint
 though:
     https://aiida.materialscloud.org/3dd/optimade/structures

@@ -5,7 +5,7 @@ This module defines the Composition class.
 
 It is a very basic extension PyMatGen's core Composition class, as it only adds
 a few extra methods and does not change any other usage. Note that this class
-is currently NOT used by Simmate's Structure class. For Simmate, 
+is currently NOT used by Simmate's Structure class. For Simmate,
 Structure.composition will still return a pymatgen composition object.
 """
 

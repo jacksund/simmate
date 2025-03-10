@@ -2,12 +2,12 @@
 
 """
 
-This file is for pulling MPDS data into the Simmate database. 
+This file is for pulling MPDS data into the Simmate database.
 
-MPDS provides a python package to make downloading their data very easy. This 
+MPDS provides a python package to make downloading their data very easy. This
 officially supported and maintained at https://github.com/mpds-io/mpds_client.
 For now the package is only available via a pip install. And to help with using
-this package, you should read through their guide and examples here:    
+this package, you should read through their guide and examples here:
 https://mpds.io/developer/#Client-library
 
 NOTE: I'm currently running into permission issues with MPDS, and will return to

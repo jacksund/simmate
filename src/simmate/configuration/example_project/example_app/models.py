@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
-This is where you add any new database tables. 
+This is where you add any new database tables.
 
-This file is named "models.py" because that is what Django expects! In their 
+This file is named "models.py" because that is what Django expects! In their
 terminology, a django 'model' is the same thing as a 'database table'.
 
 See our online documentation for more information.
