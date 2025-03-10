@@ -48,6 +48,7 @@ class StagedWorkflow(Workflow):
         subworkflow_ids = []
         failed_subworkflow = None
         error = None
+        result = None
 
         # Our first calculation is directly from our inputs.
         try:
@@ -66,6 +67,10 @@ class StagedWorkflow(Workflow):
             print(str(e))
             error = str(e)
             failed_subworkflow = cls.subworkflow_strings[0]
+            # !!! It might make more sense to just raise the error here so that
+            # the error is written to the output file. This would make troublshooting
+            # which workflow is failing easier until we incorporate a StagedCalculation
+            # mix-in.
 
         # In some rare cases, we may want to only run one subworkflow here (such
         # as when we are testing the evolutionary search) so if there is only
@@ -95,30 +100,38 @@ class StagedWorkflow(Workflow):
                     failed_subworkflow = cls.subworkflow_strings[i]
                     break
         # save final result
-        final_result = (
-            dict(
+        if error is None:
+            final_result = (
+                dict(
+                    structure=structure,
+                    subworkflow_names=cls.subworkflow_strings,
+                    subworkflow_ids=subworkflow_ids,
+                    copied_files=cls.files_to_copy,
+                    failed_subworkflow=failed_subworkflow,
+                )
+                | result.to_api_dict()
+            )  # combine results
+
+            # remove results that will conflict with the base calculation.
+            # For example, we don't want to return a directory value because this
+            # will be different from the base workflow. We also don't want to send
+            # columns from the structure mixin because these are calculated directly
+            # from the structure
+            mixin_names = result.get_mixin_names()
+            mixins = result.get_mixins()
+            for name, mixin in zip(mixin_names, mixins):
+                if name == "Structure" or name == "Calculation":
+                    for calc_data in mixin.get_column_names():
+                        if calc_data in final_result.keys():
+                            del final_result[calc_data]
+        else:
+            final_result = dict(
                 structure=structure,
                 subworkflow_names=cls.subworkflow_strings,
                 subworkflow_ids=subworkflow_ids,
                 copied_files=cls.files_to_copy,
                 failed_subworkflow=failed_subworkflow,
             )
-            | result.to_api_dict()
-        )  # combine results
-
-        # remove results that will conflict with the base calculation.
-        # For example, we don't want to return a directory value because this
-        # will be different from the base workflow. We also don't want to send
-        # columns from the structure mixin because these are calculated directly
-        # from the structure
-        mixin_names = result.get_mixin_names()
-        mixins = result.get_mixins()
-        for name, mixin in zip(mixin_names, mixins):
-            if name == "Structure" or name == "Calculation":
-                for calc_data in mixin.get_column_names():
-                    if calc_data in final_result.keys():
-                        del final_result[calc_data]
-        # breakpoint()
         return final_result
 
     @classmethod
