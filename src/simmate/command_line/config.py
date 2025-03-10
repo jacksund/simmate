@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-This defines commands for managing your Simmate configuration settings. All commands are 
+This defines commands for managing your Simmate configuration settings. All commands are
 accessible through the "simmate config" command.
 """
 

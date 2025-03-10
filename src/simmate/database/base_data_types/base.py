@@ -4,7 +4,7 @@
 This module defines the lowest-level classes for database tables and their
 search results.
 
-See the `simmate.database.base_data_types` (which is the parent module of 
+See the `simmate.database.base_data_types` (which is the parent module of
 this one) for example usage.
 """
 

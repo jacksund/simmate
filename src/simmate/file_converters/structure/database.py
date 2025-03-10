@@ -3,10 +3,10 @@
 """
 This module provides conversion between Simmate toolkit and database structures.
 
-Everything is built-in to the base toolkit/database classes, so you typically 
-convert between these two without ever loading this module directly. Below are 
+Everything is built-in to the base toolkit/database classes, so you typically
+convert between these two without ever loading this module directly. Below are
 some examples of how we recommend doing this.
-    
+
 EXAMPLE 1: Database object to Toolkit object
 ``` python
 # Grab an example database structure.

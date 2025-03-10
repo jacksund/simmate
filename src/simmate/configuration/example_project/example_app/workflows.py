@@ -10,11 +10,11 @@ calculation.
 
 As your need grow, you may need more complex Workflows. For complex workflows that
 require several calculations, other python logic, and parallelization, make
-sure you read through the documentation for 
-[the Workflow class](https://jacksund.github.io/simmate/full_guides/workflows/overview/) 
+sure you read through the documentation for
+[the Workflow class](https://jacksund.github.io/simmate/full_guides/workflows/overview/)
 as well as relevent subclasses like the
 [S3Workflow](https://jacksund.github.io/simmate/full_guides/workflows/s3_workflows/)
-or 
+or
 [VaspWorkflow](https://jacksund.github.io/simmate/full_guides/workflows/third_party_software/vasp/overview/)
 """
 
