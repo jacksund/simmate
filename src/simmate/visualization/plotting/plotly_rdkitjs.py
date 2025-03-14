@@ -97,7 +97,7 @@ HTML_TEMPLATE = """
     <head>
         <meta charset="UTF-8">
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-        <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
+        <script src="https://unpkg.com/@rdkit/rdkit@2024.3.5-1.0.0/dist/RDKit_minimal.js"></script>
     </head>
     <body>
         {{ plot_div|safe }}

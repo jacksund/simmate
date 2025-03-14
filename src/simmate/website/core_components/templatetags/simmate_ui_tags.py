@@ -5,10 +5,9 @@ import uuid
 
 from django import template
 
+from simmate.apps.rdkit.models import Molecule as DatabaseMolecule
 from simmate.toolkit import Molecule as ToolkitMolecule
 from simmate.website.utilities import hash_options
-from simmate.apps.rdkit.models import Molecule as DatabaseMolecule
-
 
 register = template.Library()
 
