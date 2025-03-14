@@ -215,7 +215,7 @@ def reset_database(
     # instead of building the database from scratch, we instead download a
     # prebuilt database file.
     if settings.database_backend == "sqlite3" and use_prebuilt:
-        from simmate.database.third_parties import load_default_sqlite3_build
+        from simmate.database.utilities import load_default_sqlite3_build
 
         logging.info("Setting up prebuilt database...")
         load_default_sqlite3_build()
@@ -349,13 +349,11 @@ def load_remote_archives(**kwargs):
     instead of this utility, which downloads a full database that was built using
     this method.
     """
-    from simmate.database.third_parties import (
-        AflowPrototype,
-        CodStructure,
-        JarvisStructure,
-        MatprojStructure,
-        OqmdStructure,
-    )
+    from simmate.apps.aflow.models import AflowPrototype
+    from simmate.apps.cod.models import CodStructure
+    from simmate.apps.jarvis.models import JarvisStructure
+    from simmate.apps.materials_project.models import MatprojStructure
+    from simmate.apps.oqmd.models import OqmdStructure
 
     logging.info("Loading AFLOW Prototypes")
     AflowPrototype.load_remote_archive(**kwargs)

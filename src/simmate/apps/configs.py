@@ -23,6 +23,10 @@ class CodConfig(AppConfig):
     name = "simmate.apps.cod"
 
 
+class DeepmdConfig(AppConfig):
+    name = "simmate.apps.deepmd"
+
+
 class EvolutionConfig(AppConfig):
     name = "simmate.apps.evolution"
 

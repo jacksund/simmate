@@ -29,7 +29,7 @@ This script queries the Material Project database for all ZnSnF6 structures with
 
 ``` python
 from simmate.database import connect
-from simmate.database.third_parties import MatprojStructure
+from simmate.apps.materials_project.models import MatprojStructure
 from simmate.workflows.utilities import get_workflow
 
 # filter all the structures you want

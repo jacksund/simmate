@@ -35,7 +35,7 @@ simmate database load-remote-archives
 Or in Python, you can download a specific table:
 
 ``` python
-from simmate.database.third_parties import MatprojStructure
+from simmate.apps.materials_project.models import MatprojStructure
 
 # This process can take >1 hour for some providers. You can
 # add `parallel=True` to expedite this process, but exercise caution when 

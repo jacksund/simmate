@@ -146,7 +146,7 @@ Simmate's database manages your private data while also integrating with third-p
 
     ```python
     from simmate.database import connect # (1)
-    from simmate.database.third_parties import MatprojStructure
+    from simmate.apps.materials_project.models import MatprojStructure
 
     # Query the database
     structures = MatprojStructure.objects.filter(  # (2)

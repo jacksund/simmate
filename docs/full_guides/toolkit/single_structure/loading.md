@@ -178,7 +178,7 @@ structure = Structure.from_file("example.cif")
     For example:
     ``` python
     from simmate.database import connect
-    from simmate.database.third_parties import MatprojStructure
+    from simmate.apps.materials_project.models import MatprojStructure
 
     structure_db = MatprojStructure.objects.get(id=123)
     structure = structure_db.to_toolkit()
