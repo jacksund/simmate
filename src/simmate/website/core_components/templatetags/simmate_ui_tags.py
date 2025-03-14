@@ -7,12 +7,8 @@ from django import template
 
 from simmate.toolkit import Molecule as ToolkitMolecule
 from simmate.website.utilities import hash_options
+from simmate.apps.rdkit.models import Molecule as DatabaseMolecule
 
-# Temporarily closed-source code
-try:
-    from simmate_corteva.rdkit.models import Molecule as DatabaseMolecule
-except:
-    DatabaseMolecule = None
 
 register = template.Library()
 
