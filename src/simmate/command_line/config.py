@@ -53,7 +53,13 @@ def add(app_name: str, custom: bool = False):
 
     from simmate.configuration import settings
 
-    if app_name == "badelf":
+    if app_name == "aflow":
+        settings.add_apps_and_update(
+            [
+                "simmate.apps.configs.AflowConfig",
+            ]
+        )
+    elif app_name == "badelf":
         settings.add_apps_and_update(
             [
                 "simmate.apps.configs.BadelfConfig",
@@ -72,11 +78,29 @@ def add(app_name: str, custom: bool = False):
                 "simmate.apps.configs.CleaseConfig",
             ]
         )
+    elif app_name == "cod":
+        settings.add_apps_and_update(
+            [
+                "simmate.apps.configs.CodConfig",
+            ]
+        )
+    elif app_name == "deepmd":
+        settings.add_apps_and_update(
+            [
+                "simmate.apps.configs.DeepmdConfig",
+            ]
+        )
     elif app_name == "evolution":
         settings.add_apps_and_update(
             [
                 "simmate.apps.configs.VaspConfig",  # TODO: deprec app dependency
                 "simmate.apps.configs.EvolutionConfig",
+            ]
+        )
+    elif app_name == "jarvis":
+        settings.add_apps_and_update(
+            [
+                "simmate.apps.configs.JarvisConfig",
             ]
         )
     elif app_name == "materials_project":
@@ -85,6 +109,12 @@ def add(app_name: str, custom: bool = False):
                 "simmate.apps.configs.VaspConfig",
                 "simmate.apps.configs.BaderConfig",
                 "simmate.apps.configs.MaterialsProjectConfig",
+            ]
+        )
+    elif app_name == "oqmd":
+        settings.add_apps_and_update(
+            [
+                "simmate.apps.configs.OqmdConfig",
             ]
         )
     elif app_name == "quantum_espresso":

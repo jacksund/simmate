@@ -182,6 +182,10 @@ class SimmateSettings:
                 "simmate.apps.configs.BaderConfig",
                 "simmate.apps.configs.EvolutionConfig",
                 "simmate.apps.configs.MaterialsProjectConfig",
+                "simmate.apps.configs.AflowConfig",
+                "simmate.apps.configs.CodConfig",
+                "simmate.apps.configs.JarvisConfig",
+                "simmate.apps.configs.OqmdConfig",
                 # These apps may become defaults in the future:
                 # "simmate.apps.configs.BadelfConfig",
                 # "simmate.apps.configs.CleaseConfig",
@@ -203,17 +207,7 @@ class SimmateSettings:
                 # is important if they involve loading custom apps/models for their templates.
                 "home_view": None,
                 "profile_view": None,
-                "data": {
-                    # TODO: set to empty default once these are in their own apps
-                    "Crystalline": [
-                        "simmate.database.third_parties.AflowPrototype",
-                        # "simmate.database.third_parties.AflowStructure",  # Not allowed yet
-                        "simmate.database.third_parties.CodStructure",
-                        "simmate.database.third_parties.JarvisStructure",
-                        "simmate.database.third_parties.MatprojStructure",
-                        "simmate.database.third_parties.OqmdStructure",
-                    ],
-                },
+                "data": {},
                 "social_oauth": {
                     "google": {"client_id": None, "secret": None},
                     "microsoft": {"client_id": None, "secret": None},

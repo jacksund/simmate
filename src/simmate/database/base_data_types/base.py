@@ -432,7 +432,7 @@ class DatabaseTable(models.Model):
      - a custom submission by the user
     
     By default, this is a JSON field to account for all scenarios, but some
-    tables (such as those in `simmate.database.third_parties`) this is value
+    tables (such as those from a third-party database) this is value
     should be the same for ALL entries in the table and therefore the column is
     overwritten as an attribute.
     
@@ -517,9 +517,9 @@ class DatabaseTable(models.Model):
     remote_archive_link: str = None
     """
     The URL that is used to download the archive and then populate this table.
-    Many tables, such as those in `simmate.database.third_parties`, have
-    pre-existing data that you can download and load into your local database,
-    so if this attribute is set, you can use the `load_remote_archive` method.
+    Many tables have pre-existing data that you can download and load into 
+    your local database, so if this attribute is set, you can use the 
+    `load_remote_archive` method.
     """
 
     # I override the default manager with the one we define above, which has
@@ -1740,7 +1740,7 @@ class DatabaseTable(models.Model):
         Dynamically creates a Django Filter from a Simmate database table.
 
         For example, this function would take
-        `simmate.database.third_parties.MatprojStructure`
+        `simmate.apps.materials_project.models.MatprojStructure`
         and automatically make the following filter:
 
         ``` python

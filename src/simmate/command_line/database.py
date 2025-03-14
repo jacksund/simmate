@@ -120,6 +120,6 @@ def load_remote_archives(parallel: bool = False):
     """
 
     from simmate.database import connect
-    from simmate.database.third_parties import load_remote_archives
+    from simmate.database.utilities import load_remote_archives
 
     load_remote_archives(parallel=parallel)

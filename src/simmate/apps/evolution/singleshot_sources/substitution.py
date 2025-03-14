@@ -18,8 +18,8 @@ def get_structures_from_substitution_of_known(
 ) -> list[Structure]:
     """
     Predicts the most likely element substitutions for a composition, and then
-    based off the predictions, it will go through all database tables in the
-    `simmate.database.third_parties` module generate substituted structures.
+    based off the predictions, it will go through all database tables from
+    third_parties and generate substituted structures.
 
     Each database table must be populated -- otherwise this function will
     return an empty list.

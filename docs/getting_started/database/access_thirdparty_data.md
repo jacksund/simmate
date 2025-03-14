@@ -18,7 +18,7 @@ Previously, we loaded our `DatabaseTable` from the workflow. However, in this ca
 
 ```python
 from simmate.database import connect  # (1)
-from simmate.database.third_parties import JarvisStructure
+from simmate.apps.jarvis.models import JarvisStructure
 ```
 
 1. This configures all database tables and establishes a connection to your database. It must be ran before any tables are imported.
@@ -64,7 +64,7 @@ Let's test our filtering ability with this new data:
 
 ```python
 from simmate.database import connect
-from simmate.database.third_parties import JarvisStructure
+from simmate.apps.jarvis.models import JarvisStructure
 
 # EXAMPLE 1: 
 structures_1 = JarvisStructure.objects.filter(nsites__lt=6).all()  # (1)

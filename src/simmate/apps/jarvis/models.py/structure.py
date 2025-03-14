@@ -12,7 +12,7 @@ class JarvisStructure(Structure):
     """
 
     class Meta:
-        app_label = "data_explorer"
+        db_table = "jarvis__structures"
 
     # disable cols
     source = None

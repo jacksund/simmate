@@ -51,7 +51,7 @@ nacl_structure = single_relaxation.to_toolkit()
 8. Explore other tables and data available. For example, third-party data is automatically included in the prebuilt database (includes [Material Project](https://materialsproject.org/), [AFLOW](http://aflowlib.org/), [COD](http://www.crystallography.net/cod/), and more):
 ```python
 from simmate.database import connect
-from simmate.database.third_parties import JarvisStructure
+from simmate.apps.jarvis.models import JarvisStructure
 
 first_150_rows = JarvisStructure.objects.all()[:150]
 dataframe = first_150_rows.to_dataframe()

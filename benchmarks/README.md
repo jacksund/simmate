@@ -31,7 +31,7 @@ Database API | [emmet](https://github.com/materialsproject/emmet) | our `databas
 Web API | [mapidoc](https://github.com/materialsproject/mapidoc) | built dynamically by our `website` module
 Utilities & toolkit | [pymatgen](https://github.com/materialsproject/pymatgen) | our `toolkit` module (built w. `pymatgen`)
 Website components | [crystaltoolkit](https://github.com/materialsproject/crystaltoolkit) | our `website.core_components` module
-Third-party Data | [mpcontribs](https://github.com/materialsproject/MPContribs) | our `database.third_parties` module 
+Third-party Data | [mpcontribs](https://github.com/materialsproject/MPContribs) | tables within `apps.**.models` modules
 *more comparisons can be made too!* | ..... | ....
 
 There are more comparisons that can be made between this organization and Simmate, but this table gets to the major analogies between the two.
@@ -96,7 +96,7 @@ The `simmate.database` module is an independent implementation that builds off o
 - [emmet](https://github.com/materialsproject/emmet)
 - [qmpy](https://static.oqmd.org/static/docs/index.html)
 
-### `database.third_parties` alternatives
+### `apps.*.models` alternatives
 - [mpcontribs](https://github.com/materialsproject/MPContribs)
 - [matminer.data_retrieval](https://matminer.readthedocs.io/en/latest/matminer.data_retrieval.html)
 - [pymatgen.ext](https://pymatgen.org/pymatgen.ext.html)

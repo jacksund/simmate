@@ -14,7 +14,7 @@ class CodStructure(Structure):
     """
 
     class Meta:
-        app_label = "data_explorer"
+        db_table = "cod__structures"
 
     # disable cols
     source = None

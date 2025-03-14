@@ -5,10 +5,10 @@ from pathlib import Path
 from pymatgen.analysis.structure_matcher import StructureMatcher
 
 from simmate.apps.bader.workflows import PopulationAnalysis__Bader__Badelf
+from simmate.apps.materials_project.models import MatprojStructure
 from simmate.apps.materials_project.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
-from simmate.database.third_parties import MatprojStructure
 from simmate.engine import Workflow
 from simmate.toolkit import Structure
 from simmate.utilities import copy_files_from_directory

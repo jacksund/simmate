@@ -19,7 +19,7 @@ The following sections will guide you through each of these steps. Here's an exa
 from simmate.database import connect
 
 # Load a specific database table
-from simmate.database.third_parties import MatprojStructure
+from simmate.apps.materials_project.models import MatprojStructure
 
 # Filter data
 results = MatprojStructure.objects.filter(
@@ -67,7 +67,7 @@ The name of your table depends on the source you're accessing. To see the availa
 
 For example, to load a table from the Materials Project, use:
 ``` python
-from simmate.database.third_parties import MatprojStructure
+from simmate.apps.materials_project.models import MatprojStructure
 ```
 
 If you're accessing data from a specific workflow, you can access the table in two ways. Besides loading from the `workflow_results` module, most workflows have a `database_table` attribute that allows you to access the table:
