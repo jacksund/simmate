@@ -13,7 +13,7 @@ class OqmdStructure(Structure):
     """
 
     class Meta:
-        app_label = "data_explorer"
+        db_table = "oqmd__structures"
 
     # disable cols
     source = None
