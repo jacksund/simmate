@@ -23,6 +23,10 @@ class MaterialsProjectConfig(AppConfig):
     name = "simmate.apps.materials_project"
 
 
+class RdkitConfig(AppConfig):
+    name = "simmate.apps.rdkit"
+
+
 class VaspConfig(AppConfig):
     name = "simmate.apps.vasp"
 
