@@ -7,6 +7,14 @@ class BioviaCosmoConfig(AppConfig):
     name = "simmate.apps.dev.biovia_cosmo"
 
 
+class CleaseConfig(AppConfig):
+    name = "simmate.apps.clease"
+
+
+class DeepmdConfig(AppConfig):
+    name = "simmate.apps.deepmd"
+
+
 class OpeneyeOmegaConfig(AppConfig):
     name = "simmate.apps.dev.openeye_omega"
 

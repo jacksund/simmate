@@ -1316,25 +1316,23 @@ class DatabaseTable(models.Model):
             # If user doesn't want parallelization, we run these in the main
             # thread and monitor progress
             db_objects = [load_single_entry(entry) for entry in track(entries)]
-            cls.objects.bulk_create(
-                db_objects,
-                batch_size=15000,
-                ignore_conflicts=True,
-            )
+
         # otherwise we use dask to submit these in batches!
         else:
-            raise Exception(
-                "Parallel loading is temporarily disabled. "
-                "Note, that the serial version is >100x faster compared to "
-                "Simmate v0.14.0 and earlier."
-            )
+
             from simmate.configuration.dask import batch_submit
 
-            batch_submit(
+            db_objects = batch_submit(
                 function=load_single_entry,
                 args_list=entries,
                 batch_size=15000,
             )
+
+        cls.objects.bulk_create(
+            db_objects,
+            batch_size=15000,
+            ignore_conflicts=True,
+        )
 
         # We can now delete the files. The zip file is only deleted if requested.
         csv_filename.unlink()
@@ -1446,7 +1444,13 @@ class DatabaseTable(models.Model):
         if cls.objects.exists() and not confirm_override:
             # if the user has a third-party app, we can be more specific with
             # our error message.
-            if cls._meta.app_label == "data_explorer":
+            if cls._meta.app_label in [
+                "aflow",
+                "cod",
+                "jarvis",
+                "materials_project",
+                "oqmd",
+            ]:
                 raise Exception(
                     "It looks like you're using a third-party database table and "
                     "that the table already has data in it! This means you already "
@@ -1461,8 +1465,8 @@ class DatabaseTable(models.Model):
             # primary keys -- and ask them to use confirm_override.
             raise Exception(
                 "It looks like this table already has data in it! By loading an "
-                "archive, you could potentially overwrite this data. The most "
-                "common mistake is non-unique primary keys between your current "
+                "archive, you could potentially overwrite this data. Make sure "
+                "common mistake that you have unique primary keys between your current "
                 "data and the archive -- if there is a duplicate primary key, it "
                 "will overwrite your data. If you are confident the data is safe "
                 "to load into your database, run this command again with "
