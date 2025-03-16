@@ -7,7 +7,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import F
 from django.shortcuts import render
 
-from simmate.apps.aflow.models import AflowPrototype
+from simmate.apps.aflow.models import AflowStructure
 from simmate.apps.cod.models import CodStructure
 from simmate.apps.jarvis.models import JarvisStructure
 from simmate.apps.materials_project.models import MatprojStructure
