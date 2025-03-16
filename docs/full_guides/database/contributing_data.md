@@ -66,7 +66,7 @@ Providers that permit redistribution are welcome to use our CDN for their archiv
 The end goal for each provider is to allow a user do the following:
 ``` python
 from simmate.database import connect
-from simmate.database.third_parties import ExampleProviderData
+from simmate.apps.example.models import ExampleProviderData
 
 ExampleProviderData.load_remote_archive()
 
@@ -183,7 +183,7 @@ simmate database reset
 # in python
 
 from simmate.database import connect
-from simmate.database.third_parties import ExampleProviderData
+from simmate.apps.example.models import ExampleProviderData
 
 # This will show you all the columns for your table
 ExampleProviderData.show_columns()
@@ -217,7 +217,7 @@ from django.db import transaction
 from rich.progress import track
 
 from simmate.toolkit import Structure
-from simmate.database.third_parties import ExampleProviderData
+from simmate.apps.example.models import ExampleProviderData
 
 # If you want to use a custom package to load your data, be sure to let our team
 # know how to install it.
@@ -279,7 +279,7 @@ Try running this on your dataset (or a subset of data if you want to quickly tes
 # in python
 
 from simmate.database import connect
-from simmate.database.third_parties import ExampleProviderData
+from simmate.apps.example.models import ExampleProviderData
 
 # Check that the number of rows matches your source data.
 total_entries = ExampleProviderData.objects.count()

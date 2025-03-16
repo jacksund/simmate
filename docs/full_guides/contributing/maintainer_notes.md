@@ -8,7 +8,7 @@ To generate a new release, adhere to these steps:
 
 2. Update the changelog with the new release and its release date.
 
-3. Confirm all tests pass using the pre-built database. If they don't, generate a new one using the commands below, rename your db file (e.g., `prebuild-2022-07-05.sqlite3`), compress the db file into a zip file, upload it to the Simmate CDN, and modify the `archive_filename` in `simmate.database.third_parties.utilites.load_default_sqlite3_build`.
+3. Confirm all tests pass using the pre-built database. If they don't, generate a new one using the commands below, rename your db file (e.g., `prebuild-2022-07-05.sqlite3`), compress the db file into a zip file, upload it to the Simmate CDN, and modify the `archive_filename` in `simmate.database.utilites.load_default_sqlite3_build`.
 ``` bash
 simmate database reset --confirm-delete --no-use-prebuilt
 simmate database load-remote-archives

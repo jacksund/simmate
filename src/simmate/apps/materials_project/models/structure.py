@@ -14,7 +14,7 @@ class MatprojStructure(Structure, Thermodynamics):
     """
 
     class Meta:
-        app_label = "data_explorer"
+        db_table = "materials_project__structures"
 
     # disable cols
     source = None

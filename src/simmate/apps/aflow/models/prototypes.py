@@ -20,7 +20,7 @@ class AflowPrototype(Structure):
     """
 
     class Meta:
-        app_label = "data_explorer"
+        db_table = "aflow__prototypes"
 
     # disable cols
     source = None
