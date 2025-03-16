@@ -17,7 +17,7 @@ class AflowStructure(Structure, Thermodynamics):
     """
 
     class Meta:
-        app_label = "data_explorer"
+        db_table = "aflow__structures"
 
     # disable cols
     source = None
