@@ -151,32 +151,3 @@ class SteadystateSource(DatabaseTable):
         except:
             raise Exception(f"Creator class {self.name} could not be found.")
         return creator
-
-    # This method is for Prefect 2.0
-    # from simmate.utilities import async_to_sync
-    # @staticmethod
-    # @async_to_sync
-    # async def _check_still_running_ids(workitem_ids):
-    #     """
-    #     Queries Prefect to see check on a list of flow run ids and determines
-    #     which ones are still in a scheduled, running, or pending state.
-    #     From the list of ids given, it will return a list of the ones that
-    #     haven't finished yet.
-    #     This is normally used within `update_flow_workitem_ids` and shouldn't
-    #     be called directly.
-    #     """
-    #     raise NotImplementedError("porting to general executor")
-    #     from prefect.client import get_client
-    #     from prefect.orion.schemas.filters import FlowRunFilter
-    #     # The reason we have this code as a separate method is because we want
-    #     # to isolate Prefect's async calls from Django's sync-restricted calls
-    #     # (i.e. django raises errors if called within an async context).
-    #     async with get_client() as client:
-    #         response = await client.read_flow_runs(
-    #             flow_run_filter=FlowRunFilter(
-    #                 id={"any_": workitem_ids},
-    #                 state={"type": {"any_": ["SCHEDULED", "PENDING", "RUNNING"]}},
-    #             ),
-    #         )
-    #     still_running_ids = [str(entry.id) for entry in response]
-    #     return still_running_ids
