@@ -207,7 +207,15 @@ class SimmateSettings:
                 # is important if they involve loading custom apps/models for their templates.
                 "home_view": None,
                 "profile_view": None,
-                "data": {},
+                "data": {
+                    "External Crystalline Datasets": [
+                        "simmate.apps.aflow.models.AflowPrototype",
+                        "simmate.apps.cod.models.CodStructure",
+                        "simmate.apps.jarvis.models.JarvisStructure",
+                        "simmate.apps.materials_project.models.MatprojStructure",
+                        "simmate.apps.oqmd.models.OqmdStructure",
+                    ],
+                },
                 "social_oauth": {
                     "google": {"client_id": None, "secret": None},
                     "microsoft": {"client_id": None, "secret": None},
