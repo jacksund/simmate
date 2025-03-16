@@ -15,16 +15,8 @@ class BaderConfig(AppConfig):
     name = "simmate.apps.bader"
 
 
-class CleaseConfig(AppConfig):
-    name = "simmate.apps.clease"
-
-
 class CodConfig(AppConfig):
     name = "simmate.apps.cod"
-
-
-class DeepmdConfig(AppConfig):
-    name = "simmate.apps.deepmd"
 
 
 class EvolutionConfig(AppConfig):
