@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.bader.toolkit import Grid
-from simmate.engine import S3Workflow
+from simmate.workflows.base_flow_types import S3Workflow
 
 
 class PopulationAnalysis__Bader__Bader(S3Workflow):

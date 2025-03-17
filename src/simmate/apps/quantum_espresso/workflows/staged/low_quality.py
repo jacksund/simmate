@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.engine.staged_workflow import StagedWorkflow
+from simmate.workflows.base_flow_types import StagedWorkflow
 
 
 class StaticEnergy__QuantumEspresso__LowQuality(StagedWorkflow):

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.badelf.models import BadElf
-from simmate.database import connect
-from simmate.engine import StagedWorkflow
+from simmate.workflows.base_flow_types import StagedWorkflow
 
 
 class BadElf__Badelf__BadelfHse(StagedWorkflow):

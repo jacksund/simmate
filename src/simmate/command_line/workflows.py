@@ -253,7 +253,7 @@ def setup_only(context: Context, workflow_name: str):
 
     # Not all workflows have a single input because some are NestWorkflows,
     # meaning they are made of multiple smaller workflows.
-    from simmate.engine import S3Workflow
+    from simmate.workflows.base_flow_types import S3Workflow
 
     if issubclass(workflow, S3Workflow):
         workflow.setup(**kwargs_cleaned)

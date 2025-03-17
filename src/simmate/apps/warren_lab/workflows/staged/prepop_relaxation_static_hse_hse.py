@@ -3,7 +3,7 @@
 from simmate.apps.warren_lab.workflows.relaxation.hse import (
     Relaxation__Vasp__WarrenLabHse,
 )
-from simmate.engine import StagedWorkflow
+from simmate.workflows.base_flow_types import StagedWorkflow
 
 
 class Relaxation__Vasp__WarrenLabHseWithWavecar(Relaxation__Vasp__WarrenLabHse):
