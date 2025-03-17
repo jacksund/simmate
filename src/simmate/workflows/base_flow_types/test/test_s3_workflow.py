@@ -21,11 +21,12 @@ from sys import platform
 
 import pytest
 
-from simmate.engine import ErrorHandler, S3Workflow
-from simmate.engine.s3_workflow import (
+from simmate.engine import ErrorHandler
+from simmate.workflows.base_flow_types.s3_workflow import (
     CommandNotFoundError,
     MaxCorrectionsError,
     NonZeroExitError,
+    S3Workflow,
 )
 
 # ----------------------------------------------------------------------------

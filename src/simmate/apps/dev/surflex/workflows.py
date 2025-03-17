@@ -17,9 +17,9 @@ import shutil
 from pathlib import Path
 
 from simmate.engine import Workflow
-from simmate.workflows.base_flow_types import S3Workflow
 from simmate.toolkit import Molecule
 from simmate.toolkit.file_converters import SmilesAdapter
+from simmate.workflows.base_flow_types import S3Workflow
 
 __all__ = [
     "ConformerGeneration__Surflex__Fgen3d",
