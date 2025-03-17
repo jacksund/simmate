@@ -185,10 +185,6 @@ class SimmateSettings:
                 "simmate.apps.configs.CodConfig",
                 "simmate.apps.configs.JarvisConfig",
                 "simmate.apps.configs.OqmdConfig",
-                # These apps may become defaults in the future:
-                # "simmate.apps.configs.BadelfConfig",
-                # "simmate.apps.configs.CleaseConfig",
-                # "simmate.apps.configs.WarrenLabConfig",
             ],
             "extra_django_apps": [],
             "database": self._default_database,
@@ -207,7 +203,7 @@ class SimmateSettings:
                 "home_view": None,
                 "profile_view": None,
                 "data": {
-                    "External Crystalline Datasets": [
+                    "Default Datasets": [
                         "simmate.apps.aflow.models.AflowPrototype",
                         "simmate.apps.cod.models.CodStructure",
                         "simmate.apps.jarvis.models.JarvisStructure",
