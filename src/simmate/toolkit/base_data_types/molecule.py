@@ -1480,13 +1480,13 @@ class Molecule:
         fpgen = AllChem.GetRDKitFPGenerator(**kwargs)
         return fpgen.GetFingerprint(self.rdkit_molecule)
 
-    def get_morgan_fingerprint(self, radius=2, **kwargs):
+    def get_morgan_fingerprint(self, radius=2, size=1024, **kwargs):
         """
         Generates a morgan fingerprint (aka a circular fingerprint).
 
         Recommend similarity scoring: Dice
         """
-        fpgen = AllChem.GetMorganGenerator(radius=radius, **kwargs)
+        fpgen = AllChem.GetMorganGenerator(radius=radius, fpSize=size, **kwargs)
         return fpgen.GetCountFingerprint(self.rdkit_molecule)
 
     # -------------------------------------------------------------------------

@@ -652,17 +652,20 @@ class DynamicFormComponent(UnicornView):
 
             entries = self.table.objects.filter(id__in=self.entry_ids_to_update)
 
-            if flat_updates:
-                entries.update(**flat_updates)
+            # Note: bulk updating will cause a bug because it won't call `save()`
+            # method (and therefore it will skip things like creating the history
+            # entry). So we need to iterate the objects and save them one at a
+            # time. This is slower + more sql calls, but UI updates are
+            # typically limited  <50 entries so this should be fine.
+            for entry in entries.all():
+                for field, new_value in flat_updates.items():
+                    setattr(entry, field, new_value)
+                for field, append_value in append_updates.items():
+                    current_value = getattr(entry, field)
+                    new_value = current_value + "\n\n" + append_value
+                    setattr(entry, field, new_value)
+                entry.save()
 
-            if append_updates:
-                for entry in entries.all():
-                    for field, append_value in append_updates.items():
-                        current_value = getattr(entry, field)
-                        new_value = current_value + "\n\n" + append_value
-                        setattr(entry, field, new_value)
-                        entry.save()
-                        # OPTIMIZE: consider doing a bulk update at the end
         elif self.form_mode == "create_many":
             for child in self.children:
                 child.presave_to_db()
