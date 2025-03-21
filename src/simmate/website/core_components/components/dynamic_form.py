@@ -258,7 +258,11 @@ class DynamicFormComponent(UnicornView):
         # reformat __in to python list
         if "id__in" in config.keys():
             # BUG: check to see it was input correctly?
-            config["id__in"] = [int(i) for i in config["id__in"].split(";")]
+            input_value = config["id__in"]
+            if isinstance(input_value, int):
+                config["id__in"] = [input_value]  # it is a single id lookup
+            else:
+                config["id__in"] = [int(i) for i in input_value.split(",")]
         if "order_by" in config.keys() and self.reverse_order_by:
             config["order_by"] = "-" + config["order_by"]
 
