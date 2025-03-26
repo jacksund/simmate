@@ -4,16 +4,19 @@ from functools import reduce
 
 import pandas
 
+
 def filter_df(data: pandas.DataFrame, **kwargs) -> pandas.DataFrame:
     """
     Filters a pandas DataFrame using django-like ORM queries.
-    
+
     The endgoal of this util is to make code cleaner and filters easier to read.
     This comes at a cost of being slightly slower.
     """
     filter_condition_checks = []
     for filter_key, filter_value in kwargs.items():
-        column, metric = filter_key.rsplit("__", 1) if "__" in filter_key else (filter_key, "exact")
+        column, metric = (
+            filter_key.rsplit("__", 1) if "__" in filter_key else (filter_key, "exact")
+        )
         if metric == "exact":
             check = data[column] == filter_value
         elif metric == "gte":
