@@ -34,9 +34,21 @@ class BadElfBase(Workflow):
         find_electrides: bool = True,
         electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
         algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
-        covalent_bond_alg: Literal[
-            "zero-flux", "voronoi"
-        ] = "zero-flux",  # other option is "voronoi"
+        shared_bond_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
+        electride_finder_kwargs: dict = dict(
+            resolution=0.02,
+            include_lone_pairs=False,
+            metal_depth_cutoff=0.1,
+            min_covalent_angle=135,
+            min_covalent_bond_ratio=0.35,
+            shell_depth=0.05,
+            electride_elf_min=0.5,
+            electride_depth_min=0.2,
+            electride_charge_min=0.5,
+            electride_volume_min=10,
+            electride_radius_min=0.3,
+        ),
+        threads: int = None,
         ignore_low_pseudopotentials: bool = False,
         write_electride_files: bool = False,
         write_ion_radii: bool = True,
@@ -58,12 +70,12 @@ class BadElfBase(Workflow):
             directory=badelf_directory,
             find_electrides=find_electrides,
             algorithm=algorithm,
-            covalent_bond_alg=covalent_bond_alg,
+            threads=threads,
+            shared_bond_algorithm=shared_bond_algorithm,
+            ignore_low_pseudopotentials=ignore_low_pseudopotentials,
+            electride_finder_kwargs=electride_finder_kwargs,
         )
-        # Set options and run badelf.
-        if not ignore_low_pseudopotentials:
-            badelf_tools.ignore_low_pseudopotentials = False
-        badelf_tools.electride_finder_cutoff = electride_finder_cutoff
+        # run badelf.
         results = badelf_tools.results
         # write results
         if write_electride_files:

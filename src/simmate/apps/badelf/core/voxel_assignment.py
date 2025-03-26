@@ -42,14 +42,14 @@ class VoxelAssignmentToolkit:
         algorithm: str,
         partitioning: dict,
         directory: Path,
-        covalent_bond_alg: str = "zero-flux",  # other option is "voronoi"
+        shared_bond_algorithm: str = "zero-flux",  # other option is "voronoi"
     ):
         self.charge_grid = charge_grid.copy()
         self.algorithm = algorithm
         # partitioning will contain electride sites for voronelf
         self.partitioning = partitioning
         self.electride_structure = electride_structure
-        self.covalent_bond_alg = covalent_bond_alg
+        self.shared_bond_algorithm = shared_bond_algorithm
 
     @property
     def unit_cell_permutations_vox(self):
@@ -553,27 +553,27 @@ class VoxelAssignmentToolkit:
             np.int16
         )
         unassigned_indices = np.column_stack(np.where(assignment_array == 0))
-        # If doing badelf we want to assign electride and covalent bond voxels
-        # using the bader method. We need to zero them here
-        # !!! This may change for covalent bonds
+        # If doing badelf we want to assign electrides using the bader method.
+        # We need to zero them here. Covalent and metallic bonds will be assigned
+        # with zero-flux or voronoi like methods depending on the provided algorithm
         if self.algorithm == "badelf":
             electride_indices = (
                 np.array(
-                    list(self.electride_structure.indices_from_symbol("X")), dtype=int
+                    list(self.electride_structure.indices_from_symbol("E")), dtype=int
                 )
                 + 1
             )
-            if self.covalent_bond_alg == "zero-flux":
-                covalent_indices = (
-                    np.array(
-                        list(self.electride_structure.indices_from_symbol("Z")),
-                        dtype=int,
+            if self.shared_bond_algorithm == "zero-flux":
+                shared_indices = []
+                for symbol in ["Z", "M", "Le"]:
+                    shared_indices.extend(
+                        self.electride_structure.indices_from_symbol(symbol)
                     )
-                    + 1
-                )
+                shared_indices = np.array(shared_indices, dtype=int) + 1
+                shared_indices.sort()
             else:
-                covalent_indices = np.array([])
-            non_atom_indices = np.concatenate([electride_indices, covalent_indices])
+                shared_indices = np.array([])
+            non_atom_indices = np.concatenate([electride_indices, shared_indices])
             assignment_array = np.where(
                 np.isin(assignment_array, non_atom_indices), 0, assignment_array
             )

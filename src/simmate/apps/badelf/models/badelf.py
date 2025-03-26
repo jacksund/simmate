@@ -33,7 +33,7 @@ class BadElf(Structure, Calculation):
     However, a more traditional Zero-flux surface type algorithm can be used as well.
     """
 
-    covalent_algorithm = table_column.CharField(
+    shared_bond_algorithm = table_column.CharField(
         blank=True,
         null=True,
         max_length=75,
