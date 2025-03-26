@@ -1,6 +1,7 @@
+{# djlint:off #}
 <div class="my-2">
     {% include "core_components/basic_elements/label.html" %}
-    <input unicorn:model.defer="{{ name }}"
+    <input unicorn:model{% if defer %}.defer{% endif %}="{{ name }}"
            class="form-control"
            id="{{ name }}{{ context.unicorn.component_key }}"
            type="number"
@@ -9,3 +10,4 @@
            {% if minimum %}min="{{ minimum }}"{% endif %}
            step="{{ step_size }}">
 </div>
+{# djlint:on #}

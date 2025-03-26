@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from .dataframes import filter_df
 from .files import (
     archive_old_runs,
     chunk_read,

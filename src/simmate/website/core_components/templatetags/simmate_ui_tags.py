@@ -28,6 +28,7 @@ def text_input(
     placeholder: str = "Type value...",
     max_length: int = None,
     disabled: bool = False,
+    defer: bool = True,
 ):
     """
     Display a single-line text input widget.
@@ -51,6 +52,7 @@ def text_area(
     placeholder: str = "Enter details...",
     ncols: int = 30,
     nrows: int = 4,
+    defer: bool = True,
 ):
     """
     Display a multi-line text input widget.
@@ -76,6 +78,7 @@ def number_input(
     minimum: float | int = None,
     is_int: bool = False,
     step_size: float | int = None,
+    defer: bool = True,
 ):
     """
     Display a numeric input widget.
