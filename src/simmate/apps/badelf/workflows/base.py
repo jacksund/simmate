@@ -10,6 +10,7 @@ from typing import Literal
 
 from simmate.apps.badelf.core.badelf import SpinBadElfToolkit
 from simmate.engine import Workflow
+from simmate.toolkit import Structure
 
 # This file contains workflows for performing Bader and BadELF. Parts of the code
 # use the Henkelman groups algorithm for Bader analysis:
@@ -32,7 +33,9 @@ class BadElfBase(Workflow):
         source: dict = None,
         directory: Path = None,
         find_electrides: bool = True,
-        electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
+        labeled_structure_up = None,
+        labeled_structure_down = None,
+        separate_spin = True,
         algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
         shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         electride_finder_kwargs: dict = dict(
@@ -56,6 +59,11 @@ class BadElfBase(Workflow):
         run_id: str = None,
         **kwargs,
     ):
+        # get cleaned labeled structures
+        if labeled_structure_up is not None:
+            labeled_structure_up = Structure.from_dynamic(labeled_structure_up)
+        if labeled_structure_down is not None:
+            labeled_structure_down = Structure.from_dynamic(labeled_structure_down)
         # make a new directory to run badelf algorithm in and copy necessary files.
         badelf_directory = directory / "badelf"
         try:
@@ -71,6 +79,9 @@ class BadElfBase(Workflow):
             directory=badelf_directory,
             find_electrides=find_electrides,
             algorithm=algorithm,
+            separate_spin=separate_spin,
+            labeled_structure_up=labeled_structure_up,
+            labeled_structure_down=labeled_structure_down,
             threads=threads,
             shared_feature_algorithm=shared_feature_algorithm,
             ignore_low_pseudopotentials=ignore_low_pseudopotentials,

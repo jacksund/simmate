@@ -21,6 +21,7 @@ from simmate.apps.badelf.core.electride_finder import ElectrideFinder
 from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.apps.badelf.core.voxel_assignment import VoxelAssignmentToolkit
 from simmate.apps.bader.toolkit import Grid
+from simmate.toolkit import Structure
 
 
 class BadElfToolkit:
@@ -46,6 +47,9 @@ class BadElfToolkit:
             or "zero-flux".
         find_electrides (bool):
             Whether or not to search for electride sites. Usually set to true.
+        labeled_structure :
+            A pymatgen structure object with dummy atoms representing
+            electride, covalent, and metallic features
         shared_feature_algorithm (str):
             The algorithm used to partition covalent bonds found in the
             structure.
@@ -70,6 +74,7 @@ class BadElfToolkit:
             "zero-flux", "voronoi"
         ] = "zero-flux",  # other option is "voronoi"
         find_electrides: bool = True,
+        labeled_structure: Structure = None,
         ignore_low_pseudopotentials: bool = False,
         electride_finder_kwargs: dict = dict(
             resolution=0.02,
@@ -111,6 +116,7 @@ class BadElfToolkit:
         self.directory = directory
         self.algorithm = algorithm
         self.find_electrides = find_electrides
+        self.labeled_structure = labeled_structure
         self.shared_feature_algorithm = shared_feature_algorithm
         self.ignore_low_pseudopotentials = ignore_low_pseudopotentials
         self.electride_finder_kwargs = electride_finder_kwargs
@@ -142,7 +148,11 @@ class BadElfToolkit:
                 **self.electride_finder_kwargs
             )
         else:
-            electride_structure = self.partitioning_grid.structure.copy()
+            if self.labeled_structure is None:
+                raise ValueError(
+                    "A labeled structure must be provided if find_electrides is False"
+                    )
+            electride_structure = self.labeled_structure.copy()
 
         shared_feature_atoms = electride_finder.get_shared_feature_neighbors(
             electride_structure
@@ -1134,14 +1144,16 @@ class SpinBadElfToolkit:
         self,
         partitioning_grid: Grid,
         charge_grid: Grid,
-        directory: Path,
+        directory: Path = Path("."),
+        partitioning_file: str = "ELFCAR",
+        charge_file: str = "CHGCAR",
         separate_spin: bool = True,
-        threads: int = None,
         algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
-        shared_feature_algorithm: Literal[
-            "zero-flux", "voronoi"
-        ] = "zero-flux",  # other option is "voronoi"
         find_electrides: bool = True,
+        labeled_structure_up: Structure = None,
+        labeled_structure_down: Structure = None,
+        threads: int = None,
+        shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         ignore_low_pseudopotentials: bool = False,
         electride_finder_kwargs: dict = dict(
             resolution=0.02,
@@ -1152,7 +1164,7 @@ class SpinBadElfToolkit:
             shell_depth=0.05,
             electride_elf_min=0.5,
             electride_depth_min=0.2,
-            electride_charge_min=0.5,
+            electride_charge_min=0.3,
             electride_volume_min=10,
             electride_radius_min=0.3,
         ),
@@ -1216,6 +1228,7 @@ class SpinBadElfToolkit:
                 algorithm,
                 shared_feature_algorithm,
                 find_electrides,
+                labeled_structure_up,
                 ignore_low_pseudopotentials,
                 electride_finder_kwargs,
             )
@@ -1227,6 +1240,7 @@ class SpinBadElfToolkit:
                 algorithm,
                 shared_feature_algorithm,
                 find_electrides,
+                labeled_structure_down,
                 ignore_low_pseudopotentials,
                 electride_finder_kwargs,
             )
@@ -1240,6 +1254,7 @@ class SpinBadElfToolkit:
                 algorithm,
                 shared_feature_algorithm,
                 find_electrides,
+                labeled_structure_up,
                 ignore_low_pseudopotentials,
                 electride_finder_kwargs,
             )
@@ -1490,6 +1505,8 @@ class SpinBadElfToolkit:
         separate_spin: bool = True,
         algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
         find_electrides: bool = True,
+        labeled_structure_up: Structure = None,
+        labeled_structure_down: Structure = None,
         threads: int = None,
         shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         ignore_low_pseudopotentials: bool = False,
@@ -1522,11 +1539,19 @@ class SpinBadElfToolkit:
                 The filename of the file containing the charge information. Must
                 be a VASP CHGCAR or ELFCAR type file.
             separate_spin (bool):
-
+                Whether or not to treat spin-up and spin-down separately
             algorithm (str):
                 The algorithm to use. Options are "badelf", "voronelf", or "zero-flux"
             find_electrides (bool):
                 Whether or not to search for electrides in the system
+            labeled_structure_up:
+                A pymatgen structure object with dummy atoms representing
+                electride, covalent, and metallic features for the spin-up
+                system
+            labeled_structure_down:
+                A pymatgen structure object with dummy atoms representing
+                electride, covalent, and metallic features for the spin-down
+                system
             thread (int):
                 The number of threads to use for analysis
             shared_feature_algorithm (str):
@@ -1539,6 +1564,7 @@ class SpinBadElfToolkit:
             electride_finder_kwargs (dict):
                 A dictionary of keyword arguments to pass to the ElectrideFinder
                 class.
+           
 
         Returns:
             A BadElfToolkit instance.
