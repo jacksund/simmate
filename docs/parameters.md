@@ -309,6 +309,23 @@ This parameter determines whether to copy the directory from the previous calcul
 
 --------------------------
 
+## covalent_bond_alg
+For BadELF workflows, this parameter determines how covalent bonds are seperated from nearby atoms. Options are "zero-flux" or "voronoi" corresponding to bader-like and plane-like seperations.
+=== "yaml"
+    ``` yaml
+    covalent_bond_alg: zero-flux
+    ```
+=== "toml"
+    ``` toml
+    covalent_bond_alg = "zero-flux"
+    ```
+=== "python"
+    ``` python
+    covalent_bond_alg = "zero-flux"
+    ```
+
+--------------------------
+
 ## diffusion_analysis_id
 (advanced users only) This is the entry id from the `DiffusionAnalysis` table to link the results to. This is set automatically by higher-level workflows and rarely (if ever) set by the user.
 
@@ -395,6 +412,24 @@ Exclusive to the badelf workflows in the simmate app. This parameter indicates w
 ## fitness_field
 (advanced users only)
 For evolutionary searches, this is the value that should be optimized. Specifically, it should minimize this value (lower value = better fitness). The default is `energy_per_atom`, but you may want to set this to a custom column in a custom database table.
+
+--------------------------
+
+## ignore_low_pseudopotentials
+This parameter is unique to the badelf workflows of the warrenapp. It indicates whether the algorithm should throw an exception when the used pseudopotential didn't contain enough valence electrons. It is generally recommended to leave this as False as the results may be nonsense.
+
+=== "yaml"
+    ``` yaml
+    ignore_low_pseudopotentials: false
+    ```
+=== "toml"
+    ``` yaml
+    ignore_low_pseudopotentials = false
+    ```
+=== "python"
+    ``` python
+    ignore_low_pseudopotentials = False
+    ```
 
 --------------------------
 

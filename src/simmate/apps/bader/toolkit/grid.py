@@ -4,6 +4,7 @@ import itertools
 import logging
 from functools import cached_property
 from pathlib import Path
+from typing import Literal
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -216,11 +217,13 @@ class Grid(VolumetricData):
         number_of_voxels = self.shape.prod()
         return number_of_voxels / volume
 
+    @cached_property
+    def symmetry_data(self):
+        return SpacegroupAnalyzer(self.structure).get_symmetry_dataset()
+
     @property
     def equivalent_atoms(self):
-        return SpacegroupAnalyzer(self.structure).get_symmetry_dataset()[
-            "equivalent_atoms"
-        ]
+        return self.symmetry_data.equivalent_atoms
 
     def interpolate_value_at_frac_coords(
         self, frac_coords, method: str = "linear"
@@ -381,8 +384,8 @@ class Grid(VolumetricData):
             A copy of the Grid.
         """
         return self.__class__(
-            self.structure,
-            self.data,
+            self.structure.copy(),
+            self.data.copy(),
         )
 
     @classmethod
@@ -511,6 +514,44 @@ class Grid(VolumetricData):
         data = {"total": new_total_data, "diff": new_diff_data}
 
         return Grid(self.structure, data)
+
+    def split_to_spin(self, data_type: Literal["elf", "charge"] = "elf"):
+        """
+        Splits the grid to spin up and spin down contributions
+        """
+        # first check if the grid has spin parts
+        if not self.is_spin_polarized:
+            raise Exception(
+                "Only one set of data detected. The grid cannot be split into spin up and spin down"
+            )
+        # Now we get the separate data parts. If the data is ELF, the parts are
+        # stored as total=spin up and diff = spin down
+        if data_type == "elf":
+            spin_up_data = self.total.copy()
+            spin_down_data = self.diff.copy()
+        elif data_type == "charge":
+            spin_data = self.spin_data
+            # pymatgen uses some custom class as keys here
+            for key in spin_data.keys():
+                if key.value == 1:
+                    spin_up_data = spin_data[key].copy()
+                elif key.value == -1:
+                    spin_down_data = spin_data[key].copy()
+
+        # convert to dicts
+        spin_up_data = {"total": spin_up_data}
+        spin_down_data = {"total": spin_down_data}
+
+        spin_up_grid = self.__class__(
+            self.structure.copy(),
+            spin_up_data,
+        )
+        spin_down_grid = self.__class__(
+            self.structure.copy(),
+            spin_down_data,
+        )
+
+        return spin_up_grid, spin_down_grid
 
     @classmethod
     def sum_grids(cls, grid1, grid2):

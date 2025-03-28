@@ -42,12 +42,14 @@ class VoxelAssignmentToolkit:
         algorithm: str,
         partitioning: dict,
         directory: Path,
+        shared_feature_algorithm: str = "zero-flux",  # other option is "voronoi"
     ):
         self.charge_grid = charge_grid.copy()
         self.algorithm = algorithm
         # partitioning will contain electride sites for voronelf
         self.partitioning = partitioning
         self.electride_structure = electride_structure
+        self.shared_feature_algorithm = shared_feature_algorithm
 
     @property
     def unit_cell_permutations_vox(self):
@@ -551,14 +553,29 @@ class VoxelAssignmentToolkit:
             np.int16
         )
         unassigned_indices = np.column_stack(np.where(assignment_array == 0))
-        # If doing self we don't want assignments to go to electrides so we zero them
-        # here. We need to save them to put them back later though
+        # If doing badelf we want to assign electrides using the bader method.
+        # We need to zero them here. Covalent and metallic bonds will be assigned
+        # with zero-flux or voronoi like methods depending on the provided algorithm
         if self.algorithm == "badelf":
             electride_indices = (
-                np.array(self.electride_structure.indices_from_symbol("He")) + 1
+                np.array(
+                    list(self.electride_structure.indices_from_symbol("E")), dtype=int
+                )
+                + 1
             )
+            if self.shared_feature_algorithm == "zero-flux":
+                shared_indices = []
+                for symbol in ["Z", "M", "Le"]:
+                    shared_indices.extend(
+                        self.electride_structure.indices_from_symbol(symbol)
+                    )
+                shared_indices = np.array(shared_indices, dtype=int) + 1
+                shared_indices.sort()
+            else:
+                shared_indices = np.array([])
+            non_atom_indices = np.concatenate([electride_indices, shared_indices])
             assignment_array = np.where(
-                np.isin(assignment_array, electride_indices), 0, assignment_array
+                np.isin(assignment_array, non_atom_indices), 0, assignment_array
             )
             structure = grid.structure
         elif self.algorithm == "voronelf":
@@ -576,7 +593,6 @@ class VoxelAssignmentToolkit:
         # Get array to assign to
         # new_assignment_array = on_plane_assignment.copy()
         new_assignment_array = np.zeros([len(unassigned_indices), len(structure)])
-
         while len(np.where(np.sum(new_assignment_array, axis=1) == 0)[0]) > 0:
             if test_radius >= max_radius:
                 raise Exception()
@@ -611,6 +627,7 @@ class VoxelAssignmentToolkit:
                     new_assignment_array[
                         still_unassigned_1d_indices[non_zero_indices[i]], site - 1
                     ] = count
+
             # increase our test radius for the next round
             test_radius += min_radius
             # print(test_radius, len(np.where(np.sum(new_assignment_array,axis=1)==0)[0]))

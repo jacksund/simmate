@@ -321,7 +321,7 @@ class PartitioningToolkit:
             site_string = self.grid.structure[site_equiv].species_string
             neigh_string = self.grid.structure[neigh_equiv].species_string
         except:
-            site_string = "He"
+            site_string = "E"
             neigh_string = "H"
 
         if site_equiv == neigh_equiv:
@@ -578,7 +578,7 @@ class PartitioningToolkit:
             site_cart_coords = row["site_coords"]
             neigh_cart_coords = row["neigh_coords"]
             neighbor_string = row["neigh_symbol"]
-            if neighbor_string != "He":
+            if neighbor_string != "E":
                 bond_dist = row["dist"]
                 break
 
