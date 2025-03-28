@@ -42,14 +42,14 @@ class VoxelAssignmentToolkit:
         algorithm: str,
         partitioning: dict,
         directory: Path,
-        shared_bond_algorithm: str = "zero-flux",  # other option is "voronoi"
+        shared_feature_algorithm: str = "zero-flux",  # other option is "voronoi"
     ):
         self.charge_grid = charge_grid.copy()
         self.algorithm = algorithm
         # partitioning will contain electride sites for voronelf
         self.partitioning = partitioning
         self.electride_structure = electride_structure
-        self.shared_bond_algorithm = shared_bond_algorithm
+        self.shared_feature_algorithm = shared_feature_algorithm
 
     @property
     def unit_cell_permutations_vox(self):
@@ -563,7 +563,7 @@ class VoxelAssignmentToolkit:
                 )
                 + 1
             )
-            if self.shared_bond_algorithm == "zero-flux":
+            if self.shared_feature_algorithm == "zero-flux":
                 shared_indices = []
                 for symbol in ["Z", "M", "Le"]:
                     shared_indices.extend(

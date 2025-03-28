@@ -217,11 +217,13 @@ class Grid(VolumetricData):
         number_of_voxels = self.shape.prod()
         return number_of_voxels / volume
 
+    @cached_property
+    def symmetry_data(self):
+        return SpacegroupAnalyzer(self.structure).get_symmetry_dataset()
+
     @property
     def equivalent_atoms(self):
-        return SpacegroupAnalyzer(self.structure).get_symmetry_dataset()[
-            "equivalent_atoms"
-        ]
+        return self.symmetry_data.equivalent_atoms
 
     def interpolate_value_at_frac_coords(
         self, frac_coords, method: str = "linear"

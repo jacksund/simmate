@@ -1612,13 +1612,13 @@ class ElectrideFinder:
                 frac_coord = temp_structure.frac_coords[0]
                 structure.append(species, frac_coord)
 
-            # To find the atoms/electrides surrounding a covalent/metallic bond,
-            # we need the structure to be organized with atoms first, then electrides,
-            # then whatever else. We organize everything here.
-            electride_indices = structure.indices_from_symbol("E")
-            other_indices = []
-            for symbol in ["M", "Le", "Z", "Lp"]:
-                other_indices.extend(structure.indices_from_symbol(symbol))
+        # To find the atoms/electrides surrounding a covalent/metallic bond,
+        # we need the structure to be organized with atoms first, then electrides,
+        # then whatever else. We organize everything here.
+        electride_indices = structure.indices_from_symbol("E")
+        other_indices = []
+        for symbol in ["M", "Le", "Z", "Lp"]:
+            other_indices.extend(structure.indices_from_symbol(symbol))
         sorted_structure = self.structure.copy()
         sorted_structure.remove_oxidation_states()
         for i in electride_indices:

@@ -22,6 +22,33 @@ class BadElf(Structure, Calculation):
     A list of calculated oxidation states for each site.
     """
 
+    atom_oxidation_states = table_column.JSONField(blank=True, null=True)
+    """
+    In systems with non-atomic elf features, this provides the oxidation
+    states for just the atoms.
+    """
+
+    non_atom_charges = table_column.JSONField(blank=True, null=True)
+    """
+    In systems with non-atomic elf features, this provides the total
+    charge on each non-atomic feature. 
+    
+    NOTE: This will only be populated if the spin-up and spin-down 
+    systems have matching positions for all features
+    """
+
+    non_atom_charges_up = table_column.JSONField(blank=True, null=True)
+    """
+    In systems with non-atomic elf features, this provides the total
+    charge on each non-atomic feature in the spin-up system.
+    """
+
+    non_atom_charges_down = table_column.JSONField(blank=True, null=True)
+    """
+    In systems with non-atomic elf features, this provides the total
+    charge on each non-atomic feature in the spin-up system.
+    """
+
     algorithm = table_column.CharField(
         blank=True,
         null=True,
@@ -33,13 +60,13 @@ class BadElf(Structure, Calculation):
     However, a more traditional Zero-flux surface type algorithm can be used as well.
     """
 
-    shared_bond_algorithm = table_column.CharField(
+    shared_feature_algorithm = table_column.CharField(
         blank=True,
         null=True,
         max_length=75,
     )
     """
-    The selected algorithm for handling covalent bonds. The defalut is 'zero-flux'
+    The selected algorithm for handling covalent/metallic bonds. The defalut is 'zero-flux'
     similar to BadELF's handling of electrides, but 'voronoi' can also be selected
     """
 
@@ -53,16 +80,54 @@ class BadElf(Structure, Calculation):
     consistent and accurate count of valence electrons
     """
 
+    charges_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of total "valence" electron counts for each site in the
+    spin-up system
+    """
+
+    charges_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of total "valence" electron counts for each site in the
+    spin-down system
+    """
+
     min_dists = table_column.JSONField(blank=True, null=True)
     """
     A list of minimum radii distance for bader volumes. i.e. the minimum
     distance from the origin of the site to the bader surface. This can be used
     as a minimum radius for the site.
+    In BadELF this is replaced by the distance to the dividing plane for
+    atoms
     """
 
-    atomic_volumes = table_column.JSONField(blank=True, null=True)
+    min_dists_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of minimum radii distance for bader volumes. i.e. the minimum
+    distance from the origin of the site to the bader surface for the
+    spin-up system.
+    """
+
+    min_dists_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of minimum radii distance for bader volumes. i.e. the minimum
+    distance from the origin of the site to the bader surface for the
+    spin-down system.
+    """
+
+    site_volumes = table_column.JSONField(blank=True, null=True)
     """
     A list of site volumes from the oxidation analysis (i.e. the bader volume)
+    """
+
+    site_volumes_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of site volumes for the spin-up system
+    """
+
+    site_volumes_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of site volumes for the spin-down system
     """
 
     element_list = table_column.JSONField(blank=True, null=True)
@@ -89,6 +154,22 @@ class BadElf(Structure, Calculation):
     In most cases, this value should be zero.
     """
 
+    vacuum_volume_up = table_column.FloatField(blank=True, null=True)
+    """
+    Total volume from electron density that was NOT assigned to ANY site -- 
+    and therefore assigned to 'vacuum' in the spin-up system.
+    
+    In most cases, this value should be zero.
+    """
+
+    vacuum_volume_down = table_column.FloatField(blank=True, null=True)
+    """
+    Total volume from electron density that was NOT assigned to ANY site -- 
+    and therefore assigned to 'vacuum' in the spin-down system.
+    
+    In most cases, this value should be zero.
+    """
+
     nelectrons = table_column.FloatField(blank=True, null=True)
     """
     The total number of electrons involved in the charge density partitioning.
@@ -97,6 +178,16 @@ class BadElf(Structure, Calculation):
     Yttrium could have used a potential where 2 or even 10 electrons are used 
     as the basis for the calculation. Use 'oxidation_states' for a more 
     consistent and accurate count of valence electrons
+    """
+
+    nelectrons_up = table_column.FloatField(blank=True, null=True)
+    """
+    The total number of electrons in the spin-up charge density
+    """
+
+    nelectrons_down = table_column.FloatField(blank=True, null=True)
+    """
+    The total number of electrons in the spin-down charge density
     """
 
     electrides_per_formula = table_column.FloatField(blank=True, null=True)
@@ -117,38 +208,145 @@ class BadElf(Structure, Calculation):
     found using pybader.
     """
 
-    ncovalent_bonds = table_column.FloatField(blank=True, null=True)
+    nelectrides_up = table_column.IntegerField(blank=True, null=True)
     """
-    The total number of covalent bonds that were found when searching the maxima
-    found using pybader.
+    The total number of electrides that were found when searching the maxima
+    of the spin-up ELF
+    """
+
+    nelectrides_down = table_column.IntegerField(blank=True, null=True)
+    """
+    The total number of electrides that were found when searching the maxima
+    of the spin-down ELF
+    """
+
+    nshared_features = table_column.FloatField(blank=True, null=True)
+    """
+    The total number of shared ELF features that were found. This includes
+    covalent bonds, metallic features, and non-electridic bare electrons.
     """
 
     electride_dim = table_column.JSONField(blank=True, null=True)
     """
-    The dimensionality of the electride network in the structure. Defaults to
-    the highest dimension network.
+    The dimensionality of the electride network in the structure. Gives
+    all dimensionalities that exist at varying ELF values.
     """
 
-    dim_cutoffs = table_column.JSONField(blank=True, null=True)
+    electride_dim_up = table_column.JSONField(blank=True, null=True)
     """
-    The ELF value cutoff used to determine if two electride sites are connected.
-    Used to determine the dimensionality of the electride electron network.
+    The dimensionality of the electride network in the spin-up system. 
+    Gives all dimensionalities that exist at varying ELF values.
+    """
+
+    electride_dim_down = table_column.JSONField(blank=True, null=True)
+    """
+    The dimensionality of the electride network in the spin-down system. 
+    Gives all dimensionalities that exist at varying ELF values.
+    """
+
+    electride_dim_cutoffs = table_column.JSONField(blank=True, null=True)
+    """
+    The ELF values at which the bare electron volume reduces dimensionality.
+    """
+
+    electride_dim_cutoffs_up = table_column.JSONField(blank=True, null=True)
+    """
+    The ELF values at which the bare electron volume reduces dimensionality
+    in the spin-up system
+    """
+
+    electride_dim_cutoffs_down = table_column.JSONField(blank=True, null=True)
+    """
+    The ELF values at which the bare electron volume reduces dimensionality
+    in the spin-down system
     """
 
     coord_envs = table_column.JSONField(blank=True, null=True)
     """
     A list of coordination environments for the atoms and electrides in the
-    structure
+    labeled structure
+    """
+
+    coord_envs_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of coordination environments for the atoms and electrides in the
+    spin-up labeled structure
+    """
+
+    coord_envs_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of coordination environments for the atoms and electrides in the
+    spin-down labeled structure
     """
 
     elf_maxima = table_column.JSONField(blank=True, null=True)
     """
     A list of ELF maxima found at the location of each atom/electride site
+    in the labeled structure
     """
 
-    covalent_atom_pairs = table_column.JSONField(blank=True, null=True)
+    elf_maxima_up = table_column.JSONField(blank=True, null=True)
     """
-    A list of atom pairs corresponding to any covalent bonds in the structure
+    A list of ELF maxima found at the location of each atom/electride site
+    in the spin-up labeled structure
+    """
+
+    elf_maxima_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of ELF maxima found at the location of each atom/electride site
+    in the spin-down labeled structure
+    """
+
+    separate_spin = table_column.BooleanField(blank=True, null=True)
+    """
+    Whether the user asked to consider spin separately in this calculation
+    """
+
+    differing_spin = table_column.BooleanField(blank=True, null=True)
+    """
+    Whether the spin up and spin down differ in the ELF and charge density
+    """
+
+    labeled_structure = table_column.JSONField(blank=True, null=True)
+    """
+    A JSON representing the structure labeled with various non-atomic
+    features in the ELF. Features are represented with the following
+    dummy atoms
+    
+    E: electride, Le: non-electridic bare electron, Lp: lone-pair, 
+    Z: covalent bond, M: metallic feature
+    """
+
+    labeled_structure_up = table_column.JSONField(blank=True, null=True)
+    """
+    The labeled structure containing information only for the spin-up
+    ELF and charge density. See labeled_structure for more details
+    """
+
+    labeled_structure_down = table_column.JSONField(blank=True, null=True)
+    """
+    The labeled structure containing information only for the spin-down
+    ELF and charge density. See labeled_structure for more details
+    """
+
+    shared_feature_atoms = table_column.JSONField(blank=True, null=True)
+    """
+    The nearest neighbor atoms for each covalent/metallic bond in the
+    system. Values are a nested list in which the order of the lists matches
+    the order of features in the structure and the values in the list
+    represent the structure index of the neighbors.
+    """
+
+    shared_feature_atoms_up = table_column.JSONField(blank=True, null=True)
+    """
+    The nearest neighbor atoms for each covalent/metallic bond in the
+    spin-up system.
+    """
+
+    shared_feature_atoms_down = table_column.JSONField(blank=True, null=True)
+    """
+    The nearest neighbor atoms for each covalent/metallic bond in the
+    spin-down system.
     """
 
     def write_output_summary(self, directory: Path):

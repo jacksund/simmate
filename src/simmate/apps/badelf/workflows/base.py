@@ -8,7 +8,7 @@ import shutil
 from pathlib import Path
 from typing import Literal
 
-from simmate.apps.badelf.core.badelf import BadElfToolkit
+from simmate.apps.badelf.core.badelf import SpinBadElfToolkit
 from simmate.engine import Workflow
 
 # This file contains workflows for performing Bader and BadELF. Parts of the code
@@ -34,7 +34,7 @@ class BadElfBase(Workflow):
         find_electrides: bool = True,
         electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
         algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
-        shared_bond_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
+        shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         electride_finder_kwargs: dict = dict(
             resolution=0.02,
             include_lone_pairs=False,
@@ -52,6 +52,7 @@ class BadElfBase(Workflow):
         ignore_low_pseudopotentials: bool = False,
         write_electride_files: bool = False,
         write_ion_radii: bool = True,
+        write_labeled_structures: bool = True,
         run_id: str = None,
         **kwargs,
     ):
@@ -66,12 +67,12 @@ class BadElfBase(Workflow):
             shutil.copy(directory / file, badelf_directory)
 
         # Get the badelf toolkit object for running badelf.
-        badelf_tools = BadElfToolkit.from_files(
+        badelf_tools = SpinBadElfToolkit.from_files(
             directory=badelf_directory,
             find_electrides=find_electrides,
             algorithm=algorithm,
             threads=threads,
-            shared_bond_algorithm=shared_bond_algorithm,
+            shared_feature_algorithm=shared_feature_algorithm,
             ignore_low_pseudopotentials=ignore_low_pseudopotentials,
             electride_finder_kwargs=electride_finder_kwargs,
         )
@@ -88,5 +89,7 @@ class BadElfBase(Workflow):
         # write ionic radii
         if write_ion_radii:
             badelf_tools.write_atom_elf_radii()
+        if write_labeled_structures:
+            badelf_tools.write_labeled_structures()
         badelf_tools.write_results_csv()
         return results
