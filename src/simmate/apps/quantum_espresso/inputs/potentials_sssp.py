@@ -8,7 +8,7 @@ at the following:
 QE docs on potentials:
     https://www.quantum-espresso.org/pseudopotentials/
     https://pseudopotentials.quantum-espresso.org/
-    
+
 Standard solid-state pseudopotentials (SSSP):
     https://www.materialscloud.org/discover/sssp
 

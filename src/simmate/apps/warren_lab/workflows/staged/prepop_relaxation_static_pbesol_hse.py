@@ -3,7 +3,7 @@
 from simmate.apps.warren_lab.workflows.relaxation.pbesol import (
     Relaxation__Vasp__WarrenLabPbesol,
 )
-from simmate.engine import StagedWorkflow
+from simmate.workflows.base_flow_types import StagedWorkflow
 
 
 # We want to run a PBE relaxation followed by an HSE static energy calculation.

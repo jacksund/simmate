@@ -3,15 +3,15 @@
 """
 This module provides conversion between Simmate toolkit and database structures.
 
-Everything is built-in to the base toolkit/database classes, so you typically 
-convert between these two without ever loading this module directly. Below are 
+Everything is built-in to the base toolkit/database classes, so you typically
+convert between these two without ever loading this module directly. Below are
 some examples of how we recommend doing this.
-    
+
 EXAMPLE 1: Database object to Toolkit object
 ``` python
 # Grab an example database structure.
 # We use Matproj as an example, but the same applies for all Structure tables.
-from simmate.database.third_parties import MatprojStructure
+from simmate.apps.materials_project.models import MatprojStructure
 database_structure = MatprojStructure.objects.first()
 
 # convert to toolkit

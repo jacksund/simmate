@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
+# isort: skip_file
+
+from simmate.database import connect
+
 import itertools
 
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-from simmate.database import connect
-from simmate.database.third_parties import AflowPrototype
+from simmate.apps.aflow.models import AflowPrototype
 from simmate.toolkit import Composition, Structure
 
 

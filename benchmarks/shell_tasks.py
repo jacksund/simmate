@@ -8,8 +8,8 @@ which calls the command "echo dummy". We compare the following:
     - a task written with Custodian and 3 dummy error handlers
 
 Note, Simmate is currently slower than Custodian, but this is entirely because
-Simmate carefully kills child Popen processes -- which takes 0.02s per task. When 
-this step is removed from all non-mpiruns, we see Simmate overhead is 
+Simmate carefully kills child Popen processes -- which takes 0.02s per task. When
+this step is removed from all non-mpiruns, we see Simmate overhead is
 significantly faster than Custodian. But I don't remove this out of fear of introducing
 a bug, which I detail in the execute method of the S3Task. This bug is actually
 present in Custodian for commands that spawn multiple processes/threads.

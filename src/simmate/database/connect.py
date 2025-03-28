@@ -2,10 +2,10 @@
 
 """
 This file connects to the Simmate database. Behind the scenes, this is really
-setting up Django settings (which includes the database). Therefore, this 
+setting up Django settings (which includes the database). Therefore, this
 file serves as a shortcut for the following:
 
-``` python    
+``` python
 # the convenient shortcut
 from simmate.database import connect
 

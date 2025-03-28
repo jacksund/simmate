@@ -44,7 +44,7 @@ Unlike custom `Workflows` where we define a `run_config` method, `S3Workflows` h
 For instance, let's use the `echo` command to print something:
 
 ``` python
-from simmate.engine import S3Workflow
+from simmate.workflows.base_flow_types import S3Workflow
 
 class Example__Echo__SayHello(S3Workflow):
     use_database = False  # no custom table for now
@@ -64,7 +64,7 @@ result = state.result()
 If you need to write input files or read output files, you'll need to update your `setup` and `workup` methods:
 
 ``` python
-from simmate.engine import S3Workflow
+from simmate.workflows.base_flow_types import S3Workflow
 
 class Example__Echo__SayHello(S3Workflow):
     

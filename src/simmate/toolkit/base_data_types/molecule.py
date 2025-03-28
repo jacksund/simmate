@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import sys
 import urllib.parse
 from functools import cached_property
 from pathlib import Path
 
+import numpy
 import pandas
 from rdkit import RDLogger
 from rdkit.Chem import (
@@ -690,6 +692,12 @@ class Molecule:
             drawer.DrawMolecule(mol)
             drawer.FinishDrawing()
             svg = drawer.GetDrawingText()
+            # in web, I don't want the white background box. This is normally
+            # present in the svg via something like...
+            # <rect style='opacity:1.0;fill:#FFFFFF;stroke:none' width='300.0' height='300.0' x='0.0' y='0.0'> </rect>
+            # Regular expression pattern to match the <rect> element with varying width and height
+            pattern = r"<rect style='opacity:1\.0;fill:#FFFFFF;stroke:none' width='\d+(\.\d+)?' height='\d+(\.\d+)?' x='\d+(\.\d+)?' y='\d+(\.\d+)?'>\s*</rect>"
+            svg = re.sub(pattern, "", svg)
             # This is the format that programs like streamlit's ImageCol expect:
             # https://docs.streamlit.io/develop/api-reference/data/st.column_config/st.column_config.imagecolumn
             svg_encoded = f"data:image/svg+xml;utf8,{urllib.parse.quote(svg)}"
@@ -1408,6 +1416,78 @@ class Molecule:
             for substruct in substructures
         ]
         return sum(matches)
+
+    # -------------------------------------------------------------------------
+
+    # Fingerprints
+
+    # !!! OPTIMIZE: we need to better understand the performance tradeoffs
+    # of dense (the default) vs sparse fingerprints. Also count vs. normal.
+
+    @cached_property
+    def fingerprint(self) -> numpy.ndarray:
+        """
+        Generates and caches the **simmate preferred** fingerprint.
+
+        If you want to choose your fingerprint parameters (such as the size or
+        path length), you should use `get_fingerprint` or it's underlying methods
+        such as `get_topological_fingerprint`.
+
+        This property is inteaded for beginers, as we choose basic fingerprint
+        settings that work in most cases and enable other high-level features,
+        such as `mol1 / mol2` -> to give similarity
+        """
+        # TODO: maybe add setting to allow user to configure the default fp globally
+        return self.get_fingerprint("morgan", "numpy")
+
+    def get_fingerprint(
+        self,
+        fingerprint_type: str = "topological",
+        vector_type: str = "rdkit",
+        **kwargs,
+    ):
+        """
+        Generates a molecule fingerprint from one of several options.
+
+        Unlike underlying methods (e.g. `get_topological_fingerprint`), this method
+        includes higher level features such as converting to altnerative formats
+        (e.g. numpy array instead of RDkit bit vectory)
+        """
+        # generate fp
+        if fingerprint_type == "topological":
+            rdkit_fp = self.get_topological_fingerprint(**kwargs)
+        elif fingerprint_type in ["circular", "morgan"]:
+            rdkit_fp = self.get_morgan_fingerprint(**kwargs)
+        else:
+            raise Exception(f"Unknown fingerprint type: {type}")
+
+        # convert to requested format
+        if vector_type == "rdkit":
+            return rdkit_fp
+        elif vector_type == "list":
+            return rdkit_fp.ToList()
+        elif vector_type == "numpy":
+            return numpy.array(rdkit_fp.ToList())
+        else:
+            raise Exception(f"Unknown fingerprint type: {type}")
+
+    def get_topological_fingerprint(self, **kwargs):
+        """
+        Generates a topological fingerprint (aka RDkit fingerprint)
+
+        Recommend similarity scoring: Tanimoto
+        """
+        fpgen = AllChem.GetRDKitFPGenerator(**kwargs)
+        return fpgen.GetFingerprint(self.rdkit_molecule)
+
+    def get_morgan_fingerprint(self, radius=2, size=1024, **kwargs):
+        """
+        Generates a morgan fingerprint (aka a circular fingerprint).
+
+        Recommend similarity scoring: Dice
+        """
+        fpgen = AllChem.GetMorganGenerator(radius=radius, fpSize=size, **kwargs)
+        return fpgen.GetCountFingerprint(self.rdkit_molecule)
 
     # -------------------------------------------------------------------------
 

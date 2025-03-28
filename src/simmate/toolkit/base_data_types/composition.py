@@ -5,7 +5,7 @@ This module defines the Composition class.
 
 It is a very basic extension PyMatGen's core Composition class, as it only adds
 a few extra methods and does not change any other usage. Note that this class
-is currently NOT used by Simmate's Structure class. For Simmate, 
+is currently NOT used by Simmate's Structure class. For Simmate,
 Structure.composition will still return a pymatgen composition object.
 """
 
@@ -103,7 +103,7 @@ class Composition(PymatgenComposition):
     def volume_estimate(
         self,
         radius_method: str = "ionic",
-        packing_factor: float = 1.35,
+        packing_factor: float = 0.74,
     ):
         """
         Gives a predicted lattice volume using the reported radii for each
@@ -139,7 +139,7 @@ class Composition(PymatgenComposition):
         )
         # based on the packing of these spheres, we want to scale the volume of the
         # lattice better packing corresponds to a lower packing_factor
-        total_volume *= packing_factor
+        total_volume /= packing_factor
 
         return total_volume
 

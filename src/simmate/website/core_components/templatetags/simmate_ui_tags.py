@@ -5,14 +5,9 @@ import uuid
 
 from django import template
 
+from simmate.apps.rdkit.models import Molecule as DatabaseMolecule
 from simmate.toolkit import Molecule as ToolkitMolecule
 from simmate.website.utilities import hash_options
-
-# Temporarily closed-source code
-try:
-    from simmate_corteva.rdkit.models import Molecule as DatabaseMolecule
-except:
-    DatabaseMolecule = None
 
 register = template.Library()
 
@@ -33,6 +28,7 @@ def text_input(
     placeholder: str = "Type value...",
     max_length: int = None,
     disabled: bool = False,
+    defer: bool = True,
 ):
     """
     Display a single-line text input widget.
@@ -56,6 +52,7 @@ def text_area(
     placeholder: str = "Enter details...",
     ncols: int = 30,
     nrows: int = 4,
+    defer: bool = True,
 ):
     """
     Display a multi-line text input widget.
@@ -81,6 +78,7 @@ def number_input(
     minimum: float | int = None,
     is_int: bool = False,
     step_size: float | int = None,
+    defer: bool = True,
 ):
     """
     Display a numeric input widget.

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
+# isort: skip_file
+from simmate.database import connect  # must be first
+
 from pymatgen.analysis.structure_matcher import StructureMatcher
 
-from simmate.database import connect
-from simmate.database.third_parties import (
-    AflowStructure,
-    CodStructure,
-    JarvisStructure,
-    MatprojStructure,
-    OqmdStructure,
-)
+from simmate.apps.aflow.models import AflowStructure
+from simmate.apps.cod.models import CodStructure
+from simmate.apps.jarvis.models import JarvisStructure
+from simmate.apps.materials_project.models import MatprojStructure
+from simmate.apps.oqmd.models import OqmdStructure
 from simmate.toolkit import Composition, Structure
 
 
@@ -20,8 +20,8 @@ def get_known_structures(
     **kwargs,  # Extra filtering criteria
 ) -> list[Structure]:
     """
-    Goes through all database tables in the `simmate.database.third_parties`
-    module and grabs all structures with a matching composition.
+    Goes through all database tables from default third-party apps
+    and grabs all structures with a matching composition.
 
     Each database table must be populated -- otherwise this function will
     return an empty list.

@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------------
 
 """
-This tests workflow execution. For simplicity, the "workflow" here is only a 
+This tests workflow execution. For simplicity, the "workflow" here is only a
 pass statement. Thus the times show us the overhead caused by the executor.
 """
 

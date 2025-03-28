@@ -24,11 +24,15 @@ def get_all_workflows(
     apps_to_search: list[str] = settings.apps,
     as_dict: bool = False,
     exclude_subflows: bool = False,
+    exclude_utilities: bool = False,
 ) -> list[Workflow]:
     """
     Goes through a list of apps and grabs all workflow objects available.
     By default, this will grab all installed 'settings.apps'
     """
+    if not exclude_utilities:
+        apps_to_search = apps_to_search + ["simmate.website.configs.WorkflowsConfig"]
+
     app_workflows = []
     for app_name in apps_to_search:
         # check if there is a workflow module for this app and load it if so

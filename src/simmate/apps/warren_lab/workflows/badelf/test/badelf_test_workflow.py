@@ -3,7 +3,7 @@
 from simmate.apps.warren_lab.workflows.static_energy.pbesol import (
     StaticEnergy__Vasp__WarrenLabPbesol,
 )
-from simmate.engine import StagedWorkflow
+from simmate.workflows.base_flow_types import StagedWorkflow
 
 
 class StaticEnergy__Vasp__WarrenLabPrebadelfTest(StaticEnergy__Vasp__WarrenLabPbesol):

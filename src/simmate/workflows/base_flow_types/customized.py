@@ -25,7 +25,7 @@ base_workflow: static-energy/mit
 # These would update the class attributes for the single workflow run
 # The "custom_" start indicates we are updating some attribute
 updated_settings:
-    incar: 
+    incar:
         - ENCUT: 600
         - KPOINTS: 0.25
     potcar_mappings:
@@ -40,7 +40,8 @@ input_parameters:
 
 import logging
 
-from simmate.engine import S3Workflow, Workflow
+from simmate.engine import Workflow
+from simmate.workflows.base_flow_types import S3Workflow
 
 
 class Customized__Toolkit__UserConfig(Workflow):
@@ -112,8 +113,6 @@ class Customized__Toolkit__UserConfig(Workflow):
         input_parameters.pop("source")
 
         # now run the task with the remaining parameters
-        # Note, we are using run_config instead of run because we do not want this
-        # registered as a task run of the original class
         state = NewWorkflow.run(
             source={
                 "customized": True,

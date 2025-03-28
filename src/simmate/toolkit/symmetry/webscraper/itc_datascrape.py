@@ -2,10 +2,10 @@
 
 """
 
-Currently I grab the first table for each spacegroup, but in many cases there 
-are more options. For example, spacegroup 10 has "Unique Axis b" and "Unique 
+Currently I grab the first table for each spacegroup, but in many cases there
+are more options. For example, spacegroup 10 has "Unique Axis b" and "Unique
 Axis c" tables to choose from -- by default I grab the first. The same goes for
-spacegroups like 166 where there is a "Hexagonal" and "Rhombohedral" option. 
+spacegroups like 166 where there is a "Hexagonal" and "Rhombohedral" option.
 If instead I wanted to specify which to choose, I would look instead the headers
 on each page. The headers should line up with the tables. For example in
 spacegroup 166, I can see:

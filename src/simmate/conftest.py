@@ -5,11 +5,11 @@ This module is for Simmate's test suite. You'll only use this if you are
 contributing to the source code and making new tests.
 
 Nearly all of Simmate's tests stem from toolkit objects, so this file loads sample
-objects using the `toolkit.base_data_types` module. These Structures and 
+objects using the `toolkit.base_data_types` module. These Structures and
 Compositions can be used in any test.
 
 Read more on pytest fixtures [here](https://docs.pytest.org/en/6.2.x/fixture.html).
-This file helps share fixtures accross files as described 
+This file helps share fixtures accross files as described
 [here](https://docs.pytest.org/en/6.2.x/fixture.html#conftest-py-sharing-fixtures-across-multiple-files).
 """
 
@@ -23,10 +23,10 @@ from typer.testing import CliRunner
 
 from simmate.apps.vasp.inputs import Potcar
 from simmate.database.base_data_types import Spacegroup
-from simmate.engine import S3Workflow
 from simmate.toolkit import Composition, Structure, base_data_types
 from simmate.utilities import get_directory
 from simmate.website.test_app.models import TestStructure
+from simmate.workflows.base_flow_types import S3Workflow
 
 COMPOSITIONS_STRS = [
     "Fe1",

@@ -6,12 +6,6 @@ from simmate.configuration import settings
 from simmate.database.base_data_types import DatabaseTable
 from simmate.website.core_components.base_api_view_dev import DynamicApiView
 
-# closed-source data types. We can skip these if they aren't present
-try:
-    from simmate_corteva.rdkit.models import Molecule
-except ModuleNotFoundError:
-    Molecule = None  # dummy class just for comparison below
-
 # BUG: fails if tables from different apps have the same name
 EXPLORABLE_TABLES = {
     DatabaseTable.get_table(table_name).table_name: DatabaseTable.get_table(table_name)

@@ -9,9 +9,11 @@ import numpy
 import pandas
 import plotly.express as plotly_express
 import plotly.graph_objects as plotly_go
+from django.utils.timezone import now
 from rich.progress import track
 
 from simmate.apps.evolution import selectors as selector_module
+from simmate.apps.evolution import stop_conditions as stop_conditions_module
 from simmate.apps.evolution.models import SteadystateSource
 from simmate.configuration.dask import get_dask_client
 from simmate.database.base_data_types import Calculation, table_column
@@ -40,12 +42,8 @@ class FixedCompositionSearch(Calculation):
     fitness_field = table_column.CharField(max_length=200, null=True, blank=True)
 
     # Other settings for the search
-    min_structures_exact = table_column.IntegerField(null=True, blank=True)
-    max_structures = table_column.IntegerField(null=True, blank=True)
-    best_survival_cutoff = table_column.IntegerField(null=True, blank=True)
     nfirst_generation = table_column.IntegerField(null=True, blank=True)
     nsteadystate = table_column.IntegerField(null=True, blank=True)
-    convergence_cutoff = table_column.FloatField(null=True, blank=True)
 
     # Key classes to use during the search
     selector_name = table_column.CharField(max_length=200, null=True, blank=True)
@@ -53,7 +51,7 @@ class FixedCompositionSearch(Calculation):
     validator_name = table_column.CharField(max_length=200, null=True, blank=True)
     validator_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
     singleshot_sources = table_column.JSONField(default=list, null=True, blank=True)
-    # stop_condition_name ---> assumed for now
+    stop_conditions = table_column.JSONField(default=dict, null=True, blank=True)
     # information about the steadystate_sources are stored within
     # the SteadstateSource datatable
 
@@ -68,18 +66,16 @@ class FixedCompositionSearch(Calculation):
         blank=True,
     )
 
-    # This is an optional an input for an expected structure in order to allow
-    # creation of plots that show convergence vs. the expected. This is very
-    # useful benchmarking and when the user has a target structure that they
-    # hope to see. For now, this MUST a dictionary input (either pymatgen.as_dict()
-    # that points to another table entry because we don't want to use the
-    # Structure mix-in on this table (too many unecessary columns)
-    expected_structure = table_column.JSONField(default=dict)
-
     # TODO:
     #   parent_variable_nsite_searches
     #   parent_binary_searches
     #   parent_ternary_searches
+
+    # define a class variable for the stop conditions so they don't need to be
+    # initialized every time
+    stop_conditions_init = []
+    # class variable to keep track of most recent stop condition check
+    last_check_timestamp = None
 
     # -------------------------------------------------------------------------
     # Setup of the database tables at the beginning of a new search
@@ -89,9 +85,31 @@ class FixedCompositionSearch(Calculation):
     def from_toolkit(
         cls,
         steadystate_sources: dict = None,
+        stop_conditions: dict = None,
         as_dict: bool = False,
         **kwargs,
     ):
+        if stop_conditions is not None:
+            # We require that the BasicStopConditions are part of our
+            # stop_conditions. We add them here if they aren't
+            if "BasicStopConditions" not in stop_conditions.keys():
+                stop_conditions["BasicStopConditions"] = dict(
+                    max_structures=None,
+                    min_structures_exact=None,
+                    convergence_cutoff=0.001,
+                    best_survival_cutoff=None,
+                )
+
+            # Some stop conditions might take a Structure object as an input, but
+            # this is not serializable. We convert them to a pymatgen dict here
+            for stop_name, stop_kwargs in stop_conditions.items():
+                for parameter, inputs in stop_kwargs.items():
+                    if isinstance(inputs, Structure):
+                        stop_conditions[stop_name][parameter] = inputs.as_dict()
+
+            # add updated stop conditions to kwargs
+            kwargs["stop_conditions"] = stop_conditions
+
         # Initialize the steady state sources by saving their config information
         # to the database.
         if steadystate_sources and not as_dict:
@@ -114,63 +132,20 @@ class FixedCompositionSearch(Calculation):
     # -------------------------------------------------------------------------
 
     def check_stop_condition(self):
-        # First, see if we have at least our minimum limit for *exact* structures.
-        # "Exact" refers to the nsites of the structures. We want to ensure at
-        # least N structures with the input/expected number of sites have been
-        # calculated.
-        # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
-        count_exact = self.individuals_datatable.objects.filter(
-            formula_full=self.composition,
-            workflow_name=self.subworkflow_name,
-            energy_per_atom__isnull=False,
-        ).count()
-        if count_exact < self.min_structures_exact:
-            return False
+        if len(self.stop_conditions) == 0:
+            raise Exception("No stop conditions were set.")
 
-        # Next, see if we've hit our maximum limit for structures.
-        # Note: because we are only looking at the results table, this is really
-        # only counting the number of successfully calculated individuals.
-        # Nothing is done to stop those that are still running or to count
-        # structures that failed to be calculated
-        # {f"{self.fitness_field}__isnull"=False} # when I allow other fitness fxns
-        if self.individuals_completed.count() > self.max_structures:
-            logging.info(
-                "Maximum number of completed calculations hit "
-                f"(n={self.max_structures})."
-            )
-            return True
+        # loop over our stop conditions and check if they are met
+        for stop_condition in self.stop_conditions_init:
+            result = stop_condition.check()
+            if result:
+                return True
 
-        # The next stop condition is based on how long we've have the same
-        # "best" individual. If the number of new individuals calculated (without
-        # any becoming the new "best") is greater than best_survival_cutoff, then
-        # we can stop the search.
-        # grab the best individual for reference
-        best = self.best_individual
+        # update time since last check
+        self.last_check_timestamp = now()
 
-        # We need this if-statement in case no structures have completed yet.
-        if not best:
-            return False
-
-        # count the number of new individuals added AFTER the best one. If it is
-        # more than best_survival_cutoff, we stop the search.
-        # Note, we look at all structures that have an energy_per_atom greater
-        # than 1meV/atom higher than the best structure. The +1meV ensures
-        # we aren't prolonging the calculation for insignificant changes in
-        # the best structure. Looking at the energy also ensures that we are
-        # only counting completed calculations.
-        # BUG: this filter needs to be updated to fitness_value and not
-        # assume we are using energy_per_atom
-        num_new_structures_since_best = self.individuals.filter(
-            energy_per_atom__gt=best.energy_per_atom + self.convergence_cutoff,
-            finished_at__gte=best.finished_at,
-        ).count()
-        if num_new_structures_since_best > self.best_survival_cutoff:
-            logging.info(
-                "Best individual has not changed after "
-                f"{self.best_survival_cutoff} new individuals added."
-            )
-            return True
-        # If we reached this point, then we haven't hit a stop condition yet!
+        # If we've reached this point without returning True, we haven't reached
+        # our conditions so we return False
         return False
 
     def _check_singleshot_sources(self, directory: Path):
@@ -324,6 +299,17 @@ class FixedCompositionSearch(Calculation):
         # being ran elsewhere? Do we still want new entries for each?
 
         return steadystate_sources_db
+
+    def _init_stop_conditions(self):
+        # Initialize our stop conditions and add them to our
+        # stop_conditions_init list to loop over later
+        for stop_condition_name, kwargs in self.stop_conditions.items():
+            # Get the stop condition class
+            stop_condition_class = getattr(stop_conditions_module, stop_condition_name)
+            # initialize the stop condition, passing it this search and any kwargs
+            stop_condition = stop_condition_class(search=self, **kwargs)
+            # add the stop condition to our list of initialized stop conditions
+            self.stop_conditions_init.append(stop_condition)
 
     def _check_steadystate_workflows(self):
         # local import to prevent circular import issues
@@ -896,6 +882,7 @@ class StagedSeriesConvergence(PlotlyFigure):
         composition = Composition(search.composition)
         plot = search.subworkflow.get_staged_series_convergence_plot(
             # See `individuals` method for why we use these filters
+            fitness_field=search.fitness_field,
             formula_reduced=composition.reduced_formula,
             nsites__lte=composition.num_atoms,
             energy_per_atom__isnull=False,
@@ -908,6 +895,7 @@ class StagedSeriesHistogram(PlotlyFigure):
         composition = Composition(search.composition)
         plot = search.subworkflow.get_staged_series_histogram_plot(
             # See `individuals` method for why we use these filters
+            fitness_field=search.fitness_field,
             formula_reduced=composition.reduced_formula,
             nsites__lte=composition.num_atoms,
             energy_per_atom__isnull=False,

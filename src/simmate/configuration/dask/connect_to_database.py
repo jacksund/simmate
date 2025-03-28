@@ -6,14 +6,14 @@ a worker is started -- rather than have each task connect separately.
 
 You can use this script like so...
 
-``` python 
+``` python
     from dask.distributed import Client
     client = Client(preload="simmate.configuration.dask.connect_to_database")
 ```
 
 Note, there is also a high-level utility for this, which can be easier to
 remember:
-    
+
 ``` python
 from simmate.utilities import get_dask_client
 client = get_dask_client()
