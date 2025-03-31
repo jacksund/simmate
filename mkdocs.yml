@@ -216,10 +216,10 @@ nav:
         - Overview: apps/overview.md
         - BadELF: 
             - Quick Start: apps/badelf/quick_start.md
-            - BadElfToolkit:
-                - Usage: apps/badelf/toolkit/bad_elf_toolkit.md
-                - Parameters: apps/badelf/toolkit/parameters.md
+            - Running in Python: apps/badelf/python.md
+            - Background: apps/badelf/background.md
             - ElectrideFinder: 
+                - Background: apps/badelf/finder/background.md
                 - Usage: apps/badelf/finder/electride_finder.md
                 - Parameters: apps/badelf/finder/parameters.md
             # - Spin Calculations: apps/badelf/spin_calculations.md

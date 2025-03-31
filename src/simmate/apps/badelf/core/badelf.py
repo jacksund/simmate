@@ -79,6 +79,7 @@ class BadElfToolkit:
         electride_finder_kwargs: dict = dict(
             resolution=0.02,
             include_lone_pairs=False,
+            include_shared_features=True,
             metal_depth_cutoff=0.1,
             min_covalent_angle=135,
             min_covalent_bond_ratio=0.35,

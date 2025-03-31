@@ -897,9 +897,8 @@ class ElectrideFinder:
                         graph,
                         {child_idx: {"type": basin_type, "subtype": basin_subtype}},
                     )
-            # The final option is that our reducible region surrounds exactly
-            # one atom. This would be the correct way to distinguish atoms if
-            # we used a full electron method. Most of the subregions of this
+            # The final option is that our reducible region surrounds a finite
+            # number of atoms. Most of the subregions of this
             # environment will be atomic, but they can be of several types including
             # atom shells/cores, unshared electrons, lone-pairs. The one exception
             # is heterogenous covalent bonds, which should be shared.
@@ -1465,6 +1464,7 @@ class ElectrideFinder:
         self,
         resolution: float = 0.02,
         include_lone_pairs: bool = False,
+        include_shared_features: bool = True,
         metal_depth_cutoff: float = 0.1,
         min_covalent_angle: float = 135,
         min_covalent_bond_ratio: float = 0.35,
@@ -1498,6 +1498,7 @@ class ElectrideFinder:
                 graph_up,
                 self.bader_up,
                 include_lone_pairs,
+                include_shared_features,
                 electride_elf_min,
                 electride_depth_min,
                 electride_charge_min,
@@ -1508,6 +1509,7 @@ class ElectrideFinder:
                 graph_down,
                 self.bader_down,
                 include_lone_pairs,
+                include_shared_features,
                 electride_elf_min,
                 electride_depth_min,
                 electride_charge_min,
@@ -1527,6 +1529,7 @@ class ElectrideFinder:
                 graph,
                 self.bader_up,
                 include_lone_pairs,
+                include_shared_features,
                 electride_elf_min,
                 electride_depth_min,
                 electride_charge_min,
@@ -1539,6 +1542,7 @@ class ElectrideFinder:
         graph: BifurcationGraph(),
         bader,
         include_lone_pairs: bool = False,
+        include_shared_features: bool = True,
         electride_elf_min: float = 0.5,
         electride_depth_min: float = 0.2,
         electride_charge_min: float = 0.5,
@@ -1568,15 +1572,15 @@ class ElectrideFinder:
             # if our subtype is anothing other than "bare electron" we have
             # a covalent bond or metal bond and append a Z dummy atom
             if subtype == "covalent":
+                if not include_shared_features: continue
                 species = "z"
             elif subtype == "metallic":
+                if not include_shared_features: continue
                 species = "m"
             elif subtype == "lone-pair":
-                if include_lone_pairs:
-                    species = "lp"
-                else:
-                    # skip to next feature
-                    continue
+                if not include_lone_pairs: continue
+                species = "lp"
+
             else:
                 # we have a bare electron. We check each condition
                 condition_test = np.array(
@@ -1592,8 +1596,9 @@ class ElectrideFinder:
                 if np.all(condition_test > conditions):
                     species = "e"
                 else:
+                    if not include_shared_features: continue
                     species = "le"
-
+            
             # Now that we have the type of feature, we want to combine all
             # of its basins to a single point.
             basins = attributes["basins"]

@@ -15,8 +15,6 @@
 
 BadELF is a method that combines Bader Charge Analysis and the Electron Localization Function (ELF) to predict oxidation states and perform population analysis of electrides. It uses Bader segmentation of the ELF to calculate the charge on electride electrons and Voronoi segmentation of the ELF to calculate charge on atoms. Since the original BadELF paper was published, additional functionality has been added to handle systems with covalent/metallic features and for handling the up/down spin ELF and charge density separately.
 
-Simmate's BadELF application provides workflows and utilities to streamline BadELF analysis. This page provides a summary of how to run the BadELF algorithm. For more details and advanced usage, see the BadElfToolkit and ElectrideFinder docs. 
-
 !!! note
     BadELF currently only works with VASP, but we are interested in expanding its use to other ab initio software. If you are interested in this, let us know, as that will help to make this a higher priority.
 
@@ -24,7 +22,7 @@ Simmate's BadELF application provides workflows and utilities to streamline BadE
 
 ## Installation
 
-To use the BadELF module you will first need to follow the instructions for [installing simmate](../../../getting_started/installation/quick_start.md). Then BadELF can be set up with the following instructions.
+To use the BadELF module you will first need to follow the instructions for [installing simmate](../../../getting_started/installation/quick_start). Then BadELF can be set up with the following instructions.
 
 1. This app uses `pybader` under the hood. Install this with:
 ``` bash
@@ -69,6 +67,7 @@ labeled_structure_down: none # Same as above, but for spin down system
 electride_finder_kwargs: # Settings for the ElectrideFinder. See ElectrideFinder docs for more info
     resolution: 0.02,
     include_lone_pairs: false,
+    include_shared_features: true,
     metal_depth_cutoff: 0.1,
     min_covalent_angle: 135,
     min_covalent_bond_ratio: 0.35,
@@ -92,28 +91,28 @@ And run the workflow:
 simmate workflows run input.yaml
 ```
 
-Alternatively, the BadELF algorithm can be run from the command line without a yaml file:
+Alternatively, the BadELF workflow can be run from the command line without a yaml file:
 ``` bash
 simmate workflows run-quick bad-elf.badelf.badelf --directory /path/to/folder
 ```
 
-For a complete list of parameters, see our [parameters page](../../parameters)
+If you plan to run many BadELF calculations or need to manipulate the results in post, it may be more convenient to run the workflow using python. See the [full guides](../../../../full_guides/workflows/basic_use) for more details. For a complete list of parameters and their usage, see our [parameters page](../../../parameters)
 
 ### (b) from structure
 
 If you would prefer to have Simmate handle the VASP calculation, workflows are available that will first run the required DFT and then BadELF. 
 
-These workflows are stored in the `Warren Lab` app, which contains our lab's preferred VASP settings. Refer to the `Warren Lab` app for more details and to view the available workflows.
+These workflows are stored in the `Warren Lab` app, which contains our lab's preferred VASP settings. Refer to the [`Warren Lab` app](../../warren_lab) for more details and to view the available workflows.
 
 --------------------------------------------------------------------------------
 
 ## Viewing Results
 
-Running BadELF using a .yaml file or the command line uses Simmate's Workflow system. The results of these workflows can be viewed in a couple of ways.
+Running BadELF as described above uses Simmate's Workflow system. The results of these workflows can be viewed in a couple of ways.
 
 ### (1) The Database
 
-When setting up simmate, you should have created a local or cloud database. Results from any workflow run through simmate will be stored here, allowing for the automation of high-throughput calculations. Basic usage of the database can be found in our [docs](../../getting_started/database/quick_start). The BadELF results table can be accessed as a pandas dataframe with the following code:
+When setting up simmate, you created a local or cloud database. Results from any workflow run through simmate will be stored here, allowing for the automation of high-throughput calculations. Basic usage of the database can be found in our [getting started docs](../../../getting_started/database/quick_start). The BadELF results table can be accessed through python as a pandas dataframe:
 
 ``` python
 from simmate.database import connect
@@ -132,12 +131,46 @@ which will return a dict object with column names as keys and doc information as
 
 ### (2) Local Files
 
-If you are only interested in a small number of BadELF calculations, it may be more convenient to use the results written to local files. These can be found in a badelf_summary.csv file or the simmate_summary.yaml files. Additionally, a cif file will be written containing the labeled structure with "dummy" atoms representing electride electrons and other non-atomic features (See [ElectrideFinder](../finder/electride_finder.md) page for more info).
+If you are only interested in a small number of BadELF calculations, it may be more convenient to use the results written to local files. These can be found in the `badelf_summary.csv` file or the `simmate_summary.yaml` files. Additionally, a cif file will be written containing the labeled structure with "dummy" atoms representing electride electrons and other non-atomic features (See [ElectrideFinder](finder/electride_finder.md) page for more info).
 
 --------------------------------------------------------------------------------
 
-## Use in python: the BadElfToolkit class
+## Covalent and Metallic Systems
 
-In addition to workflows, the BadELF app also contains a suite of python modules to aid in BadELF analysis. These can be accessed under the `simmate.apps.badelf.core` module. The most important of these is the BadElfToolkit class which allows users to run BadELF directly. Running BadELF in this way can give access to additional useful information, but is less user friendly. For more information, visit the [BadElfToolkit page](../toolkit/bad_elf_toolkit.md)
+Covalent and metallic features in the ELF conflict with the original BadELF algorithm (see [Background](../background)). There are two main ways to handle these features:
+
+### (1) Split Them with Planes
+
+Similar to placing planes at minima in the ELF in ionic systems, one can place planes at maxima in covalent/metallic systems. This results in the features being divided and their charge assigned to nearby atoms. To handle covalent/metallic bonds this way use the follow parameter in the electride_finder_kwargs:
+
+``` yaml
+include_shared_features: true
+```
+
+!!! warning
+    Metallic features are not always along bonds. If this is the case, this method may not split them effectively.
+
+### (2) Treat them Separately
+
+Alternatively, one can treat covalent and metallic bonds as their own entities, similar to the treatment of bare electrons in electrides. In these cases, one needs to decide whether to separate these features with a zero-flux surface or a voronoi like plane. This can be set with the `shared_feature_algorithm` parameter:
+
+``` yaml
+shared_feature_algorithm: zero-flux # or voronoi
+```
+
+!!! note
+    We typically recommend this method as it provides more information about the overall system. However, there is currently no method assigning the charge on these features to nearby atoms, resulting in unreasonable oxidation states in the results. We plan to implement methods for assigning this charge in the future.
+
+!!! note
+    Atoms will by default still be separated using planes placed at maxima. This hasn't been tested, and it may be preferable to use the more traditional zero-flux partitioning. To do this, set `algorithm: zero-flux`.
+--------------------------------------------------------------------------------
+
+## Accounting for Spin
+
+Electrides often have differing ELF and charge density for the spin-up and spin-down systems from spin-polarized calculations. Therefore, BadELF by default treats the spin-up and spin-down systems separately and combines the results where possible in post. This differs from the original algorithm which assumed a closed system where the spin-up and spin-down systems match. If a closed-system treatment is preferred set:
+
+``` yaml
+separate_spin: false
+```
 
 
