@@ -17,7 +17,7 @@ from pymatgen.io.vasp import Potcar
 from scipy.ndimage import label
 from tqdm import tqdm
 
-from simmate.apps.badelf.core.electride_finder import ElectrideFinder
+from simmate.apps.badelf.core.elf_analyzer import ElfAnalyzerToolkit
 from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.apps.badelf.core.voxel_assignment import VoxelAssignmentToolkit
 from simmate.apps.bader.toolkit import Grid
@@ -57,8 +57,8 @@ class BadElfToolkit:
             Whether to ignore warnings about missing atomic basins
             due to using pseudopotentials with a small amount of
             valence electrons.
-        electride_finder_kwargs (dict):
-            A dictionary of keyword arguments to pass to the ElectrideFinder
+        elf_analyzer_kwargs (dict):
+            A dictionary of keyword arguments to pass to the ElfAnalyzerToolkit
             class.
 
     """
@@ -76,7 +76,7 @@ class BadElfToolkit:
         find_electrides: bool = True,
         labeled_structure: Structure = None,
         ignore_low_pseudopotentials: bool = False,
-        electride_finder_kwargs: dict = dict(
+        elf_analyzer_kwargs: dict = dict(
             resolution=0.02,
             include_lone_pairs=False,
             include_shared_features=True,
@@ -120,7 +120,7 @@ class BadElfToolkit:
         self.labeled_structure = labeled_structure
         self.shared_feature_algorithm = shared_feature_algorithm
         self.ignore_low_pseudopotentials = ignore_low_pseudopotentials
-        self.electride_finder_kwargs = electride_finder_kwargs
+        self.elf_analyzer_kwargs = elf_analyzer_kwargs
 
     @cached_property
     def _find_electrides_and_covalent_bonds(self):
@@ -138,15 +138,15 @@ class BadElfToolkit:
         # !!! When we add spin distinction we should also allow users to provide
         # both electride structures.
 
-        electride_finder = ElectrideFinder(
+        elf_analyzer = ElfAnalyzerToolkit(
             elf_grid=self.partitioning_grid.copy(),
             charge_grid=self.charge_grid.copy(),
             directory=self.directory,
             ignore_low_pseudopotentials=self.ignore_low_pseudopotentials,
         )
         if self.find_electrides:
-            electride_structure = electride_finder.get_labeled_structures(
-                **self.electride_finder_kwargs
+            electride_structure = elf_analyzer.get_labeled_structures(
+                **self.elf_analyzer_kwargs
             )
         else:
             if self.labeled_structure is None:
@@ -155,7 +155,7 @@ class BadElfToolkit:
                 )
             electride_structure = self.labeled_structure.copy()
 
-        shared_feature_atoms = electride_finder.get_shared_feature_neighbors(
+        shared_feature_atoms = elf_analyzer.get_shared_feature_neighbors(
             electride_structure
         )
 
@@ -925,7 +925,7 @@ class BadElfToolkit:
         threads: int = None,
         shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         ignore_low_pseudopotentials: bool = False,
-        electride_finder_kwargs: dict = dict(
+        elf_analyzer_kwargs: dict = dict(
             resolution=0.02,
             include_lone_pairs=False,
             metal_depth_cutoff=0.1,
@@ -966,8 +966,8 @@ class BadElfToolkit:
                 Whether to ignore warnings about missing atomic basins
                 due to using pseudopotentials with a small amount of
                 valence electrons.
-            electride_finder_kwargs (dict):
-                A dictionary of keyword arguments to pass to the ElectrideFinder
+            elf_analyzer_kwargs (dict):
+                A dictionary of keyword arguments to pass to the ElfAnalyzerToolkit
                 class.
 
         Returns:
@@ -985,7 +985,7 @@ class BadElfToolkit:
             threads=threads,
             shared_feature_algorithm=shared_feature_algorithm,
             ignore_low_pseudopotentials=ignore_low_pseudopotentials,
-            electride_finder_kwargs=electride_finder_kwargs,
+            elf_analyzer_kwargs=elf_analyzer_kwargs,
         )
 
     def write_species_file(self, file_type: str = "ELFCAR", species: str = "E"):
@@ -1156,7 +1156,7 @@ class SpinBadElfToolkit:
         threads: int = None,
         shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         ignore_low_pseudopotentials: bool = False,
-        electride_finder_kwargs: dict = dict(
+        elf_analyzer_kwargs: dict = dict(
             resolution=0.02,
             include_lone_pairs=False,
             metal_depth_cutoff=0.1,
@@ -1201,7 +1201,7 @@ class SpinBadElfToolkit:
         self.find_electrides = find_electrides
         self.shared_feature_algorithm = shared_feature_algorithm
         self.ignore_low_pseudopotentials = ignore_low_pseudopotentials
-        self.electride_finder_kwargs = electride_finder_kwargs
+        self.elf_analyzer_kwargs = elf_analyzer_kwargs
 
         # Create badelf class variables for each spin
         if separate_spin and partitioning_grid.is_spin_polarized:
@@ -1231,7 +1231,7 @@ class SpinBadElfToolkit:
                 find_electrides,
                 labeled_structure_up,
                 ignore_low_pseudopotentials,
-                electride_finder_kwargs,
+                elf_analyzer_kwargs,
             )
             self.badelf_spin_down = BadElfToolkit(
                 partitioning_grid_down,
@@ -1243,7 +1243,7 @@ class SpinBadElfToolkit:
                 find_electrides,
                 labeled_structure_down,
                 ignore_low_pseudopotentials,
-                electride_finder_kwargs,
+                elf_analyzer_kwargs,
             )
         else:
             self.spin_polarized = False
@@ -1257,7 +1257,7 @@ class SpinBadElfToolkit:
                 find_electrides,
                 labeled_structure_up,
                 ignore_low_pseudopotentials,
-                electride_finder_kwargs,
+                elf_analyzer_kwargs,
             )
             self.badelf_spin_down = None
 
@@ -1511,7 +1511,7 @@ class SpinBadElfToolkit:
         threads: int = None,
         shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         ignore_low_pseudopotentials: bool = False,
-        electride_finder_kwargs: dict = dict(
+        elf_analyzer_kwargs: dict = dict(
             resolution=0.02,
             include_lone_pairs=False,
             metal_depth_cutoff=0.1,
@@ -1562,8 +1562,8 @@ class SpinBadElfToolkit:
                 Whether to ignore warnings about missing atomic basins
                 due to using pseudopotentials with a small amount of
                 valence electrons.
-            electride_finder_kwargs (dict):
-                A dictionary of keyword arguments to pass to the ElectrideFinder
+            elf_analyzer_kwargs (dict):
+                A dictionary of keyword arguments to pass to the ElfAnalyzerToolkit
                 class.
 
 
@@ -1583,7 +1583,7 @@ class SpinBadElfToolkit:
             threads=threads,
             shared_feature_algorithm=shared_feature_algorithm,
             ignore_low_pseudopotentials=ignore_low_pseudopotentials,
-            electride_finder_kwargs=electride_finder_kwargs,
+            elf_analyzer_kwargs=elf_analyzer_kwargs,
         )
 
     def write_results_csv(self):

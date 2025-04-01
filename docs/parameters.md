@@ -338,12 +338,12 @@ Exclusive to the `restart.simmate.automatic` workflow, this is the original fold
 
 --------------------------
 
-## electride_finder_kwargs
-Exclusive to BadELF workflows. These are the keyword arguments passed to the `ElectrideFinder` class that control how features in the ELF (e.g. bare electrons, covalent/metallic bonds, etc.) are automatically found and labeled.
+## elf_analyzer_kwargs
+Exclusive to BadELF workflows. These are the keyword arguments passed to the `ElfAnalyzerToolkit` class that control how features in the ELF (e.g. bare electrons, covalent/metallic bonds, etc.) are automatically found and labeled.
 
 === "yaml"
     ``` yaml
-    electride_finder_kwargs:
+    elf_analyzer_kwargs:
         resolution: 0.02,
         include_lone_pairs: false,
         include_shared_features: true,
@@ -359,7 +359,7 @@ Exclusive to BadELF workflows. These are the keyword arguments passed to the `El
     ```
 === "toml"
     ``` toml
-    [electride_finder_kwargs]
+    [elf_analyzer_kwargs]
     resolution = 0.02
     include_lone_pairs = false
     include_shared_features = true
@@ -375,7 +375,7 @@ Exclusive to BadELF workflows. These are the keyword arguments passed to the `El
     ```
 === "python"
     ``` python
-    electride_finder_kwargs = dict(
+    elf_analyzer_kwargs = dict(
         resolution = 0.02,
         include_lone_pairs = false,
         include_shared_features = true,
@@ -395,7 +395,7 @@ Each keyword argument controls an aspect of how ELF features are found:
 
 ### resolution
 
-The interval at which to scan the ELF to generate [BifurcationGraphs](../badelf/finder/electride_finder). Larger values will be faster, but may miss bifurcations.
+The interval at which to scan the ELF to generate [BifurcationGraphs](../badelf/finder/elf_analyzer). Larger values will be faster, but may miss bifurcations.
 
 ### include_lone_pairs
 

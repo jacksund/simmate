@@ -38,7 +38,7 @@ class BadElfBase(Workflow):
         separate_spin=True,
         algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
         shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
-        electride_finder_kwargs: dict = dict(
+        elf_analyzer_kwargs: dict = dict(
             resolution=0.02,
             include_lone_pairs=False,
             include_shared_features=True,
@@ -86,7 +86,7 @@ class BadElfBase(Workflow):
             threads=threads,
             shared_feature_algorithm=shared_feature_algorithm,
             ignore_low_pseudopotentials=ignore_low_pseudopotentials,
-            electride_finder_kwargs=electride_finder_kwargs,
+            elf_analyzer_kwargs=elf_analyzer_kwargs,
         )
         # run badelf.
         results = badelf_tools.results

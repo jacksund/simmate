@@ -1,22 +1,22 @@
 
-# The ElectrideFinder Class
+# The ElfAnalyzerToolkit Class
 
 ## About
 
-The first step of the BadELF algorithm is to determine whether there are bare electrons in the system and, if so, where they are located. In the original paper this was done by using relatively simple distance and ELF value cutoffs. Since then, the `ElectrideFinder` method has evolved to be more rigorous. Using exclusively the ELF, charge density, and crystal structure, the `ElectrideFinder` class now automatically detects not only bare electrons, but atom cores, atom shells, covalent bonds, metallic features, and lone-pairs.
+The first step of the BadELF algorithm is to determine whether there are bare electrons in the system and, if so, where they are located. In the original paper this was done by using relatively simple distance and ELF value cutoffs. Since then, the `ElfAnalyzerToolkit` method has evolved to be more rigorous. Using exclusively the ELF, charge density, and crystal structure, the `ElfAnalyzerToolkit` class now automatically detects not only bare electrons, but atom cores, atom shells, covalent bonds, metallic features, and lone-pairs.
 
-While it was originally conceived to support the BadELF algorithm, the current ElectrideFinder class can be used as a general tool for analyzing the ELF, providing considerably more information on each ELF feature than the BadElfToolkit class.
+While it was originally conceived to support the BadELF algorithm, the current ElfAnalyzerToolkit class can be used as a general tool for analyzing the ELF, providing considerably more information on each ELF feature than the BadElfToolkit class.
 
-Explanations for each parameter can be found as a subsection of the `electride_finder_kwargs` section on our [parameters page](../../../../parameters)
+Explanations for each parameter can be found as a subsection of the `elf_analyzer_kwargs` section on our [parameters page](../../../../parameters)
 
 ## Initializing the Class
 
-The `ElectrideFinder` class can be initialized from files by running:
+The `ElfAnalyzerToolkit` class can be initialized from files by running:
 
 ``` python
-from simmate.apps.badelf.core import ElectrideFinder
+from simmate.apps.badelf.core import ElfAnalyzerToolkit
 
-finder = ElectrideFinder.from_files(
+finder = ElfAnalyzerToolkit.from_files(
     directory="/path/to/folder", # This is the directory where the files are located
     # The parameters below are optional
     elf_file="partitioning_filename", # default ELFCAR
@@ -26,10 +26,10 @@ finder = ElectrideFinder.from_files(
 )
 ```
 
-Alternatively, the `ElectrideFinder` class can be initialized by providing the ELF and charge density grids as Grid class objects. The Grid class inherits from pymatgen's VolumetricData class, and in principle allows for the use of codes other than VASP.
+Alternatively, the `ElfAnalyzerToolkit` class can be initialized by providing the ELF and charge density grids as Grid class objects. The Grid class inherits from pymatgen's VolumetricData class, and in principle allows for the use of codes other than VASP.
 
 ``` python
-from simmate.apps.badelf.core import ElectrideFinder
+from simmate.apps.badelf.core import ElfAnalyzerToolkit
 from simmate.apps.bader.toolkit import Grid
 from pathlib import Path
 
@@ -37,7 +37,7 @@ directory = Path("path/to/folder") # indicates the path to the folder where BadE
 elf_grid = Grid.from_file("path/to/partitioning_file")
 charge_grid = Grid.from_file("path/to/partitioning_file")
 
-finder = ElectrideFinder(
+finder = ElfAnalyzerToolkit(
     directory=directory,
     elf_grid=partitioning_grid,
     charge_grid=charge_grid,
@@ -126,7 +126,7 @@ The Y-axis represents the ELF value at which each domain first separates from it
 
 ## Labeling Structures
 
-In addition to creating bifurcation plots, the `ElectrideFinder` can also be used to generate pymatgen Structure objects with "dummy" atoms representing different types of domains. This is primarily used by the `BadElfToolkit` for BadELF analysis, but is also useful for visualization.
+In addition to creating bifurcation plots, the `ElfAnalyzerToolkit` can also be used to generate pymatgen Structure objects with "dummy" atoms representing different types of domains. This is primarily used by the `BadElfToolkit` for BadELF analysis, but is also useful for visualization.
 
 To generate a labeled structures:
 

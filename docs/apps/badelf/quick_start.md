@@ -15,7 +15,7 @@
 
 BadELF is a method that combines Bader Charge Analysis and the Electron Localization Function (ELF) to predict oxidation states and perform population analysis of electrides. It uses Bader segmentation of the ELF to calculate the charge on electride electrons and Voronoi segmentation of the ELF to calculate charge on atoms. Since the original BadELF paper was published, additional functionality has been added to handle systems with covalent/metallic features and for handling the up/down spin ELF and charge density separately.
 
-An additional tool, the [ElectrideFinder](../finder/electride_finder) has also been developed to assist in analyzing features in the ELF. This tool is designed for in-depth ELF topological analysis, and can also perform a simple charge analysis using traditional zero-flux surfaces.
+An additional tool, the [ElfAnalyzerToolkit](../finder/elf_analyzer) has also been developed to assist in analyzing features in the ELF. This tool is designed for in-depth ELF topological analysis, and can also perform a simple charge analysis using traditional zero-flux surfaces.
 
 !!! note
     BadELF currently only works with VASP, but we are interested in expanding its use to other ab initio software. If you are interested in this, let us know, as that will help to make this a higher priority.
@@ -63,10 +63,10 @@ workflow_name: bad-elf.badelf.badelf
 directory: /path/to/folder
 
 # all parameters below are optional
-find_electrides: true # Whether or not to use ElectrideFinder to automatically find electrides
-labeled_structure_up: none # If find_electrides is false, a labeled structure with dummy atoms (see ElectrideFinder docs)
+find_electrides: true # Whether or not to use ElfAnalyzerToolkit to automatically find electrides
+labeled_structure_up: none # If find_electrides is false, a labeled structure with dummy atoms (see ElfAnalyzerToolkit docs)
 labeled_structure_down: none # Same as above, but for spin down system
-electride_finder_kwargs: # Settings for the ElectrideFinder. See ElectrideFinder docs for more info
+elf_analyzer_kwargs: # Settings for the ElfAnalyzerToolkit. See ElfAnalyzerToolkit docs for more info
     resolution: 0.02,
     include_lone_pairs: false,
     include_shared_features: true,
@@ -133,7 +133,7 @@ which will return a dict object with column names as keys and doc information as
 
 ### (2) Local Files
 
-If you are only interested in a small number of BadELF calculations, it may be more convenient to use the results written to local files. These can be found in the `badelf_summary.csv` file or the `simmate_summary.yaml` files. Additionally, a cif file will be written containing the labeled structure with "dummy" atoms representing electride electrons and other non-atomic features (See [ElectrideFinder](finder/electride_finder.md) page for more info).
+If you are only interested in a small number of BadELF calculations, it may be more convenient to use the results written to local files. These can be found in the `badelf_summary.csv` file or the `simmate_summary.yaml` files. Additionally, a cif file will be written containing the labeled structure with "dummy" atoms representing electride electrons and other non-atomic features (See [ElfAnalyzerToolkit](finder/elf_analyzer.md) page for more info).
 
 --------------------------------------------------------------------------------
 
@@ -143,7 +143,7 @@ Covalent and metallic features in the ELF conflict with the original BadELF algo
 
 ### (1) Split Them with Planes
 
-Similar to placing planes at minima in the ELF in ionic systems, one can place planes at maxima in covalent/metallic systems. This results in the features being divided and their charge assigned to nearby atoms. To handle covalent/metallic bonds this way use the follow parameter in the electride_finder_kwargs:
+Similar to placing planes at minima in the ELF in ionic systems, one can place planes at maxima in covalent/metallic systems. This results in the features being divided and their charge assigned to nearby atoms. To handle covalent/metallic bonds this way use the follow parameter in the elf_analyzer_kwargs:
 
 ``` yaml
 include_shared_features: true
