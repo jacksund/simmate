@@ -118,6 +118,8 @@ When switching from Python to YAML, make sure you adjust the input format of you
 ## algorithm
 This parameter is specific to the BadELf workflows in the warrenapp. Options include `badelf`, `voronelf`, or `zero-flux`.
 
+`zero-flux` will use traditional bader-like partitioning. `voronelf` will use planes located at minima in the ELF along atomic bonds. `badelf` will use a hybrid, separating atoms with planes and bare electrons with a zero-flux surface.
+
 === "yaml"
     ``` yaml
     algorithm: badelf
@@ -148,24 +150,6 @@ This parameter is used to determine if the angles between sites are symmetricall
 === "python"
     ``` python
     angle_tolerance = 10.0
-    ```
-
---------------------------
-
-## check_for_covalency
-This parameter is unique to the badelf workflows of the warrenapp. It indicates whether the algorithm should search the structure for covalency features. It is generally recommended to leave this as True. Covalency is not currently handled by the BadELF algorithm and covalency features in the ELF can heavily throw off the partitioning scheme, causing nonsense results.
-
-=== "yaml"
-    ``` yaml
-    check_for_covalence: true
-    ```
-=== "toml"
-    ``` yaml
-    check_for_covalence = true
-    ```
-=== "python"
-    ``` python
-    check_for_covalence = True
     ```
 
 --------------------------
@@ -307,25 +291,6 @@ This parameter determines whether to copy the directory from the previous calcul
     copy_previous_directory=True
     ```
 
---------------------------
-
-## covalent_bond_alg
-For BadELF workflows, this parameter determines how covalent bonds are seperated from nearby atoms. Options are "zero-flux" or "voronoi" corresponding to bader-like and plane-like seperations.
-=== "yaml"
-    ``` yaml
-    covalent_bond_alg: zero-flux
-    ```
-=== "toml"
-    ``` toml
-    covalent_bond_alg = "zero-flux"
-    ```
-=== "python"
-    ``` python
-    covalent_bond_alg = "zero-flux"
-    ```
-
---------------------------
-
 ## diffusion_analysis_id
 (advanced users only) This is the entry id from the `DiffusionAnalysis` table to link the results to. This is set automatically by higher-level workflows and rarely (if ever) set by the user.
 
@@ -373,26 +338,118 @@ Exclusive to the `restart.simmate.automatic` workflow, this is the original fold
 
 --------------------------
 
-## electride_finder_cutoff
-Exclusive to the badelf workflows in the simmate app. This is the minimum ELF value that the algorithm will consider an electride. Any maxima in the ELF below this will not be considered an electride site during the algorithm.
+## electride_finder_kwargs
+Exclusive to BadELF workflows. These are the keyword arguments passed to the `ElectrideFinder` class that control how features in the ELF (e.g. bare electrons, covalent/metallic bonds, etc.) are automatically found and labeled.
 
 === "yaml"
     ``` yaml
-    electride_finder_cutoff: 0.5
+    electride_finder_kwargs:
+        resolution: 0.02,
+        include_lone_pairs: false,
+        include_shared_features: true,
+        metal_depth_cutoff: 0.1,
+        min_covalent_angle: 135,
+        min_covalent_bond_ratio: 0.35,
+        shell_depth: 0.05,
+        electride_elf_min: 0.5,
+        electride_depth_min: 0.2,
+        electride_charge_min: 0.5,
+        electride_volume_min: 10,
+        electride_radius_min: 0.3,
     ```
 === "toml"
     ``` toml
-    electride_finder_cutoff = 0.5
+    [electride_finder_kwargs]
+    resolution = 0.02
+    include_lone_pairs = false
+    include_shared_features = true
+    metal_depth_cutoff = 0.1
+    min_covalent_angle = 135
+    min_covalent_bond_ratio = 0.35
+    shell_depth = 0.05
+    electride_elf_min = 0.5
+    electride_depth_min = 0.2
+    electride_charge_min = 0.5
+    electride_volume_min = 10
+    electride_radius_min = 0.3
     ```
 === "python"
     ``` python
-    electride_finder_cutoff = 0.5
+    electride_finder_kwargs = dict(
+        resolution = 0.02,
+        include_lone_pairs = false,
+        include_shared_features = true,
+        metal_depth_cutoff = 0.1,
+        min_covalent_angle = 135,
+        min_covalent_bond_ratio = 0.35,
+        shell_depth = 0.05,
+        electride_elf_min = 0.5,
+        electride_depth_min = 0.2,
+        electride_charge_min = 0.5,
+        electride_volume_min = 10,
+        electride_radius_min = 0.3,
+    )
     ```
+
+Each keyword argument controls an aspect of how ELF features are found:
+
+### resolution
+
+The interval at which to scan the ELF to generate [BifurcationGraphs](../badelf/finder/electride_finder). Larger values will be faster, but may miss bifurcations.
+
+### include_lone_pairs
+
+Whether or not to include lone-pairs in the labeled structure. It is generally recommended to leave this as `false` when using plane partitioning for atoms.
+
+### include_shared_features
+
+Whether or not to include shared features such as metallic/covalent bonds in the labeled structure. If splitting these features at their maxima with planes is the desired output, set to `false`. If the goal is a comprehensive charge analysis of these features, set to `true`. If set to `true`, the `shared_feature_algorithm` parameter will control how they are separated from nearby atoms/features.
+
+### metal_depth_cutoff
+
+For ELF features other than atom cores/shells or lone-pairs, this parameter controls the maximum depth (Difference from ELF maximum to bifurcation) that a metallic feature can have. Any non-atomic/lone-pair feature with a depth below this value will be assigned as metallic.
+
+### min_covalent_angle
+
+For features other than atom cores/shells, the algorithm will check whether the feature is along an atomic bond within an angle tolerance. This corresponds to the angle between the neighboring atoms and the feature. Any feature with an angle below this value will not be assigned covalent.
+
+### min_covalent_bond_ratio
+
+When determining between a lone-pair or covalent bond, the algorithm will check how far along the bond the feature is (noramalized to 1). Anything below this parameters value will be considered a lone-pair. This is done to avoid misassignment in situations where the lone-pairs align with nearby atoms in a dipole interaction.
+
+### shell_depth
+
+In ionic compounds, the unshared electrons will form a sphere around the more electronegative atom. As the bond becomes more covalent, this feature will break into smaller features along the atomic bonds. As covalency increases, the depth of these features increases. Thus, this parameter effectively defines a cutoff for what should be considered covalent vs. ionic.
+
+Additionally, due to voxelation, atomic shells may split into many different basins around their ELF maximum. This parameter also controls recombining these voxelated basins into one.
+
+### electride_elf_min
+
+The minimum ELF value that a bare-electron feature must have to be considered an electride.
+
+### electride_depth_min
+
+The minimum ELF depth that a bare-electron feature must have to be considered an electride.
+
+### electride_charge_min
+
+The minimum charge that a bare-electron feature must have to be considered an electride.
+
+### electride_volume_min
+
+The minimum volume that a bare-electron feature must have to be considered an electride.
+
+### electride_radius_min
+
+The minimum ELF radius that a bare-electron feature must have to be considered an electride. The radius is defined as the distance from the feature to the closest atom minus that atoms radius. Atomic radii are determined by checking the EN difference between the atom and its nearest neighbors. If the EN difference is above 1.6, the average ionic radii for the atom is used. If the EN is below 1.6, the atomic radius is used.
 
 --------------------------
 
 ## find_electrides
-Exclusive to the badelf workflows in the simmate app. This parameter indicates whether the algorithm should search for electrides. Reasons to set this as false may be that the user knows there is no electride character in the structure of interest or if the user has manually placed electride sites.
+Exclusive to the BadELF workflows. This parameter indicates whether the algorithm should search for electrides. Reasons to set this as false may be that the user knows there is no electride character in the structure of interest or if the user would like to manually indicate the location of electrides.
+
+!!! warning
+    If this parameter is set to false, the `labeled_structure_up` and/or `labeled_structure_down` parameters must be set.
 
 === "yaml"
     ``` yaml
@@ -416,7 +473,7 @@ For evolutionary searches, this is the value that should be optimized. Specifica
 --------------------------
 
 ## ignore_low_pseudopotentials
-This parameter is unique to the badelf workflows of the warrenapp. It indicates whether the algorithm should throw an exception when the used pseudopotential didn't contain enough valence electrons. It is generally recommended to leave this as False as the results may be nonsense.
+Exclusive to BadELF workflows. Indicates whether the algorithm should throw an exception when the used pseudopotential didn't contain enough valence electrons. It is generally recommended to leave this as False as the results will likely be nonsense. Instead it is recommended to use pseudopotentials with more electrons, such as Vasp's [GW PPs](https://www.vasp.at/wiki/index.php/Available_pseudopotentials).
 
 === "yaml"
     ``` yaml
@@ -457,6 +514,55 @@ This parameter indicates whether the calculation is a restarted workflow run. Th
     ``` python
     directory = "my-old-calc-folder"
     is_restart = True
+    ```
+
+--------------------------
+
+## labeled_structure_up
+In BadELF workflows, if `find_electrides` is set to false, this parameter is a structure with "dummy" atoms representing non-atomic features in the spin-up system. Inputs options are the same as for the `structure` parameter.
+
+!!! note
+    If a non-polarized ELF/charge density is used, this represents the labeled structure for the total system.
+
+The required labels for each type of non-atomic feature are:
+
+| Feature | Label | 
+| --------- | --------- | 
+| Covalent Bond      | "Z"      | 
+| Lone-Pair   | "Lp"     | 
+| Metal     | "M"      | 
+| Electride     | "E"     | 
+| Other Bare Electron       | "Le"       | 
+
+=== "yaml"
+    ``` yaml
+    labeled_structure_up: Ca2N_labeled_up.cif
+    ```
+=== "toml"
+    ``` toml
+    labeled_structure_up = Ca2N_labeled_up.cif
+    ```
+=== "python"
+    ``` python
+    labeled_structure_up: "Ca2N_labeled_up.cif"
+    ```
+
+--------------------------
+
+## labeled_structure_down
+The equivalent setting to `labeled_structure_up` for the spin-down system.
+
+=== "yaml"
+    ``` yaml
+    labeled_structure_down: Ca2N_labeled_down.cif
+    ```
+=== "toml"
+    ``` toml
+    labeled_structure_down = Ca2N_labeled_down.cif
+    ```
+=== "python"
+    ``` python
+    labeled_structure_down: "Ca2N_labeled_down.cif"
     ```
 
 --------------------------
@@ -816,6 +922,42 @@ This parameter is the base selector class that should be used. The class will be
 
 !!! warning
     Currently, we only support truncated selection, so this should be left at its default value.
+
+--------------------------
+
+## separate_spin
+In BadELF workflows, determines whether the spin-up and spin-down ELF/charge-density should be treated separately. Setting to `false` more closely matches the original BadELF paper, but relies on the assumption that the system is closed and the spin-up/spin-down are identical.
+
+=== "yaml"
+    ``` yaml
+    separate_spin: true
+    ```
+=== "toml"
+    ``` toml
+    separate_spin = true
+    ```
+=== "python"
+    ``` python
+    separate_spin = True
+    ```
+
+--------------------------
+
+## shared_feature_algorithm
+For BadELF workflows, this parameter determines how shared ELF features such as covalent/metallic bonds are seperated from nearby atoms. Options are "zero-flux" or "voronoi" corresponding to bader-like and plane-like seperations.
+
+=== "yaml"
+    ``` yaml
+    covalent_bond_alg: zero-flux
+    ```
+=== "toml"
+    ``` toml
+    covalent_bond_alg = "zero-flux"
+    ```
+=== "python"
+    ``` python
+    covalent_bond_alg = "zero-flux"
+    ```
 
 --------------------------
 
@@ -1395,7 +1537,7 @@ Unique to `customized.vasp.user-config`. This is the base workflow to use when u
 
 ## write_electride_files
 
-This parameter is unique to badelf workflows. If set to True and ELFCAR and CHGCAR will be written containing only the values where the volume belongs to an electride and zero elsewhere.
+This parameter is unique to BadELF workflows. If set to True and ELFCAR and CHGCAR will be written containing only the values where the volume belongs to an electride and zero elsewhere.
 
 === "yaml"
     ``` yaml
@@ -1408,6 +1550,44 @@ This parameter is unique to badelf workflows. If set to True and ELFCAR and CHGC
 === "python"
     ``` python
     write_electride_files = False
+    ```
+
+--------------------------
+
+## write_ion_radii
+
+This parameter is unique to BadELF workflows. If set to True, the ionic radii of each atom determined from the ELF will be written to a summary file.
+
+=== "yaml"
+    ``` yaml
+    write_ion_radii: true
+    ```
+=== "toml"
+    ``` toml
+    write_ion_radii = true
+    ```
+=== "python"
+    ``` python
+    write_ion_radii = True
+    ```
+
+--------------------------
+
+## write_labeled_structure
+
+This parameter is unique to BadELF workflows. If set to True, the structure labeled with non-atomic ELF features (e.g. bare electrons, covalent bonds, metal bonds) will be written to a summary file.
+
+=== "yaml"
+    ``` yaml
+    write_labeled_structure: true
+    ```
+=== "toml"
+    ``` toml
+    write_labeled_structure = true
+    ```
+=== "python"
+    ``` python
+    write_labeled_structure = True
     ```
 
 --------------------------

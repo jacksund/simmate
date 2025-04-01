@@ -7,7 +7,7 @@ The first step of the BadELF algorithm is to determine whether there are bare el
 
 While it was originally conceived to support the BadELF algorithm, the current ElectrideFinder class can be used as a general tool for analyzing the ELF, providing considerably more information on each ELF feature than the BadElfToolkit class.
 
-All of the parameters can be found as a subsection of the `electride_finder_kwargs` section on our [parameters page](../../../../parameters)
+Explanations for each parameter can be found as a subsection of the `electride_finder_kwargs` section on our [parameters page](../../../../parameters)
 
 ## Initializing the Class
 
@@ -19,9 +19,9 @@ from simmate.apps.badelf.core import ElectrideFinder
 finder = ElectrideFinder.from_files(
     directory="/path/to/folder", # This is the directory where the files are located
     # The parameters below are optional
-    partitioning_file="partitioning_filename", # default ELFCAR
+    elf_file="partitioning_filename", # default ELFCAR
     charge_file="charge_filename", # default CHGCAR
-    allow_spin = True, # treats spin-up and spin-down separately
+    separate_spin = True, # Treats spin-up and spin-down separately
     ignore_low_pseudopotentials = False, # ignores issues with missing core electrons
 )
 ```
@@ -34,15 +34,15 @@ from simmate.apps.bader.toolkit import Grid
 from pathlib import Path
 
 directory = Path("path/to/folder") # indicates the path to the folder where BadELF should run
-partitioning_grid = Grid.from_file("path/to/partitioning_file")
+elf_grid = Grid.from_file("path/to/partitioning_file")
 charge_grid = Grid.from_file("path/to/partitioning_file")
 
 finder = ElectrideFinder(
     directory=directory,
-    partitioning_grid=partitioning_grid,
+    elf_grid=partitioning_grid,
     charge_grid=charge_grid,
     # The parameters below are optional
-    allow_spin = True, # treats spin-up and spin-down separately
+    separate_spin = True, # treats spin-up and spin-down separately
     ignore_low_pseudopotentials = False, # ignores issues with missing core electrons        
 )
 ```
@@ -180,3 +180,16 @@ If the structure has any non-atomic features, they will be labeled with Dummy at
 
 !!! note
     Admittedly, some of these labels are not intuitive. This is due to pymatgen's Structure object limiting dummy atom labels to symbols that don't start with letters shared by an element (e.g. "Cov" isn't available because of C and Co)
+
+The labeled structures can then be written to files for visualization in software such as VESTA or OVITO.
+
+=== "spin polarized"
+    ``` python
+        labeled_structure_up.to("my_structure_up.cif", "cif")
+        labeled_structure_down.to("my_structure_down.cif", "cif")
+    ```
+
+=== "not polarized"
+    ``` python
+        labeled_structure.to("my_structure.cif", "cif")
+    ```

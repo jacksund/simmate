@@ -135,7 +135,7 @@ class ElectrideFinder:
         elf_grid: Grid,
         charge_grid: Grid,
         directory: Path,
-        allow_spin: bool = False,
+        separate_spin: bool = False,
         ignore_low_pseudopotentials: bool = False,
     ):
         self.elf_grid = elf_grid.copy()
@@ -145,7 +145,7 @@ class ElectrideFinder:
         self._basin_labeled_voxels = None
         # check if this is a spin polarized calculation and if the user wants
         # to pay attention to this.
-        if elf_grid.is_spin_polarized and allow_spin:
+        if elf_grid.is_spin_polarized and separate_spin:
             self.spin_polarized = True
             self._elf_grid_up, self._elf_grid_down = elf_grid.split_to_spin()
             self._charge_grid_up, self._charge_grid_down = charge_grid.split_to_spin(
@@ -1661,7 +1661,7 @@ class ElectrideFinder:
         directory: Path = Path("."),
         elf_file: str = "ELFCAR",
         charge_file: str = "CHGCAR",
-        allow_spin: bool = False,
+        separate_spin: bool = False,
         ignore_low_pseudopotentials: bool = False,
     ):
         """
@@ -1678,7 +1678,7 @@ class ElectrideFinder:
             charge_file (str):
                 The filename of the file containing the charge information. Must
                 be a VASP CHGCAR file.
-            allow_spin (bool):
+            separate_spin (bool):
                 Whether to check for spin and provider results for both. If this
                 is False, only the first set of data in the provided files is
                 used.
@@ -1693,6 +1693,6 @@ class ElectrideFinder:
             elf_grid=elf_grid,
             charge_grid=charge_grid,
             directory=directory,
-            allow_spin=allow_spin,
+            separate_spin=separate_spin,
             ignore_low_pseudopotentials=ignore_low_pseudopotentials,
         )
