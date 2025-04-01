@@ -21,8 +21,7 @@ Each basin represents a distinct chemical feature including atom core shells, lo
 In this method, the regions bounded by an isosurface of the ELF are viewed at different values, *f*. These regions are called *f*-localized domains, and correspond to regions where the ELF is greater than or equal to the value *f*. Any *f*-domain contains at least one attractor. Domains containing more than one attractor is called reducible while those containing only one are called irreducible. As *f* is increased, reducible domains split into smaller topologically distinct domains with fewer attractors. The critical *f* values at which these splits occur are called bifurcations. The final irreducible domains are the exact same as the basin described above. This method also allows us to define a "depth" referring to the difference in a basin's maximum from the value at which it split from it's parent reducible domain. This idea of depth is one useful characteristic for distinguishing features in the ELF. Using bifurcation plots, we can begin to categorize each of the ELF attractors. 
 
 ## Atomic Attractors
-Starting at an *f* value of 0, our entire system is one continuous domain. As we increase the *f* value, domains will begin to split off. Those that fully surround exactly one atom, can be thought of as atomic. 
-These atomic domains can split further into one of several types:
+Starting at an *f* value of 0, our entire system is one continuous domain. As we increase the *f* value, domains will begin to split off. Many of these child domains will completely surround exactly one atom. These can be further reduced into one of three main types of features. 
 
 1. **Atomic Core/Shell**. Core electrons fully surround the atom's nucleus and are nearly spherical. In simple ionic systems such as NaCl, this results in a simple bifurcation plot:
 
@@ -38,7 +37,7 @@ These atomic domains can split further into one of several types:
 
 ## Valence Attractors
 
-Once the atomic domains have split from the ELF, anything left is one large valence domain. Again, these features can be one of several types:
+Once the domains surrounding single atoms have split from the ELF, anything left is one large valence domain. Again, these features can be one of several types:
 
 1. **Homogenous Covalent Bonds**. In covalent bonds involving the same atom, the bonds will sit exactly between the two atoms and at low *f* values will form a network throughout the system surrounding multiple atoms. At higher *f* values, this network will split into individual covalent bonds. Just like heterogenous covalent bonds, these are characterized by high depth and their location along an atomic bond.
 

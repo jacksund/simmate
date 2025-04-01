@@ -15,6 +15,8 @@
 
 BadELF is a method that combines Bader Charge Analysis and the Electron Localization Function (ELF) to predict oxidation states and perform population analysis of electrides. It uses Bader segmentation of the ELF to calculate the charge on electride electrons and Voronoi segmentation of the ELF to calculate charge on atoms. Since the original BadELF paper was published, additional functionality has been added to handle systems with covalent/metallic features and for handling the up/down spin ELF and charge density separately.
 
+An additional tool, the [ElectrideFinder](../finder/electride_finder) has also been developed to assist in summarizing features in the ELF. This tool is designed for in-depth analysis of the ELF, and can also perform a simple charge analysis using traditional zero-flux surfaces.
+
 !!! note
     BadELF currently only works with VASP, but we are interested in expanding its use to other ab initio software. If you are interested in this, let us know, as that will help to make this a higher priority.
 

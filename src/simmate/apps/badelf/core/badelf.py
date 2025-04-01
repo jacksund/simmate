@@ -145,7 +145,7 @@ class BadElfToolkit:
             ignore_low_pseudopotentials=self.ignore_low_pseudopotentials,
         )
         if self.find_electrides:
-            electride_structure = electride_finder.get_electride_structures(
+            electride_structure = electride_finder.get_labeled_structures(
                 **self.electride_finder_kwargs
             )
         else:

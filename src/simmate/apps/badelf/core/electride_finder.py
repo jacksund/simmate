@@ -1291,6 +1291,7 @@ class ElectrideFinder:
         self,
         resolution: float = 0.02,
         write_plot: bool = False,
+        plot_name="bifurcation_plot.html",
         **cutoff_kwargs,
     ):
         """
@@ -1299,6 +1300,8 @@ class ElectrideFinder:
         ELF and Charge Density are spin polarized, two plots will be
         generated.
         """
+        # remove .html if its at the end of the plot name
+        plot_name = plot_name.replace(".html", "")
 
         if self.spin_polarized:
             graph_up, graph_down = self.get_bifurcation_graphs(
@@ -1306,15 +1309,15 @@ class ElectrideFinder:
                 **cutoff_kwargs,
             )
             plot_up = self.get_bifurcation_plot(
-                graph_up, write_plot, "bifurcation_plot_up.html"
+                graph_up, write_plot, f"{plot_name}_up.html"
             )
             plot_down = self.get_bifurcation_plot(
-                graph_down, write_plot, "bifurcation_plot_down.html"
+                graph_down, write_plot, f"{plot_name}_down.html"
             )
             return plot_up, plot_down
         else:
             graph = self.get_bifurcation_graphs(resolution, **cutoff_kwargs)
-            return self.get_bifurcation_plot(graph, write_plot)
+            return self.get_bifurcation_plot(graph, write_plot, plot_name)
 
     def get_bifurcation_plot(
         self,
@@ -1325,6 +1328,9 @@ class ElectrideFinder:
         """
         Returns a plotly figure
         """
+        # remove .html if its at the end of the plot name
+        plot_name = plot_name.replace(".html", "")
+        
         indices = []
         end_indices = []
         # X position is determined by the ELF value at which the feature appears.
@@ -1460,7 +1466,7 @@ class ElectrideFinder:
             fig.write_html(self.directory / plot_name)
         return fig
 
-    def get_electride_structures(
+    def get_labeled_structures(
         self,
         resolution: float = 0.02,
         include_lone_pairs: bool = False,
@@ -1494,7 +1500,7 @@ class ElectrideFinder:
                 min_covalent_angle=min_covalent_angle,
                 min_covalent_bond_ratio=min_covalent_bond_ratio,
             )
-            structure_up = self._get_electride_structure(
+            structure_up = self._get_labeled_structure(
                 graph_up,
                 self.bader_up,
                 include_lone_pairs,
@@ -1505,7 +1511,7 @@ class ElectrideFinder:
                 electride_volume_min,
                 electride_radius_min,
             )
-            structure_down = self._get_electride_structure(
+            structure_down = self._get_labeled_structure(
                 graph_down,
                 self.bader_down,
                 include_lone_pairs,
@@ -1525,7 +1531,7 @@ class ElectrideFinder:
                 min_covalent_angle=min_covalent_angle,
                 min_covalent_bond_ratio=min_covalent_bond_ratio,
             )
-            return self._get_electride_structure(
+            return self._get_labeled_structure(
                 graph,
                 self.bader_up,
                 include_lone_pairs,
@@ -1537,7 +1543,7 @@ class ElectrideFinder:
                 electride_radius_min,
             )
 
-    def _get_electride_structure(
+    def _get_labeled_structure(
         self,
         graph: BifurcationGraph(),
         bader,
