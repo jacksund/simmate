@@ -214,8 +214,14 @@ nav:
 
     - Apps: 
         - Overview: apps/overview.md
-        - BadELF: apps/badelf.md
-        - Bader (henklman): apps/bader_henkelman.md
+        - BadELF: 
+            - Background: apps/badelf/background.md
+            - Quick Start: apps/badelf/quick_start.md
+            - Running in Python: apps/badelf/python.md
+            - ElfAnalyzerToolkit: 
+                - Background: apps/badelf/finder/background.md
+                - Usage: apps/badelf/finder/elf_analyzer.md
+        - Bader (henkelman): apps/bader_henkelman.md
         - CLEASE: apps/clease.md
         - DeepMD: apps/deepmd.md
         - Evolutionary Searches: apps/evolution.md

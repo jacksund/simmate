@@ -6,9 +6,11 @@ import shutil
 # This will be added back once I go through and handle warnings within context
 # import warnings
 from pathlib import Path
+from typing import Literal
 
-from simmate.apps.badelf.core.badelf import BadElfToolkit
+from simmate.apps.badelf.core.badelf import SpinBadElfToolkit
 from simmate.engine import Workflow
+from simmate.toolkit import Structure
 
 # This file contains workflows for performing Bader and BadELF. Parts of the code
 # use the Henkelman groups algorithm for Bader analysis:
@@ -31,14 +33,38 @@ class BadElfBase(Workflow):
         source: dict = None,
         directory: Path = None,
         find_electrides: bool = True,
-        electride_finder_cutoff: float = 0.5,  # This is somewhat arbitrarily set
-        algorithm: str = "badelf",
-        check_for_covalency: bool = True,
+        labeled_structure_up=None,
+        labeled_structure_down=None,
+        separate_spin=True,
+        algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
+        shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
+        elf_analyzer_kwargs: dict = dict(
+            resolution=0.02,
+            include_lone_pairs=False,
+            include_shared_features=True,
+            metal_depth_cutoff=0.1,
+            min_covalent_angle=135,
+            min_covalent_bond_ratio=0.35,
+            shell_depth=0.05,
+            electride_elf_min=0.5,
+            electride_depth_min=0.2,
+            electride_charge_min=0.5,
+            electride_volume_min=10,
+            electride_radius_min=0.3,
+        ),
+        threads: int = None,
+        ignore_low_pseudopotentials: bool = False,
         write_electride_files: bool = False,
         write_ion_radii: bool = True,
+        write_labeled_structures: bool = True,
         run_id: str = None,
         **kwargs,
     ):
+        # get cleaned labeled structures
+        if labeled_structure_up is not None:
+            labeled_structure_up = Structure.from_dynamic(labeled_structure_up)
+        if labeled_structure_down is not None:
+            labeled_structure_down = Structure.from_dynamic(labeled_structure_down)
         # make a new directory to run badelf algorithm in and copy necessary files.
         badelf_directory = directory / "badelf"
         try:
@@ -50,15 +76,19 @@ class BadElfBase(Workflow):
             shutil.copy(directory / file, badelf_directory)
 
         # Get the badelf toolkit object for running badelf.
-        badelf_tools = BadElfToolkit.from_files(
+        badelf_tools = SpinBadElfToolkit.from_files(
             directory=badelf_directory,
             find_electrides=find_electrides,
             algorithm=algorithm,
+            separate_spin=separate_spin,
+            labeled_structure_up=labeled_structure_up,
+            labeled_structure_down=labeled_structure_down,
+            threads=threads,
+            shared_feature_algorithm=shared_feature_algorithm,
+            ignore_low_pseudopotentials=ignore_low_pseudopotentials,
+            elf_analyzer_kwargs=elf_analyzer_kwargs,
         )
-        # Set options and run badelf.
-        if not check_for_covalency:
-            badelf_tools.check_for_covalency = False
-        badelf_tools.electride_finder_cutoff = electride_finder_cutoff
+        # run badelf.
         results = badelf_tools.results
         # write results
         if write_electride_files:
@@ -71,5 +101,7 @@ class BadElfBase(Workflow):
         # write ionic radii
         if write_ion_radii:
             badelf_tools.write_atom_elf_radii()
+        if write_labeled_structures:
+            badelf_tools.write_labeled_structures()
         badelf_tools.write_results_csv()
         return results

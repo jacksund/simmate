@@ -3,9 +3,11 @@
 import csv
 import logging
 import math
+import os
 import warnings
 from functools import cached_property
 from pathlib import Path
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -15,16 +17,18 @@ from pymatgen.io.vasp import Potcar
 from scipy.ndimage import label
 from tqdm import tqdm
 
-from simmate.apps.badelf.core.electride_finder import ElectrideFinder
+from simmate.apps.badelf.core.elf_analyzer import ElfAnalyzerToolkit
 from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.apps.badelf.core.voxel_assignment import VoxelAssignmentToolkit
 from simmate.apps.bader.toolkit import Grid
+from simmate.toolkit import Structure
 
 
 class BadElfToolkit:
     """
     A set of tools for performing BadELF, VoronELF, or Zero-Flux analysis on
-    outputs from a VASP calculation.
+    outputs from a VASP calculation. This class only performs analysis
+    on one spin at a time.
 
     Args:
         partitioning_grid (Grid):
@@ -43,10 +47,21 @@ class BadElfToolkit:
             or "zero-flux".
         find_electrides (bool):
             Whether or not to search for electride sites. Usually set to true.
-    """
+        labeled_structure :
+            A pymatgen structure object with dummy atoms representing
+            electride, covalent, and metallic features
+        shared_feature_algorithm (str):
+            The algorithm used to partition covalent bonds found in the
+            structure.
+        ignore_low_pseudopotentials (bool):
+            Whether to ignore warnings about missing atomic basins
+            due to using pseudopotentials with a small amount of
+            valence electrons.
+        elf_analyzer_kwargs (dict):
+            A dictionary of keyword arguments to pass to the ElfAnalyzerToolkit
+            class.
 
-    check_for_covalency = True
-    electride_finder_cutoff = 0.5
+    """
 
     def __init__(
         self,
@@ -54,8 +69,27 @@ class BadElfToolkit:
         charge_grid: Grid,
         directory: Path,
         threads: int = None,
-        algorithm: str = "badelf",
+        algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
+        shared_feature_algorithm: Literal[
+            "zero-flux", "voronoi"
+        ] = "zero-flux",  # other option is "voronoi"
         find_electrides: bool = True,
+        labeled_structure: Structure = None,
+        ignore_low_pseudopotentials: bool = False,
+        elf_analyzer_kwargs: dict = dict(
+            resolution=0.02,
+            include_lone_pairs=False,
+            include_shared_features=True,
+            metal_depth_cutoff=0.1,
+            min_covalent_angle=135,
+            min_covalent_bond_ratio=0.35,
+            shell_depth=0.05,
+            electride_elf_min=0.5,
+            electride_depth_min=0.2,
+            electride_charge_min=0.5,
+            electride_volume_min=10,
+            electride_radius_min=0.3,
+        ),
     ):
         if partitioning_grid.structure != charge_grid.structure:
             raise ValueError("Grid structures must be the same.")
@@ -83,12 +117,49 @@ class BadElfToolkit:
         self.directory = directory
         self.algorithm = algorithm
         self.find_electrides = find_electrides
+        self.labeled_structure = labeled_structure
+        self.shared_feature_algorithm = shared_feature_algorithm
+        self.ignore_low_pseudopotentials = ignore_low_pseudopotentials
+        self.elf_analyzer_kwargs = elf_analyzer_kwargs
 
     @cached_property
-    def structure(self):
-        structure = self.partitioning_grid.structure.copy()
-        structure.remove_species(["He"])
-        return structure
+    def _find_electrides_and_covalent_bonds(self):
+        """
+        Searches the partitioning grid for potential electride sites and
+        covalent/metallic bonds and returns a structure with the found sites.
+        Also returns the neighboring atoms for each of the shared bond
+        sites.
+
+        Returns:
+            A tuple with a Structure object with electride sites as "e",
+            covalent bonds as "z", and metal features as "m" or "le"
+            , along with the sites connected by any shared bonds.
+        """
+        # !!! When we add spin distinction we should also allow users to provide
+        # both electride structures.
+
+        elf_analyzer = ElfAnalyzerToolkit(
+            elf_grid=self.partitioning_grid.copy(),
+            charge_grid=self.charge_grid.copy(),
+            directory=self.directory,
+            ignore_low_pseudopotentials=self.ignore_low_pseudopotentials,
+        )
+        if self.find_electrides:
+            electride_structure = elf_analyzer.get_labeled_structures(
+                **self.elf_analyzer_kwargs
+            )
+        else:
+            if self.labeled_structure is None:
+                raise ValueError(
+                    "A labeled structure must be provided if find_electrides is False"
+                )
+            electride_structure = self.labeled_structure.copy()
+
+        shared_feature_atoms = elf_analyzer.get_shared_feature_neighbors(
+            electride_structure
+        )
+
+        return electride_structure, shared_feature_atoms
 
     @cached_property
     def electride_structure(self):
@@ -97,29 +168,66 @@ class BadElfToolkit:
         a structure with the found sites.
 
         Returns:
-            A Structure object with electride sites as "He" atoms.
+            A Structure object with electride sites as "X" atoms.
         """
 
-        if self.find_electrides:
-            electride_structure = ElectrideFinder(
-                self.partitioning_grid.copy(),
-                self.directory,
-            ).get_electride_structure(
-                electride_finder_cutoff=self.electride_finder_cutoff,
-                check_for_covalency=self.check_for_covalency,
-                threads=self.threads,
-            )
-        else:
-            electride_structure = self.structure
-
-        return electride_structure
+        return self._find_electrides_and_covalent_bonds[0]
 
     @cached_property
-    def electride_indices(self):
+    def structure(self):
+        structure = self.electride_structure.copy()
+        if self.shared_feature_algorithm == "zero-flux":
+            for symbol in ["E", "Z", "M", "Le", "Lp"]:
+                if symbol in structure.symbol_set:
+                    structure.remove_species([symbol])
+        else:
+            if "E" in structure.symbol_set:
+                structure.remove_species(["E"])
+        return structure
+
+    @cached_property
+    def shared_feature_atoms(self):
+        """
+        Searches the partitioning grid for covalent bonds and returns the atoms
+        bonded through each covalent bond.
+        """
+        return self._find_electrides_and_covalent_bonds[1]
+
+    @cached_property
+    def electride_indices(self) -> np.array:
         """
         The indices of the structure that are electride sites.
         """
-        return np.array(list(self.electride_structure.indices_from_symbol("He")))
+        return np.array(
+            list(self.electride_structure.indices_from_symbol("E")), dtype=int
+        )
+
+    @cached_property
+    def shared_feature_indices(self) -> np.array:
+        """
+        The indices of the structure that are covalent or metallic bonds.
+        """
+        indices = []
+        for symbol in ["Z", "M", "Le", "Lp"]:
+            indices.extend(self.electride_structure.indices_from_symbol(symbol))
+        indices = np.array(indices, dtype=int)
+        indices.sort()
+        return indices
+
+    @cached_property
+    def non_atom_indices(self) -> np.array:
+        """
+        The indices of the structure that are either electrides, covalent bonds,
+        or metallic features
+        """
+        if self.shared_feature_algorithm == "zero-flux":
+            all_non_atoms_indices = np.concatenate(
+                [self.electride_indices, self.shared_feature_indices]
+            )
+            all_non_atoms_indices.sort()
+            return all_non_atoms_indices
+        else:
+            return self.electride_indices
 
     @cached_property
     def coord_envs(self):
@@ -139,15 +247,20 @@ class BadElfToolkit:
         # create a CrystalNN loop
         cnn = CrystalNN()
         coord_envs = []
-        # For each electride in the structure, we make a new temporary structure
-        # without electride sites. We then add one electride site at a time and
-        # check its environment.
-        for i, site in enumerate(self.electride_structure):
+        # For each site in the structure, we add the coordination environment.
+
+        # We first need to replace any dummy atoms with an atom CrystalNN
+        # will recognize. We default to H since it is probably the closest in radius
+        electride_structure = self.electride_structure.copy()
+        for symbol in ["E", "Z", "M", "Le", "Lp"]:
+            if symbol in electride_structure.symbol_set:
+                electride_structure.replace_species({symbol: "H1-"})
+        for i, site in enumerate(electride_structure):
             with warnings.catch_warnings():
                 warnings.filterwarnings(
                     "ignore", category=UserWarning, module="pymatgen"
                 )
-                coord_envs.append(cnn.get_cn(structure=self.electride_structure, n=i))
+                coord_envs.append(cnn.get_cn(structure=electride_structure, n=i))
         return coord_envs
 
     @cached_property
@@ -173,7 +286,7 @@ class BadElfToolkit:
         # structure already had them.
         if self.algorithm == "badelf":
             # remove electrides from grid structure and get
-            partitioning_grid.structure.remove_species("He")
+            partitioning_grid.structure = self.structure
             partitioning = PartitioningToolkit(
                 partitioning_grid, self.pybader
             ).get_partitioning()
@@ -317,7 +430,7 @@ class BadElfToolkit:
         A pybader Bader object run on the PartitioningGrid
         """
         bader_grid = self.partitioning_grid.copy()
-        bader_grid.structure = self.electride_structure
+        bader_grid.structure = self.electride_structure.copy()
         bader = bader_grid.run_pybader(threads=self.threads)
         return bader
 
@@ -356,18 +469,20 @@ class BadElfToolkit:
         # Get the objects that we'll need to assign voxels.
         elif algorithm in ["badelf", "voronelf"]:
             charge_grid = self.charge_grid
+            charge_grid.structure = self.structure
             partitioning = self.partitioning
             voxel_assignment_tools = VoxelAssignmentToolkit(
                 charge_grid=charge_grid,
-                electride_structure=self.electride_structure,
+                electride_structure=self.electride_structure.copy(),
                 partitioning=partitioning,
                 algorithm=self.algorithm,
                 directory=self.directory,
+                shared_feature_algorithm=self.shared_feature_algorithm,
             )
             if algorithm == "badelf":
-                # Get the voxel assignments for each electride site
+                # Get the voxel assignments for each electride or covalent site
                 all_voxel_site_assignments = np.where(
-                    np.isin(all_voxel_site_assignments, self.electride_indices + 1),
+                    np.isin(all_voxel_site_assignments, self.non_atom_indices + 1),
                     all_voxel_site_assignments,
                     0,
                 )
@@ -436,7 +551,7 @@ class BadElfToolkit:
         # later on
         feature_indices = []
         for i, site in enumerate(grid.structure):
-            if site.species_string == "He":
+            if site.species_string == "X":
                 frac_coords = site.frac_coords
                 voxel_coords = grid.get_voxel_coords_from_frac(frac_coords).astype(int)
                 # Make sure that the label is not 0
@@ -561,7 +676,7 @@ class BadElfToolkit:
             np.isin(voxel_assignment_array, electride_indices), elf_grid.total, 0
         )
         elf_grid.total = elf_array
-        elf_grid.structure = self.electride_structure
+        elf_grid.structure = self.electride_structure.copy()
 
         #######################################################################
         # This section scans across different cutoffs to determine what dimensionalities
@@ -617,15 +732,13 @@ class BadElfToolkit:
         algorithm = self.algorithm
         directory = self.directory
         electride_num = len(self.electride_indices)
-        electride_structure = self.electride_structure
-        electride_indices = self.electride_indices
+        shared_feature_num = len(self.shared_feature_indices)
+        electride_structure = self.electride_structure.copy()
+        non_atom_indices = self.non_atom_indices
         a, b, c = self.charge_grid.shape
         elements = []
         for site in electride_structure:
-            if site.species_string == "He":
-                elements.append("e")
-            else:
-                elements.append(site.species_string)
+            elements.append(site.species_string)
 
         # get the voxel assignments. Note that the convention here is to
         # have indices starting at 1 rather than 0
@@ -647,10 +760,10 @@ class BadElfToolkit:
         # Get the minimum distances from each atom the the partitioning
         # surface. If the algorithm is "badelf" we need to acquire the
         # radii for the electrides
-        if algorithm == "badelf" and len(electride_indices > 0):
+        if algorithm == "badelf" and len(non_atom_indices) > 0:
             bader = self.pybader
             distances = bader.atoms_surface_distance
-            electride_min_dists = distances[self.electride_indices]
+            electride_min_dists = distances[self.non_atom_indices]
 
         if algorithm == "zero-flux":
             bader = self.pybader
@@ -660,7 +773,7 @@ class BadElfToolkit:
         else:
             for site in range(len(electride_structure)):
                 # fill min_dist dictionary using the smallest partitioning radius
-                if site in electride_indices and algorithm == "badelf":
+                if site in non_atom_indices and algorithm == "badelf":
                     # Get dist from henkelman algorithm results
                     min_dists[site] = electride_min_dists[site - len(self.structure)]
                 else:
@@ -707,7 +820,7 @@ class BadElfToolkit:
         # Get the number of electrons assigned by badelf.
         nelectrons = round(sum(charges.values()), 4)
 
-        # Get
+        # Get POTCAR data
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             potcars = Potcar.from_file(directory / "POTCAR")
@@ -728,12 +841,9 @@ class BadElfToolkit:
             # get structure site
             site = electride_structure[site_index]
             # get element name
-            element_str = site.specie.name
-            # Change electride dummy atom name to e
-            if element_str == "He":
-                element_str = "e"
+            element_str = site.specie.symbol
             # calculate oxidation state and add it to the oxidation state list
-            if element_str == "e":
+            if element_str in ["E", "Z", "M", "Le", "Lp"]:
                 oxi_state = -site_charge
             else:
                 oxi_state = round((nelectron_data[element_str] - site_charge), 4)
@@ -748,8 +858,9 @@ class BadElfToolkit:
         # Idealy this should be 0.
         total_electrons = 0
         for site in self.structure:
-            site_valence_electrons = nelectron_data[site.species_string]
-            total_electrons += site_valence_electrons
+            if site.specie.symbol not in ["E", "Z", "M", "Le", "Lp"]:
+                site_valence_electrons = nelectron_data[site.specie.symbol]
+                total_electrons += site_valence_electrons
         vacuum_charge = round((total_electrons - nelectrons), 4)
 
         # Calculate the "vacuum volume" or the volume not associated with any atom.
@@ -761,7 +872,7 @@ class BadElfToolkit:
             "oxidation_states": oxi_state_data,
             "charges": charges_list,
             "min_dists": min_dists_list,
-            "atomic_volumes": atomic_volumes_list,
+            "volumes": atomic_volumes_list,
             "vacuum_charge": vacuum_charge,
             "vacuum_volume": vacuum_volume,
             "nelectrons": nelectrons,
@@ -780,16 +891,18 @@ class BadElfToolkit:
             results["electrides_per_reduced_formula"] = electrides_per_reduced_unit
         # set the results that are not algorithm dependent
         results["nelectrides"] = electride_num
+        results["nshared_features"] = shared_feature_num
+        results["shared_feature_atoms"] = self.shared_feature_atoms
         results["algorithm"] = algorithm
+        results["shared_feature_algorithm"] = self.shared_feature_algorithm
         results["element_list"] = elements
         results["coord_envs"] = self.coord_envs
         electride_dim, dim_cutoffs = self.get_electride_dimensionality()
         results["electride_dim"] = electride_dim
-        results["dim_cutoffs"] = dim_cutoffs
+        results["electride_dim_cutoffs"] = dim_cutoffs
         results["elf_maxima"] = self.get_ELF_maxima()
-        # Fill out columns unrelated to badelf alg
-        structure = self.structure
-        results["structure"] = structure
+        results["structure"] = self.structure
+        results["labeled_structure"] = self.electride_structure.copy()
 
         return results
 
@@ -807,8 +920,24 @@ class BadElfToolkit:
         directory: Path = Path("."),
         partitioning_file: str = "ELFCAR",
         charge_file: str = "CHGCAR",
-        algorithm: str = "badelf",
+        algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
         find_electrides: bool = True,
+        threads: int = None,
+        shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
+        ignore_low_pseudopotentials: bool = False,
+        elf_analyzer_kwargs: dict = dict(
+            resolution=0.02,
+            include_lone_pairs=False,
+            metal_depth_cutoff=0.1,
+            min_covalent_angle=135,
+            min_covalent_bond_ratio=0.35,
+            shell_depth=0.05,
+            electride_elf_min=0.5,
+            electride_depth_min=0.2,
+            electride_charge_min=0.5,
+            electride_volume_min=10,
+            electride_radius_min=0.3,
+        ),
     ):
         """
         Creates a BadElfToolkit instance from the requested partitioning file
@@ -828,6 +957,18 @@ class BadElfToolkit:
                 The algorithm to use. Options are "badelf", "voronelf", or "zero-flux"
             find_electrides (bool):
                 Whether or not to search for electrides in the system
+            thread (int):
+                The number of threads to use for analysis
+            shared_feature_algorithm (str):
+                The algorithm to use for calculating charge on covalent
+                and metallic bonds. Options are "zero-flux" or "voronoi"
+            ignore_low_pseudopotentials (bool):
+                Whether to ignore warnings about missing atomic basins
+                due to using pseudopotentials with a small amount of
+                valence electrons.
+            elf_analyzer_kwargs (dict):
+                A dictionary of keyword arguments to pass to the ElfAnalyzerToolkit
+                class.
 
         Returns:
             A BadElfToolkit instance.
@@ -841,9 +982,13 @@ class BadElfToolkit:
             directory=directory,
             algorithm=algorithm,
             find_electrides=find_electrides,
+            threads=threads,
+            shared_feature_algorithm=shared_feature_algorithm,
+            ignore_low_pseudopotentials=ignore_low_pseudopotentials,
+            elf_analyzer_kwargs=elf_analyzer_kwargs,
         )
 
-    def write_species_file(self, file_type: str = "ELFCAR", species: str = "He"):
+    def write_species_file(self, file_type: str = "ELFCAR", species: str = "E"):
         """
         Writes an ELFCAR or CHGCAR for a given species. Writes to the default
         directory provided to the BadelfToolkit class.
@@ -887,7 +1032,7 @@ class BadElfToolkit:
         except:
             pass
 
-        if species == "He":
+        if species == "X":
             species = "e"
         if file_type == "ELFCAR":
             grid.write_file(directory / f"ELFCAR_{species}")
@@ -918,7 +1063,6 @@ class BadElfToolkit:
         voxel_assignment_array = self.voxel_assignments_array
         if file_type == "ELFCAR":
             grid = self.partitioning_grid.copy()
-            # grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
         elif file_type == "CHGCAR":
             grid = self.charge_grid.copy()
         else:
@@ -946,6 +1090,25 @@ class BadElfToolkit:
         elif file_type == "CHGCAR":
             grid.write_file(directory / f"CHGCAR_{atom_index}")
 
+    def write_labeled_structure(self, file_name: str = None, file_type: str = "cif"):
+        """
+        Writes the structure labeled with the ELF features to file.
+
+        Args:
+            file_name (str):
+                The base name to use for the file. The reduced formula
+                will be used if not provided
+            file_type (str):
+                The type of file that you want. Allowed types are those
+                allowed by pymatgen (e.g. POSCAR, cif)
+
+        Returns:
+            None
+        """
+        if file_name is None:
+            file_name = self.partitioning_grid.structure.composition.reduced_formula
+        self.electride_structure.to(f"{file_name}_labeled", "cif")
+
     def plot_partitioning(self):
         """
         Plots the partitioning surface around each atom.
@@ -968,4 +1131,518 @@ class BadElfToolkit:
                 Plotting of zero-flux partitioning surfaces is not currently
                 supported.
                 """
+            )
+
+
+class SpinBadElfToolkit:
+    """
+    This class is a wrapper for the BadElfToolkit adding the capability
+    to individually handle spin-up and spin-down components of the
+    ELF and charge density.
+    """
+
+    def __init__(
+        self,
+        partitioning_grid: Grid,
+        charge_grid: Grid,
+        directory: Path = Path("."),
+        partitioning_file: str = "ELFCAR",
+        charge_file: str = "CHGCAR",
+        separate_spin: bool = True,
+        algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
+        find_electrides: bool = True,
+        labeled_structure_up: Structure = None,
+        labeled_structure_down: Structure = None,
+        threads: int = None,
+        shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
+        ignore_low_pseudopotentials: bool = False,
+        elf_analyzer_kwargs: dict = dict(
+            resolution=0.02,
+            include_lone_pairs=False,
+            metal_depth_cutoff=0.1,
+            min_covalent_angle=135,
+            min_covalent_bond_ratio=0.35,
+            shell_depth=0.05,
+            electride_elf_min=0.5,
+            electride_depth_min=0.2,
+            electride_charge_min=0.3,
+            electride_volume_min=10,
+            electride_radius_min=0.3,
+        ),
+    ):
+        if partitioning_grid.structure != charge_grid.structure:
+            raise ValueError("Grid structures must be the same.")
+        if threads is None:
+            self.threads = math.floor(psutil.Process().num_threads() * 0.9 / 2)
+        else:
+            self.threads = threads
+
+        # Check if POTCAR exists in path. If not, throw warning
+        if not (directory / "POTCAR").exists():
+            # BUG: This will need to be changed to allow BadELF to be performed
+            # on results from programs other than VASP
+            raise Exception(
+                """
+                No POTCAR file found in the requested directory. This
+                is needed to calculate oxidation states
+                """
+            )
+        if algorithm not in ["badelf", "voronelf", "zero-flux"]:
+            raise ValueError(
+                """The algorithm setting you chose does not exist. Please select
+                  either 'badelf', 'voronelf', or 'zero-flux'.
+                  """
+            )
+        self.partitioning_grid = partitioning_grid
+        self.separate_spin = separate_spin
+        self.charge_grid = charge_grid
+        self.directory = directory
+        self.algorithm = algorithm
+        self.find_electrides = find_electrides
+        self.shared_feature_algorithm = shared_feature_algorithm
+        self.ignore_low_pseudopotentials = ignore_low_pseudopotentials
+        self.elf_analyzer_kwargs = elf_analyzer_kwargs
+
+        # Create badelf class variables for each spin
+        if separate_spin and partitioning_grid.is_spin_polarized:
+            self.spin_polarized = True
+            # BUG This assumes the partitioning grid is ELF. This should usually
+            # be the case, but someone may want to use the voronoi method with
+            # charge density
+            partitioning_grid_up, partitioning_grid_down = (
+                partitioning_grid.split_to_spin()
+            )
+            self.partitioning_grid_up, self.partitioning_grid_down = (
+                partitioning_grid_up,
+                partitioning_grid_down,
+            )
+            charge_grid_up, charge_grid_down = charge_grid.split_to_spin("charge")
+            self.charge_grid_up, self.charge_grid_down = (
+                charge_grid_up,
+                charge_grid_down,
+            )
+            self.badelf_spin_up = BadElfToolkit(
+                partitioning_grid_up,
+                charge_grid_up,
+                directory,
+                threads,
+                algorithm,
+                shared_feature_algorithm,
+                find_electrides,
+                labeled_structure_up,
+                ignore_low_pseudopotentials,
+                elf_analyzer_kwargs,
+            )
+            self.badelf_spin_down = BadElfToolkit(
+                partitioning_grid_down,
+                charge_grid_down,
+                directory,
+                threads,
+                algorithm,
+                shared_feature_algorithm,
+                find_electrides,
+                labeled_structure_down,
+                ignore_low_pseudopotentials,
+                elf_analyzer_kwargs,
+            )
+        else:
+            self.spin_polarized = False
+            self.badelf_spin_up = BadElfToolkit(
+                partitioning_grid,
+                charge_grid,
+                directory,
+                threads,
+                algorithm,
+                shared_feature_algorithm,
+                find_electrides,
+                labeled_structure_up,
+                ignore_low_pseudopotentials,
+                elf_analyzer_kwargs,
+            )
+            self.badelf_spin_down = None
+
+    @property
+    def badelf_spin_up_results(self):
+        return self.badelf_spin_up.results
+
+    @property
+    def badelf_spin_down_results(self):
+        if self.badelf_spin_down is not None:
+            return self.badelf_spin_down.results
+        else:
+            return None
+
+    @cached_property
+    def all_atom_elf_radii(self):
+        """
+        The elf radii for all atoms-neighbor pairs in the structure. Atom neighbor
+        pairs are obtained using CrystalNN while the radii are obtained during
+        the partitioning process.
+        """
+        return self._get_all_atom_elf_radii()
+
+    def _get_all_atom_elf_radii(self):
+        """
+        Gets the elf radii for all atom-neighbor pairs in the structure.
+        If spin is separated, takes an average for each atom.
+        """
+        if self.spin_polarized:
+            spin_up_radii = self.badelf_spin_up.all_atom_elf_radii
+            spin_down_radii = self.badelf_spin_down.all_atom_elf_radii
+            radii = [
+                (i + j) / 2
+                for i, j in zip(spin_up_radii["radius"], spin_down_radii["radius"])
+            ]
+            average_radii = spin_up_radii.copy()
+            average_radii["radius"] = radii
+            return average_radii
+        else:
+            return self.badelf_spin_up.all_atom_elf_radii
+
+    def write_atom_elf_radii(self, filename: str = "elf_radii.csv"):
+        """
+        Writes atomic elf radii to a csv.
+        """
+        if ".csv" not in filename:
+            filename += ".csv"
+        if self.all_atom_elf_radii is not None:
+            self.all_atom_elf_radii.to_csv(self.directory / filename)
+        else:
+            logging.warn(
+                "Elf ionic radii could not be found (likely due to zero-flux partitioning). No radii will be written."
+            )
+
+    @cached_property
+    def results(self):
+        return self._get_results()
+
+    def _get_results(self):
+        # If this calculation isn't spin polarized, just return the results from
+        # the "spin up" badelf.
+        if not self.spin_polarized:
+            results = self.badelf_spin_up_results
+            results["separate_spin"] = self.separate_spin
+            return results
+        # otherwise we want to combine our results
+        logging.info("Getting results for spin-up")
+        spin_up_results = self.badelf_spin_up_results
+        logging.info("Getting results for spin-down")
+        spin_down_results = self.badelf_spin_down_results
+        # get structures for each
+        structure = self.partitioning_grid.structure.copy()
+        spin_up_structure = spin_up_results["labeled_structure"]
+        spin_down_structure = spin_down_results["labeled_structure"]
+        # Some results will be the same regardless of spin. We get these first
+        nelectrons_up = spin_up_results["nelectrons"]
+        nelectrons_down = spin_down_results["nelectrons"]
+        results = {}
+        results["algorithm"] = spin_up_results["algorithm"]
+        results["nelectrons"] = nelectrons_up + nelectrons_down
+        results["structure"] = structure
+        results["shared_feature_algorithm"] = spin_up_results[
+            "shared_feature_algorithm"
+        ]
+        results["separate_spin"] = self.separate_spin
+        results["differing_spin"] = self.spin_polarized
+
+        # Some results will be the same if we have identical structures
+        nshared_features_up = spin_up_results["nshared_features"]
+        nelectrides_up = spin_up_results["nelectrides"]
+        nshared_features_down = spin_down_results["nshared_features"]
+        nelectrides_down = spin_down_results["nelectrides"]
+
+        if spin_up_structure == spin_down_structure:
+            results["labeled_structure"] = spin_up_structure
+            results["coord_envs"] = spin_up_results["coord_envs"]
+            results["nshared_features"] = spin_up_results["nshared_features"]
+            results["nelectrides"] = spin_up_results["nelectrides"]
+            results["shared_feature_atoms"] = spin_up_results["shared_feature_atoms"]
+
+        # Otherwise they will be different and need to be stored in separate keys
+        else:
+            # Spin up
+            results["labeled_structure_up"] = spin_up_results["labeled_structure"]
+            results["nshared_features_up"] = nshared_features_up
+            results["nelectrides_up"] = nelectrides_up
+            results["shared_feature_atoms_up"] = spin_up_results["shared_feature_atoms"]
+            results["coord_envs_up"] = spin_up_results["coord_envs"]
+            # Spin down
+            results["labeled_structure_down"] = spin_down_results["labeled_structure"]
+            results["nshared_features_down"] = nshared_features_down
+            results["nelectrides_down"] = nelectrides_down
+            results["shared_feature_atoms_down"] = spin_down_results[
+                "shared_feature_atoms"
+            ]
+            results["coord_envs_down"] = spin_up_results["coord_envs"]
+
+        # Other results should be stored separately regardless of if the structure
+        # is the same
+        charges_up = spin_up_results["charges"]
+        charges_down = spin_down_results["charges"]
+        volumes_up = spin_up_results["volumes"]
+        volumes_down = spin_down_results["volumes"]
+
+        results["electride_dim_cutoffs_up"] = spin_up_results["electride_dim_cutoffs"]
+        results["electride_dim_up"] = spin_up_results["electride_dim"]
+        results["min_dists_up"] = spin_up_results["min_dists"]
+        results["elf_maxima_up"] = spin_up_results["elf_maxima"]
+        results["charges_up"] = charges_up
+        results["volumes_up"] = volumes_up
+        results["nelectrons_up"] = nelectrons_up
+
+        results["electride_dim_cutoffs_down"] = spin_down_results[
+            "electride_dim_cutoffs"
+        ]
+        results["electride_dim_down"] = spin_down_results["electride_dim"]
+        results["min_dists_down"] = spin_down_results["min_dists"]
+        results["elf_maxima_down"] = spin_down_results["elf_maxima"]
+        results["charges_down"] = charges_down
+        results["volumes_down"] = volumes_down
+        results["nelectrons_down"] = nelectrons_down
+
+        # Other results require a combination of both results
+        # First we calculate the total oxidation state
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            potcars = Potcar.from_file(self.directory / "POTCAR")
+        nelectron_data = {}
+        # the result is a list because there can be multiple element potcars
+        # in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)
+        for potcar in potcars:
+            nelectron_data.update({potcar.element: potcar.nelectrons})
+        atom_oxidation_states = []
+        for atom_idx, site in enumerate(structure):
+            # get element name
+            element_str = site.specie.symbol
+            atom_charge = (
+                spin_up_results["charges"][atom_idx]
+                + spin_down_results["charges"][atom_idx]
+            )
+            oxi_state = round((nelectron_data[element_str] - atom_charge), 4)
+            atom_oxidation_states.append(oxi_state)
+        results["atom_oxidation_states"] = atom_oxidation_states
+
+        # get the charges on each non-atomic site. If the structures are identical
+        # we return these as one. Otherwise we return the separate charges.
+
+        non_atom_charges_up = charges_up[
+            (len(charges_up) - (nelectrides_up + nshared_features_up)) :
+        ]
+        non_atom_charges_down = charges_down[
+            (len(charges_down) - (nelectrides_down + nshared_features_down)) :
+        ]
+        # These need to be made negative
+        non_atom_charges_up = [-i for i in non_atom_charges_up]
+        non_atom_charges_down = [-i for i in non_atom_charges_down]
+        results["non_atom_charges_up"] = non_atom_charges_up
+        results["non_atom_charges_down"] = non_atom_charges_down
+        if spin_up_structure == spin_down_structure:
+            non_atom_charges = [
+                i + j for i, j in zip(non_atom_charges_up, non_atom_charges_down)
+            ]
+            results["non_atom_charges"] = non_atom_charges
+        # Calculate the "vacuum charge" or the charge not associated with any atom.
+        # Also calculate the vacuum volume for each spin.
+        # Ideally these should be 0.
+        total_electrons = 0
+        for site in structure:
+            site_valence_electrons = nelectron_data[site.specie.symbol]
+            total_electrons += site_valence_electrons
+        total_volume_up = 0
+        total_volume_down = 0
+        for volume in volumes_up:
+            total_volume_up += volume
+        for volume in volumes_down:
+            total_volume_down += volume
+
+        results["vacuum_charge"] = round(
+            total_electrons - (nelectrons_up + nelectrons_down), 4
+        )
+        results["vacuum_volume_up"] = round(
+            spin_up_structure.volume - total_volume_up, 4
+        )
+        results["vacuum_volume_down"] = round(
+            spin_up_structure.volume - total_volume_down, 4
+        )
+
+        # Calculate electrides per formula
+        electrides_per_formula_up = spin_up_results.get("electrides_per_formula", 0)
+        electrides_per_formula_down = spin_down_results.get("electrides_per_formula", 0)
+        electrides_per_reduced_formula_up = spin_up_results.get(
+            "electrides_per_reduced_formula", 0
+        )
+        electrides_per_reduced_formula_down = spin_down_results.get(
+            "electrides_per_reduced_formula", 0
+        )
+        results["electrides_per_formula"] = (
+            electrides_per_formula_up + electrides_per_formula_down
+        )
+        results["electrides_per_reduced_formula"] = (
+            electrides_per_reduced_formula_up + electrides_per_reduced_formula_down
+        )
+
+        # Finally, we convert our labeled structures to a json format so that
+        # they can be easily read from the database if needed.
+        for key in [
+            "labeled_structure",
+            "labeled_structure_up",
+            "labeled_structure_down",
+        ]:
+            struc = results.get(key, None)
+            if struc is not None:
+                results[key] = struc.to_json()
+        # TODO: convert labeled structures to strings for saving to database. Add
+        # all potential keys to database table. Make sure all important write
+        # methods are available to workflow. Update docs.
+
+        return results
+
+    @classmethod
+    def from_files(
+        cls,
+        directory: Path = Path("."),
+        partitioning_file: str = "ELFCAR",
+        charge_file: str = "CHGCAR",
+        separate_spin: bool = True,
+        algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
+        find_electrides: bool = True,
+        labeled_structure_up: Structure = None,
+        labeled_structure_down: Structure = None,
+        threads: int = None,
+        shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
+        ignore_low_pseudopotentials: bool = False,
+        elf_analyzer_kwargs: dict = dict(
+            resolution=0.02,
+            include_lone_pairs=False,
+            metal_depth_cutoff=0.1,
+            min_covalent_angle=135,
+            min_covalent_bond_ratio=0.35,
+            shell_depth=0.05,
+            electride_elf_min=0.5,
+            electride_depth_min=0.2,
+            electride_charge_min=0.3,
+            electride_volume_min=10,
+            electride_radius_min=0.3,
+        ),
+    ):
+        """
+        Creates a BadElfToolkit instance from the requested partitioning file
+        and charge file.
+
+        Args:
+            directory (Path):
+                The path to the directory that the badelf analysis
+                will be located in.
+            partitioning_file (str):
+                The filename of the file to use for partitioning. Must be a VASP
+                CHGCAR or ELFCAR type file.
+            charge_file (str):
+                The filename of the file containing the charge information. Must
+                be a VASP CHGCAR or ELFCAR type file.
+            separate_spin (bool):
+                Whether or not to treat spin-up and spin-down separately
+            algorithm (str):
+                The algorithm to use. Options are "badelf", "voronelf", or "zero-flux"
+            find_electrides (bool):
+                Whether or not to search for electrides in the system
+            labeled_structure_up:
+                A pymatgen structure object with dummy atoms representing
+                electride, covalent, and metallic features for the spin-up
+                system
+            labeled_structure_down:
+                A pymatgen structure object with dummy atoms representing
+                electride, covalent, and metallic features for the spin-down
+                system
+            thread (int):
+                The number of threads to use for analysis
+            shared_feature_algorithm (str):
+                The algorithm to use for calculating charge on covalent
+                and metallic bonds. Options are "zero-flux" or "voronoi"
+            ignore_low_pseudopotentials (bool):
+                Whether to ignore warnings about missing atomic basins
+                due to using pseudopotentials with a small amount of
+                valence electrons.
+            elf_analyzer_kwargs (dict):
+                A dictionary of keyword arguments to pass to the ElfAnalyzerToolkit
+                class.
+
+
+        Returns:
+            A BadElfToolkit instance.
+        """
+
+        partitioning_grid = Grid.from_file(directory / partitioning_file)
+        charge_grid = Grid.from_file(directory / charge_file)
+        return SpinBadElfToolkit(
+            partitioning_grid=partitioning_grid,
+            charge_grid=charge_grid,
+            directory=directory,
+            separate_spin=separate_spin,
+            algorithm=algorithm,
+            find_electrides=find_electrides,
+            threads=threads,
+            shared_feature_algorithm=shared_feature_algorithm,
+            ignore_low_pseudopotentials=ignore_low_pseudopotentials,
+            elf_analyzer_kwargs=elf_analyzer_kwargs,
+        )
+
+    def write_results_csv(self):
+        directory = self.directory
+        results = self.results
+        with open(directory / "badelf_summary.csv", "w") as csv_file:
+            writer = csv.writer(csv_file)
+            for key, value in results.items():
+                writer.writerow([key, value])
+
+    def write_species_file(self, file_type: str = "ELFCAR", species: str = "E"):
+        """
+        Writes an ELFCAR or CHGCAR for a given species. Writes to the default
+        directory provided to the BadelfToolkit class.
+
+        Args:
+            file_type (str):
+                The type of file that you want, either ELFCAR or CHGCAR
+            species (str):
+                The species to write data for.
+
+        Returns:
+            None
+        """
+        self.badelf_spin_up.write_species_file(file_type, species)
+        if self.spin_polarized:
+            # rename with "up" so we don't overwrite
+            os.rename(
+                self.directory / f"{file_type}_{species}",
+                self.directory / f"{file_type}_{species}_up",
+            )
+            # Write the spin down file and change the name
+            self.badelf_spin_down.write_species_file(file_type, species)
+            os.rename(
+                self.directory / f"{file_type}_{species}",
+                self.directory / f"{file_type}_{species}_down",
+            )
+
+    def write_labeled_structures(self, file_name: str = None, file_type: str = "cif"):
+        """
+        Writes the structure labeled with the ELF features to file.
+
+        Args:
+            file_name (str):
+                The base name to use for the file. The reduced formula
+                will be used if not provided.
+            file_type (str):
+                The type of file that you want. Allowed types are those
+                allowed by pymatgen (e.g. POSCAR, cif)
+
+        Returns:
+            None
+        """
+        if file_name is None:
+            file_name = self.partitioning_grid.structure.composition.reduced_formula
+        self.badelf_spin_up.write_labeled_structure(
+            f"{file_name}_labeled_up", file_type
+        )
+        if self.spin_polarized:
+            self.badelf_spin_down.write_labeled_structure(
+                f"{file_name}_labeled_down", file_type
             )
