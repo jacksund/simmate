@@ -1330,7 +1330,9 @@ class ElectrideFinder:
         """
         # remove .html if its at the end of the plot name
         plot_name = plot_name.replace(".html", "")
-        
+        # then add .html to ensure its there
+        plot_name += ".html"
+
         indices = []
         end_indices = []
         # X position is determined by the ELF value at which the feature appears.
@@ -1343,9 +1345,10 @@ class ElectrideFinder:
             if node.get("split", None) is None:
                 end_indices.append(i)
                 # Get label
-                label = f"""type: {node["subtype"]}\ndepth: {node["depth"]}\nmax elf: {node["max_elf"]}\ncharge: {node["charge"]}\nvolume: {node["volume"]}\natom distance: {round(node["atom_distance"],2)}\nnearest atom: {node["nearest_atom"]}"""
+                label = f"""type: {node["subtype"]}\ndepth: {node["depth"]}\nmax elf: {node["max_elf"]}\ncharge: {node["charge"]}\nvolume: {node["volume"]}\natom distance: {round(node["atom_distance"],2)}\nnearest atom index: {node["nearest_atom"]}\nnearest atom type: {self.structure[node["nearest_atom"]].specie.name}"""
                 if node.get("bare_electron_indicator", None) is not None:
-                    label += f"\nbare electron indicator: {round(node['bare_electron_indicator'],2)}\n BEI array: {node['bare_electron_scores'].round(2)}"
+                    label += f'\ndistance minus atom radius: {round(node["dist_minus_radius"],2)}'
+                #     label += f"\nBEI array: {node['bare_electron_scores'].round(2)}"
                 types.append(node["subtype"])
             else:
                 atom_num = node["atom_num"]
@@ -1454,12 +1457,14 @@ class ElectrideFinder:
 
         # remove y axis label
         fig.update_layout(
+            margin=dict(l=0, r=0, t=0, b=0),
+            xaxis_title="ELF",
             yaxis=dict(
                 showline=False,
                 zeroline=False,
                 showgrid=False,
                 showticklabels=False,
-            )
+            ),
         )
 
         if write_plot:
@@ -1578,13 +1583,16 @@ class ElectrideFinder:
             # if our subtype is anothing other than "bare electron" we have
             # a covalent bond or metal bond and append a Z dummy atom
             if subtype == "covalent":
-                if not include_shared_features: continue
+                if not include_shared_features:
+                    continue
                 species = "z"
             elif subtype == "metallic":
-                if not include_shared_features: continue
+                if not include_shared_features:
+                    continue
                 species = "m"
             elif subtype == "lone-pair":
-                if not include_lone_pairs: continue
+                if not include_lone_pairs:
+                    continue
                 species = "lp"
 
             else:
@@ -1602,9 +1610,10 @@ class ElectrideFinder:
                 if np.all(condition_test > conditions):
                     species = "e"
                 else:
-                    if not include_shared_features: continue
+                    if not include_shared_features:
+                        continue
                     species = "le"
-            
+
             # Now that we have the type of feature, we want to combine all
             # of its basins to a single point.
             basins = attributes["basins"]

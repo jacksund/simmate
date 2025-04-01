@@ -152,7 +152,7 @@ class BadElfToolkit:
             if self.labeled_structure is None:
                 raise ValueError(
                     "A labeled structure must be provided if find_electrides is False"
-                    )
+                )
             electride_structure = self.labeled_structure.copy()
 
         shared_feature_atoms = electride_finder.get_shared_feature_neighbors(
@@ -1565,7 +1565,7 @@ class SpinBadElfToolkit:
             electride_finder_kwargs (dict):
                 A dictionary of keyword arguments to pass to the ElectrideFinder
                 class.
-           
+
 
         Returns:
             A BadElfToolkit instance.

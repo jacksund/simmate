@@ -33,9 +33,9 @@ class BadElfBase(Workflow):
         source: dict = None,
         directory: Path = None,
         find_electrides: bool = True,
-        labeled_structure_up = None,
-        labeled_structure_down = None,
-        separate_spin = True,
+        labeled_structure_up=None,
+        labeled_structure_down=None,
+        separate_spin=True,
         algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
         shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         electride_finder_kwargs: dict = dict(

@@ -79,7 +79,7 @@ This returns custom BifurcationGraphs which are built out from [networkx](https:
 plot = finder.get_bifurcation_plot(
             graph = graph,
             write_plot = True,
-            plot_name = "my_bifurcation_plot"
+            plot_name = "my_bifurcation_plot.html"
         )
 ```
 
@@ -117,9 +117,7 @@ In the examples above, the plot will be written to a .html file which can be dir
 plot.show()
 ```
 
-This should generate a plot similar to the following:
-
-(insert bifurcation plot)
+This should generate a plot similar to those on the [background page](../background).
 
 The Y-axis represents the ELF value at which each domain first separates from its parent domain. Hovering over each node in the graph will provide additional information about the domain it represents. For reducible domains, this includes information like the number of atoms it surrounds, and their structure index. For irreducible domains it includes things such as charge, volume, ELF maximum, depth, distance to nearest atom, and more. We recommend loading your ELF into a program such as VESTA or OVITO and different ELF values with the plot to help get used to what it represents. 
 

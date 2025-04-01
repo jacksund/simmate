@@ -215,13 +215,12 @@ nav:
     - Apps: 
         - Overview: apps/overview.md
         - BadELF: 
+            - Background: apps/badelf/background.md
             - Quick Start: apps/badelf/quick_start.md
             - Running in Python: apps/badelf/python.md
-            - Background: apps/badelf/background.md
             - ElectrideFinder: 
                 - Background: apps/badelf/finder/background.md
                 - Usage: apps/badelf/finder/electride_finder.md
-                - Parameters: apps/badelf/finder/parameters.md
         - Bader (henkelman): apps/bader_henkelman.md
         - CLEASE: apps/clease.md
         - DeepMD: apps/deepmd.md

@@ -15,7 +15,7 @@
 
 BadELF is a method that combines Bader Charge Analysis and the Electron Localization Function (ELF) to predict oxidation states and perform population analysis of electrides. It uses Bader segmentation of the ELF to calculate the charge on electride electrons and Voronoi segmentation of the ELF to calculate charge on atoms. Since the original BadELF paper was published, additional functionality has been added to handle systems with covalent/metallic features and for handling the up/down spin ELF and charge density separately.
 
-An additional tool, the [ElectrideFinder](../finder/electride_finder) has also been developed to assist in summarizing features in the ELF. This tool is designed for in-depth analysis of the ELF, and can also perform a simple charge analysis using traditional zero-flux surfaces.
+An additional tool, the [ElectrideFinder](../finder/electride_finder) has also been developed to assist in analyzing features in the ELF. This tool is designed for in-depth ELF topological analysis, and can also perform a simple charge analysis using traditional zero-flux surfaces.
 
 !!! note
     BadELF currently only works with VASP, but we are interested in expanding its use to other ab initio software. If you are interested in this, let us know, as that will help to make this a higher priority.
@@ -24,7 +24,7 @@ An additional tool, the [ElectrideFinder](../finder/electride_finder) has also b
 
 ## Installation
 
-To use the BadELF module you will first need to follow the instructions for [installing simmate](../../../getting_started/installation/quick_start). Then BadELF can be set up with the following instructions.
+Follow the instructions for [installing simmate](../../../getting_started/installation/quick_start). Then BadELF can be set up with the following instructions.
 
 1. This app uses `pybader` under the hood. Install this with:
 ``` bash
@@ -50,9 +50,9 @@ simmate config test badelf
 
 ## Basic Use
 
-BadELF requires outputs from VASP calculations (e.g. the CHGCAR, ELFCAR, etc.). You can either (a) generate these on your own or (b) run a simmate workflow that does it for you. 
+BadELF requires outputs from VASP calculations (e.g. the CHGCAR, ELFCAR, etc.). You can either (1) generate these on your own or (2) run a simmate workflow that does it for you. 
 
-### (a) from VASP outputs
+### (1) from VASP outputs
 
 The BadELF algorithm can be run in a folder with VASP results. Please ensure your VASP settings generate a CHGCAR and ELFCAR with matching grid sizes. 
 
@@ -100,7 +100,7 @@ simmate workflows run-quick bad-elf.badelf.badelf --directory /path/to/folder
 
 If you plan to run many BadELF calculations or need to manipulate the results in post, it may be more convenient to run the workflow using python. See the [full guides](../../../../full_guides/workflows/basic_use) for more details. For a complete list of parameters and their usage, see our [parameters page](../../../parameters)
 
-### (b) from structure
+### (2) from structure
 
 If you would prefer to have Simmate handle the VASP calculation, workflows are available that will first run the required DFT and then BadELF. 
 
@@ -164,7 +164,7 @@ shared_feature_algorithm: zero-flux # or voronoi
     We typically recommend this method as it provides more information about the overall system. However, there is currently no method assigning the charge on these features to nearby atoms, resulting in unreasonable oxidation states in the results. We plan to implement methods for assigning this charge in the future.
 
 !!! note
-    Atoms will by default still be separated using planes placed at maxima. This hasn't been tested, and it may be preferable to use the more traditional zero-flux partitioning. To do this, set `algorithm: zero-flux`.
+    To assign charge not associated with covalent/metallic bonds, atoms will by default still be separated using planes placed at maxima along the bond. This hasn't been tested, and it may be preferable to use the more traditional zero-flux partitioning. To do this, set `algorithm: zero-flux`.
 --------------------------------------------------------------------------------
 
 ## Accounting for Spin
