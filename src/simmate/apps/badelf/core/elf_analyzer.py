@@ -18,6 +18,7 @@ from scipy.ndimage import label
 
 from simmate.apps.bader.toolkit import Grid
 from simmate.toolkit import Structure
+from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 
 
 class BifurcationGraph(DiGraph):
@@ -768,7 +769,7 @@ class ElfAnalyzerToolkit:
 
         # Now we calculate a bare electron indicator for each valence basin. This
         # is used just to give a sense of how bare an electron is.
-        graph = self._mark_bare_electron_indicator(graph)
+        graph = self._mark_bare_electron_indicator(graph, bader, elf_grid)
 
         # Finally, we add a label to each node with a summary of information
         # for plotting
@@ -1177,7 +1178,7 @@ class ElfAnalyzerToolkit:
         return graph
 
     def _mark_bare_electron_indicator(
-        self, graph: BifurcationGraph()
+        self, graph: BifurcationGraph(), bader, elf_grid: Grid,
     ) -> BifurcationGraph():
         """
         Takes in a bifurcation graph and calculates an electride character
@@ -1186,6 +1187,25 @@ class ElfAnalyzerToolkit:
         ELF value, charge, depth, volume, and atom distance.
         """
         valence_summary = self.get_valence_summary(graph)
+        # We will need to get radii from the ELF. To do this, we need a labeled
+        # pybader result to pass to our PartitioningToolkit
+        frac_coords = bader.bader_maxima_fractional
+        temp_structure = self.structure.copy()
+        for feature_idx, attributes in valence_summary.items():
+            for basin_idx in attributes["basins"]:
+                frac_coord = frac_coords[basin_idx]
+                temp_structure.append("X", frac_coord)
+        temp_grid = elf_grid.copy()
+        temp_grid.structure = temp_structure
+        #TODO This can probably be made faster by rerunning only part of the
+        # bader. If not this should be passed to the BadELfToolkit to avoid
+        # repeat calculation. Also, I need to account for threads. Also, update radius finder
+        # to only use linear interpolation. Update finder to get all atom radii
+        # once.
+        labeled_pybader = temp_grid.run_pybader()
+        partitioning = PartitioningToolkit(elf_grid, labeled_pybader)
+        
+        
         for feature_idx, attributes in valence_summary.items():
             # We want to get a metric of how "bare" each feature is. To do this,
             # we need a value that ranges from 0 to 1 for each attribute we have
@@ -1226,7 +1246,7 @@ class ElfAnalyzerToolkit:
             # similar to a free s-orbital with a similar size to a hydride. Therefore
             # we use the hydride crystal radius to calculate an ideal volume and set
             # this contribution as a fraction of this, capping at 1.
-            hydride_radius = 2.08  # Taken from wikipedia and subject to change
+            hydride_radius = 1.34  # Taken from wikipedia and subject to change
             hydride_volume = 4 / 3 * 3.14159 * (hydride_radius**3)
             volume_contribution = min(attributes["volume"] / hydride_volume, 1)
 
@@ -1236,7 +1256,8 @@ class ElfAnalyzerToolkit:
             # the nearest atom and get the EN difference. We use this to guess
             # whether covalent or ionic radii should be used, then pull the appropriate one.
             atom_idx = attributes["nearest_atom"]
-            atom_radius = self.get_atom_radius_guess(atom_idx)
+            # atom_radius = self.get_atom_radius_guess(atom_idx)
+            atom_radius = partitioning.get_elf_ionic_radius(atom_idx, refine=False)
             dist = attributes["atom_distance"]
             # Now that we have a radius, we need to get a metric of 0-1. We need
             # to set an ideal distance corresponding to 1 and a minimum distance

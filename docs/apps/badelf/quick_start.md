@@ -143,10 +143,10 @@ Covalent and metallic features in the ELF conflict with the original BadELF algo
 
 ### (1) Split Them with Planes
 
-Similar to placing planes at minima in the ELF in ionic systems, one can place planes at maxima in covalent/metallic systems. This results in the features being divided and their charge assigned to nearby atoms. To handle covalent/metallic bonds this way use the follow parameter in the elf_analyzer_kwargs:
+Similar to placing planes at minima in the ELF in ionic systems, one can place planes at maxima in covalent/metallic systems. This results in the features being divided and their charge assigned to nearby atoms. To handle covalent/metallic bonds this way use the follow `shared_feature_algorithm`:
 
 ``` yaml
-include_shared_features: true
+shared_feature_algorithm: none
 ```
 
 !!! warning

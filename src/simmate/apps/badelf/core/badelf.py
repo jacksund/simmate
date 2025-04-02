@@ -71,7 +71,7 @@ class BadElfToolkit:
         threads: int = None,
         algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
         shared_feature_algorithm: Literal[
-            "zero-flux", "voronoi"
+            "zero-flux", "voronoi", "none"
         ] = "zero-flux",  # other option is "voronoi"
         find_electrides: bool = True,
         labeled_structure: Structure = None,
@@ -176,7 +176,7 @@ class BadElfToolkit:
     @cached_property
     def structure(self):
         structure = self.electride_structure.copy()
-        if self.shared_feature_algorithm == "zero-flux":
+        if self.shared_feature_algorithm != "voronoi":
             for symbol in ["E", "Z", "M", "Le", "Lp"]:
                 if symbol in structure.symbol_set:
                     structure.remove_species([symbol])
@@ -755,6 +755,9 @@ class BadElfToolkit:
         atomic_volumes = {}
         # Get min dists
         for site in range(len(electride_structure)):
+            if site in self.shared_feature_indices and self.shared_feature_algorithm == "none":
+                # We don't want to keep track of these features so we skip
+                continue
             charges[site] = 0
             atomic_volumes[site] = 0
         # Get the minimum distances from each atom the the partitioning
@@ -771,7 +774,7 @@ class BadElfToolkit:
             for i, distance in enumerate(distances):
                 min_dists[i] = distance
         else:
-            for site in range(len(electride_structure)):
+            for site in charges.keys(): # use charges dict to skip ignored features
                 # fill min_dist dictionary using the smallest partitioning radius
                 if site in non_atom_indices and algorithm == "badelf":
                     # Get dist from henkelman algorithm results
@@ -787,7 +790,7 @@ class BadElfToolkit:
 
         # Get the charge and atomic volume of each site for sites with
         # one assignment
-        for site in range(len(electride_structure)):
+        for site in charges.keys():
             site1 = site + 1
             voxel_indices = np.where(single_site_assignments == site1)[0]
             site_charge = charge_array[voxel_indices]
@@ -1202,10 +1205,10 @@ class SpinBadElfToolkit:
         self.shared_feature_algorithm = shared_feature_algorithm
         self.ignore_low_pseudopotentials = ignore_low_pseudopotentials
         self.elf_analyzer_kwargs = elf_analyzer_kwargs
-
+        
         # Create badelf class variables for each spin
+        self.spin_polarized = False
         if separate_spin and partitioning_grid.is_spin_polarized:
-            self.spin_polarized = True
             # BUG This assumes the partitioning grid is ELF. This should usually
             # be the case, but someone may want to use the voronoi method with
             # charge density
@@ -1215,12 +1218,18 @@ class SpinBadElfToolkit:
             self.partitioning_grid_up, self.partitioning_grid_down = (
                 partitioning_grid_up,
                 partitioning_grid_down,
-            )
+            )           
             charge_grid_up, charge_grid_down = charge_grid.split_to_spin("charge")
             self.charge_grid_up, self.charge_grid_down = (
                 charge_grid_up,
                 charge_grid_down,
             )
+            # check that our ELF isn't identical. If it is, we can perform a
+            # single non-polarized calculation
+            if not np.isclose(self.partitioning_grid_up.total, self.partitioning_grid.total,rtol=0,atol=0.001):
+                self.spin_polarized = True
+        # Now check if we should run a spin polarized badelf calc or not
+        if self.spin_polarized:
             self.badelf_spin_up = BadElfToolkit(
                 partitioning_grid_up,
                 charge_grid_up,
@@ -1246,7 +1255,6 @@ class SpinBadElfToolkit:
                 elf_analyzer_kwargs,
             )
         else:
-            self.spin_polarized = False
             self.badelf_spin_up = BadElfToolkit(
                 partitioning_grid,
                 charge_grid,
@@ -1424,13 +1432,16 @@ class SpinBadElfToolkit:
 
         # get the charges on each non-atomic site. If the structures are identical
         # we return these as one. Otherwise we return the separate charges.
-
-        non_atom_charges_up = charges_up[
-            (len(charges_up) - (nelectrides_up + nshared_features_up)) :
-        ]
-        non_atom_charges_down = charges_down[
-            (len(charges_down) - (nelectrides_down + nshared_features_down)) :
-        ]
+        if self.shared_feature_algorithm is not None:
+            non_atom_charges_up = charges_up[
+                (len(charges_up) - (nelectrides_up + nshared_features_up)) :
+            ]
+            non_atom_charges_down = charges_down[
+                (len(charges_down) - (nelectrides_down + nshared_features_down)) :
+            ]
+        else:
+            non_atom_charges_up = []
+            non_atom_charges_down = []
         # These need to be made negative
         non_atom_charges_up = [-i for i in non_atom_charges_up]
         non_atom_charges_down = [-i for i in non_atom_charges_down]

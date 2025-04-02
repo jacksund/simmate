@@ -28,9 +28,13 @@ class PartitioningToolkit:
 
     Args:
         grid (Grid):
-            A BadELF app Grid type object.
-        pybader (Bader):
-            A bader Bader type object.
+            A BadELF app Grid type object. The structure of this object
+            should only contain atoms and dummy atoms that the user
+            wishes to find partitioning planes for
+        bader (Bader):
+            A pybader Bader type object. This object should be labeled
+            with covalent/metallic/electride dummy atoms to properly place
+            partitioning planes.
     """
 
     def __init__(self, grid: Grid, bader: Bader):
@@ -288,6 +292,7 @@ class PartitioningToolkit:
         labels: list | ArrayLike,
         site_index: int,
         neigh_index: int,
+        refine: bool = True,
     ):
         """
         Finds the minimum point of a list of values along a line, then returns the
@@ -303,6 +308,8 @@ class PartitioningToolkit:
                 The index of the atom
             neigh_index (int):
                 The index of the neighboring atom
+            refine (bool):
+                Whether or not to refine the frac
 
         results:
             The global minimum of form [line_position, value, frac_position]
@@ -385,12 +392,20 @@ class PartitioningToolkit:
                 else:
                     elf_min_index = np.where(np.array(labels) == site_index)[0].max()
                     extrema = "min"
-
-            global_min = self._refine_line_part_frac(
-                positions=positions,
-                elf_min_index=elf_min_index,
-                extrema=extrema,
-            )
+            
+            if refine:
+                global_min = self._refine_line_part_frac(
+                    positions=positions,
+                    elf_min_index=elf_min_index,
+                    extrema=extrema,
+                )
+            else:
+                global_min = self._refine_line_part_frac(
+                    positions=positions,
+                    elf_min_index=elf_min_index,
+                    extrema=extrema,
+                    method="linear"
+                )
 
         return global_min
 
@@ -399,6 +414,7 @@ class PartitioningToolkit:
         positions: list,
         elf_min_index: int,
         extrema: str,
+        method: str = "cubic",
     ):
         """
         Refines the location of the minimum along an ELF line between two sites.
@@ -416,6 +432,8 @@ class PartitioningToolkit:
                 the minimum.
             extrema (str):
                 Which type of extrema to refine. Either max or min.
+            method (str):
+                The method to use for interpolation
 
         Returns:
             The global minimum of form [line_position, value, frac_position]
@@ -427,7 +445,7 @@ class PartitioningToolkit:
         # interpolate the grid with a more rigorous method to find more exact value
         # for the plane.
         a, b, c = grid.get_padded_grid_axes(10)
-        fn = RegularGridInterpolator((a, b, c), padded, method="cubic")
+        fn = RegularGridInterpolator((a, b, c), padded, method=method)
 
         # create variables for if the line needs to be shifted from what the
         # rough partitioning found
@@ -552,6 +570,7 @@ class PartitioningToolkit:
     def get_elf_ionic_radius(
         self,
         site_index: int,
+        refine: bool = True,
     ):
         """
         This method gets the ELF ionic radius. It interpolates the ELF values
@@ -562,6 +581,9 @@ class PartitioningToolkit:
         Args:
             site_index (int):
                 An integer value referencing an atom in the structure
+            refine (bool):
+                Whether to refine the radius using cubic interpolation. 
+                Slower, but more accurate.
 
         Returns:
             The distance the ELF ionic radius of the site
@@ -578,10 +600,18 @@ class PartitioningToolkit:
             site_cart_coords = row["site_coords"]
             neigh_cart_coords = row["neigh_coords"]
             neighbor_string = row["neigh_symbol"]
+            neigh_index = row["neigh_index"]
             if neighbor_string != "E":
                 bond_dist = row["dist"]
                 break
-
+        
+        # elf_min_frac = self.get_site_neighbor_frac(
+        #     site_cart_coords=site_cart_coords,
+        #     neigh_cart_coords=neigh_cart_coords,
+        #     site_index=site_index,
+        #     neigh_index=neigh_index
+        #     )
+        
         (
             elf_positions,
             elf_values,
@@ -590,10 +620,20 @@ class PartitioningToolkit:
             site_cart_coords,
             neigh_cart_coords,
         )
-
-        elf_min_index = np.where(np.array(label_values) == site_index)[0].max()
-        refined_index = self._refine_line_part_frac(elf_positions, elf_min_index, "min")
-        distance_to_min = refined_index[2] * bond_dist
+        
+        global_min = self.get_line_minimum_as_frac(
+            elf_positions,
+            elf_values,
+            label_values,
+            site_index,
+            neigh_index,
+            refine = refine
+            )
+        
+        distance_to_min = global_min[2] * bond_dist
+        # elf_min_index = np.where(np.array(label_values) == site_index)[0].max()
+        # refined_index = self._refine_line_part_frac(elf_positions, elf_min_index, "min")
+        # distance_to_min = refined_index[2] * bond_dist
 
         return distance_to_min
 
