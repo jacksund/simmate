@@ -15,8 +15,36 @@ class BaderConfig(AppConfig):
     name = "simmate.apps.bader"
 
 
+class BcpcConfig(AppConfig):
+    name = "simmate.apps.bcpc"
+
+
+class CasRegistryConfig(AppConfig):
+    name = "simmate.apps.cas_registry"
+
+
+class ChemblConfig(AppConfig):
+    name = "simmate.apps.chembl"
+
+
+class ChemspaceConfig(AppConfig):
+    name = "simmate.apps.chemspace"
+
+
 class CodConfig(AppConfig):
     name = "simmate.apps.cod"
+
+
+class EmoleculesConfig(AppConfig):
+    name = "simmate.apps.emolecules"
+
+
+class EnamineConfig(AppConfig):
+    name = "simmate.apps.enamine"
+
+
+class EppoGdConfig(AppConfig):
+    name = "simmate.apps.eppo_gd"
 
 
 class EvolutionConfig(AppConfig):
@@ -33,6 +61,10 @@ class MaterialsProjectConfig(AppConfig):
 
 class OqmdConfig(AppConfig):
     name = "simmate.apps.oqmd"
+
+
+class PdbConfig(AppConfig):
+    name = "simmate.apps.pdb"
 
 
 class QuantumEspressoConfig(AppConfig):
