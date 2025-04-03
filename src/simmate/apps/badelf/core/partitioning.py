@@ -522,7 +522,8 @@ class PartitioningToolkit:
             elf_min_value_new = np.polyval(np.array([d, e, f]), x)
             elf_min_frac_new = elf_min_index_new / (len(positions) - 1)
         except:
-            breakpoint()
+            raise Exception(
+                "Refinement reached end of bond and failed to find radius.")
 
         return [elf_min_index_new, elf_min_value_new, elf_min_frac_new]
 
@@ -659,6 +660,13 @@ class PartitioningToolkit:
             site_cart_coords,
             neigh_cart_coords,
         )
+        
+        # Make sure we don't have only assignments to a single site. If we do
+        # we want to place our radius right at the middle.
+        if len(np.unique(label_values)) == 1:
+            bond_frac = 0.5
+            distance_to_min = bond_frac * bond_dist
+            return distance_to_min
 
         # Now we check if there is a covalent bond along our line
         covalent = False
@@ -695,7 +703,7 @@ class PartitioningToolkit:
             # We want to use the standard ionic radius, or the first point where
             # we no longer have a basin related to our atom
             try:
-                elf_min_index = np.where(np.array(label_values) == site_index)[0].max()
+                elf_min_index = np.where(np.array(label_values) != site_index)[0][0]-1
                 extrema = "min"
             except:
                 raise Exception(
@@ -705,14 +713,22 @@ class PartitioningToolkit:
                     )
             
         # refine the location of the radius
-        global_min = self._refine_line_part_frac(
-            positions=elf_positions,
-            elf_min_index=elf_min_index,
-            extrema=extrema,
-            method=refine_method
-        )
+        try:
+            global_min = self._refine_line_part_frac(
+                positions=elf_positions,
+                elf_min_index=elf_min_index,
+                extrema=extrema,
+                method=refine_method
+            )
+            distance_to_min = global_min[2] * bond_dist
+        except:
+            breakpoint()
+            bond_frac = elf_min_index/(len(elf_positions)-1)
+            logging.warning(
+                f"Refinement of radius failed. Unrefined bond fraction of {bond_frac} will be used."
+                )
         
-        distance_to_min = global_min[2] * bond_dist
+            distance_to_min = bond_frac * bond_dist
 
         return distance_to_min
 

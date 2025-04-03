@@ -458,10 +458,10 @@ class ElfAnalyzerToolkit:
         if not inf_feature:
             return surrounded_sites
         else:
-            if len(surrounded_sites) == 0:
-                return surrounded_sites
-            else:
-                return np.insert(surrounded_sites, 0, -1)
+            # if len(surrounded_sites) == 0:
+            #     return surrounded_sites
+            # else:
+            return np.insert(surrounded_sites, 0, -1)
 
     def get_bifurcation_graphs(
         self,
@@ -610,7 +610,7 @@ class ElfAnalyzerToolkit:
                     for idx in all_parent_indices:
                         current_parent = graph.nodes[idx]
                         if current_parent["atom_num"] == -1:
-                            infinite_split = parent["split"]
+                            infinite_split = current_parent["split"]
                             break
                     depth_3d = round(max_elf - infinite_split, 2)
                     # Now we get the basins that belong to this feature.
@@ -731,12 +731,18 @@ class ElfAnalyzerToolkit:
                         atoms.insert(0, -1)
                     # If the volume surrounds infinite atoms, the first atom
                     # returned will be a -1. We check for this
+                    # TODO: Currently, an atom_num of -1 indicates an infinite
+                    # feature, but it would be useful to instead indicate this
+                    # as a separate key. So we would have the surrounded atoms,
+                    # the number of surrounded atoms, and whether the feature is
+                    # infinite or not.
                     if len(atoms) > 0:
                         if atoms[0] == -1:
                             atom_num = -1
                             atoms = atoms[1:]
-                        else:
-                            atom_num = len(atoms)
+                    else:
+                        atom_num = len(atoms)
+                    
                     networkx.set_node_attributes(
                         graph,
                         {
@@ -930,6 +936,11 @@ class ElfAnalyzerToolkit:
                         elf_data > parent_split, True, False
                     )
                     atoms_in_basin = self.get_atoms_surrounded_by_volume(low_elf_mask)
+                    # If the volume surrounds infinite atoms, the first atom
+                    # returned will be a -1. We check for this
+                    if len(atoms_in_basin) > 0:
+                        if atoms_in_basin[0] == -1:
+                            atoms_in_basin = atoms_in_basin[1:]
                     # TODO: We can probably check if these basins are cores or a shell around the atom
                     basin_type = "val"
                     basin_subtype = None
@@ -989,6 +1000,12 @@ class ElfAnalyzerToolkit:
                         atoms_in_basin = self.get_atoms_surrounded_by_volume(
                             low_elf_mask
                         )
+                        # If the volume surrounds infinite atoms, the first atom
+                        # returned will be a -1. We check for this
+                        if len(atoms_in_basin) > 0:
+                            if atoms_in_basin[0] == -1:
+                                atoms_in_basin = atoms_in_basin[1:]
+
                         if len(atoms_in_basin) > 0:
                             # We have an core/shell region
                             basin_subtype = "core"
@@ -1026,6 +1043,7 @@ class ElfAnalyzerToolkit:
             max_elf = 0
             nearest_atom = 0
             subset = 0
+            frac_coords = None
 
             all_shells = True
             # update all of our shell characteristics
@@ -1041,6 +1059,7 @@ class ElfAnalyzerToolkit:
                 max_elf = max(max_elf, child["max_elf"])
                 nearest_atom = child["nearest_atom"]
                 subset = child["subset"]
+                frac_coords = child["frac_coords"]
             if len(new_children_to_remove) == 0:
                 # we had no shells so we can just continue
                 continue
@@ -1058,6 +1077,15 @@ class ElfAnalyzerToolkit:
                 # first shell node
                 node_to_replace = new_children_to_remove.pop(0)
                 depth = max_elf - graph.nodes[i]["split"]
+            
+            # get depth to infinite feature
+            all_parent_indices = graph.deep_parent_indices(i)
+            for idx in all_parent_indices:
+                current_parent = graph.nodes[idx]
+                if current_parent["atom_num"] == -1:
+                    infinite_split = current_parent["split"]
+                    break
+            depth_3d = round(max_elf - infinite_split, 2)
 
             # clear the attributes from the node
             graph.nodes[node_to_replace].clear()
@@ -1075,6 +1103,8 @@ class ElfAnalyzerToolkit:
                         "max_elf": round(max_elf, 2),
                         "nearest_atom": nearest_atom,
                         "depth": round(depth, 2),
+                        "3d_depth": depth_3d,
+                        "frac_coords": frac_coords,
                     }
                 },
             )
