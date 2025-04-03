@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 
-from .compound import Emolecules
+from .molecules import EmoleculesMolecule
 from .supplier_offers import EmoleculesSupplierOffer

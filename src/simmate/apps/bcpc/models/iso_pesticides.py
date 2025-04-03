@@ -12,7 +12,7 @@ from simmate.database.base_data_types import table_column
 from simmate.toolkit import Molecule as ToolkitMolecule
 
 
-class IsoPesticides(Molecule):
+class BcpcIsoPesticide(Molecule):
     """
     This is the "Compendium of Pesticide Common Names" pulled from the
     British Crop Production Council (BCPC) website.
@@ -28,6 +28,9 @@ class IsoPesticides(Molecule):
         - http://www.bcpcpesticidecompendium.org/index-inchikey-frame.html
         - http://www.bcpcpesticidecompendium.org/index_cn_frame.html
     """
+
+    class Meta:
+        db_table = "bcpc__iso_pesticides__molecules"
 
     # disable cols
     source = None

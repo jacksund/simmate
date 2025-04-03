@@ -11,10 +11,13 @@ from simmate.database.base_data_types import table_column
 from simmate.toolkit import Molecule as ToolkitMolecule
 
 
-class EnamineReal(Molecule):
+class EnamineRealMolecule(Molecule):
     """
     Molecules from the [Enamine REAL](https://enamine.net/) database.
     """
+
+    class Meta:
+        db_table = "enamine__real__molecules"
 
     # disable cols
     source = None
@@ -27,12 +30,6 @@ class EnamineReal(Molecule):
     external_website = (
         "https://enamine.net/compound-collections/real-compounds/real-database"
     )
-
-    # We disable these two columns because...
-    #   1. there are ~6 billion entries and this takes up significant space
-    #   2. this dataset is static and not updated periodically (maybe every 5yrs)
-    created_at = None
-    updated_at = None
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """
@@ -119,7 +116,7 @@ class EnamineReal(Molecule):
                     molecule = ToolkitMolecule.from_smiles(entry.smiles)
 
                     # now convert the entry to a database object
-                    molecule_db = EnamineReal.from_toolkit(
+                    molecule_db = cls.from_toolkit(
                         id=entry.idnumber,
                         smiles_type=entry.Type,
                         molecule=molecule,
