@@ -9,8 +9,8 @@ from rich.progress import track
 
 from simmate.database.base_data_types import DatabaseTable, table_column
 
-from .molecules import ChemblMolecule
 from .document import ChemblDocument
+from .molecules import ChemblMolecule
 
 
 class ChemblAssayResult(DatabaseTable):
