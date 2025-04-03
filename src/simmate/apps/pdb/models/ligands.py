@@ -26,6 +26,9 @@ class PdbLigand(Molecule):
     bulk downloads from http://ligand-expo.rcsb.org/ld-download.html
     """
 
+    class Meta:
+        db_table = "pdb__ligands"
+
     # disable cols
     source = None
 

@@ -18,10 +18,13 @@ from simmate.toolkit import Molecule as ToolkitMolecule
 from simmate.utilities import chunk_list, get_directory
 
 
-class Emolecules(Molecule):
+class EmoleculesMolecule(Molecule):
     """
     Molecules from the [eMolecules](https://www.emolecules.com/) database.
     """
+
+    class Meta:
+        db_table = "emolecules__molecules"
 
     # disable cols
     source = None

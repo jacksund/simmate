@@ -23,6 +23,9 @@ class EppoCode(DatabaseTable):
     so this table can include additional codes with a custom "eppo_source".
     """
 
+    class Meta:
+        db_table = "eppo_gd__eppo_codes"
+
     # disable cols
     source = None
 

@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import logging
-import time
-import warnings
-
 import requests
-from bs4 import BeautifulSoup
 
 from simmate.apps.rdkit.models import Molecule
 from simmate.database.base_data_types import table_column
@@ -14,7 +9,7 @@ from simmate.toolkit import Molecule as ToolkitMolecule
 PUBCHEM_URL_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest"
 
 
-class CasRegistry(Molecule):
+class CasRegistryMolecule(Molecule):
     """
     Molecules & Compounds from the
     [CAS Common Chemistry database](https://www.cas.org/about-us)
@@ -51,6 +46,9 @@ class CasRegistry(Molecule):
         - (no bulk downloads available without purchase)
         - Extra info: https://www.cas.org/services/commonchemistry-api
     """
+
+    class Meta:
+        db_table = "cas_registry__molecules"
 
     # disable cols
     source = None
