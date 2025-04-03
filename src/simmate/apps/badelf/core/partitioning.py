@@ -292,7 +292,7 @@ class PartitioningToolkit:
         labels: list | ArrayLike,
         site_index: int,
         neigh_index: int,
-        refine: bool = True,
+        refine_method: str = "cubic",
     ):
         """
         Finds the minimum point of a list of values along a line, then returns the
@@ -308,8 +308,10 @@ class PartitioningToolkit:
                 The index of the atom
             neigh_index (int):
                 The index of the neighboring atom
-            refine (bool):
-                Whether or not to refine the frac
+            refine_method (str):
+                The method to use to interpolate ELF during refinement.
+                "cubic" is more accurate but takes longer, "linear" is
+                faster but can change significantly with grid density
 
         results:
             The global minimum of form [line_position, value, frac_position]
@@ -393,19 +395,12 @@ class PartitioningToolkit:
                     elf_min_index = np.where(np.array(labels) == site_index)[0].max()
                     extrema = "min"
             
-            if refine:
-                global_min = self._refine_line_part_frac(
-                    positions=positions,
-                    elf_min_index=elf_min_index,
-                    extrema=extrema,
-                )
-            else:
-                global_min = self._refine_line_part_frac(
-                    positions=positions,
-                    elf_min_index=elf_min_index,
-                    extrema=extrema,
-                    method="linear"
-                )
+            global_min = self._refine_line_part_frac(
+                positions=positions,
+                elf_min_index=elf_min_index,
+                extrema=extrema,
+                method=refine_method
+            )
 
         return global_min
 
@@ -566,24 +561,74 @@ class PartitioningToolkit:
             return "negative", value_of_plane_equation
         else:
             return "zero", value_of_plane_equation
+    
+    def get_elf_ionic_radii(
+        self,
+        refine_method: str = "cubic",
+        labeled_structure: Structure = None,
+            ):
+        """
+        Gets the ELF radius for all atoms in the grid structure. See
+        get_elf_ionic_radius for more detail.
+        
+        Args:
+            refine_method (str):
+                The method to use to interpolate ELF during refinement.
+                "cubic" is more accurate but takes longer, "linear" is
+                faster but can change significantly with grid density
+            labeled_structure (Structure):
+                A structure labeled with dummy atoms. This is used to
+                determine what type of non-atomic basin is between atoms
+                if there is one and should match the atoms in the 
+                bader parameter.
 
+        Returns:
+            A list of ELF radii for each site
+        """
+        equiv_elements = self.grid.equivalent_atoms
+        
+        unique_radii = np.zeros(len(equiv_elements))
+        
+        for atom_idx in np.unique(equiv_elements):
+            radius = self.get_elf_ionic_radius(atom_idx, refine_method, labeled_structure)
+            unique_radii[np.where(equiv_elements==atom_idx)[0]] = radius
+        
+        return unique_radii
+    
     def get_elf_ionic_radius(
         self,
         site_index: int,
-        refine: bool = True,
+        refine_method: str = "cubic",
+        labeled_structure: Structure = None,
     ):
         """
         This method gets the ELF ionic radius. It interpolates the ELF values
-        between a site and it's closest neighbor and returns the distance between
-        the atom and the minimum in this line. This has been shown to be very
-        similar to the Shannon Crystal Radius, but gives more specific values
+        between a site and it's closest neighbor. For ionic bonds, the
+        radius is defined as the minimum between the two atoms. This has 
+        been shown to be very similar to the Shannon Crystal Radius, 
+        but gives more specific values.
+        
+        For covalent bonds and some electrides (e.g. NaBa3N) there will
+        be a region that does not belong to only one of the atoms. For
+        covalent bonds the radius is defined at the maximum of the covalent
+        basin. For metal/electride features, the radius is defined at
+        the last point belonging to the atom of interest.
+        Note that this second case is not equivalent to the partitioning
+        planes used for the BadELF algorithm, which will always use the
+        ionic/covalent separation. 
 
         Args:
             site_index (int):
                 An integer value referencing an atom in the structure
-            refine (bool):
-                Whether to refine the radius using cubic interpolation. 
-                Slower, but more accurate.
+            refine_method (str):
+                The method to use to interpolate ELF during refinement.
+                "cubic" is more accurate but takes longer, "linear" is
+                faster but can change significantly with grid density
+            labeled_structure (Structure):
+                A structure labeled with dummy atoms. This is used to
+                determine what type of non-atomic basin is between atoms
+                if there is one and should match the atoms in the 
+                bader parameter.
 
         Returns:
             The distance the ELF ionic radius of the site
@@ -605,13 +650,7 @@ class PartitioningToolkit:
                 bond_dist = row["dist"]
                 break
         
-        # elf_min_frac = self.get_site_neighbor_frac(
-        #     site_cart_coords=site_cart_coords,
-        #     neigh_cart_coords=neigh_cart_coords,
-        #     site_index=site_index,
-        #     neigh_index=neigh_index
-        #     )
-        
+        # Interpolate the elf along this line
         (
             elf_positions,
             elf_values,
@@ -620,20 +659,60 @@ class PartitioningToolkit:
             site_cart_coords,
             neigh_cart_coords,
         )
+
+        # Now we check if there is a covalent bond along our line
+        covalent = False
+        for label in np.unique(label_values):
+            if labeled_structure[label].specie.symbol == "Z":
+                covalent = True
+                break
         
-        global_min = self.get_line_minimum_as_frac(
-            elf_positions,
-            elf_values,
-            label_values,
-            site_index,
-            neigh_index,
-            refine = refine
+        # If there is, we want to use the maximum closest to the center as our
+        # radius
+        if covalent:
+            # we find the closest maximum to the center
+            maxima = self.find_maximum(elf_values)
+            unrelated_indices = np.where(
+                ~np.isin(label_values, [site_index, neigh_index])
             )
+            new_maxima = []
+            for maximum in maxima:
+                if (
+                    np.isin(maximum[0], unrelated_indices)
+                    and (maximum[1] - min(elf_values)) > 0.01
+                ):
+                    new_maxima.append(maximum)
+            if len(new_maxima) > 0:
+                elf_min_index = self.get_closest_extrema_to_center(
+                    elf_values, new_maxima
+                )[0]
+                extrema = "max"
+            else:
+                elf_min_index = np.where(np.array(label_values) == site_index)[0].max()
+                extrema = "min"
+        
+        else:
+            # We want to use the standard ionic radius, or the first point where
+            # we no longer have a basin related to our atom
+            try:
+                elf_min_index = np.where(np.array(label_values) == site_index)[0].max()
+                extrema = "min"
+            except:
+                raise Exception(
+                    f"No radius could be found for atom index {site_index}. This can"
+                    " result from using too few valence electrons in your PPs. If you"
+                    " are sure this is not the case, please contact our team."
+                    )
+            
+        # refine the location of the radius
+        global_min = self._refine_line_part_frac(
+            positions=elf_positions,
+            elf_min_index=elf_min_index,
+            extrema=extrema,
+            method=refine_method
+        )
         
         distance_to_min = global_min[2] * bond_dist
-        # elf_min_index = np.where(np.array(label_values) == site_index)[0].max()
-        # refined_index = self._refine_line_part_frac(elf_positions, elf_min_index, "min")
-        # distance_to_min = refined_index[2] * bond_dist
 
         return distance_to_min
 

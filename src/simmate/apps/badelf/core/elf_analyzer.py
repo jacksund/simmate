@@ -47,7 +47,21 @@ class BifurcationGraph(DiGraph):
             return self.nodes[parent_index]
         else:
             return None
-
+    
+    def deep_parent_indices(self, n: int) -> NDArray[np.int64]:
+        """
+        Returns the indices of all nodes connected to this node by
+        parents.
+        """
+        predecessor_list = []
+        
+        current_predecessor = n
+        while current_predecessor is not None:
+            current_predecessor = self.parent_index(current_predecessor)
+            if current_predecessor is not None:
+                predecessor_list.append(current_predecessor)
+        return predecessor_list
+    
     def child_indices(self, n: int) -> NDArray[np.int64]:
         """
         Returns the indices of the children of this node if they exist
@@ -249,26 +263,28 @@ class ElfAnalyzerToolkit:
                 max_en_diff = en_diff
         # return the en difference and number of neighbors
         return max_en_diff, len(neigh_list)
-
-    def get_atom_radius_guess(self, site: int) -> float:
-        atom_element = self.structure.species[site].element
-        en_diff, neigh_num = self.get_atom_en_diff_and_cn(site)
-        # The cutoff we use for ionic vs. covalent is arbitrary. It would be
-        # worthwile to study a range of EN differences and see where covalent
-        # bonds start to show up.
-        ionic_en_cutoff = 1.6
-        if abs(en_diff) < ionic_en_cutoff:
-            # use covalent radius
-            radius = atom_element.atomic_radius
-        else:
-            # use average ionic radius. We can guess if the atom is cationic
-            # vs anionic using the EN difference. EN diff will be positive if
-            # site is more EN than neighbors, meaning its an anion.
-            if en_diff > 0:
-                radius = atom_element.average_anionic_radius
-            else:
-                radius = atom_element.average_cationic_radius
-        return radius
+    
+    # !!! The following code has been replaced by radii determined directly from
+    # the ELF
+    # def get_atom_radius_guess(self, site: int) -> float:
+    #     atom_element = self.structure.species[site].element
+    #     en_diff, neigh_num = self.get_atom_en_diff_and_cn(site)
+    #     # The cutoff we use for ionic vs. covalent is arbitrary. It would be
+    #     # worthwile to study a range of EN differences and see where covalent
+    #     # bonds start to show up.
+    #     ionic_en_cutoff = 1.6
+    #     if abs(en_diff) < ionic_en_cutoff:
+    #         # use covalent radius
+    #         radius = atom_element.atomic_radius
+    #     else:
+    #         # use average ionic radius. We can guess if the atom is cationic
+    #         # vs anionic using the EN difference. EN diff will be positive if
+    #         # site is more EN than neighbors, meaning its an anion.
+    #         if en_diff > 0:
+    #             radius = atom_element.average_anionic_radius
+    #         else:
+    #             radius = atom_element.average_cationic_radius
+    #     return radius
 
     @property
     def site_voxel_coords(self) -> np.array:
@@ -502,8 +518,10 @@ class ElfAnalyzerToolkit:
         resolution: float = 0.02,
         shell_depth: float = 0.05,
         metal_depth_cutoff: float = 0.1,
-        min_covalent_angle: float = 150,
+        min_covalent_angle: float = 135,
         min_covalent_bond_ratio: float = 0.35,
+        radius_refine_method: str = "linear",
+        **kwargs,
     ):
         """
         This will construct a BifurcationGraph class.
@@ -572,6 +590,7 @@ class ElfAnalyzerToolkit:
                 features_list = np.unique(new_features)
                 # get the node attributes corresponding to this old feature
                 parent_idx = graph.parent_index(feature)
+                all_parent_indices = graph.deep_parent_indices(feature)
                 parent = graph.parent_dict(feature)
                 # remove 0
                 if -new_len in features_list:
@@ -586,11 +605,35 @@ class ElfAnalyzerToolkit:
                     max_elf = round(np.max(elf_data[mask]), 2)
                     split = parent["split"]
                     depth = round(max_elf - split, 2)
+                    # We also want to mark a type of depth corresponding to the
+                    # point where this feature connected with an infinite domain.
+                    for idx in all_parent_indices:
+                        current_parent = graph.nodes[idx]
+                        if current_parent["atom_num"] == -1:
+                            infinite_split = parent["split"]
+                            break
+                    depth_3d = round(max_elf - infinite_split, 2)
                     # Now we get the basins that belong to this feature.
                     # NOTE: there may be more than one if the depth of the basin is
                     # smaller than the resolution
                     # basins = np.unique(basin_labeled_voxels[mask])
                     basins = graph.nodes[feature]["basins"]
+                    # Using this, we can find the average frac coords of the attractors
+                    # in this basin
+                    empty_structure = self.structure.copy()
+                    empty_structure.remove_species(empty_structure.symbol_set)
+                    frac_coords = bader.bader_maxima_fractional[basins]
+                    if len(frac_coords) == 1:
+                        frac_coord = frac_coords[0]
+                    else:
+                        # We append these to an empty structure and use pymatgen's
+                        # merge method to get their average position
+                        for frac_coord in frac_coords:
+                            empty_structure.append("He", frac_coord)
+                        if len(empty_structure) > 1:
+                            empty_structure.merge_sites(tol=1, mode="average")
+                        frac_coord = empty_structure.frac_coords[0]
+                    
                     # Using these basins, we create a mask representing the full
                     # basin (not just above this elf value) and integrate the
                     # charge in this region. We also save the volume here
@@ -618,10 +661,12 @@ class ElfAnalyzerToolkit:
                             feature: {
                                 "max_elf": max_elf,
                                 "depth": depth,
+                                "3d_depth": depth_3d,
                                 "charge": charge,
                                 "volume": volume,
                                 "atom_distance": distance,
                                 "nearest_atom": nearest_atom,
+                                "frac_coords": frac_coord
                             }
                         },
                     )
@@ -769,7 +814,7 @@ class ElfAnalyzerToolkit:
 
         # Now we calculate a bare electron indicator for each valence basin. This
         # is used just to give a sense of how bare an electron is.
-        graph = self._mark_bare_electron_indicator(graph, bader, elf_grid)
+        graph = self._mark_bare_electron_indicator(graph, bader, elf_grid, radius_refine_method=radius_refine_method)
 
         # Finally, we add a label to each node with a summary of information
         # for plotting
@@ -797,7 +842,7 @@ class ElfAnalyzerToolkit:
                     )
                 except:
                     raise Exception(
-                        "At least one feature was not assigned. This is a bug. Please report to our github:"
+                        "At least one ELF feature was not assigned. This is a bug. Please report to our github:"
                         "https://github.com/jacksund/simmate/issues"
                     )
 
@@ -1128,6 +1173,7 @@ class ElfAnalyzerToolkit:
             # as such
             if covalent:
                 subtype = "covalent"
+                print("covalent")
             # We also noted in our atomic assignment which features were part
             # of the atomic branch, but weren't shells or cores. The remaining
             # options were covalent or lone-pairs and we've just assigned the
@@ -1178,11 +1224,11 @@ class ElfAnalyzerToolkit:
         return graph
 
     def _mark_bare_electron_indicator(
-        self, graph: BifurcationGraph(), bader, elf_grid: Grid,
+        self, graph: BifurcationGraph(), bader, elf_grid: Grid, radius_refine_method: str = "linear",
     ) -> BifurcationGraph():
         """
         Takes in a bifurcation graph and calculates an electride character
-        score for each unlabeled valence feature. Electride character ranges from
+        score for each valence feature. Electride character ranges from
         0 to 1 and is the combination of several different metrics:
         ELF value, charge, depth, volume, and atom distance.
         """
@@ -1192,19 +1238,26 @@ class ElfAnalyzerToolkit:
         frac_coords = bader.bader_maxima_fractional
         temp_structure = self.structure.copy()
         for feature_idx, attributes in valence_summary.items():
+            if attributes["subtype"] == "covalent":
+                species = "Z"
+            else:
+                species = "X"
             for basin_idx in attributes["basins"]:
                 frac_coord = frac_coords[basin_idx]
-                temp_structure.append("X", frac_coord)
+                temp_structure.append(species, frac_coord)
         temp_grid = elf_grid.copy()
         temp_grid.structure = temp_structure
         #TODO This can probably be made faster by rerunning only part of the
         # bader. If not this should be passed to the BadELfToolkit to avoid
-        # repeat calculation. Also, I need to account for threads. Also, update radius finder
-        # to only use linear interpolation. Update finder to get all atom radii
-        # once.
+        # repeat calculations. 
+        # Make sure all of these values make sense with new H.
         labeled_pybader = temp_grid.run_pybader()
         partitioning = PartitioningToolkit(elf_grid, labeled_pybader)
-        
+        # TODO Ideally, these radii are stored at a class level so that they
+        # can be passed to the BadElfToolkit class for summary. However, this
+        # requires knowledge of if this is spin-up/spin-down which I currently
+        # don't have stored at this level
+        radii = partitioning.get_elf_ionic_radii(refine_method=radius_refine_method, labeled_structure=temp_structure)
         
         for feature_idx, attributes in valence_summary.items():
             # We want to get a metric of how "bare" each feature is. To do this,
@@ -1239,8 +1292,12 @@ class ElfAnalyzerToolkit:
 
             # Now we look at the depth of our feature. Like the ELF value, this
             # can only be from 0 to 1, and bare electrons tend to take on higher
-            # values. Therefore, we leave this as is
-            depth_contribution = attributes["depth"]
+            # values. Therefore, we leave this as is.
+            # NOTE: The depth here is the depth to the first irreducible feature
+            # that extends infinitely in at least one direction. This is different
+            # from the technical "depth" used in ELF topology analysis, but is
+            # more related to how isolated a feature is.
+            depth_contribution = attributes["3d_depth"]
 
             # Next is the volume. Bare electrons are usually thought of as being
             # similar to a free s-orbital with a similar size to a hydride. Therefore
@@ -1256,8 +1313,7 @@ class ElfAnalyzerToolkit:
             # the nearest atom and get the EN difference. We use this to guess
             # whether covalent or ionic radii should be used, then pull the appropriate one.
             atom_idx = attributes["nearest_atom"]
-            # atom_radius = self.get_atom_radius_guess(atom_idx)
-            atom_radius = partitioning.get_elf_ionic_radius(atom_idx, refine=False)
+            atom_radius = radii[atom_idx]
             dist = attributes["atom_distance"]
             # Now that we have a radius, we need to get a metric of 0-1. We need
             # to set an ideal distance corresponding to 1 and a minimum distance
@@ -1272,7 +1328,17 @@ class ElfAnalyzerToolkit:
             # limit to a range of 0 to 1
             dist_contribution = min(max(dist_contribution, 0), 1)
             dist_minus_radius = dist - atom_radius
-
+            
+            # We want to keep track of the full values in a convenient way
+            unnormalized_contributors = np.array(
+                [
+                    elf_contribution,
+                    charge,
+                    depth_contribution,
+                    attributes["volume"],
+                    dist_minus_radius,
+                    ]
+                )
             # Finally, our bare electron indicator is a linear combination of
             # the indicator above. The contributions are somewhat arbitrary, but
             # are based on chemical intuition. The ELF and charge contributions
@@ -1295,14 +1361,29 @@ class ElfAnalyzerToolkit:
                 ]
             )
             bare_electron_indicator = np.sum(contributers * weights)
+            
+            # Finally, we also want to get the coordination environment of this
+            # feature, even though this doesnt feed into our BEI.
+            frac_coords = attributes["frac_coords"]
+            temp_structure = self.structure.copy()
+            temp_structure.append("H-", frac_coords)
+            cnn = CrystalNN()
+            coordination = cnn.get_nn_info(temp_structure, -1)
+            coord_num = len(coordination)
+            coord_indices = [i["site_index"] for i in coordination]
+            coord_atoms = [temp_structure[i] for i in coord_indices]
             # we update our node to include this information
             networkx.set_node_attributes(
                 graph,
                 {
                     feature_idx: {
+                        "unnormalized_bare_electron_indicator": unnormalized_contributors,
                         "bare_electron_indicator": bare_electron_indicator,
                         "bare_electron_scores": contributers,
                         "dist_minus_radius": dist_minus_radius,
+                        "coord_num": coord_num,
+                        "coord_indices": coord_indices,
+                        "coord_atoms": coord_atoms,
                     }
                 },
             )
@@ -1366,10 +1447,10 @@ class ElfAnalyzerToolkit:
             if node.get("split", None) is None:
                 end_indices.append(i)
                 # Get label
-                label = f"""type: {node["subtype"]}\ndepth: {node["depth"]}\nmax elf: {node["max_elf"]}\ncharge: {node["charge"]}\nvolume: {node["volume"]}\natom distance: {round(node["atom_distance"],2)}\nnearest atom index: {node["nearest_atom"]}\nnearest atom type: {self.structure[node["nearest_atom"]].specie.name}"""
+                label = f"""type: {node["subtype"]}\ndepth: {node["depth"]}\ndepth to inf connection: {node["3d_depth"]}\nmax elf: {node["max_elf"]}\ncharge: {node["charge"]}\nvolume: {node["volume"]}\natom distance: {round(node["atom_distance"],2)}\nnearest atom index: {node["nearest_atom"]}\nnearest atom type: {self.structure[node["nearest_atom"]].specie.name}"""
                 if node.get("bare_electron_indicator", None) is not None:
                     label += f'\ndistance minus atom radius: {round(node["dist_minus_radius"],2)}'
-                #     label += f"\nBEI array: {node['bare_electron_scores'].round(2)}"
+                    label += f"\nBEI array: {node['bare_electron_scores'].round(2)}"
                 types.append(node["subtype"])
             else:
                 atom_num = node["atom_num"]
@@ -1580,14 +1661,15 @@ class ElfAnalyzerToolkit:
         electride_charge_min: float = 0.5,
         electride_volume_min: float = 10,
         electride_radius_min: float = 0.3,
+        **kwargs,
     ):
         # First, we get the valence features for this graph and create a
         # structure that we will add features to
         valence_features = self.get_valence_summary(graph)
         structure = self.structure.copy()
         structure.remove_oxidation_states()
-        empty_structure = structure.copy()
-        empty_structure.remove_species(empty_structure.symbol_set)
+        # empty_structure = structure.copy()
+        # empty_structure.remove_species(empty_structure.symbol_set)
         # create an array of our conditions to check against
         conditions = np.array(
             [
@@ -1635,23 +1717,25 @@ class ElfAnalyzerToolkit:
                         continue
                     species = "le"
 
-            # Now that we have the type of feature, we want to combine all
-            # of its basins to a single point.
-            basins = attributes["basins"]
-            # Then we get their fractional coords
-            frac_coords = bader.bader_maxima_fractional[basins]
-            if len(frac_coords) == 1:
-                structure.append(species, frac_coords[0])
-            else:
-                # We append these to an empty structure and use pymatgen's
-                # merge method to get their average position
-                temp_structure = empty_structure.copy()
-                for frac_coord in frac_coords:
-                    temp_structure.append("He", frac_coord)
-                if len(temp_structure) > 1:
-                    temp_structure.merge_sites(tol=1, mode="average")
-                frac_coord = temp_structure.frac_coords[0]
-                structure.append(species, frac_coord)
+            # Now that we have the type of feature, we want to add it to our
+            # structure.
+            frac_coords = attributes["frac_coords"]
+            structure.append(species, frac_coords)
+            # basins = attributes["basins"]
+            # # Then we get their fractional coords
+            # frac_coords = bader.bader_maxima_fractional[basins]
+            # if len(frac_coords) == 1:
+            #     structure.append(species, frac_coords[0])
+            # else:
+            #     # We append these to an empty structure and use pymatgen's
+            #     # merge method to get their average position
+            #     temp_structure = empty_structure.copy()
+            #     for frac_coord in frac_coords:
+            #         temp_structure.append("He", frac_coord)
+            #     if len(temp_structure) > 1:
+            #         temp_structure.merge_sites(tol=1, mode="average")
+            #     frac_coord = temp_structure.frac_coords[0]
+            #     structure.append(species, frac_coord)
 
         # To find the atoms/electrides surrounding a covalent/metallic bond,
         # we need the structure to be organized with atoms first, then electrides,
@@ -1717,3 +1801,46 @@ class ElfAnalyzerToolkit:
             separate_spin=separate_spin,
             ignore_low_pseudopotentials=ignore_low_pseudopotentials,
         )
+    
+    def get_full_analysis(self, write_results: bool = True, **kwargs):
+        """
+        Gets the BifurcationGraphs, plots, and labeled structures for
+        the entire analysis and returns them as a dict object.
+        """
+        if self.spin_polarized:
+            graph_up, graph_down = self.get_bifurcation_graphs(**kwargs)
+            bader_up, bader_down = self.bader_up, self.bader_down
+            plot_up = self.get_bifurcation_plot(graph_up, write_plot=write_results)
+            plot_down = self.get_bifurcation_plot(graph_down, write_plot=write_results)
+            structure_up = self._get_labeled_structure(graph_up, bader_up, **kwargs)
+            structure_down = self._get_labeled_structure(graph_down, bader_down, **kwargs)
+            if write_results:
+                # write structures
+                structure_up.to(self.directory/"labeled_up.cif", "cif")
+                structure_down.to(self.directory/"labeled_down.cif", "cif")
+            
+            return {
+                "graph_up": graph_up,
+                "graph_down": graph_down,
+                "plot_up": plot_up,
+                "plot_down": plot_down,
+                "structure_up": structure_up,
+                "structure_down": structure_down,
+                }
+        
+        else:
+            graph = self.get_bifurcation_graphs(**kwargs)
+            bader = self.bader_up
+            plot = self.get_bifurcation_plot(graph, write_plot=write_results)
+            structure = self._get_labeled_structure(graph, bader, **kwargs)
+            if write_results:
+                # write structures
+                structure.to(self.directory/"labeled.cif", fmt="cif")
+            return {
+                "graph": graph,
+                "plot": plot,
+                "structure": structure,
+                }
+            
+            
+        

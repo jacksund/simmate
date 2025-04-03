@@ -443,6 +443,10 @@ The minimum volume that a bare-electron feature must have to be considered an el
 
 The minimum ELF radius that a bare-electron feature must have to be considered an electride. The radius is defined as the distance from the feature to the closest atom minus that atoms radius. Atomic radii are determined by checking the EN difference between the atom and its nearest neighbors. If the EN difference is above 1.6, the average ionic radii for the atom is used. If the EN is below 1.6, the atomic radius is used.
 
+### radius_refine_method
+
+The type of interpolation used to refine the ionic radius. This only effects the data stored in the graphs created using the ElfAnalyzerToolkit, not the planes used in the BadELF algorithm.
+
 --------------------------
 
 ## find_electrides

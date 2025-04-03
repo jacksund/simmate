@@ -89,6 +89,7 @@ class BadElfToolkit:
             electride_charge_min=0.5,
             electride_volume_min=10,
             electride_radius_min=0.3,
+            radius_refine_method="linear",
         ),
     ):
         if partitioning_grid.structure != charge_grid.structure:
@@ -940,6 +941,7 @@ class BadElfToolkit:
             electride_charge_min=0.5,
             electride_volume_min=10,
             electride_radius_min=0.3,
+            radius_refine_method="linear",
         ),
     ):
         """
@@ -1171,6 +1173,7 @@ class SpinBadElfToolkit:
             electride_charge_min=0.3,
             electride_volume_min=10,
             electride_radius_min=0.3,
+            radius_refine_method="linear",
         ),
     ):
         if partitioning_grid.structure != charge_grid.structure:
@@ -1226,7 +1229,7 @@ class SpinBadElfToolkit:
             )
             # check that our ELF isn't identical. If it is, we can perform a
             # single non-polarized calculation
-            if not np.isclose(self.partitioning_grid_up.total, self.partitioning_grid.total,rtol=0,atol=0.001):
+            if not np.allclose(self.partitioning_grid_up.total, self.partitioning_grid.total,rtol=0,atol=0.001):
                 self.spin_polarized = True
         # Now check if we should run a spin polarized badelf calc or not
         if self.spin_polarized:
@@ -1534,6 +1537,7 @@ class SpinBadElfToolkit:
             electride_charge_min=0.3,
             electride_volume_min=10,
             electride_radius_min=0.3,
+            radius_refine_method="linear",
         ),
     ):
         """
