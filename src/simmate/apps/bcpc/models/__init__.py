@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from .molecule import BcpcIsoPesticide
+from .iso_pesticides import BcpcIsoPesticide

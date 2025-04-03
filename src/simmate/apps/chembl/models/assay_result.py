@@ -9,7 +9,7 @@ from rich.progress import track
 
 from simmate.database.base_data_types import DatabaseTable, table_column
 
-from .compound import ChEMBL
+from .molecules import ChemblMolecule
 from .document import ChemblDocument
 
 
@@ -40,7 +40,7 @@ class ChemblAssayResult(DatabaseTable):
     """
 
     chembl_compound = table_column.ForeignKey(
-        ChEMBL,
+        ChemblMolecule,
         on_delete=table_column.PROTECT,
         blank=True,
         null=True,
