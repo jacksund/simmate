@@ -196,13 +196,13 @@ nav:
                     - Lattice: full_guides/toolkit/crystal_structures/pymatgen/lattice.md
                     - Sites: full_guides/toolkit/crystal_structures/pymatgen/sites.md
                     - Composition: full_guides/toolkit/crystal_structures/pymatgen/composition.md
+                   # - API: full_guides/toolkit/crystal_structures/single_structure/api.md
                 # - Single Structure:
-                #    - Structure Loading: full_guides/toolkit/crystal_structures/single_structure/loading.md
-                #    - Structure Exporting: full_guides/toolkit/crystal_structures/single_structure/exporting.md
-                #    - Cleaning & Prep: full_guides/toolkit/crystal_structures/single_structure/cleaning.md
-                #    - Common Properties: full_guides/toolkit/crystal_structures/single_structure/properties.md
-                #    - Common Analyses: full_guides/toolkit/crystal_structures/single_structure/analyses.md
-                #    # - API: full_guides/toolkit/crystal_structures/single_structure/api.md
+                #     - Structure Loading: full_guides/toolkit/crystal_structures/single_structure/loading.md
+                #     - Structure Exporting: full_guides/toolkit/crystal_structures/single_structure/exporting.md
+                #     - Cleaning & Prep: full_guides/toolkit/crystal_structures/single_structure/cleaning.md
+                #     - Common Properties: full_guides/toolkit/crystal_structures/single_structure/properties.md
+                #     - Common Analyses: full_guides/toolkit/crystal_structures/single_structure/analyses.md
                 # - Many Structures: 
                 #    - Featurizers: full_guides/toolkit/crystal_structures/many_structures/featurizers.md
 
