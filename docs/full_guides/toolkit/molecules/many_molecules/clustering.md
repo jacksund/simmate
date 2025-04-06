@@ -214,6 +214,6 @@ class Example(ClusteringEngine):
 ```
 
 !!! tip
-    For an example of this approach, see the `Butina` clustering method's source code [here](#UPDATE TO GITHUB LINK)
+    For an example of this approach, see the `Butina` clustering method's source code [here](https://github.com/jacksund/simmate/blob/main/src/simmate/toolkit/clustering/butina.py)
 
 --------------------------------------------------------------------------------

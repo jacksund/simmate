@@ -46,7 +46,7 @@ simmate workflows explore
       - (*for experts*) Install QE using [offical guides](https://www.quantum-espresso.org/) and make sure `pw.x` is in the path
 
         !!! tip
-            If you choose Docker and need help, see our guides [here](/simmate/getting_started/workflows/configure_qe/#1-install-qe-using-docker) for installation and common errors.
+            If you choose Docker and need help, see our guides [here](/getting_started/workflows/configure_qe.md#1-install-qe-using-docker) for installation and common errors.
 
 6. To run calculations with QE, we need psuedopotentials. Simmate helps load these from the popular [SSSP library](https://www.materialscloud.org/discover/sssp/):
 ``` bash
