@@ -1,7 +1,7 @@
 # Full Guides
 
 !!! note
-    Before using the full guides, ensure you have either completed our [introductory tutorials](/simmate/getting_started/overview/) or have a good understanding of Python.
+    Before using the full guides, ensure you have either completed our [introductory tutorials](/getting_started/overview.md) or have a good understanding of Python.
 
 ## Organization Overview
 

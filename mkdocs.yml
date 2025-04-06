@@ -126,7 +126,6 @@ nav:
             - a) Create an app: getting_started/custom_tables_and_apps/create_a_custom_app.md
             - b) Create a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
             - c) Adding app workflows: getting_started/custom_tables_and_apps/using_app_workflows.md
-            - d) Extra app features: getting_started/custom_tables_and_apps/extra_features.md
         
         - 7. Use a cloud database:
             - Quickstart: getting_started/use_a_cloud_database/quick_start.md

@@ -4,7 +4,7 @@
 
 Since its conception in 1990 by [Becke and Edgecomb](https://doi.org/10.1063/1.458517), the Electron Localization Function (ELF) has been used by researchers as a tool for analyzing the bonding nature of molecules and solids. This is in large part due to the fact that the ELF tends to conveniently display many of the features familiar to chemists such as atomic orbital shells, covalent bonds, metallic interactions, and lone-pairs. 
 
-![elf_basins](../../images/ELF_basins.png)
+![elf_basins](../images/ELF_basins.png)
 
 Integration of charge in the ELF regions associated with these features gives charges close to the expected values. For example, the regions associated with atomic shells contain electron counts that [closely match](https://doi.org/10.1002/(SICI)1097-461X(1996)60:4%3C875::AID-QUA10%3E3.0.CO;2-4)  what is expected from the periodic table. The use of the ELF to analyze useful chemical features is made even more convenient by the fact that the ELF is fairly consistent with respect to the level of theory used to calculate it ([see Savin et. al.](https://doi.org/10.1002/anie.199718081)).
 

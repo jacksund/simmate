@@ -25,7 +25,7 @@ To set up a production-ready server for your team, you have three options:
 
 For options 1 and 2, contact us at `simmate.team@gmail.com`.
 
-For option 3, follow [our guide for setting up a server on DigitalOcean](https://github.com/jacksund/simmate/tree/main/.do). Ensure you've completed the base Simmate tutorials, particularly the ones on [setting up a cloud database](/getting_started/use_a_cloud_database/quick_start/) and [setting up computational resources](/getting_started/add_computational_resources/quick_start/).
+For option 3, follow [our guide for setting up a server on DigitalOcean](https://github.com/jacksund/simmate/tree/main/.do). Ensure you've completed the base Simmate tutorials, particularly the ones on [setting up a cloud database](/getting_started/use_a_cloud_database/quick_start.md) and [setting up computational resources](/getting_started/add_computational_resources/quick_start.md).
 
 !!! warning
     We are in the process of building setups via docker-compose/swarm as well as a kubernetes/helm chart to simplify server setup. Therefore, our guides for production setup may change significantly in future releases.
