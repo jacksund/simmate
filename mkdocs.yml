@@ -32,6 +32,12 @@ theme:
       - navigation.tabs.sticky
       - content.code.annotate
 
+validation:
+  links:
+    absolute_links: relative_to_docs
+    anchors: warn
+    unrecognized_links: warn
+
 # Adding versioning tags to the website
 # extra:
 #   version:
@@ -51,8 +57,8 @@ markdown_extensions:
                 class: mermaid
                 format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:
