@@ -27,7 +27,7 @@ class ChemblAssayResult(DatabaseTable):
           document. Similar assays from different publications will appear as
           distinct assays in this table.
     """
-    
+
     class Meta:
         db_table = "chembl__assay_results"
 
