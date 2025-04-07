@@ -13,6 +13,8 @@ from numpy.typing import NDArray
 from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from scipy.interpolate import RegularGridInterpolator
+from scipy.ndimage import label, center_of_mass
+from networkx.utils import UnionFind
 
 # from scipy.ndimage import binary_erosion
 
@@ -22,7 +24,7 @@ class Grid(VolumetricData):
     This class is a wraparound for Pymatgen's VolumetricData class with additional
     properties and methods useful to the badelf algorithm
     """
-
+    
     @property
     def total(self):
         return self.data["total"]
@@ -111,7 +113,7 @@ class Grid(VolumetricData):
             distances.append(voxel_distances)
         min_distances = np.min(np.column_stack(distances), axis=1)
         min_distances = min_distances.reshape(self.shape)
-        return min_distances
+        return min_distances  
 
     @property
     def voxel_volume(self):
@@ -591,22 +593,147 @@ class Grid(VolumetricData):
         new_grid.data = data
         return new_grid
     
-    def get_critical_points(self, threshold):
+    @staticmethod
+    def label(input: NDArray, structure: NDArray = np.ones([3,3,3])):
         """
-        Finds the critical points in the grid
+        Uses scipy's ndimage package to label an array, and corrects for
+        periodic boundaries
         """
+        labeled_array, _ = label(input, structure)
+        
+        # Features connected through opposite sides of the unit cell should
+        # have the same label, but they don't currently. To handle this, we
+        # pad our featured grid, re-label it, and check if the new labels
+        # contain multiple of our previous labels.
+        padded_featured_grid = np.pad(labeled_array, 1, "wrap")
+        relabeled_array, label_num = label(padded_featured_grid, structure)
+
+        connections = UnionFind()
+        for i in range(label_num):
+            mask = relabeled_array == i
+            connected_features = np.unique(padded_featured_grid[mask])
+            for feature in connected_features[1:]:
+                connections.union(connected_features[0], feature)
+        # Get the sets of basins that are connected to each other
+        connection_sets = list(connections.to_sets())
+        for label_set in connection_sets:
+            label_set = np.array(list(label_set))
+            # replace all of these labels with the lowest one
+            labeled_array = np.where(
+                np.isin(labeled_array, label_set),
+                label_set[0],
+                labeled_array,
+            )
+        # Now we reduce the feature labels so that they start at 0
+        for i, j in enumerate(np.unique(labeled_array)):
+            labeled_array = np.where(labeled_array == j, i, labeled_array)
+
+        return labeled_array
+
     
-    def _get_crit_points_from_array(array: NDArray):
+    @staticmethod
+    def periodic_center_of_mass(labels, label_vals=None) -> NDArray:
         """
-        Finds critical points from 3D numpy array
+        Computes center of mass for each label in a 3D periodic array.
+    
+        Args:
+            labels: 3D array of integer labels
+            label_vals: list/array of unique labels to compute (default: all nonzero)
+    
+        Returns:
+            A 3xN array of centers of mass
         """
-        # add padding to the array
-        padding = 10
+        shape = labels.shape
+        if label_vals is None:
+            label_vals = np.unique(labels)
+            label_vals = label_vals[label_vals != 0]
+    
+        centers = []
+        for val in label_vals:
+            # get the voxel coords for each voxel in this label
+            coords = np.array(np.where(labels == val)).T  # shape (N, 3)
+            # If we have no coords for this label, we skip
+            if coords.shape[0] == 0:
+                continue
+            
+            # From chap-gpt: Get center of mass using spherical distance
+            center = []
+            for i, size in enumerate(shape):
+                angles = coords[:, i] * 2 * np.pi / size
+                x = np.cos(angles).mean()
+                y = np.sin(angles).mean()
+                mean_angle = np.arctan2(y, x)
+                mean_pos = (mean_angle % (2 * np.pi)) * size / (2 * np.pi)
+                center.append(mean_pos)
+            centers.append(center)
+        centers = np.array(centers)
+        centers = centers.round(6)
+    
+        return centers
+
+
+    def get_critical_points(self, array: NDArray, threshold: float = 5e-03, return_hessian_s: bool = True):
+        """
+        Finds the critical points in the grid. If return_hessians is true,
+        the hessian matrices for each critical point will be returned along
+        with their type index.
+        """
+        # get gradient using a padded grid to handle periodicity
+        padding = 2
+        a, b, c = self.get_padded_grid_axes(padding)
         padded_array = np.pad(array, padding, mode="wrap")
-        # get the gradient of the array
-        gx, gy, gz = np.gradient(padded_array)
+        dx, dy, dz = np.gradient(padded_array)
+        
         # get magnitude of the gradient
-        magnitude = np.sqrt(gx**2 + gy**2 + gz**2)
+        magnitude = np.sqrt(dx**2 + dy**2 + dz**2)
+        
+        # unpad the magnitude
+        slicer = tuple(slice(padding, -padding) for _ in range(3))
+        magnitude = magnitude[slicer]
+        
+        # now we want to get where the magnitude is close to 0. To do this, we
+        # will create a mask where the magnitude is below a threshold. We will
+        # then label the regions where this is true using scipy, then combine
+        # the regions into one
+        magnitude_mask = magnitude < threshold
+        
+        label_structure = np.ones((3,3,3), dtype=int)
+        labeled_magnitude_mask = self.label(magnitude_mask, label_structure)
+        
+        critical_points = self.periodic_center_of_mass(labeled_magnitude_mask)
+        padded_critical_points = critical_points + padding
+        
+        # get the value at each of these critical points
+        fn_values = RegularGridInterpolator((a, b, c), padded_array , method="linear")
+        values = fn_values(padded_critical_points)
+        
+        if not return_hessian_s:
+            return critical_points, values
+        
+        
+        # now we want to get the hessian eigenvalues around each of these points
+        # using interpolation. First, we get the second derivatives
+        d2f_dx2 = np.gradient(dx, axis=0)
+        d2f_dy2 = np.gradient(dy, axis=1)
+        d2f_dz2 = np.gradient(dz, axis=2)
+        # now create interpolation functions for each
+        fn_dx2 = RegularGridInterpolator((a, b, c), d2f_dx2, method="linear")
+        fn_dy2 = RegularGridInterpolator((a, b, c), d2f_dy2, method="linear")
+        fn_dz2 = RegularGridInterpolator((a, b, c), d2f_dz2, method="linear")
+        # and calculate the hessian eigenvalues for each point
+        H00 = fn_dx2(padded_critical_points)
+        H11 = fn_dy2(padded_critical_points)
+        H22 = fn_dz2(padded_critical_points)
+        # summarize the hessian eigenvalues by getting the sum of their signs
+        hessian_eigs = np.array([H00, H11, H22])
+        hessian_eigs = np.moveaxis(hessian_eigs, 1, 0)
+        hessian_eigs_signs = np.where(hessian_eigs > 0, 1, hessian_eigs)
+        hessian_eigs_signs = np.where(hessian_eigs < 0, -1, hessian_eigs_signs)
+        # Now we get the sum of signs for each set of hessian eigenvalues
+        s = np.sum(hessian_eigs_signs, axis=1)
+        
+        return critical_points, values, s    
+    
 
     ###########################################################################
     # The following is a series of methods that are useful for converting between

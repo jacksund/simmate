@@ -11,10 +11,8 @@ import numpy as np
 import plotly.graph_objects as go
 import psutil
 from networkx import DiGraph
-from networkx.utils import UnionFind
 from numpy.typing import NDArray
 from pymatgen.analysis.local_env import CrystalNN
-from scipy.ndimage import label
 
 from simmate.apps.bader.toolkit import Grid
 from simmate.toolkit import Structure
@@ -322,42 +320,6 @@ class ElfAnalyzerToolkit:
         else:
             return None
 
-    def wrap_labeled_grid(self, labeled_grid: np.array):
-        """
-        Takes a 3D numpy array with labels and combines any that would
-        connect if wrapped around the unit cell
-        """
-        label_structure = np.ones([3, 3, 3])
-
-        # Features connected through opposite sides of the unit cell should
-        # have the same label, but they don't currently. To handle this, we
-        # pad our featured grid, re-label it, and check if the new labels
-        # contain multiple of our previous labels.
-        padded_featured_grid = np.pad(labeled_grid, 1, "wrap")
-        relabeled_grid, label_num = label(padded_featured_grid, label_structure)
-
-        connections = UnionFind()
-        for i in range(label_num):
-            mask = relabeled_grid == i
-            connected_features = np.unique(padded_featured_grid[mask])
-            for feature in connected_features[1:]:
-                connections.union(connected_features[0], feature)
-        # Get the sets of basins that are connected to each other
-        connection_sets = list(connections.to_sets())
-        for label_set in connection_sets:
-            label_set = np.array(list(label_set))
-            # replace all of these labels with the lowest one
-            labeled_grid = np.where(
-                np.isin(labeled_grid, label_set),
-                label_set[0],
-                labeled_grid,
-            )
-        # Now we reduce the feature labels so that they start at 0
-        for i, j in enumerate(np.unique(labeled_grid)):
-            labeled_grid = np.where(labeled_grid == j, i, labeled_grid)
-
-        return labeled_grid
-
     def get_atoms_in_volume(self, volume_mask):
         """
         Checks if an atom is within this volume. This only checks the
@@ -396,10 +358,8 @@ class ElfAnalyzerToolkit:
         inverted_mask = supercell_mask == False
         # Now we use use scipy to label unique features in our masks
         structure = np.ones([3, 3, 3])
-        feature_supercell, _ = label(supercell_mask, structure)
-        feature_supercell = self.wrap_labeled_grid(feature_supercell)
-        inverted_feature_supercell, _ = label(inverted_mask, structure)
-        inverted_feature_supercell = self.wrap_labeled_grid(inverted_feature_supercell)
+        feature_supercell = Grid.label(supercell_mask, structure)
+        inverted_feature_supercell = Grid.label(inverted_mask, structure)
         # First we check for feature connectivity. If we have 8 unique features,
         # we have a feature that doesn't extend infinitely
         inf_feature = False
@@ -454,7 +414,7 @@ class ElfAnalyzerToolkit:
 
     def get_bifurcation_graphs(
         self,
-        resolution: float = 0.02,
+        decimal_resolution: int = 2,
         **cutoff_kwargs,
     ):
         """
@@ -474,7 +434,7 @@ class ElfAnalyzerToolkit:
             charge_grid = self.charge_grid
         # Get either the spin up graph or combined spin graph
         graph_up = self._get_bifurcation_graph(
-            self.bader_up, elf_grid, charge_grid, resolution, **cutoff_kwargs
+            self.bader_up, elf_grid, charge_grid, decimal_resolution, **cutoff_kwargs
         )
         if self.spin_polarized:
             # Check if there's any difference in each spin. If not, we only need
@@ -491,7 +451,7 @@ class ElfAnalyzerToolkit:
                     self.bader_down,
                     self._elf_grid_down,
                     self._charge_grid_down,
-                    resolution,
+                    decimal_resolution,
                     **cutoff_kwargs,
                 )
             return graph_up, graph_down
@@ -504,7 +464,7 @@ class ElfAnalyzerToolkit:
         bader,
         elf_grid,
         charge_grid,
-        resolution: float = 0.02,
+        decimal_resolution: int = 2,
         shell_depth: float = 0.1,
         metal_depth_cutoff: float = 0.1,
         min_covalent_angle: float = 135,
@@ -532,23 +492,30 @@ class ElfAnalyzerToolkit:
         # keep track of the total number of labels we've had throughout the
         # process. We use this to keep track of previous nodes
         total_features = 1
-
-        for i in range(round(1 / resolution)):
-            cutoff = resolution * (i + 1)
+        # We want to get a guess for where bifurcations are going to happen.
+        # According to Lepetit et. al. (http://dx.doi.org/10.1016/j.ccr.2017.04.009)
+        # these occur at critical points where the sum of non-zero signs of the
+        # hessian matrix eigenvalues is -1. We also want the maxima which have
+        # a sign sum of -3. 
+        critical_coords, elf_values, sign_sum = elf_grid.get_critical_points(elf_data)
+        # find where the sign_sum is -1
+        bif_indices = np.where((sign_sum==-1) | (sign_sum==-3))[0]
+        bif_elf_values = np.round(elf_values[bif_indices], decimal_resolution)
+        unique_elf_values = np.unique(bif_elf_values)
+        unique_elf_values = np.insert(unique_elf_values, 0, 0) + (10**-decimal_resolution)
+        # resolution = 0.01
+        # for i in range(round(1 / resolution)):
+        for cutoff in unique_elf_values:
+            # cutoff = resolution * (i + 1)
             cutoff_elf_grid = np.where(elf_data >= cutoff, 1, 0)
             # label our data to get the unique features
             label_structure = np.ones([3, 3, 3])
             # copy previous features
             old_featured_grid = featured_grid.copy()
-            featured_grid, _ = label(cutoff_elf_grid, label_structure)
+            featured_grid = Grid.label(cutoff_elf_grid, label_structure)
             # Check if we have the exact same array as before and if so, skip
             if np.array_equal(featured_grid, old_featured_grid):
                 continue
-            # Features connected through opposite sides of the unit cell should
-            # have the same label, but they don't currently. To handle this, we
-            # pad our featured grid, re-label it, and check if the new labels
-            # contain multiple of our previous labels.
-            featured_grid = self.wrap_labeled_grid(featured_grid)
             # We use values of 1 and up to assign nodes. We don't want to accidentally
             # overwrite these so we subtract the length of unique features to
             # make all of our values 0 and below
@@ -569,7 +536,6 @@ class ElfAnalyzerToolkit:
             if len(unique_old_labels) == 0:
                 # we have no more features and are done so we break
                 break
-
             # Now we want to loop over previous features and see which one(s)
             # split into multiple new features. As features split or dissapear
             # we label them with useful information
@@ -768,6 +734,7 @@ class ElfAnalyzerToolkit:
                                 }
                             },
                         )
+        # breakpoint()
         # Now we have a graph with information associated with each basin. We want
         # to label each node.
         graph = self._mark_atomic(graph, bader, elf_grid, shell_depth)
@@ -837,6 +804,7 @@ class ElfAnalyzerToolkit:
                         },
                     )
                 except:
+                    breakpoint()
                     raise Exception(
                         "At least one ELF feature was not assigned. This is a bug. Please report to our github:"
                         "https://github.com/jacksund/simmate/issues"
@@ -1424,7 +1392,7 @@ class ElfAnalyzerToolkit:
 
     def get_bifurcation_plots(
         self,
-        resolution: float = 0.02,
+        decimal_resolution: int = 2,
         write_plot: bool = False,
         plot_name="bifurcation_plot.html",
         **cutoff_kwargs,
@@ -1440,7 +1408,7 @@ class ElfAnalyzerToolkit:
 
         if self.spin_polarized:
             graph_up, graph_down = self.get_bifurcation_graphs(
-                resolution,
+                decimal_resolution,
                 **cutoff_kwargs,
             )
             plot_up = self.get_bifurcation_plot(
@@ -1451,7 +1419,7 @@ class ElfAnalyzerToolkit:
             )
             return plot_up, plot_down
         else:
-            graph = self.get_bifurcation_graphs(resolution, **cutoff_kwargs)
+            graph = self.get_bifurcation_graphs(decimal_resolution, **cutoff_kwargs)
             return self.get_bifurcation_plot(graph, write_plot, plot_name)
 
     def get_bifurcation_plot(
@@ -1608,7 +1576,7 @@ class ElfAnalyzerToolkit:
 
     def get_labeled_structures(
         self,
-        resolution: float = 0.02,
+        decimal_resolution: int = 2,
         include_lone_pairs: bool = False,
         include_shared_features: bool = True,
         metal_depth_cutoff: float = 0.1,
@@ -1634,7 +1602,7 @@ class ElfAnalyzerToolkit:
         """
         if self.spin_polarized:
             graph_up, graph_down = self.get_bifurcation_graphs(
-                resolution,
+                decimal_resolution,
                 shell_depth=shell_depth,
                 metal_depth_cutoff=metal_depth_cutoff,
                 min_covalent_angle=min_covalent_angle,
@@ -1665,7 +1633,7 @@ class ElfAnalyzerToolkit:
             return structure_up, structure_down
         else:
             graph = self.get_bifurcation_graphs(
-                resolution,
+                decimal_resolution,
                 shell_depth=shell_depth,
                 metal_depth_cutoff=metal_depth_cutoff,
                 min_covalent_angle=min_covalent_angle,

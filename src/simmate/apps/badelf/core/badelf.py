@@ -77,7 +77,7 @@ class BadElfToolkit:
         labeled_structure: Structure = None,
         ignore_low_pseudopotentials: bool = False,
         elf_analyzer_kwargs: dict = dict(
-            resolution=0.02,
+            decimal_resolution=2,
             include_lone_pairs=False,
             include_shared_features=True,
             metal_depth_cutoff=0.1,
@@ -930,7 +930,7 @@ class BadElfToolkit:
         shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         ignore_low_pseudopotentials: bool = False,
         elf_analyzer_kwargs: dict = dict(
-            resolution=0.02,
+            decimal_resolution=2,
             include_lone_pairs=False,
             metal_depth_cutoff=0.1,
             min_covalent_angle=135,
@@ -1162,7 +1162,7 @@ class SpinBadElfToolkit:
         shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         ignore_low_pseudopotentials: bool = False,
         elf_analyzer_kwargs: dict = dict(
-            resolution=0.02,
+            decimal_resolution=2,
             include_lone_pairs=False,
             metal_depth_cutoff=0.1,
             min_covalent_angle=135,
@@ -1526,7 +1526,7 @@ class SpinBadElfToolkit:
         shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         ignore_low_pseudopotentials: bool = False,
         elf_analyzer_kwargs: dict = dict(
-            resolution=0.02,
+            decimal_resolution=2,
             include_lone_pairs=False,
             metal_depth_cutoff=0.1,
             min_covalent_angle=135,
