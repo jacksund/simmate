@@ -16,6 +16,9 @@ class ChemblDocument(DatabaseTable):
     This table holds all information about the source documents
     that compound and SAR data was pulled from and into the ChEMBL database.
     """
+    
+    class Meta:
+        db_table = "chembl__documents"
 
     published_at = table_column.IntegerField(blank=True, null=True)
     """

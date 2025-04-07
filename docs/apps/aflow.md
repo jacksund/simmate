@@ -61,9 +61,9 @@ simmate database download aflow
         from simmate.database import connect
         from simmate.apps.aflow.models import AflowPrototype, AflowStructure
 
-        prototypes = AflowPrototype.objects.to_dataframe()
+        prototype_data = AflowPrototype.objects.to_dataframe()
 
-        structures_sample = AflowStructure.objects.to_dataframe(limit=5_000)
+        structures_sample_data = AflowStructure.objects.to_dataframe(limit=5_000)
         ```
 
 --------------------------------------------------------------------------------

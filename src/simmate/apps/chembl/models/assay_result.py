@@ -27,6 +27,9 @@ class ChemblAssayResult(DatabaseTable):
           document. Similar assays from different publications will appear as
           distinct assays in this table.
     """
+    
+    class Meta:
+        db_table = "chembl__assay_results"
 
     chembl_document = table_column.ForeignKey(
         ChemblDocument,
