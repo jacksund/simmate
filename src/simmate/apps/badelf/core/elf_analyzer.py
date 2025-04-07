@@ -397,7 +397,15 @@ class ElfAnalyzerToolkit:
         # Now we use use scipy to label unique features in our masks
         structure = np.ones([3, 3, 3])
         feature_supercell, _ = label(supercell_mask, structure)
+        feature_supercell = self.wrap_labeled_grid(feature_supercell)
         inverted_feature_supercell, _ = label(inverted_mask, structure)
+        inverted_feature_supercell = self.wrap_labeled_grid(inverted_feature_supercell)
+        # First we check for feature connectivity. If we have 8 unique features,
+        # we have a feature that doesn't extend infinitely
+        inf_feature = False
+        if len(np.unique(feature_supercell)) != 9:
+            inf_feature = True
+            
         # if an atom was fully surrounded, it should sit inside one of our labels.
         # The same atom in an adjacent unit cell should have a different label.
         # To check this, we need to look at the atom in each section of the supercell
@@ -418,21 +426,6 @@ class ElfAnalyzerToolkit:
                 [1, 1, 1],  # xyz
             ]
         )
-        # First we check for feature connectivity. We use the first coordinate
-        feat_vox_coords = np.argwhere(mask)[0]
-        # convert to frac_coords
-        feat_frac_coords = self.elf_grid.get_frac_coords_from_vox(feat_vox_coords)
-        transformed_coords = transformations + feat_frac_coords
-        voxel_coords = self.elf_grid.get_voxel_coords_from_frac_full_array(
-            transformed_coords
-        ).astype(int)
-        features = feature_supercell[
-            voxel_coords[:, 0], voxel_coords[:, 1], voxel_coords[:, 2]
-        ]
-        inf_feature = False
-        if not len(np.unique(features)) == 8:
-            # This feature extends infinitely
-            inf_feature = True
         # Check each atom to determine how many atoms it surrounds
         surrounded_sites = []
         for i, site in enumerate(self.structure):
@@ -448,7 +441,6 @@ class ElfAnalyzerToolkit:
             features = inverted_feature_supercell[
                 voxel_coords[:, 0], voxel_coords[:, 1], voxel_coords[:, 2]
             ]
-            # print(len(np.unique(features)))
             if len(np.unique(features)) == 8:
                 # The atom is completely surrounded by this basin and the basin belongs
                 # to this atom
@@ -458,9 +450,6 @@ class ElfAnalyzerToolkit:
         if not inf_feature:
             return surrounded_sites
         else:
-            # if len(surrounded_sites) == 0:
-            #     return surrounded_sites
-            # else:
             return np.insert(surrounded_sites, 0, -1)
 
     def get_bifurcation_graphs(
@@ -516,7 +505,7 @@ class ElfAnalyzerToolkit:
         elf_grid,
         charge_grid,
         resolution: float = 0.02,
-        shell_depth: float = 0.05,
+        shell_depth: float = 0.1,
         metal_depth_cutoff: float = 0.1,
         min_covalent_angle: float = 135,
         min_covalent_bond_ratio: float = 0.35,
@@ -740,8 +729,9 @@ class ElfAnalyzerToolkit:
                         if atoms[0] == -1:
                             atom_num = -1
                             atoms = atoms[1:]
-                    else:
-                        atom_num = len(atoms)
+                            
+                        else:
+                            atom_num = len(atoms)
                     
                     networkx.set_node_attributes(
                         graph,
@@ -873,7 +863,7 @@ class ElfAnalyzerToolkit:
         graph: BifurcationGraph(),
         bader,
         elf_grid,
-        shell_depth: float = 0.05,
+        shell_depth: float = 0.1,
     ):
         elf_data = elf_grid.total
         basin_labeled_voxels = bader.bader_volumes.copy()
@@ -1030,88 +1020,101 @@ class ElfAnalyzerToolkit:
         """
         Reduces shell nodes to a single node
         """
-        children_to_remove = []
-        for i in graph.nodes:
-            new_children_to_remove = []
-            # We should now have assigned all of our core and shell basins. For
-            # convenient visualization we want to combine all of our shell basins
-            # into one node.
-            basins = []
-            atom_distance = 50
-            volume = 0
-            charge = 0
-            max_elf = 0
-            nearest_atom = 0
-            subset = 0
-            frac_coords = None
-
-            all_shells = True
-            # update all of our shell characteristics
-            for child_idx, child in graph.child_dicts(i).items():
-                if not child.get("subtype", None) == "shell":
-                    all_shells = False
+        # get graph lengths to compare
+        graph_length = -1
+        new_graph_length = len(graph)
+        # We do this recursively to recombine multiple shells if they are at
+        # different levels
+        # !!! Should I just use deep child nodes instead?
+        while graph_length != new_graph_length:
+            graph_length = new_graph_length
+            children_to_remove = []
+            for i in graph.nodes:
+                new_children_to_remove = []
+                # We should now have assigned all of our core and shell basins. For
+                # convenient visualization we want to combine all of our shell basins
+                # into one node.
+                basins = []
+                atom_distance = 50
+                volume = 0
+                charge = 0
+                max_elf = 0
+                nearest_atom = -1
+                subset = 0
+                frac_coords = None
+    
+                all_shells = True
+                # update all of our shell characteristics
+                for child_idx, child in graph.child_dicts(i).items():
+                    if not child.get("subtype", None) == "shell":
+                        all_shells = False
+                        continue
+                    if nearest_atom != child["nearest_atom"] and nearest_atom != -1:
+                        continue # we have shells from different atoms
+                    nearest_atom = child["nearest_atom"]
+                    new_children_to_remove.append(child_idx)
+                    basins.extend(child["basins"])
+                    atom_distance = min(atom_distance, child["atom_distance"])
+                    volume += child["volume"]
+                    charge += child["charge"]
+                    max_elf = max(max_elf, child["max_elf"])
+                    subset = child["subset"]
+                    frac_coords = child["frac_coords"]
+                if len(new_children_to_remove) == 0:
+                    # we had no shells so we can just continue
                     continue
-                new_children_to_remove.append(child_idx)
-                basins.extend(child["basins"])
-                atom_distance = min(atom_distance, child["atom_distance"])
-                volume += child["volume"]
-                charge += child["charge"]
-                max_elf = max(max_elf, child["max_elf"])
-                nearest_atom = child["nearest_atom"]
-                subset = child["subset"]
-                frac_coords = child["frac_coords"]
-            if len(new_children_to_remove) == 0:
-                # we had no shells so we can just continue
-                continue
-            if all_shells:
-                # This shell only had other shells as siblings. This means our
-                # parent node should be replaced with our new shell information
-                # and our depth should be calculated by our parent's parent
-                node_to_replace = i
-                parent = graph.parent_dict(i)
-                parent_elf = parent["split"]
-                depth = max_elf - parent_elf
-                subset -= 1
-            else:
-                # we had some features other than shells. We want to replace the
-                # first shell node
-                node_to_replace = new_children_to_remove.pop(0)
-                depth = max_elf - graph.nodes[i]["split"]
-            
-            # get depth to infinite feature
-            all_parent_indices = graph.deep_parent_indices(i)
-            for idx in all_parent_indices:
-                current_parent = graph.nodes[idx]
-                if current_parent["atom_num"] == -1:
-                    infinite_split = current_parent["split"]
-                    break
-            depth_3d = round(max_elf - infinite_split, 2)
-
-            # clear the attributes from the node
-            graph.nodes[node_to_replace].clear()
-            # Add the attributes
-            networkx.set_node_attributes(
-                graph,
-                {
-                    node_to_replace: {
-                        "type": "atom",
-                        "subtype": "shell",
-                        "subset": subset,
-                        "atom_distance": round(atom_distance, 2),
-                        "volume": round(volume, 2),
-                        "charge": round(charge, 2),
-                        "max_elf": round(max_elf, 2),
-                        "nearest_atom": nearest_atom,
-                        "depth": round(depth, 2),
-                        "3d_depth": depth_3d,
-                        "frac_coords": frac_coords,
-                    }
-                },
-            )
-            children_to_remove.extend(new_children_to_remove)
-        # delete all of the unused nodes
-        for j in children_to_remove:
-            graph.remove_node(j)
+                if all_shells:
+                    # This shell only had other shells as siblings. This means our
+                    # parent node should be replaced with our new shell information
+                    # and our depth should be calculated by our parent's parent
+                    node_to_replace = i
+                    parent = graph.parent_dict(i)
+                    parent_elf = parent["split"]
+                    depth = max_elf - parent_elf
+                    subset -= 1
+                else:
+                    # we had some features other than shells. We want to replace the
+                    # first shell node
+                    node_to_replace = new_children_to_remove.pop(0)
+                    depth = max_elf - graph.nodes[i]["split"]
+                
+                # get depth to infinite feature
+                all_parent_indices = graph.deep_parent_indices(i)
+                for idx in all_parent_indices:
+                    current_parent = graph.nodes[idx]
+                    if current_parent["atom_num"] == -1:
+                        infinite_split = current_parent["split"]
+                        break
+                depth_3d = round(max_elf - infinite_split, 2)
+    
+                # clear the attributes from the node
+                graph.nodes[node_to_replace].clear()
+                # Add the attributes
+                networkx.set_node_attributes(
+                    graph,
+                    {
+                        node_to_replace: {
+                            "type": "atom",
+                            "subtype": "shell",
+                            "subset": subset,
+                            "basins": basins,
+                            "atom_distance": round(atom_distance, 2),
+                            "volume": round(volume, 2),
+                            "charge": round(charge, 2),
+                            "max_elf": round(max_elf, 2),
+                            "nearest_atom": nearest_atom,
+                            "depth": round(depth, 2),
+                            "3d_depth": depth_3d,
+                            "frac_coords": frac_coords,
+                        }
+                    },
+                )
+                children_to_remove.extend(new_children_to_remove)
+            # delete all of the unused nodes
+            for j in children_to_remove:
+                graph.remove_node(j)
+            # get new graph length
+            new_graph_length = len(graph)
 
         return graph
 
@@ -1139,7 +1142,7 @@ class ElfAnalyzerToolkit:
             # first check for metallic character as this is easy. Note we make
             # sure this feature isn't already assigned as covalent to avoid relabeling
             # features that have already been found
-            if attributes["depth"] < metal_depth_cutoff and previous_subtype != "other":
+            if attributes["3d_depth"] < metal_depth_cutoff and previous_subtype != "other":
                 subtype = "metallic"
                 # set subtype
                 networkx.set_node_attributes(graph, {feature_idx: {"subtype": subtype}})
@@ -1401,7 +1404,7 @@ class ElfAnalyzerToolkit:
             coordination = cnn.get_nn_info(temp_structure, -1)
             coord_num = len(coordination)
             coord_indices = [i["site_index"] for i in coordination]
-            coord_atoms = [temp_structure[i] for i in coord_indices]
+            coord_atoms = [temp_structure[i].specie.symbol for i in coord_indices]
             # we update our node to include this information
             networkx.set_node_attributes(
                 graph,
@@ -1611,7 +1614,7 @@ class ElfAnalyzerToolkit:
         metal_depth_cutoff: float = 0.1,
         min_covalent_angle: float = 135,
         min_covalent_bond_ratio: float = 0.35,
-        shell_depth: float = 0.05,
+        shell_depth: float = 0.1,
         electride_elf_min: float = 0.5,
         electride_depth_min: float = 0.2,
         electride_charge_min: float = 0.5,
@@ -1733,7 +1736,7 @@ class ElfAnalyzerToolkit:
                 condition_test = np.array(
                     [
                         attributes["max_elf"],
-                        attributes["depth"],
+                        attributes["3d_depth"], # Note we use the depth to an infinite connection rather than true depth
                         attributes["charge"],
                         attributes["volume"],
                         attributes["dist_minus_radius"],

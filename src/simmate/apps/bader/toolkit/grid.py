@@ -9,7 +9,7 @@ from typing import Literal
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import NDArray
 from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from scipy.interpolate import RegularGridInterpolator
@@ -244,13 +244,13 @@ class Grid(VolumetricData):
             values.append(value)
         return values
 
-    def get_2x_supercell(self, data: ArrayLike):
+    def get_2x_supercell(self, data: NDArray):
         """
         Duplicates data with the same dimensions as the grid to make a 2x2x2
         supercell
 
         Args:
-            data (ArrayLike):
+            data (NDArray):
                 The data to duplicate. Must have the same dimensions as the
                 grid.
 
@@ -280,7 +280,7 @@ class Grid(VolumetricData):
             supercell[x, y, z] = raveled_data
         return supercell
 
-    def get_voxels_in_radius(self, radius: float, voxel: ArrayLike):
+    def get_voxels_in_radius(self, radius: float, voxel: NDArray):
         """
         Gets the indices of the voxels in a radius around a voxel
 
@@ -288,7 +288,7 @@ class Grid(VolumetricData):
             radius (float):
                 The radius in Angstroms around the voxel
 
-            voxel (ArrayLike):
+            voxel (NDArray):
                 The voxel coordinates of the voxel to find the sphere around
 
         Returns:
@@ -459,7 +459,7 @@ class Grid(VolumetricData):
         Args:
             desired_resolution (int):
                 The desired resolution in voxels/A^3.
-            new_shape (ArrayLike):
+            new_shape (NDArray):
                 The new array shape. Takes precedence over desired_resolution.
 
         Returns:
@@ -590,6 +590,23 @@ class Grid(VolumetricData):
         new_grid = grid1.copy()
         new_grid.data = data
         return new_grid
+    
+    def get_critical_points(self, threshold):
+        """
+        Finds the critical points in the grid
+        """
+    
+    def _get_crit_points_from_array(array: NDArray):
+        """
+        Finds critical points from 3D numpy array
+        """
+        # add padding to the array
+        padding = 10
+        padded_array = np.pad(array, padding, mode="wrap")
+        # get the gradient of the array
+        gx, gy, gz = np.gradient(padded_array)
+        # get magnitude of the gradient
+        magnitude = np.sqrt(gx**2 + gy**2 + gz**2)
 
     ###########################################################################
     # The following is a series of methods that are useful for converting between
@@ -652,12 +669,12 @@ class Grid(VolumetricData):
         # voxel positions go from 1 to (grid_size + 0.9999)
         return np.array(voxel_coords)
 
-    def get_voxel_coords_from_frac(self, frac_coords: ArrayLike | list):
+    def get_voxel_coords_from_frac(self, frac_coords: NDArray | list):
         """
         Takes in a fractional coordinate and returns the cartesian coordinate.
 
         Args:
-            frac_coords (ArrayLike):
+            frac_coords (NDArray):
                 The fractional position to convert to cartesian coords.
 
         Returns:
@@ -669,13 +686,13 @@ class Grid(VolumetricData):
         # voxel positions go from 1 to (grid_size + 0.9999)
         return np.array(voxel_coords)
 
-    def get_frac_coords_from_vox(self, voxel_coords: ArrayLike | list):
+    def get_frac_coords_from_vox(self, voxel_coords: NDArray | list):
         """
         Takes in a voxel grid index and returns the fractional
         coordinates.
 
         Args:
-            voxel_coords (ArrayLike):
+            voxel_coords (NDArray):
                 A voxel grid index
 
         Returns:
@@ -686,12 +703,12 @@ class Grid(VolumetricData):
         frac_coords = np.array([fa, fb, fc])
         return frac_coords
 
-    def get_cart_coords_from_frac(self, frac_coords: ArrayLike | list):
+    def get_cart_coords_from_frac(self, frac_coords: NDArray | list):
         """
         Takes in fractional coordinates and returns cartesian coordinates
 
         Args:
-            frac_coords (ArrayLike):
+            frac_coords (NDArray):
                 The fractional position to convert to cartesian coords.
 
         Returns:
@@ -705,12 +722,12 @@ class Grid(VolumetricData):
         cart_coords = np.array([x, y, z])
         return cart_coords
 
-    def get_frac_coords_from_cart(self, cart_coords: ArrayLike | list):
+    def get_frac_coords_from_cart(self, cart_coords: NDArray | list):
         """
         Takes in a cartesian coordinate and returns the fractional coordinates.
 
         Args:
-            cart_coords (ArrayLike):
+            cart_coords (NDArray):
                 A cartesian coordinate.
 
         Returns:
@@ -722,12 +739,12 @@ class Grid(VolumetricData):
 
         return frac_coords
 
-    def get_cart_coords_from_vox(self, voxel_coords: ArrayLike | list):
+    def get_cart_coords_from_vox(self, voxel_coords: NDArray | list):
         """
         Takes in a voxel grid index and returns the cartesian coordinates.
 
         Args:
-            voxel_coords (ArrayLike):
+            voxel_coords (NDArray):
                 A voxel grid index
 
         Returns:
@@ -737,12 +754,12 @@ class Grid(VolumetricData):
         cart_coords = self.get_cart_coords_from_frac(frac_coords)
         return cart_coords
 
-    def get_voxel_coords_from_cart(self, cart_coords: ArrayLike | list):
+    def get_voxel_coords_from_cart(self, cart_coords: NDArray | list):
         """
         Takes in a cartesian coordinate and returns the voxel coordinates.
 
         Args:
-            cart_coords (ArrayLike): A cartesian coordinate.
+            cart_coords (NDArray): A cartesian coordinate.
 
         Returns:
             Voxel coordinates as an Array
@@ -751,13 +768,13 @@ class Grid(VolumetricData):
         voxel_coords = self.get_voxel_coords_from_frac(frac_coords)
         return voxel_coords
 
-    def get_cart_coords_from_frac_full_array(self, frac_coords: ArrayLike):
+    def get_cart_coords_from_frac_full_array(self, frac_coords: NDArray):
         """
         Takes in a 2D array of shape (N,3) representing fractional coordinates
         at N points and calculates the equivalent cartesian coordinates.
 
         Args:
-            frac_coords (ArrayLike):
+            frac_coords (NDArray):
                 An (N,3) shaped array of fractional coordinates
 
         Returns:
@@ -770,13 +787,13 @@ class Grid(VolumetricData):
         cart_coords = np.column_stack([cart_x, cart_y, cart_z])
         return cart_coords
 
-    def get_frac_coords_from_vox_full_array(self, vox_coords: ArrayLike):
+    def get_frac_coords_from_vox_full_array(self, vox_coords: NDArray):
         """
         Takes in a 2D array of shape (N,3) representing voxel coordinates
         at N points and calculates the equivalent fractional coordinates.
 
         Args:
-            vox_coords (ArrayLike):
+            vox_coords (NDArray):
                 An (N,3) shaped array of voxel coordinates
 
         Returns:
@@ -789,13 +806,13 @@ class Grid(VolumetricData):
         frac_coords = np.column_stack([frac_x, frac_y, frac_z])
         return frac_coords
 
-    def get_voxel_coords_from_frac_full_array(self, frac_coords: ArrayLike):
+    def get_voxel_coords_from_frac_full_array(self, frac_coords: NDArray):
         """
         Takes in a 2D array of shape (N,3) representing fractional coordinates
         at N points and calculates the equivalent voxel coordinates.
 
         Args:
-            frac_coords (ArrayLike):
+            frac_coords (NDArray):
                 An (N,3) shaped array of fractional coordinates
 
         Returns:
@@ -808,13 +825,13 @@ class Grid(VolumetricData):
         vox_coords = np.column_stack([vox_x, vox_y, vox_z])
         return vox_coords
 
-    def get_cart_coords_from_vox_full_array(self, vox_coords: ArrayLike):
+    def get_cart_coords_from_vox_full_array(self, vox_coords: NDArray):
         """
         Takes in a 2D array of shape (N,3) representing voxel coordinates
         at N points and calculates the equivalent cartesian coordinates.
 
         Args:
-            frac_coords (ArrayLike):
+            frac_coords (NDArray):
                 An (N,3) shaped array of voxel coordinates
 
         Returns:
