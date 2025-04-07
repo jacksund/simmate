@@ -2,7 +2,10 @@
 
 ## About
 
-Automatic FLOW (AFLOW) is "a software framework for high-throughput calculation of crystal structure properties of alloys, intermetallics and inorganic compounds" that is used to generate "a globally available database of 3,530,330 material compounds with over 734,308,640 calculated properties, and growing".
+!!! quote
+
+    *Automatic FLOW (AFLOW) is "a software framework for high-throughput calculation of crystal structure properties of alloys, intermetallics and inorganic compounds" that is used to generate "a globally available database of [>3,500,000] material compounds with over [>725,000,000] calculated properties, and growing".*
+
 
  - [AFLOW Website](https://aflowlib.duke.edu/search/ui/)
  - [AFLOW Paper](https://doi.org/10.1016/j.commatsci.2012.02.005)

@@ -58,8 +58,8 @@ simmate database download cas_registry
 
 ## Datasets
 
-| Dataset        | Disk Space | Rows (#) | SQL Table                         | Python Class       |
-| -------------- | ---------- | -------- | --------------------------------- | ------------------ |
+| Dataset       | Disk Space | Rows (#) | SQL Table                 | Python Class          |
+| ------------- | ---------- | -------- | ------------------------- | --------------------- |
 | CAS Molecules | ---        | ---      | `cas_registry__molecules` | `CasRegistryMolecule` |
 
 !!! tip
