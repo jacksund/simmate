@@ -219,6 +219,7 @@ nav:
 
     - Apps: 
         - Overview: apps/overview.md
+        - AFLOW: apps/aflow.md
         - BadELF: 
             - Background: apps/badelf/background.md
             - Quick Start: apps/badelf/quick_start.md
@@ -226,12 +227,22 @@ nav:
             - ElfAnalyzerToolkit: 
                 - Background: apps/badelf/finder/background.md
                 - Usage: apps/badelf/finder/elf_analyzer.md
-        - Bader (henkelman): apps/bader_henkelman.md
-        - CLEASE: apps/clease.md
-        - DeepMD: apps/deepmd.md
+        - 'Bader (henkelman)': apps/bader_henkelman.md
+        - BCPC: apps/bcpc.md
+        - CAS Registry: apps/cas_registry.md
+        - Chembl: apps/chembl.md
+        - ChemSpace: apps/chemspace.md
+        - COD: apps/cod.md
+        - eMolecules: apps/emolecules.md
+        - Enamine: apps/enamine.md
+        - EPPO Globabl Database: apps/eppo_gd.md
         - Evolutionary Searches: apps/evolution.md
+        - JARVIS: apps/jarvis.md
         - Materials Project: apps/materials_project.md
+        - OQMD: apps/oqmd.md
+        - PDB: apps/pdb.md
         - Quantum Espresso: apps/quantum_espresso.md
+        - RDKit: apps/rdkit.md
         - VASP:
             - Overview: apps/vasp/overview.md
             - Installation: apps/vasp/installation.md
@@ -240,5 +251,12 @@ nav:
             # - Outputs: apps/vasp/outputs.md
             # - Error Handlers: apps/vasp/error_handlers.md
         - Warren Lab: apps/warren_lab.md
+        - '++ Experimental Apps':
+            - BIOVIA COMSO: apps/biovia_cosmo.md
+            - CLEASE: apps/clease.md
+            - DeepMD: apps/deepmd.md
+            - OpenEye OMEGA: apps/openeye_omega.md
+            - Schrodinger: apps/schrodinger.md
+            - Surflex: apps/surflex.md
     
     - Updates: change_log.md
