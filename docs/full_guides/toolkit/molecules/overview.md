@@ -96,7 +96,7 @@ This script is less intuitive and less Pythonic for other toolkits, but it's str
     ``` python
     from openeye import oechem
     from openeye import oeiupac
-
+    
     # STEP 1
     molecules = []
     with oechem.oemolistream("example.sdf") as ifs:
@@ -104,25 +104,27 @@ This script is less intuitive and less Pythonic for other toolkits, but it's str
             if mol is None:
                 continue
             molecules.append(mol)
-
+    
     # STEP 2
     molecules_filtered = []
     for mol in molecules:
-
+    
         stereo_count = sum(1 for atom in mol.GetAtoms() if atom.IsChiral())
         if stereo_count > 3:
             continue
-
-        heavy_atom_count = sum(1 for atom in mol.GetAtoms() if atom.GetAtomicNum() > 1)
+    
+        heavy_atom_count = sum(
+            1 for atom in mol.GetAtoms() if atom.GetAtomicNum() > 1
+        )
         if heavy_atom_count > 30:
             continue
-
+    
         has_na = any(atom.GetAtomicNum() == 11 for atom in mol.GetAtoms())
         if has_na:
             continue
-
+    
         molecules_filtered.append(mol)
-
+    
     # STEP 3
     inchi_keys = [oeiupac.OECreateInChIKey(m) for m in molecules_filtered]
     ```
