@@ -151,6 +151,13 @@ class ElfAnalyzerToolkit:
         separate_spin: bool = False,
         ignore_low_pseudopotentials: bool = False,
     ):
+        # rescale grids
+        # If the grid is a higher resolution than desired, downscale it
+        voxel_resolution = 400
+        # if elf_grid.voxel_resolution > voxel_resolution:
+        elf_grid = elf_grid.regrid(voxel_resolution, order=5)
+        charge_grid = charge_grid.regrid(voxel_resolution, order=5)
+            
         self.elf_grid = elf_grid.copy()
         self.charge_grid = charge_grid.copy()
         self.directory = directory
@@ -481,8 +488,9 @@ class ElfAnalyzerToolkit:
         This method is largely meant to be called through the get_bifurcation_graphs
         method.
         """
-
+        
         elf_data = elf_grid.total
+        
         basin_labeled_voxels = bader.bader_volumes.copy()
         # create a graph with a base node to start tracking features
         graph = BifurcationGraph()
@@ -499,20 +507,27 @@ class ElfAnalyzerToolkit:
         # a sign sum of -3. 
         critical_coords, elf_values, sign_sum = elf_grid.get_critical_points(elf_data)
         # find where the sign_sum is -1
-        bif_indices = np.where((sign_sum==-1) | (sign_sum==-3))[0]
-        bif_elf_values = np.round(elf_values[bif_indices], decimal_resolution)
-        unique_elf_values = np.unique(bif_elf_values)
-        unique_elf_values = np.insert(unique_elf_values, 0, 0) + (10**-decimal_resolution)
-        # resolution = 0.01
-        # for i in range(round(1 / resolution)):
-        for cutoff in unique_elf_values:
-            # cutoff = resolution * (i + 1)
+        # bif_indices = np.where((sign_sum==-1) | (sign_sum==-3))[0]
+        # bif_elf_values = np.round(elf_values[bif_indices], decimal_resolution)
+        # unique_elf_values = np.unique(bif_elf_values)
+        # # unique_elf_values = np.insert(unique_elf_values, 0, 0) + (10**-decimal_resolution)
+        # unique_elf_values = unique_elf_values + (10**-decimal_resolution)
+        important_elf_values = []
+        resolution = 0.01
+        for i in range(round(1 / resolution)):
+        # for cutoff in unique_elf_values:
+            cutoff = resolution * (i + 1)
             cutoff_elf_grid = np.where(elf_data >= cutoff, 1, 0)
             # label our data to get the unique features
             label_structure = np.ones([3, 3, 3])
             # copy previous features
             old_featured_grid = featured_grid.copy()
             featured_grid = Grid.label(cutoff_elf_grid, label_structure)
+            # make sure we have at least one label at low ELF cutoffs
+            if len(np.unique(featured_grid)) == 1 and len(np.unique(old_featured_grid)) == 1:
+                if np.unique(featured_grid)[0] == 0:
+                    featured_grid = old_featured_grid.copy()
+                    continue
             # Check if we have the exact same array as before and if so, skip
             if np.array_equal(featured_grid, old_featured_grid):
                 continue
@@ -551,6 +566,7 @@ class ElfAnalyzerToolkit:
                 if -new_len in features_list:
                     features_list = features_list[1:]
                 if len(features_list) == 0:
+                    important_elf_values.append(cutoff)
                     # This feature was irreducible and just disappeared.
                     # We want to assign the feature to be atomic or valent and
                     # then store information that might be relavent to the type
@@ -660,6 +676,7 @@ class ElfAnalyzerToolkit:
                             featured_grid == features_list[0], feature, featured_grid
                         )
                 elif len(features_list) > 1:
+                    important_elf_values.append(cutoff)
                     # This feature has split and we want to add an attribute
                     # labeling it with the value it split at. We also want to
                     # record how many features it split into, the basins that
@@ -734,7 +751,6 @@ class ElfAnalyzerToolkit:
                                 }
                             },
                         )
-        # breakpoint()
         # Now we have a graph with information associated with each basin. We want
         # to label each node.
         graph = self._mark_atomic(graph, bader, elf_grid, shell_depth)
@@ -804,7 +820,6 @@ class ElfAnalyzerToolkit:
                         },
                     )
                 except:
-                    breakpoint()
                     raise Exception(
                         "At least one ELF feature was not assigned. This is a bug. Please report to our github:"
                         "https://github.com/jacksund/simmate/issues"
@@ -995,6 +1010,9 @@ class ElfAnalyzerToolkit:
         # different levels
         # !!! Should I just use deep child nodes instead?
         while graph_length != new_graph_length:
+        # n = 1
+        # while n == 1:
+            # n +=1
             graph_length = new_graph_length
             children_to_remove = []
             for i in graph.nodes:
@@ -1028,7 +1046,7 @@ class ElfAnalyzerToolkit:
                     max_elf = max(max_elf, child["max_elf"])
                     subset = child["subset"]
                     frac_coords = child["frac_coords"]
-                if len(new_children_to_remove) == 0:
+                if len(new_children_to_remove) <= 1:
                     # we had no shells so we can just continue
                     continue
                 if all_shells:

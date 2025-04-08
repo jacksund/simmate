@@ -13,7 +13,8 @@ from numpy.typing import NDArray
 from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from scipy.interpolate import RegularGridInterpolator
-from scipy.ndimage import label, center_of_mass
+from scipy.ndimage import label, center_of_mass, zoom
+from scipy.signal import decimate
 from networkx.utils import UnionFind
 
 # from scipy.ndimage import binary_erosion
@@ -448,39 +449,33 @@ class Grid(VolumetricData):
         bader.threads = 1
         bader.min_surface_distance()
         return bader
-
+        
     def regrid(
         self,
         desired_resolution: int = 130000,
         new_shape: np.array = None,
+        order: int = 3,
     ):
         """
-        Returns a new grid resized using Fourier interplation as implemented by
-        [PyRho](https://materialsproject.github.io/pyrho/)
+        Returns a new grid resized using scipy's ndimage.zoom method
 
         Args:
             desired_resolution (int):
                 The desired resolution in voxels/A^3.
             new_shape (NDArray):
                 The new array shape. Takes precedence over desired_resolution.
+            order (int):
+                The order of spline interpolation to use.
 
         Returns:
             Changes the grid data in place.
         """
-        # Make sure the pyrho package is present
-        try:
-            from pyrho.pgrid import PGrid
-        except:
-            raise Exception(
-                "This method requires the mp-pyrho module."
-                "Install this with `conda install -c conda-forge mp-pyrho`"
-            )
         # Get data
         total = self.total
         diff = self.diff
 
-        # Get the lattice unit vectors as a 3x3 array
-        lattice_array = self.matrix
+        # # Get the lattice unit vectors as a 3x3 array
+        # lattice_array = self.matrix
 
         # get the original grid size and lattice volume.
         shape = self.shape
@@ -494,26 +489,17 @@ class Grid(VolumetricData):
             # calculate the new grid shape. round up to the nearest integer for each
             # side
             new_shape = np.around(shape * scale_factor).astype(np.int32)
-
-        # create a pyrho pgrid instance.
-        total_pgrid = PGrid(total, lattice_array)
-
-        # regrid to the desired voxel resolution and get the data back out.
-        new_total_pgrid = total_pgrid.get_transformed(
-            [[1, 0, 0], [0, 1, 0], [0, 0, 1]], new_shape
-        )
-        # new_data = pgrid.lossy_smooth_compression(new_shape)
-        new_total_data = new_total_pgrid.grid_data
-
-        # repeat for diff if exists
+        
+        # get the factor to zoom by
+        zoom_factor = new_shape/shape
+        # get the new total data
+        new_total = zoom(total, zoom_factor, order=order, mode="grid-wrap", grid_mode=True)#, prefilter=False,)
+        # if the diff exists, get the new diff data
         if diff is not None:
-            diff_pgrid = PGrid(diff, lattice_array)
-            new_diff_pgrid = diff_pgrid.get_transformed(
-                [[1, 0, 0], [0, 1, 0], [0, 0, 1]], new_shape
-            )
-            new_diff_data = new_diff_pgrid.grid_data
-
-        data = {"total": new_total_data, "diff": new_diff_data}
+            new_diff = zoom(diff, zoom_factor, order=order, mode="grid-wrap", grid_mode=True)#, prefilter=False,)
+            
+        # get the new data dict and return a new grid
+        data = {"total": new_total, "diff": new_diff}
 
         return Grid(self.structure, data)
 
@@ -678,6 +664,7 @@ class Grid(VolumetricData):
         the hessian matrices for each critical point will be returned along
         with their type index.
         """
+        # !!! Check if padding and threshold effect final result
         # get gradient using a padded grid to handle periodicity
         padding = 2
         a, b, c = self.get_padded_grid_axes(padding)
@@ -696,16 +683,28 @@ class Grid(VolumetricData):
         # then label the regions where this is true using scipy, then combine
         # the regions into one
         magnitude_mask = magnitude < threshold
+        # critical_points = np.where(magnitude<threshold)
+        # padded_critical_points = np.array(critical_points).T + padding
         
         label_structure = np.ones((3,3,3), dtype=int)
         labeled_magnitude_mask = self.label(magnitude_mask, label_structure)
+        min_indices = []
+        for idx in np.unique(labeled_magnitude_mask):
+            label_mask = labeled_magnitude_mask==idx
+            label_indices = np.where(label_mask)
+            min_mag = magnitude[label_indices].min()
+            min_indices.append(np.argwhere((magnitude==min_mag) & label_mask)[0])
+        min_indices = np.array(min_indices)
         
-        critical_points = self.periodic_center_of_mass(labeled_magnitude_mask)
-        padded_critical_points = critical_points + padding
+        critical_points = min_indices[:,0], min_indices[:,1], min_indices[:,2]
         
-        # get the value at each of these critical points
-        fn_values = RegularGridInterpolator((a, b, c), padded_array , method="linear")
-        values = fn_values(padded_critical_points)
+        
+        # critical_points = self.periodic_center_of_mass(labeled_magnitude_mask)
+        padded_critical_points = tuple([i+padding for i in critical_points])
+        values = array[critical_points]
+        # # get the value at each of these critical points
+        # fn_values = RegularGridInterpolator((a, b, c), padded_array , method="linear")
+        # values = fn_values(padded_critical_points)
         
         if not return_hessian_s:
             return critical_points, values
@@ -716,14 +715,17 @@ class Grid(VolumetricData):
         d2f_dx2 = np.gradient(dx, axis=0)
         d2f_dy2 = np.gradient(dy, axis=1)
         d2f_dz2 = np.gradient(dz, axis=2)
-        # now create interpolation functions for each
-        fn_dx2 = RegularGridInterpolator((a, b, c), d2f_dx2, method="linear")
-        fn_dy2 = RegularGridInterpolator((a, b, c), d2f_dy2, method="linear")
-        fn_dz2 = RegularGridInterpolator((a, b, c), d2f_dz2, method="linear")
+        # # now create interpolation functions for each
+        # fn_dx2 = RegularGridInterpolator((a, b, c), d2f_dx2, method="linear")
+        # fn_dy2 = RegularGridInterpolator((a, b, c), d2f_dy2, method="linear")
+        # fn_dz2 = RegularGridInterpolator((a, b, c), d2f_dz2, method="linear")
         # and calculate the hessian eigenvalues for each point
-        H00 = fn_dx2(padded_critical_points)
-        H11 = fn_dy2(padded_critical_points)
-        H22 = fn_dz2(padded_critical_points)
+        # H00 = fn_dx2(padded_critical_points)
+        # H11 = fn_dy2(padded_critical_points)
+        # H22 = fn_dz2(padded_critical_points)
+        H00 = d2f_dx2[padded_critical_points]
+        H11 = d2f_dy2[padded_critical_points]
+        H22 = d2f_dz2[padded_critical_points]
         # summarize the hessian eigenvalues by getting the sum of their signs
         hessian_eigs = np.array([H00, H11, H22])
         hessian_eigs = np.moveaxis(hessian_eigs, 1, 0)
