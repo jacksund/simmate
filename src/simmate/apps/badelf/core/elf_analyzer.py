@@ -13,6 +13,7 @@ import psutil
 from networkx import DiGraph
 from numpy.typing import NDArray
 from pymatgen.analysis.local_env import CrystalNN
+from scipy.ndimage import binary_dilation
 
 from simmate.apps.bader.toolkit import Grid
 from simmate.toolkit import Structure
@@ -150,13 +151,13 @@ class ElfAnalyzerToolkit:
         directory: Path,
         separate_spin: bool = False,
         ignore_low_pseudopotentials: bool = False,
+        downscale_resolution: int = 1200,
     ):
-        # rescale grids
         # If the grid is a higher resolution than desired, downscale it
-        voxel_resolution = 400
-        # if elf_grid.voxel_resolution > voxel_resolution:
-        elf_grid = elf_grid.regrid(voxel_resolution, order=5)
-        charge_grid = charge_grid.regrid(voxel_resolution, order=5)
+        if downscale_resolution is not None:
+            if elf_grid.voxel_resolution > downscale_resolution:
+                elf_grid = elf_grid.regrid(downscale_resolution, order=5)
+                charge_grid = charge_grid.regrid(downscale_resolution, order=5)
             
         self.elf_grid = elf_grid.copy()
         self.charge_grid = charge_grid.copy()
@@ -355,16 +356,21 @@ class ElfAnalyzerToolkit:
         """
         # first we get any atoms that are within the mask itself. These won't be
         # found otherwise because they will always sit in unlabeled regions.
-        init_atoms = self.get_atoms_in_volume(mask)
+        structure = np.ones([3, 3, 3])
+        dilated_mask = binary_dilation(mask, structure)
+        init_atoms = self.get_atoms_in_volume(dilated_mask)
         # Now we create a supercell of the mask so we can check connections to
         # neighboring cells. This will be used to check if the feature connects
         # to itself in each direction
         supercell_mask = self.elf_grid.get_2x_supercell(mask)
+        dilated_supercell_mask = self.elf_grid.get_2x_supercell(dilated_mask)
         # We also get an inversion of this mask. This will be used to check if
-        # the mask surrounds each atom.
-        inverted_mask = supercell_mask == False
+        # the mask surrounds each atom. To do this, we use the dilated supercell
+        # We do this to avoid thin walls being considered connections
+        # in the inverted mask
+        inverted_mask = dilated_supercell_mask == False
         # Now we use use scipy to label unique features in our masks
-        structure = np.ones([3, 3, 3])
+        
         feature_supercell = Grid.label(supercell_mask, structure)
         inverted_feature_supercell = Grid.label(inverted_mask, structure)
         # First we check for feature connectivity. If we have 8 unique features,
@@ -421,7 +427,7 @@ class ElfAnalyzerToolkit:
 
     def get_bifurcation_graphs(
         self,
-        decimal_resolution: int = 2,
+        resolution: float = 0.01,
         **cutoff_kwargs,
     ):
         """
@@ -441,7 +447,7 @@ class ElfAnalyzerToolkit:
             charge_grid = self.charge_grid
         # Get either the spin up graph or combined spin graph
         graph_up = self._get_bifurcation_graph(
-            self.bader_up, elf_grid, charge_grid, decimal_resolution, **cutoff_kwargs
+            self.bader_up, elf_grid, charge_grid, resolution, **cutoff_kwargs
         )
         if self.spin_polarized:
             # Check if there's any difference in each spin. If not, we only need
@@ -458,7 +464,7 @@ class ElfAnalyzerToolkit:
                     self.bader_down,
                     self._elf_grid_down,
                     self._charge_grid_down,
-                    decimal_resolution,
+                    resolution,
                     **cutoff_kwargs,
                 )
             return graph_up, graph_down
@@ -471,8 +477,8 @@ class ElfAnalyzerToolkit:
         bader,
         elf_grid,
         charge_grid,
-        decimal_resolution: int = 2,
-        shell_depth: float = 0.1,
+        resolution: float = 0.01,
+        shell_depth: float = 0.15,
         metal_depth_cutoff: float = 0.1,
         min_covalent_angle: float = 135,
         min_covalent_bond_ratio: float = 0.35,
@@ -508,10 +514,10 @@ class ElfAnalyzerToolkit:
         critical_coords, elf_values, sign_sum = elf_grid.get_critical_points(elf_data)
         # find where the sign_sum is -1
         # bif_indices = np.where((sign_sum==-1) | (sign_sum==-3))[0]
-        # bif_elf_values = np.round(elf_values[bif_indices], decimal_resolution)
+        # bif_elf_values = np.round(elf_values[bif_indices], resolution)
         # unique_elf_values = np.unique(bif_elf_values)
-        # # unique_elf_values = np.insert(unique_elf_values, 0, 0) + (10**-decimal_resolution)
-        # unique_elf_values = unique_elf_values + (10**-decimal_resolution)
+        # # unique_elf_values = np.insert(unique_elf_values, 0, 0) + (10**-resolution)
+        # unique_elf_values = unique_elf_values + (10**-resolution)
         important_elf_values = []
         resolution = 0.01
         for i in range(round(1 / resolution)):
@@ -641,7 +647,6 @@ class ElfAnalyzerToolkit:
                             }
                         },
                     )
-                    # TODO: Add other important features? e.g. coordination env
 
                 elif len(features_list) == 1:
                     # This typically means we have the same topological feature
@@ -652,21 +657,24 @@ class ElfAnalyzerToolkit:
                     # labels. (e.g. default Ti metal using vasp from matproj).
                     # From what I can tell, we should be able to remove those here
                     if features_list[0] > 0:
-                        num = parent["num"] - 1
+                        # make sure the parent hasn't already been removed due to
+                        # this same process for a different feature
+                        if parent is not None:
+                            num = parent["num"] - 1
                         # atoms = parent["atoms"]
-                        if num == 1:
-                            # this node isn't useful anymore so we remove it
-                            graph.remove_node(parent_idx)
-                            # we also need to update the subset depth of all
-                            # of our existing nodes
-                            for node in graph.nodes:
-                                graph.nodes[node]["subset"] -= 1
-                        else:
-                            # we've changed the number of children for this node
-                            # so we update it
-                            networkx.set_node_attributes(
-                                graph, {parent_idx: {"num": num}}
-                            )
+                            if num == 1:
+                                # this node isn't useful anymore so we remove it
+                                graph.remove_node(parent_idx)
+                                # we also need to update the subset depth of all
+                                # of our existing nodes
+                                for node in graph.nodes:
+                                    graph.nodes[node]["subset"] -= 1
+                            else:
+                                # we've changed the number of children for this node
+                                # so we update it
+                                networkx.set_node_attributes(
+                                    graph, {parent_idx: {"num": num}}
+                                )
                         # we don't want this node so we remove it
                         graph.remove_node(feature)
                     else:
@@ -708,13 +716,14 @@ class ElfAnalyzerToolkit:
                     # as a separate key. So we would have the surrounded atoms,
                     # the number of surrounded atoms, and whether the feature is
                     # infinite or not.
+                    atom_num = len(atoms)
                     if len(atoms) > 0:
                         if atoms[0] == -1:
                             atom_num = -1
                             atoms = atoms[1:]
                             
-                        else:
-                            atom_num = len(atoms)
+                        # else:
+                        #     atom_num = len(atoms)
                     
                     networkx.set_node_attributes(
                         graph,
@@ -846,7 +855,7 @@ class ElfAnalyzerToolkit:
         graph: BifurcationGraph(),
         bader,
         elf_grid,
-        shell_depth: float = 0.1,
+        shell_depth: float = 0.15,
     ):
         elf_data = elf_grid.total
         basin_labeled_voxels = bader.bader_volumes.copy()
@@ -960,6 +969,13 @@ class ElfAnalyzerToolkit:
                     # we assign any low depth features as shells
                     if child["depth"] < shell_depth:
                         basin_subtype = "shell"
+                        if not child["nearest_atom"] in node["atoms"]:
+                            # BUG the nearest atom check is to correct for situations like
+                            # in some of the M2C electrides where small basins are connected
+                            # to an atom domain, but are very far from the atom. There
+                            # may be a better way to do this, e.g. distance beyond radius
+                            basin_type = "val"
+                            basin_subtype = None
                     else:
                         # otherwise, we check if the feature surrounds an atom
                         # Get the basins that belong to this child
@@ -1410,7 +1426,7 @@ class ElfAnalyzerToolkit:
 
     def get_bifurcation_plots(
         self,
-        decimal_resolution: int = 2,
+        resolution: float = 0.01,
         write_plot: bool = False,
         plot_name="bifurcation_plot.html",
         **cutoff_kwargs,
@@ -1426,7 +1442,7 @@ class ElfAnalyzerToolkit:
 
         if self.spin_polarized:
             graph_up, graph_down = self.get_bifurcation_graphs(
-                decimal_resolution,
+                resolution,
                 **cutoff_kwargs,
             )
             plot_up = self.get_bifurcation_plot(
@@ -1437,7 +1453,7 @@ class ElfAnalyzerToolkit:
             )
             return plot_up, plot_down
         else:
-            graph = self.get_bifurcation_graphs(decimal_resolution, **cutoff_kwargs)
+            graph = self.get_bifurcation_graphs(resolution, **cutoff_kwargs)
             return self.get_bifurcation_plot(graph, write_plot, plot_name)
 
     def get_bifurcation_plot(
@@ -1594,13 +1610,13 @@ class ElfAnalyzerToolkit:
 
     def get_labeled_structures(
         self,
-        decimal_resolution: int = 2,
+        resolution: float = 0.01,
         include_lone_pairs: bool = False,
         include_shared_features: bool = True,
         metal_depth_cutoff: float = 0.1,
         min_covalent_angle: float = 135,
         min_covalent_bond_ratio: float = 0.35,
-        shell_depth: float = 0.1,
+        shell_depth: float = 0.15,
         electride_elf_min: float = 0.5,
         electride_depth_min: float = 0.2,
         electride_charge_min: float = 0.5,
@@ -1620,7 +1636,7 @@ class ElfAnalyzerToolkit:
         """
         if self.spin_polarized:
             graph_up, graph_down = self.get_bifurcation_graphs(
-                decimal_resolution,
+                resolution,
                 shell_depth=shell_depth,
                 metal_depth_cutoff=metal_depth_cutoff,
                 min_covalent_angle=min_covalent_angle,
@@ -1651,7 +1667,7 @@ class ElfAnalyzerToolkit:
             return structure_up, structure_down
         else:
             graph = self.get_bifurcation_graphs(
-                decimal_resolution,
+                resolution,
                 shell_depth=shell_depth,
                 metal_depth_cutoff=metal_depth_cutoff,
                 min_covalent_angle=min_covalent_angle,
@@ -1787,6 +1803,7 @@ class ElfAnalyzerToolkit:
         charge_file: str = "CHGCAR",
         separate_spin: bool = False,
         ignore_low_pseudopotentials: bool = False,
+        downscale_resolution: int = 1200,
     ):
         """
         Creates a BadElfToolkit instance from the requested partitioning file
@@ -1819,6 +1836,7 @@ class ElfAnalyzerToolkit:
             directory=directory,
             separate_spin=separate_spin,
             ignore_low_pseudopotentials=ignore_low_pseudopotentials,
+            downscale_resolution=downscale_resolution,
         )
     
     def get_full_analysis(self, write_results: bool = True, **kwargs):
@@ -1829,8 +1847,8 @@ class ElfAnalyzerToolkit:
         if self.spin_polarized:
             graph_up, graph_down = self.get_bifurcation_graphs(**kwargs)
             bader_up, bader_down = self.bader_up, self.bader_down
-            plot_up = self.get_bifurcation_plot(graph_up, write_plot=write_results)
-            plot_down = self.get_bifurcation_plot(graph_down, write_plot=write_results)
+            plot_up = self.get_bifurcation_plot(graph_up, write_plot=write_results, plot_name="bifurcation_plot_up")
+            plot_down = self.get_bifurcation_plot(graph_down, write_plot=write_results, plot_name="bifurcation_plot_down")
             structure_up = self._get_labeled_structure(graph_up, bader_up, **kwargs)
             structure_down = self._get_labeled_structure(graph_down, bader_down, **kwargs)
             if write_results:

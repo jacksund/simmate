@@ -585,14 +585,18 @@ class Grid(VolumetricData):
         Uses scipy's ndimage package to label an array, and corrects for
         periodic boundaries
         """
-        labeled_array, _ = label(input, structure)
-        
-        # Features connected through opposite sides of the unit cell should
-        # have the same label, but they don't currently. To handle this, we
-        # pad our featured grid, re-label it, and check if the new labels
-        # contain multiple of our previous labels.
-        padded_featured_grid = np.pad(labeled_array, 1, "wrap")
-        relabeled_array, label_num = label(padded_featured_grid, structure)
+        if structure is not None:
+            labeled_array, _ = label(input, structure)
+            # Features connected through opposite sides of the unit cell should
+            # have the same label, but they don't currently. To handle this, we
+            # pad our featured grid, re-label it, and check if the new labels
+            # contain multiple of our previous labels.
+            padded_featured_grid = np.pad(labeled_array, 1, "wrap")
+            relabeled_array, label_num = label(padded_featured_grid, structure)
+        else:
+            labeled_array, _ = label(input)
+            padded_featured_grid = np.pad(labeled_array, 1, "wrap")
+            relabeled_array, label_num = label(padded_featured_grid)
 
         connections = UnionFind()
         for i in range(label_num):
