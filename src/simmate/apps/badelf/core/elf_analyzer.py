@@ -302,7 +302,7 @@ class ElfAnalyzerToolkit:
     def site_sphere_voxel_coords(self) -> list:
         site_sphere_coords = []
         for vox_coord in self.site_voxel_coords:
-            nearby_voxels = self.elf_grid.get_voxels_in_radius(0.1, vox_coord)
+            nearby_voxels = self.elf_grid.get_voxels_in_radius(0.05, vox_coord)
             site_sphere_coords.append(nearby_voxels)
         return site_sphere_coords
 
@@ -335,19 +335,23 @@ class ElfAnalyzerToolkit:
         be caught by this.
         """
         atom_values = []
-        for atom_idx, atom_sphere_coords in enumerate(self.site_sphere_voxel_coords):
-            atom_sphere_in_feature = np.where(
-                volume_mask[
-                    atom_sphere_coords[:, 0],
-                    atom_sphere_coords[:, 1],
-                    atom_sphere_coords[:, 2],
-                ]
-            )[0]
-            if len(atom_sphere_in_feature) > 0:
+        # for atom_idx, atom_sphere_coords in enumerate(self.site_sphere_voxel_coords):
+        #     atom_sphere_in_feature = np.where(
+        #         volume_mask[
+        #             atom_sphere_coords[:, 0],
+        #             atom_sphere_coords[:, 1],
+        #             atom_sphere_coords[:, 2],
+        #         ]
+        #     )[0]
+        #     if len(atom_sphere_in_feature) > 0:
+        #         atom_values.append(atom_idx)
+        for atom_idx, atom_coords in enumerate(self.site_voxel_coords):
+            site_value = volume_mask[atom_coords[0], atom_coords[1], atom_coords[2]]
+            if site_value:
                 atom_values.append(atom_idx)
         return atom_values
 
-    def get_atoms_surrounded_by_volume(self, mask):
+    def get_atoms_surrounded_by_volume(self, mask, return_type: bool = False):
         """
         Checks if a list of basins completely surround any of the atoms
         in the structure. This method uses scipy's ndimage package to
@@ -420,9 +424,19 @@ class ElfAnalyzerToolkit:
                 surrounded_sites.append(i)
         surrounded_sites.extend(init_atoms)
         surrounded_sites = np.unique(surrounded_sites)
+        types = []
+        for site in surrounded_sites:
+            if site in init_atoms:
+                types.append(0)
+            else:
+                types.append(1)
         if not inf_feature:
+            if return_type:
+                return surrounded_sites, types
             return surrounded_sites
         else:
+            if return_type:
+                return np.insert(surrounded_sites, 0, -1), types
             return np.insert(surrounded_sites, 0, -1)
 
     def get_bifurcation_graphs(
@@ -478,10 +492,10 @@ class ElfAnalyzerToolkit:
         elf_grid,
         charge_grid,
         resolution: float = 0.01,
-        shell_depth: float = 0.15,
+        shell_depth: float = 0.05,
         metal_depth_cutoff: float = 0.1,
         min_covalent_angle: float = 135,
-        min_covalent_bond_ratio: float = 0.35,
+        min_covalent_bond_ratio: float = 0.4,
         radius_refine_method: str = "linear",
         **kwargs,
     ):
@@ -610,7 +624,7 @@ class ElfAnalyzerToolkit:
                         if len(empty_structure) > 1:
                             empty_structure.merge_sites(tol=1, mode="average")
                         frac_coord = empty_structure.frac_coords[0]
-                    
+                                       
                     # Using these basins, we create a mask representing the full
                     # basin (not just above this elf value) and integrate the
                     # charge in this region. We also save the volume here
@@ -760,6 +774,9 @@ class ElfAnalyzerToolkit:
                                 }
                             },
                         )
+        # First, we clean up the graph in case we removed a node earlier due
+        # to incorrect labeling and this resulted in a fake split (e.g. Dy2C)
+        graph = self._clean_reducible_nodes(graph)
         # Now we have a graph with information associated with each basin. We want
         # to label each node.
         graph = self._mark_atomic(graph, bader, elf_grid, shell_depth)
@@ -799,10 +816,17 @@ class ElfAnalyzerToolkit:
             min_covalent_angle=min_covalent_angle,
             min_covalent_bond_ratio=min_covalent_bond_ratio,
         )
+        
+        graph = self._correct_for_high_depth_shells(graph)
+        
+        # Reduce any related shell basins to a single basin
+        graph = self._reduce_atomic_shells(graph)
 
         # Now we calculate a bare electron indicator for each valence basin. This
         # is used just to give a sense of how bare an electron is.
         graph = self._mark_bare_electron_indicator(graph, bader, elf_grid, radius_refine_method=radius_refine_method)
+        
+        
 
         # Finally, we add a label to each node with a summary of information
         # for plotting
@@ -829,6 +853,7 @@ class ElfAnalyzerToolkit:
                         },
                     )
                 except:
+                    breakpoint()
                     raise Exception(
                         "At least one ELF feature was not assigned. This is a bug. Please report to our github:"
                         "https://github.com/jacksund/simmate/issues"
@@ -855,7 +880,7 @@ class ElfAnalyzerToolkit:
         graph: BifurcationGraph(),
         bader,
         elf_grid,
-        shell_depth: float = 0.15,
+        shell_depth: float = 0.05,
     ):
         elf_data = elf_grid.total
         basin_labeled_voxels = bader.bader_volumes.copy()
@@ -917,18 +942,20 @@ class ElfAnalyzerToolkit:
                     low_elf_mask = np.isin(basin_labeled_voxels, basins) & np.where(
                         elf_data > parent_split, True, False
                     )
-                    atoms_in_basin = self.get_atoms_surrounded_by_volume(low_elf_mask)
+                    atoms_in_basin, atom_types = self.get_atoms_surrounded_by_volume(low_elf_mask, return_type=True)
                     # If the volume surrounds infinite atoms, the first atom
                     # returned will be a -1. We check for this
                     if len(atoms_in_basin) > 0:
                         if atoms_in_basin[0] == -1:
                             atoms_in_basin = atoms_in_basin[1:]
-                    # TODO: We can probably check if these basins are cores or a shell around the atom
                     basin_type = "val"
                     basin_subtype = None
                     if len(atoms_in_basin) > 0:
                         basin_type = "atom"
-                        basin_subtype = "core"
+                        if atom_types[0] == 0:
+                            basin_subtype = "core"
+                        else:
+                            basin_subtype = "shell"
                         # Note that we found a new atom
                         remaining_atoms -= 1
                     # label this basin
@@ -965,29 +992,34 @@ class ElfAnalyzerToolkit:
                     if "split" in child.keys():
                         continue
                     # If we have many shell basins that form a sphere around the
-                    # atom they may separate at a low depth. To account for this
-                    # we assign any low depth features as shells
-                    if child["depth"] < shell_depth:
+                    # atom they may separate at a low depth. However, lone-pairs
+                    # that are highly symmetric may also separate in a similar way.
+                    # We actually want the depth to the point where the basin connects
+                    # to a reducible domain surrounding the atom of interest
+                    basin_shell_depth = child["max_elf"] - node["split"]
+                    # if child["depth"] < shell_depth:
+                    if basin_shell_depth < shell_depth:
                         basin_subtype = "shell"
-                        if not child["nearest_atom"] in node["atoms"]:
-                            # BUG the nearest atom check is to correct for situations like
-                            # in some of the M2C electrides where small basins are connected
-                            # to an atom domain, but are very far from the atom. There
-                            # may be a better way to do this, e.g. distance beyond radius
-                            basin_type = "val"
-                            basin_subtype = None
+                        # if not child["nearest_atom"] in node["atoms"]:
+                        #     # BUG the nearest atom check is to correct for situations like
+                        #     # in some of the M2C electrides where small basins are connected
+                        #     # to an atom domain, but are very far from the atom. There
+                        #     # may be a better way to do this, e.g. distance beyond radius
+                        #     basin_type = "val"
+                        #     basin_subtype = None
                     else:
                         # otherwise, we check if the feature surrounds an atom
                         # Get the basins that belong to this child
                         basins = child["basins"]
                         # Using these basins, and the value the basin split at, we
                         # get a mask for the location of the basin
-                        parent_split = node["split"]
+                        child_parent = graph.parent_dict(child_idx)
+                        parent_split = child_parent["split"]
                         low_elf_mask = np.isin(basin_labeled_voxels, basins) & np.where(
                             elf_data > parent_split, True, False
                         )
-                        atoms_in_basin = self.get_atoms_surrounded_by_volume(
-                            low_elf_mask
+                        atoms_in_basin, atom_types = self.get_atoms_surrounded_by_volume(
+                            low_elf_mask, return_type = True
                         )
                         # If the volume surrounds infinite atoms, the first atom
                         # returned will be a -1. We check for this
@@ -997,7 +1029,10 @@ class ElfAnalyzerToolkit:
 
                         if len(atoms_in_basin) > 0:
                             # We have an core/shell region
-                            basin_subtype = "core"
+                            if atom_types[0] == 0:
+                                basin_subtype = "core"
+                            else:
+                                basin_subtype = "shell"
                         else:
                             # otherwise its an other
                             basin_type = "val"
@@ -1007,11 +1042,116 @@ class ElfAnalyzerToolkit:
                         graph,
                         {child_idx: {"type": basin_type, "subtype": basin_subtype}},
                     )
-        # Reduce any related shell basins to a single basin
-        graph = self._reduce_atomic_shells(graph)
 
         return graph
-
+    
+    def _correct_for_high_depth_shells(
+            self,
+            graph: BifurcationGraph(),
+            ) -> BifurcationGraph():
+        """
+        Sometimes atomic shells have particularly deep separations, for
+        example when they are heavily polarized (e.g. Er2C). In these
+        cases, the shell will split into one irreducible domain and
+        one or more reducible domains. This is similar to a covalent bond/
+        lone-pair shell. However, none of the domains will fit the criteria
+        for a covalent bond, so all of them will be marked as shells or
+        lone-pairs. We change all of them to be marked as shells here.
+        """
+        for i in graph.nodes:
+            # Get the dict of information for our node and the parent of our node
+            node = graph.nodes[i]
+            # skip irreducible domains
+            if not "split" in node.keys():
+                continue
+            num_atoms = node["atom_num"]
+            # We check only for situations where we have a finite number of
+            # atoms in a reducible region
+            if num_atoms > 0:
+                all_lone_pairs_or_shells = True
+                for child_idx, child in graph.deep_child_dicts(i).items():
+                    # skip reducible domains
+                    if "split" in child.keys():
+                        continue
+                    if child["subtype"] not in ["lone-pair", "shell"]:
+                        all_lone_pairs_or_shells = False
+                        break
+                if not all_lone_pairs_or_shells:
+                    # This reducible domain isn't a shell. Continue
+                    continue
+                for child_idx, child in graph.deep_child_dicts(i).items():
+                    # skip reducible domains
+                    if "split" in child.keys():
+                        continue
+                    networkx.set_node_attributes(
+                        graph,
+                        {child_idx: {"type": "atom", "subtype": "shell"}},
+                    )
+        
+        return graph
+        
+    
+    def _combine_shells(
+            self, 
+            graph: BifurcationGraph(), 
+            nodes: list[int]
+            ) -> BifurcationGraph():
+        """
+        Combines a list of nodes into one
+        """
+        # Get the new values for each feature of this node
+        basins = []
+        atom_distance = 50
+        volume = 0
+        charge = 0
+        max_elf = 0
+        nearest_atom = -1
+        subset = 0
+        frac_coords = None
+        depth = 0
+        depth_3d = 0
+        # update all of our shell characteristics
+        for child_idx in nodes:
+            child = graph.nodes[child_idx]
+            nearest_atom = child["nearest_atom"]
+            basins.extend(child["basins"])
+            atom_distance = min(atom_distance, child["atom_distance"])
+            volume += child["volume"]
+            charge += child["charge"]
+            max_elf = max(max_elf, child["max_elf"])
+            subset = child["subset"]
+            frac_coords = child["frac_coords"]
+            depth = max(depth, child["depth"])
+            depth_3d = max(depth_3d, child["3d_depth"])
+        
+        # clear the attributes from the first node
+        graph.nodes[nodes[0]].clear()
+        # Add the attributes
+        networkx.set_node_attributes(
+            graph,
+            {
+                nodes[0]: {
+                    "type": "atom",
+                    "subtype": "shell",
+                    "subset": subset,
+                    "basins": basins,
+                    "atom_distance": round(atom_distance, 2),
+                    "volume": round(volume, 2),
+                    "charge": round(charge, 2),
+                    "max_elf": round(max_elf, 2),
+                    "nearest_atom": nearest_atom,
+                    "depth": round(depth, 2),
+                    "3d_depth": depth_3d,
+                    "frac_coords": frac_coords,
+                }
+            },
+        )
+        children_to_remove=nodes[1:]
+        # delete all of the unused nodes
+        for j in children_to_remove:
+            graph.remove_node(j)
+        return graph
+    
     def _reduce_atomic_shells(
         self,
         graph: BifurcationGraph(),
@@ -1019,104 +1159,92 @@ class ElfAnalyzerToolkit:
         """
         Reduces shell nodes to a single node
         """
-        # get graph lengths to compare
-        graph_length = -1
-        new_graph_length = len(graph)
-        # We do this recursively to recombine multiple shells if they are at
-        # different levels
-        # !!! Should I just use deep child nodes instead?
-        while graph_length != new_graph_length:
-        # n = 1
-        # while n == 1:
-            # n +=1
-            graph_length = new_graph_length
-            children_to_remove = []
-            for i in graph.nodes:
-                new_children_to_remove = []
-                # We should now have assigned all of our core and shell basins. For
-                # convenient visualization we want to combine all of our shell basins
-                # into one node.
-                basins = []
-                atom_distance = 50
-                volume = 0
-                charge = 0
-                max_elf = 0
-                nearest_atom = -1
-                subset = 0
-                frac_coords = None
-    
-                all_shells = True
-                # update all of our shell characteristics
-                for child_idx, child in graph.child_dicts(i).items():
-                    if not child.get("subtype", None) == "shell":
-                        all_shells = False
-                        continue
-                    if nearest_atom != child["nearest_atom"] and nearest_atom != -1:
-                        continue # we have shells from different atoms
-                    nearest_atom = child["nearest_atom"]
-                    new_children_to_remove.append(child_idx)
-                    basins.extend(child["basins"])
-                    atom_distance = min(atom_distance, child["atom_distance"])
-                    volume += child["volume"]
-                    charge += child["charge"]
-                    max_elf = max(max_elf, child["max_elf"])
-                    subset = child["subset"]
-                    frac_coords = child["frac_coords"]
-                if len(new_children_to_remove) <= 1:
-                    # we had no shells so we can just continue
+        
+        # first we find all of the reducible nodes
+        reducible_nodes = []
+        for i in graph.nodes:
+            node = graph.nodes[i]
+            if "split" in node.keys():
+                reducible_nodes.append(i)
+        # Now we loop over them backwards. We check if all of the children are
+        # shells, and if so we combine any that belong to the same atom. We also
+        # note if they were a reducible complete shell, so that atoms with multiple
+        # shells don't have their shells combined.
+        reducible_nodes.reverse()
+        for i in reducible_nodes:
+            node = graph.nodes[i]
+            atom_num = node["atom_num"]
+            all_shells = True
+            atom_assignments = []
+            child_indices = []
+            for child_idx, child in graph.child_dicts(i).items():
+                # skip reducible domains
+                if "split" in child.keys():
+                    all_shells = False
                     continue
-                if all_shells:
-                    # This shell only had other shells as siblings. This means our
-                    # parent node should be replaced with our new shell information
-                    # and our depth should be calculated by our parent's parent
-                    node_to_replace = i
-                    parent = graph.parent_dict(i)
-                    parent_elf = parent["split"]
-                    depth = max_elf - parent_elf
-                    subset -= 1
-                else:
-                    # we had some features other than shells. We want to replace the
-                    # first shell node
-                    node_to_replace = new_children_to_remove.pop(0)
-                    depth = max_elf - graph.nodes[i]["split"]
-                
-                # get depth to infinite feature
-                all_parent_indices = graph.deep_parent_indices(i)
-                for idx in all_parent_indices:
-                    current_parent = graph.nodes[idx]
-                    if current_parent["atom_num"] == -1:
-                        infinite_split = current_parent["split"]
-                        break
-                depth_3d = round(max_elf - infinite_split, 2)
-    
-                # clear the attributes from the node
-                graph.nodes[node_to_replace].clear()
+                # Also skip shells that have already been combined and that fully
+                # surrounded an atom.
+                reducible = child.get("reducible")
+                if reducible:
+                    all_shells = False
+                    continue
+                # and skip if the subtype is not a shell
+                if child["subtype"] != "shell":
+                    all_shells = False
+                    continue
+                    # break
+                atom_assignments.append(child["nearest_atom"])
+                child_indices.append(child_idx)
+            child_indices = np.array(child_indices)
+            # If we don't have only shells or if we only have one shell, we continue
+            # if not all_shells:
+            #     continue
+            # Now, if we have only shells we want to combine them into one shell
+            # for each unique atom
+            for atom_idx in np.unique(atom_assignments):
+                child_indices_to_combine = child_indices[np.where(atom_assignments==atom_idx)[0]]
+                graph = self._combine_shells(graph, child_indices_to_combine)
+            # if we only had one unique atom, we want to remove this reducible node
+            # and replace it with the unique child
+            if len(np.unique(atom_assignments)) == 1 and all_shells:
+                child_dict = graph.nodes[child_indices[0]]
+                # recalculate depth
+                parent = graph.parent_dict(i)
+                if parent is None:
+                    # this is our lowest depth and we want to continue
+                    continue
+                parent_elf = parent["split"]
+                depth = child_dict["max_elf"] - parent_elf
+                subset = node["subset"]
+                # clear the attributes from the first node
+                graph.nodes[i].clear()
                 # Add the attributes
+                if atom_num == 1:
+                    reducible = True
+                else:
+                    reducible = False
                 networkx.set_node_attributes(
                     graph,
                     {
-                        node_to_replace: {
+                        i: {
                             "type": "atom",
                             "subtype": "shell",
                             "subset": subset,
-                            "basins": basins,
-                            "atom_distance": round(atom_distance, 2),
-                            "volume": round(volume, 2),
-                            "charge": round(charge, 2),
-                            "max_elf": round(max_elf, 2),
-                            "nearest_atom": nearest_atom,
+                            "basins": child_dict["basins"],
+                            "atom_distance": child_dict["atom_distance"],
+                            "volume": child_dict["volume"],
+                            "charge": child_dict["charge"],
+                            "max_elf": child_dict["max_elf"],
+                            "nearest_atom": child_dict["nearest_atom"],
                             "depth": round(depth, 2),
-                            "3d_depth": depth_3d,
-                            "frac_coords": frac_coords,
+                            "3d_depth": child_dict["3d_depth"],
+                            "frac_coords": child_dict["frac_coords"],
+                            "reducible": reducible
                         }
                     },
                 )
-                children_to_remove.extend(new_children_to_remove)
-            # delete all of the unused nodes
-            for j in children_to_remove:
-                graph.remove_node(j)
-            # get new graph length
-            new_graph_length = len(graph)
+                # delete the child node
+                graph.remove_node(child_indices[0])
 
         return graph
 
@@ -1126,7 +1254,7 @@ class ElfAnalyzerToolkit:
         graph: BifurcationGraph(),
         metal_depth_cutoff: float = 0.1,
         min_covalent_angle: float = 135,
-        min_covalent_bond_ratio: float = 0.35,
+        min_covalent_bond_ratio: float = 0.4,
     ) -> BifurcationGraph():
         """
         Takes in a bifurcation graph and labels valence features that
@@ -1157,7 +1285,7 @@ class ElfAnalyzerToolkit:
             # be done using numpy arrays and the structure.distance_matrix
             # We assume there is only one basin, as this is the typical case for
             # covalent bonds
-            frac_coords = bader.bader_maxima_fractional[attributes["basins"][0]]
+            frac_coords = attributes["frac_coords"]
             temp_structure = self.structure.copy()
             temp_structure.append("X", frac_coords)
             nearest_atom = attributes["nearest_atom"]
@@ -1208,7 +1336,6 @@ class ElfAnalyzerToolkit:
             # as such
             if covalent:
                 subtype = "covalent"
-                print("covalent")
             # We also noted in our atomic assignment which features were part
             # of the atomic branch, but weren't shells or cores. The remaining
             # options were covalent or lone-pairs and we've just assigned the
@@ -1423,7 +1550,60 @@ class ElfAnalyzerToolkit:
                 },
             )
         return graph
-
+    
+    def _clean_reducible_nodes(
+            self,
+            graph: BifurcationGraph()
+            ) -> BifurcationGraph():
+        
+        nodes_to_remove = []
+        for i in graph.nodes:
+            node = graph.nodes[i]
+            # skip irreducible nodes
+            if not "split" in node.keys():
+                continue
+            children = graph.child_indices(i)
+            # check if we only have one child
+            if len(children) != 1:
+                continue
+            # check if this child is reducible
+            child = graph.nodes[children[0]]
+            if not "split" in child.keys():
+                continue
+            # If we made it to this point, we have a single reducible child under
+            # this reducible node. We want to remove the child and change the
+            # connections
+            nodes_to_remove.append(children[0])
+        
+        # breakpoint()
+        # now remove each child
+        nodes_to_remove.reverse()
+        for child_idx in nodes_to_remove:
+            child = graph.nodes[child_idx]
+            i = graph.parent_index(child_idx)
+            edge_companions = []
+            for edge in graph.edges:
+                if child_idx == edge[0]:
+                    edge_companions.append(edge[1])
+            # get the features to update on this node
+            split = child["split"]
+            num = child["num"]
+            networkx.set_node_attributes(
+                graph,
+                {
+                    i: {
+                        "split": split,
+                        "num": num
+                    }
+                },
+            )
+            # delete the child node
+            graph.remove_node(child_idx)
+            # add back connections
+            for edge_companion in edge_companions:
+                graph.add_edge(i, edge_companion)
+        return graph
+            
     def get_bifurcation_plots(
         self,
         resolution: float = 0.01,
@@ -1498,7 +1678,11 @@ class ElfAnalyzerToolkit:
             labels.append(label)
             parent = graph.parent_dict(i)
             if parent is not None:
-                Xn.append(parent["split"])
+                try:
+                    Xn.append(parent["split"])
+                except:
+                    breakpoint()
+
             else:
                 Xn.append(0)
         # Now we get the Y positions. First, we calculate how spread out each end node should
@@ -1615,8 +1799,8 @@ class ElfAnalyzerToolkit:
         include_shared_features: bool = True,
         metal_depth_cutoff: float = 0.1,
         min_covalent_angle: float = 135,
-        min_covalent_bond_ratio: float = 0.35,
-        shell_depth: float = 0.15,
+        min_covalent_bond_ratio: float = 0.4,
+        shell_depth: float = 0.05,
         electride_elf_min: float = 0.5,
         electride_depth_min: float = 0.2,
         electride_charge_min: float = 0.5,
@@ -1644,7 +1828,7 @@ class ElfAnalyzerToolkit:
             )
             structure_up = self._get_labeled_structure(
                 graph_up,
-                self.bader_up,
+                # self.bader_up,
                 include_lone_pairs,
                 include_shared_features,
                 electride_elf_min,
@@ -1655,7 +1839,7 @@ class ElfAnalyzerToolkit:
             )
             structure_down = self._get_labeled_structure(
                 graph_down,
-                self.bader_down,
+                # self.bader_down,
                 include_lone_pairs,
                 include_shared_features,
                 electride_elf_min,
@@ -1675,7 +1859,7 @@ class ElfAnalyzerToolkit:
             )
             return self._get_labeled_structure(
                 graph,
-                self.bader_up,
+                # self.bader_up,
                 include_lone_pairs,
                 include_shared_features,
                 electride_elf_min,
@@ -1688,7 +1872,6 @@ class ElfAnalyzerToolkit:
     def _get_labeled_structure(
         self,
         graph: BifurcationGraph(),
-        bader,
         include_lone_pairs: bool = False,
         include_shared_features: bool = True,
         electride_elf_min: float = 0.5,
@@ -1846,11 +2029,11 @@ class ElfAnalyzerToolkit:
         """
         if self.spin_polarized:
             graph_up, graph_down = self.get_bifurcation_graphs(**kwargs)
-            bader_up, bader_down = self.bader_up, self.bader_down
+            # bader_up, bader_down = self.bader_up, self.bader_down
             plot_up = self.get_bifurcation_plot(graph_up, write_plot=write_results, plot_name="bifurcation_plot_up")
             plot_down = self.get_bifurcation_plot(graph_down, write_plot=write_results, plot_name="bifurcation_plot_down")
-            structure_up = self._get_labeled_structure(graph_up, bader_up, **kwargs)
-            structure_down = self._get_labeled_structure(graph_down, bader_down, **kwargs)
+            structure_up = self._get_labeled_structure(graph_up, **kwargs)
+            structure_down = self._get_labeled_structure(graph_down, **kwargs)
             if write_results:
                 # write structures
                 structure_up.to(self.directory/"labeled_up.cif", "cif")
@@ -1867,9 +2050,9 @@ class ElfAnalyzerToolkit:
         
         else:
             graph = self.get_bifurcation_graphs(**kwargs)
-            bader = self.bader_up
+            # bader = self.bader_up
             plot = self.get_bifurcation_plot(graph, write_plot=write_results)
-            structure = self._get_labeled_structure(graph, bader, **kwargs)
+            structure = self._get_labeled_structure(graph, **kwargs)
             if write_results:
                 # write structures
                 structure.to(self.directory/"labeled.cif", fmt="cif")
