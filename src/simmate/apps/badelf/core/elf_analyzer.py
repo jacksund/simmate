@@ -710,12 +710,14 @@ class ElfAnalyzerToolkit:
                     # ELF value while being distinct. This allows us to see if
                     # this feature fully surrounded an atom.
                     if parent is not None:
-                        parent_split = parent.get("split", None)
+                        parent_split = parent.get("split", None)-resolution
                         basins = graph.nodes[feature]["basins"]
                         low_elf_mask = np.isin(basin_labeled_voxels, basins) & np.where(
                             elf_grid.total > parent_split, True, False
                         )
                         atoms = self.get_atoms_surrounded_by_volume(low_elf_mask)
+                        # if len(atoms) == 0:
+                        #     breakpoint()
                     else:
                         # if we have no parent this is our first node and
                         # we have as many atoms as there are in the structure
