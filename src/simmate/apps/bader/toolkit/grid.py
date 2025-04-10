@@ -9,13 +9,13 @@ from typing import Literal
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from networkx.utils import UnionFind
 from numpy.typing import NDArray
 from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from scipy.interpolate import RegularGridInterpolator
-from scipy.ndimage import label, center_of_mass, zoom
+from scipy.ndimage import center_of_mass, label, zoom
 from scipy.signal import decimate
-from networkx.utils import UnionFind
 
 # from scipy.ndimage import binary_erosion
 
@@ -25,7 +25,7 @@ class Grid(VolumetricData):
     This class is a wraparound for Pymatgen's VolumetricData class with additional
     properties and methods useful to the badelf algorithm
     """
-    
+
     @property
     def total(self):
         return self.data["total"]
@@ -114,7 +114,7 @@ class Grid(VolumetricData):
             distances.append(voxel_distances)
         min_distances = np.min(np.column_stack(distances), axis=1)
         min_distances = min_distances.reshape(self.shape)
-        return min_distances  
+        return min_distances
 
     @property
     def voxel_volume(self):
@@ -449,7 +449,7 @@ class Grid(VolumetricData):
         bader.threads = 1
         bader.min_surface_distance()
         return bader
-        
+
     def regrid(
         self,
         desired_resolution: int = 130000,
@@ -489,15 +489,19 @@ class Grid(VolumetricData):
             # calculate the new grid shape. round up to the nearest integer for each
             # side
             new_shape = np.around(shape * scale_factor).astype(np.int32)
-        
+
         # get the factor to zoom by
-        zoom_factor = new_shape/shape
+        zoom_factor = new_shape / shape
         # get the new total data
-        new_total = zoom(total, zoom_factor, order=order, mode="grid-wrap", grid_mode=True)#, prefilter=False,)
+        new_total = zoom(
+            total, zoom_factor, order=order, mode="grid-wrap", grid_mode=True
+        )  # , prefilter=False,)
         # if the diff exists, get the new diff data
         if diff is not None:
-            new_diff = zoom(diff, zoom_factor, order=order, mode="grid-wrap", grid_mode=True)#, prefilter=False,)
-            
+            new_diff = zoom(
+                diff, zoom_factor, order=order, mode="grid-wrap", grid_mode=True
+            )  # , prefilter=False,)
+
         # get the new data dict and return a new grid
         data = {"total": new_total, "diff": new_diff}
 
@@ -578,9 +582,9 @@ class Grid(VolumetricData):
         new_grid = grid1.copy()
         new_grid.data = data
         return new_grid
-    
+
     @staticmethod
-    def label(input: NDArray, structure: NDArray = np.ones([3,3,3])):
+    def label(input: NDArray, structure: NDArray = np.ones([3, 3, 3])):
         """
         Uses scipy's ndimage package to label an array, and corrects for
         periodic boundaries
@@ -620,16 +624,15 @@ class Grid(VolumetricData):
 
         return labeled_array
 
-    
     @staticmethod
     def periodic_center_of_mass(labels, label_vals=None) -> NDArray:
         """
         Computes center of mass for each label in a 3D periodic array.
-    
+
         Args:
             labels: 3D array of integer labels
             label_vals: list/array of unique labels to compute (default: all nonzero)
-    
+
         Returns:
             A 3xN array of centers of mass
         """
@@ -637,7 +640,7 @@ class Grid(VolumetricData):
         if label_vals is None:
             label_vals = np.unique(labels)
             label_vals = label_vals[label_vals != 0]
-    
+
         centers = []
         for val in label_vals:
             # get the voxel coords for each voxel in this label
@@ -645,7 +648,7 @@ class Grid(VolumetricData):
             # If we have no coords for this label, we skip
             if coords.shape[0] == 0:
                 continue
-            
+
             # From chap-gpt: Get center of mass using spherical distance
             center = []
             for i, size in enumerate(shape):
@@ -658,11 +661,12 @@ class Grid(VolumetricData):
             centers.append(center)
         centers = np.array(centers)
         centers = centers.round(6)
-    
+
         return centers
 
-
-    def get_critical_points(self, array: NDArray, threshold: float = 5e-03, return_hessian_s: bool = True):
+    def get_critical_points(
+        self, array: NDArray, threshold: float = 5e-03, return_hessian_s: bool = True
+    ):
         """
         Finds the critical points in the grid. If return_hessians is true,
         the hessian matrices for each critical point will be returned along
@@ -674,14 +678,14 @@ class Grid(VolumetricData):
         a, b, c = self.get_padded_grid_axes(padding)
         padded_array = np.pad(array, padding, mode="wrap")
         dx, dy, dz = np.gradient(padded_array)
-        
+
         # get magnitude of the gradient
         magnitude = np.sqrt(dx**2 + dy**2 + dz**2)
-        
+
         # unpad the magnitude
         slicer = tuple(slice(padding, -padding) for _ in range(3))
         magnitude = magnitude[slicer]
-        
+
         # now we want to get where the magnitude is close to 0. To do this, we
         # will create a mask where the magnitude is below a threshold. We will
         # then label the regions where this is true using scipy, then combine
@@ -689,31 +693,29 @@ class Grid(VolumetricData):
         magnitude_mask = magnitude < threshold
         # critical_points = np.where(magnitude<threshold)
         # padded_critical_points = np.array(critical_points).T + padding
-        
-        label_structure = np.ones((3,3,3), dtype=int)
+
+        label_structure = np.ones((3, 3, 3), dtype=int)
         labeled_magnitude_mask = self.label(magnitude_mask, label_structure)
         min_indices = []
         for idx in np.unique(labeled_magnitude_mask):
-            label_mask = labeled_magnitude_mask==idx
+            label_mask = labeled_magnitude_mask == idx
             label_indices = np.where(label_mask)
             min_mag = magnitude[label_indices].min()
-            min_indices.append(np.argwhere((magnitude==min_mag) & label_mask)[0])
+            min_indices.append(np.argwhere((magnitude == min_mag) & label_mask)[0])
         min_indices = np.array(min_indices)
-        
-        critical_points = min_indices[:,0], min_indices[:,1], min_indices[:,2]
-        
-        
+
+        critical_points = min_indices[:, 0], min_indices[:, 1], min_indices[:, 2]
+
         # critical_points = self.periodic_center_of_mass(labeled_magnitude_mask)
-        padded_critical_points = tuple([i+padding for i in critical_points])
+        padded_critical_points = tuple([i + padding for i in critical_points])
         values = array[critical_points]
         # # get the value at each of these critical points
         # fn_values = RegularGridInterpolator((a, b, c), padded_array , method="linear")
         # values = fn_values(padded_critical_points)
-        
+
         if not return_hessian_s:
             return critical_points, values
-        
-        
+
         # now we want to get the hessian eigenvalues around each of these points
         # using interpolation. First, we get the second derivatives
         d2f_dx2 = np.gradient(dx, axis=0)
@@ -737,9 +739,8 @@ class Grid(VolumetricData):
         hessian_eigs_signs = np.where(hessian_eigs < 0, -1, hessian_eigs_signs)
         # Now we get the sum of signs for each set of hessian eigenvalues
         s = np.sum(hessian_eigs_signs, axis=1)
-        
-        return critical_points, values, s    
-    
+
+        return critical_points, values, s
 
     ###########################################################################
     # The following is a series of methods that are useful for converting between

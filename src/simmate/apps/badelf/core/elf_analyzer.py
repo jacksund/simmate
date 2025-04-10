@@ -15,9 +15,9 @@ from numpy.typing import NDArray
 from pymatgen.analysis.local_env import CrystalNN
 from scipy.ndimage import binary_dilation
 
+from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 from simmate.apps.bader.toolkit import Grid
 from simmate.toolkit import Structure
-from simmate.apps.badelf.core.partitioning import PartitioningToolkit
 
 
 class BifurcationGraph(DiGraph):
@@ -46,21 +46,21 @@ class BifurcationGraph(DiGraph):
             return self.nodes[parent_index]
         else:
             return None
-    
+
     def deep_parent_indices(self, n: int) -> NDArray[np.int64]:
         """
         Returns the indices of all nodes connected to this node by
         parents.
         """
         predecessor_list = []
-        
+
         current_predecessor = n
         while current_predecessor is not None:
             current_predecessor = self.parent_index(current_predecessor)
             if current_predecessor is not None:
                 predecessor_list.append(current_predecessor)
         return predecessor_list
-    
+
     def child_indices(self, n: int) -> NDArray[np.int64]:
         """
         Returns the indices of the children of this node if they exist
@@ -158,7 +158,7 @@ class ElfAnalyzerToolkit:
             if elf_grid.voxel_resolution > downscale_resolution:
                 elf_grid = elf_grid.regrid(downscale_resolution, order=5)
                 charge_grid = charge_grid.regrid(downscale_resolution, order=5)
-            
+
         self.elf_grid = elf_grid.copy()
         self.charge_grid = charge_grid.copy()
         self.directory = directory
@@ -269,7 +269,7 @@ class ElfAnalyzerToolkit:
                 max_en_diff = en_diff
         # return the en difference and number of neighbors
         return max_en_diff, len(neigh_list)
-    
+
     # !!! The following code has been replaced by radii determined directly from
     # the ELF
     # def get_atom_radius_guess(self, site: int) -> float:
@@ -374,7 +374,7 @@ class ElfAnalyzerToolkit:
         # in the inverted mask
         inverted_mask = dilated_supercell_mask == False
         # Now we use use scipy to label unique features in our masks
-        
+
         # feature_supercell = Grid.label(supercell_mask, structure)
         inverted_feature_supercell = Grid.label(inverted_mask, structure)
         # First we check for feature connectivity. If we have 8 unique features,
@@ -382,7 +382,7 @@ class ElfAnalyzerToolkit:
         # inf_feature = False
         # if len(np.unique(feature_supercell)) != 9:
         #     inf_feature = True
-            
+
         # if an atom was fully surrounded, it should sit inside one of our labels.
         # The same atom in an adjacent unit cell should have a different label.
         # To check this, we need to look at the atom in each section of the supercell
@@ -438,11 +438,8 @@ class ElfAnalyzerToolkit:
         #     if return_type:
         #         return np.insert(surrounded_sites, 0, -1), types
         #     return np.insert(surrounded_sites, 0, -1)
-    
-    def check_if_infinite_feature(
-            self,
-            mask: NDArray
-            ) -> bool:
+
+    def check_if_infinite_feature(self, mask: NDArray) -> bool:
         """
         Checks if a feature extends infinitely in at least one direction
         """
@@ -458,7 +455,7 @@ class ElfAnalyzerToolkit:
         inf_feature = False
         if len(np.unique(feature_supercell)) != 9:
             inf_feature = True
-        
+
         return inf_feature
 
     def get_bifurcation_graphs(
@@ -530,9 +527,9 @@ class ElfAnalyzerToolkit:
         This method is largely meant to be called through the get_bifurcation_graphs
         method.
         """
-        
+
         elf_data = elf_grid.total
-        
+
         basin_labeled_voxels = bader.bader_volumes.copy()
         # create a graph with a base node to start tracking features
         graph = BifurcationGraph()
@@ -546,7 +543,7 @@ class ElfAnalyzerToolkit:
         # According to Lepetit et. al. (http://dx.doi.org/10.1016/j.ccr.2017.04.009)
         # these occur at critical points where the sum of non-zero signs of the
         # hessian matrix eigenvalues is -1. We also want the maxima which have
-        # a sign sum of -3. 
+        # a sign sum of -3.
         critical_coords, elf_values, sign_sum = elf_grid.get_critical_points(elf_data)
         # find where the sign_sum is -1
         # bif_indices = np.where((sign_sum==-1) | (sign_sum==-3))[0]
@@ -557,7 +554,7 @@ class ElfAnalyzerToolkit:
         important_elf_values = []
         resolution = 0.01
         for i in range(round(1 / resolution)):
-        # for cutoff in unique_elf_values:
+            # for cutoff in unique_elf_values:
             cutoff = resolution * (i + 1)
             cutoff_elf_grid = np.where(elf_data >= cutoff, 1, 0)
             # label our data to get the unique features
@@ -566,7 +563,10 @@ class ElfAnalyzerToolkit:
             old_featured_grid = featured_grid.copy()
             featured_grid = Grid.label(cutoff_elf_grid, label_structure)
             # make sure we have at least one label at low ELF cutoffs
-            if len(np.unique(featured_grid)) == 1 and len(np.unique(old_featured_grid)) == 1:
+            if (
+                len(np.unique(featured_grid)) == 1
+                and len(np.unique(old_featured_grid)) == 1
+            ):
                 if np.unique(featured_grid)[0] == 0:
                     featured_grid = old_featured_grid.copy()
                     continue
@@ -647,7 +647,7 @@ class ElfAnalyzerToolkit:
                         if len(empty_structure) > 1:
                             empty_structure.merge_sites(tol=1, mode="average")
                         frac_coord = empty_structure.frac_coords[0]
-                                       
+
                     # Using these basins, we create a mask representing the full
                     # basin (not just above this elf value) and integrate the
                     # charge in this region. We also save the volume here
@@ -682,7 +682,7 @@ class ElfAnalyzerToolkit:
                                 "volume": volume,
                                 "atom_distance": distance,
                                 "nearest_atom": nearest_atom,
-                                "frac_coords": frac_coord
+                                "frac_coords": frac_coord,
                             }
                         },
                     )
@@ -700,7 +700,7 @@ class ElfAnalyzerToolkit:
                         # this same process for a different feature
                         if parent is not None:
                             num = parent["num"] - 1
-                        # atoms = parent["atoms"]
+                            # atoms = parent["atoms"]
                             if num == 1:
                                 # this node isn't useful anymore so we remove it
                                 graph.remove_node(parent_idx)
@@ -735,14 +735,14 @@ class ElfAnalyzerToolkit:
                     # ELF value while being distinct. This allows us to see if
                     # this feature fully surrounded an atom.
                     if parent is not None:
-                        parent_split = parent.get("split", None)-resolution
+                        parent_split = parent.get("split", None) - resolution
                         basins = graph.nodes[feature]["basins"]
                         low_elf_mask = np.isin(basin_labeled_voxels, basins) & np.where(
                             elf_grid.total > parent_split, True, False
                         )
-                        high_elf_mask = np.isin(basin_labeled_voxels, basins) & np.where(
-                            elf_grid.total > cutoff-resolution, True, False
-                        )
+                        high_elf_mask = np.isin(
+                            basin_labeled_voxels, basins
+                        ) & np.where(elf_grid.total > cutoff - resolution, True, False)
                         atoms = self.get_atoms_surrounded_by_volume(low_elf_mask)
                         # BUG-FIX we check if this feature is infinite right
                         # before it split. This should fix issues with atomic
@@ -774,10 +774,10 @@ class ElfAnalyzerToolkit:
                     #     if atoms[0] == -1:
                     #         atom_num = -1
                     #         atoms = atoms[1:]
-                            
-                        # else:
-                        #     atom_num = len(atoms)
-                    
+
+                    # else:
+                    #     atom_num = len(atoms)
+
                     networkx.set_node_attributes(
                         graph,
                         {
@@ -857,15 +857,15 @@ class ElfAnalyzerToolkit:
         )
         # breakpoint()
         graph = self._correct_for_high_depth_shells(graph)
-        
+
         # Reduce any related shell basins to a single basin
         graph = self._reduce_atomic_shells(graph)
 
         # Now we calculate a bare electron indicator for each valence basin. This
         # is used just to give a sense of how bare an electron is.
-        graph = self._mark_bare_electron_indicator(graph, bader, elf_grid, radius_refine_method=radius_refine_method)
-        
-        
+        graph = self._mark_bare_electron_indicator(
+            graph, bader, elf_grid, radius_refine_method=radius_refine_method
+        )
 
         # Finally, we add a label to each node with a summary of information
         # for plotting
@@ -981,7 +981,9 @@ class ElfAnalyzerToolkit:
                     low_elf_mask = np.isin(basin_labeled_voxels, basins) & np.where(
                         elf_data > parent_split, True, False
                     )
-                    atoms_in_basin, atom_types = self.get_atoms_surrounded_by_volume(low_elf_mask, return_type=True)
+                    atoms_in_basin, atom_types = self.get_atoms_surrounded_by_volume(
+                        low_elf_mask, return_type=True
+                    )
                     # If the volume surrounds infinite atoms, the first atom
                     # returned will be a -1. We check for this
                     # if len(atoms_in_basin) > 0:
@@ -1057,8 +1059,10 @@ class ElfAnalyzerToolkit:
                         low_elf_mask = np.isin(basin_labeled_voxels, basins) & np.where(
                             elf_data > parent_split, True, False
                         )
-                        atoms_in_basin, atom_types = self.get_atoms_surrounded_by_volume(
-                            low_elf_mask, return_type = True
+                        atoms_in_basin, atom_types = (
+                            self.get_atoms_surrounded_by_volume(
+                                low_elf_mask, return_type=True
+                            )
                         )
                         # If the volume surrounds infinite atoms, the first atom
                         # returned will be a -1. We check for this
@@ -1083,11 +1087,11 @@ class ElfAnalyzerToolkit:
                     )
 
         return graph
-    
+
     def _correct_for_high_depth_shells(
-            self,
-            graph: BifurcationGraph(),
-            ) -> BifurcationGraph():
+        self,
+        graph: BifurcationGraph(),
+    ) -> BifurcationGraph():
         """
         Sometimes atomic shells have particularly deep separations, for
         example when they are heavily polarized (e.g. Er2C). In these
@@ -1127,15 +1131,12 @@ class ElfAnalyzerToolkit:
                         graph,
                         {child_idx: {"type": "atom", "subtype": "shell"}},
                     )
-        
+
         return graph
-        
-    
+
     def _combine_shells(
-            self, 
-            graph: BifurcationGraph(), 
-            nodes: list[int]
-            ) -> BifurcationGraph():
+        self, graph: BifurcationGraph(), nodes: list[int]
+    ) -> BifurcationGraph():
         """
         Combines a list of nodes into one
         """
@@ -1163,7 +1164,7 @@ class ElfAnalyzerToolkit:
             frac_coords = child["frac_coords"]
             depth = max(depth, child["depth"])
             depth_3d = max(depth_3d, child["3d_depth"])
-        
+
         # clear the attributes from the first node
         graph.nodes[nodes[0]].clear()
         # Add the attributes
@@ -1186,12 +1187,12 @@ class ElfAnalyzerToolkit:
                 }
             },
         )
-        children_to_remove=nodes[1:]
+        children_to_remove = nodes[1:]
         # delete all of the unused nodes
         for j in children_to_remove:
             graph.remove_node(j)
         return graph
-    
+
     def _reduce_atomic_shells(
         self,
         graph: BifurcationGraph(),
@@ -1199,7 +1200,7 @@ class ElfAnalyzerToolkit:
         """
         Reduces shell nodes to a single node
         """
-        
+
         # first we find all of the reducible nodes
         reducible_nodes = []
         for i in graph.nodes:
@@ -1242,7 +1243,9 @@ class ElfAnalyzerToolkit:
             # Now, if we have only shells we want to combine them into one shell
             # for each unique atom
             for atom_idx in np.unique(atom_assignments):
-                child_indices_to_combine = child_indices[np.where(atom_assignments==atom_idx)[0]]
+                child_indices_to_combine = child_indices[
+                    np.where(atom_assignments == atom_idx)[0]
+                ]
                 graph = self._combine_shells(graph, child_indices_to_combine)
             # if we only had one unique atom, we want to remove this reducible node
             # and replace it with the unique child
@@ -1279,7 +1282,7 @@ class ElfAnalyzerToolkit:
                             "depth": round(depth, 2),
                             "3d_depth": child_dict["3d_depth"],
                             "frac_coords": child_dict["frac_coords"],
-                            "reducible": reducible
+                            "reducible": reducible,
                         }
                     },
                 )
@@ -1310,7 +1313,7 @@ class ElfAnalyzerToolkit:
             # Default to bare electron
             basin_type = "val"
             subtype = "bare electron"
-            
+
             # First check for covalent character. We do this before the metallic
             # character cutoff because some covalent bonds in molecular solids
             # have very low depths
@@ -1350,7 +1353,11 @@ class ElfAnalyzerToolkit:
                 # we check within a small tolerance for rounding errors
                 test_dist = round(atom_dist + neigh_dist, 2)
                 tolerance = 0.01
-                if (test_dist-tolerance) <= atom_neigh_dist <= (test_dist+tolerance):
+                if (
+                    (test_dist - tolerance)
+                    <= atom_neigh_dist
+                    <= (test_dist + tolerance)
+                ):
                     covalent = True
                     break
                 try:
@@ -1386,11 +1393,15 @@ class ElfAnalyzerToolkit:
                 # be bare electrons (e.g. Sr6CrN6) if the basin doesn't bifurcate
                 # before the atomic basins. This could potentially be corrected
                 # for with a distance cutoff.
-            
+
             # Now check for metallic character. Note we make
             # sure this feature isn't already assigned as covalent to avoid relabeling
             # features that have already been found
-            if attributes["3d_depth"] < metal_depth_cutoff and previous_subtype != "other" and not covalent:
+            if (
+                attributes["3d_depth"] < metal_depth_cutoff
+                and previous_subtype != "other"
+                and not covalent
+            ):
                 # breakpoint()
                 subtype = "metallic"
                 # set subtype
@@ -1402,6 +1413,7 @@ class ElfAnalyzerToolkit:
             networkx.set_node_attributes(
                 graph, {feature_idx: {"type": basin_type, "subtype": subtype}}
             )
+
         # There is an exception to the lone-pair rule that can result in missing
         # a lone-pair assignment. If a covalent/lone-pair feature surrounds two atoms
         # these features won't be assigned as "other".
@@ -1423,22 +1435,28 @@ class ElfAnalyzerToolkit:
                 else:
                     parent_idx = graph.parent_index(parent_idx)
             return molecule_parent_idx
+
         features_to_relabel = []
         for feature_idx, attributes in valence_summary.items():
             if attributes.get("subtype") == "bare electron":
-                
+
                 all_cov_lp_be = True
                 at_least_one_cov = False
                 molecule_parent_idx = get_molecule_parent(feature_idx)
                 # for sibling_idx, sibling in graph.sibling_dicts(feature_idx).items():
                 # Check if all siblings are covalent, bare electrons, or lone-pairs. If so,
                 # this is a lone-pair
-                for sibling_idx, sibling in graph.deep_child_dicts(molecule_parent_idx).items():
+                for sibling_idx, sibling in graph.deep_child_dicts(
+                    molecule_parent_idx
+                ).items():
                     # make sure this sibling isn't the child of a different submolecule
                     direct_parent_idx = get_molecule_parent(sibling_idx)
                     direct_parent = graph.nodes[direct_parent_idx]
-                    if direct_parent["atom_num"] !=0 and direct_parent_idx != molecule_parent_idx:
-                        continue                    
+                    if (
+                        direct_parent["atom_num"] != 0
+                        and direct_parent_idx != molecule_parent_idx
+                    ):
+                        continue
                     if "split" in sibling.keys():
                         continue
                     # We need to make sure there's at least one covalent bond as well
@@ -1460,7 +1478,11 @@ class ElfAnalyzerToolkit:
         return graph
 
     def _mark_bare_electron_indicator(
-        self, graph: BifurcationGraph(), bader, elf_grid: Grid, radius_refine_method: str = "linear",
+        self,
+        graph: BifurcationGraph(),
+        bader,
+        elf_grid: Grid,
+        radius_refine_method: str = "linear",
     ) -> BifurcationGraph():
         """
         Takes in a bifurcation graph and calculates an electride character
@@ -1483,9 +1505,9 @@ class ElfAnalyzerToolkit:
                 temp_structure.append(species, frac_coord)
         temp_grid = elf_grid.copy()
         temp_grid.structure = temp_structure
-        #TODO This can probably be made faster by rerunning only part of the
+        # TODO This can probably be made faster by rerunning only part of the
         # bader. If not this should be passed to the BadELfToolkit to avoid
-        # repeat calculations. 
+        # repeat calculations.
         # Make sure all of these values make sense with new H.
         labeled_pybader = temp_grid.run_pybader()
         partitioning = PartitioningToolkit(elf_grid, labeled_pybader)
@@ -1493,8 +1515,10 @@ class ElfAnalyzerToolkit:
         # can be passed to the BadElfToolkit class for summary. However, this
         # requires knowledge of if this is spin-up/spin-down which I currently
         # don't have stored at this level
-        radii = partitioning.get_elf_ionic_radii(refine_method=radius_refine_method, labeled_structure=temp_structure)
-        
+        radii = partitioning.get_elf_ionic_radii(
+            refine_method=radius_refine_method, labeled_structure=temp_structure
+        )
+
         for feature_idx, attributes in valence_summary.items():
             # We want to get a metric of how "bare" each feature is. To do this,
             # we need a value that ranges from 0 to 1 for each attribute we have
@@ -1564,7 +1588,7 @@ class ElfAnalyzerToolkit:
             # limit to a range of 0 to 1
             dist_contribution = min(max(dist_contribution, 0), 1)
             dist_minus_radius = dist - atom_radius
-            
+
             # We want to keep track of the full values in a convenient way
             unnormalized_contributors = np.array(
                 [
@@ -1573,8 +1597,8 @@ class ElfAnalyzerToolkit:
                     depth_contribution,
                     attributes["volume"],
                     dist_minus_radius,
-                    ]
-                )
+                ]
+            )
             # Finally, our bare electron indicator is a linear combination of
             # the indicator above. The contributions are somewhat arbitrary, but
             # are based on chemical intuition. The ELF and charge contributions
@@ -1597,7 +1621,7 @@ class ElfAnalyzerToolkit:
                 ]
             )
             bare_electron_indicator = np.sum(contributers * weights)
-            
+
             # Finally, we also want to get the coordination environment of this
             # feature, even though this doesnt feed into our BEI.
             frac_coords = attributes["frac_coords"]
@@ -1624,12 +1648,9 @@ class ElfAnalyzerToolkit:
                 },
             )
         return graph
-    
-    def _clean_reducible_nodes(
-            self,
-            graph: BifurcationGraph()
-            ) -> BifurcationGraph():
-        
+
+    def _clean_reducible_nodes(self, graph: BifurcationGraph()) -> BifurcationGraph():
+
         nodes_to_remove = []
         for i in graph.nodes:
             node = graph.nodes[i]
@@ -1648,7 +1669,7 @@ class ElfAnalyzerToolkit:
             # this reducible node. We want to remove the child and change the
             # connections
             nodes_to_remove.append(children[0])
-        
+
         # breakpoint()
         # now remove each child
         nodes_to_remove.reverse()
@@ -1664,12 +1685,7 @@ class ElfAnalyzerToolkit:
             num = child["num"]
             networkx.set_node_attributes(
                 graph,
-                {
-                    i: {
-                        "split": split,
-                        "num": num
-                    }
-                },
+                {i: {"split": split, "num": num}},
             )
             # delete the child node
             graph.remove_node(child_idx)
@@ -1677,7 +1693,7 @@ class ElfAnalyzerToolkit:
             for edge_companion in edge_companions:
                 graph.add_edge(i, edge_companion)
         return graph
-            
+
     def get_bifurcation_plots(
         self,
         resolution: float = 0.01,
@@ -1995,7 +2011,9 @@ class ElfAnalyzerToolkit:
                 condition_test = np.array(
                     [
                         attributes["max_elf"],
-                        attributes["3d_depth"], # Note we use the depth to an infinite connection rather than true depth
+                        attributes[
+                            "3d_depth"
+                        ],  # Note we use the depth to an infinite connection rather than true depth
                         attributes["charge"],
                         attributes["volume"],
                         attributes["dist_minus_radius"],
@@ -2095,7 +2113,7 @@ class ElfAnalyzerToolkit:
             ignore_low_pseudopotentials=ignore_low_pseudopotentials,
             downscale_resolution=downscale_resolution,
         )
-    
+
     def get_full_analysis(self, write_results: bool = True, **kwargs):
         """
         Gets the BifurcationGraphs, plots, and labeled structures for
@@ -2104,15 +2122,19 @@ class ElfAnalyzerToolkit:
         if self.spin_polarized:
             graph_up, graph_down = self.get_bifurcation_graphs(**kwargs)
             # bader_up, bader_down = self.bader_up, self.bader_down
-            plot_up = self.get_bifurcation_plot(graph_up, write_plot=write_results, plot_name="bifurcation_plot_up")
-            plot_down = self.get_bifurcation_plot(graph_down, write_plot=write_results, plot_name="bifurcation_plot_down")
+            plot_up = self.get_bifurcation_plot(
+                graph_up, write_plot=write_results, plot_name="bifurcation_plot_up"
+            )
+            plot_down = self.get_bifurcation_plot(
+                graph_down, write_plot=write_results, plot_name="bifurcation_plot_down"
+            )
             structure_up = self._get_labeled_structure(graph_up, **kwargs)
             structure_down = self._get_labeled_structure(graph_down, **kwargs)
             if write_results:
                 # write structures
-                structure_up.to(self.directory/"labeled_up.cif", "cif")
-                structure_down.to(self.directory/"labeled_down.cif", "cif")
-            
+                structure_up.to(self.directory / "labeled_up.cif", "cif")
+                structure_down.to(self.directory / "labeled_down.cif", "cif")
+
             return {
                 "graph_up": graph_up,
                 "graph_down": graph_down,
@@ -2120,8 +2142,8 @@ class ElfAnalyzerToolkit:
                 "plot_down": plot_down,
                 "structure_up": structure_up,
                 "structure_down": structure_down,
-                }
-        
+            }
+
         else:
             graph = self.get_bifurcation_graphs(**kwargs)
             # bader = self.bader_up
@@ -2129,12 +2151,9 @@ class ElfAnalyzerToolkit:
             structure = self._get_labeled_structure(graph, **kwargs)
             if write_results:
                 # write structures
-                structure.to(self.directory/"labeled.cif", fmt="cif")
+                structure.to(self.directory / "labeled.cif", fmt="cif")
             return {
                 "graph": graph,
                 "plot": plot,
                 "structure": structure,
-                }
-            
-            
-        
+            }
