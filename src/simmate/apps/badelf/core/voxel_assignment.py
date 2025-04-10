@@ -553,33 +553,39 @@ class VoxelAssignmentToolkit:
             np.int16
         )
         unassigned_indices = np.column_stack(np.where(assignment_array == 0))
-        # If doing badelf we want to assign electrides using the bader method.
+        # If doing badelf we've already assigned electrides using the bader method.
         # We need to zero them here. Covalent and metallic bonds will be assigned
         # with zero-flux or voronoi like methods depending on the provided algorithm
+        structure = self.electride_structure.copy()
+        # structure.remove_oxidation_states()
         if self.algorithm == "badelf":
+            # Remove electrides from structure and assignments
+            if "E" in structure.symbol_set:
+                structure.remove_species("E")
+            # zero out electride site assignments
             electride_indices = (
                 np.array(
                     list(self.electride_structure.indices_from_symbol("E")), dtype=int
                 )
                 + 1
             )
-            if self.shared_feature_algorithm == "zero-flux":
-                shared_indices = []
-                for symbol in ["Z", "M", "Le"]:
-                    shared_indices.extend(
-                        self.electride_structure.indices_from_symbol(symbol)
-                    )
-                shared_indices = np.array(shared_indices, dtype=int) + 1
-                shared_indices.sort()
-            else:
-                shared_indices = np.array([])
-            non_atom_indices = np.concatenate([electride_indices, shared_indices])
             assignment_array = np.where(
-                np.isin(assignment_array, non_atom_indices), 0, assignment_array
+                np.isin(assignment_array, electride_indices), 0, assignment_array
             )
-            structure = grid.structure
-        elif self.algorithm == "voronelf":
-            structure = self.electride_structure
+        if self.shared_feature_algorithm != "voronoi":
+            # remove shared features from structure and assignments
+            shared_indices = []
+            for symbol in ["Z", "M", "Le"]:
+                if symbol in structure.symbol_set:
+                    structure.remove_species(symbol)
+                shared_indices.extend(
+                    self.electride_structure.indices_from_symbol(symbol)
+                )
+            shared_indices = np.array(shared_indices, dtype=int) + 1
+            assignment_array = np.where(
+                np.isin(assignment_array, shared_indices), 0, assignment_array
+            )
+
         # Get smallest radius for a sphere
         lattice = grid.structure.lattice
 

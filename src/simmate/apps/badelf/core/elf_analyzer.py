@@ -1382,6 +1382,10 @@ class ElfAnalyzerToolkit:
             # feature isn't covalent it must be a lone-pair
             if previous_subtype == "other" and not covalent:
                 subtype = "lone-pair"
+                # BUG: In some rare cases, this may misassign basins that should
+                # be bare electrons (e.g. Sr6CrN6) if the basin doesn't bifurcate
+                # before the atomic basins. This could potentially be corrected
+                # for with a distance cutoff.
             
             # Now check for metallic character. Note we make
             # sure this feature isn't already assigned as covalent to avoid relabeling
