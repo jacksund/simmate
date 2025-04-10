@@ -366,7 +366,7 @@ class ElfAnalyzerToolkit:
         # Now we create a supercell of the mask so we can check connections to
         # neighboring cells. This will be used to check if the feature connects
         # to itself in each direction
-        supercell_mask = self.elf_grid.get_2x_supercell(mask)
+        # supercell_mask = self.elf_grid.get_2x_supercell(mask)
         dilated_supercell_mask = self.elf_grid.get_2x_supercell(dilated_mask)
         # We also get an inversion of this mask. This will be used to check if
         # the mask surrounds each atom. To do this, we use the dilated supercell
@@ -375,13 +375,13 @@ class ElfAnalyzerToolkit:
         inverted_mask = dilated_supercell_mask == False
         # Now we use use scipy to label unique features in our masks
         
-        feature_supercell = Grid.label(supercell_mask, structure)
+        # feature_supercell = Grid.label(supercell_mask, structure)
         inverted_feature_supercell = Grid.label(inverted_mask, structure)
         # First we check for feature connectivity. If we have 8 unique features,
         # we have a feature that doesn't extend infinitely
-        inf_feature = False
-        if len(np.unique(feature_supercell)) != 9:
-            inf_feature = True
+        # inf_feature = False
+        # if len(np.unique(feature_supercell)) != 9:
+        #     inf_feature = True
             
         # if an atom was fully surrounded, it should sit inside one of our labels.
         # The same atom in an adjacent unit cell should have a different label.
@@ -430,14 +430,36 @@ class ElfAnalyzerToolkit:
                 types.append(0)
             else:
                 types.append(1)
-        if not inf_feature:
-            if return_type:
-                return surrounded_sites, types
-            return surrounded_sites
-        else:
-            if return_type:
-                return np.insert(surrounded_sites, 0, -1), types
-            return np.insert(surrounded_sites, 0, -1)
+        # if not inf_feature:
+        if return_type:
+            return surrounded_sites, types
+        return surrounded_sites
+        # else:
+        #     if return_type:
+        #         return np.insert(surrounded_sites, 0, -1), types
+        #     return np.insert(surrounded_sites, 0, -1)
+    
+    def check_if_infinite_feature(
+            self,
+            mask: NDArray
+            ) -> bool:
+        """
+        Checks if a feature extends infinitely in at least one direction
+        """
+        structure = np.ones([3, 3, 3])
+        # Now we create a supercell of the mask so we can check connections to
+        # neighboring cells. This will be used to check if the feature connects
+        # to itself in each direction
+        supercell_mask = self.elf_grid.get_2x_supercell(mask)
+        # Now we use use scipy to label unique features in our masks
+        feature_supercell = Grid.label(supercell_mask, structure)
+        # First we check for feature connectivity. If we have 8 unique features,
+        # we have a feature that doesn't extend infinitely
+        inf_feature = False
+        if len(np.unique(feature_supercell)) != 9:
+            inf_feature = True
+        
+        return inf_feature
 
     def get_bifurcation_graphs(
         self,
@@ -612,6 +634,7 @@ class ElfAnalyzerToolkit:
                     # Using this, we can find the average frac coords of the attractors
                     # in this basin
                     empty_structure = self.structure.copy()
+                    empty_structure.remove_oxidation_states()
                     empty_structure.remove_species(empty_structure.symbol_set)
                     frac_coords = bader.bader_maxima_fractional[basins]
                     if len(frac_coords) == 1:
@@ -644,6 +667,8 @@ class ElfAnalyzerToolkit:
                     nearest_atom = bader.bader_atoms[basins][
                         np.where(distances == distance)[0][0]
                     ]
+                    # if nearest_atom == 0:
+                    #     breakpoint()
 
                     # Now we update this node with the information we gathered
                     networkx.set_node_attributes(
@@ -715,7 +740,16 @@ class ElfAnalyzerToolkit:
                         low_elf_mask = np.isin(basin_labeled_voxels, basins) & np.where(
                             elf_grid.total > parent_split, True, False
                         )
+                        high_elf_mask = np.isin(basin_labeled_voxels, basins) & np.where(
+                            elf_grid.total > cutoff-resolution, True, False
+                        )
                         atoms = self.get_atoms_surrounded_by_volume(low_elf_mask)
+                        # BUG-FIX we check if this feature is infinite right
+                        # before it split. This should fix issues with atomic
+                        # features in small cells that connect to themselves
+                        # by wrapping around the cell. In a larger cell, the
+                        # split would be noted, but it's not for these.
+                        is_infinite = self.check_if_infinite_feature(high_elf_mask)
                         # if len(atoms) == 3:
                         #     breakpoint()
                     else:
@@ -724,7 +758,8 @@ class ElfAnalyzerToolkit:
                         atoms = [i for i in range(len(self.structure))]
                         # This is always infinite, so we note that by adding -1
                         # to the front of our list
-                        atoms.insert(0, -1)
+                        # atoms.insert(0, -1)
+                        is_infinite = True
                     # If the volume surrounds infinite atoms, the first atom
                     # returned will be a -1. We check for this
                     # TODO: Currently, an atom_num of -1 indicates an infinite
@@ -733,10 +768,12 @@ class ElfAnalyzerToolkit:
                     # the number of surrounded atoms, and whether the feature is
                     # infinite or not.
                     atom_num = len(atoms)
-                    if len(atoms) > 0:
-                        if atoms[0] == -1:
-                            atom_num = -1
-                            atoms = atoms[1:]
+                    if is_infinite:
+                        atom_num = -1
+                    # if len(atoms) > 0:
+                    #     if atoms[0] == -1:
+                    #         atom_num = -1
+                    #         atoms = atoms[1:]
                             
                         # else:
                         #     atom_num = len(atoms)
@@ -818,7 +855,7 @@ class ElfAnalyzerToolkit:
             min_covalent_angle=min_covalent_angle,
             min_covalent_bond_ratio=min_covalent_bond_ratio,
         )
-        
+        # breakpoint()
         graph = self._correct_for_high_depth_shells(graph)
         
         # Reduce any related shell basins to a single basin
@@ -855,7 +892,7 @@ class ElfAnalyzerToolkit:
                         },
                     )
                 except:
-                    breakpoint()
+                    # breakpoint()
                     raise Exception(
                         "At least one ELF feature was not assigned. This is a bug. Please report to our github:"
                         "https://github.com/jacksund/simmate/issues"
@@ -947,9 +984,9 @@ class ElfAnalyzerToolkit:
                     atoms_in_basin, atom_types = self.get_atoms_surrounded_by_volume(low_elf_mask, return_type=True)
                     # If the volume surrounds infinite atoms, the first atom
                     # returned will be a -1. We check for this
-                    if len(atoms_in_basin) > 0:
-                        if atoms_in_basin[0] == -1:
-                            atoms_in_basin = atoms_in_basin[1:]
+                    # if len(atoms_in_basin) > 0:
+                    #     if atoms_in_basin[0] == -1:
+                    #         atoms_in_basin = atoms_in_basin[1:]
                     basin_type = "val"
                     basin_subtype = None
                     if len(atoms_in_basin) > 0:
@@ -1002,13 +1039,13 @@ class ElfAnalyzerToolkit:
                     # if child["depth"] < shell_depth:
                     if basin_shell_depth < shell_depth:
                         basin_subtype = "shell"
-                        # if not child["nearest_atom"] in node["atoms"]:
-                        #     # BUG the nearest atom check is to correct for situations like
-                        #     # in some of the M2C electrides where small basins are connected
-                        #     # to an atom domain, but are very far from the atom. There
-                        #     # may be a better way to do this, e.g. distance beyond radius
-                        #     basin_type = "val"
-                        #     basin_subtype = None
+                        if not child["nearest_atom"] in node["atoms"]:
+                            # BUG the nearest atom check is to correct for situations like
+                            # in some of the M2C electrides where small basins are connected
+                            # to an atom domain, but are very far from the atom. There
+                            # may be a better way to do this, e.g. distance beyond radius
+                            basin_type = "val"
+                            basin_subtype = None
                     else:
                         # otherwise, we check if the feature surrounds an atom
                         # Get the basins that belong to this child
@@ -1025,9 +1062,9 @@ class ElfAnalyzerToolkit:
                         )
                         # If the volume surrounds infinite atoms, the first atom
                         # returned will be a -1. We check for this
-                        if len(atoms_in_basin) > 0:
-                            if atoms_in_basin[0] == -1:
-                                atoms_in_basin = atoms_in_basin[1:]
+                        # if len(atoms_in_basin) > 0:
+                        #     if atoms_in_basin[0] == -1:
+                        #         atoms_in_basin = atoms_in_basin[1:]
 
                         if len(atoms_in_basin) > 0:
                             # We have an core/shell region
@@ -1085,6 +1122,7 @@ class ElfAnalyzerToolkit:
                     # skip reducible domains
                     if "split" in child.keys():
                         continue
+                    # breakpoint()
                     networkx.set_node_attributes(
                         graph,
                         {child_idx: {"type": "atom", "subtype": "shell"}},
@@ -1263,6 +1301,7 @@ class ElfAnalyzerToolkit:
         are obviously metallic or covalent
         """
         valence_summary = self.get_valence_summary(graph)
+        # breakpoint()
         # TODO: Many of these features could be symmetric. I should only perform
         # each action for one of these symmetric features and assign the result
         # to all of them.
@@ -1335,6 +1374,7 @@ class ElfAnalyzerToolkit:
             # as such
             if covalent:
                 subtype = "covalent"
+                # breakpoint()
             # We also noted in our atomic assignment which features were part
             # of the atomic branch, but weren't shells or cores. The remaining
             # options were covalent or lone-pairs and we've just assigned the
