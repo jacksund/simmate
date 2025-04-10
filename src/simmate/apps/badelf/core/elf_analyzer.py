@@ -716,7 +716,7 @@ class ElfAnalyzerToolkit:
                             elf_grid.total > parent_split, True, False
                         )
                         atoms = self.get_atoms_surrounded_by_volume(low_elf_mask)
-                        # if len(atoms) == 0:
+                        # if len(atoms) == 3:
                         #     breakpoint()
                     else:
                         # if we have no parent this is our first node and
@@ -1271,15 +1271,10 @@ class ElfAnalyzerToolkit:
             # Default to bare electron
             basin_type = "val"
             subtype = "bare electron"
-            # first check for metallic character as this is easy. Note we make
-            # sure this feature isn't already assigned as covalent to avoid relabeling
-            # features that have already been found
-            if attributes["3d_depth"] < metal_depth_cutoff and previous_subtype != "other":
-                subtype = "metallic"
-                # set subtype
-                networkx.set_node_attributes(graph, {feature_idx: {"subtype": subtype}})
-                continue
-            # next check for covalent character
+            
+            # First check for covalent character. We do this before the metallic
+            # character cutoff because some covalent bonds in molecular solids
+            # have very low depths
             # We create a temporary structure to calculate distances to neighboring
             # atoms. This is just to utilize pymatgen's distance method which
             # takes periodic boundaries into account.
@@ -1313,8 +1308,10 @@ class ElfAnalyzerToolkit:
                 # We want to apply the law of cosines to get angle with feature
                 # at center, then convert to degrees. This won't work if our feature
                 # is exactly along the bond, so we first check for that case.
+                # we check within a small tolerance for rounding errors
                 test_dist = round(atom_dist + neigh_dist, 2)
-                if test_dist == atom_neigh_dist:
+                tolerance = 0.01
+                if (test_dist-tolerance) <= atom_neigh_dist <= (test_dist+tolerance):
                     covalent = True
                     break
                 try:
@@ -1345,6 +1342,16 @@ class ElfAnalyzerToolkit:
             # feature isn't covalent it must be a lone-pair
             if previous_subtype == "other" and not covalent:
                 subtype = "lone-pair"
+            
+            # Now check for metallic character. Note we make
+            # sure this feature isn't already assigned as covalent to avoid relabeling
+            # features that have already been found
+            if attributes["3d_depth"] < metal_depth_cutoff and previous_subtype != "other" and not covalent:
+                # breakpoint()
+                subtype = "metallic"
+                # set subtype
+                networkx.set_node_attributes(graph, {feature_idx: {"subtype": subtype}})
+                continue
 
             # We've now checked for metallic character, covalent bonds and most
             # lone-pairs. We update our subtype accordingly
