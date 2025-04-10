@@ -6,7 +6,7 @@ This module, akin to the `simmate.workflows` module, organizes all database tabl
 
 ## Retrieving Results
 
-[The beginner tutorials](/simmate/getting_started/overview/) offer guidance on running workflows and fetching their results. Here's a brief summary:
+[The beginner tutorials](/getting_started/overview.md) offer guidance on running workflows and fetching their results. Here's a brief summary:
 
 ``` python
 from simmate.workflows.static_energy import mit_workflow

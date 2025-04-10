@@ -395,7 +395,7 @@ Each keyword argument controls an aspect of how ELF features are found:
 
 ### resolution
 
-The interval at which to scan the ELF to generate [BifurcationGraphs](../badelf/finder/elf_analyzer). Larger values will be faster, but may miss bifurcations.
+The interval at which to scan the ELF to generate [BifurcationGraphs](/apps/badelf/finder/elf_analyzer.md). Larger values will be faster, but may miss bifurcations.
 
 ### include_lone_pairs
 

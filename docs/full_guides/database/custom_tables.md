@@ -93,7 +93,7 @@ class MyCustomTable(Structure, Thermodynamics):
 ```
 
 !!! warning
-    Unless you are contributing to Simmate's source code, defining a new table does *NOT* automatically register it to your database. To do this, you must follow along with [our custom workflows guides](/full_guides/workflows/creating_new_workflows/).
+    Unless you are contributing to Simmate's source code, defining a new table does *NOT* automatically register it to your database. To do this, you must follow along with [our custom workflows guides](/full_guides/workflows/creating_basic_workflows.md).
 
 ----------------------------------------------------------------------
 

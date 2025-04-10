@@ -66,7 +66,7 @@ There are several properties & methods available for all `Workflow` subclasses:
 | `parameter_defaults`       |
 
 !!! tip
-    We've dedicated [a entire section of our documentation](../../../parameters) to workflow parameters. Please familiarize yourself with this section for detailed parameter descriptions and examples.
+    We've dedicated [a entire section of our documentation](/parameters.md) to workflow parameters. Please familiarize yourself with this section for detailed parameter descriptions and examples.
 
 
 ------------------------------------------------------------
@@ -172,7 +172,7 @@ To schedule a workflow to run on a remote cluster, ensure your computational res
 !!! warning
     The `run-cloud` command/method only **schedules** the workflow. It won't 
     run until you add computational resources (or `Workers`). To do this, you
-    must read through the ["Computational Resources"](../../../getting_started/add_computational_resources/quick_start/) documentation.
+    must read through the ["Computational Resources"](/getting_started/add_computational_resources/quick_start.md) documentation.
 
 ------------------------------------------------------------
 
@@ -213,7 +213,7 @@ For viewing the results of *many* workflow runs:
     1. This takes the relevent table (e.g. `StaticEnergy`) and filters down to all results matching this workflow name.
 
 !!! tip
-    View the [Database](../../database/basic_use) guides for advanced filtering and data manipulation.
+    View the [Database](/full_guides/database/basic_use.md) guides for advanced filtering and data manipulation.
 
 ### Option 3: The Database
 

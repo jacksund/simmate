@@ -28,6 +28,9 @@ class ChemblAssayResult(DatabaseTable):
           distinct assays in this table.
     """
 
+    class Meta:
+        db_table = "chembl__assay_results"
+
     chembl_document = table_column.ForeignKey(
         ChemblDocument,
         on_delete=table_column.PROTECT,

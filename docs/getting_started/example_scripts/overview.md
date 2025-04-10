@@ -5,7 +5,7 @@ This section contains example Python scripts demonstrating the use of Simmate.
 !!! warning
     These examples do *NOT* cover all the features of Simmate, but they can be useful for beginners. 
     
-    Before referring to these examples, make sure to check the "[Full Guides](/simmate/full_guides/overview/)" and "[Apps](/simmate/apps/overview/)" sections.
+    Before referring to these examples, make sure to check the "[Full Guides](/full_guides/overview.md)" and "[Apps](/apps/overview.md)" sections.
 
 
 | Script Name | Description                                                                                                        |

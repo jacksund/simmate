@@ -2,7 +2,7 @@
 
 This module provides tools for defining and managing your database.
 
-If you're new to this, make sure you've gone through [our database tutorial](/simmate/getting_started/access_the_database/quick_start/).
+If you're new to this, make sure you've gone through [our database tutorial](/getting_started/database/quick_start.md).
 
 The module includes the following submodules:
 

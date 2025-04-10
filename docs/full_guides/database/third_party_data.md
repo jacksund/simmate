@@ -22,7 +22,7 @@ We have also configured the following provider, but are still awaiting permissio
 
 ## Downloading Data
 
-Before proceeding, make sure you've completed [our introductory tutorial](/simmate/getting_started/access_the_database/access_thirdparty_data/) on downloading data from these providers. We use `MatprojStructure` as an example, but the same procedure applies to all other tables in this module.
+Before proceeding, make sure you've completed [our introductory tutorial](/getting_started/database/access_thirdparty_data.md) on downloading data from these providers. We use `MatprojStructure` as an example, but the same procedure applies to all other tables in this module.
 
 WARNING: The initial loading of the data archive can be time-consuming. We suggest running this process overnight. Once completed, we recommend backing up your database by duplicating your ~/simmate/my_env-database.sqlite3 file to avoid repeating this lengthy process.
 

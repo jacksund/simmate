@@ -76,7 +76,7 @@ pytest src/simmate/workflows/test/test_all_workflow_runs.py -s
 
 ## Website CSS
 
-The Hyper theme, as outlined in our main docs [here](/simmate/full_guides/website/overview/#css-and-js-assets), must be built and hosted separately from any Simmate server due to licensing. To build/host the assets, adhere to these steps: 
+The Hyper theme, as outlined in our main docs [here](/full_guides/website/setup_and_config.md#css-and-js-assets), must be built and hosted separately from any Simmate server due to licensing. To build/host the assets, adhere to these steps: 
 
 1. Download the Hyper theme (private access): e.g., `Hyper_v4.6.0.zip`
 2. Unpack the zip file and navigate to this directory:

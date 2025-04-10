@@ -1,7 +1,7 @@
 # Simmate REST API
 
 !!! warning
-    This section is only for experts! If you're aiming to extract data from Simmate, we suggest using our Python client, as outlined in [the database guides](/full_guides/database/overview/). The REST API is mainly for teams that cannot use Simmate's python package but still need to extract data. Be aware that data extraction via our REST API is heavily throttled, making it unsuitable for large data retrievals.
+    This section is only for experts! If you're aiming to extract data from Simmate, we suggest using our Python client, as outlined in [the database guides](/full_guides/database/overview.md). The REST API is mainly for teams that cannot use Simmate's python package but still need to extract data. Be aware that data extraction via our REST API is heavily throttled, making it unsuitable for large data retrievals.
 
 ------------------------------------------------------------
 

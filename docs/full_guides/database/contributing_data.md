@@ -1,7 +1,7 @@
 ## Contributing Your Data with Simmate
 
 !!! warning
-    This module is intended for the Simmate development team or third-party contributors who wish to integrate their own data. Users should use the `load_remote_archive` method to access data. For more information, refer to the [database documentation](/full_guides/database/third_party_data/).
+    This module is intended for the Simmate development team or third-party contributors who wish to integrate their own data. Users should use the `load_remote_archive` method to access data. For more information, refer to the [database documentation](/full_guides/database/third_party_data.md).
 
 This module enables the import of data from various databases into Simmate using third-party codes. This data can then be used to build archives that users can access.
 
@@ -93,7 +93,7 @@ To illustrate how this is done, we will walk through the required steps:
 5. Link the CDN to the Simmate table
 
 !!! tip
-    These steps involve contributing changes to Simmate's code, so we recommend [opening a github issue](https://github.com/jacksund/simmate/issues) before starting too. That way, our team can help you through this process. If you are new to Github and contributing, be sure to read our [tutorial for contributors](/contributing/overview/) too.
+    These steps involve contributing changes to Simmate's code, so we recommend [opening a github issue](https://github.com/jacksund/simmate/issues) before starting too. That way, our team can help you through this process. If you are new to Github and contributing, be sure to read our [tutorial for contributors](/full_guides/contributing/creating_and_submitting_changes.md) too.
 
 ### Step 1: Define a Simmate Table
 
