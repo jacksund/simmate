@@ -1366,14 +1366,35 @@ class ElfAnalyzerToolkit:
         # still be labeled as a bare electron. We correct for this in an
         # additional loop by checking for bare electrons that are siblings with
         # covalent bonds.
+        # BUG-FIX rather than exact siblings, we want all of the features that
+        # are children of the parent domain that fully surrounds the molecule
+        def get_molecule_parent(idx):
+            # get parent that fully surrounds at least one atom
+            molecule_parent_idx = -1
+            parent_idx = graph.parent_index(idx)
+            while molecule_parent_idx == -1:
+                current_parent = graph.nodes[parent_idx]
+                if current_parent["atom_num"] != 0:
+                    molecule_parent_idx = parent_idx
+                else:
+                    parent_idx = graph.parent_index(parent_idx)
+            return molecule_parent_idx
         features_to_relabel = []
         for feature_idx, attributes in valence_summary.items():
             if attributes.get("subtype") == "bare electron":
-                # Check if all siblings are covalent, bare electrons, or lone-pairs. If so,
-                # this is a lone-pair
+                
                 all_cov_lp_be = True
                 at_least_one_cov = False
-                for sibling_idx, sibling in graph.sibling_dicts(feature_idx).items():
+                molecule_parent_idx = get_molecule_parent(feature_idx)
+                # for sibling_idx, sibling in graph.sibling_dicts(feature_idx).items():
+                # Check if all siblings are covalent, bare electrons, or lone-pairs. If so,
+                # this is a lone-pair
+                for sibling_idx, sibling in graph.deep_child_dicts(molecule_parent_idx).items():
+                    # make sure this sibling isn't the child of a different submolecule
+                    direct_parent_idx = get_molecule_parent(sibling_idx)
+                    direct_parent = graph.nodes[direct_parent_idx]
+                    if direct_parent["atom_num"] !=0 and direct_parent_idx != molecule_parent_idx:
+                        continue                    
                     if "split" in sibling.keys():
                         continue
                     # We need to make sure there's at least one covalent bond as well
