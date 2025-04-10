@@ -187,7 +187,7 @@ Simmate's database can manage your perosnal data while also integrating with thi
     ```
 
 ### Beginner-Friendly Toolkit
-Simmate includes a `toolkit` that builds off popular packages in the chemistry community, specifically [`rdkit`](https://www.rdkit.org/) for molecular systems and [`pymatgen`](https://pymatgen.org/) for crystalline systems. The end result is a toolkit that is "batteries-included" and very powerful for rapidly prototyping analyses. Here is an eample script that is straightforward & clean with Simmate's toolkit, but less intuitive & Pythonic for others:
+Simmate includes a `toolkit` that builds off popular packages in the chemistry community, specifically [`rdkit`](https://www.rdkit.org/) for molecules and [`pymatgen`](https://pymatgen.org/) for periodic crystals. The end result is a toolkit that is "batteries-included" and very powerful for rapidly prototyping analyses. Here is an eample script that is straightforward & clean with Simmate's toolkit, but less intuitive & Pythonic for others:
 
 === "simmate-toolkit"
     ``` python

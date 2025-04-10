@@ -4,18 +4,14 @@
 
 1. Download and install [anaconda](https://www.anaconda.com/products/distribution)
 
-2. Set up a conda environment, install Simmate within it, and activate it. *(Note: We recommend using Spyder as your IDE, but it's not mandatory)*
+    !!! warning
+        Anaconda requires a license if you work at a company with >200 employees. If this applies to you, download [miniforge](https://github.com/conda-forge/miniforge) instead, which is free & open-source for everyone. The conda commands below will be the same, even with miniforge.
+
+2. Set up a conda environment, install Simmate within it, and activate it
 ``` shell
 conda create -n my_env -c conda-forge python=3.11 simmate
-conda install -n my_env -c conda-forge spyder  # optional but recommended
 conda activate my_env
 ```
-
-    !!! tip
-        If the environment takes more than 2 minutes to resolve, you might be using an outdated version of conda. Ensure your conda version is updated ([>=23.10.0](https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community)) to utilize the new [libmamba solver](https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community).
-    
-    !!! info
-        Simmate is also available via `pip install simmate`, but because of our many dependencies, we recommend sticking with `conda`.
 
 3. Run the help command to verify the installation
 ``` bash
