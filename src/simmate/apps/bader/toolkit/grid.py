@@ -452,7 +452,7 @@ class Grid(VolumetricData):
 
     def regrid(
         self,
-        desired_resolution: int = 130000,
+        desired_resolution: int = 1200,
         new_shape: np.array = None,
         order: int = 3,
     ):
@@ -497,6 +497,7 @@ class Grid(VolumetricData):
             total, zoom_factor, order=order, mode="grid-wrap", grid_mode=True
         )  # , prefilter=False,)
         # if the diff exists, get the new diff data
+        new_diff = None
         if diff is not None:
             new_diff = zoom(
                 diff, zoom_factor, order=order, mode="grid-wrap", grid_mode=True

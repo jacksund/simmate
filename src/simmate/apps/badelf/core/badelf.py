@@ -922,6 +922,7 @@ class BadElfToolkit:
         for volumes in [atom_volumes, electride_volumes, shared_feature_volumes]:
             for site, volume in volumes.items():
                 volumes[site] = round(volume, 4)
+        results["nelectrons"] = nelectrons
 
         results["atom_min_dists"] = [i for i in atom_min_dists.values()]
         results["atom_charges"] = [i for i in atom_charges.values()]
@@ -1370,7 +1371,7 @@ class SpinBadElfToolkit:
             # single non-polarized calculation
             if not np.allclose(
                 self.partitioning_grid_up.total,
-                self.partitioning_grid.total,
+                self.partitioning_grid_down.total,
                 rtol=0,
                 atol=0.001,
             ):
@@ -1573,8 +1574,16 @@ class SpinBadElfToolkit:
 
         results["electride_dim_cutoffs_up"] = spin_up_results["electride_dim_cutoffs"]
         results["electride_dim_up"] = spin_up_results["electride_dim"]
-        results["min_dists_up"] = spin_up_results["min_dists"]
-        results["elf_maxima_up"] = spin_up_results["elf_maxima"]
+        results["atom_min_dists_up"] = spin_up_results["atom_min_dists"]
+        results["electride_min_dists_up"] = spin_up_results["electride_min_dists"]
+        results["shared_feature_min_dists_up"] = spin_up_results[
+            "shared_feature_min_dists"
+        ]
+        results["atom_elf_maxima_up"] = spin_up_results["atom_elf_maxima"]
+        results["electride_elf_maxima_up"] = spin_up_results["electride_elf_maxima"]
+        results["shared_feature_elf_maxima_up"] = spin_up_results[
+            "shared_feature_elf_maxima"
+        ]
         results["atom_charges_up"] = atom_charges_up
         results["electride_charges_up"] = electride_charges_up
         results["shared_feature_charges_up"] = shared_feature_charges_up
@@ -1588,8 +1597,16 @@ class SpinBadElfToolkit:
             "electride_dim_cutoffs"
         ]
         results["electride_dim_down"] = spin_down_results["electride_dim"]
-        results["min_dists_down"] = spin_down_results["min_dists"]
-        results["elf_maxima_down"] = spin_down_results["elf_maxima"]
+        results["atom_min_dists_down"] = spin_down_results["atom_min_dists"]
+        results["electride_min_dists_down"] = spin_down_results["electride_min_dists"]
+        results["shared_feature_min_dists_down"] = spin_down_results[
+            "shared_feature_min_dists"
+        ]
+        results["atom_elf_maxima_down"] = spin_down_results["atom_elf_maxima"]
+        results["electride_elf_maxima_down"] = spin_down_results["electride_elf_maxima"]
+        results["shared_feature_elf_maxima_down"] = spin_down_results[
+            "shared_feature_elf_maxima"
+        ]
         results["atom_charges_down"] = atom_charges_down
         results["electride_charges_down"] = electride_charges_down
         results["shared_feature_charges_down"] = shared_feature_charges_down
