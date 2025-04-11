@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import json
 import logging
 import math
 import warnings
@@ -130,6 +131,75 @@ class BifurcationGraph(DiGraph):
         for i in self.sibling_indices(n):
             siblings[i] = self.nodes[i]
         return siblings
+
+    def to_dict(self) -> dict:
+        """
+        Converts graph into two dicts for the nodes and edges
+        """
+        graph_dict = {}
+        node_dict = {}
+        for node in self.nodes:
+            node_dict[node] = self.nodes[node]
+        edge_list = [edge for edge in self.edges]
+        graph_dict["nodes"] = node_dict
+        graph_dict["edges"] = edge_list
+        return graph_dict
+
+    @classmethod
+    def from_dict(cls, graph_dict: dict):
+        """
+        Converts from a dict to a bifurcation graph
+        """
+        new_graph = BifurcationGraph()
+
+        for node_idx in graph_dict["nodes"].keys():
+            new_graph.add_node(node_idx)
+
+        networkx.set_node_attributes(new_graph, graph_dict["nodes"])
+
+        for edge0, edge1 in graph_dict["edges"]:
+            new_graph.add_edge(edge0, edge1)
+
+        return new_graph
+
+    def to_json(self):
+        """
+        Converts graph to a jsonable object
+        """
+        graph_dict = self.to_dict()
+        # convert all numpy objects to python
+        for node, attributes in graph_dict["nodes"].items():
+            for key, attribute in attributes.items():
+                if isinstance(attribute, np.integer):
+                    attributes[key] = int(attribute)
+                if isinstance(attribute, np.floating):
+                    attributes[key] = float(attribute)
+                if isinstance(attribute, np.ndarray) or isinstance(attribute, list):
+                    new_attribute = list(attribute)
+                    for i, value in enumerate(new_attribute):
+                        if isinstance(value, np.integer):
+                            new_attribute[i] = int(value)
+                        if isinstance(value, np.floating):
+                            new_attribute[i] = float(value)
+                    attributes[key] = new_attribute
+
+        cleaned_edges = []
+        for edge in graph_dict["edges"]:
+            new_edge = [int(edge[0]), int(edge[1])]
+            cleaned_edges.append(new_edge)
+
+        graph_dict["edges"] = cleaned_edges
+        graph_json = json.dumps(graph_dict)
+        return graph_json
+
+    @classmethod
+    def from_json_string(cls, graph_string: str):
+        """
+        Converts from a json string to a BifurcationGraph
+        """
+        graph_dict = json.loads(graph_string)
+        new_graph = cls.from_dict(graph_dict)
+        return new_graph
 
 
 class ElfAnalyzerToolkit:

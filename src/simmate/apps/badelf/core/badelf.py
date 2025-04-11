@@ -1445,6 +1445,11 @@ class SpinBadElfToolkit:
         Gets the elf radii for all atom-neighbor pairs in the structure.
         If spin is separated, takes an average for each atom.
         """
+        if self.algorithm == "zero-flux":
+            logging.warn(
+                "Elf ionic radii are not calculated when using zero-flux partitioning."
+            )
+            return None
         if self.spin_polarized:
             spin_up_radii = self.badelf_spin_up.all_atom_elf_radii
             spin_down_radii = self.badelf_spin_down.all_atom_elf_radii
@@ -1564,6 +1569,7 @@ class SpinBadElfToolkit:
         atom_volumes_up = spin_up_results["atom_volumes"]
         electride_volumes_up = spin_up_results["electride_volumes"]
         shared_feature_volumes_up = spin_up_results["shared_feature_volumes"]
+        electride_oxidation_states_up = spin_up_results["electride_oxidation_states"]
 
         atom_volumes_down = spin_down_results["atom_volumes"]
         electride_volumes_down = spin_down_results["electride_volumes"]
@@ -1571,7 +1577,10 @@ class SpinBadElfToolkit:
         atom_charges_down = spin_down_results["atom_charges"]
         electride_charges_down = spin_down_results["electride_charges"]
         shared_feature_charges_down = spin_down_results["shared_feature_charges"]
-
+        electride_oxidation_states_down = spin_down_results[
+            "electride_oxidation_states"
+        ]
+        # up
         results["electride_dim_cutoffs_up"] = spin_up_results["electride_dim_cutoffs"]
         results["electride_dim_up"] = spin_up_results["electride_dim"]
         results["atom_min_dists_up"] = spin_up_results["atom_min_dists"]
@@ -1586,6 +1595,7 @@ class SpinBadElfToolkit:
         ]
         results["atom_charges_up"] = atom_charges_up
         results["electride_charges_up"] = electride_charges_up
+        results["electride_oxidation_states_up"] = electride_oxidation_states_up
         results["shared_feature_charges_up"] = shared_feature_charges_up
         results["atom_volumes_up"] = atom_volumes_up
         results["electride_volumes_up"] = electride_volumes_up
@@ -1593,6 +1603,7 @@ class SpinBadElfToolkit:
         results["nelectrons_up"] = nelectrons_up
         results["bifurcation_graph_up"] = spin_up_results["bifurcation_graph"]
 
+        # down
         results["electride_dim_cutoffs_down"] = spin_down_results[
             "electride_dim_cutoffs"
         ]
@@ -1609,6 +1620,7 @@ class SpinBadElfToolkit:
         ]
         results["atom_charges_down"] = atom_charges_down
         results["electride_charges_down"] = electride_charges_down
+        results["electride_oxidation_states_down"] = electride_oxidation_states_down
         results["shared_feature_charges_down"] = shared_feature_charges_down
         results["atom_volumes_down"] = atom_volumes_down
         results["electride_volumes_down"] = electride_volumes_down
@@ -1641,11 +1653,18 @@ class SpinBadElfToolkit:
         # get the charges on each non-atomic site. If the structures are identical
         # we return these as one. Otherwise we return the separate charges.
         if spin_up_structure == spin_down_structure:
-            # get electride charges
+            # get electride charges and oxidation states
             electride_charges = [
                 i + j for i, j in zip(electride_charges_up, electride_charges_down)
             ]
             results["electride_charges"] = electride_charges
+            electride_oxidation_states = [
+                i + j
+                for i, j in zip(
+                    electride_oxidation_states_up, electride_oxidation_states_down
+                )
+            ]
+            results["electride_oxidation_states"] = electride_oxidation_states
             # get other feature charges
             shared_feature_charges = [
                 i + j
@@ -1712,9 +1731,14 @@ class SpinBadElfToolkit:
             struc = results.get(key, None)
             if struc is not None:
                 results[key] = struc.to_json()
-        # TODO: convert labeled structures to strings for saving to database. Add
-        # all potential keys to database table. Make sure all important write
-        # methods are available to workflow. Update docs.
+        for key in [
+            "bifurcation_graph",
+            "bifurcation_graph_up",
+            "bifurcation_graph_down",
+        ]:
+            graph = results.get(key, None)
+            if graph is not None:
+                results[key] = graph.to_json()
 
         return results
 

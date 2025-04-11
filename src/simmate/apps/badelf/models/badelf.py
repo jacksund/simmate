@@ -17,36 +17,28 @@ class BadElf(Structure, Calculation):
     This table contains results from a BadELF analysis.
     """
 
-    oxidation_states = table_column.JSONField(blank=True, null=True)
-    """
-    A list of calculated oxidation states for each site.
-    """
-
     atom_oxidation_states = table_column.JSONField(blank=True, null=True)
     """
     In systems with non-atomic elf features, this provides the oxidation
     states for just the atoms.
     """
 
-    non_atom_charges = table_column.JSONField(blank=True, null=True)
+    electride_oxidation_states = table_column.JSONField(blank=True, null=True)
     """
-    In systems with non-atomic elf features, this provides the total
-    charge on each non-atomic feature. 
-    
-    NOTE: This will only be populated if the spin-up and spin-down 
-    systems have matching positions for all features
+    In systems with non-atomic elf features, this provides the oxidation
+    states for just the electrides.
     """
 
-    non_atom_charges_up = table_column.JSONField(blank=True, null=True)
+    electride_oxidation_states_up = table_column.JSONField(blank=True, null=True)
     """
-    In systems with non-atomic elf features, this provides the total
-    charge on each non-atomic feature in the spin-up system.
+    In systems with non-atomic elf features, this provides the oxidation
+    states for just the electrides in the spin-up system.
     """
 
-    non_atom_charges_down = table_column.JSONField(blank=True, null=True)
+    electride_oxidation_states_down = table_column.JSONField(blank=True, null=True)
     """
-    In systems with non-atomic elf features, this provides the total
-    charge on each non-atomic feature in the spin-up system.
+    In systems with non-atomic elf features, this provides the oxidation
+    states for just the electrides in the spin-down system.
     """
 
     algorithm = table_column.CharField(
@@ -70,7 +62,16 @@ class BadElf(Structure, Calculation):
     similar to BadELF's handling of electrides, but 'voronoi' can also be selected
     """
 
-    charges = table_column.JSONField(blank=True, null=True)
+    shared_feature_separation_method = table_column.CharField(
+        blank=True,
+        null=True,
+        max_length=75,
+    )
+    """
+    The selected algorithm for dividing charge in covalent/metallic bonds.
+    """
+
+    atom_charges = table_column.JSONField(blank=True, null=True)
     """
     A list of total "valence" electron counts for each site.
     
@@ -80,62 +81,151 @@ class BadElf(Structure, Calculation):
     consistent and accurate count of valence electrons
     """
 
-    charges_up = table_column.JSONField(blank=True, null=True)
+    atom_charges_up = table_column.JSONField(blank=True, null=True)
     """
-    A list of total "valence" electron counts for each site in the
+    A list of total "valence" electron counts for each atom in the
     spin-up system
     """
 
-    charges_down = table_column.JSONField(blank=True, null=True)
+    atom_charges_down = table_column.JSONField(blank=True, null=True)
     """
-    A list of total "valence" electron counts for each site in the
+    A list of total "valence" electron counts for each atom in the
     spin-down system
     """
 
-    min_dists = table_column.JSONField(blank=True, null=True)
+    electride_charges = table_column.JSONField(blank=True, null=True)
     """
-    A list of minimum radii distance for bader volumes. i.e. the minimum
-    distance from the origin of the site to the bader surface. This can be used
-    as a minimum radius for the site.
-    In BadELF this is replaced by the distance to the dividing plane for
-    atoms
+    A list of total "valence" electron counts for each electride in the
+    total system
     """
 
-    min_dists_up = table_column.JSONField(blank=True, null=True)
+    electride_charges_up = table_column.JSONField(blank=True, null=True)
     """
-    A list of minimum radii distance for bader volumes. i.e. the minimum
-    distance from the origin of the site to the bader surface for the
-    spin-up system.
-    """
-
-    min_dists_down = table_column.JSONField(blank=True, null=True)
-    """
-    A list of minimum radii distance for bader volumes. i.e. the minimum
-    distance from the origin of the site to the bader surface for the
-    spin-down system.
+    A list of total "valence" electron counts for each electride in the
+    spin-up system
     """
 
-    site_volumes = table_column.JSONField(blank=True, null=True)
+    electride_charges_down = table_column.JSONField(blank=True, null=True)
     """
-    A list of site volumes from the oxidation analysis (i.e. the bader volume)
-    """
-
-    site_volumes_up = table_column.JSONField(blank=True, null=True)
-    """
-    A list of site volumes for the spin-up system
+    A list of total "valence" electron counts for each electride in the
+    spin-down system
     """
 
-    site_volumes_down = table_column.JSONField(blank=True, null=True)
+    shared_feature_charges = table_column.JSONField(blank=True, null=True)
     """
-    A list of site volumes for the spin-down system
+    A list of total "valence" electron counts for each covalent/metallic
+    feature in the total system
     """
 
-    element_list = table_column.JSONField(blank=True, null=True)
+    shared_feature_charges_up = table_column.JSONField(blank=True, null=True)
     """
-    A list of all element species in order that appear in the structure.
-    
-    This information is stored in the 'structure' column as well, but it is 
-    stored here as an extra for convenience.
+    A list of total "valence" electron counts for each covalent/metallic
+    feature in the spin-up system
+    """
+
+    shared_feature_charges_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of total "valence" electron counts for each covalent/metallic
+    feature in thespin-down system
+    """
+
+    atom_min_dists = table_column.JSONField(blank=True, null=True)
+    """
+    A list of minimum distances from the origin of an atom to the
+    bader/plane surface.
+    """
+
+    atom_min_dists_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of minimum distances from the origin of an atom to the
+    bader/plane surface for the spin-up system.
+    """
+
+    atom_min_dists_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of minimum distances from the origin of an atom to the
+    bader/plane surface for the spin-down system.
+    """
+
+    electride_min_dists = table_column.JSONField(blank=True, null=True)
+    """
+    A list of minimum distances from the origin of an electride to the
+    bader/plane surface.
+    """
+
+    electride_min_dists_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of minimum distances from the origin of an electride to the
+    bader/plane surface for the spin-up system.
+    """
+
+    electride_min_dists_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of minimum distances from the origin of an electride to the
+    bader/plane surface for the spin-down system.
+    """
+
+    shared_feature_min_dists = table_column.JSONField(blank=True, null=True)
+    """
+    A list of minimum distances from the origin of an shared_feature to the
+    bader/plane surface.
+    """
+
+    shared_feature_min_dists_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of minimum distances from the origin of an shared_feature to the
+    bader/plane surface for the spin-up system.
+    """
+
+    shared_feature_min_dists_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of minimum distances from the origin of an shared_feature to the
+    bader/plane surface for the spin-down system.
+    """
+
+    atom_volumes = table_column.JSONField(blank=True, null=True)
+    """
+    A list of atom volumes from the oxidation analysis
+    """
+
+    atom_volumes_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of atom volumes for the spin-up system
+    """
+
+    atom_volumes_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of atom volumes for the spin-down system
+    """
+
+    electride_volumes = table_column.JSONField(blank=True, null=True)
+    """
+    A list of electride volumes from the oxidation analysis
+    """
+
+    electride_volumes_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of electride volumes for the spin-up system
+    """
+
+    electride_volumes_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of electride volumes for the spin-down system
+    """
+
+    shared_feature_volumes = table_column.JSONField(blank=True, null=True)
+    """
+    A list of shared_feature volumes from the oxidation analysis
+    """
+
+    shared_feature_volumes_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of shared_feature volumes for the spin-up system
+    """
+
+    shared_feature_volumes_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of shared_feature volumes for the spin-down system
     """
 
     vacuum_charge = table_column.FloatField(blank=True, null=True)
@@ -261,39 +351,111 @@ class BadElf(Structure, Calculation):
     in the spin-down system
     """
 
-    coord_envs = table_column.JSONField(blank=True, null=True)
+    atom_coord_envs = table_column.JSONField(blank=True, null=True)
     """
-    A list of coordination environments for the atoms and electrides in the
+    A list of coordination environments for the atoms in the
     labeled structure
     """
 
-    coord_envs_up = table_column.JSONField(blank=True, null=True)
+    atom_coord_envs_up = table_column.JSONField(blank=True, null=True)
     """
-    A list of coordination environments for the atoms and electrides in the
+    A list of coordination environments for the atoms in the
     spin-up labeled structure
     """
 
-    coord_envs_down = table_column.JSONField(blank=True, null=True)
+    atom_coord_envs_down = table_column.JSONField(blank=True, null=True)
     """
-    A list of coordination environments for the atoms and electrides in the
+    A list of coordination environments for the atoms in the
     spin-down labeled structure
     """
 
-    elf_maxima = table_column.JSONField(blank=True, null=True)
+    electride_coord_envs = table_column.JSONField(blank=True, null=True)
     """
-    A list of ELF maxima found at the location of each atom/electride site
+    A list of coordination environments for the electrides in the
+    labeled structure
+    """
+
+    electride_coord_envs_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of coordination environments for the electrides in the
+    spin-up labeled structure
+    """
+
+    electride_coord_envs_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of coordination environments for the electrides in the
+    spin-down labeled structure
+    """
+
+    shared_feature_coord_envs = table_column.JSONField(blank=True, null=True)
+    """
+    A list of coordination environments for the shared_features in the
+    labeled structure
+    """
+
+    shared_feature_coord_envs_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of coordination environments for the shared_features in the
+    spin-up labeled structure
+    """
+
+    shared_feature_coord_envs_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of coordination environments for the shared_features in the
+    spin-down labeled structure
+    """
+
+    atom_elf_maxima = table_column.JSONField(blank=True, null=True)
+    """
+    A list of ELF maxima found at the location of each atom
     in the labeled structure
     """
 
-    elf_maxima_up = table_column.JSONField(blank=True, null=True)
+    atom_elf_maxima_up = table_column.JSONField(blank=True, null=True)
     """
-    A list of ELF maxima found at the location of each atom/electride site
+    A list of ELF maxima found at the location of each atom
     in the spin-up labeled structure
     """
 
-    elf_maxima_down = table_column.JSONField(blank=True, null=True)
+    atom_elf_maxima_down = table_column.JSONField(blank=True, null=True)
     """
-    A list of ELF maxima found at the location of each atom/electride site
+    A list of ELF maxima found at the location of each atom
+    in the spin-down labeled structure
+    """
+
+    electride_elf_maxima = table_column.JSONField(blank=True, null=True)
+    """
+    A list of ELF maxima found at the location of each electride
+    in the labeled structure
+    """
+
+    electride_elf_maxima_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of ELF maxima found at the location of each electride
+    in the spin-up labeled structure
+    """
+
+    electride_elf_maxima_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of ELF maxima found at the location of each electride
+    in the spin-down labeled structure
+    """
+
+    shared_feature_elf_maxima = table_column.JSONField(blank=True, null=True)
+    """
+    A list of ELF maxima found at the location of each shared_feature
+    in the labeled structure
+    """
+
+    shared_feature_elf_maxima_up = table_column.JSONField(blank=True, null=True)
+    """
+    A list of ELF maxima found at the location of each shared_feature
+    in the spin-up labeled structure
+    """
+
+    shared_feature_elf_maxima_down = table_column.JSONField(blank=True, null=True)
+    """
+    A list of ELF maxima found at the location of each shared_feature
     in the spin-down labeled structure
     """
 
@@ -349,6 +511,31 @@ class BadElf(Structure, Calculation):
     spin-down system.
     """
 
+    shared_feature_types = table_column.JSONField(blank=True, null=True)
+    """
+    The type of each non-atomic and non-electridic feature in the ELF.
+    Options are:
+        Lp: lone-pair, Z: covalent bond, M: metal bond, Le: bare electron
+    """
+
+    bifurcation_graph = table_column.JSONField(blank=True, null=True)
+    """
+    The bifurcation graph representing where features appear and connect
+    in the ELF
+    """
+
+    bifurcation_graph_up = table_column.JSONField(blank=True, null=True)
+    """
+    The bifurcation graph representing where features appear and connect
+    in the spin-up ELF
+    """
+
+    bifurcation_graph_down = table_column.JSONField(blank=True, null=True)
+    """
+    The bifurcation graph representing where features appear and connect
+    in the spin-down ELF
+    """
+
     def write_output_summary(self, directory: Path):
         super().write_output_summary(directory)
 
@@ -368,17 +555,18 @@ class BadElf(Structure, Calculation):
         # model, we look need to use "ionic_radii.model".
         radius_model = self.ionic_radii.model
         # Let's iterate through the ionic radii and save these to the database.
-        for number, row in radii.iterrows():
-            site_index = row["site_index"]
-            neigh_index = row["neigh_index"]
-            radius = row["radius"]
-            new_row = radius_model(
-                site_index=site_index,
-                neigh_index=neigh_index,
-                radius=radius,
-                bad_elf=self,  # links to this badelf calc
-            )
-            new_row.save()
+        if radii is not None:
+            for number, row in radii.iterrows():
+                site_index = row["site_index"]
+                neigh_index = row["neigh_index"]
+                radius = row["radius"]
+                new_row = radius_model(
+                    site_index=site_index,
+                    neigh_index=neigh_index,
+                    radius=radius,
+                    bad_elf=self,  # links to this badelf calc
+                )
+                new_row.save()
 
 
 class ElfIonicRadii(DatabaseTable):
