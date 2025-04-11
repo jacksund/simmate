@@ -67,7 +67,7 @@ find_electrides: true # Whether or not to use ElfAnalyzerToolkit to automaticall
 labeled_structure_up: none # If find_electrides is false, a labeled structure with dummy atoms (see ElfAnalyzerToolkit docs)
 labeled_structure_down: none # Same as above, but for spin down system
 elf_analyzer_kwargs: # Settings for the ElfAnalyzerToolkit. See ElfAnalyzerToolkit docs for more info
-    resolution: 0.02,
+    resolution: 0.01,
     include_lone_pairs: false,
     include_shared_features: true,
     metal_depth_cutoff: 0.1,
@@ -79,10 +79,14 @@ elf_analyzer_kwargs: # Settings for the ElfAnalyzerToolkit. See ElfAnalyzerToolk
     electride_charge_min: 0.5,
     electride_volume_min: 10,
     electride_radius_min: 0.3,
+    radius_refine_method: linear,
+    write_results: true,
 algorithm: badelf # The algorithm for separating atoms and electride sites
 separate_spin: true # Whether to treat spin-up and spin-down systems separately
 shared_feature_algorithm: zero-flux # The algorithm for separating covalent/metallic features
+shared_feature_separation_method: pauling # The method used to assigne covalent/metallic charge to atoms
 ignore_low_pseudopotentials: false # Forces algorithm to ignore errors related to PPs with few electrons
+downscale_resolution: 1200 # The resolution in voxels/A^3 to downscale grids to in ElfAnalysisToolkit
 write_electride_files: false # Writes the bare electron volume ELF and charge
 write_ion_radii: true # Writes the ionic radius calculated from the ELF for each atom
 write_labeled_structure: true # Writes a cif file with dummy atoms for each non-atomic ELF feature
@@ -139,32 +143,37 @@ If you are only interested in a small number of BadELF calculations, it may be m
 
 ## Covalent and Metallic Systems
 
-Covalent and metallic features in the ELF conflict with the original BadELF algorithm (see [Background](../background)). There are two main ways to handle these features:
+Covalent and metallic features in the ELF conflict with the original BadELF algorithm (see [Background](../background)). The current version of BadELF offers several ways to handle these features:
 
 ### (1) Split Them with Planes
 
-Similar to placing planes at minima in the ELF in ionic systems, one can place planes at maxima in covalent/metallic systems. This results in the features being divided and their charge assigned to nearby atoms. To handle covalent/metallic bonds this way use the follow `shared_feature_algorithm`:
+Similar to placing planes at minima in the ELF in ionic systems, one can place planes at maxima in covalent/metallic systems. This results in the features being divided and their charge assigned to nearby atoms. To handle covalent/metallic bonds this way use the follow `shared_feature_separation_method`:
 
 ``` yaml
-shared_feature_algorithm: none
+shared_feature_separation_method: plane
 ```
 
 !!! warning
-    Metallic features are not always along bonds. If this is the case, this method may not split them effectively.
+    Metallic features are not always along bonds. If this is the case, this method may not split them effectively. Additionally, no information will be returned about each shared feature.
 
 ### (2) Treat them Separately
 
-Alternatively, one can treat covalent and metallic bonds as their own entities, similar to the treatment of bare electrons in electrides. In these cases, one needs to decide whether to separate these features with a zero-flux surface or a voronoi like plane. This can be set with the `shared_feature_algorithm` parameter:
+Alternatively, one can treat covalent and metallic bonds as their own entities, similar to the treatment of bare electrons in electrides. In these cases, one needs to decide how to separate these features from the nearby atoms. The options available are with a zero-flux surface or a voronoi like plane and can be set with the `shared_feature_algorithm` parameter. Additionally, one must decide how to assign the charge from these 'shared features' to the nearby atoms. We currently offer two methods for doing this: splitting them equally, and splitting by pauling electronegativity. Splitting equally divides the features equally to each neighboring atom. Splitting by pauling EN gives more charge to more electronegative atoms.
 
-``` yaml
-shared_feature_algorithm: zero-flux # or voronoi
-```
+=== "equal split"
+    ``` yaml
+    shared_feature_algorithm: zero-flux # or voronoi
+    shared_feature_separation_method: equal
+    ```
+    
+=== "pauling electronegativity"
+    ``` yaml
+    shared_feature_algorithm: zero-flux # or voronoi
+    shared_feature_separation_method: pauling
+    ```
 
 !!! note
-    We typically recommend this method as it provides more information about the overall system. However, there is currently no method assigning the charge on these features to nearby atoms, resulting in unreasonable oxidation states in the results. We plan to implement methods for assigning this charge in the future.
-
-!!! note
-    To assign charge not associated with covalent/metallic bonds, atoms will by default still be separated using planes placed at maxima along the bond. This hasn't been tested, and it may be preferable to use the more traditional zero-flux partitioning. To do this, set `algorithm: zero-flux`.
+    In systems where atoms are always surrounded by covalent/metallic bonds, there will be very little difference in results between using planes ore zero-flux surfaces to separate atoms from one another. However, the zero-flux surface separation is much faster. If you are confident your system is heavily metallic or covalent, we suggest setting `algorithm: zero-flux`. In systems where this is not the case, this will just result in atom oxidation states tending more towards integer values.
 --------------------------------------------------------------------------------
 
 ## Accounting for Spin

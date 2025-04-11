@@ -2217,7 +2217,12 @@ class ElfAnalyzerToolkit:
         else:
             graph = self.get_bifurcation_graphs(**kwargs)
             # bader = self.bader_up
-            plot = self.get_bifurcation_plot(graph, write_plot=write_results)
+            plot_name = "bifurcation_plot"
+            if "plot_name" in kwargs.keys():
+                plot_name = kwargs["plot_name"]
+            plot = self.get_bifurcation_plot(
+                graph, write_plot=write_results, plot_name=plot_name
+            )
             structure = self._get_labeled_structure(graph, **kwargs)
             if write_results:
                 # write structures

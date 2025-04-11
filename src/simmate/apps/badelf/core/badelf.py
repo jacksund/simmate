@@ -62,6 +62,9 @@ class BadElfToolkit:
             Whether to ignore warnings about missing atomic basins
             due to using pseudopotentials with a small amount of
             valence electrons.
+        downscale_resolution (int):
+            The resolution in voxels/Angstrom^3 that the grids should be
+            downscaled to in the ElfAnalysisToolkit
         elf_analyzer_kwargs (dict):
             A dictionary of keyword arguments to pass to the ElfAnalyzerToolkit
             class.
@@ -82,6 +85,7 @@ class BadElfToolkit:
         find_electrides: bool = True,
         labeled_structure: Structure = None,
         ignore_low_pseudopotentials: bool = False,
+        downscale_resolution: int = 1200,
         elf_analyzer_kwargs: dict = dict(
             resolution=0.01,
             include_lone_pairs=False,
@@ -96,6 +100,7 @@ class BadElfToolkit:
             electride_volume_min=10,
             electride_radius_min=0.3,
             radius_refine_method="linear",
+            write_results=True,
         ),
     ):
         if partitioning_grid.structure != charge_grid.structure:
@@ -142,6 +147,7 @@ class BadElfToolkit:
             self.shared_feature_algorithm = "zero-flux"
         self.shared_feature_separation_method = shared_feature_separation_method
         self.ignore_low_pseudopotentials = ignore_low_pseudopotentials
+        self.downscale_resolution = downscale_resolution
         self.elf_analyzer_kwargs = elf_analyzer_kwargs
 
     @cached_property
@@ -154,6 +160,7 @@ class BadElfToolkit:
             charge_grid=self.charge_grid.copy(),
             directory=self.directory,
             ignore_low_pseudopotentials=self.ignore_low_pseudopotentials,
+            downscale_resolution=self.downscale_resolution,
         )
         return elf_analyzer
 
@@ -1062,6 +1069,7 @@ class BadElfToolkit:
         ] = "pauling",
         shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         ignore_low_pseudopotentials: bool = False,
+        downscale_resolution: int = 1200,
         elf_analyzer_kwargs: dict = dict(
             resolution=0.01,
             include_lone_pairs=False,
@@ -1075,6 +1083,7 @@ class BadElfToolkit:
             electride_volume_min=10,
             electride_radius_min=0.3,
             radius_refine_method="linear",
+            write_results=True,
         ),
     ):
         """
@@ -1107,6 +1116,9 @@ class BadElfToolkit:
                 Whether to ignore warnings about missing atomic basins
                 due to using pseudopotentials with a small amount of
                 valence electrons.
+            downscale_resolution (int):
+                The resolution in voxels/Angstrom^3 that the grids should be
+                downscaled to in the ElfAnalysisToolkit
             elf_analyzer_kwargs (dict):
                 A dictionary of keyword arguments to pass to the ElfAnalyzerToolkit
                 class.
@@ -1128,6 +1140,7 @@ class BadElfToolkit:
             shared_feature_algorithm=shared_feature_algorithm,
             ignore_low_pseudopotentials=ignore_low_pseudopotentials,
             elf_analyzer_kwargs=elf_analyzer_kwargs,
+            downscale_resolution=downscale_resolution,
         )
 
     def write_species_file(self, file_type: str = "ELFCAR", species: str = "E"):
@@ -1301,6 +1314,7 @@ class SpinBadElfToolkit:
         ] = "pauling",
         shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         ignore_low_pseudopotentials: bool = False,
+        downscale_resolution: int = 1200,
         elf_analyzer_kwargs: dict = dict(
             resolution=0.01,
             include_lone_pairs=False,
@@ -1314,6 +1328,7 @@ class SpinBadElfToolkit:
             electride_volume_min=10,
             electride_radius_min=0.3,
             radius_refine_method="linear",
+            write_results=True,
         ),
     ):
         if partitioning_grid.structure != charge_grid.structure:
@@ -1378,45 +1393,50 @@ class SpinBadElfToolkit:
                 self.spin_polarized = True
         # Now check if we should run a spin polarized badelf calc or not
         if self.spin_polarized:
+            elf_analyzer_kwargs["plot_name"] = "bifurcation_plot_up"
             self.badelf_spin_up = BadElfToolkit(
-                partitioning_grid_up,
-                charge_grid_up,
-                directory,
-                threads,
-                algorithm,
-                shared_feature_separation_method,
-                shared_feature_algorithm,
-                find_electrides,
-                labeled_structure_up,
-                ignore_low_pseudopotentials,
-                elf_analyzer_kwargs,
+                partitioning_grid=partitioning_grid_up,
+                charge_grid=charge_grid_up,
+                directory=directory,
+                threads=threads,
+                algorithm=algorithm,
+                shared_feature_separation_method=shared_feature_separation_method,
+                shared_feature_algorithm=shared_feature_algorithm,
+                find_electrides=find_electrides,
+                labeled_structure=labeled_structure_up,
+                ignore_low_pseudopotentials=ignore_low_pseudopotentials,
+                downscale_resolution=downscale_resolution,
+                elf_analyzer_kwargs=elf_analyzer_kwargs,
             )
+            elf_analyzer_kwargs["plot_name"] = "bifurcation_plot_down"
             self.badelf_spin_down = BadElfToolkit(
-                partitioning_grid_down,
-                charge_grid_down,
-                directory,
-                threads,
-                algorithm,
-                shared_feature_separation_method,
-                shared_feature_algorithm,
-                find_electrides,
-                labeled_structure_down,
-                ignore_low_pseudopotentials,
-                elf_analyzer_kwargs,
+                partitioning_grid=partitioning_grid_down,
+                charge_grid=charge_grid_down,
+                directory=directory,
+                threads=threads,
+                algorithm=algorithm,
+                shared_feature_separation_method=shared_feature_separation_method,
+                shared_feature_algorithm=shared_feature_algorithm,
+                find_electrides=find_electrides,
+                labeled_structure=labeled_structure_up,
+                ignore_low_pseudopotentials=ignore_low_pseudopotentials,
+                downscale_resolution=downscale_resolution,
+                elf_analyzer_kwargs=elf_analyzer_kwargs,
             )
         else:
             self.badelf_spin_up = BadElfToolkit(
-                partitioning_grid,
-                charge_grid,
-                directory,
-                threads,
-                algorithm,
-                shared_feature_separation_method,
-                shared_feature_algorithm,
-                find_electrides,
-                labeled_structure_up,
-                ignore_low_pseudopotentials,
-                elf_analyzer_kwargs,
+                partitioning_grid=partitioning_grid,
+                charge_grid=charge_grid,
+                directory=directory,
+                threads=threads,
+                algorithm=algorithm,
+                shared_feature_separation_method=shared_feature_separation_method,
+                shared_feature_algorithm=shared_feature_algorithm,
+                find_electrides=find_electrides,
+                labeled_structure=labeled_structure_up,
+                ignore_low_pseudopotentials=ignore_low_pseudopotentials,
+                downscale_resolution=downscale_resolution,
+                elf_analyzer_kwargs=elf_analyzer_kwargs,
             )
             self.badelf_spin_down = None
 
@@ -1759,6 +1779,7 @@ class SpinBadElfToolkit:
         ] = "pauling",
         shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
         ignore_low_pseudopotentials: bool = False,
+        downscale_resolution: int = 1200,
         elf_analyzer_kwargs: dict = dict(
             resolution=0.01,
             include_lone_pairs=False,
@@ -1772,6 +1793,7 @@ class SpinBadElfToolkit:
             electride_volume_min=10,
             electride_radius_min=0.3,
             radius_refine_method="linear",
+            write_results=True,
         ),
     ):
         """
@@ -1814,6 +1836,9 @@ class SpinBadElfToolkit:
                 Whether to ignore warnings about missing atomic basins
                 due to using pseudopotentials with a small amount of
                 valence electrons.
+            downscale_resolution (int):
+                The resolution in voxels/Angstrom^3 that the grids should be
+                downscaled to in the ElfAnalysisToolkit
             elf_analyzer_kwargs (dict):
                 A dictionary of keyword arguments to pass to the ElfAnalyzerToolkit
                 class.
@@ -1837,6 +1862,7 @@ class SpinBadElfToolkit:
             shared_feature_algorithm=shared_feature_algorithm,
             ignore_low_pseudopotentials=ignore_low_pseudopotentials,
             elf_analyzer_kwargs=elf_analyzer_kwargs,
+            downscale_resolution=downscale_resolution,
         )
 
     def write_results_csv(self):
