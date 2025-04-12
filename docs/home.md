@@ -55,9 +55,9 @@ This website is your go-to resource for all our tutorials and guides. Before div
 
 Simmate is a full-stack framework for chemistry research. It helps you calculate properties and explore third-party databases for both for molecular and crystalline systems. For experts, it also provides a toolbox to build out your own chemistry applications.
 
-The computational side of chemistry research can be intimidating because there are so many programs to choose from, and it's challenging to select and combine them for your specific project. Simmate aims to bridge this gap, acting as a link between the many diverse programs, databases, and utilities out there. Third-party datasets and tools are ingetrated into Simmate as "apps", where there is a growing list of [supported software and databases](/apps/overview.md).
+The computational side of chemistry research can be intimidating because there are so many programs to choose from, and it's challenging to select and combine them for your specific project. Simmate aims to be a link between the many diverse programs, databases, and utilities out there, and in turn, simplify the setup and execution of chemistry projects. Third-party datasets and tools are ingetrated into Simmate as "apps", where there is a growing list of [supported software and databases](/apps/overview.md). 
 
-We also provide an extremely powerful toolbox and API for experts. Our top priorities are usability and readability, so we distribute Simmate as an "all-in-one" package. This includes a core chemical toolkit, workflow management, database ORM, and a website interface.
+You can mix & match these apps to meet your research needs and to even build out your own custom applications. Simmate includes a core chemical toolkit, workflow management system, database ORM, and web component library -- giving you a framework with essential frontend and backend tools. Our goal is for Simmate to be "batteries-included", so all of these apps & tools are available within the base installation. To learn more about Simmate's scope & design, as well as how it compares to other popular chemistry frameworks, visit [our comparisons page](https://github.com/jacksund/simmate/tree/main/benchmarks).
 
 ## A Sneak-Peak of Features
 
