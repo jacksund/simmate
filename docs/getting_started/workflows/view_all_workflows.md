@@ -1,10 +1,13 @@
 # Exploring Available Workflows
 
+!!! warning
+    Keep in mind that only the *default* Simmate workflows will show in this section! To explore others, you'll need to through the [Apps](/apps/overview.md) tab of our documentation.
+
 ----------------------------------------------------------------------
 
 ## Accessing All Workflows
 
-Simmate can be used to compute a material's energy, structure, or properties. For each of these needs, we have preconfigured workflows. You can access all of these via the `simmate workflows` command.
+Simmate can be used to compute a material's energy, structure, or properties. For each of these needs, we have preconfigured workflows. You can access these via the `simmate workflows` command.
 
 To view all available workflows, run:
 

@@ -142,13 +142,15 @@ nav:
             - Overview: getting_started/example_scripts/overview.md
             - Example-001: getting_started/example_scripts/example-001.md
             - Example-002: getting_started/example_scripts/example-002.md
-
-    - Parameters: parameters.md
     
     - Full Guides:
         
         - Overview: full_guides/overview.md
         
+        - Apps:
+            - Basic Use: full_guides/apps/basic_use.md
+            - Creating custom apps: full_guides/apps/creating_custom_apps.md
+
         - Website:
             - Setup & Config: full_guides/website/setup_and_config.md
             - REST API: full_guides/website/rest_api.md
@@ -205,17 +207,17 @@ nav:
                 #     - Common Analyses: full_guides/toolkit/crystal_structures/single_structure/analyses.md
                 # - Many Structures: 
                 #    - Featurizers: full_guides/toolkit/crystal_structures/many_structures/featurizers.md
+        - Extras:
+            - Configuration: full_guides/extras/configuration.md
+            - Contributing:
+                - First time setup: full_guides/contributing/first_time_setup.md
+                # - Testing: full_guides/extras/testing.md
+                - Creating & submitting changes: full_guides/contributing/creating_and_submitting_changes.md
+                - Extra notes & tips: full_guides/contributing/extra.md
+                - Maintainer notes: full_guides/contributing/maintainer_notes.md
+            - Utilities: full_guides/extras/utilities.md
 
-        - Contributing:
-            - First time setup: full_guides/contributing/first_time_setup.md
-            - Creating & submitting changes: full_guides/contributing/creating_and_submitting_changes.md
-            - Extra notes & tips: full_guides/contributing/extra.md
-            - Maintainer notes: full_guides/contributing/maintainer_notes.md
-
-        # - Extras:
-            # - Utilities: full_guides/extras/utilities.md
-            # - Configuration: full_guides/extras/configuration.md
-            # - Testing: full_guides/extras/testing.md  # Move to contributing...?
+    - Parameters: parameters.md
 
     - Apps: 
         - Overview: apps/overview.md
@@ -235,7 +237,7 @@ nav:
         - COD: apps/cod.md
         - eMolecules: apps/emolecules.md
         - Enamine: apps/enamine.md
-        - EPPO Globabl Database: apps/eppo_gd.md
+        - EPPO Global Database: apps/eppo_gd.md
         - Evolutionary Searches: apps/evolution.md
         - JARVIS: apps/jarvis.md
         - Materials Project: apps/materials_project.md

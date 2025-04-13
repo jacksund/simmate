@@ -5,7 +5,7 @@
 1. Download and install [anaconda](https://www.anaconda.com/products/distribution)
 
     !!! warning
-        Anaconda requires a license if you work at a company with >200 employees. If this applies to you, download [miniforge](https://github.com/conda-forge/miniforge) instead, which is free & open-source for everyone. The conda commands below will be the same, even with miniforge.
+        Anaconda requires a license if you work at a company with >200 employees (academic instituitions exlcuded). If this applies to you, download [miniforge](https://github.com/conda-forge/miniforge) instead, which is free & open-source for everyone. The conda commands below will be the same.
 
 2. Set up a conda environment, install Simmate within it, and activate it
 ``` shell

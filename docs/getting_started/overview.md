@@ -9,7 +9,7 @@ We recommend creating a [GitHub account](https://github.com/join) before startin
 
 *Python Experts:* Tutorials 1-4 will take under 1 hour total, while tutorials 5-8 will take 2-3 hours total
 
-*Beginners:* If you're new to coding, we suggest you dedicate 1-2 hrs per tutorial in order to fully grasp the concepts introduced in each. Please note that tutorials 5-8 cover advanced topics and are entirely optional.
+*Beginners:* If you're new to coding, we suggest you dedicate 1-2 hrs per tutorial in order to fully understand the concepts introduced in each. Please note that tutorials 5-8 cover advanced topics and are entirely optional.
 
 ## Other software used
 
