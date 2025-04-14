@@ -262,7 +262,7 @@ class ElfAnalyzerToolkit:
         Gets the coordination environment for the atoms in the system
         using CrystalNN
         """
-        cnn = CrystalNN()
+        cnn = CrystalNN(distance_cutoffs=None)
         neighbors = cnn.get_all_nn_info(self.structure)
         return neighbors
 
@@ -298,7 +298,7 @@ class ElfAnalyzerToolkit:
             cleaned_structure.replace_species({"E": "He"})
         # for each index, we append a dummy atom ("He" because its relatively small)
         # then get the nearest neighbors
-        cnn = CrystalNN()
+        cnn = CrystalNN(distance_cutoffs=None)
         all_neighbors = []
         for idx in shared_feature_indices:
             neigh_indices = []
@@ -405,16 +405,6 @@ class ElfAnalyzerToolkit:
         be caught by this.
         """
         atom_values = []
-        # for atom_idx, atom_sphere_coords in enumerate(self.site_sphere_voxel_coords):
-        #     atom_sphere_in_feature = np.where(
-        #         volume_mask[
-        #             atom_sphere_coords[:, 0],
-        #             atom_sphere_coords[:, 1],
-        #             atom_sphere_coords[:, 2],
-        #         ]
-        #     )[0]
-        #     if len(atom_sphere_in_feature) > 0:
-        #         atom_values.append(atom_idx)
         for atom_idx, atom_coords in enumerate(self.site_voxel_coords):
             site_value = volume_mask[atom_coords[0], atom_coords[1], atom_coords[2]]
             if site_value:
@@ -500,14 +490,9 @@ class ElfAnalyzerToolkit:
                 types.append(0)
             else:
                 types.append(1)
-        # if not inf_feature:
         if return_type:
             return surrounded_sites, types
         return surrounded_sites
-        # else:
-        #     if return_type:
-        #         return np.insert(surrounded_sites, 0, -1), types
-        #     return np.insert(surrounded_sites, 0, -1)
 
     def check_if_infinite_feature(self, mask: NDArray) -> bool:
         """
@@ -609,20 +594,6 @@ class ElfAnalyzerToolkit:
         # keep track of the total number of labels we've had throughout the
         # process. We use this to keep track of previous nodes
         total_features = 1
-        # We want to get a guess for where bifurcations are going to happen.
-        # According to Lepetit et. al. (http://dx.doi.org/10.1016/j.ccr.2017.04.009)
-        # these occur at critical points where the sum of non-zero signs of the
-        # hessian matrix eigenvalues is -1. We also want the maxima which have
-        # a sign sum of -3.
-        critical_coords, elf_values, sign_sum = elf_grid.get_critical_points(elf_data)
-        # find where the sign_sum is -1
-        # bif_indices = np.where((sign_sum==-1) | (sign_sum==-3))[0]
-        # bif_elf_values = np.round(elf_values[bif_indices], resolution)
-        # unique_elf_values = np.unique(bif_elf_values)
-        # # unique_elf_values = np.insert(unique_elf_values, 0, 0) + (10**-resolution)
-        # unique_elf_values = unique_elf_values + (10**-resolution)
-        important_elf_values = []
-        resolution = 0.01
         for i in range(round(1 / resolution)):
             # for cutoff in unique_elf_values:
             cutoff = resolution * (i + 1)
@@ -652,6 +623,7 @@ class ElfAnalyzerToolkit:
             new_len = len(unique_new_labels)
             featured_grid -= new_len
             unique_new_labels -= new_len
+
             # Prior to decreasing our values, 0 referred to areas with no feature.
             # We don't want to consider these regions so we remove them from
             # our unique lists
@@ -678,7 +650,6 @@ class ElfAnalyzerToolkit:
                 if -new_len in features_list:
                     features_list = features_list[1:]
                 if len(features_list) == 0:
-                    important_elf_values.append(cutoff)
                     # This feature was irreducible and just disappeared.
                     # We want to assign the feature to be atomic or valent and
                     # then store information that might be relavent to the type
@@ -699,7 +670,6 @@ class ElfAnalyzerToolkit:
                     # Now we get the basins that belong to this feature.
                     # NOTE: there may be more than one if the depth of the basin is
                     # smaller than the resolution
-                    # basins = np.unique(basin_labeled_voxels[mask])
                     basins = graph.nodes[feature]["basins"]
                     # Using this, we can find the average frac coords of the attractors
                     # in this basin
@@ -737,8 +707,6 @@ class ElfAnalyzerToolkit:
                     nearest_atom = bader.bader_atoms[basins][
                         np.where(distances == distance)[0][0]
                     ]
-                    # if nearest_atom == 0:
-                    #     breakpoint()
 
                     # Now we update this node with the information we gathered
                     networkx.set_node_attributes(
@@ -793,13 +761,12 @@ class ElfAnalyzerToolkit:
                             featured_grid == features_list[0], feature, featured_grid
                         )
                 elif len(features_list) > 1:
-                    important_elf_values.append(cutoff)
                     # This feature has split and we want to add an attribute
                     # labeling it with the value it split at. We also want to
                     # record how many features it split into, the basins that
                     # are in this feature, and if there are any atoms contained
                     # in it. This info may be used later to categorize basin.
-                    # basins = np.unique(basin_labeled_voxels[mask])
+
                     # Our current mask is the last point where this feature was
                     # distinct, but we want the point where it had the lowest
                     # ELF value while being distinct. This allows us to see if
@@ -822,8 +789,6 @@ class ElfAnalyzerToolkit:
                         # by wrapping around the cell. In a larger cell, the
                         # split would be noted, but it's not for these.
                         is_infinite = self.check_if_infinite_feature(high_elf_mask)
-                        # if len(atoms) == 3:
-                        #     breakpoint()
                     else:
                         # if we have no parent this is our first node and
                         # we have as many atoms as there are in the structure
@@ -842,14 +807,6 @@ class ElfAnalyzerToolkit:
                     atom_num = len(atoms)
                     if is_infinite:
                         atom_num = -1
-                    # if len(atoms) > 0:
-                    #     if atoms[0] == -1:
-                    #         atom_num = -1
-                    #         atoms = atoms[1:]
-
-                    # else:
-                    #     atom_num = len(atoms)
-
                     networkx.set_node_attributes(
                         graph,
                         {
@@ -927,7 +884,6 @@ class ElfAnalyzerToolkit:
             min_covalent_angle=min_covalent_angle,
             min_covalent_bond_ratio=min_covalent_bond_ratio,
         )
-        # breakpoint()
         graph = self._correct_for_high_depth_shells(graph)
 
         # Reduce any related shell basins to a single basin
@@ -964,7 +920,6 @@ class ElfAnalyzerToolkit:
                         },
                     )
                 except:
-                    # breakpoint()
                     raise Exception(
                         "At least one ELF feature was not assigned. This is a bug. Please report to our github:"
                         "https://github.com/jacksund/simmate/issues"
@@ -1039,7 +994,6 @@ class ElfAnalyzerToolkit:
             # TODO: It may be that this loop should just be for when the number
             # of atoms is infinite. Basically, any finite number suggests a
             # molecular feature and all basins would be core/shell/covalent/lone-pair.
-            # elif num_atoms > 1 or num_atoms == -1:# and remaining_atoms > 0:
             elif num_atoms == -1:
                 for child_idx, child in graph.child_dicts(i).items():
                     # skip any nodes that are reducible
@@ -1136,11 +1090,6 @@ class ElfAnalyzerToolkit:
                                 low_elf_mask, return_type=True
                             )
                         )
-                        # If the volume surrounds infinite atoms, the first atom
-                        # returned will be a -1. We check for this
-                        # if len(atoms_in_basin) > 0:
-                        #     if atoms_in_basin[0] == -1:
-                        #         atoms_in_basin = atoms_in_basin[1:]
 
                         if len(atoms_in_basin) > 0:
                             # We have an core/shell region
@@ -1198,7 +1147,6 @@ class ElfAnalyzerToolkit:
                     # skip reducible domains
                     if "split" in child.keys():
                         continue
-                    # breakpoint()
                     networkx.set_node_attributes(
                         graph,
                         {child_idx: {"type": "atom", "subtype": "shell"}},
@@ -1376,7 +1324,6 @@ class ElfAnalyzerToolkit:
         are obviously metallic or covalent
         """
         valence_summary = self.get_valence_summary(graph)
-        # breakpoint()
         # TODO: Many of these features could be symmetric. I should only perform
         # each action for one of these symmetric features and assign the result
         # to all of them.
@@ -1453,7 +1400,6 @@ class ElfAnalyzerToolkit:
             # as such
             if covalent:
                 subtype = "covalent"
-                # breakpoint()
             # We also noted in our atomic assignment which features were part
             # of the atomic branch, but weren't shells or cores. The remaining
             # options were covalent or lone-pairs and we've just assigned the
@@ -1474,7 +1420,6 @@ class ElfAnalyzerToolkit:
                 and previous_subtype != "other"
                 and not covalent
             ):
-                # breakpoint()
                 subtype = "metallic"
                 # set subtype
                 networkx.set_node_attributes(graph, {feature_idx: {"subtype": subtype}})
@@ -1699,7 +1644,7 @@ class ElfAnalyzerToolkit:
             frac_coords = attributes["frac_coords"]
             temp_structure = self.structure.copy()
             temp_structure.append("H-", frac_coords)
-            cnn = CrystalNN()
+            cnn = CrystalNN(distance_cutoffs=None)
             coordination = cnn.get_nn_info(temp_structure, -1)
             coord_num = len(coordination)
             coord_indices = [i["site_index"] for i in coordination]
@@ -1742,7 +1687,6 @@ class ElfAnalyzerToolkit:
             # connections
             nodes_to_remove.append(children[0])
 
-        # breakpoint()
         # now remove each child
         nodes_to_remove.reverse()
         for child_idx in nodes_to_remove:
@@ -1840,10 +1784,7 @@ class ElfAnalyzerToolkit:
             labels.append(label)
             parent = graph.parent_dict(i)
             if parent is not None:
-                try:
-                    Xn.append(parent["split"])
-                except:
-                    breakpoint()
+                Xn.append(parent["split"])
 
             else:
                 Xn.append(0)

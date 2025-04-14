@@ -599,10 +599,32 @@ class Grid(VolumetricData):
             padded_featured_grid = np.pad(labeled_array, 1, "wrap")
             relabeled_array, _ = label(padded_featured_grid)
 
+        # We want to keep track of which features are connected to each other
+        unique_connections = []
         for i in np.unique(relabeled_array):
+            # Get the list of features that are in this super feature
             mask = relabeled_array == i
-            connected_features = np.unique(padded_featured_grid[mask])
+            connected_features = list(np.unique(padded_featured_grid[mask]))
+            # Iterate over these features. If they exist in a connection that we
+            # already have, we want to extend the connection to include any other
+            # features in this super feature
+            for j in connected_features:
+                # check if index is in a unique connection already
+                connection_found = False
+                for connections in unique_connections:
+                    if j in connections:
+                        connections.extend(connected_features)
+                        connection_found = True
+                        break
+                if connection_found:
+                    break
+            # If not connections were found, this is a new connection and we
+            # want to add it to our list.
+            if not connection_found:
+                unique_connections.append(connected_features)
             # Now we relabel each of these labels to the lowest on
+        for connections in unique_connections:
+            connected_features = np.unique(connections)
             lowest_idx = connected_features[0]
             for higher_idx in connected_features[1:]:
                 labeled_array = np.where(

@@ -275,7 +275,7 @@ class BadElfToolkit:
             the system.
         """
         # create a CrystalNN loop
-        cnn = CrystalNN()
+        cnn = CrystalNN(distance_cutoffs=None)
         coord_envs = []
         # For each site in the structure, we add the coordination environment.
 
