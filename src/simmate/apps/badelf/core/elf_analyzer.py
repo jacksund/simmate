@@ -224,6 +224,8 @@ class ElfAnalyzerToolkit:
         downscale_resolution: int = 1200,
     ):
         # If the grid is a higher resolution than desired, downscale it
+        self.unscaled_elf_grid = elf_grid.copy()
+        self.unscaled_charge_grid = charge_grid.copy()
         if downscale_resolution is not None:
             if elf_grid.voxel_resolution > downscale_resolution:
                 elf_grid = elf_grid.regrid(downscale_resolution, order=5)
@@ -242,10 +244,18 @@ class ElfAnalyzerToolkit:
             self._charge_grid_up, self._charge_grid_down = charge_grid.split_to_spin(
                 "charge"
             )
+            self._unscaled_elf_grid_up, self._unscaled_elf_grid_down = (
+                self.unscaled_elf_grid.split_to_spin()
+            )
+            self._unscaled_charge_grid_up, self._unscaled_charge_grid_down = (
+                self.unscaled_charge_grid.split_to_spin("charge")
+            )
         else:
             self.spin_polarized = False
             self._elf_grid_up, self._elf_grid_down = None, None
             self._charge_grid_up, self._charge_grid_down = None, None
+            self._unscaled_elf_grid_up, self._unscaled_elf_grid_down = None, None
+            self._unscaled_charge_grid_up, self._unscaled_charge_grid_down = None, None
 
     @property
     def structure(self) -> Structure:
@@ -530,12 +540,19 @@ class ElfAnalyzerToolkit:
         if self.spin_polarized:
             elf_grid = self._elf_grid_up
             charge_grid = self._charge_grid_up
+            unscaled_elf_grid = self._unscaled_elf_grid_up
         else:
             elf_grid = self.elf_grid
             charge_grid = self.charge_grid
+            unscaled_elf_grid = self.unscaled_elf_grid
         # Get either the spin up graph or combined spin graph
         graph_up = self._get_bifurcation_graph(
-            self.bader_up, elf_grid, charge_grid, resolution, **cutoff_kwargs
+            self.bader_up,
+            elf_grid,
+            charge_grid,
+            unscaled_elf_grid,
+            resolution,
+            **cutoff_kwargs,
         )
         if self.spin_polarized:
             # Check if there's any difference in each spin. If not, we only need
@@ -552,6 +569,7 @@ class ElfAnalyzerToolkit:
                     self.bader_down,
                     self._elf_grid_down,
                     self._charge_grid_down,
+                    self._unscaled_elf_grid_down,
                     resolution,
                     **cutoff_kwargs,
                 )
@@ -565,6 +583,7 @@ class ElfAnalyzerToolkit:
         bader,
         elf_grid,
         charge_grid,
+        unscaled_elf_grid,
         resolution: float = 0.01,
         shell_depth: float = 0.05,
         metal_depth_cutoff: float = 0.1,
@@ -687,6 +706,9 @@ class ElfAnalyzerToolkit:
                         if len(empty_structure) > 1:
                             empty_structure.merge_sites(tol=1, mode="average")
                         frac_coord = empty_structure.frac_coords[0]
+                    frac_coord = unscaled_elf_grid.get_maxima_near_frac_coord(
+                        frac_coord
+                    )
 
                     # Using these basins, we create a mask representing the full
                     # basin (not just above this elf value) and integrate the

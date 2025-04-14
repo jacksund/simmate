@@ -14,6 +14,7 @@ from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from scipy.interpolate import RegularGridInterpolator
 from scipy.ndimage import label, zoom
+from scipy.optimize import minimize
 
 
 class Grid(VolumetricData):
@@ -242,6 +243,45 @@ class Grid(VolumetricData):
             value = float(fn(adjusted_pos))
             values.append(value)
         return values
+
+    def get_slice_around_voxel_coord(
+        self, voxel_coords: NDArray, neighbor_size: int = 1
+    ):
+        slices = []
+        for dim, c in zip(self.shape, voxel_coords):
+            idx = np.arange(c - neighbor_size, c + 2) % dim
+            idx = idx.astype(int)
+            slices.append(idx)
+        return self.total[np.ix_(slices[0], slices[1], slices[2])]
+
+    def get_maxima_near_frac_coord(self, frac_coords: NDArray, neighbor_size: int = 2):
+        coords = self.get_voxel_coords_from_frac(frac_coords).astype(int)
+        init_coords = coords + 1
+        new_coords = coords.copy()
+        # First hill climb until the voxel max is reached
+        while not np.allclose(init_coords, new_coords, rtol=0, atol=0.001):
+            init_coords = new_coords.copy()
+            subset = self.get_slice_around_voxel_coord(init_coords, 2)
+            max_val = subset.max()
+            max_loc = np.array(np.where(subset == max_val))
+            res = max_loc.mean(axis=1).round()
+            local_offset = res - 2  # shift from subset center
+            voxel_coords = new_coords + local_offset
+            new_coords = voxel_coords % np.array(self.shape)
+        # Now get the average in the area
+        # Use np.ix_ to get the full 3D cube using broadcasting
+        subset = self.get_slice_around_voxel_coord(new_coords, neighbor_size)
+        max_val = subset.max()
+        max_loc = np.array(np.where(subset == max_val))
+        res = max_loc.mean(axis=1)
+        local_offset = res - neighbor_size  # shift from subset center
+        voxel_coords = new_coords + local_offset
+        new_coords = voxel_coords % np.array(self.shape)
+        # print(self.get_frac_coords_from_vox(new_coords))
+
+        new_frac_coords = self.get_frac_coords_from_vox(new_coords)
+
+        return new_frac_coords
 
     def get_2x_supercell(self, data: NDArray):
         """
