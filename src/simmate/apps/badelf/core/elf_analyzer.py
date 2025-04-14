@@ -812,7 +812,9 @@ class ElfAnalyzerToolkit:
                         )
                         high_elf_mask = np.isin(
                             basin_labeled_voxels, basins
-                        ) & np.where(elf_grid.total > cutoff - resolution, True, False)
+                        ) & np.where(
+                            elf_grid.total > (cutoff - 2 * resolution), True, False
+                        )
                         atoms = self.get_atoms_surrounded_by_volume(low_elf_mask)
                         # BUG-FIX we check if this feature is infinite right
                         # before it split. This should fix issues with atomic
