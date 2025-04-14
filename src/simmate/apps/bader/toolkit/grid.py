@@ -597,9 +597,9 @@ class Grid(VolumetricData):
         else:
             labeled_array, _ = label(input)
             padded_featured_grid = np.pad(labeled_array, 1, "wrap")
-            relabeled_array, label_num = label(padded_featured_grid)
+            relabeled_array, _ = label(padded_featured_grid)
 
-        for i in range(label_num):
+        for i in np.unique(relabeled_array):
             mask = relabeled_array == i
             connected_features = np.unique(padded_featured_grid[mask])
             # Now we relabel each of these labels to the lowest on
