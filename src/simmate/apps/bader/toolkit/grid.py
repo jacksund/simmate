@@ -9,12 +9,11 @@ from typing import Literal
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import NDArray
 from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from scipy.interpolate import RegularGridInterpolator
-
-# from scipy.ndimage import binary_erosion
+from scipy.ndimage import label, zoom
 
 
 class Grid(VolumetricData):
@@ -244,13 +243,13 @@ class Grid(VolumetricData):
             values.append(value)
         return values
 
-    def get_2x_supercell(self, data: ArrayLike):
+    def get_2x_supercell(self, data: NDArray):
         """
         Duplicates data with the same dimensions as the grid to make a 2x2x2
         supercell
 
         Args:
-            data (ArrayLike):
+            data (NDArray):
                 The data to duplicate. Must have the same dimensions as the
                 grid.
 
@@ -280,7 +279,7 @@ class Grid(VolumetricData):
             supercell[x, y, z] = raveled_data
         return supercell
 
-    def get_voxels_in_radius(self, radius: float, voxel: ArrayLike):
+    def get_voxels_in_radius(self, radius: float, voxel: NDArray):
         """
         Gets the indices of the voxels in a radius around a voxel
 
@@ -288,7 +287,7 @@ class Grid(VolumetricData):
             radius (float):
                 The radius in Angstroms around the voxel
 
-            voxel (ArrayLike):
+            voxel (NDArray):
                 The voxel coordinates of the voxel to find the sphere around
 
         Returns:
@@ -449,36 +448,30 @@ class Grid(VolumetricData):
 
     def regrid(
         self,
-        desired_resolution: int = 130000,
+        desired_resolution: int = 1200,
         new_shape: np.array = None,
+        order: int = 3,
     ):
         """
-        Returns a new grid resized using Fourier interplation as implemented by
-        [PyRho](https://materialsproject.github.io/pyrho/)
+        Returns a new grid resized using scipy's ndimage.zoom method
 
         Args:
             desired_resolution (int):
                 The desired resolution in voxels/A^3.
-            new_shape (ArrayLike):
+            new_shape (NDArray):
                 The new array shape. Takes precedence over desired_resolution.
+            order (int):
+                The order of spline interpolation to use.
 
         Returns:
             Changes the grid data in place.
         """
-        # Make sure the pyrho package is present
-        try:
-            from pyrho.pgrid import PGrid
-        except:
-            raise Exception(
-                "This method requires the mp-pyrho module."
-                "Install this with `conda install -c conda-forge mp-pyrho`"
-            )
         # Get data
         total = self.total
         diff = self.diff
 
-        # Get the lattice unit vectors as a 3x3 array
-        lattice_array = self.matrix
+        # # Get the lattice unit vectors as a 3x3 array
+        # lattice_array = self.matrix
 
         # get the original grid size and lattice volume.
         shape = self.shape
@@ -493,25 +486,21 @@ class Grid(VolumetricData):
             # side
             new_shape = np.around(shape * scale_factor).astype(np.int32)
 
-        # create a pyrho pgrid instance.
-        total_pgrid = PGrid(total, lattice_array)
-
-        # regrid to the desired voxel resolution and get the data back out.
-        new_total_pgrid = total_pgrid.get_transformed(
-            [[1, 0, 0], [0, 1, 0], [0, 0, 1]], new_shape
-        )
-        # new_data = pgrid.lossy_smooth_compression(new_shape)
-        new_total_data = new_total_pgrid.grid_data
-
-        # repeat for diff if exists
+        # get the factor to zoom by
+        zoom_factor = new_shape / shape
+        # get the new total data
+        new_total = zoom(
+            total, zoom_factor, order=order, mode="grid-wrap", grid_mode=True
+        )  # , prefilter=False,)
+        # if the diff exists, get the new diff data
+        new_diff = None
         if diff is not None:
-            diff_pgrid = PGrid(diff, lattice_array)
-            new_diff_pgrid = diff_pgrid.get_transformed(
-                [[1, 0, 0], [0, 1, 0], [0, 0, 1]], new_shape
-            )
-            new_diff_data = new_diff_pgrid.grid_data
+            new_diff = zoom(
+                diff, zoom_factor, order=order, mode="grid-wrap", grid_mode=True
+            )  # , prefilter=False,)
 
-        data = {"total": new_total_data, "diff": new_diff_data}
+        # get the new data dict and return a new grid
+        data = {"total": new_total, "diff": new_diff}
 
         return Grid(self.structure, data)
 
@@ -591,6 +580,159 @@ class Grid(VolumetricData):
         new_grid.data = data
         return new_grid
 
+    @staticmethod
+    def label(input: NDArray, structure: NDArray = np.ones([3, 3, 3])):
+        """
+        Uses scipy's ndimage package to label an array, and corrects for
+        periodic boundaries
+        """
+        if structure is not None:
+            labeled_array, _ = label(input, structure)
+            # Features connected through opposite sides of the unit cell should
+            # have the same label, but they don't currently. To handle this, we
+            # pad our featured grid, re-label it, and check if the new labels
+            # contain multiple of our previous labels.
+            padded_featured_grid = np.pad(labeled_array, 1, "wrap")
+            relabeled_array, label_num = label(padded_featured_grid, structure)
+        else:
+            labeled_array, _ = label(input)
+            padded_featured_grid = np.pad(labeled_array, 1, "wrap")
+            relabeled_array, _ = label(padded_featured_grid)
+
+        for i in np.unique(relabeled_array):
+            mask = relabeled_array == i
+            connected_features = np.unique(padded_featured_grid[mask])
+            # Now we relabel each of these labels to the lowest on
+            lowest_idx = connected_features[0]
+            for higher_idx in connected_features[1:]:
+                labeled_array = np.where(
+                    labeled_array == higher_idx, lowest_idx, labeled_array
+                )
+
+        # Now we reduce the feature labels so that they start at 0
+        for i, j in enumerate(np.unique(labeled_array)):
+            labeled_array = np.where(labeled_array == j, i, labeled_array)
+
+        return labeled_array
+
+    @staticmethod
+    def periodic_center_of_mass(labels, label_vals=None) -> NDArray:
+        """
+        Computes center of mass for each label in a 3D periodic array.
+
+        Args:
+            labels: 3D array of integer labels
+            label_vals: list/array of unique labels to compute (default: all nonzero)
+
+        Returns:
+            A 3xN array of centers of mass
+        """
+        shape = labels.shape
+        if label_vals is None:
+            label_vals = np.unique(labels)
+            label_vals = label_vals[label_vals != 0]
+
+        centers = []
+        for val in label_vals:
+            # get the voxel coords for each voxel in this label
+            coords = np.array(np.where(labels == val)).T  # shape (N, 3)
+            # If we have no coords for this label, we skip
+            if coords.shape[0] == 0:
+                continue
+
+            # From chap-gpt: Get center of mass using spherical distance
+            center = []
+            for i, size in enumerate(shape):
+                angles = coords[:, i] * 2 * np.pi / size
+                x = np.cos(angles).mean()
+                y = np.sin(angles).mean()
+                mean_angle = np.arctan2(y, x)
+                mean_pos = (mean_angle % (2 * np.pi)) * size / (2 * np.pi)
+                center.append(mean_pos)
+            centers.append(center)
+        centers = np.array(centers)
+        centers = centers.round(6)
+
+        return centers
+
+    def get_critical_points(
+        self, array: NDArray, threshold: float = 5e-03, return_hessian_s: bool = True
+    ):
+        """
+        Finds the critical points in the grid. If return_hessians is true,
+        the hessian matrices for each critical point will be returned along
+        with their type index.
+        """
+        # !!! Check if padding and threshold effect final result
+        # get gradient using a padded grid to handle periodicity
+        padding = 2
+        a, b, c = self.get_padded_grid_axes(padding)
+        padded_array = np.pad(array, padding, mode="wrap")
+        dx, dy, dz = np.gradient(padded_array)
+
+        # get magnitude of the gradient
+        magnitude = np.sqrt(dx**2 + dy**2 + dz**2)
+
+        # unpad the magnitude
+        slicer = tuple(slice(padding, -padding) for _ in range(3))
+        magnitude = magnitude[slicer]
+
+        # now we want to get where the magnitude is close to 0. To do this, we
+        # will create a mask where the magnitude is below a threshold. We will
+        # then label the regions where this is true using scipy, then combine
+        # the regions into one
+        magnitude_mask = magnitude < threshold
+        # critical_points = np.where(magnitude<threshold)
+        # padded_critical_points = np.array(critical_points).T + padding
+
+        label_structure = np.ones((3, 3, 3), dtype=int)
+        labeled_magnitude_mask = self.label(magnitude_mask, label_structure)
+        min_indices = []
+        for idx in np.unique(labeled_magnitude_mask):
+            label_mask = labeled_magnitude_mask == idx
+            label_indices = np.where(label_mask)
+            min_mag = magnitude[label_indices].min()
+            min_indices.append(np.argwhere((magnitude == min_mag) & label_mask)[0])
+        min_indices = np.array(min_indices)
+
+        critical_points = min_indices[:, 0], min_indices[:, 1], min_indices[:, 2]
+
+        # critical_points = self.periodic_center_of_mass(labeled_magnitude_mask)
+        padded_critical_points = tuple([i + padding for i in critical_points])
+        values = array[critical_points]
+        # # get the value at each of these critical points
+        # fn_values = RegularGridInterpolator((a, b, c), padded_array , method="linear")
+        # values = fn_values(padded_critical_points)
+
+        if not return_hessian_s:
+            return critical_points, values
+
+        # now we want to get the hessian eigenvalues around each of these points
+        # using interpolation. First, we get the second derivatives
+        d2f_dx2 = np.gradient(dx, axis=0)
+        d2f_dy2 = np.gradient(dy, axis=1)
+        d2f_dz2 = np.gradient(dz, axis=2)
+        # # now create interpolation functions for each
+        # fn_dx2 = RegularGridInterpolator((a, b, c), d2f_dx2, method="linear")
+        # fn_dy2 = RegularGridInterpolator((a, b, c), d2f_dy2, method="linear")
+        # fn_dz2 = RegularGridInterpolator((a, b, c), d2f_dz2, method="linear")
+        # and calculate the hessian eigenvalues for each point
+        # H00 = fn_dx2(padded_critical_points)
+        # H11 = fn_dy2(padded_critical_points)
+        # H22 = fn_dz2(padded_critical_points)
+        H00 = d2f_dx2[padded_critical_points]
+        H11 = d2f_dy2[padded_critical_points]
+        H22 = d2f_dz2[padded_critical_points]
+        # summarize the hessian eigenvalues by getting the sum of their signs
+        hessian_eigs = np.array([H00, H11, H22])
+        hessian_eigs = np.moveaxis(hessian_eigs, 1, 0)
+        hessian_eigs_signs = np.where(hessian_eigs > 0, 1, hessian_eigs)
+        hessian_eigs_signs = np.where(hessian_eigs < 0, -1, hessian_eigs_signs)
+        # Now we get the sum of signs for each set of hessian eigenvalues
+        s = np.sum(hessian_eigs_signs, axis=1)
+
+        return critical_points, values, s
+
     ###########################################################################
     # The following is a series of methods that are useful for converting between
     # voxel coordinates, fractional coordinates, and cartesian coordinates.
@@ -652,12 +794,12 @@ class Grid(VolumetricData):
         # voxel positions go from 1 to (grid_size + 0.9999)
         return np.array(voxel_coords)
 
-    def get_voxel_coords_from_frac(self, frac_coords: ArrayLike | list):
+    def get_voxel_coords_from_frac(self, frac_coords: NDArray | list):
         """
         Takes in a fractional coordinate and returns the cartesian coordinate.
 
         Args:
-            frac_coords (ArrayLike):
+            frac_coords (NDArray):
                 The fractional position to convert to cartesian coords.
 
         Returns:
@@ -669,13 +811,13 @@ class Grid(VolumetricData):
         # voxel positions go from 1 to (grid_size + 0.9999)
         return np.array(voxel_coords)
 
-    def get_frac_coords_from_vox(self, voxel_coords: ArrayLike | list):
+    def get_frac_coords_from_vox(self, voxel_coords: NDArray | list):
         """
         Takes in a voxel grid index and returns the fractional
         coordinates.
 
         Args:
-            voxel_coords (ArrayLike):
+            voxel_coords (NDArray):
                 A voxel grid index
 
         Returns:
@@ -686,12 +828,12 @@ class Grid(VolumetricData):
         frac_coords = np.array([fa, fb, fc])
         return frac_coords
 
-    def get_cart_coords_from_frac(self, frac_coords: ArrayLike | list):
+    def get_cart_coords_from_frac(self, frac_coords: NDArray | list):
         """
         Takes in fractional coordinates and returns cartesian coordinates
 
         Args:
-            frac_coords (ArrayLike):
+            frac_coords (NDArray):
                 The fractional position to convert to cartesian coords.
 
         Returns:
@@ -705,12 +847,12 @@ class Grid(VolumetricData):
         cart_coords = np.array([x, y, z])
         return cart_coords
 
-    def get_frac_coords_from_cart(self, cart_coords: ArrayLike | list):
+    def get_frac_coords_from_cart(self, cart_coords: NDArray | list):
         """
         Takes in a cartesian coordinate and returns the fractional coordinates.
 
         Args:
-            cart_coords (ArrayLike):
+            cart_coords (NDArray):
                 A cartesian coordinate.
 
         Returns:
@@ -722,12 +864,12 @@ class Grid(VolumetricData):
 
         return frac_coords
 
-    def get_cart_coords_from_vox(self, voxel_coords: ArrayLike | list):
+    def get_cart_coords_from_vox(self, voxel_coords: NDArray | list):
         """
         Takes in a voxel grid index and returns the cartesian coordinates.
 
         Args:
-            voxel_coords (ArrayLike):
+            voxel_coords (NDArray):
                 A voxel grid index
 
         Returns:
@@ -737,12 +879,12 @@ class Grid(VolumetricData):
         cart_coords = self.get_cart_coords_from_frac(frac_coords)
         return cart_coords
 
-    def get_voxel_coords_from_cart(self, cart_coords: ArrayLike | list):
+    def get_voxel_coords_from_cart(self, cart_coords: NDArray | list):
         """
         Takes in a cartesian coordinate and returns the voxel coordinates.
 
         Args:
-            cart_coords (ArrayLike): A cartesian coordinate.
+            cart_coords (NDArray): A cartesian coordinate.
 
         Returns:
             Voxel coordinates as an Array
@@ -751,13 +893,13 @@ class Grid(VolumetricData):
         voxel_coords = self.get_voxel_coords_from_frac(frac_coords)
         return voxel_coords
 
-    def get_cart_coords_from_frac_full_array(self, frac_coords: ArrayLike):
+    def get_cart_coords_from_frac_full_array(self, frac_coords: NDArray):
         """
         Takes in a 2D array of shape (N,3) representing fractional coordinates
         at N points and calculates the equivalent cartesian coordinates.
 
         Args:
-            frac_coords (ArrayLike):
+            frac_coords (NDArray):
                 An (N,3) shaped array of fractional coordinates
 
         Returns:
@@ -770,13 +912,13 @@ class Grid(VolumetricData):
         cart_coords = np.column_stack([cart_x, cart_y, cart_z])
         return cart_coords
 
-    def get_frac_coords_from_vox_full_array(self, vox_coords: ArrayLike):
+    def get_frac_coords_from_vox_full_array(self, vox_coords: NDArray):
         """
         Takes in a 2D array of shape (N,3) representing voxel coordinates
         at N points and calculates the equivalent fractional coordinates.
 
         Args:
-            vox_coords (ArrayLike):
+            vox_coords (NDArray):
                 An (N,3) shaped array of voxel coordinates
 
         Returns:
@@ -789,13 +931,13 @@ class Grid(VolumetricData):
         frac_coords = np.column_stack([frac_x, frac_y, frac_z])
         return frac_coords
 
-    def get_voxel_coords_from_frac_full_array(self, frac_coords: ArrayLike):
+    def get_voxel_coords_from_frac_full_array(self, frac_coords: NDArray):
         """
         Takes in a 2D array of shape (N,3) representing fractional coordinates
         at N points and calculates the equivalent voxel coordinates.
 
         Args:
-            frac_coords (ArrayLike):
+            frac_coords (NDArray):
                 An (N,3) shaped array of fractional coordinates
 
         Returns:
@@ -808,13 +950,13 @@ class Grid(VolumetricData):
         vox_coords = np.column_stack([vox_x, vox_y, vox_z])
         return vox_coords
 
-    def get_cart_coords_from_vox_full_array(self, vox_coords: ArrayLike):
+    def get_cart_coords_from_vox_full_array(self, vox_coords: NDArray):
         """
         Takes in a 2D array of shape (N,3) representing voxel coordinates
         at N points and calculates the equivalent cartesian coordinates.
 
         Args:
-            frac_coords (ArrayLike):
+            frac_coords (NDArray):
                 An (N,3) shaped array of voxel coordinates
 
         Returns:
