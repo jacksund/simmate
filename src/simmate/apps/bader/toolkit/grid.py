@@ -9,15 +9,11 @@ from typing import Literal
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from networkx.utils import UnionFind
 from numpy.typing import NDArray
 from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from scipy.interpolate import RegularGridInterpolator
-from scipy.ndimage import center_of_mass, label, zoom
-from scipy.signal import decimate
-
-# from scipy.ndimage import binary_erosion
+from scipy.ndimage import label, zoom
 
 
 class Grid(VolumetricData):
@@ -603,22 +599,16 @@ class Grid(VolumetricData):
             padded_featured_grid = np.pad(labeled_array, 1, "wrap")
             relabeled_array, label_num = label(padded_featured_grid)
 
-        connections = UnionFind()
         for i in range(label_num):
             mask = relabeled_array == i
             connected_features = np.unique(padded_featured_grid[mask])
-            for feature in connected_features[1:]:
-                connections.union(connected_features[0], feature)
-        # Get the sets of basins that are connected to each other
-        connection_sets = list(connections.to_sets())
-        for label_set in connection_sets:
-            label_set = np.array(list(label_set))
-            # replace all of these labels with the lowest one
-            labeled_array = np.where(
-                np.isin(labeled_array, label_set),
-                label_set[0],
-                labeled_array,
-            )
+            # Now we relabel each of these labels to the lowest on
+            lowest_idx = connected_features[0]
+            for higher_idx in connected_features[1:]:
+                labeled_array = np.where(
+                    labeled_array == higher_idx, lowest_idx, labeled_array
+                )
+
         # Now we reduce the feature labels so that they start at 0
         for i, j in enumerate(np.unique(labeled_array)):
             labeled_array = np.where(labeled_array == j, i, labeled_array)
