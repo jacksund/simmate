@@ -26,9 +26,9 @@ An additional tool, the [ElfAnalyzerToolkit](../finder/elf_analyzer) has also be
 
 Follow the instructions for [installing simmate](../../../getting_started/installation/quick_start). Then BadELF can be set up with the following instructions.
 
-1. This app uses `pybader` under the hood. Install this with:
+1. This app uses `pybader` and `networkx` under the hood. Install this with:
 ``` bash
-conda install -n my_env -c conda-forge pybader
+conda install -n my_env -c conda-forge pybader networkx
 ```
 
 2. Add `badelf` (and it's dependencies) to the list of installed Simmate apps with:
