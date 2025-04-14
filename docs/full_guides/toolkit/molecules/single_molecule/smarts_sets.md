@@ -14,8 +14,8 @@ The `SmartsSet` class manages the search and labeling process for input molecule
 
 Two default SMARTS sets are available:
 
-- `ChemblAlerts` ([csv](#UPDATE TO GITHUB LINK))
-- `CdkFunctionalGroups` ([csv](#UPDATE TO GITHUB LINK))
+- `ChemblAlerts` ([csv](https://github.com/jacksund/simmate/blob/main/src/simmate/toolkit/smarts_sets/cdk_fxn_groups.csv))
+- `CdkFunctionalGroups` ([csv](https://github.com/jacksund/simmate/blob/main/src/simmate/toolkit/smarts_sets/chembl_alerts_v33.csv))
 
 The `ChemblAlerts` set includes several popular subsets:
 

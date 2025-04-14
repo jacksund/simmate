@@ -12,7 +12,7 @@ from simmate.database.base_data_types import table_column
 from simmate.toolkit import Molecule as ToolkitMolecule
 
 
-class ChEMBL(Molecule):
+class ChemblMolecule(Molecule):
     """
     Molecules from the
     [ChEMBL database](https://chembl.gitbook.io/chembl-interface-documentation/downloads)
@@ -23,6 +23,9 @@ class ChEMBL(Molecule):
     - https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_33_schema.png
     - https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/schema_documentation.html
     """
+
+    class Meta:
+        db_table = "chembl__molecules"
 
     # disable cols
     source = None

@@ -4,12 +4,15 @@ from simmate.apps.rdkit.models import Molecule
 from simmate.database.base_data_types import table_column
 
 
-class ChemSpaceFreedom(Molecule):
+class ChemSpaceFreedomSpaceMolecule(Molecule):
     """
     Molecules from the
     [ChemSpace "Freedom Space"](https://chem-space.com/compounds/freedom-space)
     database.
     """
+
+    class Meta:
+        db_table = "chemspace__freedom_space__molecules"
 
     # TODO: Freedom space is now 5bil molecules... The "Screening Compound Catalog"
     # is now what we'd want. It is roughly 7.5mil compounds:

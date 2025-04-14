@@ -3,6 +3,7 @@
 import logging
 import shutil
 import urllib
+from pathlib import Path
 
 from django.apps import apps
 from django.core.management import call_command
@@ -171,7 +172,7 @@ def reset_database(
     if settings.database_backend == "sqlite3":
         # grab the location of the database file. I assume the default
         # database for now.
-        db_filename = settings.database.name
+        db_filename = Path(settings.database.name)
 
         # delete the sqlite3 database file if it exists
         if db_filename.exists():

@@ -189,6 +189,7 @@ class DynamicFormComponent(UnicornView):
     def confirm_update_many(self, select_form_data):
         # Example of how the data will look:
         # {
+        #     "example_select_all": "on",  # we want to ignore this
         #     "1": "on",
         #     "2": "on",
         #     "4": "on",
@@ -196,8 +197,9 @@ class DynamicFormComponent(UnicornView):
         # }
         data = json.loads(select_form_data)
         data.pop("csrfmiddlewaretoken", None)
-        data.pop("cortevatarget_select_all", None)
-        self.entry_ids_to_update = [int(key) for key, value in data.items()]
+        self.entry_ids_to_update = [
+            int(key) for key, value in data.items() if key.isnumeric()
+        ]
 
         if self.entry_ids_to_update:
             self.is_update_many_confirmed = True
@@ -448,7 +450,7 @@ class DynamicFormComponent(UnicornView):
     def unmount_for_update(self):
         # set initial data using the form fields and applying its values to
         # the table entry (this is the reverse of mount_for_update)
-        config = self.to_db_dict()
+        config = self.to_db_dict(include_empties=True)
         for field in config:
             if not hasattr(self, field) or field in self.ignore_on_update:
                 # skip things like "molecule" and "molecule_original" that are
