@@ -621,6 +621,8 @@ class ElfAnalyzerToolkit:
             label_structure = np.ones([3, 3, 3])
             # copy previous features
             old_featured_grid = featured_grid.copy()
+            # if cutoff == 0.42:
+            #     breakpoint()
             featured_grid = Grid.label(cutoff_elf_grid, label_structure)
             # make sure we have at least one label at low ELF cutoffs
             if (
@@ -654,10 +656,14 @@ class ElfAnalyzerToolkit:
             if len(unique_old_labels) == 0:
                 # we have no more features and are done so we break
                 break
+            # if -8 in unique_old_labels:
+            #     breakpoint()
+            
             # Now we want to loop over previous features and see which one(s)
             # split into multiple new features. As features split or dissapear
             # we label them with useful information
             for feature in unique_old_labels:
+
                 mask = old_featured_grid == feature
                 new_features = featured_grid[mask]
                 features_list = np.unique(new_features)
@@ -668,6 +674,9 @@ class ElfAnalyzerToolkit:
                 # remove 0
                 if -new_len in features_list:
                     features_list = features_list[1:]
+                # remove any positive assignments from previous split (caused by
+                # error in labeling)
+                # features_list = np.array([f for f in features_list if f < 0])
                 if len(features_list) == 0:
                     # This feature was irreducible and just disappeared.
                     # We want to assign the feature to be atomic or valent and
@@ -783,6 +792,8 @@ class ElfAnalyzerToolkit:
                             featured_grid == features_list[0], feature, featured_grid
                         )
                 elif len(features_list) > 1:
+                    print(feature)
+                    print(cutoff)
                     # This feature has split and we want to add an attribute
                     # labeling it with the value it split at. We also want to
                     # record how many features it split into, the basins that
@@ -841,8 +852,37 @@ class ElfAnalyzerToolkit:
                         },
                     )
                     # We have new features and we want to label them as such
+                    # BUG There is occassionally an error where two nearby domains
+                    # break into smaller domains and overwrite one another. In these cases
+                    # we want to combine these domains into one
+                    # all_basins = {}
+                    # new_features = 0
                     for new_feat in features_list:
+                        feature_mask = featured_grid == new_feat
+                        basins = np.unique(basin_labeled_voxels[feature_mask])
+                        # shared_basins = False
+                        # for old_feat, other_basins in all_basins.items():
+                        #     for basin in basins:
+                        #         if basin in other_basins:
+                        #             # this feature has overlap with another
+                        #             featured_grid = np.where(
+                        #                 featured_grid == new_feat, old_feat, featured_grid
+                        #             )
+                        #             shared_basins = True
+                        #             break
+                        #     if shared_basins:
+                        #         break
+                        # if shared_basins:
+                        #     featured_grid = np.where(
+                        #         featured_grid == -new_len, new_len-1, featured_grid
+                        #     )
+                        #     new_len -= 1
+                        #     # breakpoint()
+                        #     continue
+                        
                         total_features += 1
+                        # new_features += 1
+                        # all_basins[total_features] = basins
                         # relabel feature
                         featured_grid = np.where(
                             featured_grid == new_feat, total_features, featured_grid
@@ -852,8 +892,8 @@ class ElfAnalyzerToolkit:
                         graph.add_edge(feature, total_features)
                         # add an attribute for the depth of this feature as well
                         # as the basins that belong to this feature
-                        feature_mask = featured_grid == total_features
-                        basins = np.unique(basin_labeled_voxels[feature_mask])
+                        # feature_mask = featured_grid == total_features
+                        # basins = np.unique(basin_labeled_voxels[feature_mask])
                         depth = len(networkx.ancestors(graph, total_features)) + 1
                         networkx.set_node_attributes(
                             graph,
@@ -864,6 +904,14 @@ class ElfAnalyzerToolkit:
                                 }
                             },
                         )
+                    # if new_features == 1:
+                    #     # all of our children recombined into one and we want to
+                    #     # replace them with our parent
+                    #     for fake_feat in all_basins.keys():
+                    #         graph.remove_node(fake_feat)
+                    #         featured_grid = np.where(
+                    #             featured_grid == fake_feat, feature, featured_grid
+                    #         )
         # First, we clean up the graph in case we removed a node earlier due
         # to incorrect labeling and this resulted in a fake split (e.g. Dy2C)
         graph = self._clean_reducible_nodes(graph)
@@ -1086,6 +1134,7 @@ class ElfAnalyzerToolkit:
                     # We actually want the depth to the point where the basin connects
                     # to a reducible domain surrounding the atom of interest
                     basin_shell_depth = child["max_elf"] - node["split"]
+
                     # if child["depth"] < shell_depth:
                     if basin_shell_depth < shell_depth:
                         basin_subtype = "shell"
