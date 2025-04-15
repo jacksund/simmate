@@ -14,7 +14,6 @@ from pymatgen.io.vasp import VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from scipy.interpolate import RegularGridInterpolator
 from scipy.ndimage import label, zoom
-from scipy.optimize import minimize
 
 
 class Grid(VolumetricData):
@@ -620,54 +619,6 @@ class Grid(VolumetricData):
         new_grid.data = data
         return new_grid
 
-    # @staticmethod
-    # def label(input: NDArray, structure: NDArray = np.ones([3, 3, 3])):
-    #     """
-    #     Uses scipy's ndimage package to label an array, and corrects for
-    #     periodic boundaries, without using UnionFind.
-    #     """
-    #     if structure is not None:
-    #         labeled_array, _ = label(input, structure)
-    #         padded_labeled = np.pad(labeled_array, 1, "wrap")
-    #         relabeled_array, label_num = label(padded_labeled, structure)
-    #     else:
-    #         labeled_array, _ = label(input)
-    #         padded_labeled = np.pad(labeled_array, 1, "wrap")
-    #         relabeled_array, label_num = label(padded_labeled)
-
-    #     # Map each new relabeled group to the set of original labels it includes
-    #     mapping = {}
-    #     for i in range(1, label_num + 1):
-    #         mask = relabeled_array == i
-    #         overlapping = np.unique(padded_labeled[mask])
-    #         overlapping = overlapping[overlapping != 0]  # exclude background
-    #         if overlapping.size > 0:
-    #             mapping[i] = set(overlapping)
-
-    #     # Merge overlapping sets (transitive closure)
-    #     merged = []
-    #     for group in mapping.values():
-    #         found = False
-    #         for existing in merged:
-    #             if not group.isdisjoint(existing):
-    #                 existing.update(group)
-    #                 found = True
-    #                 break
-    #         if not found:
-    #             merged.append(set(group))
-
-    #     # Assign new consistent labels
-    #     label_map = {}
-    #     for new_label, group in enumerate(merged):
-    #         for old_label in group:
-    #             label_map[old_label] = new_label
-
-    #     # Apply label mapping
-    #     result = np.zeros_like(labeled_array)
-    #     for old, new in label_map.items():
-    #         result[labeled_array == old] = new
-
-    #     return result
     @staticmethod
     def label(input: NDArray, structure: NDArray = np.ones([3, 3, 3])):
         """
@@ -707,26 +658,33 @@ class Grid(VolumetricData):
 
                 unique_connections[j] = list(np.unique(unique_connections[j]))
 
-        # NEEDS COMMENTS
+        # create set/list to keep track of which features have already been connected
+        # to others and the full list of connections
         already_connected = set()
         reduced_connections = []
 
+        # loop over each shared connection
         for i in range(len(unique_connections)):
             if i in already_connected:
+                # we've already done these connections, so we skip
                 continue
-
+            # create sets of connections to compare with as we add more
             connections = set()
             new_connections = set(unique_connections[i])
-
             while connections != new_connections:
+                # loop over the connections we've found so far. As we go, add
+                # any features we encounter to our set.
                 connections = new_connections.copy()
                 for j in connections:
                     already_connected.add(j)
                     new_connections.update(unique_connections[j])
 
+            # If we found any connections, append them to our list of reduced connections
             if connections:
                 reduced_connections.append(sorted(new_connections))
 
+        # For each set of connections in our reduced set, relabel all values to
+        # the lowest one.
         for connections in reduced_connections:
             connected_features = np.unique(connections)
             lowest_idx = connected_features[0]
