@@ -688,7 +688,7 @@ class Grid(VolumetricData):
             relabeled_array, label_num = label(padded_featured_grid)
 
         # We want to keep track of which features are connected to each other
-        unique_connections = [[] for i in range(len(labeled_array))]
+        unique_connections = [[] for i in range(len(np.unique(labeled_array)))]
         
         for i in np.unique(relabeled_array):
         # for i in range(label_num):
@@ -699,7 +699,10 @@ class Grid(VolumetricData):
             # already have, we want to extend the connection to include any other
             # features in this super feature
             for j in connected_features:
-                unique_connections[j].extend([k for k in connected_features if k != j])
+                try:
+                    unique_connections[j].extend([k for k in connected_features if k != j])
+                except:
+                    breakpoint()
                 unique_connections[j] = list(np.unique(unique_connections[j]))
         
         # NEEDS COMMENTS

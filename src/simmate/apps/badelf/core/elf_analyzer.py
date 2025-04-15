@@ -792,8 +792,6 @@ class ElfAnalyzerToolkit:
                             featured_grid == features_list[0], feature, featured_grid
                         )
                 elif len(features_list) > 1:
-                    print(feature)
-                    print(cutoff)
                     # This feature has split and we want to add an attribute
                     # labeling it with the value it split at. We also want to
                     # record how many features it split into, the basins that
