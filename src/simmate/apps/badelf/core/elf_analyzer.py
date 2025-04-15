@@ -621,8 +621,6 @@ class ElfAnalyzerToolkit:
             label_structure = np.ones([3, 3, 3])
             # copy previous features
             old_featured_grid = featured_grid.copy()
-            # if cutoff == 0.42:
-            #     breakpoint()
             featured_grid = Grid.label(cutoff_elf_grid, label_structure)
             # make sure we have at least one label at low ELF cutoffs
             if (
@@ -656,8 +654,6 @@ class ElfAnalyzerToolkit:
             if len(unique_old_labels) == 0:
                 # we have no more features and are done so we break
                 break
-            # if -8 in unique_old_labels:
-            #     breakpoint()
 
             # Now we want to loop over previous features and see which one(s)
             # split into multiple new features. As features split or dissapear
@@ -850,37 +846,12 @@ class ElfAnalyzerToolkit:
                         },
                     )
                     # We have new features and we want to label them as such
-                    # BUG There is occassionally an error where two nearby domains
-                    # break into smaller domains and overwrite one another. In these cases
-                    # we want to combine these domains into one
-                    # all_basins = {}
-                    # new_features = 0
+
                     for new_feat in features_list:
                         feature_mask = featured_grid == new_feat
                         basins = np.unique(basin_labeled_voxels[feature_mask])
-                        # shared_basins = False
-                        # for old_feat, other_basins in all_basins.items():
-                        #     for basin in basins:
-                        #         if basin in other_basins:
-                        #             # this feature has overlap with another
-                        #             featured_grid = np.where(
-                        #                 featured_grid == new_feat, old_feat, featured_grid
-                        #             )
-                        #             shared_basins = True
-                        #             break
-                        #     if shared_basins:
-                        #         break
-                        # if shared_basins:
-                        #     featured_grid = np.where(
-                        #         featured_grid == -new_len, new_len-1, featured_grid
-                        #     )
-                        #     new_len -= 1
-                        #     # breakpoint()
-                        #     continue
 
                         total_features += 1
-                        # new_features += 1
-                        # all_basins[total_features] = basins
                         # relabel feature
                         featured_grid = np.where(
                             featured_grid == new_feat, total_features, featured_grid
@@ -902,14 +873,6 @@ class ElfAnalyzerToolkit:
                                 }
                             },
                         )
-                    # if new_features == 1:
-                    #     # all of our children recombined into one and we want to
-                    #     # replace them with our parent
-                    #     for fake_feat in all_basins.keys():
-                    #         graph.remove_node(fake_feat)
-                    #         featured_grid = np.where(
-                    #             featured_grid == fake_feat, feature, featured_grid
-                    #         )
         # First, we clean up the graph in case we removed a node earlier due
         # to incorrect labeling and this resulted in a fake split (e.g. Dy2C)
         graph = self._clean_reducible_nodes(graph)
@@ -1836,7 +1799,10 @@ class ElfAnalyzerToolkit:
             indices.append(i)
             node = graph.nodes[i]
             if node.get("split", None) is None:
-                Xn1.append(node["max_elf"])
+                if node["depth"] > 0.01:
+                    Xn1.append(node["max_elf"])
+                else:
+                    Xn1.append(node["max_elf"] - node["depth"] + 0.01)
                 end_indices.append(i)
                 # Get label
                 label = f"""type: {node["subtype"]}\ndepth: {node["depth"]}\ndepth to inf connection: {node["3d_depth"]}\nmax elf: {node["max_elf"]}\ncharge: {node["charge"]}\nvolume: {node["volume"]}\natom distance: {round(node["atom_distance"],2)}\nnearest atom index: {node["nearest_atom"]}\nnearest atom type: {self.structure[node["nearest_atom"]].specie.name}"""
@@ -1917,7 +1883,6 @@ class ElfAnalyzerToolkit:
         Yn = np.array(Yn)
         Yn0 = Yn - y_division / 3
         Yn1 = Yn + y_division / 3
-        # breakpoint()
         already_added_types = set()
         for idx in range(len(Xn)):
             # get color
