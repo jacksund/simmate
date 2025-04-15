@@ -619,7 +619,55 @@ class Grid(VolumetricData):
         new_grid = grid1.copy()
         new_grid.data = data
         return new_grid
-
+    
+    # @staticmethod
+    # def label(input: NDArray, structure: NDArray = np.ones([3, 3, 3])):
+    #     """
+    #     Uses scipy's ndimage package to label an array, and corrects for
+    #     periodic boundaries, without using UnionFind.
+    #     """
+    #     if structure is not None:
+    #         labeled_array, _ = label(input, structure)
+    #         padded_labeled = np.pad(labeled_array, 1, "wrap")
+    #         relabeled_array, label_num = label(padded_labeled, structure)
+    #     else:
+    #         labeled_array, _ = label(input)
+    #         padded_labeled = np.pad(labeled_array, 1, "wrap")
+    #         relabeled_array, label_num = label(padded_labeled)
+    
+    #     # Map each new relabeled group to the set of original labels it includes
+    #     mapping = {}
+    #     for i in range(1, label_num + 1):
+    #         mask = relabeled_array == i
+    #         overlapping = np.unique(padded_labeled[mask])
+    #         overlapping = overlapping[overlapping != 0]  # exclude background
+    #         if overlapping.size > 0:
+    #             mapping[i] = set(overlapping)
+    
+    #     # Merge overlapping sets (transitive closure)
+    #     merged = []
+    #     for group in mapping.values():
+    #         found = False
+    #         for existing in merged:
+    #             if not group.isdisjoint(existing):
+    #                 existing.update(group)
+    #                 found = True
+    #                 break
+    #         if not found:
+    #             merged.append(set(group))
+    
+    #     # Assign new consistent labels
+    #     label_map = {}
+    #     for new_label, group in enumerate(merged):
+    #         for old_label in group:
+    #             label_map[old_label] = new_label
+    
+    #     # Apply label mapping
+    #     result = np.zeros_like(labeled_array)
+    #     for old, new in label_map.items():
+    #         result[labeled_array == old] = new
+    
+    #     return result
     @staticmethod
     def label(input: NDArray, structure: NDArray = np.ones([3, 3, 3])):
         """
@@ -637,11 +685,13 @@ class Grid(VolumetricData):
         else:
             labeled_array, _ = label(input)
             padded_featured_grid = np.pad(labeled_array, 1, "wrap")
-            relabeled_array, _ = label(padded_featured_grid)
+            relabeled_array, label_num = label(padded_featured_grid)
 
         # We want to keep track of which features are connected to each other
-        unique_connections = []
+        unique_connections = [[] for i in range(len(labeled_array))]
+        
         for i in np.unique(relabeled_array):
+        # for i in range(label_num):
             # Get the list of features that are in this super feature
             mask = relabeled_array == i
             connected_features = list(np.unique(padded_featured_grid[mask]))
@@ -649,21 +699,30 @@ class Grid(VolumetricData):
             # already have, we want to extend the connection to include any other
             # features in this super feature
             for j in connected_features:
-                # check if index is in a unique connection already
-                connection_found = False
-                for connections in unique_connections:
-                    if j in connections:
-                        connections.extend(connected_features)
-                        connection_found = True
-                        break
-                if connection_found:
-                    break
-            # If not connections were found, this is a new connection and we
-            # want to add it to our list.
-            if not connection_found:
-                unique_connections.append(connected_features)
-            # Now we relabel each of these labels to the lowest on
-        for connections in unique_connections:
+                unique_connections[j].extend([k for k in connected_features if k != j])
+                unique_connections[j] = list(np.unique(unique_connections[j]))
+        
+        # NEEDS COMMENTS
+        already_connected = set()
+        reduced_connections = []
+        
+        for i in range(len(unique_connections)):
+            if i in already_connected:
+                continue
+        
+            connections = set()
+            new_connections = set(unique_connections[i])
+        
+            while connections != new_connections:
+                connections = new_connections.copy()
+                for j in connections:
+                    already_connected.add(j)
+                    new_connections.update(unique_connections[j])
+        
+            if connections:
+                reduced_connections.append(sorted(new_connections))
+
+        for connections in reduced_connections:
             connected_features = np.unique(connections)
             lowest_idx = connected_features[0]
             for higher_idx in connected_features[1:]:
