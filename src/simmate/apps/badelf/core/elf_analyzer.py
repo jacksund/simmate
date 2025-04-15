@@ -1829,12 +1829,14 @@ class ElfAnalyzerToolkit:
         end_indices = []
         # X position is determined by the ELF value at which the feature appears.
         Xn = []
+        Xn1 = []  # Used for depth
         labels = []
         types = []
         for i in graph.nodes():
             indices.append(i)
             node = graph.nodes[i]
             if node.get("split", None) is None:
+                Xn1.append(node["max_elf"])
                 end_indices.append(i)
                 # Get label
                 label = f"""type: {node["subtype"]}\ndepth: {node["depth"]}\ndepth to inf connection: {node["3d_depth"]}\nmax elf: {node["max_elf"]}\ncharge: {node["charge"]}\nvolume: {node["volume"]}\natom distance: {round(node["atom_distance"],2)}\nnearest atom index: {node["nearest_atom"]}\nnearest atom type: {self.structure[node["nearest_atom"]].specie.name}"""
@@ -1843,6 +1845,7 @@ class ElfAnalyzerToolkit:
                     label += f"\nBEI array: {node['bare_electron_scores'].round(2)}"
                 types.append(node["subtype"])
             else:
+                Xn1.append(-1)
                 atom_num = node["atom_num"]
                 if atom_num == -1:
                     atom_num = "infinite"
@@ -1901,57 +1904,91 @@ class ElfAnalyzerToolkit:
                 y=Ye,
                 mode="lines",
                 name="connection",
-                line=dict(color="rgb(210,210,210)", width=1),
+                line=dict(color="rgb(210,210,210)", width=3),
                 hoverinfo="none",
             )
         )
 
-        # convert lists to numpy arrays for easy querying
+        # convert lists to numpy arrays for easy querying.
         types = np.array(types)
         labels = np.array(labels)
         Xn = np.array(Xn)
+        Xn1 = np.array(Xn1)
         Yn = np.array(Yn)
-        # add nodes for each type of point
-        for basin_type in np.unique(types):
+        Yn0 = Yn - y_division / 3
+        Yn1 = Yn + y_division / 3
+        # breakpoint()
+        already_added_types = set()
+        for idx in range(len(Xn)):
+            # get color
+            basin_type = types[idx]
+            # add nodes for each type of point
+            # for basin_type in np.unique(types):
             # Color code by type
             if basin_type == "reducible":
-                color = "#808080"  # grey
+                color = "rgba(128, 128, 128, 1)"  # grey
             elif basin_type == "shell" or basin_type == "core":
-                color = "#000000"  # black
+                color = "rgba(0, 0, 0, 1)"  # black
             elif basin_type == "covalent":
-                color = "#00FFFF"  # aqua
+                color = "rgba(0, 255, 255, 1)"  # aqua
             elif basin_type == "metallic":
-                color = "#C0C0C0"  # silver
+                color = "rgba(192, 192, 192, 1)"  # silver
             elif basin_type == "lone-pair":
-                color = "#800080"  # purple
+                color = "rgba(128, 0, 128, 1)"  # purple
             elif basin_type == "bare electron":
-                color = "#800000"  # maroon
+                color = "rgba(128, 0, 0, 1)"  # maroon
 
-            xs = Xn[np.where(types == basin_type)[0]]
-            ys = Yn[np.where(types == basin_type)[0]]
-            sub_labels = labels[np.where(types == basin_type)[0]]
-            fig.add_trace(
-                go.Scatter(
-                    x=xs,
-                    y=ys,
-                    mode="markers",
-                    name=f"{basin_type}",
-                    marker=dict(
-                        symbol="circle-dot",
-                        size=36,
-                        color=color,  #'#DB4551',
-                        line=dict(color="rgb(50,50,50)", width=1),
-                    ),
-                    text=sub_labels,
-                    hoverinfo="text",
-                    opacity=0.8,
+            showlegend = basin_type not in already_added_types
+            already_added_types.add(basin_type)
+            # xs = Xn[np.where(types == basin_type)[0]]
+            # ys = Yn[np.where(types == basin_type)[0]]
+            # sub_labels = labels[np.where(types == basin_type)[0]]
+            sub_label = labels[idx]
+            if Xn1[idx] == -1:
+                fig.add_trace(
+                    go.Scatter(
+                        # x=xs,
+                        # y=ys,
+                        x=[Xn[idx]],
+                        y=[Yn[idx]],
+                        mode="markers",
+                        name=f"{basin_type}",
+                        marker=dict(
+                            symbol="circle-dot",
+                            size=36,
+                            color=color,  #'#DB4551',
+                            line=dict(color="grey", width=1),
+                        ),
+                        text=sub_label,
+                        hoverinfo="text",
+                        showlegend=showlegend,
+                    )
                 )
-            )
+            else:
+                x0 = Xn[idx]
+                x1 = Xn1[idx]
+                y0 = Yn0[idx]
+                y1 = Yn1[idx]
+                fig.add_trace(
+                    go.Scatter(
+                        x=[x0, x1, x1, x0, x0],
+                        y=[y0, y0, y1, y1, y0],
+                        fill="toself",
+                        fillcolor=color,
+                        line=dict(color="grey"),
+                        hoverinfo="text",
+                        text=sub_label,
+                        name=f"{basin_type}",
+                        mode="lines",
+                        opacity=0.8,
+                        showlegend=showlegend,
+                    )
+                )
 
         # remove y axis label
         fig.update_layout(
             margin=dict(l=0, r=0, t=0, b=0),
-            xaxis_title="ELF",
+            xaxis=dict(range=[-0.1, 1], title="ELF"),
             yaxis=dict(
                 showline=False,
                 zeroline=False,
