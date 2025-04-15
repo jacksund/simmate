@@ -619,7 +619,7 @@ class Grid(VolumetricData):
         new_grid = grid1.copy()
         new_grid.data = data
         return new_grid
-    
+
     # @staticmethod
     # def label(input: NDArray, structure: NDArray = np.ones([3, 3, 3])):
     #     """
@@ -634,7 +634,7 @@ class Grid(VolumetricData):
     #         labeled_array, _ = label(input)
     #         padded_labeled = np.pad(labeled_array, 1, "wrap")
     #         relabeled_array, label_num = label(padded_labeled)
-    
+
     #     # Map each new relabeled group to the set of original labels it includes
     #     mapping = {}
     #     for i in range(1, label_num + 1):
@@ -643,7 +643,7 @@ class Grid(VolumetricData):
     #         overlapping = overlapping[overlapping != 0]  # exclude background
     #         if overlapping.size > 0:
     #             mapping[i] = set(overlapping)
-    
+
     #     # Merge overlapping sets (transitive closure)
     #     merged = []
     #     for group in mapping.values():
@@ -655,18 +655,18 @@ class Grid(VolumetricData):
     #                 break
     #         if not found:
     #             merged.append(set(group))
-    
+
     #     # Assign new consistent labels
     #     label_map = {}
     #     for new_label, group in enumerate(merged):
     #         for old_label in group:
     #             label_map[old_label] = new_label
-    
+
     #     # Apply label mapping
     #     result = np.zeros_like(labeled_array)
     #     for old, new in label_map.items():
     #         result[labeled_array == old] = new
-    
+
     #     return result
     @staticmethod
     def label(input: NDArray, structure: NDArray = np.ones([3, 3, 3])):
@@ -676,6 +676,9 @@ class Grid(VolumetricData):
         """
         if structure is not None:
             labeled_array, _ = label(input, structure)
+            if len(np.unique(labeled_array)) == 1:
+                # there is one feature or no features
+                return labeled_array
             # Features connected through opposite sides of the unit cell should
             # have the same label, but they don't currently. To handle this, we
             # pad our featured grid, re-label it, and check if the new labels
@@ -689,9 +692,9 @@ class Grid(VolumetricData):
 
         # We want to keep track of which features are connected to each other
         unique_connections = [[] for i in range(len(np.unique(labeled_array)))]
-        
+
         for i in np.unique(relabeled_array):
-        # for i in range(label_num):
+            # for i in range(label_num):
             # Get the list of features that are in this super feature
             mask = relabeled_array == i
             connected_features = list(np.unique(padded_featured_grid[mask]))
@@ -699,29 +702,28 @@ class Grid(VolumetricData):
             # already have, we want to extend the connection to include any other
             # features in this super feature
             for j in connected_features:
-                try:
-                    unique_connections[j].extend([k for k in connected_features if k != j])
-                except:
-                    breakpoint()
+
+                unique_connections[j].extend([k for k in connected_features if k != j])
+
                 unique_connections[j] = list(np.unique(unique_connections[j]))
-        
+
         # NEEDS COMMENTS
         already_connected = set()
         reduced_connections = []
-        
+
         for i in range(len(unique_connections)):
             if i in already_connected:
                 continue
-        
+
             connections = set()
             new_connections = set(unique_connections[i])
-        
+
             while connections != new_connections:
                 connections = new_connections.copy()
                 for j in connections:
                     already_connected.add(j)
                     new_connections.update(unique_connections[j])
-        
+
             if connections:
                 reduced_connections.append(sorted(new_connections))
 
