@@ -64,7 +64,7 @@ class SdfAdapter:
             lines = file.read()
 
         molecules = []
-        for sdf_str in track(lines.split("$$$$")):
+        for sdf_str in lines.split("$$$$"):
             # make sure we don't have an empty string
             sdf_str = sdf_str.strip()
             if not sdf_str:
