@@ -13,8 +13,7 @@ engine_app = typer.Typer(rich_markup_mode="markdown")
 @engine_app.callback(no_args_is_help=True)
 def engine():
     """
-    A group of commands for starting up computational resources (Workers,
-    Agents, and Clusters)
+    A group of commands for starting up computational resources (Workers, Clusters, and Schedulers)
     """
     pass
 
@@ -38,13 +37,14 @@ def start_worker(
     tag: list[str] = ["simmate"],
 ):
     """
-    Starts a Simmate Worker which will query the database for jobs to run
+    Starts a Simmate Worker which will query the database for jobs to run.
 
     By default this worker will run endlessly and not close.
 
-    - `nitems_max`: the number of task run to submit before shutdown
+    - `nitems_max`: the number of workflow runs to carry out before shutdown
+
     - `timeout`: the time (in seconds) after which this worker will stop running
-    jobs and shutdown
+    workflows and shutdown
 
     - `close_on_empty_queue`: whether the worker should shut down when the
     queue is empty
@@ -52,9 +52,8 @@ def start_worker(
     - `waittime_on_empty_queue`: if the queue is empty, the time (in seconds)
     the worker should wait before checking the queue again
 
-    - `tag`: tags to filter tasks by for submission. defaults to just 'simmate'.
+    - `tag`: tags to filter workflows by for submission. defaults to just 'simmate'.
     To provide multiple use `--tag example1 --tag example2` etc.
-
     """
 
     from simmate.engine import Worker
@@ -138,6 +137,7 @@ def stats():
 def stats_detail(tag: list[str] = [], recent: float = None):
     """
     Prints a summary of different workitems and their status
+
     - `tag`: tags to filter tasks by for submission. To provide multiple use
     `--tag example1 --tag example2` etc.
 
