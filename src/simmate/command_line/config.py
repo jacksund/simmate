@@ -138,6 +138,22 @@ def add(app_name: str, custom: bool = False):
                 "simmate.apps.configs.WarrenLabConfig",
             ]
         )
+    elif app_name in [
+        "rdkit",
+        "bcpc",
+        "cas_registry",
+        "chembl",
+        "chemspace",
+        "cod",
+        "emolecules",
+        "enamine",
+        "eppo_gd",
+        "pdb",
+    ]:
+        logging.critical(
+            "Molecular apps are not available yet! These will be available in the next simmate release (Summer 2025)"
+        )
+        return
     else:
         if not custom:
             # The user may have mistyped. We don't want to add a line to the

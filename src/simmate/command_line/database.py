@@ -74,6 +74,18 @@ def update():
 
 
 @database_app.command()
+def download(app_name: str):
+    """
+    Downloads all data for a given Simmate app & loads it into the Simmate database
+    """
+
+    from simmate.database import connect
+    from simmate.database.utilities import download_app_data
+
+    download_app_data(app_name)
+
+
+@database_app.command()
 def dump_data(filename: Path = "database_dump.json", exclude: list[str] = []):
     """
     Takes the Simmate database and writes it to a json file

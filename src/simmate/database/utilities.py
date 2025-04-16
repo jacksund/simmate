@@ -333,6 +333,61 @@ def get_all_table_docs(extra_docs: dict = {}, include_empties: bool = True) -> d
 # -----------------------------------------------------------------------------
 
 
+def download_app_data(app_name: str, **kwargs):
+    """
+    Downloads all data for a given Simmate app & loads it into the Simmate database
+    """
+    # TODO: make this dynamic & iterate all app tables. For now we hardcode
+    # supported apps.
+    logging.info(f"Loading data for the '{app_name}' app")
+
+    if app_name == "aflow":
+        from simmate.apps.aflow.models import AflowPrototype
+
+        AflowPrototype.load_remote_archive(**kwargs)
+
+    elif app_name == "cod":
+        from simmate.apps.cod.models import CodStructure
+
+        CodStructure.load_remote_archive(**kwargs)
+
+    elif app_name == "jarvis":
+        from simmate.apps.jarvis.models import JarvisStructure
+
+        JarvisStructure.load_remote_archive(**kwargs)
+
+    elif app_name == "materials_project":
+        from simmate.apps.materials_project.models import MatprojStructure
+
+        MatprojStructure.load_remote_archive(**kwargs)
+        MatprojStructure.update_all_stabilities()
+
+    elif app_name == "oqmd":
+
+        from simmate.apps.oqmd.models import OqmdStructure
+
+        OqmdStructure.load_remote_archive(**kwargs)
+
+    elif app_name in [
+        "badelf",
+        "bader",
+        "evolution",
+        "quantum_espresso",
+        "rdkit",
+        "vasp",
+    ]:
+        logging.info("'{app_name}' does not have any datasets to download. Exiting.")
+        return
+
+    else:
+        logging.critical(f"Unknown app '{app_name}'. Failed to download data.")
+        return
+
+    logging.info(
+        f"Success! Your database now contains all data associated with the '{app_name}' app."
+    )
+
+
 def load_remote_archives(**kwargs):
     """
     Goes through all third-party databases and loads their most recent remote
@@ -350,6 +405,10 @@ def load_remote_archives(**kwargs):
     instead of this utility, which downloads a full database that was built using
     this method.
     """
+    logging.warning(
+        "the 'load-remote-archives' method is depreciated and will be removed in 'v0.19.0'"
+    )
+
     from simmate.apps.aflow.models import AflowPrototype
     from simmate.apps.cod.models import CodStructure
     from simmate.apps.jarvis.models import JarvisStructure

@@ -23,18 +23,6 @@ def base_command():
     """
     This is the base command that all other Simmate commands stem from
     :fire::fire::rocket:
-
-    ---------
-
-    If you are a beginner to the command line, be sure to start with
-    [our tutorials](https://jacksund.github.io/simmate/getting_started/overview/).
-    Below you will see a list of sub-commands to try. For example, you can run `simmate
-    database --help` to learn more about it.
-
-    \n
-    TIP: Many Simmate commands are long and verbose. You can use `--install-completion`
-    to add ipython-like autocomplete to your shell.
-
     """
     # When we call the command "simmate" this is where we start, and it then
     # looks for all other functions that have the decorator "@simmate.command()"
@@ -96,8 +84,7 @@ def run_server(port: int = 8000):
 @simmate_app.command()
 def start_project():
     """
-    Creates a new folder and fills it with an example project to
-    get you started with custom Simmate workflows/datatables
+    Creates a new folder and fills it with an example Simmate app
     """
 
     import logging
