@@ -243,6 +243,45 @@ class Grid(VolumetricData):
             values.append(value)
         return values
 
+    def get_slice_around_voxel_coord(
+        self, voxel_coords: NDArray, neighbor_size: int = 1
+    ):
+        slices = []
+        for dim, c in zip(self.shape, voxel_coords):
+            idx = np.arange(c - neighbor_size, c + 2) % dim
+            idx = idx.astype(int)
+            slices.append(idx)
+        return self.total[np.ix_(slices[0], slices[1], slices[2])]
+
+    def get_maxima_near_frac_coord(self, frac_coords: NDArray, neighbor_size: int = 2):
+        coords = self.get_voxel_coords_from_frac(frac_coords).astype(int)
+        init_coords = coords + 1
+        new_coords = coords.copy()
+        # First hill climb until the voxel max is reached
+        while not np.allclose(init_coords, new_coords, rtol=0, atol=0.001):
+            init_coords = new_coords.copy()
+            subset = self.get_slice_around_voxel_coord(init_coords, 2)
+            max_val = subset.max()
+            max_loc = np.array(np.where(subset == max_val))
+            res = max_loc.mean(axis=1).round()
+            local_offset = res - 2  # shift from subset center
+            voxel_coords = new_coords + local_offset
+            new_coords = voxel_coords % np.array(self.shape)
+        # Now get the average in the area
+        # Use np.ix_ to get the full 3D cube using broadcasting
+        subset = self.get_slice_around_voxel_coord(new_coords, neighbor_size)
+        max_val = subset.max()
+        max_loc = np.array(np.where(subset == max_val))
+        res = max_loc.mean(axis=1)
+        local_offset = res - neighbor_size  # shift from subset center
+        voxel_coords = new_coords + local_offset
+        new_coords = voxel_coords % np.array(self.shape)
+        # print(self.get_frac_coords_from_vox(new_coords))
+
+        new_frac_coords = self.get_frac_coords_from_vox(new_coords)
+
+        return new_frac_coords
+
     def get_2x_supercell(self, data: NDArray):
         """
         Duplicates data with the same dimensions as the grid to make a 2x2x2
@@ -588,6 +627,9 @@ class Grid(VolumetricData):
         """
         if structure is not None:
             labeled_array, _ = label(input, structure)
+            if len(np.unique(labeled_array)) == 1:
+                # there is one feature or no features
+                return labeled_array
             # Features connected through opposite sides of the unit cell should
             # have the same label, but they don't currently. To handle this, we
             # pad our featured grid, re-label it, and check if the new labels
@@ -597,12 +639,54 @@ class Grid(VolumetricData):
         else:
             labeled_array, _ = label(input)
             padded_featured_grid = np.pad(labeled_array, 1, "wrap")
-            relabeled_array, _ = label(padded_featured_grid)
+            relabeled_array, label_num = label(padded_featured_grid)
+
+        # We want to keep track of which features are connected to each other
+        unique_connections = [[] for i in range(len(np.unique(labeled_array)))]
 
         for i in np.unique(relabeled_array):
+            # for i in range(label_num):
+            # Get the list of features that are in this super feature
             mask = relabeled_array == i
-            connected_features = np.unique(padded_featured_grid[mask])
-            # Now we relabel each of these labels to the lowest on
+            connected_features = list(np.unique(padded_featured_grid[mask]))
+            # Iterate over these features. If they exist in a connection that we
+            # already have, we want to extend the connection to include any other
+            # features in this super feature
+            for j in connected_features:
+
+                unique_connections[j].extend([k for k in connected_features if k != j])
+
+                unique_connections[j] = list(np.unique(unique_connections[j]))
+
+        # create set/list to keep track of which features have already been connected
+        # to others and the full list of connections
+        already_connected = set()
+        reduced_connections = []
+
+        # loop over each shared connection
+        for i in range(len(unique_connections)):
+            if i in already_connected:
+                # we've already done these connections, so we skip
+                continue
+            # create sets of connections to compare with as we add more
+            connections = set()
+            new_connections = set(unique_connections[i])
+            while connections != new_connections:
+                # loop over the connections we've found so far. As we go, add
+                # any features we encounter to our set.
+                connections = new_connections.copy()
+                for j in connections:
+                    already_connected.add(j)
+                    new_connections.update(unique_connections[j])
+
+            # If we found any connections, append them to our list of reduced connections
+            if connections:
+                reduced_connections.append(sorted(new_connections))
+
+        # For each set of connections in our reduced set, relabel all values to
+        # the lowest one.
+        for connections in reduced_connections:
+            connected_features = np.unique(connections)
             lowest_idx = connected_features[0]
             for higher_idx in connected_features[1:]:
                 labeled_array = np.where(

@@ -955,7 +955,7 @@ class PartitioningToolkit:
         """
         if structure is None:
             structure = self.grid.structure
-        c = CrystalNN(search_cutoff=5)
+        c = CrystalNN(search_cutoff=5, distance_cutoffs=None)
         closest_neighbors = {}
         for i in range(len(structure)):
             with warnings.catch_warnings():
