@@ -59,13 +59,13 @@ class EmoleculesMolecule(Molecule):
     # an eMolecules subscription (via the bb metadata)
     # ----------------------------
 
-    cas_compound = table_column.ForeignKey(
-        "datasets.CasRegistry",  # str to prevent circ import
-        on_delete=table_column.PROTECT,
-        null=True,
-        blank=True,
-        related_name="+",  # disabled
-    )
+    # cas_compound = table_column.ForeignKey(
+    #     "datasets.CasRegistry",  # str to prevent circ import
+    #     on_delete=table_column.PROTECT,
+    #     null=True,
+    #     blank=True,
+    #     related_name="+",  # disabled
+    # )
     """
     The CAS number associated with this compound.
     

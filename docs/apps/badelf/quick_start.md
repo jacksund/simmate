@@ -15,7 +15,7 @@
 
 BadELF is a method that combines Bader Charge Analysis and the Electron Localization Function (ELF) to predict oxidation states and perform population analysis of electrides. It uses Bader segmentation of the ELF to calculate the charge on electride electrons and Voronoi segmentation of the ELF to calculate charge on atoms. Since the original BadELF paper was published, additional functionality has been added to handle systems with covalent/metallic features and for handling the up/down spin ELF and charge density separately.
 
-An additional tool, the [ElfAnalyzerToolkit](../finder/elf_analyzer) has also been developed to assist in analyzing features in the ELF. This tool is designed for in-depth ELF topological analysis, and can also perform a simple charge analysis using traditional zero-flux surfaces.
+An additional tool, the [ElfAnalyzerToolkit](finder/elf_analyzer.md) has also been developed to assist in analyzing features in the ELF. This tool is designed for in-depth ELF topological analysis, and can also perform a simple charge analysis using traditional zero-flux surfaces.
 
 !!! note
     BadELF currently only works with VASP, but we are interested in expanding its use to other ab initio software. If you are interested in this, let us know, as that will help to make this a higher priority.
@@ -24,7 +24,7 @@ An additional tool, the [ElfAnalyzerToolkit](../finder/elf_analyzer) has also be
 
 ## Installation
 
-Follow the instructions for [installing simmate](../../../getting_started/installation/quick_start). Then BadELF can be set up with the following instructions.
+Follow the instructions for [installing simmate](/getting_started/installation/quick_start.md). Then BadELF can be set up with the following instructions.
 
 1. This app uses `pybader` and `networkx` under the hood. Install this with:
 ``` bash
@@ -102,13 +102,13 @@ Alternatively, the BadELF workflow can be run from the command line without a ya
 simmate workflows run-quick bad-elf.badelf.badelf --directory /path/to/folder
 ```
 
-If you plan to run many BadELF calculations or need to manipulate the results in post, it may be more convenient to run the workflow using python. See the [full guides](../../../../full_guides/workflows/basic_use) for more details. For a complete list of parameters and their usage, see our [parameters page](../../../parameters)
+If you plan to run many BadELF calculations or need to manipulate the results in post, it may be more convenient to run the workflow using python. See the [full guides](/full_guides/workflows/basic_use.md) for more details. For a complete list of parameters and their usage, see our [parameters page](/parameters.md)
 
 ### (2) from structure
 
 If you would prefer to have Simmate handle the VASP calculation, workflows are available that will first run the required DFT and then BadELF. 
 
-These workflows are stored in the `Warren Lab` app, which contains our lab's preferred VASP settings. Refer to the [`Warren Lab` app](../../warren_lab) for more details and to view the available workflows.
+These workflows are stored in the `Warren Lab` app, which contains our lab's preferred VASP settings. Refer to the [`Warren Lab` app](/apps/warren_lab.md) for more details and to view the available workflows.
 
 --------------------------------------------------------------------------------
 
@@ -118,7 +118,7 @@ Running BadELF as described above uses Simmate's Workflow system. The results of
 
 ### (1) The Database
 
-When setting up simmate, you created a local or cloud database. Results from any workflow run through simmate will be stored here, allowing for the automation of high-throughput calculations. Basic usage of the database can be found in our [getting started docs](../../../getting_started/database/quick_start). The BadELF results table can be accessed through python as a pandas dataframe:
+When setting up simmate, you created a local or cloud database. Results from any workflow run through simmate will be stored here, allowing for the automation of high-throughput calculations. Basic usage of the database can be found in our [getting started docs](/getting_started/database/quick_start.md). The BadELF results table can be accessed through python as a pandas dataframe:
 
 ``` python
 from simmate.database import connect
@@ -143,7 +143,7 @@ If you are only interested in a small number of BadELF calculations, it may be m
 
 ## Covalent and Metallic Systems
 
-Covalent and metallic features in the ELF conflict with the original BadELF algorithm (see [Background](../background)). The current version of BadELF offers several ways to handle these features:
+Covalent and metallic features in the ELF conflict with the original BadELF algorithm (see [Background](background.md)). The current version of BadELF offers several ways to handle these features:
 
 ### (1) Split Them with Planes
 

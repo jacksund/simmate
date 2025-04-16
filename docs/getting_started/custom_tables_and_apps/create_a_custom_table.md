@@ -4,7 +4,7 @@
 
 ## Building Custom Tables
 
-1. Review the tutorial on [python inheritance](../../database/intro_to_python_inheritance/) (from the `How tables are built` tutorial in the `Database` section). This topic is important to understanding when building new tables. 
+1. Review the tutorial on [python inheritance](/getting_started/database/intro_to_python_inheritance.md) (from the `How tables are built` tutorial in the `Database` section). This topic is important to understanding when building new tables. 
 
 2. In your new app, open the file `example_app/models.py` and you will see two example tables defined for you. This is all you need to build tables! Note, how we also use `Structure` and `Calculation` to add a bunch of columns to in the 2nd table:
 ``` python
@@ -20,7 +20,7 @@ class MyCustomTable2(Structure, Calculation):
 ```
 
     !!! tip
-        We only demonstrate `Structure` and `Calculation` in the examples shown, but there are many more `base_data_types` you can utilize. Make sure to review our guides in the [`simmate.database`](/full_guides/database/overview/) module for more information.
+        We only demonstrate `Structure` and `Calculation` in the examples shown, but there are many more `base_data_types` you can utilize. Make sure to review our guides in the [`simmate.database`](/full_guides/database/overview.md) module for more information.
     
     !!! info
         In Django (which Simmate uses under the hood), a `DatabaseTable` is referred to as a `Model`. Therefore, a model and table can be considered the same. As we're using Django, the file name `models.py` must remain as-is. That's where Django searches for your custom database tables.

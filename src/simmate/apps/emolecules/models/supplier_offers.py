@@ -18,6 +18,9 @@ class EmoleculesSupplierOffer(DatabaseTable):
     [eMolecules](https://www.emolecules.com/) database.
     """
 
+    class Meta:
+        db_table = "emolecules__supplier_offers"
+
     # disable cols
     source = None
 

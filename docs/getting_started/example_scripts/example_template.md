@@ -16,9 +16,9 @@ This script does x, y, z using a, b, c...
 
 (note: these are common prerequisites for complex setups so we keep these below)
 
-- [x] use a postgres database ([guide](/simmate/getting_started/use_a_cloud_database/build_a_postgres_database/))
-- [x] load the matproj database into your postgres database ([guide](/simmate/getting_started/use_a_cloud_database/build_a_postgres_database/#vii-load-third-party-data)))
-- [x] start a bunch of simmate workers (or a "cluster") ([guide](/simmate/getting_started/add_computational_resources/quick_start/))
+- [x] use a postgres database ([guide](/getting_started/use_a_cloud_database/build_a_postgres_database.md))
+- [x] load the matproj database into your postgres database
+- [x] start a bunch of simmate workers (or a "cluster") ([guide](/getting_started/add_computational_resources/quick_start.md))
 
 
 ## The script :rocket:

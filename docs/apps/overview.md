@@ -1,31 +1,35 @@
-## Understanding Apps
 
-Apps are groups of functionality designed to help with a specific analysis or third-party software.
+## What is an App?
 
-For instance, VASP is a program capable of running a variety of density functional theory (DFT) calculations. However, since it's not written in Python, we require some "helper" code to execute VASP commands, create input files, and extract data from the outputs. This helper code is what makes up Simmate's `vasp` app.
+Apps are installable Simmate add-ons. Each one adds support for a third-party software/dataset or helps with a specific analysis. Learn more in the [`Apps` section within the `Full Guides`](/full_guides/apps/basic_use.md).
 
-Similarly, Simmate includes an `evolution` app that encompasses all the functionalities required to run evolutionary structure prediction.
+!!! example
+    VASP is a program capable of running a variety of density functional theory (DFT) calculations. However, since it's not written in Python, we require some "helper" code to execute VASP commands, create input files, and extract data from the outputs. This helper code is what makes up Simmate's `vasp` app.
 
-## Source code for each app
+!!! example
+    The `evolution` app includes workflows for running evolutionary structure prediction. It also utilizies datasets from other data-providing apps like `oqmd`, `jarvis`, and `aflow` into the evolutionary searches.
 
-All apps adhere to the same folder structure (though each folder is optional):
+## Summary Table
 
-```
-├── example_app
-│   ├── configuration
-│   ├── inputs
-│   ├── outputs
-│   ├── error_handlers
-│   ├── models (aka database tables)
-│   ├── website
-│   └── workflows
-```
-
-Here's a logical breakdown of what each module contains:
-
-- `configuration`: Assists in installing the program and configuring common settings.
-- `inputs` & `outputs`: Automates file generation and data loading into Python.
-- `error_handlers`: Helps rectify common calculation errors that cause the program to fail.
-- `database`: Contains all the datatables for storing our results.
-- `workflows`: Defines how the program is set up, executed, and processed by integrating all the `inputs`, `outputs`, and `error-handler` functions. Some workflows also use `database` and manage the saving of results.
-- `website`: Inclides any website interface features the app may need.
+| App                   | Type       | CLI                | Workflows          | Data               |
+| --------------------- | ---------- | ------------------ | ------------------ | ------------------ |
+| AFLOW                 | `crystal`  | :x:                | :x:                | :white_check_mark: |
+| BadELF                | `crystal`  | :x:                | :x:                | :white_check_mark: |
+| Bader (henkelman)     | `crystal`  | :x:                | :white_check_mark: | :x:                |
+| BCPC                  | `molecule` | :x:                | :x:                | :white_check_mark: |
+| CAS Registry          | `molecule` | :x:                | :x:                | :white_check_mark: |
+| ChEMBL                | `molecule` | :x:                | :x:                | :white_check_mark: |
+| ChemSpace             | `molecule` | :x:                | :x:                | :white_check_mark: |
+| COD                   | `crystal`  | :x:                | :x:                | :white_check_mark: |
+| eMolecules            | `molecule` | :x:                | :x:                | :white_check_mark: |
+| Enamine               | `molecule` | :x:                | :x:                | :white_check_mark: |
+| EPPO Global Database  | `other`    | :x:                | :x:                | :white_check_mark: |
+| Evolutionary Searches | `crystal`  | :x:                | :white_check_mark: | :x:                |
+| JARVIS                | `crystal`  | :x:                | :x:                | :white_check_mark: |
+| Materials Project     | `crystal`  | :x:                | :white_check_mark: | :white_check_mark: |
+| OQMD                  | `crystal`  | :x:                | :x:                | :white_check_mark: |
+| PDB                   | `molecule` | :x:                | :x:                | :white_check_mark: |
+| Quantum Espresso      | `crystal`  | :white_check_mark: | :white_check_mark: | :x:                |
+| RDKit                 | `molecule` | :x:                | :x:                | :x:                |
+| VASP                  | `crystal`  | :white_check_mark: | :white_check_mark: | :x:                |
+| Warren Lab            | `crystal`  | :x:                | :white_check_mark: | :white_check_mark: |

@@ -7,7 +7,7 @@ The first step of the BadELF algorithm is to determine whether there are bare el
 
 While it was originally conceived to support the BadELF algorithm, the current ElfAnalyzerToolkit class can be used as a general tool for analyzing the ELF, providing considerably more information on each ELF feature than the BadElfToolkit class.
 
-Explanations for each parameter can be found as a subsection of the `elf_analyzer_kwargs` section on our [parameters page](../../../../parameters)
+Explanations for each parameter can be found as a subsection of the `elf_analyzer_kwargs` section on our [parameters page](/parameters.md)
 
 ## Initializing the Class
 
@@ -110,7 +110,7 @@ If `write_results=True`, the plots will be written to a .html file which can be 
 plot.show()
 ```
 
-This should generate a plot similar to those on the [background page](../background).
+This should generate a plot similar to those on the [background page](../background.md).
 
 These plots are the easiest way to visualize the ELF features in your system. The Y-axis represents the ELF value at which each domain first separates from its parent domain. Hovering over each node in the graph will provide additional information about the domain it represents. For reducible domains, this includes information like the number of atoms it surrounds, and their structure index. For irreducible domains it includes things such as charge, volume, ELF maximum, depth, distance to nearest atom, and more. We recommend loading your ELF into a program such as VESTA or OVITO and different ELF values with the plot to help get used to what it represents. 
 

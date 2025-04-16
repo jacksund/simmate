@@ -20,17 +20,17 @@ In this tutorial, we'll install Anaconda on your local desktop/laptop. Even if y
 
 
 ### 1. Install Anaconda
-To install Anaconda, you don't need to create an account on their website. Simply visit [their download page](https://www.anaconda.com/products/distribution) and install Anaconda. Stick to the default options during installation.
+To install Anaconda, you don't need to create an account on their website. Simply visit [their download page](https://www.anaconda.com/download/success) and install Anaconda. Stick to the default options during installation.
 
 
 ### 2. Open Anaconda
 After the download is complete, launch the application, which will be named **Anaconda Navigator**.
 
-On the home screen, you'll see several "IDEs", such as Orange3, Jupyter Notebook, Spyder, and others. These IDEs are for writing your own Python code. Just as there are multiple platforms like Microsoft Word, Google Docs, & LibreOffice for writing essays, these IDEs offer different ways to write Python. We recommend [Spyder](https://www.spyder-ide.org/), which we will introduce in a later tutorial.
+On the home screen, you'll see several "IDEs", such as Orange3, Jupyter Notebook, Spyder, and others. These IDEs are for writing your own Python code. Just as there are multiple platforms like Microsoft Word, Google Docs, & LibreOffice for writing essays, these IDEs offer different ways to write Python. We recommend [Spyder](https://www.spyder-ide.org/), which we will introduce in a later tutorial (so don't select it yet).
 
 <!-- This is an image of the Anaconda GUI home -->
 <p align="center" style="margin-bottom:40px;">
-<img src="https://docs.anaconda.com/_images/nav-tabs1.png"  height=440 style="max-height: 440px;">
+<img src="https://mintlify.s3.us-west-1.amazonaws.com/anaconda-29683c67/images/nav-tabs.png"  height=440 style="max-height: 440px;">
 </p>
 
 
@@ -39,7 +39,7 @@ On the left side of the application window, you'll find an **Environments** tab.
 
 <!-- This is an image of the Anaconda GUI environments -->
 <p align="center" style="margin-bottom:40px;">
-<img src="https://docs.anaconda.com/_images/nav-env1.png"  height=440 style="max-height: 440px;">
+<img src="https://mintlify.s3.us-west-1.amazonaws.com/anaconda-29683c67/images/nav-env.png"  height=440 style="max-height: 440px;">
 </p>
 
 

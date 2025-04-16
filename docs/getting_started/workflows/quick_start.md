@@ -10,7 +10,7 @@
 simmate database reset
 ```
 
-2. Create a structure file for sodium chloride, which we will use to practice calculations. Name it `POSCAR` and fill it with the following content:
+2. Create a structure file for sodium chloride, which we will use to practice calculations. Name it `POSCAR` and add the following text to it:
 ```
 Na1 Cl1
 1.0
