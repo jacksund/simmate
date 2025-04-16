@@ -90,7 +90,10 @@ class SmartsSet:
             )
 
         # convert all smarts to mol objects
-        data["smarts_mol"] = [Molecule.from_smarts(s) for s in data.smarts_str]
+        data["smarts_mol"] = [
+            Molecule.from_smarts(s, clean_benchtop_conventions=False)
+            for s in data.smarts_str
+        ]
 
         # set cache for faster loading next time
         cls._smarts_data = data

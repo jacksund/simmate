@@ -301,11 +301,12 @@ class Molecule:
         return cls(rdkit_molecule)
 
     @classmethod
-    def from_smarts(cls, smarts: str):
+    def from_smarts(cls, smarts: str, clean_benchtop_conventions: bool = True):
         """
         Takes a SMARTS (SMILES-like) string and converts it to a `Molecule` object.
         """
-        smarts = cls._clean_benchtop_conventions(smarts)
+        if clean_benchtop_conventions:
+            smarts = cls._clean_benchtop_conventions(smarts)
         rdkit_molecule = cls._load_rdkit(
             rdkit_loader=AllChem.MolFromSmarts,
             molecule_input=smarts,
