@@ -2,7 +2,9 @@
 
 ----------------------------------------------------------------------
 
-Before running a workflow, we need a crystal structure. There are numerous ways to obtain a crystal structure, such as downloading one online or creating one from scratch. In this guide, we will create a structure file from scratch so that we understand the information it contains.
+Before running a workflow, we need a crystal structure or a molecule. In this tutorial, we'll use a crystal structure, but the same process applies to molecular systems.
+
+There are numerous ways to obtain a crystal structure, such as downloading one online or creating one from scratch. Here, we will create a structure file from scratch so that we understand the information it contains.
 
 ----------------------------------------------------------------------
 
@@ -50,7 +52,7 @@ direct
 ```
 This text represents a structure, which consists of a lattice and a list of atomic sites. The lattice is defined by a 3x3 matrix (lines 3-5), and the sites are a list of xyz coordinates with an element (lines 8-9 show fractional coordinates). 
 
-1. Renaming Your File from `POSCAR.txt` file to `POSCAR`. If you're using the command-line to create/edit this file, you can use the copy (`cp`) command to rename it:
+4. Rename your file from `POSCAR.txt` file to `POSCAR`. If you're using the command-line to create/edit this file, you can use the copy (`cp`) command to rename it:
 ``` bash
 cp POSCAR.txt POSCAR
 ```
@@ -58,7 +60,7 @@ cp POSCAR.txt POSCAR
     !!! note 
         On Windows, you may receive a warning about changing the file extension. You can safely ignore this warning and change the extension.
 
-1. Your structure file is now ready to use!
+5. Your structure file is now ready to use!
 
 ----------------------------------------------------------------------
 
@@ -96,5 +98,56 @@ loop_
   Na  Na0  1  0.00000000  0.00000000  0.00000000  1
   Cl  Cl1  1  0.50000000  0.50000000  0.50000000  1
 ```
+
+----------------------------------------------------------------------
+
+## Molecular Formats
+
+While we're focusing on crystal structures for this tutorial, keep in mind that molecular compounds have their own formats too. For example, the molecule for [Apirin](https://pubchem.ncbi.nlm.nih.gov/compound/Aspirin) can be represented in several ways:
+
+- In the SMILES format (`example.smi` files):
+```
+CC(=O)OC1=CC=CC=C1C(=O)O
+```
+
+    !!! note
+        The SMILES format includes *only* bonding information, and it does not include XY or XYZ coordinates for each atom. This means the 2D orientation (and 3D conformation) of whatever compound you have is lost in the SMILES format. Still, it's a handy and easy format because of how small the text file is.
+
+- In the Structure Data File (SDF) format (`example.sdf` files):
+```
+     RDKit          2D
+
+ 13 13  0  0  0  0  0  0  0  0999 V2000
+    5.2500   -1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    3.7500   -1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    3.0000   -2.5981    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
+    3.0000    0.0000    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
+    1.5000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.7500   -1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.7500   -1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.5000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.7500    1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.7500    1.2990    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.5000    2.5981    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.7500    3.8971    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
+    3.0000    2.5981    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0
+  2  3  2  0
+  2  4  1  0
+  4  5  1  0
+  5  6  2  0
+  6  7  1  0
+  7  8  2  0
+  8  9  1  0
+  9 10  2  0
+ 10 11  1  0
+ 11 12  2  0
+ 11 13  1  0
+ 10  5  1  0
+M  END
+```
+    
+    !!! note
+        You can see each line is a single atom in an SDF. The first three numbers are the XYZ coordinates, where all of our Z values are 0 in this example (meaning we have a 2D drawing of the molecule!). The remaining numbers include bonding and stereochemistry information.
 
 ----------------------------------------------------------------------

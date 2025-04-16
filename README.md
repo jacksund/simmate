@@ -35,8 +35,7 @@
 
 ## About
 
-The Simulated Materials Ecosystem (Simmate) is a toolbox and framework for computational materials research. It lets you explore various crystal databases, predict new materials, and quickly calculate properties.
-
+Simmate is a full-stack framework for chemistry research. It helps you calculate properties and explore third-party databases for both for molecular and crystalline systems. For experts, it also provides a toolbox to build out your own chemistry applications.
 
 ## Before exploring the code
 

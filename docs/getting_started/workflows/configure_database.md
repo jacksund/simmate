@@ -10,7 +10,7 @@ The Simmate database is just a list of tables -- so you can imagine an Excel spr
     Let's say we want a table for crystal structures. It would have columns for formula, density, and number of sites, among other things. Likewise, a static-energy calculation would have columns for final energy, CPU time, and more. Rather than build & fill these tables from scratch, we let Simmate handle all of this.
 
 !!! note
-    Our database tutorial will come after we learn about workflows. For now, we are just building the database and will revisit it later.
+    Our database tutorial will come after we learn about workflows. For now, just know we building the database so that we have somewhere to store results.
 
 ----------------------------------------------------------------------
 

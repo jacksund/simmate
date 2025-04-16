@@ -53,16 +53,16 @@ This website is your go-to resource for all our tutorials and guides. Before div
 
 ## What is Simmate?
 
-Simmate, or the Simulated Materials Ecosystem, is a comprehensive toolbox and framework designed for computational materials research. It allows you to explore various crystal databases, predict new materials, and easily calculate properties such as electronic, elastic, thermodynamic, and more.
+Simmate is a full-stack framework for chemistry research. It helps you calculate properties and explore third-party databases for both for molecular and crystalline systems. For experts, it also provides a toolbox to build out your own chemistry applications.
 
-Computational research can be intimidating because there are so many programs to choose from, and it's challenging to select and combine them for your specific project. Simmate is designed to bridge this gap, acting as the link between these diverse programs, databases, and utilities. We take on the heavy lifting and teach you these programs along the way.
+The computational side of chemistry research can be intimidating because there are so many programs to choose from, and it's challenging to select and combine them for your specific project. Simmate aims to be a link between the many diverse programs, databases, and utilities out there, and in turn, simplify the setup and execution of chemistry projects. Third-party datasets and tools are ingetrated into Simmate as "apps", where there is a growing list of [supported software and databases](/apps/overview.md). 
 
-We also provide an extremely powerful toolbox and API for experts. Those familiar with the field can view Simmate as an alternative to the [Materials Project](https://materialsproject.org/) stack ([Atomate](https://github.com/hackingmaterials/atomate), [PyMatGen](https://github.com/materialsproject/pymatgen), [MatMiner](https://github.com/hackingmaterials/matminer), and [more](https://matsci.org/)), where we operate under a different coding philosophy. **Our top priorities are usability and readability.** We therefore distribute Simmate as an "all-in-one" package, including a core material science toolkit, workflow management, database ORM, and a website interface. To learn more about the design choices in Simmate compared to other codes, visit our [comparisons page](https://github.com/jacksund/simmate/tree/main/benchmarks).
+You can mix & match these apps to meet your research needs and to even build out your own custom applications. Simmate includes a core chemical toolkit, workflow management system, database ORM, and web component library -- giving you a framework with essential frontend and backend tools. Our goal is for Simmate to be "batteries-included", so all of these apps & tools are available within the base installation. To learn more about Simmate's scope & design, as well as how it compares to other popular chemistry frameworks, visit [our comparisons page](https://github.com/jacksund/simmate/tree/main/benchmarks).
 
 ## A Sneak-Peak of Features
 
 ### Prebuilt Workflows
-Simmate comes with ready-to-use workflows for most common material properties, ranging from simple XRD pattern prediction to intensive dynamic simulations. All workflows can be submitted via a website user-interface, the command-line, or custom python scripts:
+Simmate comes with ready-to-use workflows for most common calculated properties, ranging from simple XRD pattern prediction to intensive dynamic simulations. All workflows can be submitted via a website user-interface, the command-line, or custom python scripts:
 
 === "yaml"
     ``` yaml
@@ -107,8 +107,8 @@ Simmate comes with ready-to-use workflows for most common material properties, r
     https://simmate.org/workflows/static-energy/vasp/matproj/submit
     ```
 
-### Scalable Workflows
-Simmate adjusts to your project's scale, whether on a single computer or across thousands of machines. It supports various settings, including university clusters with SLURM or PBS, and cloud platforms using Kubernetes and Docker.
+### Scalable Orchestration
+Simmate can easily scale along with your project, whether you're on a single computer or across thousands of machines. It supports various setups, including university clusters with SLURM or PBS, and cloud platforms using Kubernetes and Docker.
 
 === "create workflow"
     ```python
@@ -124,23 +124,23 @@ Simmate adjusts to your project's scale, whether on a single computer or across 
 
 === "schedule jobs"
     ```python
-    state = workflow.run_cloud(structure="NaCl.cif")  # (1)
+    state = workflow.run_cloud(name="Jack")  # (1)
     result = state.result()  # (2)
     ```
 
-    1. On your local computer, schedule your workflow run. This is as easy as replacing "run" with "run_cloud". This returns a "future-like" object.
-    2. Calling result will wait until the job completes and grab the result! Note, the job won't run until you start a worker that is connected to the same database
+    1. On your local computer, schedule your workflow run. This returns a "future-like" object.
+    2. This will wait until the job completes and return the result. Note, the job won't run until you start a worker that is connected to the same database
 
 === "add remote resources"
     ``` bash
     simmate engine start-worker  # (1)
     ```
 
-    1. In a separate terminal or even on a remote HPC cluster, you can start a worker that will start running any scheduled jobs
+    1. In a separate terminal or even on a remote HPC cluster, you can start a worker that will start running any scheduled jobs in your database.
 
 
 ### Full-Feature Database
-Simmate's database manages your private data while also integrating with third-party databases such as COD, Materials Project, JARVIS, and others. It automatically constructs tables with common data types by including a wide range of standard columns. You can then access this data through a web interface, REST API, SQL, or Python ORM:
+Simmate's database can manage your perosnal data while also integrating with third-party databases such as COD, Materials Project, JARVIS, and others. It automatically constructs tables with common data types by including a wide range of standard columns. You can then access this data through a web interface, REST API, SQL, or Python ORM:
 
 === "python"
 
@@ -168,7 +168,7 @@ Simmate's database manages your private data while also integrating with third-p
 === "SQL"
     ``` postgres
     SELECT *
-    FROM data_explorer_matprojstructure
+    FROM materials_project__structures
     WHERE nsites >= 3
       AND energy IS NOT NULL
       AND density BETWEEN 1 AND 5
@@ -178,12 +178,118 @@ Simmate's database manages your private data while also integrating with third-p
 
 === "REST API"
     ``` url
-    https://simmate.org/third-parties/MatprojStructure/?format=api
+    https://simmate.org/third-parties/MatprojStructure/?format=json
     ```
 
 === "website"
     ``` url
     https://simmate.org/third-parties/MatprojStructure/
+    ```
+
+### Beginner-Friendly Toolkit
+Simmate includes a `toolkit` that builds off popular packages in the chemistry community, specifically [`rdkit`](https://www.rdkit.org/) for molecules and [`pymatgen`](https://pymatgen.org/) for periodic crystals. The end result is a toolkit for rapidly prototyping analyses. Here is an eample script that is straightforward & clean with Simmate's toolkit, but less intuitive & Pythonic for others:
+
+=== "simmate-toolkit"
+    ``` python
+    from simmate.toolkit import Molecule
+
+    # STEP 1
+    molecules = Molecule.from_sdf_file("example.sdf")
+
+    # STEP 2
+    molecules_filtered = []
+    for molecule in molecules:
+        if molecule.num_stereocenters > 3:
+            continue
+        if molecule.num_atoms_heavy > 30:
+            continue
+        if "Na" in molecule.elements:
+            continue
+        molecules_filtered.append(molecule)
+
+    # STEP 3
+    inchi_keys = [m.to_inchi_key() for m in molecules_filtered]
+    ```
+
+=== "rdkit"
+    ``` python
+    from rdkit import Chem
+    from rdkit.Chem import FindMolChiralCenters, Descriptors
+
+    # STEP 1
+    molecules = []
+    with Chem.SDMolSupplier("example.sdf") as supplier:
+    for molecule in supplier:
+        if mol is None:
+            continue
+        molecules.append(molecule)
+
+    # STEP 2
+    molecules_filtered = []
+    for molecule in molecules:
+
+        chiral_centers = FindMolChiralCenters(
+            molecule,
+            force=True,
+            includeUnassigned=True,
+            useLegacyImplementation=False,
+        )
+        if len(chiral_centers) > 3:
+            continue
+        
+        nheavy = Descriptors.HeavyAtomCount(molecule)
+        if nheavy > 30:
+            continue
+
+        has_na = False  # false until proven otherwise
+        for atom in molecule.GetAtoms():
+            if atom.GetSymbol() == "Na":
+                has_na = True
+                break
+        if has_na:
+            continue
+
+        molecules_filtered.append(molecule)
+
+    # STEP 3
+    inchi_keys = [Chem.MolToInchiKey(m) for m in molecules_filtered]
+    ```
+
+=== "oe-toolkit"
+    ``` python
+    from openeye import oechem
+    from openeye import oeiupac
+    
+    # STEP 1
+    molecules = []
+    with oechem.oemolistream("example.sdf") as ifs:
+        for mol in ifs.GetOEMols():
+            if mol is None:
+                continue
+            molecules.append(mol)
+    
+    # STEP 2
+    molecules_filtered = []
+    for mol in molecules:
+    
+        stereo_count = sum(1 for atom in mol.GetAtoms() if atom.IsChiral())
+        if stereo_count > 3:
+            continue
+    
+        heavy_atom_count = sum(
+            1 for atom in mol.GetAtoms() if atom.GetAtomicNum() > 1
+        )
+        if heavy_atom_count > 30:
+            continue
+    
+        has_na = any(atom.GetAtomicNum() == 11 for atom in mol.GetAtoms())
+        if has_na:
+            continue
+    
+        molecules_filtered.append(mol)
+    
+    # STEP 3
+    inchi_keys = [oeiupac.OECreateInChIKey(m) for m in molecules_filtered]
     ```
 
 ## Need help?

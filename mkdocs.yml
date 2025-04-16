@@ -126,7 +126,6 @@ nav:
             - a) Create an app: getting_started/custom_tables_and_apps/create_a_custom_app.md
             - b) Create a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
             - c) Adding app workflows: getting_started/custom_tables_and_apps/using_app_workflows.md
-            - d) Extra app features: getting_started/custom_tables_and_apps/extra_features.md
         
         - 7. Use a cloud database:
             - Quickstart: getting_started/use_a_cloud_database/quick_start.md
@@ -143,13 +142,15 @@ nav:
             - Overview: getting_started/example_scripts/overview.md
             - Example-001: getting_started/example_scripts/example-001.md
             - Example-002: getting_started/example_scripts/example-002.md
-
-    - Parameters: parameters.md
     
     - Full Guides:
         
         - Overview: full_guides/overview.md
         
+        - Apps:
+            - Basic Use: full_guides/apps/basic_use.md
+            - Creating custom apps: full_guides/apps/creating_custom_apps.md
+
         - Website:
             - Setup & Config: full_guides/website/setup_and_config.md
             - REST API: full_guides/website/rest_api.md
@@ -197,29 +198,30 @@ nav:
                     - Lattice: full_guides/toolkit/crystal_structures/pymatgen/lattice.md
                     - Sites: full_guides/toolkit/crystal_structures/pymatgen/sites.md
                     - Composition: full_guides/toolkit/crystal_structures/pymatgen/composition.md
+                   # - API: full_guides/toolkit/crystal_structures/single_structure/api.md
                 # - Single Structure:
-                #    - Structure Loading: full_guides/toolkit/crystal_structures/single_structure/loading.md
-                #    - Structure Exporting: full_guides/toolkit/crystal_structures/single_structure/exporting.md
-                #    - Cleaning & Prep: full_guides/toolkit/crystal_structures/single_structure/cleaning.md
-                #    - Common Properties: full_guides/toolkit/crystal_structures/single_structure/properties.md
-                #    - Common Analyses: full_guides/toolkit/crystal_structures/single_structure/analyses.md
-                #    # - API: full_guides/toolkit/crystal_structures/single_structure/api.md
+                #     - Structure Loading: full_guides/toolkit/crystal_structures/single_structure/loading.md
+                #     - Structure Exporting: full_guides/toolkit/crystal_structures/single_structure/exporting.md
+                #     - Cleaning & Prep: full_guides/toolkit/crystal_structures/single_structure/cleaning.md
+                #     - Common Properties: full_guides/toolkit/crystal_structures/single_structure/properties.md
+                #     - Common Analyses: full_guides/toolkit/crystal_structures/single_structure/analyses.md
                 # - Many Structures: 
                 #    - Featurizers: full_guides/toolkit/crystal_structures/many_structures/featurizers.md
+        - Extras:
+            - Configuration: full_guides/extras/configuration.md
+            - Contributing:
+                - First time setup: full_guides/contributing/first_time_setup.md
+                # - Testing: full_guides/extras/testing.md
+                - Creating & submitting changes: full_guides/contributing/creating_and_submitting_changes.md
+                - Extra notes & tips: full_guides/contributing/extra.md
+                - Maintainer notes: full_guides/contributing/maintainer_notes.md
+            - Utilities: full_guides/extras/utilities.md
 
-        - Contributing:
-            - First time setup: full_guides/contributing/first_time_setup.md
-            - Creating & submitting changes: full_guides/contributing/creating_and_submitting_changes.md
-            - Extra notes & tips: full_guides/contributing/extra.md
-            - Maintainer notes: full_guides/contributing/maintainer_notes.md
-
-        # - Extras:
-            # - Utilities: full_guides/extras/utilities.md
-            # - Configuration: full_guides/extras/configuration.md
-            # - Testing: full_guides/extras/testing.md  # Move to contributing...?
+    - Parameters: parameters.md
 
     - Apps: 
         - Overview: apps/overview.md
+        - AFLOW: apps/aflow.md
         - BadELF: 
             - Background: apps/badelf/background.md
             - Quick Start: apps/badelf/quick_start.md
@@ -227,12 +229,22 @@ nav:
             - ElfAnalyzerToolkit: 
                 - Background: apps/badelf/finder/background.md
                 - Usage: apps/badelf/finder/elf_analyzer.md
-        - Bader (henkelman): apps/bader_henkelman.md
-        - CLEASE: apps/clease.md
-        - DeepMD: apps/deepmd.md
+        - 'Bader (henkelman)': apps/bader_henkelman.md
+        - BCPC: apps/bcpc.md
+        - CAS Registry: apps/cas_registry.md
+        - Chembl: apps/chembl.md
+        - ChemSpace: apps/chemspace.md
+        - COD: apps/cod.md
+        - eMolecules: apps/emolecules.md
+        - Enamine: apps/enamine.md
+        - EPPO Global Database: apps/eppo_gd.md
         - Evolutionary Searches: apps/evolution.md
+        - JARVIS: apps/jarvis.md
         - Materials Project: apps/materials_project.md
+        - OQMD: apps/oqmd.md
+        - PDB: apps/pdb.md
         - Quantum Espresso: apps/quantum_espresso.md
+        - RDKit: apps/rdkit.md
         - VASP:
             - Overview: apps/vasp/overview.md
             - Installation: apps/vasp/installation.md
@@ -241,5 +253,12 @@ nav:
             # - Outputs: apps/vasp/outputs.md
             # - Error Handlers: apps/vasp/error_handlers.md
         - Warren Lab: apps/warren_lab.md
+        - '++ Experimental Apps':
+            - BIOVIA COMSO: apps/biovia_cosmo.md
+            - CLEASE: apps/clease.md
+            - DeepMD: apps/deepmd.md
+            - OpenEye OMEGA: apps/openeye_omega.md
+            - Schrodinger: apps/schrodinger.md
+            - Surflex: apps/surflex.md
     
     - Updates: change_log.md
