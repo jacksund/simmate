@@ -5,7 +5,7 @@ var sketchers = {};
 
 // Creates a 2D molecule ChemDraw sketcher
 function add_mol_sketcher(sketcher_id) {
-    perkinelmer.ChemdrawWebManager.attach({
+    RevvitySignals.ChemdrawWebManager.attach({
         id: sketcher_id,
         callback: function(chemdrawweb) {
             sketchers[sketcher_id] = chemdrawweb;  // Save the sketcher instance with its ID
