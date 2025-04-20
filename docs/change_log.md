@@ -60,6 +60,33 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 --------------------------------------------------------------------------------
 
+## v0.18.0 (2025.04.20)
+
+**Enhancements**
+
+- added a molecular toolkit, which is a wrapper around `rdkit` that cleans up the python api
+- updated Data web pages and UI to be more user friendly
+- added frontend framework for building dynamic web forms/pages
+- enabled data management from web ui -- allowing users to create and update a dataset from the ui
+- added chemdraw support and beta apps for molecular datasets (eMolecules, Enamine, Chemspace, etc)
+- added Quantum Espresso support
+- added rdkit-postgres cartridge support
+- large updates to the `BadELF` app to support materials with covalent and metallic character
+
+
+**Refactors**
+
+- `django_unicorn` dependency was forked and refactored into a custom interal version
+- REST APIs for data views no longer use `django_rest_framework`
+- add the `simmate.apps.dev` module for early-stage, experimental apps
+- the `database.third_parties` module is now moved into individual apps: `materials_project`, `jarvis`, `aflow`, and `oqmd`
+
+**Fixes**
+
+- many misc fixes to the website UI and settings config
+
+--------------------------------------------------------------------------------
+
 ## v0.17.0 (2024.05.20)
 
 **Enhancements**
