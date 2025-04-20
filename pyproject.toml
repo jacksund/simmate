@@ -155,7 +155,8 @@ EXTRAS = [
     "h5py",  # for reading QE's binary output files
     # OpenEye needs to point to a different source & a license is required
     #   pip install -i https://pypi.anaconda.org/OpenEye/simple OpenEye-toolkits
-    "OpenEye-toolkits @ https://pypi.anaconda.org/OpenEye/simple",
+    # "OpenEye-toolkits @ https://pypi.anaconda.org/OpenEye/simple",
+    # ^^^ BUG: must be commented out for pypi uploads to work
 ]
 
 # Link to our homepage. Use github for now.
