@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     "crispy_forms",  # django-crispy-forms for HTML boostrap forms
     "rest_framework",  # djangorestframework for the REST API
     "rest_framework.authtoken",  # for programmatic REST API access
-    "django_filters",  # django-filter for filterable REST API urls
     #
     # Apps for django-allauth that allow sign-on using external accounts
     "allauth",
@@ -67,10 +66,6 @@ INSTALLED_APPS = [
     # those changes) for a given model. This is important for models that users
     # interact with and edit in the UI
     "simple_history",
-    #
-    # Django contrib comments let you track comments on a model and handles
-    # moderation / user / date features for you.
-    "django_comments",
     #
     # Other third-party apps/tools to consider. Note that some of these don't
     # need to be installed apps while some also request different setups.
@@ -276,9 +271,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {"anon": "2500/hour", "user": "7500/hr"},
-    # We use django-filter to automatically handle filtering from a REST url
     "DEFAULT_FILTER_BACKENDS": [
-        "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.OrderingFilter",
     ],
     # There are multiple ways to render the data, where we default to a nice HTML
