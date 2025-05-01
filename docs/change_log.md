@@ -58,6 +58,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 **Enhancements**
 - added frontend framework and docs, based off of a fork of `django-unicorn`
+- added custom API token generation and auth backend
 
 **Refactors**
 - refactored website's workflow tab to use new API backend

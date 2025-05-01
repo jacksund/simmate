@@ -45,10 +45,6 @@ INSTALLED_APPS = [
     #   "django.contrib.redirects",
     #   "django.contrib.sitemaps",
     #
-    # These are apps created by third-parties that give us extra features
-    "rest_framework",  # djangorestframework for the REST API
-    "rest_framework.authtoken",  # for programmatic REST API access
-    #
     # Apps for django-allauth that allow sign-on using external accounts
     "allauth",
     "allauth.account",
@@ -232,52 +228,6 @@ if settings.website.static_file_hashes:
 # production server, so we don't include it when DEBUG is set to False.
 # if DEBUG:
 #     STATICFILES_DIRS += [STATIC_ROOT]
-
-# These settings help configure djangorestframework and our REST API
-REST_FRAMEWORK = {
-    # The REST framework has both authentication AND permission classes. Adding
-    # the auth classes ensure we have user data available when rendering the
-    # template. Then I allow anyone (anonymous and signed in users) to access
-    # the REST APIs. Note, even though this is allow-all, we still have the
-    # "RequireLoginMiddleware" applied elsewhere if the admin choses.
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.TokenAuthentication",
-    ],
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",
-    ],
-    # Because we have a massive number of results for different endpoints,
-    # we want to set results to be paginated by 20 results per page. This
-    # way we don't have to set a page limit for every individual endpoint. Note
-    # I can consider switching to LimitOffsetPagination in the future, which
-    # allows the number of results per page to vary, but I don't do this
-    # for now because there's no easy way to set paginator.max_limit in the
-    # settings here.
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 20,
-    # To prevent users from querying too much and bringing down our servers,
-    # we set a throttle rate on each user. Here, "anon" represents an anonymous
-    # user (not signed-in) while signed-in users have access to higher download
-    # rates. Note these are very restrictive because we prefer users to download
-    # full databases and use Simmate locally instead.
-    "DEFAULT_THROTTLE_CLASSES": [
-        "rest_framework.throttling.AnonRateThrottle",
-        "rest_framework.throttling.UserRateThrottle",
-    ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "2500/hour", "user": "7500/hr"},
-    "DEFAULT_FILTER_BACKENDS": [
-        "rest_framework.filters.OrderingFilter",
-    ],
-    # There are multiple ways to render the data, where we default to a nice HTML
-    # view, but also support pure JSON or using Django-REST's interactive API
-    "DEFAULT_RENDERER_CLASSES": [
-        "rest_framework.renderers.TemplateHTMLRenderer",
-        "rest_framework.renderers.BrowsableAPIRenderer",
-        "rest_framework.renderers.JSONRenderer",
-    ],
-}
 
 # Allows the use of iFrames from within Simmate (such as the structure-viewer)
 X_FRAME_OPTIONS = "SAMEORIGIN"

@@ -70,7 +70,6 @@ dependencies=[
     # Extra (smaller) dependencies & utilities
     "django-allauth >=0.56.0, <=0.63.3",  # for website accounts and google/github sign-ins
     "django-simple-history >=3.3.0, <=3.3.0",  # for tracking changes to data
-    "djangorestframework >=3.13.1, <3.15.2",  # for our REST API
     "pyyaml >=6.0, <=6.0.1",  # for yaml configuration files
     "plotly >=5.4.0, <5.19.0",  # for interactive plots and visualization
     "markdown >=3.4.1, <=3.5.1",  # for docs and markdown rendering in html templates
