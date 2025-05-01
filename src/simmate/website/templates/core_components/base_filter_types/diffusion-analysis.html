@@ -1,5 +1,3 @@
-{% load crispy_forms_tags %}
-<!-- Diffusion Info -->
 <div class="accordion-item">
     <h2 class="accordion-header" id="headingDiffusionFilters">
         <button class="accordion-button collapsed"
@@ -15,11 +13,11 @@
          class="accordion-collapse collapse"
          aria-labelledby="headingDiffusionFilters">
         <div class="accordion-body">
-            {{ form.migrating_specie | as_crispy_field }}
-            {{ form.vacancy_mode | as_crispy_field }}
-            {{ form.atomic_fraction__range | as_crispy_field }}
-            {{ form.barrier_cell__range | as_crispy_field }}
-            {{ form.npaths_involved__range | as_crispy_field }}
+            {{ form.migrating_specie }}
+            {{ form.vacancy_mode }}
+            {{ form.atomic_fraction__range }}
+            {{ form.barrier_cell__range }}
+            {{ form.npaths_involved__range }}
         </div>
     </div>
 </div>

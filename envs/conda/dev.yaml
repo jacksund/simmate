@@ -25,7 +25,6 @@ dependencies:
     - distributed >=2023.6.1, <2024.4.3
     - django >=4.0.0, <4.2.8
     - django-allauth >=0.56.0, <=0.63.3
-    - django-crispy-forms >=1.13.0, <=1.14.0
     #
     # A fork of django-unicorn was made, which we now use + its deps
     # - django_unicorn >=0.59.0, <=0.59.0

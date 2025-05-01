@@ -1,4 +1,3 @@
-{% load crispy_forms_tags %}
 <div class="card mb-0">
     <div class="card-header" id="headingCalculationFilters">
         <h5 class="m-0">
@@ -17,15 +16,15 @@
          aria-labelledby="headingCalculationFilters"
          data-bs-parent="#accordionExample">
         <div class="card-body">
-            {{ form.run_id | as_crispy_field }}
-            {{ form.directory | as_crispy_field }}
-            {{ form.created_at__range | as_crispy_field }}
-            {{ form.updated_at__range | as_crispy_field }}
-            {{ form.workflow_name | as_crispy_field }}
-            {{ form.computer_system | as_crispy_field }}
-            {{ form.directory | as_crispy_field }}
-            {{ form.total_time__range | as_crispy_field }}
-            {{ form.queue_time__range | as_crispy_field }}
+            {{ form.run_id }}
+            {{ form.directory }}
+            {{ form.created_at__range}}
+            {{ form.updated_at__range }}
+            {{ form.workflow_name }}
+            {{ form.computer_system }}
+            {{ form.directory }}
+            {{ form.total_time__range }}
+            {{ form.queue_time__range }}
         </div>
     </div>
 </div>

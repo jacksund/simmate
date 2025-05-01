@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     #   "django.contrib.sitemaps",
     #
     # These are apps created by third-parties that give us extra features
-    "crispy_forms",  # django-crispy-forms for HTML boostrap forms
     "rest_framework",  # djangorestframework for the REST API
     "rest_framework.authtoken",  # for programmatic REST API access
     #
@@ -233,9 +232,6 @@ if settings.website.static_file_hashes:
 # production server, so we don't include it when DEBUG is set to False.
 # if DEBUG:
 #     STATICFILES_DIRS += [STATIC_ROOT]
-
-# This sets the django-crispy formating style
-CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 # These settings help configure djangorestframework and our REST API
 REST_FRAMEWORK = {

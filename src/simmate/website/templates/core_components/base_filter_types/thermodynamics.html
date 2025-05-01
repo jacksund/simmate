@@ -1,4 +1,3 @@
-{% load crispy_forms_tags %}
 <div class="card mb-0">
     <div class="card-header" id="headingThermoFilters">
         <h5 class="m-0">
@@ -17,12 +16,12 @@
          aria-labelledby="headingThermoFilters"
          data-bs-parent="#accordionExample">
         <div class="card-body">
-            {{ form.energy__range | as_crispy_field }}
-            {{ form.energy_per_atom__range | as_crispy_field }}
-            {{ form.energy_above_hull__range | as_crispy_field }}
-            {{ form.is_stable | as_crispy_field }}
-            {{ form.formation_energy__range | as_crispy_field }}
-            {{ form.formation_energy__range | as_crispy_field }}
+            {{ form.energy__range }}
+            {{ form.energy_per_atom__range }}
+            {{ form.energy_above_hull__range }}
+            {{ form.is_stable }}
+            {{ form.formation_energy__range }}
+            {{ form.formation_energy__range }}
         </div>
     </div>
 </div>

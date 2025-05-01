@@ -1,4 +1,3 @@
-{% load crispy_forms_tags %}
 {% include "core_components/base_filter_types/calculation.html" %}
 {% include "core_components/base_filter_types/structure.html" %}
 {% include "core_components/base_filter_types/thermodynamics.html" %}
@@ -25,11 +24,11 @@
             <a><em><b>WARNING:</b> even though some static energy calculations provide this information, these values
                 are
             very rough estimates.</em></a>
-            {{ form.band_gap__range | as_crispy_field }}
-            {{ form.is_gap_direct | as_crispy_field }}
-            {{ form.energy_fermi__range | as_crispy_field }}
-            {{ form.conduction_band_minimum__range | as_crispy_field }}
-            {{ form.valence_band_maximum__range | as_crispy_field }}
+            {{ form.band_gap__range }}
+            {{ form.is_gap_direct }}
+            {{ form.energy_fermi__range }}
+            {{ form.conduction_band_minimum__range }}
+            {{ form.valence_band_maximum__range }}
         </div>
     </div>
 </div>

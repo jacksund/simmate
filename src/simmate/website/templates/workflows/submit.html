@@ -48,8 +48,7 @@
       method="post"
       enctype="multipart/form-data">
     {% csrf_token %}
-    {% load crispy_forms_tags %}
-    {{ submission_form | crispy }}
+    {{ submission_form }}
     <input type="submit" value="Submit">
 </form>
 {% endblock %}

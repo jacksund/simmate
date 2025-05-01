@@ -1,5 +1,3 @@
-{% load crispy_forms_tags %}
-<!-- Relaxation Info -->
 <div class="card mb-0">
     <div class="card-header" id="headingRelaxFilters">
         <h5 class="m-0">
@@ -17,7 +15,7 @@
          class="collapse"
          aria-labelledby="headingRelaxFilters"
          data-bs-parent="#accordionExample">
-        <div class="card-body">{{ form.volume_change__range | as_crispy_field }}</div>
+        <div class="card-body">{{ form.volume_change__range }}</div>
     </div>
 </div>
 {% include "core_components/base_filter_types/calculation.html" %}
@@ -43,11 +41,11 @@
         <div class="card-body">
             <a><em><b>WARNING:</b> even though some relaxations provide this information, these values are
             very rough estimates.</em></a>
-            {{ form.band_gap__range | as_crispy_field }}
-            {{ form.is_gap_direct | as_crispy_field }}
-            {{ form.energy_fermi__range | as_crispy_field }}
-            {{ form.conduction_band_minimum__range | as_crispy_field }}
-            {{ form.valence_band_maximum__range | as_crispy_field }}
+            {{ form.band_gap__range }}
+            {{ form.is_gap_direct }}
+            {{ form.energy_fermi__range }}
+            {{ form.conduction_band_minimum__range }}
+            {{ form.valence_band_maximum__range }}
         </div>
     </div>
 </div>

@@ -1,5 +1,3 @@
-{% load crispy_forms_tags %}
-<!-- Dynamics Run Info -->
 <div class="card mb-0">
     <div class="card-header" id="headingDynamFilters">
         <h5 class="m-0">
@@ -18,10 +16,10 @@
          aria-labelledby="headingDynamFilters"
          data-bs-parent="#accordionExample">
         <div class="card-body">
-            {{ form.temperature_start__range | as_crispy_field }}
-            {{ form.temperature_end__range | as_crispy_field }}
-            {{ form.time_step__range | as_crispy_field }}
-            {{ form.nsteps__range | as_crispy_field }}
+            {{ form.temperature_start__range }}
+            {{ form.temperature_end__range }}
+            {{ form.time_step__range }}
+            {{ form.nsteps__range }}
         </div>
     </div>
 </div>

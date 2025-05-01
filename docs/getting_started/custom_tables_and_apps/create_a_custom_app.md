@@ -190,7 +190,7 @@ You can update hard-coded django settings using the simmate setting file (`~/sim
 
 ``` yaml
 django_settings:
-    CRISPY_TEMPLATE_PACK: bootstrap4
+    LOGIN_REDIRECT_URL: '/accounts/profile/'
 ```
 
 If you need even more control (such as providing a custom `settings.py` entirely), please reach out to our team so that we can add support for your needs.
