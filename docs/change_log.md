@@ -56,7 +56,15 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 **Fixes**
 -->
 
-- no new changes have been merged into the `main` branch yet
+**Enhancements**
+- added frontend framework and docs, based off of a fork of `django-unicorn`
+
+**Refactors**
+- refactored website's workflow tab to use new API backend
+- removed `django-contrib-comments`, `django-crispy-forms`, `dj-database-url`, `django-filter`, and `djangorestframework` dependencies
+
+**Fixes**
+- fix Data tab in website view failing to load due to molecule template
 
 --------------------------------------------------------------------------------
 

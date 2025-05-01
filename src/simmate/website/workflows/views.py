@@ -3,8 +3,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from simmate.database.base_data_types import DatabaseTable
-from simmate.website.core_components.base_api_view import SimmateAPIViewSet
 from simmate.website.workflows.forms import SubmitWorkflow
 from simmate.workflows.utilities import (  # WORKFLOW_TYPES,
     get_apps_by_type,
@@ -106,68 +104,6 @@ def workflows_by_type(request, workflow_type):
     }
     template = "workflows/by_type.html"
     return render(request, template, context)
-
-
-class WorkflowAPIViewSet(SimmateAPIViewSet):
-    template_list = "workflows/detail.html"
-    template_retrieve = "workflows/detail_run.html"
-
-    @staticmethod
-    def get_table(
-        request,
-        workflow_type,
-        workflow_app,
-        workflow_preset,
-        pk=None,  # this is passed for 'retrieve' views but we don't use it
-    ) -> DatabaseTable:
-        """
-        grabs the relevant database table using the URL request
-        """
-        name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
-        workflow = get_workflow(name_full)
-        return workflow.database_table
-
-    @staticmethod
-    def get_initial_queryset(
-        request,
-        workflow_type,
-        workflow_app,
-        workflow_preset,
-        pk=None,  # this is passed for 'retrieve' views but we don't use it
-    ):
-        name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
-        workflow = get_workflow(name_full)
-        return workflow.all_results
-
-    def get_list_context(
-        self,
-        request,
-        workflow_type,
-        workflow_app,
-        workflow_preset,
-    ) -> dict:
-        name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
-        workflow = get_workflow(name_full)
-
-        # TODO: grab some metadata about this calc. For example...
-        # ncalculations = MITRelaxation.objects.count()
-        # nflows_submitted = workflow.nflows_submitted
-
-        return {"workflow": workflow}
-
-    def get_retrieve_context(
-        self,
-        request,
-        workflow_type,
-        workflow_app,
-        workflow_preset,
-        pk,
-    ) -> dict:
-        name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
-        workflow = get_workflow(name_full)
-
-        return {"workflow": workflow}
-
 
 @login_required
 def workflow_submit(

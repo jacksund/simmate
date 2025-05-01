@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 from simmate.configuration import settings
 from simmate.database.base_data_types import DatabaseTable
-from simmate.website.core_components.base_api_view_dev import DynamicApiView
+from simmate.website.core_components.base_api_view import DynamicApiView
 
 # BUG: fails if tables from different apps have the same name
 EXPLORABLE_TABLES = {

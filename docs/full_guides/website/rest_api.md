@@ -149,9 +149,3 @@ Some custom servers (such as Simmate's Corteva site), do require authenticated u
         ```
 
 ------------------------------------------------------------
-
-## Advanced API Usage
-
-Our endpoints are dynamically created for each request, thanks to our `SimmateAPIViewset` class in the `simmate.website.core_components` module, which automatically renders an API endpoint from a Simmate database table. The backend implementation of dynamic APIs is still experimental as we assess the pros and cons of this approach -- for example, it allows for quick Django configuration, but at the expense of increased CPU time per web request.
-
-------------------------------------------------------------

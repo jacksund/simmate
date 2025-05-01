@@ -1,313 +1,285 @@
 # -*- coding: utf-8 -*-
 
-from django.http import HttpRequest
+from django.shortcuts import get_object_or_404, render
+from django.views import View
 
-# from rest_framework.generics import GenericAPIView
-from rest_framework.response import Response
-from rest_framework.serializers import ModelSerializer
-from rest_framework.viewsets import GenericViewSet
-
-from simmate.database.base_data_types import DatabaseTable, SearchResults, Spacegroup
+from simmate.database.base_data_types import DatabaseTable
+from simmate.website.utilities import get_pagination_urls
 
 
-class SimmateAPIViewSet(GenericViewSet):
+class DynamicApiView(View):
     """
-    Example use:
+    Abstract base class that enables dynamic API format (html vs. json) as well
+    as (optionally) dynamic table selection via `get_table`. Setting a single
+    table is also allowed via the `_table` attribute.
 
-    ``` python
-    # in views.py
-    class ExampleTableViewSet(SimmateAPIViewSet):
-        table = ExampleTable
-        template_list = "custom_app/list.html"
-        template_retrieve = "custom_app/retrieve.html"
-
-    # in urls.py
-    path(
-        route="example-table",
-        view=ExampleTableViewSet.list_view,
-        name="example-list",
-    ),
-    path(
-        route="example-table/<int:id>",
-        view=ExampleTableViewSet.retrieve_view,
-        name="example-retrieve",
-    )
-    ```
+    This class is largely inspired by the GenericViewSet class in django
+    rest_framework, where it was re-written for clarity, extra features, and
+    better integration with Simmate database tables.
     """
 
-    table: DatabaseTable = None
-
-    template_about: str = None
-
-    template_list: str = None
-
-    template_retrieve: str = None
-
-    max_query_size: int = 10000
-
-    def get_about_response(self, request: HttpRequest, *args, **kwargs) -> Response:
-        # !!! we assume html format for now, but might want api/json formats in the future
-        table = self.get_table(request, *args, **kwargs)
-        data = {
-            "table_docs": table.get_table_docs(),
-            **self.get_about_context(request, **kwargs),
-        }
-        return Response(data)
-
-    def get_list_response(self, request: HttpRequest, *args, **kwargs) -> Response:
-        # This code is modified from the ListModelMixin, where instead of returning
-        # a response, we perform additional introspection first.
-        # https://github.com/encode/django-rest-framework/blob/master/rest_framework/mixins.py#L33
-
-        # self.format_kwarg --> not sure why this always returns None, so I
-        # grab the format from the request instead. If it isn't listed, then
-        # I'm using the default which is html.
-        self._format_kwarg = request.GET.get("format", "html")
-
-        queryset = self.filter_queryset(self.get_queryset())
-
-        # Suprisingly, counting the total number of results in a query is MUCH
-        # slower than loading some of the rows! See...
-        #   https://wiki.postgresql.org/wiki/Slow_Counting
-        # To address this, we limit the maximum queryset size to be 10k. This
-        # is a large number because counting queries really only becomes an
-        # issue with >1mil rows in the dataset.
-        # We still allow users to set "None" disable this feature.
-        if self.max_query_size:
-            queryset = queryset[: self.max_query_size]
-        # TODO: should max_query_size be attached to each model instead?
-
-        # attempt to paginate the results
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-        else:
-            serializer = self.get_serializer(queryset, many=True)
-
-        # If don't have the html format, we follow simple logic from the
-        # original ListModelMixin method
-        if self._format_kwarg != "html":
-            if page is not None:
-                return self.get_paginated_response(serializer.data)
-            else:
-                return Response(serializer.data)
-
-        # otherwise we assume the html format.
-        else:
-            filterset = self.filterset_class(request.GET)
-            data = {
-                "filterset": filterset,
-                "filterset_mixins": filterset._meta.model.get_mixin_names(),
-                "form": filterset.form,
-                "extra_filters": filterset._meta.model.api_filters_extra,
-                "calculations": serializer.instance,  # return python objs, not dict
-                # OPTIMIZE: counting can take ~20 sec for ~10 mil rows, which is
-                # terrible for a web UI. I tried a series of fixes but no luck:
-                #   https://stackoverflow.com/questions/55018986/
-                "ncalculations_matching": queryset.count(),
-                # "ncalculations_possible": self.get_queryset().count(), # too slow
-                **self.paginator.get_html_context(),
-                **self.get_list_context(request, **kwargs),
-            }
-            return Response(data)
-
-    def get_retrieve_response(self, request: HttpRequest, *args, **kwargs) -> Response:
-        # self.format_kwarg --> not sure why this always returns None, so I
-        # grab the format from the request instead. If it isn't listed, then
-        # I'm using the default which is html.
-        self._format_kwarg = request.GET.get("format", "html")
-
-        # ---------------------------------------------------
-        # This code is from the RetrieveModelMixin, where instead of returning
-        # a response, we perform additional introspection first
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        # return Response(serializer.data) <--- removed from original
-        # ---------------------------------------------------
-
-        if self._format_kwarg == "html":
-            # we want to return a python object, not a serialized dictionary
-            # because the object has more attributes and methods attached to it.
-            calculation = serializer.instance
-            data = {
-                "calculation": calculation,
-                "table_mixins": calculation.get_mixin_names(),
-                "extra_columns": calculation.get_extra_columns(),
-                **self.get_retrieve_context(request, **kwargs),
-            }
-            return Response(data)
-        else:
-            return Response(serializer.data)
+    mode: str = None
+    # options:
+    # 'list',
+    # 'entry',
+    # 'about',
+    # 'search',
+    # 'entry-new',
+    # 'entry-update',
+    # 'entry-new-many',
+    # 'entry-update-many',
 
     @classmethod
-    def from_table(
-        cls,
-        table: DatabaseTable,
-        view_type: str,
-        initial_queryset: SearchResults = None,
-        **kwargs,
-    ):
-        # For all tables, we share all the data -- no columns are hidden. Therefore
-        # the code for the Serializer is always the same.
-        class NewSerializer(ModelSerializer):
-            class Meta:
-                model = table
-                fields = "__all__"
+    @property
+    def about_view(cls):
+        return cls.as_view(mode="about")
 
-        # For the source dataset, not all tables have a "created_at" column, but
-        # when they do, we want to return results with the most recent additions first
-        # by default. Ordering can also be overwritten by passing "ordering=..."
-        # to the URL.
-        default_ordering_field = (
-            "-created_at" if hasattr(table, "created_at") else table._meta.pk.name
-        )
+    @classmethod
+    @property
+    def list_view(cls):
+        return cls.as_view(mode="list")
 
-        # we also want to preload spacegroup for the structure mixin
-        intial_queryset = initial_queryset or table.objects.all()
-        if issubclass(table, Spacegroup) and hasattr(table, "spacegroup"):
-            intial_queryset = intial_queryset.select_related("spacegroup")
+    @classmethod
+    @property
+    def search_view(cls):
+        return cls.as_view(mode="search")
 
-        NewViewSet = type(
-            f"{table.table_name}ViewSet",
-            (cls,),
-            dict(
-                queryset=intial_queryset,
-                serializer_class=NewSerializer,
-                filterset_class=table.api_filterset,
-                ordering_fields="__all__",  # allowed to order by any field
-                ordering=[default_ordering_field],  # set default order
-                **kwargs,
-            ),
-        )
+    @classmethod
+    @property
+    def entry_view(cls):
+        return cls.as_view(mode="entry")
 
-        # these two parameters depend on the view_type
-        if view_type == "list":
-            NewViewSet.template_name = (
-                table.html_table_template
-                if table.html_table_template
-                else cls.template_list
+    @classmethod
+    @property
+    def entry_new_view(cls):
+        return cls.as_view(mode="entry-new")
+
+    @classmethod
+    @property
+    def entry_new_many_view(cls):
+        return cls.as_view(mode="entry-new-many")
+
+    @classmethod
+    @property
+    def entry_update_view(cls):
+        return cls.as_view(mode="entry-update")
+
+    def get(self, request, *args, **kwargs):
+        """
+        This is the main entrypoint for all GET requests.
+        """
+
+        # TODO: I could make this extra dynamic if there's ever a reason for it.
+        #   getattr(f"get_{mode}_{format}_view")
+        # For now, I just hardcode the options for mode and format.
+
+        if not self.mode:
+            raise Exception(
+                "Make sure you initialize your view with `.as_view(mode=...)`."
+                " Mode options are 'list', 'about', and 'entry'."
             )
-            return NewViewSet.as_view({"get": "get_list_response"})
-        elif view_type == "retrieve":
-            NewViewSet.template_name = (
-                table.html_template_entry
-                if table.html_template_entry
-                else cls.template_retrieve
-            )
-            return NewViewSet.as_view({"get": "get_retrieve_response"})
-        elif view_type == "about":
-            NewViewSet.template_name = (
-                table.html_template_about
-                if table.html_template_about
-                else cls.template_about
-            )
-            return NewViewSet.as_view({"get": "get_about_response"})
+        elif self.mode == "list":
+            html_view = self.get_list_html_view
+            json_view = self.get_list_json_view
+        elif self.mode == "entry":
+            html_view = self.get_entry_html_view
+            json_view = self.get_entry_json_view
+        elif self.mode == "search":
+            html_view = self.get_search_html_view
+            json_view = self.get_search_json_view
+        elif self.mode == "entry-new":
+            html_view = self.get_entry_new_html_view
+            json_view = self.get_entry_new_json_view
+        elif self.mode == "entry-new-many":
+            html_view = self.get_entry_new_many_html_view
+            json_view = self.get_entry_new_many_json_view
+        elif self.mode == "entry-update":
+            html_view = self.get_entry_update_html_view
+            json_view = self.get_entry_update_json_view
+        elif self.mode == "about":
+            html_view = self.get_about_html_view
+            json_view = self.get_about_json_view
+        else:
+            raise Exception(f"Unknown 'mode' given: {self.mode}")
+
+        # move to proper view function based on requested format
+        view_format = request.GET.get("format", "html")  # default is html
+        if view_format == "html":
+            return html_view(request, *args, **kwargs)
+        elif view_format == "json":
+            # BUG: new/update/search should be POST, not GET
+            return json_view(request, *args, **kwargs)
+        else:
+            raise Exception(f"Unknown 'format' GET arg given: {view_format}")
+
+    # -------------------------------------------------------------------------
+
+    _table: DatabaseTable = None
+    """
+    The table to use in building this view. Note, if the table is dynamically
+    determined (via a custom `get_table` method), this should be left as `None`.
+    
+    Always use the `get_table` to grab the table, rather than this attribute.
+    """
+
+    _table_entry_kwarg: str = "table_entry_id"
+
+    @classmethod
+    def get_table(cls, request, *args, **kwargs) -> DatabaseTable:
+        """
+        grabs the relevant database table using the request.
+
+        Some apps dynamically determine the table, so 'get_table' method is
+        overwritten to do this.
+        """
+        if cls._table:
+            return cls._table
         else:
             raise Exception(
-                "Unknown view type. Must be 'about', 'list', or 'retrieve'."
+                f"No `_table` attribute set for {cls.__name__}. Either set "
+                "the table, or overwrite the `get_table` method."
             )
+
+    @classmethod
+    def get_table_entry(cls, request, *args, **kwargs) -> DatabaseTable:
+        """
+        grabs the relevant table entry using the request.
+
+        By default, this uses the `_table_entry_kwarg` attribute in the URL
+        config as the `pk`
+        """
+        table = cls.get_table(request, *args, **kwargs)
+        return get_object_or_404(table, pk=kwargs[cls._table_entry_kwarg])
 
     # -------------------------------------------------------------------------
 
-    # METHODS FOR STATIC VIEWS
+    # The "about" views, which give documentation for a given table
 
-    @classmethod
-    def about_view(cls, request, **request_kwargs):
-        view = cls.from_table(table=cls.table, view_type="about")
-        return view(request, **request_kwargs)
+    def get_about_json_view(self, request, *args, **kwargs):
+        raise NotImplementedError("JSON responses for tables is still under dev.")
 
-    @classmethod
-    def list_view(cls, request, **request_kwargs):
-        view = cls.from_table(table=cls.table, view_type="list")
-        return view(request, **request_kwargs)
-
-    @classmethod
-    def retrieve_view(cls, request, **request_kwargs):
-        view = cls.from_table(table=cls.table, view_type="retrieve")
-        return view(request, **request_kwargs)
+    def get_about_html_view(self, request, *args, **kwargs):
+        table = self.get_table(request, *args, **kwargs)
+        context = {
+            "table": table,
+            "table_docs": table.get_table_docs(),
+            # TODO: **table.html_extra_about_context,
+        }
+        template = table.html_about_template
+        return render(request, template, context)
 
     # -------------------------------------------------------------------------
 
-    # METHODS FOR DYNAMIC VIEWS
+    # The "list" views for a single database table.
+    # Includes filtering via GET params.
 
-    # NOTE: These dynamically create a serializer and a view EVERY TIME a
-    # URL is requested. This means...
-    #   1. there is no pre-set api that exists. The exisiting api must be inferred
-    #       from lower level workflows and their tables
-    #   2. these views will be very inefficient if queried by a script
-    # I chose dynamic creation over creating all endpoints on-startup to prevent
-    # the `from simmate.database import connect` method from taking too long --
-    # as that would require import all workflows on start-up. However, if the
-    # (1) api spec or (2) speed of this method ever becomes an issue, I can
-    # address these by either...
-    #   1. having a utility that prints out the full API spec but isn't called on startup
-    #   2. making all APIViews up-front
-
-    @classmethod
-    def get_table(cls, request: HttpRequest = None, *args, **kwargs) -> Response:
-        if not cls.table:
-            raise NotImplementedError(
-                "Either set a table attribute to your viewset or write a custom"
-                "get_table method"
-            )
-        else:
-            return cls.table
-
-    @staticmethod
-    def get_initial_queryset(request: HttpRequest, *args, **kwargs) -> Response:
-        # Sometimes you may want the query to start from a filtered input, rather
-        # than 'objects.all()` An example of this when we are building a view
-        # for a specific workflow and need to filter by workflow_name.
-        # If you just return None, then 'objects.all()` will be used by default.
-        return
-
-    @classmethod
-    def dynamic_about_view(cls, request, **request_kwargs):
-        table = cls.get_table(request, **request_kwargs)
-        view = cls.from_table(table=table, view_type="about")
-        return view(request, **request_kwargs)
-
-    @classmethod
-    def dynamic_list_view(cls, request, **request_kwargs):
-        table = cls.get_table(request, **request_kwargs)
-        initial_queryset = cls.get_initial_queryset(request, **request_kwargs)
-        view = cls.from_table(
-            table=table,
-            initial_queryset=initial_queryset,
-            view_type="list",
+    def get_list_json_view(self, request, *args, **kwargs):
+        table = self.get_table(request, *args, **kwargs)
+        page = table.filter_from_request(request)
+        pagination_urls = get_pagination_urls(request, page)
+        response = page.object_list.to_json_response(
+            next_url=pagination_urls["next"],
+            previous_url=pagination_urls["previous"],
         )
-        return view(request, **request_kwargs)
+        return response
 
-    @classmethod
-    def dynamic_retrieve_view(cls, request, **request_kwargs):
-        table = cls.get_table(request, **request_kwargs)
-        view = cls.from_table(table=table, view_type="retrieve")
-        return view(request, **request_kwargs)
+    def get_list_html_view(self, request, *args, **kwargs):
+        table = self.get_table(request, *args, **kwargs)
+        page = table.filter_from_request(request)
+        pagination_urls = get_pagination_urls(request, page)
+        context = {
+            "table": table,
+            "page": page,
+            "pagination_urls": pagination_urls,
+            # "paginator": page.paginator,
+            # "entries": page.object_list,  # page.paginator.object_list gives ALL results
+            # TODO:
+            **table.html_breadcrumb_context,
+            **table.html_extra_context,
+            # make left sidebar compact (only icons) when there's a quick-search
+            # view, so that we can put the search form on the right side
+            # "compact_sidebar": True if table.html_search_view else False,
+        }
+        template = table.html_table_template
+        return render(request, template, context)
 
     # -------------------------------------------------------------------------
 
-    # OPTIONAL METHODS FOR SUPPLYING EXTRA CONTEXT TO HTML TEMPLATES
+    # The "entry" view for a single database table. Uses IDs to get the entry.
 
-    def get_about_context(self, request, **request_kwargs) -> dict:
-        """
-        This defines extra context that should be passed to the template when
-        using format=html when a list-view is requested. By default, no extra
-        context is returned.
-        """
-        return {}
+    def get_entry_json_view(self, request, *args, **kwargs):
+        table_entry = self.get_table_entry(request, *args, **kwargs)
+        return table_entry.to_json_response()
 
-    def get_list_context(self, request, **request_kwargs) -> dict:
-        """
-        This defines extra context that should be passed to the template when
-        using format=html when a list-view is requested. By default, no extra
-        context is returned.
-        """
-        return {}
+    def get_entry_html_view(self, request, *args, **kwargs):
+        table_entry = self.get_table_entry(request, *args, **kwargs)
+        context = {
+            "table_entry": table_entry,
+            # TODO:
+            # **table.html_entry_breadcrumb_context,
+            # **table.html_entry_extra_context,
+        }
+        template = table_entry.html_entry_template
+        return render(request, template, context)
 
-    def get_retrieve_context(self, request, **request_kwargs) -> dict:
-        """
-        This defines extra context that should be passed to the template when
-        using format=html when a retrieve-view is requested. By default, no extra
-        context is returned.
-        """
-        return {}
+    # -------------------------------------------------------------------------
+    # Below are HTML Form views -- typically these are POST, but we use
+    # django-unicorn which contains any POSTs within a component.
+    # TODO: in the future, I may want to allow JSON post requests so that
+    # rows can be added/updated via API calls. I don't do this yet because the
+    # ORM is preferred + using admin permissions.
+    # -------------------------------------------------------------------------
+
+    # The "entry-new" views, which are for creating one or more new rows
+
+    def get_entry_new_json_view(self, request, *args, **kwargs):
+        raise NotImplementedError("Entry-New views still under dev.")
+
+    def get_entry_new_html_view(self, request, *args, **kwargs):
+        table = self.get_table(request, *args, **kwargs)
+        if not table.html_form_view:
+            raise NotImplementedError(
+                "This model does not have an 'entry-new' view yet!"
+            )
+        context = {
+            "unicorn_component_name": table.html_form_view,
+            **table.html_breadcrumb_context,  # TODO: need to update crumbs
+        }
+        template = table.html_entry_form_template
+        return render(request, template, context)
+
+    # -------------------------------------------------------------------------
+
+    # The "entry-update" views, which are for editting one or more existing rows
+
+    def get_entry_update_json_view(self, request, *args, **kwargs):
+        raise NotImplementedError("Entry-Update views still under dev.")
+
+    def get_entry_update_html_view(self, request, *args, **kwargs):
+        # We can just use the entry-new view because our underlying unicorn
+        # view will dynamically determine if we have a new vs update.
+        return self.get_entry_new_html_view(request, *args, **kwargs)
+
+    # -------------------------------------------------------------------------
+
+    # The "entry-new-many" views, which build a entry_new_many form for the table
+
+    def get_entry_new_many_json_view(self, request, *args, **kwargs):
+        raise NotImplementedError("entry_new_many views still under dev.")
+
+    def get_entry_new_many_html_view(self, request, *args, **kwargs):
+        # We can just use the entry-new view because our underlying unicorn
+        # view will dynamically determine if we have a new vs update.
+        return self.get_entry_new_html_view(request, *args, **kwargs)
+
+    # -------------------------------------------------------------------------
+
+    # The "search" views, which build a search form for the table
+
+    def get_search_json_view(self, request, *args, **kwargs):
+        raise NotImplementedError("Search views still under dev.")
+
+    def get_search_html_view(self, request, *args, **kwargs):
+        raise NotImplementedError("Search views still under dev.")
+
+    # -------------------------------------------------------------------------
