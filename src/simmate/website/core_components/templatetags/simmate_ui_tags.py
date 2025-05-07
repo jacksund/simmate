@@ -25,7 +25,7 @@ def text_input(
     label: str = None,
     show_label: bool = True,
     help_text: str = None,
-    placeholder: str = "Type value...",
+    placeholder: str = "Enter value...",
     max_length: int = None,
     disabled: bool = False,
     defer: bool = True,
@@ -149,7 +149,6 @@ def selectbox(
     options: list[tuple[any, str]] = [],
     label: str = None,
     show_label: bool = True,
-    initial_value: bool = None,
     dynamic_options: bool = False,
     allow_custom_input: bool = False,
     multiselect: bool = False,
@@ -169,8 +168,7 @@ def selectbox(
     if not options:
         options = context.get(f"{name}_options", [])
 
-    if not initial_value:
-        initial_value = context.get(name)
+    initial_value = context.get(name, None)
 
     # Needed because select2 is within an "ignore" div but we also want to
     # replace the full select box if the options are changed at all
@@ -190,10 +188,9 @@ def radio(
     options: list[tuple[any, str]] = [],
     label: str = None,
     show_label: bool = True,
-    initial_value: bool = None,
 ):
     """
-    Display a checkbox widget.
+    Display a radio select widget.
     """
     # options should be a list of tuples: (value, display)
 
@@ -203,8 +200,7 @@ def radio(
     if not options:
         options = context.get(f"{name}_options", [])
 
-    if not initial_value:
-        initial_value = context.get(name)
+    initial_value = context.get(name, None)
 
     return locals()
 
