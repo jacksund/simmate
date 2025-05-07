@@ -2,13 +2,19 @@
     <div class="col-12">
         <div class="page-title-box">
             <div class="page-title-right">
-                <ol class="breadcrumb m-0">
+                <ol class="breadcrumb m-0">                    
                     {% for crumb in breadcrumbs %}
-                        <li class="breadcrumb-item">
-                            <a href="{% url crumb.0 %}">{{ crumb.1 }}</a>
-                        </li>
+                        {% if forloop.revcounter > 1 %}
+                            {# the counter does a relative path expansion (e.g., href="..", href="../..", href="../../..", etc.),#}
+                            <li class="breadcrumb-item">
+                                
+                                <a href="{% for i in ''|center:forloop.revcounter0 %}../{% endfor %}">{{ crumb }}</a>
+                            </li>
+                        {% else %}
+                            {# The final entry is the current page #}
+                            <li class="breadcrumb-item active">{{ crumb }}</li>
+                        {% endif %}
                     {% endfor %}
-                    <li class="breadcrumb-item active">{{ breadcrumb_active }}</li>
                 </ol>
             </div>
             <h4 class="page-title">

@@ -140,7 +140,7 @@ def test_list_of_apps_by_type():
         get_apps_by_type("non-existant-type")
 
 
-def test_list_of_workflows_by_type():
+def test_list_of_workflows_of_given_type():
     assert get_workflow_names_by_type("static-energy") == [
         # "static-energy.vasp.cluster-high-qe",
         "static-energy.quantum-espresso.evo-tutorial",

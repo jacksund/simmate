@@ -30,7 +30,7 @@ DATA_CONFIG = get_data_config()
 def home(request):
     context = {
         "data_config": DATA_CONFIG,
-        "breadcrumb_active": "Data",
+        "breadcrumbs": ["Data"],
     }
     template = "data_explorer/home.html"
     return render(request, template, context)

@@ -14,7 +14,7 @@
                             <a href="{% url 'workflows' %}">workflows</a>
                         </li>
                         <li class="breadcrumb-item">
-                            <a href="{% url 'workflows_by_type' workflow.name_type %}">{{ workflow.name_type }}</a>
+                            <a href="{% url 'workflows_of_given_type' workflow.name_type %}">{{ workflow.name_type }}</a>
                         </li>
                         <li class="breadcrumb-item">
                             <a href="{% url 'workflow_detail' workflow.name_type workflow.name_app workflow.name_preset %}">

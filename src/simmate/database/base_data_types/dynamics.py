@@ -25,6 +25,11 @@ class Dynamics(Structure, Calculation):
     of the run via the `structures` attribute. This attribute gives a list of
     `DynamicsIonicSteps`.
     """
+    
+    html_display_name = "Dynamics"
+    html_description_short = (
+        "Results for Molecular Dynamics Calculations"
+    )
 
     class Meta:
         app_label = "workflows"

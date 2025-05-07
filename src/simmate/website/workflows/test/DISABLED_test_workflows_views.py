@@ -45,7 +45,7 @@ def test_workflows_view(client):
 def test_workflows_by_type_view(client, workflow_type):
     # grabs f"/workflows/{workflow_type}/"
     url = reverse(
-        "workflows_by_type",
+        "workflows_of_given_type",
         kwargs={"workflow_type": workflow_type},
     )
 

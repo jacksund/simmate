@@ -3,47 +3,60 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
+from simmate.configuration import settings
 from simmate.website.workflows.forms import SubmitWorkflow
-from simmate.workflows.utilities import (  # WORKFLOW_TYPES,
+from simmate.workflows.utilities import (
     get_apps_by_type,
     get_workflow,
     get_workflow_names_by_type,
 )
 
-TYPE_DESCRIPTIONS = {
-    "static-energy": (
-        "Calculate the energy for a structure. In many cases, this also "
-        "involves calculating the lattice strain and forces for each site."
+DEFAULT_TYPE_DESCRIPTIONS = {
+    "diffusion": (
+        "Evaluate the diffusion of an atom through a material. "
+        "At this time, these workflows are entirely Nudged-Elastic-Band (NEB) "
+        "calculations."
     ),
-    "relaxation": (
-        "Geometry-optimize a structure's the lattice and sites "
-        "to their lowest-energy positions until convergence criteria are met."
+    "dynamics": (
+        "Molecular dynamics (MD) simulations for a material. Involves "
+        "iteratively evaluating the energy/forces at "
+        "specific temperature (or temperature ramp)."
+    ),
+    "electronic-structure": (
+        "Calculate the electronic structure for a material. "
+        "This include band-structure and density of states calculations."
+    ),
+    "physical-property": (
+        "Calculate common physical properties."
     ),
     "population-analysis": (
         "Evaluate where electrons exist in a structure and assign them to a "
         "specific site/atom. Used to predicted oxidation states."
     ),
-    "band-structure": (
-        "These workflows calculate the electronic band structure for a material."
+    "relaxation": (
+        "Geometry-optimize a structure's the lattice and sites "
+        "to their lowest-energy positions until convergence criteria are met."
     ),
-    "density-of-states": (
-        "These workflows calculate the electronic density of states for a material."
+    "similarity": (
+        "Run 2D and 3D structure searches across billions of compounds."
     ),
-    "dynamics": (
-        "Run a molecular dynamics simulation for a material. Involves "
-        "iteratively evaluating the energy/forces at "
-        "specific temperature (or temperature ramp)."
+    "solubility": (
+        "Calculate solubility of compounds in different solutions."
     ),
-    "diffusion": (
-        "These workflows evaluate the diffusion of an atom through a material. "
-        "At this time, these workflows are entirely Nudged-Elastic-Band (NEB) "
-        "calculations."
+    "stability": (
+        "Calculate therodynamic and kinetic stability of compounds, "
+        "as well as expected decomposition products."
+    ), 
+    "static-energy": (
+        "Calculate the energy for a structure. In many cases, this also "
+        "involves calculating the lattice strain and forces for each site."
     ),
     "structure-prediction": (
         "Predict the most stable structure when given only chemical composition "
         "or system. Strategies range from evolutionary searches to "
         "substituition of known materials."
     ),
+    # TYPES BELOW ARE UNUSED RIGHT NOW
     "conformer-generation": (
         "Predict the most stable structure when given only chemical composition "
         "or system. Strategies range from evolutionary searches to "
@@ -61,25 +74,27 @@ TYPE_DESCRIPTIONS = {
     ),
 }
 
+DEFAULT_DESCRIPTION = "A custom workflow type, built internally. (no description given)"
 
-def workflows_all(request):
-    # TODO: maybe instead load these descriptions from the simmate.{module}'s docstr
-    # This would look something like...
-    # all_metadata = {}
-    # for flow_type in WORKFLOW_TYPES:
-    #     --> grab the module
-    #     --> use the __doc__ as the text.
+TYPE_DESCRIPTIONS = {
+    t: (
+        settings.website.workflows.type_descriptions.get(t)
+        if t in settings.website.workflows.type_descriptions
+        else DEFAULT_TYPE_DESCRIPTIONS.get(t, DEFAULT_DESCRIPTION)
+    )
+    for t in settings.website.workflows.types_to_display
+}
 
-    # now let's put the data and template together to send the user
+def all_workflow_types(request):
     context = {
         "workflows_metadata": TYPE_DESCRIPTIONS,
-        "breadcrumb_active": "Workflows",
+        "breadcrumbs": ["Workflows"],
     }
-    template = "workflows/all.html"
+    template = "workflows/all_workflow_types.html"
     return render(request, template, context)
 
 
-def workflows_by_type(request, workflow_type):
+def workflows_of_given_type(request, workflow_type):
     apps = get_apps_by_type(workflow_type)
 
     # pull the information together for each individual flow and organize by
@@ -96,13 +111,12 @@ def workflows_by_type(request, workflow_type):
     # now let's put the data and template together to send the user
     context = {
         "workflow_type": workflow_type,
-        "workflow_type_description": TYPE_DESCRIPTIONS.get(workflow_type, ""),
+        "workflow_type_description": TYPE_DESCRIPTIONS[workflow_type],
         "workflow_dict": workflow_dict,
         "page_title": "Workflow Type",
-        "breadcrumbs": [("workflows", "Workflows")],
-        "breadcrumb_active": workflow_type,
+        "breadcrumbs": ["Workflows", workflow_type],
     }
-    template = "workflows/by_type.html"
+    template = "workflows/workflows_of_given_type.html"
     return render(request, template, context)
 
 @login_required

@@ -1770,8 +1770,7 @@ class DatabaseTable(models.Model):
         return {
             "page_title": cls.table_name,
             "page_title_icon": "mdi-database",
-            "breadcrumbs": [("data_explorer:home", "Data")],
-            "breadcrumb_active": cls.table_name,
+            "breadcrumbs": ["Data", cls.table_name],
         }
 
     @classmethod

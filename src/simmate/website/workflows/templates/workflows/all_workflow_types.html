@@ -6,15 +6,8 @@
         <div class="container">
             <h1 class="jumbotron-heading">Workflows</h1>
             <p class="lead text-muted">
-                Explore all of the workflows available with Simmate, submit new calculations, and view the results of past runs
+                Explore workflows, submit new runs, and view past results
             </p>
-        </div>
-        <div class="alert alert-danger" role="alert">
-            <i class="mdi mdi-alert"></i><i class="mdi mdi-alert"></i>
-            <strong>DANGER</strong>
-            <i class="mdi mdi-alert"></i><i class="mdi mdi-alert"></i>
-            <br>
-            These web pages are still in early testing and some links may be broken. We expect that workflow submissions/views will go through many changes in the next few months.
         </div>
     </section>
     {# List of Cards #}
@@ -25,7 +18,7 @@
                     <div class="card-body">
                         <h5 class="card-title text-primary">{{ workflow_type }}</h5>
                         <p class="card-text">{{ workflow_description }}</p>
-                        <a href="{% url 'workflows_by_type' workflow_type %}"
+                        <a href="{% url 'workflows_of_given_type' workflow_type %}"
                            class="btn btn-primary btn-sm">View All</a>
                     </div>
                 </div>

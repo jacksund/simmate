@@ -57,14 +57,18 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 -->
 
 **Enhancements**
+
 - added frontend framework and docs, based off of a fork of `django-unicorn`
 - added custom API token generation and auth backend
 
 **Refactors**
+
 - refactored website's workflow tab to use new API backend
 - removed `django-contrib-comments`, `django-crispy-forms`, `dj-database-url`, `django-filter`, and `djangorestframework` dependencies
+- update `breadcrumbs` tag to include deprec `breadcrumb_active`
 
 **Fixes**
+
 - fix Data tab in website view failing to load due to molecule template
 
 --------------------------------------------------------------------------------
