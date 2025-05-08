@@ -20,13 +20,20 @@ urlpatterns = [
         name="workflows_of_given_type",
     ),
     #
+    # A list of workflows for a given type+app. This is only present for
+    # breadcrumb compatibility, so the page is minimal.
+    path(
+        route="<workflow_type>/<workflow_app>/",
+        view=views.workflows_of_given_type_and_app,
+        name="workflows_of_given_type_and_app",
+    ),
+    #
     # A detailed view of a specific workflow. This page will contain sections
     # about the workflow as well as host actions for submitting and querying
     # new flow runs.
     path(
-        route="<workflow_type>/<workflow_app>/<workflow_preset>",
-        # view=views.workflow_detail,
-        view=views.workflows_of_given_type,
+        route="<workflow_type>/<workflow_app>/<workflow_preset>/",
+        view=views.workflow_detail,
         name="workflow_detail",
     ),
     #

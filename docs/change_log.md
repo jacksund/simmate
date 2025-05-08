@@ -66,6 +66,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - refactored website's workflow tab to use new API backend
 - removed `django-contrib-comments`, `django-crispy-forms`, `dj-database-url`, `django-filter`, and `djangorestframework` dependencies
 - update `breadcrumbs` tag to include deprec `breadcrumb_active`
+- workflows results in the web ui now exists within the Data tab. The workflow tab has been limited to submission, docs, and analytics
 
 **Fixes**
 

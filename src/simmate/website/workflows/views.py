@@ -26,9 +26,7 @@ DEFAULT_TYPE_DESCRIPTIONS = {
         "Calculate the electronic structure for a material. "
         "This include band-structure and density of states calculations."
     ),
-    "physical-property": (
-        "Calculate common physical properties."
-    ),
+    "physical-property": ("Calculate common physical properties."),
     "population-analysis": (
         "Evaluate where electrons exist in a structure and assign them to a "
         "specific site/atom. Used to predicted oxidation states."
@@ -37,16 +35,12 @@ DEFAULT_TYPE_DESCRIPTIONS = {
         "Geometry-optimize a structure's the lattice and sites "
         "to their lowest-energy positions until convergence criteria are met."
     ),
-    "similarity": (
-        "Run 2D and 3D structure searches across billions of compounds."
-    ),
-    "solubility": (
-        "Calculate solubility of compounds in different solutions."
-    ),
+    "similarity": ("Run 2D and 3D structure searches across billions of compounds."),
+    "solubility": ("Calculate solubility of compounds in different solutions."),
     "stability": (
         "Calculate therodynamic and kinetic stability of compounds, "
         "as well as expected decomposition products."
-    ), 
+    ),
     "static-energy": (
         "Calculate the energy for a structure. In many cases, this also "
         "involves calculating the lattice strain and forces for each site."
@@ -85,6 +79,7 @@ TYPE_DESCRIPTIONS = {
     for t in settings.website.workflows.types_to_display
 }
 
+
 def all_workflow_types(request):
     context = {
         "workflows_metadata": TYPE_DESCRIPTIONS,
@@ -104,11 +99,10 @@ def workflows_of_given_type(request, workflow_type):
         workflow_names = get_workflow_names_by_type(
             workflow_type,
             app,
-            remove_no_database_flows=False,  # BUG: this breaks some views...
+            remove_no_database_flows=False,
         )
         workflow_dict[app] = [get_workflow(n) for n in workflow_names]
 
-    # now let's put the data and template together to send the user
     context = {
         "workflow_type": workflow_type,
         "workflow_type_description": TYPE_DESCRIPTIONS[workflow_type],
@@ -118,6 +112,43 @@ def workflows_of_given_type(request, workflow_type):
     }
     template = "workflows/workflows_of_given_type.html"
     return render(request, template, context)
+
+
+def workflows_of_given_type_and_app(request, workflow_type, workflow_app):
+    workflow_names = get_workflow_names_by_type(
+        workflow_type,
+        workflow_app,
+        remove_no_database_flows=False,
+    )
+    workflows = [get_workflow(n) for n in workflow_names]
+
+    context = {
+        "workflows": workflows,
+        "page_title": f"{workflow_type}.{workflow_app}",
+        "breadcrumbs": ["Workflows", workflow_type, workflow_app],
+    }
+    template = "workflows/workflows_of_given_type_and_app.html"
+    return render(request, template, context)
+
+
+def workflow_detail(request, workflow_type, workflow_app, workflow_preset):
+
+    workflow_name = f"{workflow_type}.{workflow_app}.{workflow_preset}"
+    workflow = get_workflow(workflow_name)
+
+    # TODO: grab some metadata about this calc. For example...
+    # ncalculations = workflow.all_results.objects.count()
+    # nflows_submitted = workflow.nflows_submitted
+    # workflow.database_table
+
+    context = {
+        "workflow": workflow,
+        "page_title": workflow_name,
+        "breadcrumbs": ["Workflows", workflow_type, workflow_app, workflow_preset],
+    }
+    template = "workflows/workflow_detail.html"
+    return render(request, template, context)
+
 
 @login_required
 def workflow_submit(

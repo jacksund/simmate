@@ -137,12 +137,10 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
     workflows are common in materials science, so this table defines the most
     common data that results from such workflow calculations.
     """
-    
+
     html_display_name = "Band Structures"
-    html_description_short = (
-        "Results for Band Structure Calculations"
-    )
-    
+    html_description_short = "Results for Band Structure Calculations"
+
     class Meta:
         app_label = "workflows"
 

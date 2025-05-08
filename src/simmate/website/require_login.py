@@ -57,6 +57,7 @@ class RequireLoginMiddleware:
         # Users can also authenticate via Tokens from Django REST Framework
         # for programmatic access
         from rest_framework.authentication import TokenAuthentication
+
         token_auth = TokenAuthentication()
         try:
             # Returns None if not signed-in OR if no token was given

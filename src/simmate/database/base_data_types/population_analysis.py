@@ -13,12 +13,10 @@ class PopulationAnalysis(StaticEnergy):
     This table combines results from a static energy calculation and the follow-up
     oxidation analysis on the charge density.
     """
-    
+
     html_display_name = "Population Analysis"
-    html_description_short = (
-        "Results for Population Analysis Calculations"
-    )
-    
+    html_description_short = "Results for Population Analysis Calculations"
+
     class Meta:
         app_label = "workflows"
 

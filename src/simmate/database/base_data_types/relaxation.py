@@ -46,11 +46,9 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
     the correct structure, use the `structure_final` attribute, which gives
     the final IonicStep.
     """
-    
+
     html_display_name = "Relaxation"
-    html_description_short = (
-        "Results for Relaxation Calculations"
-    )
+    html_description_short = "Results for Relaxation Calculations"
 
     class Meta:
         app_label = "workflows"

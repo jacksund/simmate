@@ -114,9 +114,7 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
     """
 
     html_display_name = "Density of States"
-    html_description_short = (
-        "Results for Density of States Calculations"
-    )
+    html_description_short = "Results for Density of States Calculations"
 
     class Meta:
         app_label = "workflows"
