@@ -212,7 +212,6 @@ STATICFILES_DIRS = [
     get_directory(
         settings.config_directory / "static_files"
     ),  # let's user add their own files
-    settings.django_directory / "static_files",
 ]
 
 # Ensures users' caches are reset in production when a static file's content changes.

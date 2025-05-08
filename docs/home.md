@@ -2,7 +2,7 @@
 
 <!-- This displays the Simmate Logo -->
 <p align="center" href=https://simmate.org>
-   <img src="https://github.com/jacksund/simmate/blob/main/src/simmate/website/static_files/images/simmate-logo-dark.svg?raw=true" width="80%" style="max-width: 1000px;">
+   <img src="https://github.com/jacksund/simmate/blob/main/src/simmate/website/core_components/static/images/simmate-logo-dark.svg?raw=true" width="80%" style="max-width: 1000px;">
 </p>
 
 <!-- 
