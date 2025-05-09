@@ -3,7 +3,7 @@
 import pytest
 from pytest_django.asserts import assertTemplateUsed
 
-from simmate.website.core_components.templatetags.structure_serialize_filter import (
+from simmate.website.core_components.templatetags.simmate_utils import (
     structure_to_url,
 )
 
