@@ -1774,15 +1774,6 @@ class DatabaseTable(models.Model):
 
     @classmethod
     @property
-    def html_breadcrumb_context(cls) -> dict:
-        return {
-            "page_title": cls.table_name,
-            "page_title_icon": "mdi-database",
-            "breadcrumbs": ["Data", cls.table_name],
-        }
-
-    @classmethod
-    @property
     def html_extra_context(cls) -> dict:
         return {}
 

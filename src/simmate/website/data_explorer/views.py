@@ -68,6 +68,8 @@ def table_about(request, table_name):
         "table": table,
         "table_docs": table.get_table_docs(),
         # TODO: **table.html_extra_about_context,
+        "page_title": table_name,
+        "breadcrumbs": ["Data", table_name, "About"],
     }
     template = table.html_about_template
     return render(request, template, context)
@@ -88,13 +90,14 @@ def table_entries(request, table_name):
             "total": page.paginator.count,  # often limited to 10k
             # "paginator": page.paginator,
             # "entries": page.object_list,  # page.paginator.object_list gives ALL results
-            # TODO:
-            **table.html_breadcrumb_context,
+            "page_title": table_name,
+            "page_title_icon": "mdi-database",
+            "breadcrumbs": ["Data", table_name],
+            "title_json_link": True,
             **table.html_extra_context,
             # make left sidebar compact (only icons) when there's a quick-search
             # view, so that we can put the search form on the right side
             # "compact_sidebar": True if table.html_search_view else False,
-            "title_json_link": True,
         }
         template = table.html_table_template
         return render(request, template, context)
@@ -175,7 +178,9 @@ def table_entry_new(request, table_name):
 
     context = {
         "unicorn_component_name": table.html_form_view,
-        **table.html_breadcrumb_context,  # TODO: need to update crumbs
+        "page_title": table_name,
+        "page_title_icon": "mdi-database",
+        "breadcrumbs": ["Data", table_name, "Form"],
     }
     template = table.html_entry_form_template
     return render(request, template, context)
