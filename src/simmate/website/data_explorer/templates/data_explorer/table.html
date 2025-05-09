@@ -1,9 +1,7 @@
 {% extends "core_components/site_base.html" %}
 {% block tabtitle %}{{ table.table_name }} Data - Simmate{% endblock %}
-{% block banner %}
-    {% include "core_components/header.html" %}
-{% endblock %}
 {% block body %}
+    {% load update_url %}
     <div class="row">
         {# Buttons & Sidebars #}
         <div class="col-8">
@@ -29,6 +27,9 @@
                     {% include "data_explorer/table_add_entry.html" %}
                 {% endif %}
             {% endblock %}
+            <a href="{% update_url format='csv' %}"
+               class="btn btn-secondary my-1">
+                <i class="mdi mdi-download"></i>&nbsp;&nbsp;Download</a> 
         </div>
         {# Table Description #}
         <div class="col-4">
@@ -45,18 +46,15 @@
                     <i class="mdi mdi-check-circle"></i>&nbsp;&nbsp;
                     <div>
                         Showing <b>{{ page.start_index }}-{{ page.end_index }}</b> of
-                        {% with total=page.paginator.count %}
-                            <b>
-                                {# linting is disabled for this line to stop it from adding a space #}
-                                {# djlint:off #}
-                                        {% if total == 10000 %}&gt;{% endif %}{{ total|intcomma }}
-                                {# djlint:on #}
-                            </b> filtered results.
-                            {% if total == 10000 %}
-                                We limit searches to 10k results for our Web UI and API. Switch to Python or SQL if you need the full dataset.
-                            {% endif %}
-                            {# (total counts too slow) The full dataset has <b>{{ nentries_possible|intcomma }}</b> entries. #}
-                        {% endwith %}
+                        <b>
+                            {# linting is disabled for this line to stop it from adding a space #}
+                            {# djlint:off #}
+                                    {% if total == 10000 %}&gt;{% endif %}{{ total|intcomma }}
+                            {# djlint:on #}
+                        </b> filtered results.
+                        {% if total == 10000 %}
+                            We limit searches to 10k results for our Web UI and API. Switch to Python or SQL if you need the full dataset.
+                        {% endif %}
                     </div>
                 </div>
                 {% block search_results_table %}

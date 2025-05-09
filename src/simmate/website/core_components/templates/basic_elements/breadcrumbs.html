@@ -1,3 +1,4 @@
+{% load update_url %}
 <div class="row">
     <div class="col-12">
         <div class="page-title-box">
@@ -19,6 +20,14 @@
             <h4 class="page-title">
                 {{ page_title }}
                 {% if page_title_icon %}<i class="mdi {{ page_title_icon }} me-1"></i>{% endif %}
+                {# djlint:off #}
+                    {% if title_json_link %}
+                        <small>(see also:
+                            <a href="{% update_url format='json' %}" target="_blank">JSON</a>)</small>
+                        <small>
+                    {% endif %}
+                {# djlint:on #}
+                
             </h4>
         </div>
     </div>

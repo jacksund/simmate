@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 
 from simmate.configuration import settings
@@ -74,19 +75,17 @@ def table_about(request, table_name):
 
 def table_entries(request, table_name):
 
-    # Filtering via GET params & split into pages
     table = get_table_safe(table_name)
-    page = table.filter_from_request(request)
-    pagination_urls = get_pagination_urls(request, page)
-
-    # move to proper view function based on requested format
     view_format = request.GET.get("format", "html")  # default is html
 
     if view_format == "html":
+        page = table.filter_from_request(request)
+        pagination_urls = get_pagination_urls(request, page)
         context = {
             "table": table,
             "page": page,
             "pagination_urls": pagination_urls,
+            "total": page.paginator.count,  # often limited to 10k
             # "paginator": page.paginator,
             # "entries": page.object_list,  # page.paginator.object_list gives ALL results
             # TODO:
@@ -95,15 +94,32 @@ def table_entries(request, table_name):
             # make left sidebar compact (only icons) when there's a quick-search
             # view, so that we can put the search form on the right side
             # "compact_sidebar": True if table.html_search_view else False,
+            "title_json_link": True,
         }
         template = table.html_table_template
         return render(request, template, context)
 
     elif view_format == "json":
+        page = table.filter_from_request(request)
+        pagination_urls = get_pagination_urls(request, page)
         return page.object_list.to_json_response(
             next_url=pagination_urls["next"],
             previous_url=pagination_urls["previous"],
         )
+
+    elif view_format == "csv":
+        # CSV is a unique case where we do a bulk download (up to 10k rows or
+        # whatever limit is set by filter_from_config).
+        objects = table.filter_from_request(request, paginate=False)
+
+        # https://stackoverflow.com/questions/54729411/
+        df = objects.to_dataframe()
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = (
+            f"attachment; filename={table_name}_queryset.csv"
+        )
+        df.to_csv(path_or_buf=response, index=False)
+        return response
 
     else:
         raise Exception(f"Unknown 'format' GET arg given: {view_format}")
@@ -122,6 +138,10 @@ def table_entry(request, table_name, table_entry_id):
             # TODO:
             # **table.html_entry_breadcrumb_context,
             # **table.html_entry_extra_context,
+            #
+            "page_title": "Table Entry",
+            "breadcrumbs": ["Data", table_name, table_entry_id],
+            "title_json_link": True,
         }
         template = table_entry.html_entry_template
         return render(request, template, context)

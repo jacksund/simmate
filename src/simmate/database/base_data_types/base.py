@@ -1721,6 +1721,7 @@ class DatabaseTable(models.Model):
 
     html_display_name: str = None
     html_description_short: str = None
+    html_tabtitle_label_col: str = "id"
 
     html_about_template: str = "data_explorer/table_about.html"
     html_table_template: str = "data_explorer/table.html"
@@ -1735,6 +1736,13 @@ class DatabaseTable(models.Model):
     html_form_view: str = None
     html_enabled_forms: list[str] = []
     # options: "search", "create", "update", "create_many", "create_many_entry", "update_many"
+
+    @property
+    def html_tabtitle_label(self) -> str:
+        """
+        Provides a label to put in the tab title. By default, this uses the id
+        """
+        return str(getattr(self, self.html_tabtitle_label_col))
 
     @classmethod
     @property
