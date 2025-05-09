@@ -6,8 +6,6 @@ Displays a checkbox input widget and maps its value to the backend as a boolean.
 === "frontend (html+django)"
 
     ``` html+django
-    {% load simmate_ui_tags %}
-
     {% checkbox name="my_input" %}
     ```
 

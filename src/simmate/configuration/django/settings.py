@@ -144,6 +144,14 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
+            # We have custom template tags that should be loaded by default.
+            # This avoids us having to do {% load simmate_ui_tags %} in
+            # a bunch of templates.
+            "builtins": [
+                "simmate.website.core_components.templatetags.simmate_input_forms",
+                "simmate.website.core_components.templatetags.simmate_settings",
+                "simmate.website.core_components.templatetags.simmate_utils",
+            ],
         },
     },
 ]

@@ -6,8 +6,6 @@ Displays a molecule sketcher widget and maps its value to the backend as a strin
 === "frontend (html+django)"
 
     ``` html+django
-    {% load simmate_ui_tags %}
-
     {% molecule_input %}
     ```
 

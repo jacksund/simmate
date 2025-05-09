@@ -6,8 +6,6 @@ Displays a button in the frontend that when clicked calls a python method in the
 === "frontend (html+django)"
 
     ``` html+django
-    {% load simmate_ui_tags %}
-
     {% button name="my_method" %}
     ```
 

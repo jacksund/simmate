@@ -6,8 +6,6 @@ Displays a radio select input widget and maps its value to the backend as a stri
 === "frontend (html+django)"
 
     ``` html+django
-    {% load simmate_ui_tags %}
-
     {% radio name="my_input" %}
     ```
 

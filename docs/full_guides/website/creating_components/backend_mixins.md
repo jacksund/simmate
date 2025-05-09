@@ -132,10 +132,6 @@ And for each file & it's contents:
 - `frontend` --> `html (+js)`
 - `backend` --> `python`
 
-``` html
-{% load simmate_ui_tags %}
-```
-
 ### text_input
 
 === "frontend"

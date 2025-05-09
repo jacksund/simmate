@@ -6,8 +6,6 @@ Displays a search box widget that combines a selectbox (optional), a single-line
 === "frontend (html+django)"
 
     ```html+django
-    {% load simmate_ui_tags %}
-
     {% search_box name="search_query" %}
     ```
 

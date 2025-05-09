@@ -8,8 +8,6 @@ We use [Select2](https://select2.org/) under the hood to make the dropdown searc
 === "frontend (html+django)"
 
     ``` html+django
-    {% load simmate_ui_tags %}
-
     {% selectbox name="my_input" %}
     ```
 

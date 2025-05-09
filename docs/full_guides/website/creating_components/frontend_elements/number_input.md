@@ -6,8 +6,6 @@ Displays a numeric input widget and maps its value to the backend as either a `f
 === "frontend (html+django)"
 
     ``` html+django
-    {% load simmate_ui_tags %}
-
     {% number_input name="my_input" %}
     ```
 

@@ -6,8 +6,6 @@ Displays a single-line text input widget and maps its value to the backend as a 
 === "frontend (html+django)"
 
     ``` html+django
-    {% load simmate_ui_tags %}
-
     {% text_input name="my_input" %}
     ```
 

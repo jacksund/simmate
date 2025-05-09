@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Copied code from...
-https://stackoverflow.com/questions/433162/
-"""
 
 from django import template
 from django.conf import settings as django_settings
@@ -19,7 +15,6 @@ def django_setting(name):
 
     Example use:
     ``` html
-    {% load getsetting %}
     {% django_setting "DEBUG" %}
     ```
     """
@@ -34,7 +29,6 @@ def simmate_setting(name):
 
     Example use:
     ``` html
-    {% load getsetting %}
     {% simmate_setting "website.require_login" %}
     ```
     """
