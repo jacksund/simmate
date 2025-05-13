@@ -7,6 +7,9 @@ from simmate.database.base_data_types import DatabaseTable, table_column
 
 class WebsitePageVisit(DatabaseTable):
 
+    class Meta:
+        db_table = "django_website_page_visits"
+
     # disable the default columns -- as we only inherit bc we want
     # the extra simmate methods such as the plotly figure rendering
     created_at = None

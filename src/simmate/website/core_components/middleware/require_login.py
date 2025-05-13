@@ -54,27 +54,13 @@ class RequireLoginMiddleware:
         if request.user.is_authenticated:
             return
 
-        # Users can also authenticate via Tokens from Django REST Framework
-        # for programmatic access
-        from rest_framework.authentication import TokenAuthentication
-
-        token_auth = TokenAuthentication()
-        try:
-            # Returns None if not signed-in OR if no token was given
-            # Returns (user, token) if successful
-            # Raises an error if the token is invalid or improperly formatted
-            # TODO: redirect to helpful pages for failed token auth
-            if token_auth.authenticate(request):
-                return
-
-        except:  # any error corresponds to not authenticated
-            pass
-
+        # Check if this view is excluded from the required login view
         # An exception match should immediately return None
         for url in self.exceptions:
             if url.match(request.path):
                 return
 
+        # Check if the view requires a login
         # Requests matching a restricted URL pattern are returned
         # wrapped with the login_required decorator
         for url in self.required:

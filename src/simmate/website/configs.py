@@ -15,10 +15,6 @@ class UnicornConfig(AppConfig):
     name = "simmate.website.unicorn"
 
 
-class UserTrackingConfig(AppConfig):
-    name = "simmate.website.user_tracking"
-
-
 class WorkflowsConfig(AppConfig):
     name = "simmate.website.workflows"
 

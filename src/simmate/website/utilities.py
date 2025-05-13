@@ -1,10 +1,64 @@
 # -*- coding: utf-8 -*-
 
 import json
+from functools import wraps
 from urllib import parse
 
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponseNotAllowed, JsonResponse
 from django.utils.encoding import force_str
+from django.views.decorators.csrf import csrf_exempt
+
+
+def api_view(allowed_methods: list[str] = ["GET"]) -> callable:
+    """
+    Decorator that converts a function-based view into an API-ready view.
+    Takes a list of allowed methods for the view as an argument.
+
+    It makes the view API-ready by...
+
+    - Restricts access to the given HTTP methods. (defaults to just GET)
+    - Parses JSON request bodies for POST, PUT, and PATCH, attaching the data to `request.data`.
+    - Returns a 400 error if the JSON is invalid.
+    - Exempts the view from CSRF protection.
+
+    It is largely based on `rest_framework.decorators.api_view`
+
+    Example:
+
+    ``` python
+    @api_view(["GET", "POST"])
+        def my_api_view(request):
+            if request.method == "POST":
+                # Access parsed JSON data with request.data
+                pass
+    ```
+    """
+
+    def decorator(func):
+        @wraps(func)
+        @csrf_exempt
+        def wrapped(request, *args, **kwargs):
+
+            if request.method not in allowed_methods:
+                return HttpResponseNotAllowed(allowed_methods)
+
+            elif request.method == "POST":
+                try:
+                    request.data = json.loads(request.body.decode("utf-8"))
+                except json.JSONDecodeError:
+                    return JsonResponse(
+                        {"error": "Invalid JSON."},
+                        status=400,
+                    )
+
+            else:  # i.e., request.method == "GET":
+                request.data = {}
+
+            return func(request, *args, **kwargs)
+
+        return wrapped
+
+    return decorator
 
 
 def hash_options(options: list[tuple]) -> str:

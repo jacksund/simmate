@@ -77,11 +77,9 @@ INSTALLED_APPS = [
     # Any extra apps from the user (such as django-table2 or some other package)
     *settings.extra_django_apps,
     # Simmate apps + user apps
-    "simmate.website.configs.UserTrackingConfig",
     "simmate.website.configs.CoreComponentsConfig",
     "simmate.website.configs.DataExplorerConfig",
     "simmate.website.configs.WorkflowsConfig",
-    "simmate.website.configs.WorkflowEngineConfig",
     *settings.apps,
 ]
 # OPTIMIZE: for now, I just load everything, but I will want to allow users to
@@ -121,8 +119,11 @@ MIDDLEWARE = [
     "simple_history.middleware.HistoryRequestMiddleware",
     # adds specific authentication methods, such as login by email
     "allauth.account.middleware.AccountMiddleware",
+    # add token-based authentication for programmatic access (e.g, REST API)
+    "simmate.website.core_components.middleware.TokenAuthenticationMiddleware",
     # tracks page visits accross the website
-    "simmate.website.user_tracking.middleware.WebsitePageVisitMiddleware",
+    "simmate.website.core_components.middleware.WebsitePageVisitMiddleware",
+    # Note: extras such as RequireLoginMiddleware are added conditionally below
 ]
 
 # "core" here is based on the name of my main django folder
@@ -133,7 +134,10 @@ TEMPLATES = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
             settings.config_directory / "templates",  # let's user easily override html
-            settings.django_directory / "templates",  # a single templates folder
+            # note: this dir is automatically picked up because it's within an
+            # app, but we need it to come BEFORE some other apps (such as allauth)
+            # in order to properly override default templates.
+            settings.django_directory / "core_components" / "templates",
             # Then APP_DIRS are checked in order
         ],
         "APP_DIRS": True,
@@ -243,6 +247,8 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # Extra settings for django-allauth
 
+# Note: these backends are for session-based auth. API Token auth is separate
+# and carried out via a separate middleware.
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
     "django.contrib.auth.backends.ModelBackend",
@@ -325,7 +331,9 @@ if not settings.website.debug:
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 if settings.website.require_login:
-    MIDDLEWARE.append("simmate.website.require_login.RequireLoginMiddleware")
+    MIDDLEWARE.append(
+        "simmate.website.core_components.middleware.RequireLoginMiddleware"
+    )
 
 LOGIN_REQUIRED_URLS = (r"/(.*)$",)
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (

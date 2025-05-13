@@ -3,9 +3,7 @@
 import pytest
 from pytest_django.asserts import assertTemplateUsed
 
-from simmate.website.core_components.templatetags.simmate_utils import (
-    structure_to_url,
-)
+from simmate.website.core_components.templatetags.simmate_utils import structure_to_url
 
 # BUG: disabled because the "id" column in rest api doesn't exist for this table
 # @pytest.mark.django_db
