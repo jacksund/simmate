@@ -61,6 +61,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added frontend framework and docs, based off of a fork of `django-unicorn`
 - added custom API token generation and auth backend
 - added `CSV` download button on the `Data` web views
+- added `api_view` decorator for basic REST endpoints 
 
 **Refactors**
 
@@ -69,6 +70,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - update `breadcrumbs` tag to include deprec `breadcrumb_active`
 - workflows results in the web ui now exists within the Data tab. The workflow tab has been limited to submission, docs, and analytics
 - `DynamicApiView` was split up into separate views for easier debugging and future enhancements
+-   `website.engine` apps and others are condensed into `core_components`, `data_explorer`, and `workflows` apps
 
 **Fixes**
 
