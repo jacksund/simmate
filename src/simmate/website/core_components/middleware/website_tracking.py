@@ -4,7 +4,7 @@ from django.contrib.auth.models import AnonymousUser
 
 from simmate.website.utilities import parse_request_get
 
-from .models import WebsitePageVisit
+from ..models import WebsitePageVisit
 
 
 class WebsitePageVisitMiddleware:
