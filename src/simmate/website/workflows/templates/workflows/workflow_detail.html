@@ -1,0 +1,85 @@
+{% extends "core_components/site_base.html" %}
+{% block tabtitle %}{{ workflow.name_full }} - Simmate{% endblock %}
+{% block body %}
+    <div class="row">
+        {# Buttons & Sidebars #}
+        <div class="col-8">
+            <a href="{% url 'data_explorer:table' workflow.database_table.table_name %}?workflow_name=%22{{ workflow.name_full }}%22"
+               class="btn btn-primary my-1"
+               target="_blank">
+                <i class="mdi mdi-database"></i>&nbsp;&nbsp;Results</a>
+            {% block submission_form %}
+                {% if workflow.html_form_submit and "submit" in workflow.html_enabled_forms %}
+                    {# TODO include "workflows/workflow_submit_form.html" #}
+                {% endif %}
+            {% endblock %}
+        </div>
+        {# Workflow Description #}
+        <div class="col-4">
+            <p class="lead text-muted">{{ workflow.description_doc_short }}</p>
+        </div>
+    </div>
+    {# About #}
+    <div class="container px-4">
+        <div class="card-body">{{ workflow.description_doc | markdown }}</div>
+    </div>
+    {# Parameters #}
+    <div class="container px-4">
+        <table id="SearchResultsTable"
+               class="table table-centered table-striped mb-0 border">
+            <thead class="table-primary">
+                <tr>
+                    <th>
+                        Parameter (<i class="mdi mdi-star-circle"></i>= required)
+                    </th>
+                    <th>Default</th>
+                    <th>Docs</th>
+                </tr>
+            </thead>
+            <tbody>
+                {# Required Parameters #}
+                {% for parameter in workflow.parameter_names_required %}
+                    <tr>
+                        <td>
+                            <i class="mdi mdi-star-circle"></i>&nbsp;&nbsp;{{ parameter }}
+                        </td>
+                        <td></td>
+                        <td>
+                            <a href="https://jacksund.github.io/simmate/parameters/#{{ parameter }}"
+                               target="_blank"
+                               rel="noopener"
+                               title="Open parameter docs">
+                                <button class="btn btn-link p-0" style="vertical-align: middle;">
+                                    <i class="mdi mdi-open-in-new"></i>
+                                </button>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                {# Optional Parameters #}
+                {% for parameter, default_value in workflow.parameter_defaults.items %}
+                    <tr>
+                        <td>{{ parameter }}</td>
+                        <td>{{ default_value }}</td>
+                        <td>
+                            <a href="https://jacksund.github.io/simmate/parameters/#{{ parameter }}"
+                               target="_blank"
+                               rel="noopener"
+                               title="Open parameter docs">
+                                <button class="btn btn-link p-0" style="vertical-align: middle;">
+                                    <i class="mdi mdi-open-in-new"></i>
+                                </button>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p>
+            <small>Read through our
+                <a href="https://jacksund.github.io/simmate/parameters/" target="_blank">our parameter documentation</a>
+                for more information.
+            </small>
+        </p>
+    </div>
+{% endblock %}

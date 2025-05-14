@@ -1,0 +1,55 @@
+{% extends "core_components/site_base.html" %}
+{% block tabtitle %}{{ workflow_type }} Workflows - Simmate{% endblock %}
+{% block body %}
+    {# Header #}
+    <section class="jumbotron text-center">
+        <div class="container">
+            <h1 class="jumbotron-heading">{{ workflow_type }}</h1>
+            <p class="lead text-muted">{{ workflow_type_description }}</p>
+        </div>
+    </section>
+    {# Workflow details #}
+    <h4>Available apps:</h4>
+    <div class="accordion custom-accordion" id="accordionExample">
+        {% for app, workflows in workflow_dict.items %}
+            <div class="card mb-0">
+                <div class="card-header" id="heading{{ app }}">
+                    <h5 class="m-0">
+                        <a class="custom-accordion-title d-block pt-2 pb-2"
+                           data-bs-toggle="collapse"
+                           href="#collapse{{ app }}"
+                           aria-expanded="true"
+                           aria-controls="collapse{{ app }}">
+                            {{ app }}
+                            <i class="mdi mdi-chevron-down accordion-arrow"></i>
+                        </a>
+                    </h5>
+                </div>
+                <div id="collapse{{ app }}"
+                     class="collapse"
+                     aria-labelledby="heading{{ app }}"
+                     data-bs-parent="#accordionExample">
+                    <div class="card-body">
+                        {# List of Cards #}
+                        <div class="row">
+                            {% for workflow in workflows %}
+                                <div class="col-md-4">
+                                    <div class="card border-primary border">
+                                        <div class="card-body">
+                                            <h5 class="card-title text-primary">{{ workflow.name_preset }}</h5>
+                                            {{ workflow.description_doc_short }}
+                                            <br>
+                                            <br>
+                                            <a href="{% url 'workflow_detail' workflow_type workflow.name_app workflow.name_preset %}"
+                                               class="btn btn-primary btn-sm">Explore</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

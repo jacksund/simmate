@@ -119,7 +119,6 @@ class SimmateSettings:
         are to update specific settings. This writes updates to the currently
         used settings file
         """
-        # TODO: Do I want to make a backup of the old settings...?
 
         # updates are only allowed if we have yaml config. This is bc we dont
         # want to set environment variables perminantly via Simmate.
@@ -198,6 +197,11 @@ class SimmateSettings:
                 "require_login_internal": False,
                 "require_login_exceptions": [],
                 "login_message": None,
+                "social_oauth": {
+                    "google": {"client_id": None, "secret": None},
+                    "microsoft": {"client_id": None, "secret": None},
+                    "github": {"client_id": None, "secret": None},
+                },
                 # These allow server maintainers to override the homepage and profile views, which
                 # is important if they involve loading custom apps/models for their templates.
                 "home_view": None,
@@ -210,14 +214,37 @@ class SimmateSettings:
                         "simmate.apps.materials_project.models.MatprojStructure",
                         "simmate.apps.oqmd.models.OqmdStructure",
                     ],
+                    "HIDDEN": [
+                        "simmate.database.base_data_types.symmetry.Spacegroup",
+                    ],
                 },
-                "social_oauth": {
-                    "google": {"client_id": None, "secret": None},
-                    "microsoft": {"client_id": None, "secret": None},
-                    "github": {"client_id": None, "secret": None},
+                "workflows": {
+                    # This list is long and verbose, so we store the defaults elsewhere.
+                    # See simmate.website.workflows.views
+                    "type_descriptions": {},
+                    # which sections to render in web
+                    "types_to_display": [
+                        # "customized",
+                        "diffusion",
+                        "dynamics",
+                        "electronic-structure",
+                        # "maintenance",
+                        "physical-property",
+                        "population-analysis",
+                        "relaxation",
+                        # "restart",
+                        "similarity",
+                        "solubility",
+                        "stability",
+                        "static-energy",
+                        "structure-prediction",
+                        # "utility",
+                    ],
                 },
+                # django extras
                 "log_sql": False,
                 # django extras
+                "log_sql": False,
                 "debug": False,
                 "allowed_hosts": ["127.0.0.1", "localhost", "testserver"],
                 # sets STATICFILES_STORAGE to ManifestStaticFilesStorage for prod setups
@@ -226,9 +253,7 @@ class SimmateSettings:
                 # ingress (url for k8s) or a nginx load balancer. To get past a 403 forbidden
                 # result, we need to sometimes specify allowed origins for csrf.
                 "csrf_trusted_origins": ["http://localhost"],
-                # Keep the secret key used in production secret!
-                # !!! I removed get_random_secret_key() so I don't have to sign out every time
-                # while testing my server. I may change this back in the future.
+                # We don't use get_random_secret_key() to make local testing easier
                 # from django.core.management.utils import get_random_secret_key
                 "secret_key": "pocj6cunub4zi31r02vr5*5a2c(+_a0+(zsswa7fmus^o78v)r",
                 # Settings for sending automated emails.
@@ -298,7 +323,7 @@ class SimmateSettings:
         }
 
     @cached_property
-    def database_backend(self) -> str:  # was... DATABASE_BACKEND
+    def database_backend(self) -> str:
         if self.database.engine == "django.db.backends.sqlite3":
             return "sqlite3"
         elif self.database.engine == "django.db.backends.postgresql":

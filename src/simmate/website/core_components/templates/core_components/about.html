@@ -1,0 +1,127 @@
+{% extends "core_components/site_base.html" %}
+{% block tabtitle %}About - Simmate{% endblock %}
+{% block body %}
+    <!-- START FEATURE OVERVIEW -->
+    <div class="container">
+        <!-- Header -->
+        <div class="row py-4">
+            <div class="col-lg-12">
+                <div class="text-center ">
+                    <h2>Simmate is a framework and toolkit for materials science</h2>
+                    <h4 class="text-muted mt-2">
+                        Our primary goal is to provide an all-in-one solution for creating, analyzing, and distributing
+                        materials science data. While our website is the end result for many of our features, we
+                        encourage users to visit our <a href="https://github.com/jacksund/simmate" target="_blank">Github
+                        page</a> to see everything Simmate has to offer.
+                    </h4>
+                </div>
+            </div>
+        </div>
+        <!-- First row of icons -->
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="text-center p-3">
+                    <div class="avatar-sm m-auto">
+                        <span class="avatar-title bg-primary-lighten rounded-circle">
+                            <i class="uil uil-plug text-primary font-24"></i>
+                        </span>
+                    </div>
+                    <h4 class="mt-3">Third-Party Integrations</h4>
+                    <p class="text-muted mt-2 mb-0">
+                        Access popular databases like the Materials Project, COD, OQMD, and others all in one place. Or if
+                        you'd like to run your own calculations, build-in popular codes VASP or LAMMPS into your custom
+                        workflows.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center p-3">
+                    <div class="avatar-sm m-auto">
+                        <span class="avatar-title bg-primary-lighten rounded-circle">
+                            <i class="uil uil-sitemap text-primary font-24"></i>
+                        </span>
+                    </div>
+                    <h4 class="mt-3">Prebuilt Workflows</h4>
+                    <p class="text-muted mt-2 mb-0">
+                        While currently at the early stages, we are quickly building a library of common materials science
+                        workflows. These let you quickly calculate properties using popular softwares like VASP.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center p-3">
+                    <div class="avatar-sm m-auto">
+                        <span class="avatar-title bg-primary-lighten rounded-circle">
+                            <i class="uil uil-database text-primary font-24"></i>
+                        </span>
+                    </div>
+                    <h4 class="mt-3">A Full-Feature Database</h4>
+                    <p class="text-muted mt-2 mb-0">
+                        Whether data is from pre-built workflows or even an excel file, Simmate can be used to
+                        automatically expand materials science data into python+REST APIs and a dynamically-built web
+                        interface.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!-- Second row of icons -->
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="text-center p-3">
+                    <div class="avatar-sm m-auto">
+                        <span class="avatar-title bg-primary-lighten rounded-circle">
+                            <i class="uil uil-calcualtor text-primary font-24"></i>
+                        </span>
+                    </div>
+                    <h4 class="mt-3">Common Utilities & Toolbox</h4>
+                    <p class="text-muted mt-2 mb-0">
+                        Thanks to the PyMatGen community, Simmate contains an abundance of utilities
+                        for common materials science analyses - from simple symmetry analysis to
+                        complex phase space visualization.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center p-3">
+                    <div class="avatar-sm m-auto">
+                        <span class="avatar-title bg-primary-lighten rounded-circle">
+                            <i class="uil uil-server text-primary font-24"></i>
+                        </span>
+                    </div>
+                    <h4 class="mt-3">Quick-Startup & Easy Scaling</h4>
+                    <p class="text-muted mt-2 mb-0">
+                        Run the full server (database, API, interface, etc.) on your local computer, and once you're
+                        comfortable, scale to any number of remote resources or HPC clusters in a few lines of code.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center p-3">
+                    <div class="avatar-sm m-auto">
+                        <span class="avatar-title bg-primary-lighten rounded-circle">
+                            <i class="uil uil-unlock-alt text-primary font-24"></i>
+                        </span>
+                    </div>
+                    <h4 class="mt-3">Free & Open-Source</h4>
+                    <p class="text-muted mt-2 mb-0">
+                        Simmate is built on top of other open-source giants like Django, Prefect, Dask, and PyMatGen. This
+                        makes every part of our software completely free to install and use.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!-- Final "created by" statement -->
+        <div class="row py-4">
+            <div class="col-lg-12">
+                <div class="text-center ">
+                    <p class="mt-2">
+                        This software and website was created by <a href="https://jacksund.github.io/" target="_blank">Jack
+                        Sundberg</a> with the support of the <a href="https://materials-lab.io/" target="_blank">Warren
+                        Lab</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END FEATURE OVERVIEW -->
+{% endblock %}

@@ -152,6 +152,23 @@ nav:
             - Creating custom apps: full_guides/apps/creating_custom_apps.md
 
         - Website:
+            - Creating views: full_guides/website/creating_views.md
+            - Creating components: 
+                - Overview: full_guides/website/creating_components/overview.md
+                - Frontend Elements:
+                    - text_input: full_guides/website/creating_components/frontend_elements/text_input.md
+                    - text_area: full_guides/website/creating_components/frontend_elements/text_area.md
+                    - number_input: full_guides/website/creating_components/frontend_elements/number_input.md
+                    - button: full_guides/website/creating_components/frontend_elements/button.md
+                    - radio: full_guides/website/creating_components/frontend_elements/radio.md
+                    - molecule_input: full_guides/website/creating_components/frontend_elements/molecule_input.md
+                    - selectbox: full_guides/website/creating_components/frontend_elements/selectbox.md
+                    - checkbox: full_guides/website/creating_components/frontend_elements/checkbox.md
+                    - search_box: full_guides/website/creating_components/frontend_elements/search_box.md
+                    # TODO
+                    # - alert: full_guides/website/creating_components/frontend_elements/alert.md
+                    # - draw_molecule: full_guides/website/creating_components/frontend_elements/draw_molecule.md
+                - Backend Mix-ins: full_guides/website/creating_components/backend_mixins.md
             - Setup & Config: full_guides/website/setup_and_config.md
             - REST API: full_guides/website/rest_api.md
 

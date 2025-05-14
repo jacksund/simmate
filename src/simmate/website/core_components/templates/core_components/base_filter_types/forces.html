@@ -1,0 +1,25 @@
+<div class="card mb-0">
+    <div class="card-header" id="headingForcesFilters">
+        <h5 class="m-0">
+            <a class="custom-accordion-title d-block pt-2 pb-2"
+               data-bs-toggle="collapse"
+               href="#collapseForcesFilters"
+               aria-expanded="true"
+               aria-controls="collapseForcesFilters">
+                By Forces Info:
+                <i class="mdi mdi-chevron-down accordion-arrow"></i>
+            </a>
+        </h5>
+    </div>
+    <div id="collapseForcesFilters"
+         class="collapse"
+         aria-labelledby="headingForcesFilters"
+         data-bs-parent="#accordionExample">
+        <div class="card-body">
+            {{ form.site_force_norm_max__range }}
+            {{ form.site_forces_norm_per_atom__range }}
+            {{ form.lattice_stress_norm__range }}
+            {{ form.lattice_stress_norm_per_atom__range }}
+        </div>
+    </div>
+</div>

@@ -138,6 +138,9 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
     common data that results from such workflow calculations.
     """
 
+    html_display_name = "Band Structures"
+    html_description_short = "Results for Band Structure Calculations"
+
     class Meta:
         app_label = "workflows"
 

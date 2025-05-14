@@ -1,0 +1,48 @@
+{% extends "core_components/site_base.html" %}
+{% block tabtitle %}Extras - Simmate{% endblock %}
+{% block body %}
+    {# Header #}
+    <section class="jumbotron text-center">
+        <div class="container">
+            <h1 class="jumbotron-heading">Extras</h1>
+            <p class="lead text-muted">
+                Additional features that Simmate currently supports. Many more features and utilities
+                can also be found on our Github page.
+            </p>
+        </div>
+    </section>
+    <div class="row">
+        {# REST API card #}
+        <div class="col-md-4">
+            <div class="card" style="width: 25rem;">
+                <div class="card-body">
+                    <h5 class="card-title">REST API</h5>
+                    <p class="card-text">
+                        This lets you search our database using just a website URL and then
+                        returns your data as JSON.
+                        <div class="alert alert-warning d-flex align-items-center p-2"
+                             role="alert">
+                            <i class="dripicons-warning me-2 fs-4"></i>
+                            <div>
+                                <i><small>
+                                    Note that REST API is only meant for experts
+                                    who prefer not to use Simmate's
+                                    <a href="https://jacksund.github.io/simmate/full_guides/database/basic_use/"
+                                       target="_blank">python client</a>.
+                                </small></i>
+                            </div>
+                        </div>
+                        <a role="button"
+                           class="btn btn-primary btn-sm"
+                           href="https://jacksund.github.io/simmate/full_guides/website/rest_api/"
+                           target="_blank">Learn More...</a>
+                        <a role="button"
+                           class="btn btn-primary btn-sm"
+                           href="{% url 'data_explorer:table' 'MatprojStructure' %}?format=json"
+                           target="_blank">View an example!</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

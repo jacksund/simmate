@@ -2,14 +2,15 @@
 
 ## Finding & Installing Apps
 
-1. Browse the full list in the [`Apps`](/apps/overview.md) tab above :material-arrow-up::material-arrow-up::material-arrow-up:
+**One app at a time**
 
+1. Browse the full list in the [`Apps`](/apps/overview.md) tab above :material-arrow-up::material-arrow-up::material-arrow-up:
 2. Follow the installation directions for each app you would like to use
 
-## Install **_all_** available apps
+**All apps at once**
 
 !!! danger
-    **This guide is not yet available.** For now, go through each app installation one at a time. We will eventually add a guide on how to install all of them at once, which will help advanced users setup productions systems quickly.
+    This guide is not yet available. For now, go through each app installation one at a time. We will eventually add a guide on how to install all of them at once, which will help advanced users setup production systems quickly.
 
 ## View installed apps
 

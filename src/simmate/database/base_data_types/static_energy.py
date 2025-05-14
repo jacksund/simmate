@@ -14,6 +14,10 @@ from simmate.database.base_data_types import (
 
 
 class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
+
+    html_display_name = "Static Energy"
+    html_description_short = "Results for Static Energy Calculations"
+
     class Meta:
         app_label = "workflows"
 

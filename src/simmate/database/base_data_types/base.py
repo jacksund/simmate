@@ -30,7 +30,6 @@ from django.shortcuts import get_object_or_404
 from django.urls import resolve, reverse
 from django.utils.module_loading import import_string
 from django.utils.timezone import datetime, now, timedelta
-from django_filters import rest_framework as django_api_filters
 from rich.progress import track
 
 from simmate.configuration import settings
@@ -395,8 +394,6 @@ class DatabaseTable(models.Model):
     """
     The unique ID number assigned to each entry.
     """
-    # DEV-NOTE: Normally this is set automatically by django, but we must
-    # list it explicitly in order for django_filters (the REST API) to work.
 
     created_at = table_column.DateTimeField(
         auto_now_add=True,
@@ -546,24 +543,6 @@ class DatabaseTable(models.Model):
     name (e.g. "--energy" will not store the energy).
     
     To see all archive fields, see the `archive_fieldset` property.
-    """
-
-    # DEPRECIATED
-    api_filters: dict = {}
-    """
-    Configuration of fields that can be filtered in the REST API and website 
-    interface. This follows the format used by django-filters.
-    
-    For example...
-    ``` python
-    filter_fields = dict(
-        column1=["exact"],
-        column2=["range"],
-        column3=BooleanFilter(...),
-    )
-    ```
-    
-    See the `api_filterset` property for the final filter object.
     """
 
     exclude_from_summary: list[str] = []
@@ -1640,7 +1619,6 @@ class DatabaseTable(models.Model):
         # became too verbose and tedious. You'd need to list out "gt", "gte", and
         # any other field lookups allowed for EACH field... In practice, we want
         # to just allow anything and trust the user follows the docs correctly.
-        # Worst case, the API call fails, which is no big deal.
         from simmate.website.utilities import parse_request_get
 
         get_kwargs = parse_request_get(
@@ -1735,201 +1713,6 @@ class DatabaseTable(models.Model):
         else:
             return queryset
 
-    # DEPRECIATED
-    @classmethod
-    @property
-    @cache
-    def api_filterset(cls) -> django_api_filters.FilterSet:
-        """
-        Dynamically creates a Django Filter from a Simmate database table.
-
-        For example, this function would take
-        `simmate.apps.materials_project.models.MatprojStructure`
-        and automatically make the following filter:
-
-        ``` python
-        from simmate.website.core_components.filters import (
-            DatabaseTableFilter,
-            Structure,
-            Thermodynamics,
-        )
-
-
-        class MatprojStrucureFilter(
-            DatabaseTableFilter,
-            Structure,
-            Thermodynamics,
-        ):
-            class Meta:
-                model = MatprojStructure  # this is database table
-                fields = {...} # this combines the fields from Structure/Thermo mixins
-
-            # These attributes are set using the declared filters from
-            # the Structure/Thermo mixins
-            declared_filter1 = ...
-            declared_filter1 = ...
-        ```
-        """
-
-        # ---------------------------------------------------------------------
-        # This is the filter mix-in for the base DatabaseTable class, which
-        # ALL other filters will use. We set this up manually.
-        # TODO: Consider moving this outside of this method.
-        class ApiFilter(django_api_filters.FilterSet):
-            class Meta:
-                table = DatabaseTable
-                fields = dict(
-                    id=["exact"],
-                    created_at=["range"],
-                    updated_at=["range"],
-                )
-
-            def skip_filter(self, queryset, name, value):
-                """
-                For filter fields that use this method, nothing is done to queryset. This
-                is because the filter is typically used within another field. For example,
-                the `include_subsystems` field is not applied to the queryset, but it
-                is used within the `filter_chemical_system` method.
-                """
-                return queryset
-
-        # ---------------------------------------------------------------------
-
-        # If calling this method on the base class, just return the sole mix-in.
-        if cls == DatabaseTable:
-            return ApiFilter
-
-        # First we need to grab the parent mixin classes of the table. For example,
-        # the MatprojStructure uses the database mixins ['Structure', 'Thermodynamics']
-        # while MatprojStaticEnergy uses ["StaticEnergy"].
-        table_mixins = cls.get_mixins()
-
-        # When we make this filter, we want it to inherit from the filters of
-        # all mixins available. We therefore grab all these filters into a list.
-        # We also add the standard ModelForm class from django-filters.
-        filter_mixins = [ApiFilter]
-        filter_mixins += [mixin.api_filterset for mixin in table_mixins]
-
-        # "Declared Filters" are ones normally set as an attribute when creating
-        # a Django filter, whereas normal filters are provided in a meta. For
-        # example...
-        #
-        # class Structure(filters.FilterSet):
-        #     class Meta:
-        #         model = StructureTable
-        #         fields = dict(
-        #             nsites=["range"],  <-------------- field filter
-        #             nelements=["range"],  <----------- field filter
-        #         )
-        #     include_subsystems = filters.BooleanFilter(
-        #         field_name="include_subsystems",
-        #         label="Include chemical subsystems in results?",
-        #         method="skip_filter",
-        #     ) <-------------------------------------- declared filter
-        #     chemical_system = filters.CharFilter(
-        #         method="filter_chemical_system"
-        #     ) <-------------------------------------- declared filter
-        #
-        # I need to separate these out in order to create our class properly
-        field_filters = {}
-        declared_filters = {}
-        filter_methods = {}
-        for field, conditions in cls.api_filters.items():
-            if isinstance(conditions, django_api_filters.Filter):
-                declared_filters.update({field: conditions})
-                # For the declared filters, there is sometimes a method that
-                # needs to be called. This will be attached to the original
-                # mixin as a method of the same name. Here we check if there
-                # is a method and attach it. For an example of this, see the
-                # "filter_chemical_system" method of the Structure class.
-                if conditions.method and conditions.method != "skip_filter":
-                    filter_methods.update(
-                        {conditions.method: getattr(cls, conditions.method)}
-                    )
-            else:
-                field_filters.update({field: conditions})
-
-        # combine the fields of each filter mixin. Note we use .get_fields instead
-        # of .fields to ensure we get a dictionary back
-        field_filters.update(
-            {
-                field: conditions
-                for mixin in filter_mixins
-                for field, conditions in mixin.get_fields().items()
-            }
-        )
-
-        # Also combine all declared filters from each mixin
-        declared_filters.update(
-            {
-                name: filter_obj
-                for mixin in filter_mixins
-                for name, filter_obj in mixin.declared_filters.items()
-            }
-        )
-
-        # The FilterSet class requires that we set extra fields in the Meta class.
-        # We define those here. Note, we accept all fields by default and the
-        # excluded fields are only those defined by the supported form_mixins -
-        # and we skip the first mixin (which is always DatabaseTableFilter)
-        class Meta:
-            model = cls
-            fields = field_filters
-
-        extra_attributes = {"Meta": Meta, **declared_filters, **filter_methods}
-        # BUG: __module__ may need to be set in the future, but we never import
-        # these forms elsewhere, so there's no need to set it now.
-
-        # Now we dynamically create a new form class that we can return.
-        NewClass = type(cls.table_name, tuple(filter_mixins), extra_attributes)
-
-        # Match the filter name to the table name
-        NewClass.filter_name = cls.table_name
-
-        return NewClass
-
-    # DEPRECIATED
-    @classmethod
-    @property
-    @cache
-    def api_filters_extra(cls):
-        """
-        Finds all columns that aren't covered by the supported Form mix-ins.
-
-        For example, a form made from the database table...
-
-        ``` python
-        from simmate.database.base_data_types import (
-            table_column,
-            Structure,
-            Forces,
-        )
-
-        class ExampleTable(Structure, Forces):
-            custom_column1 = table_column.FloatField()
-            custom_column2 = table_column.FloatField()
-        ```
-
-        ... would return ...
-
-        ``` python
-        ["custom_column1", "custom_column2"]
-        ```
-        """
-
-        all_columns = cls.api_filterset.base_filters.keys()
-        columns_w_mixin = [
-            column
-            for mixin in cls.get_mixins()
-            for column in mixin.api_filterset.base_filters.keys()
-        ]
-        extra_columns = [
-            column
-            for column in all_columns
-            if column not in columns_w_mixin and column != "id"
-        ]
-        return extra_columns
-
     # -------------------------------------------------------------------------
     # Methods that link to the website UI
     # -------------------------------------------------------------------------
@@ -1938,6 +1721,7 @@ class DatabaseTable(models.Model):
 
     html_display_name: str = None
     html_description_short: str = None
+    html_tabtitle_label_col: str = "id"
 
     html_about_template: str = "data_explorer/table_about.html"
     html_table_template: str = "data_explorer/table.html"
@@ -1952,6 +1736,13 @@ class DatabaseTable(models.Model):
     html_form_view: str = None
     html_enabled_forms: list[str] = []
     # options: "search", "create", "update", "create_many", "create_many_entry", "update_many"
+
+    @property
+    def html_tabtitle_label(self) -> str:
+        """
+        Provides a label to put in the tab title. By default, this uses the id
+        """
+        return str(getattr(self, self.html_tabtitle_label_col))
 
     @classmethod
     @property
@@ -1980,16 +1771,6 @@ class DatabaseTable(models.Model):
             "data_explorer:table-entry",
             kwargs={"table_name": self.table_name, "table_entry_id": self.pk},
         )
-
-    @classmethod
-    @property
-    def html_breadcrumb_context(cls) -> dict:
-        return {
-            "page_title": cls.table_name,
-            "page_title_icon": "mdi-database",
-            "breadcrumbs": [("data_explorer:home", "Data")],
-            "breadcrumb_active": cls.table_name,
-        }
 
     @classmethod
     @property

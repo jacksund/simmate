@@ -1,0 +1,34 @@
+{% include "core_components/base_filter_types/calculation.html" %}
+{% include "core_components/base_filter_types/structure.html" %}
+{% include "core_components/base_filter_types/thermodynamics.html" %}
+{% include "core_components/base_filter_types/forces.html" %}
+<!-- Electronic Info -->
+<div class="card mb-0">
+    <div class="card-header" id="headingElectronicFilters">
+        <h5 class="m-0">
+            <a class="custom-accordion-title d-block pt-2 pb-2"
+               data-bs-toggle="collapse"
+               href="#collapseElectronicFilters"
+               aria-expanded="true"
+               aria-controls="collapseElectronicFilters">
+                By Electronic Info:
+                <i class="mdi mdi-chevron-down accordion-arrow"></i>
+            </a>
+        </h5>
+    </div>
+    <div id="collapseElectronicFilters"
+         class="collapse"
+         aria-labelledby="headingElectronicFilters"
+         data-bs-parent="#accordionExample">
+        <div class="card-body">
+            <a><em><b>WARNING:</b> even though some static energy calculations provide this information, these values
+                are
+            very rough estimates.</em></a>
+            {{ form.band_gap__range }}
+            {{ form.is_gap_direct }}
+            {{ form.energy_fermi__range }}
+            {{ form.conduction_band_minimum__range }}
+            {{ form.valence_band_maximum__range }}
+        </div>
+    </div>
+</div>

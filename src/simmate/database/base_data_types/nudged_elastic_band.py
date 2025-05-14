@@ -15,6 +15,10 @@ from simmate.visualization.plotting import MatplotlibFigure
 
 
 class DiffusionAnalysis(Structure, Calculation):
+
+    html_display_name = "Diffusion Analysis"
+    html_description_short = "Results for Diffusion Analysis Calculations"
+
     class Meta:
         app_label = "workflows"
 

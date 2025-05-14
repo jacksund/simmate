@@ -1,0 +1,29 @@
+{% extends "core_components/site_base.html" %}
+{% block tabtitle %}Apps - Simmate{% endblock %}
+{% block body %}
+    <!-- Header -->
+    <section class="jumbotron text-center">
+        <div class="container">
+            <h1 class="jumbotron-heading">Apps</h1>
+            <p class="lead text-muted">
+                Access custom resources and tools, such as dashboards for advanced analyses across multiple datasets.
+            </p>
+        </div>
+    </section>
+    <!-- List of Cards -->
+    <div class="row pt-3">
+        {% for extra_app in extra_apps %}
+            <div class="col-md-4">
+                <div class="card border-primary border" style="height: 90%">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">{{ extra_app.verbose_name }}</h5>
+                        <p class="card-text">{{ extra_app.description_short }}</p>
+                        <a role="button"
+                           class="btn btn-primary btn-sm"
+                           href="{{ extra_app.short_name }}">Explore</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

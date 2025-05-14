@@ -1,5 +1,4 @@
 {% load humanize %}
-{% load chemical_formula_filter %}
 {% if "Structure" in table.get_mixin_names %}
     <table id="SearchResultsTable"
            class="table table-striped"
@@ -28,7 +27,6 @@
         </tbody>
     </table>
 {% elif "Molecule" in table.get_mixin_names %}
-    {% load draw_molecule %}
     {% for entry in entries %}
         <div class="col-auto">
             <div class="card border-secondary border ribbon-box" style="width: 12rem;">
@@ -59,8 +57,9 @@
             </small>
         </div>
     </div>
-    <table id="SearchResultsTable" class="table table-striped">
-        <thead>
+    <table id="SearchResultsTable"
+           class="table table-centered table-striped mb-0 border">
+        <thead class="table-primary">
             <tr>
                 <th>ID</th>
                 <th></th>

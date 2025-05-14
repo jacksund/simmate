@@ -45,12 +45,6 @@ INSTALLED_APPS = [
     #   "django.contrib.redirects",
     #   "django.contrib.sitemaps",
     #
-    # These are apps created by third-parties that give us extra features
-    "crispy_forms",  # django-crispy-forms for HTML boostrap forms
-    "rest_framework",  # djangorestframework for the REST API
-    "rest_framework.authtoken",  # for programmatic REST API access
-    "django_filters",  # django-filter for filterable REST API urls
-    #
     # Apps for django-allauth that allow sign-on using external accounts
     "allauth",
     "allauth.account",
@@ -68,10 +62,6 @@ INSTALLED_APPS = [
     # interact with and edit in the UI
     "simple_history",
     #
-    # Django contrib comments let you track comments on a model and handles
-    # moderation / user / date features for you.
-    "django_comments",
-    #
     # Other third-party apps/tools to consider. Note that some of these don't
     # need to be installed apps while some also request different setups.
     #   django-ratelimit
@@ -87,11 +77,9 @@ INSTALLED_APPS = [
     # Any extra apps from the user (such as django-table2 or some other package)
     *settings.extra_django_apps,
     # Simmate apps + user apps
-    "simmate.website.configs.UserTrackingConfig",
     "simmate.website.configs.CoreComponentsConfig",
     "simmate.website.configs.DataExplorerConfig",
     "simmate.website.configs.WorkflowsConfig",
-    "simmate.website.configs.WorkflowEngineConfig",
     *settings.apps,
 ]
 # OPTIMIZE: for now, I just load everything, but I will want to allow users to
@@ -131,8 +119,11 @@ MIDDLEWARE = [
     "simple_history.middleware.HistoryRequestMiddleware",
     # adds specific authentication methods, such as login by email
     "allauth.account.middleware.AccountMiddleware",
+    # add token-based authentication for programmatic access (e.g, REST API)
+    "simmate.website.core_components.middleware.TokenAuthenticationMiddleware",
     # tracks page visits accross the website
-    "simmate.website.user_tracking.middleware.WebsitePageVisitMiddleware",
+    "simmate.website.core_components.middleware.WebsitePageVisitMiddleware",
+    # Note: extras such as RequireLoginMiddleware are added conditionally below
 ]
 
 # "core" here is based on the name of my main django folder
@@ -143,7 +134,10 @@ TEMPLATES = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
             settings.config_directory / "templates",  # let's user easily override html
-            settings.django_directory / "templates",  # a single templates folder
+            # note: this dir is automatically picked up because it's within an
+            # app, but we need it to come BEFORE some other apps (such as allauth)
+            # in order to properly override default templates.
+            settings.django_directory / "core_components" / "templates",
             # Then APP_DIRS are checked in order
         ],
         "APP_DIRS": True,
@@ -153,6 +147,14 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+            ],
+            # We have custom template tags that should be loaded by default.
+            # This avoids us having to do {% load simmate_ui_tags %} in
+            # a bunch of templates.
+            "builtins": [
+                "simmate.website.core_components.templatetags.simmate_input_forms",
+                "simmate.website.core_components.templatetags.simmate_settings",
+                "simmate.website.core_components.templatetags.simmate_utils",
             ],
         },
     },
@@ -222,7 +224,6 @@ STATICFILES_DIRS = [
     get_directory(
         settings.config_directory / "static_files"
     ),  # let's user add their own files
-    settings.django_directory / "static_files",
 ]
 
 # Ensures users' caches are reset in production when a static file's content changes.
@@ -239,57 +240,6 @@ if settings.website.static_file_hashes:
 # if DEBUG:
 #     STATICFILES_DIRS += [STATIC_ROOT]
 
-# This sets the django-crispy formating style
-CRISPY_TEMPLATE_PACK = "bootstrap4"
-
-# These settings help configure djangorestframework and our REST API
-REST_FRAMEWORK = {
-    # The REST framework has both authentication AND permission classes. Adding
-    # the auth classes ensure we have user data available when rendering the
-    # template. Then I allow anyone (anonymous and signed in users) to access
-    # the REST APIs. Note, even though this is allow-all, we still have the
-    # "RequireLoginMiddleware" applied elsewhere if the admin choses.
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.TokenAuthentication",
-    ],
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",
-    ],
-    # Because we have a massive number of results for different endpoints,
-    # we want to set results to be paginated by 20 results per page. This
-    # way we don't have to set a page limit for every individual endpoint. Note
-    # I can consider switching to LimitOffsetPagination in the future, which
-    # allows the number of results per page to vary, but I don't do this
-    # for now because there's no easy way to set paginator.max_limit in the
-    # settings here.
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 20,
-    # To prevent users from querying too much and bringing down our servers,
-    # we set a throttle rate on each user. Here, "anon" represents an anonymous
-    # user (not signed-in) while signed-in users have access to higher download
-    # rates. Note these are very restrictive because we prefer users to download
-    # full databases and use Simmate locally instead.
-    "DEFAULT_THROTTLE_CLASSES": [
-        "rest_framework.throttling.AnonRateThrottle",
-        "rest_framework.throttling.UserRateThrottle",
-    ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "2500/hour", "user": "7500/hr"},
-    # We use django-filter to automatically handle filtering from a REST url
-    "DEFAULT_FILTER_BACKENDS": [
-        "django_filters.rest_framework.DjangoFilterBackend",
-        "rest_framework.filters.OrderingFilter",
-    ],
-    # There are multiple ways to render the data, where we default to a nice HTML
-    # view, but also support pure JSON or using Django-REST's interactive API
-    "DEFAULT_RENDERER_CLASSES": [
-        "rest_framework.renderers.TemplateHTMLRenderer",
-        "rest_framework.renderers.BrowsableAPIRenderer",
-        "rest_framework.renderers.JSONRenderer",
-    ],
-}
-
 # Allows the use of iFrames from within Simmate (such as the structure-viewer)
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
@@ -297,6 +247,8 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # Extra settings for django-allauth
 
+# Note: these backends are for session-based auth. API Token auth is separate
+# and carried out via a separate middleware.
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
     "django.contrib.auth.backends.ModelBackend",
@@ -379,7 +331,9 @@ if not settings.website.debug:
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 if settings.website.require_login:
-    MIDDLEWARE.append("simmate.website.require_login.RequireLoginMiddleware")
+    MIDDLEWARE.append(
+        "simmate.website.core_components.middleware.RequireLoginMiddleware"
+    )
 
 LOGIN_REQUIRED_URLS = (r"/(.*)$",)
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (

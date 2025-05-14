@@ -4,7 +4,7 @@
 
 ## Local Server Setup
 
-To set up Simmate on your local computer, execute the following command:
+To set up Simmate on your local computer, use the following command:
 
 === "command line"
     ``` bash

@@ -1,0 +1,32 @@
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    {% for crumb in breadcrumbs %}
+                        {% if forloop.revcounter > 1 %}
+                            {# the counter does a relative path expansion (e.g., href="..", href="../..", href="../../..", etc.),#}
+                            <li class="breadcrumb-item">
+                                <a href="{% for i in ''|center:forloop.revcounter0 %}../{% endfor %}">{{ crumb }}</a>
+                            </li>
+                        {% else %}
+                            {# The final entry is the current page #}
+                            <li class="breadcrumb-item active">{{ crumb }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ol>
+            </div>
+            <h4 class="page-title">
+                {{ page_title }}
+                {% if page_title_icon %}<i class="mdi {{ page_title_icon }} me-1"></i>{% endif %}
+                {# djlint:off #}
+                    {% if title_json_link %}
+                        <small>(see also:
+                            <a href="{% update_url format='json' %}" target="_blank">JSON</a>)</small>
+                        <small>
+                    {% endif %}
+                {# djlint:on #}
+            </h4>
+        </div>
+    </div>
+</div>

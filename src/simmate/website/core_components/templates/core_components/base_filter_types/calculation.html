@@ -1,0 +1,30 @@
+<div class="card mb-0">
+    <div class="card-header" id="headingCalculationFilters">
+        <h5 class="m-0">
+            <a class="custom-accordion-title d-block pt-2 pb-2"
+               data-bs-toggle="collapse"
+               href="#collapseCalculationFilters"
+               aria-expanded="true"
+               aria-controls="collapseCalculationFilters">
+                By Calculation Info:
+                <i class="mdi mdi-chevron-down accordion-arrow"></i>
+            </a>
+        </h5>
+    </div>
+    <div id="collapseCalculationFilters"
+         class="collapse"
+         aria-labelledby="headingCalculationFilters"
+         data-bs-parent="#accordionExample">
+        <div class="card-body">
+            {{ form.run_id }}
+            {{ form.directory }}
+            {{ form.created_at__range }}
+            {{ form.updated_at__range }}
+            {{ form.workflow_name }}
+            {{ form.computer_system }}
+            {{ form.directory }}
+            {{ form.total_time__range }}
+            {{ form.queue_time__range }}
+        </div>
+    </div>
+</div>

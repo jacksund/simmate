@@ -120,9 +120,6 @@ urlpatterns = [
         name="unicorn",
     ),
     #
-    # Django-contrib-comments urls
-    path("comments/", include("django_comments.urls")),
-    #
     # Custom Simmate apps (if present)
     path(route="apps/", view=views.apps, name="apps"),
     *get_app_urls(),

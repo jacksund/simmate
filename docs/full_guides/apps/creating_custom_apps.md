@@ -1,25 +1,24 @@
 ## Django Apps vs. Simmate Apps
 
-Simmate is built on top of the [Django web framework](https://www.djangoproject.com/), which is used by thousands of developers to build a countless number of applications and software. In turn, the applications built with Django support millions of users accross the globe. Moreover, many major software companies & products were built using Django:
+Simmate is built on top of the [Django web framework](https://www.djangoproject.com/), which is used by thousands of developers. In fact, many major software companies & products were built using Django:
 
 - [Instagram](https://www.instagram.com/)
 - [Spotify](https://open.spotify.com/)
 - [Pinterest](https://www.pinterest.com/)
 - [Dropbox](https://www.dropbox.com/)
 - [The Washington Post](https://www.washingtonpost.com/)
-- ... and many more!
 
-And again, Simmate is a small addition to this list. 
+... and many more. Simmate is a very small addition to this list. 
 
-With this in mind, it is helpful to know that all of our Simmate apps are really just Django apps -- but with some extra features tacked on (e.g. chemistry tools & workflows). In fact, **any app you build with Django can be used with Simmate.** Because of this, we highly recommend exploring [Django's guides](https://docs.djangoproject.com/en/5.2/) to get started.
+With this in mind, it is helpful to know that all of our Simmate apps are really just Django apps -- but with some extra features tacked on (e.g. chemistry tools & workflows). In fact, **any app you build with Django can be used with Simmate.** Because of this, we highly recommend exploring [Django's intro guides](https://docs.djangoproject.com/en/5.2/intro/) to get started.
 
 
 ## Step-by-Step Tutorials
 
-1. [Django's official tutorial](https://docs.djangoproject.com/en/5.2/intro/tutorial01/)
+1. [Django's official tutorial](https://docs.djangoproject.com/en/5.2/intro/)
 2. [Simmate's getting-start guide](/getting_started/custom_tables_and_apps/create_a_custom_app.md)
 
-!!! note
+!!! tip
     `django` is installed for you when you install `simmate`, so you can start their tutorials without any additional setup.
 
 ## Folder Structure
@@ -97,6 +96,9 @@ from .test_results import MyTestResults
 
 !!! note
     Simmate uses [Django](https://docs.djangoproject.com/en/5.2/topics/db/models/) to detect and maintain models, so all the same rules apply.
+    
+!!! tip
+    Read more about custom tables in our [Database guides](/full_guides/database/custom_tables.md)
 
 ## Adding Workflows
 
@@ -108,7 +110,7 @@ __all__ = [
     "MyExample__Workflow__Test321",
 ]
 
-# (then these workflows are defined)
+# (then the workflows are defined below)
 ```
 
 If you make `my_app/workflows` a folder, make sure your final tables are imported within `my_app/workflows/__init__.py`
@@ -118,10 +120,13 @@ from .flow_abc import MyExample__Workflow__TestABC
 from .flow_def import MyExample__Workflow__TestDEF
 ```
 
+!!! tip
+    Read more about custom tables in our [Workflow guides](/full_guides/workflows/creating_basic_workflows.md)
+
 
 ## Adding Web UI (urls/views)
 
-Normally in Django, you need to add `include('example_app.urls')` and define what url endpoints this will map to. Simmate automatically handles this when you build `urls.py` and `views.py` files. Everything in your `urls.py` will be mapped to a namespace matching your app's name.
+Build your `urls.py`, `views.py`, and `templates/*.html` files following [official Django docs](https://docs.djangoproject.com/en/5.2/). Everything in your `urls.py` will be mapped to a namespace matching your app's name.
 
 For example, if you app was called `example_app` and this was your `urls.py`:
 
@@ -140,3 +145,6 @@ You could view them in the Simmate website at:
 
 - `http://127.0.0.1:8000/apps/example_app/`
 - `http://127.0.0.1:8000/apps/example_app/my-custom-view/`
+
+!!! tip
+    Read more about custom tables in our [Workflow guides](/full_guides/website/creating_views.md)

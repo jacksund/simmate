@@ -1,0 +1,129 @@
+{% load static %}
+{% load unicorn %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {# Indicate which Character Encoding set the browser should use #}
+        <meta charset="utf-8">
+        {# Title of the page (located in the tab header) #}
+        <title>
+            {% block tabtitle %}Simmate{% endblock %}
+        </title>
+        {# Set the icons to use in the tab header #}
+        <link rel="apple-touch-icon"
+              sizes="76x76"
+              href="{% static 'images/simmate-icon.svg' %}">
+        <link rel="icon"
+              type="image/png"
+              href="{% static 'images/simmate-icon.svg' %}">
+        {# Set meta data for responsive viewport scaling/size (i.e. phone vs monitor) #}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta content="A toolkit and framework for materials science"
+              name="description" />
+        <meta content="The Simmate Team" name="author" />
+        {# Load CSS #}
+        <link href="https://archives.simmate.org/assets/css/icons.min.css"
+              rel="stylesheet"
+              type="text/css" />
+        <link href="https://archives.simmate.org/assets/css/app-modern.min.css"
+              rel="stylesheet"
+              type="text/css"
+              id="app-style" />
+        {# CodeHilite CSS #}
+        <link rel="stylesheet"
+              type="text/css"
+              href="{% static '/css/codehilite.css' %}">
+        {# Load Plotly Javascript #}
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        {# Django-unicorn scripts (+custom styling) for dynamic webpages / AJAX calls #}
+        {% unicorn_scripts %}
+        <link rel="stylesheet"
+              type="text/css"
+              href='{% static "/css/unicorn_errors.css" %}'>
+        {# Load the RDKit JS file #}
+        <script src="https://unpkg.com/@rdkit/rdkit@2024.3.5-1.0.0/dist/RDKit_minimal.js"></script>
+        {# Load ChemDoodle JS and CSS #}
+        <link rel="stylesheet"
+              href="https://archives.simmate.org/assets/chemdoodle/ChemDoodleWeb.css"
+              type="text/css">
+        <script type="text/javascript"
+                src="https://archives.simmate.org/assets/chemdoodle/ChemDoodleWeb.js"></script>
+        <link rel="stylesheet"
+              href="https://archives.simmate.org/assets/chemdoodle/uis/jquery-ui-1.11.4.css"
+              type="text/css">
+        <script type="text/javascript"
+                src="https://archives.simmate.org/assets/chemdoodle/uis/ChemDoodleWeb-uis.js"></script>
+        {% comment %}
+            For customized servers that use ChemDraw instead of ChemDoodle, you can specify your ChemDraw
+            server like so (this is the official server as an example):
+                <script src="https://chemdrawdirect.perkinelmer.cloud/js/chemdrawweb/chemdrawweb.js"></script> 
+            All ChemDoodle JS/CSS code in the section above this can then be removed. In addition, the
+            custom simmate javascript "chemdoodle_utils" needs to be replaced with:
+                <script type="text/javascript" src="{% static "js/chemdraw_utils.2025_04_18.js" %}"></script>
+            NOTE: ChemDraw requires a license, which you can place in any app folder with the
+            following path: 
+                static/licenses/ChemDraw-JS-License.xml
+            Then set this in the header as well:
+                <script>var ChemDrawLicenseURL = '{% static "/licenses/ChemDraw-JS-License.xml" %}';</script>
+        {% endcomment %}
+        {# Custom Simmate Javascript for molecule sketching + images #}
+        <script type="text/javascript" src="{% static "js/rdkit_utils.2024_09_13.js" %}"></script>
+        {# Custom Simmate Javascript #}
+        <script type="text/javascript" src="{% static "js/chemdoodle_utils.2024_09_03.js" %}"></script>
+        <script type="text/javascript" src="{% static "js/progress_bars.2024_05_27.js" %}"></script>
+        <script type="text/javascript" src="{% static "js/select2_utils.2024_05_27.js" %}"></script>
+        {# Some pages may require extra lines in the header such as loading extra libraries #}
+        {% block extraheader %}{% endblock %}
+    </head>
+    <body class="loading"
+          data-layout-color="light"
+          data-layout="detached"
+          data-rightbar-onstart="true"
+          {% if compact_sidebar %}data-leftbar-compact-mode="condensed"{% endif %}>
+        {# token always required for Django-Unicorn #}
+        {% csrf_token %}
+        {# Pre-loader #}
+        <div id="preloader">
+            <div id="status">
+                <div class="bouncing-loader">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+        {# The navigation bar is the same for every webpage #}
+        {% include "core_components/navbar.html" %}
+        {% if not fullpage_dashboard %}
+            {# This is the main portion of the webpage. The sidebar and footbar are always present, and the remainder of the page varies. #}
+            <div class="container-fluid">
+                <div class="wrapper">
+                    {% include "core_components/sidebar_left.html" %}
+                    <div class="content-page">
+                        <div class="container-fluid">
+                            {% block breadcrumbs %}
+                                {% include "basic_elements/breadcrumbs.html" %}
+                            {% endblock %}
+                            {% block body %}{% endblock %}
+                        </div>
+                        {% include "core_components/footerbar.html" %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            {# Some streamlit dashboards are best displayed as a full page. This setup is rare and more rigid #}
+            <div class="px-5">{% include "basic_elements/breadcrumbs.html" %}</div>
+            <div class="row justify-content-center">
+                <iframe src="{{ dashboard_url }}?embed=true&user_id={{ request.user.id }}"
+                        style="height:150vh;
+                               width:100%;
+                               border:none"></iframe>
+            </div>
+            <div class="pt-5">{% include "core_components/footerbar.html" %}</div>
+        {% endif %}
+        {# Many packages for JS libraries should be loaded last #}
+        {% include "core_components/footer.html" %}
+        {# Sometimes we load extra javascript at the bottom of the page #}
+        {% block extrafooter %}{% endblock %}
+    </body>
+</html>

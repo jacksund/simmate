@@ -2,14 +2,10 @@
 
 import time
 
-# import pickle
-import cloudpickle  # needed to serialize Prefect workflow runs and tasks
+import cloudpickle
 from django.db import transaction
 
 from simmate.database.base_data_types import DatabaseTable, table_column
-
-# BUG: I have this database table within a module that calls "database.connect"
-# at a higher level... Will this cause circular import issues?
 
 
 class WorkItem(DatabaseTable):
@@ -26,7 +22,8 @@ class WorkItem(DatabaseTable):
     """
 
     class Meta:
-        app_label = "engine"
+        app_label = "workflows"
+        db_table = "workflow_engine__work_items"
 
     tags = table_column.JSONField(default=list)
     """

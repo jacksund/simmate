@@ -1,0 +1,27 @@
+<div class="card mb-0">
+    <div class="card-header" id="headingThermoFilters">
+        <h5 class="m-0">
+            <a class="custom-accordion-title d-block pt-2 pb-2"
+               data-bs-toggle="collapse"
+               href="#collapseThermoFilters"
+               aria-expanded="true"
+               aria-controls="collapseThermoFilters">
+                By Thermodynamic Info:
+                <i class="mdi mdi-chevron-down accordion-arrow"></i>
+            </a>
+        </h5>
+    </div>
+    <div id="collapseThermoFilters"
+         class="collapse"
+         aria-labelledby="headingThermoFilters"
+         data-bs-parent="#accordionExample">
+        <div class="card-body">
+            {{ form.energy__range }}
+            {{ form.energy_per_atom__range }}
+            {{ form.energy_above_hull__range }}
+            {{ form.is_stable }}
+            {{ form.formation_energy__range }}
+            {{ form.formation_energy__range }}
+        </div>
+    </div>
+</div>

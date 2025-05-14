@@ -322,6 +322,24 @@ def get_all_table_docs(extra_docs: dict = {}, include_empties: bool = True) -> d
     return all_docs
 
 
+def get_table(table_name: str):  # returns subclass of DatabaseTable
+    """
+    Given a table name (e.g. "MaterialsProjectStructure") or a full import
+    path of a table, this will load and return the corresponding table class.
+
+    This is a wrapper around the `DatabaseTable.get_table` method. We make it
+    available within the utils to match the pattern of the
+    `worklfows.utilities.get_workflow` utility that is commonly used elsewhere
+    """
+
+    # local import is required to prevent circular dep. This is also a higher
+    # level util for users, so we establish db connection for them upfront
+    from simmate.database import connect
+    from simmate.database.base_data_types import DatabaseTable
+
+    return DatabaseTable.get_table(table_name=table_name)
+
+
 # BUG: This function isn't working as intended
 # def graph_database(filename="database_graph.png"):
 #     # using django-extensions, we want to make an image of all the available

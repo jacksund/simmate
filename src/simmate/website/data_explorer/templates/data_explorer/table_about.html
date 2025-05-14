@@ -1,27 +1,6 @@
 {% extends "core_components/site_base.html" %}
-{% block tabtitle %}Simmate{% endblock %}
-{% block breadcrumbs %}
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box">
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item">
-                            <a href="{% url 'data_explorer:home' %}">Data</a>
-                        </li>
-                        <li class="breadcrumb-item">
-                            <a href="{% url 'data_explorer:table' table_docs.table_info.python_name %}">{{ table_docs.name }}</a>
-                        </li>
-                        <li class="breadcrumb-item active">About</li>
-                    </ol>
-                </div>
-                <h4 class="page-title">Table Info</h4>
-            </div>
-        </div>
-    </div>
-{% endblock %}
+{% block tabtitle %}{{ table.table_name }} About - Simmate{% endblock %}
 {% block body %}
-    {% load markdown_filter %}
     {# Title #}
     <div class="row text-center py-2">
         <h2>{{ table_docs.name }}</h2>

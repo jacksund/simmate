@@ -3,49 +3,54 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from simmate.database.base_data_types import DatabaseTable
-from simmate.website.core_components.base_api_view import SimmateAPIViewSet
+from simmate.configuration import settings
 from simmate.website.workflows.forms import SubmitWorkflow
-from simmate.workflows.utilities import (  # WORKFLOW_TYPES,
+from simmate.workflows.utilities import (
     get_apps_by_type,
     get_workflow,
     get_workflow_names_by_type,
 )
 
-TYPE_DESCRIPTIONS = {
-    "static-energy": (
-        "Calculate the energy for a structure. In many cases, this also "
-        "involves calculating the lattice strain and forces for each site."
+DEFAULT_TYPE_DESCRIPTIONS = {
+    "diffusion": (
+        "Evaluate the diffusion of an atom through a material. "
+        "At this time, these workflows are entirely Nudged-Elastic-Band (NEB) "
+        "calculations."
+    ),
+    "dynamics": (
+        "Molecular dynamics (MD) simulations for a material. Involves "
+        "iteratively evaluating the energy/forces at "
+        "specific temperature (or temperature ramp)."
+    ),
+    "electronic-structure": (
+        "Calculate the electronic structure for a material. "
+        "This include band-structure and density of states calculations."
+    ),
+    "physical-property": ("Calculate common physical properties."),
+    "population-analysis": (
+        "Evaluate where electrons exist in a structure and assign them to a "
+        "specific site/atom. Used to predicted oxidation states."
     ),
     "relaxation": (
         "Geometry-optimize a structure's the lattice and sites "
         "to their lowest-energy positions until convergence criteria are met."
     ),
-    "population-analysis": (
-        "Evaluate where electrons exist in a structure and assign them to a "
-        "specific site/atom. Used to predicted oxidation states."
+    "similarity": ("Run 2D and 3D structure searches across billions of compounds."),
+    "solubility": ("Calculate solubility of compounds in different solutions."),
+    "stability": (
+        "Calculate therodynamic and kinetic stability of compounds, "
+        "as well as expected decomposition products."
     ),
-    "band-structure": (
-        "These workflows calculate the electronic band structure for a material."
-    ),
-    "density-of-states": (
-        "These workflows calculate the electronic density of states for a material."
-    ),
-    "dynamics": (
-        "Run a molecular dynamics simulation for a material. Involves "
-        "iteratively evaluating the energy/forces at "
-        "specific temperature (or temperature ramp)."
-    ),
-    "diffusion": (
-        "These workflows evaluate the diffusion of an atom through a material. "
-        "At this time, these workflows are entirely Nudged-Elastic-Band (NEB) "
-        "calculations."
+    "static-energy": (
+        "Calculate the energy for a structure. In many cases, this also "
+        "involves calculating the lattice strain and forces for each site."
     ),
     "structure-prediction": (
         "Predict the most stable structure when given only chemical composition "
         "or system. Strategies range from evolutionary searches to "
         "substituition of known materials."
     ),
+    # TYPES BELOW ARE UNUSED RIGHT NOW
     "conformer-generation": (
         "Predict the most stable structure when given only chemical composition "
         "or system. Strategies range from evolutionary searches to "
@@ -63,25 +68,28 @@ TYPE_DESCRIPTIONS = {
     ),
 }
 
+DEFAULT_DESCRIPTION = "A custom workflow type, built internally. (no description given)"
 
-def workflows_all(request):
-    # TODO: maybe instead load these descriptions from the simmate.{module}'s docstr
-    # This would look something like...
-    # all_metadata = {}
-    # for flow_type in WORKFLOW_TYPES:
-    #     --> grab the module
-    #     --> use the __doc__ as the text.
+TYPE_DESCRIPTIONS = {
+    t: (
+        settings.website.workflows.type_descriptions.get(t)
+        if t in settings.website.workflows.type_descriptions
+        else DEFAULT_TYPE_DESCRIPTIONS.get(t, DEFAULT_DESCRIPTION)
+    )
+    for t in settings.website.workflows.types_to_display
+}
 
-    # now let's put the data and template together to send the user
+
+def all_workflow_types(request):
     context = {
         "workflows_metadata": TYPE_DESCRIPTIONS,
-        "breadcrumb_active": "Workflows",
+        "breadcrumbs": ["Workflows"],
     }
-    template = "workflows/all.html"
+    template = "workflows/all_workflow_types.html"
     return render(request, template, context)
 
 
-def workflows_by_type(request, workflow_type):
+def workflows_of_given_type(request, workflow_type):
     apps = get_apps_by_type(workflow_type)
 
     # pull the information together for each individual flow and organize by
@@ -91,82 +99,55 @@ def workflows_by_type(request, workflow_type):
         workflow_names = get_workflow_names_by_type(
             workflow_type,
             app,
-            remove_no_database_flows=False,  # BUG: this breaks some views...
+            remove_no_database_flows=False,
         )
         workflow_dict[app] = [get_workflow(n) for n in workflow_names]
 
-    # now let's put the data and template together to send the user
     context = {
         "workflow_type": workflow_type,
-        "workflow_type_description": TYPE_DESCRIPTIONS.get(workflow_type, ""),
+        "workflow_type_description": TYPE_DESCRIPTIONS[workflow_type],
         "workflow_dict": workflow_dict,
         "page_title": "Workflow Type",
-        "breadcrumbs": [("workflows", "Workflows")],
-        "breadcrumb_active": workflow_type,
+        "breadcrumbs": ["Workflows", workflow_type],
     }
-    template = "workflows/by_type.html"
+    template = "workflows/workflows_of_given_type.html"
     return render(request, template, context)
 
 
-class WorkflowAPIViewSet(SimmateAPIViewSet):
-    template_list = "workflows/detail.html"
-    template_retrieve = "workflows/detail_run.html"
-
-    @staticmethod
-    def get_table(
-        request,
+def workflows_of_given_type_and_app(request, workflow_type, workflow_app):
+    workflow_names = get_workflow_names_by_type(
         workflow_type,
         workflow_app,
-        workflow_preset,
-        pk=None,  # this is passed for 'retrieve' views but we don't use it
-    ) -> DatabaseTable:
-        """
-        grabs the relevant database table using the URL request
-        """
-        name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
-        workflow = get_workflow(name_full)
-        return workflow.database_table
+        remove_no_database_flows=False,
+    )
+    workflows = [get_workflow(n) for n in workflow_names]
 
-    @staticmethod
-    def get_initial_queryset(
-        request,
-        workflow_type,
-        workflow_app,
-        workflow_preset,
-        pk=None,  # this is passed for 'retrieve' views but we don't use it
-    ):
-        name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
-        workflow = get_workflow(name_full)
-        return workflow.all_results
+    context = {
+        "workflows": workflows,
+        "page_title": f"{workflow_type}.{workflow_app}",
+        "breadcrumbs": ["Workflows", workflow_type, workflow_app],
+    }
+    template = "workflows/workflows_of_given_type_and_app.html"
+    return render(request, template, context)
 
-    def get_list_context(
-        self,
-        request,
-        workflow_type,
-        workflow_app,
-        workflow_preset,
-    ) -> dict:
-        name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
-        workflow = get_workflow(name_full)
 
-        # TODO: grab some metadata about this calc. For example...
-        # ncalculations = MITRelaxation.objects.count()
-        # nflows_submitted = workflow.nflows_submitted
+def workflow_detail(request, workflow_type, workflow_app, workflow_preset):
 
-        return {"workflow": workflow}
+    workflow_name = f"{workflow_type}.{workflow_app}.{workflow_preset}"
+    workflow = get_workflow(workflow_name)
 
-    def get_retrieve_context(
-        self,
-        request,
-        workflow_type,
-        workflow_app,
-        workflow_preset,
-        pk,
-    ) -> dict:
-        name_full = f"{workflow_type}.{workflow_app}.{workflow_preset}"
-        workflow = get_workflow(name_full)
+    # TODO: grab some metadata about this calc. For example...
+    # ncalculations = workflow.all_results.objects.count()
+    # nflows_submitted = workflow.nflows_submitted
+    # workflow.database_table
 
-        return {"workflow": workflow}
+    context = {
+        "workflow": workflow,
+        "page_title": workflow_name,
+        "breadcrumbs": ["Workflows", workflow_type, workflow_app, workflow_preset],
+    }
+    template = "workflows/workflow_detail.html"
+    return render(request, template, context)
 
 
 @login_required
