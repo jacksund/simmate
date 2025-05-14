@@ -19,9 +19,5 @@ class WorkflowsConfig(AppConfig):
     name = "simmate.website.workflows"
 
 
-class WorkflowEngineConfig(AppConfig):
-    name = "simmate.website.engine"
-
-
 class TestAppConfig(AppConfig):
     name = "simmate.website.test_app"
