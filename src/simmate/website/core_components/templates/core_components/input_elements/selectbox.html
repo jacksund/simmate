@@ -8,6 +8,7 @@
                 {% if multiselect %}multiple="multiple"{% endif %}
                 data-toggle="select2"
                 data-placeholder="Choose one ..."
+                {% if popout_parent_id %}data-dropdown-parent="#{{ popout_parent_id }}"{% endif %}
                 onchange="Unicorn.call('{% if not context.unicorn.component_key %}{{ context.unicorn.component_name }}{% else %}{{ context.unicorn.component_key }}{% endif %}', 'set_property', '{{ name }}', $('#{{ name }}{{ context.unicorn.component_key }}-input').val(){% if multiselect %}.join('--and--'){% endif %});">
             
             {% if not multiselect %}

@@ -31,4 +31,4 @@ def test_structure_viewer_view(client, structure):
     url_data = structure_to_url(structure)
     response = client.get(f"/core-components/structure-viewer/?{url_data}")
     assert response.status_code == 200
-    assertTemplateUsed(response, "core_components/structure_viewer.html")
+    assertTemplateUsed(response, "core_components/chem_elements/structure_viewer.html")

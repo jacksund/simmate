@@ -1,9 +1,43 @@
 {% extends "core_components/site_base.html" %}
 {% block tabtitle %}{{ table_entry.table_name }} {{ table_entry.html_tabtitle_label }} - Simmate{% endblock %}
 {% block body %}
-    {% include "core_components/table_entry_header.html" %}
+    {% include "data_explorer/table_entry_header.html" %}
     {# Build views for the table entry's data #}
     {% block entrycontent %}
-        {% include "core_components/table_entry.html" %}
+        {# If no default page is et, then we iterate through the fundamental mixins and pull the proper components #}
+        {% if "Calculation" in table_mixins %}
+            {% include "core_components/base_data_types/calculation.html" %}
+        {% endif %}
+        {% if "Structure" in table_mixins %}
+            {% include "core_components/base_data_types/structure.html" %}
+        {% endif %}
+        {% if "Thermodynamics" in table_mixins %}
+            {% include "core_components/base_data_types/thermodynamics.html" %}
+        {% endif %}
+        {% if "Forces" in table_mixins %}
+            {% include "core_components/base_data_types/forces.html" %}
+        {% endif %}
+        {% if "BandStructure" in table_mixins %}
+            {% include "core_components/base_data_types/band-structure.html" %}
+        {% endif %}
+        {% if "DensityofStates" in table_mixins %}
+            {% include "core_components/base_data_types/density-of-states.html" %}
+        {% endif %}
+        {% if "Molecule" in table_mixins %}
+            {% include "core_components/base_data_types/molecule.html" %}
+        {% endif %}
+        {# Add any extra columns using default formatting #}
+        {% if extra_columns %}
+            <div class="container p-4">
+                <h3>Extra Information:</h3>
+                <ul>
+                    {% for extra_column in extra_columns %}
+                        <li>
+                            <b>{{ extra_column }}:</b> {{ table_entry|getattribute:extra_column }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
     {% endblock %}
 {% endblock %}

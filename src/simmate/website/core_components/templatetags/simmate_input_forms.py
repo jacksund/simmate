@@ -175,6 +175,14 @@ def selectbox(
     if dynamic_options:
         options_hash = hash_options(options)
 
+    # the searchbar breaks when the dropdown is in a model or offcanvas. So
+    # this must be set to patch that via the `data-dropdown-parent` attr
+    popout_parent_id = {
+        "searchpopout": "offcanvasQuickSearch",
+        "updatemanypopout": "offcanvasUpdater",
+        "createpopout": "offcanvasAddEntry",
+    }.get(context["unicorn"]["component_key"], None)
+
     return locals()
 
 
@@ -346,7 +354,7 @@ def alert(
 
 
 @register.inclusion_tag(
-    filename="core_components/basic_elements/draw_molecule.html",
+    filename="core_components/chem_elements/draw_molecule.html",
     takes_context=True,
 )
 def draw_molecule(

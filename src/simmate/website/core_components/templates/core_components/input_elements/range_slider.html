@@ -1,0 +1,62 @@
+{# TODO - This input element is not ready yet. just a collection of note from past tests #}
+<div unicorn:ignore>
+    <div class="form-group">
+        {% if label %}
+            <label class="pt-2">
+                {{ label }}
+                {% if help_text %}
+                    <p class="badge bg-secondary rounded-pill"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="top"
+                       data-bs-title="{{ help_text }}">?</p>
+                {% endif %}
+            </label>
+        {% endif %}
+        <input type="text"
+               id="{{ name }}{{ key }}"
+               name="{{ name }}"
+               class="js-range-slider"
+               value="">
+    </div>
+</div>
+<script>
+    $("#{{ name }}{{ key }}").ionRangeSlider({
+        {% if is_double %}
+            values_separator: ",",
+            type: "double",
+        {% endif %}
+        min: {{ min }},
+        max: {{ max }},
+        {% if from %}from: {{ from }},{% endif %}
+        {% if to %}to: {{ to }},{% endif %}
+        {% if grid %}grid: true,{% endif %}
+        {% if grid_num %}grid_num: {{ grid_num }},{% endif %}
+        {% if step %}step: {{ step }},{% endif %}
+        {% if postfix %}max_postfix: "+",{% endif %}    
+        onFinish: function (data) {
+            Unicorn.call('{{ unicorn_view }}', 'set_{{ name }}', $('#{{ name }}{{ key }}').val());
+        }
+    });
+</script>
+{# or... #}
+<div id="div_{{ form_field.html_name }}" class="form-group">
+    {{ form_field.errors }}
+    <label for="{{ form_field.id_for_label }}" class="pt-2">
+        {% if not label %}
+            {{ form_field.name }}
+        {% else %}
+            {{ label }}
+        {% endif %}
+    </label>
+    <input type="text"
+           name="{{ form_field.html_name }}"
+           id="{{ form_field.html_name }}"
+           data-plugin="range-slider"
+           data-min="{{ min }}"
+           data-max="{{ max }}"
+           data-input-values-separator=","
+           data-max_postfix="+"
+           {% if form_field.value %}data-from="{{ form_field.value.0 }}" data-to="{{ form_field.value.1 }}"{% endif %}
+           data-type="double"
+           data-grid="true">
+</div>
