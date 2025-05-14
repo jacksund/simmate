@@ -102,7 +102,7 @@
                     <div class="content-page">
                         <div class="container-fluid">
                             {% block breadcrumbs %}
-                                {% include "basic_elements/breadcrumbs.html" %}
+                                {% include "core_components/basic_elements/breadcrumbs.html" %}
                             {% endblock %}
                             {% block body %}{% endblock %}
                         </div>
@@ -112,7 +112,7 @@
             </div>
         {% else %}
             {# Some streamlit dashboards are best displayed as a full page. This setup is rare and more rigid #}
-            <div class="px-5">{% include "basic_elements/breadcrumbs.html" %}</div>
+            <div class="px-5">{% include "core_components/basic_elements/breadcrumbs.html" %}</div>
             <div class="row justify-content-center">
                 <iframe src="{{ dashboard_url }}?embed=true&user_id={{ request.user.id }}"
                         style="height:150vh;

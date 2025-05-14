@@ -52,7 +52,7 @@ def structure_viewer(request):
     # we pass the base name to the template so that it knows where the static
     # file is located (template assumes static directory)
     context = {"3d_structure_filename": temp_filname_base}
-    template = "core_components/structure_viewer.html"
+    template = "core_components/chem_elements/structure_viewer.html"
     return render(request, template, context)
 
 

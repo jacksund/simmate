@@ -63,7 +63,7 @@ def home(request):
 
 
 def table_about(request, table_name):
-    table = get_table_safe(request, table_name)
+    table = get_table_safe(table_name)
     context = {
         "table": table,
         "table_docs": table.get_table_docs(),

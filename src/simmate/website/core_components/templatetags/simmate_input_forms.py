@@ -354,7 +354,7 @@ def alert(
 
 
 @register.inclusion_tag(
-    filename="core_components/basic_elements/draw_molecule.html",
+    filename="core_components/chem_elements/draw_molecule.html",
     takes_context=True,
 )
 def draw_molecule(
