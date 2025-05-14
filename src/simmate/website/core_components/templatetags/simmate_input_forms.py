@@ -174,7 +174,7 @@ def selectbox(
     # replace the full select box if the options are changed at all
     if dynamic_options:
         options_hash = hash_options(options)
-    
+
     # the searchbar breaks when the dropdown is in a model or offcanvas. So
     # this must be set to patch that via the `data-dropdown-parent` attr
     popout_parent_id = {
