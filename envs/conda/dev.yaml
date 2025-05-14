@@ -66,3 +66,7 @@ dependencies:
     # Recommended IDE for development -- We leave this as a separate install
     # because it's up to you and Spyder is a large package with many dependencies.
     # - spyder >=5.1.5
+     # BUG-FIX for typer
+     # https://github.com/fastapi/typer/discussions/1215
+     # https://github.com/fastapi/typer/pull/1222
+    - click <8.2.0

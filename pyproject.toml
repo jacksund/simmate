@@ -66,6 +66,10 @@ dependencies=[
     "distributed >=2023.6.1, <2023.11.1",  # part of dask
     "django >=4.0.0, <4.2.8",
     "typer >=0.6.0, <0.7.1",
+     # BUG-FIX for typer
+     # https://github.com/fastapi/typer/discussions/1215
+     # https://github.com/fastapi/typer/pull/1222
+    "click <8.2.0",
     #
     # Extra (smaller) dependencies & utilities
     "django-allauth >=0.56.0, <=0.63.3",  # for website accounts and google/github sign-ins
