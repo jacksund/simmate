@@ -9,6 +9,7 @@ from rich.progress import track
 from simmate.apps.rdkit.models import Molecule
 from simmate.database.base_data_types import table_column
 from simmate.toolkit import Molecule as ToolkitMolecule
+from simmate.toolkit.file_converters import SmilesAdapter
 
 
 class EnamineRealMolecule(Molecule):
@@ -81,7 +82,6 @@ class EnamineRealMolecule(Molecule):
         [here](https://enamine.net/compound-collections/real-compounds/real-database).
         We use the cxsmiles file as input.
         """
-        from simmate.toolkit.file_converters import SmilesAdapter
 
         # The SDF file is too large to load, so we split it into chunks first
         if chunk_file:

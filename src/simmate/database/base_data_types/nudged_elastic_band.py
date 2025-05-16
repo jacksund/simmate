@@ -11,7 +11,7 @@ from simmate.database.base_data_types import Calculation, Structure, table_colum
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.toolkit.diffusion import MigrationHop as ToolkitMigrationHop
 from simmate.toolkit.diffusion import MigrationImages
-from simmate.visualization.plotting import MatplotlibFigure
+from simmate.toolkit.visualization.plotting import MatplotlibFigure
 
 
 class DiffusionAnalysis(Structure, Calculation):

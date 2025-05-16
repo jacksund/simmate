@@ -13,7 +13,7 @@ from simmate.database.base_data_types import (
     Structure,
     table_column,
 )
-from simmate.visualization.plotting import MatplotlibFigure
+from simmate.toolkit.visualization.plotting import MatplotlibFigure
 
 
 class DensityofStates(DatabaseTable):

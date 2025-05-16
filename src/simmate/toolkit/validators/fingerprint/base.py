@@ -433,7 +433,7 @@ class FingerprintValidator(Validator):
         )
 
         # collect the unique sources so that we can make a single query.
-        from simmate.file_converters.structure.database import DatabaseAdapter
+        from simmate.toolkit.file_converters.structure.database import DatabaseAdapter
 
         structures = DatabaseAdapter.get_toolkits_from_database_dicts(unique_sources)
 

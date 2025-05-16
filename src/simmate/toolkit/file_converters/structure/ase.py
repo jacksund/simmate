@@ -7,7 +7,7 @@ convert between Simmate.toolkit and ASE.atoms objects.
 ``` python
 
 from simmate.toolkit import Structure
-from simmate.file_converters.structure.ase import AseAtomsAdaptor
+from simmate.toolkit.file_converters import AseAtomsAdaptor
 
 
 initial_structure = Structure.from_file("example.cif")

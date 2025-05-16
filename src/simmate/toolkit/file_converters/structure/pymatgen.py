@@ -5,7 +5,7 @@ this feature should rarely (if ever) be used.
 
 ``` python
 from simmate.toolkit import Structure
-from simmate.file_converters.structure.pymatgen import PyMatGenAdapter
+from simmate.toolkit.file_converters import PyMatGenAdapter
 
 
 initial_structure = Structure.from_file("example.cif")

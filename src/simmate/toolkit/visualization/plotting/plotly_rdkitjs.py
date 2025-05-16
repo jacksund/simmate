@@ -6,7 +6,7 @@ from pathlib import Path
 
 from django.template import Template
 
-from simmate.visualization.plotting.plotly import PlotlyFigure
+from simmate.toolkit.visualization.plotting.plotly import PlotlyFigure
 
 
 class PlotlyRdkitjsFigure(PlotlyFigure):

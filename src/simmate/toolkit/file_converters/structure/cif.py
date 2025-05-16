@@ -23,7 +23,7 @@ initial_structure.to(filename="my_new_file.cif", fmt="cif")
 For advanced use, you can interact with this class directly:
 
 ``` python
-from simmate.file_converters.structure.cif import CifParser
+from simmate.toolkit.file_converters import CifParser
 
 # load from file
 cif_data = CifParser("example.cif")

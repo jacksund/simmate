@@ -13,7 +13,7 @@ from plotly.subplots import make_subplots
 
 from simmate.engine import Workflow
 from simmate.toolkit import Structure
-from simmate.visualization.plotting import PlotlyFigure
+from simmate.toolkit.visualization.plotting import PlotlyFigure
 
 
 class StagedWorkflow(Workflow):

@@ -13,7 +13,7 @@ from simmate.database.base_data_types import (
     Thermodynamics,
     table_column,
 )
-from simmate.visualization.plotting import PlotlyFigure
+from simmate.toolkit.visualization.plotting import PlotlyFigure
 
 
 class Dynamics(Structure, Calculation):

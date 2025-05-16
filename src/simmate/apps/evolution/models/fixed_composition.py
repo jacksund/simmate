@@ -20,8 +20,8 @@ from simmate.database.base_data_types import Calculation, table_column
 from simmate.engine.execution import WorkItem
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.validators import fingerprint as validator_module
+from simmate.toolkit.visualization.plotting import PlotlyFigure
 from simmate.utilities import get_directory
-from simmate.visualization.plotting import PlotlyFigure
 
 
 class FixedCompositionSearch(Calculation):
