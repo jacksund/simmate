@@ -6,7 +6,7 @@ convert between Simmate.toolkit and JARVIS.atoms objects.
 
 ``` python
 from simmate.toolkit import Structure
-from simmate.file_converters.structure.jarvis import JarvisAtomsAdaptor
+from simmate.toolkit.file_converters.structure.jarvis import JarvisAtomsAdaptor
 
 
 initial_structure = Structure.from_file("example.cif")

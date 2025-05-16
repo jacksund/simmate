@@ -6,7 +6,7 @@ from pathlib import Path
 
 from django.utils.safestring import mark_safe
 
-from simmate.visualization.plotting import Figure
+from simmate.toolkit.visualization.plotting import Figure
 
 
 class MatplotlibFigure(Figure):

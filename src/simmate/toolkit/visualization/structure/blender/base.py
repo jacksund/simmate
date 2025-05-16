@@ -7,7 +7,9 @@ from pathlib import Path
 
 import numpy
 
-from simmate.visualization.structure.blender.configuration import get_blender_command
+from simmate.toolkit.visualization.structure.blender.configuration import (
+    get_blender_command,
+)
 
 
 def make_blender_structure(structure, filename="simmate_structure.blend"):

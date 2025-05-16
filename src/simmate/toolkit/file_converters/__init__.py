@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from .mae import MaeAdapter
-from .sdf import SdfAdapter
-from .smiles import SmilesAdapter
-from .xyz import XyzAdapter
+from .molecule import MaeAdapter, SdfAdapter, SmilesAdapter, XyzAdapter
+from .structure import (
+    AseAtomsAdaptor,
+    CifParser,
+    CifWriter,
+    JarvisAtomsAdaptor,
+    PyMatGenAdapter,
+)

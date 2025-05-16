@@ -143,26 +143,26 @@ class Structure(PymatgenStructure):
 
     # -------------------------------------------------------------------------
 
-    # All methods below wrap converters from the `simmate.file_converters.structure`
+    # All methods below wrap converters from the `simmate.toolkit.file_converters.structure`
     # module. To keep this class modular (from the database and optional deps),
     # imports are done lazily. This means we import the relevant convert once
     # the method is called -- rather than when this module is initially loaded.
 
     @classmethod
     def from_database_dict(cls, structure: dict):
-        from simmate.file_converters.structure.database import DatabaseAdapter
+        from simmate.toolkit.file_converters.structure.database import DatabaseAdapter
 
         return DatabaseAdapter.get_toolkit_from_database_dict(structure)
 
     @classmethod
     def from_database_object(cls, structure: dict):
-        from simmate.file_converters.structure.database import DatabaseAdapter
+        from simmate.toolkit.file_converters.structure.database import DatabaseAdapter
 
         return DatabaseAdapter.get_toolkit_from_database_object(structure)
 
     @classmethod
     def from_database_string(cls, structure_string: str):
-        from simmate.file_converters.structure.database import DatabaseAdapter
+        from simmate.toolkit.file_converters.structure.database import DatabaseAdapter
 
         return DatabaseAdapter.get_toolkit_from_database_string(structure_string)
 

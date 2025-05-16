@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from simmate.visualization.plotting import Figure
+from simmate.toolkit.visualization.plotting import Figure
 
 
 class PlotlyFigure(Figure):
