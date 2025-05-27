@@ -67,20 +67,20 @@ find_electrides: true # Whether or not to use ElfAnalyzerToolkit to automaticall
 labeled_structure_up: null # If find_electrides is false, a labeled structure with dummy atoms (see ElfAnalyzerToolkit docs)
 labeled_structure_down: null # Same as above, but for spin down system
 elf_analyzer_kwargs: # Settings for the ElfAnalyzerToolkit. See ElfAnalyzerToolkit docs for more info
-    resolution: 0.01,
-    include_lone_pairs: false,
-    include_shared_features: true,
-    metal_depth_cutoff: 0.1,
-    min_covalent_angle: 135,
-    min_covalent_bond_ratio: 0.35,
-    shell_depth: 0.05,
-    electride_elf_min: 0.5,
-    electride_depth_min: 0.2,
-    electride_charge_min: 0.5,
-    electride_volume_min: 10,
-    electride_radius_min: 0.3,
-    radius_refine_method: linear,
-    write_results: true,
+    resolution: 0.01
+    include_lone_pairs: false
+    include_shared_features: true
+    metal_depth_cutoff: 0.1
+    min_covalent_angle: 135
+    min_covalent_bond_ratio: 0.35
+    shell_depth: 0.05
+    electride_elf_min: 0.5
+    electride_depth_min: 0.2
+    electride_charge_min: 0.5
+    electride_volume_min: 10
+    electride_radius_min: 0.3
+    radius_refine_method: linear
+    write_results: true
 algorithm: badelf # The algorithm for separating atoms and electride sites
 separate_spin: true # Whether to treat spin-up and spin-down systems separately
 shared_feature_algorithm: zero-flux # The algorithm for separating covalent/metallic features
