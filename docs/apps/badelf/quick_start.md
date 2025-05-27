@@ -64,8 +64,8 @@ directory: /path/to/folder
 
 # all parameters below are optional
 find_electrides: true # Whether or not to use ElfAnalyzerToolkit to automatically find electrides
-labeled_structure_up: none # If find_electrides is false, a labeled structure with dummy atoms (see ElfAnalyzerToolkit docs)
-labeled_structure_down: none # Same as above, but for spin down system
+labeled_structure_up: null # If find_electrides is false, a labeled structure with dummy atoms (see ElfAnalyzerToolkit docs)
+labeled_structure_down: null # Same as above, but for spin down system
 elf_analyzer_kwargs: # Settings for the ElfAnalyzerToolkit. See ElfAnalyzerToolkit docs for more info
     resolution: 0.01,
     include_lone_pairs: false,
