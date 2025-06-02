@@ -574,11 +574,11 @@ class Molecule:
         Converts the current `Molecule` object to an SDF string
         """
         sdf = AllChem.MolToMolBlock(self.rdkit_molecule)
-        
+
         if include_metadata and self.metadata:
             for key, value in self.metadata.items():
                 sdf += f"\n>  <{key}>\n{value}\n"
-        
+
         sdf += "\n$$$$\n"
         return sdf
 
@@ -865,11 +865,11 @@ class Molecule:
             includePrivate=True,
             includeComputed=False,
         )
-    
+
     def update_metadata(self, key: str, value: str):
         """
-        Updates a key-value pair in the metadata. 
-        
+        Updates a key-value pair in the metadata.
+
         Note, rdkit only allows strings to be set for the values, probably to
         simplify exporting to an SDF format
         """
