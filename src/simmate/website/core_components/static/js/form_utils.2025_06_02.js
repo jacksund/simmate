@@ -50,6 +50,8 @@ function add_file_upload_listener(containerId, maxSizeMB) {
             const reader = new FileReader();
             reader.onload = function (event) {
                 hiddenInput.value = event.target.result;
+                // "bubble up" through the DOM tree (i.e., trigger a refresh in dj-unicorn)
+                hiddenInput.dispatchEvent(new Event('input', {bubbles: true}));
             };
             reader.readAsDataURL(file);
         } else {

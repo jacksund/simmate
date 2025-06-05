@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import base64
+import io
 import json
 from functools import wraps
 from urllib import parse
 
+import pandas
 from django.http import HttpRequest, HttpResponseNotAllowed, JsonResponse
 from django.utils.encoding import force_str
 from django.views.decorators.csrf import csrf_exempt
@@ -86,6 +89,17 @@ def parse_multiselect(select_list: any) -> list:
     else:
         select_list = [select_list]  # lone id that needs placed in list
     return select_list
+
+
+def parse_csv_upload(data: str) -> pandas.DataFrame():
+    """
+    The `file_upload` input returns a base64 encoded string, even if the upload was a
+    simple CSV/text file. This util decodes the string and converts it back to
+    an original text input. It then converts the CSV to a pandas df.
+    """
+    data_64 = data.split(";base64,")[-1]
+    csv_string = base64.b64decode(data_64).decode("utf-8")
+    return pandas.read_csv(io.StringIO(csv_string))
 
 
 def replace_query_param(url: str, key: str, val: any) -> str:
