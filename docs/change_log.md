@@ -62,6 +62,8 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added custom API token generation and auth backend
 - added `CSV` download button on the `Data` web views
 - added `api_view` decorator for basic REST endpoints 
+- added `file_upload` web component
+- added export of SDF metadata
 
 **Refactors**
 
