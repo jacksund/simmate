@@ -149,6 +149,7 @@ def selectbox(
     options: list[tuple[any, str]] = [],
     label: str = None,
     show_label: bool = True,
+    help_text: str = None,
     dynamic_options: bool = False,
     allow_custom_input: bool = False,
     multiselect: bool = False,

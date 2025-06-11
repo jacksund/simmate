@@ -4,12 +4,12 @@
     <input id="{{ name }}{{ context.unicorn.component_key }}-filename"
            class="form-control"
            type="file"
-           placeholder="test123"
+           accept="{{ file_type }}"
            {% if disabled %}disabled{% endif %}>
     <input unicorn:model{% if defer %}.defer{% endif %}="{{ name }}"
            id="{{ name }}{{ context.unicorn.component_key }}-filedata"
            type="hidden" 
-           class="file-data"/>
+           class="file-data">
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             add_file_upload_listener("{{ name }}{{ context.unicorn.component_key }}", {{ max_size }});

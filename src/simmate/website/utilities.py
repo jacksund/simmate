@@ -91,15 +91,25 @@ def parse_multiselect(select_list: any) -> list:
     return select_list
 
 
-def parse_csv_upload(data: str) -> pandas.DataFrame():
+def parse_file_upload(data: str, file_type: str = ".csv") -> pandas.DataFrame():
     """
-    The `file_upload` input returns a base64 encoded string, even if the upload was a
-    simple CSV/text file. This util decodes the string and converts it back to
-    an original text input. It then converts the CSV to a pandas df.
+    Decodes a base64-encoded file upload and returns a pandas DataFrame.
+    Supports CSV and Excel (.xlsx) files.
+
+    We need this because `file_upload` input returns a base64 encoded string,
+    even if the upload was a simple CSV/text file.
     """
     data_64 = data.split(";base64,")[-1]
-    csv_string = base64.b64decode(data_64).decode("utf-8")
-    return pandas.read_csv(io.StringIO(csv_string))
+    file_bytes = base64.b64decode(data_64)
+
+    if file_type == ".csv":
+        buffer = io.StringIO(file_bytes.decode("utf-8"))
+        return pandas.read_csv(buffer)
+    elif file_type == ".xlsx":
+        buffer = io.BytesIO(file_bytes)
+        return pandas.read_excel(buffer)
+    else:
+        raise Exception(f"Unsupported file upload type: {file_type}")
 
 
 def replace_query_param(url: str, key: str, val: any) -> str:
