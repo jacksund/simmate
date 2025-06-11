@@ -569,11 +569,18 @@ class Molecule:
 
     # OUTPUT METHODS
 
-    def to_sdf(self) -> str:
+    def to_sdf(self, include_metadata: bool = False) -> str:
         """
         Converts the current `Molecule` object to an SDF string
         """
-        return AllChem.MolToMolBlock(self.rdkit_molecule)
+        sdf = AllChem.MolToMolBlock(self.rdkit_molecule)
+
+        if include_metadata and self.metadata:
+            for key, value in self.metadata.items():
+                sdf += f"\n>  <{key}>\n{value}\n"
+
+        sdf += "\n$$$$\n"
+        return sdf
 
     def to_smiles(
         self,
@@ -858,6 +865,15 @@ class Molecule:
             includePrivate=True,
             includeComputed=False,
         )
+
+    def update_metadata(self, key: str, value: str):
+        """
+        Updates a key-value pair in the metadata.
+
+        Note, rdkit only allows strings to be set for the values, probably to
+        simplify exporting to an SDF format
+        """
+        self.rdkit_molecule.SetProp(key, value)
 
     @property
     def comment(self) -> str:

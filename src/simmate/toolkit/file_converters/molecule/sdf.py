@@ -113,7 +113,7 @@ class SdfAdapter:
             # molecules -- this saves on memory
             for molecule in track(molecules):
                 smi_str = molecule.to_sdf(**kwargs)
-                file.write(f"{smi_str}$$$$\n")
+                file.write(f"{smi_str}\n")
 
     @staticmethod
     def split_sdf_file(filename: Path | str, chunk_size: int) -> list[Path]:
