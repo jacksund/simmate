@@ -981,6 +981,22 @@ class DatabaseTable(models.Model):
     # Methods that handle updating a database entry and its related entries
     # -------------------------------------------------------------------------
 
+    def update_wo_timestamp(self, **kwargs):
+        """
+        Saves changes to the database WITHOUT affecting the `updated_at` or any
+        other "auto_now=True" columns. IF the table has a `history` table, this
+        will also be skipped.
+
+        This is effectively a hack and can mean the `updated_at` columns becomes
+        misleading to users, so use sparingly!! It is intended for frequently
+        cached calculated columns. For example, a column that is `status_age`
+        that is updated daily (even when nothing else has change)
+
+        Note, the object that this is called on will be out of date once called.
+        You should requery the database to get the updated entry.
+        """
+        self.__class__.objects.filter(id=self.id).update(**kwargs)
+
     def update_from_fields(self, **fields_to_update):
         # go through each key in the dictionary and attach the value to the
         # attribute of this entry
