@@ -1497,6 +1497,19 @@ class DatabaseTable(models.Model):
     # !!! DEV -- This section is currently a mixture of depreciated and experimental
     # methods. Users should avoid until these methods become stable
 
+    @classmethod
+    def get_web_queryset(cls):
+        """
+        Optional method to override the input queryset which modify how
+        `filter_from_request` queries data. By default it return the full
+        `cls.objects` queryset.
+
+        This can is useful when you either need to (1) prevent certain data
+        from being accessible in the UI, and (2) optimize the input queryset
+        using `select_related(...)` or `prefetch_related(...)` calls.
+        """
+        return cls.objects
+
     # SINGLE OBJECT APIs
 
     def to_api_dict(self, fields: list[str] = None, exclude: list[str] = None) -> dict:
@@ -1645,6 +1658,7 @@ class DatabaseTable(models.Model):
         return cls.filter_from_config(
             **get_kwargs,
             paginate=paginate,
+            use_web_queryset=True,
         )
 
     @classmethod
@@ -1658,6 +1672,7 @@ class DatabaseTable(models.Model):
         page: int = 1,
         page_size: int = 25,
         paginate: bool = True,
+        use_web_queryset: bool = False,
     ) -> SearchResults | Page:
         """
         Converts URL kwargs into a queryset.
@@ -1673,7 +1688,7 @@ class DatabaseTable(models.Model):
         filter_methods = cls.filter_methods
         filter_methods_args = cls.filter_methods_extra_args
 
-        queryset = cls.objects
+        queryset = cls.objects if not use_web_queryset else cls.get_web_queryset()
         for filter_name, filter_value in filters.items():
 
             # if we have a filter method, we apply it to our queryset right away
