@@ -53,6 +53,9 @@
                         {% if total == 10000 %}
                             We limit searches to 10k results for our Web UI and API. Switch to Python or SQL if you need the full dataset.
                         {% endif %}
+                        <a class="text-dark fw-bold text-decoration-underline" href=".">
+                            Reset Filters <i class="mdi mdi-refresh"></i>
+                        </a>
                     </div>
                 </div>
                 {% block search_results_table %}
@@ -66,7 +69,10 @@
             {% else %}
                 <div class="alert alert-danger d-flex align-items-center p-2" role="alert">
                     <div>
-                        <i class="mdi mdi-alert-circle"></i>&nbsp;&nbsp;<b>No entries were found that match your search criteria!</b>
+                        <i class="mdi mdi-alert-circle"></i>&nbsp;&nbsp;<b>No entries were found that match your search criteria!</b>&nbsp;&nbsp;
+                        <a class="text-dark fw-bold text-decoration-underline" href=".">
+                            Reset Filters<i class="mdi mdi-refresh"></i>
+                        </a>
                     </div>
                 </div>
             {% endif %}

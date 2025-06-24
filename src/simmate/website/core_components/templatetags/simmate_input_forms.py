@@ -455,3 +455,51 @@ def status_bar(
     theme: str = "info",
 ):
     return locals()
+
+@register.inclusion_tag(
+    filename="core_components/basic_elements/table_header.html",
+    takes_context=True,
+)
+def table_header(
+    context: dict,
+    column_name: str,
+    text_display: str = None,
+):
+    order_by = context.request.GET.get("order_by", "-id")
+    
+    if order_by.startswith("-"):
+        order_by = order_by[1:]
+        reverse = True
+    else:
+        reverse = False
+        
+    if order_by == column_name:
+        if reverse:
+            arrow = "up"
+            link = f"{column_name}"
+        else:
+            arrow = "down"
+            link = f"-{column_name}"
+    else:
+        link = f"{column_name}"
+    
+    if not text_display:
+        text_display = column_name.replace("_", " ").title()
+    
+    request = context.request # BUG-FIX
+    return locals()
+
+@register.inclusion_tag(
+    filename="core_components/basic_elements/button_link.html",
+    takes_context=True,
+)
+def button_link(
+    context: dict,
+    link: str,
+    label: str = None,
+    small: bool = False,
+    icon: str = "open-in-new",
+    theme: str = "primary",
+    open_in_new: bool = False,
+):
+    return locals()
