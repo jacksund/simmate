@@ -567,7 +567,13 @@ class Workflow:
 
         # adds a hyphen between each capital letter
         # copied from https://stackoverflow.com/questions/199059/
-        name = re.sub(r"(\w)([A-Z])", r"\1-\2", name)
+        # Explanation:
+        # (?<=[A-Z])(?=[A-Z][a-z]) matches a position between two capital letters
+        # where the second is followed by a lowercase letter (e.g., "ABcd" → "A-Bcd").
+        # (?<=[a-z])(?=[A-Z]) matches a position between a lowercase and an
+        # uppercase letter (e.g., "AbCd" → "Ab-Cd").
+        # The | combines both conditions.
+        name = re.sub(r"(?<=[A-Z])(?=[A-Z][a-z])|(?<=[a-z])(?=[A-Z])", "-", name)
 
         return name.lower()
 

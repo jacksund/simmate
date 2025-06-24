@@ -77,6 +77,8 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 **Fixes**
 
 - fix Data tab in website view failing to load due to molecule template
+- fix workflow names that have captial letters next to eachother (e.g, `LogDWorkflow` --> `log-d-workflow`)
+- fix `parse_multiselect` util when nested in a `create_many` form
 
 --------------------------------------------------------------------------------
 
