@@ -86,8 +86,9 @@ def parse_multiselect(select_list: any) -> list:
         if all([i.isnumeric() for i in select_list]):
             select_list = [int(i) for i in select_list]
 
-    else:
+    elif isinstance(select_list, str) or isinstance(select_list, int):
         select_list = [select_list]  # lone id that needs placed in list
+
     return select_list
 
 
