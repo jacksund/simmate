@@ -56,8 +56,11 @@
                     </div>
                 </div>
                 {% block search_results_table %}
-                    {# we assume that if enable_select is used, then there is a viable update_many view #}
-                    {% include table.html_entries_template with enable_select=True entries=page.object_list %}
+                    {% if table.html_form_view and "update_many" in table.html_enabled_forms %}
+                        {% include table.html_entries_template with enable_select=True entries=page.object_list %}
+                    {% else %}
+                        {% include table.html_entries_template with enable_select=False entries=page.object_list %}
+                    {% endif %}
                 {% endblock %}
                 {% include "data_explorer/pagination.html" %}
             {% else %}

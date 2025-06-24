@@ -432,3 +432,26 @@ def canvas(
     the DynamicFormComponent dynamically & *after* the page is loaded.
     """
     return locals()
+
+@register.inclusion_tag(
+    filename="core_components/basic_elements/foreign_key_link.html",
+    takes_context=True,
+)
+def foreign_key_link(
+    context: dict,
+    entry, # db_object
+    display_column: str = None,
+    mode: str = "text",  # other options are "pill" and "block"
+):
+    return locals()
+
+@register.inclusion_tag(
+    filename="core_components/basic_elements/status_bar.html",
+    takes_context=True,
+)
+def status_bar(
+    context: dict,
+    status: str,
+    theme: str = "info",
+):
+    return locals()
