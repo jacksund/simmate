@@ -64,6 +64,8 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `api_view` decorator for basic REST endpoints 
 - added `file_upload` web component
 - added export of SDF metadata
+- added `foriegn_key_link` util
+- added `tags` support in dynamic components
 
 **Refactors**
 
