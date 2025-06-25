@@ -38,9 +38,7 @@
                             </td>
                         {% endif %}
                         {% block table_rows %}
-                            <td>
-                                {% foreign_key_link entry %}
-                            </td>
+                            <td>{% foreign_key_link entry %}</td>
                             <td>{{ entry.created_at|date:"Y-m-d" }}</td>
                             <td>{{ entry.updated_at|date:"Y-m-d" }}</td>
                         {% endblock %}

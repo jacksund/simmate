@@ -1,10 +1,10 @@
 <th>
-<a class="text-light" href="{% update_url order_by=link %}">
-    <small>{{ text_display }}</small>
-    {% if arrow == "up" %}
-        <i class="mdi mdi-arrow-up"></i>
-    {% elif arrow == "down" %}
-        <i class="mdi mdi-arrow-down"></i>
-    {% endif %}
-</a>
+    <a class="text-light" href="{% update_url order_by=link %}">
+        <small>{{ text_display }}</small>
+        {% if arrow == "up" %}
+            <i class="mdi mdi-arrow-up"></i>
+        {% elif arrow == "down" %}
+            <i class="mdi mdi-arrow-down"></i>
+        {% endif %}
+    </a>
 </th>
