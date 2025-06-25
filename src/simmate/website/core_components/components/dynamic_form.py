@@ -2,6 +2,7 @@
 
 import json
 import urllib
+
 from django.db import transaction
 from django.shortcuts import redirect
 
@@ -273,7 +274,7 @@ class DynamicFormComponent(UnicornView):
         if "molecule" in config.keys():
             config[self.molecule_query_type] = self._molecule_obj.to_smiles()
             config.pop("molecule")
-        
+
         # TODO: support other m2m
         if hasattr(self, "tag_ids") and self.tag_ids:
             config["tags__id__in"] = self.tag_ids
@@ -413,11 +414,13 @@ class DynamicFormComponent(UnicornView):
         for field in self.mount_for_update_columns:
             current_val = getattr(self.table_entry, field)
             self.set_property(field, current_val)
-        
+
         # SPECIAL CASES
         # TODO: support other m2m
         if hasattr(self, "tag_ids") and hasattr(self.table_entry, "tags"):
-            self.tag_ids = list(self.table_entry.tags.values_list("id", flat=True).all())
+            self.tag_ids = list(
+                self.table_entry.tags.values_list("id", flat=True).all()
+            )
 
     def mount_for_update_many(self):
         # default is we want everything to be set to None, which includes
@@ -549,8 +552,7 @@ class DynamicFormComponent(UnicornView):
         matching_fields = [
             attr
             for attr in self._attribute_names
-            if attr in table_cols 
-            or (attr.endswith("_id") and attr[:-3] in table_cols)
+            if attr in table_cols or (attr.endswith("_id") and attr[:-3] in table_cols)
         ]
 
         config = {}
@@ -661,7 +663,7 @@ class DynamicFormComponent(UnicornView):
 
         if self.form_mode == "search":
             pass  # nothing to save
-        
+
         if self.form_mode in ["create", "update", "create_many_entry"]:
             with transaction.atomic():
                 self.table_entry.save()
@@ -672,7 +674,7 @@ class DynamicFormComponent(UnicornView):
                     else:
                         self.table_entry.tags.set(self.tag_ids)
                     self.table_entry.save()
-            
+
         elif self.form_mode == "update_many":
 
             flat_updates = self.final_updates["flat_updates"]
@@ -695,7 +697,7 @@ class DynamicFormComponent(UnicornView):
                     new_value = current_value + "\n\n" + append_value
                     setattr(entry, field, new_value)
                 entry.save()
-                
+
                 # SPECIAL CASE
                 # TODO: support other m2m
                 if hasattr(self, "tag_ids") and hasattr(entry, "tags") and self.tag_ids:
