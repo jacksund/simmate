@@ -1,0 +1,14 @@
+<a href="{% url 'data_explorer:table-entry' entry.table_name entry.id %}"
+   {% if mode == "pill" %} class="badge bg-primary rounded-pill" {% elif mode == "block" %} type="button" class="btn btn-secondary btn-sm col-10 m-0" {% endif %}
+   target="_blank">
+    {% if display_column %}
+        {{ entry|getattribute:display_column }}
+    {% else %}
+        {{ entry.id }}
+    {% endif %}
+    <i class="mdi mdi-open-in-new"></i>
+</a>
+<a href="{{ link }}" {% if open_in_new %}target="_blank"{% endif %}>
+    {% if show_label %}{{ label }}{% endif %}
+    {% if icon %}<i class="mdi mdi-{{ icon }}"></i>{% endif %}
+</a>

@@ -1,0 +1,23 @@
+<div class="text-center pt-2">
+    {% if form_errors %}
+        <div>
+            {% for error in form_errors %}
+                {% alert message=error theme="danger" %}
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if form_mode == "update_many" %}
+        {% if not is_update_many_confirmed %}
+            <div>There is no undo button! Are you sure you want to update all these entries?</div>
+            <button onclick="Unicorn.call('{% if not unicorn.component_key %}{{ unicorn.component_name }}{% else %}{{ unicorn.component_key }}{% endif %}', 'confirm_update_many', getFormValues('select_search_results'));"
+                    class="btn btn-outline-danger my-2">Continue</button>
+        {% else %}
+            <div>This will update {{ entry_ids_to_update|length }} entries.</div>
+            {% button name="submit_form" label="Save to database" icon="content-save" %}
+        {% endif %}
+    {% elif form_mode == "search" %}
+        {% button name="submit_form" label="Search" icon="magnify" %}
+    {% else %}
+        {% button name="submit_form" label="Save to database" icon="content-save" %}
+    {% endif %}
+</div>

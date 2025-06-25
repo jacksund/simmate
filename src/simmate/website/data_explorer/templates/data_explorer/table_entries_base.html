@@ -1,0 +1,50 @@
+<form id="select_search_results"
+      action="#"
+      method="post"
+      enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if enable_select %}
+        <div class="row">
+            <div class="py-2">
+                <input type="checkbox"
+                       class="form-check-input"
+                       name="entry_row_select_all"
+                       onClick="toggle_select_all(this, 'entry_row_select')" />
+                <b>Select All</b>
+            </div>
+        </div>
+    {% endif %}
+    <div class="row table-responsive">
+        <table class="table table-striped table-centered table-sm border-bottom text-center">
+            <thead class="table-dark">
+                <tr>
+                    {% if enable_select %}<th></th>{% endif %}
+                    {% block table_headers %}
+                        <th>ID</th>
+                        <th>Created</th>
+                        <th>Updated</th>
+                    {% endblock %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                    <tr>
+                        {% if enable_select %}
+                            <td>
+                                <input type="checkbox"
+                                       class="form-check-input entry_row_select"
+                                       id="select{{ entry.id }}"
+                                       name="{{ entry.id }}">
+                            </td>
+                        {% endif %}
+                        {% block table_rows %}
+                            <td>{% foreign_key_link entry %}</td>
+                            <td>{{ entry.created_at|date:"Y-m-d" }}</td>
+                            <td>{{ entry.updated_at|date:"Y-m-d" }}</td>
+                        {% endblock %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>

@@ -53,17 +53,26 @@
                         {% if total == 10000 %}
                             We limit searches to 10k results for our Web UI and API. Switch to Python or SQL if you need the full dataset.
                         {% endif %}
+                        <a class="text-dark fw-bold text-decoration-underline" href=".">
+                            Reset Filters <i class="mdi mdi-refresh"></i>
+                        </a>
                     </div>
                 </div>
                 {% block search_results_table %}
-                    {# we assume that if enable_select is used, then there is a viable update_many view #}
-                    {% include table.html_entries_template with enable_select=True entries=page.object_list %}
+                    {% if table.html_form_view and "update_many" in table.html_enabled_forms %}
+                        {% include table.html_entries_template with enable_select=True entries=page.object_list %}
+                    {% else %}
+                        {% include table.html_entries_template with enable_select=False entries=page.object_list %}
+                    {% endif %}
                 {% endblock %}
                 {% include "data_explorer/pagination.html" %}
             {% else %}
                 <div class="alert alert-danger d-flex align-items-center p-2" role="alert">
                     <div>
-                        <i class="mdi mdi-alert-circle"></i>&nbsp;&nbsp;<b>No entries were found that match your search criteria!</b>
+                        <i class="mdi mdi-alert-circle"></i>&nbsp;&nbsp;<b>No entries were found that match your search criteria!</b>&nbsp;&nbsp;
+                        <a class="text-dark fw-bold text-decoration-underline" href=".">
+                            Reset Filters<i class="mdi mdi-refresh"></i>
+                        </a>
                     </div>
                 </div>
             {% endif %}

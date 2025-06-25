@@ -155,6 +155,7 @@ TEMPLATES = [
                 "simmate.website.core_components.templatetags.simmate_input_forms",
                 "simmate.website.core_components.templatetags.simmate_settings",
                 "simmate.website.core_components.templatetags.simmate_utils",
+                "simmate.website.unicorn.templatetags.unicorn",
             ],
         },
     },
