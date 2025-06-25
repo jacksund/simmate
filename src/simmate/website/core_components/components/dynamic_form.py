@@ -2,7 +2,7 @@
 
 import json
 import urllib
-
+from django.db import transaction
 from django.shortcuts import redirect
 
 from simmate.database.base_data_types import DatabaseTable
@@ -273,7 +273,11 @@ class DynamicFormComponent(UnicornView):
         if "molecule" in config.keys():
             config[self.molecule_query_type] = self._molecule_obj.to_smiles()
             config.pop("molecule")
-
+        
+        # TODO: support other m2m
+        if hasattr(self, "tag_ids") and self.tag_ids:
+            config["tags__id__in"] = self.tag_ids
+        print(config)
         return config
 
     def get_search_redirect(self):  # *args, **kwargs
@@ -373,6 +377,7 @@ class DynamicFormComponent(UnicornView):
         self.redirect_mode = "table"
 
     def mount_for_update(self):
+
         # This section is entered when we have many_to_one child components.
         if self.is_subform:
             if not self.parent or not self.uuid:
@@ -408,6 +413,11 @@ class DynamicFormComponent(UnicornView):
         for field in self.mount_for_update_columns:
             current_val = getattr(self.table_entry, field)
             self.set_property(field, current_val)
+        
+        # SPECIAL CASES
+        # TODO: support other m2m
+        if hasattr(self, "tag_ids") and hasattr(self.table_entry, "tags"):
+            self.tag_ids = list(self.table_entry.tags.values_list("id", flat=True).all())
 
     def mount_for_update_many(self):
         # default is we want everything to be set to None, which includes
@@ -469,7 +479,7 @@ class DynamicFormComponent(UnicornView):
         }
 
         # Special cases! Comments should be appended so nothing is lost, whereas
-        # flat updates replace the col value entirely
+        # flat updates replace the col value entirely.
         flat_updates = {}
         append_updates = {}
         for field, value in all_updates.items():
@@ -500,6 +510,7 @@ class DynamicFormComponent(UnicornView):
         *args,
         **kwargs,
     ):
+
         # attempt casting to correct type
         new_value = parse_value(new_value)
         # buggy
@@ -538,7 +549,8 @@ class DynamicFormComponent(UnicornView):
         matching_fields = [
             attr
             for attr in self._attribute_names
-            if attr in table_cols or (attr.endswith("_id") and attr[:-3] in table_cols)
+            if attr in table_cols 
+            or (attr.endswith("_id") and attr[:-3] in table_cols)
         ]
 
         config = {}
@@ -564,6 +576,7 @@ class DynamicFormComponent(UnicornView):
                 elif form_attr == "structure":
                     config["structure_original"] = current_val
                     config["structure"] = Structure.from_dynamic(current_val)
+
         return config
 
     # -------------------------------------------------------------------------
@@ -633,6 +646,7 @@ class DynamicFormComponent(UnicornView):
         return  # default is there's nothing extra to do
 
     def save_to_db(self):
+
         if self.skip_db_save:
             return
 
@@ -647,8 +661,18 @@ class DynamicFormComponent(UnicornView):
 
         if self.form_mode == "search":
             pass  # nothing to save
+        
         if self.form_mode in ["create", "update", "create_many_entry"]:
-            self.table_entry.save()
+            with transaction.atomic():
+                self.table_entry.save()
+                # TODO: support other m2m
+                if hasattr(self, "tag_ids") and hasattr(self.table_entry, "tags"):
+                    if not self.tag_ids:
+                        self.table_entry.tags.clear()
+                    else:
+                        self.table_entry.tags.set(self.tag_ids)
+                    self.table_entry.save()
+            
         elif self.form_mode == "update_many":
 
             flat_updates = self.final_updates["flat_updates"]
@@ -671,6 +695,13 @@ class DynamicFormComponent(UnicornView):
                     new_value = current_value + "\n\n" + append_value
                     setattr(entry, field, new_value)
                 entry.save()
+                
+                # SPECIAL CASE
+                # TODO: support other m2m
+                if hasattr(self, "tag_ids") and hasattr(entry, "tags") and self.tag_ids:
+                    # !!! for update many, do I want to set() or add()?
+                    entry.tags.add(*self.tag_ids)
+                    entry.save()
 
         elif self.form_mode == "create_many":
             for child in self.children:
