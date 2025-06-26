@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import os
 import re
 import sys
@@ -179,16 +180,57 @@ class Molecule:
 
                 # If user didn't include formal charges, we update them here.
 
-                # add +1 formal charge to 4-coord Nitrogen
-                if symbol == "N" and total_valence == 4 and charge != 1:
-                    error_atom.SetFormalCharge(1)
+                # WARNING: These are naive formal charge estimates based solely
+                # on atom symbol and total valence.
+                # They do NOT account for resonance, aromaticity, hypervalency,
+                # radicals, or unusual bonding environments.
+                # These rules may fail for many real-world molecules, especially
+                # those with delocalized charges or non-standard valences.
+                # Use only for basic error correction or as a last resort
+                # when explicit formal charges are missing.
+
+                # Define naive formal charge rules:
+                # (symbol, total_valence): expected_charge
+                formal_charge_rules = {
+                    ("N", 4): 1,  # Ammonium-like N
+                    ("N", 5): 2,  # Nitroso/nitrite-like N
+                    ("N", 1): -3,  # Nitride-like N
+                    ("O", 3): 1,  # Oxonium-like O
+                    ("O", 1): -1,  # Peroxide-like O
+                    ("P", 5): 0,  # Phosphonium-like P  (1?)
+                    ("P", 6): 3,  # Hypothetical hypervalent  (2?)
+                    ("P", 7): 3,  # Hypothetical hypervalent P
+                    ("C", 4): 1,  # Carbenium ion C
+                    ("C", 2): -1,  # Carbanion C
+                    ("As", 5): 1,  # Arsonium-like As
+                    ("As", 6): 3,  # Hypothetical hypervalent As (2?)
+                    ("Sb", 5): 1,  # Stibonium-like Sb
+                    ("Sb", 6): 2,  # Hexacoordinate Sb ([SbF6]-)
+                    ("Sb", 7): 3,  # Hypothetical hypervalent Sb
+                    ("As", 7): 3,  # Hypothetical hypervalent
+                    ("Si", 5): 2,  # Pentacoordinate Si (rare)  (1?)
+                    ("Si", 6): 2,  # Hexacoordinate Si ([SiF6]2-)
+                    ("Al", 4): -1,  # Tetrahedral Al ([AlH4]-)
+                    ("Al", 6): -3,  # Hexacoordinate Al ([AlF6]3-)
+                }
+                key = (symbol, total_valence)
+                if key in formal_charge_rules:
+                    expected_charge = formal_charge_rules[key]
+                    if charge != expected_charge:
+                        logging.warning(
+                            f"WARNING: Setting formal charge {expected_charge:+d} "
+                            f"on {symbol} with valence {total_valence} at atom "
+                            f"index {error_atom.GetIdx()}"
+                        )
+                        error_atom.SetFormalCharge(expected_charge)
 
                 # print error for us to fix / add as elif condition above
                 else:
                     raise Exception(
                         f"AtomValenceException: {symbol} has a total valence "
                         f"of {total_valence} and a formal charge of {charge}, "
-                        "which is not allowed"
+                        "which is not allowed. Molecule input was: "
+                        f"\n {molecule_input}"
                     )
 
             # we don't do an "else" check, but instead just let the rdkit
