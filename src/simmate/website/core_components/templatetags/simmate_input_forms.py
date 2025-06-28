@@ -467,6 +467,7 @@ def table_header(
     context: dict,
     column_name: str,
     text_display: str = None,
+    min_width: int = None,  # in px
 ):
     order_by = context.request.GET.get("order_by", "-id")
 
