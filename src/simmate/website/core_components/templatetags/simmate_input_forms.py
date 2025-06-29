@@ -448,6 +448,17 @@ def foreign_key_link(
 
 
 @register.inclusion_tag(
+    filename="core_components/basic_elements/update_entry_link.html",
+    takes_context=True,
+)
+def update_entry_link(
+    context: dict,
+    entry,  # db_object
+):
+    return locals()
+
+
+@register.inclusion_tag(
     filename="core_components/basic_elements/status_bar.html",
     takes_context=True,
 )
