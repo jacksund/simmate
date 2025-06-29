@@ -278,7 +278,7 @@ class DynamicFormComponent(UnicornView):
         # TODO: support other m2m
         if hasattr(self, "tag_ids") and self.tag_ids:
             config["tags__id__in"] = self.tag_ids
-        print(config)
+
         return config
 
     def get_search_redirect(self):  # *args, **kwargs
