@@ -8,6 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pandas
+import requests
 from django.utils.timezone import make_aware
 from pymatgen.io.cif import CifFile
 from rich.progress import track
@@ -136,34 +137,58 @@ class PdbLigand(Molecule):
 
         - https://www.rcsb.org/docs/programmatic-access/batch-downloads-with-shell-script
 
+
+
+        #### 07.01.2025
+
+        Looks like the Ligand Expo has been retired. I'm using these links now:
+        - https://www.wwpdb.org/data/ccd
+        - https://www.rcsb.org/search
+        - https://data.rcsb.org/
+        - https://github.com/rcsb/py-rcsb-api
+
         """
         # There is no need for refdata_id_list.json like we did for proteins bc
         # PDB provides a single bulk download file for us.
 
-        data_url = "https://files.wwpdb.org/pub/pdb/data/monomers/components.cif"
-        mapping_url = "http://ligand-expo.rcsb.org/dictionaries/cc-to-pdb.tdd"
-
         # download, uncompress, and read the listing to a dictionary
-        logging.info("Downloading all ligands & mappings from PDB...")
+        logging.info("Downloading ligands from PDB...")
         data_filename = Path("components.cif")
         if not data_filename.exists():
+            data_url = "https://files.wwpdb.org/pub/pdb/data/monomers/components.cif"
             urllib.request.urlretrieve(data_url, data_filename)
-        mapping_filename = Path("cc-to-pdb.tdd")
-        if not mapping_filename.exists():
-            urllib.request.urlretrieve(mapping_url, mapping_filename)
-
-        logging.info("Reading data from CIF & CSV files...")
+        logging.info("Reading ligands file...")
         data = CifFile.from_file(data_filename).data
-        mappings = pandas.read_csv(
-            mapping_filename,
-            delimiter="\t",
-            header=None,
-            names=["ligand_id", "protein_ids"],
-            index_col="ligand_id",
-        )
+
+        logging.info("Downloading mappings from PDB...")
+        # DEPREC - ligand expo no longer exists.
+        # mapping_url = "http://ligand-expo.rcsb.org/dictionaries/cc-to-pdb.tdd"
+        # mapping_filename = Path("cc-to-pdb.tdd")
+        # if not mapping_filename.exists():
+        #     urllib.request.urlretrieve(mapping_url, mapping_filename)
+        # mappings = pandas.read_csv(
+        #     mapping_filename,
+        #     delimiter="\t",
+        #     header=None,
+        #     names=["ligand_id", "protein_ids"],
+        #     index_col="ligand_id",
+        # )
+        # protein_ids = mappings.loc[ligand_id].protein_ids.strip().split(" ")
+        data_filename = Path("cc_to_pdb_map.json")
+        if data_filename.exists():
+            with open(data_filename, "r") as f:
+                pdb_id_map = json.load(f)
+        else:
+            ligand_ids = [e.data.get("_chem_comp.id", None) for k, e in data.items()]
+            pdb_id_map = {
+                ligand_id: cls._get_pdb_ids(ligand_id, silence_errors=True)
+                for ligand_id in track(ligand_ids)
+            }
+            with open(data_filename, "w") as f:
+                json.dump(pdb_id_map, f)
 
         # This for-loop simply loads all the metadata and smiles strings
-        logging.info("Load metadata and molecules...")
+        logging.info("Parsing metadata and molecules...")
         db_objs = []
         failed = 0
         for key, entry in track(data.items(), total=len(data)):
@@ -217,10 +242,7 @@ class PdbLigand(Molecule):
 
                 # grab protein ids (and not all ligands have them)
                 ligand_id = entry_data.get("_chem_comp.id", None)
-                try:
-                    protein_ids = mappings.loc[ligand_id].protein_ids.strip().split(" ")
-                except:
-                    protein_ids = []
+                protein_ids = pdb_id_map.get(ligand_id, None)
 
                 # now finalize the metadata and molecule into a database object
                 db_obj = PdbLigand.from_toolkit(
@@ -253,6 +275,42 @@ class PdbLigand(Molecule):
 
         logging.info("Done.")
         return failed
+
+    @staticmethod
+    def _get_pdb_ids(cc_id: str, silence_errors: bool = False):
+
+        import urllib3
+
+        # to silence ssl warnings below
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+        url = "https://search.rcsb.org/rcsbsearch/v2/query"
+        query = {
+            "query": {
+                "type": "terminal",
+                "service": "text_chem",
+                "parameters": {
+                    "attribute": "rcsb_chem_comp_container_identifiers.comp_id",
+                    "operator": "in",
+                    "negation": False,
+                    "value": [cc_id],
+                },
+            },
+            "return_type": "entry",
+        }
+
+        response = requests.post(url, json=query, verify=False)  # ssl disabled
+
+        if response.ok:
+            if response.status_code == 204:  # "No content" code
+                return []
+            data = response.json()
+            pdb_ids = [result["identifier"] for result in data.get("result_set", [])]
+            return pdb_ids
+        else:
+            if silence_errors:
+                return None
+            raise Exception(f"Request failed: {response.status_code}\n {response.text}")
 
 
 # -----------------------------------------------------------------------------
