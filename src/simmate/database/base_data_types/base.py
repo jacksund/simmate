@@ -1857,31 +1857,34 @@ class DatabaseTable(models.Model):
             f"for {len(ids_to_update)} entries"
         )
         for ids_chunk in chunk_list(ids_to_update, batch_size):
+            try:
+                # grab the next set of objects to update
+                objs_to_update = cls.objects.filter(id__in=ids_chunk).all()
 
-            # grab the next set of objects to update
-            objs_to_update = cls.objects.filter(id__in=ids_chunk).all()
+                # First check for a user-defined method.
+                predefined_method = f"_format_inputs_for__{column_name}"
+                if hasattr(cls, predefined_method):
+                    # method = getattr(cls, predefined_method)
+                    # method(workflow, objs_to_update)
+                    raise NotImplementedError("This feature is still being developed")
+                else:
+                    # OPTIMIZE: should I support run_cloud for parallelization?
+                    # BUG: see comment at start of for-loop where I say I assume
+                    # a 'molecules' input
+                    status = workflow.run(
+                        molecules=objs_to_update.to_toolkit(),
+                        compress_output=True,
+                    )
+                    results = status.result()
+                    logging.info("Saving results to db")
 
-            # First check for a user-defined method.
-            predefined_method = f"_format_inputs_for__{column_name}"
-            if hasattr(cls, predefined_method):
-                # method = getattr(cls, predefined_method)
-                # method(workflow, objs_to_update)
-                raise NotImplementedError("This feature is still being developed")
-            else:
-                # OPTIMIZE: should I support run_cloud for parallelization?
-                # BUG: see comment at start of for-loop where I say I assume
-                # a 'molecules' input
-                status = workflow.run(
-                    molecules=objs_to_update.to_toolkit(),
-                    compress_output=True,
-                )
-                results = status.result()
-                logging.info("Saving results to db")
-
-                # update the column with the new value and save
-                for entry, entry_result in zip(objs_to_update, results):
-                    setattr(entry, column_name, entry_result)
-                cls.objects.bulk_update(objs_to_update, [column_name])
+                    # update the column with the new value and save
+                    for entry, entry_result in zip(objs_to_update, results):
+                        setattr(entry, column_name, entry_result)
+                    cls.objects.bulk_update(objs_to_update, [column_name])
+            except:
+                logging.warning("BATCH FAILED")
+                continue
 
     @classmethod
     def populate_workflow_columns(cls, batch_size: int = 1000):

@@ -212,6 +212,12 @@ class Molecule:
                     ("Si", 6): 2,  # Hexacoordinate Si ([SiF6]2-)
                     ("Al", 4): -1,  # Tetrahedral Al ([AlH4]-)
                     ("Al", 6): -3,  # Hexacoordinate Al ([AlF6]3-)
+                    ("In", 4): -1,  # Tetrahedral In ([InH4]-)
+                    ("In", 6): -3,  # Hexacoordinate In ([InF6]3-)
+                    ("Sn", 4): 0,  # Neutral tetravalent Sn (most common, e.g., in SnO2)
+                    ("Sn", 2): -2,  # Stannide (Sn2-), rare
+                    ("Sn", 5): 2,  # Pentacoordinate Sn (rare, cationic)
+                    ("Sn", 6): -2,  # Hexacoordinate Sn ([SnCl6]2-)
                 }
                 key = (symbol, total_valence)
                 if key in formal_charge_rules:
