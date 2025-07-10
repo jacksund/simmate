@@ -2,6 +2,7 @@ import { Component } from "./component.js";
 import { isEmpty, hasValue } from "./utils.js";
 import { components, lifecycleEvents } from "./store.js";
 import { getMorpher } from "./morpher.js";
+import { handleLoading } from "./eventListeners.js";
 
 let messageUrl = "";
 let csrfTokenHeaderName = "X-CSRFToken";
@@ -128,6 +129,7 @@ export function deleteComponent(componentId) {
  * Call an action on the specified component.
  */
 export function call(componentNameOrKey, methodName, ...args) {
+
   const component = getComponent(componentNameOrKey);
   let argString = "";
 
@@ -145,7 +147,12 @@ export function call(componentNameOrKey, methodName, ...args) {
     argString = argString.slice(0, -2);
     methodName = `${methodName}(${argString})`;
   }
-
+  
+  // BUG-FIX: jacksund https://github.com/adamghill/django-unicorn/issues/366
+  try {
+    handleLoading(component, component.loadingEls[0]);
+  } catch (error) {};
+  
   component.callMethod(methodName, 0, null, (err) => {
     console.error(err);
   });
