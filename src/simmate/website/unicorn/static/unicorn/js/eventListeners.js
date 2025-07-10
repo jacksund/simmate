@@ -6,7 +6,8 @@ import { Element } from "./element.js";
  * @param {Component} component Component.
  * @param {Element} targetElement Targetted element.
  */
-function handleLoading(component, targetElement) {
+export function handleLoading(component, targetElement) {
+
   targetElement.handleLoading();
 
   // Look at all elements with a loading attribute
@@ -237,6 +238,7 @@ export function addModelEventListener(component, element, eventType) {
   const { el } = element;
 
   el.addEventListener(eventType, (event) => {
+
     let isDirty = false;
 
     if (component.data[element.model.name] !== element.getValue()) {
@@ -295,8 +297,13 @@ export function addModelEventListener(component, element, eventType) {
 
       return;
     }
-
+    
     component.actionQueue.push(action);
+
+    // BUG-FIX: jacksund https://github.com/adamghill/django-unicorn/issues/366
+    try {
+      handleLoading(component, component.loadingEls[0]);
+    } catch (error) {};
 
     component.queueMessage(
       element.model.debounceTime,
