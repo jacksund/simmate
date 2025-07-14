@@ -1805,7 +1805,11 @@ class DatabaseTable(models.Model):
 
     @classmethod
     @property
-    def html_extra_context(cls) -> dict:
+    def html_extra_table_context(cls) -> dict:
+        return {}
+
+    @property
+    def html_extra_entry_context(self) -> dict:
         return {}
 
     # -------------------------------------------------------------------------

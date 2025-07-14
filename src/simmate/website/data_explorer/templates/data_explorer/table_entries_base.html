@@ -44,6 +44,13 @@
                         {% endblock %}
                     </tr>
                 {% endfor %}
+                {% if truncated %}
+                    <tr>
+                        <td class="text-center" colspan="100">
+                            <b><em>*** select View All for the full dataset ***</em></b>
+                        </td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
