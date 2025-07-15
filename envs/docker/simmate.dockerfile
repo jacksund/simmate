@@ -55,15 +55,12 @@ RUN wget https://download.blender.org/release/Blender3.1/blender-3.1.0-linux-x64
 # Blender is automatically added to path
 
 # Download and install Miniforge (conda)
-RUN wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh" && \
-    bash Miniforge3.sh -b -p "${HOME}/conda" && \
-    echo jacksund123-1 && \
-    source "${HOME}/conda/etc/profile.d/conda.sh" && \
-    echo jacksund123-2 && \
-    source "${HOME}/conda/etc/profile.d/mamba.sh" && \
-    echo jacksund123-3 && \
-    conda activate && \
-    rm Miniforge3.sh
+RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -O ~/miniforge.sh && \
+    bash miniforge.sh -b -p miniforge && \
+    echo jacksund123 && \
+    ls && \
+    ls miniforge/bin && \
+    rm miniforge.sh
 
 # Install Simmate's Python dependencies 
 COPY envs/conda/dev.yaml .
