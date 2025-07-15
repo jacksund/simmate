@@ -519,3 +519,10 @@ def button_link(
     open_in_new: bool = False,
 ):
     return locals()
+
+
+@register.inclusion_tag(
+    filename="core_components/basic_elements/loading_spinner.html",
+)
+def loading_spinner():
+    return

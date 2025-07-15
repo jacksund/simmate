@@ -24,7 +24,7 @@ WORKDIR /root/
 
 # Setup up env variables. We do this before installing
 # simmate + deps to keep the layer sizes down.
-ENV PATH=/root/miniconda/bin:$PATH
+ENV PATH=/root/miniforge/bin:$PATH
 ENV CMD_PREFIX="conda run -n simmate_dev"
 ENV DJANGO_SETTINGS_MODULE="simmate.configuration.django.settings"
 ENV DEBUG=False
@@ -54,10 +54,11 @@ RUN wget https://download.blender.org/release/Blender3.1/blender-3.1.0-linux-x64
     rm blender.tar.xz
 # Blender is automatically added to path
 
-# Download and install Miniconda
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
-    bash miniconda.sh -b -p miniconda && \
-    rm miniconda.sh
+# Download and install Miniforge (conda)
+RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -O ~/miniforge.sh && \
+    bash miniforge.sh -b -p miniforge && \
+    rm miniforge.sh
+# Note: folder added to PATH at start of file
 
 # Install Simmate's Python dependencies 
 COPY envs/conda/dev.yaml .

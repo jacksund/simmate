@@ -94,7 +94,7 @@ def table_entries(request, table_name):
             "page_title_icon": "mdi-database",
             "breadcrumbs": ["Data", table_name],
             "title_json_link": True,
-            **table.html_extra_context,
+            **table.html_extra_table_context,
             # make left sidebar compact (only icons) when there's a quick-search
             # view, so that we can put the search form on the right side
             # "compact_sidebar": True if table.html_search_view else False,
@@ -138,13 +138,10 @@ def table_entry(request, table_name, table_entry_id):
     if view_format == "html":
         context = {
             "table_entry": table_entry,
-            # TODO:
-            # **table.html_entry_breadcrumb_context,
-            # **table.html_entry_extra_context,
-            #
             "page_title": "Table Entry",
             "breadcrumbs": ["Data", table_name, table_entry_id],
             "title_json_link": True,
+            **table_entry.html_extra_entry_context,
         }
         template = table_entry.html_entry_template
         return render(request, template, context)
