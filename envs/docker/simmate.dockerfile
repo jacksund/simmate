@@ -57,10 +57,8 @@ RUN wget https://download.blender.org/release/Blender3.1/blender-3.1.0-linux-x64
 # Download and install Miniforge (conda)
 RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -O ~/miniforge.sh && \
     bash miniforge.sh -b -p miniforge && \
-    echo jacksund123 && \
-    ls && \
-    ls miniforge/bin && \
     rm miniforge.sh
+ENV PATH="/root/miniforge/bin:${PATH}"
 
 # Install Simmate's Python dependencies 
 COPY envs/conda/dev.yaml .
