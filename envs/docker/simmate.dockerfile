@@ -24,7 +24,7 @@ WORKDIR /root/
 
 # Setup up env variables. We do this before installing
 # simmate + deps to keep the layer sizes down.
-ENV PATH=/root/miniconda/bin:$PATH
+ENV PATH=/root/miniforge/bin:$PATH
 ENV CMD_PREFIX="conda run -n simmate_dev"
 ENV DJANGO_SETTINGS_MODULE="simmate.configuration.django.settings"
 ENV DEBUG=False
@@ -58,7 +58,7 @@ RUN wget https://download.blender.org/release/Blender3.1/blender-3.1.0-linux-x64
 RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -O ~/miniforge.sh && \
     bash miniforge.sh -b -p miniforge && \
     rm miniforge.sh
-ENV PATH="/root/miniforge/bin:${PATH}"
+# Note: folder added to PATH at start of file
 
 # Install Simmate's Python dependencies 
 COPY envs/conda/dev.yaml .
