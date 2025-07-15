@@ -66,6 +66,8 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added export of SDF metadata
 - added `foriegn_key_link` util
 - added `tags` support in dynamic components
+- added html table and entry context hooks
+- added `loading_spinner` tag for unicorn components
 
 **Refactors**
 
@@ -81,6 +83,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - fix Data tab in website view failing to load due to molecule template
 - fix workflow names that have captial letters next to eachother (e.g, `LogDWorkflow` --> `log-d-workflow`)
 - fix `parse_multiselect` util when nested in a `create_many` form
+- fix `unicorn.loading` activity when `Unicorn.call()` js is called
 
 --------------------------------------------------------------------------------
 
