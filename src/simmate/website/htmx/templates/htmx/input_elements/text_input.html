@@ -1,0 +1,18 @@
+{# djlint:off #}
+<div class="my-2">
+    {% include "core_components/basic_elements/label.html" %}
+    <input id="{{ context.component.component_id }}-{{ name }}"
+           name="{{ name }}"
+           class="form-control"
+           type="text"
+           placeholder="{{ placeholder }}"
+           {% if max_length %}maxlength="{{ max_length }}"{% endif %}
+           hx-preserve
+           {% if not defer %}
+               hx-post={% url 'htmx:component' context.component.component_id %}
+               hx-trigger="change"
+           {% endif %}
+           {% if disabled %}disabled{% endif %}
+           {% if required %}required{% endif %}>
+</div>
+{# djlint:on #}
