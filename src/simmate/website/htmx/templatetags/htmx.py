@@ -42,6 +42,9 @@ def htmx_loading_spinner():
     return  # html is static so no vars passed
 
 
+# -----------------------------------------------------------------------------
+
+
 @register.inclusion_tag(
     filename="htmx/input_elements/text_input.html",
     takes_context=True,
@@ -63,6 +66,116 @@ def htmx_text_input(
     """
     if not label:
         label = name.replace("_", " ").title()
+
+    return locals()
+
+
+@register.inclusion_tag(
+    filename="htmx/input_elements/text_area.html",
+    takes_context=True,
+)
+def htmx_text_area(
+    context: dict,
+    name: str,
+    label: str = None,
+    show_label: bool = True,
+    help_text: str = None,
+    placeholder: str = "Enter details...",
+    ncols: int = 30,
+    nrows: int = 4,
+    defer: bool = True,
+    required: bool = False,
+):
+    """
+    Display a multi-line text input widget.
+    """
+    if not label:
+        label = name.replace("_", " ").title()
+
+    return locals()
+
+
+@register.inclusion_tag(
+    filename="htmx/input_elements/number_input.html",
+    takes_context=True,
+)
+def htmx_number_input(
+    context: dict,
+    name: str,
+    label: str = None,
+    show_label: bool = True,
+    help_text: str = None,
+    placeholder: str = None,
+    maximum: float | int = None,
+    minimum: float | int = None,
+    is_int: bool = False,
+    step_size: float | int = None,
+    defer: bool = True,
+    required: bool = False,
+):
+    """
+    Display a numeric input widget.
+    """
+    if not label:
+        label = name.replace("_", " ").title()
+
+    if not step_size:
+        step_size = 1 if is_int else "any"
+
+    if not placeholder:
+        placeholder = "123" if is_int else "0.123"
+
+    return locals()
+
+
+@register.inclusion_tag(
+    filename="htmx/input_elements/checkbox.html",
+    takes_context=True,
+)
+def htmx_checkbox(
+    context: dict,
+    name: str,
+    label: str = None,
+    show_label: bool = True,
+    help_text: str = None,
+    side_text: str = "Yes/True",
+    defer: bool = True,
+    required: bool = False,
+):
+    """
+    Display a checkbox widget.
+    """
+    if not label:
+        label = name.replace("_", " ").title()
+
+    return locals()
+
+
+@register.inclusion_tag(
+    filename="htmx/input_elements/radio.html",
+    takes_context=True,
+)
+def htmx_radio(
+    context: dict,
+    name: str,
+    options: list[tuple[any, str]] = [],
+    label: str = None,
+    show_label: bool = True,
+    defer: bool = True,
+    required: bool = False,
+):
+    """
+    Display a radio select widget.
+    """
+    # options should be a list of tuples: (value, display)
+
+    if not label:
+        label = name.replace("_", " ").title()
+
+    if not options:
+        options = context.get(f"{name}_options", [])
+
+    initial_value = context.get(name, None)
 
     return locals()
 

@@ -1,0 +1,19 @@
+{# djlint:off #}
+<div class="my-2">
+    {% include "core_components/basic_elements/label.html" %}
+    <div class="mt-1">
+        <input id="{{ context.component.component_id }}-{{ name }}"
+               name="{{ name }}"
+               class="form-check-input"
+               type="checkbox"
+               hx-preserve
+               {% if not defer %}
+                   hx-post={% url 'htmx:component' context.component.component_id %}
+                   hx-trigger="change"
+               {% endif %}
+               {% if disabled %}disabled{% endif %}
+               {% if required %}required{% endif %}>
+        {% if side_text %}<small>{{ side_text }}</small>{% endif %}
+    </div>
+</div>
+{# djlint:on #}

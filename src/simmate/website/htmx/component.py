@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import re
+from typing import get_args, get_origin
 
+from django.forms import Form as DjangoForm
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+
+from simmate.utilities import dotdict, str_to_datatype
 
 from .utilities import get_uuid_starting_with_letter, htmx_redirect
 
@@ -35,21 +39,19 @@ class HtmxComponent:
     @classmethod
     @property
     def component_name(cls) -> str:
-        # Switch from class name to unicorn convent (ExampleNameView --> example-name)
-        # adds a hyphen between each capital letter
+        # adds a hyphen between each capital letter (ExampleName --> example-name)
         # copied from https://stackoverflow.com/questions/199059/
         return re.sub(r"(\w)([A-Z])", r"\1-\2", cls.__name__).lower()
 
-    template_name: str = "htmx/example_form.html"
     # @classmethod
     # @property
     # def template_name(self) -> str:
     #     """
-    #     Sets a default template name based on component's name if necessary.
+    #     Sets a default template name based on component's name
     #     """
     #     # Convert component name with a dot to a folder structure
     #     template_name = self.component_name.replace(".", "/")
-    #     self.template_name = f"unicorn/{template_name}.html"
+    #     self.template_name = f"htmx/{template_name}.html"
 
     # -------------------------------------------------------------------------
 
@@ -103,7 +105,7 @@ class HtmxComponent:
         # **self.initial_context.flatten(),  # include this?
 
     def handle_request(self, request) -> HttpResponse:
-        self.post_data = request.POST
+        self.post_data = self.parse_post_data(request)
         # TODO: process
         return render(
             request,
@@ -112,6 +114,65 @@ class HtmxComponent:
         )
 
     # -------------------------------------------------------------------------
+
+    ####
+    # request.POST data parsing + cleaning
+    ####
+
+    post_data_form: DjangoForm = None
+    post_data_mappings: dict = {}
+
+    def parse_post_data(self, request):
+
+        # TODO: allow other more robust parsing methods. For example:
+        #   1. simmate.utilities.str_to_datatype --> uses a mapping dict for type
+        #   2. a pydantic class
+        #   3. django form class
+
+        # BUG:
+        # For now, I don't want the boilerplate associated with those methods,
+        # so I naively try parsing to the correct format. This can lead to bugs
+        # though -- such as someone typing "false" into a text field and it
+        # incorrectly being converted to a boolean when it should stay as a str.
+        # As another example, we might have a multiselect with one or zero items
+        # selected. This default parser would incorrectly convert to None or
+        # a single type, rather than [] or ["example"]
+
+        result = {}
+        # note: all values are given as a list for requst.POST
+        for key, values in request.POST.lists():
+
+            target_type = self.post_data_mappings.get(key, None)
+
+            # if it isn't explicitly given as a list type AND it has only 0 or 1
+            # entries in the list, then we assume it should not be a list.
+            if get_origin(target_type) != list and len(values) == 1:
+                result[key] = str_to_datatype(
+                    key,
+                    values[0],
+                    {key: target_type},
+                    allow_type_guessing=True,
+                )
+            else:
+                # we have a list and it must be one of...
+                # list[bool], list[str], list[float], list[int]
+                # grab inner type (e.g. list[str] -> str)
+                target_subtype = get_args(target_type)[-1] if target_type else None
+                result[key] = [
+                    str_to_datatype(
+                        key,
+                        value,
+                        {key: target_subtype},
+                        allow_type_guessing=True,
+                    )
+                    for value in values
+                ]
+
+        return dotdict(result)
+
+    # -------------------------------------------------------------------------
+
+    template_name: str = "htmx/example_form.html"
 
     status_options = [
         (o, o)
@@ -145,7 +206,6 @@ class HtmxComponent:
         return self.handle_request(request)
 
     def update_selection_test(self, request):
-        print(request.POST)
         self.new_selection = True
         self.actions = [
             {"refresh_select2": []},

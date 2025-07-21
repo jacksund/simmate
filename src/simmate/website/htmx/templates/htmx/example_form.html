@@ -5,7 +5,11 @@
       hx-swap="outerHTML">
     {% htmx_text_input name="name" %}
     {% htmx_text_input name="job_title" required=True %}
-    {% htmx_selectbox name="status" options=component.status_options %}
+    {% htmx_text_area name="job_description" %}
+    {% htmx_number_input name="years_worked" %}
+    {% htmx_checkbox name="still_working" %}
+    {% htmx_radio name="status0" options=component.status_options %}
+    {% htmx_selectbox name="status1" options=component.status_options %}
     {% htmx_selectbox name="status2" options=component.status_options multiselect=True %}
     {% htmx_button method_name="submit" %}
     {% htmx_button method_name="add_molecule_image" label="Draw Molecule" %}
