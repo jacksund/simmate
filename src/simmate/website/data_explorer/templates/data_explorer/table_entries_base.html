@@ -1,3 +1,8 @@
+<div id="search_results_report">
+    {% if report %}
+        {% block table_report %}{% endblock %}
+    {% endif %}
+</div>
 <form id="select_search_results"
       action="#"
       method="post"

@@ -1813,6 +1813,41 @@ class DatabaseTable(models.Model):
         return {}
 
     # -------------------------------------------------------------------------
+    # Methods for reports and plotting.
+    # -------------------------------------------------------------------------
+
+    # Note, many methods associated with this section would normally be
+    # attached to custom QuerySet/SearchResults subclasses, but that leads
+    # to extra boiler plate.
+
+    enable_html_report: bool = False
+    report_df_columns: list[str] = None
+
+    @classmethod
+    def get_report(cls, data_source: SearchResults | Page = None) -> dict:
+        """
+        Gives a dictionary of report information, such as statistical values
+        or plotly figures.
+
+        If data_source is left as None, the entire table is used
+        """
+
+        # convert to a SearchResults/queryset obj
+        if data_source == None:
+            data_source = cls.objects  # use full table by default
+        elif isinstance(data_source, SearchResults):
+            pass  # queryset ready to go
+        elif isinstance(data_source, Page):
+            data_source = data_source.object_list
+
+        df = data_source.to_dataframe(cls.report_df_columns)
+        return cls.get_report_from_df(df)
+
+    @classmethod
+    def get_report_from_df(cls, df: pandas.DataFrame) -> dict:
+        raise NotImplementedError("A `get_report_from_df` method must be provided")
+
+    # -------------------------------------------------------------------------
     # Methods that populate "workflow columns" of custom tables
     # -------------------------------------------------------------------------
 
