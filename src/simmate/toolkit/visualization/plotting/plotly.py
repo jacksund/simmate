@@ -2,7 +2,36 @@
 
 from pathlib import Path
 
+import plotly.graph_objects as go
+import plotly.io as pio
+
 from simmate.toolkit.visualization.plotting import Figure
+
+pio.templates["bootstrap_grey"] = go.layout.Template(
+    layout=dict(
+        font=dict(
+            family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+            color="grey",
+            size=12,
+        ),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        xaxis=dict(
+            showgrid=False,
+            zeroline=False,
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor="lightgrey",
+            gridwidth=1,
+            zeroline=False,
+        ),
+        margin={"l": 0, "r": 0, "t": 0, "b": 0},
+    )
+)
+
+# Compose with the default 'plotly' template
+pio.templates.default = "plotly+bootstrap_grey"
 
 
 class PlotlyFigure(Figure):
