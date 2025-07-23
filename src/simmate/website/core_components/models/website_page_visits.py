@@ -15,6 +15,8 @@ class WebsitePageVisit(DatabaseTable):
     class Meta:
         db_table = "django_website_page_visits"
 
+    html_entries_template = "core_components/website_page_visits/table.html"
+
     # disable the default columns -- as we only inherit bc we want
     # the extra simmate methods such as the plotly figure rendering
     created_at = None
@@ -83,26 +85,29 @@ class WebsitePageVisit(DatabaseTable):
     @classmethod
     def get_unique_users_and_traffic(cls, df: pandas.DataFrame):
 
-        # Daily
+        # --- Data Preparation ---
+
+        # Daily aggregation
         df["date"] = df["timestamp"].dt.date
         daily_users = df.groupby("date")["user_id"].nunique().reset_index()
         daily_users.rename(columns={"user_id": "unique_users"}, inplace=True)
 
-        # Weekly
+        # Weekly aggregation
         df["week"] = (
             df["timestamp"].dt.to_period("W").apply(lambda r: r.start_time.date())
         )
         weekly_users = df.groupby("week")["user_id"].nunique().reset_index()
         weekly_users.rename(columns={"user_id": "unique_users"}, inplace=True)
 
-        # Monthly
+        # Monthly aggregation
         df["month"] = (
             df["timestamp"].dt.to_period("M").apply(lambda r: r.start_time.date())
         )
         monthly_users = df.groupby("month")["user_id"].nunique().reset_index()
         monthly_users.rename(columns={"user_id": "unique_users"}, inplace=True)
 
-        # Calculate histogram bins (2-hour bins)
+        # --- Histogram Preparation (2-hour bins) ---
+
         min_date = df["timestamp"].min()
         max_date = df["timestamp"].max()
         total_hours = (max_date - min_date).total_seconds() / 3600
@@ -116,11 +121,20 @@ class WebsitePageVisit(DatabaseTable):
         # For bar plotting, use the left edge of each bin
         hist_x = bin_edges[:-1]
         hist_y = hist_counts
+        bin_width_ms = (
+            hist_x[1] - hist_x[0]
+        ).total_seconds() * 1000  # width in milliseconds
 
-        # Create subplots: 4 rows, 1 column, reduced vertical spacing
-        fig = make_subplots(rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.03)
+        # --- Plotting ---
 
-        # Monthly
+        fig = make_subplots(
+            rows=4,
+            cols=1,
+            shared_xaxes=True,
+            vertical_spacing=0.03,
+        )
+
+        # Monthly users (row 1)
         fig.add_trace(
             plotly_go.Bar(
                 x=monthly_users["month"],
@@ -131,7 +145,7 @@ class WebsitePageVisit(DatabaseTable):
             col=1,
         )
 
-        # Weekly
+        # Weekly users (row 2)
         fig.add_trace(
             plotly_go.Bar(
                 x=weekly_users["week"],
@@ -142,7 +156,7 @@ class WebsitePageVisit(DatabaseTable):
             col=1,
         )
 
-        # Daily
+        # Daily users (row 3)
         fig.add_trace(
             plotly_go.Bar(
                 x=daily_users["date"],
@@ -153,23 +167,26 @@ class WebsitePageVisit(DatabaseTable):
             col=1,
         )
 
-        # Histogram (2-hour bins)
+        # 2-hour histogram (row 4)
         fig.add_trace(
             plotly_go.Bar(
                 x=hist_x,
                 y=hist_y,
                 marker_color="rgba(150, 150, 150, 0.7)",
-                width=(hist_x[1] - hist_x[0]),
+                width=bin_width_ms,
             ),
             row=4,
             col=1,
         )
 
         fig.update_layout(
-            height=1300,
+            height=700,
             showlegend=False,
             xaxis4=dict(title="Date"),
-            yaxis2=dict(title="Unique Users (#)"),
+            yaxis1=dict(title="Unique Monthly Users (#)"),
+            yaxis2=dict(title="Unique Weekly Users (#)"),
+            yaxis3=dict(title="Unique Daily Users (#)"),
+            yaxis4=dict(title="Unique Users (#)"),
             bargap=0.1,
         )
 
