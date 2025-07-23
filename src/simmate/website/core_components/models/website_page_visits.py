@@ -79,7 +79,15 @@ class WebsitePageVisit(DatabaseTable):
         top_urls_df = pandas.DataFrame(
             {"url_path": url_counts.index, "visits": url_counts.values}
         )
-        fig = plotly_express.bar(top_urls_df, x="url_path", y="visits")
+        fig = plotly_express.bar(
+            top_urls_df,
+            x="url_path",
+            y="visits",
+            labels={
+                "url_path": "URL",
+                "visits": "Visits (#)",
+            },
+        )
         return fig
 
     @classmethod
@@ -139,7 +147,6 @@ class WebsitePageVisit(DatabaseTable):
             plotly_go.Bar(
                 x=monthly_users["month"],
                 y=monthly_users["unique_users"],
-                marker_color="rgba(44, 160, 44, 0.7)",
             ),
             row=1,
             col=1,
@@ -150,7 +157,6 @@ class WebsitePageVisit(DatabaseTable):
             plotly_go.Bar(
                 x=weekly_users["week"],
                 y=weekly_users["unique_users"],
-                marker_color="rgba(255, 127, 14, 0.7)",
             ),
             row=2,
             col=1,
@@ -161,7 +167,6 @@ class WebsitePageVisit(DatabaseTable):
             plotly_go.Bar(
                 x=daily_users["date"],
                 y=daily_users["unique_users"],
-                marker_color="rgba(31, 119, 180, 0.7)",
             ),
             row=3,
             col=1,
@@ -172,7 +177,6 @@ class WebsitePageVisit(DatabaseTable):
             plotly_go.Bar(
                 x=hist_x,
                 y=hist_y,
-                marker_color="rgba(150, 150, 150, 0.7)",
                 width=bin_width_ms,
             ),
             row=4,
@@ -180,13 +184,13 @@ class WebsitePageVisit(DatabaseTable):
         )
 
         fig.update_layout(
-            height=700,
+            height=500,
             showlegend=False,
             xaxis4=dict(title="Date"),
-            yaxis1=dict(title="Unique Monthly Users (#)"),
-            yaxis2=dict(title="Unique Weekly Users (#)"),
-            yaxis3=dict(title="Unique Daily Users (#)"),
-            yaxis4=dict(title="Unique Users (#)"),
+            yaxis1=dict(title="Monthly Users"),
+            yaxis2=dict(title="Weekly Users"),
+            yaxis3=dict(title="Daily Users"),
+            yaxis4=dict(title="Total Visits"),
             bargap=0.1,
         )
 
