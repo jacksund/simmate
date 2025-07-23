@@ -1838,7 +1838,7 @@ class DatabaseTable(models.Model):
         elif isinstance(data_source, SearchResults):
             pass  # queryset ready to go
         elif isinstance(data_source, Page):
-            data_source = data_source.object_list
+            data_source = data_source.paginator.object_list
 
         df = data_source.to_dataframe(cls.report_df_columns)
         return cls.get_report_from_df(df)
