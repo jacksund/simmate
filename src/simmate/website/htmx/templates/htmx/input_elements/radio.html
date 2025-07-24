@@ -1,0 +1,24 @@
+{# djlint:off #}
+<div class="my-2">
+    {% include "core_components/basic_elements/label.html" %}
+    <div class="px-2">
+        {% for option in options %}
+            <div class="form-check">
+                <input id="{{ context.component.component_id }}-{{ name }}"
+                       name="{{ name }}"
+                       class="form-check-input"
+                       type="radio"
+                       value="{{ option.0 }}"
+                       hx-preserve
+                       {% if not defer %}
+                           hx-post={% url 'htmx:component' context.component.component_id %}
+                           hx-trigger="change"
+                       {% endif %}
+                       {% if disabled %}disabled{% endif %}
+                       {% if required %}required{% endif %}>
+                <label class="form-check-label">{{ option.1 }}</label>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{# djlint:on #}
