@@ -7,6 +7,7 @@
 from .base import DatabaseTable, table_column, SearchResults
 
 from .filtered_scope import FilteredScope
+from .status_tracking import StatusTracking
 
 from .symmetry import Spacegroup
 from .structure import Structure
