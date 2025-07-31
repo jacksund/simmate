@@ -51,7 +51,8 @@ class StatusTracking(DatabaseTable):
         - "Staged for Deletion": Request is marked for removal from the database.
     """
 
-    history = HistoricalRecords()
+    # BUG: must be set by child class
+    # history = HistoricalRecords()
 
     # -------------------------------------------------------------------------
 
