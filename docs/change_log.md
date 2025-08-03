@@ -70,6 +70,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `loading_spinner` tag for unicorn components
 - added `plotly_figure` filter tag for rendering plots
 - added `report` features to database tables and data_explorer views
+- added `StatusTracking` model to `database.base_data_types`
 
 **Refactors**
 
