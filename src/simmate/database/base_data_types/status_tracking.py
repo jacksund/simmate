@@ -235,7 +235,7 @@ class StatusTracking(DatabaseTable):
 
     @classmethod
     def get_age_histogram(cls, df: DataFrame):
-        df_s = df[df.status.isin(["Proposed", "In Progress", "Contracted (CRO)"])]
+        df_s = df[df.status.isin(cls.status_age_enable)]
         figure = plotly_express.histogram(
             df_s,
             x="status_age",
