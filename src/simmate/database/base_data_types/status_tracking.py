@@ -87,11 +87,11 @@ class StatusTracking(DatabaseTable):
     def update_days_to_completed(cls):
         for target in cls.objects.filter(
             status=cls.status_completed_name,
-            days_to_synthesized__isnull=True,
+            days_to_completed__isnull=True,
         ).all():
-            num_days = target.get_days_to_synthesized()
+            num_days = target.get_days_to_completed()
             if num_days:
-                target.update_wo_timestamp(days_to_synthesized=num_days)
+                target.update_wo_timestamp(days_to_completed=num_days)
 
     # -------------------------------------------------------------------------
 
