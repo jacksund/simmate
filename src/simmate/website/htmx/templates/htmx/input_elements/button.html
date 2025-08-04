@@ -1,0 +1,22 @@
+{# djlint:off #}
+<div class="my-2 text-center">
+    <button class="btn btn-{{ theme }} {% if small %}btn-sm{% endif %}"
+            hx-disabled-elt
+            {% if method_name == "submit" %}
+                type="submit"
+            {% else %}
+                hx-post="{% url 'htmx:component_method' context.component.component_id method_name %}"
+                hx-trigger="click"
+                {% if javascript_only %}
+                    hx-swap="none"
+                {% else %}
+                    hx-target="#{{ context.component.component_id }}"
+                    hx-swap="outerHTML"
+                {% endif %}
+            {% endif %}
+        >
+        {% if icon %}<i class="mdi mdi-{{ icon }}"></i>&nbsp;&nbsp;{% endif %}
+        {% if show_label %}{{ label }}{% endif %}
+    </button>
+</div>
+{# djlint:on #}

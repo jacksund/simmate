@@ -1,0 +1,46 @@
+{# djlint:off #}
+<div hx-preserve id="{{ context.component.component_id }}-{{ name }}{% if dynamic_options %}-{{ options_hash }}{% endif %}" class="my-2">
+    {% include "core_components/basic_elements/label.html" %}
+    <select id="{{ context.component.component_id }}-{{ name }}-select2"
+            name="{{ name }}"
+            style="width: 200px"
+            class="select2 {% if multiselect %}select2-multiple{% endif %} form-control {% if allow_custom_input %}select2-dynamic{% endif %}"
+            data-toggle="select2"
+            data-placeholder="Choose one ..."
+            {% if multiselect %}multiple="multiple"{% endif %}
+            {% if popout_parent_id %}data-dropdown-parent="#{{ popout_parent_id }}"{% endif %}
+            {% if not defer %}
+                {% if method_name %}
+                    hx-post="{% url 'htmx:component_method' context.component.component_id method_name %}"
+                {% else %}
+                    hx-post="{% url 'htmx:component' context.component.component_id %}"
+                {% endif %}
+                hx-target="#{{ context.component.component_id }}"
+                hx-indicator="#loading-spinner"
+                hx-swap="outerHTML"
+                hx-trigger="select2-change"
+                onchange="htmx.trigger(this, 'select2-change')"
+            {% endif %}
+            >
+        {% if not multiselect %}
+            {% if initial_value %}
+                <option value="{{ initial_value }}">
+                    {% for option in options %}
+                        {% if initial_value == option.0 %}{{ option.1 }}{% endif %}
+                    {% endfor %}
+                </option>
+            {% else %}
+                <option value="NONE">Choose one...</option>
+            {% endif %}
+            {% for option in options %}
+                {% if option.0 != initial_value %}<option value="{{ option.0 }}">{{ option.1 }}</option>{% endif %}
+            {% endfor %}
+        {% else %}
+            {% for option in options %}
+                <option value="{{ option.0 }}"
+                        {% if initial_value and option.0 in initial_value %}selected{% endif %}>{{ option.1 }}</option>
+            {% endfor %}
+        {% endif %}
+    </select>
+</div>
+{# djlint:on #}
