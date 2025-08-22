@@ -1,0 +1,14 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    <div class="row py-2">
+        {# header #}
+        <div class="row pb-2">
+            <div class="col-12">
+                <div class="page-title-box">
+                    <h3 class="m-0">Overview</h3>
+                </div>
+            </div>
+        </div>
+        {% include "rdkit/molecule_entry_display.html" %}
+    </div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" min_width=50 %}
+    {% table_header "compound__id" "CoRe ID" min_width=100 %}
+    {% table_header "status" min_width=100 %}
+    {% if not project_view %}
+        {% table_header "project__name" "Project" min_width=100 %}
+    {% endif %}
+    {% table_header "hypothesis__name" "Hypothesis" min_width=100 %}
+    <th style="min-width:200px">Tags</th>
+    {% table_header "submitted_by__last_name" "Submitted by" min_width=100 %}
+    {% table_header "assigned_to__last_name" "Assigned to" min_width=100 %}
+    {% table_header "completed_by__last_name" "Completed by" min_width=100 %}
+    {% table_header "priority" min_width=50 %}
+    {% table_header "created_at" min_width=100 %}
+    {% table_header "updated_at" min_width=100 %}
+    <th style="min-width:50px">Edit</th>
+{% endblock %}
+{% block table_rows %}
+    <td class="text-center">
+        {% draw_molecule entry width=150 height=150 %}
+        {% foreign_key_link entry %}
+    </td>
+    <td>{% foreign_key_link entry.corteva_core_match %}</td>
+    <td>
+        {% if entry.status == "Proposed" %}
+            {% status_bar "Proposed" "info" %}
+        {% elif entry.status == "Proposal Rejected" %}
+            {% status_bar "Proposal Rejected" "danger" %}
+        {% elif entry.status == "In Progress" %}
+            {% status_bar "In Progress" "warning" %}
+        {% elif entry.status == "Contracted (CRO)" %}
+            {% status_bar "Contracted (CRO)" "dark" %}
+        {% elif entry.status == "Synthesized" %}
+            {% status_bar "Synthesized" "success" %}
+        {% elif entry.status == "Synthesis Failed" %}
+            {% status_bar "Synthesis Failed" "danger" %}
+        {% elif entry.status == "Staged for Deletion" %}
+            {% status_bar "Staged for Deletion" "danger" %}
+        {% elif entry.status == "Reference Only" %}
+            {% status_bar "Reference Only" "light" %}
+        {% endif %}
+    </td>
+    {% if not project_view %}
+        <td>{% foreign_key_link entry.project "name" %}</td>
+    {% endif %}
+    <td>{% foreign_key_link entry.hypothesis "name" %}</td>
+    <td>
+        {% for tag in entry.tags.all %}
+            {% foreign_key_link tag "name" "pill" %}
+        {% endfor %}
+    </td>
+    <td>{{ entry.submitted_by.first_name }} {{ entry.submitted_by.last_name }}</td>
+    <td>{{ entry.assigned_to.first_name }} {{ entry.assigned_to.last_name }}</td>
+    <td>{{ entry.completed_by.first_name }} {{ entry.completed_by.last_name }}</td>
+    <td>{{ entry.priority }}</td>
+    <td>{{ entry.created_at|date:"Y-m-d" }}</td>
+    <td>{{ entry.updated_at|date:"Y-m-d" }}</td>
+    {% update_entry_link entry %}
+{% endblock %}

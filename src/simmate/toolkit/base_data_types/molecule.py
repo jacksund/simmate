@@ -952,6 +952,31 @@ class Molecule:
         elements = [atom.GetSymbol() for atom in self.rdkit_molecule.GetAtoms()]
         return set(elements)
 
+    @property
+    def is_dueterated(self) -> bool:
+        """
+        Whether the molecule has any Dueterium
+        """
+        for atom in self.rdkit_molecule.GetAtoms():
+            if atom.GetAtomicNum() == 1 and atom.GetIsotope() == 2:
+                # a single duet is enough to return true
+                return True
+        return False
+
+    @property
+    def is_dueterated_full(self) -> bool:
+        """
+        Whether the molecule is fully dueterated (i.e. 100% Hs are Dueterium)
+        """
+        if self.is_dueterated:
+            for atom in self.rdkit_molecule.GetAtoms():
+                if atom.GetAtomicNum() == 1 and atom.GetIsotope() == 1:
+                    # a single non-D is enough to say no
+                    return False
+            return True
+        # No D at all is an automatic no
+        return False
+
     # -------------------------------------------------------------------------
 
     # MOLECULAR WEIGHT
