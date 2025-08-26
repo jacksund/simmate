@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import warnings
 from io import StringIO
 
 import numpy
 import pandas
-import requests
-from bs4 import BeautifulSoup
 from rich.progress import track
 
+from simmate.database.external_connectors import WebScraper
 from simmate.toolkit import Molecule
 
 from .data import BCPC_NEWS_ARCHIVE
@@ -17,7 +15,7 @@ from .data import BCPC_NEWS_ARCHIVE
 # from simmate.apps.chatbot import get_llm # TODO
 
 
-class BcpcWebScrapper:
+class BcpcWebScraper(WebScraper):
 
     @classmethod
     def get_all_data(
@@ -56,28 +54,6 @@ class BcpcWebScrapper:
 
         # for-loop above merged news_data into the name_data
         return name_data
-
-    # -------------------------------------------------------------------------
-
-    # TODO: move to base class
-
-    @staticmethod
-    def get_html(url: str) -> BeautifulSoup:
-
-        # BUG: disable verify bc of Corteva SSL & silence warnings from not
-        # using the verify fxn
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            response = requests.get(url, verify=False)
-
-        if response.status_code == 200:
-            html_content = response.text
-        else:
-            raise Exception(
-                f"Failed to retrieve the page. Status code: {response.status_code}"
-            )
-
-        return BeautifulSoup(html_content, "html.parser")
 
     # -------------------------------------------------------------------------
 

@@ -73,6 +73,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `StatusTracking` model to `database.base_data_types`
 - added `is_dueterated` methods to `Molecule`
 - added web scrape of news archive for `apps.bcpc`
+- added `apps.ppdb`
 
 **Refactors**
 

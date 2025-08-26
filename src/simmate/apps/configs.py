@@ -67,6 +67,10 @@ class PdbConfig(AppConfig):
     name = "simmate.apps.pdb"
 
 
+class PpdbConfig(AppConfig):
+    name = "simmate.apps.ppdb"
+
+
 class QuantumEspressoConfig(AppConfig):
     name = "simmate.apps.quantum_espresso"
 

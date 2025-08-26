@@ -7,7 +7,7 @@ from rich.progress import track
 from simmate.apps.rdkit.models import Molecule
 from simmate.database.base_data_types import table_column
 
-from ..web_scrapper import BcpcWebScrapper
+from ..web_scraper import BcpcWebScraper
 
 
 class BcpcIsoPesticide(Molecule):
@@ -85,7 +85,7 @@ class BcpcIsoPesticide(Molecule):
         else:
             existing_names = []
 
-        all_data = BcpcWebScrapper.get_all_data(
+        all_data = BcpcWebScraper.get_all_data(
             skip_names=existing_names,
             **kwargs,
         )
