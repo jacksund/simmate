@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from datetime import datetime
 
+from django.utils.timezone import make_aware
 from rich.progress import track
 
 from simmate.database.external_connectors import WebScraper
@@ -11,29 +13,25 @@ from simmate.toolkit import Molecule
 class PpdbWebScraper(WebScraper):
 
     @classmethod
-    def get_all_data(cls, skip_names: list[str] = [], **kwargs) -> list[dict]:
+    def get_all_data(cls, skip_ids: list[str] = [], **kwargs) -> list[dict]:
         all_data = []
-        for iso_name in track(cls.get_all_name_links(**kwargs)):
-            if iso_name in skip_names:
+        for entry_id in track(cls.get_all_id_links(**kwargs)):
+            if entry_id in skip_ids:
                 continue
 
             # Their website is unstable and inconsistent, so I just skip those
             # that fail. Most cases, this is a website disconnect so the
             # iso_name should work the next time this function is ran.
             try:
-                entry_data = cls.get_name_data(iso_name)
-
-                # we only want to include entries that have a compound associated with it
-                if "molecule" in entry_data.keys():
-                    all_data.append(entry_data)
-
+                entry_data = cls.get_id_data(entry_id)
+                all_data.append(entry_data)
             except:
-                logging.warning(f"Failed to load {iso_name}")
+                logging.warning(f"Failed to load {entry_id}")
 
         return all_data
 
     @classmethod
-    def get_all_name_links(cls, **kwargs) -> list[str]:
+    def get_all_id_links(cls, **kwargs) -> list[str]:
 
         logging.info("Loading all entries from index...")
         index_url = "https://sitem.herts.ac.uk/aeru/ppdb/en/atoz.htm"
@@ -60,7 +58,7 @@ class PpdbWebScraper(WebScraper):
         iso_url = f"https://sitem.herts.ac.uk/aeru/ppdb/en/Reports/{str(entry_id)}.htm"
         html_data = cls.get_html(iso_url)
 
-        data_final = {}
+        data_final = {"id": entry_id}
 
         # Title
         element = html_data.find("td", class_="title")
@@ -77,8 +75,9 @@ class PpdbWebScraper(WebScraper):
         # Last update
         element = html_data.find("td", class_="date")
         if element:
-            data_final["last_updated_orginal"] = (
-                element.text.strip().replace("Last updated:", "").strip()
+            date_str = element.text.strip().replace("Last updated:", "").strip()
+            data_final["updated_at_original"] = make_aware(
+                datetime.strptime(date_str, "%d/%m/%Y")
             )
 
         # Summary
@@ -120,9 +119,11 @@ class PpdbWebScraper(WebScraper):
                 data_final["ec_regulatory_status"] = rows[i + 2].text
             elif row.text == "Canonical SMILES":
                 data_final["molecule_original"] = rows[i + 1].text
-                # data_final["molecule"] = Molecule.from_smiles(rows[i+1].text)
+                data_final["molecule"] = Molecule.from_smiles(rows[i + 1].text)
             elif row.text == "Pesticide type":
-                data_final["pesticide_type"] = rows[i + 1].text
+                data_final["pesticide_type"] = [
+                    s.strip() for s in rows[i + 1].text.split(";")
+                ]
             elif row.text == "Substance groups":
                 data_final["substance_groups"] = [
                     t.strip() for t in rows[i + 1].text.split(";")
@@ -162,6 +163,10 @@ class PpdbWebScraper(WebScraper):
                 data_final["commercial_production_details"] = rows[i + 1].text
 
         # cleanup empty values
-        data_final = {k: v for k, v in data_final.items() if v not in [None, "", "-"]}
+        data_final = {
+            k: v
+            for k, v in data_final.items()
+            if v not in [None, "", "-", "No data found", "Not listed", "None allocated"]
+        }
 
         return data_final
