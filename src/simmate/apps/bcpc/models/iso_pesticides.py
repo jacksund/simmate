@@ -36,6 +36,9 @@ class BcpcIsoPesticide(Molecule):
     html_display_name = "ISO Pesticides"
     html_description_short = "A compendium of pesticides with common names."
 
+    html_entries_template = "bcpc/iso_pesticides/table.html"
+    html_entry_template = "bcpc/iso_pesticides/view.html"
+
     external_website = "http://www.bcpcpesticidecompendium.org/index.html"
     source_doi = "http://www.bcpcpesticidecompendium.org/index_cn_frame.html"
 
