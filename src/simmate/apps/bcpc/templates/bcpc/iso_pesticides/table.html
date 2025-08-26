@@ -1,0 +1,30 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" min_width=50 %}
+    {% table_header "cas_number" "CAS #" min_width=100 %}
+    {% table_header "name" min_width=100 %}
+    <th style="min-width:200px">Disciplines</th>
+    <th style="min-width:200px">Classes</th>
+    {% table_header "approval_source" min_width=100 %}
+    {% table_header "notes" min_width=200 %}
+    {% table_header "created_at" min_width=100 %}
+    {% table_header "updated_at" min_width=100 %}
+{% endblock %}
+{% block table_rows %}
+    <td class="text-center">
+        {% draw_molecule entry width=150 height=150 %}
+        {% foreign_key_link entry %}
+    </td>
+    <td>{{ entry.cas_number }}</td>
+    <td>{{ entry.name }}</td>
+    <td>
+        {% for tag in entry.disciplines %}<div class="badge bg-primary rounded-pill">{{ tag }}</div>{% endfor %}
+    </td>
+    <td>
+        {% for tag in entry.pesticide_classes %}<div class="badge bg-primary rounded-pill">{{ tag }}</div>{% endfor %}
+    </td>
+    <td>{{ entry.approval_source }}</td>
+    <td>{{ entry.notes }}</td>
+    <td>{{ entry.created_at|date:"Y-m-d" }}</td>
+    <td>{{ entry.updated_at|date:"Y-m-d" }}</td>
+{% endblock %}

@@ -71,6 +71,8 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `plotly_figure` filter tag for rendering plots
 - added `report` features to database tables and data_explorer views
 - added `StatusTracking` model to `database.base_data_types`
+- added `is_dueterated` methods to `Molecule`
+- added web scrape of news archive for `apps.bcpc`
 
 **Refactors**
 
@@ -87,6 +89,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - fix workflow names that have captial letters next to eachother (e.g, `LogDWorkflow` --> `log-d-workflow`)
 - fix `parse_multiselect` util when nested in a `create_many` form
 - fix `unicorn.loading` activity when `Unicorn.call()` js is called
+- fix `to_sdf` export
 
 --------------------------------------------------------------------------------
 

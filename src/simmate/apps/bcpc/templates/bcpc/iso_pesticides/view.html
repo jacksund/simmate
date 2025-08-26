@@ -1,0 +1,73 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    <div class="row py-2">
+        {# header #}
+        <div class="row pb-2">
+            <div class="col-12">
+                <div class="page-title-box">
+                    <h3 class="m-0">Overview</h3>
+                </div>
+            </div>
+        </div>
+        {% include "rdkit/molecule_entry_display.html" %}
+    </div>
+    <div class="row py-2">
+        <div class="col-12">
+            <!-- table of properties -->
+            <div class="row pt-2">
+                <div>
+                    <table class="table table-centered table-striped mb-0 border">
+                        <thead class="table-primary">
+                            <tr>
+                                <th style="width: 45%">Base Info</th>
+                                <th class="text-center"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CAS Number</td>
+                                <td>{{ table_entry.cas_number }}</td>
+                            </tr>
+                            <tr>
+                                <td>Name</td>
+                                <td>{{ table_entry.name }}</td>
+                            </tr>
+                            <tr>
+                                <td>Disciplines</td>
+                                <td>
+                                    {% for tag in table_entry.disciplines %}<div class="badge bg-primary rounded-pill">{{ tag }}</div>{% endfor %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Classes</td>
+                                <td>
+                                    {% for tag in table_entry.pesticide_classes %}<div class="badge bg-primary rounded-pill">{{ tag }}</div>{% endfor %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Approval Source</td>
+                                <td>{{ table_entry.approval_source }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row py-2">
+        <div class="col-12">
+            <table class="table table-sm table-centered table-striped mb-0 border">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ table_entry.notes|linebreaks }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
