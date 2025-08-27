@@ -37,7 +37,7 @@ class PpdbWebScraper(WebScraper):
         index_url = "https://sitem.herts.ac.uk/aeru/ppdb/en/atoz.htm"
         html_data = cls.get_html(index_url)
 
-        urls_to_skip = []
+        urls_to_skip = ["mailto:aeru@herts.ac.uk"]
         links = [
             a["href"].split("/")[-1].split(".")[0]
             for p in html_data.find_all("p")
@@ -168,5 +168,12 @@ class PpdbWebScraper(WebScraper):
             for k, v in data_final.items()
             if v not in [None, "", "-", "No data found", "Not listed", "None allocated"]
         }
+
+        # clean up buggy characters
+        for k, v in data_final.items():
+            if isinstance(v, str):
+                data_final[k] = cls.replace_accents(v)
+            elif isinstance(v, list) and all([isinstance(s, str) for s in v]):
+                data_final[k] = [cls.replace_accents(s) for s in v]
 
         return data_final

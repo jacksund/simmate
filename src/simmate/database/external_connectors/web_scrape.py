@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import unicodedata
 import warnings
 
 import requests
@@ -32,3 +33,36 @@ class WebScraper:
 
     # TODO: add helper methods for parsing data using an LLM + prompts. See
     # the `apps.bcpc` for the start of this & example use
+
+    @staticmethod
+    def replace_accents(text: str) -> str:
+        # replacements = {
+        #     "é": "e",
+        #     "è": "e",
+        #     "ê": "e",
+        #     "ë": "e",
+        #     "á": "a",
+        #     "à": "a",
+        #     "ä": "a",
+        #     "â": "a",
+        #     "ç": "c",
+        #     "í": "i",
+        #     "ï": "i",
+        #     "ò": "o",
+        #     "ó": "o",
+        #     "ô": "o",
+        #     "ö": "o",
+        #     "ú": "u",
+        #     "ù": "u",
+        #     "ü": "u",
+        #     "–": "-",
+        # }
+        # for accented_char, replacement in replacements.items():
+        #     text = text.replace(accented_char, replacement)
+        # return text
+
+        # This is a more robust implentation given by GPT. It should be effectively
+        # the same as the commented out code above.
+        nfkd_form = unicodedata.normalize("NFKD", text)
+        nfkd_form = "".join([c for c in nfkd_form if not unicodedata.combining(c)])
+        return nfkd_form.encode("ascii", "ignore").decode("ascii")

@@ -257,13 +257,17 @@ class PpdbMolecule(Molecule):
         logging.info("Saving to simmate database...")
         for entry_data in track(all_data):
             entry_id = entry_data.pop("id")
-            cls.objects.update_or_create(
-                id=entry_id,
-                defaults=cls.from_toolkit(
-                    as_dict=True,
-                    **entry_data,
-                ),
-            )
+            try:
+                cls.objects.update_or_create(
+                    id=entry_id,
+                    defaults=cls.from_toolkit(
+                        as_dict=True,
+                        **entry_data,
+                    ),
+                )
+            except:
+                logging.info(f"Failed to load entry {entry_id} into database")
+                continue
 
         logging.info("Adding molecule fingerprints...")
         cls.populate_fingerprint_database()
