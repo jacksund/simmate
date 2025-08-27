@@ -260,6 +260,7 @@ nav:
         - Materials Project: apps/materials_project.md
         - OQMD: apps/oqmd.md
         - PDB: apps/pdb.md
+        - PPDB: apps/pdb.md
         - Quantum Espresso: apps/quantum_espresso.md
         - RDKit: apps/rdkit.md
         - VASP:
