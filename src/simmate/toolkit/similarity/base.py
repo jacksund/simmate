@@ -18,6 +18,8 @@ class SimilarityEngine:
 
     is_distance_based: bool = False
 
+    matrix_mode: bool = "pairwise"
+
     # -------------------------------------------------------------------------
 
     @classmethod
@@ -40,7 +42,7 @@ class SimilarityEngine:
         Compute the similarity between two fingerprints using the specified
         similarity method.
         """
-        return cls.get_similarity_series(fingerprint1, [fingerprint2])[0]
+        return cls.get_similarity_series(fingerprint1, numpy.array([fingerprint2]))[0]
 
     @classmethod
     def get_similarity_series(
@@ -54,24 +56,49 @@ class SimilarityEngine:
             for fingerprint2 in fingerprints
         ]
 
-    def get_similarity_matrix(self, fingerprints: list) -> list[list]:
+    @classmethod
+    def get_similarity_matrix(cls, fingerprints: list) -> list[list]:
         """
         Calculates the pairwise similarity scores between all molecules.
         Note that the similarity matrix is symmetric, so only the upper
         triangle of the matrix needs to be calculated. The full symmetric
-        matrix is still returned though
+        matrix is still returned.
+
+        Note, if individual calls to `get_similarity` are slow due to overhead
+        of calling another layer (e.g. numba), switch to `matrix_mode="series"`
+        where `get_similarity_series` will be used instead.
         """
-        num_molecules = len(self.molecules)
-        similarity_matrix = numpy.zeros((num_molecules, num_molecules))
-        for i in range(num_molecules):
-            for j in range(i + 1, num_molecules):
-                similarity = self.similarity_func(
-                    self.fingerprints[i],
-                    self.fingerprints[j],
-                )
-                similarity_matrix[i][j] = similarity
-                similarity_matrix[j][i] = similarity
-        return similarity_matrix
+        if cls.matrix_mode == "pairwise":
+            num_fingerprints = len(fingerprints)
+            similarity_matrix = numpy.zeros((num_fingerprints, num_fingerprints))
+            for i in range(num_fingerprints):
+                for j in range(i + 1, num_fingerprints):
+                    similarity = cls.get_similarity(
+                        fingerprints[i],
+                        fingerprints[j],
+                    )
+                    similarity_matrix[i][j] = similarity
+                    similarity_matrix[j][i] = similarity
+            return similarity_matrix
+
+        elif cls.matrix_mode == "series":
+            # TODO: update this alg to only calculate half the matrix then mirror it
+            fingerprints = numpy.array(fingerprints)
+            return numpy.array(
+                [
+                    cls.get_similarity_series(fingerprint, fingerprints)
+                    for fingerprint in fingerprints
+                ]
+            )
+
+    def get_similarity_mean(cls, fingerprints: list) -> float:
+        # we want the matrix mean NOT including the diagonal
+        # https://stackoverflow.com/questions/62250799
+        # (total_sum - diagonal_sum) / (num_elements - num_diagonal_elements)
+        matrix = cls.get_similarity_matrix(fingerprints)
+        return (matrix.sum() - matrix.diagonal().sum()) / (
+            len(matrix) ** 2 - len(matrix.diagonal())
+        )
 
     # -------------------------------------------------------------------------
 
