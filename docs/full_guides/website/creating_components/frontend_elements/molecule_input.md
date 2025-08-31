@@ -18,7 +18,7 @@ Displays a molecule sketcher widget and maps its value to the backend as a strin
     )
 
 
-    class CortevaTargetFormView(DynamicFormComponent, MoleculeInput):
+    class TargetFormView(DynamicFormComponent, MoleculeInput):
 
         class Meta:
             javascript_exclude = (

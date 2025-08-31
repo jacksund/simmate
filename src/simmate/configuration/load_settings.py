@@ -192,7 +192,7 @@ class SimmateSettings:
                 # By default, we allow anonymous users to explore because this makes things like
                 # REST API calls much easier for them. In special cases, such as industry, we
                 # ONLY let users sign in via a specific allauth endpoint. An example of this
-                # is Corteva limiting users to those approved via their Microsoft auth.
+                # is a company limiting users to those approved via their Microsoft auth.
                 "require_login": False,
                 "require_login_internal": False,
                 "require_login_exceptions": [],

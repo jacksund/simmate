@@ -1,0 +1,10 @@
+{% extends "core_components/site_base.html" %}
+{% block tabtitle %}Analysis Dashboard - Simmate{% endblock %}
+{% block body %}
+    <div class="row justify-content-center">
+        <iframe src="{{ dashboard_url }}?embed=true&user_id={{ request.user.id }}"
+                style="height:75vh;
+                       width:100%;
+                       border:none"></iframe>
+    </div>
+{% endblock %}

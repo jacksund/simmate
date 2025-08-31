@@ -91,6 +91,7 @@ class SimilarityEngine:
                 ]
             )
 
+    @classmethod
     def get_similarity_mean(cls, fingerprints: list) -> float:
         # we want the matrix mean NOT including the diagonal
         # https://stackoverflow.com/questions/62250799

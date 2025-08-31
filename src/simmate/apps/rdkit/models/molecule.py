@@ -242,7 +242,7 @@ class Molecule(DatabaseTable):
     the functional group is not listed, then its count is 0.
     
     The full set of ~300 functional groups that we check for are listed 
-    [here](https://dsigitlab.research.auto.pioneer.com/cheminformatics/simmate-corteva/-/blob/main/src/simmate_corteva/toolkit/smarts_sets/cdk_fxn_groups.csv)
+    [here](#)
     which is pulled from CDK's `SubstructureFingerprinter` class located
     [here](https://cdk.github.io/cdk/2.2/docs/api/org/openscience/cdk/fingerprint/SubstructureFingerprinter.html)
     

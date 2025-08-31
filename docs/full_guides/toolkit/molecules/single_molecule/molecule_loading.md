@@ -119,9 +119,9 @@ molecule = Molecule.from_smiles("Cc1ccccc1")
     For example:
     ``` python
     from simmate.database import connect
-    from simmate.datasets.models import CortevaCore
+    from simmate.apps.chembl import ChemblMolecule
 
-    molecule_db = CortevaCore.objects.get(id=123)
+    molecule_db = ChemblMolecule.objects.get(id=123)
     molecule = molecule_db.to_toolkit()
     ```
 
