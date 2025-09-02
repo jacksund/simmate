@@ -218,6 +218,7 @@ class Molecule:
                     ("Sn", 2): -2,  # Stannide (Sn2-), rare
                     ("Sn", 5): 2,  # Pentacoordinate Sn (rare, cationic)
                     ("Sn", 6): -2,  # Hexacoordinate Sn ([SnCl6]2-)
+                    ("F", 1): 0,  # Carbon-fluorine (C-F)
                 }
                 key = (symbol, total_valence)
                 if key in formal_charge_rules:

@@ -260,7 +260,7 @@ And for each file & it's contents:
     )
 
 
-    class CortevaTargetFormView(DynamicFormComponent, MoleculeInput):
+    class TargetFormView(DynamicFormComponent, MoleculeInput):
 
         class Meta:
             javascript_exclude = (

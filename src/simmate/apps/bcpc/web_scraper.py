@@ -7,7 +7,7 @@ import numpy
 import pandas
 from rich.progress import track
 
-from simmate.database.external_connectors import WebScraper
+from simmate.database.external_connectors.web_scrape import WebScraper
 from simmate.toolkit import Molecule
 
 from .data import BCPC_NEWS_ARCHIVE
