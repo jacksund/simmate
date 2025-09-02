@@ -1,0 +1,11 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    <div>
+        {% include "projects/project/for_view/tabs_header.html" %}
+        <div class="tab-content">
+            {% include "projects/project/for_view/overview_tab.html" %}
+            {% include "projects/project/for_view/tags_tab.html" %}
+            {% include "projects/project/for_view/hypotheses_tab.html" %}
+        </div>
+    </div>
+{% endblock %}

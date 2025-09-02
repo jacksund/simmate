@@ -1,0 +1,63 @@
+<div class="tab-pane show active" id="overview-section">
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="row py-2">
+                <div>
+                    <table class="table table-centered table-striped mb-0 border">
+                        <tbody>
+                            <tr>
+                                <td>Project Name</td>
+                                <td>
+                                    <p class="p-1 bg-dark text-light text-center fw-bold rounded col-12 display-6">{{ table_entry.name }}</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Current Status</td>
+                                <td>
+                                    {% if table_entry.status == "PR" %}
+                                        <p class="p-1 bg-info text-light text-center fw-bold rounded col-12 display-6">Pending Review</p>
+                                    {% elif table_entry.status == "A" %}
+                                        <p class="p-1 bg-success text-light text-center fw-bold rounded col-12 display-6">Active</p>
+                                    {% elif table_entry.status == "RU" %}
+                                        <p class="p-1 bg-warning text-dark text-center fw-bold rounded col-12 display-6">Requires Update</p>
+                                    {% elif table_entry.status == "IA" %}
+                                        <p class="p-1 bg-danger text-light text-center fw-bold rounded col-12 display-6">Inactive</p>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Discipline</td>
+                                <td>{{ table_entry.get_discipline_display }}</td>
+                            </tr>
+                            <tr>
+                                <td>Leaders</td>
+                                <td>
+                                    <ul>
+                                        {% for user in table_entry.leaders.all %}<li>{{ user.first_name }} {{ user.last_name }}</li>{% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Members</td>
+                                <td>
+                                    <ul>
+                                        {% for user in table_entry.members.all %}<li>{{ user.first_name }} {{ user.last_name }}</li>{% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Description</td>
+                                <td>{{ table_entry.description|linebreaks }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center py-2">
+        <a role="button"
+           class="btn btn-outline-primary btn-sm"
+           href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Edit <i class="mdi mdi-pencil"></i></a>
+    </div>
+</div>

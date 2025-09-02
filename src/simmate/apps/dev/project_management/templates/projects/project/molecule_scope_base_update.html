@@ -1,0 +1,147 @@
+{% load unicorn %}
+<div class="row justify-content-center">
+    <div class="col-lg-12">
+        <div>
+            <div class="text-left my-2" unicorn:view>
+                {% csrf_token %}
+                {# Metadata & submit form #}
+                <div class="container mt-4 border border-3 border-secondary rounded py-2">
+                    <h3>
+                        <span class="badge bg-secondary">Basic Filters</span>
+                    </h3>
+                    {% alert theme="info" message="All fields are optional" %}
+                    {% alert theme="danger" message="Advanced filters are available, but I haven't built a web interface for them yet. So if you want something like 'exlcude XYZ functional groups' or 'check reactivity/SAS scores', just send me a message.  -Jack Sundberg" %}
+                    <div class="row">
+                        {# Molecular Weight #}
+                        <div class="col-md-4">
+                            <label class="pt-2">Molecular Weight</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input unicorn:model.defer="molecular_weight_exact__gte"
+                                           type="number"
+                                           id="molecular_weight_exact__gte"
+                                           class="form-control"
+                                           placeholder="0.123 (min)">
+                                </div>
+                                <div class="col-6">
+                                    <input unicorn:model.defer="molecular_weight_exact__lte"
+                                           type="number"
+                                           id="molecular_weight_exact__lte"
+                                           class="form-control"
+                                           placeholder="0.345 (max)">
+                                </div>
+                            </div>
+                        </div>
+                        {# Stereocenters #}
+                        <div class="col-md-4">
+                            <label class="pt-2">Number of Stereocenters</label>
+                            {# add note that this doesn't count atropisomers #}
+                            <div class="row">
+                                <div class="col-6">
+                                    <input unicorn:model.defer="num_stereocenters__gte"
+                                           type="number"
+                                           id="num_stereocenters__gte"
+                                           class="form-control"
+                                           placeholder="0 (min)">
+                                </div>
+                                <div class="col-6">
+                                    <input unicorn:model.defer="num_stereocenters__lte"
+                                           type="number"
+                                           id="num_stereocenters__lte"
+                                           class="form-control"
+                                           placeholder="4 (max)">
+                                </div>
+                            </div>
+                        </div>
+                        {# Number of Rings #}
+                        <div class="col-md-4">
+                            <label class="pt-2">Number of Rings</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input unicorn:model.defer="num_rings__gte"
+                                           type="number"
+                                           id="num_rings__gte"
+                                           class="form-control"
+                                           placeholder="0 (min)">
+                                </div>
+                                <div class="col-6">
+                                    <input unicorn:model.defer="num_rings__lte"
+                                           type="number"
+                                           id="num_rings__lte"
+                                           class="form-control"
+                                           placeholder="4 (max)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        {# Log P Rdkit #}
+                        <div class="col-md-4">
+                            <label class="pt-2">Log P (RDkit)</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input unicorn:model.defer="log_p_rdkit__gte"
+                                           type="number"
+                                           id="log_p_rdkit__gte"
+                                           class="form-control"
+                                           placeholder="1.35 (min)">
+                                </div>
+                                <div class="col-6">
+                                    <input unicorn:model.defer="log_p_rdkit__lte"
+                                           type="number"
+                                           id="log_p_rdkit__lte"
+                                           class="form-control"
+                                           placeholder="1.80 (max)">
+                                </div>
+                            </div>
+                        </div>
+                        {# Number of H Acceptors #}
+                        <div class="col-md-4">
+                            <label class="pt-2">Hydrogen Acceptors</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input unicorn:model.defer="num_h_acceptors__gte"
+                                           type="number"
+                                           id="num_h_acceptors__gte"
+                                           class="form-control"
+                                           placeholder="2 (min)">
+                                </div>
+                                <div class="col-6">
+                                    <input unicorn:model.defer="num_h_acceptors__lte"
+                                           type="number"
+                                           id="num_h_acceptors__lte"
+                                           class="form-control"
+                                           placeholder="10 (max)">
+                                </div>
+                            </div>
+                        </div>
+                        {# Number of H Donor #}
+                        <div class="col-md-4">
+                            <label class="pt-2">Hydrogen Donors</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input unicorn:model.defer="num_h_donors__gte"
+                                           type="number"
+                                           id="num_h_donors__lte"
+                                           class="form-control"
+                                           placeholder="2 (min)">
+                                </div>
+                                <div class="col-6">
+                                    <input unicorn:model.defer="num_h_donors__lte"
+                                           type="number"
+                                           id="num_h_donors__lte"
+                                           class="form-control"
+                                           placeholder="10 (max)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center pt-2">
+                    {% if form_errors %}<div>{{ form_errors }}</div>{% endif %}
+                    {% button name="submit_form" label="Save to database" icon="content-save" %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

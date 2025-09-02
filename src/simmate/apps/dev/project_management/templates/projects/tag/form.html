@@ -1,0 +1,25 @@
+<div>
+    {% include "data_explorer/general_search_options.html" %}
+    <div class="container mt-4 border border-3 border-secondary rounded py-2">
+        <h3>
+            <span class="badge bg-secondary">1. Tag Info</span>
+        </h3>
+        <div class="row">
+            <div class="col-md-4">{% selectbox name="tag_type" %}</div>
+            {% if tag_type == "project-specific" %}
+                <div class="col-md-4">{% selectbox name="project_id" options=project_options %}</div>
+            {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-md-4">{% text_input name="name" placeholder="ex: Ring A" max_length="30" %}</div>
+        </div>
+        {% if form_mode != "search" %}
+            <div class="row">
+                <div class="col-sm">
+                    {% text_area name="description" placeholder="1-2 sentences describing the goal and/or core idea" %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    {% include "data_explorer/dynamic_submit_button.html" %}
+</div>

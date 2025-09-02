@@ -1,0 +1,41 @@
+<table class="table table-centered table-striped table-sm mb-0 border">
+    <thead class="table-primary">
+        <tr>
+            <th>Nickname</th>
+            <th>Status</th>
+            <th>Molecule Query</th>
+            <th>Created By</th>
+            <th>Driven By</th>
+            <th>Description</th>
+            <th>Comments</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if entries %}
+            {% for entry in entries %}
+                <tr>
+                    <td>{{ entry.nickname }}</td>
+                    <td>{{ entry.get_status_display }}</td>
+                    <td>{{ entry.molecule_query }}</td>
+                    {% comment %}
+                        <td>{% draw_molecule entry.molecule_query %}</td>
+                    {% endcomment %}
+                    <td>{{ entry.created_by.first_name }} {{ entry.created_by.last_name }}</td>
+                    <td>{{ entry.driven_by.first_name }} {{ entry.driven_by.last_name }}</td>
+                    <td>{{ entry.description }}</td>
+                    <td>{{ entry.comments }}</td>
+                    <td>
+                        <a role="button"
+                           class="btn btn-outline-secondary btn-sm"
+                           href="{% url 'data_explorer:table-entry-update' 'MoleculeScope' entry.id %}"><i class="mdi mdi-pencil-outline"></i></a>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="8">no scopes have been added yet</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
