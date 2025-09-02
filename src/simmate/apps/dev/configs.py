@@ -31,6 +31,10 @@ class OpeneyeOmegaConfig(AppConfig):
     name = "simmate.apps.dev.openeye_omega"
 
 
+class ProjectManagementConfig(AppConfig):
+    name = "immate.apps.dev.project_management"
+
+
 class SchrodingerConfig(AppConfig):
     name = "simmate.apps.dev.schrodinger"
 

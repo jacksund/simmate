@@ -1,0 +1,13 @@
+<div class="row">
+    <div class="col-md-4">{% selectbox name="project_id" options=project_options %}</div>
+    {% if hypothesis_options %}
+        <div class="col-md-8">{% selectbox name="hypothesis_id" options=hypothesis_options %}</div>
+    {% endif %}
+</div>
+{% if tag_options %}
+    <div class="row">
+        <div class="col-md-12">
+            {% selectbox name="tag_ids" label="Tags" options=tag_options dynamic_options=True multiselect=True %}
+        </div>
+    </div>
+{% endif %}

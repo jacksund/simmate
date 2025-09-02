@@ -1,0 +1,446 @@
+name-english,name-greek,main-type,sub-type,description
+Aphrodite,Ἀφροδίτη,god,olympian,"goddess of beauty, love, desire, and pleasure"
+Apollo,Ἀπόλλων,god,olympian,"god of music, arts, knowledge, healing, plague, prophecy, poetry, manly beauty, and archery"
+Ares,Ἄρης,god,olympian,"god of courage, war, bloodshed, and violence"
+Artemis,Ἄρτεμις,god,olympian,"virgin goddess of the hunt, wilderness, animals, the moon and young girls"
+Athena,Ἀθηνᾶ,god,olympian,"goddess of reason, wisdom, intelligence, skill, peace, warfare, battle strategy, and handicrafts"
+Demeter,Δημήτηρ,god,olympian,"goddess of grain, agriculture, harvest, growth, and nourishment"
+Dionysus,Διόνυσος,god,olympian,"god of wine, fruitfulness, parties, festivals, madness, chaos, drunkenness, vegetation, ecstasy, and the theater"
+Hades,ᾍδης,god,olympian,god and king of the underworld and the dead
+Hephaestus,Ἥφαιστος,god,olympian,"god of fire, metalworking, and crafts"
+Hera,Ἥρα,god,olympian,"queen of the gods, and goddess of marriage, women, childbirth, heirs, kings, and empires"
+Hermes,Ἑρμῆς,god,olympian,"god of boundaries, travel, communication, trade, language, thieves and writing"
+Hestia,Ἑστία,god,olympian,"virgin goddess of the hearth, home, and chastity"
+Poseidon,Ποσειδῶν,god,olympian,"god of the sea, rivers, floods, droughts, and earthquakes"
+Zeus,Ζεύς,god,olympian,"king of the gods, ruler of mount olympus, and god of the sky, weather, thunder, lightning, law, order, and justice"
+Achlys,Ἀχλύς,god,primordial," goddess of poisons, and the personification of misery and sadness"
+Aether,Αἰθήρ,god,primordial, god of light and the upper atmosphere
+Aion,Αἰών,god,primordial," god of eternity, personifying cyclical and unbounded time"
+Ananke,Ἀνάγκη,god,primordial," goddess of inevitability, compulsion, and necessity"
+Chaos,Χάος,god,primordial, personification of nothingness from which all of existence sprang
+Chronos,Χρόνος,god,primordial," god of empirical time, sometimes equated with aion"
+Erebus,Ἔρεβος,god,primordial, god of darkness and shadow
+Eros,Ἔρως,god,primordial, god of love and attraction
+Gaia,Γαῖα,god,primordial,personification of the earth (mother earth); mother of the titans
+Hemera,Ἡμέρα,god,primordial, goddess of day
+Hypnos,Ὕπνος,god,primordial,god of sleep
+Nemesis,Νέμεσις,god,primordial, goddess of retribution
+Nesoi,Νῆσοι,god,primordial, goddesses of islands
+Nyx,Νύξ,god,primordial, goddess of night
+Ourea,Οὔρεα,god,primordial, gods of mountains
+Phanes,Φάνης,god,primordial, god of procreation in the orphic tradition
+Pontus,Πόντος,god,primordial," god of the sea, father of the fish and other sea creatures"
+Tartarus,Τάρταρος,god,primordial," god of the deepest, darkest part of the underworld, the tartarean pit (which is also referred to as tartarus itself)"
+Thalassa,Θάλασσα,god,primordial,personification of the sea and consort of pontus
+Thanatos,Θάνατος,god,primordial,god of death
+Uranus,Οὐρανός,god,primordial, god of the heavens (father sky); father of the titans
+Coeus,Κοῖος,titan,twelve titan,titan of intellect and the axis of heaven around which the constellations revolved
+Crius,Κρεῖος,titan,twelve titan," least individualized of the twelve titans, he is the father of astraeus, pallas, and perses"
+Cronus,Κρόνος,titan,twelve titan,titan of harvests and personification of destructive time
+Hyperion,Ὑπερίων,titan,twelve titan,titan of light
+Iapetus,Ἰαπετός,titan,twelve titan,"titan of mortality and father of prometheus, epimetheus, menoetius, and atlas"
+Mnemosyne,Mνημοσύνη,titan,twelve titan,"titaness of memory and remembrance, and mother of the nine muses"
+Oceanus,Ὠκεανός,titan,twelve titan,"titan of the all-encircling river oceans around the earth, the fount of all the earths fresh-water"
+Phoebe,Φοίβη,titan,twelve titan,"titaness of the bright intellect and prophecy, and consort of koios"
+Rhea,Ῥέα,titan,twelve titan,"titaness of fertility, motherhood and the mountain wilds"
+Tethys,Τηθύς,titan,twelve titan,"titaness of fresh-water, and the mother of the rivers, springs, streams, fountains, and clouds"
+Theia,Θεία,titan,twelve titan,titaness of sight and the shining light of the clear blue sky
+Themis,Θέμις,titan,twelve titan,titaness of divine law and order
+Asteria,Ἀστερία,titan,other titan,titaness of nocturnal oracles and falling stars
+Astraeus,Ἀστραῖος,titan,other titan,"titan of dusk, stars, and planets, and the art of astrology"
+Atlas,Ἄτλας,titan,other titan,titan forced to carry the heavens upon his shoulders by zeus
+Dione,Διώνη,titan,other titan,titaness of the oracle of dodona
+Helios,Ἥλιος,titan,other titan,titan of the sun and guardian of oaths
+Selene,Σελήνη,titan,other titan,titaness of the moon
+Eos,Ἠώς,titan,other titan,titaness of the dawn
+Epimetheus,Ἐπιμηθεύς,titan,other titan,titan of afterthought and the father of excuses
+Lelantos,Λήλαντος,titan,other, titan father of the nymph aura
+Leto,Λητώ,titan,other titan,"titaness of motherhood and mother of the twin olympians, artemis and apollo"
+Menoetius,Μενοίτιος,titan,other titan,"titan of violent anger, rash action, and human mortality"
+Metis,Μῆτις,titan,other titan,"titaness of good counsel, advice, planning, cunning, craftiness, and wisdom"
+Pallas,Πάλλας,titan,other titan,titan of warcraft
+Perses,Πέρσης,titan,other titan,titan of destruction
+Prometheus,Προμηθεύς,titan,other titan,"titan of forethought and crafty counsel, and creator of mankind"
+Styx,Στύξ,titan,other titan,titaness of the underworld river styx and personification of hatred
+Adephagia,Ἀδηφαγία,personification,personification,spirit of satiety and gluttony
+Adikia,Ἀδικία,personification,personification,spirit of injustice and wrongdoing
+Aergia,Ἀεργία,personification,personification,"spirit of idleness, laziness, indolence and sloth"
+Agathodaemon,Ἀγαθοδαίμων,personification,personification,spirit  of the vineyards and grainfields
+Agon,Ἀγών,personification,personification,"spirit of contest, who possessed an altar at olympia, site of the olympic games"
+Aidos,Αἰδώς,personification,personification,"spirit of modesty, reverence and respect"
+Aisa,Αἴσα,personification,personification,personification of lot and fate
+Alala,Ἀλαλά,personification,personification,spirit of the war cry
+Alastor,Ἀλάστωρ,personification,personification,spirit of blood feuds and vengeance
+Aletheia,Ἀλήθεια,personification,personification,"spirit of truth, truthfulness and sincerity"
+Achos,Ἄχος,personification,personification,spirit of trouble and distress (algea; ἄλγεα)
+Ania,Ἀνία,personification,personification,spirit of ache and anguish (algea; ἄλγεα)
+Lupe,Λύπη,personification,personification,"spirit of pain, grief, and sadness (algea; ἄλγεα)"
+Alke,Ἀλκή,personification,personification,spirit of prowess and courage (one of the machai)
+Amechania,Ἀμηχανία,personification,personification,spirit of helplessness and want of means
+Amphilogiai,Ἀμφιλογίαι,personification,personification,"spirits of disputes, debate, and contention"
+Anaideia,Ἀναίδεια,personification,personification,"spirit of ruthlessness, shamelessness, and unforgivingness"
+Androktasiai,Ἀνδροκτασίαι,personification,personification,spirits of battlefield slaughter
+Angelia,Ἀγγελία,personification,personification,"spirit of messages, tidings and proclamations"
+Apate,Ἀπάτη,personification,personification,"spirit of deceit, guile, fraud and deception"
+Apheleia,Ἀφέλεια,personification,personification,spirit of simplicity
+Arae,Ἀραί,personification,personification,spirits of curses
+Arete,Ἀρετή,personification,personification,"spirit of virtue, excellence, goodness, and valour"
+Ate,Ἄτη,personification,personification,"spirit of delusion, infatuation, blind folly, recklessness, and ruin"
+Bia,"Βία ""Violence""",personification,personification, personification of force and raw energy
+Caerus,Καιρός,personification,personification,spirit of opportunity
+Corus,Κόρος,personification,personification,spirit of surfeit
+Deimos,Δεῖμος,personification,personification,"spirit of fear, dread, and terror"
+Dikaiosyne,Δικαιοσύνη,personification,personification,spirit of justice and righteousness
+Dike,Δίκη,personification,personification,"spirit of justice, fair judgement, and the rights established by custom and law"
+Dolos,Δόλος,personification,personification,"spirit of trickery, cunning deception, craftiness, treachery, and guile"
+Dysnomia,Δυσνομία,personification,personification,spirit of lawlessness and poor civil constitution
+Dyssebeia,Δυσσέβεια,personification,personification,spirit of impiety
+Eiresione,Ειρεσιώνη,personification,personification,personification of the olive branch
+Ekecheiria,Ἐκεχειρία,personification,personification,"spirit of truce, armistice, and the cessation of all hostilities; honoured at the olympic games"
+Eleos,Ἔλεος,personification,personification,"spirit of mercy, pity, and compassion"
+Elpis,Ἐλπίς,personification,personification,spirit of hope and expectation
+Epiphron,Ἐπίφρων,personification,personification,"spirit of prudence, shrewdness, thoughtfulness, carefulness, and sagacity"
+Eris,Ἔρις,personification,personification,"spirit of strife, discord, contention, and rivalry"
+Anteros,Ἀντέρως,personification,personification,god of requited love
+Hedylogos,Ἡδύλογος,personification,personification,god of sweet talk and flattery
+Himeros,Ἵμερος,personification,personification,god of sexual desire
+Pothos,Πόθος,personification,personification,"god of sexual longing, yearning, and desire"
+Eucleia,Εὔκλεια,personification,personification,spirit of good repute and glory
+Eulabeia,Εὐλάβεια,personification,personification,"spirit of discretion, caution, and circumspection"
+Eupheme,Εὐφήμη,personification,personification,"spirit of words of good omen, acclamation, praise, applause, and shouts of triumph"
+Eupraxia,Eὐπραξία,personification,personification,spirit of well-being
+Eusebeia,Eὐσέβεια,personification,personification,"spirit of piety, loyalty, duty, and filial respect"
+Euthenia,Εὐθενία,personification,personification,"spirit of prosperity, abundance, and plenty"
+Gelos,Γέλως,personification,personification,spirit of laughter
+Geras,Γῆρας,personification,personification,spirit of old age
+Harmonia,Ἁρμονία,personification,personification,goddess of harmony and concord
+Hedone,Ἡδονή,personification,personification,"spirit of pleasure, enjoyment, and delight"
+Heimarmene,Εἵμαρμένη,personification,personification,personification of share destined by fate
+Homados,Ὅμαδος,personification,personification,spirit of the din of battle
+Homonoia,Ὁμόνοια,personification,personification,"spirit of concord, unanimity, and oneness of mind"
+Horkos,Ὅρκος,personification,personification,spirit of oaths
+Horme,Ὁρμή,personification,personification,"spirit of impulse or effort (to do a thing), eagerness, setting oneself in motion, and starting an action"
+Hybris,Ὕβρις,personification,personification,spirit of outrageous behaviour
+Hysminai,Ὑσμῖναι,personification,personification,spirits of fighting and combat
+Ioke,Ἰωκή,personification,personification,spirit of pursuit in battle
+Kakia,Kακία,personification,personification,spirit of vice and moral badness
+Keres,Κῆρες,personification,personification,spirits of violent or cruel death
+Koalemos,Κοάλεμος,personification,personification,spirit of stupidity and foolishness
+Kratos,Κράτος,personification,personification,"spirit of strength, might, power, and sovereign rule"
+Kydoimos,Κυδοιμός,personification,personification,"spirit of the din of battle, confusion, uproar, and hubbub"
+Lethe,Λήθη,personification,personification,"spirit of forgetfulness and oblivion, and of the river of the same name"
+Limos,Λιμός,personification,personification,spirit of hunger and starvation
+Litae,Λιταί,personification,personification,spirits of prayer
+Lyssa,Λύσσα,personification,personification,"spirit of rage, fury and rabies in animals"
+Machai,Μάχαι,personification,personification,spirits of fighting and combat
+Mania,Μανία,personification,personification,"spirit or spirits of madness, insanity, and frenzy"
+Clotho,Κλωθώ,personification,personification,spinner of the life thread (fates; μοίραι)
+Lachesis,Λάχεσις,personification,personification,measurer of the life thread (fates; μοίραι)
+Atropos,Άτροπος,personification,personification,severer of the life thread (fates; μοίραι)
+Momus,Μῶμος,personification,personification,"spirit of mockery, blame, censure and stinging criticism"
+Moros,Μόρος,personification,personification,spirit of doom
+Neikea,τὰ Νείκη,personification,personification,"spirits of quarrels, feuds and grievances"
+Nike,Νίκη,personification,personification,goddess of victory
+Nomos,Νόμος,personification,personification,spirit of law
+Oizys,Ὀϊζύς,personification,personification,spirit of woe and misery
+Oneiroi,Ὄνειροι,personification,personification,dreams
+Palioxis,Παλίωξις,personification,personification,"spirit of backrush, flight and retreat from battle"
+Peitharchia,Πειθαρχία,personification,personification,spirit of discipline
+Peitho,Πειθώ,personification,personification,spirit of persuasion and seduction
+Penia,Πενία,personification,personification,spirit of poverty and need
+Penthus,Πένθος,personification,personification,"spirit of grief, mourning, and lamentation"
+Pepromene,Πεπρωμένη,personification,personification,"personification of the destined share, similar to heimarmene"
+Pheme,Φήμη,personification,personification,"spirit of rumour, report, and gossip"
+Philophrosyne,Φιλοφροσύνη,personification,personification,"spirit of friendliness, kindness, and welcome"
+Philotes,Φιλότης,personification,personification,"spirit of friendship, affection, and sexual intercourse"
+Phobos,Φόβος,personification,personification,"spirit of panic fear, flight, and battlefield rout"
+Phonoi,Φόνοι,personification,personification,"spirits of murder, killing, and slaughter"
+Phrike,Φρίκη,personification,personification,spirit of horror and trembling fear
+Phthonus,Φθόνος,personification,personification,spirit of envy and jealousy
+Pistis,Πίστις,personification,personification,"spirit of trust, honesty, and good faith"
+Poine,Ποίνη,personification,personification,"spirit of retribution, vengeance, recompense, punishment, and penalty for the crime of murder and manslaughter"
+Polemos,Πόλεμος,personification,personification,personification of war
+Ponos,Πόνος,personification,personification,spirit of hard labour and toil
+Poros,Πόρος,personification,personification,"spirit of expediency, the means of accomplishing or providing, contrivance and device"
+Praxidike,Πραξιδίκη,personification,personification,spirit of exacting justice
+Proioxis,Προίωξις,personification,personification,spirit of onrush and battlefield pursuit
+Prophasis,Πρόφασις,personification,personification,spirit of excuses and pleas
+Ptocheia,Πτωχεία,personification,personification,spirit of beggary
+Soter,Σωτήρ,personification,personification,"male spirit of safety, preservation, and deliverance from harm"
+Soteria,Σωτηρία,personification,personification,"female personification of safety, preservation, and deliverance from harm"
+Sophrosyne,Σωφροσύνη,personification,personification,"spirit of moderation, self-control, temperance, restraint, and discretion"
+Thrasos,Θράσος,personification,personification,spirit of boldness
+Tyche,Τύχη,personification,personification,"goddess of fortune, chance, providence, and fate"
+Zelos,Ζῆλος,personification,personification,"spirit of eager rivalry, emulation, envy, jealousy, and zeal"
+Amphiaraus,Ἀμφιάραος,god,chthonic," seer, and one of the seven against thebes who became an oracular spirit of the underworld after his death"
+Angelos,Ἄγγελος,god,chthonic, daughter of zeus and hera who became an underworld goddess
+Askalaphos,Ἀσκάλαφος,god,chthonic, son of acheron and orphne who tended the underworld orchards before being transformed into a screech owl by demeter
+Charon,Χάρων,god,chthonic,ferryman of hades
+Erebos,Ἔρεβος,god,chthonic," primeval god of darkness, his mists encircled the underworld and filled the hollows of the earth"
+Alecto,Ἀληκτώ,god,chthonic,goddesses of retribution; the unceasing one (furies; ἐρινύες)
+Tisiphone,Τισιφόνη,god,chthonic,goddesses of retribution; the avenger of murder (furies; ἐρινύες)
+Megaera,Μέγαιρα,god,chthonic,goddesses of retribution; the jealous one (furies; ἐρινύες)
+Hecate,Ἑκάτη,god,chthonic,"goddess of magic, witchcraft, the night, moon, ghosts, and necromancy"
+Aiakos,Αἰακός,god,chthonic,"former mortal king of aegina, guardian of the keys of hades and judge of the men of europe"
+Minos,Μίνως,god,chthonic,former mortal king of crete and judge of the final vote
+Rhadamanthys,Ῥαδάμανθυς,god,chthonic,former mortal lawmaker and judge of the men of asia
+Keuthonymos,Κευθόνυμος,god,chthonic, underworld spirit and father of menoetes
+Gorgyra,Γοργύρα,god,nymph, torch-bearing underworld nymph (lampades; λαμπάδες)
+Orphne,Ορφνη,god,nymph,"lampad nymph of hades, mother of askalaphos (lampades; λαμπάδες)"
+Macaria,Μακαρία,god,chthonic,goddess of blessed death and daughter of Hades
+Melinoe,Μελινόη,god,chthonic,daughter of persephone and zeus who presided over the propitiations offered to the ghosts of the dead
+Menoetes,Μενοίτης,god,chthonic, underworld spirit who herded the cattle of hades
+Acheron,Αχέρων,god,chthonic, river of woe
+Kokytos,Kωκυτός,god,chthonic, river of wailing
+Eridanos,Ἠριδανός,god,chthonic, river of amber
+Phlegethon,Φλεγέθων,god,chthonic, river of fire
+Zagreus,Ζαγρεύς,god,chthonic,"underworld god, possibly the son of Hades and Persephone or Zeus and Persephone"
+Aegaeon,Αιγαίων,god,sea,god of violent sea storms and ally of the titans
+Amphitrite,Αμφιτρίτη,god,sea,sea goddess and consort of poseidon
+Benthesikyme,Βενθεσικύμη,god,sea,"daughter of poseidon, who resided in ethiopia"
+Brizo,Βριζώ,god,sea,"patron goddess of sailors, who sent prophetic dreams"
+Ceto,Κῆτώ,god,sea,goddess of the dangers of the ocean and of sea monsters
+Cymopoleia,Κυμοπόλεια,god,sea, daughter of poseidon married to the giant briareus
+Eidothea,Ειδοθέα,god,nymph,prophetic sea nymph and daughter of proteus
+Glaucus,Γλαῦκος,god,sea, fishermans sea god and oracle
+Leucothea,Λευκοθέα,god,sea, sea goddess who aided sailors in distress
+Arethusa,Αρετούσα,god,nymph,sea nymph and  daughter of nereus who was transformed into a fountain
+Dynamene,Δυναμένη,god,nymph,sea nymph associated with the might and power of great ocean swells
+Galene,Γαλήνη,god,nymph,sea nymph and goddess of calm seas
+Psamathe,Πσαμάθη,god,nymph,sea nymph and goddess of sand beaches
+Thetis,Θέτις,god,nymph,sea nymph and leader of the nereids who presided over the spawning of marine life in the sea
+Nereus,Νηρέας,god,nymph,"sea nymph and  old man of the sea, and the god of the seas rich bounty of fish"
+Nerites,Νερίτης,god,sea, sea spirit who was transformed into a shell-fish by aphrodite
+Idyia,Ίδυια,god,nymph,"sea nymph and wife of the colchian king aeetes, mother of medea"
+Palaemon,Παλαίμων,god,sea, young sea god who aided sailors in distress
+Phorcys,Φόρκυς,god,sea,god of the hidden dangers of the deep
+Pontos,Πόντος,god,sea,"primeval god of the sea, father of the fish and other sea creatures"
+Proteus,Πρωτεύς,god,sea," shape-shifting, prophetic old sea god, and the herdsman of poseidons seals"
+Sangarius,Σαγγάριος,god,sea, river-god
+Actaeus,Ακταίος,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Argyron,Αργυρών,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Atabyrius,Αταβύριος,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Chalcon,Χαλκών,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Chryson,Χρυσών,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Damon,Δαμων,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Dexithea,Δεξιθέα,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Lycos,Λύκος,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Lysagora,Λυσαγόρα,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Makelo,Μακελώ,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Megalesius,Μεγαλήσιος,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Mylas,Μύλας,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Nikon,Νίκων,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Ormenos,Ορμενος,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Simon,Σίμων,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Skelmis,Σκελμις,god,sea,sea spirit native to the island of rhodes (telchines; τελχινες)
+Thaumas,Θαῦμας,god,sea,god of the wonders of the sea
+Thoosa,Θόοσα,god,sea,goddess of swift currents
+Triteia,Τριτεια,god,sea,daughter of triton and companion of ares
+Triton,Τρίτων,god,sea,fish-tailed son and herald of poseidon
+Tritones ,Τρίτωνες,god,sea,fish-tailed spirits in poseidons retinue
+Aeolus,Αίολος,god,sky,god of the winds
+Alectrona,Αλεκτρονα,god,sky,solar goddess of the morning or waking up
+Aparctias,Απαρκτίας,god,sky,"another name for the north wind (anemoi, άνεμοι)"
+Apheliotes,Αφηλιώτης,god,sky,"god of the east wind (anemoi, άνεμοι)"
+Argestes,Αργέστης,god,sky,"another name for the west or northwest wind (anemoi, άνεμοι)"
+Boreas,Βορέας,god,sky,"god of the north wind and of winter (anemoi, άνεμοι)"
+Caicias,Καικίας,god,sky,"god of the northeast wind (anemoi, άνεμοι)"
+Circios,Κίρκιος,god,sky,"god of the north-northwest wind (anemoi, άνεμοι)"
+Euronotus,Ευρονότος,god,sky,"god of the southeast wind (anemoi, άνεμοι)"
+Eurus,Εύρος,god,sky,"god of the unlucky east or southeast wind (anemoi, άνεμοι)"
+Lips,Λίψ,god,sky,"god of the southwest wind (anemoi, άνεμοι)"
+Notus,Νότος,god,sky,"god of the south wind (anemoi, άνεμοι)"
+Skeiron,Σκείρων,god,sky,"god of the northwest wind (anemoi, άνεμοι)"
+Zephyrus,Ζέφυρος,god,sky,"god of the west wind (anemoi, άνεμοι)"
+Arke,Άρκη,god,sky,messenger of the titans and twin sister of iris
+Astraios,Ἀστραῖος,god,sky,"titan god of stars and planets, and the art of astrology"
+Stilbon,Στιλβών,god,sky,"god of hermaon, the planet mercury"
+Eosphorus,Ηωσφόρος,god,sky,god of venus the morning star
+Hesperus,Ἓσπερος,god,sky,god of venus the evening star
+Pyroeis,Πυρόεις,god,sky,"god of areios, the planet mars"
+Phaethon,Φαέθων,god,sky,"god of dios, the planet jupiter"
+Phaenon,Φαίνων,god,sky,"god of kronion, the planet saturn"
+Aurai,"Αὖραι', 'Αὖρα",god,nymph,"nymphs of the cooling breeze, goddess of the breeze and the fresh, cool air of early morning"
+Aura,Αὖρα,god,sky,"goddess of the breeze and the fresh, cool air of early morning"
+Chione,Χιόνη,god,sky,goddess of snow and daughter of boreas
+Ersa,Ἕρση,god,sky,goddess of the morning dew
+Hesperides,´Εσπερίδες,god,nymph,nymphs of the evening and sunset
+Iris,Ίρις,god,sky,goddess of the rainbow and divine messenger
+Men,Μήν,god,sky, lunar deity worshiped in the western interior parts of anatolia
+Nephele,Νεφέλη,god,nymph,cloud nymph
+Pandia,Πανδία,god,sky,"personification of the moon, daughter of selene and zeus"
+Alcyone,Αλκυόνη,god,sky,goddess of the star cluster pleiades and were associated with rain (pleiades; πλειάδες)
+Sterope,Στερόπη,god,sky,goddess of the star cluster pleiades and were associated with rain (pleiades; πλειάδες)
+Celaeno,Κελαινώ,god,sky,goddess of the star cluster pleiades and were associated with rain (pleiades; πλειάδες)
+Electra,Ηλέκτρα,god,sky,goddess of the star cluster pleiades and were associated with rain (pleiades; πλειάδες)
+Maia,Μαία,god,sky,goddess of the star cluster pleiades and were associated with rain (pleiades; πλειάδες)
+Merope,Μερώπη,god,sky,goddess of the star cluster pleiades and were associated with rain (pleiades; πλειάδες)
+Taygete,Ταϋγέτη,god,sky,goddess of the star cluster pleiades and were associated with rain (pleiades; πλειάδες)
+Sabazios,Σαβάζιος,god,sky,goddess of the star cluster pleiades and were associated with rain (pleiades; πλειάδες)
+Zeus,Ζεύς,god,sky,"king of heaven and god of the sky, clouds, thunder, and lightning"
+Aetna,Αἴτνη,god,rustic,goddess of the volcanic mount etna in sicily
+Amphictyonis,Αμφικτυονίς,god,rustic,"goddess of wine and friendship between nations, a local form of demeter"
+Anthousai,Ανθούσαι,god,nymph,flower nymphs
+Aristaeus,Ἀρισταῖος,god,rustic,"god of bee-keeping, cheese-making, herding, olive-growing, and hunting"
+Attis,Άττις,god,rustic,vegetation god and consort of cybele
+Britomartis,Βριτόμαρτις,god,rustic,"cretan goddess of hunting and nets used for fishing, fowling and the hunting of small game"
+Aitnaios,Αιτναιος,god,rustic,god presiding over the mysteries of the islands of lemnos and samothrace (cabeiri; κάβειροι)
+Alkon,Αλκων,god,rustic,god presiding over the mysteries of the islands of lemnos and samothrace (cabeiri; κάβειροι)
+Eurymedon,Ευρυμεδών,god,rustic,god presiding over the mysteries of the islands of lemnos and samothrace (cabeiri; κάβειροι)
+Onnes,Όννης,god,rustic,god presiding over the mysteries of the islands of lemnos and samothrace (cabeiri; κάβειροι)
+Tonnes,Τόννης,god,rustic,god presiding over the mysteries of the islands of lemnos and samothrace (cabeiri; κάβειροι)
+Chloris,Χλωρίς,god,nymph,minor flower nymph and wife of zephyrus
+Comus,Κόμος,god,rustic,"god of revelry, merrymaking, and festivity"
+Corymbus,Κόρυμβος,god,rustic,god of the fruit of the ivy
+Cybele,Κυβέλη,god,rustic, phrygian mountain goddess
+Acmon,Ακμών,god,rustic,spirit of fingers of the hand (dactyls; δάκτυλοι)
+Damnameneus,Δαμναμενεύς,god,rustic,spirit of fingers of the hand (dactyls; δάκτυλοι)
+Delas,Δήλας,god,rustic,spirit of fingers of the hand (dactyls; δάκτυλοι)
+Epimedes,Επιμήδης,god,rustic,spirit of fingers of the hand (dactyls; δάκτυλοι)
+Heracles,Ἡρακλῆς,god,rustic,spirit of fingers of the hand (dactyls; δάκτυλοι)
+Iasios,Ιάσιος,god,rustic,spirit of fingers of the hand (dactyls; δάκτυλοι)
+Kelmis,Κελμις,god,rustic,spirit of fingers of the hand (dactyls; δάκτυλοι)
+Skythes,Σκύθης,god,rustic,spirit of fingers of the hand (dactyls; δάκτυλοι)
+Titias,Τιτίας,god,rustic,spirit of fingers of the hand (dactyls; δάκτυλοι)
+Cyllenus,Κύλληνος,god,rustic,spirit of fingers of the hand (dactyls; δάκτυλοι)
+Dryades,Δρυάδες,god,nymph,tree and forest nymphs
+Epimeliades,Επιμελίδες,god,nymph,nymphs of highland pastures and protectors of sheep flocks
+Hamadryades,Αμαδρυάδες,god,rustic,oak tree dryades
+Hecaterus,Ηεκατερος,god,rustic,minor god of the hekateris — a rustic dance of quickly moving hands — and perhaps of the skill of hands in general
+Pyrrhichos,Πυρῥιχος,god,rustic,god of the rustic dance
+Maenades,Μαινάδες,god,nymph,"crazed nymphs in the retinue of dionysus, nymph of drunkenness"
+Methe,Μέθη,god,nymph,nymph of drunkenness
+Meliae,Μελίαι,god,nymph,nymphs of honey and the ash tree
+Daphne,Δάφνη,god,nymph,fresh water nymph (naiades; ναιάδες)
+Metope,Μετώπη,god,nymph,fresh water nymph (naiades; ναιάδες)
+Minthe,Μίνθη,god,nymph,fresh water nymph (naiades; ναιάδες)
+Hekaerge,Εκαέργη,god,nymph,nymph representing the aspect of archery distancing (nymphai hyperboreioi; νύμφαι υπερβόρειοι)
+Loxo,Λοξώ,god,nymph,nymph representing the aspect of archery trajectory (nymphai hyperboreioi; νύμφαι υπερβόρειοι)
+Oupis,Ουπις,god,nymph,nymph representing the aspect of archery aim (nymphai hyperboreioi; νύμφαι υπερβόρειοι)
+Adrasteia,Αδράστεια,god,nymph,nymph  nursemaid of the infant zeus
+Echo,Ηχώ,god,nymph, nymph cursed never to speak except to repeat the words of others
+Ourea,Ούρος,god,rustic,primeval gods of mountains
+Palici,Παλικοί,god,rustic, pair of rustic gods who presided over the geysers and thermal springs in sicily
+Pan,Πάν,god,rustic,"god of shepherds, pastures, and fertility"
+Achelous,Αχέλους,god,rustic,river god (potamoi; ποταμοί)
+Acis,Άκις,god,rustic,river god (potamoi; ποταμοί)
+Alpheus,Αλφειός,god,rustic,river god (potamoi; ποταμοί)
+Asopus,Ασωπός,god,rustic,river god (potamoi; ποταμοί)
+Cladeus,Κλάδεος,god,rustic,river god (potamoi; ποταμοί)
+Eurotas,Ευρώτας,god,rustic,river god (potamoi; ποταμοί)
+Nilus,Νείλος,god,rustic,river god (potamoi; ποταμοί)
+Peneus,Πηνειός,god,rustic,river god (potamoi; ποταμοί)
+Scamander,Σκάμανδρος,god,rustic,river god (potamoi; ποταμοί)
+Priapus,Πρίαπος,god,rustic,god of garden fertility
+Silenus,Σειληνός,god,rustic, old rustic god of the dance of the wine-press
+Telete,Τελέτη,god,rustic,goddess of initiation into the bacchic orgies
+Adonis,Άδωνις,god,agriculture, life-death-rebirth deity
+Aphaea,Αφαία,god,agriculture,minor goddess of agriculture and fertility
+Cyamites,Κυαμίτης,god,agriculture,demi-god of the bean
+Despoina,Δέσποινη,god,agriculture,"daughter of poseidon and demeter, goddess of mysteries in arcadia"
+Eunostus,Εύνοστος,god,agriculture,goddess of the flour mill
+Persephone,Περσεφόνη,god,agriculture,"queen of the underworld, wife of hades and goddess of spring growth"
+Philomelus,Φιλόμελος,god,agriculture,agricultural demi-god inventor of the wagon and the plough
+Plutus,Πλοῦτος,god,agriculture,"god of wealth, including agricultural wealth, son of demeter"
+Triptolemus,Τριπτόλεμος,god,agriculture,"god of farming and agriculture, he brought agriculture to greece"
+Asclepius,Ασκληπιός,god,health,god of medicine
+Aceso,Ἀκεσώ,god,health,goddess of the healing of wounds and the curing of illnesses
+Aegle,Αἴγλη,god,health, goddess of radiant good health
+Epione,Ἠπιόνη,god,health,goddess of the soothing of pain
+Hygieia,Ὑγεία,god,health,goddess of cleanliness and good health
+Iaso,Ἰασώ,god,health,"goddess of cures, remedies, and modes of healing"
+Paean,Παιάν,god,health,physician of the gods
+Panacea,Πανάκεια,god,health,goddess of healing
+Telesphorus,Τελεσφόρος,god,health,"demi-god of convalescence, who brought to fulfillment recuperation from illness or injury"
+Empusa,Ἔμπουσα,god,sleep,goddess of shape-shifting
+Epiales,Ἐφιάλτης,god,sleep,goddess of nightmares
+Oneiroi,Ὀνείρων,god,sleep,god of dreams
+Morpheus,μορφή,god,sleep,god of dreaming
+Acratopotes,Ἀκρατοπότης,god,other,god of unmixed wine
+Agdistis,Ἄγδιστις,god,other,phrygian hermaphroditic deity
+Aphroditus,Ἀφρόδιτος,god,other,cyprian hermaphroditic aphrodite
+Astraea,Αστραία,god,other,virgin goddess of justice
+Aglaea,Αγλαΐα,god,other,"goddess of beauty, adornment, splendor and glory (charites; χάριτες)"
+Euphrosyne,Εὐφροσύνη,god,other,"goddess of good cheer, joy, mirth, and merriment (charites; χάριτες)"
+Thalia,Θάλεια,god,other,goddess of festive celebrations and rich and luxurious banquets (charites; χάριτες)
+Hegemone,Ηγεμόνη,god,other,goddess of mastery (charites; χάριτες)
+Antheia,Άνθεια,god,other,goddess of flowers and flowery wreaths (charites; χάριτες)
+Pasithea,Πασιθέα,god,other,goddess of rest and relaxation (charites; χάριτες)
+Cleta,Κλήτα,god,other,goddess of fame and glory (charites; χάριτες)
+Phaenna,Φαέννα,god,other,goddess of gratitude (charites; χάριτες)
+Eudaimonia,Ευδαιμονία,god,other,goddess of happiness (charites; χάριτες)
+Euthymia,Ευθυμία,god,other,goddess of good mood (charites; χάριτες)
+Calleis,Καλλείς,god,other,goddess of beauty (charites; χάριτες)
+Paidia,Παιδία,god,other,goddess of amusement (charites; χάριτες)
+Pandaisia,Πανδαισία,god,other,goddess of banquets (charites; χάριτες)
+Pannychis,Παννυχίς,god,other,goddess of all-night festivities (charites; χάριτες)
+Ceraon,Κεραων,god,other,"demi-god of the meal, specifically the mixing of wine (charites; χάριτες)"
+Chrysus,Χρύσος,god,other,spirit of gold
+Circe,Κίρκη,god,other,goddess-witch of aeaea
+Syntribos,Σύντριβος,god,other,spirit which shatters pottery (daemones ceramici; δαίμονες κεραμικοί)
+Smaragos,Σμάραγος,god,other,spirit which smashes pottery (daemones ceramici; δαίμονες κεραμικοί)
+Asbetos,Ασβετος,god,other,spirit which chars pottery (daemones ceramici; δαίμονες κεραμικοί)
+Sabaktes,Σαβάκτης,god,other,spirit which destroys pottery (daemones ceramici; δαίμονες κεραμικοί)
+Omodamos,Ωμόδαμος,god,other,spirit which crudebakes pottery (daemones ceramici; δαίμονες κεραμικοί)
+Deipneus,Δειπνεύς,god,other,"demi-god of the preparation of meals, specifically the making of bread"
+Eileithyia,Εἰλείθυια,god,other,goddess of childbirth
+Enyalius,Ενυάλιος,god,other,minor god of war
+Enyo,Ἐνυώ,god,other,goddess of destructive war
+Epidotes,Ἐπιδώτης,god,other, divinity who was worshipped at lacedaemon
+Glycon,Γλύκων,god,other, snake god
+Harpocrates,Ἁρποκράτης,god,other,god of silence
+Hebe,Ήβη,god,other,goddess of youth and cup-bearer to the olympians
+Hermaphroditus,Ἑρμάφρόδιτός,god,other,god of hermaphrodites and effeminate men
+Eunomia,Ευνομία,god,hours,"spirit of good order, and springtime goddess of green pastures"
+Eirene,Ειρήνη,god,hours,spirit of peace and goddess of the springtime
+Thallo,Θαλλώ,god,hours,"goddess of spring buds and shoots, identified with eirene"
+Auxo,Αυξώ,god,hours,goddess of spring growth
+Karpo,Καρπώ,god,hours,goddess of the fruits of the earth
+Pherousa,Φέρουσα,god,hours,goddess of substance and farm estates
+Euporie,Ευπορίη,god,hours,goddess of abundance
+Orthosie,Ορθοσίη,god,hours,goddess of prosperity
+Auge,Αυγή,god,hours,first light of the morning
+Anatolia,Ανατολία,god,hours,sunrise
+Musica,Μουσική,god,hours, morning hour of music and study
+Gymnastica,Γυμνασία,god,hours,morning hour of gymnastics/exercise
+Nymphe,Νυμφή,god,hours," morning hour of ablutions (bathing, washing)"
+Mesembria,Μεσημβρία,god,hours,noon
+Sponde,Σπονδή,god,hours,libations poured after lunch
+Acte,Ακτή,god,hours,second of the afternoon work hours
+Hesperis,Έσπερίς,god,hours,evening
+Dysis,Δύσις,god,hours,sunset
+Arktos,Άρκτος,god,hours,"night sky, constellation"
+Eiar,Είαρ,god,hours,spring
+Theros,Θέρος,god,hours,summer
+Pthinoporon,Φθινόπωρον,god,hours,autumn
+Cheimon,Χειμών,god,hours,winter
+Hymenaios,Ὑμέναιος,god,hours,god of marriage and marriage feasts
+Ichnaea,Ιχναία,god,other,goddess of tracking
+Iynx,Ιύνξ,god,other,goddess of the love charm
+Matton,Μάττων,god,other,"demi-god of the meal, specifically the kneading of dough"
+Aoide,Ἀοιδή,god,muse,muse of song
+Arche,Αρχή,god,muse,muse of origins
+Melete,Μελέτη,god,muse,muse of meditation and practice
+Mneme,Μνήμη,god,muse,muse of memory
+Thelxinoe,Θελξινόη,god,muse,muse charmer of minds
+Calliope,Καλλιόπη,god,muse,muse of epic poetry
+Clio,Κλειώ,god,muse,muse of history
+Euterpe,Ευτέρπη,god,muse,muse of musical poetry
+Erato,Ερατώ,god,muse,muse of lyric poetry
+Melpomene,Μελπομένη,god,muse,muse of tragedy
+Polyhymnia ,Πολυμνία,god,muse,muse of sacred poetry
+Terpsichore,Τερψιχόρη,god,muse,muse of dance and choral poetry
+Urania,Ουρανία,god,muse,muse of astronomy
+Cephisso,Κεφισσώ,god,muse,daughter of Apollo
+Apollonis,Απολλωνίς,god,muse,daughter of Apollo
+Borysthenis,Βορυσθενίς,god,muse,daughter of Apollo
+Hypate,Υπάτη,god,muse, upper chord of the lyre
+Mese,Μέση,god,muse, middle chord of the lyre
+Nete,Νήτη,god,muse, lowest chord of the lyre
+Polymatheia,Πολυμάθεια,god,muse,muse of knowledge
+Palaestra,Παλαίστρα,god,other,goddess of wrestling
+Rhapso,Ραψώ,god,nymph,minor goddess or nymph whose name apparently refers to sewing
+Alexiares,Αλεξιαρης,god,other,son of heracles presiding over the defence of fortified towns and citadels
+Anicetus,Ανικητος,god,other,son of heracles presiding over the defence of fortified towns and citadels
+Auxesia,Αυξησία,god,other,local fertility goddess
+Damia,Δαμία,god,other,local fertility goddess

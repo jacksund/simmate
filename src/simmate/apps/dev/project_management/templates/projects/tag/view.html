@@ -1,0 +1,50 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    {# Base Info #}
+    <div class="row py-2">
+        <div class="row pb-2">
+            <div class="col-12">
+                <div class="page-title-box">
+                    <div class="page-title-right m-0">
+                        <a role="button"
+                           class="btn btn-outline-primary btn-sm"
+                           href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Edit <i class="mdi mdi-pencil"></i></a>
+                    </div>
+                    <h3 class="m-0">Tag Info</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="row py-2">
+                <div>
+                    <table class="table table-centered table-striped mb-0 border">
+                        <tbody>
+                            <tr>
+                                <td>Tag Name</td>
+                                <td>{{ table_entry.name }}</td>
+                            </tr>
+                            <tr>
+                                <td>Tag Type</td>
+                                <td>{{ table_entry.tag_type }}</td>
+                            </tr>
+                            <tr>
+                                <td>Project</td>
+                                <td>
+                                    {% if table_entry.tag_type == "project-specific" %}
+                                        <a href="{% url 'data_explorer:table-entry' 'Project' table_entry.project.id %}">{{ table_entry.project.name }} <i class="mdi mdi-open-in-new"></i></a>
+                                    {% else %}
+                                        ---
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Description</td>
+                                <td>{{ table_entry.description }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

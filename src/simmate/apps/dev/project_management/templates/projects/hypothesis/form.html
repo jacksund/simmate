@@ -1,0 +1,34 @@
+<div>
+    {% include "data_explorer/general_search_options.html" %}
+    <div class="container mt-4 border border-3 border-secondary rounded py-2">
+        <h3>
+            <span class="badge bg-secondary">1. Hypothesis Info</span>
+        </h3>
+        <div class="row">
+            <div class="col-md-4">{% text_input name="name" placeholder="ex: Screen Polar R1" max_length="30" %}</div>
+            <div class="col-md-4">{% selectbox name="status" %}</div>
+            <div class="col-md-4">{% selectbox name="driven_by_id" options=user_options %}</div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">{% selectbox name="project_id" options=project_options %}</div>
+            <div class="col-md-8">
+                {% selectbox name="tag_ids" label="Tags" options=tag_options dynamic_options=True multiselect=True %}
+            </div>
+        </div>
+        {% if form_mode != "search" %}
+            <div class="row">
+                <div class="col-sm">
+                    {% text_area name="description" placeholder="1-2 sentences describing the goal and/or core idea" %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm">{% text_area name="comments" placeholder="Any details and updates on this hypothesis" %}</div>
+            </div>
+        {% else %}
+            <div class="row">
+                <div class="col-md-4">{% selectbox name="submitted_by_id" options=user_options %}</div>
+            </div>
+        {% endif %}
+    </div>
+    {% include "data_explorer/dynamic_submit_button.html" %}
+</div>
