@@ -1,0 +1,144 @@
+<div class="col-12 border border-4 border-light">
+    <div class="row text-center">{% draw_molecule table_entry width=300 height=300 %}</div>
+    <div class="row m-2">
+        {# list out molecule formats to copy #}
+        <ul class="nav nav-tabs nav-bordered mb-3">
+            <li class="nav-item">
+                <a href="#smiles"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link active ">
+                    <i class="mdi mdi-home-variant d-md-none d-block"></i>
+                    <span class="d-none d-md-block">SMILES</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#inchi"
+                   data-bs-toggle="tab"
+                   aria-expanded="true"
+                   class="nav-link">
+                    <i class="mdi mdi-account-circle d-md-none d-block"></i>
+                    <span class="d-none d-md-block">INCHI</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#inchi_key"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="mdi mdi-settings-outline d-md-none d-block"></i>
+                    <span class="d-none d-md-block">INCHI KEY</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#sdf_ctab"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="mdi mdi-settings-outline d-md-none d-block"></i>
+                    <span class="d-none d-md-block">SDF (c-tab)</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#origmol"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="mdi mdi-settings-outline d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Original Input</span>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane show active" id="smiles">
+                <div class="row bg-light p-0 m-0 border border-secondary-lighten">
+                    <div class="col-11 mt-1">
+                        <pre id="smiles_text" class="text-center">{{ table_entry.smiles }}</pre>
+                    </div>
+                    <div class="col-1">
+                        <button onclick="copyTextById('smiles_text')"
+                                class="btn btn-outline-secondary btn-sm border border-light"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="hover"
+                                data-bs-placement="bottom"
+                                data-bs-content="Click to copy">
+                            <i class="mdi mdi-content-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="inchi">
+                <div class="row bg-light p-0 m-0 border border-secondary-lighten">
+                    <div class="col-11 mt-1">
+                        <pre id="inchi_text" class="text-center">{{ table_entry.inchi }}</pre>
+                    </div>
+                    <div class="col-1">
+                        <button onclick="copyTextById('inchi_text')"
+                                class="btn btn-outline-secondary btn-sm border border-light"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="hover"
+                                data-bs-placement="bottom"
+                                data-bs-content="Click to copy">
+                            <i class="mdi mdi-content-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="inchi_key">
+                <div class="row bg-light p-0 m-0 border border-secondary-lighten">
+                    <div class="col-11 mt-1">
+                        <pre id="inchi_key_text" class="text-center">{{ table_entry.inchi_key }}</pre>
+                    </div>
+                    <div class="col-1">
+                        <button onclick="copyTextById('inchi_key_text')"
+                                class="btn btn-outline-secondary btn-sm border border-light"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="hover"
+                                data-bs-placement="bottom"
+                                data-bs-content="Click to copy">
+                            <i class="mdi mdi-content-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="sdf_ctab">
+                <div class="row bg-light p-0 m-0 border border-secondary-lighten">
+                    <div class="col-11 mt-1">
+                        <pre id="sdf_ctab_text">
+                        <small>{{ table_entry.molecule }}</small>
+                    </pre>
+                    </div>
+                    <div class="col-1">
+                        <button onclick="copyTextById('sdf_ctab_text')"
+                                class="btn btn-outline-secondary btn-sm border border-light"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="hover"
+                                data-bs-placement="bottom"
+                                data-bs-content="Click to copy">
+                            <i class="mdi mdi-content-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="origmol">
+                <div class="row bg-light p-0 m-0 border border-secondary-lighten">
+                    <div class="col-11 mt-1">
+                        <pre id="origmol_text">
+                        <small>{{ table_entry.molecule_original }}</small>
+                    </pre>
+                    </div>
+                    <div class="col-1">
+                        <button onclick="copyTextById('origmol_text')"
+                                class="btn btn-outline-secondary btn-sm border border-light"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="hover"
+                                data-bs-placement="bottom"
+                                data-bs-content="Click to copy">
+                            <i class="mdi mdi-content-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

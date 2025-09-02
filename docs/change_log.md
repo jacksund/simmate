@@ -74,6 +74,8 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `is_dueterated` methods to `Molecule`
 - added web scrape of news archive for `apps.bcpc`
 - added `apps.ppdb`
+- added dev apps `chatbot` and `analysis_dashboard`
+- added `database.external_connectors` utils
 
 **Refactors**
 
@@ -106,7 +108,6 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added Quantum Espresso support
 - added rdkit-postgres cartridge support
 - large updates to the `BadELF` app to support materials with covalent and metallic character
-
 
 **Refactors**
 
