@@ -104,7 +104,7 @@ class OracleDB:
         # setup cursor for old db bug-fix
         self._patch_cursor(self.cursor)
 
-    def get_query_data(self, query: str) -> pandas.DataFrame:
+    def get_query_data(self, query: str, fetch_size: int = 1_000) -> pandas.DataFrame:
         """
         Given an SQL query, this will call 'fetchall' and return the results
         as a pandas dataframe.
@@ -114,8 +114,19 @@ class OracleDB:
         # fetch_type: str = "fetchall",
         # chunk_size: str = None,
         self.cursor.execute(query)
+
+        # below is the same as...
+        #   self._patch_fetch(self.cursor.fetchall())
+        # But fetching 1,000 at a time is more stable and often faster
+        fetch_data = []
+        new_data = True
+        while new_data:
+            new_data = self._patch_fetch(self.cursor.fetchmany(fetch_size))
+            fetch_data += new_data
+            print("here")
+
         data = pandas.DataFrame(
-            data=self._patch_fetch(self.cursor.fetchall()),
+            data=fetch_data,
             columns=[c[0] for c in self.cursor.description],
         )
         # ---- BUG FIXES -----------------------
