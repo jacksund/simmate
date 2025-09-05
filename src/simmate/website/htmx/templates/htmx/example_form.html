@@ -1,0 +1,31 @@
+{# <form hx-post="/htmx/component/{{ component.component_id }}/{{ method_to_call }}/" hx-indicator="#loading-spinner" hx-swap="outerHTML"> #}
+<form id="{{ component.component_id }}"
+      hx-post="{% url 'htmx:component' component.component_id %}"
+      hx-indicator="#loading-spinner"
+      hx-swap="outerHTML">
+    {% htmx_text_input name="name" %}
+    {% htmx_text_input name="job_title" required=True %}
+    {% htmx_text_area name="job_description" %}
+    {% htmx_number_input name="years_worked" %}
+    {% htmx_checkbox name="still_working" %}
+    {% htmx_radio name="status0" options=component.status_options %}
+    {% htmx_selectbox name="status1" options=component.status_options %}
+    {% htmx_selectbox name="status2" options=component.status_options multiselect=True %}
+    {% htmx_button method_name="submit" %}
+    {% htmx_button method_name="add_molecule_image" label="Draw Molecule" %}
+    {% if component.actions %}
+        {% canvas name="jacks-molecule" %}
+        {% htmx_js_actions component.actions %}
+    {% endif %}
+    {% htmx_button method_name="run_some_js" label="Run Javascript Only, No Swap" javascript_only=True %}
+    <div id="result" style="margin-top:20px;">Result area</div>
+    {% htmx_selectbox name="status3" method_name="update_selection_test" options=component.status_options %}
+    {% if component.new_selection %}
+        {% htmx_selectbox name="status4" options=component.status_options %}
+    {% endif %}
+    <div>POST: {{ post_values }}</div>
+    <div>COMPONENT: {{ component }}</div>
+    <div>ID: {{ component.component_id }}</div>
+    <div>Data: {{ component.post_data }}</div>
+    <div>Actions: {{ component.actions }}</div>
+</form>

@@ -120,6 +120,19 @@ urlpatterns = [
         name="unicorn",
     ),
     #
+    # HTMX urls
+    path(
+        route="htmx/",
+        view=include(
+            (
+                "simmate.website.htmx.urls",
+                "simmate.website.htmx",
+            ),
+            namespace="htmx",
+        ),
+        name="htmx",
+    ),
+    #
     # Custom Simmate apps (if present)
     path(route="apps/", view=views.apps, name="apps"),
     *get_app_urls(),

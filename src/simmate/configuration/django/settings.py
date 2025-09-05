@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     # (i.e. AJAX calls can be made to update the views)
     # "django_unicorn",
     "simmate.website.configs.UnicornConfig",  # fork of django_unicorn
+    "simmate.website.configs.HtmxConfig",  # refacto of unicorn onto htmx
     #
     # Django simple history lets you track history of changes (and who made
     # those changes) for a given model. This is important for models that users
@@ -157,6 +158,7 @@ TEMPLATES = [
                 "simmate.website.core_components.templatetags.simmate_settings",
                 "simmate.website.core_components.templatetags.simmate_utils",
                 "simmate.website.unicorn.templatetags.unicorn",
+                "simmate.website.htmx.templatetags.htmx",
             ],
         },
     },
