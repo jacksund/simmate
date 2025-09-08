@@ -123,7 +123,6 @@ class OracleDB:
         while new_data:
             new_data = self._patch_fetch(self.cursor.fetchmany(fetch_size))
             fetch_data += new_data
-            print("here")
 
         data = pandas.DataFrame(
             data=fetch_data,
