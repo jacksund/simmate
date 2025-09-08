@@ -65,6 +65,7 @@ def test_list_of_all_workflows():
         "population-analysis.vasp-bader.badelf-matproj",
         "population-analysis.vasp-bader.bader-matproj",
         "population-analysis.vasp.elf-matproj",
+        'maintenance.postgres.pg-dump',
         "relaxation.quantum-espresso.lda00",
         "relaxation.quantum-espresso.lda01",
         "relaxation.quantum-espresso.quality00",
