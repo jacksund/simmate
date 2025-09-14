@@ -4,6 +4,7 @@ from datetime import datetime
 
 import numpy
 import pandas
+import plotly.express as plotly_express
 from django.utils.timezone import make_aware
 from rich.progress import track
 
@@ -66,6 +67,33 @@ class MarketItem(DatabaseTable):
     global_abundance_mg_per_kg_crust = table_column.FloatField(blank=True, null=True)
 
     price_per_kg = table_column.FloatField(blank=True, null=True)
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_figure(cls):
+
+        from .price_history import PriceHistory
+
+        data = PriceHistory.objects.order_by("market_item__name", "date").to_dataframe(
+            [
+                "market_item__name",
+                "date",
+                "price",
+                "price_normalized",
+                "delta_10y",
+                "delta_10y_normalized",
+                "delta_10y_percent",
+                "delta_10y_percent_normalized",
+            ]
+        )
+        fig = plotly_express.line(
+            data,
+            x="date",
+            y="delta_10y_percent_normalized",
+            color="market_item__name",
+        )
+        fig.show(renderer="browser")
 
     # -------------------------------------------------------------------------
 
@@ -146,7 +174,6 @@ class MarketItem(DatabaseTable):
                 "Sugar",
                 "Cocoa",
                 "Cotton",
-                "Hogs",
                 "Cattle",
             ],
             "Cryptocurrency": [
@@ -240,7 +267,7 @@ class MarketItem(DatabaseTable):
             ),
         )
 
-        for entry in track(cls.objects.filter(name="Bitcoin").all()):
+        for entry in track(cls.objects.all()):
 
             entry_10y = (
                 entry.price_history.filter(date__gte=ten_years_ago)
