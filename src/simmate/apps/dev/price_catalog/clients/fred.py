@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas
+from rich.progress import track
 
 # NOTE: the is a FRED REST API and even a fredapi python package. But there
 # are URLs for downloadling CSV files without an API key... So I just use those.
@@ -16,7 +17,7 @@ class FredClient:
     ticker_map = {
         "Electricity": "CUSR0000SEHF01",  # or APU000072610
         "Housing": "CSUSHPINSA",
-        "Inflation": "CPIAUCSL",  # Consumer Price Index (All Items)
+        "Consumer Price Index": "CPIAUCSL",  # use for inflation metrics
     }
 
     @classmethod
@@ -25,7 +26,7 @@ class FredClient:
         Uses the list of tickers in `ticker_map` to grab all datasets
         """
         final_data = {}
-        for name in cls.ticker_map.items():
+        for name in track(cls.ticker_map):
             final_data[name] = cls.get_data(name)
         return final_data
 

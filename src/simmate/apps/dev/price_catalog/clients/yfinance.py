@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from rich.progress import track
+
 try:
     import yfinance
 except:
@@ -20,32 +22,31 @@ class YahooFinanceClient:
         # Metals
         "Gold": "GC=F",
         "Silver": "SI=F",
-        # "Platinum": "PL=F",
-        # "Palladium": "PA=F",
-        # "Copper": "HG=F",
-        # # Fuels
-        # "Crude Oil": "CL=F",
-        # "Natural Gas": "NG=F",
-        # # Crops
-        # "Lumber": "LBR=F",
-        # "Soybeans": "ZS=F",
-        # "Corn": "ZC=F",
-        # "Wheat": "KE=F",
-        # "Coffee": "KC=F",
-        # "Sugar": "SB=F",
-        # "Cocoa": "CC=F",
-        # "Cotton": "CT=F",
-        # # Livestock
-        # "Hogs": "HET=F",
-        # "Cattle": "LE=F",
-        # # Crypto
-        # "Bitcoin": "BTC-USD",
-        # "Ethereum": "ETH-USD",
-        # "Solana": "SOL-USD",
-        # # Indexes
-        # "S&P GSCI": "GD=F",  # Commodity Index
-        # "S&P 500": "SPY",
-        # "Total Market Index": "FSKAX",
+        "Platinum": "PL=F",
+        "Palladium": "PA=F",
+        "Copper": "HG=F",
+        # Fuels
+        "Crude Oil": "CL=F",
+        "Natural Gas": "NG=F",
+        # Crops
+        "Lumber": "LBR=F",
+        "Soybeans": "ZS=F",
+        "Corn": "ZC=F",
+        "Wheat": "KE=F",
+        "Coffee": "KC=F",
+        "Sugar": "SB=F",
+        "Cocoa": "CC=F",
+        "Cotton": "CT=F",
+        # Livestock
+        "Cattle": "LE=F",
+        # Crypto
+        "Bitcoin": "BTC-USD",
+        "Ethereum": "ETH-USD",
+        "Solana": "SOL-USD",
+        # Indexes
+        "S&P GSCI": "GD=F",  # Commodity Index
+        "S&P 500": "SPY",
+        "Total Market Index": "FSKAX",
     }
 
     @classmethod
@@ -54,7 +55,7 @@ class YahooFinanceClient:
         Uses the list of tickers in `ticker_map` to grab all datasets
         """
         final_data = {}
-        for name in cls.ticker_map.items():
+        for name in track(cls.ticker_map):
             final_data[name] = cls.get_data(name)
         return final_data
 
