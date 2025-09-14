@@ -5,6 +5,7 @@ from datetime import datetime
 import numpy
 import pandas
 import plotly.express as plotly_express
+import plotly.graph_objects as plotly_go
 from django.utils.timezone import make_aware
 from rich.progress import track
 
@@ -79,11 +80,11 @@ class MarketItem(DatabaseTable):
             [
                 "market_item__name",
                 "date",
-                "price",
-                "price_normalized",
-                "delta_10y",
-                "delta_10y_normalized",
-                "delta_10y_percent",
+                # "price",
+                # "price_normalized",
+                # "delta_10y",
+                # "delta_10y_normalized",
+                # "delta_10y_percent",
                 "delta_10y_percent_normalized",
             ]
         )
@@ -93,6 +94,76 @@ class MarketItem(DatabaseTable):
             y="delta_10y_percent_normalized",
             color="market_item__name",
         )
+        fig.show(renderer="browser")
+
+    def get_price_figure(self, normalized: bool = False):
+
+        y_col = "price" if not normalized else "price_normalized"
+        columns = ["date", y_col]
+        data = self.price_history.order_by("date").to_dataframe(columns)
+
+        fig = plotly_express.area(
+            data,
+            x="date",
+            y=y_col,
+        )
+
+        fig.update_layout(yaxis_tickprefix="$")
+
+        fig.show(renderer="browser")
+
+    def get_delta_10y_figure(self, normalized: bool = False):
+
+        ten_years_ago = self.get_10y_datetime()
+        y_col = (
+            "delta_10y_percent" if not normalized else "delta_10y_percent_normalized"
+        )
+        columns = ["date", y_col]
+        data = self.price_history.filter(date__gte=ten_years_ago).to_dataframe(columns)
+
+        # Separate positive and negative parts
+        rel_change = data[y_col]
+        pos = numpy.where(rel_change > 0, rel_change, 0) / 100
+        neg = numpy.where(rel_change < 0, rel_change, 0) / 100
+
+        fig = plotly_go.Figure()
+
+        fig.add_trace(
+            plotly_go.Scatter(
+                x=data.date,
+                y=pos,
+                fill="tozeroy",
+                name="Positive",
+                line=dict(color="green"),
+                showlegend=False,
+            )
+        )
+
+        fig.add_trace(
+            plotly_go.Scatter(
+                x=data.date,
+                y=neg,
+                fill="tozeroy",
+                name="Negative",
+                line=dict(color="red"),
+                showlegend=False,
+            )
+        )
+
+        # Black line at Zero
+        fig.add_trace(
+            plotly_go.Scatter(
+                x=data.date,
+                y=[0] * len(data),
+                mode="lines",
+                line=dict(color="black", width=3),
+                name="Zero",
+                showlegend=False,
+            )
+        )
+
+        fig.update_layout(yaxis_tickformat=".0%")
+
         fig.show(renderer="browser")
 
     # -------------------------------------------------------------------------
@@ -257,15 +328,7 @@ class MarketItem(DatabaseTable):
         # and normalize it to buying power so that we can scale other data
         buying_power_data = cls.get_buying_power_series()
 
-        today = datetime.now()
-        # BUG: this might break on leap days
-        ten_years_ago = make_aware(
-            datetime(
-                year=today.year - 10,
-                month=today.month,
-                day=today.day,
-            ),
-        )
+        ten_years_ago = cls.get_10y_datetime()
 
         for entry in track(cls.objects.all()):
 
@@ -320,5 +383,18 @@ class MarketItem(DatabaseTable):
         new_x = pandas.Series(new_x).astype("int64") // 1e9  # to seconds
         new_y = numpy.interp(new_x, original_x, original_y)[0]
         return new_y
+
+    @staticmethod
+    def get_10y_datetime():
+        today = datetime.now()
+        # BUG: this might break on leap days
+        ten_years_ago = make_aware(
+            datetime(
+                year=today.year - 10,
+                month=today.month,
+                day=today.day,
+            ),
+        )
+        return ten_years_ago
 
     # -------------------------------------------------------------------------
