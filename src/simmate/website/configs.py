@@ -11,6 +11,10 @@ class DataExplorerConfig(AppConfig):
     name = "simmate.website.data_explorer"
 
 
+class HtmxConfig(AppConfig):
+    name = "simmate.website.htmx"
+
+
 class UnicornConfig(AppConfig):
     name = "simmate.website.unicorn"
 
