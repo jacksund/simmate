@@ -6,6 +6,7 @@ from datetime import datetime
 
 import pandas
 import requests
+from rich.progress import track
 
 from simmate.configuration import settings
 
@@ -33,16 +34,28 @@ class EtherscanClient:
     }
 
     token_map = {
-        # Stablecoins ($1 per token)
-        "USDC": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-        "USDT": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-        "DAI": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-        "USDS": "0xdC035D45d973E3EC169d2276DDab16f1e407384F",
-        # Other
-        "UNI": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",  # Uniswap
-        "COMP": "0xc00e94Cb662C3520282E6f5717214004A7f26888",  # Compound
-        "rETH": "0xae78736Cd615f374D3085123A210448E74Fc6393",  # Rocket Pool ETH
-        "POOL": "0x0cEC1A9154Ff802e7934Fc916Ed7Ca50bDE6844e",  # PoolTogether
+        "Ethereum": {
+            # Stablecoins (1 token = $1)
+            "USDC": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",  # Circle
+            "USDT": "0xdAC17F958D2ee523a2206206994597C13D831ec7",  # Tether
+            "DAI": "0x6B175474E89094C44Da98b954EedeAC495271d0F",  # DAO
+            "USDS": "0xdC035D45d973E3EC169d2276DDab16f1e407384F",  # Sky
+            # Wrapped Assets
+            "WBTC": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",  # Wrapped Bitcoin
+            "rETH": "0xae78736Cd615f374D3085123A210448E74Fc6393",  # Rocket Pool ETH
+            # Governance / Ownership
+            "UNI": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",  # Uniswap
+            "COMP": "0xc00e94Cb662C3520282E6f5717214004A7f26888",  # Compound
+            "POOL": "0x0cEC1A9154Ff802e7934Fc916Ed7Ca50bDE6844e",  # PoolTogether
+        },
+        "Base": {
+            "USDC": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "USDS": "0x820c137fa70c8691f0e44dc420a5e53c168921dc",
+            "WBTC": "0x0555e30da8f98308edb960aa94c0db47230d2b9c",
+            "COMP": "0x9e1028f5f1d5ede59748ffcee5532509976840e0",
+            "rETH": "0xb6fe221fe9eef5aba221c348ba20a1bf5e73624c",
+            "POOL": "0xd652c5425aea2afd5fb142e120fecf79e18fafc3",
+        },
     }
 
     transaction_type_map = {
@@ -89,9 +102,18 @@ class EtherscanClient:
         for ens_name, address in cls.address_map.items():
             logging.info(f"Loading balances for '{ens_name}'")
             balances = cls.get_all_balances(address=address)
-            balances["address"] = address
-            balances["ens_name"] = ens_name
-            all_data.append(balances)
+            # flatten balances dict into a single dict
+            balances_flat = {}
+            for chain, tokens in balances.items():
+                for token, amount in tokens.items():
+                    if chain != "Ethereum":
+                        key = f"{token}_{chain}"
+                    else:
+                        key = token
+                    balances_flat[key] = amount
+            balances_flat["address"] = address
+            balances_flat["ens_name"] = ens_name
+            all_data.append(balances_flat)
         return pandas.DataFrame(all_data)
 
     # -------------------------------------------------------------------------
@@ -139,10 +161,20 @@ class EtherscanClient:
     @classmethod
     def get_all_balances(cls, address: str) -> dict:
         balances = {}
-        for token in cls.token_map:
-            logging.info(f"Loading '{token}'")
-            balances[token] = cls.get_token_balance(address=address, token=token)
-        balances["ETH"] = cls.get_balance(address=address)
+        for chain, tokens in cls.token_map.items():
+            logging.info(f"Loading from '{chain}' chain")
+            chain_balances = {}
+            for token in track(tokens):
+                chain_balances[token] = cls.get_token_balance(
+                    chain=chain,
+                    address=address,
+                    token=token,
+                )
+            chain_balances["ETH"] = cls.get_balance(
+                chain=chain,
+                address=address,
+            )
+            balances[chain] = chain_balances
         return balances
 
     @classmethod
@@ -160,17 +192,22 @@ class EtherscanClient:
 
     @classmethod
     def get_token_balance(
-        cls, token: str, address: str, tag: str = "latest", **kwargs
+        cls,
+        token: str,
+        address: str,
+        tag: str = "latest",
+        chain: str = "Ethereum",
+        **kwargs,
     ) -> float:
         response = cls.get_response(
             action="tokenbalance",
-            contractaddress=cls.token_map[token],
+            contractaddress=cls.token_map[chain][token],
             address=address,
             tag=tag,
             **kwargs,
         )
-        balance_token = int(response["result"])
-        return balance_token  # TODO: adjust units if needed
+        balance_token = int(response["result"]) / 10**18
+        return balance_token
 
     # -------------------------------------------------------------------------
 
@@ -179,14 +216,14 @@ class EtherscanClient:
         all_data = []
         for chain in cls.chain_map:
             logging.info(f"Loading from '{chain}' chain")
-            for transaction_type in cls.transaction_type_map:
-                logging.info(f"{transaction_type} transactions...")
+            for transaction_type in track(cls.transaction_type_map):
                 data = cls.get_transactions(
                     chain=chain,
                     address=address,
                     transaction_type=transaction_type,
                 )
                 data["transaction_type"] = transaction_type
+                data["chain"] = chain
                 all_data.append(data)
         return pandas.concat(all_data)
 
