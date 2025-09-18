@@ -1,0 +1,34 @@
+<!-- bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" 
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" 
+        crossorigin="anonymous">
+</script>
+<!-- Load Javascript for Slider http://ionden.com/a/plugins/ion.rangeslider/index.html -->
+<script src="https://archives.simmate.org/assets/js/vendor/ion.rangeSlider.min.js"></script>
+<script src="https://archives.simmate.org/assets/js/ui/component.range-slider.js"></script>
+<!-- This script removes extra fields from API forms on GET method. 
+  Code is from https://stackoverflow.com/questions/5904437/
+  Where I found this link from https://stackoverflow.com/questions/46834539/
+  -->
+<script>
+    $(function() {
+        var form = $('form')[0];
+        $(form).submit(function() {
+            $('input, select').each(function() {
+                if ($(this).val().length === 0) {
+                    $(this).prop('disabled', true);
+                    $(this).next().prop('disabled', true);
+                }
+            });
+        });
+    });
+</script>
+<!-- Extra javascript that enables copy-to-clipboard for a given element -->
+<script>
+    function copyTextById(id2copy) {
+        // Get the text field
+        var copyText = document.getElementById(id2copy);
+        // Copy the text inside the text field
+        navigator.clipboard.writeText(copyText.innerHTML);
+    }
+</script>

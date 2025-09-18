@@ -1,0 +1,82 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg shadow-lg border-bottom">
+  <div class="container">
+    {# Simmate Logo / Home button #}
+    <a href="{% url 'home' %}" class="navbar-brand">
+        <span class="d-none d-md-block">
+            <img src="{% static 'images/simmate-logo-dark.svg' %}" alt="" height="38">
+        </span>
+        <span class="d-md-none">
+            <img src="{% static 'images/simmate-icon.svg' %}" alt="" height="36">
+        </span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'apps' %}"><i class="bi bi-speedometer2"></i> Apps</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'data_explorer:home' %}"><i class="bi bi-bar-chart"></i> Data</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'workflows' %}"><i class="bi bi-diagram-3"></i> Workflows</a>
+        </li>
+        
+        <li class="nav-item dropdown">
+          <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-three-dots"></i> Extras
+          </a>
+          <ul class="dropdown-menu">
+            <li><h6 class="dropdown-header">General</h6></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle"></i> About</a></li>
+            <li><a class="dropdown-item" href="https://github.com/jacksund/simmate/"><i class="bi bi-github"></i> Github</a></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-currency-dollar"></i> Pricing</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><h6 class="dropdown-header">Guides</h6></li>
+            <li><a class="dropdown-item" href="https://jacksund.github.io/simmate/home/"><i class="bi bi-book"></i> Docs</a></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-braces"></i> REST API</a></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-tools"></i> Toolkit</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><h6 class="dropdown-header">Help</h6></li>
+            <li><a class="dropdown-item" href="{% url 'contact' %}"><i class="bi bi-envelope"></i> Contact</a></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-question-circle"></i> FAQs</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <div class="d-flex">
+      {% if not user.is_authenticated %}
+          <button type="button" class="btn btn-light rounded-4 py-0 px-2 me-2"><img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24"> <b>5.00</b></button>
+          <button type="button" class="btn btn-light rounded-4 py-0 px-2 me-2"><img src="{% static 'images/simmate-token-icon.svg' %}" alt="" height="24"> <b>1,215.01</b></button>
+          <a class="btn btn-success me-2" href="{% url 'profile' %}"><i class="bi bi-person-circle"></i>&nbsp;&nbsp;Jack Sundberg{{ user.username }}</a>
+          {# logout button that gives popout confirmation modal #}
+          <a class="btn btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#logoutModal">
+            <i class="bi bi-door-open"></i>
+          </a>
+            <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    Are you sure you want to log out?
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <a href="{% url 'account_logout' %}" class="btn btn-danger">Yes, Logout</a>
+                  </div>
+                </div>
+              </div>
+            </div>          
+      {% else %}
+          <a class="btn btn-outline-light me-2" href="{% url 'account_login' %}"><i class="bi bi-key-fill"></i> Login</a>
+          <a class="btn btn-secondary" href="{% url 'account_signup' %}"><i class="bi bi-person-plus"></i> Sign Up</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
