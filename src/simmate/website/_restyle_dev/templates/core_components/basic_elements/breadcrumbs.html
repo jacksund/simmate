@@ -1,0 +1,24 @@
+<div class="border-bottom py-2">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <ol class="breadcrumb m-0 ps-3">
+                    <li class="breadcrumb-item">
+                        <a href="/"><i class="bi bi-house"></i></a>
+                    </li>
+                    {% for crumb in breadcrumbs %}
+                        {% if forloop.revcounter > 1 %}
+                            {# the counter does a relative path expansion (e.g., href="..", href="../..", href="../../..", etc.),#}
+                            <li class="breadcrumb-item">
+                                <a href="{% for i in ''|center:forloop.revcounter0 %}../{% endfor %}">{{ crumb }}</a>
+                            </li>
+                        {% else %}
+                            {# The final entry is the current page #}
+                            <li class="breadcrumb-item active">{{ crumb }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>

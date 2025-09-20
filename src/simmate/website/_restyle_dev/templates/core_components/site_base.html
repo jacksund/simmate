@@ -22,12 +22,13 @@
               name="description" />
         <meta content="The Simmate Team" name="author" />
         {# Bootstrap CSS #}
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" 
-              rel="stylesheet" 
-              integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" 
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+              rel="stylesheet"
+              integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
               crossorigin="anonymous">
         {# Bootstrap Icons #}
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+        <link rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
         {# Simmate CSS #}
         <link rel="stylesheet"
               type="text/css"
@@ -70,12 +71,17 @@
                 <script>var ChemDrawLicenseURL = '{% static "/licenses/ChemDraw-JS-License.xml" %}';</script>
         {% endcomment %}
         {# Custom Simmate Javascript #}
-        <script type="text/javascript" src="{% static "js/rdkit_utils.2024_09_13.js" %}"></script>
+        <script type="text/javascript"
+                src="{% static "js/rdkit_utils.2024_09_13.js" %}"></script>
         {# <script type="text/javascript" src="{% static "js/chemdraw_utils.2025_04_18.js" %}"></script> #}
-        <script type="text/javascript" src="{% static "js/chemdoodle_utils.2024_09_03.js" %}"></script>
-        <script type="text/javascript" src="{% static "js/form_utils.2025_06_02.js" %}"></script>
-        <script type="text/javascript" src="{% static "js/progress_bars.2024_05_27.js" %}"></script>
-        <script type="text/javascript" src="{% static "js/select2_utils.2024_05_27.js" %}"></script>
+        <script type="text/javascript"
+                src="{% static "js/chemdoodle_utils.2024_09_03.js" %}"></script>
+        <script type="text/javascript"
+                src="{% static "js/form_utils.2025_06_02.js" %}"></script>
+        <script type="text/javascript"
+                src="{% static "js/progress_bars.2024_05_27.js" %}"></script>
+        <script type="text/javascript"
+                src="{% static "js/select2_utils.2024_05_27.js" %}"></script>
         {# Some pages may require extra lines in the header such as loading extra libraries #}
         {% block extraheader %}{% endblock %}
     </head>
@@ -84,33 +90,25 @@
         {% csrf_token %}
         {# The navigation bar is the same for every webpage #}
         {% include "core_components/navbar.html" %}
+        {% block breadcrumbs %}
+            {% include "core_components/basic_elements/breadcrumbs.html" %}
+        {% endblock %}
         {% if not fullpage_dashboard %}
-            {# This is the main portion of the webpage. The sidebar and footbar are always present, and the remainder of the page varies. #}
-            <div class="container-fluid">
-                <div class="wrapper">
-                    {% include "core_components/sidebar_left.html" %}
-                    <div class="content-page">
-                        <div class="container-fluid">
-                            {% block breadcrumbs %}
-                                {% include "core_components/basic_elements/breadcrumbs.html" %}
-                            {% endblock %}
-                            {% block body %}{% endblock %}
-                        </div>
-                        {% include "core_components/footerbar.html" %}
-                    </div>
-                </div>
+            {# This is the main portion of the webpage #}
+            {# TODO: include "core_components/sidebar_left.html" #}
+            <div class="container{% if full_width_body %}-flex{% endif %} min-vh-100 py-3">
+                {% block body %}{% endblock %}
             </div>
         {% else %}
             {# Some streamlit dashboards are best displayed as a full page. This setup is rare and more rigid #}
-            <div class="px-5">{% include "core_components/basic_elements/breadcrumbs.html" %}</div>
-            <div class="row justify-content-center">
+            <div class="container-flex min-vh-100">
                 <iframe src="{{ dashboard_url }}?embed=true&user_id={{ request.user.id }}"
                         style="height:150vh;
                                width:100%;
                                border:none"></iframe>
             </div>
-            <div class="pt-5">{% include "core_components/footerbar.html" %}</div>
         {% endif %}
+        {% include "core_components/footerbar.html" %}
         {# Many packages for JS libraries should be loaded last #}
         {% include "core_components/footer.html" %}
         {# Sometimes we load extra javascript at the bottom of the page #}
