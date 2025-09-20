@@ -44,23 +44,20 @@
         </li>
     </ul>
     <div class="tab-content p-3" id="myTabContent">
-        <div class="tab-pane fade show active"
-             id="overview"
-             role="tabpanel">
-             
-            <div class="container my-4">
-              <div class="alert alert-success shadow-sm border-0" role="alert">
-                <h5 class="alert-heading fw-bold mb-2">TL;DR</h5>
-                <p class="mb-0">
-                  Simmate is entirely <a href="https://github.com/jacksund/simmate" target="_blank" class="text-light"><strong>free & open-source</strong> <i class="bi bi-box-arrow-up-right"></i></a>. Costs occur only when you:
-                </p>
-                <ul class="mb-0 mt-2">
-                  <li>Use our computational resources to run workflows</li>
-                  <li>Have our team set up & maintain a private server</li>
-                </ul>
-              </div>
+        <div class="tab-pane fade show active" id="overview" role="tabpanel">
+            <div class="container my-4 text">
+                <div class="alert alert-success shadow-sm border-0 text-light"
+                     role="alert">
+                    <h5 class="alert-heading fw-bold mb-2">TL;DR</h5>
+                    <p class="mb-0">
+                        Simmate is entirely <a href="https://github.com/jacksund/simmate" target="_blank"><strong>free & open-source</strong> <i class="bi bi-box-arrow-up-right"></i></a>. Costs occur only when you:
+                    </p>
+                    <ul class="mb-0 mt-2">
+                        <li>Use our computational resources to run workflows</li>
+                        <li>Have our team set up & maintain a private server</li>
+                    </ul>
+                </div>
             </div>
-
             <hr>
             <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
                 <h1 class="display-4 fw-normal text-body-emphasis">Hosting Options</h1>
@@ -72,112 +69,184 @@
                             <h4 class="my-0 fw-normal">Self-Hosted</h4>
                         </div>
                         <div class="card-body">
-                            <h1 class="card-title pricing-card-title text-center">
-                                Free
-                            </h1>
+                            <h1 class="card-title pricing-card-title text-center">Free</h1>
                             <ul class="my-4">
-                                <li class="my-3"><b class="text-secondary">Who it’s for</b></br> Individual researchers, hobbyists, and groups with their own servers. Python experience recommended.</li>
-                                <li class="my-3"><b class="text-secondary">Costs</b></br>Everything is open-source, so you can download & run things locally.</li>
-                                <li class="my-3"><b class="text-secondary">Upkeep</b></br> Server setup is optional, and you would handle installation, updates, and maintenance.</li>
-                            </ul>
-                            <a class="w-100 btn btn-lg btn-secondary" href="https://jacksund.github.io/simmate/getting_started/overview/" target="_blank">View Tutorials</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card mb-4 rounded-3 shadow-sm border-success">
-                        <div class="card-header py-3 text-center text-bg-success border-success">
-                            <h4 class="my-0 fw-normal">Official Simmate Website</h4>
-                        </div>
-                        <div class="card-body">
-                            <h1 class="card-title pricing-card-title text-center">
-                                Pay as you go
-                            </h1>
-                            <ul class="my-4">
-                                <li class="my-3"><b class="text-secondary">Who it’s for</b></br> Beginners & small groups that want a turnkey experience with zero setup.</li>
-                                <li class="my-3"><b class="text-secondary">Costs</b></br>Pay-as-you-go in USDC for cloud compute. Price per workflow varies, so read our <b>Compute Costs</b> section below. Users can contribute their own resources to earn USDC as well.</li>
-                                <li class="my-3"><b class="text-secondary">Upkeep</b></br>Managed by the Simmate team and always up-to-date.</li>
-                            </ul>
-                            {% if user.is_authenticated %}
-                                <a class="w-100 btn btn-lg btn-success" href="{% url 'profile' %}">Start exploring</a>
-                            {% else %}
-                                <a class="w-100 btn btn-lg btn-success" href="#">Sign up & recieve $50 to test</a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card mb-4 rounded-3 shadow-sm">
-                        <div class="card-header py-3 text-center">
-                            <h4 class="my-0 fw-normal">Privately Hosted & Managed</h4>
-                        </div>
-                        <div class="card-body">
-                            <h1 class="card-title pricing-card-title text-center">
-                                Quote Required
-                            </h1>
-                            <ul class="my-4">
-                                <li class="my-3"><b class="text-secondary">Who it’s for</b></br> Companies, labs, or enterprises needing dedicated infrastructure that is managed by the Simmate team.</li>
-                                <li class="my-3"><b class="text-secondary">Costs</b></br>Pricing varies based on resources required, custom app development, etc.</li>
-                                <li class="my-3"><b class="text-secondary">Upkeep</b></br> The Simmate team will maintain your infrastructure on private servers.</li>
-                            </ul>
-                            <a class="w-100 btn btn-lg btn-secondary" href="{% url 'contact' %}">Contact Us</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <hr>
-            <div class="pricing-header p-3 pb-md-4 mx-auto">
-                <h1 class="display-4 fw-normal text-body-emphasis text-center">Data Access</h1>
-                <div class="card shadow-sm border-0">
-                  <div class="card-body p-4">
-                    <p class="fs-5 mb-3">
-                      <strong>All data is accessible for free.</strong>
-                    </p>
-                    <p class="fs-5 mb-3">
-                      Many datasets are made available by third-parties —
-                      such as the Materials Project, OQMD, JARVIS, and more. We will never
-                      charge for the access of data that is already free & open. Be sure to thank 
-                      & properly attribute the original communities!
-                    </p>
-                    <p class="fs-5 mb-0">
-                      Importantly, some datasets are only available in the <span class="fw-semibold">Self-Hosted</span>
-                      version of Simmate — such as AFLOW, eMolecules, Enamine, and more.
-                      This is because some sources do not allow redistribution of their data.
-                      While we cannot display this data on our public website, the Simmate Python
-                      client still lets you download datasets <em>directly</em> from third-party
-                      providers for your private use.
-                    </p>
-                  </div>
-                </div>
-            </div>
-            <hr>
-            <div class="pricing-header p-3 pb-md-4 mx-auto">
-                <h1 class="display-4 fw-normal text-body-emphasis text-center">Compute Costs</h1>
-                <div class="py-3 text-left">
-                    This is a test 123. This is a test 123. This is a test 123. This is a test 123. This is a test 123.
-                    This is a test 123. This is a test 123. This is a test 123. This is a test 123. This is a test 123.
-                    This is a test 123. This is a test 123. This is a test 123. This is a test 123. This is a test 123.
-                    This is a test 123. This is a test 123. This is a test 123. This is a test 123. This is a test 123.
-                    This is a test 123. This is a test 123. This is a test 123. This is a test 123. This is a test 123.
-                    This is a test 123. This is a test 123. This is a test 123. This is a test 123. This is a test 123.
-                    This is a test 123. This is a test 123. This is a test 123. This is a test 123. This is a test 123.
-                    This is a test 123. This is a test 123. This is a test 123. This is a test 123. This is a test 123.
-                </div>
-            </div>
-            <div>
+                                <li class="my-3">
+                                    <b class="text-secondary">Who it’s for</b>
+                                </br>
+                                Individual researchers, hobbyists, and groups with their own servers. Python experience recommended.
+                            </li>
+                            <li class="my-3">
+                                <b class="text-secondary">Costs</b>
+                            </br>
+                            Everything is open-source, so you can download & run things locally.
+                        </li>
+                        <li class="my-3">
+                            <b class="text-secondary">Upkeep</b>
+                        </br>
+                        Server setup is optional, and you would handle installation, updates, and maintenance.
+                    </li>
+                </ul>
+                <a class="w-100 btn btn-lg btn-secondary"
+                   href="https://jacksund.github.io/simmate/getting_started/overview/"
+                   target="_blank">View Tutorials</a>
             </div>
         </div>
-        <div class="tab-pane fade"
-             id="usdc-tokens"
-             role="tabpanel"
-             aria-labelledby="usdc-tokens-tab">USDC vs Tokens content goes here.</div>
-        <div class="tab-pane fade"
-             id="usdc-balance"
-             role="tabpanel"
-             aria-labelledby="usdc-balance-tab">USDC Balance content goes here.</div>
-        <div class="tab-pane fade"
-             id="tokens"
-             role="tabpanel"
-             aria-labelledby="tokens-tab">Simamte Tokens content goes here.</div>
     </div>
+    <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm border-success">
+            <div class="card-header py-3 text-center text-bg-success border-success">
+                <h4 class="my-0 fw-normal">Official Simmate Website</h4>
+            </div>
+            <div class="card-body">
+                <h1 class="card-title pricing-card-title text-center">Pay as you go</h1>
+                <ul class="my-4">
+                    <li class="my-3">
+                        <b class="text-secondary">Who it’s for</b>
+                    </br>
+                    Beginners & small groups that want a turnkey experience with zero setup.
+                </li>
+                <li class="my-3">
+                    <b class="text-secondary">Costs</b>
+                </br>
+                Pay-as-you-go in USDC for cloud compute. Price per workflow varies, so read our <b>Compute Costs</b> section below. Users can contribute their own resources to earn USDC as well.
+            </li>
+            <li class="my-3">
+                <b class="text-secondary">Upkeep</b>
+            </br>
+            Managed by the Simmate team and always up-to-date.
+        </li>
+    </ul>
+    {% if user.is_authenticated %}
+        <a class="w-100 btn btn-lg btn-success" href="{% url 'profile' %}">Start exploring</a>
+    {% else %}
+        <a class="w-100 btn btn-lg btn-success" href="#">Sign up & recieve $50 to test</a>
+    {% endif %}
+</div>
+</div>
+</div>
+<div class="col">
+    <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-header py-3 text-center">
+            <h4 class="my-0 fw-normal">Privately Hosted & Managed</h4>
+        </div>
+        <div class="card-body">
+            <h1 class="card-title pricing-card-title text-center">Quote Required</h1>
+            <ul class="my-4">
+                <li class="my-3">
+                    <b class="text-secondary">Who it’s for</b>
+                </br>
+                Companies, labs, or enterprises needing dedicated infrastructure that is managed by the Simmate team.
+            </li>
+            <li class="my-3">
+                <b class="text-secondary">Costs</b>
+            </br>
+            Pricing varies based on resources required, custom app development, etc.
+        </li>
+        <li class="my-3">
+            <b class="text-secondary">Upkeep</b>
+        </br>
+        The Simmate team will maintain your infrastructure on private servers.
+    </li>
+</ul>
+<a class="w-100 btn btn-lg btn-secondary" href="{% url 'contact' %}">Contact Us</a>
+</div>
+</div>
+</div>
+</div>
+<hr>
+<div class="pricing-header p-3 pb-md-4 mx-auto">
+    <h1 class="display-4 fw-normal text-body-emphasis text-center">Data Access</h1>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <p class="mb-3">All data is accessible for free.</p>
+            <p class="mb-3">
+                Many datasets are made available by third-parties —
+                such as the Materials Project, OQMD, JARVIS, and more. We will never
+                charge for the access of data that is already free & open. Be sure to thank
+                & properly attribute the original communities!
+            </p>
+            <p class="mb-0">
+                Importantly, some datasets are only available in the <span class="fw-semibold">Self-Hosted</span>
+                version of Simmate — such as AFLOW, eMolecules, Enamine, and more.
+                This is because those third-parties do not allow redistribution of their data.
+                While we cannot display this data on our public website, the Simmate Python
+                client still lets you download datasets <em>directly</em> from third-party
+                providers for your private use.
+            </p>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="pricing-header p-3 pb-md-4 mx-auto">
+    <h1 class="display-4 fw-normal text-body-emphasis text-center">Compute Costs</h1>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <div class="mb-4">
+                <p>
+                    Compute costs are based on the total resources and time used by a workflow run.
+                    Estimates are shown before submission, and charges apply only after the calculation completes successfully.
+                </p>
+                <p>Costs can vary significantly because:</p>
+                <ul class="mb-3">
+                    <li>
+                        Not all CPU time is equal (e.g., 24 hrs on a 2GB RAM node is much cheaper than 24 hrs on a 32GB RAM large-mem node)
+                    </li>
+                    <li>
+                        Total CPU usage can vary even for identical workflows (e.g., due to differences in DFT convergence or relaxation)
+                    </li>
+                    <li>CPU time heavily depends on the submitted structure/molecule atom count and/or composition</li>
+                </ul>
+                <p class="mb-3">
+                    This is why each workflow provides cost estimates and historical runtime data on its submission page.
+                </p>
+                <p class="mb-3">
+                    Currently, all computations run on Kubernetes Pods hosted on DigitalOcean.
+                    Our pricing aligns closely with <a href="https://www.digitalocean.com/pricing/kubernetes"
+    target="_blank">DigitalOcean’s rates</a>,
+                    averaging about <strong>$0.50 per CPU hour</strong>.
+                </p>
+                <div class="alert alert-warning" role="alert">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <i class="bi bi-exclamation-triangle fs-3"></i>
+                        </div>
+                        <div class="col">
+                            Compute costs are paid using your <b>USDC Balance</b>. Do not confuse this with your <b>Token Balance</b>.
+                            <small><em>(see "USDC vs. Tokens" tab at the top of this page)</em></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-secondary" role="alert">
+                    <div class="row">
+                        <div class="col-auto d-flex align-items-start">
+                            <i class="bi bi-info-circle fs-3"></i>
+                        </div>
+                        <div class="col">
+                            Looking ahead, Simmate plans to integrate HPC clusters from partner companies and universities.
+                            Once available, these will reduce compute costs drastically. There are also plans to allow users to
+                            provide their own resources for their own calculation or even others to utilize. For the latter,
+                            Simmate would compensate contributed resources by adding to their USDC balance. Reach out if
+                            you are interested in early testing of these features.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="tab-pane fade"
+     id="usdc-tokens"
+     role="tabpanel"
+     aria-labelledby="usdc-tokens-tab">USDC vs Tokens content goes here.</div>
+<div class="tab-pane fade"
+     id="usdc-balance"
+     role="tabpanel"
+     aria-labelledby="usdc-balance-tab">USDC Balance content goes here.</div>
+<div class="tab-pane fade"
+     id="tokens"
+     role="tabpanel"
+     aria-labelledby="tokens-tab">Simamte Tokens content goes here.</div>
+</div>
 {% endblock %}
