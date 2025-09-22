@@ -61,7 +61,9 @@
                     <h4 class="my-0 fw-normal">Official Simmate Website</h4>
                 </div>
                 <div class="card-body">
-                    <h1 class="card-title pricing-card-title text-center">Pay as you go</h1>
+                    <h1 class="card-title pricing-card-title text-center">
+                        ~50¢<small class="text-body-secondary fw-light">/cpu-hr</small>
+                    </h1>
                     <ul class="my-4">
                         {# djlint:off #}
                     <li class="my-3">
@@ -205,15 +207,52 @@
                     </div>
                     <div class="col">
                         <p>
-                            Simmate is in a very early stage where we would like to keep forms of payment limited.
-                            For now, the easiest route is to accept USDC, which is a stablecoin pegged 1:1 to the
-                            U.S. dollar. Using USDC allows peer-to-peer payments on the Ethereum blockchain without
-                            requiring any of your personal payment information — meaning no credit or debit card info
-                            needed.
+                            USDC is used to pay for compute costs on Simmate when you are using
+                            Simmate's computational resources, rather than supplying your own.
                         </p>
                         <p>
-                            If you’re new to crypto and USDC, we recommend using <a href="https://www.base.org/" target="_blank">the Base app</a> to create your wallet, fund, and send USDC.
+                            Configure your preferred payment method on your
+                            <a href="{% url 'profile' %}">Profile page</a>, where you
+                            are given the following options:
                         </p>
+                        <ul>
+                            <li>
+                                <b>Stripe Checkout <small>(card, Google Pay, Apple Pay, etc.)</small></b>
+                                <p>
+                                    This is the most straightforward method as it supports familiar payment options.
+                                    Simmate enforces a minimum payment of $25 for Stripe transactions to negate
+                                    <a href="https://stripe.com/pricing" target="_blank">Stripe’s fees</a> and
+                                    to encourage users to switch to USDC.
+                                </p>
+                            </li>
+                            <li>
+                                <b>USDC stablecoin</b>
+                                <p>
+                                    Pegged 1:1 with the USD, USDC enables secure, peer-to-peer, and worldwide
+                                    payments on the Ethereum blockchain.
+                                    Simmate does not enforce any minimum payment with USDC. Currently, we
+                                    only support USDC on Ethereum and Base chains, but reach out if you
+                                    would like us to add support for other stablecoins and/or chains.
+                                    And if you are new to cryptocurrencies and USDC, we recommend that beginners use
+                                    <a href="https://www.base.org/" target="_blank">the Base app</a> to
+                                    create a wallet and send USDC.
+                                </p>
+                            </li>
+                            <li>
+                                <b>Venmo <small><em>(not recommended)</em></small></b>
+                                <p>
+                                    In the US, Venmo is well established and convienient method for small
+                                    transactions. Just like with Stripe, Simmate enforces a minimum payment
+                                    of $25 for Venmo transactions to negate
+                                    <a href="https://help.venmo.com/cs/articles/business-profile-transaction-fees-vhel221"
+                                       target="_blank">Venmo’s fees</a> and
+                                    to encourage users to switch to USDC. Payment made via Venmo must be
+                                    manually added to the Simmate system by a member of our team - so there
+                                    will be a delay in the funds showing in your balance. For this reason,
+                                    we ask that users fund via Venmo only as a last resort.
+                                </p>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -233,6 +272,10 @@
                     </div>
                     <div class="col">
                         <p>
+                            Simmate tokens have no physical value and are only used for planning and budgeting.
+                            Your token balance is unlimited since Tokens are purely theoretical, and you can adjust your balance in the navbar.
+                        </p>
+                        <p>
                             As an example, let's say you submit a molecule to the "Synthesis Tracker" app,
                             indicating that you plan to run a synthesis of it. This costs nothing to submit & track
                             in the website, but you may still want to record the total costs of actually running this
@@ -240,10 +283,6 @@
                             And as you record many syntheses and assay runs, you will be able to track real-world costs
                             dedicated to specific projects, regions chemical chemical space, or specific hypotheses.
                         </p>
-                        <p>
-                            Thus, Simmate tokens have no physical value and are only used for planning and budgeting.
-                            Your token balance is unlimited since Tokens are purely theoretical, and you can adjust your balance in the navbar.
-                        </div>
                     </div>
                 </div>
             </div>
