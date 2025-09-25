@@ -14,6 +14,9 @@ class Project(DatabaseTable):
     Project meteadata
     """
 
+    class Meta:
+        db_table = "project_management__projects"
+
     html_display_name = "Projects"
     html_description_short = "List of different chemistry projects"
 

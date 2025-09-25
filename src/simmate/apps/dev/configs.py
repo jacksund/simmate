@@ -24,7 +24,11 @@ class CleaseConfig(AppConfig):
 
 
 class DeepmdConfig(AppConfig):
-    name = "simmate.apps.deepmd"
+    name = "simmate.apps.dev.deepmd"
+
+
+class EtherscanConfig(AppConfig):
+    name = "simmate.apps.dev.etherscan"
 
 
 class OpeneyeOmegaConfig(AppConfig):

@@ -177,13 +177,25 @@ def extras(request):
     return render(request, template, context)
 
 
+def about(request):
+    context = {"breadcrumbs": ["About"]}
+    template = "core_components/about.html"
+    return render(request, template, context)
+
+
 def contact(request):
     context = {"breadcrumbs": ["Extras"]}
     template = "core_components/contact.html"
     return render(request, template, context)
 
 
-def about(request):
-    context = {"breadcrumbs": ["About"]}
-    template = "core_components/about.html"
+def pricing(request):
+    context = {"breadcrumbs": ["Pricing"]}
+    template = "core_components/pricing.html"
+    return render(request, template, context)
+
+
+def faqs(request):
+    context = {"breadcrumbs": ["FAQs"]}
+    template = "core_components/faqs.html"
     return render(request, template, context)
