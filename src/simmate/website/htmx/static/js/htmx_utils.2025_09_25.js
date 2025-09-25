@@ -9,8 +9,9 @@ function runJsonActions(actions) {
     });
 }
 
-// Allows us to handle a JsonResponse, with no swap involved
+
 document.addEventListener("DOMContentLoaded", function() {
+    // Allows us to handle a JsonResponse, with no swap involved
     document.body.addEventListener('htmx:afterSwap', function(evt) {
         var xhr = evt.detail.xhr;
         try {
@@ -26,7 +27,13 @@ document.addEventListener("DOMContentLoaded", function() {
             // Not JSON, do nothing
         }
     });
+    // Automatically attaches the body's csrf token to htmx posts
+    document.body.addEventListener("htmx:configRequest", (event) => {
+      const token = document.querySelector("[name=csrfmiddlewaretoken]").value;
+      event.detail.headers["X-CSRFToken"] = token;
+    });
 });
+
 
 // Example methods
 function showAlert(message) {

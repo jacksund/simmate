@@ -1,9 +1,13 @@
 /* custom.css (must load after bootstrap.css) */
+/* -------------------------------------------------------------------------- */
+
+/* Bootstrap overrides */
+
 :root {
   /* --bs-body-bg: #9c9ea1;  */
   /* --bs-body-bg-rgb: 156, 158, 161; */
-  --bs-primary: #009199;
-  --bs-primary-rgb: 0, 145, 153;
+  --bs-primary: #198754;
+  --bs-primary-rgb: 25, 135, 84;
 }
 
 
@@ -21,17 +25,30 @@ a:focus {
 .btn-primary {
   --bs-btn-bg: var(--bs-primary);
   --bs-btn-border-color: var(--bs-primary);
-  --bs-btn-hover-bg: #d81b60;
-  --bs-btn-hover-border-color: #c2185b;
-  --bs-btn-active-bg: #ad1457;
-  --bs-btn-active-border-color: #880e4f;
+  --bs-btn-hover-bg: #157347;
+  --bs-btn-hover-border-color: #146c43;
+  --bs-btn-active-bg: #146c43;
+  --bs-btn-active-border-color: #13653f;
 }
 
 .nav-tabs .nav-link:not(.active) {
   color: var(--bs-secondary);
 }
 
-/* For the django-unicorn and htmx loading spinner */
+/* -------------------------------------------------------------------------- */
+
+/* For the htmx loading spinner */
+
+#loading-spinner {
+  display: none; /* Hidden by default */
+  pointer-events: none; /* Allow clicks through when hidden */
+}
+
+#loading-spinner.htmx-request {
+  display: block;
+  pointer-events: all; /* Block clicks when visible */
+}
+
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -44,15 +61,131 @@ a:focus {
   align-items: center;
   z-index: 9999;
 }
+
 .loading-spinner {
   border: 24px solid #f3f3f3;
-  border-top: 24px solid #0072ce;
+  border-top: 24px solid #157046;
   border-radius: 50%;
   width: 120px;
   height: 120px;
   animation: spin 1s linear infinite;
 }
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* -------------------------------------------------------------------------- */
+
+/* For select2 inputs */
+
+.select2-container--bootstrap-5 .select2-dropdown {
+    background-color: var(--bs-body-bg) !important;
+}
+
+/* Dropdown menu */
+.select2-container--bootstrap-5 .select2-dropdown {
+    background-color: var(--bs-body-bg) !important;
+    color: var(--bs-body-color) !important;
+    border: 1px solid var(--bs-border-color) !important;
+    border-radius: var(--bs-border-radius) !important;
+    box-shadow: var(--bs-dropdown-box-shadow) !important;
+}
+
+/* Single select main box */
+.select2-container--bootstrap-5 .select2-selection--single {
+    background-color: var(--bs-body-bg) !important;
+    border: 1px solid var(--bs-border-color) !important;
+    border-radius: var(--bs-border-radius) !important;
+}
+
+/* Single select selected text */
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    color: var(--bs-body-color) !important;
+    line-height: 1.5em;
+}
+
+/* Single select focus glow */
+.select2-container--bootstrap-5.select2-container--focus .select2-selection--single {
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25) !important;
+}
+
+/* Single select search field */
+.select2-container--bootstrap-5 .select2-search__field {
+    outline: none !important;
+    border-color: var(--bs-secondary) !important;
+    background-color: var(--bs-body-bg) !important;
+    color: var(--bs-body-color) !important;
+}
+
+/* Multi-select main box */
+.select2-container--bootstrap-5 .select2-selection--multiple {
+    background-color: var(--bs-body-bg) !important;
+    border: 1px solid var(--bs-border-color) !important;
+    border-radius: var(--bs-border-radius) !important;
+    min-height: calc(1.5em + 0.75rem) !important;
+}
+
+/* Multi-select selected text */
+.select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered {
+    color: var(--bs-body-color) !important;
+}
+
+/* Multi-select selected items/chips */
+.select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--bs-primary) !important; /* Active selection */
+    color: var(--bs-light) !important;
+    border: 1px solid var(--bs-primary-dark) !important;
+    border-radius: var(--bs-border-radius) !important;
+    padding-right: 0.25rem !important;
+}
+
+/* Multi-select "x" in selected items. White -> red on hover */
+.select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered .select2-selection__choice .select2-selection__choice__remove {
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") 50%/.75rem auto no-repeat !important;
+}
+.select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered .select2-selection__choice .select2-selection__choice__remove:hover {
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ff0000'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") 50%/.75rem auto no-repeat !important;
+}
+
+/* Multi-select padding for selected items text */
+.select2-container--bootstrap-5 
+.select2-selection--multiple 
+.select2-selection__choice 
+.select2-selection__choice__display {
+    margin-left: .5rem !important;  /* mx-2 = 0.5rem */
+    margin-right: .5rem !important;
+}
+
+
+/* Multi-select focus glow */
+.select2-container--bootstrap-5.select2-container--focus .select2-selection--multiple {
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25) !important;
+}
+
+/* Multi-select search field */
+.select2-container--bootstrap-5 .select2-selection--multiple .select2-search__field {
+    outline: none !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--bs-body-color) !important;
+}
+
+/* Dropdown options */
+.select2-container--bootstrap-5 .select2-results__option {
+    background-color: var(--bs-body-bg) !important;
+    color: var(--bs-body-color) !important;
+}
+
+/* Highlighted/active dropdown option */
+.select2-container--bootstrap-5 .select2-results__option--highlighted {
+    background-color: var(--bs-secondary) !important;
+    color: var(--bs-light) !important;
+}
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--selected,.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[aria-selected=true]:not(.select2-results__option--highlighted) {
+    background-color: var(--bs-secondary) !important;
+    color: var(--bs-light) !important;
 }
