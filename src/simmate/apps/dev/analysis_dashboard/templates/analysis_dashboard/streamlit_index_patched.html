@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport"
+              content="width=device-width,initial-scale=1,shrink-to-fit=no" />
+        <link rel="shortcut icon" href="./favicon.png" />
+        <link rel="preload"
+              href="./static/media/SourceSansPro-Regular.0d69e5ff5e92ac64a0c9.woff2"
+              as="font"
+              type="font/woff2"
+              crossorigin>
+        <link rel="preload"
+              href="./static/media/SourceSansPro-SemiBold.abed79cd0df1827e18cf.woff2"
+              as="font"
+              type="font/woff2"
+              crossorigin>
+        <link rel="preload"
+              href="./static/media/SourceSansPro-Bold.118dea98980e20a81ced.woff2"
+              as="font"
+              type="font/woff2"
+              crossorigin>
+        <title>Streamlit</title>
+        <script>window.prerenderReady = !1</script>
+        <!-- BUG: two lines below need updated. Copy lines from the default index -->
+        <script defer="defer" src="./static/js/main.75ac1cb6.js"></script>
+        <link href="./static/css/main.23bdda6f.css" rel="stylesheet">
+        <script src="https://unpkg.com/@rdkit/rdkit@2024.3.5-1.0.0/dist/RDKit_minimal.js"></script>
+        <script>
+        function monitor_ploty_w_rdkit_js() {
+            window.initRDKitModule().then(function(RDKit) {
+                window.RDKit = RDKit;
+            
+                function setupPlot() {
+                    var plot = document.querySelector('.stPlotlyChart.js-plotly-plot');
+                    
+                    if (plot) {
+                        
+                        // Remove existing event listeners to prevent duplicates
+                        plot.removeAllListeners('plotly_hover');
+                        plot.removeAllListeners('plotly_unhover');
+                        
+                        // Add listener to draw on hovering a point
+                        plot.on('plotly_hover', function(data) {
+
+                            // Get molecule using hovered point's "customdata", which
+                            // should be set to the SMILES str in python
+                            var point = data.points[0];    
+                            var smiles = point.customdata[0];
+                            var mol = RDKit.get_mol(smiles);
+                            
+                            // Normally you draw the molecule with this method,
+                            // but we want extra styling options, so we use the
+                            // "get_svg_with_highlights" instead:
+                            //     mol.get_svg();
+                            // styling options (e.g. clear background)
+                            var rdkit_styling = {};
+                            rdkit_styling['backgroundColour']=[0.0, 0.0, 0.0, 0.0];
+                            var svg = mol.get_svg_with_highlights(JSON.stringify(rdkit_styling));
+                            mol_canvas = document.getElementById('mol-canvas')
+                            mol_canvas.innerHTML = svg;
+
+                            // Find the location of the hover popout from plotly
+                            // and move the mol-canvas into it.
+                            hover_layer = document.querySelector('g.hoverlayer g.hovertext')
+                            const rect = hover_layer.getBoundingClientRect();
+                            const absoluteTop = rect.top + window.scrollY + 25;
+                            const absoluteLeft = rect.left + window.scrollX + 15;
+                            mol_canvas.style.position = 'absolute';
+                            mol_canvas.style.top = `${absoluteTop}px`;
+                            mol_canvas.style.left = `${absoluteLeft}px`;;
+                        });
+                        
+                        // Add listener to remove image on unhover
+                        plot.on('plotly_unhover', function(data) {
+                            document.getElementById('mol-canvas').innerHTML = '';
+                        });
+                    } else {
+                        // Plot element not found, retrying after delay
+                        setTimeout(setupPlot, 500);
+                    }
+                }
+            
+                setupPlot();
+            }).catch((error) => {
+                console.error("Failed to load RDKit.js", error);
+            });
+        }
+        
+        // call once when page first starts
+        monitor_ploty_w_rdkit_js();
+        </script>
+        <script>
+        // BUG-FIX: Streamlit dynamically updates the DOM, which causes any
+        // javascript event listeners to stop after you do something like apply
+        // a filter to change your plot. This chunk of code monitors the
+        // head element for changes and restarts our javascript code. This
+        // listener survives the DOM change because the head survives!
+        document.addEventListener("DOMContentLoaded", function() {
+            function attachJs() {
+                // restart are javascript on page change
+                monitor_ploty_w_rdkit_js();
+            }
+        
+            // Run once on load
+            attachJs();
+        
+            // Observe the <head> for changes
+            const headObserver = new MutationObserver((mutations) => {
+                attachJs();  // Run your JS function when <head> changes
+            });
+        
+            // Monitor the <head> for added/removed child nodes
+            headObserver.observe(document.head, { childList: true, subtree: true });
+        });
+        </script>
+    </head>
+    <body>
+        <noscript>You need to enable JavaScript to run this app. There is also custom JS -Jacksund</noscript>
+        <div id="mol-canvas"
+             style="position: absolute;
+                    z-index: 10;
+                    width: 150px;
+                    height: 150px;
+                    pointer-events: none"></div>
+        <div id="root" style="z-index: 1;"></div>
+    </body>
+</html>

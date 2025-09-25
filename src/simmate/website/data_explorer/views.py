@@ -88,6 +88,7 @@ def table_entries(request, table_name):
             "page": page,
             "pagination_urls": pagination_urls,
             "total": page.paginator.count,  # often limited to 10k
+            "report": table.get_report(page) if table.enable_html_report else {},
             # "paginator": page.paginator,
             # "entries": page.object_list,  # page.paginator.object_list gives ALL results
             "page_title": table_name,

@@ -68,6 +68,14 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `tags` support in dynamic components
 - added html table and entry context hooks
 - added `loading_spinner` tag for unicorn components
+- added `plotly_figure` filter tag for rendering plots
+- added `report` features to database tables and data_explorer views
+- added `StatusTracking` model to `database.base_data_types`
+- added `is_dueterated` methods to `Molecule`
+- added web scrape of news archive for `apps.bcpc`
+- added `apps.ppdb`
+- added dev apps `chatbot` and `analysis_dashboard`
+- added `database.external_connectors` utils
 
 **Refactors**
 
@@ -76,7 +84,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - update `breadcrumbs` tag to include deprec `breadcrumb_active`
 - workflows results in the web ui now exists within the Data tab. The workflow tab has been limited to submission, docs, and analytics
 - `DynamicApiView` was split up into separate views for easier debugging and future enhancements
--   `website.engine` apps and others are condensed into `core_components`, `data_explorer`, and `workflows` apps
+- `website.engine` apps and others are condensed into `core_components`, `data_explorer`, and `workflows` apps
 
 **Fixes**
 
@@ -84,6 +92,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - fix workflow names that have captial letters next to eachother (e.g, `LogDWorkflow` --> `log-d-workflow`)
 - fix `parse_multiselect` util when nested in a `create_many` form
 - fix `unicorn.loading` activity when `Unicorn.call()` js is called
+- fix `to_sdf` export
 
 --------------------------------------------------------------------------------
 
@@ -99,7 +108,6 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added Quantum Espresso support
 - added rdkit-postgres cartridge support
 - large updates to the `BadELF` app to support materials with covalent and metallic character
-
 
 **Refactors**
 

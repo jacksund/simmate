@@ -29,6 +29,7 @@ Apps are installable Simmate add-ons. Each one adds support for a third-party so
 | Materials Project     | `crystal`  | :x:                | :white_check_mark: | :white_check_mark: |
 | OQMD                  | `crystal`  | :x:                | :x:                | :white_check_mark: |
 | PDB                   | `molecule` | :x:                | :x:                | :white_check_mark: |
+| PPDB                  | `molecule` | :x:                | :x:                | :white_check_mark: |
 | Quantum Espresso      | `crystal`  | :white_check_mark: | :white_check_mark: | :x:                |
 | RDKit                 | `molecule` | :x:                | :x:                | :x:                |
 | VASP                  | `crystal`  | :white_check_mark: | :white_check_mark: | :x:                |

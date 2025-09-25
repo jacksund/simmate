@@ -1,0 +1,31 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" min_width=50 %}
+    {% table_header "name" "Tag" min_width=100 %}
+    {% if not project_view %}
+        {% table_header "tag_type" min_width=100 %}
+        {% table_header "project__name" "Project" min_width=100 %}
+    {% endif %}
+    {% table_header "description" min_width=300 %}
+    {% table_header "created_at" min_width=100 %}
+    {% table_header "updated_at" min_width=100 %}
+    <th style="min-width:50px">Edit</th>
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry %}</td>
+    <td>{{ entry.name }}</td>
+    {% if not project_view %}
+        <td>{{ entry.tag_type }}</td>
+        <td>
+            {% if entry.tag_type == "project-specific" %}
+                {% foreign_key_link entry.project "name" %}
+            {% else %}
+                ( -- all -- )
+            {% endif %}
+        </td>
+    {% endif %}
+    <td>{{ entry.description }}</td>
+    <td>{{ entry.created_at|date:"Y-m-d" }}</td>
+    <td>{{ entry.updated_at|date:"Y-m-d" }}</td>
+    {% update_entry_link entry %}
+{% endblock %}

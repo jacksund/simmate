@@ -156,3 +156,15 @@ def structure_to_url(structure):
     # ensure it safe before returning. Read more about this here:
     # https://docs.djangoproject.com/en/3.2/howto/custom-template-tags/#filters-and-auto-escaping
     return mark_safe(url_query)
+
+
+@register.filter(name="plotly_figure")
+def plotly_figure(figure):
+    """
+    Converts a plotly figure object to an html element for the frontend.
+    """
+    hmtl = figure.to_html(
+        full_html=False,
+        include_plotlyjs=False,
+    )
+    return mark_safe(hmtl)

@@ -19,7 +19,7 @@ class EppoCode(DatabaseTable):
     This table includes codes and metadata pulled lazily from the official
     [EPPO website](https://gd.eppo.int/).
 
-    Note that some organizations (such as Corteva) use internal codes as well,
+    Note that some organizations use internal codes as well,
     so this table can include additional codes with a custom "eppo_source".
     """
 
@@ -45,7 +45,7 @@ class EppoCode(DatabaseTable):
     eppo_source = table_column.CharField(max_length=25, blank=True, null=True)
     """
     Where the EPPO code originated from. Typically this is "eppo_global_db",
-    but can sometime be an separate source such as "corteva".
+    but can sometime be an separate source such as "simmate_user".
     """
 
     preferred_name = table_column.TextField(blank=True, null=True)
@@ -140,7 +140,7 @@ class EppoCode(DatabaseTable):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls, update_only: bool = False, **kwargs):
+    def _load_data(cls, eppo_codes: list[str], update_only: bool = False, **kwargs):
         """
         Only use this function if you are part of the Simmate dev team!
         Users should instead access data via the load_remote_archive method.
@@ -150,12 +150,13 @@ class EppoCode(DatabaseTable):
         """
 
         if update_only and cls.objects.exists():
-            existing_codes = list(cls.objects.values_list("id", flat=True).all())
+            skip_codes = list(cls.objects.values_list("id", flat=True).all())
         else:
-            existing_codes = []
+            skip_codes = []
 
+        eppo_codes = [c for c in eppo_codes if c not in skip_codes]
         all_data = EppoWebScrapper.get_all_eppo_code_data(
-            skip_codes=existing_codes,
+            eppo_codes=eppo_codes,
             **kwargs,
         )
 
@@ -191,41 +192,28 @@ class EppoCode(DatabaseTable):
 class EppoWebScrapper:
 
     @classmethod
-    def get_all_eppo_code_data(cls, skip_codes: list[str] = [], **kwargs) -> list[dict]:
-        return [
-            cls.get_eppo_code_data(code)
-            for code in track(cls._get_corteva_eppo_codes(**kwargs))
-            if code not in skip_codes
-        ]
+    def get_all_eppo_code_data(cls, eppo_codes: list[str], **kwargs) -> list[dict]:
+        return [cls.get_eppo_code_data(code, **kwargs) for code in track(eppo_codes)]
 
     @classmethod
-    def get_eppo_code_data(cls, eppo_code: str) -> dict:
+    def get_eppo_code_data(
+        cls, eppo_code: str, no_match_source: str = "internal"
+    ) -> dict:
         html_obj = cls._get_html_for_eppo_code(eppo_code)
         return (
             cls._parse_html_data(html_obj)
             if html_obj
-            # As of 2024/03/08: 122 out of the 580 eppo codes in corteva DDV
-            # do not have a match to the official eppo database. For these,
-            # we mark them them as "internal"
-            else {"eppo_code": eppo_code, "eppo_source": "corteva"}
+            # If there is no match to the official eppo database, we mark the
+            # source as internal
+            else {"eppo_code": eppo_code, "eppo_source": no_match_source}
         )
-
-    @staticmethod
-    def _get_corteva_eppo_codes(**kwargs) -> list[str]:
-
-        # local import because this is a dev-only dependency
-        from simmate_corteva.datasets.oracle import DDVConnection
-
-        # establish connection & grab unique codes
-        corteva_ddv = DDVConnection(**kwargs)
-        return corteva_ddv.get_eppo_codes()
 
     @staticmethod
     def _get_html_for_eppo_code(eppo_code: str) -> BeautifulSoup:
 
         eppo_code_url = f"https://gd.eppo.int/taxon/{eppo_code}"
 
-        # BUG: disable verify bc of Corteva SSL & silence warnings from not
+        # BUG: disable verify bc of SSL & silence warnings from not
         # using the verify fxn
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")

@@ -218,6 +218,7 @@ class Molecule:
                     ("Sn", 2): -2,  # Stannide (Sn2-), rare
                     ("Sn", 5): 2,  # Pentacoordinate Sn (rare, cationic)
                     ("Sn", 6): -2,  # Hexacoordinate Sn ([SnCl6]2-)
+                    ("F", 1): 0,  # Carbon-fluorine (C-F)
                 }
                 key = (symbol, total_valence)
                 if key in formal_charge_rules:
@@ -951,6 +952,31 @@ class Molecule:
         # TODO: should this return a list? should it be in alphabetical order?
         elements = [atom.GetSymbol() for atom in self.rdkit_molecule.GetAtoms()]
         return set(elements)
+
+    @property
+    def is_dueterated(self) -> bool:
+        """
+        Whether the molecule has any Dueterium
+        """
+        for atom in self.rdkit_molecule.GetAtoms():
+            if atom.GetAtomicNum() == 1 and atom.GetIsotope() == 2:
+                # a single duet is enough to return true
+                return True
+        return False
+
+    @property
+    def is_dueterated_full(self) -> bool:
+        """
+        Whether the molecule is fully dueterated (i.e. 100% Hs are Dueterium)
+        """
+        if self.is_dueterated:
+            for atom in self.rdkit_molecule.GetAtoms():
+                if atom.GetAtomicNum() == 1 and atom.GetIsotope() == 1:
+                    # a single non-D is enough to say no
+                    return False
+            return True
+        # No D at all is an automatic no
+        return False
 
     # -------------------------------------------------------------------------
 

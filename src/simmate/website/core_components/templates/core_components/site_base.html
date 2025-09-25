@@ -71,12 +71,17 @@
                 <script>var ChemDrawLicenseURL = '{% static "/licenses/ChemDraw-JS-License.xml" %}';</script>
         {% endcomment %}
         {# Custom Simmate Javascript #}
-        <script type="text/javascript" src="{% static "js/rdkit_utils.2024_09_13.js" %}"></script>
+        <script type="text/javascript"
+                src="{% static "js/rdkit_utils.2024_09_13.js" %}"></script>
         {# <script type="text/javascript" src="{% static "js/chemdraw_utils.2025_04_18.js" %}"></script> #}
-        <script type="text/javascript" src="{% static "js/chemdoodle_utils.2024_09_03.js" %}"></script>
-        <script type="text/javascript" src="{% static "js/form_utils.2025_06_02.js" %}"></script>
-        <script type="text/javascript" src="{% static "js/progress_bars.2024_05_27.js" %}"></script>
-        <script type="text/javascript" src="{% static "js/select2_utils.2024_05_27.js" %}"></script>
+        <script type="text/javascript"
+                src="{% static "js/chemdoodle_utils.2024_09_03.js" %}"></script>
+        <script type="text/javascript"
+                src="{% static "js/form_utils.2025_06_02.js" %}"></script>
+        <script type="text/javascript"
+                src="{% static "js/progress_bars.2024_05_27.js" %}"></script>
+        <script type="text/javascript"
+                src="{% static "js/select2_utils.2024_05_27.js" %}"></script>
         {# Some pages may require extra lines in the header such as loading extra libraries #}
         {% block extraheader %}{% endblock %}
     </head>

@@ -1,0 +1,23 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_report %}
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">{{ report.most_visited_pages|plotly_figure }}</div>
+            <div class="col-md-6 d-flex flex-column">{{ report.unique_users_and_traffic|plotly_figure }}</div>
+        </div>
+    </div>
+{% endblock %}
+{% block table_headers %}
+    {% table_header "id" min_width=50 %}
+    {% table_header "user__last_name" "User" min_width=100 %}
+    {% table_header "url_path" min_width=100 %}
+    {% table_header "url_parameters " min_width=100 %}
+    {% table_header "timestamp" min_width=100 %}
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry %}</td>
+    <td>{{ entry.user.first_name }} {{ entry.user.last_name }}</td>
+    <td>{{ entry.url_path }}</td>
+    <td>{{ entry.url_parameters }}</td>
+    <td>{{ entry.timestamp|date:"Y-m-d" }}</td>
+{% endblock %}

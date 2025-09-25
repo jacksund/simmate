@@ -116,12 +116,12 @@ The public Simmate website does not require you to be authenticated to access ou
 
 === "curl"
     ``` bash
-    curl -X GET http://localhost/data/CortevaTarget/?format=api
+    curl -X GET http://localhost/data/ChemblMolecule/?format=api
     ```
 
 ### Private Servers
 
-Some custom servers (such as Simmate's Corteva site), do require authenticated users to ensure data secuirity. For these, you can access endpoints by providing an API key.
+Some private servers, do require authenticated users to ensure data security. For these, you can access endpoints by providing an API key.
 
 1. find your API key in the `Profile` page of the website and select the `View API Key` at the bottom of the page. The key will be something like...
 ```
