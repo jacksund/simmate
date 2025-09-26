@@ -104,7 +104,7 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content text-center">
                             <div class="modal-header">
-                                <h5 class="modal-title">Fund Account with USDC</h5>
+                                <h5 class="modal-title">Fund USDC Balance</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
@@ -152,7 +152,7 @@
                                 {% csrf_token %}
                                 <div class="modal-body">
                                     <div class="alert alert-success text-center">
-                                        <a href="{% url 'pricing' %}" class="alert-link"><small>Simmate tokens are free, so you can add as much as you'd like. Please read our Pricing page for how these are used <i class="bi bi-box-arrow-up-right"></i></small></a>
+                                        <a href="{% url 'pricing' %}" class="alert-link"><small>Simmate tokens are free, so you can add (or remove) as much as you'd like. Please read our Pricing page for how these are used <i class="bi bi-box-arrow-up-right"></i></small></a>
                                     </div>
                                     <input type="number"
                                            class="form-control"
@@ -160,7 +160,6 @@
                                            name="tokenAmount"
                                            step="1"
                                            placeholder="1,000">
-                                    <small class="text-muted">Enter a positive number to add or a negative number to subtract.</small>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
