@@ -9,7 +9,7 @@
                 Simmate is entirely <a href="https://github.com/jacksund/simmate" target="_blank"><strong>open-source</strong> <i class="bi bi-box-arrow-up-right"></i></a>, and all data is shared freely. So costs occur only when...
             </p>
             <ul>
-                <li>You use our cloud resources to run workflows, rather than your own</li>
+                <li>You run workflows using our cloud resources, rather than your own</li>
                 <li>You have our team set up & maintain a private server</li>
             </ul>
             <p>
@@ -22,14 +22,14 @@
     </div>
     <hr>
     <div class="p-3 pb-md-4 mx-auto">
-        <h1 class="display-4 fw-normal text-body-emphasis text-center">Our Not-For-Profit Mission</h1>
+        <h1 class="display-4 fw-normal text-body-emphasis text-center">Our Mission</h1>
         <div class="p-4">
             <p class="mb-3">
-                Simmate is a "not-for-profit" organization, where our primary goal
+                Simmate's primary goal
                 is to build a community that openly shares chemistry data.
                 We believe that energy is wasted and research is slowed when
                 academics repeatedly perform the same calculations in isolation,
-                so we sought to build a platform that provides the infrastructure
+                so we sought to build a platform
                 for open collaboration in chemistry. This is why in our
                 public website you only pay for computational resources that
                 are not your own, and any workflows ran on the public website are
@@ -140,6 +140,7 @@
                 </div>
                 <div class="card-body">
                     <h1 class="card-title pricing-card-title text-center">Quote Required</h1>
+                    <h6 class="text-secondary text-center">Starting at $2,500/month</h6>
                     <ul class="my-4">
                         {# djlint:off #}
                     <li class="my-3">
@@ -148,8 +149,7 @@
                     </li>
                     <li class="my-3">
                         <b class="text-secondary">Costs</b><br>
-                        Pricing varies based on resources required, custom app development, etc. Training and
-                        workshops are also available.
+                        Pricing varies based on resources required, custom app development, etc.
                     </li>
                     <li class="my-3">
                         <b class="text-secondary">Upkeep</b><br>
@@ -202,30 +202,30 @@
             </p>
             <p>
                 It is important to recognize that price is not determined until you
-                provide all input parameters (including your structure/molecule).
+                provide all input parameters, including your structure/molecule.
                 This is because total CPU usage can vary even for identical workflows
-                (e.g., due to differences in DFT convergence or relaxation). However,
-                the expected CPU time heavily depends on the submitted structure/molecule atom count
-                or composition, meaning we can provide fair pricing before calculation
-                submission.
-            </p>
-            <p>
-                This is counter to other cloud platforms that charge at the end
-                after the calculation completes or at a fixed rate throughout the
-                computation. We opt for the pay-first method for several reasons:
+                (e.g., due to differences in convergence). However, expected CPU time
+                heavily depends on the submitted structure/molecule, meaning we can
+                provide fair pricing before you submit.
+                Paying at the start of calculations is counter to how other cloud
+                platforms typically bill users. Is it more common to charge users
+                after a calculation completes or even at a fixed rate throughout
+                the compute run. We opt for the pay-first, run-second setup for
+                several reasons:
             </p>
             <ul class="mb-3">
                 <li>Users can submit with confidence and avoid surprises.</li>
                 <li>Clear pricing allows for easier project budgeting and management.</li>
-                <li>We never want to wastefully terminating workflows mid-run due to insufficient funds.</li>
+                <li>We never need to wastefully terminate workflows mid-run due to insufficient funds.</li>
+                <li>A minimum threshhold can be set in $/cpu/hr to automatically refund users when needed.</li>
                 <li>It reduces our administrative overhead, keeping the platform simple and fair.</li>
             </ul>
             <p class="mb-3">
                 Overall, this is why each workflow provides cost estimates and historical runtime data on its submission page.
             </p>
             <p class="mb-3">
-                Currently, all computations run on Kubernetes Pods hosted on DigitalOcean.
-                Our pricing aligns closely with <a href="https://www.digitalocean.com/pricing/kubernetes"
+                Currently, all computations run on Kubernetes Pods hosted on DigitalOcean, so
+                our pricing aligns closely with <a href="https://www.digitalocean.com/pricing/kubernetes"
     target="_blank">DigitalOcean’s rates</a>,
                 averaging about <strong>$0.50 per CPU hour</strong>.
             </p>
@@ -240,7 +240,7 @@
                     </div>
                 </div>
             </div>
-            <div class="alert alert-secondary" role="alert">
+            <div class="alert alert-success" role="alert">
                 <div class="row">
                     <div class="col-auto d-flex align-items-start">
                         <i class="bi bi-info-circle fs-3"></i>
@@ -248,8 +248,8 @@
                     <div class="col">
                         Looking ahead, Simmate plans to integrate HPC clusters from partner companies and universities.
                         Once available, these will reduce compute costs drastically. There are also plans to allow users to
-                        provide their own resources for their own calculations or even others to utilize. For the latter,
-                        Simmate would compensate contributed resources by adding to their USDC balance. Reach out if
+                        provide their own resources for their own calculations or even for others to utilize. For the latter,
+                        Simmate will compensate contributed resources by adding to their USDC balance. Reach out if
                         you are interested in early testing of these features.
                     </div>
                 </div>
@@ -281,7 +281,8 @@
                             <li>
                                 <b>Stripe Checkout <small>(card, Google Pay, Apple Pay, etc.)</small></b>
                                 <p>
-                                    This is the most straightforward method as it supports familiar payment options.
+                                    This is the most straightforward method as it supports familiar payment options
+                                    such as credit and debit cards.
                                     Simmate enforces a minimum payment of $25 for Stripe transactions to negate
                                     <a href="https://stripe.com/pricing" target="_blank">Stripe’s fees</a> and
                                     to encourage users to switch to USDC.
@@ -310,8 +311,8 @@
                                        target="_blank">Venmo’s fees</a> and
                                     to encourage users to switch to USDC. Payment made via Venmo must be
                                     manually added to the Simmate system by a member of our team - so there
-                                    will be a delay in the funds showing in your balance. For this reason,
-                                    we ask that users fund via Venmo only as a last resort.
+                                    will be a delay in the funds showing in your balance of up to 5 days.
+                                    For this reason, we ask that users fund via Venmo only as a last resort.
                                 </p>
                             </li>
                         </ul>
