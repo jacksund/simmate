@@ -31,6 +31,23 @@ var add_mol_viewer = function (canvas_id, mol_str, width, height) {
             'scaleBondWidth': true,
             'fixedBondLength': 50,  // bug: will this look different depending on monitor res?
             'additionalAtomLabelPadding': 0.1,
+            // Dark Theme coloring orginally forked from... 
+            // https://github.com/rdkit/rdkit-js/discussions/325#discussioncomment-7238704
+            'atomColourPalette': {
+                '-1':  [0.6, 0.6, 0.6],  // "dummy atoms" (R-groups, query atoms, etc.)
+                0:   [0.7, 0.7, 0.7],  // unknown/unspecified element
+                1:   [0.7, 0.7, 0.7],  // Hydrogen (H)
+                6:   [0.7, 0.7, 0.7],  // Carbon (C)
+                7:   [0.33, 0.41, 0.92], // Nitrogen (N) → blue
+                8:   [1.0, 0.2, 0.2],    // Oxygen (O) → red
+                9:   [0.2, 0.8, 0.8],    // Fluorine (F) → teal
+                15:  [1.0, 0.5, 0.0],    // Phosphorus (P) → orange
+                16:  [0.8, 0.8, 0.0],    // Sulfur (S) → yellow
+                17:  [0.0, 0.802, 0.0],  // Chlorine (Cl) → green
+                35:  [0.71, 0.4, 0.07],  // Bromine (Br) → brown
+                53:  [0.89, 0.004, 1],   // Iodine (I) → purple/violet
+                201: [0.68, 0.85, 0.90], // Pseudo-atom/other (RDKit special, used in queries)
+            },
          };
         var svg = mol.get_svg_with_highlights(JSON.stringify(rdkit_styling));
         mol_canvas.innerHTML = svg;
