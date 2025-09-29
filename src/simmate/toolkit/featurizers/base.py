@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from concurrent.futures import ProcessPoolExecutor
+
 from rich.progress import track
 
 from simmate.toolkit import Molecule
+from simmate.utilities import chunk_list
 
 
 class Featurizer:
@@ -26,7 +29,7 @@ class Featurizer:
     @classmethod
     def featurize_many(
         cls,
-        molecules: list[Molecule],
+        molecules: list[Molecule] | list[any],  # any bc we use from_dynamic
         parallel: bool = False,
         **kwargs,
     ) -> list:
@@ -51,6 +54,8 @@ class Featurizer:
         """
         features_list = []
         for molecule in track(molecules, disable=not progress_bar):
+            if not isinstance(molecule, Molecule):
+                molecule = Molecule.from_dynamic(molecule)
             features = cls.featurize(molecule, **kwargs)
             features_list.append(features)
         return features_list
@@ -59,17 +64,26 @@ class Featurizer:
     def _featurize_many_parallel(
         cls,
         molecules: list[Molecule],
-        batch_size: int = 10000,
-        use_serial_batches: bool = False,
-        batch_size_serial: int = 500,
+        chunk_size: int = 1_000,
+        max_workers: int = None,
         **kwargs,
     ):
         """
         Generates fingerprints for a list of molecules in parallel.
         """
-        # Use this method to help. Maybe write a utility function for batch
-        # submitting and serial-batch submitting to dask too.
-        # https://github.com/jacksund/simmate/blob/17d926fe5ee8f183240a4526982b4d7fd5d7042b/src/simmate/toolkit/creators/structure/base.py#L67
-        raise NotImplementedError(
-            "This method is still being written. Try parallel=False."
-        )
+
+        # note, we submit to the proccess pool in batches rather than normal
+        # like this:
+        #   with ProcessPoolExecutor() as executor:
+        #       futures = [executor.submit(cls.featurize, molecule, **kwargs) for molecule in molecules]
+        #       return [f.result() for f in track(futures)]
+        # We do this to prevent the io from being the bottleneck.
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            futures = [
+                executor.submit(
+                    cls._featurize_many_serial, chunk, progress_bar=False, **kwargs
+                )
+                for chunk in chunk_list(full_list=molecules, chunk_size=chunk_size)
+            ]
+            # flatten results before returning
+            return [item for future in track(futures) for item in future.result()]
