@@ -1,186 +1,240 @@
 {% load static %}
-<div class="navbar-custom topnav-navbar topnav-navbar-dark shadow-lg">
-    <div class="container-fluid">
-        <!-- LOGO -->
-        <a href="{% url 'home' %}" class="topnav-logo">
-            <span class="topnav-logo-lg">
-                <img src="{% static 'images/simmate-logo-dark.svg' %}" alt="" height="36">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+    <div class="container">
+        {# Simmate Logo / Home button #}
+        <a href="{% url 'home' %}" class="navbar-brand">
+            <span class="d-none d-md-block">
+                <img src="{% static 'images/simmate-logo-dark.svg' %}" alt="" height="38">
             </span>
-            <span class="topnav-logo-sm">
+            <span class="d-md-none">
                 <img src="{% static 'images/simmate-icon.svg' %}" alt="" height="36">
             </span>
         </a>
-        <ul class="list-unstyled topbar-menu float-end mb-0">
-            <li class="dropdown notification-list d-none d-sm-inline-block">
-                <a class="nav-link dropdown-toggle arrow-none"
-                   data-bs-toggle="dropdown"
-                   href="#"
-                   role="button"
-                   aria-haspopup="false"
-                   aria-expanded="false">
-                    <i class="dripicons-view-apps noti-icon"></i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg p-0">
-                    <div class="p-2">
-                        <div class="row g-0">
-                            <div class="col">
-                                <a class="dropdown-icon-item"
-                                   href="https://github.com/jacksund/simmate"
-                                   target="_blank">
-                                    <img src="{% static 'images/github-icon.svg' %}"
-                                         alt="github"
-                                         style="height:36px">
-                                    <span><b>GitHub</b></span>
-                                </a>
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    {# todo: add 'active' class to whichever section is active + highlighted #}
+                    <a class="nav-link" href="{% url 'apps' %}"><i class="bi bi-speedometer2"></i> Apps</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'data_explorer:home' %}"><i class="bi bi-bar-chart"></i> Data</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'workflows' %}"><i class="bi bi-diagram-3"></i> Workflows</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots"></i> Extras
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <h6 class="dropdown-header">General</h6>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'about' %}"><i class="bi bi-info-circle"></i> About</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               href="https://github.com/jacksund/simmate/"
+                               target="_blank"><i class="bi bi-github"></i> Github</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'pricing' %}"><i class="bi bi-currency-dollar"></i> Pricing</a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <h6 class="dropdown-header">Guides</h6>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               href="https://jacksund.github.io/simmate/home/"
+                               target="_blank"><i class="bi bi-book"></i> Docs</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               href="https://jacksund.github.io/simmate/full_guides/website/rest_api/"
+                               target="_blank"><i class="bi bi-braces"></i> REST API</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               href="https://jacksund.github.io/simmate/full_guides/toolkit/molecules/overview/"
+                               target="_blank"><i class="bi bi-tools"></i> Toolkit</a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <h6 class="dropdown-header">Help</h6>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'contact' %}"><i class="bi bi-envelope"></i> Contact</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               href="https://github.com/jacksund/simmate/issues/new/"
+                               target="_blank"><i class="bi bi-bug"></i> Report a Bug</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'faqs' %}"><i class="bi bi-question-circle"></i> FAQs</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="d-flex">
+            {% if user.is_authenticated %}
+                {# USDC button #}
+                <button type="button"
+                        class="btn btn-outline-light rounded-4 py-0 px-2 me-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#usdcModal">
+                    <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
+                    <b>5.00</b>
+                </button>
+                {# USDC modal #}
+                <div class="modal fade" id="usdcModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content text-center">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Fund USDC Balance</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
-                            <div class="col">
-                                <a class="dropdown-icon-item"
-                                   href="https://jacksund.github.io/simmate/home/"
-                                   target="_blank">
-                                    <img src="{% static 'images/simmate-icon.svg' %}"
-                                         alt="apidocs"
-                                         style="height:36px">
-                                    <span><b>API Docs</b></span>
-                                </a>
-                            </div>
-                            <div class="col">
-                                <a class="dropdown-icon-item"
-                                   href="https://docs.djangoproject.com/en/4.0/"
-                                   target="_blank">
-                                    <img src="{% static 'images/django-icon.svg' %}"
-                                         alt="django"
-                                         style="height:36px">
-                                    <span><b>Django</b></span>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="row g-0">
-                            <div class="col">
-                                <a class="dropdown-icon-item"
-                                   href="https://cloud.prefect.io/"
-                                   target="_blank">
-                                    <img src="{% static 'images/prefect-icon.svg' %}"
-                                         alt="prefect"
-                                         style="height:36px">
-                                    <span><b>Prefect</b></span>
-                                </a>
-                            </div>
-                            <div class="col">
-                                <a class="dropdown-icon-item"
-                                   href="https://docs.dask.org/en/stable/futures.html"
-                                   target="_blank">
-                                    <img src="{% static 'images/dask-icon.svg' %}"
-                                         alt="dask"
-                                         style="height:40px">
-                                    <span><b>Dask</b></span>
-                                </a>
-                            </div>
-                            <div class="col">
-                                <a class="dropdown-icon-item"
-                                   href="https://cloud.digitalocean.com/"
-                                   target="_blank">
-                                    <img src="{% static 'images/digitalocean-icon.svg' %}"
-                                         alt="digitalocean"
-                                         style="height:36px">
-                                    <span><b>DigitalOcean</b></span>
-                                </a>
+                            <div class="modal-body">
+                                <div class="alert alert-success">
+                                    <a href="{% url 'pricing' %}" class="alert-link">Please read our Pricing page before sending <i class="bi bi-box-arrow-up-right"></i></a>
+                                </div>
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/444px-QR_code_for_mobile_English_Wikipedia.svg.png"
+                                     alt="USDC QR Code"
+                                     class="img-fluid mb-3"
+                                     style="max-width:400px">
+                                <h3>simmate.eth</h3>
+                                <div class="input-group mb-3">
+                                    <input type="text"
+                                           class="form-control text-center text-secondary"
+                                           id="walletAddress"
+                                           value="0x1234...ABCD"
+                                           readonly>
+                                    <button class="btn btn-outline-secondary"
+                                            type="button"
+                                            onclick="navigator.clipboard.writeText('SimmatewalletAddress12345')">
+                                        <i class="bi bi-clipboard"></i> Copy
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </li>
-            <!-- start Account Login -->
-            {% if user.is_authenticated %}
-                <li class="dropdown notification-list">
-                    <a class="nav-link dropdown-toggle nav-user arrow-none me-0"
-                       data-bs-toggle="dropdown"
-                       id="topbar-userdrop"
-                       href="#"
-                       role="button"
-                       aria-haspopup="true"
-                       aria-expanded="false">
-                        <span class="account-user-avatar">
-                            <img src="/static/images/simmate-icon.svg"
-                                 alt="user-image"
-                                 class="rounded-circle">
-                        </span>
-                        <span>
-                            <span class="account-user-name">{{ user.username }}</span>
-                            <span class="account-position">{{ user.email }}</span>
-                        </span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown"
-                         aria-labelledby="topbar-userdrop">
-                        <!-- item-->
-                        <a href="{% url 'profile' %}" class="dropdown-item notify-item">
-                            <i class="mdi mdi-account-circle me-1"></i>
-                            <span>My Account</span>
-                        </a>
-                        <!-- item
-                    <a href="#" class="dropdown-item notify-item">
-                        <i class="mdi mdi-account-edit me-1"></i>
-                        <span>Settings</span>
-                    </a>
--->
-                        <!-- item-->
-                        <a href="{% url 'contact' %}" class="dropdown-item notify-item">
-                            <i class="mdi mdi-email me-1"></i>
-                            <span>Contact Us</span>
-                        </a>
-                        <!-- item-->
-                        <a href="{% url 'account_logout' %}" class="dropdown-item notify-item">
-                            <i class="mdi mdi-logout me-1"></i>
-                            <span>Logout</span>
-                        </a>
+                {# Simmate Token button #}
+                <button type="button"
+                        class="btn btn-outline-light rounded-4 py-0 px-2 me-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#simmateModal">
+                    <img src="{% static 'images/simmate-token-icon.svg' %}" alt="" height="24">
+                    <b>1,215.01</b>
+                </button>
+                {# Simmate Token modal #}
+                <div class="modal fade" id="simmateModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Adjust Token Balance</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="post" action="#">
+                                {% csrf_token %}
+                                <div class="modal-body">
+                                    <div class="alert alert-success text-center">
+                                        <a href="{% url 'pricing' %}" class="alert-link"><small>Simmate tokens are free, so you can add (or remove) as much as you'd like. Please read our Pricing page for how these are used <i class="bi bi-box-arrow-up-right"></i></small></a>
+                                    </div>
+                                    <input type="number"
+                                           class="form-control"
+                                           id="tokenAmount"
+                                           name="tokenAmount"
+                                           step="1"
+                                           placeholder="1,000">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-success">Submit</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </li>
+                </div>
+                {# user name + profile button #}
+                <a class="btn btn-success me-2" href="{% url 'profile' %}">
+                    <i class="bi bi-person-circle"></i>&nbsp;&nbsp;
+                    {% if user.first_name %}
+                        {{ user.first_name }} {{ user.last_name }}
+                    {% else %}
+                        {{ user.username }}
+                    {% endif %}
+                </a>
+                {# logout button #}
+                <a class="btn btn-outline-secondary me-2"
+                   data-bs-toggle="modal"
+                   data-bs-target="#logoutModal">
+                    <i class="bi bi-door-open"></i>
+                </a>
+                {# logout confirmation modal #}
+                <div class="modal fade" id="logoutModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Confirm Logout</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">Are you sure you want to log out?</div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form method="post" action="{% url 'account_logout' %}">
+                                    {% csrf_token %}
+                                    {% if redirect_field_value %}
+                                        <input type="hidden"
+                                               name="{{ redirect_field_name }}"
+                                               value="{{ redirect_field_value }}" />
+                                    {% endif %}
+                                    <button type="submit" class="btn btn-danger">Yes, Logout</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             {% else %}
-                <li class="dropdown notification-list">
-                    <a class="nav-link dropdown-toggle nav-user arrow-none me-0"
-                       data-bs-toggle="dropdown"
-                       id="topbar-userdrop"
-                       href="#"
-                       role="button"
-                       aria-haspopup="true"
-                       aria-expanded="false">
-                        <span class="account-user-avatar">
-                            <img src="{% static 'images/simmate-icon.svg' %}"
-                                 alt="user-image"
-                                 class="rounded-circle">
-                        </span>
-                        <span>
-                            <span class="account-user-name">Anonymous</span>
-                            <span class="account-position">exploring w/o an account</span>
-                        </span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown"
-                         aria-labelledby="topbar-userdrop">
-                        <!-- item-->
-                        <a href="{% url 'account_login' %}" class="dropdown-item notify-item">
-                            <i class="mdi mdi-account-circle me-1"></i>
-                            <span>Sign In</span>
-                        </a>
-                        <!-- item-->
-                        <a href="{% url 'account_signup' %}" class="dropdown-item notify-item">
-                            <i class="mdi mdi-account-plus me-1"></i>
-                            <span>Create Account</span>
-                        </a>
-                        <!-- item-->
-                        <a href="{% url 'contact' %}" class="dropdown-item notify-item">
-                            <i class="mdi mdi-email me-1"></i>
-                            <span>Contact Us</span>
-                        </a>
-                    </div>
-                </li>
+                <a class="btn btn-success me-2" href="{% url 'account_login' %}"><i class="bi bi-key-fill"></i> Login</a>
+                {% simmate_setting "website.require_login_internal" as REQUIRE_LOGIN_INTERNAL %}
+                {% if not REQUIRE_LOGIN_INTERNAL %}
+                    <a class="btn btn-secondary me-2" href="{% url 'account_signup' %}"><i class="bi bi-person-plus"></i> Sign Up</a>
+                {% endif %}
             {% endif %}
-            <!-- end Account Login -->
-        </ul>
-        <a class="button-menu-mobile disable-btn">
-            <div class="lines">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </a>
+            {# light/dark mode button. Disabled for now #}
+            {% comment %}
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary border-0" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-circle-half"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <button class="dropdown-item" data-bs-theme-value="light">
+                                <i class="bi bi-brightness-high"></i> Light
+                            </button>
+                        </li>
+                        <li>
+                            <button class="dropdown-item" data-bs-theme-value="dark">
+                                <i class="bi bi-moon-stars"></i> Dark
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            {% endcomment %}
+        </div>
     </div>
-</div>
+</nav>

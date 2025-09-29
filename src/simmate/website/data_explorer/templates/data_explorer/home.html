@@ -5,33 +5,64 @@
     <section class="jumbotron text-center">
         <div class="container">
             <h1 class="jumbotron-heading">Data Explorer</h1>
-            <p class="lead text-muted">
-                View and manage individual datasets, where each option below represents a single database table.
-            </p>
+            <p class="lead text-muted">Each option below corresponds to a single table in our database. Select one to explore.</p>
         </div>
     </section>
-    {# List of Cards #}
-    <div class="row">
+    <div class="container-fluid mt-4">
+        {# Main loop for sections #}
         {% for section_name, datasets in data_config.items %}
             {% if datasets and section_name != "HIDDEN" %}
-                <h3 class="mt-4">{{ section_name }}</h3>
-                {% for dataset in datasets %}
-                    <div class="col-md-4">
-                        <div class="card border-primary border" style="height: 90%">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary">{{ dataset.html_display_name }}</h5>
-                                <p class="card-text">{{ dataset.html_description_short }}</p>
-                                <a href="{% url 'data_explorer:table' dataset.table_name %}"
-                                   class="btn btn-primary btn-sm">Explore</a>
-                                {% if dataset.external_website %}
-                                    <a href="{{ dataset.external_website }}"
-                                       target="_blank"
-                                       class="btn btn-secondary btn-sm">Source Website</a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
+                {# Section Heading #}
+                <h3 class="mt-4 mb-3 border-bottom pb-2 text-primary">{{ section_name }}</h3>
+                {# Start of the table for the current section #}
+                <div class="table-responsive mb-5">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-success">
+                            <tr>
+                                <th scope="col" style="width: 20%">Dataset</th>
+                                <th scope="col" style="width: 10%">Entries (#)</th>
+                                <th scope="col" style="width: 10%">Size (GB)</th>
+                                <th scope="col" style="width: 50%">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dataset in datasets %}
+                                <tr>
+                                    <td>
+                                        {# the extra style is to make the link be the entire cell #}
+                                        <a class="text-dark"
+                                           href="{% url 'data_explorer:table' dataset.table_name %}"
+                                           style="display: block;
+                                                  width: 100%;
+                                                  height: 100%;
+                                                  padding: 0;
+                                                  text-decoration: none">
+                                            {{ dataset.html_display_name }} <i class="bi bi-box-arrow-in-right"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {% if dataset.num_rows_cache is not None %}
+                                            {{ dataset.num_rows_cache|floatformat:0|intcomma }}
+                                        {% else %}
+                                            <span class="text-muted fst-italic">---</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if dataset.download_size_cache is not None %}
+                                            {{ dataset.download_size_cache|floatformat:0|intcomma }}
+                                        {% else %}
+                                            <span class="text-muted fst-italic">---</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ dataset.html_description_short }}</small>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {# End of the table for the current section #}
             {% endif %}
         {% endfor %}
     </div>

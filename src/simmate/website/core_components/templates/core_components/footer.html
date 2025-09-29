@@ -1,13 +1,8 @@
-<!-- bundle -->
-<script src="https://archives.simmate.org/assets/js/vendor.min.js"></script>
-<script src="https://archives.simmate.org/assets/js/app.min.js"></script>
-<!-- Load Javascript for Slider http://ionden.com/a/plugins/ion.rangeslider/index.html -->
-<script src="https://archives.simmate.org/assets/js/vendor/ion.rangeSlider.min.js"></script>
-<script src="https://archives.simmate.org/assets/js/ui/component.range-slider.js"></script>
-<!-- This script removes extra fields from API forms on GET method. 
-  Code is from https://stackoverflow.com/questions/5904437/
-  Where I found this link from https://stackoverflow.com/questions/46834539/
-  -->
+{% comment %}
+ This script removes extra fields from API forms on GET method. 
+  - https://stackoverflow.com/questions/5904437/
+  - https://stackoverflow.com/questions/46834539/
+{% endcomment %}
 <script>
     $(function() {
         var form = $('form')[0];
@@ -21,12 +16,11 @@
         });
     });
 </script>
-<!-- Extra javascript that enables copy-to-clipboard for a given element -->
+{# Extra javascript that enables copy-to-clipboard for a given element #}
 <script>
     function copyTextById(id2copy) {
-        // Get the text field
         var copyText = document.getElementById(id2copy);
-        // Copy the text inside the text field
         navigator.clipboard.writeText(copyText.innerHTML);
     }
 </script>
+<script>refresh_select2()</script>

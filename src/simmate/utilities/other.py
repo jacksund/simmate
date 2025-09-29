@@ -113,6 +113,7 @@ def str_to_datatype(
     value: str,
     type_mappings: dict = {},
     strip_quotes: bool = False,
+    allow_type_guessing: bool = False,
 ):
     """
     When given a parameter name and it's value as a string, this helper
@@ -138,15 +139,31 @@ def str_to_datatype(
     ```
     """
 
-    # If the value is not a string, then assume we are already in the
-    # correct format. Note, an incorrect format will throw an error
-    # somewhere below, which may be tricky for beginners to traceback.
+    # If the value is not a string, then assume we are already in the correct
+    # format. List mode can't do this because we'd still have list such as
+    # ["123", "345"] which might need converted to list[int] or something else.
     if not isinstance(value, str):
         return value
 
-    # next, try grabbing the type from mapping dictionary. If the parameter is
-    # not mapped, then we assume it is a str.
-    target_type = type_mappings.get(parameter, str)
+    # grab the type from mapping dictionary.
+    target_type = type_mappings.get(parameter, None)
+
+    # If the parameter is not mapped, we can try guessing OR just assume it
+    # is a str. Assuming it's a string is safer and the default.
+    if not target_type:
+        if allow_type_guessing:
+            if value.isdigit():
+                target_type = int
+            elif value.replace(".", "", 1).isdigit():
+                target_type = float
+            elif value.lower() in ["on", "true", "off", "false"]:
+                target_type = bool
+            elif value.lower() in ["none", ""]:
+                return None  # special case. return immediately
+            else:
+                target_type = str
+        else:
+            target_type = str
 
     # Now that we know the target type to convert to, we can go through
     # decide how to handle converting the value
@@ -173,9 +190,9 @@ def str_to_datatype(
         # Python is weird where bool("FALSE") will return True... So I need
         # to convert the string to lowercase and read it to know what to
         # return here.
-        if "t" in value.lower():
+        if "t" in value.lower() or value == "on":
             return True
-        elif "f" in value.lower():
+        elif "f" in value.lower() or value == "off":
             return False
 
     elif target_type == list[float]:

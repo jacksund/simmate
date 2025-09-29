@@ -1,6 +1,6 @@
 function refresh_select2() {
     // call this after an ajax request to init new select2 inputs
-    $('.select2').select2();;
+    $('.select2').select2({theme: 'bootstrap-5'});
 }
 function add_dynamic_select2() {
     // call this to allow dynamic input options
