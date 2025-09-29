@@ -76,6 +76,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `apps.ppdb`
 - added dev apps `chatbot` and `analysis_dashboard`
 - added `database.external_connectors` utils
+- added proof of concept htmx app for frontend forms
 
 **Refactors**
 
