@@ -2,6 +2,8 @@
 
 from concurrent.futures import ProcessPoolExecutor
 
+import numpy
+import pandas
 from rich.progress import track
 
 from simmate.toolkit import Molecule
@@ -17,6 +19,14 @@ class Featurizer:
     # considered a fork/refactor of it:
     #     https://github.com/hackingmaterials/matminer/blob/main/matminer/featurizers/base.py
 
+    @classmethod
+    def get_feature_names(cls, **kwargs) -> list[str]:
+        """
+        Grabs a list of the feature names to optionally be used when converting
+        the list of features to a dataframe.
+        """
+        return None
+
     @staticmethod
     def featurize(molecule: Molecule):
         """
@@ -31,15 +41,33 @@ class Featurizer:
         cls,
         molecules: list[Molecule] | list[any],  # any bc we use from_dynamic
         parallel: bool = False,
+        dataframe_format: str = "numpy",  # numpy, polars, pandas, or list
         **kwargs,
     ) -> list:
         """
         Generates fingerprints for a list of molecules in a serial or parallel manner.
         """
         if not parallel:
-            return cls._featurize_many_serial(molecules, **kwargs)
+            features = cls._featurize_many_serial(molecules, **kwargs)
         else:
-            return cls._featurize_many_parallel(molecules, **kwargs)
+            features = cls._featurize_many_parallel(molecules, **kwargs)
+
+        if dataframe_format == "list":
+            return features
+        elif dataframe_format == "numpy":
+            return numpy.array(features)
+        elif dataframe_format == "pandas":
+            return pandas.from_numpy(
+                data=numpy.array(features), schema=cls.get_feature_names(**kwargs)
+            )
+        elif dataframe_format == "polars":
+            import polars  # not an official dep yet
+
+            return polars.from_numpy(
+                data=numpy.array(features), schema=cls.get_feature_names(**kwargs)
+            )
+        else:
+            raise Exception(f"Unknown `dataframe_format`: {dataframe_format}")
 
     @classmethod
     def _featurize_many_serial(

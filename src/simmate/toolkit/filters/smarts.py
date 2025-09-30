@@ -16,12 +16,19 @@ class ManySmarts(Filter):
         cls,
         molecule: Molecule,
         smarts_list: list[Molecule],
+        mode: str = "all",
     ) -> bool:
-        # TODO: This will likely become a Molecule method in the future
-        # TODO: should this be an ANY or ALL clause? Or maybe an input kwarg?
-        for smarts in smarts_list:
-            # molecule.rdkit_molecule.GetSubstructMatches(smarts)
-            if molecule.rdkit_molecule.HasSubstructMatch(smarts):
-                return True
-        # It's false if we make it through the entire loop above
-        return False
+
+        if mode == "any":
+            # gives True if *any* smarts in the list match the molecule
+            for smarts in smarts_list:
+                if molecule.is_smarts_match(smarts):
+                    return True
+            return False
+
+        elif mode == "all":
+            # gives True only if *all* smarts in the list match the molecule
+            for smarts in smarts_list:
+                if not molecule.is_smarts_match(smarts):
+                    return False
+            return True

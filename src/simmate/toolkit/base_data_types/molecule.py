@@ -651,10 +651,7 @@ class Molecule:
         """
         return (
             AllChem.MolToSmiles(
-                AllChem.RemoveHs(
-                    self.rdkit_molecule,
-                    # sanitize=False,  # !!! BUG with eMolecules
-                ),
+                AllChem.RemoveHs(self.rdkit_molecule),
                 kekuleSmiles=kekulize,
             )
             if remove_hydrogen
@@ -675,12 +672,7 @@ class Molecule:
         Converts the current `Molecule` object to an INCHI string
         """
         return (
-            AllChem.MolToInchi(
-                AllChem.RemoveHs(
-                    self.rdkit_molecule,
-                    # sanitize=False,  # !!! BUG with eMolecules
-                )
-            )
+            AllChem.MolToInchi(AllChem.RemoveHs(self.rdkit_molecule))
             if remove_hydrogen
             else AllChem.MolToInchi(self.rdkit_molecule)
         )
@@ -690,12 +682,7 @@ class Molecule:
         Converts the current `Molecule` object to an INCHI key string
         """
         return (
-            AllChem.MolToInchiKey(
-                AllChem.RemoveHs(
-                    self.rdkit_molecule,
-                    # sanitize=False,  # !!! BUG with eMolecules
-                )
-            )
+            AllChem.MolToInchiKey(AllChem.RemoveHs(self.rdkit_molecule))
             if remove_hydrogen
             else AllChem.MolToInchiKey(self.rdkit_molecule)
         )
@@ -1536,26 +1523,26 @@ class Molecule:
         **kwargs,
     ):
         """
-        Generates a molecule fingerprint from one of several options.
-
-        Unlike underlying methods (e.g. `get_topological_fingerprint`), this method
-        includes higher level features such as converting to altnerative formats
-        (e.g. numpy array instead of RDkit bit vectory)
+        Generates a molecule fingerprint from one of several options and formats
         """
-        from ..featurizers.utilities import convert_rdkit_fingerprint
 
-        # generate fp
         if fingerprint_type == "topological":
-            rdkit_fp = self.get_topological_fingerprint(**kwargs)
+            return self.get_topological_fingerprint(**kwargs)
+
         elif fingerprint_type in ["circular", "morgan"]:
-            rdkit_fp = self.get_morgan_fingerprint(**kwargs)
+            return self.get_morgan_fingerprint(**kwargs)
+
         elif fingerprint_type == "pattern":
-            rdkit_fp = self.get_pattern_fingerprint(**kwargs)
+            from ..featurizers import PatternFingerprint
+
+            return PatternFingerprint.featurize(
+                molecule=self,
+                vector_type=vector_type,
+                **kwargs,
+            )
+
         else:
             raise Exception(f"Unknown fingerprint type: {type}")
-
-        # convert to requested format
-        return convert_rdkit_fingerprint(rdkit_fp, vector_type)
 
     def get_topological_fingerprint(self, **kwargs):
         """
@@ -1574,18 +1561,6 @@ class Molecule:
         """
         fpgen = AllChem.GetMorganGenerator(radius=radius, fpSize=size, **kwargs)
         return fpgen.GetCountFingerprint(self.rdkit_molecule)
-
-    def get_pattern_fingerprint(self, **kwargs):
-        """
-        Generates a pattern fingerprint, which can be used as a pre-screening
-        pattern before a SMARTS/substructure query.
-
-        Recommend scoring: DataStructs.AllProbeBitsMatch
-        """
-
-        from ..featurizers import PatternFingerprint
-
-        return PatternFingerprint.featurize(self.rdkit_molecule)
 
     # -------------------------------------------------------------------------
 
