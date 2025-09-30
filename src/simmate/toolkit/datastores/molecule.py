@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from pathlib import Path
 
 import polars
 
@@ -17,15 +18,12 @@ from ..featurizers.utilities import load_rdkit_fingerprint_from_base64
 
 class MoleculeStore:
     """
-    This class is intended for molecular datasets that are so large that
-    it becomes an issue to:
-        1. have in memory all at once
+    This class is intended for datasets with >10 million molecules, where it
+    becomes an issue to:
+        1. have toolkit objects in memory all at once (memory/ram)
         2. parse all molecule inputs into objs up front (cpu time)
         3. perform substructure or similarity searches in postgres
         4. store in postgres at all ($ or disk space)
-
-    We recommend using this class only if you are working with more than
-    10 million molecules.
 
     The primary use case for this class is efficient filtering of the dataset
     via similarity, substructure, or other common properties. Many of this
@@ -33,23 +31,26 @@ class MoleculeStore:
     module, where the key difference is pre-caching and lazy-loading of
     molecule objects to disk.
 
-    The class is focused only on 2D molecular formats and data at the moment, so
+    The class is focused only on 2D molecular formats at the moment, so
     SMILES format is required.
+
+    We selected polars as the backend for speed and easy file chunking
+    with parquet that can be used by other programs. If this class were to
+    need a rewrite using another backend, alternatives to consider are
+    pandas+dask, sqlite, or duckdb.
     """
 
-    # we select polars as the backend for speed and easy file writing/chunking
-    # with parquet that can be used by other programs. If this class were to
-    # need a rewrite using another backend, alternatives to consider are
-    # pandas+dask, sqlite, or duckdb
-
-    # list of csv files
-    # list of parquet files
-    # list of smi files
-    # list of sdf files
-
     local_path: str
+    """
+    Rative path to the directory where all parquet chunk files are stored.
+    
+    Use the `directory` property for the more robust Path object
+    """
 
     chunk_size: int = 1_000_000
+    """
+    Number of molecule (i.e. rows) per chunked parquet file
+    """
 
     metadata_columns: list[str] = []
 
@@ -63,10 +64,30 @@ class MoleculeStore:
 
     method_columns: dict = {}  # to_inchi_key included automatically
 
+    # -------------------------------------------------------------------------
+
     @classmethod
     @property
-    def directory(cls):
+    def directory(cls) -> Path:
+        """
+        Path object of the directory where all parquet chunk files are stored
+        """
         return get_directory(cls.local_path)
+
+    @classmethod
+    @property
+    def chunk_files(cls) -> list[Path]:
+        """
+        Returns a sorted list of existing parquet chunk files in the store directory.
+        """
+        chunk_files = [
+            f
+            for f in cls.directory.iterdir()
+            if f.is_file() and f.suffix == ".parquet" and f.stem.isnumeric()
+        ]
+        return sorted(chunk_files, key=lambda f: f.stem)
+
+    # -------------------------------------------------------------------------
 
     @classmethod
     def add_dataframe(cls, df: polars.DataFrame):
@@ -92,13 +113,7 @@ class MoleculeStore:
         # pose a memory issue in some cases. The current implementation below
         # is slower but more stable
 
-        logging.info("Checking current data store chunks...")
-        chunk_files = [
-            f
-            for f in cls.directory.iterdir()
-            if f.is_file() and f.suffix == ".parquet" and f.stem.isnumeric()
-        ]
-        chunk_files = sorted(chunk_files, key=lambda f: f.stem)
+        chunk_files = cls.get_chunk_files()
         current_chunk_index = int(chunk_files[-1].stem) + 1 if chunk_files else 0
         if chunk_files:
             logging.info(
@@ -165,3 +180,5 @@ class MoleculeStore:
         # del fingerprints
 
         return df
+
+    # -------------------------------------------------------------------------
