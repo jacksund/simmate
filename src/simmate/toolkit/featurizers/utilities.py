@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import numpy
-from rdkit.Chem import AllChem
+from rdkit.DataStructs.cDataStructs import ExplicitBitVect
 
 
 def convert_rdkit_fingerprint(
-    rdkit_fp: AllChem.DataStructs.cDataStructs.ExplicitBitVect,
+    rdkit_fp: ExplicitBitVect,
     vector_type: str,
-) -> any:
+) -> ExplicitBitVect | list | numpy.ndarray | str:
     """
     Converts an rdkit fingerprint object to some other common format. Options are:
         - rdkit (returns initial object)
         - list
         - numpy
-        - base64
+        - base64 (for cache-based storage on disk)
     """
 
     if vector_type == "rdkit":
@@ -26,3 +26,17 @@ def convert_rdkit_fingerprint(
         return numpy.array(rdkit_fp.ToBase64())
     else:
         raise Exception(f"Unknown fingerprint type: {vector_type}")
+
+
+def load_rdkit_fingerprint_from_base64(
+    fp_base64: str,
+    nbits: int = 2048,
+) -> ExplicitBitVect:
+    """
+    Reloads an rdkit fingerprint (ExplicitBitVect object) from a base64 string.
+
+    This is commonly used when fingerprints are cached to disk with large datasets
+    """
+    fp = ExplicitBitVect(2048)
+    fp.FromBase64(fp_base64)
+    return fp

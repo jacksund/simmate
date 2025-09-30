@@ -12,11 +12,12 @@ from ..featurizers import (
     PatternFingerprint,
     PropertyGrabber,
 )
+from ..featurizers.utilities import load_rdkit_fingerprint_from_base64
 
 
 class MoleculeStore:
     """
-    This class is intended to be a molecular dataset that is so large that
+    This class is intended for molecular datasets that are so large that
     it becomes an issue to:
         1. have in memory all at once
         2. parse all molecule inputs into objs up front (cpu time)
@@ -106,7 +107,7 @@ class MoleculeStore:
 
         # TODO: fill last file if it is not a full size chunk or combine it
         # with list below + rebuild it by default
-        total_chunks = (len(df) // cls.chunk_size) + 1 + current_chunk_index
+        total_chunks = (len(df) // cls.chunk_size) + current_chunk_index
         for chunk in chunk_list(df, cls.chunk_size):
             logging.info(f"Building chunk {current_chunk_index} of {total_chunks}...")
             chunk = cls._inflate_data_chunk(chunk)
