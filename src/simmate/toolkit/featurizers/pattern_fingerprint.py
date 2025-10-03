@@ -17,8 +17,6 @@ class PatternFingerprint(Featurizer):
     @staticmethod
     def featurize(
         molecule: Molecule,
-        radius: float = 2,
-        nbits: int = 1024,
         vector_type: str = "numpy",
         **kwargs,
     ) -> numpy.array:
