@@ -102,7 +102,7 @@ class MoleculeDataFrame:
             # assume we have a base64 str of the fingerprint
             fingerprints = [
                 load_rdkit_fingerprint_from_base64(fp)
-                for fp in self.df["pattern_fingerprint"]
+                for fp in track(self.df["pattern_fingerprint"])
             ]
             self.df = self.df.with_columns(
                 polars.Series("pattern_fingerprint", fingerprints)
@@ -189,20 +189,16 @@ class MoleculeDataFrame:
     def filter_substructure(
         self,
         molecule_query: Molecule,
-        limit: int = None,
+        limit: int = 20_000_000,
         nthreads: int = -1,
     ):
 
         molecule_query = Molecule.from_dynamic(molecule_query)
 
-        # BUG: passing None causes crashout
-        limit_kwarg = {"maxResults": limit} if limit else {}
-
         hit_ids = self.substructure_library.GetMatches(
             molecule_query.rdkit_molecule,
             numThreads=nthreads,
-            # maxResults=limit, # see bug comment above
-            **limit_kwarg,
+            maxResults=limit,  # BUG: rdkit has no way to allow unlimited
         )
         hit_ids = list(hit_ids)
 

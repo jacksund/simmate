@@ -23,7 +23,7 @@ def convert_rdkit_fingerprint(
     elif vector_type == "numpy":
         return numpy.array(rdkit_fp.ToList())
     elif vector_type == "base64":
-        return numpy.array(rdkit_fp.ToBase64())
+        return rdkit_fp.ToBase64()
     else:
         raise Exception(f"Unknown fingerprint type: {vector_type}")
 

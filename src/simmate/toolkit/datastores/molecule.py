@@ -112,6 +112,8 @@ class MoleculeStore:
         init_toolkit_objs: bool = False,
         init_substructure_lib: bool = False,
         init_morgan_fp_lib: bool = False,
+        # for all stages
+        parallel: bool = False,
         # then any django-like filters for columns (e.g. id__lte=100)
         **kwargs,
     ) -> MoleculeDataFrame:
@@ -125,22 +127,22 @@ class MoleculeStore:
         if limit:
             lazy_df.limit(limit)
 
-        if similarity:
-            pass  # TODO
-
-        if smarts:
-            pass  # TODO
-
         # execute the query (not including similarity/substructure)
+        logging.info("Loading from datastore...")
         df = lazy_df.collect()
 
         # load_rdkit_fingerprint_from_base64
+        if similarity:
+            pass  # TODO
+        if smarts:
+            pass  # TODO
 
         return MoleculeDataFrame.from_polars(
             df,
             init_toolkit_objs=init_toolkit_objs,
             init_substructure_lib=init_substructure_lib,
             init_morgan_fp_lib=init_morgan_fp_lib,
+            parallel=parallel,
         )
 
     # -------------------------------------------------------------------------
@@ -169,7 +171,7 @@ class MoleculeStore:
         # pose a memory issue in some cases. The current implementation below
         # is slower but more stable
 
-        chunk_files = cls.get_chunk_files()
+        chunk_files = cls.chunk_files
         current_chunk_index = int(chunk_files[-1].stem) + 1 if chunk_files else 0
         if chunk_files:
             logging.info(
