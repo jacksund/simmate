@@ -116,11 +116,6 @@ class MoleculeStore:
         **kwargs,
     ) -> MoleculeDataFrame:
 
-        # TODO: add check to ensure user has enough RAM
-        # For the smiles strs alone, you need ~1.5gb per 10mil molecules
-        # For the substruct lib, you need ~4.5gb per 10mil molecules
-        # For the morgan fp lib, you need ___gb per 10mil molecules
-
         data_str = str(cls.chunk_files_wildcard)
         lazy_df = polars.scan_parquet(data_str)
 

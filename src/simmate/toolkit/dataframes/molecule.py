@@ -6,6 +6,7 @@ from pathlib import Path
 
 import polars
 from rdkit.Chem import rdSubstructLibrary
+from rich.progress import track
 
 from simmate.toolkit import Molecule
 from simmate.utilities import chunk_list, filter_polars_df, get_directory
@@ -29,8 +30,13 @@ class MoleculeDataFrame:
     will be performing many operations/queries on and have plenty of RAM to
     keep fingerprints and/or molecule objects stored in RAM with it.
 
-    The polars lazy queries are not yet supported
+    Lazy queries are not supported
     """
+
+    # TODO: add check to ensure user has enough RAM
+    # For the smiles strs alone, you need ~1.5gb per 10mil molecules
+    # For the substruct lib, you need ~4.5gb per 10mil molecules
+    # For the morgan fp lib, you need ___gb per 10mil molecules
 
     def __init__(
         self,
@@ -38,35 +44,93 @@ class MoleculeDataFrame:
         init_toolkit_objs: bool = False,
         init_substructure_lib: bool = False,
         init_morgan_fp_lib: bool = False,
+        parallel: bool = False,
     ):
 
-        if any([c not in df.columns for c in ["smiles", "molecule", "molecule_obj"]]):
+        if all([c not in df.columns for c in ["smiles", "molecule", "molecule_obj"]]):
             raise Exception(
                 "The dataframe must have a `smiles`, `molecule`, or `molecule_obj` column "
                 "in order to generate a full dataframe."
             )
 
         self.df = df
+        if init_toolkit_objs and "molecule_obj" not in df.columns:
+            self.init_toolkit_objs(parallel=parallel)
+        if init_substructure_lib:
+            self.init_substructure_lib(parallel=parallel)
+        if init_morgan_fp_lib:
+            self.init_morgan_fp_lib(parallel=parallel)
 
-        if init_toolkit_objs and "molecule_obj" not in self.df.columns:
+    # init methods are kept separate to keep code organized and also allow cols
+    # to be populated dynamically at a later time
+
+    def init_toolkit_objs(self, parallel: bool = False):
+        # priority of columns goes..
+        # 1. molecule_obj (ie nothing to do)
+        # 2. molecule (use from_dynamic)
+        # 3. smiles (use from_smiles)
+        logging.info("Building `toolkit.Molecule` objects...")
+
+        if "molecule_obj" in self.df.columns:
+            pass  # nothing to do
+
+        elif "molecule" in self.df.columns:
+            mol_objs = [Molecule.from_dynamic(m) for m in track(self.df["molecule"])]
+            self.df = self.df.with_columns(polars.Series("molecule_obj", mol_objs))
+
+        elif "smiles" in self.df.columns:
+            mol_objs = [Molecule.from_smiles(m) for m in track(self.df["smiles"])]
+            self.df = self.df.with_columns(polars.Series("molecule_obj", mol_objs))
+
+    def init_substructure_lib(self, parallel: bool = False):
+        logging.info(
+            "Building `pattern_fingerprint` column for substructure searches..."
+        )
+        mol_col = self._get_molecule_column()
+
+        if "pattern_fingerprint" not in self.df.columns:
+            fingerprints = PatternFingerprint.featurize_many(
+                molecules=self.df[mol_col],
+                parallel=parallel,
+                vector_type="rdkit",
+            )
+            self.df = self.df.with_columns(
+                polars.Series("pattern_fingerprint", fingerprints)
+            )
+
+        elif isinstance(self.df["pattern_fingerprint"][0], str):
+            # assume we have a base64 str of the fingerprint
+            fingerprints = [
+                load_rdkit_fingerprint_from_base64(fp)
+                for fp in self.df["pattern_fingerprint"]
+            ]
+            self.df = self.df.with_columns(
+                polars.Series("pattern_fingerprint", fingerprints)
+            )
+        else:
+            pass  # assume pattern_fingerprint col is already in correct format
+
+    def init_morgan_fp_lib(self, parallel: bool = False):
+        raise NotImplementedError("")  # TODO
+        logging.info(
+            "Building `morgan_fingerprint` column for 2D similarity searches..."
+        )
+        mol_col = self._get_molecule_column()
+        if "morgan_fingerprint" not in self.df.columns:
+            pass
+        elif isinstance(self.df["morgan_fingerprint"][0], str):
+            pass
+        else:
             pass
 
-        if init_substructure_lib:
-
-            if "pattern_fingerprint" not in self.df.columns:
-                pass
-            elif isinstance(self.df["pattern_fingerprint"][0], str):
-                pass
-            else:
-                pass
-
-        if init_morgan_fp_lib:
-            if "morgan_fingerprint" not in self.df.columns:
-                pass
-            elif isinstance(self.df["morgan_fingerprint"][0], str):
-                pass
-            else:
-                pass
+    def _get_molecule_column(self):
+        priority_order = ["molecule_obj", "molecule", "smiles"]
+        for col_name in priority_order:
+            if col_name in self.df.columns:
+                return col_name
+        raise ValueError(
+            f"DataFrame does not contain any of the accepted molecule columns: {priority_order}"
+        )
 
     # -------------------------------------------------------------------------
 
@@ -128,21 +192,27 @@ class MoleculeDataFrame:
         limit: int = None,
         nthreads: int = -1,
     ):
+
         molecule_query = Molecule.from_dynamic(molecule_query)
+
+        # BUG: passing None causes crashout
+        limit_kwarg = {"maxResults": limit} if limit else {}
+
         hit_ids = self.substructure_library.GetMatches(
             molecule_query.rdkit_molecule,
-            maxResults=None,
             numThreads=nthreads,
+            # maxResults=limit, # see bug comment above
+            **limit_kwarg,
         )
         hit_ids = list(hit_ids)
 
         # hits = [df[i] for i in hit_ids]
         filtered_df = (
-            self.with_row_index("row_index")  # Add a temporary row_index column
+            self.df.with_row_index("row_index")  # Add a temporary row_index column
             .filter(polars.col("row_index").is_in(hit_ids))  # Filter using the list
             .drop("row_index")  # Drop the temporary index column
         )
-        return filtered_df
+        return self.__class__(filtered_df)
 
     def filter_similarity_2d(
         self,
@@ -158,18 +228,21 @@ class MoleculeDataFrame:
     @cached_property
     def substructure_library(self):
         logging.info("Generating substructure library...")
-        if "smiles" not in self.columns or "pattern_fingerprint" not in self.columns:
+        if (
+            "smiles" not in self.df.columns
+            or "pattern_fingerprint" not in self.df.columns
+        ):
             raise Exception(
                 "The dataframe must have both `smiles` and `pattern_fingerprint` "
                 "columns in order to generate a substructure library."
             )
 
         molecule_library = rdSubstructLibrary.CachedTrustedSmilesMolHolder()
-        _ = [molecule_library.AddSmiles(r[1]) for r in self["smiles"]]
+        [molecule_library.AddSmiles(r) for r in self.df["smiles"]]
 
         # load_rdkit_fingerprint_from_base64 if instance base64 str
         fingerprint_library = rdSubstructLibrary.PatternHolder()
-        _ = [fingerprint_library.AddFingerprint(r) for r in self["pattern_fingerprint"]]
+        [fingerprint_library.AddFingerprint(r) for r in self.df["pattern_fingerprint"]]
 
         library = rdSubstructLibrary.SubstructLibrary(
             molecule_library,
