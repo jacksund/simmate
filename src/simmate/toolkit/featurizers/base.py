@@ -41,7 +41,7 @@ class Featurizer:
         cls,
         molecules: list[Molecule] | list[any],  # any bc we use from_dynamic
         parallel: bool = False,
-        dataframe_format: str = "numpy",  # numpy, polars, pandas, or list
+        dataframe_format: str = "list",  # numpy, polars, pandas, or list
         **kwargs,
     ) -> list:
         """

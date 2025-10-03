@@ -5,8 +5,10 @@ from pathlib import Path
 
 import polars
 
-from simmate.utilities import chunk_list, get_directory
+from simmate.toolkit import Molecule
+from simmate.utilities import chunk_list, filter_polars_df, get_directory
 
+from ..dataframes import MoleculeDataFrame
 from ..featurizers import (
     MethodCaller,
     MorganFingerprint,
@@ -86,6 +88,65 @@ class MoleculeStore:
             if f.is_file() and f.suffix == ".parquet" and f.stem.isnumeric()
         ]
         return sorted(chunk_files, key=lambda f: f.stem)
+
+    @classmethod
+    @property
+    def chunk_files_wildcard(cls) -> Path:
+        """
+        Wildcard path object for the directory + all parquet files in it.
+        """
+        return cls.directory / "*.parquet"
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def filter_to_dataframe(
+        cls,
+        # note these are done *lazily* and any generated fingerprints are not
+        # kept (to keep memory use low). This is counter to the MoleculeDataFrame
+        # where fingerprints a kept once generated.
+        similarity: Molecule = None,
+        smarts: list[Molecule] = None,
+        limit: int = None,
+        # for the final df, whether to build out extra mol features into memory
+        init_toolkit_objs: bool = False,
+        init_substructure_lib: bool = False,
+        init_morgan_fp_lib: bool = False,
+        # then any django-like filters for columns (e.g. id__lte=100)
+        **kwargs,
+    ) -> MoleculeDataFrame:
+
+        # TODO: add check to ensure user has enough RAM
+        # For the smiles strs alone, you need ~1.5gb per 10mil molecules
+        # For the substruct lib, you need ~4.5gb per 10mil molecules
+        # For the morgan fp lib, you need ___gb per 10mil molecules
+
+        data_str = str(cls.chunk_files_wildcard)
+        lazy_df = polars.scan_parquet(data_str)
+
+        if kwargs:
+            lazy_df = filter_polars_df(lazy_df, **kwargs)
+
+        if limit:
+            lazy_df.limit(limit)
+
+        if similarity:
+            pass  # TODO
+
+        if smarts:
+            pass  # TODO
+
+        # execute the query (not including similarity/substructure)
+        df = lazy_df.collect()
+
+        # load_rdkit_fingerprint_from_base64
+
+        return MoleculeDataFrame.from_polars(
+            df,
+            init_toolkit_objs=init_toolkit_objs,
+            init_substructure_lib=init_substructure_lib,
+            init_morgan_fp_lib=init_morgan_fp_lib,
+        )
 
     # -------------------------------------------------------------------------
 
