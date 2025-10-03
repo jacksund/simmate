@@ -553,18 +553,18 @@ class Molecule:
         """
         # if the input is already a toolkit molecule, just return it back
         if isinstance(molecule, cls):
-            molecule_cleaned = molecule
+            return molecule
 
         elif isinstance(molecule, bytes):
-            molecule_cleaned = cls.from_binary(molecule)
+            return cls.from_binary(molecule)
 
         # if the string contains an "END" then we have an SDF
         elif isinstance(molecule, str) and ("END" in molecule or "$$$$" in molecule):
-            molecule_cleaned = cls.from_sdf(molecule)
+            return cls.from_sdf(molecule)
 
         # if the string contains an "END" then we have an SDF
         elif isinstance(molecule, str) and molecule.startswith("InChI="):
-            molecule_cleaned = cls.from_inchi(molecule)
+            return cls.from_inchi(molecule)
 
         # if the value is a str and it relates to a filepath, then we load the
         # structure from a file.
@@ -582,7 +582,7 @@ class Molecule:
             ]
         ):
             if Path(molecule).exists():
-                molecule_cleaned = cls.from_file(molecule)
+                return cls.from_file(molecule)
             else:
                 raise FileNotFoundError(
                     "Are you trying to provide a filename as your input molecule? "
@@ -596,7 +596,7 @@ class Molecule:
         # common input so we should either move this up or have a smarter check
         elif isinstance(molecule, str):
             try:
-                molecule_cleaned = cls.from_smiles(molecule)
+                return cls.from_smiles(molecule)
             except:
                 raise Exception("Unknown string format OR incorrect smiles.")
 
@@ -611,8 +611,6 @@ class Molecule:
                 "Unknown format provided for molecule input. "
                 f"{type(molecule)} was provided."
             )
-
-        return molecule_cleaned
 
     # -------------------------------------------------------------------------
 
@@ -653,10 +651,7 @@ class Molecule:
         """
         return (
             AllChem.MolToSmiles(
-                AllChem.RemoveHs(
-                    self.rdkit_molecule,
-                    # sanitize=False,  # !!! BUG with eMolecules
-                ),
+                AllChem.RemoveHs(self.rdkit_molecule),
                 kekuleSmiles=kekulize,
             )
             if remove_hydrogen
@@ -677,12 +672,7 @@ class Molecule:
         Converts the current `Molecule` object to an INCHI string
         """
         return (
-            AllChem.MolToInchi(
-                AllChem.RemoveHs(
-                    self.rdkit_molecule,
-                    # sanitize=False,  # !!! BUG with eMolecules
-                )
-            )
+            AllChem.MolToInchi(AllChem.RemoveHs(self.rdkit_molecule))
             if remove_hydrogen
             else AllChem.MolToInchi(self.rdkit_molecule)
         )
@@ -692,12 +682,7 @@ class Molecule:
         Converts the current `Molecule` object to an INCHI key string
         """
         return (
-            AllChem.MolToInchiKey(
-                AllChem.RemoveHs(
-                    self.rdkit_molecule,
-                    # sanitize=False,  # !!! BUG with eMolecules
-                )
-            )
+            AllChem.MolToInchiKey(AllChem.RemoveHs(self.rdkit_molecule))
             if remove_hydrogen
             else AllChem.MolToInchiKey(self.rdkit_molecule)
         )
@@ -1538,27 +1523,24 @@ class Molecule:
         **kwargs,
     ):
         """
-        Generates a molecule fingerprint from one of several options.
-
-        Unlike underlying methods (e.g. `get_topological_fingerprint`), this method
-        includes higher level features such as converting to altnerative formats
-        (e.g. numpy array instead of RDkit bit vectory)
+        Generates a molecule fingerprint from one of several options and formats
         """
-        # generate fp
-        if fingerprint_type == "topological":
-            rdkit_fp = self.get_topological_fingerprint(**kwargs)
-        elif fingerprint_type in ["circular", "morgan"]:
-            rdkit_fp = self.get_morgan_fingerprint(**kwargs)
-        else:
-            raise Exception(f"Unknown fingerprint type: {type}")
 
-        # convert to requested format
-        if vector_type == "rdkit":
-            return rdkit_fp
-        elif vector_type == "list":
-            return rdkit_fp.ToList()
-        elif vector_type == "numpy":
-            return numpy.array(rdkit_fp.ToList())
+        if fingerprint_type == "topological":
+            return self.get_topological_fingerprint(**kwargs)
+
+        elif fingerprint_type in ["circular", "morgan"]:
+            return self.get_morgan_fingerprint(**kwargs)
+
+        elif fingerprint_type == "pattern":
+            from ..featurizers import PatternFingerprint
+
+            return PatternFingerprint.featurize(
+                molecule=self,
+                vector_type=vector_type,
+                **kwargs,
+            )
+
         else:
             raise Exception(f"Unknown fingerprint type: {type}")
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .dataframes import filter_df
+from .dataframes import filter_pandas_df, filter_polars_df
 from .files import (
     archive_old_runs,
     chunk_read,
