@@ -8,8 +8,8 @@ import simmate.toolkit.creators as creation_module
 import simmate.toolkit.transformations as transform_module
 import simmate.toolkit.transformations.from_ase as ase_transform_module
 from simmate.database.base_data_types import DatabaseTable, table_column
-from simmate.engine.execution import WorkItem
 from simmate.toolkit import Composition
+from simmate.workflows.execution import WorkItem
 
 
 class SteadystateSource(DatabaseTable):
@@ -58,7 +58,7 @@ class SteadystateSource(DatabaseTable):
             print("You can preview ALL failed jobs in the command line:")
             print("simmate engine show-error-summary\n")
             print("Or view a specific error (w. full trackback) in python:")
-            print("from simmate.engine.execution import WorkItem")
+            print("from simmate.workflows.execution import WorkItem")
             print(f"item = WorkItem.objects.get(id={failed_ids[0]})")
             print("item.result()\n")
             print(

@@ -18,8 +18,8 @@ or
 [VaspWorkflow](https://jacksund.github.io/simmate/full_guides/workflows/third_party_software/vasp/overview/)
 """
 
-from simmate.engine import Workflow, workflow
 from simmate.toolkit import Structure
+from simmate.workflows import Workflow, workflow
 
 # Import our tables from the other files.
 from .models import MyCustomTable2

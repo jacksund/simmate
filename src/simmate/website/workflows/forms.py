@@ -3,8 +3,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from simmate.engine import Workflow
 from simmate.toolkit import Structure
+from simmate.workflows import Workflow
 
 # TODO:
 # class SubmitWorkflowYaml(forms.ModelForm):

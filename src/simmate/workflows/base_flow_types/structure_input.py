@@ -3,8 +3,9 @@
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-from simmate.engine import Workflow
 from simmate.toolkit import Structure
+
+from .base import Workflow
 
 
 class StructureWorkflow(Workflow):

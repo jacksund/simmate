@@ -111,7 +111,7 @@ The `simmate.database` module is an independent implementation that builds off o
 
 ## Workflow Engine
 
-The `simmate.engine` module builds off of Prefect where a lot of the core functionality is inspired by [fireworks](https://github.com/materialsproject/fireworks) and [custodian](https://github.com/materialsproject/custodian).
+The `simmate.workflows` module builds off of Prefect where a lot of the core functionality is inspired by [fireworks](https://github.com/materialsproject/fireworks) and [custodian](https://github.com/materialsproject/custodian).
 
 ### `engine.s3task` alternatives
 - [custodian](https://github.com/materialsproject/custodian)

@@ -40,8 +40,8 @@ input_parameters:
 
 import logging
 
-from simmate.engine import Workflow
-from simmate.workflows.base_flow_types import S3Workflow
+from .base import Workflow
+from .s3 import S3Workflow
 
 
 class Customized__Toolkit__UserConfig(Workflow):

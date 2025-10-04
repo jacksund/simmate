@@ -6,7 +6,7 @@ from pathlib import Path
 from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.apps.vasp.inputs import Incar
-from simmate.engine import ErrorHandler
+from simmate.workflows import ErrorHandler
 
 
 class Unconverged(ErrorHandler):

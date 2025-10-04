@@ -18,7 +18,7 @@ class ErrorHandler(ABC):
 
     As an example of creating a custom error handler for your tasks:
     ``` python
-    from simmate.engine import ErrorHandler
+    from simmate.workflows import ErrorHandler
 
     class ExampleHandler(ErrorHandler):
 

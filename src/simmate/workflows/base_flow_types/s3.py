@@ -10,8 +10,10 @@ from pathlib import Path
 
 import pandas
 
-from simmate.engine import ErrorHandler, Workflow
 from simmate.utilities import get_directory, make_error_archive
+
+from ..error_handler import ErrorHandler
+from .base import Workflow
 
 
 class S3Workflow(Workflow):

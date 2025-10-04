@@ -16,7 +16,7 @@ Simmate therefore let's you build workflows from a `Workflow` class, rather than
 Taking our `add` workflow from the previous tutorial:
 
 ``` python
-from simmate.engine import Workflow
+from simmate.workflows import Workflow
 
 class Math__Basic__Add(Workflow):
 

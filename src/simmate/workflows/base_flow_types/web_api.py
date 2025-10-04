@@ -2,7 +2,7 @@
 
 import requests
 
-from simmate.engine import Workflow
+from .base import Workflow
 
 
 class WebApiWorkflow(Workflow):

@@ -5,7 +5,7 @@ from pathlib import Path
 
 from simmate.configuration import settings
 
-from .s3_workflow import S3Workflow
+from .s3 import S3Workflow
 
 
 class Maintenance__Postgres__PgDump(S3Workflow):

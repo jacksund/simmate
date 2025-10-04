@@ -17,7 +17,7 @@ result = add(x=1, y=2)
 
 2. To make this a Simmate workflow, we need to (a) add the `@workflow` decorator and (b) make sure we include `**kwargs` as an input. The `add` function will then become a `Workflow`. This means we have access to a `run` method that adds extra functionality for us and returns a future-like object:
 ```python
-from simmate.engine import workflow
+from simmate.workflows import workflow
 
 @workflow
 def add(x, y, **kwargs):
@@ -46,7 +46,7 @@ result = status.result()
 
 1. As more advanced example, here is a workflow that converts a structure to a primitive unitcell and writes it to a CIF file:
     ``` python
-    from simmate.engine import workflow
+    from simmate.workflows import workflow
 
     @workflow
     def write_primitive(structure, directory, **kwargs):
@@ -80,7 +80,7 @@ result = status.result()
 
 3. To make a `Workflow` class, we must (i) set the class name using Simmate conventions (see full guides) and (ii) define a `run_config` method as a `@staticmethod` OR a `@classmethod`.
     ``` python
-    from simmate.engine import Workflow
+    from simmate.workflows import Workflow
 
     class Example__Basic__WritePrimitive(Workflow):
 

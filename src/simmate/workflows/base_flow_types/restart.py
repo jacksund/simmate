@@ -4,9 +4,10 @@ from pathlib import Path
 
 import yaml
 
-from simmate.engine import Workflow
 from simmate.utilities import copy_directory
 from simmate.workflows.utilities import get_workflow
+
+from .base import Workflow
 
 
 class Restart__Toolkit__Automatic(Workflow):

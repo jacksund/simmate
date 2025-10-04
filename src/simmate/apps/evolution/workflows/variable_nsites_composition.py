@@ -9,8 +9,8 @@ from simmate.apps.evolution.models.variable_nsites_composition import (
 from simmate.apps.evolution.workflows.fixed_composition import (
     StructurePrediction__Toolkit__FixedComposition,
 )
-from simmate.engine import Workflow
 from simmate.toolkit import Composition
+from simmate.workflows import Workflow
 
 
 class StructurePrediction__Toolkit__VariableNsitesComposition(Workflow):

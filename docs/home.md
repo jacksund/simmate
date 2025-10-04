@@ -112,7 +112,7 @@ Simmate can easily scale along with your project, whether you're on a single com
 
 === "create workflow"
     ```python
-    from simmate.engine import workflow
+    from simmate.workflows import workflow
 
     @workflow
     def hello(name, **kwargs):  # (1)
