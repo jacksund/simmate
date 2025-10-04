@@ -79,7 +79,6 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added proof of concept htmx app for frontend forms
 - added `toolkit.datastores` and `toolkit.dataframes` helper modules
 
-
 **Refactors**
 
 - refactored website's workflow tab to use new API backend
@@ -89,6 +88,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - `DynamicApiView` was split up into separate views for easier debugging and future enhancements
 - `website.engine` apps and others are condensed into `core_components`, `data_explorer`, and `workflows` apps
 - refactored `toolkit.featurizers` module
+- moved all of `simmate.engine` module into `simmate.workflows`
 
 **Fixes**
 
