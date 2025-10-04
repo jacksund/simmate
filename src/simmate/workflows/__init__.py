@@ -11,5 +11,5 @@ from .error_handler import ErrorHandler
 # that models can be imported.
 from simmate.database import connect
 
-from .workflow import Workflow, workflow
+from .base_flow_types import Workflow, workflow
 from .execution import SimmateWorker as Worker

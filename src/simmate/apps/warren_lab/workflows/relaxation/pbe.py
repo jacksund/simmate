@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from simmate.apps.vasp.error_handlers import Edddav  # Frozen,
 from simmate.apps.vasp.error_handlers import (
     Brions,
     Brmix,
-    Edddav,  # Frozen,
     Eddrmm,
     Edwav,
     ElfKpar,

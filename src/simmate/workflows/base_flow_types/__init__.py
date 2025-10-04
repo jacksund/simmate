@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .base import Workflow
+from .base import Workflow, workflow
 from .pg_dump import Maintenance__Postgres__PgDump
 from .s3 import S3Workflow
 from .staged import StagedWorkflow

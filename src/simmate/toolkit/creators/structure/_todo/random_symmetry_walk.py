@@ -7,9 +7,9 @@ from numpy.random import choice, shuffle
 
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.lattice import RSLSmartVolume
-from simmate.toolkit.creators.sites.random_wyckoff import (
+from simmate.toolkit.creators.sites.random_wyckoff import (  # !!! this will move to simmate.toolkit.symmetry in the future
     asymmetric_unit_boundries,
-)  # !!! this will move to simmate.toolkit.symmetry in the future
+)
 from simmate.toolkit.creators.vector import UniformlyDistributedVectors
 from simmate.toolkit.symmetry.wyckoff import loadWyckoffData
 

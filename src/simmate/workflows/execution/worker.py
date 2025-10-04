@@ -194,9 +194,7 @@ class SimmateWorker:
                 )
 
                 # local import to prevent circular import issues
-                from simmate.workflows.base_flow_types.s3_workflow import (
-                    CommandNotFoundError,
-                )
+                from simmate.workflows.base_flow_types.s3 import CommandNotFoundError
 
                 # The most common error (by far) is a command-not-found issue.
                 # We want to handle this separately -- whereas other exceptions

@@ -8,8 +8,8 @@ import plotly.graph_objects as go
 from dask.distributed import Client
 from matminer.featurizers.site import CrystalNNFingerprint as cnnf
 from matminer.featurizers.structure.sites import (
-    SiteStatsFingerprint as pssf,
-)  # PartialsSiteStatsFingerprint
+    SiteStatsFingerprint as pssf,  # PartialsSiteStatsFingerprint
+)
 from plotly.offline import plot
 from rich.progress import track
 
