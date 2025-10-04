@@ -9,8 +9,8 @@ from pathlib import Path
 from typing import Literal
 
 from simmate.apps.badelf.core.badelf import SpinBadElfToolkit
-from simmate.engine import Workflow
 from simmate.toolkit import Structure
+from simmate.workflows import Workflow
 
 # This file contains workflows for performing Bader and BadELF. Parts of the code
 # use the Henkelman groups algorithm for Bader analysis:

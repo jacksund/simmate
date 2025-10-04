@@ -16,13 +16,13 @@ from django.utils import timezone
 import simmate
 from simmate.configuration import settings
 from simmate.database.base_data_types import Calculation
-from simmate.engine.execution import SimmateExecutor, WorkItem
 from simmate.utilities import (
     copy_directory,
     copy_files_from_directory,
     get_directory,
     make_archive,
 )
+from simmate.workflows.execution import SimmateExecutor, WorkItem
 
 
 class DummyState:

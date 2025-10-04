@@ -2,8 +2,8 @@
 
 import pytest
 
-from simmate.engine import Workflow
 from simmate.website.test_app.models import TestCalculation
+from simmate.workflows import Workflow
 
 
 class DummyProject__DummyCaclulator__DummyPreset(Workflow):

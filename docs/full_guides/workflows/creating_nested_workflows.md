@@ -8,7 +8,7 @@ You can use the `run` method of a workflow within another workflow for repeated 
 
 ``` python
 from simmate.workflows.utilities import get_workflow
-from simmate.engine import Workflow
+from simmate.workflows import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -35,7 +35,7 @@ You can call a series of workflows on an input. The `run_config` accepts any Pyt
 
 ``` python
 from simmate.workflows.utilities import get_workflow
-from simmate.engine import Workflow
+from simmate.workflows import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -60,7 +60,7 @@ To save the results of all workflows in a single location, manually set the dire
 
 ``` python
 from simmate.workflows.utilities import get_workflow
-from simmate.engine import Workflow
+from simmate.workflows import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -89,7 +89,7 @@ You can pass the result from one subworkflow to the next subworkflow by interact
 
 ``` python
 from simmate.workflows.utilities import get_workflow
-from simmate.engine import Workflow
+from simmate.workflows import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -125,7 +125,7 @@ A workflow can require a file from a previous calculation as an input. This can 
 
 ``` python
 from simmate.workflows.utilities import get_workflow
-from simmate.engine import Workflow
+from simmate.workflows import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     
@@ -164,7 +164,7 @@ For situations where you don't want to wait for each workflow run to finish or n
 
 ``` python
 from simmate.workflows.utilities import get_workflow
-from simmate.engine import Workflow
+from simmate.workflows import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):
     

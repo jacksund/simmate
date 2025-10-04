@@ -23,7 +23,7 @@ def start_schedules():
     """
     Starts the main process for periodic tasks in each app's "schedules" module.
     """
-    from simmate.engine.scheduler import SimmateScheduler
+    from simmate.workflows.scheduler import SimmateScheduler
 
     SimmateScheduler.start()
 
@@ -56,7 +56,7 @@ def start_worker(
     To provide multiple use `--tag example1 --tag example2` etc.
     """
 
-    from simmate.engine import Worker
+    from simmate.workflows import Worker
 
     worker = Worker(
         nitems_max,
@@ -81,7 +81,7 @@ def start_singleflow_worker():
     `simmate engine start-worker --nitems-max 1 --close-on-empty-queue`
     """
 
-    from simmate.engine import Worker
+    from simmate.workflows import Worker
 
     Worker.run_singleflow_worker()
 
@@ -104,7 +104,7 @@ def start_cluster(
 
     """
 
-    from simmate.engine.execution.utilities import start_cluster
+    from simmate.workflows.execution.utilities import start_cluster
 
     start_cluster(
         nworkers=nworkers,
@@ -118,7 +118,7 @@ def error_summary():
     """
     Prints the shorthand error for all failed jobs
     """
-    from simmate.engine.execution import SimmateExecutor
+    from simmate.workflows.execution import SimmateExecutor
 
     SimmateExecutor.show_error_summary()
 
@@ -128,7 +128,7 @@ def stats():
     """
     Prints a summary of different workitems and their status
     """
-    from simmate.engine.execution import SimmateExecutor
+    from simmate.workflows.execution import SimmateExecutor
 
     SimmateExecutor.show_stats()
 
@@ -144,7 +144,7 @@ def stats_detail(tag: list[str] = [], recent: float = None):
     - `recent`: show only items that have been updated in the last N hours.
     For example `--recent 24` limits to jobs editted in the last 24 hrs
     """
-    from simmate.engine.execution import SimmateExecutor
+    from simmate.workflows.execution import SimmateExecutor
 
     SimmateExecutor.show_stats_detail(
         tags=tag,
@@ -166,7 +166,7 @@ def workitems(tag: list[str] = [], status: str = None, recent: float = None):
     For example `--recent 24` limits to jobs editted in the last 24 hrs
 
     """
-    from simmate.engine.execution import SimmateExecutor
+    from simmate.workflows.execution import SimmateExecutor
 
     SimmateExecutor.show_workitems(
         tags=tag,
@@ -180,7 +180,7 @@ def delete_finished(confirm: bool = False):
     """
     Deletes all finished workitems from the database
     """
-    from simmate.engine.execution import SimmateExecutor
+    from simmate.workflows.execution import SimmateExecutor
 
     SimmateExecutor.delete_finished(confirm)
 
@@ -190,7 +190,7 @@ def delete_all(confirm: bool = False):
     """
     Deletes all workitems from the database
     """
-    from simmate.engine.execution import SimmateExecutor
+    from simmate.workflows.execution import SimmateExecutor
 
     SimmateExecutor.delete_all(confirm)
 
@@ -200,6 +200,6 @@ def delete(tag: list[str] = [], confirm: bool = False):
     """
     Deletes all workitems from the database that match the provided tags
     """
-    from simmate.engine.execution import SimmateExecutor
+    from simmate.workflows.execution import SimmateExecutor
 
     SimmateExecutor.delete(tags=tag, confirm=confirm)

@@ -6,9 +6,9 @@ from simmate.apps.bader.workflows import PopulationAnalysis__Bader__Bader
 from simmate.apps.materials_project.workflows.static_energy.matproj import (
     StaticEnergy__Vasp__Matproj,
 )
-from simmate.engine import Workflow
 from simmate.toolkit import Structure
 from simmate.utilities import copy_files_from_directory
+from simmate.workflows import Workflow
 
 
 class PopulationAnalysis__VaspBader__BaderMatproj(Workflow):

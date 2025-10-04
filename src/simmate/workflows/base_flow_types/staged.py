@@ -11,9 +11,10 @@ import numpy
 import plotly.graph_objects as plotly_go
 from plotly.subplots import make_subplots
 
-from simmate.engine import Workflow
 from simmate.toolkit import Structure
 from simmate.toolkit.visualization.plotting import PlotlyFigure
+
+from .base import Workflow
 
 
 class StagedWorkflow(Workflow):

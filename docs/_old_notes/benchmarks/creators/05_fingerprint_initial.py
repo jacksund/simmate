@@ -5,19 +5,18 @@ import itertools
 import numpy as np
 import pandas
 import plotly.graph_objects as go
+from dask.distributed import Client
 from matminer.featurizers.site import CrystalNNFingerprint as cnnf
 from matminer.featurizers.structure.sites import (
-    SiteStatsFingerprint as pssf,  # PartialsSiteStatsFingerprint
-)
+    SiteStatsFingerprint as pssf,
+)  # PartialsSiteStatsFingerprint
 from plotly.offline import plot
 from rich.progress import track
 
-from simmate.configuration.dask import get_dask_client
-from simmate.toolkit import Composition
+from simmate.toolkit import Composition, Structure
 from simmate.utilities import get_directory
-from simmate.workflows.utilities import get_workflow
 
-client = get_dask_client()
+client = Client()
 
 COMPOSITIONS_TO_TEST = [
     "Fe1",
@@ -51,27 +50,24 @@ featurizer = pssf(
 
 parent_dir = get_directory("creator_benchmarks")
 
-workflow = get_workflow("relaxation.vasp.staged")
-
 limit = 10000
 plot_series = []
 for creator_name in CREATORS_TO_TEST:
-    csv_file = parent_dir / creator_name / "final_fingergprint_distances.csv"
+    csv_file = parent_dir / creator_name / "initial_fingergprint_distances.csv"
 
     if csv_file.exists():
         df = pandas.read_csv(csv_file, index_col=0)
     else:
         distances_creator = []
         for composition in track(compositions):
-            structures = workflow.all_results.filter(
-                source__creator=creator_name,
-                formula_reduced=composition.reduced_formula,
-                energy_per_atom__isnull=False,
-            ).to_toolkit()
-
-            if not structures:
+            directory = parent_dir / creator_name / str(composition)
+            if not directory.exists():
                 distances_creator.append(np.array([None] * limit))
                 continue
+            structures = []
+            for file in directory.iterdir():
+                structure = Structure.from_file(file)
+                structures.append(structure)
 
             # ------------
 
@@ -145,7 +141,7 @@ layout = go.Layout(
         mirror=True,
     ),
     yaxis=dict(
-        title_text="Distance Between Fingerprints",
+        title_text="Fingerprint Distance",
         # type="log",
         ticks="outside",
         tickwidth=2,
@@ -154,7 +150,7 @@ layout = go.Layout(
         color="black",
         linecolor="black",
         mirror=True,
-        range=[-0.2, 4.5],
+        # range=[-0.2, 4.5],
     ),
     legend=dict(
         # x=0.05,
@@ -166,7 +162,7 @@ layout = go.Layout(
 )
 
 fig = go.Figure(data=plot_series, layout=layout)
-fig.write_image("fingerptint_final.svg")
+fig.write_image("fingerptint_initial.svg")
 plot(fig, config={"scrollZoom": True})
 
 # -----------------------------------------------------------------------------

@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 
 from simmate.apps.vasp.inputs import Incar
-from simmate.engine import ErrorHandler
+from simmate.workflows import ErrorHandler
 
 
 class Zbrent(ErrorHandler):

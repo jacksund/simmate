@@ -58,7 +58,7 @@ write_to_csv(nomanager_times, name="nomanager")
 
 # a workflow written with Simmate and ran locally
 
-from simmate.engine import Workflow, task
+from simmate.workflows import Workflow, task
 
 simmate_local_times = []
 for ntasks in ntasks_range:

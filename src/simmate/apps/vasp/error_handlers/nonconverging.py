@@ -4,7 +4,7 @@ from pathlib import Path
 
 from simmate.apps.vasp.inputs import Incar
 from simmate.apps.vasp.outputs import Oszicar
-from simmate.engine import ErrorHandler
+from simmate.workflows import ErrorHandler
 
 
 class NonConverging(ErrorHandler):

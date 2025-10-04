@@ -10,7 +10,7 @@ The `add` workflow was super basic, so now let's try a more advanced workflow in
 Here, we will make a workflow that (i) converts a structure to a primitive unitcell and (ii) writes it to a CIF file:
 
 ``` python
-from simmate.engine import workflow
+from simmate.workflows import workflow
 
 @workflow
 def write_primitive(structure, directory, **kwargs):

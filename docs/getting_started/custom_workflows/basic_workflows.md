@@ -38,7 +38,7 @@ Simple enough! Next, let's turn this into a Simmate workflow.
 Here's what our workflow looks like:
 
 ```python
-from simmate.engine import workflow
+from simmate.workflows import workflow
 
 @workflow
 def add(x, y, **kwargs):
@@ -71,7 +71,7 @@ result = status.result()
 And here is our final script:
 
 ```python
-from simmate.engine import workflow
+from simmate.workflows import workflow
 
 @workflow
 def add(x, y, **kwargs):
@@ -94,7 +94,7 @@ So far, this might seem like a lot of work (and complexity) just to get the same
 For starters, we added `**kwargs`. Let's modify our function to see what this actual did:
 
 ```python
-from simmate.engine import workflow
+from simmate.workflows import workflow
 
 @workflow
 def add(x, y, **kwargs):

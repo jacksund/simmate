@@ -15,7 +15,7 @@ Any python function can be a workflow. There are two steps to convert it:
 For example:
 
 ``` python
-from simmate.engine import workflow
+from simmate.workflows import workflow
 
 @workflow
 def add(x, y, **kwargs):
@@ -35,7 +35,7 @@ As you build more advanced workflows, you may want to switch to a class-based fo
 For example (using the same function as above):
 
 ``` python
-from simmate.engine import Workflow
+from simmate.workflows import Workflow
 
 class Math__Basic__Add(Workflow):
 
@@ -97,7 +97,7 @@ You can use any of these inputs to assist with your workflow. Alternatively, jus
 
 !!! example
     ``` python
-    from simmate.engine import workflow
+    from simmate.workflows import workflow
 
     @workflow
     def example(run_id, **kwargs):
@@ -118,7 +118,7 @@ For example, if you use a `structure` input variable, it behaves as described in
 
 ``` python
 from simmate.toolkit import Structure
-from simmate.engine import Workflow
+from simmate.workflows import Workflow
 
 class Example__Python__GetVolume(Workflow):
     
@@ -145,7 +145,7 @@ Of all the default parameters (described above in `**kwargs`), you'll likely get
 `directory` is given as a [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html) object. Just add the directory to your `run_config()` method and use the object that's provided. For example:
 
 ``` python
-from simmate.engine import Workflow
+from simmate.workflows import Workflow
 
 class Example__Python__WriteFile(Workflow):
     

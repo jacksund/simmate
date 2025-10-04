@@ -8,7 +8,7 @@ import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 from django.db import transaction
 from rich import print
 
-from simmate.engine.execution.database import WorkItem
+from simmate.workflows.execution.database import WorkItem
 
 # This string is just something fancy to display in the console when a worker
 # starts up.

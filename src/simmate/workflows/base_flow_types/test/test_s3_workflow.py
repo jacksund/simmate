@@ -21,7 +21,7 @@ from sys import platform
 
 import pytest
 
-from simmate.engine import ErrorHandler
+from simmate.workflows import ErrorHandler
 from simmate.workflows.base_flow_types.s3_workflow import (
     CommandNotFoundError,
     MaxCorrectionsError,

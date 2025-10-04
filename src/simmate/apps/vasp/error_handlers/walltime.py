@@ -11,7 +11,7 @@ import numpy
 from pymatgen.io.vasp.outputs import Outcar
 
 from simmate.apps.vasp.error_handlers import Unconverged
-from simmate.engine import ErrorHandler
+from simmate.workflows import ErrorHandler
 
 
 class Walltime(ErrorHandler):

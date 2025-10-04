@@ -8,8 +8,8 @@ from pathlib import Path
 
 from simmate.apps.dev.biovia_cosmo.models import LogPow as LogPowTable
 from simmate.configuration import settings
-from simmate.engine import Workflow
 from simmate.toolkit import Molecule
+from simmate.workflows import Workflow
 from simmate.workflows.base_flow_types import S3Workflow
 
 __all__ = [

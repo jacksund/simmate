@@ -10,7 +10,7 @@ from rich import print
 from rich.progress import track
 
 from simmate.configuration import settings
-from simmate.engine.execution.database import WorkItem
+from simmate.workflows.execution.database import WorkItem
 
 
 class SimmateExecutor:

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from .base import Workflow
 from .pg_dump import Maintenance__Postgres__PgDump
-from .s3_workflow import S3Workflow
-from .staged_workflow import StagedWorkflow
-from .structure_workflow import StructureWorkflow
-from .web_api_workflow import WebApiWorkflow
+from .s3 import S3Workflow
+from .staged import StagedWorkflow
+from .structure_input import StructureWorkflow
+from .web_api import WebApiWorkflow
