@@ -6,8 +6,8 @@
 :root {
   /* --bs-body-bg: #9c9ea1;  */
   /* --bs-body-bg-rgb: 156, 158, 161; */
-  --bs-primary: #198754;
-  --bs-primary-rgb: 25, 135, 84;
+  --bs-primary: #009485;
+  --bs-primary-rgb: 0, 148, 133;
 }
 
 
@@ -29,6 +29,10 @@ a:focus {
   --bs-btn-hover-border-color: #146c43;
   --bs-btn-active-bg: #146c43;
   --bs-btn-active-border-color: #13653f;
+}
+
+.table-primary {
+    --bs-table-bg: #0094854f !important;
 }
 
 .nav-tabs .nav-link:not(.active) {
