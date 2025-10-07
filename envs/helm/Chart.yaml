@@ -1,0 +1,33 @@
+apiVersion: v2
+name: simmate
+version: 0.0.0
+description: Simmate is a full-stack framework for chemistry research.
+type: application
+home: https://simmate.org/
+sources:
+  - https://github.com/jacksund/simmate
+maintainers:
+  - name: Jack Sundberg
+    email: jacksundberg123@gmail.com
+    url: https://jacksund.github.io/
+
+# Add-on services are disabled for now
+# dependencies:
+#   - name: minio
+#     repository: https://charts.bitnami.com/bitnami
+#     version: 12.4.4
+#   - name: pgadmin4
+#     repository: https://helm.runix.net
+#     version: 1.15.1
+#   # We are using a custom postgres image for now
+#   # - name: postgresql    (consider postgresql-ha too!)
+#   #   repository: https://charts.bitnami.com/bitnami
+#   #   version: 12.4.2
+#   - name: pgbouncer
+#     version: 1.0.15
+#     repository: https://raw.githubusercontent.com/cradlepoint/kubernetes-helm-chart-pgbouncer/master/repos/stable
+
+# EXTRAS (to add later)
+# icon: A URL to an SVG or PNG image to be used as an icon (optional).
+# appVersion: The version of the app that this contains (optional). Needn't be SemVer. Quotes recommended.
+# kubeVersion: A SemVer range of compatible Kubernetes versions (optional)

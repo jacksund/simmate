@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simmate-gunicorn-deployment
+  labels:
+    app: simmate-gunicorn
+spec:
+  selector:
+    matchLabels:
+      app: simmate-gunicorn
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: simmate-gunicorn
+        # bug-fix: https://stackoverflow.com/questions/46336852/
+        date: "{{ now | unixEpoch }}"
+    spec:
+      containers:
+        - name: simmate-gunicorn
+          image: simmate/simmate-gunicorn:latest
+          env:
+            {{- include "simmate.env_config" . | indent 12 }}
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - mountPath: /staticfiles
+              name: simmate-gunicorn-staticfiles
+          resources:
+            requests:
+              memory: "6Gi"
+              cpu: "1"
+              ephemeral-storage: "1Gi"
+            limits:
+              memory: "12Gi"
+              cpu: "1"
+              ephemeral-storage: "2Gi"
+      volumes:
+        - name: simmate-gunicorn-staticfiles
+          persistentVolumeClaim:
+            claimName: simmate-gunicorn-staticfiles

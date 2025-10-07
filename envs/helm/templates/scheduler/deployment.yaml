@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simmate-scheduler-deployment
+  labels:
+    app: simmate-scheduler
+spec:
+  selector:
+    matchLabels:
+      app: simmate-scheduler
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: simmate-scheduler
+        # bug-fix: https://stackoverflow.com/questions/46336852/
+        date: "{{ now | unixEpoch }}"
+    spec:
+      containers:
+        - name: simmate-scheduler
+          image: simmate/simmate-scheduler:latest
+          # TODO: much of this env is copy/pasted from gunicorn deployment
+          env:
+            {{- include "simmate.env_config" . | indent 12 }}
+          volumeMounts:
+            - mountPath: /simmate_workers
+              name: simmate-worker-data
+          resources:
+            requests:
+              memory: "6Gi"
+              cpu: "1"
+              ephemeral-storage: "1Gi"
+            limits:
+              memory: "12Gi"
+              cpu: "1"
+              ephemeral-storage: "2Gi"
+      volumes:
+        - name: simmate-worker-data
+          persistentVolumeClaim:
+            claimName: simmate-worker-data
