@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simmate-nginx-deployment
+  labels:
+    app: simmate-nginx
+spec:
+  selector:
+    matchLabels:
+      app: simmate-nginx
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: simmate-nginx
+        # bug-fix: https://stackoverflow.com/questions/46336852/
+        date: "{{ now | unixEpoch }}"
+    spec:
+      containers:
+        - name: simmate-nginx
+          image: simmate/simmate-nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: simmate-gunicorn-staticfiles
+              mountPath: /staticfiles
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "0.5"
+              ephemeral-storage: "100M"
+            limits:
+              memory: "8Gi"
+              cpu: "1"
+              ephemeral-storage: "500M"
+      volumes:
+        - name: simmate-gunicorn-staticfiles
+          persistentVolumeClaim:
+            claimName: simmate-gunicorn-staticfiles
