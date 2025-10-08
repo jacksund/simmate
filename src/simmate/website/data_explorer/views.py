@@ -11,16 +11,56 @@ from simmate.website.utilities import get_pagination_urls
 # -----------------------------------------------------------------------------
 
 DEFAULT_CONFIG = {
-    "Project Management": [],
+    "Project Management": [
+        "simmate.apps.project_management.models.Project",
+        "simmate.apps.project_management.models.Tag",
+        "simmate.apps.project_management.models.Wallet",
+        "simmate.apps.project_management.models.Transaction",
+    ],
     "Chemical Inventory & Tracking": [],
-    "External Molecular Catalogs": [],
-    "External Crystalline Catalogs": [],
-    "Workflow Results": [],
+    "External Molecular Catalogs": [
+        "simmate.apps.bcpc.models.BcpcIsoPesticide",
+        "simmate.apps.cas_registry.models.CasRegistryMolecule",
+        "simmate.apps.chembl.models.ChemblMolecule",
+        "simmate.apps.chemspace.models.ChemSpaceFreedomSpaceMolecule",
+        "simmate.apps.emolecules.models.EmoleculesMolecule",
+        "simmate.apps.enamine.models.EnamineRealMolecule",
+        "simmate.apps.pdb.models.PdbLigand",
+        "simmate.apps.ppdb.models.PpdbMolecule",
+    ],
+    "External Crystalline Catalogs": [
+        "simmate.apps.aflow.models.models.AflowPrototype",
+        "simmate.apps.aflow.models.models.AflowStructure",
+        "simmate.apps.cod.models.models.CodStructure",
+        "simmate.apps.jarvis.models.models.JarvisStructure",
+        "simmate.apps.materials_project.models.models.MatprojStructure",
+        "simmate.apps.oqmd.models.models.OqmdStructure",
+    ],
+    "Workflow Results": [
+        "simmate.apps.evolution.models.FixedCompositionSearch",
+        "simmate.apps.evolution.models.VariableNsitesCompositionSearch",
+        "simmate.apps.evolution.models.ChemicalSystemSearch",
+    ],
+    "Business & Finance": [
+        "simmate.apps.etherscan.models.EthereumWallet",
+        "simmate.apps.etherscan.models.EthereumTransaction",
+        "simmate.apps.price_catalog.models.MarketItem",
+    ],
+    "Other": [
+        "simmate.apps.eppod_gd.models.EppoCode",
+    ],
+    "HIDDEN": [
+        "simmate.database.base_data_types.symmetry.Spacegroup",
+        "simmate.apps.chatbot.models.ChatbotHistory",
+        "simmate.apps.chembl.models.ChemblAssayResult",
+        "simmate.apps.chembl.models.ChemblDocument",
+        "simmate.apps.emolecules.models.EmoleculesSupplierOffer",
+        "simmate.apps.evolution.models.SteadystateSource",
+        "simmate.apps.price_catalog.models.PriceHistory",
+    ],
     # "Computational Assay Tracking": [],
     # "Physical Property Assays Tracking": [],
     # "Field Assay Tracking": [],
-    "Business & Finance": [],
-    "__HIDDEN__": [],
 }
 
 # We build this dict up front to reduce overhead on all API calls.

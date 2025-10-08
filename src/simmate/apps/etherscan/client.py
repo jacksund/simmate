@@ -42,11 +42,15 @@ class EtherscanClient:
             "USDS": "0xdC035D45d973E3EC169d2276DDab16f1e407384F",  # Sky
             # Wrapped Assets
             # "WBTC": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",  # Wrapped Bitcoin
-            # "rETH": "0xae78736Cd615f374D3085123A210448E74Fc6393",  # Rocket Pool ETH
             # Governance / Ownership
             # "UNI": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",  # Uniswap
             # "COMP": "0xc00e94Cb662C3520282E6f5717214004A7f26888",  # Compound
             # "POOL": "0x0cEC1A9154Ff802e7934Fc916Ed7Ca50bDE6844e",  # PoolTogether
+            # Lending
+            # "AWETH": "0x4d5f47fa6a74757f35c14fd3a6ef8e3c9bc514e8",  # Aave v3 WETH
+            # Staking
+            # "RETH": "0xae78736cd615f374d3085123a210448e74fc6393", # Rocket Pool ETH
+            # "stETH": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",  # Lido Staked ETH
         },
         "Base": {
             "USDC": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
