@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simmate-postgres-deployment
+  labels:
+    app: simmate-postgres
+spec:
+  selector:
+    matchLabels:
+      app: simmate-postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: simmate-postgres
+    spec:
+      containers:
+        - name: simmate-postgres
+          image: informaticsmatters/rdkit-cartridge-debian:latest
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/simmate
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgres.password }}
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data/
+              name: simmate-postgres-data
+          resources:
+            requests:
+              memory: {{ .Values.postgres.memory.request }}
+              cpu: {{ .Values.postgres.cpu.request }}
+              ephemeral-storage: {{ .Values.postgres.ephemeral.request }}
+            limits:
+              memory: {{ .Values.postgres.memory.limit }}
+              cpu: {{ .Values.postgres.cpu.limit }}
+              ephemeral-storage: {{ .Values.postgres.ephemeral.limit }}
+      volumes:
+        - name: simmate-postgres-data
+          persistentVolumeClaim:
+            claimName: simmate-postgres-data

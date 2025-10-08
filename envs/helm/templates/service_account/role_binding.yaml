@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: simmate-service-account-admin
+  namespace: simmate
+subjects:
+  - kind: ServiceAccount
+    name: simmate-service-account
+    namespace: simmate
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io

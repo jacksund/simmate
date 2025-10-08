@@ -1,0 +1,246 @@
+
+# NOTE: Anywhere you see "UPDATE REQUIRED", we update via secrets in our CI
+
+# -----------------------------------------------------------------------
+
+# Simmate Components
+
+nginx:
+  hostname: simmate.example.com
+
+gunicorn:
+  storage: 1Gi
+
+postgres:
+  password: example123 # UPDATE REQUIRED
+  storage: 300Gi
+  memory:
+    request: 8Gi
+    limit: 16Gi
+  cpu:
+    request: 1
+    limit: 2
+  ephemeral:
+    request: 1Gi
+    limit: 2Gi
+
+simmate:
+  chatbot_url: simmate-chatbot.example.com
+  chatbot:
+    endpoint: https://example.azure-api.net/ # UPDATE REQUIRED
+    model: gpt-4-turbo
+    version: '2024-02-01'
+    api_key: abc123 # UPDATE REQUIRED
+    sql_uri: "postgresql://user:password@host.com:5432/simmate_prod" # UPDATE REQUIRED
+    verbose: true
+  openai:
+    base: example.openai.azure.com  # UPDATE REQUIRED
+    key: abcd1234                   # UPDATE REQUIRED
+    type: azure                     # UPDATE REQUIRED
+    version: '2023-05-15'           # UPDATE REQUIRED
+  # regular simmate settings
+  workers:
+    storage: 100Gi
+  # apps:
+  #   - simmate.apps.configs.AflowConfig
+  #   - simmate.apps.configs.CodConfig
+  #   - simmate.apps.configs.JarvisConfig
+  database:
+    engine: django.db.backends.postgresql
+    host: simmate-postgres-service
+    name: simmate_prod
+    user: example_user      # UPDATE REQUIRED
+    password: example123    # UPDATE REQUIRED
+    port: 5432
+  website:
+    # These 2 settings are fixed in the chart
+    # allowed_hosts: 
+    #   - "*"
+    # crsf_trusted_origins:
+    #  - "https://{{ .Values.nginx.hostname }}"
+    # data:
+    #     Default Datasets: []  # disable default section
+    #     # TODO
+    debug: false
+    # email:
+    #   from_email: example@gmail.com
+    #   host: mailhost.example.com
+    #   port: 0
+    #   timeout: 15
+    # home_view: simmate_custom.main_views
+    # login_message: Example custom login message.
+    # profile_view: simmate_custom.main_views
+    require_login: true
+    require_login_exceptions:
+      - /apps/example(.*)$
+    require_login_internal: microsoft
+    social_oauth:
+      microsoft:
+        client_id: example_user     # UPDATE REQUIRED
+        secret: example123          # UPDATE REQUIRED
+
+# -----------------------------------------------------------------------
+# Add-on services are disabled for now
+# -----------------------------------------------------------------------
+
+# MinIO - S3bucket Web Interface (dependency)
+
+# minio:
+#   enabled: true
+#   auth:
+#     rootUser: example_user          # UPDATE REQUIRED
+#     rootPassword: example123        # UPDATE REQUIRED
+#   persistence:
+#     enabled: true
+#     annotations:
+#       "helm.sh/resource-policy": keep
+#   ingress:
+#     enabled: true
+#     hostname: simmate-minio.example.com
+#     annotations:
+#       nginx.ingress.kubernetes.io/proxy-body-size: "0"
+#       nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+#       nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+#       nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+#   # BUGFIX: added harbor path to avoid docker pull limits 
+#   global:
+#     imageRegistry: registry.example.com/dockerhub
+
+# -----------------------------------------------------------------------
+
+# PgAdmin4 - Postgres Web Interface (dependency)
+
+# pgadmin4:
+#   enabled: true
+#   env:
+#     email: example@gmail.com      # UPDATE REQUIRED
+#     password: example123            # UPDATE REQUIRED
+#   ingress:
+#     enabled: true
+#     hosts:
+#       - host: simmate-pgadmin.oc.research.gmail.com
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: simmate-nginx-service
+#                 port:
+#                   number: 80
+#   # BUGFIX: added harbor path to avoid docker pull limits
+#   # This fails for some reason... Kubefarm team just said
+#   # that this cached endpoint can be buggy.
+#   # image:
+#   #  registry: registry.example.com/dockerhub
+#   #  tag: 8.3
+
+# -----------------------------------------------------------------------
+
+# PgBouncer - Postgres Connection Pool (dependency)
+
+# pgbouncer:
+#   enabled: true
+#   # BUGFIX: added harbor path to avoid docker pull limits 
+#   image:
+#     repository: registry.example.com/dockerhub/cradlepoint/pgbouncer
+#   verbose: 1
+#   users:
+#     example_user: example123    # UPDATE REQUIRED
+#     example_user2: example123   # UPDATE REQUIRED
+#   databases:
+#     simmate_prod_pool:
+#       host: simmate-postgres-service
+#       port: 5432
+#       user: example_user        # UPDATE REQUIRED
+#       dbname: simmate_prod
+#     simmate_prod_readpool:
+#       host: simmate-postgres-service
+#       port: 5432
+#       user: example_user2       # UPDATE REQUIRED
+#       dbname: simmate_prod
+#   connectionLimits:
+#     defaultPoolSize: 20
+#     minPoolSize: 20
+#     reservePoolSize: 20
+#   # BUG: I can't get load balancer to work here, so I leave this service section
+#   # at the default "ClusterIP" and setup a LoadBalancer service separately
+#   # inside of /templates/postgres/service-external-pgbouncer.yaml
+#   # service:
+#   #   type: LoadBalancer
+#   #servicePort: 5445
+#   #internalPort: 5445
+
+# -----------------------------------------------------------------------
+
+# TODO: test bitnami postgres or postgres-ha charts with rdkit
+
+# Postgres (high availability)
+
+# image:
+#   registry: docker.io
+#   repository: informaticsmatters/rdkit-cartridge-debian
+#   tag: latest
+#   primary:
+#    service:
+#       type: LoadBalancer
+
+# -----------------------------------------------------------------------
+
+# Prefect - Workflow scheduling and orchestration
+
+# prefect-server:
+#   enabled: true
+#   server:
+#     publicApiUrl: "https://simmate-prefect.example.com/api"
+#     # env:
+#     #   - name: PREFECT_API_URL
+#     #     value: "https://simmate-prefect.example.com/api" 
+#   ingress:
+#     enabled: true
+#     host:
+#       hostname: simmate-prefect.example.com
+#   postgresql:
+#     auth:
+#       password: "prefect"
+
+# -----------------------------------------------------------------------
+
+# Dask - Workflow scheduling and orchestration
+
+# https://kubernetes.dask.org/en/latest/
+# https://artifacthub.io/packages/helm/dask/dask
+# https://github.com/dask/dask-docker/issues/244
+# https://github.com/dask/dask-docker/blob/main/notebook/prepare.sh
+# https://github.com/dask/dask-docker/blob/main/base/prepare.sh
+# webUI:
+#   ingress:
+#     enabled: true
+#     hostname: simmate-dask.example.com
+# scheduler:
+#   image:
+#     tag: "2023.5.1-py3.11"
+#   env:
+#     - name: USE_MAMBA
+#       value: "true"
+# jupyter:
+#   image:
+#     tag: "2023.5.1-py3.11"
+#   env:
+#     - name: USE_MAMBA
+#       value: "true"
+#     - name: EXTRA_CONDA_PACKAGES
+#       value: simmate -c conda-forge
+#     # - name: EXTRA_PIP_PACKAGES
+#     #   value: simmate==0.13.2 --upgrade
+#     - name: JUPYTERLAB_ARGS
+#       value: "--ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password='' --NotebookApp.allow_origin='*'"
+# worker:
+#   image:
+#     tag: "2023.5.1-py3.11"
+#   env:
+#     - name: USE_MAMBA
+#       value: "true"
+#     - name: EXTRA_CONDA_PACKAGES
+#       value: simmate -c conda-forge
+
+# -----------------------------------------------------------------------

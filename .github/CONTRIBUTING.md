@@ -1,3 +1,2 @@
-Our guide for contributing is located within our tutorials folder 
-([here](https://github.com/jacksund/simmate/tree/main/tutorials/Guides_for_contributors)).
-We place it there so that beginners can more easily find the guide.
+Our contributing guide is located within the main documentation website  
+([here](https://jacksund.github.io/simmate/full_guides/contributing/first_time_setup/)).

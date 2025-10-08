@@ -1,0 +1,42 @@
+
+# This is a placeholder file which shows all the variables that we update
+# via our repo's environment variables & secrets.
+# In gitlab, these are set via $HELM_VALUES_PROD
+
+simmate:
+  chatbot:
+    endpoint: https://example.azure-api.net/
+    model: gpt-4-turbo
+    version: '2024-02-01'
+    api_key: abc123
+    sql_uri: "postgresql://user:password@host.com:5432/simmate_prod"
+    verbose: true
+  database:
+    name: simmate_prod
+    user: example_user
+    password: example123
+  website:
+    social_oauth:
+      microsoft:
+        client_id: example_id
+        secret: example123
+
+minio:
+  auth:
+    rootUser: example_user
+    rootPassword: example123
+
+pgadmin4:
+  env:
+    email: example_user@gmail.com
+    password: example123
+
+pgbouncer:
+  users:
+    example_user: example123
+    example_user2: example123
+  databases:
+    simmate_prod_pool:
+      user: example_user
+    simmate_prod_readpool:
+      user: example_user2

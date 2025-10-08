@@ -1,0 +1,65 @@
+{{- define "simmate.env_config" }}
+# SIMMATE CHATBOT SETTINGS
+- name: CHATBOT_URL
+  value: "https://{{ .Values.simmate.chatbot_url }}/"
+- name: SIMMATE__CHATBOT__ENDPOINT
+  value: {{ .Values.simmate.chatbot.endpoint | quote }}
+- name: SIMMATE__CHATBOT__MODEL
+  value: {{ .Values.simmate.chatbot.model | quote }}
+- name: SIMMATE__CHATBOT__VERSION
+  value: {{ .Values.simmate.chatbot.version | quote }}
+- name: SIMMATE__CHATBOT__API_KEY
+  value: {{ .Values.simmate.chatbot.api_key | quote }}
+- name: SIMMATE__CHATBOT__SQL_URI
+  value: {{ .Values.simmate.chatbot.sql_uri | quote }}
+- name: SIMMATE__CHATBOT__VERBOSE
+  value: {{ .Values.simmate.chatbot.verbose | quote }}
+# Fixed simmate settings
+- name: SIMMATE__WEBSITE__ALLOWED_HOSTS
+  value: "*"
+- name: SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS
+  value: "https://{{ .Values.nginx.hostname }}"
+# User provided simmate settings
+- name: SIMMATE__APPS
+  value: {{ join " " .Values.simmate.apps | quote }}
+- name: SIMMATE__DATABASE__ENGINE
+  value: {{ .Values.simmate.database.engine | quote }}
+- name: SIMMATE__DATABASE__HOST
+  value: {{ .Values.simmate.database.host | quote }}
+- name: SIMMATE__DATABASE__NAME
+  value: {{ .Values.simmate.database.name | quote }}
+- name: SIMMATE__DATABASE__USER
+  value: {{ .Values.simmate.database.user | quote }}
+- name: SIMMATE__DATABASE__PASSWORD
+  value: {{ .Values.simmate.database.password | quote }}
+- name: SIMMATE__DATABASE__PORT
+  value: {{ .Values.simmate.database.port | quote }}
+- name: SIMMATE__WEBSITE__DATA
+  value: '{{ .Values.simmate.website.data | toJson }}'
+- name: SIMMATE__WEBSITE__DEBUG
+  value: {{ .Values.simmate.website.debug | quote }}
+- name: SIMMATE__WEBSITE__EMAIL__FROM_EMAIL
+  value: {{ .Values.simmate.website.email.from_email | quote }}
+- name: SIMMATE__WEBSITE__EMAIL__HOST
+  value: {{ .Values.simmate.website.email.host | quote }}
+- name: SIMMATE__WEBSITE__EMAIL__PORT
+  value: {{ .Values.simmate.website.email.port | quote }}
+- name: SIMMATE__WEBSITE__EMAIL__TIMEOUT
+  value: {{ .Values.simmate.website.email.timeout | quote }}
+- name: SIMMATE__WEBSITE__HOME_VIEW
+  value: {{ .Values.simmate.website.home_view | quote }}
+- name: SIMMATE__WEBSITE__LOGIN_MESSAGE
+  value: {{ .Values.simmate.website.login_message | quote }}
+- name: SIMMATE__WEBSITE__PROFILE_VIEW
+  value: {{ .Values.simmate.website.profile_view | quote }}
+- name: SIMMATE__WEBSITE__REQUIRE_LOGIN
+  value: {{ .Values.simmate.website.require_login | quote }}
+- name: SIMMATE__WEBSITE__REQUIRE_LOGIN_EXCEPTIONS
+  value: {{ join " " .Values.simmate.website.require_login_exceptions | quote }}
+- name: SIMMATE__WEBSITE__REQUIRE_LOGIN_INTERNAL
+  value: {{ .Values.simmate.website.require_login_internal| quote }}
+- name: SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__CLIENT_ID
+  value: {{ .Values.simmate.website.social_oauth.microsoft.client_id | quote }}
+- name: SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__SECRET
+  value: {{ .Values.simmate.website.social_oauth.microsoft.secret | quote }}
+{{- end }}

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: simmate-worker-data
+spec:
+  accessModes:
+    - ReadWriteMany  # bc many worker pods will access this volume
+  # storageClassName: simmate-efs-sc  # fixed for entire namespace
+  resources:
+    requests:
+      storage: {{ .Values.simmate.workers.storage }}

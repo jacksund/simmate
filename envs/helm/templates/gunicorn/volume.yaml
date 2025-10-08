@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: simmate-gunicorn-staticfiles
+spec:
+  accessModes:
+    - ReadWriteMany  # bc static files are shared with nginx deployment
+  # storageClassName: simmate-efs-sc  # fixed for entire namespace
+  resources:
+    requests:
+      storage: {{ .Values.gunicorn.storage }}

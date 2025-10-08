@@ -1,0 +1,20 @@
+# These are packages that I commonly use alongside simmate or for coding in general
+name: simmate_dev
+channels:
+    - conda-forge
+dependencies:
+    - spyder # Recommended IDE for development
+    - dask-jobqueue  # for submitting on HPC clusters
+    - numba  # for speed-up of basic calcs
+    - psycopg2-binary  # for Postgres connections (added -binary to fix bug)
+    - selenium  # for web scraping (slow but robust)
+    - gunicorn  # for website server (Django+DigitalOcean) # NOT WINDOWS
+    - pygraphviz  # pygraphviz on conda. for viewing django tables
+    - fabric  # for remote ssh connections
+    - django-extensions  # simple tools to help with django development
+    - bokeh  # for the dask dashboard
+    - h5py  # for reading QE's binary output files
+    # OpenEye needs to point to a different source & a license is required
+    #   pip install -i https://pypi.anaconda.org/OpenEye/simple OpenEye-toolkits
+    # "OpenEye-toolkits @ https://pypi.anaconda.org/OpenEye/simple",
+    # ^^^ BUG: must be commented out for pypi uploads to work
