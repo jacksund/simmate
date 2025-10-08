@@ -1,9 +1,6 @@
-# This workflow will check for Black formating, install Python dependencies using Anaconda, and then run tests with a single version of Python.
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-#
-# We also use a third-party action(s) for setting up our conda environment. See:
-#   conda: https://github.com/marketplace/actions/setup-miniconda
-#   mamba: https://github.com/mamba-org/provision-with-micromamba
+
+# This job runs on all MRs and the main branch. It tests the code quality,
+# any python unittests, any docker builds, etc.
 
 name: Test
 
@@ -13,11 +10,25 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    # Runs the schedule every day at 5:30 and at 17:30 UTC
-    - cron: "30 5,17 * * *"
+    # every Sunday at 23:00 UTC
+    - cron: "0 23 * * 0"
 
 jobs:
-  lint-and-test:
+
+  lint-check:
+    name: Code Quality Check
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Initial setup
+        uses: actions/checkout@v3
+      - name: Black
+        uses: psf/black@stable
+      - name: iSort
+        uses: isort/isort-action@master
+      # TODO: djlint
+      # TODO: maybe ruff for other file types
+
+  python-test:
     # Establishes the combination of all OS and python versions
     # for us to test. The "steps" below will be ran for each
     # of these combinations.
@@ -28,60 +39,33 @@ jobs:
       matrix:
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
         python-version: ["3.10", "3.11"]
-
     steps:
       - name: Initial setup
         uses: actions/checkout@v3
-
-      - name: Check code format with Black
-        uses: psf/black@stable
-
-      # This action seems poorly-maintained -- as it fails on MacOS and also
-      # directly installs isort (unlike the action used for Black). I therefore
-      # disable this for now.
-      # - name: Check import format with iSort
-      #   uses: isort/isort-action@master
 
       - name: Create conda env and install deps
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
-          environment-file: envs/conda/dev.yaml
+          environment-file: envs/conda/ci.yaml
           python-version: ${{ matrix.python-version }}
           auto-activate-base: false
-          channels: conda-forge
           activate-environment: simmate_dev
           channel-priority: strict
+          # ensure we are using conda-forge and never the default channel
+          miniforge-version: latest
+          channels: conda-forge
+          conda-remove-defaults: "true"
       # The lines "shell: bash -l {0}" ensure we use the created env below
-      
       - name: Install Simmate
         shell: bash -l {0}
         run: |
           pip install -e .
       # --editable is needed because we need test files too
-      # note: we want to skip installing the deps (--no-deps) because they were 
-      # done in last step, but we repeat this because of a bug:
-      #  "maggma 0.57.0 has requirement ruamel.yaml<0.18, but you have ruamel-yaml 0.18.5."
-      
-      # Run checks to see that simmate & deps are installed correctly
-      - name: Check conda info
-        shell: bash -l {0}
-        run: |
-          conda info
-          conda list
-      # DISABLED BC OF https://github.com/jacksund/simmate/issues/669 
-      # - name: Check dependencies
-      #   shell: bash -l {0}
-      #   run: |
-      #     pip check
-      
       - name: Run default tests
         shell: bash -l {0}
         run: |
-          pytest -vv --durations=15
-    # "-vv" makes the pytest output verbose so errors are more useful
-    # and "duration=0" has pytest print how long every test took. We ask for
-    # the 15 slowest ones.
+          pytest --durations=15
 
   docker-build:
     name: Docker
@@ -94,10 +78,8 @@ jobs:
       contents: read
       packages: write
     steps:
-
       - name: Initial setup
         uses: actions/checkout@v3
-
       - name: Build Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:

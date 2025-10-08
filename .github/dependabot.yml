@@ -1,16 +1,6 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
 updates:
-  - package-ecosystem: "pip"
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "conda"
+    directory: "/envs/conda/"
     schedule:
       interval: "monthly"
-
-# The following issues are relevant if I want Dependabot to also
-# check for updatess to our environment.yaml
-# https://github.com/dependabot/dependabot-core/issues/2227
-# https://github.com/dependabot/dependabot-core/issues/2824

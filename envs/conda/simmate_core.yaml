@@ -1,0 +1,63 @@
+###############
+# NOTE: This file of dependencies is copied and modified from pyproject.toml
+# It is meant only for dev and CI testing. You should refere to the toml file
+# for official dependencies.
+###############
+
+# This env file was creating using...
+# (1) anaconda docs
+#	https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
+# (2) grayskull to list deps
+#	https://www.marcelotrevisani.com/grayskull
+#
+# To install this env, use `conda env create -f envs/conda/dev.yaml`
+
+name: simmate_dev
+channels:
+    - conda-forge
+dependencies:
+    - python >=3.10
+    # Core dependencies
+    - numpy >=1.22.0, <1.24.2
+    - pandas >=2.0.0, <2.1.4 
+    - django >=4.0.0, <4.2.8
+    - typer >=0.6.0, <0.7.1
+     # BUG-FIX for typer
+     # https://github.com/fastapi/typer/discussions/1215
+     # https://github.com/fastapi/typer/pull/1222
+    - click <8.2.0
+    #
+    # Material/Crystal-based dependencies
+    - pymatgen >=2022.1.9, <2023.5.32
+    - pymatgen-analysis-diffusion >=2021.4.29, <=2023.8.15  # pymatgen-diffusion on conda
+    - matminer >=0.9.3, <=0.9.3
+    - ase >=3.22.1, <=3.23.0
+    #
+    # Molecule-based dependencies
+    - rdkit >=2024.03.1, <=2024.03.1  # cheminformatics library  # BUG: install is broken on pypi
+    - ipython >=8.22.2, <=8.29.0  # for rendering molecules in output
+    - umap-learn >=0.5.5, <=0.5.5  # for chemspace mapping
+    #
+    # Extra (smaller) dependencies & utilities
+    - django-allauth >=0.56.0, <=0.63.3  # for website accounts and google/github sign-ins
+    - django-simple-history >=3.3.0, <=3.3.0  # for tracking changes to data
+    - pyyaml >=6.0, <=6.0.1  # for yaml configuration files
+    - plotly >=5.4.0, <5.19.0  # for interactive plots and visualization
+    - markdown >=3.4.1, <=3.5.1  # for docs and markdown rendering in html templates
+    - requests >=2.28.1, <=2.32.3  # for quick web queries and downloads
+    - scikit-learn >=1.1.1, <1.5.1  # machine-learning methods
+    - cloudpickle >=2.1.0, <=3.0.0  # for serializing complex python objects
+    - rich >=11.0, <=13.5.2  # for coloring and styling the CLI outputs
+    - toml >=0.10.2, <=0.10.2  # for toml configuration files
+    - schedule >=1.2.0, <=1.2.0  # for running periodic tasks (prefect alternative)
+    - xmltodict >=0.13.0, <=0.13.0  # for reading XML files (QE outputs)
+    - dask-core >=2023.6.1, <2024.4.3  # "dask" on pypi. for parallelization
+    - distributed >=2023.6.1, <2024.4.3  # part of dask
+    #
+    # A fork of django-unicorn was made, which we now use + its deps
+    # - django-unicorn >=0.59.0, <=0.59.0  # for responsive web UI (AJAX calls)
+    - beautifulsoup4 >=4.8.0
+    - orjson >=3.6.0
+    - shortuuid >=1.0.1
+    - cachetools >=4.1.1
+    - decorator >=4.4.2
