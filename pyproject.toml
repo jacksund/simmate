@@ -24,28 +24,12 @@ build-backend = "setuptools.build_meta"
 # -----------------------------------------------------------------------------
 
 [project]
-
-# published name for pip install to use
 name="simmate"
-
-# Versions should comply with PEP 440:
-# https://www.python.org/dev/peps/pep-0440/
-# https://semver.org/
 version="0.18.0"
-
-# Maintainer info
 authors = [{name = "Jack D. Sundberg", email = "jacksundberg123@gmail.com"}]
-
-# a quick summary and then README
-# NOTE: instead of our main README, I tell users to move directly to github
-description="Simmate is a toolbox for computational materials research."
+description="Simmate is a full-stack framework for chemistry research."
 readme = ".github/README_for_PyPI.md"
-
-# General name for our LICENSE file
 license = {text = "BSD 3-Clause License"}
-
-# Classifiers help users find your project by categorizing it.
-# For a list of valid classifiers, see https://pypi.org/classifiers/
 classifiers=[
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
@@ -53,135 +37,38 @@ classifiers=[
     "Programming Language :: Python :: 3.11",
     "Operating System :: OS Independent",
 ]
-
-# Specify which Python versions are supported.
 requires-python=">=3.10"
-
-# This field lists other packages that your project depends on to run.
 dependencies=[
-    # Core dependencies
-    "numpy >=1.22.0, <1.24.2",
-    "pandas >=2.0.0, <2.1.4",
-    "dask >=2023.6.1, <2024.4.3",
-    "distributed >=2023.6.1, <2023.11.1",  # part of dask
-    "django >=4.0.0, <4.2.8",
-    "typer >=0.6.0, <0.7.1",
-     # BUG-FIX for typer
-     # https://github.com/fastapi/typer/discussions/1215
-     # https://github.com/fastapi/typer/pull/1222
-    "click <8.2.0",
+    # NOTE!!!
+    # We manage our dependencies over in `/env/conda`.
     #
-    # Extra (smaller) dependencies & utilities
-    "django-allauth >=0.56.0, <=0.63.3",  # for website accounts and google/github sign-ins
-    "django-simple-history >=3.3.0, <=3.3.0",  # for tracking changes to data
-    "pyyaml >=6.0, <=6.0.1",  # for yaml configuration files
-    "plotly >=5.4.0, <5.19.0",  # for interactive plots and visualization
-    "markdown >=3.4.1, <=3.5.1",  # for docs and markdown rendering in html templates
-    "requests >=2.28.1, <=2.32.3",  # for quick web queries and downloads
-    "scikit-learn >=1.1.1, <1.5.1",  # machine-learning methods
-    "cloudpickle >=2.1.0, <=3.0.0",  # for serializing complex python objects
-    "rich >=11.0, <13.5.2",  # for coloring and styling the CLI outputs
-    "toml >=0.10.2, <=0.10.2",  # for toml configuration files
-    "schedule >=1.2.0, <=1.2.0",  # for running periodic tasks (prefect alternative)
-    "xmltodict >=0.13.0, <=0.13.0",  # for reading XML files (QE outputs)
-    #
-    # These are from the MP stack and I want to phase them out over time.
-    # Some of these could be optional, but we add them for convenience.
-    "pymatgen >=2022.1.9, <2023.5.32",
-    "pymatgen-analysis-diffusion >=2021.4.29, <=2023.8.15",  # pymatgen-diffusion on conda
-    "matminer >=0.9.3, <=0.9.3",
-    "ase >=3.22.1, <=3.23.0",
-    #
-    # Molecule-based dependencies are broken with pip, so we limit them to conda installs
-    # "rdkit",  # cheminformatics library  # BUG: install is broken on pypi
-    # "ipython",  # for rendering molecules in output
-    # "umap-learn",  # for chemspace mapping
-    #
-    # A fork of django-unicorn was made, which we now use + its deps
-    # "django-unicorn >=0.59.0, <=0.59.0",  # for responsive web UI (AJAX calls)
-    "beautifulsoup4 >=4.8.0",
-    "orjson >=3.6.0",
-    "shortuuid >=1.0.1",
-    "cachetools >=4.1.1",
-    "decorator >=4.4.2",
+    # We have decided to move away from pip-based installations because some of
+    # our dependencies (such as rdkit) have problematic installations via pypi.
+    # While we wish we could use pip+uv, it causes too many issues for users,
+    # so we will only support conda-based installs for now.
 ]
+# likewise, our optional-dependencies also live there. For example, BADELF
+# optional deps live in `/env/conda/badelf.yaml`
+# [project.optional-dependencies]
+# BADELF = [...]
 
-# optional dependencies that are not installed by default
-[project.optional-dependencies]
-
-# For development and testing
-DEV = [
-    "pytest >=6.2.5, <7.3.2",
-    "pytest-django >=4.5.2, <=4.8.0",
-    "pytest-mock >=3.7.0, <3.14.1",
-    "pytest-xdist >=2.5.0, <3.4.0",
-    "black >=25.1.0, <26.0.0",
-    "coverage >=6.2, <7.4.4",
-    "isort >=5.10.1, <5.12.1",
-    "mkdocs-material >=9.5.44, <9.6.0",
-    "mkdocstrings >=0.25.2, <=0.26.0",
-    "mkdocstrings-python >=1.10.9, <1.11.0",
-    "mkdocs_autorefs >=1.3.1, <1.4.0"  # BUG-FIX
-]
-
-# Specific dependencies needed for optional simmate apps
-BADELF = [
-    "mp-pyrho >=0.3.0, <=0.3.0",
-    "pybader >= 0.3.12, <=0.3.12",
-]
-CLEASE = [
-    "clease >=1.0.3, <=1.0.6",  # for cluster expansion calcs
-]
-MATERIALS_PROJECT = [
-    "mp-api >=0.26.3, <0.39.2",  # for downloading data directly MP
-]
-
-# These are packages that I commonly use alongside simmate. I plan to
-# organize these into optional dependencies and/or documentation. But until
-# then, I keep them here for my own reference.
-EXTRAS = [
-    "dask-jobqueue >=0.7.3, <=0.8.2",  # for submitting on HPC clusters
-    "numba >=0.53.0",  # for speed-up of basic calcs
-    "psycopg2-binary >=2.9.2",  # for Postgres connections (added -binary to fix bug)
-    "selenium",  # for web scraping (slow but robust)
-    "spyder",  # IDE for writing/editting
-    "gunicorn",  # for website server (Django+DigitalOcean) # NOT WINDOWS
-    "pygraphviz",  # pygraphviz on conda. for viewing django tables
-    "scikit-learn",  # for machine-learning
-    "fabric",  # for remote ssh connections
-    "django-extensions",  # simple tools to help with django development
-    "bokeh",  # for the dask dashboard
-    "h5py",  # for reading QE's binary output files
-    # OpenEye needs to point to a different source & a license is required
-    #   pip install -i https://pypi.anaconda.org/OpenEye/simple OpenEye-toolkits
-    # "OpenEye-toolkits @ https://pypi.anaconda.org/OpenEye/simple",
-    # ^^^ BUG: must be commented out for pypi uploads to work
-]
-
-# Link to our homepage. Use github for now.
 [project.urls]
 homepage = "https://simmate.org/"
 repository = "https://github.com/jacksund/simmate"
 documentation = "https://jacksund.github.io/simmate/home/"
 
-# Register command line interface
+# command line interface
 [project.scripts]
 simmate = "simmate.command_line.base_command:simmate_app"
 simmate-vasp = "simmate.apps.vasp.command_line.base_command:vasp_app"
 simmate-qe = "simmate.apps.quantum_espresso.command_line.base_command:qe_app"
 
-# -----------------------------------------------------------------------------
-
-# Indicate which directory the source coude is in
 [tool.setuptools.packages.find]
 where = ["src"]
 
-# All files that aren't *.py need to be defined explicitly. Don't "automate"
-# this to grab all files because this could break installation. This can
-# be effectively the opposite of .gitignore.
+# All files that aren't *.py need to be defined explicitly.
 [tool.setuptools]
 include-package-data = true
-
 [tool.setuptools.package-data]
 simmate = [
     "**/*.md",
