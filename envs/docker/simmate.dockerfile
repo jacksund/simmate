@@ -61,9 +61,9 @@ RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Minif
 # Note: folder added to PATH at start of file
 
 # Install Simmate's Python dependencies 
-COPY envs/conda/dev.yaml .
+COPY envs/conda/simmate_core.yaml .
 RUN conda update -n base conda && \
-    conda env update -f dev.yaml && \
+    conda env update -f simmate_core.yaml && \
     conda install -n simmate_dev -c conda-forge gunicorn psycopg2 && \
     conda clean -afy
 
