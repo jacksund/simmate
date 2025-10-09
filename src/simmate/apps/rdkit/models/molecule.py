@@ -103,13 +103,16 @@ class Molecule(DatabaseTable):
 
     class Meta:
         abstract = True
-        if settings.postgres_rdkit_extension:
-            indexes = [
+        indexes = (
+            [
                 # for faster mol-query searches
                 indexes.GistIndex(fields=["rdkit_mol"]),
                 # for faster similarity searches
                 indexes.GistIndex(fields=["fingerprint_morganbv"]),
             ]
+            if settings.postgres_rdkit_extension
+            else []
+        )
 
     exclude_from_summary = ["molecule"]
     archive_fields = ["molecule", "molecule_original"]

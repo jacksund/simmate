@@ -259,7 +259,7 @@ class SimmateSettings:
                         "simmate.apps.evolution.models.VariableNsitesCompositionSearch",
                         "simmate.apps.evolution.models.ChemicalSystemSearch",
                     ],
-                    "Business & Finance": [
+                    "Business and Finance": [
                         "simmate.apps.etherscan.models.EthereumWallet",
                         "simmate.apps.etherscan.models.EthereumTransaction",
                         "simmate.apps.price_catalog.models.MarketItem",
