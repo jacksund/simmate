@@ -46,7 +46,7 @@ def get_llm(temperature: float = 0.0, **kwargs) -> AzureChatOpenAI:
     Calling the model:
 
     ``` python
-    from simmate.apps.dev.chatbot.utilities import get_llm
+    from simmate.apps.chatbot.utilities import get_llm
 
     llm = get_llm()
     response = llm.invoke("hello world!")

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.dev.openeye_omega.workflows.base import OmegaWorkflow
+from simmate.apps.openeye_omega.workflows.base import OmegaWorkflow
 
 
 class ConformerGeneration__OpeneyeOmega__FastrocsPrep(OmegaWorkflow):

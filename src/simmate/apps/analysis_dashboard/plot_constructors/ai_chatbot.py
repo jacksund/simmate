@@ -3,7 +3,7 @@
 import pandas as pd
 import streamlit as st
 
-from simmate.apps.dev.chatbot.plotly import get_plotly_figure
+from simmate.apps.chatbot.plotly import get_plotly_figure
 
 from .base import PlotConstructor
 

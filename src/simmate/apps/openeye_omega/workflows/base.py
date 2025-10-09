@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from simmate.apps.dev.openeye_omega.inputs import OmegaParm
+from simmate.apps.openeye_omega.inputs import OmegaParm
 from simmate.toolkit import Molecule
 from simmate.toolkit.file_converters import SmilesAdapter
 from simmate.workflows.base_flow_types import S3Workflow

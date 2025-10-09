@@ -8,7 +8,7 @@ class AflowConfig(AppConfig):
 
 
 class AnalysisDashboardConfig(AppConfig):
-    name = "simmate.apps.dev.analysis_dashboard"
+    name = "simmate.apps.analysis_dashboard"
     verbose_name = "Analysis Dashboard"
     description_short = (
         "A dashboard for analyzing general datasets with dynamic and interactive plots"
@@ -28,7 +28,7 @@ class BcpcConfig(AppConfig):
 
 
 class BioviaCosmoConfig(AppConfig):
-    name = "simmate.apps.dev.biovia_cosmo"
+    name = "simmate.apps.biovia_cosmo"
 
 
 class CasRegistryConfig(AppConfig):
@@ -36,7 +36,7 @@ class CasRegistryConfig(AppConfig):
 
 
 class ChatbotConfig(AppConfig):
-    name = "simmate.apps.dev.chatbot"
+    name = "simmate.apps.chatbot"
 
 
 class ChemblConfig(AppConfig):
@@ -48,7 +48,7 @@ class ChemspaceConfig(AppConfig):
 
 
 class CleaseConfig(AppConfig):
-    name = "simmate.apps.dev.clease"
+    name = "simmate.apps.clease"
 
 
 class CodConfig(AppConfig):
@@ -56,7 +56,7 @@ class CodConfig(AppConfig):
 
 
 class DeepmdConfig(AppConfig):
-    name = "simmate.apps.dev.deepmd"
+    name = "simmate.apps.deepmd"
 
 
 class EmoleculesConfig(AppConfig):
@@ -72,7 +72,7 @@ class EppoGdConfig(AppConfig):
 
 
 class EtherscanConfig(AppConfig):
-    name = "simmate.apps.dev.etherscan"
+    name = "simmate.apps.etherscan"
 
 
 class EvolutionConfig(AppConfig):
@@ -88,7 +88,7 @@ class MaterialsProjectConfig(AppConfig):
 
 
 class OpeneyeOmegaConfig(AppConfig):
-    name = "simmate.apps.dev.openeye_omega"
+    name = "simmate.apps.openeye_omega"
 
 
 class OqmdConfig(AppConfig):
@@ -104,11 +104,11 @@ class PpdbConfig(AppConfig):
 
 
 class PriceCatalogConfig(AppConfig):
-    name = "simmate.apps.dev.price_catalog"
+    name = "simmate.apps.price_catalog"
 
 
 class ProjectManagementConfig(AppConfig):
-    name = "simmate.apps.dev.project_management"
+    name = "simmate.apps.project_management"
 
 
 class QuantumEspressoConfig(AppConfig):
@@ -120,11 +120,11 @@ class RdkitConfig(AppConfig):
 
 
 class SchrodingerConfig(AppConfig):
-    name = "simmate.apps.dev.schrodinger"
+    name = "simmate.apps.schrodinger"
 
 
 class SurflexConfig(AppConfig):
-    name = "simmate.apps.dev.surflex"
+    name = "simmate.apps.surflex"
 
 
 class VaspConfig(AppConfig):

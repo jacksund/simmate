@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     "simmate.website.configs.CoreComponentsConfig",
     "simmate.website.configs.DataExplorerConfig",
     "simmate.website.configs.WorkflowsConfig",
+    "simmate.apps.configs.RdkitConfig",  # enables rdkit ext when using postgres
     *settings.apps,
 ]
 # OPTIMIZE: for now, I just load everything, but I will want to allow users to

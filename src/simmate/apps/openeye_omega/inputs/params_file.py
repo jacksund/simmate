@@ -14,7 +14,7 @@ class OmegaParm(dict):
 
     Example use:
     ```python
-    from simmate.apps.dev.openeye_omega.inputs import OmegaParm
+    from simmate.apps.openeye_omega.inputs import OmegaParm
 
     settings = OmegaParm(
         in_="input.sdf",
