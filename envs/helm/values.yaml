@@ -45,6 +45,7 @@ simmate:
   #   - simmate.apps.configs.AflowConfig
   #   - simmate.apps.configs.CodConfig
   #   - simmate.apps.configs.JarvisConfig
+  postgres_rdkit_extension: true
   database:
     engine: django.db.backends.postgresql
     host: simmate-postgres-service

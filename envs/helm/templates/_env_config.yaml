@@ -22,6 +22,8 @@
 # User provided simmate settings
 - name: SIMMATE__APPS
   value: {{ join " " .Values.simmate.apps | quote }}
+- name: SIMMATE__POSTGRES_RDKIT_EXTENSION
+  value: {{ .Values.simmate.postgres_rdkit_extension | quote }}
 - name: SIMMATE__DATABASE__ENGINE
   value: {{ .Values.simmate.database.engine | quote }}
 - name: SIMMATE__DATABASE__HOST
