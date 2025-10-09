@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from simmate.apps.dev.schrodinger.inputs import JaguarInput
+from simmate.apps.schrodinger.inputs import JaguarInput
 from simmate.toolkit import Molecule
 from simmate.workflows.base_flow_types import S3Workflow
 

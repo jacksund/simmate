@@ -2,8 +2,7 @@
 
 from django.db import migrations, models
 
-import simmate.apps.rdkit.models.custom_fields.bfp
-import simmate.apps.rdkit.models.custom_fields.mol
+from simmate.apps.rdkit.utilities import get_rdkit_ext_fields
 
 
 class Migration(migrations.Migration):
@@ -40,18 +39,7 @@ class Migration(migrations.Migration):
                 ("log_p_rdkit", models.FloatField(blank=True, null=True)),
                 ("tpsa_rdkit", models.FloatField(blank=True, null=True)),
                 ("synthetic_accessibility", models.FloatField(blank=True, null=True)),
-                (
-                    "rdkit_mol",
-                    simmate.apps.rdkit.models.custom_fields.mol.MolField(
-                        blank=True, null=True
-                    ),
-                ),
-                (
-                    "fingerprint_morganbv",
-                    simmate.apps.rdkit.models.custom_fields.bfp.BfpField(
-                        blank=True, null=True
-                    ),
-                ),
+                *get_rdkit_ext_fields(),
                 (
                     "id",
                     models.CharField(max_length=5, primary_key=True, serialize=False),

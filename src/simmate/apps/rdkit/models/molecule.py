@@ -5,6 +5,7 @@ from django.contrib.postgres import indexes
 from django.db.models import Func
 
 from simmate.apps.rdkit.models import custom_fields
+from simmate.configuration import settings
 from simmate.database.base_data_types import DatabaseTable, SearchResults, table_column
 from simmate.toolkit import Molecule as ToolkitMolecule
 
@@ -102,12 +103,13 @@ class Molecule(DatabaseTable):
 
     class Meta:
         abstract = True
-        indexes = [
-            # for faster mol-query searches
-            indexes.GistIndex(fields=["rdkit_mol"]),
-            # for faster similarity searches
-            indexes.GistIndex(fields=["fingerprint_morganbv"]),
-        ]
+        if settings.postgres_rdkit_extension:
+            indexes = [
+                # for faster mol-query searches
+                indexes.GistIndex(fields=["rdkit_mol"]),
+                # for faster similarity searches
+                indexes.GistIndex(fields=["fingerprint_morganbv"]),
+            ]
 
     exclude_from_summary = ["molecule"]
     archive_fields = ["molecule", "molecule_original"]
@@ -305,31 +307,34 @@ class Molecule(DatabaseTable):
     # ------------------------ RDkit-extension fields ------------------------
 
     # RDkit-extension fields that allow us to do things like substructure
-    # and similarity searches.
-    rdkit_mol = custom_fields.MolField(blank=True, null=True)
-    """
-    This is the column used for substructure (+ SMARTS) searches. However, we 
-    recommend using the `filter_similarity_2d` method in our Python API rather 
-    than interact with this column via SQL.
-    
-    On the surface, this column is a copy of the `smiles` column. But this
-    is a special RDkit datatype that allows extra cheminformatics features.
-    To perform extra molecule analysis within the database, you can use [the
-    additional functions RDkit provides](https://www.rdkit.org/docs/Cartridge.html#functions).                                   
-    Keep in mind that many of these functions are available (and more performant)
-    in the python toolkit as well.
-    """
-    # OPTIMIZE: "rdkit_mol" is really just duplicate of the "smiles" column
+    # and similarity searches directly within postgres
 
-    fingerprint_morganbv = custom_fields.BfpField(blank=True, null=True)
-    """
-    This is the column used for 2D similarity searches. However, we recommend
-    using the `filter_substructure` method in our Python API rather than
-    interact with this column via SQL.
-    
-    The fingerprint used is a bit vector Morgan fingerprint, which is an
-    ECFP-like fingerprint. We use the default radius of 2 Angstroms.
-    """
+    if settings.postgres_rdkit_extension:
+
+        rdkit_mol = custom_fields.MolField(blank=True, null=True)
+        """
+        This is the column used for substructure (+ SMARTS) searches. However, we 
+        recommend using the `filter_similarity_2d` method in our Python API rather 
+        than interact with this column via SQL.
+        
+        On the surface, this column is a copy of the `smiles` column. But this
+        is a special RDkit datatype that allows extra cheminformatics features.
+        To perform extra molecule analysis within the database, you can use [the
+        additional functions RDkit provides](https://www.rdkit.org/docs/Cartridge.html#functions).                                   
+        Keep in mind that many of these functions are available (and more performant)
+        in the python toolkit as well.
+        """
+        # OPTIMIZE: "rdkit_mol" is really just duplicate of the "smiles" column
+
+        fingerprint_morganbv = custom_fields.BfpField(blank=True, null=True)
+        """
+        This is the column used for 2D similarity searches. However, we recommend
+        using the `filter_substructure` method in our Python API rather than
+        interact with this column via SQL.
+        
+        The fingerprint used is a bit vector Morgan fingerprint, which is an
+        ECFP-like fingerprint. We use the default radius of 2 Angstroms.
+        """
 
     # ------------------------ TODO fields ------------------------
 

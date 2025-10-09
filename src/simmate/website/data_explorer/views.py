@@ -10,19 +10,6 @@ from simmate.website.utilities import get_pagination_urls
 
 # -----------------------------------------------------------------------------
 
-DEFAULT_CONFIG = {
-    "Project Management": [],
-    "Chemical Inventory & Tracking": [],
-    "External Molecular Catalogs": [],
-    "External Crystalline Catalogs": [],
-    "Workflow Results": [],
-    # "Computational Assay Tracking": [],
-    # "Physical Property Assays Tracking": [],
-    # "Field Assay Tracking": [],
-    "Business & Finance": [],
-    "__HIDDEN__": [],
-}
-
 # We build this dict up front to reduce overhead on all API calls.
 _SAFE_TABLES = {
     get_table(table_name).table_name: get_table(table_name)

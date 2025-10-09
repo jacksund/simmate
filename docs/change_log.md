@@ -78,6 +78,8 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `database.external_connectors` utils
 - added proof of concept htmx app for frontend forms
 - added `toolkit.datastores` and `toolkit.dataframes` helper modules
+- added molecular and poc apps to the list of df
+- allow conditional postgres-rdkit extension with settings flag
 
 **Refactors**
 
