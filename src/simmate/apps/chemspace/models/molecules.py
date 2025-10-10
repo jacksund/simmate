@@ -25,7 +25,7 @@ class ChemSpaceFreedomSpaceMolecule(Molecule):
     html_description_short = (
         "A diverse set of 201M compounds, 73% of which comply with Ro5."
     )
-    is_redistribution_allowed = True
+    is_redistribution_allowed = False
 
     external_website = "https://chem-space.com/compounds/freedom-space"
 
