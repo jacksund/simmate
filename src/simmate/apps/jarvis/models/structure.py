@@ -24,6 +24,7 @@ class JarvisStructure(Structure):
 
     external_website = "https://jarvis.nist.gov/"
     source_doi = "https://doi.org/10.1038/s41524-020-00440-1"
+    is_redistribution_allowed = True
 
     remote_archive_link = "https://archives.simmate.org/JarvisStructure-2023-07-07.zip"
     archive_fields = ["energy_above_hull"]

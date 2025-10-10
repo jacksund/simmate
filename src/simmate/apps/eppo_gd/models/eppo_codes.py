@@ -33,6 +33,7 @@ class EppoCode(DatabaseTable):
     html_description_short = (
         "EPPO codes and metadata for >95k species of interest to agriculture."
     )
+    is_redistribution_allowed = True
 
     external_website = "https://gd.eppo.int/"
 

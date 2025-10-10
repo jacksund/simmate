@@ -1,4 +1,11 @@
-<div class="alert alert-{{ theme }}" role="alert">
-    <i class="mdi mdi-{{ icon }} mx-2"></i>
-    {{ message }}
+<div class="alert alert-{{ theme }} d-flex align-items-center"
+     role="alert">
+    <i class="bi bi-{{ icon }} my-2"></i>
+    <div class="px-3">
+        {% if small %}
+            {{ message }}
+        {% else %}
+            <small>{{ message }}</small>
+        {% endif %}
+    </div>
 </div>

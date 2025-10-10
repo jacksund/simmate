@@ -37,6 +37,7 @@ class ChemblMolecule(Molecule):
 
     external_website = "https://www.ebi.ac.uk/chembl/beta/"
     source_doi = "https://doi.org/10.1093/nar/gky1075"
+    is_redistribution_allowed = True
 
     # id is set to the 'molregno' in the chembl db (ex: 12345)
 

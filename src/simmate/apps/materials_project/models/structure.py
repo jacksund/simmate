@@ -24,6 +24,7 @@ class MatprojStructure(Structure, Thermodynamics):
 
     external_website = "https://materialsproject.org/"
     source_doi = "https://doi.org/10.1063/1.4812323"
+    is_redistribution_allowed = True
 
     remote_archive_link = "https://archives.simmate.org/MatprojStructure-2023-07-07.zip"
     archive_fields = [

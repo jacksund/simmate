@@ -27,6 +27,7 @@ class AflowStructure(Structure, Thermodynamics):
 
     external_website = "http://www.aflowlib.org/"
     source_doi = "https://doi.org/10.1016/j.commatsci.2012.02.005"
+    is_redistribution_allowed = False
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """

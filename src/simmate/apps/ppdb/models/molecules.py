@@ -38,6 +38,7 @@ class PpdbMolecule(Molecule):
 
     external_website = "https://sitem.herts.ac.uk/aeru/ppdb/en/index.htm"
     source_doi = "https://sitem.herts.ac.uk/aeru/ppdb/en/atoz.htm"
+    is_redistribution_allowed = False
 
     name = table_column.TextField(blank=True, null=True)
     """

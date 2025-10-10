@@ -15,6 +15,15 @@ with warnings.catch_warnings(record=True):
 
 
 class ChemicalSystemSearch(Calculation):
+
+    html_display_name = "Chemical System Searches"
+    html_description_short = (
+        "All evolutionary searches ran for a given chemical system (e.g. Na-Cl or Ca-N-Cl). "
+        "This are also known as variable composition searches, where both the composition "
+        " and total atom counts are allowed to change."
+        "This is essentially many variable nsites composition searches in one."
+    )
+
     class Meta:
         app_label = "workflows"
 

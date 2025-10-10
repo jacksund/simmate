@@ -60,6 +60,7 @@ class CasRegistryMolecule(Molecule):
     )
 
     external_website = "https://www.cas.org/about-us"
+    is_redistribution_allowed = False
 
     id = table_column.CharField(max_length=15, primary_key=True)
     """

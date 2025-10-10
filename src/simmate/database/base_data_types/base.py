@@ -1750,6 +1750,8 @@ class DatabaseTable(models.Model):
 
     # experimental overrides for templates used by the Data Explorer app
 
+    is_redistribution_allowed: bool = True
+
     html_display_name: str = None
     html_description_short: str = None
     html_tabtitle_label_col: str = "id"
