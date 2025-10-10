@@ -29,6 +29,7 @@ class EmoleculesSupplierOffer(DatabaseTable):
 
     external_website = "https://www.emolecules.com/"
     source_doi = "https://www.emolecules.com/data-downloads"
+    is_redistribution_allowed = False
 
     id = table_column.CharField(
         primary_key=True,

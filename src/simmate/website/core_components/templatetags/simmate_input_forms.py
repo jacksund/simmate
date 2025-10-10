@@ -364,16 +364,17 @@ def alert(
     theme: str = "primary",
     label: str = None,
     icon: str = None,
+    small: bool = False,
 ):
     """
     Display a alert widget with some message.
     """
     default_icon_mapping = {
-        "primary": "information",
-        "info": "information",
-        "secondary": "information",
-        "warning": "alert",
-        "danger": "alert",
+        "primary": "info-circle-fill",
+        "info": "info-circle-fill",
+        "secondary": "info-circle-fill",
+        "warning": "exclamation-triangle-fill",
+        "danger": "exclamation-triangle-fill",
     }
     if not icon:
         icon = default_icon_mapping.get(theme, "information")

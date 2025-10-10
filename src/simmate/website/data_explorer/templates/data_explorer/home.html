@@ -1,8 +1,9 @@
 {% extends "core_components/site_base.html" %}
 {% block tabtitle %}Data - Simmate{% endblock %}
 {% block body %}
+    {% simmate_setting "website.lock_data_redistribution" as LOCK_DATA_REDISTRIBUTION %}
     {# Header #}
-    <section class="jumbotron text-center">
+    <section class="jumbotron text-center py-3">
         <div class="container">
             <h1 class="jumbotron-heading">Data Explorer</h1>
             <p class="lead text-muted">Each option below corresponds to a single table in our database. Select one to explore.</p>
@@ -16,7 +17,7 @@
                 <h3 class="mt-4 pb-2 text-primary">{{ section_name }}</h3>
                 {# Start of the table for the current section #}
                 <div class="table-responsive mb-5">
-                    <table class="table table-striped table-hover align-middle">
+                    <table class="table table-striped align-middle">
                         <thead class="table-primary">
                             <tr>
                                 <th scope="col" style="width: 25%">Dataset</th>
@@ -28,7 +29,7 @@
                             {% for dataset in datasets %}
                                 <tr>
                                     <td>
-                                        {% if True %}
+                                        {% if dataset.is_redistribution_allowed or not LOCK_DATA_REDISTRIBUTION %}
                                             {# the extra style is to make the link be the entire cell #}
                                             <a class="text-dark"
                                                href="{% url 'data_explorer:table' dataset.table_name %}"
@@ -40,14 +41,19 @@
                                                 {{ dataset.html_display_name }} <i class="bi bi-box-arrow-in-right"></i>
                                             </a>
                                         {% else %}
-                                            {# TODO for datasets I want to show but cant redistribute #}
                                             <button type="button"
-                                                    class="text-danger border-0 p-0 m-0"
-                                                    style="background-color: transparent"
-                                                    data-bs-toggle="tooltip"
+                                                    class="text-danger text-start border-0 p-0 m-0"
+                                                    style="display: block;
+                                                           width: 100%;
+                                                           height: 100%;
+                                                           padding: 0;
+                                                           background-color: transparent;
+                                                           text-decoration: none"
+                                                    data-bs-toggle="popover"
                                                     data-bs-placement="right"
-                                                    data-bs-title="Simmate does not have permission to redistribute this data. However, you can still use our python package to download the data directly from the third-party source.">
-                                                {{ dataset.html_display_name }} <i class="bi bi-x-octagon"></i>
+                                                    data-bs-title="Unavailable in Public Website"
+                                                    data-bs-content="Simmate does not have permission to redistribute data from this provider. However, you can still use our python package to download the data *directly* from the third-party source. In other words, we can't give you their data ourselves, so you must get the data from the provider and then use simmate locally to work with it. The original data's Terms & Conditions will still apply.">
+                                                {{ dataset.html_display_name }} <i class="bi bi-exclamation-triangle"></i>
                                             </button>
                                         {% endif %}
                                     </td>

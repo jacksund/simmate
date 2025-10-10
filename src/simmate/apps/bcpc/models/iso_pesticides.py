@@ -38,6 +38,7 @@ class BcpcIsoPesticide(Molecule):
 
     html_entries_template = "bcpc/iso_pesticides/table.html"
     html_entry_template = "bcpc/iso_pesticides/view.html"
+    is_redistribution_allowed = False
 
     external_website = "http://www.bcpcpesticidecompendium.org/index.html"
     source_doi = "http://www.bcpcpesticidecompendium.org/index_cn_frame.html"

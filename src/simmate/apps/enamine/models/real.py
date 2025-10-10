@@ -27,6 +27,7 @@ class EnamineRealMolecule(Molecule):
     html_description_short = (
         "The largest enumerated database of synthetically feasible molecules"
     )
+    is_redistribution_allowed = False
 
     external_website = (
         "https://enamine.net/compound-collections/real-compounds/real-database"

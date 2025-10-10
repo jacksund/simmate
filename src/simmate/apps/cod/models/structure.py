@@ -24,6 +24,7 @@ class CodStructure(Structure):
 
     external_website = "https://www.crystallography.net/cod/"
     source_doi = "https://doi.org/10.1107/S0021889809016690"
+    is_redistribution_allowed = True
 
     remote_archive_link = "https://archives.simmate.org/CodStructure-2023-07-10.zip"
     archive_fields = ["is_ordered", "has_implicit_hydrogens"]
