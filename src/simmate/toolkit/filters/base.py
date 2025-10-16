@@ -59,7 +59,7 @@ class Filter:
         else:
             if not cls.is_atomic:
                 # !!! Is there an example algo where is_atomic=False, but it
-                # can be ran in parallel? If so, I'd need to add `allow_parallel`
+                # can be ran in parallel?
                 raise Exception(
                     "This filtering method is not atomic and cannot be ran in parallel"
                 )
@@ -74,6 +74,8 @@ class Filter:
             return sum(keep_list)
         elif return_mode == "booleans":
             return keep_list
+        elif return_mode == "index":
+            return [i for i, keep in enumerate(keep_list) if keep]
         elif return_mode == "molecules":
             # return only Molecules that are True in keep_list
             return [mol for keep, mol in zip(keep_list, molecules) if keep]

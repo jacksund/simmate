@@ -2,22 +2,17 @@
 
 import logging
 from functools import cached_property
-from pathlib import Path
 
 import polars
 from rdkit.Chem import rdSubstructLibrary
 from rich.progress import track
 
 from simmate.toolkit import Molecule
-from simmate.utilities import chunk_list, filter_polars_df, get_directory
+from simmate.utilities import filter_polars_df
 
-from ..featurizers import (
-    MethodCaller,
-    MorganFingerprint,
-    PatternFingerprint,
-    PropertyGrabber,
-)
+from ..featurizers import PatternFingerprint
 from ..featurizers.utilities import load_rdkit_fingerprint_from_base64
+from ..filters import AllowedElements
 
 
 class MoleculeDataFrame:
@@ -54,17 +49,18 @@ class MoleculeDataFrame:
             )
 
         self.df = df
+        self.parallel = parallel
         if init_toolkit_objs and "molecule_obj" not in df.columns:
-            self.init_toolkit_objs(parallel=parallel)
+            self.init_toolkit_objs()
         if init_substructure_lib:
-            self.init_substructure_lib(parallel=parallel)
+            self.init_substructure_lib()
         if init_morgan_fp_lib:
-            self.init_morgan_fp_lib(parallel=parallel)
+            self.init_morgan_fp_lib()
 
     # init methods are kept separate to keep code organized and also allow cols
     # to be populated dynamically at a later time
 
-    def init_toolkit_objs(self, parallel: bool = False):
+    def init_toolkit_objs(self):
         # priority of columns goes..
         # 1. molecule_obj (ie nothing to do)
         # 2. molecule (use from_dynamic)
@@ -82,7 +78,7 @@ class MoleculeDataFrame:
             mol_objs = [Molecule.from_smiles(m) for m in track(self.df["smiles"])]
             self.df = self.df.with_columns(polars.Series("molecule_obj", mol_objs))
 
-    def init_substructure_lib(self, parallel: bool = False):
+    def init_substructure_lib(self):
         logging.info(
             "Building `pattern_fingerprint` column for substructure searches..."
         )
@@ -91,7 +87,7 @@ class MoleculeDataFrame:
         if "pattern_fingerprint" not in self.df.columns:
             fingerprints = PatternFingerprint.featurize_many(
                 molecules=self.df[mol_col],
-                parallel=parallel,
+                parallel=self.parallel,
                 vector_type="rdkit",
             )
             self.df = self.df.with_columns(
@@ -110,18 +106,18 @@ class MoleculeDataFrame:
         else:
             pass  # assume pattern_fingerprint col is already in correct format
 
-    def init_morgan_fp_lib(self, parallel: bool = False):
+    def init_morgan_fp_lib(self):
         raise NotImplementedError("")  # TODO
-        logging.info(
-            "Building `morgan_fingerprint` column for 2D similarity searches..."
-        )
-        mol_col = self._get_molecule_column()
-        if "morgan_fingerprint" not in self.df.columns:
-            pass
-        elif isinstance(self.df["morgan_fingerprint"][0], str):
-            pass
-        else:
-            pass
+        # logging.info(
+        #     "Building `morgan_fingerprint` column for 2D similarity searches..."
+        # )
+        # mol_col = self._get_molecule_column()
+        # if "morgan_fingerprint" not in self.df.columns:
+        #     pass
+        # elif isinstance(self.df["morgan_fingerprint"][0], str):
+        #     pass
+        # else:
+        #     pass
 
     def _get_molecule_column(self):
         priority_order = ["molecule_obj", "molecule", "smiles"]
@@ -193,22 +189,18 @@ class MoleculeDataFrame:
         nthreads: int = -1,
     ):
 
+        # NOTE: it is much faster for us to use the underlying `substructure_library`
+        # than it is to use a filter from the `toolkit.filters` module
         molecule_query = Molecule.from_dynamic(molecule_query)
 
-        hit_ids = self.substructure_library.GetMatches(
+        filtered_ids = self.substructure_library.GetMatches(
             molecule_query.rdkit_molecule,
             numThreads=nthreads,
             maxResults=limit,  # BUG: rdkit has no way to allow unlimited
         )
-        hit_ids = list(hit_ids)
+        filtered_ids = list(filtered_ids)
 
-        # hits = [df[i] for i in hit_ids]
-        filtered_df = (
-            self.df.with_row_index("row_index")  # Add a temporary row_index column
-            .filter(polars.col("row_index").is_in(hit_ids))  # Filter using the list
-            .drop("row_index")  # Drop the temporary index column
-        )
-        return self.__class__(filtered_df)
+        return self.filter_from_ids(filtered_ids)
 
     def filter_similarity_2d(
         self,
@@ -218,6 +210,26 @@ class MoleculeDataFrame:
     ):
         molecule = Molecule.from_dynamic(molecule)
         raise NotImplementedError("")  # TODO
+
+    def filter_allowed_elements(self, elements: list[str]):
+        mol_col = self._get_molecule_column()
+        filtered_ids = AllowedElements.filter(
+            molecules=self.df[mol_col],
+            parallel=self.parallel,
+            return_mode="index",
+        )
+        return self.filter_from_ids(filtered_ids)
+
+    def filter_from_ids(self, ids: list[int]):
+        # normally, we could just do something like...
+        #   hits = [df[i] for i in hit_ids]
+        # but polars api is messy, so we do this:
+        filtered_df = (
+            self.df.with_row_index("row_index")  # Add a temporary row_index column
+            .filter(polars.col("row_index").is_in(ids))  # Filter using the list
+            .drop("row_index")  # Drop the temporary index column
+        )
+        return self.__class__(filtered_df)
 
     # -------------------------------------------------------------------------
 

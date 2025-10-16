@@ -604,6 +604,7 @@ class SimmateSettings:
         "SIMMATE__BADER__DOCKER__ENABLE": bool,
         "SIMMATE__QUANTUM_ESPRESSO__DOCKER__ENABLE": bool,
         "SIMMATE__VASP__DOCKER__ENABLE": bool,
+        "SIMMATE__POSTGRES_RDKIT_EXTENSION": bool,
     }
 
 

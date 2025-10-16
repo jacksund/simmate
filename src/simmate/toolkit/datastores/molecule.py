@@ -125,7 +125,7 @@ class MoleculeStore:
             lazy_df = filter_polars_df(lazy_df, **kwargs)
 
         if limit:
-            lazy_df.limit(limit)
+            lazy_df = lazy_df.limit(limit)
 
         # execute the query (not including similarity/substructure)
         logging.info("Loading from datastore...")
