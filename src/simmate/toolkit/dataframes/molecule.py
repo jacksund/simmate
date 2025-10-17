@@ -188,11 +188,10 @@ class MoleculeDataFrame:
         limit: int = 20_000_000,
         nthreads: int = -1,
     ):
+        molecule_query = Molecule.from_dynamic(molecule_query)
 
         # NOTE: it is much faster for us to use the underlying `substructure_library`
         # than it is to use a filter from the `toolkit.filters` module
-        molecule_query = Molecule.from_dynamic(molecule_query)
-
         filtered_ids = self.substructure_library.GetMatches(
             molecule_query.rdkit_molecule,
             numThreads=nthreads,

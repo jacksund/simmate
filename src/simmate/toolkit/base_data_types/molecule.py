@@ -137,6 +137,8 @@ class Molecule:
         Prints an image of the molecule if using an iPython-based console
         (e.g. iPython, Spyder IDE, Jupyter Notebook, etc.)
         """
+        # for wavy bonds
+        # AllChem.ReapplyMolBlockWedging(self.rdkit_molecule)
         # hacky way of doing this... it really just returns the rdkit_molecule
         return self.rdkit_molecule
 
@@ -385,8 +387,27 @@ class Molecule:
                 # smarts = AllChem.MolToSmarts(AllChem.MolFromSmiles(smarts))
                 m = cls.from_smiles(smarts)
                 if expand_implicit_hydrogen:
+                    # BUG-FIX: we need to prevent implicit Hs from being attached 
+                    # to dummy atoms (like *) where *any* bond is allowed (~)
+                    check = False
+                    for atom in m.rdkit_molecule.GetAtoms():
+                        if any(
+                            n.GetAtomicNum() == 0 for n in atom.GetNeighbors()
+                        ) and any(
+                            str(b.GetBondType()) == "UNSPECIFIED"
+                            for b in atom.GetBonds()
+                        ):
+                            atom.SetNoImplicit(True)
+                            atom.SetNumExplicitHs(0)  # ensure explicit H count is zero
+                            check = True
+                    if check:
+                        # need to refresh if *any* atoms were triggered
+                        m.rdkit_molecule.UpdatePropertyCache(strict=False)
+                    # we can add H normally after the patch fix above
                     m.add_hydrogens()
-                smarts = m.to_smarts()
+                # we need the 'replace' because the from_smiles call converts
+                # all "*" away from the wildcard, breaking the query.
+                smarts = m.to_smarts().replace("#0", "*")
             except:
                 logging.warning(
                     "Failed to read SMARTS with expand_explicit_notation=True. "
