@@ -40,6 +40,7 @@ class PdbLigand(Molecule):
 
     external_website = "https://www.wwpdb.org/"
     source_doi = "https://www.wwpdb.org/data/ccd"
+    is_redistribution_allowed = True
 
     id = table_column.CharField(max_length=5, primary_key=True)
     """

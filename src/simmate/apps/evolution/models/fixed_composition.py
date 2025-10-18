@@ -30,6 +30,13 @@ class FixedCompositionSearch(Calculation):
     search and also has convient methods to analyze the data + write output files.
     """
 
+    html_display_name = "Fixed-Composition Searches"
+    html_description_short = (
+        "All evolutionary searches ran for a given fixed-composition. "
+        "Fixed means the composition and atom count are the same for all "
+        "structures evaluated (e.g., Na1Cl1 or Ca4N2Cl1)."
+    )
+
     class Meta:
         app_label = "workflows"
 
