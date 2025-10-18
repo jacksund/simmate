@@ -387,7 +387,7 @@ class Molecule:
                 # smarts = AllChem.MolToSmarts(AllChem.MolFromSmiles(smarts))
                 m = cls.from_smiles(smarts)
                 if expand_implicit_hydrogen:
-                    # BUG-FIX: we need to prevent implicit Hs from being attached 
+                    # BUG-FIX: we need to prevent implicit Hs from being attached
                     # to dummy atoms (like *) where *any* bond is allowed (~)
                     check = False
                     for atom in m.rdkit_molecule.GetAtoms():
