@@ -3,35 +3,82 @@
 {% block body %}
     <div class="row">
         {# Buttons & Sidebars #}
-        <div class="col-8">
+        <div class="col-12 py-3">
             <a href="{% url 'data_explorer:table-about' table.table_name %}"
                class="btn btn-primary my-1">
-                <i class="mdi mdi-information"></i>&nbsp;&nbsp;Table Info</a>
-            {# Quick Search Sidebar #}
+                <i class="bi bi-info-circle"></i>&nbsp;&nbsp;Table Info</a>
             {% block quicksearch %}
                 {% if table.html_form_view and "search" in table.html_enabled_forms %}
                     {% include "data_explorer/table_search.html" %}
                     {# ELSE: include "data_explorer/table_filters.html" (disabled for now) #}
                 {% endif %}
             {% endblock %}
-            {# Update Sidebar #}
             {% block updater %}
                 {% if table.html_form_view and "update_many" in table.html_enabled_forms %}
                     {% include "data_explorer/table_update_many.html" %}
                 {% endif %}
             {% endblock %}
-            {# Add New Sidebar #}
             {% block addnew %}
                 {% if table.html_form_view and "create" in table.html_enabled_forms %}
                     {% include "data_explorer/table_add_entry.html" %}
                 {% endif %}
             {% endblock %}
-            <a href="{% update_url format='csv' %}" class="btn btn-secondary my-1">
-                <i class="mdi mdi-download"></i>&nbsp;&nbsp;Download</a>
-        </div>
-        {# Table Description #}
-        <div class="col-4">
-            <p class="lead text-muted">{{ table.html_description_short }}</p>
+            <a class="btn btn-secondary my-1"
+               href="#"
+               role="button"
+               data-bs-toggle="dropdown">
+                <i class="bi bi-download"></i>&nbsp;&nbsp;Download
+            </a>
+            <ul class="dropdown-menu">
+                {% comment %}
+                    <li>
+                        <h6 class="dropdown-header">User-friendly Version</h6>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% update_url format='csv' %}"><i class="bi bi-file-earmark-spreadsheet"></i> CSV <small>(cleaned)</small></a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                {% endcomment %}
+                <li>
+                    <h6 class="dropdown-header">
+                        REST API <small>(raw data)</small>
+                    </h6>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% update_url format='csv' %}"><i class="bi bi-file-earmark-spreadsheet"></i> CSV</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% update_url format='json' %}"><i class="bi bi-braces"></i> JSON</a>
+                </li>
+                {% comment %}
+                    <li>
+                        <a class="dropdown-item" href="#"><i class="bi bi-box"></i> CIF</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#"><i class="bi bi-flask"></i> SDF</a>
+                    </li>
+                {% endcomment %}
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <h6 class="dropdown-header">
+                        Other <small>(requires install)</small>
+                    </h6>
+                </li>
+                <li>
+                    <a class="dropdown-item"
+                       href="https://jacksund.github.io/simmate/full_guides/database/basic_use/"
+                       target="_blank"><i class="bi bi-code"></i> Python</a>
+                </li>
+                <li>
+                    <a class="dropdown-item"
+                       href="https://jacksund.github.io/simmate/getting_started/database/quick_start/"
+                       target="_blank"><i class="bi bi-database"></i> SQL</a>
+                </li>
+            </ul>
         </div>
     </div>
     {# Search Results #}
@@ -40,7 +87,7 @@
             {% if page.object_list %}
                 <div class="alert alert-primary d-flex align-items-center mt-2"
                      role="alert">
-                    <i class="mdi mdi-check-circle"></i>&nbsp;&nbsp;
+                    <i class="bi bi-info-circle"></i>&nbsp;&nbsp;
                     <div>
                         Showing <b>{{ page.start_index }}-{{ page.end_index }}</b> of
                         <b>
@@ -52,8 +99,8 @@
                         {% if total == 10000 %}
                             We limit searches to 10k results for our Web UI and API. Switch to Python or SQL if you need the full dataset.
                         {% endif %}
-                        <a class="text-dark fw-bold text-decoration-underline" href=".">
-                            Reset Filters <i class="mdi mdi-refresh"></i>
+                        <a class="text-dark text-decoration-underline" href=".">
+                            Clear Filters <i class="bi bi-arrow-clockwise"></i>
                         </a>
                     </div>
                 </div>
@@ -68,9 +115,9 @@
             {% else %}
                 <div class="alert alert-danger d-flex align-items-center p-2" role="alert">
                     <div>
-                        <i class="mdi mdi-alert-circle"></i>&nbsp;&nbsp;<b>No entries were found that match your search criteria!</b>&nbsp;&nbsp;
-                        <a class="text-dark fw-bold text-decoration-underline" href=".">
-                            Reset Filters<i class="mdi mdi-refresh"></i>
+                        <i class="bi bi-exclamation-triangle"></i>&nbsp;&nbsp;<b>No entries were found that match your search criteria!</b>&nbsp;&nbsp;
+                        <a class="text-dark text-decoration-underline" href=".">
+                            Clear Filters<i class="bi bi-arrow-clockwise"></i>
                         </a>
                     </div>
                 </div>

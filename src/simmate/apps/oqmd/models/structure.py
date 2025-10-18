@@ -23,6 +23,7 @@ class OqmdStructure(Structure):
 
     external_website = "https://oqmd.org/"
     source_doi = "https://doi.org/10.1007/s11837-013-0755-4"
+    is_redistribution_allowed = True
 
     remote_archive_link = "https://archives.simmate.org/OqmdStructure-2023-07-21.zip"
     archive_fields = ["formation_energy"]

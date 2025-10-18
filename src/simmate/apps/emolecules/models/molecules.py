@@ -34,6 +34,7 @@ class EmoleculesMolecule(Molecule):
 
     external_website = "https://www.emolecules.com/"
     source_doi = "https://www.emolecules.com/data-downloads"
+    is_redistribution_allowed = False
 
     # emol_versions_id --> set to id in the table
     emol_parent_id = table_column.IntegerField(blank=True, null=True)

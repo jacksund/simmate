@@ -229,6 +229,9 @@ class SimmateSettings:
                 # is important if they involve loading custom apps/models for their templates.
                 "home_view": None,
                 "profile_view": None,
+                # Default is for local use, where no redistribution is happening.
+                # Any public server MUST have this set to True.
+                "lock_data_redistribution": True,
                 "data": {
                     "Project Management": [
                         "simmate.apps.project_management.models.Project",

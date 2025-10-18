@@ -31,8 +31,9 @@ class AflowPrototype(Structure):
         " for Materials Discovery"
     )
 
-    external_website = "http://www.aflowlib.org/prototype-encyclopedia/"
+    external_website = "https://www.aflowlib.org/prototype-encyclopedia/"
     source_doi = "https://doi.org/10.1016/j.commatsci.2017.01.017"
+    is_redistribution_allowed = False
 
     remote_archive_link = "https://archives.simmate.org/AflowPrototype-2023-07-06.zip"
     archive_fields = [
