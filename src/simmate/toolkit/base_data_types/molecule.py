@@ -137,6 +137,8 @@ class Molecule:
         Prints an image of the molecule if using an iPython-based console
         (e.g. iPython, Spyder IDE, Jupyter Notebook, etc.)
         """
+        # for wavy bonds
+        # AllChem.ReapplyMolBlockWedging(self.rdkit_molecule)
         # hacky way of doing this... it really just returns the rdkit_molecule
         return self.rdkit_molecule
 
@@ -253,27 +255,36 @@ class Molecule:
     @staticmethod
     def _clean_benchtop_conventions(smiles: str) -> str:
         """
-        Converts common notations in benchtop chemistry to a SMILES/SMARTS
-        format.
+        Converts common benchtop notations to SMILES/SMARTS-friendly forms.
 
-        For example, benchtop chemists use "R1, R2, R3" to denote R (functional)
-        groups, whereas SMARTS would use "*:1, *:2, *:3" to label these atoms.
+        - R, Rn  -> '*' or '[*:n]' (n preserved as an atom-map number)
+        - [R], [Rn], [R:n] -> '[*]', '[*:n]'
+        - Does NOT touch real elements (e.g., Ru, Rh, Rb, Rn, Re, Rf, Rg, Ra, Ar),
+          including bracketed forms like [Ru], [Ar], etc.
+
+        Notes:
+        - Using [*:n] is robust for both SMILES and SMARTS (RDKit supports mapped dummy atoms).
+        - Naked '*' cannot carry a map outside brackets, so we emit '[*:n]' for Rn and '*' for bare R.
         """
 
-        # It is common that chemist use R instead of the SMARTS standard *
-        # BUG: need regex to catch when R shouldn't be replaced -- such as
-        # when there is an element that starts with R
-        r_elements = ["Ra", "Rn", "Re", "Rh", "Rg", "Rb", "Ru", "Rf"]
-        if "R" in smiles and not any([e in smiles for e in r_elements]):
+        # 1) [R:n] -> [*:n]
+        smiles = re.sub(r"$$R:(\d+)$$", r"[*:\1]", smiles)
 
-            smiles = smiles.replace("R", "*")
+        # 2) [R] or [Rn] -> [*] or [*:n]
+        def _repl_bracket(m: re.Match) -> str:
+            idx = m.group(1)
+            return f"[*:{idx}]" if idx else "[*]"
 
-            # If the user set things like R1, R2, R3, etc., then we actually
-            # want these changed to :1, *:2, *:3
-            n = 1
-            while f"*{n}" in smiles:
-                smiles = smiles.replace(f"*{n}", f"*:{n}")
-                n += 1
+        smiles = re.sub(r"$$R(\d+)?$$", _repl_bracket, smiles)
+
+        # 3) Naked R or Rn not part of element symbols:
+        #    - Not preceded by a letter (avoids Br, Cl, ... and any X R adjacency)
+        #    - Not followed by a lowercase letter (avoids Ru, Rh, Rb, Rn, Re, Rf, Rg, etc.)
+        def _repl_naked(m: re.Match) -> str:
+            idx = m.group(1)
+            return f"*:{idx}" if idx else "*"
+
+        smiles = re.sub(r"(?<![A-Za-z])R(\d+)?(?![a-z])", _repl_naked, smiles)
 
         return smiles
 
@@ -350,12 +361,66 @@ class Molecule:
         return cls(rdkit_molecule)
 
     @classmethod
-    def from_smarts(cls, smarts: str, clean_benchtop_conventions: bool = True):
+    def from_smarts(
+        cls,
+        smarts: str,
+        clean_benchtop_conventions: bool = True,
+        expand_implicit_bonds: bool = False,
+        expand_implicit_hydrogen: bool = False,  # when you have an R-group template
+    ):
         """
         Takes a SMARTS (SMILES-like) string and converts it to a `Molecule` object.
         """
         if clean_benchtop_conventions:
             smarts = cls._clean_benchtop_conventions(smarts)
+
+        if expand_implicit_bonds:
+            # This is a hack that converts things like "*CC" into the
+            # more explicit "[#0]-[#6]-[#6]". Note element numbers are given
+            # exactly and that bond types (single here) are written out. This
+            # is generally what benchtop chemist want when they copy a structure
+            # from ChemDraw, but it fails for more advanced SMARTS formats such
+            # as "[F,Cl,Br,I]C".
+            try:
+                # The trick is to load it as smiles -> then convert to smarts ->
+                # then reload that smarts.
+                # smarts = AllChem.MolToSmarts(AllChem.MolFromSmiles(smarts))
+                m = cls.from_smiles(smarts)
+                if expand_implicit_hydrogen:
+                    # BUG-FIX: we need to prevent implicit Hs from being attached
+                    # to dummy atoms (like *) where *any* bond is allowed (~)
+                    check = False
+                    for atom in m.rdkit_molecule.GetAtoms():
+                        if any(
+                            n.GetAtomicNum() == 0 for n in atom.GetNeighbors()
+                        ) and any(
+                            str(b.GetBondType()) == "UNSPECIFIED"
+                            for b in atom.GetBonds()
+                        ):
+                            atom.SetNoImplicit(True)
+                            atom.SetNumExplicitHs(0)  # ensure explicit H count is zero
+                            check = True
+                    if check:
+                        # need to refresh if *any* atoms were triggered
+                        m.rdkit_molecule.UpdatePropertyCache(strict=False)
+                    # we can add H normally after the patch fix above
+                    m.add_hydrogens()
+                # we need the 'replace' because the from_smiles call converts
+                # all "*" away from the wildcard, breaking the query.
+                smarts = m.to_smarts().replace("#0", "*")
+            except:
+                logging.warning(
+                    "Failed to read SMARTS with expand_explicit_notation=True. "
+                    "This can happen when you have a more advanced SMARTS. "
+                    "Explicit notation will be skipped."
+                )
+
+        if expand_implicit_hydrogen and not expand_implicit_bonds:
+            raise NotImplementedError(
+                "expand_implicit_bonds=True with `from_smarts` is only allowed "
+                "when expand_implicit_bonds=True"
+            )
+
         rdkit_molecule = cls._load_rdkit(
             rdkit_loader=AllChem.MolFromSmarts,
             molecule_input=smarts,
@@ -629,6 +694,12 @@ class Molecule:
         sdf += "\n$$$$\n"
         return sdf
 
+    def to_smarts(self):
+        """
+        Converts the current `Molecule` object to a SMARTS query string
+        """
+        return AllChem.MolToSmarts(self.rdkit_molecule)
+
     def to_smiles(
         self,
         remove_hydrogen: bool = True,
@@ -858,6 +929,10 @@ class Molecule:
     def components(self):
         components_rdkit = rdmolops.GetMolFrags(self.rdkit_molecule, asMols=True)
         return [self.__class__(mol) for mol in components_rdkit]
+
+    @property
+    def num_components(self):
+        return len(self.num_components)
 
     @property
     def largest_component(self):  # -> Molecule
