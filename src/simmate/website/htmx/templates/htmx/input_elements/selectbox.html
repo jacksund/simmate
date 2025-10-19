@@ -3,7 +3,6 @@
     {% include "core_components/basic_elements/label.html" %}
     <select id="{{ context.component.component_id }}-{{ name }}-select2"
             name="{{ name }}"
-            style="width: 200px"
             class="select2 {% if multiselect %}select2-multiple{% endif %} form-control {% if allow_custom_input %}select2-dynamic{% endif %}"
             data-toggle="select2"
             data-placeholder="Choose one ..."

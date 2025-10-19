@@ -38,7 +38,7 @@ class HtmxComponent:
         self.form_data = {}
         self.intial_context = context
         self.update_caches()
-        self.on_create(context.request)  # hook
+        self.mount(context.request)  # hook
 
     # -------------------------------------------------------------------------
 
@@ -205,7 +205,7 @@ class HtmxComponent:
 
     # HOOKS -- all do nothing by default
 
-    def on_create(self, request):  # aka mount()
+    def mount(self, request):  # aka on_init() or on_create()
         pass
 
     def pre_parse(self, request):

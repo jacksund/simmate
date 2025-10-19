@@ -18,7 +18,7 @@ class ExampleComponent(HtmxComponent):
         ]
     ]
 
-    def on_create(self, request):
+    def mount(self, request):
         pass
 
     def run_some_js(self, request) -> JsonResponse:
