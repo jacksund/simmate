@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 
 from simmate.website.utilities import hash_options
 
-from ..component import HtmxComponent
+from ..components import HtmxComponent
 
 register = template.Library()
 
@@ -21,7 +21,9 @@ def htmx_cdn_script():
 def htmx_component(context: dict, component_name: str, **kwargs):
     # TODO: util that converts name to class
     if component_name == "ExampleComponent":
-        component_class = HtmxComponent
+        from simmate.website.htmx.components.example import ExampleComponent
+
+        component_class = ExampleComponent
     else:
         raise NotImplementedError()
 

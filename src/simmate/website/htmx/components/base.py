@@ -9,7 +9,7 @@ from django.shortcuts import render
 
 from simmate.utilities import dotdict, str_to_datatype
 
-from .utilities import get_uuid_starting_with_letter, htmx_redirect
+from ..utilities import get_uuid_starting_with_letter, htmx_redirect
 
 # for cachetools v1 and v2 support
 try:
@@ -22,9 +22,11 @@ LOCAL_COMPONENT_CACHE = LRUCache(maxsize=10_000)
 
 class HtmxComponent:
 
-    component_id = None
+    component_id: str = None
 
-    post_data = None
+    post_data: dict = None
+
+    js_actions: list[dict] = None
 
     def __init__(self, context: dict = None, **kwargs):
         # Objects are always initialized through the {% htmx_component ... %} templatetag.
@@ -34,7 +36,96 @@ class HtmxComponent:
         self.component_id = get_uuid_starting_with_letter()
         self.intial_context = context
         self.update_caches()
-        # self.mount()
+        self.on_create(context.request)  # hook
+
+    # -------------------------------------------------------------------------
+
+    _direct_obj_attrs_in_context: bool = False
+
+    def get_context(self):
+        obj_attrs = self.__dict__ if self._direct_obj_attrs_in_context else {}
+        return {
+            "component": self,
+            **obj_attrs,
+        }
+        # **self.initial_context.flatten(),  # include this?
+
+    def handle_request(self, request, method_name: str = None) -> HttpResponse:
+
+        self.js_actions = []  # reset as to not repeat last request's actions
+
+        self.pre_parse(request)
+        self.post_data = self.parse_post_data(request)
+        self.post_parse(request)
+
+        if method_name:
+            method = getattr(self, method_name)
+            response = method(request)
+        else:
+            response = self.process(request)
+
+        # response is typically None, meaning we defer to rendering the component
+        # template again.
+        # But in some cases, it can return a JsonResponse or its own html
+        # that takes priority
+        return (
+            response
+            if response is not None
+            else render(
+                request,
+                self.template_name,
+                self.get_context(),
+            )
+        )
+
+    # -------------------------------------------------------------------------
+
+    # LOADING FROM CACHE METHODS
+
+    @classmethod
+    def from_cache(cls, component_id: str) -> "HtmxComponent":
+
+        component_cache_key = f"htmx:component:{component_id}"
+
+        # try local cache
+        cached_component = cls.from_local_cache(component_cache_key)
+        if cached_component:
+            return cached_component
+        else:
+            raise Exception("Failed to load component from cache")
+
+        # try django cache  (DISABLED FOR NOW)
+        # cached_component = cls.from_django_cache(component_cache_key)
+        # if cached_component:
+        #     return cached_component
+
+    @staticmethod
+    def from_local_cache(component_cache_key: str) -> "HtmxComponent":
+        return LOCAL_COMPONENT_CACHE.get(component_cache_key)
+
+    # @staticmethod
+    # def from_django_cache(self):
+    #     ....from_dict(...)
+
+    # -------------------------------------------------------------------------
+
+    # ADDING TO CACHE METHODS
+
+    @property
+    def component_cache_key(self):
+        return f"htmx:component:{self.component_id}"
+
+    def update_caches(self):
+        self.to_local_cache()
+        # self.to_django_cache()  # DISABLE FOR NOW
+
+    def to_local_cache(self):
+        LOCAL_COMPONENT_CACHE[self.component_cache_key] = self
+
+    # def to_django_cache(self):
+    #     cache_full_tree(self)
+
+    # -------------------------------------------------------------------------
 
     @classmethod
     @property
@@ -55,79 +146,15 @@ class HtmxComponent:
 
     # -------------------------------------------------------------------------
 
-    @classmethod
-    def from_cache(cls, component_id: str) -> "HtmxComponent":
-
-        component_cache_key = f"htmx:component:{component_id}"
-
-        # try local cache
-        cached_component = cls.from_local_cache(component_cache_key)
-        if cached_component:
-            return cached_component
-        else:
-            raise Exception()
-
-        # try django cache  (DISABLED FOR NOW)
-        # cached_component = cls.from_django_cache(component_cache_key)
-        # if cached_component:
-        #     return cached_component
-
-    @staticmethod
-    def from_local_cache(component_cache_key: str) -> "HtmxComponent":
-        return LOCAL_COMPONENT_CACHE.get(component_cache_key)
-
-    # -------------------------------------------------------------------------
-
-    @property
-    def component_cache_key(self):
-        return f"htmx:component:{self.component_id}"
-
-    def update_caches(self):
-        self.to_local_cache()
-        # self.to_django_cache()  # DISABLE FOR NOW
-
-    def to_local_cache(self):
-        LOCAL_COMPONENT_CACHE[self.component_cache_key] = self
-
-    # def to_django_cache(self):
-    #     cache_full_tree(self)
-
-    # -------------------------------------------------------------------------
-
-    _direct_obj_attrs_in_context: bool = False
-
-    def get_context(self):
-        obj_attrs = self.__dict__ if self._direct_obj_attrs_in_context else {}
-        return {
-            "component": self,
-            **obj_attrs,
-        }
-        # **self.initial_context.flatten(),  # include this?
-
-    def handle_request(self, request) -> HttpResponse:
-        self.post_data = self.parse_post_data(request)
-        # TODO: process
-        return render(
-            request,
-            self.template_name,
-            self.get_context(),
-        )
-
-    # -------------------------------------------------------------------------
-
-    ####
     # request.POST data parsing + cleaning
-    ####
 
-    post_data_form: DjangoForm = None
     post_data_mappings: dict = {}
 
     def parse_post_data(self, request):
 
         # TODO: allow other more robust parsing methods. For example:
-        #   1. simmate.utilities.str_to_datatype --> uses a mapping dict for type
-        #   2. a pydantic class
-        #   3. django form class
+        #   1. a pydantic class
+        #   2. django form class
 
         # BUG:
         # For now, I don't want the boilerplate associated with those methods,
@@ -172,42 +199,18 @@ class HtmxComponent:
 
     # -------------------------------------------------------------------------
 
-    template_name: str = "htmx/example_form.html"
+    # HOOKS -- all do nothing by default
 
-    status_options = [
-        (o, o)
-        for o in [
-            "option one",
-            "option two",
-            "option three",
-        ]
-    ]
+    def on_create(self, request):  # aka mount()
+        pass
 
-    def run_some_js(self, request) -> JsonResponse:
-        actions = [
-            {"showAlert": ["Hello from Django!"]},
-            {"highlight": ["#result"]},
-        ]
-        return JsonResponse(actions, safe=False)
+    def pre_parse(self, request):
+        pass
 
-    def add_molecule_image(self, request):
-        from simmate.toolkit import Molecule
+    def post_parse(self, request):
+        pass
 
-        self.actions = [
-            {
-                "add_mol_viewer": [
-                    "jacks-molecule",
-                    Molecule.from_smiles("CCCCCC").to_sdf(),
-                    200,
-                    300,
-                ]
-            }
-        ]
-        return self.handle_request(request)
+    def process(self, request):
+        pass
 
-    def update_selection_test(self, request):
-        self.new_selection = True
-        self.actions = [
-            {"refresh_select2": []},
-        ]
-        return self.handle_request(request)
+    # -------------------------------------------------------------------------
