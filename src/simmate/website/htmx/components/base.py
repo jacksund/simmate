@@ -3,7 +3,7 @@
 import re
 from typing import get_args, get_origin
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 
 from simmate.utilities import dotdict, str_to_datatype
@@ -29,6 +29,10 @@ class HtmxComponent:
 
     js_actions: list[dict] = None
 
+    inital_context: dict = None
+
+    request: HttpRequest = None  # overwritten on each new ajax call
+
     def __init__(self, context: dict = None, **kwargs):
         # Objects are always initialized through the {% htmx_component ... %} templatetag.
         # So they are built when the html page is being rendered. On init, we
@@ -37,8 +41,9 @@ class HtmxComponent:
         self.component_id = get_uuid_starting_with_letter()
         self.form_data = {}
         self.intial_context = context
+        self.request = context.request
         self.update_caches()
-        self.mount(context.request)  # hook
+        self.mount()
 
     # -------------------------------------------------------------------------
 
@@ -54,33 +59,38 @@ class HtmxComponent:
 
     def handle_request(self, request, method_name: str = None) -> HttpResponse:
 
+        self.request = request  # for easy access elsewhere
+
         self.js_actions = []  # reset as to not repeat last request's actions
 
-        self.pre_parse(request)
-        self.post_data = self.parse_post_data(request)
-        self.post_parse(request)
+        self.pre_parse()
+        self.post_data = self.parse_post_data()
+        self.post_parse()
 
         self.form_data.update(self.post_data)
 
         if method_name:
             method = getattr(self, method_name)
-            response = method(request)
+            response = method()
         else:
-            response = self.process(request)
+            response = self.process()
 
         # response is typically None, meaning we defer to rendering the component
         # template again.
-        # But in some cases, it can return a JsonResponse or its own html
+        # But in some cases, it can return a JsonResponse, a URL, or some html
         # that takes priority
-        return (
-            response
-            if response is not None
-            else render(
+        if isinstance(response, JsonResponse):
+            return response
+        elif False and isinstance(response, str):  # DISABLED -- need better check
+            return htmx_redirect(response)  # redirect to url
+        elif response is not None:
+            return response  # could be Http, html or something else
+        else:
+            render(
                 request,
                 self.template_name,
                 self.get_context(),
             )
-        )
 
     # -------------------------------------------------------------------------
 
@@ -154,7 +164,7 @@ class HtmxComponent:
 
     post_data_mappings: dict = {}
 
-    def parse_post_data(self, request):
+    def parse_post_data(self):
 
         # TODO: allow other more robust parsing methods. For example:
         #   1. a pydantic class
@@ -171,7 +181,7 @@ class HtmxComponent:
 
         result = {}
         # note: all values are given as a list for requst.POST
-        for key, values in request.POST.lists():
+        for key, values in self.request.POST.lists():
 
             target_type = self.post_data_mappings.get(key, None)
 
@@ -205,16 +215,16 @@ class HtmxComponent:
 
     # HOOKS -- all do nothing by default
 
-    def mount(self, request):  # aka on_init() or on_create()
+    def mount(self):  # aka on_init() or on_create()
         pass
 
-    def pre_parse(self, request):
+    def pre_parse(self):
         pass
 
-    def post_parse(self, request):
+    def post_parse(self):
         pass
 
-    def process(self, request):
+    def process(self):
         pass
 
     # -------------------------------------------------------------------------
