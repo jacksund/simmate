@@ -13,11 +13,11 @@
                     class="btn btn-outline-danger my-2">Continue</button>
         {% else %}
             <div>This will update {{ entry_ids_to_update|length }} entries.</div>
-            {% button name="submit_form" label="Save to database" icon="content-save" %}
+            {% htmx_button method_name="submit_form" label="Save to database" icon="content-save" %}
         {% endif %}
     {% elif form_mode == "search" %}
-        {% button name="submit_form" label="Search" icon="magnify" %}
+        {% htmx_button method_name="submit_form" label="Search" icon="magnify" %}
     {% else %}
-        {% button name="submit_form" label="Save to database" icon="content-save" %}
+        {% htmx_button method_name="submit_form" label="Save to database" icon="content-save" %}
     {% endif %}
 </div>

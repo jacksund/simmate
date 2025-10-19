@@ -27,11 +27,7 @@
                 </small>
             </div>
         </div>
-        <div>
-            {% load unicorn %}
-            {% csrf_token %}
-            {% unicorn 'api-filter' %}
-        </div>
+        <div>{% htmx_component 'api-filter' %}</div>
     </div>
 </div>
 {# Toggle sidebar button #}

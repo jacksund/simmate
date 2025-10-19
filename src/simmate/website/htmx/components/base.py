@@ -3,13 +3,12 @@
 import re
 from typing import get_args, get_origin
 
-from django.forms import Form as DjangoForm
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
 from simmate.utilities import dotdict, str_to_datatype
 
-from ..utilities import get_uuid_starting_with_letter, htmx_redirect
+from .utilities import get_uuid_starting_with_letter, htmx_redirect
 
 # for cachetools v1 and v2 support
 try:
@@ -26,6 +25,8 @@ class HtmxComponent:
 
     post_data: dict = None
 
+    form_data: dict = None
+
     js_actions: list[dict] = None
 
     def __init__(self, context: dict = None, **kwargs):
@@ -34,6 +35,7 @@ class HtmxComponent:
         # also add it to the cache, so that htmx ajax calls can load the object
         # from cache using the component_id
         self.component_id = get_uuid_starting_with_letter()
+        self.form_data = {}
         self.intial_context = context
         self.update_caches()
         self.on_create(context.request)  # hook
@@ -57,6 +59,8 @@ class HtmxComponent:
         self.pre_parse(request)
         self.post_data = self.parse_post_data(request)
         self.post_parse(request)
+
+        self.form_data.update(self.post_data)
 
         if method_name:
             method = getattr(self, method_name)

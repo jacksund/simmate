@@ -23,11 +23,11 @@ class Project(DatabaseTable):
     html_entries_template = "projects/project/table.html"
     html_entry_template = "projects/project/view.html"
 
-    html_form_view = "project-form"
+    html_form_component = "project-form"
     html_enabled_forms = [
-        "search",
+        # "search",
         "create",
-        "update",
+        # "update",
     ]
 
     source = None  # disable col
@@ -44,15 +44,14 @@ class Project(DatabaseTable):
     to fill out this information & how much detail they wish to provide
     """
 
-    status_choices = (
-        ("PR", "Pending Review"),
-        ("A", "Active"),
-        ("IA", "Inactive"),
-        ("RU", "Requires Update"),
+    status_options = (
+        "Pending Review",
+        "Active",
+        "Inactive",
+        "Requires Update",
     )
     status = table_column.CharField(
         max_length=3,
-        choices=status_choices,
         blank=True,
         null=True,
     )

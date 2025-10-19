@@ -8,18 +8,18 @@
                class="btn btn-primary my-1">
                 <i class="bi bi-info-circle"></i>&nbsp;&nbsp;Table Info</a>
             {% block quicksearch %}
-                {% if table.html_form_view and "search" in table.html_enabled_forms %}
+                {% if table.html_form_component and "search" in table.html_enabled_forms %}
                     {% include "data_explorer/table_search.html" %}
                     {# ELSE: include "data_explorer/table_filters.html" (disabled for now) #}
                 {% endif %}
             {% endblock %}
             {% block updater %}
-                {% if table.html_form_view and "update_many" in table.html_enabled_forms %}
+                {% if table.html_form_component and "update_many" in table.html_enabled_forms %}
                     {% include "data_explorer/table_update_many.html" %}
                 {% endif %}
             {% endblock %}
             {% block addnew %}
-                {% if table.html_form_view and "create" in table.html_enabled_forms %}
+                {% if table.html_form_component and "create" in table.html_enabled_forms %}
                     {% include "data_explorer/table_add_entry.html" %}
                 {% endif %}
             {% endblock %}
@@ -105,7 +105,7 @@
                     </div>
                 </div>
                 {% block search_results_table %}
-                    {% if table.html_form_view and "update_many" in table.html_enabled_forms %}
+                    {% if table.html_form_component and "update_many" in table.html_enabled_forms %}
                         {% include table.html_entries_template with enable_select=True entries=page.object_list %}
                     {% else %}
                         {% include table.html_entries_template with enable_select=False entries=page.object_list %}

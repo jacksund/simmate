@@ -19,12 +19,12 @@ class Tag(DatabaseTable):
     html_entries_template = "projects/tag/table.html"
     html_entry_template = "projects/tag/view.html"
 
-    html_form_view = "tag-form"
-    html_enabled_forms = [
-        "search",
-        "create",
-        "update",
-    ]
+    # html_form_component = "tag-form"
+    # html_enabled_forms = [
+    #     "search",
+    #     "create",
+    #     "update",
+    # ]
 
     # TODO: Maybe allow FilteredScope objects to be linked to these for
     # auto-tagging things in other tables

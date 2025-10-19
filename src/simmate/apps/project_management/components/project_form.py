@@ -2,56 +2,28 @@
 
 from django.db import transaction
 
-from simmate.website.core_components.components import DynamicFormComponent, UserInput
-from simmate.website.utilities import parse_multiselect
+from simmate.website.htmx.components import HtmxComponent
 
 from ..models import Project
 
+# DynamicTableForm, UserInput
 
-class ProjectFormView(DynamicFormComponent, UserInput):
+
+class ProjectForm(HtmxComponent):
 
     table = Project
-    template_names = dict(
-        default="projects/project/form.html",
-    )
+
+    template_name = "project_management/project/form.html"
+    # template_names = dict(
+    #     default="project_management/project/form.html",
+    # )
 
     # -------------------------------------------------------------------------
 
-    name = None
-    description = None
-
-    status = None
-    status_options = Project.status_choices
-
-    discipline = None
-    discipline_options = Project.discipline_options
-
-    leader_ids = None
-    member_ids = None
+    def suggest_new_name(self, request):
+        self.form_data["name"] = Project.suggest_new_name()
 
     # -------------------------------------------------------------------------
-
-    # boiler plate for multi-select widgets
-
-    def set_leader_ids(self, leader_ids):
-        self.leader_ids = parse_multiselect(leader_ids)
-
-    def set_member_ids(self, member_ids):
-        self.member_ids = parse_multiselect(member_ids)
-
-    # -------------------------------------------------------------------------
-
-    def suggest_new_name(self):
-        self.name = Project.suggest_new_name()
-
-    # -------------------------------------------------------------------------
-
-    class Meta:
-        javascript_exclude = (
-            "status_options",
-            *DynamicFormComponent.Meta.javascript_exclude,
-            *UserInput.Meta.javascript_exclude,
-        )
 
     required_inputs = [
         "name",

@@ -26,19 +26,19 @@
             {% if initial_value %}
                 <option value="{{ initial_value }}">
                     {% for option in options %}
-                        {% if initial_value == option.0 %}{{ option.1 }}{% endif %}
+                        {% if initial_value == option %}{{ option }}{% endif %}
                     {% endfor %}
                 </option>
             {% else %}
                 <option value="NONE">Choose one...</option>
             {% endif %}
             {% for option in options %}
-                {% if option.0 != initial_value %}<option value="{{ option.0 }}">{{ option.1 }}</option>{% endif %}
+                {% if option != initial_value %}<option value="{{ option }}">{{ option }}</option>{% endif %}
             {% endfor %}
         {% else %}
             {% for option in options %}
-                <option value="{{ option.0 }}"
-                        {% if initial_value and option.0 in initial_value %}selected{% endif %}>{{ option.1 }}</option>
+                <option value="{{ option }}"
+                        {% if initial_value and option in initial_value %}selected{% endif %}>{{ option }}</option>
             {% endfor %}
         {% endif %}
     </select>

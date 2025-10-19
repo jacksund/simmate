@@ -1765,8 +1765,8 @@ class DatabaseTable(models.Model):
     html_search_template: str = "core_components/unicorn_full_page.html"
     html_entry_form_template: str = "core_components/unicorn_full_page.html"
 
-    # Unicorn views (side panels in the table view of the Data Explorer app)
-    html_form_view: str = None
+    # HTMX views (side panels in the table view of the Data Explorer app)
+    html_form_component: str = None
     html_enabled_forms: list[str] = []
     # options: "search", "create", "update", "create_many", "create_many_entry", "update_many"
 

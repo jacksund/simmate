@@ -1,18 +1,18 @@
 {% if form_mode == "search" %}
-    <div class="text-center pt-2">{% button name="submit_form" label="Search" icon="magnify" %}</div>
+    <div class="text-center pt-2">{% htmx_button method_name="submit_form" label="Search" icon="magnify" %}</div>
     <div class="container border border-3 border-secondary rounded py-2">
         <h3>
             <span class="badge bg-secondary">0. General Search Options</span>
         </h3>
         <div class="row">
-            <div class="col-md-4">{% text_input name="id__in" label="ID(s)" placeholder="123, 456, 789, ..." %}</div>
+            <div class="col-md-4">{% htmx_text_input name="id__in" label="ID(s)" placeholder="123, 456, 789, ..." %}</div>
         </div>
         <div class="row">
-            <div class="col-md-4">{% selectbox name="order_by" %}</div>
-            <div class="col-md-4">{% checkbox name="reverse_order_by" label="Reverse the order?" side_text="Reverse" %}</div>
+            <div class="col-md-4">{% htmx_selectbox name="order_by" %}</div>
+            <div class="col-md-4">{% htmx_checkbox name="reverse_order_by" label="Reverse the order?" side_text="Reverse" %}</div>
         </div>
         <div class="row">
-            <div class="col-md-4">{% selectbox name="page_size" label="Results per page" %}</div>
+            <div class="col-md-4">{% htmx_selectbox name="page_size" label="Results per page" %}</div>
         </div>
     </div>
 {% endif %}
