@@ -109,19 +109,6 @@ urlpatterns = [
     path(route="pricing/", view=views.pricing, name="pricing"),
     path(route="faqs/", view=views.faqs, name="faqs"),
     #
-    # Django-unicorn urls
-    path(
-        route="unicorn/",
-        view=include(
-            (
-                "simmate.website.unicorn.urls",
-                "simmate.website.unicorn",
-            ),
-            namespace="unicorn",
-        ),
-        name="unicorn",
-    ),
-    #
     # HTMX urls
     path(
         route="htmx/",
