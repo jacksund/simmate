@@ -364,13 +364,18 @@ class Molecule:
     def from_smarts(
         cls,
         smarts: str,
-        clean_benchtop_conventions: bool = True,
+        clean_benchtop_conventions: bool = False,
         expand_implicit_bonds: bool = False,
         expand_implicit_hydrogen: bool = False,  # when you have an R-group template
+        allow_h_in_wildcard: bool = True,
     ):
         """
         Takes a SMARTS (SMILES-like) string and converts it to a `Molecule` object.
         """
+
+        # NOTE! many of the kwargs available are only intended for the
+        # from_scaffold_query method and other advanced use cases.
+
         if clean_benchtop_conventions:
             smarts = cls._clean_benchtop_conventions(smarts)
 
@@ -408,6 +413,10 @@ class Molecule:
                 # we need the 'replace' because the from_smiles call converts
                 # all "*" away from the wildcard, breaking the query.
                 smarts = m.to_smarts().replace("#0", "*")
+                # allow anything except H in the wildcard spot
+                if not allow_h_in_wildcard:
+                    smarts = smarts.replace("*", "!#1")
+
             except:
                 logging.warning(
                     "Failed to read SMARTS with expand_explicit_notation=True. "
@@ -426,6 +435,32 @@ class Molecule:
             molecule_input=smarts,
         )
         return cls(rdkit_molecule)
+
+    @classmethod
+    def from_scaffold_query(
+        cls,
+        template: str,
+        allow_h_in_r_group: bool = False,  # different default than from_smarts
+        **kwargs,
+    ):
+        """
+        A scaffold query is a special type of SMARTS, where R-groups
+        are specified and all hydrogens are presumed to be explicit.
+
+        This is the behavior expected when a chemist uses a molecule with
+        an R-group for a structure search. When the structure is copied out
+        of ChemDraw as SMILES, the bonds and hydrogens are not explicit, so
+        this util helps formilize them.
+
+        When in doubt, avoid this method and stick to regular SMARTS.
+        """
+        return cls.from_smarts(
+            smarts=template,
+            clean_benchtop_conventions=True,
+            expand_implicit_bonds=True,
+            expand_implicit_hydrogen=True,
+            allow_h_in_wildcard=allow_h_in_r_group,
+        )
 
     @classmethod
     def from_xyz(cls, xyz: str, **kwargs):

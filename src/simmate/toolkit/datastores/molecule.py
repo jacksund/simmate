@@ -112,6 +112,7 @@ class MoleculeStore:
         init_toolkit_objs: bool = False,
         init_substructure_lib: bool = False,
         init_morgan_fp_lib: bool = False,
+        explicit_h_mode: bool = False,
         # for all stages
         parallel: bool = False,
         # then any django-like filters for columns (e.g. id__lte=100)
@@ -142,6 +143,7 @@ class MoleculeStore:
             init_toolkit_objs=init_toolkit_objs,
             init_substructure_lib=init_substructure_lib,
             init_morgan_fp_lib=init_morgan_fp_lib,
+            explicit_h_mode=explicit_h_mode,
             parallel=parallel,
         )
 
