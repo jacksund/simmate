@@ -19,8 +19,19 @@ class MethodCaller(Featurizer):
             "to_inchi": "inchi",
             "to_smiles": "smiles",
             # !!! maybe just remove "to_" when the str starts with it?
+            # for MolecularDataFrame special type:
+            "_get_smiles_with_h": "smiles",
         }
-        return list([method_name_map.get(k, k) for k in method_map.keys()])
+        return list(
+            [
+                (
+                    method_name_map.get(k, k)
+                    if isinstance(k, str)
+                    else method_name_map.get(k.__name__, k.__name__)
+                )
+                for k in method_map.keys()
+            ]
+        )
 
     @staticmethod
     def featurize(
@@ -29,7 +40,11 @@ class MethodCaller(Featurizer):
         **kwargs,
     ) -> numpy.array:
         values = [
-            getattr(molecule, method_name)(**method_kwargs)
+            (
+                getattr(molecule, method_name)(**method_kwargs)
+                if isinstance(method_name, str)
+                else method_name(molecule=molecule, **method_kwargs)
+            )  # assume callable
             for method_name, method_kwargs in method_map.items()
         ]
         return numpy.array(values)

@@ -260,22 +260,22 @@ class MoleculeDataFrame:
             )
 
         molecule_library = rdSubstructLibrary.CachedTrustedSmilesMolHolder()
-
-        if not self.explicit_h_mode:
-            # the normal behavior
-            [molecule_library.AddSmiles(r) for r in self.df["smiles"]]
-        elif self.explicit_h_mode and "molecule_obj" in self.df.columns:
-            # if we need smiles with Hs, then its fastest to use the toolkit objs
-            for molecule in track(self.df["molecule_obj"]):
-                s = molecule.to_smiles(remove_hydrogen=False)
-                molecule_library.AddSmiles(s)
-        else:
-            # otherwise we need to generate the new smiles and add it.
-            for r in track(self.df["smiles"]):
-                molecule = Molecule.from_smiles(r)
-                molecule.add_hydrogens()
-                s = molecule.to_smiles(remove_hydrogen=False)
-                molecule_library.AddSmiles(s)
+        [molecule_library.AddSmiles(r) for r in self.df["smiles"]]
+        # if not self.explicit_h_mode:
+        #     # the normal behavior
+        #     [molecule_library.AddSmiles(r) for r in self.df["smiles"]]
+        # elif self.explicit_h_mode and "molecule_obj" in self.df.columns:
+        #     # if we need smiles with Hs, then its fastest to use the toolkit objs
+        #     for molecule in track(self.df["molecule_obj"]):
+        #         s = molecule.to_smiles(remove_hydrogen=False)
+        #         molecule_library.AddSmiles(s)
+        # else:
+        #     # otherwise we need to generate the new smiles and add it.
+        #     for r in track(self.df["smiles"]):
+        #         molecule = Molecule.from_smiles(r)
+        #         molecule.add_hydrogens()
+        #         s = molecule.to_smiles(remove_hydrogen=False)
+        #         molecule_library.AddSmiles(s)
 
         # load_rdkit_fingerprint_from_base64 if instance base64 str
         fingerprint_library = rdSubstructLibrary.PatternHolder()

@@ -440,7 +440,7 @@ class Molecule:
     def from_scaffold_query(
         cls,
         template: str,
-        allow_h_in_r_group: bool = False,  # different default than from_smarts
+        allow_h: bool = True,
         **kwargs,
     ):
         """
@@ -459,7 +459,7 @@ class Molecule:
             clean_benchtop_conventions=True,
             expand_implicit_bonds=True,
             expand_implicit_hydrogen=True,
-            allow_h_in_wildcard=allow_h_in_r_group,
+            allow_h_in_wildcard=allow_h,
         )
 
     @classmethod
