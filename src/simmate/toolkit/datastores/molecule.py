@@ -5,6 +5,7 @@ from pathlib import Path
 
 import polars
 
+from simmate.configuration import settings
 from simmate.toolkit import Molecule
 from simmate.utilities import chunk_list, filter_polars_df, get_directory
 
@@ -42,9 +43,10 @@ class MoleculeStore:
     pandas+dask, sqlite, or duckdb.
     """
 
-    local_path: str
+    directory_name: str
     """
     Rative path to the directory where all parquet chunk files are stored.
+    These are assumed to be in the simmate base directory (~/simmate/datastores/)
     
     Use the `directory` property for the more robust Path object
     """
@@ -82,7 +84,9 @@ class MoleculeStore:
         """
         Path object of the directory where all parquet chunk files are stored
         """
-        return get_directory(cls.local_path)
+        return get_directory(
+            settings.config_directory / "datastores" / cls.directory_name
+        )
 
     @classmethod
     @property

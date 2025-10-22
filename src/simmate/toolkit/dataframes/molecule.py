@@ -290,3 +290,36 @@ class MoleculeDataFrame:
         return library
 
     # -------------------------------------------------------------------------
+
+    def _custom_substructure_filter(self, query: Molecule):
+        # this is a unwrapped version of rdkit's substruc lib. I keep it here becuase
+        # it helps to know what is happening behind the scenes
+
+        from rdkit.Chem import AllChem, DataStructs
+
+        query_fingerprint = query.get_fingerprint("pattern", "rdkit")
+
+        # AllProbeBitsMatch is a fast C++ check: only candidates can possibly match
+        candidate_ids = [
+            i
+            for i, fp in enumerate(self.df["patten_fingerprint"])
+            if DataStructs.AllProbeBitsMatch(query_fingerprint, fp)
+        ]
+        # OPTIMIZE: this would be way faster if there was a BulkAllProbeBitsMatch
+        # because the bottleneck is the python call to C++ call overhead.
+        # It might even be better to reimplement this in numpy+numba.
+
+        # run exact substructure only on candidates
+        hit_ids = []
+        q = query.rdkit_molecule
+        for i in candidate_ids:
+            # a faster way to load trusted smiles based on CachedTrustedSmilesMolHolder
+            # https://rdkit.blogspot.com/2016/09/avoiding-unnecessary-work-and.html
+            # mol = Molecule.from_smiles(df[i]["smiles"][0]) # too slow
+            mol = AllChem.MolFromSmiles(self.df[i]["smiles"][0], sanitize=False)
+            mol.UpdatePropertyCache()
+            # Chem.FastFindRings(mol)
+            if mol.HasSubstructMatch(q):
+                hit_ids.append(i)
+
+        return self.filter_from_ids(hit_ids)
