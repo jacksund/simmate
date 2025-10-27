@@ -5,10 +5,6 @@
    viewBox="0 0 102 24"
    version="1.1"
    id="svg905"
-   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
-   sodipodi:docname="simmate-logo-dark.svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -16,28 +12,6 @@
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs899" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="218.39286"
-     inkscape:cy="24.821429"
-     inkscape:document-units="mm"
-     inkscape:current-layer="g1562"
-     inkscape:document-rotation="0"
-     showgrid="false"
-     inkscape:window-width="2560"
-     inkscape:window-height="1369"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
-     inkscape:pagecheckerboard="0"
-     inkscape:showpageshadow="2"
-     inkscape:deskcolor="#d1d1d1" />
   <metadata
      id="metadata902">
     <rdf:RDF>
@@ -50,8 +24,6 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
      id="layer1">
     <g
        id="g1562"
@@ -59,23 +31,19 @@
       <path
          id="path2269"
          style="fill:#00de59;fill-opacity:1;stroke:#00de59;stroke-width:0.15942;stroke-linejoin:round;stroke-opacity:1"
-         d="M 5.9981512,16.716903 16.307298,10.578435 15.037233,20.640067 Z"
-         sodipodi:nodetypes="cccc" />
+         d="M 5.9981512,16.716903 16.307298,10.578435 15.037233,20.640067 Z" />
       <path
          id="path3240"
          style="fill:#00aa44;fill-opacity:1;stroke:#00aa44;stroke-width:0.185917;stroke-linejoin:round;stroke-opacity:1"
-         d="m 5.6899586,17.559602 6.5983234,9.739665 2.471521,-5.836392 z"
-         sodipodi:nodetypes="cccc" />
+         d="m 5.6899586,17.559602 6.5983234,9.739665 2.471521,-5.836392 z" />
       <path
          id="path3244"
          style="fill:#00666b;fill-opacity:1;stroke:#00666b;stroke-width:0.185916;stroke-linejoin:round;stroke-opacity:1"
-         d="M 22.536074,21.81574 13.200726,27.581477 15.614912,21.752 Z"
-         sodipodi:nodetypes="cccc" />
+         d="M 22.536074,21.81574 13.200726,27.581477 15.614912,21.752 Z" />
       <path
          id="path3242"
          style="fill:#008f97;fill-opacity:1;stroke:#008f97;stroke-width:0.156324;stroke-linejoin:round;stroke-opacity:1"
-         d="M 22.345657,20.966347 17.213793,10.852877 15.903677,20.876364 Z"
-         sodipodi:nodetypes="cccc" />
+         d="M 22.345657,20.966347 17.213793,10.852877 15.903677,20.876364 Z" />
       <path
          d="M 38.461395,25.95709 V 14.236785 H 40.60749 V 25.95709 Z m 10.975742,-3.144685 q 0.385421,-1.384012 0.954793,-2.969495 l 2.023461,-5.606125 h 3.013292 V 25.95709 h -2.146095 v -5.938988 q 0,-1.305176 0.105115,-3.030812 h -0.07884 q -0.148913,0.499296 -0.350383,1.121225 -0.20147,0.62193 -0.420459,1.22634 l -2.426401,6.622235 h -1.384012 l -2.426401,-6.622235 q -0.21899,-0.60441 -0.42046,-1.22634 -0.20147,-0.621929 -0.350382,-1.121225 h -0.07884 q 0.105115,1.620521 0.105115,3.022052 V 25.95709 H 43.410553 V 14.236785 h 2.995773 l 2.02346,5.579847 q 0.508055,1.392771 0.954793,2.995773 z"
          id="text1-8"
