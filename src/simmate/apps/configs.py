@@ -22,6 +22,8 @@ class BadelfConfig(AppConfig):
 class BaderConfig(AppConfig):
     name = "simmate.apps.bader"
 
+class BaderkitConfig(AppConfig):
+    name = "simmate.apps.baderkit"
 
 class BcpcConfig(AppConfig):
     name = "simmate.apps.bcpc"
