@@ -104,22 +104,28 @@ class PopulationAnalysis(StaticEnergy):
         # For loading the static-energy data, we can just call the parent
         # method of this class.
         energy_data = StaticEnergy.from_vasp_directory(directory, as_dict=as_dict)
-
-        # We must then look for the bader analysis data
-
-        # load the ACF.dat file
-        dataframe, extra_data = ACF(directory)
-
-        all_data = {
-            # OPTIMIZE: consider a related table for Sites
-            "oxidation_states": list(dataframe.oxidation_state.values),
-            "charges": list(dataframe.charge.values),
-            "min_dists": list(dataframe.min_dist.values),
-            "atomic_volumes": list(dataframe.atomic_vol.values),
-            "element_list": list(dataframe.element.values),
-            **extra_data,
-            **energy_data,
-        }
+        
+        # For bader analysis, we must check if the results are from the Henkelman
+        # groups code or BaderKit. BaderKit returns this information directly
+        
+        if (directory / "ACF.dat").exists():
+            # We must then look for the bader analysis data
+    
+            # load the ACF.dat file
+            dataframe, extra_data = ACF(directory)
+    
+            all_data = {
+                # OPTIMIZE: consider a related table for Sites
+                "oxidation_states": list(dataframe.oxidation_state.values),
+                "charges": list(dataframe.charge.values),
+                "min_dists": list(dataframe.min_dist.values),
+                "atomic_volumes": list(dataframe.atomic_vol.values),
+                "element_list": list(dataframe.element.values),
+                **extra_data,
+                **energy_data,
+            }
+        else:
+            all_data = {**energy_data}
 
         return all_data if as_dict else cls(**all_data)
 
