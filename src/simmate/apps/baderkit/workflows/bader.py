@@ -11,8 +11,7 @@ class PopulationAnalysis__Baderkit__Bader(Workflow):
     use_database = False
     use_previous_directory = ["AECCAR0", "AECCAR2", "CHGCAR", "POTCAR"]
     parent_workflows = [
-        "population-analysis.vasp-bader.bader-matproj",
-        
+        "population-analysis.vasp-baderkit.bader-warren-lab",
         ]
 
     """
