@@ -72,6 +72,12 @@ def add(app_name: str, custom: bool = False):
                 "simmate.apps.configs.BaderConfig",
             ]
         )
+    elif app_name == "baderkit":
+        settings.add_apps_and_update(
+            [
+                "simmate.apps.configs.BaderkitConfig",
+            ]
+        )
     elif app_name == "clease":
         settings.add_apps_and_update(
             [
@@ -195,6 +201,11 @@ def test(app_name: str):
 
     elif app_name == "bader":
         from simmate.apps.bader.configuration import test_config
+
+        passed = test_config()
+        
+    elif app_name == "baderkit":
+        from simmate.apps.baderkit.configuration import test_config
 
         passed = test_config()
 

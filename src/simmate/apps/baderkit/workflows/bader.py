@@ -5,6 +5,7 @@ from baderkit.core import Grid, Bader
 from baderkit.core.bader.methods import Method
 from simmate.workflows.base_flow_types import Workflow
 
+from simmate.database import connect
 
 class PopulationAnalysis__Baderkit__Bader(Workflow):
     required_files = ["AECCAR0", "AECCAR2", "CHGCAR", "POTCAR"]

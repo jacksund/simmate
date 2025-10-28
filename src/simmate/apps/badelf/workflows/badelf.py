@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.badelf.models import BadElf
+from simmate.apps.badelf.models import Badelf
 from simmate.apps.badelf.workflows.base import BadElfBase
 from simmate.database import connect
 
 
-class BadElf__Badelf__Badelf(BadElfBase):
+class Badelf__Badelf__Badelf(BadElfBase):
     """
     This class runs a Bader and BadELF analysis without running a static
     energy calculation. The directory it is run in must already have an
@@ -18,4 +18,4 @@ class BadElf__Badelf__Badelf(BadElfBase):
     """
 
     use_database = True
-    database_table = BadElf
+    database_table = Badelf

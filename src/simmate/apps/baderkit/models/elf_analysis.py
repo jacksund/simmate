@@ -13,6 +13,8 @@ use ForeignKeys to point to the corresponding ElfAnalysis table.
 from pathlib import Path
 
 from baderkit.core import ElfLabeler, SpinElfLabeler
+from baderkit.core.labelers.bifurcation_graph.enum_and_styling import FeatureType
+import numpy as np
 
 from simmate.database.base_data_types import (
     Calculation,
@@ -27,6 +29,9 @@ class ElfAnalysis(Structure):
     does not inherit from the Calculation table as the results may not
     be generated from a dedicated workflow.
     """
+    
+    class Meta:
+        app_label = "baderkit"
     
     cutoff_kwargs = table_column.JSONField(blank=True, null=True)
     """
@@ -105,8 +110,9 @@ class ElfAnalysis(Structure):
         """
         pass
     
-    def update_from_labeler(
-            self, 
+    @classmethod
+    def from_labeler(
+            cls, 
             labeler: ElfLabeler,
             directory: Path,
             **kwargs
@@ -114,8 +120,13 @@ class ElfAnalysis(Structure):
         """
         Creates a new row from an ElfLabeler object
         """
+        # get structure dict info
+        structure_dict = cls._from_toolkit(
+            structure=labeler.structure,
+            as_dict=True
+            )
+        
         results = {}
-        results["structure"] = labeler.structure
         results["bifurcation_graph"] = labeler.bifurcation_graph.to_json()
         results["labeled_structure"] = labeler.labeled_structure.to_json()
         results["quasi_atom_structure"] = labeler.quasi_atom_structure.to_json()
@@ -127,9 +138,9 @@ class ElfAnalysis(Structure):
             potcar_path = directory / "POTCAR",
             **kwargs
             )
-        results["oxidation_states"] = oxidation_states
-        results["atomic_charges"] = charges
-        results["atomic_volumes"] = volumes
+        results["oxidation_states"] = oxidation_states.tolist()
+        results["charges"] = charges.tolist()
+        results["volumes"] = volumes.tolist()
         
         # add setting kwargs
         cutoff_kwargs = {}
@@ -148,10 +159,16 @@ class ElfAnalysis(Structure):
                 ]:
             cutoff_kwargs[attr] = getattr(labeler, attr, None)
         results["cutoff_kwargs"] = cutoff_kwargs
-        new_row = ElfAnalysis(**results)
+        # create a new entry
+        new_row = cls(
+            **structure_dict,
+            **results
+            )
         new_row.save()
+
         # update elf features
-        self.update_elf_features(labeler)
+        new_row.update_elf_features(labeler)
+        return new_row
 
     def update_elf_features(self, labeler: ElfLabeler):
         # pull all the data together and save it to the database. We
@@ -159,13 +176,25 @@ class ElfAnalysis(Structure):
         # model, we need to use "elf_features.model".
         feature_model = self.elf_features.model
         # Let's iterate through the ELF features and save these to the database.
-        for node in labeler.bifurcation_graph.irreducible_nodes:
+        struc_len = len(labeler.structure)
+        quasi_atom_count = 0
+        for node_idx, node in enumerate(labeler.bifurcation_graph.irreducible_nodes):
             # get dict of all info for this feature
             new_row_dict = {}
-            for entry in feature_model.columns:
-                new_row_dict[entry] = getattr(node, entry, None)
+            for entry in feature_model.get_column_names():
+                test_attr = getattr(node, entry, None)
+                if test_attr is None:
+                    continue
+                # convert numpy arrays
+                if isinstance(test_attr, np.ndarray):
+                    test_attr = test_attr.tolist()
+                new_row_dict[entry] = test_attr
             # update values not stored directly in dict
             new_row_dict["analysis"] = self
+            if node.feature_type in FeatureType.bare_types:
+                new_row_dict["quasi_atom_structure_index"] = struc_len + quasi_atom_count
+                quasi_atom_count += 1
+            new_row_dict["labeled_structure_index"] = struc_len + node_idx
             new_row = feature_model(**new_row_dict)
             new_row.save()
             
@@ -175,21 +204,28 @@ class SpinElfAnalysis(Structure):
     calculation. It intentionally does not inherit from the Calculation
     table as the results may not be calculated from a dedicated workflow.
     """
+    class Meta:
+        app_label = "baderkit"
+    
     cutoff_kwargs = table_column.JSONField(blank=True, null=True)
     """
     The settings used when labeling features in the structure
     """
     
     analysis_up = table_column.ForeignKey(
-        "ElfAnalysis",
+        "baderkit.ElfAnalysis",
         on_delete=table_column.CASCADE,
         related_name="spin_analysis",
+        blank=True,
+        null=True,
     )
     
     analysis_down = table_column.ForeignKey(
-        "ElfAnalysis",
+        "baderkit.ElfAnalysis",
         on_delete=table_column.CASCADE,
         related_name="spin_analysis",
+        blank=True,
+        null=True,
     )
     
     total_labeled_structure = table_column.JSONField(blank=True, null=True)
@@ -238,6 +274,11 @@ class SpinElfAnalysis(Structure):
     in one spin system.
     """
     
+    differing_spin = table_column.BooleanField(blank=True, null=True)
+    """
+    Whether the spin up and spin down differ in the ELF and charge density
+    """
+    
     def update_from_directory(self, directory):
         """
         The base database workflow will try and register data from the local
@@ -248,8 +289,9 @@ class SpinElfAnalysis(Structure):
         """
         pass
     
-    def update_from_spin_labeler(
-            self, 
+    @classmethod
+    def from_spin_labeler(
+            cls, 
             labeler: SpinElfLabeler,
             directory: Path,
             **kwargs
@@ -257,8 +299,13 @@ class SpinElfAnalysis(Structure):
         """
         Creates a new row from a SpinElfLabeler object
         """
+        # get structure dict info
+        structure_dict = cls._from_toolkit(
+            structure=labeler.structure,
+            as_dict=True
+            )
+        
         results = {}
-        results["structure"] = labeler.structure
         results["total_labeled_structure"] = labeler.labeled_structure.to_json()
         results["total_quasi_atom_structure"] = labeler.quasi_atom_structure.to_json()
         results["average_atom_elf_radii"] = [float(i) for i in labeler.average_atom_elf_radii]
@@ -267,9 +314,10 @@ class SpinElfAnalysis(Structure):
             potcar_path = directory / "POTCAR",
             **kwargs
             )
-        results["total_oxidation_states"] = oxidation_states
-        results["total_charges"] = charges
-        results["average_volumes"] = volumes
+        results["total_oxidation_states"] = oxidation_states.tolist()
+        results["total_charges"] = charges.tolist()
+        results["average_volumes"] = volumes.tolist()
+        results["differing_spin"] = not labeler._equal_spin
         
         # add setting kwargs
         cutoff_kwargs = {}
@@ -288,14 +336,20 @@ class SpinElfAnalysis(Structure):
                 ]:
             cutoff_kwargs[attr] = getattr(labeler, attr, None)
         results["cutoff_kwargs"] = cutoff_kwargs
-        new_row = SpinElfAnalysis(**results)
-        new_row.save()
-        # update spin up/down labelers
-        labeler_up_model = self.analysis_up.model
-        labeler_up_model.update_from_labeler(labeler.elf_labeler_up)
         
-        labeler_down_model = self.analysis_down.model
-        labeler_down_model.update_from_labeler(labeler.elf_labeler_down)           
+        # create spin up/down entries
+        labeler_up = ElfAnalysis.from_labeler(labeler.elf_labeler_up, directory)
+        labeler_down = ElfAnalysis.from_labeler(labeler.elf_labeler_down, directory)   
+
+        # create new entry
+        new_row = cls(
+            analysis_up=labeler_up,
+            analysis_down=labeler_down,
+            **results,
+            **structure_dict
+            )
+        new_row.save()
+        return new_row
 
             
 class ElfAnalysisCalculation(Calculation):
@@ -303,34 +357,46 @@ class ElfAnalysisCalculation(Calculation):
     This table contains results from an ELF topology analysis calculation.
     The results should be from a dedicated workflow. 
     """
+    class Meta:
+        app_label = "baderkit"
     
     analysis = table_column.ForeignKey(
-        "ElfAnalysis",
+        "baderkit.ElfAnalysis",
         on_delete=table_column.CASCADE,
         related_name="calculation",
+        blank=True,
+        null=True,
     )
     
-    def update_from_labeler(self, labeler: ElfLabeler):
-        # get labeler table
-        labeler_model = self.analysis.model
-        labeler_model.update_from_labeler(labeler)
+    def update_from_labeler(self, labeler: ElfLabeler, directory: Path, **kwargs):
+        # create an entry in the ElfAnalysis table
+        labeler = ElfAnalysis.from_labeler(labeler, directory)
+        # link to table
+        self.analysis = labeler
+        self.save()
 
 class SpinElfAnalysisCalculation(Calculation):
     """
     This table contains results from a spin-separated ELF topology 
     analysis calculation. The results should be from a dedicated workflow. 
     """
+    class Meta:
+        app_label = "baderkit"
     
     analysis = table_column.ForeignKey(
         "baderkit.SpinElfAnalysis",
         on_delete=table_column.CASCADE,
         related_name="calculation",
+        blank=True,
+        null=True,
     )
     
-    def update_from_spin_labeler(self, spin_labeler: ElfLabeler):
-        # get labeler table
-        labeler_model = self.analysis.model
-        labeler_model.update_from_spin_labeler(spin_labeler)
+    def update_from_spin_labeler(self, labeler: SpinElfLabeler, directory: Path, **kwargs):
+        # create an entry in the SpinElfAnalysis table
+        labeler = SpinElfAnalysis.from_spin_labeler(labeler, directory)
+        # link to table
+        self.analysis = labeler
+        self.save()
 
 
 class ElfFeatures(DatabaseTable):
@@ -338,8 +404,11 @@ class ElfFeatures(DatabaseTable):
     This table contains the elf features calculated during an elf analysis
     calculation
     """
+    class Meta:
+        app_label = "baderkit"
+    
     analysis = table_column.ForeignKey(
-        "ElfAnalysis",
+        "baderkit.ElfAnalysis",
         on_delete=table_column.CASCADE,
         related_name="elf_features",
     )
@@ -415,10 +484,10 @@ class ElfFeatures(DatabaseTable):
     The index of the nearest atom to this feature
     """
     
-    nearest_atom_type = table_column.CharField(
+    nearest_atom_species = table_column.CharField(
         blank=True,
         null=True,
-        max_length=75,
+        max_length=10,
     )
     """
     The type of atom that is closest to this feature
@@ -429,9 +498,15 @@ class ElfFeatures(DatabaseTable):
     The distance from this feature to the nearest atom
     """
     
-    quasi_atom_structure_index = table_column.IntegerField(blank=True, null=True)
+    labeled_structure_index = table_column.IntegerField(blank=True, null=True)
     """
     The index of the dummy atom in the labeled structure that this feature belongs
+    to
+    """
+    
+    quasi_atom_structure_index = table_column.IntegerField(blank=True, null=True)
+    """
+    The index of the dummy atom in the quasi atom structure that this feature belongs
     to
     """
     

@@ -5,11 +5,13 @@ from pathlib import Path
 from baderkit.core import ElfLabeler
 from baderkit.core.labelers.bifurcation_graph.enum_and_styling import FeatureType
 
+from simmate.database import connect
+
 from simmate.workflows.base_flow_types import Workflow
-from simmate.apps.baderkit.models import ElfAnalysis
+from simmate.apps.baderkit.models import ElfAnalysisCalculation
 
 
-class ElfAnalysis__Baderkit__ElfAnalysis(Workflow):
+class ElfAnalysisCalculation__Baderkit__ElfAnalysis(Workflow):
     """
     Labels chemical features in the ELF and calculates various properties.
     Assumes the system is not spin separated.
@@ -17,7 +19,7 @@ class ElfAnalysis__Baderkit__ElfAnalysis(Workflow):
 
     required_files = ["CHGCAR", "ELFCAR", "POTCAR"]
     use_database = True
-    database_table = ElfAnalysis
+    database_table = ElfAnalysisCalculation
     use_previous_directory = ["CHGCAR", "ELFCAR", "POTCAR"]
 
     @classmethod
@@ -25,13 +27,10 @@ class ElfAnalysis__Baderkit__ElfAnalysis(Workflow):
         cls,
         source: dict = None,
         directory: Path = None,
-        write_files: bool = False,
+        write_files: bool = True,
         run_id = None,
         **kwargs,
     ):
-        # make a new directory to run labeler algorithm in and copy necessary files.
-        analysis_dir = directory / cls.name_full
-        os.makedirs(analysis_dir, exist_ok=True)
 
         # Get the badelf toolkit object for running badelf.
         labeler = ElfLabeler.from_vasp(
@@ -40,15 +39,15 @@ class ElfAnalysis__Baderkit__ElfAnalysis(Workflow):
             **kwargs
         )
         # update the database
-        search_datatable = cls.database_table.objects.get(run_id=run_id)
-        search_datatable.update_from_labeler(
+        analysis_datatable = cls.database_table.objects.get(run_id=run_id)
+        analysis_datatable.update_from_labeler(
             labeler=labeler,
             directory=directory,
             **kwargs
             )
         # remove the ELFCAR, CHGCAR, and POTCAR copies for space
         for file in cls.use_previous_directory:
-            os.remove(directory / analysis_dir / file)
+            os.remove(directory / file)
             
         # write summary plot, structures, etc.
         if write_files:

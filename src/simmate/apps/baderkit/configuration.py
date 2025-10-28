@@ -5,10 +5,10 @@ from simmate.configuration.utilities import check_app_reg, show_test_results, ch
 
 def test_config(run_calcs: bool = False):
     """
-    Checks to see if BadELF is configured correctly
+    Checks to see if Baderkit is configured correctly
     """
     # 1 - check that Simmate app is registered
-    is_registered = check_app_reg("simmate.apps.configs.BadelfConfig")
+    is_registered = check_app_reg("simmate.apps.configs.BaderkitConfig")
 
     # 2 - check app dependancies
     has_bader = check_command_exists("baderkit")
@@ -19,4 +19,4 @@ def test_config(run_calcs: bool = False):
 
     # 4 - read out result of all tests
     passed_all = bool(is_registered and has_bader)
-    show_test_results("BadELF", passed_all)
+    show_test_results("Baderkit", passed_all)

@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from baderkit.core import ElfLabeler
+
 from simmate.database.base_data_types import (
     Calculation,
     DatabaseTable,
@@ -11,7 +13,7 @@ from simmate.database.base_data_types import (
     table_column,
 )
 
-class SpinBadElf(Structure, Calculation):
+class SpinBadelf(Structure, Calculation):
     """
     Contains results from a spin-separated BadELF analysis
     """
@@ -22,19 +24,106 @@ class SpinBadElf(Structure, Calculation):
     """
     
     badelf_up = table_column.ForeignKey(
-        "BadElf",
+        "Badelf",
         on_delete=table_column.CASCADE,
-        related_name="spin_bad_elf",
+        related_name="spin_badelf",
     )
     
     badelf_down = table_column.ForeignKey(
-        "BadElf",
+        "Badelf",
         on_delete=table_column.CASCADE,
-        related_name="spin_bad_elf",
+        related_name="spin_badelf",
     )
     
+    total_oxidation_states = table_column.JSONField(blank=True, null=True)
+    """
+    The oxidation states for each atom and electride in the system.
+    """
 
-class BadElf(Structure, Calculation):
+    total_charges = table_column.JSONField(blank=True, null=True)
+    """
+    A list of total "valence" electron counts for each atom and electride
+    feature in the system (i.e. electride/covelent bond etc.)
+    
+    WARNING: this count is dependent on the potentials used. For example, 
+    Yttrium could have used a potential where 2 or even 10 electrons are used 
+    as the basis for the calculation. Use 'oxidation_states' for a more 
+    consistent and accurate count of valence electrons
+    """
+    
+    average_volumes = table_column.JSONField(blank=True, null=True)
+    """
+    A list of atom or electride volumes.
+    
+    WARNING: for systems with major differences between the spin up/down
+    systems (e.g. magnetic systems like Y2C), the volumes may not have
+    a physical meaning. The average must be taken to retain the correct
+    total volume, but this reduces the size of features appearing only
+    in one spin system.
+    """
+
+    total_vacuum_charge = table_column.FloatField(blank=True, null=True)
+    """
+    Total electron count that was NOT assigned to ANY site -- and therefore
+    assigned to 'vacuum'.
+    
+    In most cases, this value should be zero.
+    """
+
+    average_vacuum_volume = table_column.FloatField(blank=True, null=True)
+    """
+    Total volume from electron density that was NOT assigned to ANY site -- 
+    and therefore assigned to 'vacuum'.
+    
+    In most cases, this value should be zero.
+    """
+    
+    nelectrons = table_column.FloatField(blank=True, null=True)
+    """
+    The total number of electrons involved in the charge density partitioning.
+    
+    WARNING: this count is dependent on the potentials used. For example, 
+    Yttrium could have used a potential where 2 or even 10 electrons are used 
+    as the basis for the calculation. Use 'oxidation_states' for a more 
+    consistent and accurate count of valence electrons
+    """
+    
+    electride_structure = table_column.JSONField(blank=True, null=True)
+    """
+    A PyMatGen Structure JSON with dummy atoms representing electrides.
+    Dummy atoms are chosed based on which spin system the maximum is
+    found in:
+        Exu - spin-up
+        Exd - spin-down
+        E - both
+    """
+    
+    electride_indices = table_column.JSONField(blank=True, null=True)
+    """
+    The indices in each entry (e.g. charges, volumes) that correspond
+    to electrides in the electride structure
+    """   
+    
+    nelectrides = table_column.IntegerField(blank=True, null=True)
+    """
+    The total number of electride maxima that were found in the system.
+    This is the sum of the spin-up and spin-down systems. Maxima found
+    in both are not counted twice.
+    """
+
+    total_electrides_per_formula = table_column.FloatField(blank=True, null=True)
+    """
+    The total number of electrons assigned to electride sites for this structures
+    formula unit.
+    """
+
+    electrides_per_reduced_formula = table_column.FloatField(blank=True, null=True)
+    """
+    The total number of electrons assigned to electride sites for this structures
+    reduced formula unit.
+    """
+
+class Badelf(Structure, Calculation):
     """
     This table contains results from a BadELF analysis.
     """
@@ -59,22 +148,16 @@ class BadElf(Structure, Calculation):
     as the basis for the calculation. Use 'oxidation_states' for a more 
     consistent and accurate count of valence electrons
     """
+    
+    volumes = table_column.JSONField(blank=True, null=True)
+    """
+    A list of atom or electride volumes from the oxidation analysis
+    """
 
     min_surface_dists = table_column.JSONField(blank=True, null=True)
     """
     A list of minimum distances from the origin of an atom or electride 
     to the bader/plane surface.
-    """
-    
-    avg_surface_dists = table_column.JSONField(blank=True, null=True)
-    """
-    A list of average distances from the origin of an atom or electride 
-    to the bader/plane surface.
-    """
-
-    volumes = table_column.JSONField(blank=True, null=True)
-    """
-    A list of atom or electride volumes from the oxidation analysis
     """
     
     electride_indices = table_column.JSONField(blank=True, null=True)
@@ -150,16 +233,6 @@ class BadElf(Structure, Calculation):
     in the labeled structure
     """
 
-    separate_spin = table_column.BooleanField(blank=True, null=True)
-    """
-    Whether the user asked to consider spin separately in this calculation
-    """
-
-    differing_spin = table_column.BooleanField(blank=True, null=True)
-    """
-    Whether the spin up and spin down differ in the ELF and charge density
-    """
-
     electride_structure = table_column.JSONField(blank=True, null=True)
     """
     A PyMatGen Structure JSON with dummy atoms (E) representing electrides.
@@ -174,6 +247,15 @@ class BadElf(Structure, Calculation):
     The ElfAnalysis table entry from this calculation which includes
     more detailed information on each chemical feature found in the
     system.
+    """
+    
+    spin_system = table_column.CharField(
+        blank=True,
+        null=True,
+        max_length=25,
+    )
+    """
+    Which type of spin this calculation was performed on i.e. up, down, total, separate
     """
 
     def write_output_summary(self, directory: Path):
@@ -207,6 +289,11 @@ class BadElf(Structure, Calculation):
                     bad_elf=self,  # links to this badelf calc
                 )
                 new_row.save()
+                
+    def update_elf_analysis(self, labeler: ElfLabeler):
+        # get the labeler model
+        labeler_model = self.elf_analysis.model
+        labeler_model.update_from_labeler(labeler)
 
 
 class ElfIonicRadii(DatabaseTable):
@@ -240,7 +327,7 @@ class ElfIonicRadii(DatabaseTable):
     # Therefore, there's just a simple column stating which badelf calc it
     # belongs to.
     bad_elf = table_column.ForeignKey(
-        "BadElf",
+        "Badelf",
         on_delete=table_column.CASCADE,
         related_name="ionic_radii",
     )

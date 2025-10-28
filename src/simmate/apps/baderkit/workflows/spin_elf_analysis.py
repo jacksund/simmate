@@ -5,11 +5,13 @@ from pathlib import Path
 from baderkit.core import SpinElfLabeler
 from baderkit.core.labelers.bifurcation_graph.enum_and_styling import FeatureType
 
+from simmate.database import connect
+
 from simmate.workflows.base_flow_types import Workflow
-from simmate.apps.baderkit.models import SpinElfAnalysis
+from simmate.apps.baderkit.models import SpinElfAnalysisCalculation
 
 
-class ElfAnalysis__Baderkit__SpinElfAnalysis(Workflow):
+class SpinElfAnalysisCalculation__Baderkit__SpinElfAnalysis(Workflow):
     """
     Labels chemical features in the ELF and calculates various properties.
     Assumes the system is spin separated.
@@ -17,7 +19,7 @@ class ElfAnalysis__Baderkit__SpinElfAnalysis(Workflow):
 
     required_files = ["CHGCAR", "ELFCAR", "POTCAR"]
     use_database = True
-    database_table = SpinElfAnalysis
+    database_table = SpinElfAnalysisCalculation
     use_previous_directory = ["CHGCAR", "ELFCAR", "POTCAR"]
 
     @classmethod
@@ -25,14 +27,10 @@ class ElfAnalysis__Baderkit__SpinElfAnalysis(Workflow):
         cls,
         source: dict = None,
         directory: Path = None,
-        write_files: bool = False,
+        write_files: bool = True,
         run_id = None,
         **kwargs,
     ):
-        # make a new directory to run labeler algorithm in and copy necessary files.
-        analysis_dir = directory / cls.name_full
-        os.makedirs(analysis_dir, exist_ok=True)
-
         # Get the badelf toolkit object for running badelf.
         labeler = SpinElfLabeler.from_vasp(
             charge_filename=directory / "CHGCAR",
@@ -48,11 +46,11 @@ class ElfAnalysis__Baderkit__SpinElfAnalysis(Workflow):
             )
         # remove the ELFCAR, CHGCAR, and POTCAR copies for space
         for file in cls.use_previous_directory:
-            os.remove(directory / analysis_dir / file)
+            os.remove(directory / file)
             
         # write summary plot, structures, etc.
         if write_files:
-            labeler.write_bifurcation_plot(
+            labeler.write_bifurcation_plots(
                 filename = directory / "bifurcation_plot.html"
                 )
             labeler.labeled_structure.to("POSCAR_labeled", "POSCAR")
