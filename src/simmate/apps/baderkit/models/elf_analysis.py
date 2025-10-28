@@ -1,4 +1,14 @@
 # -*- coding: utf-8 -*-
+"""
+This file contains tables related to results from the ElfLabeler class.
+Since this class is often used during other workfows (e.g. BadELF) there
+is some model gymnastics going on. The ElfAnalysis and SpinElfAnalysis
+classes do not inherit the Calculation database intentionally to avoid
+many empty entries. The ElfAnalysisCalculation and SpinElfAnalysisCalculation
+models are essentially wrappers that add in the Calculation mixin and
+use ForeignKeys to point to the corresponding ElfAnalysis table.
+
+"""
 
 from pathlib import Path
 
@@ -11,131 +21,11 @@ from simmate.database.base_data_types import (
     table_column,
 )
 
-class SpinElfAnalysis(Structure, Calculation):
+class ElfAnalysis(Structure):
     """
-    This table contains results from a spin-dependant ELF topology analysis
-    """
-    cutoff_kwargs = table_column.JSONField(blank=True, null=True)
-    """
-    The settings used when labeling features in the structure
-    """
-    
-    elf_analysis_up = table_column.ForeignKey(
-        "ElfAnalysis",
-        on_delete=table_column.CASCADE,
-        related_name="spin_elf_analysis",
-    )
-    
-    elf_analysis_down = table_column.ForeignKey(
-        "ElfAnalysis",
-        on_delete=table_column.CASCADE,
-        related_name="spin_elf_analysis",
-    )
-    
-    labeled_structure = table_column.JSONField(blank=True, null=True)
-    """
-    The labeled structure with dummy atoms representing the location of chemical
-    features in the system. This is a combination of the dummy atoms found in
-    both the spin up and spin down systems.
-    """
-
-    quasi_atom_structure = table_column.JSONField(blank=True, null=True)
-    """
-    The labeled structure with dummy atoms representing the location of quasi
-    atoms (e.g. electrides, bare electrons, etc.) This is a combination of the 
-    dummy atoms found in both the spin up and spin down systems.
-    """
-    
-    average_atom_elf_radii = table_column.JSONField(blank=True, null=True)
-    """
-    The average of the spin up/down radii of each atom in the structure 
-    calculated from the ELF
-    """
-    
-    oxidation_states = table_column.JSONField(blank=True, null=True)
-    """
-    A list of calculated oxidation states for each quasi atom.
-    """
-
-    atomic_charges = table_column.JSONField(blank=True, null=True)
-    """
-    A list of total "valence" electron counts for each quasi atom.
-    
-    WARNING: this count is dependent on the potentials used. For example, 
-    Yttrium could have used a potential where 2 or even 10 electrons are used 
-    as the basis for the calculation. Use 'oxidation_states' for a more 
-    consistent and accurate count of valence electrons
-    """
-    
-    atomic_volumes = table_column.JSONField(blank=True, null=True)
-    """
-    A list of quasi atom volumes from the oxidation analysis (i.e. the bader volume)
-    """
-    
-    def update_from_directory(self, directory):
-        """
-        The base database workflow will try and register data from the local
-        directory. As part of this it checks for a vasprun.xml file and
-        attempts to run a from_vasp_run method. Since this is not defined for
-        this model, an error is thrown. To account for this, I just create an empty
-        update_from_directory method here.
-        """
-        pass
-    
-    def update_from_spin_labeler(
-            self, 
-            labeler: SpinElfLabeler,
-            directory: Path,
-            **kwargs
-            ):
-        """
-        Creates a new row from a SpinElfLabeler object
-        """
-        results = {}
-        results["structure"] = labeler.structure
-        results["labeled_structure"] = labeler.labeled_structure.to_json()
-        results["quasi_atom_structure"] = labeler.quasi_atom_structure.to_json()
-        results["average_atom_elf_radii"] = [float(i) for i in labeler.average_atom_elf_radii]
-            
-        oxidation_states, charges, volumes = labeler.get_oxidation_and_volumes_from_potcar(
-            potcar_path = directory / "POTCAR",
-            **kwargs
-            )
-        results["oxidation_states"] = oxidation_states
-        results["atomic_charges"] = charges
-        results["atomic_volumes"] = volumes
-        
-        # add setting kwargs
-        cutoff_kwargs = {}
-        for attr in [
-            "ignore_low_pseudopotentials",
-            "shared_shell_ratio",
-            "combine_shells",
-            "min_covalent_charge",
-            "min_covalent_angle",
-            "min_electride_charge",
-            "min_electride_depth",
-            "min_electride_dist_beyond_atom",
-            "min_electride_volume",
-            "min_electride_elf_value",
-            "crystalnn_kwargs"
-                ]:
-            cutoff_kwargs[attr] = getattr(labeler, attr, None)
-        results["cutoff_kwargs"] = cutoff_kwargs
-        new_row = SpinElfAnalysis(**results)
-        new_row.save()
-        # update spin up/down labelers
-        labeler_up_model = self.elf_analysis_up.model
-        labeler_up_model.update_from_labeler(labeler.elf_labeler_up)
-        
-        labeler_down_model = self.elf_analysis_down.model
-        labeler_down_model.update_from_labeler(labeler.elf_labeler_down)
-        
-
-
-class ElfAnalysis(Structure, Calculation):
-    """
-    This table contains results from an ELF topology analysis.
+    This table contains data from an ELF topology analysis. It intentionally
+    does not inherit from the Calculation table as the results may not
+    be generated from a dedicated workflow.
     """
     
     cutoff_kwargs = table_column.JSONField(blank=True, null=True)
@@ -180,9 +70,10 @@ class ElfAnalysis(Structure, Calculation):
     instead
     """
 
-    atomic_charges = table_column.JSONField(blank=True, null=True)
+    charges = table_column.JSONField(blank=True, null=True)
     """
-    A list of total "valence" electron counts for each quasi atom.
+    A list of total "valence" electron counts for each atom and quasi
+    atom.
     
     WARNING: this count is dependent on the potentials used. For example, 
     Yttrium could have used a potential where 2 or even 10 electrons are used 
@@ -190,9 +81,9 @@ class ElfAnalysis(Structure, Calculation):
     consistent and accurate count of valence electrons
     """
     
-    atomic_volumes = table_column.JSONField(blank=True, null=True)
+    volumes = table_column.JSONField(blank=True, null=True)
     """
-    A list of quasi atom volumes from the oxidation analysis (i.e. the bader volume)
+    A list of volumes from the oxidation analysis (i.e. the bader volume)
     """
     
     spin_system = table_column.CharField(
@@ -201,7 +92,7 @@ class ElfAnalysis(Structure, Calculation):
         max_length=25,
     )
     """
-    Which type of spin this calculation was performed on i.e. up, down, or total
+    Which type of spin this calculation was performed on i.e. up, down, total, separate
     """
 
     def update_from_directory(self, directory):
@@ -230,6 +121,7 @@ class ElfAnalysis(Structure, Calculation):
         results["quasi_atom_structure"] = labeler.quasi_atom_structure.to_json()
         results["atom_elf_radii"] = [float(i) for i in labeler.atom_elf_radii]
         results["quasi_atom_elf_radii"] = [float(i) for i in labeler.quasi_atom_elf_radii]
+        results["spin_system"] = labeler._spin_system
             
         oxidation_states, charges, volumes = labeler.get_oxidation_and_volumes_from_potcar(
             potcar_path = directory / "POTCAR",
@@ -273,16 +165,180 @@ class ElfAnalysis(Structure, Calculation):
             for entry in feature_model.columns:
                 new_row_dict[entry] = getattr(node, entry, None)
             # update values not stored directly in dict
-            new_row_dict["elf_analysis"] = self
+            new_row_dict["analysis"] = self
             new_row = feature_model(**new_row_dict)
             new_row.save()
+            
+class SpinElfAnalysis(Structure):
+    """
+    This table contains results from a spin-dependant ELF topology analysis
+    calculation. It intentionally does not inherit from the Calculation
+    table as the results may not be calculated from a dedicated workflow.
+    """
+    cutoff_kwargs = table_column.JSONField(blank=True, null=True)
+    """
+    The settings used when labeling features in the structure
+    """
+    
+    analysis_up = table_column.ForeignKey(
+        "ElfAnalysis",
+        on_delete=table_column.CASCADE,
+        related_name="spin_analysis",
+    )
+    
+    analysis_down = table_column.ForeignKey(
+        "ElfAnalysis",
+        on_delete=table_column.CASCADE,
+        related_name="spin_analysis",
+    )
+    
+    total_labeled_structure = table_column.JSONField(blank=True, null=True)
+    """
+    The labeled structure with dummy atoms representing the location of chemical
+    features in the system. This is a combination of the dummy atoms found in
+    both the spin up and spin down systems.
+    """
+
+    total_quasi_atom_structure = table_column.JSONField(blank=True, null=True)
+    """
+    The labeled structure with dummy atoms representing the location of quasi
+    atoms (e.g. electrides, bare electrons, etc.) This is a combination of the 
+    dummy atoms found in both the spin up and spin down systems.
+    """
+    
+    average_atom_elf_radii = table_column.JSONField(blank=True, null=True)
+    """
+    The average of the spin up/down radii of each atom in the structure 
+    calculated from the ELF
+    """
+    
+    total_oxidation_states = table_column.JSONField(blank=True, null=True)
+    """
+    A list of calculated oxidation states for each atom and quasi atom.
+    """
+
+    total_charges = table_column.JSONField(blank=True, null=True)
+    """
+    A list of total "valence" electron counts for each quasi atom.
+    
+    WARNING: this count is dependent on the potentials used. For example, 
+    Yttrium could have used a potential where 2 or even 10 electrons are used 
+    as the basis for the calculation. Use 'oxidation_states' for a more 
+    consistent and accurate count of valence electrons
+    """
+    
+    average_volumes = table_column.JSONField(blank=True, null=True)
+    """
+    A list of quasi atom volumes from the oxidation analysis (i.e. the bader volume)
+    
+    WARNING: for systems with major differences between the spin up/down
+    systems (e.g. magnetic systems like Y2C), the volumes may not have
+    a physical meaning. The average must be taken to retain the correct
+    total volume, but this reduces the size of features appearing only
+    in one spin system.
+    """
+    
+    def update_from_directory(self, directory):
+        """
+        The base database workflow will try and register data from the local
+        directory. As part of this it checks for a vasprun.xml file and
+        attempts to run a from_vasp_run method. Since this is not defined for
+        this model, an error is thrown. To account for this, I just create an empty
+        update_from_directory method here.
+        """
+        pass
+    
+    def update_from_spin_labeler(
+            self, 
+            labeler: SpinElfLabeler,
+            directory: Path,
+            **kwargs
+            ):
+        """
+        Creates a new row from a SpinElfLabeler object
+        """
+        results = {}
+        results["structure"] = labeler.structure
+        results["total_labeled_structure"] = labeler.labeled_structure.to_json()
+        results["total_quasi_atom_structure"] = labeler.quasi_atom_structure.to_json()
+        results["average_atom_elf_radii"] = [float(i) for i in labeler.average_atom_elf_radii]
+            
+        oxidation_states, charges, volumes = labeler.get_oxidation_and_volumes_from_potcar(
+            potcar_path = directory / "POTCAR",
+            **kwargs
+            )
+        results["total_oxidation_states"] = oxidation_states
+        results["total_charges"] = charges
+        results["average_volumes"] = volumes
+        
+        # add setting kwargs
+        cutoff_kwargs = {}
+        for attr in [
+            "ignore_low_pseudopotentials",
+            "shared_shell_ratio",
+            "combine_shells",
+            "min_covalent_charge",
+            "min_covalent_angle",
+            "min_electride_charge",
+            "min_electride_depth",
+            "min_electride_dist_beyond_atom",
+            "min_electride_volume",
+            "min_electride_elf_value",
+            "crystalnn_kwargs"
+                ]:
+            cutoff_kwargs[attr] = getattr(labeler, attr, None)
+        results["cutoff_kwargs"] = cutoff_kwargs
+        new_row = SpinElfAnalysis(**results)
+        new_row.save()
+        # update spin up/down labelers
+        labeler_up_model = self.analysis_up.model
+        labeler_up_model.update_from_labeler(labeler.elf_labeler_up)
+        
+        labeler_down_model = self.analysis_down.model
+        labeler_down_model.update_from_labeler(labeler.elf_labeler_down)           
+
+            
+class ElfAnalysisCalculation(Calculation):
+    """
+    This table contains results from an ELF topology analysis calculation.
+    The results should be from a dedicated workflow. 
+    """
+    
+    analysis = table_column.ForeignKey(
+        "ElfAnalysis",
+        on_delete=table_column.CASCADE,
+        related_name="calculation",
+    )
+    
+    def update_from_labeler(self, labeler: ElfLabeler):
+        # get labeler table
+        labeler_model = self.analysis.model
+        labeler_model.update_from_labeler(labeler)
+
+class SpinElfAnalysisCalculation(Calculation):
+    """
+    This table contains results from a spin-separated ELF topology 
+    analysis calculation. The results should be from a dedicated workflow. 
+    """
+    
+    analysis = table_column.ForeignKey(
+        "baderkit.SpinElfAnalysis",
+        on_delete=table_column.CASCADE,
+        related_name="calculation",
+    )
+    
+    def update_from_spin_labeler(self, spin_labeler: ElfLabeler):
+        # get labeler table
+        labeler_model = self.analysis.model
+        labeler_model.update_from_spin_labeler(spin_labeler)
+
 
 class ElfFeatures(DatabaseTable):
     """
     This table contains the elf features calculated during an elf analysis
     calculation
     """
-    elf_analysis = table_column.ForeignKey(
+    analysis = table_column.ForeignKey(
         "ElfAnalysis",
         on_delete=table_column.CASCADE,
         related_name="elf_features",

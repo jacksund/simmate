@@ -57,7 +57,7 @@ class VoxelAssignmentToolkit:
         The permutations required to transform a unit cell to each of its neighbors.
         Uses voxel coordinates.
         """
-        return self.charge_grid.permutations
+        return self.charge_grid.grid_neighbor_transforms
 
     @property
     def unit_cell_permutations_frac(self):
@@ -80,7 +80,7 @@ class VoxelAssignmentToolkit:
         Uses cartesian coordinates.
         """
         grid = self.charge_grid
-        return grid.get_cart_coords_from_frac_full_array(
+        return grid.frac_to_cart(
             self.unit_cell_permutations_frac
         )
 
@@ -102,7 +102,7 @@ class VoxelAssignmentToolkit:
         The transformations required to transform the center of a voxel to its
         corners. Uses cartesian coordinates.
         """
-        return self.charge_grid.get_cart_coords_from_frac_full_array(
+        return self.charge_grid.frac_to_cart(
             self.vertices_transforms_frac
         )
 
@@ -111,7 +111,7 @@ class VoxelAssignmentToolkit:
         """
         The fractional coordinates for all of the voxels in the charge grid
         """
-        return self.charge_grid.all_voxel_frac_coords
+        return self.charge_grid.grid_to_frac(self.charge_grid.grid_indices)
 
     @cached_property
     def all_partitioning_plane_points_and_vectors(self):
@@ -251,7 +251,7 @@ class VoxelAssignmentToolkit:
             new_frac_coords[:, 1] += y1
             new_frac_coords[:, 2] += z1
             # Convert the frac coords into cartesian coords
-            cart_coords = grid.get_cart_coords_from_frac_full_array(
+            cart_coords = grid.frac_to_cart(
                 new_frac_coords
             ).astype(float)
             points = np.array(cart_coords).astype(float)
@@ -459,7 +459,7 @@ class VoxelAssignmentToolkit:
             new_frac_coords[:, 1] += y1
             new_frac_coords[:, 2] += z1
             # Convert the frac coords into cartesian coords
-            cart_coords = grid.get_cart_coords_from_frac_full_array(
+            cart_coords = grid.frac_to_cart(
                 new_frac_coords
             ).astype(float)
             points = np.array(cart_coords).astype(float)
@@ -603,7 +603,7 @@ class VoxelAssignmentToolkit:
             if test_radius >= max_radius:
                 raise Exception()
             # Get the transformations to get a sphere around a voxel
-            sphere_transforms = grid.get_voxels_transformations_to_radius(test_radius)
+            sphere_transforms = grid.get_transformations_in_radius(test_radius)
             # Get the indices that still don't have an assignment
             still_unassigned_1d_indices = np.where(
                 np.sum(new_assignment_array, axis=1) == 0
