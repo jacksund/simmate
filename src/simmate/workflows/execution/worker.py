@@ -8,6 +8,7 @@ import cloudpickle  # needed to serialize Prefect workflow runs and tasks
 from django.db import transaction
 from rich import print
 
+from simmate.utilities import get_class
 from simmate.workflows.execution.database import WorkItem
 
 # This string is just something fancy to display in the console when a worker
@@ -51,7 +52,8 @@ class SimmateWorker:
         # settings on what to do when the queue is empty
         close_on_empty_queue: bool = False,
         waittime_on_empty_queue: float = 15,
-        tags: list[str] = ["simmate"],  # should default be empty...?
+        tags: list[str] = ["simmate"],
+        startup_method: str = None,
     ):
         """
         Configures a worker that connects to the default executor backend.
@@ -84,6 +86,7 @@ class SimmateWorker:
         self.timeout = timeout or float("inf")
         self.close_on_empty_queue = close_on_empty_queue
         self.waittime_on_empty_queue = waittime_on_empty_queue
+        self.startup_method = startup_method
 
         # whether to wait on the running workitems to finish before shutting down
         # the timedout worker.
@@ -95,15 +98,20 @@ class SimmateWorker:
         """
 
         # print the header in the console to let the user know the worker started
-        print("[bold cyan]" + HEADER_ART)
+        print("[bold dark_cyan]" + HEADER_ART)
 
-        # loggin helpful info
         logging.info(f"Starting worker with tags {list(self.tags)}")
+
+        if self.startup_method:
+            logging.info(f"Running startup method: '{self.startup_method}'")
+            startup_method = get_class(self.startup_method)
+            startup_method()
 
         # establish starting point for the worker
         time_start = time.time()
         ntasks_finished = 0
 
+        logging.info("Worker is ready & listening for WorkItems")
         # Loop endlessly until one of the following happens...
         #   the timeout limit is hit
         #   the queue is empty

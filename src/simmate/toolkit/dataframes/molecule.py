@@ -39,6 +39,7 @@ class MoleculeDataFrame:
         init_toolkit_objs: bool = False,
         init_substructure_lib: bool = False,
         init_morgan_fp_lib: bool = False,
+        explicit_h_mode: bool = False,  # Required when doing R-group template searches
         parallel: bool = False,
     ):
 
@@ -49,6 +50,7 @@ class MoleculeDataFrame:
             )
 
         self.df = df
+        self.explicit_h_mode = explicit_h_mode
         self.parallel = parallel
         if init_toolkit_objs and "molecule_obj" not in df.columns:
             self.init_toolkit_objs()
@@ -68,15 +70,22 @@ class MoleculeDataFrame:
         logging.info("Building `toolkit.Molecule` objects...")
 
         if "molecule_obj" in self.df.columns:
-            pass  # nothing to do
+            if self.explicit_h_mode:
+                logging.warning(
+                    "using 'molecule_obj' cache while explicit_h_mode=True. "
+                    "Make sure molecule already include hydrogens."
+                )
+            return  # nothing to do
 
         elif "molecule" in self.df.columns:
             mol_objs = [Molecule.from_dynamic(m) for m in track(self.df["molecule"])]
-            self.df = self.df.with_columns(polars.Series("molecule_obj", mol_objs))
 
         elif "smiles" in self.df.columns:
             mol_objs = [Molecule.from_smiles(m) for m in track(self.df["smiles"])]
-            self.df = self.df.with_columns(polars.Series("molecule_obj", mol_objs))
+
+        if self.explicit_h_mode:
+            [m.add_hydrogens() for m in mol_objs]
+        self.df = self.df.with_columns(polars.Series("molecule_obj", mol_objs))
 
     def init_substructure_lib(self):
         logging.info(
@@ -87,6 +96,7 @@ class MoleculeDataFrame:
         if "pattern_fingerprint" not in self.df.columns:
             fingerprints = PatternFingerprint.featurize_many(
                 molecules=self.df[mol_col],
+                explicit_h=self.explicit_h_mode,
                 parallel=self.parallel,
                 vector_type="rdkit",
             )
@@ -95,6 +105,11 @@ class MoleculeDataFrame:
             )
 
         elif isinstance(self.df["pattern_fingerprint"][0], str):
+            if self.explicit_h_mode:
+                logging.warning(
+                    "using 'pattern_fingerprint' base64 cache while explicit_h_mode=True. "
+                    "Make sure your cached fingerprint already includes hydrogen."
+                )
             # assume we have a base64 str of the fingerprint
             fingerprints = [
                 load_rdkit_fingerprint_from_base64(fp)
@@ -246,6 +261,21 @@ class MoleculeDataFrame:
 
         molecule_library = rdSubstructLibrary.CachedTrustedSmilesMolHolder()
         [molecule_library.AddSmiles(r) for r in self.df["smiles"]]
+        # if not self.explicit_h_mode:
+        #     # the normal behavior
+        #     [molecule_library.AddSmiles(r) for r in self.df["smiles"]]
+        # elif self.explicit_h_mode and "molecule_obj" in self.df.columns:
+        #     # if we need smiles with Hs, then its fastest to use the toolkit objs
+        #     for molecule in track(self.df["molecule_obj"]):
+        #         s = molecule.to_smiles(remove_hydrogen=False)
+        #         molecule_library.AddSmiles(s)
+        # else:
+        #     # otherwise we need to generate the new smiles and add it.
+        #     for r in track(self.df["smiles"]):
+        #         molecule = Molecule.from_smiles(r)
+        #         molecule.add_hydrogens()
+        #         s = molecule.to_smiles(remove_hydrogen=False)
+        #         molecule_library.AddSmiles(s)
 
         # load_rdkit_fingerprint_from_base64 if instance base64 str
         fingerprint_library = rdSubstructLibrary.PatternHolder()
@@ -260,3 +290,36 @@ class MoleculeDataFrame:
         return library
 
     # -------------------------------------------------------------------------
+
+    def _custom_substructure_filter(self, query: Molecule):
+        # this is a unwrapped version of rdkit's substruc lib. I keep it here becuase
+        # it helps to know what is happening behind the scenes
+
+        from rdkit.Chem import AllChem, DataStructs
+
+        query_fingerprint = query.get_fingerprint("pattern", "rdkit")
+
+        # AllProbeBitsMatch is a fast C++ check: only candidates can possibly match
+        candidate_ids = [
+            i
+            for i, fp in enumerate(self.df["patten_fingerprint"])
+            if DataStructs.AllProbeBitsMatch(query_fingerprint, fp)
+        ]
+        # OPTIMIZE: this would be way faster if there was a BulkAllProbeBitsMatch
+        # because the bottleneck is the python call to C++ call overhead.
+        # It might even be better to reimplement this in numpy+numba.
+
+        # run exact substructure only on candidates
+        hit_ids = []
+        q = query.rdkit_molecule
+        for i in candidate_ids:
+            # a faster way to load trusted smiles based on CachedTrustedSmilesMolHolder
+            # https://rdkit.blogspot.com/2016/09/avoiding-unnecessary-work-and.html
+            # mol = Molecule.from_smiles(df[i]["smiles"][0]) # too slow
+            mol = AllChem.MolFromSmiles(self.df[i]["smiles"][0], sanitize=False)
+            mol.UpdatePropertyCache()
+            # Chem.FastFindRings(mol)
+            if mol.HasSubstructMatch(q):
+                hit_ids.append(i)
+
+        return self.filter_from_ids(hit_ids)

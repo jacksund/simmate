@@ -5,6 +5,7 @@ from pathlib import Path
 
 import polars
 
+from simmate.configuration import settings
 from simmate.toolkit import Molecule
 from simmate.utilities import chunk_list, filter_polars_df, get_directory
 
@@ -42,9 +43,10 @@ class MoleculeStore:
     pandas+dask, sqlite, or duckdb.
     """
 
-    local_path: str
+    directory_name: str
     """
     Rative path to the directory where all parquet chunk files are stored.
+    These are assumed to be in the simmate base directory (~/simmate/datastores/)
     
     Use the `directory` property for the more robust Path object
     """
@@ -66,6 +68,14 @@ class MoleculeStore:
 
     method_columns: dict = {}  # to_inchi_key included automatically
 
+    explicit_h_mode: bool = False
+    """
+    Whether SMILES and fingerprints should be stored with explicit hydrogens.
+    This is generally needed when you want to perform many scaffold queries 
+    (with R-groups), but keep in mind that this greatly increase file size
+    because SMILES strings will be much larger.
+    """
+
     # -------------------------------------------------------------------------
 
     @classmethod
@@ -74,7 +84,9 @@ class MoleculeStore:
         """
         Path object of the directory where all parquet chunk files are stored
         """
-        return get_directory(cls.local_path)
+        return get_directory(
+            settings.config_directory / "datastores" / cls.directory_name
+        )
 
     @classmethod
     @property
@@ -142,6 +154,7 @@ class MoleculeStore:
             init_toolkit_objs=init_toolkit_objs,
             init_substructure_lib=init_substructure_lib,
             init_morgan_fp_lib=init_morgan_fp_lib,
+            explicit_h_mode=cls.explicit_h_mode,
             parallel=parallel,
         )
 
@@ -192,7 +205,9 @@ class MoleculeStore:
 
     @classmethod
     def _inflate_data_chunk(
-        cls, df: polars.DataFrame, parallel: bool = True
+        cls,
+        df: polars.DataFrame,
+        parallel: bool = True,
     ) -> polars.DataFrame:
         # General properties from Molecule obj attributes
         logging.info("Calculating properties...")
@@ -205,14 +220,22 @@ class MoleculeStore:
         df = polars.concat([df, properties], how="horizontal")
         del properties
 
-        # Inchi key for exact-match searches
         logging.info("Calculating method-based properties...")
+        extra_method_cols = {_get_smiles_with_h: {}} if cls.explicit_h_mode else {}
         method_features = MethodCaller.featurize_many(
             molecules=df["smiles"],
-            method_map={"to_inchi_key": {}, **cls.method_columns},
+            method_map={
+                # Inchi key for exact-match searches
+                "to_inchi_key": {},
+                **cls.method_columns,
+                **extra_method_cols,
+            },
             parallel=parallel,
             dataframe_format="polars",
         )
+        if cls.explicit_h_mode:
+            # because we have a new smiles column in method_features
+            df = df.drop("smiles")
         df = polars.concat([df, method_features], how="horizontal")
         del method_features
 
@@ -222,6 +245,7 @@ class MoleculeStore:
             molecules=df["smiles"],
             parallel=parallel,
             vector_type="base64",
+            explicit_h=cls.explicit_h_mode,
         )
         df = df.with_columns(polars.Series("pattern_fingerprint", fingerprints))
         del fingerprints
@@ -240,3 +264,8 @@ class MoleculeStore:
         return df
 
     # -------------------------------------------------------------------------
+
+
+def _get_smiles_with_h(molecule):
+    molecule.add_hydrogens()
+    return molecule.to_smiles(remove_hydrogen=False)

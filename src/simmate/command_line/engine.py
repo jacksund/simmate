@@ -35,6 +35,7 @@ def start_worker(
     close_on_empty_queue: bool = False,
     waittime_on_empty_queue: float = 1,
     tag: list[str] = ["simmate"],
+    startup_method: str = None,
 ):
     """
     Starts a Simmate Worker which will query the database for jobs to run.
@@ -64,6 +65,7 @@ def start_worker(
         close_on_empty_queue,
         waittime_on_empty_queue,
         tag,  # this is actually "tags" --> a list of strings
+        startup_method,
     )
     worker.start()
 
