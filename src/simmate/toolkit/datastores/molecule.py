@@ -210,15 +210,15 @@ class MoleculeStore:
         parallel: bool = True,
     ) -> polars.DataFrame:
         # General properties from Molecule obj attributes
-        # logging.info("Calculating properties...")
-        # properties = PropertyGrabber.featurize_many(
-        #     molecules=df["smiles"],
-        #     properties=cls.property_columns,
-        #     parallel=parallel,
-        #     dataframe_format="polars",
-        # )
-        # df = polars.concat([df, properties], how="horizontal")
-        # del properties
+        logging.info("Calculating properties...")
+        properties = PropertyGrabber.featurize_many(
+            molecules=df["smiles"],
+            properties=cls.property_columns,
+            parallel=parallel,
+            dataframe_format="polars",
+        )
+        df = polars.concat([df, properties], how="horizontal")
+        del properties
 
         logging.info("Calculating method-based properties...")
         extra_method_cols = {_get_smiles_with_h: {}} if cls.explicit_h_mode else {}
