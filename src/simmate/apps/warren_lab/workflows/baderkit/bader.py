@@ -24,11 +24,10 @@ class PopulationAnalysis__VaspBaderkit__WarrenLabBader(Workflow):
         command: str = None,
         source: dict = None,
         directory: Path = None,
-        method: str = "weight",
         **kwargs,
     ):
         prebader_dir = directory / StaticEnergy__Vasp__PrebaderWarrenLab.name_full
-        StaticEnergy__Vasp__PrebaderWarrenLab.run(
+        result = StaticEnergy__Vasp__PrebaderWarrenLab.run(
             structure=structure,
             command=command,
             source=source,
@@ -40,7 +39,7 @@ class PopulationAnalysis__VaspBaderkit__WarrenLabBader(Workflow):
         BaderkitChargeAnalysis__Baderkit__Bader.run(
             directory=bader_dir,
             previous_directory=prebader_dir,
-            method=method,
+            source=result,
         ).result()
 
 

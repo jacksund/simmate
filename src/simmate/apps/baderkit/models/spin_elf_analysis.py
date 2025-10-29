@@ -6,7 +6,6 @@ from baderkit.core import SpinElfLabeler
 
 from simmate.database.base_data_types import (
     Calculation,
-    Structure,
     table_column,
 )
 from .elf_analysis import ElfAnalysis
@@ -69,8 +68,9 @@ class SpinElfAnalysis(ElfAnalysis):
         labeler_down = ElfAnalysis.from_labeler(labeler.elf_labeler_down, directory)   
 
         # update entry
-        new_row.labeler_up = labeler_up
-        new_row.labeler_down = labeler_down
+        new_row.analysis_up = labeler_up
+        new_row.analysis_down = labeler_down
+        new_row.differing_spin = not labeler._equal_spin
         new_row.save()
         return new_row
 

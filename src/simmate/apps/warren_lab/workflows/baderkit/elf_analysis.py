@@ -29,7 +29,7 @@ class ElfAnalysis__VaspBaderkit__ElfAnalysisWarrenlab(Workflow):
         **kwargs,
     ):
         static_dir = directory / StaticEnergy__Vasp__WarrenLabPrebadelfScan.name_full
-        StaticEnergy__Vasp__WarrenLabPrebadelfScan.run(
+        result = StaticEnergy__Vasp__WarrenLabPrebadelfScan.run(
             structure=structure,
             command=command,
             source=source,
@@ -41,4 +41,5 @@ class ElfAnalysis__VaspBaderkit__ElfAnalysisWarrenlab(Workflow):
         SpinElfAnalysisCalculation__Baderkit__SpinElfAnalysis.run(
             directory=analysis_dir,
             previous_directory=static_dir,
+            source=result,
         ).result()

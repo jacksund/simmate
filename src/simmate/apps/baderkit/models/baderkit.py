@@ -159,6 +159,12 @@ class BaderkitChargeAnalysis(Structure, Calculation):
         A basic workup process that takes a BaderKit Bader class and
         reads the necessary data
         """
+        # get structure dict info
+        structure_dict = self._from_toolkit(
+            structure=bader.structure,
+            as_dict=True
+            )
+        
         data = {}
         # try and load each column in the table
         for entry in self.get_column_names():
@@ -185,6 +191,7 @@ class BaderkitChargeAnalysis(Structure, Calculation):
             logging.warning("No POTCAR found in file. Oxidation states will not be calculated")
         
         # update entry
+        data.update(**structure_dict)
         self.update_from_fields(**data)
         self.save()
 

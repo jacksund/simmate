@@ -135,6 +135,7 @@ class ElfAnalysis(Structure):
             graph = graph.to_json()
         results["bifurcation_graph"] = graph
         results["labeled_structure"] = labeler.labeled_structure.to_json()
+        results["quasi_atom_structure"] = labeler.quasi_atom_structure.to_json()
         results["atom_elf_radii"] = [float(i) for i in labeler.atom_elf_radii]
         results["atom_elf_radii_types"] = [str(i) for i in labeler.atom_elf_radii_types]
         results["spin_system"] = labeler._spin_system

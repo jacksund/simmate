@@ -10,6 +10,7 @@ from simmate.database import connect
 from .baderkit import (
     ElfAnalysis__VaspBaderkit__ElfAnalysisWarrenlab,
     ElfAnalysis__VaspBaderkit__ElfRadiiWarrenlab,
+    PopulationAnalysis__VaspBaderkit__WarrenLabBader,
 )
 from .relaxation import (
     Relaxation__Vasp__WarrenLabHse,

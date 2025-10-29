@@ -34,7 +34,7 @@ class ElfAnalysis__VaspBaderkit__ElfRadiiWarrenlab(Workflow):
     ):
         # First we run a static energy calculation
         static_dir = directory / StaticEnergy__Vasp__WarrenLabPreRadii.name_full
-        StaticEnergy__Vasp__WarrenLabPreRadii.run(
+        result = StaticEnergy__Vasp__WarrenLabPreRadii.run(
             structure=structure,
             command=command,
             source=source,
@@ -46,6 +46,7 @@ class ElfAnalysis__VaspBaderkit__ElfRadiiWarrenlab(Workflow):
         BaderkitChargeAnalysis__Baderkit__Bader.run(
             directory=bader_dir,
             previous_directory=static_dir,
+            source=result,
             )
 
         # And run the ELF analysis
@@ -53,6 +54,7 @@ class ElfAnalysis__VaspBaderkit__ElfRadiiWarrenlab(Workflow):
         SpinElfAnalysisCalculation__Baderkit__SpinElfAnalysis.run(
             directory=analysis_dir,
             previous_directory=static_dir,
+            source=result,
         ).result()
 
 
