@@ -7,7 +7,7 @@ import polars
 from rdkit.Chem import rdSubstructLibrary
 from rich.progress import track
 
-from simmate.toolkit import Molecule
+from simmate.toolkit import Molecule, Reaction
 from simmate.utilities import filter_polars_df
 
 from ..clustering import ClusteringEngine
@@ -64,7 +64,7 @@ class MoleculeDataFrame:
     # init methods are kept separate to keep code organized and also allow cols
     # to be populated dynamically at a later time
 
-    def init_toolkit_objs(self):
+    def init_toolkit_objs(self, add_h: bool = False):
         # priority of columns goes..
         # 1. molecule_obj (ie nothing to do)
         # 2. molecule (use from_dynamic)
@@ -85,7 +85,7 @@ class MoleculeDataFrame:
         elif "smiles" in self.df.columns:
             mol_objs = [Molecule.from_smiles(m) for m in track(self.df["smiles"])]
 
-        if self.explicit_h_mode:
+        if self.explicit_h_mode or add_h:
             [m.add_hydrogens() for m in mol_objs]
         self.df = self.df.with_columns(polars.Series("molecule_obj", mol_objs))
 
@@ -168,6 +168,20 @@ class MoleculeDataFrame:
 
     # -------------------------------------------------------------------------
 
+    def enumerate_reaction(self, reaction: Reaction, split: bool = False):
+        # BUG: I assume molecule_obj col exists
+        products = [
+            reaction.apply_template([molecule])[0] for molecule in track(self.molecules)
+        ]
+        if split:
+            # create a new mdf object
+            return self.__class__.from_molecules(products)
+        else:
+            # add new columns to the current mdf for products
+            self.add_column(name="product_obj", values=products)
+
+    # -------------------------------------------------------------------------
+
     @property
     def molecules(self) -> list[Molecule]:
         return self.df[self._get_molecule_column()]
@@ -206,6 +220,14 @@ class MoleculeDataFrame:
     @classmethod
     def from_polars(cls, df: polars.DataFrame, **kwargs):
         return cls(df, **kwargs)
+
+    @classmethod
+    def from_molecules(cls, molecules: list[Molecule], **kwargs):
+        df = polars.DataFrame(
+            [molecules],
+            schema=["molecule_obj"],
+        )
+        return cls.from_polars(df, **kwargs)
 
     # @classmethod
     # def from_pandas(cls, df: pandas.DataFrame, **kwargs):
