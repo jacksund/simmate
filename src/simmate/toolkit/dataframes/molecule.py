@@ -14,6 +14,7 @@ from ..clustering import ClusteringEngine
 from ..featurizers import PatternFingerprint
 from ..featurizers.utilities import load_rdkit_fingerprint_from_base64
 from ..filters import AllowedElements
+from ..mapping import ChemSpaceMapper
 
 
 class MoleculeDataFrame:
@@ -154,6 +155,16 @@ class MoleculeDataFrame:
             flat_output=True,
         )
         self.add_column(name="cluster_id", values=cluster_ids)
+
+    def init_2d_chemspace(self):
+        logging.info("Chemspace mapping using 'umap-morgan'...")
+        x, y = ChemSpaceMapper.from_preset(
+            molecules=self.molecules,
+            preset="umap-morgan",
+            n_outputs=2,  # For a 2D (XY) plot
+        )
+        self.add_column(name="chemspace_x", values=x)
+        self.add_column(name="chemspace_y", values=y)
 
     # -------------------------------------------------------------------------
 

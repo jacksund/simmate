@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy
-from sklearn.cluster import KMeans, kmeans_plusplus
+from sklearn.cluster import KMeans as sk_KMeans
+from sklearn.cluster import kmeans_plusplus
 
 from .base import ClusteringEngine
 from .utilities import unflatten_cluster_ids
@@ -26,7 +27,7 @@ class Kmeans(ClusteringEngine):
 
         fingerprints = numpy.array(fingerprints)
 
-        kmeans = KMeans(n_clusters=n_clusters, random_state=random_state)
+        kmeans = sk_KMeans(n_clusters=n_clusters, random_state=random_state)
         cluster_ids = kmeans.fit_predict(fingerprints)
 
         result = cluster_ids if flat_output else unflatten_cluster_ids(cluster_ids)

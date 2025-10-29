@@ -35,6 +35,14 @@ class Reaction:
         self.reagent_amounts = reagent_amounts
 
     @property
+    def image(self):
+        """
+        Prints an image of the reaction if using an iPython-based console
+        (e.g. iPython, Spyder IDE, Jupyter Notebook, etc.)
+        """
+        return self.rdkit_reaction
+
+    @property
     def rdkit_reaction(self):
         return AllChem.ReactionFromSmarts(
             self.to_smiles(),
@@ -50,6 +58,7 @@ class Reaction:
         if ">" not in smiles:
             raise Exception("Only reaction-based SMILES/SMARTS are accepted.")
 
+        # note this will split via 'reactants>reagents>>products'
         reactants, reagents, products = [s.split(".") for s in smiles.split(">")]
         return cls(
             reactants=reactants,
