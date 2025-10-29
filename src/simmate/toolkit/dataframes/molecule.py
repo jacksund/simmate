@@ -10,6 +10,7 @@ from rich.progress import track
 from simmate.toolkit import Molecule
 from simmate.utilities import filter_polars_df
 
+from ..clustering import ClusteringEngine
 from ..featurizers import PatternFingerprint
 from ..featurizers.utilities import load_rdkit_fingerprint_from_base64
 from ..filters import AllowedElements
@@ -145,6 +146,23 @@ class MoleculeDataFrame:
 
     # -------------------------------------------------------------------------
 
+    def init_clusters(self):
+        logging.info("Clustering using 'butina-tanimoto-morgan'...")
+        cluster_ids = ClusteringEngine.from_preset(
+            molecules=self.molecules,
+            preset="butina-tanimoto-morgan",
+            flat_output=True,
+        )
+        self.add_column(name="cluster_id", values=cluster_ids)
+
+    # -------------------------------------------------------------------------
+
+    @property
+    def molecules(self) -> list[Molecule]:
+        return self.df[self._get_molecule_column()]
+
+    # -------------------------------------------------------------------------
+
     def filter(
         self,
         limit: int = None,
@@ -160,6 +178,9 @@ class MoleculeDataFrame:
             filtered_df = filtered_df.limit(limit)
 
         return MoleculeDataFrame.from_polars(filtered_df)
+
+    def add_column(self, name: str, values: list[any]):
+        self.df = self.df.with_columns(polars.Series(name=name, values=values))
 
     # -------------------------------------------------------------------------
 

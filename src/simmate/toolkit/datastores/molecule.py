@@ -235,7 +235,8 @@ class MoleculeStore:
         )
         if cls.explicit_h_mode:
             # because we have a new smiles column in method_features
-            df = df.drop("smiles")
+            df = df.rename({"smiles": "smiles_original"})
+            # df = df.drop("smiles")
         df = polars.concat([df, method_features], how="horizontal")
         del method_features
 
