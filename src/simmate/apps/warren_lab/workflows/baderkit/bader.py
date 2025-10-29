@@ -2,20 +2,20 @@
 
 from pathlib import Path
 
-from simmate.apps.baderkit.workflows import PopulationAnalysis__Baderkit__Bader
+from simmate.apps.baderkit.workflows import BaderkitChargeAnalysis__Baderkit__Bader
 from simmate.apps.warren_lab.workflows.static_energy import (
     StaticEnergy__Vasp__WarrenLabPbesol
 )
 from simmate.toolkit import Structure
-from simmate.utilities import copy_files_from_directory
 from simmate.workflows import Workflow
 
 
-class PopulationAnalysis__VaspBaderkit__BaderWarrenLab(Workflow):
+class PopulationAnalysis__VaspBaderkit__WarrenLabBader(Workflow):
     """
     Runs a static energy calculation using an extra-fine FFT grid and then
     carries out Bader analysis on the resulting charge density.
     """
+    use_database = False # nested workflows save separately
 
     @classmethod
     def run_config(
@@ -36,26 +36,13 @@ class PopulationAnalysis__VaspBaderkit__BaderWarrenLab(Workflow):
         ).result()
 
         # And run the bader analysis on the resulting chg denisty
-        bader_dir = directory / PopulationAnalysis__Baderkit__Bader.name_full
-        PopulationAnalysis__Baderkit__Bader.run(
+        bader_dir = directory / BaderkitChargeAnalysis__Baderkit__Bader.name_full
+        BaderkitChargeAnalysis__Baderkit__Bader.run(
             directory=bader_dir,
             previous_directory=prebader_dir,
             method=method,
         ).result()
 
-        # The from_vasp_directory method that loads results into the database
-        # requires the following files to be in the main directory:
-        #  2. INCAR
-        #  3. vasprun.xml
-        #  4. POTCAR
-        #  5. CHGCAR
-        copy_files_from_directory(
-            files_to_copy=["INCAR", "vasprun.xml", "POTCAR", "CHGCAR"],
-            directory_new=directory,
-            directory_old=prebader_dir,
-        )
-        # !!! I need a better way to access these files in the workup method
-        # without copying them into the main dir...
 
 
 class StaticEnergy__Vasp__PrebaderWarrenLab(StaticEnergy__Vasp__WarrenLabPbesol):

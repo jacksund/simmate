@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from .badelf import Badelf, ElfIonicRadii
+from .badelf import Badelf

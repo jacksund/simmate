@@ -2,28 +2,34 @@
 from pathlib import Path
 
 from baderkit.core import Grid, Bader
-from baderkit.core.bader.methods import Method
 from simmate.workflows.base_flow_types import Workflow
 
 from simmate.database import connect
 
-class PopulationAnalysis__Baderkit__Bader(Workflow):
+from simmate.apps.baderkit.models.baderkit import BaderkitChargeAnalysis
+
+class BaderkitChargeAnalysis__Baderkit__Bader(Workflow):
     required_files = ["AECCAR0", "AECCAR2", "CHGCAR", "POTCAR"]
-    use_database = False
+    use_database = True
+    database_table = BaderkitChargeAnalysis
     use_previous_directory = ["AECCAR0", "AECCAR2", "CHGCAR", "POTCAR"]
-    parent_workflows = [
-        "population-analysis.vasp-baderkit.bader-warren-lab",
-        ]
+    # parent_workflows = [
+    #     "population-analysis.vasp-baderkit.bader-warren-lab",
+    #     ]
 
     """
     Runs a Bader charge analysis on VASP outputs using the BaderKit package.
     """
     
-    @staticmethod
+    @classmethod
     def run_config(
+        cls,
+        previous_directory: Path,
         source: dict = None,
         directory: Path = None,
-        method: str | Method = "weight",
+        run_id = None,
+        baderkit_kwargs: dict = {},
+        **kwargs,
             ):
         # create CHGCAR_sum grid
         grid1 = Grid.from_vasp(directory / "AECCAR0")
@@ -35,22 +41,11 @@ class PopulationAnalysis__Baderkit__Bader(Workflow):
         bader = Bader(
             charge_grid=charge_grid,
             reference_grid=reference_grid,
-            method=method
+            **baderkit_kwargs,
             )
-        # get oxidation states
-        oxidation_states = bader.get_oxidation_from_potcar(directory / "POTCAR")
-        # create results dict matching output from Henkelman Bader
-        results = {
-            "oxidation_states": oxidation_states,
-            "charges": bader.atom_charges,
-            "min_dists": bader.basin_min_surface_distances,
-            "volumes": bader.atom_volumes,
-            "element_list": [i.species_string for i in bader.structure],
-            "vacuum_charge": bader.vacuum_charge,
-            "vacuum_volume": bader.vacuum_volume,
-            "nelectrons": bader.total_electron_number,
-            }
-        return results
+        # get the table for this workflow and update entry
+        datatable = cls.database_table.objects.get(run_id=run_id)
+        datatable.update_from_baderkit(bader, directory)
 
 
 

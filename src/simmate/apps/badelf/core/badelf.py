@@ -1231,31 +1231,6 @@ class BadElfToolkit:
             file_name = self.partitioning_grid.structure.composition.reduced_formula
         self.electride_structure.to(f"{file_name}_labeled", "cif")
 
-    # def plot_partitioning(self):
-    #     """
-    #     Plots the partitioning surface around each atom.
-    #     """
-    #     partitioning, _ = self.partitioning
-    #     grid = self.partitioning_grid.copy()
-    #     if self.algorithm == "badelf":
-    #         grid.structure = self.structure
-    #         PartitioningToolkit(grid, self.elf_labeler).plot_partitioning_results(
-    #             partitioning
-    #         )
-    #     elif self.algorithm == "voronelf":
-    #         grid.structure = self.electride_structure
-    #         PartitioningToolkit(grid, self.elf_labeler).plot_partitioning_results(
-    #             partitioning
-    #         )
-    #     else:
-    #         warnings.warn(
-    #             """
-    #             Plotting of zero-flux partitioning surfaces is not currently
-    #             supported.
-    #             """
-    #         )
-
-
 class SpinBadElfToolkit:
     """
     This class is a wrapper for the BadElfToolkit adding the capability

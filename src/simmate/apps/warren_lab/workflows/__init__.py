@@ -2,12 +2,14 @@
 
 from simmate.database import connect
 
-from .badelf import (
-    BadElf__Badelf__BadelfHse,
-    BadElf__Badelf__BadelfPbesol,
-    BadElf__Badelf__BadelfTest,
-    StaticEnergy__Vasp__WarrenLabPrebadelfHse,
-    StaticEnergy__Vasp__WarrenLabPrebadelfPbesol,
+# from .badelf import (
+#     BadElf__Badelf__BadelfHse,
+#     BadElf__Badelf__BadelfPbesol,
+#     BadElf__Badelf__BadelfTest,
+# )
+from .baderkit import (
+    ElfAnalysis__VaspBaderkit__ElfAnalysisWarrenlab,
+    ElfAnalysis__VaspBaderkit__ElfRadiiWarrenlab,
 )
 from .relaxation import (
     Relaxation__Vasp__WarrenLabHse,
