@@ -13,10 +13,7 @@
     {% htmx_selectbox name="status2" options=component.status_options multiselect=True %}
     {% htmx_button method_name="submit" %}
     {% htmx_button method_name="add_molecule_image" label="Draw Molecule" %}
-    {% if component.actions %}
-        {% canvas name="jacks-molecule" %}
-        {% htmx_js_actions component.actions %}
-    {% endif %}
+    {% canvas name="jacks-molecule" %}
     {% htmx_button method_name="run_some_js" label="Run Javascript Only, No Swap" javascript_only=True %}
     <div id="result" style="margin-top:20px;">Result area</div>
     {% htmx_selectbox name="status3" method_name="update_selection_test" options=component.status_options %}
@@ -27,5 +24,8 @@
     <div>COMPONENT: {{ component }}</div>
     <div>ID: {{ component.component_id }}</div>
     <div>Data: {{ component.post_data }}</div>
-    <div>Actions: {{ component.actions }}</div>
+    <div>Actions: {{ component.js_actions }}</div>
+    {% if component.js_actions %}
+        {% htmx_js_actions component.js_actions %}
+    {% endif %}
 </form>

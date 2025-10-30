@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from .project_form import ProjectForm
 
-from .mixins import ProjectInput, ProjectManagementInput
-from .project_form import ProjectFormView
-from .tag_form import TagFormView
+# from .mixins import ProjectInput, ProjectManagementInput
+# from .tag_form import TagFormView
