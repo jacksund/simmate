@@ -53,8 +53,8 @@ class SpinElfAnalysisCalculation__Baderkit__SpinElfAnalysis(Workflow):
             labeler.write_bifurcation_plots(
                 filename = directory / "bifurcation_plot.html"
                 )
-            labeler.labeled_structure.to("POSCAR_labeled", "POSCAR")
-            labeler.quasi_atom_structure.to("POSCAR_quasi", "POSCAR")
+            labeler.labeled_structure.to(directory/"POSCAR_labeled", "POSCAR")
+            labeler.quasi_atom_structure.to(directory/"POSCAR_quasi", "POSCAR")
             # write quasi atom volumes
             included = FeatureType.bare_types
             labeler.elf_labeler_up.write_features_by_type_sum(

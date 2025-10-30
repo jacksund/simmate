@@ -54,8 +54,8 @@ class ElfAnalysisCalculation__Baderkit__ElfAnalysis(Workflow):
             labeler.write_bifurcation_plot(
                 filename = directory / "bifurcation_plot.html"
                 )
-            labeler.labeled_structure.to("POSCAR_labeled", "POSCAR")
-            labeler.quasi_atom_structure.to("POSCAR_quasi", "POSCAR")
+            labeler.labeled_structure.to(directory/"POSCAR_labeled", "POSCAR")
+            labeler.quasi_atom_structure.to(directory/"POSCAR_quasi", "POSCAR")
             # write quasi atom volume
             included = FeatureType.bare_types
             labeler.write_features_by_type_sum(
