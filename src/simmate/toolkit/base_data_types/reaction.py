@@ -35,6 +35,14 @@ class Reaction:
         self.reagent_amounts = reagent_amounts
 
     @property
+    def image(self):
+        """
+        Prints an image of the reaction if using an iPython-based console
+        (e.g. iPython, Spyder IDE, Jupyter Notebook, etc.)
+        """
+        return self.rdkit_reaction
+
+    @property
     def rdkit_reaction(self):
         return AllChem.ReactionFromSmarts(
             self.to_smiles(),
@@ -50,6 +58,7 @@ class Reaction:
         if ">" not in smiles:
             raise Exception("Only reaction-based SMILES/SMARTS are accepted.")
 
+        # note this will split via 'reactants>reagents>>products'
         reactants, reagents, products = [s.split(".") for s in smiles.split(">")]
         return cls(
             reactants=reactants,
@@ -133,6 +142,15 @@ class Reaction:
         rdkit_rxn = self.template_rdkit_reaction
         rdkit_reactants = tuple([r.rdkit_molecule for r in reactants])
         rdkit_products = rdkit_rxn.RunReactants(tuple(rdkit_reactants))[0]
-        return [Molecule.from_rdkit(p) for p in rdkit_products]
+
+        # BUG: rdkit doesn't fully initialize the mol objs... causing downstream
+        # methods like mol.get_morgan_fingerprint() to fail. To fix this,
+        # we convert to smiles and then immediately reload it using from_smiles.
+        # Without this bug, here's what the more basic line would be:
+        #   return [Molecule.from_rdkit(p) for p in rdkit_products]
+        return [
+            Molecule.from_smiles(Molecule.from_rdkit(p).to_smiles())
+            for p in rdkit_products
+        ]
 
     # -------------------------------------------------------------------------

@@ -4,6 +4,7 @@ import numpy
 from rich.progress import track
 
 from .base import ClusteringEngine, SimilarityEngine
+from .utilities import flatten_clusters
 
 
 class Butina(ClusteringEngine):
@@ -72,13 +73,4 @@ class Butina(ClusteringEngine):
 
         clusters = tuple(res)
 
-        if flat_output:
-            column_ids = []
-            for mol_index in range(len(fingerprints)):
-                for cluster_index, cluster in enumerate(clusters):
-                    if mol_index in cluster:
-                        column_ids.append(cluster_index)
-                        break
-            return column_ids
-        else:
-            return clusters
+        return flatten_clusters(clusters) if flat_output else clusters
