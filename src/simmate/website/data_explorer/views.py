@@ -113,9 +113,9 @@ def table_entries(request, table_name):
     elif view_format == "csv":
         objects = table.filter_from_request(request, paginate=False)
         return objects.to_csv_response()
-    
+
     # TODO: add support for CIF, SDF, and other mol/crystal formats
-    
+
     else:
         raise Exception(f"Unknown 'format' GET arg given: {view_format}")
 
