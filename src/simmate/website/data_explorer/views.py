@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 
 from simmate.configuration import settings
@@ -112,19 +111,11 @@ def table_entries(request, table_name):
         )
 
     elif view_format == "csv":
-        # CSV is a unique case where we do a bulk download (up to 10k rows or
-        # whatever limit is set by filter_from_config).
         objects = table.filter_from_request(request, paginate=False)
-
-        # https://stackoverflow.com/questions/54729411/
-        df = objects.to_dataframe()
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = (
-            f"attachment; filename={table_name}_queryset.csv"
-        )
-        df.to_csv(path_or_buf=response, index=False)
-        return response
-
+        return objects.to_csv_response()
+    
+    # TODO: add support for CIF, SDF, and other mol/crystal formats
+    
     else:
         raise Exception(f"Unknown 'format' GET arg given: {view_format}")
 

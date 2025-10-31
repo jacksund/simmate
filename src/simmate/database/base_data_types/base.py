@@ -1,13 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-This module defines the lowest-level classes for database tables and their
-search results.
-
-See the `simmate.database.base_data_types` (which is the parent module of
-this one) for example usage.
-"""
-
 import inspect
 import json
 import logging
@@ -25,7 +17,7 @@ from django.core.paginator import Page, Paginator
 from django.db import models  # see comment below
 from django.db import models as table_column
 from django.forms.models import model_to_dict
-from django.http import HttpRequest, JsonResponse, QueryDict
+from django.http import HttpRequest, JsonResponse, QueryDict, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import resolve, reverse
 from django.utils.module_loading import import_string
@@ -173,7 +165,8 @@ class SearchResults(models.QuerySet):
                 else self.values_list(*columns)[:limit]
             )
             values_list = list(query)
-
+        
+        # TODO: support polars and toolkit.dataframes objs
         df = pandas.DataFrame.from_records(
             data=values_list,
             columns=columns,
@@ -297,6 +290,17 @@ class SearchResults(models.QuerySet):
         """
         return JsonResponse(self.to_api_dict(**kwargs))
 
+    def to_csv_response(self, **kwargs) -> HttpResponse:
+        # https://stackoverflow.com/questions/54729411/
+        df = self.to_dataframe()
+        response = HttpResponse(content_type="text/csv")
+        date_str = now().strftime("%Y_%m_%d")  # e.g. 2025_10_31
+        response["Content-Disposition"] = (
+            f"attachment; filename={date_str}_simmate_{self.model.__name__}.csv"
+        )
+        df.to_csv(path_or_buf=response, index=False)
+        return response
+    
     # -------------------------------------------------------------------------
 
     def filter_by_tags(self, tags: list[str]):
