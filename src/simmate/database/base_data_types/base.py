@@ -1,13 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-This module defines the lowest-level classes for database tables and their
-search results.
-
-See the `simmate.database.base_data_types` (which is the parent module of
-this one) for example usage.
-"""
-
 import inspect
 import json
 import logging
@@ -25,7 +17,7 @@ from django.core.paginator import Page, Paginator
 from django.db import models  # see comment below
 from django.db import models as table_column
 from django.forms.models import model_to_dict
-from django.http import HttpRequest, JsonResponse, QueryDict
+from django.http import HttpRequest, HttpResponse, JsonResponse, QueryDict
 from django.shortcuts import get_object_or_404
 from django.urls import resolve, reverse
 from django.utils.module_loading import import_string
@@ -174,6 +166,7 @@ class SearchResults(models.QuerySet):
             )
             values_list = list(query)
 
+        # TODO: support polars and toolkit.dataframes objs
         df = pandas.DataFrame.from_records(
             data=values_list,
             columns=columns,
@@ -183,6 +176,12 @@ class SearchResults(models.QuerySet):
         # TODO: add toolkit col
 
         return df
+
+    def to_curated_dataframe(self) -> pandas.DataFrame:
+        """
+        Converts your SearchResults to a list of pymatgen objects
+        """
+        return self.model.get_curated_df(self)
 
     def to_toolkit(
         self,
@@ -266,8 +265,6 @@ class SearchResults(models.QuerySet):
         # we can now delete the csv file
         csv_filename.unlink()
 
-    # -------------------------------------------------------------------------
-
     def to_api_dict(
         self, next_url: str = None, previous_url: str = None, **kwargs
     ) -> dict:
@@ -296,6 +293,30 @@ class SearchResults(models.QuerySet):
         Django JSON reponse
         """
         return JsonResponse(self.to_api_dict(**kwargs))
+
+    def to_csv_response(self, mode: str = "api", **kwargs) -> HttpResponse:
+        # TODO: this is the code once the htmx ui updates are merged:
+        # if mode == "curated":
+        #   df = self.model.get_curated_df(self)
+        # elif mode == "api":
+        #   df = self.to_dataframe()
+        # else:
+        #   rasie Exception("Unknown `mode` for `to_csv_response`: {mode}")
+        # Until then....
+        df = (
+            self.to_curated_dataframe()
+            if hasattr(self.model, "get_curated_df")
+            else self.to_dataframe()
+        )
+
+        # https://stackoverflow.com/questions/54729411/
+        response = HttpResponse(content_type="text/csv")
+        date_str = now().strftime("%Y_%m_%d")  # e.g. 2025_10_31
+        response["Content-Disposition"] = (
+            f"attachment; filename={date_str}_simmate_{self.model.__name__}.csv"
+        )
+        df.to_csv(path_or_buf=response, index=False)
+        return response
 
     # -------------------------------------------------------------------------
 
