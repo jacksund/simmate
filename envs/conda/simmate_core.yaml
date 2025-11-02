@@ -55,3 +55,4 @@ dependencies:
     - dask-core >=2023.6.1, <2024.4.3  # "dask" on pypi. for parallelization
     - distributed >=2023.6.1, <2024.4.3  # part of dask
     - beautifulsoup4 >=4.0.0, <=4.13.5  # for parsing html files
+    - cachetools >=6.0.0, <=6.2.0  # for caching dicts (easily replaced if needed)

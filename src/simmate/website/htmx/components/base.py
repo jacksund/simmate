@@ -3,18 +3,13 @@
 import re
 from typing import get_args, get_origin
 
+from cachetools import LRUCache
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 
 from simmate.utilities import dotdict, str_to_datatype
 
 from .utilities import get_uuid_starting_with_letter, htmx_redirect
-
-# for cachetools v1 and v2 support
-try:
-    from cachetools.lru import LRUCache
-except ImportError:
-    from cachetools import LRUCache
 
 LOCAL_COMPONENT_CACHE = LRUCache(maxsize=10_000)
 
