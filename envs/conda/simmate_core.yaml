@@ -54,3 +54,4 @@ dependencies:
     - xmltodict >=0.13.0, <=0.13.0  # for reading XML files (QE outputs)
     - dask-core >=2023.6.1, <2024.4.3  # "dask" on pypi. for parallelization
     - distributed >=2023.6.1, <2024.4.3  # part of dask
+    - beautifulsoup4 >=4.0.0, <=4.13.5
