@@ -20,6 +20,13 @@ class CreateManyMixin:
     def mount_for_create_many(self):
         self.redirect_mode = "table"
 
+    def check_form_for_create_many(self):
+        for child in self.children:
+            if not child.check_form():
+                for error in child.form_errors:
+                    if error not in self.form_errors:
+                        self.form_errors.append(error)
+
     def unmount_for_create_many(self):
         for child in self.children:
             child.unmount_for_create()

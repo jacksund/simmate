@@ -130,7 +130,7 @@ class DynamicTableForm(
             else:
                 raise Exception(f"Unknown view type for dynamic form: {view_name}")
 
-        # check that editting is actually allowed
+        # check that mode is actually allowed
         if self.form_mode not in self.table.html_enabled_forms:
             raise Exception(
                 f"The form mode '{self.form_mode}' is disabled for this table."
@@ -164,16 +164,18 @@ class DynamicTableForm(
         if self.skip_db_save:
             return True
 
-        if self.form_mode in ["create", "update", "create_many_entry"]:
-            self.check_required_inputs()
-        elif self.form_mode == "update_many":
-            self.check_max_update_many()
+        if self.form_mode == "create":
+            self.check_form_for_create()
         elif self.form_mode == "create_many":
-            for child in self.children:
-                if not child.check_form():
-                    for error in child.form_errors:
-                        if error not in self.form_errors:
-                            self.form_errors.append(error)
+            self.check_form_for_create_many()
+        elif self.form_mode == "update":
+            self.check_form_for_update()
+        elif self.form_mode == "update_many":
+            self.check_form_for_update_many()
+        elif self.form_mode == "search":
+            self.check_form_for_search()
+        else:
+            raise Exception(f"Unknown form_mode is set: {self.form_mode}")
 
         self.check_form_hook()
 
@@ -185,7 +187,7 @@ class DynamicTableForm(
     def check_required_inputs(self):
         # Check that all basic inputs are filled out
         for input_name in self.required_inputs:
-            input_value = getattr(self, input_name)
+            input_value = self.form_data.get(input_name, None)
             if input_value in [None, ""]:
                 message = f"'{input_name}' is a required input."
                 self.form_errors.append(message)
@@ -252,31 +254,6 @@ class DynamicTableForm(
     # -------------------------------------------------------------------------
     # -------------------------------------------------------------------------
 
-    def set_property(
-        self,
-        # BUG: for some reason, giving ": str" causes errors...?
-        property_name: any,
-        new_value: any,
-        *args,
-        **kwargs,
-    ):
-
-        # attempt casting to correct type
-        new_value = parse_value(new_value)
-        # buggy
-        # from simmate.website.unicorn.typer import cast_attribute_value
-        # new_value = cast_attribute_value(self, property_name, new_value)
-
-        # check if there is a special defined method for this property
-        method_name = f"set_{property_name}"
-        if hasattr(self, method_name):
-            method = getattr(self, method_name)
-            method(new_value, *args, **kwargs)
-        else:
-            setattr(self, property_name, new_value)
-
-    # -------------------------------------------------------------------------
-
     # Model creation and update utils
 
     def to_db_dict(
@@ -297,20 +274,19 @@ class DynamicTableForm(
         ]
 
         matching_fields = [
-            attr
-            for attr in self._attribute_names
-            if attr in table_cols or (attr.endswith("_id") and attr[:-3] in table_cols)
+            key
+            for key in self.form_data.keys()
+            if key in table_cols or (key.endswith("_id") and key[:-3] in table_cols)
         ]
 
         config = {}
-        for form_attr in matching_fields:
-            current_val = getattr(self, form_attr)
-            current_val = parse_value(current_val)
+        for form_key in matching_fields:
+            current_val = self.form_data[form_key]
 
             if not include_empties and current_val is None:
                 continue
 
-            config[form_attr] = current_val
+            config[form_key] = current_val
 
             # special data types and common field names. Note, variations
             # of this should be handled by overriding the `to_db_dict`
@@ -319,10 +295,10 @@ class DynamicTableForm(
                 and current_val is not None
                 and self.form_mode != "create_many"
             ):
-                if form_attr == "molecule":
+                if form_key == "molecule":
                     config["molecule_original"] = current_val
                     config["molecule"] = Molecule.from_dynamic(current_val)
-                elif form_attr == "structure":
+                elif form_key == "structure":
                     config["structure_original"] = current_val
                     config["structure"] = Structure.from_dynamic(current_val)
 
@@ -346,7 +322,6 @@ class DynamicTableForm(
     """
 
     def get_submission_redirect(self):
-
         if self.form_mode == "search":
             # has its own unique redirect that takes priority
             return self.get_search_redirect()

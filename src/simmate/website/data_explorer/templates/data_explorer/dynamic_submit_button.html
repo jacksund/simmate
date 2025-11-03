@@ -1,7 +1,7 @@
 <div class="text-center pt-2">
-    {% if form_errors %}
+    {% if component.form_errors %}
         <div>
-            {% for error in form_errors %}
+            {% for error in component.form_errors %}
                 {% alert message=error theme="danger" %}
             {% endfor %}
         </div>
@@ -13,11 +13,11 @@
                     class="btn btn-outline-danger my-2">Continue</button>
         {% else %}
             <div>This will update {{ entry_ids_to_update|length }} entries.</div>
-            {% htmx_button method_name="submit_form" label="Save to database" icon="content-save" %}
+            {% htmx_button method_name="submit_form" label="Save to database" icon="floppy2" %}
         {% endif %}
     {% elif form_mode == "search" %}
-        {% htmx_button method_name="submit_form" label="Search" icon="magnify" %}
+        {% htmx_button method_name="submit_form" label="Search" icon="search" %}
     {% else %}
-        {% htmx_button method_name="submit_form" label="Save to database" icon="content-save" %}
+        {% htmx_button method_name="submit_form" label="Save to database" icon="floppy2" %}
     {% endif %}
 </div>

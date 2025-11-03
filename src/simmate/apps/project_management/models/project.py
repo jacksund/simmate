@@ -20,8 +20,8 @@ class Project(DatabaseTable):
     html_display_name = "Projects"
     html_description_short = "List of different chemistry projects"
 
-    html_entries_template = "projects/project/table.html"
-    html_entry_template = "projects/project/view.html"
+    html_entries_template = "project_management/project/table.html"
+    html_entry_template = "project_management/project/view.html"
 
     html_form_component = "project-form"
     html_enabled_forms = [
@@ -51,7 +51,7 @@ class Project(DatabaseTable):
         "Requires Update",
     )
     status = table_column.CharField(
-        max_length=3,
+        max_length=25,
         blank=True,
         null=True,
     )
@@ -102,19 +102,6 @@ class Project(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # has related - molecule_scopes
-
-    molecule_scope_base = table_column.JSONField(blank=True, null=True)
-    """
-    A list of filters to apply when querying all MoleculeScopes.
-    (e.g., range of allowed mol wts, max functional groups, etc.)
-    """
-    # TODO: would I ever want to move this to the MoleculeScope model and
-    # allow filters/limit to vary on a per-molecule-scope basis? I don't do this
-    # for now, because it's easier on users to just have a universal default.
-
-    # -------------------------------------------------------------------------
-
     @classmethod
     def suggest_new_name(cls) -> str:
 
@@ -144,23 +131,10 @@ class Project(DatabaseTable):
         tags = self.tags.order_by("-id").all()[:tags__limit]
         tags__truncated = bool(len(tags) >= tags__limit)
 
-        hypotheses__limit = 10
-        hypotheses__count = self.hypotheses.all()[:count_limit].count()
-        hypotheses = (
-            self.hypotheses.prefetch_related("tags")
-            .select_related("created_by", "driven_by")
-            .order_by("-id")
-            .all()[:hypotheses__limit]
-        )
-        hypotheses__truncated = bool(len(hypotheses) >= hypotheses__limit)
-
         return {
             "tags": tags,
             "tags__count": tags__count,
             "tags__truncated": tags__truncated,
-            "hypotheses": hypotheses,
-            "hypotheses__count": hypotheses__count,
-            "hypotheses__truncated": hypotheses__truncated,
         }
 
     # -------------------------------------------------------------------------

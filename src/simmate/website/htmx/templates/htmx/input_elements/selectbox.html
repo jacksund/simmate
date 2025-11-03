@@ -24,21 +24,40 @@
         {% if not multiselect %}
             {% if initial_value %}
                 <option value="{{ initial_value }}">
-                    {% for option in options %}
-                        {% if initial_value == option %}{{ option }}{% endif %}
-                    {% endfor %}
+                    {% if tuple_mode %}
+                        {% for option_val, option_display in options %}
+                            {% if initial_value == option_val %}{{ option_display }}{% endif %}
+                        {% endfor %}
+                    {% else %}
+                        {% for option in options %}
+                            {% if initial_value == option %}{{ option }}{% endif %}
+                        {% endfor %}
+                    {% endif %}
                 </option>
             {% else %}
                 <option value="NONE">Choose one...</option>
             {% endif %}
-            {% for option in options %}
-                {% if option != initial_value %}<option value="{{ option }}">{{ option }}</option>{% endif %}
-            {% endfor %}
+            {% if tuple_mode %}
+                {% for option_val, option_display in options %}
+                    {% if option_val != initial_value %}<option value="{{ option_val }}">{{ option_display }}</option>{% endif %}
+                {% endfor %}
+            {% else %}
+                {% for option in options %}
+                    {% if option != initial_value %}<option value="{{ option }}">{{ option }}</option>{% endif %}
+                {% endfor %}
+            {% endif %}
         {% else %}
-            {% for option in options %}
-                <option value="{{ option }}"
-                        {% if initial_value and option in initial_value %}selected{% endif %}>{{ option }}</option>
-            {% endfor %}
+            {% if tuple_mode %}
+                {% for option_val, option_display in options %}
+                    <option value="{{ option_val }}"
+                            {% if initial_value and option_val in initial_value %}selected{% endif %}>{{ option_display }}</option>
+                {% endfor %}
+            {% else %}
+                {% for option in options %}
+                    <option value="{{ option }}"
+                            {% if initial_value and option in initial_value %}selected{% endif %}>{{ option }}</option>
+                {% endfor %}
+            {% endif %}
         {% endif %}
     </select>
 </div>

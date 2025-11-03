@@ -4,7 +4,7 @@ import re
 from typing import get_args, get_origin
 
 from cachetools import LRUCache
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 
 from simmate.utilities import dotdict, str_to_datatype
@@ -36,9 +36,14 @@ class HtmxComponent:
         self.component_id = get_uuid_starting_with_letter()
         self.form_data = {}
         self.intial_context = context
-        self.request = context.request
-        self.update_caches()
+        self.request = context.request  # is updated with new request every new call
+        # this part allows us to pass kwargs to the html tag and apply them to attrs
+        # ex: form_mode="example" --> apply to python obj on init
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
         self.mount()
+        self.update_caches()
 
     # -------------------------------------------------------------------------
 
@@ -71,17 +76,20 @@ class HtmxComponent:
             response = self.process()
 
         # response is typically None, meaning we defer to rendering the component
-        # template again.
-        # But in some cases, it can return a JsonResponse, a URL, or some html
-        # that takes priority
+        # template again. But in some cases, it can return a JsonResponse, a URL,
+        # or some html that takes priority
         if isinstance(response, JsonResponse):
             return response
-        elif False and isinstance(response, str):  # DISABLED -- need better check
-            return htmx_redirect(response)  # redirect to url
+        elif isinstance(response, HttpResponseRedirect):
+            # convert to special redirect htmx response
+            return htmx_redirect(response.url)
+        # elif isinstance(response, str):  # DISABLED -- need better check
+        #     return htmx_redirect(response)  # redirect to url
         elif response is not None:
             return response  # could be Http, html or something else
         else:
-            render(
+            # None returned, meaning we re-render the whole component template
+            return render(
                 request,
                 self.template_name,
                 self.get_context(),
@@ -179,6 +187,11 @@ class HtmxComponent:
         for key, values in self.request.POST.lists():
 
             target_type = self.post_data_mappings.get(key, None)
+
+            # special case where we infer "example_ids" is a list of integers
+            # BUG: sometimes ids can be strings causing error below
+            if target_type is None and key.endswith("_ids"):
+                target_type = list[int]
 
             # if it isn't explicitly given as a list type AND it has only 0 or 1
             # entries in the list, then we assume it should not be a list.

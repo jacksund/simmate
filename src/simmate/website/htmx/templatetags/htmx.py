@@ -231,6 +231,13 @@ def htmx_selectbox(
         else:
             options = []
 
+    # check whether the list of options is a simple list or a list of tuples.
+    # If it is the latter, then we have a list of (value, display) options, which
+    # is commonly used when foreign keys are involved. For example with users,
+    # where options are given as [(1, "jacksund"), (2, "janedoe"), ...]
+    if options and isinstance(options[0], (list, tuple)):
+        tuple_mode = True  # we assume they have the correct format
+
     if method_name:
         defer = False
 

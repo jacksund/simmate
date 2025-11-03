@@ -29,10 +29,12 @@ class UpdateManyMixin:
     form_mode = "update_many"
     """
 
-    def check_max_update_many(self):
-        if len(self.entry_ids_to_update) > self.n_ids_to_update_max:
-            message = f"You are only allowed to update a maximum of '{self.n_ids_to_update_max}' at a time."
-            self.form_errors.append(message)
+    def mount_for_update_many(self):
+        # default is we want everything to be set to None, which includes
+        # overriding default values
+        for field in self.update_many_inputs:
+            # opt for setattr instead of self.set_property since this is unsetting
+            setattr(self, field, None)
 
     def confirm_update_many(self, select_form_data):
         # Example of how the data will look:
@@ -52,12 +54,13 @@ class UpdateManyMixin:
         if self.entry_ids_to_update:
             self.is_update_many_confirmed = True
 
-    def mount_for_update_many(self):
-        # default is we want everything to be set to None, which includes
-        # overriding default values
-        for field in self.update_many_inputs:
-            # opt for setattr instead of self.set_property since this is unsetting
-            setattr(self, field, None)
+    def check_form_for_update_many(self):
+        self.check_max_update_many()
+
+    def check_max_update_many(self):
+        if len(self.entry_ids_to_update) > self.n_ids_to_update_max:
+            message = f"You are only allowed to update a maximum of '{self.n_ids_to_update_max}' at a time."
+            self.form_errors.append(message)
 
     def unmount_for_update_many(self):
         config = self.to_db_dict()

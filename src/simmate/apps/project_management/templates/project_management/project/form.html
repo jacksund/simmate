@@ -30,10 +30,13 @@
             </div>
         {% endif %}
         <div class="row">
-            <div class="col-12">{% htmx_selectbox name="leader_ids" label="Leaders" options=user_options multiselect=True %}</div>
-            <div class="col-12">{% htmx_selectbox name="member_ids" label="Members" options=user_options multiselect=True %}</div>
+            <div class="col-12">
+                {% htmx_selectbox name="leader_ids" label="Leaders" options=component.user_options multiselect=True %}
+            </div>
+            <div class="col-12">
+                {% htmx_selectbox name="member_ids" label="Members" options=component.user_options multiselect=True %}
+            </div>
         </div>
     </div>
     {% include "data_explorer/dynamic_submit_button.html" %}
-    {{ component.status_options }}
 {% endblock %}

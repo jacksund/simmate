@@ -33,7 +33,12 @@
                                 <td>Leaders</td>
                                 <td>
                                     <ul>
-                                        {% for user in table_entry.leaders.all %}<li>{{ user.first_name }} {{ user.last_name }}</li>{% endfor %}
+                                        {% for user in table_entry.leaders.all %}
+                                            <li>
+                                                {{ user.username }}
+                                                {% if user.first_name %}({{ user.first_name }} {{ user.last_name }}){% endif %}
+                                            </li>
+                                        {% endfor %}
                                     </ul>
                                 </td>
                             </tr>
@@ -41,7 +46,12 @@
                                 <td>Members</td>
                                 <td>
                                     <ul>
-                                        {% for user in table_entry.members.all %}<li>{{ user.first_name }} {{ user.last_name }}</li>{% endfor %}
+                                        {% for user in table_entry.members.all %}
+                                            <li>
+                                                {{ user.username }}
+                                                {% if user.first_name %}({{ user.first_name }} {{ user.last_name }}){% endif %}
+                                            </li>
+                                        {% endfor %}
                                     </ul>
                                 </td>
                             </tr>

@@ -2,12 +2,12 @@
 
 from django.db import transaction
 
-from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.htmx.components import DynamicTableForm, UserInput
 
 from ..models import Project
 
 
-class ProjectForm(DynamicTableForm):  # UserInput
+class ProjectForm(DynamicTableForm, UserInput):
 
     table = Project
 
@@ -29,12 +29,16 @@ class ProjectForm(DynamicTableForm):  # UserInput
     ]
 
     def check_form_for_create(self):
-        # make sure the Project name is a new one
-        project_exists = Project.objects.filter(name=self.name).exists()
-        if project_exists:
-            self.form_errors.append(
-                f"A project with the name {self.name} already exists."
-            )
+        super().check_form_for_create()
+
+        project_name = self.form_data.get("name", None)
+        if project_name:
+            # make sure the Project name is a new one
+            project_exists = Project.objects.filter(name=project_name).exists()
+            if project_exists:
+                self.form_errors.append(
+                    f"A project with the name '{project_name}' already exists."
+                )
 
     # -------------------------------------------------------------------------
 
@@ -42,10 +46,10 @@ class ProjectForm(DynamicTableForm):  # UserInput
 
     def mount_for_update(self):
         super().mount_for_update()
-        self.leader_ids = list(
+        self.form_data["leader_ids"] = list(
             self.table_entry.leaders.values_list("id", flat=True).all()
         )
-        self.member_ids = list(
+        self.form_data["member_ids"] = list(
             self.table_entry.members.values_list("id", flat=True).all()
         )
 
@@ -64,10 +68,12 @@ class ProjectForm(DynamicTableForm):  # UserInput
     # -------------------------------------------------------------------------
 
     # CREATE MANY
+    # disabled
 
     # -------------------------------------------------------------------------
 
     # UPDATE MANY
+    # disabled
 
     # -------------------------------------------------------------------------
 
@@ -92,8 +98,8 @@ class ProjectForm(DynamicTableForm):  # UserInput
             # Save the request to the database
             self.table_entry.save()
             # add leaders and members
-            self.table_entry.leaders.set(self.leader_ids)
-            self.table_entry.members.set(self.member_ids)
+            self.table_entry.leaders.set(self.form_data["leader_ids"])
+            self.table_entry.members.set(self.form_data["member_ids"])
 
     def to_search_dict(self, **kwargs):
         search = self._get_default_search_dict(**kwargs)
@@ -105,7 +111,7 @@ class ProjectForm(DynamicTableForm):  # UserInput
 
     # -------------------------------------------------------------------------
 
-    def suggest_new_name(self, request):
+    def suggest_new_name(self):
         self.form_data["name"] = Project.suggest_new_name()
 
     # -------------------------------------------------------------------------
