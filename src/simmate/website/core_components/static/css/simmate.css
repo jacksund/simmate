@@ -6,8 +6,20 @@
 :root {
   /* --bs-body-bg: #9c9ea1;  */
   /* --bs-body-bg-rgb: 156, 158, 161; */
+  /* PRIMARY */
   --bs-primary: #009485;
   --bs-primary-rgb: 0, 148, 133;
+  --bs-primary-darker: #006b60;
+  --bs-primary-darker-rgb: 0, 107, 96;
+  --bs-primary-lighter: #00a695;
+  --bs-primary-lighter-rgb: 0, 166, 149;
+  /* SUCCESS */
+  --bs-success: #00aa44;
+  --bs-success-rgb: 0, 170, 68;
+  --bs-success-darker: #01913b;
+  --bs-success-darker-rgb: 0, 145, 59;
+  --bs-success-lighter: #02c952;
+  --bs-success-lighter-rgb: 0, 201, 82;
 }
 
 
@@ -25,11 +37,20 @@ a:focus {
 .btn-primary {
   --bs-btn-bg: var(--bs-primary);
   --bs-btn-border-color: var(--bs-primary);
-  --bs-btn-hover-bg: #157347;
-  --bs-btn-hover-border-color: #146c43;
-  --bs-btn-active-bg: #146c43;
-  --bs-btn-active-border-color: #13653f;
+  --bs-btn-hover-bg: var(--bs-primary-darker);
+  --bs-btn-hover-border-color: var(--bs-primary-darker);
+  --bs-btn-active-bg: var(--bs-primary-lighter);
+  --bs-btn-active-border-color: var(--bs-primary-lighter);
 }
+
+.btn-success {
+  --bs-btn-bg: var(--bs-success);
+  --bs-btn-border-color: var(--bs-success);
+  --bs-btn-hover-bg: var(--bs-success-darker);
+  --bs-btn-hover-border-color: var(--bs-success-darker);
+  --bs-btn-active-bg: var(--bs-success-lighter);
+  --bs-btn-active-border-color: var(--bs-success-lighter);
+}   
 
 .table-primary {
     --bs-table-bg: #0094854f !important;

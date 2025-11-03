@@ -178,12 +178,12 @@ def table_entry_new(request, table_name):
 
 
 def table_entry_new_many(request, table_name):
-    # We can just use the entry-new view because our underlying unicorn
-    # view will dynamically determine this using the URL path
+    # We can just use the entry-new view because our underlying htmx form
+    # will dynamically determine the form mode using the URL path
     return table_entry_new(request, table_name)
 
 
 def table_entry_update(request, table_name, table_entry_id):
-    # We can just use the entry-new view because our underlying unicorn
-    # view will dynamically determine this using the URL path
+    # We can just use the entry-new view because our underlying htmx form
+    # will dynamically determine the form mode using the URL path
     return table_entry_new(request, table_name)

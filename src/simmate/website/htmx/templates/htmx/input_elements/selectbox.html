@@ -60,5 +60,7 @@
             {% endif %}
         {% endif %}
     </select>
+    {# this is for a bug-fix. See the parse_post_data method for more info #}
+    {% if multiselect %}<input type="hidden" name="{{ name }}__blankmultiselect" value=""/>{% endif %}
 </div>
 {# djlint:on #}

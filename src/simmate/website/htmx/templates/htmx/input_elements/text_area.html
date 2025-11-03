@@ -13,6 +13,6 @@
                hx-trigger="change"
            {% endif %}
            {% if disabled %}disabled{% endif %}
-           {% if required %}required{% endif %}></textarea>
+           {% if required %}required{% endif %}>{% if current_value %}{{ current_value }}{% endif %}</textarea>
 </div>
 {# djlint:on #}

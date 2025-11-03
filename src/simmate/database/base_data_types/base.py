@@ -1783,8 +1783,8 @@ class DatabaseTable(models.Model):
     html_entries_template: str = "data_explorer/table_entries.html"
 
     # This take the views below and just put them within the main body
-    html_search_template: str = "core_components/unicorn_full_page.html"
-    html_entry_form_template: str = "core_components/unicorn_full_page.html"
+    html_search_template: str = "htmx/full_page_component.html"
+    html_entry_form_template: str = "htmx/full_page_component.html"
 
     # HTMX views (side panels in the table view of the Data Explorer app)
     html_form_component: str = None

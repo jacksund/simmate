@@ -40,6 +40,16 @@ class ProjectForm(DynamicTableForm, UserInput):
                     f"A project with the name '{project_name}' already exists."
                 )
 
+    def save_to_db_for_create(self):
+        # We are saving multiple objects, so we want to make sure ALL work.
+        # If not, we roll back everything
+        with transaction.atomic():
+            # Save the request to the database
+            self.table_entry.save()
+            # add leaders and members
+            self.table_entry.leaders.set(self.form_data["leader_ids"])
+            self.table_entry.members.set(self.form_data["member_ids"])
+
     # -------------------------------------------------------------------------
 
     # UPDATE
@@ -54,16 +64,20 @@ class ProjectForm(DynamicTableForm, UserInput):
         )
 
     def check_form_for_update(self):
+        self.check_required_inputs()
+
         # if the sure the Project name was changed, make sure it is a new one
-        project_exists = (
-            Project.objects.filter(name=self.name)
-            .exclude(id=self.table_entry.id)
-            .exists()
-        )
-        if project_exists:
-            self.form_errors.append(
-                f"A project with the name {self.name} already exists."
+        project_name = self.form_data.get("name", None)
+        if project_name:
+            project_exists = (
+                Project.objects.filter(name=project_name)
+                .exclude(id=self.table_entry.id)
+                .exists()
             )
+            if project_exists:
+                self.form_errors.append(
+                    f"A project with the name '{project_name}' already exists."
+                )
 
     # -------------------------------------------------------------------------
 
@@ -86,20 +100,6 @@ class ProjectForm(DynamicTableForm, UserInput):
     ]
 
     # -------------------------------------------------------------------------
-
-    def save_to_db(self):
-
-        if self.form_mode not in ["create", "update"]:
-            return  # nothing to save
-
-        # We are saving multiple objects, so we want to make sure ALL work.
-        # If not, we roll back everything
-        with transaction.atomic():
-            # Save the request to the database
-            self.table_entry.save()
-            # add leaders and members
-            self.table_entry.leaders.set(self.form_data["leader_ids"])
-            self.table_entry.members.set(self.form_data["member_ids"])
 
     def to_search_dict(self, **kwargs):
         search = self._get_default_search_dict(**kwargs)

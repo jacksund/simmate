@@ -71,6 +71,13 @@ def htmx_text_input(
         current_value = getattr(component, name)
     elif name in component.form_data:
         current_value = component.form_data[name]
+    elif (
+        hasattr(component, "table_entry")
+        and component.table_entry is not None
+        and hasattr(component.table_entry, name)
+        and getattr(component.table_entry, name) is not None
+    ):
+        current_value = getattr(component.table_entry, name)
     else:
         current_value = None
 
@@ -98,6 +105,24 @@ def htmx_text_area(
     """
     if not label:
         label = name.replace("_", " ").title()
+
+    # grab the current value to render in the form
+    component = context["component"]
+    if name in context:
+        current_value = context[name]
+    elif hasattr(component, name):
+        current_value = getattr(component, name)
+    elif name in component.form_data:
+        current_value = component.form_data[name]
+    elif (
+        hasattr(component, "table_entry")
+        and component.table_entry is not None
+        and hasattr(component.table_entry, name)
+        and getattr(component.table_entry, name) is not None
+    ):
+        current_value = getattr(component.table_entry, name)
+    else:
+        current_value = None
 
     return locals()
 
@@ -248,6 +273,13 @@ def htmx_selectbox(
         initial_value = getattr(component, name)
     elif name in component.form_data:
         initial_value = component.form_data[name]
+    elif (
+        hasattr(component, "table_entry")
+        and component.table_entry is not None
+        and hasattr(component.table_entry, name)
+        and getattr(component.table_entry, name) is not None
+    ):
+        initial_value = getattr(component.table_entry, name)
     else:
         initial_value = None
 

@@ -193,19 +193,31 @@ class HtmxComponent:
             if target_type is None and key.endswith("_ids"):
                 target_type = list[int]
 
+            # BUG-FIX: we pass things like `user_ids__blankmultiselect` because
+            # post data will not include when we have an empty multiselect input.
+            # We want to make sure this key shows in the post data because it
+            # allows us to unset values (such as removing all tags)
+            #   https://github.com/select2/select2/issues/6055
+            if key.endswith("__blankmultiselect"):
+                if key[:-18] not in self.request.POST.keys():
+                    result[key[:-18]] = []
+                else:
+                    continue  # skip as it is not needed
+
             # if it isn't explicitly given as a list type AND it has only 0 or 1
             # entries in the list, then we assume it should not be a list.
-            if get_origin(target_type) != list and len(values) == 1:
+            elif get_origin(target_type) != list and len(values) == 1:
                 result[key] = str_to_datatype(
                     key,
                     values[0],
                     {key: target_type},
                     allow_type_guessing=True,
                 )
+
+            # we have a list and it must be one of...
+            # list[bool], list[str], list[float], list[int]
+            # grab inner type (e.g. list[str] -> str)
             else:
-                # we have a list and it must be one of...
-                # list[bool], list[str], list[float], list[int]
-                # grab inner type (e.g. list[str] -> str)
                 target_subtype = get_args(target_type)[-1] if target_type else None
                 result[key] = [
                     str_to_datatype(

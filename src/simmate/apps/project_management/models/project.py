@@ -27,7 +27,7 @@ class Project(DatabaseTable):
     html_enabled_forms = [
         # "search",
         "create",
-        # "update",
+        "update",
     ]
 
     source = None  # disable col
@@ -45,7 +45,7 @@ class Project(DatabaseTable):
     """
 
     status_options = (
-        "Pending Review",
+        "Under Review",
         "Active",
         "Inactive",
         "Requires Update",

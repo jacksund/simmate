@@ -146,9 +146,7 @@ class DynamicTableForm(
         )
         # and then GET params
         get_kwargs = parse_request_get(self.request)
-        for field, value in get_kwargs.items():
-            if hasattr(self, field):
-                self.set_property(field, value)
+        self.form_data.update(get_kwargs)
 
     def mount_extra(self):
         return  # default is there's nothing extra to do
@@ -188,7 +186,7 @@ class DynamicTableForm(
         # Check that all basic inputs are filled out
         for input_name in self.required_inputs:
             input_value = self.form_data.get(input_name, None)
-            if input_value in [None, ""]:
+            if input_value in [None, "", []]:
                 message = f"'{input_name}' is a required input."
                 self.form_errors.append(message)
 
@@ -250,8 +248,6 @@ class DynamicTableForm(
     def postsave_to_db(self):
         return  # default is there's nothing extra to do
 
-    # -------------------------------------------------------------------------
-    # -------------------------------------------------------------------------
     # -------------------------------------------------------------------------
 
     # Model creation and update utils
