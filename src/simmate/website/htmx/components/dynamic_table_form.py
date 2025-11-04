@@ -112,6 +112,7 @@ class DynamicTableForm(
         self.mount_extra()
 
     def mount_form_mode(self):
+
         view_name = self.request.resolver_match.url_name
 
         # Dynamically determine form_mode using the view name if it is not

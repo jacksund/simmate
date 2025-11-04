@@ -25,7 +25,7 @@ class Project(DatabaseTable):
 
     html_form_component = "project-form"
     html_enabled_forms = [
-        # "search",
+        "search",
         "create",
         "update",
     ]

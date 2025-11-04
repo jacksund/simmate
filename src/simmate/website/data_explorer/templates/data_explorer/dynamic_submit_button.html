@@ -6,7 +6,7 @@
             {% endfor %}
         </div>
     {% endif %}
-    {% if form_mode == "update_many" %}
+    {% if component.form_mode == "update_many" %}
         {% if not is_update_many_confirmed %}
             <div>There is no undo button! Are you sure you want to update all these entries?</div>
             <button onclick="Unicorn.call('{% if not unicorn.component_key %}{{ unicorn.component_name }}{% else %}{{ unicorn.component_key }}{% endif %}', 'confirm_update_many', getFormValues('select_search_results'));"
@@ -15,7 +15,7 @@
             <div>This will update {{ entry_ids_to_update|length }} entries.</div>
             {% htmx_button method_name="submit_form" label="Save to database" icon="floppy2" %}
         {% endif %}
-    {% elif form_mode == "search" %}
+    {% elif component.form_mode == "search" %}
         {% htmx_button method_name="submit_form" label="Search" icon="search" %}
     {% else %}
         {% htmx_button method_name="submit_form" label="Save to database" icon="floppy2" %}

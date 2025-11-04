@@ -93,21 +93,18 @@ class ProjectForm(DynamicTableForm, UserInput):
 
     # SEARCH
 
-    search_inputs = [
-        "name",
-        "status",
-        "discipline",
-    ]
-
-    # -------------------------------------------------------------------------
-
     def to_search_dict(self, **kwargs):
-        search = self._get_default_search_dict(**kwargs)
-        if self.leader_ids:
-            search["leaders__id__in"] = self.leader_ids
-        if self.member_ids:
-            search["members__id__in"] = self.member_ids
-        return search
+        search_dict = self._get_default_search_dict(**kwargs)
+
+        leader_ids = search_dict.pop("leader_ids", None)
+        if leader_ids:
+            search_dict["leaders__id__in"] = leader_ids
+
+        member_ids = search_dict.pop("leader_ids", None)
+        if member_ids:
+            search_dict["members__id__in"] = member_ids
+
+        return search_dict
 
     # -------------------------------------------------------------------------
 

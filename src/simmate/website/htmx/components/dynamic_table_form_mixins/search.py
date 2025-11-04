@@ -10,55 +10,53 @@ class SearchMixin:
 
     # for form_mode "search"
 
-    search_inputs = [
+    general_search_inputs = [
         "id__in",
         "page_size",
         "order_by",
-        # "reverse_order_by",
+        "reverse_order_by",
     ]
 
-    # assumed filters from DatabaseTable
-    id__in = None
-
-    page_size = None
     page_size_options = [
         25,
         50,
         100,
     ]
 
-    order_by = None
-    reverse_order_by = False
-
     @property
     def order_by_options(self):
-        # reformat into tuple of (value, display)
-        return [(col, col) for col in self.table.get_column_names()]
+        return self.table.get_column_names(include_relations=False)
 
-    def set_order_by(self, value):
-        if value.startswith("-"):
-            self.order_by = value[1:]
-            self.reverse_order_by = True
-        else:
-            self.order_by = value
-            self.reverse_order_by = False
+    def mount_for_search(self):
+        return  # default is there's nothing extra to do
 
     def to_search_dict(self, **kwargs) -> dict:
         return self._get_default_search_dict(**kwargs)
 
     def _get_default_search_dict(self, include_empties: bool = False):
-        # !!! consider merging functionality with _get_default_db_dict
+        # kept as a separate method so others can call it in a clean manner
+        # and avoid any super() stuff
+
+        # build the dict of API filters
         config = {}
-        for form_attr in self.search_inputs:
-            current_val = getattr(self, form_attr)
-            current_val = parse_value(current_val)
-            if not include_empties and current_val is None:
+        for search_key in list(self.form_data.keys()) + self.general_search_inputs:
+            search_val = self.form_data.get(search_key, None)
+            if not include_empties and search_val in [None, "", []]:
                 continue
-            config[form_attr] = current_val
+            if search_key.endswith("_ids"):  # assume m2m and we want __in query
+                # ex: config["tags__id__in"] = [1,2,3,...]
+                # BUG: need to standardize this
+                config[f"{search_key[:-4]}s__id__in"] = search_val
+            else:
+                config[search_key] = search_val
+
+        # -----------------
+        # Modify special cases for filters
 
         # comments should be a contains search
         if "comments" in config.keys():
             config["comments__contains"] = config.pop("comments")
+
         # reformat __in to python list
         if "id__in" in config.keys():
             # BUG: check to see it was input correctly?
@@ -67,7 +65,8 @@ class SearchMixin:
                 config["id__in"] = [input_value]  # it is a single id lookup
             else:
                 config["id__in"] = [int(i) for i in input_value.split(",")]
-        if "order_by" in config.keys() and self.reverse_order_by:
+
+        if "order_by" in config.keys() and config.pop("reverse_order_by", False):
             config["order_by"] = "-" + config["order_by"]
 
         # TODO: should prob be in mol mixin
@@ -76,13 +75,18 @@ class SearchMixin:
             config[self.molecule_query_type] = self._molecule_obj.to_smiles()
             config.pop("molecule")
 
-        # TODO: support other m2m
-        if hasattr(self, "tag_ids") and self.tag_ids:
-            config["tags__id__in"] = self.tag_ids
-
         return config
 
-    def get_search_redirect(self):  # *args, **kwargs
+    def check_form_for_search(self):
+        return  # nothing to check
+
+    def unmount_for_search(self):
+        return  # default is there's nothing extra to do
+
+    def save_to_db_for_search(self):
+        pass  # nothing to save
+
+    def get_search_redirect(self):
 
         # moleclue_query: str
         # self.set_molecule(moleclue_query, render=False)
@@ -98,13 +102,3 @@ class SearchMixin:
 
         final_url = self.parent_url + "?" + url_get_clause
         return redirect(final_url)
-
-    def mount_for_search(self):
-        raise NotImplementedError("mount_for_update")
-        return  # default is there's nothing extra to do
-
-    def unmount_for_search(self):
-        return  # default is there's nothing extra to do
-
-    def save_to_db_for_search(self):
-        pass  # nothing to save

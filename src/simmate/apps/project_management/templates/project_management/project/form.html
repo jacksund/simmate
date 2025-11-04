@@ -5,14 +5,9 @@
         <h3>
             <span class="badge bg-secondary">1. Project Info</span>
         </h3>
-        POST: {{ component.post_data }}
-        <br>
-        FORM: {{ component.form_data }}
-        <br>
-        MODE: {{ component.form_mode }}
         <div class="row">
             <div class="col-md-4">
-                {% if form_mode == "search" %}
+                {% if component.form_mode == "search" %}
                     {% htmx_text_input name="name" %}
                 {% else %}
                     {% htmx_text_input name="name" label="Project Name" placeholder="ex: X23 or Zeus" dynamically_set=True %}
@@ -22,7 +17,7 @@
             <div class="col-md-4">{% htmx_selectbox name="discipline" %}</div>
             <div class="col-md-4">{% htmx_selectbox name="status" %}</div>
         </div>
-        {% if form_mode != "search" %}
+        {% if component.form_mode != "search" %}
             <div class="row">
                 <div class="col-sm">
                     {% htmx_text_area name="description" placeholder="A quick description about this project and its scope" %}
