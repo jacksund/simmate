@@ -14,12 +14,12 @@
   --bs-primary-lighter: #00a695;
   --bs-primary-lighter-rgb: 0, 166, 149;
   /* SUCCESS */
-  --bs-success: #00aa44;
-  --bs-success-rgb: 0, 170, 68;
-  --bs-success-darker: #01913b;
-  --bs-success-darker-rgb: 0, 145, 59;
-  --bs-success-lighter: #02c952;
-  --bs-success-lighter-rgb: 0, 201, 82;
+  --bs-success: #01913b;
+  --bs-success-rgb: 0, 145, 59;
+  --bs-success-darker: #02692b;
+  --bs-success-darker-rgb: 0, 105, 43;
+  --bs-success-lighter: #00b549;
+  --bs-success-lighter-rgb: 0, 181, 73;
 }
 
 
@@ -54,6 +54,23 @@ a:focus {
 
 .table-primary {
     --bs-table-bg: #0094854f !important;
+}
+
+.page-link {
+    color: var(--bs-dark);
+    border-color: var(--bs-dark); 
+}
+
+.page-item.active .page-link {
+    background-color: var(--bs-dark); 
+    border-color: var(--bs-dark); 
+    color: #fff;
+}
+
+.page-link:hover {
+    color: #fff; 
+    background-color: var(--bs-dark); 
+    border-color: var(--bs-dark);
 }
 
 .nav-tabs .nav-link:not(.active) {
