@@ -22,7 +22,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     // default to dark
     const stored = localStorage.getItem('theme');
-    const theme = stored || 'dark';
+    const theme = stored || 'light';
     applyTheme(theme);
 
     // handle dropdown clicks
