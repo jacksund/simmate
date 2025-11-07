@@ -7,6 +7,8 @@ from .pbesol import (
 )
 from .scan import StaticEnergy__Vasp__WarrenLabScan
 
+from simmate.apps.vasp.inputs.potcar_mappings import PBE_GW_POTCAR_MAPPINGS
+
 
 class StaticEnergy__Vasp__WarrenLabPrebadelfPbesol(StaticEnergy__Vasp__WarrenLabPbesol):
     """
@@ -17,6 +19,7 @@ class StaticEnergy__Vasp__WarrenLabPrebadelfPbesol(StaticEnergy__Vasp__WarrenLab
     use the full workflow, which runs this calculation AND the following bader
     analysis for you. This S3Task is only the first step of that workflow.
     """
+    potcar_mappings = PBE_GW_POTCAR_MAPPINGS
 
     _incar_updates = dict(
         # Note that these set the FFT grid while the pre-Bader task sets the
@@ -41,6 +44,7 @@ class StaticEnergy__Vasp__WarrenLabPrebadelfHse(StaticEnergy__Vasp__WarrenLabHse
     use the full workflow, which runs this calculation AND the following bader
     analysis for you. This S3Task is only the first step of that workflow.
     """
+    potcar_mappings = PBE_GW_POTCAR_MAPPINGS
 
     _incar_updates = dict(
         # Note that these set the FFT grid while the pre-Bader task sets the
@@ -64,6 +68,7 @@ class StaticEnergy__Vasp__WarrenLabPrebadelfScan(StaticEnergy__Vasp__WarrenLabSc
     use the full workflow, which runs this calculation AND the following bader
     analysis for you. This S3Task is only the first step of that workflow.
     """
+    potcar_mappings = PBE_GW_POTCAR_MAPPINGS
 
     _incar_updates = dict(
         # Note that these set the FFT grid while the pre-Bader task sets the

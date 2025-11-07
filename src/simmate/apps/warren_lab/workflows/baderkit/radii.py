@@ -8,6 +8,7 @@ from simmate.toolkit import Structure
 from simmate.apps.warren_lab.workflows.static_energy.pbesol import StaticEnergy__Vasp__WarrenLabPbesol
 from simmate.apps.baderkit.workflows.spin_elf_analysis import SpinElfAnalysisCalculation__Baderkit__SpinElfAnalysis
 from simmate.apps.baderkit.workflows.bader import BaderkitChargeAnalysis__Baderkit__Bader
+from simmate.apps.vasp.inputs.potcar_mappings import PBE_GW_POTCAR_MAPPINGS
 
 
 class ElfAnalysis__VaspBaderkit__ElfRadiiWarrenlab(Workflow):
@@ -69,6 +70,7 @@ class StaticEnergy__Vasp__WarrenLabPreRadii(StaticEnergy__Vasp__WarrenLabPbesol)
 
     See `bader.workflows.materials_project`.
     """
+    potcar_mappings = PBE_GW_POTCAR_MAPPINGS
 
     # The key thing for bader analysis is that we need a very fine FFT mesh. Other
     # than that, it's the same as a static energy calculation.
