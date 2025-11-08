@@ -8,6 +8,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonRes
 from django.shortcuts import render
 
 from simmate.utilities import dotdict, str_to_datatype
+from simmate.website.utilities import parse_request_get
 
 from .utilities import get_uuid_starting_with_letter, htmx_redirect
 
@@ -71,7 +72,8 @@ class HtmxComponent:
 
         if method_name:
             method = getattr(self, method_name)
-            response = method()
+            method_kwargs = parse_request_get(self.request)
+            response = method(**method_kwargs)
         else:
             response = self.process()
 

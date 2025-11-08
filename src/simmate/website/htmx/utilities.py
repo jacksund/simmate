@@ -49,7 +49,9 @@ def get_all_components(
             # a tuple is returned by getmembers so c[0] is the string name while
             # c[1] is the python class object.
             app_components += [
-                c[1] for c in getmembers(app_components_module) if isclass(c[1])
+                c[1]
+                for c in getmembers(app_components_module)
+                if isclass(c[1]) and issubclass(c[1], HtmxComponent)
             ]
 
     return (

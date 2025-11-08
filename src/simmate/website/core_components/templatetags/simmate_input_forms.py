@@ -29,12 +29,13 @@ def alert(
     default_icon_mapping = {
         "primary": "info-circle-fill",
         "info": "info-circle-fill",
+        "success": "check-circle-fill",
         "secondary": "info-circle-fill",
         "warning": "exclamation-triangle-fill",
         "danger": "exclamation-triangle-fill",
     }
     if not icon:
-        icon = default_icon_mapping.get(theme, "information")
+        icon = default_icon_mapping.get(theme, "info-circle-fill")
 
     return locals()
 

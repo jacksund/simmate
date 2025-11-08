@@ -1,5 +1,4 @@
 <div class="my-2">
-    {{ component.form_data }}
     {% include "core_components/basic_elements/label.html" %}
     {% if molecule is None %}
         {% if many_molecules %}
@@ -19,17 +18,17 @@
         {% endif %}
         {% if allow_sketcher_input %}
             {# Molecule Sketcher (ChemDraw.js or Ketcher.js) #}
-            <div class="px-3 py-1">
+            <div id="{{ name }}-{{ component.component_id }}-sketcher-and-input-div"
+                 class="px-3 py-1"
+                 hx-preserve>
                 {% if show_option_labels %}<label class="form-label">{{ sketcher_input_label }}</label>{% endif %}
-                <div hx-preserve
-                     id="{{ name }}-{{ component.component_id }}"
+                <div id="{{ name }}-{{ component.component_id }}"
                      style="width: 600px;
                             height: 400px"></div>
                 <script>add_mol_sketcher("{{ name }}-{{ component.component_id }}");</script>
                 <input type="hidden"
                     id="{{ name }}-{{ component.component_id }}-hidden"
-                    name="{{ name }}"
-                    placeholder="hidden mol input"
+                    name="{{ sketcher_input_name }}"
                     {# this defer works, but it is annoying because there is a loading bar ever time you make an edit #}
                     {% if not defer %}
                         hx-post={% url 'htmx:component' context.component.component_id %}
@@ -45,7 +44,7 @@
                 {% if many_molecules %}
                     {% htmx_button method_name="load_many_molecules" label="Load Molecules" %}
                 {% else %}
-                    {% htmx_button method_name="load_molecule" label="Load Molecule" %}
+                    {% htmx_button method_name="load_molecule" label="Load Molecule" input_name=name %}
                 {% endif %}
             </div>
         {% endif %}
@@ -59,7 +58,14 @@
             {% alert theme="success" message="Molecules successfully loaded! Refresh this page if you wish to restart." %}
         {% else %}
             {% alert theme="success" message="Molecule successfully loaded! Refresh this page if you wish to restart." %}
-            {% canvas name=name %}
+            {# canvas #}
+            <div class="text-center">
+                <div hx-preserve
+                     id="{{ name }}-{{ component.component_id }}-image"
+                     width="{{ width }}"
+                     height="{{ height }}"
+                     hidden></div>
+            </div>
             {% if molecule_matches %}
                 <div>
                     <div class="alert alert-danger" role="alert">

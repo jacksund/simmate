@@ -115,7 +115,7 @@ function get_mol_from_sketcher(sketcher_id, input_element_id) {
 // Enable auto-write of MOL to a hidden input on every sketcher change.
 function enable_mol_autowrite(sketcher_id, input_element_id, options) {
     options = options || {};
-    var debounceMs = typeof options.debounceMs === 'number' ? options.debounceMs : 200;
+    var debounceMs = typeof options.debounceMs === 'number' ? options.debounceMs : 50;
     var triggerInitial = options.triggerInitial !== false;
 
     function wire(sketcher) {

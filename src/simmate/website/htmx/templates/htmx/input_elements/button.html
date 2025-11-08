@@ -5,7 +5,7 @@
             {% if method_name == "submit" %}
                 type="submit"
             {% else %}
-                hx-post="{% url 'htmx:component_method' context.component.component_id method_name %}"
+                hx-post="{% url 'htmx:component_method' context.component.component_id method_name %}{% if method_kwargs %}?{{ method_kwargs }}{% endif %}"
                 hx-trigger="click"
                 {% if javascript_only %}
                     hx-swap="none"

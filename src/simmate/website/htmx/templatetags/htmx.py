@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import urllib
 
 from django import template
 from django.template.loader import render_to_string
@@ -156,6 +157,24 @@ def htmx_number_input(
 
     if not placeholder:
         placeholder = "123" if is_int else "0.123"
+
+    # grab the current value to render in the form
+    component = context["component"]
+    if name in context:
+        current_value = context[name]
+    elif hasattr(component, name):
+        current_value = getattr(component, name)
+    elif name in component.form_data:
+        current_value = component.form_data[name]
+    elif (
+        hasattr(component, "table_entry")
+        and component.table_entry is not None
+        and hasattr(component.table_entry, name)
+        and getattr(component.table_entry, name) is not None
+    ):
+        current_value = getattr(component.table_entry, name)
+    else:
+        current_value = None
 
     return locals()
 
@@ -313,12 +332,15 @@ def htmx_button(
     icon: str = None,
     small: bool = False,
     javascript_only: bool = False,
+    **method_kwargs,
 ):
     """
     Display a button widget.
     """
     if not label:
         label = method_name.replace("_", " ").title()
+
+    method_kwargs = urllib.parse.urlencode(method_kwargs)
 
     return locals()
 
@@ -339,22 +361,28 @@ def htmx_molecule_input(
     show_label: bool = True,
     help_text: str = None,
     load_button: bool = True,
-    set_molecule_method: str = None,
-    allow_sketcher_input: bool = True,
-    sketcher_input_label: str = "Draw Molecule",
     defer: bool = True,
-    # Mol text input (text_area)
-    allow_text_input: bool = False,
-    text_input_name: str = None,
-    text_input_label: str = "Paste Molecule Text",
-    # Custom input (text_input)
-    allow_custom_input: bool = False,
-    custom_input_name: str = None,
-    custom_input_label: str = "Custom Input",
-    custom_input_placeholder: str = "12345",
+    many_molecules: bool = False,
     # TODO:
     # initial_value: bool = None,
-    many_molecules: bool = False,
+    #
+    ### there are several input format options for molecules
+    ### and by default only the sketcher is enabled
+    #
+    # Mol sketcher input (chemdraw or ketcher js)
+    allow_sketcher_input: bool = True,
+    sketcher_input_label: str = "Draw Molecule",
+    # Mol text input (text_area)
+    allow_text_input: bool = False,
+    text_input_label: str = "Paste Molecule Text",
+    # Reference input (text_input)
+    allow_reference_input: bool = False,
+    reference_input_label: str = "Molecule Ref. ID",
+    reference_input_placeholder: str = "12345",
+    # Custom input (text_input)
+    allow_custom_input: bool = False,
+    custom_input_label: str = "Custom Input",
+    custom_input_placeholder: str = "12345",
 ):
     """
     Display a ChemDraw.js (or ChemDoodle.js) input widget.
@@ -364,16 +392,10 @@ def htmx_molecule_input(
     if not label:
         label = name.replace("_", " ").title()
 
-    if not set_molecule_method:
-        set_molecule_method = (
-            f"set_{name}" if not many_molecules else "load_many_molecules"
-        )
-
-    if allow_text_input and not text_input_name:
-        text_input_name = f"{name}_text_input"
-
-    if allow_custom_input and not custom_input_name:
-        custom_input_name = f"{name}_custom_input"
+    sketcher_input_name = f"{name}__molecule_sketcher"
+    text_input_name = f"{name}__molecule_text"
+    reference_input_name = f"{name}__molecule_reference"
+    custom_input_name = f"{name}__molecule_custom"
 
     show_option_labels = (
         True
@@ -392,8 +414,8 @@ def htmx_molecule_input(
             sketcher_input_label = f"Option {noption}: {sketcher_input_label}"
             noption += 1
 
-    molecule = component.form_data.get(name, None)
-    # molecule_matches = context["molecule_matches"]
+    molecule = component.form_data.get(name, None)  # gives molecule_obj
+    molecule_matches = component.form_data.get(f"{name}__molecule_matches", None)
 
     return locals()
 

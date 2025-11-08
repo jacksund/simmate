@@ -6,6 +6,7 @@
            class="form-control"
            type="number"
            placeholder="{{ placeholder }}"
+           {% if current_value %}value="{{ current_value }}"{% endif %}
            {% if maximum %}max="{{ maximum }}"{% endif %}
            {% if minimum %}min="{{ minimum }}"{% endif %}
            hx-preserve
