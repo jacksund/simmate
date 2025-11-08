@@ -348,6 +348,9 @@ class SimmateSettings:
                 # whether to use ChemDraw.js or the free/open-source fallback Ketcher.
                 # Note, chemdraw_js requires providing static files + license
                 "chemdraw_js": False,
+                # whether to use the username or first+last name when displaying
+                # users accross the website, such as in option menus
+                "user_format": "username",
             },
             # app-specific configs
             # TODO: consider moving these to the respective apps

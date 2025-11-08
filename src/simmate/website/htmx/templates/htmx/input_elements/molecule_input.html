@@ -1,4 +1,5 @@
 <div class="my-2">
+    {{ component.form_data }}
     {% include "core_components/basic_elements/label.html" %}
     {% if molecule is None %}
         {% if many_molecules %}
@@ -7,37 +8,45 @@
         {% if allow_custom_input %}
             {# Custom Text input (e.g. searching by ID or CAS number) #}
             <div class="px-3 py-1">
-                {% text_input name=custom_input_name show_label=show_option_labels label=custom_input_label placeholder=custom_input_placeholder %}
+                {% htmx_text_input name=custom_input_name show_label=show_option_labels label=custom_input_label placeholder=custom_input_placeholder %}
             </div>
         {% endif %}
         {% if allow_text_input %}
             {# Text-based input for smiles/sdf/ichi/etc... #}
             <div class="px-3 py-1">
-                {% text_area name=text_input_name show_label=show_option_labels label=text_input_label placeholder="Paste in SMILES, INCHI, MOL text, or any other supported format." %}
+                {% htmx_text_area name=text_input_name show_label=show_option_labels label=text_input_label placeholder="Paste in SMILES, INCHI, MOL text, or any other supported format." %}
             </div>
         {% endif %}
         {% if allow_sketcher_input %}
-            {# Molecule Sketcher (ChemDraw.js or ChemDoodle.js) #}
+            {# Molecule Sketcher (ChemDraw.js or Ketcher.js) #}
             <div class="px-3 py-1">
                 {% if show_option_labels %}<label class="form-label">{{ sketcher_input_label }}</label>{% endif %}
-                <div unicorn:ignore
-                     id="{{ name }}{{ context.unicorn.component_key }}"
+                <div hx-preserve
+                     id="{{ name }}-{{ component.component_id }}"
                      style="width: 600px;
                             height: 400px"></div>
-                <script>add_mol_sketcher("{{ name }}{{ context.unicorn.component_key }}");</script>
+                <script>add_mol_sketcher("{{ name }}-{{ component.component_id }}");</script>
+                <input type="hidden"
+                    id="{{ name }}-{{ component.component_id }}-hidden"
+                    name="{{ name }}"
+                    placeholder="hidden mol input"
+                    {# this defer works, but it is annoying because there is a loading bar ever time you make an edit #}
+                    {% if not defer %}
+                        hx-post={% url 'htmx:component' context.component.component_id %}
+                        hx-trigger="change"
+                        hx-target="#{{ component.component_id }}"
+                    {% endif %}>
+                </input>
+                <script>enable_mol_autowrite('{{ name }}-{{ component.component_id }}', '{{ name }}-{{ component.component_id }}-hidden');</script>
             </div>
         {% endif %}
         {% if load_button %}
             <div class="text-center pt-3">
-                <button type="button"
-                    class="btn btn-primary"
-                    {# modal_dismiss used only if this is in a popout modal #}
-                    {% if modal_dismiss %}data-bs-dismiss="modal"{% endif %}
-                    onclick="get_mol_from_sketcher('{{ name }}{{ context.unicorn.component_key }}', '{% if not context.unicorn.component_key %}{{ context.unicorn.component_name }}{% else %}{{ context.unicorn.component_key }}{% endif %}', '{{ set_molecule_method }}')">
-                    {# djlint:off #}
-                    Load Molecule{% if many_molecules %}s{% endif %}
-                    {# djlint:on #}
-                </button>
+                {% if many_molecules %}
+                    {% htmx_button method_name="load_many_molecules" label="Load Molecules" %}
+                {% else %}
+                    {% htmx_button method_name="load_molecule" label="Load Molecule" %}
+                {% endif %}
             </div>
         {% endif %}
     {% elif molecule == False %}

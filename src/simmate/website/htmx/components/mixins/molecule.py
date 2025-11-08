@@ -6,14 +6,6 @@ from simmate.toolkit import Molecule
 
 class MoleculeInput:
 
-    class Meta:
-        javascript_exclude = (
-            "molecule_match_tables",
-            "molecule_query_type_options",
-            "is_molecule_ref",
-            # "molecule_ref_table",
-        )
-
     search_inputs = [
         "molecule",
         # "molecule_query_type",
