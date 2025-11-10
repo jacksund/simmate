@@ -94,10 +94,9 @@ class SearchResults(models.QuerySet):
 
         if not columns:
             has_user_cols = False
-            # TODO: I'd like to include foreign keys or other relations by default
             columns = [
                 c
-                for c in self.model.get_column_names(include_relations=False)
+                for c in self.model.get_column_names(id_mode=True)
                 if c not in exclude_columns
             ]
         else:
@@ -629,19 +628,37 @@ class DatabaseTable(models.Model):
     @classmethod
     def get_column_names(
         cls,
-        include_relations: bool = True,
         include_parents: bool = True,
+        include_to_one_relations: bool = True,
+        include_to_many_relations: bool = False,
+        id_mode: bool = False,  # e.g. give "project_id" instead of "project"
     ) -> list[str]:
         """
-        Returns a list of all the column names for this table and indicates which
-        columns are related to other tables. This is primarily used to help
-        view what data is available.
+        Returns a list of all the column names for this table. Kwargs are used to
+        specify how to handle relation columns (ForeignKey, ManyToManyField,
+        OneToOneField, and their reverses). There is also an option to toggle
+        whether inherited columns should be included.
         """
-        return [
-            column.name
-            for column in cls._meta.get_fields(include_parents)
-            if include_relations or not column.is_relation
-        ]
+        column_names = []
+        for column in cls._meta.get_fields(include_parents):
+
+            name = column.name
+
+            if column.many_to_many or column.one_to_many:
+                if not include_to_many_relations:
+                    continue
+                if id_mode:
+                    name += "_ids"
+
+            if column.many_to_one or column.one_to_one:
+                if not include_to_one_relations:
+                    continue
+                if id_mode:
+                    name += "_id"
+
+            column_names.append(name)
+
+        return column_names
 
     @classmethod
     def show_columns(cls):

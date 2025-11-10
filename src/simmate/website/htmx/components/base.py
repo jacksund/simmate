@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+from functools import cached_property
 from typing import get_args, get_origin
 
 from cachetools import LRUCache
@@ -68,7 +69,12 @@ class HtmxComponent:
         self.post_data = self.parse_post_data()
         self.post_parse()
 
-        self.form_data.update(self.post_data)
+        # we could just do...
+        #   self.form_data.update(self.post_data)
+        # but we want to call any `on_change_hook__example_col` methods if they
+        # are present and the value changed
+        for key, new_value in self.post_data.items():
+            self.update_form(key, new_value)
 
         if method_name:
             method = getattr(self, method_name)
@@ -96,6 +102,37 @@ class HtmxComponent:
                 self.template_name,
                 self.get_context(),
             )
+
+    # -------------------------------------------------------------------------
+
+    def update_form(self, key: str, new_value: any):
+        """
+        The form is just a dictionary, so could be `self.form_data[key] = new_value`
+        but calling `self.update_form(key, new_value)` to ensure any on-change
+        hooks for that column are also called if the value in the form is different
+        from the new one.
+        """
+        if key in self.on_change_hooks:
+            original_value = self.form_data.get(key, None)
+            self.form_data[key] = new_value  # should call come after hook?
+            if original_value != new_value:
+                hook = getattr(self, f"on_change_hook__{key}")
+                hook()  # maybe pass both the orignal value and new one?
+        else:
+            self.form_data[key] = new_value
+
+    _on_change_hooks_cache: list[str] = False
+
+    @classmethod
+    @property
+    def on_change_hooks(self):
+        if self._on_change_hooks_cache == False:
+            self._on_change_hooks_cache = [
+                m[16:]
+                for m in dir(self)
+                if m.startswith("on_change_hook__") and callable(getattr(self, m))
+            ]
+        return self._on_change_hooks_cache
 
     # -------------------------------------------------------------------------
 

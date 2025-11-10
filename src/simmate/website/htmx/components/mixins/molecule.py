@@ -15,6 +15,7 @@ class MoleculeInput:
 
     # -------------------------------------------------------------------------
 
+    # TODO
     # For input_type == "reference":
     # is_molecule_ref = False
     # molecule_ref_table = None
@@ -104,15 +105,14 @@ class MoleculeInput:
         if self.form_mode == "create" and self.molecule_match_tables:
             matches = self.check_datasets(molecule_obj)
             self.form_data[f"{input_name}__molecule_matches"] = matches
-
-        if matches:
-            self.skip_db_save = True
-        # TODO: are there cases where we allow duplicates? eg
-        # allow_molecule_matches: bool = False
-        # if self.molecule_matches and not self.allow_molecule_matches:
-        #     self.errors.append(
-        #         f"This molecule has already been added to {table.table_name}"
-        #     )
+            if matches:
+                self.skip_db_save = True
+            # TODO: are there cases where we allow duplicates? eg
+            # allow_molecule_matches: bool = False
+            # if self.molecule_matches and not self.allow_molecule_matches:
+            #     self.errors.append(
+            #         f"This molecule has already been added to {table.table_name}"
+            #     )
 
         # draw mol image
         self.js_actions = [
@@ -203,40 +203,40 @@ class MoleculeInput:
 
     # Molecule searching
 
-    # molecule_query_type = "similarity_2d"
-    # molecule_query_type_options = [
-    #     ("molecule_exact", "Exact match"),
-    #     ("molecule_list_exact", "Exact match (list of molecules)"),
-    #     ("substructure", "Substructure"),
-    #     ("similarity_2d", "Similarity (2D, basic)"),
-    #     # ("similarity_3d", "Similarity (3D, FastROCS)"),
-    # ]
+    molecule_query_type = "similarity_2d"
+    molecule_query_type_options = [
+        ("molecule_exact", "Exact match"),
+        ("molecule_list_exact", "Exact match (list of molecules)"),
+        ("substructure", "Substructure"),
+        ("similarity_2d", "Similarity (2D, basic)"),
+        # ("similarity_3d", "Similarity (3D, FastROCS)"),
+    ]
 
-    # # methods to help with mounting GET kwargs
+    # methods to help with mounting GET kwargs
 
-    # def set_molecule_exact(self, value):
-    #     self.molecule_query_type = "molecule_exact"
-    #     self.molecule_text_input = value
-    #     # self.set_molecule(value)
+    def set_molecule_exact(self, value):
+        self.molecule_query_type = "molecule_exact"
+        self.molecule_text_input = value
+        # self.set_molecule(value)
 
-    # def set_molecule_list_exact(self, value):
-    #     self.molecule_query_type = "molecule_list_exact"
-    #     self.molecule_text_input = value
-    #     # self.set_molecule(value)
+    def set_molecule_list_exact(self, value):
+        self.molecule_query_type = "molecule_list_exact"
+        self.molecule_text_input = value
+        # self.set_molecule(value)
 
-    # def set_substructure(self, value):
-    #     self.molecule_query_type = "substructure"
-    #     self.molecule_text_input = value
-    #     # self.set_molecule(value)
+    def set_substructure(self, value):
+        self.molecule_query_type = "substructure"
+        self.molecule_text_input = value
+        # self.set_molecule(value)
 
-    # def set_similarity_2d(self, value):
-    #     self.molecule_query_type = "similarity_2d"
-    #     self.molecule_text_input = value
-    #     # self.set_molecule(value)
+    def set_similarity_2d(self, value):
+        self.molecule_query_type = "similarity_2d"
+        self.molecule_text_input = value
+        # self.set_molecule(value)
 
-    # def set_similarity_3d(self, value):
-    #     self.molecule_query_type = "similarity_3d"
-    #     self.molecule_text_input = value
-    #     # self.set_molecule(value)
+    def set_similarity_3d(self, value):
+        self.molecule_query_type = "similarity_3d"
+        self.molecule_text_input = value
+        # self.set_molecule(value)
 
     # -------------------------------------------------------------------------

@@ -23,9 +23,7 @@ class UpdateMixin:
             "updated_at",
         ]
         return [
-            c
-            for c in self.table.get_column_names(include_relations=False)
-            if c not in exclude
+            c for c in self.table.get_column_names(id_mode=True) if c not in exclude
         ]
 
     def mount_for_update(self):
@@ -58,15 +56,14 @@ class UpdateMixin:
 
         # With the table_entry set above, we can now set initial data using the
         # database and applying its values to the form fields.
-        # for field in self.mount_for_update_columns:
-        #     current_val = getattr(self.table_entry, field)
-        #     self.form_data[field] = current_val
+        for field in self.mount_for_update_columns:
+            current_val = getattr(self.table_entry, field)
+            self.update_form(field, current_val)
 
         # SPECIAL CASES
-        # TODO: support other m2m
-        if "tags" in self.mount_for_update_columns and hasattr(
-            self.table_entry, "tags"
-        ):
+        # TODO: support other
+        # if "tags" in self.mount_for_update_columns
+        if hasattr(self.table_entry, "tags"):
             self.form_data["tag_ids"] = list(
                 self.table_entry.tags.values_list("id", flat=True).all()
             )

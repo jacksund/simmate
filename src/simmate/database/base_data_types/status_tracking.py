@@ -214,6 +214,7 @@ class StatusTracking(DatabaseTable):
             names="status",
             color="status",
             color_discrete_map=cls.status_color_map,
+            hole=0.5,  # for a donut-like pie chart
         )
         return figure
 

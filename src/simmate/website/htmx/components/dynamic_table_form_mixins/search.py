@@ -25,7 +25,7 @@ class SearchMixin:
 
     @property
     def order_by_options(self):
-        return self.table.get_column_names(include_relations=False)
+        return self.table.get_column_names(include_to_one_relations=False)
 
     def mount_for_search(self):
         return  # default is there's nothing extra to do

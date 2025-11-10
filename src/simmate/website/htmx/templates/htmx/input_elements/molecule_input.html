@@ -73,10 +73,10 @@
                         <p>This compound is already registered! Jump to that entry to edit:</p>
                         {% for match in molecule_matches %}
                             <a type="button"
-                               class="btn btn-info btn-sm"
+                               class="btn btn-primary btn-sm"
                                href="{{ match.table_entry_url }}"
                                target="_blank">
-                                {{ match.table_name }} {{ match.table_entry_id }}<i class="mdi mdi-open-in-new"></i>
+                                {{ match.table_name }} {{ match.table_entry_id }} <i class="bi bi-box-arrow-up-right"></i>
                             </a>
                         {% endfor %}
                     </div>
