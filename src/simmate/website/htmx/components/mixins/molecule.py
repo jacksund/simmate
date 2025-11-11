@@ -8,17 +8,26 @@ from simmate.toolkit import Molecule
 
 class MoleculeInput:
 
-    search_inputs = [
-        "molecule",
-        # "molecule_query_type",
+    ignore_on_search = ["molecule_query_type"]
+
+    # -------------------------------------------------------------------------
+
+    molecule_query_type = "similarity_2d"  # sets default value
+    molecule_query_type_options = [
+        ("molecule_exact", "Exact match"),
+        ("molecule_list_exact", "Exact match (list of molecules)"),
+        ("substructure", "Substructure"),
+        ("scaffold", "Scaffold (R-groups)"),
+        ("similarity_2d", "Similarity (2D, basic)"),
+        # ("similarity_3d", "Similarity (3D, FastROCS)"),
     ]
 
     # -------------------------------------------------------------------------
 
-    # TODO
-    # For input_type == "reference":
-    # is_molecule_ref = False
-    # molecule_ref_table = None
+    # For when input_type="reference"
+    molecule_ref_table = None
+
+    # -------------------------------------------------------------------------
 
     def load_molecule(self, input_name: str):
 
@@ -44,62 +53,57 @@ class MoleculeInput:
             logging.warning(f"Failed to find non-null input: '{input_name}'")
             return  # nothing to load
 
-        # This is an example mol_str given when *NOTHING* is in the chemdraw image
-        # '"ACS Document 1996\r\n  ChemDraw09172414502D\r\n\r\n  0  0  0  0  0  0  0  0  0  0999 V2000\r\nM  END\r\n"'
-        # It will cause the from_dynamic to fail.
-        # The JS checks for this, but it doesn't hurt to check for this again here.
-        if molecule_input is None or (
-            len(input_type) < 100
-            and input_type.startswith('"ACS Document 1996\r\n  ChemDraw')
-            and input_type.endswith(
-                '2D\r\n\r\n  0  0  0  0  0  0  0  0  0  0999 V2000\r\nM  END\r\n"'
+        # How the molecule is loaded varies depending on the input type and
+        # form mode. We want to notify users when the load fails too, which
+        # is why we put this whole section in a try/except
+        try:
+
+            if input_type in ["sketcher", "text"]:
+
+                if self.form_mode == "search":
+                    query_type = self.form_data["molecule_query_type"]
+                    # TODO: better loading for SMARTS
+                    # if query_type == "molecule_exact":
+                    #     pass
+                    # elif query_type == "molecule_list_exact":
+                    #     pass
+                    # elif query_type == "substructure":
+                    #     pass
+                    # elif query_type == "scaffold":
+                    #     pass
+                    # elif query_type == "similarity_2d":
+                    #     pass
+                    molecule_obj = Molecule.from_dynamic(molecule_input)
+                    self.form_data[query_type] = molecule_obj.to_smiles()
+                    # BUG: format means we can't search the related field
+                    # f"{input_name}__{query_type}" would be better
+
+                    # so that the image renders but we don't have any loose
+                    # value sitting in the form
+                    setattr(self, input_name, True)
+
+                else:
+                    molecule_obj = Molecule.from_dynamic(molecule_input)
+                    self.form_data[f"{input_name}__molecule_original"] = molecule_input
+                    self.form_data[input_name] = molecule_obj
+
+            elif input_type == "reference":
+                raise NotImplementedError()
+                # db_mol = self.molecule_ref_table.objects.get(
+                #     id=self.molecule_custom_input
+                # )
+                # self.molecule_ref_id = db_mol.id  # should equal the custom input val
+                # self.molecule = db_mol.molecule  # sdf string
+                # self._molecule_obj = db_mol.to_toolkit()
+
+            elif input_type == "custom":
+                self.load_molecule_custom(input_name)
+
+        except:
+            logging.warning(
+                f"Failed to load molecule for input '{input_name}' of type '{input_type}': '{molecule_input}'"
             )
-        ):
-            return  # nothing to load
-
-        if input_type in ["sketcher", "text"]:
-            try:
-                molecule_obj = Molecule.from_dynamic(molecule_input)
-                self.form_data[f"{input_name}__molecule_original"] = molecule_input
-                self.form_data[input_name] = molecule_obj
-            except:
-                logging.warning(
-                    f"Failed to load molecule for input '{input_name}': '{molecule_input}'"
-                )
-                self.form_data[input_name] = False  # to display error
-                molecule_obj = None
-
-        elif input_type == "reference":
-            # The most common custom input is an entry ID that points to some other
-            # molecule table.
-            assert self.is_molecule_ref and self.molecule_ref_table
-
-            try:
-                db_mol = self.molecule_ref_table.objects.get(
-                    id=self.molecule_custom_input
-                )
-                self.molecule_ref_id = db_mol.id  # should equal the custom input val
-                self.molecule = db_mol.molecule  # sdf string
-                self._molecule_obj = db_mol.to_toolkit()
-            except:
-                self.molecule = False
-
-        elif input_type == "custom":
-            self.load_molecule_custom(input_name)
-
-        # if this is a relation field, we need to ensure the pointer id is set
-        # if self.molecule and self.is_molecule_ref and not self.molecule_ref_id:
-        #     try:
-        #         # BUG: what if there is more than one match below?
-        #         db_mol = self.molecule_ref_table.objects.get(
-        #             inchi_key=self._molecule_obj.to_inchi_key()
-        #         )
-        #         self.molecule_ref_id = db_mol.id
-        #     except:
-        #         self.molecule = False
-
-        # NOTE: if the load methods above failed, then we exit early
-        if not molecule_obj:
+            self.form_data[input_name] = False  # to display error
             return
 
         if self.form_mode == "create" and self.molecule_match_tables:
@@ -198,45 +202,5 @@ class MoleculeInput:
     #         # {{ name }}{{ context.unicorn.component_key }}
     #         f"{name}{self.component_key}",
     #     )
-
-    # -------------------------------------------------------------------------
-
-    # Molecule searching
-
-    molecule_query_type = "similarity_2d"
-    molecule_query_type_options = [
-        ("molecule_exact", "Exact match"),
-        ("molecule_list_exact", "Exact match (list of molecules)"),
-        ("substructure", "Substructure"),
-        ("similarity_2d", "Similarity (2D, basic)"),
-        # ("similarity_3d", "Similarity (3D, FastROCS)"),
-    ]
-
-    # methods to help with mounting GET kwargs
-
-    def set_molecule_exact(self, value):
-        self.molecule_query_type = "molecule_exact"
-        self.molecule_text_input = value
-        # self.set_molecule(value)
-
-    def set_molecule_list_exact(self, value):
-        self.molecule_query_type = "molecule_list_exact"
-        self.molecule_text_input = value
-        # self.set_molecule(value)
-
-    def set_substructure(self, value):
-        self.molecule_query_type = "substructure"
-        self.molecule_text_input = value
-        # self.set_molecule(value)
-
-    def set_similarity_2d(self, value):
-        self.molecule_query_type = "similarity_2d"
-        self.molecule_text_input = value
-        # self.set_molecule(value)
-
-    def set_similarity_3d(self, value):
-        self.molecule_query_type = "similarity_3d"
-        self.molecule_text_input = value
-        # self.set_molecule(value)
 
     # -------------------------------------------------------------------------

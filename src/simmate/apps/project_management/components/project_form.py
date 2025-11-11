@@ -93,19 +93,6 @@ class ProjectForm(DynamicTableForm, UserInput):
 
     # SEARCH
 
-    def to_search_dict(self, **kwargs):
-        search_dict = self._get_default_search_dict(**kwargs)
-
-        leader_ids = search_dict.pop("leader_ids", None)
-        if leader_ids:
-            search_dict["leaders__id__in"] = leader_ids
-
-        member_ids = search_dict.pop("leader_ids", None)
-        if member_ids:
-            search_dict["members__id__in"] = member_ids
-
-        return search_dict
-
     # -------------------------------------------------------------------------
 
     def suggest_new_name(self):

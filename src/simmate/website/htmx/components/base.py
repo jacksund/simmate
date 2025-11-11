@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import re
-from functools import cached_property
 from typing import get_args, get_origin
 
 from cachetools import LRUCache
@@ -131,6 +130,19 @@ class HtmxComponent:
                 m[16:]
                 for m in dir(self)
                 if m.startswith("on_change_hook__") and callable(getattr(self, m))
+            ]
+        return self._on_change_hooks_cache
+
+    _search_hooks_cache: list[str] = False
+
+    @classmethod
+    @property
+    def search_hooks(self):
+        if self._on_change_hooks_cache == False:
+            self._on_change_hooks_cache = [
+                m[16:]
+                for m in dir(self)
+                if m.startswith("search_hook__") and callable(getattr(self, m))
             ]
         return self._on_change_hooks_cache
 

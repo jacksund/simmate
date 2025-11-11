@@ -450,7 +450,24 @@ def htmx_molecule_input(
             sketcher_input_label = f"Option {noption}: {sketcher_input_label}"
             noption += 1
 
-    molecule = component.form_data.get(name, None)  # gives molecule_obj
+    # molecule = component.form_data.get(name, None)  # gives molecule_obj
+    # grab the initial value to render in the form
+    if name in component.form_data:
+        molecule = component.form_data[name]
+    elif name in context:
+        molecule = context[name]
+    elif hasattr(component, name):
+        molecule = getattr(component, name)
+    elif (
+        hasattr(component, "table_entry")
+        and component.table_entry is not None
+        and hasattr(component.table_entry, name)
+        and getattr(component.table_entry, name) is not None
+    ):
+        molecule = getattr(component.table_entry, name)
+    else:
+        molecule = None
+
     molecule_matches = component.form_data.get(f"{name}__molecule_matches", None)
 
     return locals()

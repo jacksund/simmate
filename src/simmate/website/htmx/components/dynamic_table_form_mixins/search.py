@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import re
 import urllib
 
 from django.shortcuts import redirect
@@ -10,12 +11,10 @@ class SearchMixin:
 
     # for form_mode "search"
 
-    general_search_inputs = [
-        "id__in",
-        "page_size",
-        "order_by",
-        "reverse_order_by",
-    ]
+    ignore_on_search: list[str] = []
+    """
+    List of columns/fields to ignore when the form_mode = "search"
+    """
 
     page_size_options = [
         25,
@@ -30,51 +29,13 @@ class SearchMixin:
     def mount_for_search(self):
         return  # default is there's nothing extra to do
 
-    def to_search_dict(self, **kwargs) -> dict:
-        return self._get_default_search_dict(**kwargs)
-
-    def _get_default_search_dict(self, include_empties: bool = False):
-        # kept as a separate method so others can call it in a clean manner
-        # and avoid any super() stuff
-
-        # build the dict of API filters
+    def to_search_dict(self, include_empties: bool = False) -> dict:
+        # The default is just to remove all empty values
         config = {}
-        for search_key in list(self.form_data.keys()) + self.general_search_inputs:
-            search_val = self.form_data.get(search_key, None)
-            if not include_empties and search_val in [None, "", []]:
+        for search_key, search_value in self.form_data.items():
+            if search_value in [None, "", []] or search_key in self.ignore_on_search:
                 continue
-            if search_key.endswith("_ids"):  # assume m2m and we want __in query
-                # ex: config["tags__id__in"] = [1,2,3,...]
-                # BUG: need to standardize this
-                config[f"{search_key[:-4]}s__id__in"] = search_val
-            else:
-                config[search_key] = search_val
-
-        # -----------------
-        # Modify special cases for filters
-
-        # comments should be a contains search
-        if "comments" in config.keys():
-            config["comments__contains"] = config.pop("comments")
-
-        # reformat __in to python list
-        if "id__in" in config.keys():
-            # BUG: check to see it was input correctly?
-            input_value = config["id__in"]
-            if isinstance(input_value, int):
-                config["id__in"] = [input_value]  # it is a single id lookup
-            else:
-                config["id__in"] = [int(i) for i in input_value.split(",")]
-
-        if "order_by" in config.keys() and config.pop("reverse_order_by", False):
-            config["order_by"] = "-" + config["order_by"]
-
-        # TODO: should prob be in mol mixin
-        # moleculequery's key depends on its type
-        if "molecule" in config.keys():
-            config[self.molecule_query_type] = self._molecule_obj.to_smiles()
-            config.pop("molecule")
-
+            config[search_key] = search_value
         return config
 
     def check_form_for_search(self):
@@ -102,3 +63,24 @@ class SearchMixin:
 
         final_url = self.parent_url + "?" + url_get_clause
         return redirect(final_url)
+
+    # -------------------------------------------------------------------------
+
+    def on_change_hook__id__in(self):
+        input_value = self.form_data["id__in"]
+        if isinstance(input_value, int):
+            self.form_data["id__in"] = [input_value]  # it is a single id lookup
+        else:
+            self.form_data["id__in"] = [
+                int(i) for i in re.split(",| |\n", input_value) if i
+            ]
+
+    def on_change_hook__reverse_order_by(self):
+        # by popping it, we ensure this hook is called EVERY htmx call
+        reverse = self.form_data.pop("reverse_order_by", False)
+        order_col = self.form_data.get("order_by")
+        if order_col:
+            order_col = order_col.strip("-")
+            if reverse:
+                order_col = "-" + order_col
+        self.form_data["order_by"] = order_col
