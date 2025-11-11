@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import json
-
 
 class UpdateManyMixin:
 
     # for form_mode "update_many"
 
-    update_many_inputs: list[str] = []
+    ignore_on_update_many: list[str] = []
     """
-    List of columns/fields to allow when the form_mode = "update_many"
+    List of columns/fields to ignore when the form_mode = "update_many".
+    Note that all of `ignore_on_update` are automatically included
     """
 
     n_ids_to_update_max: int = 25
@@ -30,26 +29,29 @@ class UpdateManyMixin:
     """
 
     def mount_for_update_many(self):
-        # default is we want everything to be set to None, which includes
-        # overriding default values
-        for field in self.update_many_inputs:
-            # opt for setattr instead of self.set_property since this is unsetting
-            setattr(self, field, None)
+        return  # default is there's nothing extra to do
 
-    def confirm_update_many(self, select_form_data):
-        # Example of how the data will look:
+    def confirm_update_many(self):
+
+        # Example of how the data will look initially:
         # {
-        #     "example_select_all": "on",  # we want to ignore this
-        #     "1": "on",
-        #     "2": "on",
-        #     "4": "on",
-        #     "csrfmiddlewaretoken": "LTJaJf5gz6fUKUZaN0p6gMyVnLQGM7LGjPRVohe3pVgR5M0UpepNokgePN3pQ4dI"
+        #     "entry_row_select_all": True,  # we want to ignore this
+        #     "BULK_UPDATE_1": True,
+        #     "BULK_UPDATE_2": True,
+        #     "BULK_UPDATE_4": True,
         # }
-        data = json.loads(select_form_data)
-        data.pop("csrfmiddlewaretoken", None)
-        self.entry_ids_to_update = [
-            int(key) for key, value in data.items() if key.isnumeric()
-        ]
+        # And we convert to the following format:
+        #   self.entry_ids_to_update = [1,2,4]
+
+        self.form_data.pop("entry_row_select_all", None)  # ignored
+
+        self.entry_ids_to_update = []
+        keys = list(self.form_data.keys())  # separate line bc we delete as we iter
+        prefix = "BULK_UPDATE_"
+        for key in keys:
+            if key.startswith(prefix):
+                self.form_data.pop(key)
+                self.entry_ids_to_update.append(int(key.strip(prefix)))
 
         if self.entry_ids_to_update:
             self.is_update_many_confirmed = True
@@ -63,12 +65,14 @@ class UpdateManyMixin:
             self.form_errors.append(message)
 
     def unmount_for_update_many(self):
+
         config = self.to_db_dict()
 
         all_updates = {
             field: value
             for field, value in config.items()
-            if field not in self.ignore_on_update and field in self.update_many_inputs
+            if field not in self.ignore_on_update
+            and field not in self.ignore_on_update_many
         }
 
         # Special cases! Comments should be appended so nothing is lost, whereas

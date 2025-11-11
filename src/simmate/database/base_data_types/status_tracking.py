@@ -3,7 +3,6 @@
 import plotly.express as plotly_express
 from django.utils import timezone
 from pandas import DataFrame
-from simple_history.models import HistoricalRecords
 
 from .base import DatabaseTable, table_column
 
@@ -52,6 +51,7 @@ class StatusTracking(DatabaseTable):
     """
 
     # BUG: must be set by child class
+    # from simple_history.models import HistoricalRecords
     # history = HistoricalRecords()
 
     # -------------------------------------------------------------------------

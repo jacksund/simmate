@@ -368,6 +368,7 @@ def htmx_button(
     icon: str = None,
     small: bool = False,
     javascript_only: bool = False,
+    extra_include: str = None,
     **method_kwargs,
 ):
     """

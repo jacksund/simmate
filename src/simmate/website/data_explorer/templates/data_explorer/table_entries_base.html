@@ -7,7 +7,6 @@
       action="#"
       method="post"
       enctype="multipart/form-data">
-    {% csrf_token %}
     {% if enable_select %}
         <div class="row">
             <div class="py-2">
@@ -39,7 +38,7 @@
                                 <input type="checkbox"
                                        class="form-check-input entry_row_select"
                                        id="select{{ entry.id }}"
-                                       name="{{ entry.id }}">
+                                       name="BULK_UPDATE_{{ entry.id }}">
                             </td>
                         {% endif %}
                         {% block table_rows %}

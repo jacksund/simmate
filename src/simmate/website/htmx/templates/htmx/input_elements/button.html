@@ -14,7 +14,9 @@
                     hx-swap="outerHTML"
                 {% endif %}
             {% endif %}
-        >
+            {% if extra_include %}
+                hx-include="#{{ extra_include }}"
+            {% endif %}>
         {% if icon %}<i class="bi bi-{{ icon }}"></i>&nbsp;&nbsp;{% endif %}
         {% if show_label %}{{ label }}{% endif %}
     </button>
