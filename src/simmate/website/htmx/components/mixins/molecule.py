@@ -109,14 +109,6 @@ class MoleculeInput:
         if self.form_mode == "create" and self.molecule_match_tables:
             matches = self.check_datasets(molecule_obj)
             self.form_data[f"{input_name}__molecule_matches"] = matches
-            if matches:
-                self.skip_db_save = True
-            # TODO: are there cases where we allow duplicates? eg
-            # allow_molecule_matches: bool = False
-            # if self.molecule_matches and not self.allow_molecule_matches:
-            #     self.errors.append(
-            #         f"This molecule has already been added to {table.table_name}"
-            #     )
 
         # draw mol image
         self.js_actions = [
@@ -143,7 +135,7 @@ class MoleculeInput:
 
         inchi_key = molecule.to_inchi_key()
 
-        all_matches = []
+        matches = []
         for table_name in self.molecule_match_tables:
 
             if table_name == "__self__":
@@ -152,7 +144,7 @@ class MoleculeInput:
                 table = DatabaseTable.get_table(table_name)
 
             for db_obj in table.objects.filter(inchi_key=inchi_key).all():
-                all_matches.append(
+                matches.append(
                     {
                         "table_name": db_obj.table_name,
                         "table_entry_id": db_obj.id,
@@ -160,38 +152,71 @@ class MoleculeInput:
                     }
                 )
 
-        return all_matches
+        if matches:
+            self.skip_db_save = True
+        # TODO: are there cases where we allow duplicates? eg
+        # allow_molecule_matches: bool = False
+        # if self.molecule_matches and not self.allow_molecule_matches:
+        #     self.errors.append(
+        #         f"This molecule has already been added to {table.table_name}"
+        #     )
+
+        return matches
 
     # -------------------------------------------------------------------------
 
-    # def load_many_molecules(self, mol_str: str):
-    #     try:
-    #         molecules = Molecule.from_dynamic(mol_str).components
-    #         self.molecule = True  # indicates successful load in templates
+    def load_many_molecules(self, input_name: str):
 
-    #         self.entries_for_create_many = []
-    #         for molecule in molecules:
-    #             entry = {}
-    #             entry["molecule"] = molecule.to_sdf()
-    #             if self.form_mode == "create_many" and self.molecule_match_tables:
-    #                 entry["molecule_matches"] = self.check_datasets(molecule)
-    #                 entry["skip_db_save"] = True if entry["molecule_matches"] else False
-    #             self.entries_for_create_many.append(entry)
+        # BUG: we assume self.form_mode="create_many" right now
+        assert self.form_mode == "create_many"
 
-    #         # draw molecules in ui
-    #         for i, entry in enumerate(self.entries_for_create_many):
-    #             self.call(
-    #                 "add_mol_viewer",
-    #                 f"{i}_{self.component_name}_molecule",
-    #                 entry["molecule"],  # sdf str
-    #                 100,
-    #                 100,
-    #             )
-    #         # in case the form automatically creates new dropdowns. Though
-    #         # this typically isn't needed.
-    #         self.call("refresh_select2")
-    #     except:
-    #         self.molecule = False
+        mol_str = self.form_data.pop("molecule__molecule_sketcher", None)
+
+        try:
+            molecules = Molecule.from_dynamic(mol_str).components
+            self.molecule = True  # indicates successful load in templates
+        except:
+            self.molecule = False
+            return
+
+        self.entries_for_create_many = []
+        for molecule_obj in molecules:
+
+            # TODO: maybe have a create_child_component() method?
+            subcomponent = self.__class__(context=self.initial_context)
+            # linking them together -- for forward and reverse access
+            self.entries_for_create_many.append(subcomponent)
+            subcomponent.parent_component = self
+
+            subcomponent.form_data[input_name] = molecule_obj
+            # !!! this really isn't the original input...
+            subcomponent.form_data[f"{input_name}__molecule_original"] = (
+                molecule_obj.to_sdf()
+            )
+
+            if self.molecule_match_tables:
+                matches = subcomponent.check_datasets(molecule_obj)
+                subcomponent.form_data[f"{input_name}__molecule_matches"] = matches
+
+        # in case the form automatically creates new dropdowns. Though
+        # this typically isn't needed bc is_editting=False by default
+        self.js_actions = [
+            {"refresh_select2": []},
+        ]
+
+        # draw molecules in ui
+        for entry in self.entries_for_create_many:
+            js_action = {
+                "add_mol_viewer": [
+                    f"{input_name}-{entry.component_id}-image",
+                    entry.form_data[f"{input_name}__molecule_original"],  # sdf str,
+                    100,
+                    100,
+                ]
+            }
+            self.js_actions.append(js_action)
+
+    # -------------------------------------------------------------------------
 
     # def unset_molecule(self):
     #     name = "molecule"  # TODO: accept as kwarg

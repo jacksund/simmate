@@ -42,7 +42,7 @@
         {% if load_button %}
             <div class="text-center pt-3">
                 {% if many_molecules %}
-                    {% htmx_button method_name="load_many_molecules" label="Load Molecules" %}
+                    {% htmx_button method_name="load_many_molecules" label="Load Molecules" input_name=name %}
                 {% else %}
                     {% htmx_button method_name="load_molecule" label="Load Molecule" input_name=name %}
                 {% endif %}

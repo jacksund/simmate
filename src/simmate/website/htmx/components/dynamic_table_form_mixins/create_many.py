@@ -8,14 +8,8 @@ class CreateManyMixin:
     applied_create_many_defaults: bool = False
     apply_to_children_inputs: list = []
 
-    entries_for_create_many: list = []
-
-    is_editting: bool = True
-
-    def toggle_is_editting(self):
-        self.is_editting = not self.is_editting
-        if self.is_editting:
-            self.call("refresh_select2")
+    entries_for_create_many: list = []  # ie child_components
+    parent_component = None
 
     def mount_for_create_many(self):
         self.redirect_mode = "table"
@@ -56,11 +50,26 @@ class CreateManyMixin:
 
         self.applied_create_many_defaults = True
 
+    # -------------------------------------------------------------------------
+
+    is_editting: bool = False
+
+    def toggle_is_editting(self):
+        self.is_editting = not self.is_editting
+        if self.is_editting:
+            self.js_actions = [
+                {"refresh_select2": []},
+            ]
+
+    # -------------------------------------------------------------------------
+
+    # TODO
+
     # for many_to_one type child components
 
-    is_subform: bool = False
-    subform_pointer: str = None  # e.g. parent_id
+    # is_subform: bool = False
+    # subform_pointer: str = None  # e.g. parent_id
 
-    # is_editting: bool = True  ( this is set in create_many section ^^^)
-    uuid: str = None
-    is_confirmed: bool = False
+    # # is_editting: bool = True  ( this is set in create_many section ^^^)
+    # uuid: str = None
+    # is_confirmed: bool = False

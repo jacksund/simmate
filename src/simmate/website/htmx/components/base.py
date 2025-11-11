@@ -36,7 +36,7 @@ class HtmxComponent:
         # from cache using the component_id
         self.component_id = get_uuid_starting_with_letter()
         self.form_data = {}
-        self.intial_context = context
+        self.initial_context = context
         self.request = context.request  # is updated with new request every new call
         # this part allows us to pass kwargs to the html tag and apply them to attrs
         # ex: form_mode="example" --> apply to python obj on init

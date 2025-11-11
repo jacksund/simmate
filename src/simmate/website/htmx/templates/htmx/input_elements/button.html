@@ -17,7 +17,8 @@
             {% if extra_include %}
                 hx-include="#{{ extra_include }}"
             {% endif %}>
-        {% if icon %}<i class="bi bi-{{ icon }}"></i>&nbsp;&nbsp;{% endif %}
+        {% if icon %}<i class="bi bi-{{ icon }}"></i>{% endif %}
+        {% if icon and show_label %}&nbsp;&nbsp;{% endif %}
         {% if show_label %}{{ label }}{% endif %}
     </button>
 </div>
