@@ -1,24 +1,9 @@
 {# djlint:off #}
 <div class="my-2 text-center">
     <button class="btn btn-{{ theme }} {% if small %}btn-sm{% endif %}"
-            hx-disabled-elt
-            {% if method_name == "submit" %}
-                type="submit"
-            {% else %}
-                hx-post="{% url 'htmx:component_method' context.component.component_id method_name %}{% if method_kwargs %}?{{ method_kwargs }}{% endif %}"
-                hx-trigger="click"
-                {% if javascript_only %}
-                    hx-swap="none"
-                {% else %}
-                    hx-target="#{{ context.component.component_id }}"
-                    hx-swap="outerHTML"
-                {% endif %}
-            {% endif %}
-            {% if extra_include %}
-                hx-include="#{{ extra_include }}"
-            {% endif %}>
-        {% if icon %}<i class="bi bi-{{ icon }}"></i>{% endif %}
-        {% if icon and show_label %}&nbsp;&nbsp;{% endif %}
+            {% htmx_post trigger="click" method_name=method_name method_kwargs=method_kwargs javascript_only=javascript_only include=include %}
+            hx-disabled-elt>  {# disabled button after submit and until response comes #}
+        {% if icon %}<i class="bi bi-{{ icon }} mx-1"></i>{% endif %}
         {% if show_label %}{{ label }}{% endif %}
     </button>
 </div>

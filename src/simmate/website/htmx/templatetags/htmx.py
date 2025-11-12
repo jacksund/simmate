@@ -38,6 +38,32 @@ def htmx_loading_spinner():
     return  # html is static so no vars passed
 
 
+@register.inclusion_tag(
+    filename="htmx/post_action.html",
+    takes_context=True,
+)
+def htmx_post(
+    context: dict,
+    component_id: str = None,
+    target: str = None,
+    include: str = None,
+    trigger: str = "change",
+    javascript_only: str = False,
+    method_name: str = None,
+    method_kwargs: dict = None,
+):
+    if not component_id:
+        # BUG: not sure why context is nested here. Maybe because I call this
+        # tag within other inclusion tags?
+        component_id = context["context"]["component"].component_id
+    if not target:
+        target = f"#{component_id}"
+    if not include:
+        include = f"#{component_id}"
+    swap = "none" if javascript_only else "outerHTML"
+    return locals()
+
+
 # -----------------------------------------------------------------------------
 
 
@@ -283,6 +309,7 @@ def htmx_selectbox(
     multiselect: bool = False,
     defer: bool = True,
     method_name: str = None,  # fxn_to_call -- presumes defer=False
+    include: str = None,
 ):
     """
     Display a selectbox widget.
@@ -368,7 +395,7 @@ def htmx_button(
     icon: str = None,
     small: bool = False,
     javascript_only: bool = False,
-    extra_include: str = None,
+    include: str = None,
     **method_kwargs,
 ):
     """

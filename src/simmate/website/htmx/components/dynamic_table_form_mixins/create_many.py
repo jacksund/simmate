@@ -5,12 +5,6 @@ class CreateManyMixin:
 
     # for form_mode "create_many"
 
-    applied_create_many_defaults: bool = False
-    apply_to_children_inputs: list = []
-
-    entries_for_create_many: list = []  # ie child_components
-    parent_component = None
-
     def mount_for_create_many(self):
         self.redirect_mode = "table"
 
@@ -31,24 +25,39 @@ class CreateManyMixin:
             child.save_to_db()
             child.postsave_to_db()
 
-    def save_to_db_for_create_many_entry(self):
-        self.save_to_db_for_create()  # default is to repeat create method
+    # -------------------------------------------------------------------------
+
+    child_components: list = None  # ie individual entries for the create many
+    parent_component = None
+
+    applied_defaults_to_children: bool = False
+    ignore_on_apply_to_children: list = []
+
+    def create_child_component(self):
+        child = self.__class__(
+            context=self.initial_context,  # or should it be the current context?
+            form_mode="create_many_entry",
+        )
+
+        # linking them together -- for forward and reverse access
+        if self.child_components is None:
+            self.child_components = []  # first child needs new list
+        self.child_components.append(child)
+        child.parent_component = self
+
+        return child
 
     def apply_to_children(self):
 
-        # BUG-FIX: see https://github.com/adamghill/django-unicorn/issues/666
-        # Applying to children only works when is_editting is disabled
-        for child in self.children:
-            child.is_editting = False
-
-        for form_attr in self.apply_to_children_inputs:
-            parent_val = getattr(self, form_attr)
-            if parent_val is None:
+        for key, value in self.form_data.items():
+            if value is None:
                 continue
-            for child in self.children:
-                child.set_property(form_attr, parent_val)
 
-        self.applied_create_many_defaults = True
+            for child in self.child_components:
+                # OPTIMIZE: what if the hooks are slow and should be avoided?
+                child.update_form(key, value)
+
+        self.applied_defaults_to_children = True
 
     # -------------------------------------------------------------------------
 
@@ -62,14 +71,3 @@ class CreateManyMixin:
             ]
 
     # -------------------------------------------------------------------------
-
-    # TODO
-
-    # for many_to_one type child components
-
-    # is_subform: bool = False
-    # subform_pointer: str = None  # e.g. parent_id
-
-    # # is_editting: bool = True  ( this is set in create_many section ^^^)
-    # uuid: str = None
-    # is_confirmed: bool = False

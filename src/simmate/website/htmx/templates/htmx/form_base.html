@@ -1,10 +1,30 @@
-<form id="{{ component.component_id }}"
-    hx-post="{% url 'htmx:component' component.component_id %}"
-    {# i.e.: hx-post="/htmx/component/{{ component.component_id }}/{{ method_to_call }}/" #}
-    hx-indicator="#loading-spinner"
-    hx-swap="outerHTML">
+<div id="{{ component.component_id }}">
     {% block form %}Add your form html here!{% endblock %}
     {% if component.js_actions %}
         {% htmx_js_actions component.js_actions %}
     {% endif %}
-</form>
+</div>
+{% comment %}
+    I used to have the base template be whats shown below, but it gave issues 
+    when I wanted nested forms.
+    
+    For example, I wanted to have a 'create_many' form where you can edit rows
+    one at a time and *only* send the data for a single row, rather than the
+    whole form on update. When the base component template wraps everything in
+    a form tag, pretty much everything is submitted unless I have unique names
+    for every input row (e.g. name1, name2, name3 for each row).
+    
+    I found it cleanest to just have hx-include whenever
+    necessary so that I have better control over the exact post data.
+
+    <form id="{{ component.component_id }}"
+        hx-post="{% url 'htmx:component' component.component_id %}"
+        {# i.e.: hx-post="/htmx/component/{{ component.component_id }}/{{ method_to_call }}/" #}
+        hx-indicator="#loading-spinner"
+        hx-swap="outerHTML">
+        {% block form %}Add your form html here!{% endblock %}
+        {% if component.js_actions %}
+            {% htmx_js_actions component.js_actions %}
+        {% endif %}
+    </form>
+{% endcomment %}

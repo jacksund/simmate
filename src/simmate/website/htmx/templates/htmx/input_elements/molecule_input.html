@@ -29,12 +29,8 @@
                 <input type="hidden"
                     id="{{ name }}-{{ component.component_id }}-hidden"
                     name="{{ sketcher_input_name }}"
-                    {# this defer works, but it is annoying because there is a loading bar ever time you make an edit #}
-                    {% if not defer %}
-                        hx-post={% url 'htmx:component' context.component.component_id %}
-                        hx-trigger="change"
-                        hx-target="#{{ component.component_id }}"
-                    {% endif %}>
+                    {# this defer works, but it is annoying because there is a loading bar every time you make an edit #}
+                    {% if not defer %}{% htmx_post %}{% endif %}>
                 </input>
                 <script>enable_mol_autowrite('{{ name }}-{{ component.component_id }}', '{{ name }}-{{ component.component_id }}-hidden');</script>
             </div>
@@ -42,9 +38,9 @@
         {% if load_button %}
             <div class="text-center pt-3">
                 {% if many_molecules %}
-                    {% htmx_button method_name="load_many_molecules" label="Load Molecules" input_name=name %}
+                    {% htmx_button method_name="load_many_molecules" label="Load Molecules" input_name=name icon="upload" %}
                 {% else %}
-                    {% htmx_button method_name="load_molecule" label="Load Molecule" input_name=name %}
+                    {% htmx_button method_name="load_molecule" label="Load Molecule" input_name=name icon="upload" %}
                 {% endif %}
             </div>
         {% endif %}

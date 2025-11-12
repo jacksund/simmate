@@ -9,15 +9,7 @@
             {% if multiselect %}multiple="multiple"{% endif %}
             {% if popout_parent_id %}data-dropdown-parent="#{{ popout_parent_id }}"{% endif %}
             {% if not defer %}
-                {% if method_name %}
-                    hx-post="{% url 'htmx:component_method' context.component.component_id method_name %}"
-                {% else %}
-                    hx-post="{% url 'htmx:component' context.component.component_id %}"
-                {% endif %}
-                hx-target="#{{ context.component.component_id }}"
-                hx-indicator="#loading-spinner"
-                hx-swap="outerHTML"
-                hx-trigger="select2-change"
+                {% htmx_post method_name=method_name trigger="select2-change" include=include %}
                 onchange="htmx.trigger(this, 'select2-change')"
             {% endif %}
             >

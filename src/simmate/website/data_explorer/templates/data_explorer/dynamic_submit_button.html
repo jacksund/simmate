@@ -9,7 +9,7 @@
     {% if component.form_mode == "update_many" %}
         {% if not component.is_update_many_confirmed %}
             <div>There is no undo button! Are you sure you want to update all these entries?</div>
-            {% htmx_button method_name="confirm_update_many" extra_include="select_search_results" %}
+            {% htmx_button method_name="confirm_update_many" include="#select_search_results" %}
         {% else %}
             <div>
                 This will update <b>{{ component.entry_ids_to_update|length }}</b> entries.

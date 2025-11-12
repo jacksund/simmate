@@ -224,14 +224,13 @@ class DynamicTableForm(
         if self.skip_db_save:
             return
 
-        if self.is_subform:
-
-            # ensure the parent obj has been saved and has an id
-            if not (
-                self.parent and self.parent.table_entry and self.parent.table_entry.id
-            ):
-                raise Exception("parent object must be saved first")
-            setattr(self.table_entry, self.subform_pointer, self.parent.table_entry.id)
+        # if self.is_subform:
+        #     # ensure the parent obj has been saved and has an id
+        #     if not (
+        #         self.parent and self.parent.table_entry and self.parent.table_entry.id
+        #     ):
+        #         raise Exception("parent object must be saved first")
+        #     setattr(self.table_entry, self.subform_pointer, self.parent.table_entry.id)
 
         if self.form_mode == "create":
             self.save_to_db_for_create()

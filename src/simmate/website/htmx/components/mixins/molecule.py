@@ -179,15 +179,9 @@ class MoleculeInput:
             self.molecule = False
             return
 
-        self.entries_for_create_many = []
+        self.child_components = []
         for molecule_obj in molecules:
-
-            # TODO: maybe have a create_child_component() method?
-            subcomponent = self.__class__(context=self.initial_context)
-            # linking them together -- for forward and reverse access
-            self.entries_for_create_many.append(subcomponent)
-            subcomponent.parent_component = self
-
+            subcomponent = self.create_child_component()
             subcomponent.form_data[input_name] = molecule_obj
             # !!! this really isn't the original input...
             subcomponent.form_data[f"{input_name}__molecule_original"] = (
@@ -205,11 +199,11 @@ class MoleculeInput:
         ]
 
         # draw molecules in ui
-        for entry in self.entries_for_create_many:
+        for child in self.child_components:
             js_action = {
                 "add_mol_viewer": [
-                    f"{input_name}-{entry.component_id}-image",
-                    entry.form_data[f"{input_name}__molecule_original"],  # sdf str,
+                    f"{input_name}-{child.component_id}-image",
+                    child.form_data[f"{input_name}__molecule_original"],  # sdf str,
                     100,
                     100,
                 ]
