@@ -98,7 +98,6 @@ class DynamicTableForm(
             self.mount_for_create_many()
         elif self.form_mode == "create_many_entry":
             self.mount_for_create()
-            self.is_editting = False
         elif self.form_mode == "update":
             self.mount_for_update()
         elif self.form_mode == "update_many":
@@ -167,6 +166,8 @@ class DynamicTableForm(
             self.check_form_for_create()
         elif self.form_mode == "create_many":
             self.check_form_for_create_many()
+        elif self.form_mode == "create_many_entry":
+            self.check_form_for_create()
         elif self.form_mode == "update":
             self.check_form_for_update()
         elif self.form_mode == "update_many":
@@ -198,6 +199,8 @@ class DynamicTableForm(
             self.unmount_for_create()
         elif self.form_mode == "create_many":
             self.unmount_for_create_many()
+        elif self.form_mode == "create_many_entry":
+            self.unmount_for_create()
         elif self.form_mode == "update":
             self.unmount_for_update()
         elif self.form_mode == "update_many":
@@ -236,6 +239,8 @@ class DynamicTableForm(
             self.save_to_db_for_create()
         elif self.form_mode == "create_many":
             self.save_to_db_for_create_many()
+        elif self.form_mode == "create_many_entry":
+            self.save_to_db_for_create()
         elif self.form_mode == "update":
             self.save_to_db_for_update()
         elif self.form_mode == "update_many":

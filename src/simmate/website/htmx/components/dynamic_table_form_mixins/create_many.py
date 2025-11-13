@@ -9,18 +9,18 @@ class CreateManyMixin:
         self.redirect_mode = "table"
 
     def check_form_for_create_many(self):
-        for child in self.children:
+        for child in self.child_components:
             if not child.check_form():
                 for error in child.form_errors:
                     if error not in self.form_errors:
                         self.form_errors.append(error)
 
     def unmount_for_create_many(self):
-        for child in self.children:
+        for child in self.child_components:
             child.unmount_for_create()
 
     def save_to_db_for_create_many(self):
-        for child in self.children:
+        for child in self.child_components:
             child.presave_to_db()
             child.save_to_db()
             child.postsave_to_db()
