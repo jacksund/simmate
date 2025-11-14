@@ -5,9 +5,15 @@
             {% alert theme="danger" message="This section assumes all individual components are their own molecule, which means it will incorrectly split up salts and make things like Na+ or Cl- their own entries. Until this is fixed, avoid using the create_many form for such compounds." %}
         {% endif %}
         {% if allow_custom_input %}
-            {# Custom Text input (e.g. searching by ID or CAS number) #}
+            {# Custom Text input #}
             <div class="px-3 py-1">
                 {% htmx_text_input name=custom_input_name show_label=show_option_labels label=custom_input_label placeholder=custom_input_placeholder %}
+            </div>
+        {% endif %}
+        {% if allow_reference_input %}
+            {# Reference Text input (e.g. searching by ID or CAS number) #}
+            <div class="px-3 py-1">
+                {% htmx_text_input name=reference_input_name show_label=show_option_labels label=reference_input_label placeholder=reference_input_placeholder %}
             </div>
         {% endif %}
         {% if allow_text_input %}

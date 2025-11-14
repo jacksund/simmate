@@ -42,13 +42,14 @@ class MoleculeInput:
             "sketcher",
         ]
         found_type = False
-        for input_type in input_types:
-            molecule_input = self.form_data.pop(
-                f"{input_name}__molecule_{input_type}", None
-            )
-            if molecule_input:
+        for t in input_types:
+            i = self.form_data.pop(f"{input_name}__molecule_{t}", None)
+            if i and not found_type and i not in ["None"]:
                 found_type = True
-                break
+                # fix these vars as we want them later
+                input_type = t
+                molecule_input = i
+                # we continue to loop to pop() all other keys
         if not found_type:
             logging.warning(f"Failed to find non-null input: '{input_name}'")
             return  # nothing to load
@@ -88,13 +89,12 @@ class MoleculeInput:
                     self.form_data[input_name] = molecule_obj
 
             elif input_type == "reference":
-                raise NotImplementedError()
-                # db_mol = self.molecule_ref_table.objects.get(
-                #     id=self.molecule_custom_input
-                # )
-                # self.molecule_ref_id = db_mol.id  # should equal the custom input val
-                # self.molecule = db_mol.molecule  # sdf string
-                # self._molecule_obj = db_mol.to_toolkit()
+                db_mol = self.molecule_ref_table.objects.get(id=molecule_input)
+                molecule_obj = db_mol.to_toolkit()
+                self.form_data[f"{input_name}_id"] = (
+                    db_mol.id
+                )  # should equal the input value
+                setattr(self, input_name, True)  # for template rendering
 
             elif input_type == "custom":
                 self.load_molecule_custom(input_name)

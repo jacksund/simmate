@@ -23,7 +23,7 @@ class StatusTracking(DatabaseTable):
 
     # NOTE: many child classes override these defaults
 
-    status_choices = [
+    status_options = [
         "Under Review",
         "In Progress",
         "On Hold",

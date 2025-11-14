@@ -225,6 +225,24 @@ def htmx_checkbox(
     if not label:
         label = name.replace("_", " ").title()
 
+    # grab the current value to render in the form
+    component = context["component"]
+    if name in context:
+        current_value = context[name]
+    elif hasattr(component, name):
+        current_value = getattr(component, name)
+    elif name in component.form_data:
+        current_value = component.form_data[name]
+    elif (
+        hasattr(component, "table_entry")
+        and component.table_entry is not None
+        and hasattr(component.table_entry, name)
+        and getattr(component.table_entry, name) is not None
+    ):
+        current_value = getattr(component.table_entry, name)
+    else:
+        current_value = None
+
     return locals()
 
 
@@ -463,13 +481,22 @@ def htmx_molecule_input(
 
     show_option_labels = (
         True
-        if [allow_sketcher_input, allow_text_input, allow_custom_input].count(True) > 1
+        if [
+            allow_sketcher_input,
+            allow_text_input,
+            allow_reference_input,
+            allow_custom_input,
+        ].count(True)
+        > 1
         else False
     )
     if show_option_labels:
         noption = 1
         if allow_custom_input:
             custom_input_label = f"Option {noption}: {custom_input_label}"
+            noption += 1
+        if allow_reference_input:
+            reference_input_label = f"Option {noption}: {reference_input_label}"
             noption += 1
         if allow_text_input:
             text_input_label = f"Option {noption}: {text_input_label}"

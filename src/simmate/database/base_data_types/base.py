@@ -1988,3 +1988,11 @@ class DatabaseTable(models.Model):
         """
         for column_name in cls.workflow_columns.keys():
             cls.populate_workflow_column(column_name, batch_size=batch_size)
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_curated_df(cls, queryset=None):
+        if queryset is None:
+            queryset = cls.objects
+        return queryset.to_dataframe()  # default to just raw data
