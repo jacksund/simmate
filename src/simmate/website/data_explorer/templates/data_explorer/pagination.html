@@ -1,33 +1,32 @@
-<ul class="pagination">
+<ul class="pagination m-3">
     {# previous button #}
     {% if pagination_urls.previous is not None %}
-        <li class="page-item previous" id="basic-datatable_previous">
-            <a href="{{ pagination_urls.previous }}" class="page-link"><i class="mdi mdi-chevron-left"></i> Previous</a>
+        <li class="page-item" id="basic-datatable_previous">
+            <a href="{{ pagination_urls.previous }}" class="page-link"><i class="bi bi-chevron-left"></i> Previous</a>
         </li>
     {% else %}
-        <li class="page-item previous disabled" id="basic-datatable_previous">
+        <li class="page-item disabled" id="basic-datatable_previous">
             <a href="#" class="page-link">
-                <i class="mdi mdi-chevron-left"></i> Previous
+                <i class="bi bi-chevron-left"></i> Previous
             </a>
         </li>
     {% endif %}
     {# numbered and elided buttons #}
     {% for dispaly_value, page_link in pagination_urls.elided_pages %}
-        <li class="page-item {% if dispaly_value == "..." %}disabled{% elif dispaly_value == page.number %}active{% endif %}">
+        <li class="page-item {% if dispaly_value == '...' %}disabled{% elif dispaly_value == page.number %}active{% endif %}">
             <a href="{{ page_link }}" class="page-link">{{ dispaly_value }}</a>
         </li>
     {% endfor %}
     {# next button #}
     {% if pagination_urls.next is not None %}
-        <li class="page-item next" id="basic-datatable_next">
+        <li class="page-item" id="basic-datatable_next">
             <a href="{{ pagination_urls.next }}" class="page-link">
-            Next <i class="mdi mdi-chevron-right"></i></a>
+            Next <i class="bi bi-chevron-right"></i></a>
         </li>
     {% else %}
-        <li class="page-item next disabled" id="basic-datatable_next">
+        <li class="page-item disabled" id="basic-datatable_next">
             <a href="#" class="page-link">
-            Next <i class="mdi mdi-chevron-right"></i></a>
-        </a>
-    </li>
-{% endif %}
+            Next <i class="bi bi-chevron-right"></i></a>
+        </li>
+    {% endif %}
 </ul>

@@ -1,0 +1,12 @@
+<div class="my-2">
+    {% include "core_components/basic_elements/label.html" %}
+    <input id="{{ context.component.component_id }}-{{ name }}"
+           name="{{ name }}"
+           type="file"
+           class="form-control"
+           hx-post="{% url 'htmx:component' component.component_id %}"
+           hx-encoding="multipart/form-data"
+           {% if file_type %}accept="{{ file_type }}"{% endif %}
+           {% if not defer %}{% htmx_post %}{% endif %}
+           {% if allow_multiple %}multiple{% endif %}>
+</div>

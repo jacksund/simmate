@@ -321,6 +321,7 @@ class SimmateSettings:
                 "csrf_trusted_origins": ["http://localhost"],
                 # We don't use get_random_secret_key() to make local testing easier
                 # from django.core.management.utils import get_random_secret_key
+                # But our prod setups replace this key.
                 "secret_key": "pocj6cunub4zi31r02vr5*5a2c(+_a0+(zsswa7fmus^o78v)r",
                 # Settings for sending automated emails.
                 # For example, this can be set up for GMail by...
@@ -344,6 +345,12 @@ class SimmateSettings:
                     ("jacksund", "jacksundberg123@gmail.com"),
                     ("jacksund-corteva", "jack.sundberg@corteva.com"),
                 ],
+                # whether to use ChemDraw.js or the free/open-source fallback Ketcher.
+                # Note, chemdraw_js requires providing static files + license
+                "chemdraw_js": False,
+                # whether to use the username or first+last name when displaying
+                # users accross the website, such as in option menus
+                "user_format": "username",
             },
             # app-specific configs
             # TODO: consider moving these to the respective apps

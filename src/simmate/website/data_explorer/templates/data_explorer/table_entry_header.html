@@ -1,20 +1,27 @@
 {# Gives a tabbed header of fields from the base database table (id, created_at, updated_at) #}
-<hr>
-<div class="row">
+<div class="row my-3">
     <div class="col-xl-4">
-        <div class="text-center p-1 bg-primary text-light opacity-90">
-            <b>{{ table_entry.table_name }} ID:</b> {{ table_entry.id }}
+        <div class="text-center p-1 bg-primary text-light">
+            <div>
+                <b>{{ table_entry.table_name }} ID</b>
+            </div>
+            <div>{{ table_entry.id }}</div>
         </div>
     </div>
     <div class="col-xl-4">
-        <div class="text-center p-1 bg-secondary text-light opacity-75">
-            <b>Created:</b> {{ table_entry.created_at }}
+        <div class="text-center p-1 bg-secondary text-light">
+            <div>
+                <b>Created at</b>
+            </div>
+            <div>{{ table_entry.created_at|date:"M. jS Y @ P T" }}</div>
         </div>
     </div>
     <div class="col-xl-4">
-        <div class="text-center p-1 bg-secondary text-light opacity-75">
-            <b>Last updated:</b> {{ table_entry.updated_at }}
+        <div class="text-center p-1 bg-secondary text-light">
+            <div>
+                <b>Last updated at</b>
+            </div>
+            <div>{{ table_entry.updated_at|date:"M. jS Y @ P T" }}</div>
         </div>
     </div>
 </div>
-<hr>

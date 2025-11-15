@@ -4,19 +4,18 @@
     <div class="px-2">
         {% for option in options %}
             <div class="form-check">
-                <input id="{{ context.component.component_id }}-{{ name }}"
+                <input id="{{ context.component.component_id }}-{{ name }}-{{ option.0 }}"
                        name="{{ name }}"
                        class="form-check-input"
                        type="radio"
                        value="{{ option.0 }}"
-                       hx-preserve
-                       {% if not defer %}
-                           hx-post={% url 'htmx:component' context.component.component_id %}
-                           hx-trigger="change"
-                       {% endif %}
+                       {% if not defer %}{% htmx_post %}{% endif %}
                        {% if disabled %}disabled{% endif %}
-                       {% if required %}required{% endif %}>
-                <label class="form-check-label">{{ option.1 }}</label>
+                       {% if required %}required{% endif %} 
+                       {% if initial_value and option.0 == initial_value %}checked{% endif %}>
+                <label class="form-check-label" for="{{ context.component.component_id }}-{{ name }}-{{ option.0 }}">
+                    {{ option.1 }}
+                </label>
             </div>
         {% endfor %}
     </div>

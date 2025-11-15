@@ -7,7 +7,6 @@
       action="#"
       method="post"
       enctype="multipart/form-data">
-    {% csrf_token %}
     {% if enable_select %}
         <div class="row">
             <div class="py-2">
@@ -19,9 +18,9 @@
             </div>
         </div>
     {% endif %}
-    <div class="row table-responsive small">
-        <table class="table table-striped table-centered table-sm border">
-            <thead class="table-dark">
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-primary">
                 <tr>
                     {% if enable_select %}<th></th>{% endif %}
                     {% block table_headers %}
@@ -39,7 +38,7 @@
                                 <input type="checkbox"
                                        class="form-check-input entry_row_select"
                                        id="select{{ entry.id }}"
-                                       name="{{ entry.id }}">
+                                       name="BULK_UPDATE_{{ entry.id }}">
                             </td>
                         {% endif %}
                         {% block table_rows %}

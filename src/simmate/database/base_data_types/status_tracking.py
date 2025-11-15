@@ -3,7 +3,6 @@
 import plotly.express as plotly_express
 from django.utils import timezone
 from pandas import DataFrame
-from simple_history.models import HistoricalRecords
 
 from .base import DatabaseTable, table_column
 
@@ -24,7 +23,7 @@ class StatusTracking(DatabaseTable):
 
     # NOTE: many child classes override these defaults
 
-    status_choices = [
+    status_options = [
         "Under Review",
         "In Progress",
         "On Hold",
@@ -52,6 +51,7 @@ class StatusTracking(DatabaseTable):
     """
 
     # BUG: must be set by child class
+    # from simple_history.models import HistoricalRecords
     # history = HistoricalRecords()
 
     # -------------------------------------------------------------------------
@@ -214,6 +214,7 @@ class StatusTracking(DatabaseTable):
             names="status",
             color="status",
             color_discrete_map=cls.status_color_map,
+            hole=0.5,  # for a donut-like pie chart
         )
         return figure
 
