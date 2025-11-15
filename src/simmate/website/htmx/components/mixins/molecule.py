@@ -29,7 +29,7 @@ class MoleculeInput:
 
     # -------------------------------------------------------------------------
 
-    def load_molecule(self, input_name: str):
+    def load_molecule(self, input_name: str = "molecule"):
 
         # There are 4 options for mol inputs: custom, ref (e.g. an ID), text, and sketcher
         # The order of priority is... custom -> ref -> text -> sketcher.
@@ -62,7 +62,7 @@ class MoleculeInput:
             if input_type in ["sketcher", "text"]:
 
                 if self.form_mode == "search":
-                    query_type = self.form_data["molecule_query_type"]
+                    query_type = self.form_data.pop(f"{input_name}_query_type")
                     # TODO: better loading for SMARTS
                     # if query_type == "molecule_exact":
                     #     pass
@@ -85,7 +85,7 @@ class MoleculeInput:
 
                 else:
                     molecule_obj = Molecule.from_dynamic(molecule_input)
-                    self.form_data[f"{input_name}__molecule_original"] = molecule_input
+                    self.form_data[f"{input_name}_original"] = molecule_input
                     self.form_data[input_name] = molecule_obj
 
             elif input_type == "reference":
@@ -108,7 +108,7 @@ class MoleculeInput:
 
         if self.form_mode == "create" and self.molecule_match_tables:
             matches = self.check_datasets(molecule_obj)
-            self.form_data[f"{input_name}__molecule_matches"] = matches
+            setattr(self, f"{input_name}_matches", matches)
 
         # draw mol image
         self.js_actions = [
@@ -165,12 +165,12 @@ class MoleculeInput:
 
     # -------------------------------------------------------------------------
 
-    def load_many_molecules(self, input_name: str):
+    def load_many_molecules(self, input_name: str = "molecule"):
 
         # BUG: we assume self.form_mode="create_many" right now
         assert self.form_mode == "create_many"
 
-        mol_str = self.form_data.pop("molecule__molecule_sketcher", None)
+        mol_str = self.form_data.pop(f"{input_name}__molecule_sketcher", None)
 
         try:
             molecules = Molecule.from_dynamic(mol_str).components
@@ -179,18 +179,25 @@ class MoleculeInput:
             self.molecule = False
             return
 
+        self.create_children_from_mols(molecules, input_name)
+
+    def create_children_from_mols(
+        self,
+        molecules: list[Molecule],
+        input_name: str = "molecule",
+    ):
         self.child_components = []
         for molecule_obj in molecules:
-            subcomponent = self.create_child_component()
-            subcomponent.form_data[input_name] = molecule_obj
+
+            child = self.create_child_component()
+            child.form_data[input_name] = molecule_obj
+
             # !!! this really isn't the original input...
-            subcomponent.form_data[f"{input_name}__molecule_original"] = (
-                molecule_obj.to_sdf()
-            )
+            child.form_data[f"{input_name}_original"] = molecule_obj.to_sdf()
 
             if self.molecule_match_tables:
-                matches = subcomponent.check_datasets(molecule_obj)
-                subcomponent.form_data[f"{input_name}__molecule_matches"] = matches
+                matches = child.check_datasets(molecule_obj)
+                setattr(child, f"{input_name}_matches", matches)
 
         # in case the form automatically creates new dropdowns. Though
         # this typically isn't needed bc is_editting=False by default
@@ -203,7 +210,7 @@ class MoleculeInput:
             js_action = {
                 "add_mol_viewer": [
                     f"{input_name}-{child.component_id}-image",
-                    child.form_data[f"{input_name}__molecule_original"],  # sdf str,
+                    child.form_data[f"{input_name}_original"],  # sdf str,
                     100,
                     100,
                 ]

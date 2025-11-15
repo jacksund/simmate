@@ -66,12 +66,14 @@ class UpdateManyMixin:
 
     def unmount_for_update_many(self):
 
-        config = self.to_db_dict()
-
+        # note we don't allow unsetting in bulk (i.e. values can be None) because
+        # the bulk update form is typically mostly empty and we have no way
+        # of knowing what is intentionally left None vs just wasn't touched
         all_updates = {
             field: value
-            for field, value in config.items()
-            if field not in self.ignore_on_update
+            for field, value in self.form_data.items()
+            if value is not None
+            and field not in self.ignore_on_update
             and field not in self.ignore_on_update_many
         }
 

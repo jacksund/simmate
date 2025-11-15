@@ -631,6 +631,7 @@ class DatabaseTable(models.Model):
         include_parents: bool = True,
         include_to_one_relations: bool = True,
         include_to_many_relations: bool = False,
+        include_one_to_one_reverse: bool = False,
         id_mode: bool = False,  # e.g. give "project_id" instead of "project"
     ) -> list[str]:
         """
@@ -653,8 +654,16 @@ class DatabaseTable(models.Model):
             if column.many_to_one or column.one_to_one:
                 if not include_to_one_relations:
                     continue
+
+                is_reverse = not hasattr(cls, f"{column.name}_id")
+                if is_reverse and not include_one_to_one_reverse:
+                    continue
+
                 if id_mode:
-                    name += "_id"
+                    if is_reverse:
+                        name += "__id"
+                    else:
+                        name += "_id"
 
             column_names.append(name)
 

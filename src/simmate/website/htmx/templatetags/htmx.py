@@ -528,32 +528,36 @@ def htmx_molecule_input(
     return locals()
 
 
+@register.inclusion_tag(
+    filename="htmx/input_elements/file_upload.html",
+    takes_context=True,
+)
+def htmx_file_upload(
+    context: dict,
+    name: str,
+    label: str = None,
+    show_label: bool = True,
+    help_text: str = None,
+    max_size: int = 10,  # in MB
+    disabled: bool = False,
+    defer: bool = False,
+    file_type: str = None,  # only accept CSV files. Comma sep for others
+    allow_multiple: bool = False,
+):
+    """
+    Display a file upload widget.
+    """
+    component = context["component"]
+
+    if not label:
+        label = name.replace("_", " ").title()
+
+    return locals()
+
+
 # -----------------------------------------------------------------------------
 
 # TODO
-
-# @register.inclusion_tag(
-#     filename="core_components/input_elements/file_upload.html",
-#     takes_context=True,
-# )
-# def file_upload(
-#     context: dict,
-#     name: str,
-#     label: str = None,
-#     show_label: bool = True,
-#     help_text: str = None,
-#     max_size: int = 10,  # in MB
-#     disabled: bool = False,
-#     defer: bool = False,
-#     file_type: str = ".csv",  # only accept CSV files. Comma sep for others
-# ):
-#     """
-#     Display a file upload widget.
-#     """
-#     if not label:
-#         label = name.replace("_", " ").title()
-
-#     return locals()
 
 # @register.inclusion_tag(
 #     filename="core_components/input_elements/search_box.html",

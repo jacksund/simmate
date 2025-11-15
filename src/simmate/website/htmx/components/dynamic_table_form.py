@@ -3,7 +3,6 @@
 from django.shortcuts import redirect
 
 from simmate.database.base_data_types import DatabaseTable
-from simmate.toolkit import Molecule, Structure
 from simmate.website.utilities import parse_request_get
 
 from .base import HtmxComponent
@@ -252,58 +251,6 @@ class DynamicTableForm(
 
     def postsave_to_db(self):
         return  # default is there's nothing extra to do
-
-    # -------------------------------------------------------------------------
-
-    # Model creation and update utils
-
-    def to_db_dict(
-        self,
-        load_toolkits: bool = True,
-        include_empties: bool = False,
-    ) -> dict:
-
-        # By default, we say the form maps to columns of the model with same name.
-        # We also check for direct relations, which would end in "_id"
-        # (e.g. 'created_by_id' for users where col is technically 'created_by')
-        # We also ignore *_to_many relations because these are saved using
-        # child components
-        table_cols = [
-            column.name
-            for column in self.table.columns
-            if not column.one_to_many and not column.many_to_many
-        ]
-
-        matching_fields = [
-            key
-            for key in self.form_data.keys()
-            if key in table_cols or (key.endswith("_id") and key[:-3] in table_cols)
-        ]
-
-        config = {}
-        for form_key in matching_fields:
-            current_val = self.form_data[form_key]
-
-            if not include_empties and current_val is None:
-                continue
-
-            config[form_key] = current_val
-
-            # special data types and common field names. Note, variations
-            # of this should be handled by overriding the `to_db_dict`
-            if (
-                load_toolkits
-                and current_val is not None
-                and self.form_mode != "create_many"
-            ):
-                if form_key == "molecule":
-                    config["molecule_original"] = current_val
-                    config["molecule"] = Molecule.from_dynamic(current_val)
-                elif form_key == "structure":
-                    config["structure_original"] = current_val
-                    config["structure"] = Structure.from_dynamic(current_val)
-
-        return config
 
     # -------------------------------------------------------------------------
 

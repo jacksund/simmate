@@ -57,6 +57,12 @@ class CreateManyMixin:
                 # OPTIMIZE: what if the hooks are slow and should be avoided?
                 child.update_form(key, value)
 
+        # tags special case -- it isn't applied by default bc it is an attribute
+        if hasattr(self, "tag_ids") and self.tag_ids is not None:
+            for child in self.child_components:
+                # OPTIMIZE: what if the hooks are slow and should be avoided?
+                child.update_form("tag_ids", self.tag_ids)
+
         self.applied_defaults_to_children = True
 
     # -------------------------------------------------------------------------

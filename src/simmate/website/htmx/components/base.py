@@ -3,6 +3,8 @@
 import re
 from typing import get_args, get_origin
 
+import numpy
+import pandas
 from cachetools import LRUCache
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -113,8 +115,8 @@ class HtmxComponent:
         """
         if key in self.on_change_hooks:
             original_value = self.form_data.get(key, None)
-            self.form_data[key] = new_value  # should call come after hook?
-            if original_value != new_value:
+            self.form_data[key] = new_value
+            if isinstance(new_value, pandas.DataFrame) or original_value != new_value:
                 hook = getattr(self, f"on_change_hook__{key}")
                 hook()  # maybe pass both the orignal value and new one?
         else:
@@ -279,6 +281,27 @@ class HtmxComponent:
                     )
                     for value in values
                 ]
+
+        # Separately parse any files uploaded in the form
+        for key, files in self.request.FILES.lists():
+
+            files_parsed = []
+            for file in files:
+                if file.content_type == "text/csv":
+                    df = pandas.read_csv(file)
+                    df.replace({numpy.nan: None}, inplace=True)
+                    files_parsed.append(df)
+                # TODO: other common types like excel, yaml, and chemistry formats
+                else:
+                    files_parsed.append(file)
+
+            if len(files_parsed) == 0:
+                continue
+            elif len(files_parsed) == 1:
+                # BUG: what if allow_multiple=True but only one was uploaded?
+                result[key] = files_parsed[0]
+            else:
+                result[key] = files_parsed
 
         return dotdict(result)
 

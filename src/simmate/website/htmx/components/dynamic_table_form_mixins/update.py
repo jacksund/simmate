@@ -64,18 +64,15 @@ class UpdateMixin:
         # TODO: support other
         # if "tags" in self.mount_for_update_columns
         if hasattr(self.table_entry, "tags"):
-            self.form_data["tag_ids"] = list(
-                self.table_entry.tags.values_list("id", flat=True).all()
-            )
+            tag_ids = list(self.table_entry.tags.values_list("id", flat=True).all())
+            self.update_form("tag_ids", tag_ids)
 
     def check_form_for_update(self):
         self.check_form_for_create()  # default is to repeat create checks
 
     def unmount_for_update(self):
-        # set initial data using the form fields and applying its values to
-        # the table entry (this is the reverse of mount_for_update)
-        config = self.to_db_dict(include_empties=True)
-        for field, value in config.items():
+        # maybe use self.table_entry.update_from_toolkit()?
+        for field, value in self.form_data.items():
             if field in self.ignore_on_update:
                 # skip things like "molecule" and "molecule_original" that are
                 # present for creation but should be ignored here
