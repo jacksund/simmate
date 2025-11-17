@@ -128,7 +128,7 @@ class MoleculeInput:
     # -------------------------------------------------------------------------
 
     # Checking other datasets for exact match
-
+    molecule_matches: list = []
     molecule_match_tables: list = []  # ["__self__"] is most common
 
     def check_datasets(self, molecule: Molecule) -> list[dict]:

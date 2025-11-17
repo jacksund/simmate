@@ -7,7 +7,9 @@ class UpdateMixin:
 
     ignore_on_update: list[str] = []
     """
-    List of columns/fields to ignore when the form_mode = "update"
+    List of columns/fields to ignore when the form_mode = "update". Note that
+    these values will still be mounted (so that they are visible in the form)
+    but any updates to them will not be unmounted+saved.
     """
 
     @property
@@ -23,7 +25,11 @@ class UpdateMixin:
             "updated_at",
         ]
         return [
-            c for c in self.table.get_column_names(id_mode=True) if c not in exclude
+            c
+            for c in self.table.get_column_names(
+                include_to_many_relations=True, id_mode=True
+            )
+            if c not in exclude
         ]
 
     def mount_for_update(self):
@@ -57,27 +63,33 @@ class UpdateMixin:
         # With the table_entry set above, we can now set initial data using the
         # database and applying its values to the form fields.
         for field in self.mount_for_update_columns:
-            current_val = getattr(self.table_entry, field)
+            if field.endswith("__ids"):
+                relation_name = field[:-5]
+                relation = getattr(self.table_entry, relation_name)
+                current_val = list(relation.values_list("id", flat=True).all())
+            else:
+                current_val = getattr(self.table_entry, field)
             self.update_form(field, current_val)
-
-        # SPECIAL CASES
-        # TODO: support other
-        # if "tags" in self.mount_for_update_columns
-        if hasattr(self.table_entry, "tags"):
-            tag_ids = list(self.table_entry.tags.values_list("id", flat=True).all())
-            self.update_form("tag_ids", tag_ids)
 
     def check_form_for_update(self):
         self.check_form_for_create()  # default is to repeat create checks
 
     def unmount_for_update(self):
         # maybe use self.table_entry.update_from_toolkit()?
+        # also this is a near copy-paste of unmount_for_create
+        to_many_data = {}  # e.g., "tags__ids" or "users__ids"
         for field, value in self.form_data.items():
             if field in self.ignore_on_update:
                 # skip things like "molecule" and "molecule_original" that are
                 # present for creation but should be ignored here
                 continue
-            setattr(self.table_entry, field, value)
+            if field.endswith("__ids"):
+                to_many_data[field[:-5]] = value
+            else:
+                # BUG: what if from_toolkit is needed?
+                setattr(self.table_entry, field, value)
+
+        self.table_entry_to_many_data = to_many_data
 
     def save_to_db_for_update(self):
         self.save_to_db_for_create()  # default is to repeat create method

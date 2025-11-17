@@ -291,8 +291,18 @@ class HtmxComponent:
                     df = pandas.read_csv(file)
                     df.replace({numpy.nan: None}, inplace=True)
                     files_parsed.append(df)
-                # TODO: other common types like excel, yaml, and chemistry formats
+
+                elif (
+                    file.content_type
+                    == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ):
+                    df = pandas.read_excel(file)
+                    df.replace({numpy.nan: None}, inplace=True)
+                    files_parsed.append(df)
+
+                # TODO: other common types like yaml, json, and chemistry formats
                 else:
+                    breakpoint()
                     files_parsed.append(file)
 
             if len(files_parsed) == 0:

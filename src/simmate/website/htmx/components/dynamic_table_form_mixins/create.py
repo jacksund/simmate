@@ -13,6 +13,11 @@ class CreateMixin:
     be completed, otherwise the form will not submit.
     """
 
+    table_entry = None
+
+    # for to_many fields (tag_ids, user_ids, etc)
+    table_entry_to_many_data: dict = {}
+
     _db_save_completed: bool = False
 
     def mount_for_create(self):
@@ -22,7 +27,16 @@ class CreateMixin:
         self.check_required_inputs()
 
     def unmount_for_create(self):
-        self.table_entry = self.table.from_toolkit(**self.form_data)
+        direct_data = {}
+        to_many_data = {}  # e.g., "tags__ids" or "users__ids"
+        for key, value in self.form_data.items():
+            if key.endswith("__ids"):
+                to_many_data[key[:-5]] = value
+            else:
+                direct_data[key] = value
+
+        self.table_entry = self.table.from_toolkit(**direct_data)
+        self.table_entry_to_many_data = to_many_data
 
     def save_to_db_for_create(self):
 
@@ -51,10 +65,15 @@ class CreateMixin:
         with transaction.atomic():
             self.table_entry.save()
 
-            # TODO: support other m2m
-            if hasattr(self, "tag_ids") and hasattr(self.table_entry, "tags"):
-                if not self.tag_ids:
-                    self.table_entry.tags.clear()
+            # handle to_many data (such as tag_ids)
+            for relation_name, ids_list in self.table_entry_to_many_data.items():
+                if not hasattr(self.table_entry, relation_name):
+                    raise Exception(
+                        f"To-many relation data given with '{relation_name}__ids'"
+                        f" but model has no relation named '{relation_name}'"
+                    )
+                relation = getattr(self.table_entry, relation_name)
+                if not ids_list:
+                    relation.clear()  # allows unsetting on updates
                 else:
-                    self.table_entry.tags.set(self.tag_ids)
-                self.table_entry.save()
+                    relation.set(ids_list)

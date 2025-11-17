@@ -81,22 +81,27 @@ class UpdateManyMixin:
         # flat updates replace the col value entirely.
         flat_updates = {}
         append_updates = {}
+        to_many_updates = {}
         for field, value in all_updates.items():
             if field == "comments" or field.endswith("_comments"):
                 # TODO: allow other cols to be append type
                 append_updates[field] = value
+            elif field.endswith("__ids"):
+                to_many_updates[field[:-5]] = value
             else:
                 flat_updates[field] = value
 
         self.final_updates = {
             "flat_updates": flat_updates,
             "append_updates": append_updates,
+            "to_many_updates": to_many_updates,
         }
 
     def save_to_db_for_update_many(self):
 
         flat_updates = self.final_updates["flat_updates"]
         append_updates = self.final_updates["append_updates"]
+        to_many_updates = self.final_updates["to_many_updates"]
 
         # TODO: put this all within a single db transaction...?
 
@@ -116,9 +121,7 @@ class UpdateManyMixin:
                 setattr(entry, field, new_value)
             entry.save()
 
-            # SPECIAL CASE
-            # TODO: support other m2m
-            if hasattr(self, "tag_ids") and hasattr(entry, "tags") and self.tag_ids:
+            for relation_name, ids_list in to_many_updates.items():
+                relation = getattr(entry, relation_name)
                 # !!! for update many, do I want to set() or add()?
-                entry.tags.add(*self.tag_ids)
-                entry.save()
+                relation.add(*ids_list)

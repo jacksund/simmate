@@ -632,6 +632,8 @@ class DatabaseTable(models.Model):
         include_to_one_relations: bool = True,
         include_to_many_relations: bool = False,
         include_one_to_one_reverse: bool = False,
+        include_many_to_many_reverse: bool = False,
+        include_one_to_many_reverse: bool = False,
         id_mode: bool = False,  # e.g. give "project_id" instead of "project"
     ) -> list[str]:
         """
@@ -645,25 +647,41 @@ class DatabaseTable(models.Model):
 
             name = column.name
 
-            if column.many_to_many or column.one_to_many:
-                if not include_to_many_relations:
-                    continue
-                if id_mode:
-                    name += "_ids"
+            # there is some redundant code here, but organizing in this way
+            # makes the logic a lot easier to follow
 
-            if column.many_to_one or column.one_to_one:
+            if column.many_to_one:  # i.e. a Foreign Key
                 if not include_to_one_relations:
                     continue
+                if id_mode:
+                    name += "_id"
 
+            elif column.one_to_many:  # i.e. reverse of Foreign Key
+                if not include_to_many_relations or not include_one_to_many_reverse:
+                    continue
+                if id_mode:
+                    name += "__ids"
+
+            elif column.one_to_one:  # OneToOne that can be on either model
+                if not include_to_one_relations:
+                    continue
                 is_reverse = not hasattr(cls, f"{column.name}_id")
                 if is_reverse and not include_one_to_one_reverse:
                     continue
-
                 if id_mode:
                     if is_reverse:
                         name += "__id"
                     else:
-                        name += "_id"
+                        name += "_id"  # bc this is an actual col in the db
+
+            elif column.many_to_many:  # ManyToMany that can be on either model
+                if not include_to_many_relations:
+                    continue
+                is_reverse = getattr(cls, column.name).reverse
+                if is_reverse and not include_many_to_many_reverse:
+                    continue
+                if id_mode:
+                    name += "__ids"
 
             column_names.append(name)
 
