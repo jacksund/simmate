@@ -162,11 +162,13 @@ def table_search(request, table_name):
 def table_entry_new(request, table_name):
 
     table = get_table_safe(table_name)
-    if not table.html_form_view:
-        raise NotImplementedError("This model does not have an 'entry-new' view yet!")
+    if not table.html_form_component:
+        raise NotImplementedError(
+            "This model does not have an 'entry-new' component yet!"
+        )
 
     context = {
-        "unicorn_component_name": table.html_form_view,
+        "component_name": table.html_form_component,
         "page_title": table_name,
         "page_title_icon": "mdi-database",
         "breadcrumbs": ["Data", table_name, "Form"],
@@ -176,12 +178,12 @@ def table_entry_new(request, table_name):
 
 
 def table_entry_new_many(request, table_name):
-    # We can just use the entry-new view because our underlying unicorn
-    # view will dynamically determine this using the URL path
+    # We can just use the entry-new view because our underlying htmx form
+    # will dynamically determine the form mode using the URL path
     return table_entry_new(request, table_name)
 
 
 def table_entry_update(request, table_name, table_entry_id):
-    # We can just use the entry-new view because our underlying unicorn
-    # view will dynamically determine this using the URL path
+    # We can just use the entry-new view because our underlying htmx form
+    # will dynamically determine the form mode using the URL path
     return table_entry_new(request, table_name)

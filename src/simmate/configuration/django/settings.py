@@ -52,12 +52,6 @@ INSTALLED_APPS = [
     # note: there are extra apps installed based on configuration. See the
     # allauth section at the bottom of this page for more.
     #
-    # Django unicorn acts as a frontend framework for making dyanmic webpages
-    # (i.e. AJAX calls can be made to update the views)
-    # "django_unicorn",
-    "simmate.website.configs.UnicornConfig",  # fork of django_unicorn
-    "simmate.website.configs.HtmxConfig",  # refacto of unicorn onto htmx
-    #
     # Django simple history lets you track history of changes (and who made
     # those changes) for a given model. This is important for models that users
     # interact with and edit in the UI
@@ -78,6 +72,7 @@ INSTALLED_APPS = [
     # Any extra apps from the user (such as django-table2 or some other package)
     *settings.extra_django_apps,
     # Simmate apps + user apps
+    "simmate.website.configs.HtmxConfig",  # for dynamic webpages (AJAX calls)
     "simmate.website.configs.CoreComponentsConfig",
     "simmate.website.configs.DataExplorerConfig",
     "simmate.website.configs.WorkflowsConfig",
@@ -158,7 +153,6 @@ TEMPLATES = [
                 "simmate.website.core_components.templatetags.simmate_input_forms",
                 "simmate.website.core_components.templatetags.simmate_settings",
                 "simmate.website.core_components.templatetags.simmate_utils",
-                "simmate.website.unicorn.templatetags.unicorn",
                 "simmate.website.htmx.templatetags.htmx",
             ],
         },

@@ -1,4 +1,5 @@
 {% load static %}
+{% simmate_setting "website.chemdraw_js" as chemdraw_js %}
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
     <head>
@@ -31,7 +32,7 @@
         {# Simmate CSS #}
         <link rel="stylesheet"
               type="text/css"
-              href='{% static "/css/simmate.css" %}'>
+              href='{% static "/css/simmate.2025_11_13.css" %}'>
         {# CodeHilite CSS #}
         <link rel="stylesheet"
               type="text/css"
@@ -53,42 +54,36 @@
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
         {# Load the RDKit JS file #}
         <script src="https://unpkg.com/@rdkit/rdkit@2024.3.5-1.0.0/dist/RDKit_minimal.js"></script>
-        {# Load ChemDoodle JS and CSS #}
-        <link rel="stylesheet"
-              href="https://archives.simmate.org/assets/chemdoodle/ChemDoodleWeb.css"
-              type="text/css">
+        {% if chemdraw_js %}
+            <script src="{% static "chemdrawweb/chemdrawweb.js" %}"></script>
+            <script>var ChemDrawLicenseURL = '{% static "/licenses/ChemDraw-JS-License.xml" %}';</script>
+            <script type="text/javascript"
+                    src="{% static 'js/chemdraw_utils.2025_11_07.js' %}"></script>
+        {% else %}
+            {# TODO: switch to ketcher as the default #}
+            {# Load ChemDoodle JS and CSS #}
+            <link rel="stylesheet"
+                  href="https://archives.simmate.org/assets/chemdoodle/ChemDoodleWeb.css"
+                  type="text/css">
+            <script type="text/javascript"
+                    src="https://archives.simmate.org/assets/chemdoodle/ChemDoodleWeb.js"></script>
+            <link rel="stylesheet"
+                  href="https://archives.simmate.org/assets/chemdoodle/uis/jquery-ui-1.11.4.css"
+                  type="text/css">
+            <script type="text/javascript"
+                    src="https://archives.simmate.org/assets/chemdoodle/uis/ChemDoodleWeb-uis.js"></script>
+            <script type="text/javascript"
+                    src="{% static 'js/chemdoodle_utils.2024_09_03.js' %}"></script>
+        {% endif %}
+        {# Rest of Custom Simmate Javascript #}
         <script type="text/javascript"
-                src="https://archives.simmate.org/assets/chemdoodle/ChemDoodleWeb.js"></script>
-        <link rel="stylesheet"
-              href="https://archives.simmate.org/assets/chemdoodle/uis/jquery-ui-1.11.4.css"
-              type="text/css">
-        <script type="text/javascript"
-                src="https://archives.simmate.org/assets/chemdoodle/uis/ChemDoodleWeb-uis.js"></script>
-        {% comment %}
-            For customized servers that use ChemDraw instead of ChemDoodle, you can specify your ChemDraw
-            server like so (this is the official server as an example):
-                <script src="https://chemdrawdirect.perkinelmer.cloud/js/chemdrawweb/chemdrawweb.js"></script> 
-            All ChemDoodle JS/CSS code in the section above this can then be removed. In addition, the
-            custom simmate javascript "chemdoodle_utils" needs to be replaced with:
-                <script type="text/javascript" src="{% static 'js/chemdraw_utils.2025_04_18.js' %}"></script>
-            NOTE: ChemDraw requires a license, which you can place in any app folder with the
-            following path: 
-                static/licenses/ChemDraw-JS-License.xml
-            Then set this in the header as well:
-                <script>var ChemDrawLicenseURL = '{% static '/licenses/ChemDraw-JS-License.xml' %}';</script>
-        {% endcomment %}
-        {# Custom Simmate Javascript #}
-        <script type="text/javascript"
-                src="{% static "js/rdkit_utils.2024_09_13.js" %}"></script>
-        {# <script type="text/javascript" src="{% static 'js/chemdraw_utils.2025_04_18.js' %}"></script> #}
-        <script type="text/javascript"
-                src="{% static 'js/chemdoodle_utils.2024_09_03.js' %}"></script>
+                src="{% static 'js/rdkit_utils.2024_11_07.js' %}"></script>
         <script type="text/javascript"
                 src="{% static 'js/form_utils.2025_06_02.js' %}"></script>
         <script type="text/javascript"
                 src="{% static 'js/progress_bars.2024_05_27.js' %}"></script>
         <script type="text/javascript"
-                src="{% static 'js/select2_utils.2024_05_27.js' %}"></script>
+                src="{% static 'js/select2_utils.2024_11_07.js' %}"></script>
         <script type="text/javascript"
                 src="{% static 'js/bootstrap_utils.2025_09_23.js' %}"></script>
         <script type="text/javascript"
@@ -100,6 +95,8 @@
         {# token always required for htmx #}
         {# hx-headers='{"x-csrftoken": "{{ csrf_token }}"}' #}
         {% csrf_token %}
+        {# have the hidden spinner for when htmx is loading #}
+        {% htmx_loading_spinner %}
         {# The navigation bar is the same for every webpage #}
         {% include "core_components/navbar.html" %}
         {% block breadcrumbs %}
@@ -108,7 +105,8 @@
         {% if not fullpage_dashboard %}
             {# This is the main portion of the webpage #}
             {# TODO: include "core_components/sidebar_left.html" #}
-            <div class="container{% if full_width_body %}-flex{% endif %} min-vh-100 py-3">
+            <div id="main_body_container"
+                 class="container{% if full_width_body %}-flex{% endif %} min-vh-100 py-3">
                 {% block body %}{% endblock %}
             </div>
         {% else %}

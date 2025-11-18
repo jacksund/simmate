@@ -94,10 +94,9 @@ class SearchResults(models.QuerySet):
 
         if not columns:
             has_user_cols = False
-            # TODO: I'd like to include foreign keys or other relations by default
             columns = [
                 c
-                for c in self.model.get_column_names(include_relations=False)
+                for c in self.model.get_column_names(id_mode=True)
                 if c not in exclude_columns
             ]
         else:
@@ -629,19 +628,64 @@ class DatabaseTable(models.Model):
     @classmethod
     def get_column_names(
         cls,
-        include_relations: bool = True,
         include_parents: bool = True,
+        include_to_one_relations: bool = True,
+        include_to_many_relations: bool = False,
+        include_one_to_one_reverse: bool = False,
+        include_many_to_many_reverse: bool = False,
+        include_one_to_many_reverse: bool = False,
+        id_mode: bool = False,  # e.g. give "project_id" instead of "project"
     ) -> list[str]:
         """
-        Returns a list of all the column names for this table and indicates which
-        columns are related to other tables. This is primarily used to help
-        view what data is available.
+        Returns a list of all the column names for this table. Kwargs are used to
+        specify how to handle relation columns (ForeignKey, ManyToManyField,
+        OneToOneField, and their reverses). There is also an option to toggle
+        whether inherited columns should be included.
         """
-        return [
-            column.name
-            for column in cls._meta.get_fields(include_parents)
-            if include_relations or not column.is_relation
-        ]
+        column_names = []
+        for column in cls._meta.get_fields(include_parents):
+
+            name = column.name
+
+            # there is some redundant code here, but organizing in this way
+            # makes the logic a lot easier to follow
+
+            if column.many_to_one:  # i.e. a Foreign Key
+                if not include_to_one_relations:
+                    continue
+                if id_mode:
+                    name += "_id"
+
+            elif column.one_to_many:  # i.e. reverse of Foreign Key
+                if not include_to_many_relations or not include_one_to_many_reverse:
+                    continue
+                if id_mode:
+                    name += "__ids"
+
+            elif column.one_to_one:  # OneToOne that can be on either model
+                if not include_to_one_relations:
+                    continue
+                is_reverse = not hasattr(cls, f"{column.name}_id")
+                if is_reverse and not include_one_to_one_reverse:
+                    continue
+                if id_mode:
+                    if is_reverse:
+                        name += "__id"
+                    else:
+                        name += "_id"  # bc this is an actual col in the db
+
+            elif column.many_to_many:  # ManyToMany that can be on either model
+                if not include_to_many_relations:
+                    continue
+                is_reverse = getattr(cls, column.name).reverse
+                if is_reverse and not include_many_to_many_reverse:
+                    continue
+                if id_mode:
+                    name += "__ids"
+
+            column_names.append(name)
+
+        return column_names
 
     @classmethod
     def show_columns(cls):
@@ -1735,6 +1779,22 @@ class DatabaseTable(models.Model):
             elif filter_name in filter_methods_args:
                 continue  # these are only used via method_kwargs above
 
+            # ex: a `tags` m2m column and the filter is `tag_ids=[1,2,3,...]`.
+            elif filter_name.endswith("_ids") and hasattr(cls, f"{filter_name[:-4]}s"):
+                relation = f"{filter_name[:-4]}s__id"  # eg `tags__id`
+                # Note: filter_methods like `filter_tag_ids` would take priority
+                # and should be used when possible
+                if filter_value == []:
+                    queryset = queryset.filter(**{relation: []})
+                else:
+                    # By default we filter down to entries that have all of the
+                    # listed ids linked. So a tag_ids=[1,3] query would match
+                    # entries where tag_ids=[1,2,3,4,5] but NOT tag_ids=[2,3,4,5].
+                    # For alternative ways to filter (e.g. using `tags__in` or
+                    # a full list match) a custom filter method should be defined
+                    for i in filter_value:
+                        queryset = queryset.filter(**{relation: i})
+
             # otherwise we have a basic filter (e.g. `user__email__startswith`)
             else:
                 basic_filters[filter_name] = filter_value
@@ -1783,11 +1843,11 @@ class DatabaseTable(models.Model):
     html_entries_template: str = "data_explorer/table_entries.html"
 
     # This take the views below and just put them within the main body
-    html_search_template: str = "core_components/unicorn_full_page.html"
-    html_entry_form_template: str = "core_components/unicorn_full_page.html"
+    html_search_template: str = "htmx/full_page_component.html"
+    html_entry_form_template: str = "htmx/full_page_component.html"
 
-    # Unicorn views (side panels in the table view of the Data Explorer app)
-    html_form_view: str = None
+    # HTMX views (side panels in the table view of the Data Explorer app)
+    html_form_component: str = None
     html_enabled_forms: list[str] = []
     # options: "search", "create", "update", "create_many", "create_many_entry", "update_many"
 
@@ -1955,3 +2015,11 @@ class DatabaseTable(models.Model):
         """
         for column_name in cls.workflow_columns.keys():
             cls.populate_workflow_column(column_name, batch_size=batch_size)
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_curated_df(cls, queryset=None):
+        if queryset is None:
+            queryset = cls.objects
+        return queryset.to_dataframe()  # default to just raw data

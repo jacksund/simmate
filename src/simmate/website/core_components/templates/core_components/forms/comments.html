@@ -1,8 +1,8 @@
-<div class="row">
-    <div class="col-sm">
-        {% text_area name="comments" %}
-        {% if form_mode == "update_many" %}
-            {% alert theme="info" message="New comments will be appended the end of any current comments." %}
-        {% endif %}
-    </div>
-</div>
+{% if component.form_mode == "search" %}
+    {% htmx_text_area name="comments__contains" placeholder="Enter a phrase to search for" %}
+{% else %}
+    {% htmx_text_area name="comments" placeholder="(optional) Enter any extra notes or comments" %}
+{% endif %}
+{% if component.form_mode == "update_many" %}
+    {% alert theme="info" message="New comments will be appended the end of any current comments." %}
+{% endif %}

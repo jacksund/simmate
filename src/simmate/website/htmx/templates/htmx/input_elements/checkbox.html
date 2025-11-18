@@ -7,12 +7,10 @@
                class="form-check-input"
                type="checkbox"
                hx-preserve
-               {% if not defer %}
-                   hx-post={% url 'htmx:component' context.component.component_id %}
-                   hx-trigger="change"
-               {% endif %}
+               {% if not defer %}{% htmx_post %}{% endif %}
                {% if disabled %}disabled{% endif %}
-               {% if required %}required{% endif %}>
+               {% if required %}required{% endif %}
+               {% if current_value %}checked{% endif %}>
         {% if side_text %}<small>{{ side_text }}</small>{% endif %}
     </div>
 </div>

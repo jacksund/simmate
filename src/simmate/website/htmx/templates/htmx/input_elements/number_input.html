@@ -6,13 +6,11 @@
            class="form-control"
            type="number"
            placeholder="{{ placeholder }}"
+           {% if current_value %}value="{{ current_value }}"{% endif %}
            {% if maximum %}max="{{ maximum }}"{% endif %}
            {% if minimum %}min="{{ minimum }}"{% endif %}
            hx-preserve
-           {% if not defer %}
-               hx-post={% url 'htmx:component' context.component.component_id %}
-               hx-trigger="change"
-           {% endif %}
+           {% if not defer %}{% htmx_post %}{% endif %}
            {% if disabled %}disabled{% endif %}
            {% if required %}required{% endif %}>
 </div>

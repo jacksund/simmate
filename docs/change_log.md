@@ -92,6 +92,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - `website.engine` apps and others are condensed into `core_components`, `data_explorer`, and `workflows` apps
 - refactored `toolkit.featurizers` module
 - moved all of `simmate.engine` module into `simmate.workflows`
+- deprec django-unicorn in favor of htmx
 
 **Fixes**
 
