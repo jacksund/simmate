@@ -342,8 +342,8 @@ class SimmateSettings:
                 },
                 # These people get an email when DEBUG=False
                 "admins": [
-                    ("jacksund", "jacksundberg123@gmail.com"),
-                    ("jacksund-corteva", "jack.sundberg@corteva.com"),
+                    # for example:
+                    # ("janedoe", "janedoe@gmail.com"),
                 ],
                 # whether to use ChemDraw.js or the free/open-source fallback Ketcher.
                 # Note, chemdraw_js requires providing static files + license
