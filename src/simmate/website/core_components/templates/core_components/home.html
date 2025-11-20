@@ -1,0 +1,140 @@
+{% extends "core_components/site_base.html" %}
+{% block tabtitle %}About - Simmate{% endblock %}
+{% block body %}
+    {% load static %}
+    <div class="row mt-5 mb-3">
+        <img src="{% static 'images/simmate-logo-dark.svg' %}" height="200">
+    </div>
+    <div class="row align-items-center mb-5">
+        <div class="col-12 px-5 text-center">
+            <h2 class="fs-2 fw-normal lh-1 text-body-secondary">
+                an open collective & full-stack framework for chemistry research
+            </h2>
+        </div>
+    </div>
+    <div class="row align-items-center">
+        <div class="col-md-12 px-5">
+            <h3>Our mission</h3>
+            <p class="lead">
+                Simmate's primary goal is to build a community that openly shares chemistry data and infrastructure.
+                We believe that energy is wasted and research is slowed when
+                academics repeatedly perform the same calculations in isolation,
+                so we sought to build a platform
+                for open collaboration. This is why in our
+                public website you only pay for computational resources that
+                are not your own, and all workflow results are
+                openly accessible to everyone.
+                However, for the majority of researchers that work with
+                confidential data, we still wish to collaborate
+                through building the chemistry infrastructure together.
+                For this reason, 100% of our codebase is open-source, and it is
+                free to setup you own private server.
+            </p>
+        </div>
+    </div>
+    <hr class="my-5">
+    <div class="row align-items-center">
+        <div class="col-md-5">
+            <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
+                 height="300">
+        </div>
+        <div class="col-md-7">
+            <h3>All data is free & open</h3>
+            <p class="lead">
+                Easy, unrestricted access to data is what enables new ideas and great
+                science. This is because we as researchers must understand what has been
+                done before in order to truly innovate and do something new next.
+            </p>
+        </div>
+    </div>
+    <hr class="my-5">
+    <div class="row align-items-center">
+        <div class="col-md-7">
+            <h3>Compute is scalable & collaborative</h3>
+            <p class="lead">
+                The type of computational resources that researchers have access to
+                varies greatly depending on if you are in academia, industry, or
+                even just a hobbyist.
+                Our infrastructure scales across the cloud, HPC, &
+                personal computers to carryout calculations together.
+            </p>
+        </div>
+        <div class="col-md-5">
+            <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
+                 height="300">
+        </div>
+    </div>
+    <hr class="my-5">
+    <div class="row align-items-center">
+        <div class="col-md-5">
+            <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
+                 height="300">
+        </div>
+        <div class="col-md-7">
+            <h3>Earnings are accessible to everyone*</h3>
+            <p class="lead">
+                You can earn when you contribute computer resources for
+                other to use. And to make everything as transparent & fair as possible,
+                we make our financial data public - so you can trust that the science
+                is coming first.
+            </p>
+            <p class="lead">
+                <small>
+                    <em>
+                        * payouts depend on several factors, such the demand created by users and how much compute you provided. Make sure you read and understand our
+                        <a href="#" target="_blank">
+                            pay distribution strategy
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </a>.
+                    </em>
+                </small>
+            </p>
+        </div>
+    </div>
+    <hr class="my-5">
+    <div class="row align-items-center">
+        <div class="col-md-7">
+            <h3>Popular chemistry datasets are built-in</h3>
+            <p class="lead">1234</p>
+        </div>
+        <div class="col-md-5">
+            <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
+                 height="300">
+        </div>
+    </div>
+    <hr class="my-5">
+    <div class="row align-items-center">
+        <div class="col-md-5">
+            <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
+                 height="300">
+        </div>
+        <div class="col-md-7">
+            <h3>Workflows are built on trusted software</h3>
+            <p class="lead">1234</p>
+        </div>
+    </div>
+    <hr class="my-5">
+    <div class="row align-items-center">
+        <div class="col-md-7">
+            <h3>The codebase is 100% open-source</h3>
+            <p class="lead">
+                Simmate is built on top of other open-source giants like PyMatGen, RDkit, and Django. This
+                makes every part of our software completely free to install and use.
+            </p>
+        </div>
+        <div class="col-md-5">
+            <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
+                 height="300">
+        </div>
+    </div>
+    <hr class="my-5">
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <div class="text-center ">
+                <p class="mt-2">
+                    To learn more about Simmate and our history, visit our <a href="{% url 'about' %}">About</a> page
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
