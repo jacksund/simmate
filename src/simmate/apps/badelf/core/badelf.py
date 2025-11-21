@@ -59,13 +59,6 @@ class BadElfToolkit:
             The algorithm used to partition covalent bonds found in the
             structure. Only used for separation methods other than the
             plane method.
-        ignore_low_pseudopotentials (bool):
-            Whether to ignore warnings about missing atomic basins
-            due to using pseudopotentials with a small amount of
-            valence electrons.
-        downscale_resolution (int):
-            The resolution in voxels/Angstrom^3 that the grids should be
-            downscaled to in the ElfAnalysisToolkit
         elf_labeler_kwargs (dict):
             A dictionary of keyword arguments to pass to the ElfAnalyzerToolkit
             class.
@@ -76,15 +69,17 @@ class BadElfToolkit:
         self,
         partitioning_grid: Grid,
         charge_grid: Grid,
-        directory: Path,
         threads: int = None,
         algorithm: Literal["badelf", "voronelf", "zero-flux"] = "badelf",
-        shared_feature_separation_method: Literal[
-            "plane", "pauling", "equal"
-        ] = "pauling",
-        shared_feature_algorithm: Literal["zero-flux", "voronoi"] = "zero-flux",
-        find_electrides: bool = True,
+        shared_feature_splitting_method: Literal[
+            "plane", "weighted_dist", "pauling", "equal", "dist", "nearest"
+        ] = "plane",
         labeled_structure: Structure = None,
+        crystalnn_kwargs: dict = {
+            "distance_cutoffs": None,
+            "x_diff_weight": 0.0,
+            "porous_adjustment": False,
+            },
         elf_labeler_kwargs: dict = {
             "ignore_low_pseuodpotentials" : False,
             },
@@ -97,12 +92,12 @@ class BadElfToolkit:
             self.threads = threads
 
         # Check if POTCAR exists in path. If not, throw warning
-        if not (directory / "POTCAR").exists():
-            raise Exception(
-                """
-                No POTCAR file found in the requested directory.
-                """
-            )
+        # if not (directory / "POTCAR").exists():
+        #     raise Exception(
+        #         """
+        #         No POTCAR file found in the requested directory.
+        #         """
+        #     )
         if algorithm not in ["badelf", "voronelf", "zero-flux"]:
             raise ValueError(
                 """The algorithm setting you chose does not exist. Please select
@@ -112,193 +107,148 @@ class BadElfToolkit:
 
         self.partitioning_grid = partitioning_grid
         self.charge_grid = charge_grid
-        self.directory = directory
         self.algorithm = algorithm
-        self.find_electrides = find_electrides
-        self.labeled_structure = labeled_structure
-        if shared_feature_separation_method == "plane":
-            if algorithm == "zero-flux":
-                logging.warning(
-                    "The `plane` shared feature separation cannot be used with the zero-flux algorithm. Defaulting to pauling method."
-                )
-                shared_feature_separation_method = "pauling"
-            # We don't want to treat shared features as their own entities
-            self.shared_feature_algorithm = "none"
-        else:
-            self.shared_feature_algorithm = shared_feature_algorithm
-        if algorithm == "zero-flux" and shared_feature_algorithm == "voronoi":
+        self.crystalnn_kwargs = crystalnn_kwargs
+        self.cnn = CrystalNN(**crystalnn_kwargs)
+
+        # make sure the user isn't trying to split features with the plane method
+        # while using the zero-flux method
+        if shared_feature_splitting_method == "plane" and algorithm == "zero-flux":
             logging.warning(
-                "The voronoi shared feature algorithm cannot be used with the zero-flux algorithm. Zero-flux will be used instead."
+                "The `plane` separation method cannot be used with the zero-flux algorithm. Defaulting to pauling method."
             )
-            self.shared_feature_algorithm = "zero-flux"
-        self.shared_feature_separation_method = shared_feature_separation_method
-        self.elf_labeler_kwargs = elf_labeler_kwargs
-
-    @cached_property
-    def elf_labeler(self) -> ElfLabeler:
-        """
-        Returns an ElfLabeler object for this BadELF analysis
-        """
-        elf_labeler = ElfLabeler(
-            reference_grid=self.partitioning_grid.copy(),
-            charge_grid=self.charge_grid.copy(),
-            directory=self.directory,
-            **self.elf_labeler_kwargs
-        )
-        return elf_labeler
-
-    @cached_property
-    def _find_electrides_and_covalent_bonds(self):
-        """
-        Searches the partitioning grid for potential electride sites and
-        covalent/metallic bonds and returns a structure with the found sites.
-        Also returns the neighboring atoms for each of the shared bond
-        sites.
-
-        Returns:
-            A tuple with a Structure object with electride sites as "e",
-            covalent bonds as "z", and metal features as "m" or "le"
-            , along with the sites connected by any shared bonds.
-        """
-
-        if self.find_electrides:
-            electride_structure = self.elf_labeler.get_feature_structure(
-                included_features=FeatureType.valence_types
-                )
-            # get the neighbors of each shared feature
-            feature_indices = self.elf_labeler.feature_indices_by_type(FeatureType.valence_types)
-            shared_feature_atoms = [self.elf_labeler.feature_quasi_coord_atoms[i] for i in feature_indices]
+            self.shared_feature_separation_method = "pauling"
 
         else:
-            if self.labeled_structure is None:
-                raise ValueError(
-                    "A labeled structure must be provided if find_electrides is False"
+            self.shared_feature_splitting_method = shared_feature_splitting_method
+
+        
+        # if a labeled structure is provided, use that instead of the elf labeler
+        if labeled_structure is not None:
+            self._labeled_structure = labeled_structure
+            self.elf_labeler = None
+            self.elf_labeler_kwargs = None
+            self.bader = Bader(**self.elf_labeler_kwargs)
+        else:
+            self._labeled_structure = None
+            self.elf_labeler_kwargs = elf_labeler_kwargs
+            self.elf_labeler = ElfLabeler(
+                charge_grid=charge_grid,
+                reference_grid=partitioning_grid,
+                crystalnn_kwargs=crystalnn_kwargs,
+                **self.elf_labeler_kwargs
                 )
-            electride_structure = self.labeled_structure.copy()
-            # create a dummy structure with only electrides
-            dummy_structure = self.structure.copy()
-            for site in electride_structure:
-                if site.specie.symbol in ["E", "Le"]:
-                    dummy_structure.append(site.specie.symbol, site.frac_coords)
-            # get the local neighbors for each feature
-            shared_feature_atoms = []
-            cnn = CrystalNN()
-            electride_num = 0
-            for site in electride_structure:
-                if site.specie.symbol in ["E", "Le"]:
-                    site_idx = len(self.structure) + electride_num
-                    shared_feature_atoms.append(cnn.get_nn_info(dummy_structure, site_idx))
-                    electride_num += 1
-                else:
-                    temp_structure = dummy_structure.copy()
-                    temp_structure.append("H-", site.frac_coords)
-                    shared_feature_atoms.append(cnn.get_nn_info(dummy_structure, -1))      
+            self.bader = self.elf_labeler.bader
+            
+        # Properties that will be calculated and cached
+        self._structure = None
+        self._plane_partitioning_structure = None
+        self._electride_structure = None
 
-        return electride_structure, shared_feature_atoms
+        self._partitioning = None
+        self._zero_flux_feature_labels = None
+        self._atom_labels = None
+        self._multi_atom_mask = None
+        self._multi_atom_fracs = None
+        
+        self._electride_dim = None
+        self._all_electride_dims
+        self._all_electride_dim_cutoffs = None
+        
+        self._nelectrons = None
+        self._charges = None
+        self._volumes = None
 
-    @cached_property
-    def electride_structure(self) -> Structure:
-        """
-        Searches the partitioning grid for potential electride sites and returns
-        a structure with the found sites.
+        self._electrides_per_formula = None
+        self._electrides_per_reduced_formula = None
+        
+        self._vacuum_charge = None
+        self._vacuum_volume = None
+        
+        self._results_summary = None
 
-        Returns:
-            A Structure object with electride sites as "X" atoms.
-        """
+    ###########################################################################
+    # Convenient Properites
+    ###########################################################################
 
-        return self._find_electrides_and_covalent_bonds[0]
-
-    @cached_property
+    @property
+    def labeled_structure(self):
+        if self._labeled_structure is None:
+            self._labeled_structure = self.elf_labeler.get_feature_structure(
+                included_types=FeatureType.valence_types)
+        return self._labeled_structure
+    
+    @property
     def structure(self) -> Structure:
-        structure = self.electride_structure.copy()
-        # remove all non-atomic sites
-        for symbol in FEATURE_DUMMY_ATOMS.values():
-            if symbol in structure.symbol_set:
-                structure.remove_species([symbol])
+        if self._structure is None:
+            # NOTE: We don't just use the structure from one of the grids in
+            # case for some reason they differ from a provided structure from
+            # the user
+            structure = self.labeled_structure.copy()
+            # remove all non-atomic sites
+            for symbol in FEATURE_DUMMY_ATOMS.values():
+                if symbol in structure.symbol_set:
+                    structure.remove_species([symbol])
         return structure
+    
+    @property
+    def electride_structure(self):
+        if self._electride_structure is None:
+            # create our elecride structure from our labeled structure.
+            # NOTE: We don't just use the structure from the elf labeler in
+            # case the user provided their own
+            electride_structure = self.structure.copy()
+            for site in self.labeled_structure:
+                if site.specie.symbol in FeatureType.bare_types:
+                    electride_structure.append(FeatureType.bare_electron.dummy_species, site.frac_coords)
+            self._electride_structure = electride_structure
+        return self._electride_structure
+    
+    @property
+    def plane_partitioning_structure(self) -> Structure:
+        if self._plane_partitioning_structure is None:
+            # we want a structure that contains all of the atoms and features
+            # we plan to separate using planes.
+            if self.algorithm == "zero-flux":
+                self._plane_partitioning_structure = None
+            elif self.algorithm == "voronelf":
+                # we always want to separate both atoms and electrides with planes
+                # with this method. If the "plane" method is not selected, we
+                # also want to separate shared features
+                if self.shared_feature_splitting_method == "plane":
+                    self._plane_partitioning_structure = self.electride_structure
+                else:
+                    self._plane_partitioning_structure = self.labeled_structure
+            elif self.algorithm == "badelf":
+                # We only want to separate the atoms with planes
+                self._plane_partitioning_structure = self.structure
 
-    @cached_property
-    def shared_feature_atoms(self):
-        """
-        Searches the partitioning grid for covalent bonds and returns the atoms
-        bonded through each covalent bond.
-        """
-        return self._find_electrides_and_covalent_bonds[1]
+    @property
+    def nelectrides(self):
+        return len(self.electride_structure.indices_from_symbol(FeatureType.bare_electron.dummy_species))
+    
+    @property
+    def zero_flux_feature_labels(self):
+        if self._zero_flux_feature_labels is None:
+            if self.elf_labeler is not None:
+                self._zero_flux_feature_labels = self.elf_labeler.get_feature_labels(
+                    included_features=FeatureType.valence_types,
+                    return_structure=False
+                    )
+            else:
+                _,_, self._zero_flux_feature_labels=self.bader.assign_basins_to_structure(self.labeled_structure)
+        return self._zero_flux_feature_labels
 
-    @cached_property
-    def electride_indices(self) -> np.array:
-        """
-        The indices of the structure that are electride sites.
-        """
-        return np.array(
-            list(self.electride_structure.indices_from_symbol("Le")), dtype=int
-        )
 
-    @cached_property
-    def shared_feature_indices(self) -> np.array:
-        """
-        The indices of the structure that are covalent or metallic bonds.
-        """
-        indices = []
-        for symbol in ["Z", "M", "Lp"]:
-            indices.extend(self.electride_structure.indices_from_symbol(symbol))
-        indices = np.array(indices, dtype=int)
-        indices.sort()
-        return indices
-
-    @cached_property
-    def non_atom_indices(self) -> np.array:
-        """
-        The indices of the structure that are either electrides, covalent bonds,
-        or metallic features
-        """
-        all_non_atoms_indices = np.concatenate(
-            [self.electride_indices, self.shared_feature_indices]
-        )
-        all_non_atoms_indices.sort()
-        return all_non_atoms_indices
-
-    @cached_property
-    def coord_envs(self):
-        """
-        The coordination environment around each electride.
-        """
-        return self._get_coord_envs()
-
-    def _get_coord_envs(self):
-        """
-        Gets the coordination environment for electrides in the system.
-
-        Returns:
-            A list of coordination environments in order of the electrides in
-            the system.
-        """
-        # create a CrystalNN loop
-        cnn = CrystalNN(distance_cutoffs=None)
-        coord_envs = []
-        # For each site in the structure, we add the coordination environment.
-
-        # We first need to replace any dummy atoms with an atom CrystalNN
-        # will recognize. We default to H since it is probably the closest in radius
-        electride_structure = self.electride_structure.copy()
-        for symbol in ["E", "Z", "M", "Le", "Lp"]:
-            if symbol in electride_structure.symbol_set:
-                electride_structure.replace_species({symbol: "H1-"})
-        for i, site in enumerate(electride_structure):
-            with warnings.catch_warnings():
-                warnings.filterwarnings(
-                    "ignore", category=UserWarning, module="pymatgen"
-                )
-                coord_envs.append(cnn.get_cn(structure=electride_structure, n=i))
-        return coord_envs
-
-    @cached_property
+    @property
     def partitioning(self):
         """
         The partitioning planes for the structure as a dictionary of dataframes.
         None if the zero-flux method is selected
         """
-        return self._get_partitioning()
+        if self._partitioning is None:
+            self._partitioning = self._get_partitioning()
+        return self.partitioning
 
     def _get_partitioning(self):
         """
@@ -318,165 +268,47 @@ class BadElfToolkit:
             return None
         # Get the partitioning grid
         partitioning_grid = self.partitioning_grid.copy()
-        # Which sites we include in the plane partitioning depend on both the
-        # algorithm and shared_feature_algorithm. We start with the labeled structure
-        # and remove sites as needed
-        partitioning_structure = self.electride_structure.copy()
-        if self.algorithm != "voronelf":
-            partitioning_structure.remove_species("E")
-        if self.shared_feature_algorithm != "voronoi":
-            for symbol in ["Z", "M", "Le", "Lp"]:
-                if symbol in partitioning_structure.symbol_set:
-                    partitioning_structure.remove_species([symbol])
-        # Now get the partitioning with the given structure
-        partitioning_grid.structure = partitioning_structure
+        # Now get the partitioning with the proper structure
+        partitioning_grid.structure = self.plane_partitioning_structure
+        labeled_grid = partitioning_grid.copy()
+        labeled_grid.total = self.zero_flux_feature_labels
         partitioning = PartitioningToolkit(
-            partitioning_grid, self.elf_labeler
+            partitioning_grid, 
+            labeled_grid
         ).get_partitioning()
         return partitioning
 
-    @cached_property
-    def all_atom_elf_radii(self):
+    @property
+    def atom_labels(self):
         """
-        The elf radii for all atoms-neighbor pairs in the structure. Atom neighbor
-        pairs are obtained using CrystalNN while the radii are obtained during
-        the partitioning process.
+        A 3D array with the same shape as the charge grid indicating
+        which atom/electride each grid point is assigned to
         """
-        return self._get_all_atom_elf_radii()
-
-    def _get_all_atom_elf_radii(self):
-        """
-        Gets the elf radii for all atom-neighbor pairs in the structure.
-        """
-        if self.algorithm == "zero-flux":
-            logging.warn(
-                "Elf ionic radii are not calculated when using zero-flux partitioning."
-            )
-            return None
-        atom_elf_radii = pd.DataFrame(
-            columns=[
-                "site_index",
-                "neigh_index",
-                "radius",
-            ]
-        )
-        for i, site in enumerate(self.structure):
-            coordination = self.coord_envs[i]
-            neighbors_df = self.partitioning[i]
-            for j in range(coordination):
-                neigh_index = neighbors_df.iloc[j]["neigh_index"]
-                radius = neighbors_df.iloc[j]["radius"]
-                atom_elf_radii.loc[len(atom_elf_radii)] = [i, neigh_index, radius]
-        return atom_elf_radii
-
-    def write_atom_elf_radii(self, filename: str = "elf_radii.csv"):
-        """
-        Writes atomic elf radii to a csv.
-        """
-        if ".csv" not in filename:
-            filename += ".csv"
-        if self.all_atom_elf_radii is not None:
-            self.all_atom_elf_radii.to_csv(self.directory / filename)
-        else:
-            logging.warn(
-                "Elf ionic radii could not be found (likely due to zero-flux partitioning). No radii will be written."
-            )
+        if self._atom_labels is None:
+            self._get_voxel_assignments()
+        return self._atom_labels
 
     @property
-    def single_site_voxel_assignments(self):
-        """
-        A 1D array with site assignments for voxels not exactly on a partitioning
-        plane
-        """
-        return self.voxel_assignments[0]
-
-    @property
-    def multi_site_voxel_assignments(self):
+    def multi_atom_fracs(self):
         """
         An (N,M) shaped array with indices i,j where i is the voxel index
-        (these are sub indices, full indices are stored in multi_site_voxel_indices)
+        (these are sub indices, full indices are stored in multi_site_indices)
         and j is the site. A 1 indicates that this voxel is partially shared by
         this site
         """
-        return self.voxel_assignments[1]
+        if self._multi_atom_fracs is None:
+            self._get_voxel_assignments()
+        return self._multi_atom_fracs
 
     @property
-    def multi_site_voxel_indices(self):
+    def multi_atom_mask(self):
         """
-        The corresponding voxel indices for the multi_site_voxel_assignments
+        The corresponding voxel indices for the multi_atom_fracs
         array.
         """
-        return np.where(self.single_site_voxel_assignments == 0)[0]
-
-    @cached_property
-    def voxel_assignments_array(self):
-        """
-        A 3D array with the same shape as the charge grid indicating where
-        voxels are assigned
-        """
-        # Get multi site indices
-        split_voxel_indices = self.multi_site_voxel_indices
-        # create a list to store the randomly assigned voxels
-        random_voxel_assignments = []
-        # loop through the voxels belonging to multiple sites to pick one random
-        # site to assign to.
-        for split_voxel in self.multi_site_voxel_assignments:
-            # round the assignments
-            split_voxel = np.round(split_voxel, 2)
-            if len(np.unique(split_voxel)) == 2:
-                # There are several sites that share an equal part of this voxel.
-                # We want to randomly assign to one of these
-                # Get which sites this voxel is split by
-                possible_sites = np.where(split_voxel != 0)[0]
-                # Pick one randomly
-                # site_choice = np.random.choice(possible_sites)
-                # !!! For the purposes of electride dimensionality it is better to
-                # assign shared voxels to electrides which always have higher index
-                # values.
-                # !!! With new assignment method it may be better to assign to
-                # highest frac or random
-                site_choice = possible_sites.max()
-                # append it to our list
-                random_voxel_assignments.append(site_choice)
-            else:
-                # There are multiple ratios. We want to assign to the site with
-                # the most
-                site_choice = np.where(split_voxel == np.max(split_voxel))[0][0]
-                random_voxel_assignments.append(site_choice)
-        # Get the single site assignments and subtract one to get to sites
-        # beginning at 0
-        all_site_assignments = self.single_site_voxel_assignments.copy() - 1
-        # Assign our randomly generated sites then return the array as a 3D grid
-        all_site_assignments[split_voxel_indices] = np.array(random_voxel_assignments)
-        return all_site_assignments.reshape(self.charge_grid.shape)
-
-    @cached_property
-    def bader(self) -> Bader:
-        """
-        A BaderKit Bader object run on the Paritioning Grid
-        """
-        bader = self.elf_labeler.bader
-        return bader
-
-    @cached_property
-    def zero_flux_voxel_assignments(self):
-        """
-        An array of the same size as the partitioning grid representing the site
-        assignments from the zero-flux partitioning method. 
-        """
-        labels = self.elf_labeler.get_feature_labels(
-            included_features=FeatureType.valence_types,
-            return_structure=False
-            )
-        return labels
-
-    @cached_property
-    def voxel_assignments(self):
-        """
-        Two arrays representing voxels assigned to only one site and voxels
-        assigned to multiple sites
-        """
-        return self._get_voxel_assignments()
+        if self._multi_atom_mask is None and self._multi_atom_fracs is None:
+            self._get_voxel_assignments()
+        return self._multi_atom_mask
 
     def _get_voxel_assignments(self):
         """
@@ -486,12 +318,13 @@ class BadElfToolkit:
         logging.info("Beginning voxel assignment (this can take a while)")
         algorithm = self.algorithm
         # Get the zero-flux voxel assignments
-        all_voxel_site_assignments = self.zero_flux_voxel_assignments.ravel()
+        all_voxel_site_assignments = self.feature_labels.ravel()
         # shift voxel assignments to convention where 0 is unassigned
         all_voxel_site_assignments += 1
         if algorithm == "zero-flux":
-            single_site_voxel_assignments = all_voxel_site_assignments
-            multi_site_voxel_assignments = np.array([])
+            self._atom_labels = all_voxel_site_assignments
+            self._multi_atom_fracs = np.array([])
+            self._multi_atom_mask = None
 
         # Get the objects that we'll need to assign voxels.
         elif algorithm in ["badelf", "voronelf"]:
@@ -500,7 +333,7 @@ class BadElfToolkit:
             partitioning = self.partitioning
             voxel_assignment_tools = VoxelAssignmentToolkit(
                 charge_grid=charge_grid,
-                electride_structure=self.electride_structure.copy(),
+                electride_structure=self.labeled_structure.copy(),
                 partitioning=partitioning,
                 algorithm=self.algorithm,
                 directory=self.directory,
@@ -525,35 +358,65 @@ class BadElfToolkit:
                 )
 
             # get assignments for voxels belonging to single sites
-            single_site_voxel_assignments = (
-                voxel_assignment_tools.get_single_site_voxel_assignments(
+            atom_labels = (
+                voxel_assignment_tools.get_atom_labels(
                     initial_voxel_site_assignments
                 )
             )
+            
             # get assignments for voxels split by two or more sites
-            multi_site_voxel_assignments = (
-                voxel_assignment_tools.get_multi_site_voxel_assignments(
-                    single_site_voxel_assignments.copy()
+            multi_atom_fracs = (
+                voxel_assignment_tools.get_multi_atom_fracs(
+                    atom_labels.copy()
                 )
             )
+            self._multi_atom_fracs = multi_atom_fracs
+            # reshape atom labels
+            atom_labels = atom_labels.reshape(self.charge_grid.shape)
+            
+            # get mask at multi-atom points
+            multi_atom_mask = atom_labels == 0
+            self._multi_atom_mask = multi_atom_mask
+
+            # round multi-atom fractional assignments
+            multi_atom_fracs = np.round(multi_atom_fracs, 2)
+            
+            # get assignments from maximum fractional assignment
+            multi_atom_labels = np.argmax(multi_atom_fracs, axis=1)
+            
+            # Shift atom labels so they start at 0
+            atom_labels -= 1
+            
+            # assign our multi-atom points
+            atom_labels[multi_atom_mask] = multi_atom_labels
+            self._atom_labels = atom_labels
+
 
         logging.info("Finished voxel assignment")
         return (
-            single_site_voxel_assignments,
-            multi_site_voxel_assignments,
+            atom_labels,
+            multi_atom_labels,
         )
-
-    def get_ELF_maxima(self):
-        """
-        Gets the ELF maxima at each atom center or bare electron site
-        """
-        frac_coords = self.electride_structure.frac_coords
-        return self.partitioning_grid.values_at(
-            frac_coords, "cubic"
-        )
+    
+    @property
+    def all_electride_dims(self):
+        if self._all_electride_dims is None:
+            self._get_electride_dimensionality()
+        return self._all_electride_dims
+    
+    @property
+    def all_electride_dim_cutoffs(self):
+        if self._all_electride_dim_cutoffs is None:
+            self._get_electride_dimensionality()
+        return self._all_electride_dim_cutoffs
+            
+    @property
+    def electride_dimensionality(self):
+        if self._electride_dim is None:
+            self._electride_dim = self.all_electride_dims[0]
 
     @staticmethod
-    def get_ELF_dimensionality(grid: Grid, cutoff: float):
+    def _get_ELF_dimensionality(grid: Grid, cutoff: float):
         """
         This algorithm works by checking if the voxels with values above the cutoff
         are connected to the equivalent voxel in the unit cell one transformation
@@ -680,7 +543,7 @@ class BadElfToolkit:
 
         return max(dimensionalities)
 
-    def get_electride_dimensionality(self):
+    def _get_electride_dimensionality(self):
         """
         Finds the dimensionality (e.g. 0D, 1D, etc.) of an electride by labeling
         features in the ELF at various cutoffs and determining if they are
@@ -719,7 +582,7 @@ class BadElfToolkit:
         #######################################################################
         logging.info("Finding dimensionality cutoffs")
         logging.info("Calculating dimensionality at 0 ELF")
-        highest_dimension = self.get_ELF_dimensionality(elf_grid, 0)
+        highest_dimension = self._get_ELF_dimensionality(elf_grid, 0)
         dimensions = [i for i in range(0, highest_dimension)]
         dimensions.reverse()
         # Create lists for the refined dimensions
@@ -739,7 +602,7 @@ class BadElfToolkit:
                 # check what our current dimension is. If we are at a higher dimension
                 # we need to raise the cutoff. If we are at a lower dimension or at
                 # the dimension we need to lower it
-                current_dimension = self.get_ELF_dimensionality(elf_grid, guess)
+                current_dimension = self._get_ELF_dimensionality(elf_grid, guess)
                 if current_dimension > dimension:
                     guess += i
                 elif current_dimension < dimension:
@@ -751,74 +614,53 @@ class BadElfToolkit:
             if found_dimension:
                 final_connections.append(round(guess, 4))
                 final_dimensions.append(dimension)
-        return final_dimensions, final_connections
+        self._all_electride_dims = final_dimensions
+        self._all_electride_dim_cutoffs = final_connections
 
-    @cached_property
-    def results(self):
+    @property
+    def results_summary(self):
         """
         A summary of the results from a BadELF run.
         """
+        if self._results_summary is None:
+            results = {}
+            # collect method kwargs
+            method_kwargs = {
+                "algorithm": self.algorithm,
+                "shared_feature_separation_method": self.shared_feature_separation_method,
+                "shared_feature_algorithm": self.shared_feature_algorithm,
+                "crystalnn_kwargs": self.crystalnn_kwargs,
+                "elf_labeler_kwargs": self.elf_labeler_kwargs,
+            }
+            results["method_kwargs"] = method_kwargs
+            if self.bifurcation_graph is not None:
+                results["bifurcation_graph"] = self.bifurcation_graph.to_json()
+            else:
+                results["bifurcation_graph"] = None
+            
+            for result in [
+                "structure",
+                "labeled_structure",
+                "electride_structure",
+                "nelectrides",
+                "feature_types",
+                "feature_coord_atoms",
+                "feature_coord_nums",
+                "feature_max_values",
+                "atom_max_values",
+                "all_electride_dims",
+                "all_electride_dim_cutoffs",
+                "electride_dimensionality",
+                
+                    ]:
+                results[result] = getattr(self, result, None)
+            self._results_summary = results
         return self._get_results()
 
     def _get_results(self):
         """
         Gets the results for a BadELF run and prints them to a .csv file.
         """
-        #######################################################################
-        # Get the initial voxel assignments
-        #######################################################################
-        single_site_assignments, multi_site_assignments = self.voxel_assignments
-        logging.info("Calculating additional useful information")
-        results = {}
-        #######################################################################
-        # Algorithm Information
-        #######################################################################
-        results["algorithm"] = self.algorithm
-        results["shared_feature_algorithm"] = self.shared_feature_algorithm
-        results["shared_feature_separation_method"] = (
-            self.shared_feature_separation_method
-        )
-
-        #######################################################################
-        # Structure Information
-        #######################################################################
-        results["structure"] = self.structure
-        results["labeled_structure"] = self.electride_structure.copy()
-        results["nelectrides"] = len(self.electride_indices)
-        results["nshared_features"] = len(self.shared_feature_indices)
-        shared_feature_types = []
-        for site_idx in self.shared_feature_indices:
-            site = self.electride_structure[site_idx]
-            shared_feature_types.append(site.specie.symbol)
-        results["shared_feature_types"] = shared_feature_types
-        results["atom_coord_envs"] = [
-            self.coord_envs[i] for i, _ in enumerate(self.structure)
-        ]
-        results["electride_coord_envs"] = [
-            self.coord_envs[i] for i in self.electride_indices
-        ]
-        results["shared_feature_coord_envs"] = [
-            self.coord_envs[i] for i in self.shared_feature_indices
-        ]
-        results["shared_feature_atoms"] = self.shared_feature_atoms
-
-        #######################################################################
-        # ELF Information
-        #######################################################################
-        results["bifurcation_graph"] = self.elf_labeler.bifurcation_graph.to_json()
-        elf_maxima = self.get_ELF_maxima()
-        results["atom_elf_maxima"] = [
-            elf_maxima[i] for i, _ in enumerate(self.structure)
-        ]
-        results["electride_elf_maxima"] = [
-            elf_maxima[i] for i in self.electride_indices
-        ]
-        results["shared_feature_elf_maxima"] = [
-            elf_maxima[i] for i in self.shared_feature_indices
-        ]
-        electride_dim, dim_cutoffs = self.get_electride_dimensionality()
-        results["electride_dim"] = electride_dim
-        results["electride_dim_cutoffs"] = dim_cutoffs
 
         #######################################################################
         # Charge and Volume Information
@@ -861,7 +703,7 @@ class BadElfToolkit:
                 if self.algorithm == "voronelf":
                     electride_min_dists[site] = get_voronoi_radius(site)
                 else:
-                    electride_min_dists[site] = bader.atom_min_surface_distancee[site]
+                    electride_min_dists[site] = bader.atom_min_surface_distance[site]
             elif site in self.shared_feature_indices:
                 if (
                     self.shared_feature_algorithm == "voronoi"
@@ -894,8 +736,8 @@ class BadElfToolkit:
         # Get the charge and atomic volume of each voxel with multiple site
         # assignments. These are stored as a (N,M) shaped array where N
         # is the number of split voxels and M is the number of atoms.
-        if len(self.multi_site_voxel_assignments) > 0:
-            split_voxel_indices = self.multi_site_voxel_indices
+        if len(self.multi_atom_labels) > 0:
+            split_voxel_indices = self.multi_site_indices
             split_voxel_charge = charge_array[split_voxel_indices]
             # get how many sites each voxel is split by
             # split_voxel_ratio = 1 / np.sum(multi_site_assignments, axis=1)
@@ -1417,8 +1259,8 @@ class SpinBadElfToolkit:
             results["labeled_structure"] = spin_up_structure
             results["atom_coord_envs"] = spin_up_results["atom_coord_envs"]
             results["electride_coord_envs"] = spin_up_results["electride_coord_envs"]
-            results["shared_feature_coord_envs"] = spin_up_results[
-                "shared_feature_coord_envs"
+            results["shared_feature_coord_atoms"] = spin_up_results[
+                "shared_feature_coord_atoms"
             ]
             results["nshared_features"] = spin_up_results["nshared_features"]
             results["nelectrides"] = spin_up_results["nelectrides"]
@@ -1434,8 +1276,8 @@ class SpinBadElfToolkit:
             results["shared_feature_atoms_up"] = spin_up_results["shared_feature_atoms"]
             results["atom_coord_envs_up"] = spin_up_results["atom_coord_envs"]
             results["electride_coord_envs_up"] = spin_up_results["electride_coord_envs"]
-            results["shared_feature_coord_envs_up"] = spin_up_results[
-                "shared_feature_coord_envs"
+            results["shared_feature_coord_atoms_up"] = spin_up_results[
+                "shared_feature_coord_atoms"
             ]
             results["shared_feature_types_up"] = spin_up_results["shared_feature_types"]
             # Spin down
@@ -1449,8 +1291,8 @@ class SpinBadElfToolkit:
             results["electride_coord_envs_down"] = spin_down_results[
                 "electride_coord_envs"
             ]
-            results["shared_feature_coord_envs_down"] = spin_down_results[
-                "shared_feature_coord_envs"
+            results["shared_feature_coord_atoms_down"] = spin_down_results[
+                "shared_feature_coord_atoms"
             ]
             results["shared_feature_types_down"] = spin_down_results[
                 "shared_feature_types"
@@ -1485,8 +1327,8 @@ class SpinBadElfToolkit:
         ]
         results["atom_elf_maxima_up"] = spin_up_results["atom_elf_maxima"]
         results["electride_elf_maxima_up"] = spin_up_results["electride_elf_maxima"]
-        results["shared_feature_elf_maxima_up"] = spin_up_results[
-            "shared_feature_elf_maxima"
+        results["shared_feature_max_values_up"] = spin_up_results[
+            "shared_feature_max_values"
         ]
         results["atom_charges_up"] = atom_charges_up
         results["electride_charges_up"] = electride_charges_up
@@ -1510,8 +1352,8 @@ class SpinBadElfToolkit:
         ]
         results["atom_elf_maxima_down"] = spin_down_results["atom_elf_maxima"]
         results["electride_elf_maxima_down"] = spin_down_results["electride_elf_maxima"]
-        results["shared_feature_elf_maxima_down"] = spin_down_results[
-            "shared_feature_elf_maxima"
+        results["shared_feature_max_values_down"] = spin_down_results[
+            "shared_feature_max_values"
         ]
         results["atom_charges_down"] = atom_charges_down
         results["electride_charges_down"] = electride_charges_down

@@ -518,7 +518,7 @@ class VoxelAssignmentToolkit:
         results_array = np.where(results_array > 0, 1, 0)
         return results_array
 
-    def get_multi_site_voxel_assignments(self, all_site_voxel_assignments):
+    def get_multi_atom_labels(self, all_site_voxel_assignments):
         """
         Gets the voxel assignments for voxels that are not split by a plane.
 

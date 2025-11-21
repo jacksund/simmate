@@ -9,8 +9,7 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 from numpy.typing import ArrayLike
-from baderkit.core import Grid, ElfLabeler
-from baderkit.core.labelers.bifurcation_graph.enum_and_styling import FeatureType
+from baderkit.core import Grid
 from pymatgen.analysis.local_env import CrystalNN
 from scipy.spatial import ConvexHull
 from tqdm import tqdm
@@ -26,22 +25,20 @@ class PartitioningToolkit:
 
     Args:
         grid (Grid):
-            A BadELF app Grid type object. The structure of this object
-            should only contain atoms and dummy atoms that the user
-            wishes to find partitioning planes for
-        labeler (ElfLabeler):
-            A BaderKit ElfLabeler type object. This object should be labeled
-            with covalent/metallic/electride dummy atoms to properly place
-            partitioning planes.
+            A BaderKit Grid type object with the structure and reference
+            data that the user wishes to find partitioning planes for
+        labeled_grid (Grid):
+            A BaderKit Grid type object with labeled data representing
+            zero-flux voxel assignments
     """
 
-    def __init__(self, grid: Grid, labeler: ElfLabeler):
+    def __init__(
+            self, 
+            grid: Grid, 
+            labeled_grid: Grid,
+            ):
         self.grid = grid
-        self.labeler = labeler
-        self.label_data = labeler.get_feature_labels(
-            included_features=FeatureType.valence_types,
-            return_structure=False
-            )
+        self.labeled_grid = labeled_grid
         
     def get_partitioning_line_from_frac(
         self,
@@ -54,12 +51,10 @@ class PartitioningToolkit:
         y_pts = np.linspace(site_frac_coords[1], neigh_frac_coords[1], num=steps)
         z_pts = np.linspace(site_frac_coords[2], neigh_frac_coords[2], num=steps)
         frac_coords = np.column_stack((x_pts, y_pts, z_pts))
-        # make grid with labels as data
-        label_grid = self.grid.copy()
-        label_grid.total = self.label_data
+
         # get slices
         values = self.grid.values_at(frac_coords)
-        label_values = label_grid.values_at(
+        label_values = self.labeled_grid.values_at(
             frac_coords,
             method="nearest",
             )
