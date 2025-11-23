@@ -1,0 +1,315 @@
+{% extends "core_components/site_base.html" %}
+{% block tabtitle %}Contact - Simmate{% endblock %}
+{% block body %}
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <h1 class="text-center mb-5 fw-bold text-primary">Frequently Asked Questions</h1>
+            <div class="accordion" id="faqAccordion">
+                <h5 class="mt-5 mb-3">Privacy</h5>
+                <div class="accordion-item"
+                     style="border-radius: 0.5rem;
+                            margin-bottom: 1rem;
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+                            border: none">
+                    <h2 class="accordion-header" id="headingSix">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseSix"
+                                aria-expanded="false"
+                                aria-controls="collapseSix"
+                                style="font-weight: 600;
+                                       color: #0d6efd">Can I make my workflow results private?</button>
+                    </h2>
+                    <div id="collapseSix"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingSix"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            You can install Simmate locally to run private workflows and even set up a private server.
+                            But as far as the public website goes: no, you can not make any of your results private.
+                            In the spirit of building a community that openly shares chemistry data, everything
+                            in our public website will remain openly accessible to everyone.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item"
+                     style="border-radius: 0.5rem;
+                            margin-bottom: 1rem;
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+                            border: none">
+                    <h2 class="accordion-header" id="headingSix">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseSix"
+                                aria-expanded="false"
+                                aria-controls="collapseSix"
+                                style="font-weight: 600;
+                                       color: #0d6efd">Why is Simmate's ledger public?</button>
+                    </h2>
+                    <div id="collapseSix"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingSix"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            We aim to be as transparent as possible with our finances. This is because,
+                            as an open collective, we want users to know that the science & our community
+                            comes first - and that all funds going through Simmate are fairly distributed.
+                            A public ledger might be suprising, but it is by no means revolutionary. Simmate
+                            uses pseudonymity -- where all transactions are public, but user identities are
+                            not. This is exactly how many cryptocurrencies operate, including the most popular
+                            currencies like Bitcoin and Ethereum.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item"
+                     style="border-radius: 0.5rem;
+                            margin-bottom: 1rem;
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+                            border: none">
+                    <h2 class="accordion-header" id="headingSix">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseSix"
+                                aria-expanded="false"
+                                aria-controls="collapseSix"
+                                style="font-weight: 600;
+                                       color: #0d6efd">What user data is collected?</button>
+                    </h2>
+                    <div id="collapseSix"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingSix"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <ul>
+                                <li>
+                                    <b>Email & Name:</b> only your email and (if it's available) your name are stored. We will never send you promotional emails or newsletters.
+                                </li>
+                                <li>
+                                    <b>Country/State:</b> this is only required for purchases made on Simmate, and we only need this information for tax purposes. We are required to collect this by "Know your Customer" regulations, but if there's ever the option, we will gladly remove this from our data collection.
+                                </li>
+                                <li>
+                                    <b>Website Traffic:</b> every new page visit is logged so that we can go back and scale cloud resources appropriately, see what features users are most interested in, and utilize stats for grants/funding.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <h5 class="mt-5 mb-3">Finances</h5>
+                <div class="accordion-item"
+                     style="border-radius: 0.5rem;
+                            margin-bottom: 1rem;
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+                            border: none">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseOne"
+                                aria-expanded="false"
+                                aria-controls="collapseOne"
+                                style="font-weight: 600;
+                                       color: #0d6efd">How much does it cost to run a workflow?</button>
+                    </h2>
+                    <div id="collapseOne"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingOne"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Our platform operates on a pay-as-you-go model. Costs are transparent and determined by the underlying decentralized compute resources consumed (CPU/GPU time, storage, network). The platform itself takes a minimal transaction fee (typically less than 5%). You can drastically reduce or eliminate these costs by running tasks on your own compute node.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item"
+                     style="border-radius: 0.5rem;
+                            margin-bottom: 1rem;
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+                            border: none">
+                    <h2 class="accordion-header" id="headingFive">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseFive"
+                                aria-expanded="false"
+                                aria-controls="collapseFive"
+                                style="font-weight: 600;
+                                       color: #0d6efd">
+                            How can I use my own compute resources and avoid workflow costs?
+                        </button>
+                    </h2>
+                    <div id="collapseFive"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingFive"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            To use your own hardware, simply download and deploy our **Compute Node Client**. Once registered, you can route your personal workflows directly to your node ID. This means you only incur your local operational costs (electricity, internet) and bypass the fees associated with renting compute from the decentralized network.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item"
+                     style="border-radius: 0.5rem;
+                            margin-bottom: 1rem;
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+                            border: none">
+                    <h2 class="accordion-header" id="headingThree">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseThree"
+                                aria-expanded="false"
+                                aria-controls="collapseThree"
+                                style="font-weight: 600;
+                                       color: #0d6efd">How can I earn USDC?</button>
+                    </h2>
+                    <div id="collapseThree"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingThree"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            There are two primary ways to earn USDC:
+                            <ol class="mt-2">
+                                <li>
+                                    <strong>Compute Provision:</strong> Run a secure compute node and earn fees for every task executed on your machine.
+                                </li>
+                                <li>
+                                    <strong>Workflow Creation:</strong> Develop and publish popular, high-value workflows. You earn a royalty every time another user executes your published workflow.
+                                </li>
+                            </ol>
+                            All earnings are automatically distributed via smart contracts directly to your linked wallet.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item"
+                     style="border-radius: 0.5rem;
+                            margin-bottom: 1rem;
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+                            border: none">
+                    <h2 class="accordion-header" id="headingSix">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseSix"
+                                aria-expanded="false"
+                                aria-controls="collapseSix"
+                                style="font-weight: 600;
+                                       color: #0d6efd">How much does it cost to set up my own private server?</button>
+                    </h2>
+                    <div id="collapseSix"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingSix"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Simmate is completely free. If you decide to download and host your own server,
+                            your team may want to use a cloud provider like DigitalOcean. These extra cloud-hosting features are
+                            100% optional because every component for Simmate is built on free and open-source software.
+                        </div>
+                    </div>
+                </div>
+                <h5 class="mt-5 mb-3">Licensing</h5>
+                <div class="accordion-item"
+                     style="border-radius: 0.5rem;
+                            margin-bottom: 1rem;
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+                            border: none">
+                    <h2 class="accordion-header" id="headingSix">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseSix"
+                                aria-expanded="false"
+                                aria-controls="collapseSix"
+                                style="font-weight: 600;
+                                       color: #0d6efd">What is Simmate licensed under?</button>
+                    </h2>
+                    <div id="collapseSix"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingSix"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Simmate is open-sourced under the BSD-3 License. This permits commercial use,
+                            modification, distribution, and private use - but still has limitations. Read the specifics
+                            <a href="https://github.com/jacksund/simmate/blob/main/LICENSE"
+                               target="_blank">here</a>.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item"
+                     style="border-radius: 0.5rem;
+                            margin-bottom: 1rem;
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+                            border: none">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseTwo"
+                                aria-expanded="false"
+                                aria-controls="collapseTwo"
+                                style="font-weight: 600;
+                                       color: #0d6efd">What parts of the platform are open source?</button>
+                    </h2>
+                    <div id="collapseTwo"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingTwo"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            We are committed to transparency. The core execution engine, the client SDKs, the underlying smart contracts, and the majority of our community-driven workflow components are fully open source under the MIT license. Only proprietary infrastructure components and internal administrative tooling are closed source.
+                        </div>
+                    </div>
+                </div>
+                <h5 class="mt-5 mb-3">Our Community</h5>
+                <div class="accordion-item"
+                     style="border-radius: 0.5rem;
+                            margin-bottom: 1rem;
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+                            border: none">
+                    <h2 class="accordion-header" id="headingFour">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseFour"
+                                aria-expanded="false"
+                                aria-controls="collapseFour"
+                                style="font-weight: 600;
+                                       color: #0d6efd">I'm interested in contributing — how can I help?</button>
+                    </h2>
+                    <div id="collapseFour"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingFour"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            We welcome contributions from the community! You can contribute in several ways: writing code for core features or SDKs, enhancing documentation, designing new workflow templates, proposing new features, or joining our governance forums. Check out our main repository on GitHub for a list of open issues and contribution guidelines.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item"
+                     style="border-radius: 0.5rem;
+                            margin-bottom: 1rem;
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+                            border: none">
+                    <h2 class="accordion-header" id="headingSix">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseSix"
+                                aria-expanded="false"
+                                aria-controls="collapseSix"
+                                style="font-weight: 600;
+                                       color: #0d6efd">Can I request a new feature?</button>
+                    </h2>
+                    <div id="collapseSix"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingSix"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Yes, please send suggestions! Send us an email or make a post on Github. Any
+                            feedback is welcome, and we'll do our best to prioritize new components.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
