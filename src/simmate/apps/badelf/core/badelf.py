@@ -90,6 +90,7 @@ class BadElfToolkit:
         else:
             self.threads = threads
             
+        self.crystalnn_kwargs = crystalnn_kwargs
         self.cnn = CrystalNN(**crystalnn_kwargs)
 
         if algorithm not in ["badelf", "voronelf", "zero-flux"]:
@@ -149,7 +150,7 @@ class BadElfToolkit:
         self._multi_atom_fracs = None
         
         self._electride_dim = None
-        self._all_electride_dims
+        self._all_electride_dims = None
         self._all_electride_dim_cutoffs = None
         
         self._nelectrons = None
@@ -207,7 +208,7 @@ class BadElfToolkit:
     def labeled_structure(self):
         if self._labeled_structure is None:
             labeled_structure = self.elf_labeler.get_feature_structure(
-                included_types=FeatureType.valence_types)
+                included_features=FeatureType.valence_types)
             self._labeled_structure = self._get_sorted_structure(labeled_structure)
         return self._labeled_structure
     
@@ -281,7 +282,7 @@ class BadElfToolkit:
         """
         if self._partitioning is None:
             self._partitioning = self._get_partitioning()
-        return self.partitioning
+        return self._partitioning
 
     def _get_partitioning(self):
         """
@@ -348,19 +349,29 @@ class BadElfToolkit:
         Gets a dataframe of voxel assignments. The dataframe has columns
         [x, y, z, charge, sites]
         """
-        logging.info("Beginning voxel assignment")
         algorithm = self.algorithm
-        # Get the zero-flux voxel assignments
-        all_voxel_site_assignments = self.feature_labels.ravel()
-        # shift voxel assignments to convention where 0 is unassigned
-        all_voxel_site_assignments += 1
         if algorithm == "zero-flux":
-            self._atom_labels = all_voxel_site_assignments
+            self._atom_labels = self.zero_flux_feature_labels
             self._multi_atom_fracs = np.array([])
             self._multi_atom_mask = None
-
+            # if we have an elf labeler, we can go ahead and assign charges/volumes
+            # since it has an internal method
+            if self.elf_labeler is not None:
+                self._charges, self._volumes = self.elf_labeler.get_charges_and_volumes(
+                    splitting_method=self.shared_feature_splitting_method
+                    )
+            return
+        # make sure we've run our partitioning (for logging clarity)
+        self.partitioning
+        logging.info("Beginning voxel assignment")
+        
+        # Get the zero-flux voxel assignments
+        all_voxel_site_assignments = self.zero_flux_feature_labels.ravel()
+        # shift voxel assignments to convention where 0 is unassigned
+        all_voxel_site_assignments += 1
+        
         # Get the objects that we'll need to assign voxels.
-        elif algorithm in ["badelf", "voronelf"]:
+        if algorithm in ["badelf", "voronelf"]:
             charge_grid = self.charge_grid
             charge_grid.structure = self.structure
             partitioning = self.partitioning
@@ -369,10 +380,9 @@ class BadElfToolkit:
                 electride_structure=self.labeled_structure.copy(),
                 partitioning=partitioning,
                 algorithm=self.algorithm,
-                directory=self.directory,
-                shared_feature_algorithm=self.shared_feature_algorithm,
+                shared_feature_splitting_method=self.shared_feature_splitting_method
             )
-            initial_voxel_site_assignments = np.zeros(charge_grid.ngridpts)
+            initial_voxel_site_assignments = np.zeros(charge_grid.ngridpts, dtype=np.int64)
             if algorithm == "badelf":
                 # Get the voxel assignments for each electride or covalent site
                 if self.shared_feature_splitting_method == "plane":
@@ -684,7 +694,10 @@ class BadElfToolkit:
         charge_array = self.charge_grid.total
         # Get charges and volumes from base assignment
         for site_idx in range(len(self.labeled_structure)):
-            voxel_mask = (self.atom_labels == site_idx) & (~self.multi_atom_mask)
+            if self.multi_atom_mask is not None:
+                voxel_mask = (self.atom_labels == site_idx) & (~self.multi_atom_mask)
+            else:
+                voxel_mask = self.atom_labels == site_idx
             site_charge = charge_array[voxel_mask].sum()
             site_volume = np.count_nonzero(voxel_mask) * self.charge_grid.point_volume
             all_charges[site_idx] = site_charge
@@ -693,17 +706,16 @@ class BadElfToolkit:
         # Get the charge and atomic volume of each voxel with multiple site
         # assignments. These are stored as a (N,M) shaped array where N
         # is the number of split voxels and M is the number of atoms.
-        if len(self.multi_atom_labels) > 0:
+        if len(self.multi_atom_fracs) > 0:
             split_voxel_charge = charge_array[self.multi_atom_mask]
             # get how many sites each voxel is split by
-            # split_voxel_ratio = 1 / np.sum(multi_site_assignments, axis=1)
             for site_index, assignment_array in enumerate(self.multi_atom_fracs.T):
                 indices_where_assigned = np.where(assignment_array > 0)[0]
                 site_charge = split_voxel_charge[indices_where_assigned]
                 site_charge = site_charge * assignment_array[indices_where_assigned]
                 # add charge/volume to site
-                all_charges += site_charge.sum()
-                all_volumes += np.sum(
+                all_charges[site_index] += site_charge.sum()
+                all_volumes[site_index] += np.sum(
                     assignment_array[indices_where_assigned] * self.charge_grid.point_volume
                 )
         
@@ -717,7 +729,8 @@ class BadElfToolkit:
         if self.shared_feature_splitting_method == "plane":
             # we shouldn't find any charge/volume for our shared features because
             # we assigned them based on planes. We can just return
-            return charges, volumes
+            self._charges = charges
+            self._volumes = volumes
         
         for site_idx in range(len(self.electride_structure), len(self.labeled_structure)):
             charge = all_charges[site_idx]
@@ -775,6 +788,7 @@ class BadElfToolkit:
                 best_neigh = np.where(site_row==min_val)[0][0]
                 charges[best_neigh] += charge
                 volumes[best_neigh] += volume
+
         self._charges = charges
         self._volumes = volumes
         
@@ -813,7 +827,7 @@ the shared features. Atom/electride surface distances may be smaller than expect
             neighbor_transforms=neigh_transforms,
             vacuum_mask=self.bader.vacuum_mask
             )
-        self.min_surface_dists, self.avg_surface_dists = get_min_avg_surface_dists(
+        self._min_surface_dists, self._avg_surface_dists = get_min_avg_surface_dists(
             labels=self.atom_labels,
             frac_coords=self.electride_structure.frac_coords,
             edge_mask=edges,
@@ -873,15 +887,10 @@ the shared features. Atom/electride surface distances may be smaller than expect
         method_kwargs = {
             "algorithm": self.algorithm,
             "shared_feature_splitting_method": self.shared_feature_splitting_method,
-            "shared_feature_algorithm": self.shared_feature_algorithm,
             "crystalnn_kwargs": self.crystalnn_kwargs,
             "elf_labeler_kwargs": self.elf_labeler_kwargs,
         }
         results["method_kwargs"] = method_kwargs
-        if self.bifurcation_graph is not None:
-            results["bifurcation_graph"] = self.bifurcation_graph
-        else:
-            results["bifurcation_graph"] = None
         
         results["oxidation_states"] = self.get_oxidation_states(potcar_path)
         
@@ -905,9 +914,11 @@ the shared features. Atom/electride surface distances may be smaller than expect
             results[result] = getattr(self, result, None)
         if use_json:
             # get serializable versions of each attribute
-            for key in ["structure", "labeled_structure", "electride_structure", "bifurcation_graph"]:
+            for key in ["structure", "labeled_structure", "electride_structure"]:
                 results[key] = results[key].to_json()
             for key in ["charges", "volumes", "oxidation_states", "min_surface_dists", "avg_surface_dists"]:
+                if results[key] is None:
+                    continue # skip oxidation states if they fail
                 results[key] = results[key].tolist()        
         return results
                 

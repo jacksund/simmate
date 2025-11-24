@@ -4,13 +4,14 @@ import itertools
 import logging
 import math
 from functools import cached_property
-from pathlib import Path
 
 import dask.array as da
 import numpy as np
 import psutil
 from numpy.typing import ArrayLike
 from tqdm import tqdm
+
+from baderkit.core.labelers.bifurcation_graph.enum_and_styling import FeatureType
 
 from simmate.apps.bader.toolkit import Grid
 from simmate.toolkit import Structure
@@ -32,6 +33,9 @@ class VoxelAssignmentToolkit:
             PartitioningToolkit. Will be generated from the grid if None.
         electride_structure (Structure):
             The structure with electride sites. Will be generated if not given.
+        shared_feature_splitting_method (str):
+            The method used to split charge/volume assigned to each shared ELF
+            feature
 
     """
 
@@ -41,15 +45,14 @@ class VoxelAssignmentToolkit:
         electride_structure: Structure,
         algorithm: str,
         partitioning: dict,
-        directory: Path,
-        shared_feature_algorithm: str = "zero-flux",  # other option is "voronoi"
+        shared_feature_splitting_method: str,
     ):
         self.charge_grid = charge_grid.copy()
         self.algorithm = algorithm
         # partitioning will contain electride sites for voronelf
         self.partitioning = partitioning
         self.electride_structure = electride_structure
-        self.shared_feature_algorithm = shared_feature_algorithm
+        self.shared_feature_splitting_method = shared_feature_splitting_method
 
     @property
     def unit_cell_permutations_vox(self):
@@ -383,7 +386,7 @@ class VoxelAssignmentToolkit:
             voxel_results_array = np.concatenate([voxel_results_array, split_result])
         return voxel_results_array
 
-    def get_single_site_voxel_assignments(self, all_site_voxel_assignments: ArrayLike):
+    def get_atom_labels(self, all_site_voxel_assignments: ArrayLike):
         """
         Gets the voxel assignments for voxels that are not split by a plane.
 
@@ -518,7 +521,7 @@ class VoxelAssignmentToolkit:
         results_array = np.where(results_array > 0, 1, 0)
         return results_array
 
-    def get_multi_atom_labels(self, all_site_voxel_assignments):
+    def get_multi_atom_fracs(self, all_site_voxel_assignments):
         """
         Gets the voxel assignments for voxels that are not split by a plane.
 
@@ -560,22 +563,23 @@ class VoxelAssignmentToolkit:
         # structure.remove_oxidation_states()
         if self.algorithm == "badelf":
             # Remove electrides from structure and assignments
-            if "E" in structure.symbol_set:
-                structure.remove_species("E")
+            if FeatureType.bare_electron.dummy_species in structure.symbol_set:
+                structure.remove_species(FeatureType.bare_electron.dummy_species)
             # zero out electride site assignments
             electride_indices = (
                 np.array(
-                    list(self.electride_structure.indices_from_symbol("E")), dtype=int
+                    list(self.electride_structure.indices_from_symbol(FeatureType.bare_electron.dummy_species)), dtype=int
                 )
                 + 1
             )
             assignment_array = np.where(
                 np.isin(assignment_array, electride_indices), 0, assignment_array
             )
-        if self.shared_feature_algorithm != "voronoi":
+
+        if self.shared_feature_splitting_method == "plane" or self.algorithm != "voronelf":
             # remove shared features from structure and assignments
             shared_indices = []
-            for symbol in ["Z", "M", "Le"]:
+            for symbol in FeatureType.shared_species:
                 if symbol in structure.symbol_set:
                     structure.remove_species(symbol)
                 shared_indices.extend(
