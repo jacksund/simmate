@@ -4,10 +4,10 @@
         {# Simmate Logo / Home button #}
         <a href="{% url 'home' %}" class="navbar-brand">
             <span class="d-none d-md-block bg-light px-3 rounded-pill">
-                <img src="{% static 'images/simmate-logo-dark.svg' %}" alt="" height="35">
+                <img src="{% static 'images/simmate-logo-dark.svg' %}" height="35">
             </span>
             <span class="d-md-none">
-                <img src="{% static 'images/simmate-icon.svg' %}" alt="" height="36">
+                <img src="{% static 'images/simmate-icon.svg' %}" height="36">
             </span>
         </a>
         <button class="navbar-toggler"
@@ -48,6 +48,9 @@
                             <a class="dropdown-item" href="{% url 'pricing' %}"><i class="bi bi-currency-dollar"></i> Pricing</a>
                         </li>
                         <li>
+                            <a class="dropdown-item" href="#"><i class="bi bi-piggy-bank"></i> Finances</a>
+                        </li>
+                        <li>
                             <hr class="dropdown-divider">
                         </li>
                         <li>
@@ -56,7 +59,7 @@
                         <li>
                             <a class="dropdown-item"
                                href="https://jacksund.github.io/simmate/home/"
-                               target="_blank"><i class="bi bi-book"></i> Docs</a>
+                               target="_blank"><i class="bi bi-book"></i> All Docs</a>
                         </li>
                         <li>
                             <a class="dropdown-item"
@@ -67,6 +70,9 @@
                             <a class="dropdown-item"
                                href="https://jacksund.github.io/simmate/full_guides/toolkit/molecules/overview/"
                                target="_blank"><i class="bi bi-tools"></i> Toolkit</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#"><i class="bi bi-cpu"></i> Contribue & Earn</a>
                         </li>
                         <li>
                             <hr class="dropdown-divider">

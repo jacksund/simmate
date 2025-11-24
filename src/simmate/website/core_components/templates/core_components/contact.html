@@ -1,84 +1,76 @@
 {% extends "core_components/site_base.html" %}
 {% block tabtitle %}Contact - Simmate{% endblock %}
 {% block body %}
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="text-center">
-                <h3 class="">Contact & FAQs</h3>
-                <p class="text-muted mt-3">
-                    If you run into any issues, there are serveral ways to
-                    contact us. The easiest way is to send an email to simmate.team@gmail.com
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <h2 class="text-center mb-5">How Can We Help You?</h2>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 text-center">
+            <div class="col">
+                <div class="card shadow-sm h-100 border-primary">
+                    <div class="card-body">
+                        <i class="bi bi-people-fill text-primary display-4 mb-3"></i>
+                        <h5 class="card-title">Collaboration & Support</h5>
+                        <p class="card-text">For questions about collaboration opportunities or specialized support services.</p>
+                        <a href="mailto:support@simmate.org" class="btn btn-primary mt-3">
+                            <i class="bi bi-envelope-fill me-2"></i> Email us (support@simmate.org)
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow-sm h-100 border-success">
+                    <div class="card-body">
+                        <i class="bi bi-mortarboard-fill text-success display-4 mb-3"></i>
+                        <h5 class="card-title">Workshops & Education</h5>
+                        <p class="card-text">For inquiries regarding workshops, training, and other educational resources.</p>
+                        <a href="mailto:education@simmate.org" class="btn btn-success mt-3">
+                            <i class="bi bi-envelope-fill me-2"></i> Email us (education@simmate.org)
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow-sm h-100 border-danger">
+                    <div class="card-body">
+                        <i class="bi bi-bug-fill text-danger display-4 mb-3"></i>
+                        <h5 class="card-title">Bugs & Feature Requests</h5>
+                        <p class="card-text">
+                            Found a bug or have a great idea for a new feature? Log it on GitHub and recieve alerts on your issue/request.
+                        </p>
+                        <a href="https://github.com/jacksund/simmate/issues"
+                           target="_blank"
+                           class="btn btn-danger mt-3">
+                            <i class="bi bi-github me-2"></i> Report on GitHub Issues
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow-sm h-100 border-info">
+                    <div class="card-body">
+                        <i class="bi bi-chat-dots-fill text-info display-4 mb-3"></i>
+                        <h5 class="card-title">Coding & Technical Help</h5>
+                        <p class="card-text">Need coding assistance or have general technical questions? Join the discussion.</p>
+                        <a href="https://github.com/jacksund/simmate/discussions"
+                           target="_blank"
+                           class="btn btn-info mt-3 text-white">
+                            <i class="bi bi-github me-2"></i> Ask on GitHub Discussions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-10 text-center">
+                <p class="text-muted">
+                    The Simmate userbase is still very small, so don't hesitate to ask
+                    about even the smaller things. You'll make our day just by reaching out
+                    <i class="bi bi-emoji-smile"></i>
                 </p>
-                <button onclick="copyContactEmail()"
-                        class="btn btn-primary btn-sm uil-envelope mt-2"
-                        data-bs-toggle="popover"
-                        data-bs-trigger="hover"
-                        data-bs-placement="bottom"
-                        data-bs-content="Click to copy">Email us your question</button>
-                <a href="https://github.com/jacksund/simmate/issues"
-                   class="btn btn-primary btn-sm uil-github-alt mt-2"
-                   target="_blank">Open an issue on Github</a>
             </div>
         </div>
     </div>
-    <div class="row pt-5">
-        <div class="col-lg-5 offset-lg-1">
-            <!-- Question/Answer -->
-            <div>
-                <div class="faq-question-q-box">Q.</div>
-                <h4 class="faq-question" data-wow-delay=".1s">How much does Simmate cost?</h4>
-                <p class="faq-answer mb-4">
-                    Simmate is completely free. If you decide to download and host your own server,
-                    your team may want to use a cloud provider like DigitalOcean. These extra cloud-hosting features are
-                    100% optional because every component for Simmate is built on free and open-source software.
-                </p>
-            </div>
-            <!-- Question/Answer -->
-            <div>
-                <div class="faq-question-q-box">Q.</div>
-                <h4 class="faq-question">License &amp; Copyright</h4>
-                <p class="faq-answer mb-4">
-                    Simmate is open-sourced under the BSD-3 License. This permits commercial use,
-                    modification, distribution, and private use - but still has limitations. Read the specifics
-                    <a href="https://github.com/jacksund/simmate/blob/main/LICENSE"
-                       target="_blank">here</a>.
-                </p>
-            </div>
-        </div>
-        <!--/col-md-5 -->
-        <div class="col-lg-5">
-            <!-- Question/Answer -->
-            <div>
-                <div class="faq-question-q-box">Q.</div>
-                <h4 class="faq-question">How do I sumbit my own workflows?</h4>
-                <p class="faq-answer mb-4">
-                    The easiest way is to download and run Simmate on your own computer. Because our
-                    team consists of a single lab, our computational resources are limited and can't be shared at this time
-                    -- meaning submissions through our website won't run unless we manually approve them.
-                </p>
-            </div>
-            <!-- Question/Answer -->
-            <div>
-                <div class="faq-question-q-box">Q.</div>
-                <h4 class="faq-question">Can I request a new feature?</h4>
-                <p class="faq-answer mb-4">
-                    Yes, please send suggestions! Send us an email or make a post on Github. Any
-                    feedback is welcome, and we'll do our best to prioritize new components.
-                </p>
-            </div>
-        </div>
-        <!--/col-md-5-->
-    </div>
-    <!-- end row -->
-{% endblock %}
-{% block extrafooter %}
-    <!-- Extra javascript that enables copy-to-clipboard for the email -->
-    <script>
-        function copyContactEmail() {
-            /* Get the text field */
-            var copyText = "simmate.team@gmail.com";
-            /* Copy the text inside the text field */
-            navigator.clipboard.writeText(copyText);
-        }
-    </script>
 {% endblock %}

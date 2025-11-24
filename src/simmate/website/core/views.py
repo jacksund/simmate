@@ -123,7 +123,7 @@ def home_default_view(request):
         "page_title": "The Simmate Website",
         "breadcrumbs": ["Home"],
     }
-    template = "home/home.html"
+    template = "core_components/home.html"
     return render(request, template, context)
 
 

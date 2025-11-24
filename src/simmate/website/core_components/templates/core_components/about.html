@@ -1,127 +1,365 @@
 {% extends "core_components/site_base.html" %}
 {% block tabtitle %}About - Simmate{% endblock %}
+{% block extraheader %}
+    <style>
+        /* Container for the timeline itself */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+            margin-top: 30px;
+            max-width: 900px; /* Adjust this to your desired max width */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* The vertical line on the left */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 30px; 
+            width: 6px;
+            background-color: #dee2e6; /* Bootstrap's $gray-300 */
+            transform: none;
+        }
+
+        /* Styling for each event container */
+        .timeline-event {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        /* Dot/Marker on the timeline */
+        .timeline-event::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--bs-primary);
+            border: 3px solid #f8f9fa;
+            top: 25%;
+            left: 30px; 
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        /* Positioning for ALL events to the right of the line (for all screens) */
+        .timeline-event .timeline-panel {
+            /* This is now the universal rule for all panels */
+            text-align: left;
+            padding-left: 50px; /* Space for the line/dot */
+            padding-right: 0;
+            width: 100%;
+        }
+        
+        /* Clearfix to contain floats */
+        .timeline-event::before, .timeline-event::after {
+            content: " ";
+            display: table;
+        }
+        .timeline-event::after {
+            clear: both;
+        }
+
+        /* No extra media queries needed for this change, but keeping your original small screen adjustments (which are still valid) */
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 30px;
+                transform: none;
+            }
+
+            .timeline-event::after {
+                left: 30px;
+                transform: translateX(-50%);
+            }
+
+            .timeline-event .timeline-panel {
+                width: 100%;
+                float: none !important;
+                text-align: left !important;
+                padding-left: 50px !important;
+                padding-right: 0 !important;
+            }
+        }
+    </style>
+{% endblock %}
 {% block body %}
-    <!-- START FEATURE OVERVIEW -->
-    <div class="container">
-        <!-- Header -->
-        <div class="row py-4">
-            <div class="col-lg-12">
-                <div class="text-center ">
-                    <h2>Simmate is a framework and toolkit for materials science</h2>
-                    <h4 class="text-muted mt-2">
-                        Our primary goal is to provide an all-in-one solution for creating, analyzing, and distributing
-                        materials science data. While our website is the end result for many of our features, we
-                        encourage users to visit our <a href="https://github.com/jacksund/simmate" target="_blank">Github
-                        page</a> to see everything Simmate has to offer.
-                    </h4>
-                </div>
+    <div class="row my-5">
+        <div class="col-lg-12">
+            <div class="text-center ">
+                <p class="mt-2">
+                    For a quick overview of Simmate's mission and key features, visit our <a href="{% url 'home' %}">Home</a> page
+                </p>
             </div>
         </div>
-        <!-- First row of icons -->
-        <div class="row">
-            <div class="col-lg-4">
-                <div class="text-center p-3">
-                    <div class="avatar-sm m-auto">
-                        <span class="avatar-title bg-primary-lighten rounded-circle">
-                            <i class="uil uil-plug text-primary font-24"></i>
-                        </span>
-                    </div>
-                    <h4 class="mt-3">Third-Party Integrations</h4>
-                    <p class="text-muted mt-2 mb-0">
-                        Access popular databases like the Materials Project, COD, OQMD, and others all in one place. Or if
-                        you'd like to run your own calculations, build-in popular codes VASP or LAMMPS into your custom
-                        workflows.
-                    </p>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="text-center p-3">
-                    <div class="avatar-sm m-auto">
-                        <span class="avatar-title bg-primary-lighten rounded-circle">
-                            <i class="uil uil-sitemap text-primary font-24"></i>
-                        </span>
-                    </div>
-                    <h4 class="mt-3">Prebuilt Workflows</h4>
-                    <p class="text-muted mt-2 mb-0">
-                        While currently at the early stages, we are quickly building a library of common materials science
-                        workflows. These let you quickly calculate properties using popular softwares like VASP.
-                    </p>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="text-center p-3">
-                    <div class="avatar-sm m-auto">
-                        <span class="avatar-title bg-primary-lighten rounded-circle">
-                            <i class="uil uil-database text-primary font-24"></i>
-                        </span>
-                    </div>
-                    <h4 class="mt-3">A Full-Feature Database</h4>
-                    <p class="text-muted mt-2 mb-0">
-                        Whether data is from pre-built workflows or even an excel file, Simmate can be used to
-                        automatically expand materials science data into python+REST APIs and a dynamically-built web
-                        interface.
-                    </p>
-                </div>
+    </div>
+    <hr class="my-5">
+    <div class="row align-items-center">
+        <div class="col-12">
+            <h3 class="text-center">
+                <i class="bi bi-people"></i> The Simmate Team
+            </h3>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-5">
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 text-center mb-4">
+            <img src="https://avatars.githubusercontent.com/u/47992949"
+                 class="rounded-circle img-fluid mb-2"
+                 alt="Profile Image of Person 1">
+            <p class="mb-0">
+                <strong>Dr. Jack Sundberg</strong>
+                <br>
+                <small class="text-muted">Creator & Maintainer</small>
+            </p>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 text-center mb-4">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"
+                 class="rounded-circle img-fluid mb-2"
+                 alt="Profile Image of Person 2">
+            <p class="mb-0">
+                <strong>###### ######</strong>
+                <br>
+                <small class="text-muted">Developer</small>
+            </p>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 text-center mb-4">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"
+                 class="rounded-circle img-fluid mb-2"
+                 alt="Profile Image of Person 4">
+            <p class="mb-0">
+                <strong>Dr. ### #####</strong>
+                <br>
+                <small class="text-muted">Developer</small>
+            </p>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 text-center mb-4">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"
+                 class="rounded-circle img-fluid mb-2"
+                 alt="Profile Image of Person 3">
+            <p class="mb-0">
+                <strong>Prof. ##### ######</strong>
+                <br>
+                <small class="text-muted">Academic R&D Liason</small>
+            </p>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 text-center mb-4">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"
+                 class="rounded-circle img-fluid mb-2"
+                 alt="Profile Image of Person 5">
+            <p class="mb-0">
+                <strong>Prof. ##### ########</strong>
+                <br>
+                <small class="text-muted">Academic Education Liason</small>
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center mt-4">
+            <h5 class="text-center mb-4">Full contributor list from Github</h5>
+            <div>
+                <ul class="list-unstyled d-flex flex-wrap">
+                    <li class="col-2 mb-2">jacksund</li>
+                    <li class="col-2 mb-2">SWeav02</li>
+                    <li class="col-2 mb-2">laurenmm</li>
+                    <li class="col-2 mb-2">scott-materials</li>
+                    <li class="col-2 mb-2">becca9825</li>
+                    <li class="col-2 mb-2">sionab</li>
+                    <li class="col-2 mb-2">bocklund</li>
+                    <li class="col-2 mb-2">Andrew-S-Rosen</li>
+                    <li class="col-2 mb-2">...</li>
+                    <li class="col-2 mb-2">...</li>
+                    <li class="col-2 mb-2">...</li>
+                    <li class="col-2 mb-2">...</li>
+                    <li class="col-2 mb-2">...</li>
+                    <li class="col-2 mb-2">...</li>
+                    <li class="col-2 mb-2">...</li>
+                    <li class="col-2 mb-2">...</li>
+                    <li class="col-2 mb-2">...</li>
+                    <li class="col-2 mb-2">...</li>
+                </ul>
             </div>
         </div>
-        <!-- Second row of icons -->
-        <div class="row">
-            <div class="col-lg-4">
-                <div class="text-center p-3">
-                    <div class="avatar-sm m-auto">
-                        <span class="avatar-title bg-primary-lighten rounded-circle">
-                            <i class="uil uil-calcualtor text-primary font-24"></i>
-                        </span>
-                    </div>
-                    <h4 class="mt-3">Common Utilities & Toolbox</h4>
-                    <p class="text-muted mt-2 mb-0">
-                        Thanks to the PyMatGen community, Simmate contains an abundance of utilities
-                        for common materials science analyses - from simple symmetry analysis to
-                        complex phase space visualization.
-                    </p>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="text-center p-3">
-                    <div class="avatar-sm m-auto">
-                        <span class="avatar-title bg-primary-lighten rounded-circle">
-                            <i class="uil uil-server text-primary font-24"></i>
-                        </span>
-                    </div>
-                    <h4 class="mt-3">Quick-Startup & Easy Scaling</h4>
-                    <p class="text-muted mt-2 mb-0">
-                        Run the full server (database, API, interface, etc.) on your local computer, and once you're
-                        comfortable, scale to any number of remote resources or HPC clusters in a few lines of code.
-                    </p>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="text-center p-3">
-                    <div class="avatar-sm m-auto">
-                        <span class="avatar-title bg-primary-lighten rounded-circle">
-                            <i class="uil uil-unlock-alt text-primary font-24"></i>
-                        </span>
-                    </div>
-                    <h4 class="mt-3">Free & Open-Source</h4>
-                    <p class="text-muted mt-2 mb-0">
-                        Simmate is built on top of other open-source giants like Django, Prefect, Dask, and PyMatGen. This
-                        makes every part of our software completely free to install and use.
-                    </p>
-                </div>
-            </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center mt-3">
+            <p class="text-muted">
+                We are always open to new team members and collaborators! See our <a href="{% url 'contact' %}">Contact</a> page if you are interested.
+            </p>
         </div>
-        <!-- Final "created by" statement -->
-        <div class="row py-4">
-            <div class="col-lg-12">
-                <div class="text-center ">
-                    <p class="mt-2">
-                        This software and website was created by <a href="https://jacksund.github.io/" target="_blank">Jack
-                        Sundberg</a> with the support of the <a href="https://materials-lab.io/" target="_blank">Warren
-                        Lab</a>.
-                    </p>
+    </div>
+    {% comment %}
+    <hr class="my-5">
+    <div class="row align-items-center">
+        <div class="col-12">
+            <h3 class="text-center">
+                <i class="bi bi-rocket-takeoff"></i> Sponsors
+            </h3>
+            <p class="lead">123456</p>
+        </div>
+    </div>
+    {% endcomment %}
+    <hr class="my-5">
+    <div class="container py-5">
+        <h3 class="text-center mb-5">
+            <i class="bi bi-calendar-week"></i> History & Milestones
+        </h3>
+        <div class="row timeline">
+            <div class="col-12 timeline-event">
+                <div class="row">
+                    <div class="col-md-12 timeline-panel">
+                        <div class="card shadow-sm border-primary">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">
+                                    <i class="bi bi-git"></i> 1st commit to Github
+                                </h5>
+                                <h6 class="card-subtitle mb-2">December 2020</h6>
+                                <p class="card-text">
+                                    Jack Sundberg started Simmate while working towards his PhD
+                                    in Chemistry at UNC Chapel Hill. This took place in
+                                    <a href="https://materials-lab.io/people/" target="_blank">Scott Warren's lab</a>,
+                                    which focused on exotic materials known as electrides
+                                    and their potential as fluoride-ion batteries. At the time, only
+                                    crystalline materials were in scope, abd molecular features didn't
+                                    come until later. This is why we came up with the name "Simmate", which
+                                    is short for "<b>Sim</b>ulated <b>Mat</b>erials <b>E</b>cosytem" -- i.e., a suite of
+                                    tools for computational materials chemistry. "<b>Sim</b>ulation <b>Mate</b> (i.e., buddy/helper)"
+                                    became an alternative interpretation over time.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 timeline-event">
+                <div class="row">
+                    <div class="col-md-12 timeline-panel">
+                        <div class="card shadow-sm border-primary">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">
+                                    <i class="bi bi-browser-chrome"></i> Website is published
+                                </h5>
+                                <h6 class="card-subtitle mb-2">April 2021</h6>
+                                <p class="card-text">
+                                    This website was <em>VERY</em> different from what it is today.
+                                    Even though we didn't have many features at the time, we
+                                    reserved the simmate.org domain, and the first version
+                                    of our website was made publicall available. It was a basic
+                                    (and, admittedly, mostly broken) website because we were new
+                                    to frontend web development, and our priority was to focus
+                                    on the backend & research. The public website remainly
+                                    largely untouched for a couple of years while we worked
+                                    on adding new features in local development.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 timeline-event">
+                <div class="row">
+                    <div class="col-md-12 timeline-panel">
+                        <div class="card shadow-sm border-primary">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">
+                                    <i class="bi bi-bookmarks"></i> 1st study citing Simmate
+                                </h5>
+                                <h6 class="card-subtitle mb-2">May 2022</h6>
+                                <p class="card-text">
+                                    Before Simmate itself was published, there was the <a href="https://www.nature.com/articles/s41524-022-00786-8"
+    target="_blank">first study</a>
+                                    completed using it. It was a high-throughput screening
+                                    of fluoride-ion conductors, published by Jack and the Warren Lab.
+                                    It set the groundwork for a lot of core Simmate features: (1) integration to
+                                    popular databases like the Materials Project, (2) workflow orchestration
+                                    of thousands of DFT calculations, (3) a central database to analyze
+                                    results, and (4) lower-level utilies for chemistry data.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 timeline-event">
+                <div class="row">
+                    <div class="col-md-12 timeline-panel">
+                        <div class="card shadow-sm border-primary">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">
+                                    <i class="bi bi-book"></i> Simmate published (v0.7.0)
+                                </h5>
+                                <h6 class="card-subtitle mb-2">July 2022</h6>
+                                <p class="card-text">
+                                    Simmate was <a href="https://joss.theoj.org/papers/10.21105/joss.04364"
+    target="_blank">published</a>
+                                    as "a framework for materials science" in the Journal
+                                    of Open-Source Software (JOSS). It was heavily focused on data
+                                    from the materials science community and automating workflows
+                                    using VASP (a commerical DFT software). So even though a lot
+                                    of the key features were present, Simmate was still only useful
+                                    to a small few. Nevertheless, it remained an incredibly impactful
+                                    within our own team's research, so development continued
+                                    over time, even as the primary developer (@jacksund) graduated
+                                    out the Warren Lab.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 timeline-event">
+                <div class="row">
+                    <div class="col-md-12 timeline-panel">
+                        <div class="card shadow-sm border-primary">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">
+                                    <i class="bi bi-flask-florence"></i> Molecular support added
+                                </h5>
+                                <h6 class="card-subtitle mb-2">October 2024</h6>
+                                <p class="card-text">
+                                    Jack Sundberg continued to be the primary maintainer for Simmate
+                                    and even utilize it in some of his work in industry -- where his
+                                    research focused on molecular systems, as opposed
+                                    to the crystalline systems Simmate was originally built for.
+                                    After a series of reviews and approvals, he was allowed to
+                                    contribute many features for molecular systems to the open-source
+                                    Simmate codebase. This also sparked a large reorganization of
+                                    the framework's core functionality and features. With the scope
+                                    expanding, Simmate began organizing functionality into "apps"
+                                    separate from the core framework -- a strategy that led to
+                                    much more rapid development of features and integrations.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 timeline-event">
+                <div class="row">
+                    <div class="col-md-12 timeline-panel">
+                        <div class="card shadow-sm border-primary">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">
+                                    <i class="bi bi-layers"></i> Framework becomes "full-stack"
+                                </h5>
+                                <h6 class="card-subtitle mb-2">November 2025</h6>
+                                <p class="card-text">
+                                    Up to this point, the Simmate website wasn't recieving much
+                                    attention -- the workflows, database, and toolkit stole the
+                                    focus. Efforts were made to establish web-building tools,
+                                    but they weren't super easy to use. But in 2025, we were able to
+                                    refactor our frontend framework to handle dynamically change pages
+                                    and partial updates - and do so in a way that was as easy as
+                                    building a streamlit dashboard. It was at this point we started
+                                    our website rebuild to be much more user friendly and to truly
+                                    leverage the backend orchestration of workflows and data.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- END FEATURE OVERVIEW -->
 {% endblock %}

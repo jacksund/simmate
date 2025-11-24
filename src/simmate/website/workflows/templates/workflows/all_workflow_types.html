@@ -1,23 +1,22 @@
 {% extends "core_components/site_base.html" %}
 {% block tabtitle %}Workflows - Simmate{% endblock %}
 {% block body %}
-    {# Header #}
     <section class="jumbotron text-center">
         <div class="container">
             <h1 class="jumbotron-heading">Workflows</h1>
-            <p class="lead text-muted">Explore workflows, submit new runs, and view past results</p>
+            <p class="lead text-muted">Explore workflows, submit new runs, and view past results.</p>
         </div>
     </section>
-    {# List of Cards #}
-    <div class="row pt-3">
+    <div class="row g-4 pt-3">
         {% for workflow_type, workflow_description in workflows_metadata.items %}
             <div class="col-md-4">
-                <div class="card border-primary border" style="height: 90%">
-                    <div class="card-body">
+                <div class="card border-primary h-100">
+                    <div class="card-body d-flex flex-column">
                         <h5 class="card-title text-primary">{{ workflow_type }}</h5>
                         <p class="card-text">{{ workflow_description }}</p>
-                        <a href="{% url 'workflows_of_given_type' workflow_type %}"
-                           class="btn btn-primary btn-sm">View All</a>
+                        <a role="button"
+                           class="btn btn-primary btn-sm mt-auto"
+                           href="{% url 'workflows_of_given_type' workflow_type %}">Explore <i class="bi bi-box-arrow-in-right"></i></a>
                     </div>
                 </div>
             </div>

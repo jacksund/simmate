@@ -1,0 +1,263 @@
+{% extends "core_components/site_base.html" %}
+{% block tabtitle %}Contact - Simmate{% endblock %}
+{% block body %}
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <h1 class="text-center mb-5 fw-bold text-primary">Frequently Asked Questions</h1>
+            <div class="accordion" id="faqAccordion">
+                <h5 class="mt-5 mb-3">Privacy</h5>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseOne"
+                                aria-expanded="false"
+                                aria-controls="collapseOne">Can I make my workflow results private?</button>
+                    </h2>
+                    <div id="collapseOne"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingOne"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            You can install Simmate locally to run private workflows or run them on your private server.
+                            But as far as the public website goes: no, you can not make any of your results private.
+                            In the spirit of building a community that openly shares chemistry data, everything
+                            in our public website will remain openly accessible to everyone.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseTwo"
+                                aria-expanded="false"
+                                aria-controls="collapseTwo">Why is Simmate's ledger public?</button>
+                    </h2>
+                    <div id="collapseTwo"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingTwo"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            We aim to be as transparent as possible with our finances. This is because,
+                            as an open collective, we want users to know that the science & our community
+                            comes first - and that all funds going through Simmate are fairly distributed.
+                            A public ledger might be suprising, but it is by no means revolutionary. Simmate
+                            uses pseudonymity -- where all transactions are public, but user identities are
+                            not. This is exactly how many cryptocurrencies operate, including the most popular
+                            currencies like Bitcoin and Ethereum.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingThree">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseThree"
+                                aria-expanded="false"
+                                aria-controls="collapseThree">What user data is collected?</button>
+                    </h2>
+                    <div id="collapseThree"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingThree"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <ul>
+                                <li>
+                                    <b>Email & Name:</b> only your email and (if it's available) your name are stored. We will never send you promotional emails or newsletters.
+                                </li>
+                                <li>
+                                    <b>Country/State:</b> this is only required for purchases made on Simmate, and we only need this information for tax purposes. We are required to collect this by "Know your Customer" regulations, but if there's ever the option, we will gladly remove this from our data collection.
+                                </li>
+                                <li>
+                                    <b>Website Traffic:</b> every new page visit is logged so that we can go back and scale cloud resources appropriately, see what features users are most interested in, and utilize stats for grants/funding.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <h5 class="mt-5 mb-3">Finances</h5>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFour">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseFour"
+                                aria-expanded="false"
+                                aria-controls="collapseFour">How much does it cost to run a workflow?</button>
+                    </h2>
+                    <div id="collapseFour"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingFour"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            It is pay-as-you-go for workflow submissions. Per-workflow cost varies, and
+                            price can often not be calculated until you provide your inputs.
+                            This is because input parameters (such as the molecule/structure you provide)
+                            can influence compute time, and in turn the price. So set up your workflow run,
+                            and you will be able to reviece + accept the workflow quote before submission.
+                            Also, you can drastically reduce or eliminate these costs by running tasks
+                            on your own compute.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFive">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseFive"
+                                aria-expanded="false"
+                                aria-controls="collapseFive">
+                            How can I use my own compute resources and minimize workflow costs?
+                        </button>
+                    </h2>
+                    <div id="collapseFive"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingFive"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            You need to set up and run a Simmate Worker on
+                            your personal computer or wherever your hardware is located.
+                            Keep in mind that USDC collatoral is required to start
+                            a worker, but your full balance is redeemable as soon as you stop your
+                            worker. The full guide is located in our documentation <a href="#" target="_blank">here</a>.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingSix">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseSix"
+                                aria-expanded="false"
+                                aria-controls="collapseSix">How can I earn USDC?</button>
+                    </h2>
+                    <div id="collapseSix"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingSix"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            You can earn USDC by configuring a Simmate Worker on your computer
+                            and linking it to a community worker pool (such as a pool specific to
+                            small DFT jobs). Keep in mind that USDC collatoral is required to start
+                            a worker, but your full balance is redeemable as soon as you stop your
+                            worker. The full guide is located in our documentation <a href="#" target="_blank">here</a>.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingSeven">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseSeven"
+                                aria-expanded="false"
+                                aria-controls="collapseSeven">
+                            How much does it cost to set up my own private server?
+                        </button>
+                    </h2>
+                    <div id="collapseSeven"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingSeven"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Simmate is completely free. If you decide to download and host your own server,
+                            your team may want to use a cloud provider like DigitalOcean, AWS, or GCP. These extra cloud-hosting features are
+                            100% optional because every component for Simmate is built on free and open-source software.
+                            As a rough estimate, a minimal setup within a cloud provider will be ~$50/month the for k8s setup plus postgres db.
+                        </div>
+                    </div>
+                </div>
+                <h5 class="mt-5 mb-3">Licensing</h5>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingEight">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseEight"
+                                aria-expanded="false"
+                                aria-controls="collapseEight">What is Simmate licensed under?</button>
+                    </h2>
+                    <div id="collapseEight"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingEight"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Simmate is open-sourced under the BSD-3 License. This permits commercial use,
+                            modification, distribution, and private use - but still has limitations, such as where you can use the Simmate name. Read the specifics
+                            <a href="https://github.com/jacksund/simmate/blob/main/LICENSE"
+                               target="_blank">here</a>.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingNine">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseNine"
+                                aria-expanded="false"
+                                aria-controls="collapseNine">What parts of the platform are open source?</button>
+                    </h2>
+                    <div id="collapseNine"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingNine"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Everything. Whatever you see on the website, you can also
+                            do in a local/private setup. In fact, you can in many
+                            cases do more with a local setup, because locally
+                            you can integrate additional datasets that we are not
+                            able to include in the public website.
+                        </div>
+                    </div>
+                </div>
+                <h5 class="mt-5 mb-3">Community</h5>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingTen">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseTen"
+                                aria-expanded="false"
+                                aria-controls="collapseTen">I'm interested in contributing — how can I help?</button>
+                    </h2>
+                    <div id="collapseTen"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingTen"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            You can contribute in many ways: improving documentation, proposing new features, building new apps, and more.
+                            Start a discussion or open an issue on Github if you want to contribute features or code.
+                            For anything else, feel free to send us an email. See our <a href="{% url 'contact' %}">Contact</a> page for more info.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingEleven">
+                        <button class="accordion-button collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseEleven"
+                                aria-expanded="false"
+                                aria-controls="collapseEleven">Can I request a new feature?</button>
+                    </h2>
+                    <div id="collapseEleven"
+                         class="accordion-collapse collapse"
+                         aria-labelledby="headingEleven"
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Yes, please send suggestions! Send us an email or make a post on Github. Any
+                            feedback is welcome, and we'll do our best to prioritize new components.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -9,7 +9,7 @@ def test_home_view(client):
     # test initial view
     response = client.get("/")
     assert response.status_code == 200
-    assertTemplateUsed(response, "home/home.html")
+    assertTemplateUsed(response, "core_components/home.html")
 
     # test submission of the form
     response = client.post(
