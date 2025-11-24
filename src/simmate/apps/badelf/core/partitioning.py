@@ -203,14 +203,9 @@ class PartitioningToolkit:
 
         site_equiv = self.grid.structure.equivalent_atoms[site_index]
         neigh_equiv = self.grid.structure.equivalent_atoms[neigh_index]
-        # get the string for the site and neigh. During the electride dimensionality
-        # search this can throw an error so we add a try/except clause here.
-        try:
-            site_string = self.grid.structure[site_equiv].species_string
-            neigh_string = self.grid.structure[neigh_equiv].species_string
-        except:
-            site_string = "E"
-            neigh_string = "H"
+        # get the string for the site and neigh.
+        site_string = self.grid.structure[site_equiv].species_string
+        neigh_string = self.grid.structure[neigh_equiv].species_string
 
         if site_equiv == neigh_equiv:
             # We have an atom bonded to another atom that is symmetrically equivalent
