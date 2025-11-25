@@ -142,6 +142,7 @@ class BadElfToolkit:
         self._structure = None
         self._plane_partitioning_structure = None
         self._electride_structure = None
+        self._species = None
 
         self._partitioning = None
         self._zero_flux_feature_labels = None
@@ -239,6 +240,14 @@ class BadElfToolkit:
         return self._electride_structure
     
     @property
+    def nelectrides(self):
+        return len(self.electride_structure) - len(self.structure)
+    
+    @property
+    def species(self) -> list[str]:
+        return [i.specie.symbol for i in self.electride_structure]
+    
+    @property
     def plane_partitioning_structure(self) -> Structure:
         if self._plane_partitioning_structure is None:
             # we want a structure that contains all of the atoms and features
@@ -257,10 +266,6 @@ class BadElfToolkit:
                 # We only want to separate the atoms with planes
                 self._plane_partitioning_structure = self.structure
         return self._plane_partitioning_structure
-
-    @property
-    def nelectrides(self):
-        return len(self.electride_structure.indices_from_symbol(FeatureType.bare_electron.dummy_species))
     
     @property
     def zero_flux_feature_labels(self):
@@ -456,9 +461,13 @@ class BadElfToolkit:
     def electride_dimensionality(self):
         if self._electride_dim is None:
             self._electride_dim = self.all_electride_dims[0]
+        return self._electride_dim
 
-    @staticmethod
-    def _get_ELF_dimensionality(grid: Grid, cutoff: float):
+    def _get_ELF_dimensionality(
+            self,
+            electride_mask: np.array,
+            cutoff: float,
+            ):
         """
         This algorithm works by checking if the voxels with values above the cutoff
         are connected to the equivalent voxel in the unit cell one transformation
@@ -476,31 +485,27 @@ class BadElfToolkit:
             grid (Grid):
                 The ELF Grid object with only values associated with electrides.
         """
-        data = grid.total
-        voxel_indices = np.indices(grid.shape).reshape(3, -1).T
         # Remove data below our cutoff
-        thresholded_data = np.where(data <= cutoff, 0, 1)
-        raveled_data = thresholded_data.ravel()
-        # Label connected components in the eroded data. We will check each distinct
-        # body to see if it connects in each direction
-        structure = np.ones([3, 3, 3])
-        labels, num_features = label(thresholded_data, structure=structure)
-        if num_features == 0:
+        mask = electride_mask & (self.reference_grid.total >= cutoff)
+        
+        # if we have no features, return 0 immediately
+        if not np.any(mask):
             return 0
-        # We need to get one voxel in each of the features that we can transpose
-        # later on
-        feature_indices = []
-        for i, site in enumerate(grid.structure):
-            if site.species_string == "X":
-                frac_coords = site.frac_coords
-                voxel_coords = grid.get_voxel_coords_from_frac(frac_coords).astype(int)
-                # Make sure that the label is not 0
-                site_label = labels[voxel_coords[0], voxel_coords[1], voxel_coords[2]]
-                if site_label != 0:
-                    feature_indices.append(voxel_coords)
+
+        # get the features that sit in the mask at this value
+        feature_indices = self.electride_structure.frac_coords[len(self.structure):]
+        feature_indices = np.round(self.charge_grid.frac_to_grid(feature_indices)).astype(int)
+        # only use indices that are not 0
+        feature_indices = [i for i in feature_indices if mask[i[0],i[1],i[2]]]
+
+        # if we have no electride features in the mask, immediately return 0
         if len(feature_indices) == 0:
             return 0
 
+        # create a supercell mask and label it
+        supercell_mask = np.tile(mask, [2,2,2])
+        labels, num_features = label(supercell_mask, structure=np.ones([3, 3, 3]))
+        
         # We are going to need to translate the above voxels and the entire unit
         # cell so we create a list of desired transformations
         transformations = [
@@ -514,18 +519,8 @@ class BadElfToolkit:
             [1, 1, 1],  # xyz
         ]
         transformations = np.array(transformations)
-        transformations = grid.get_voxel_coords_from_frac(transformations.T).T
-        # create a new numpy array representing the data tiled once in each direction
-        # to get a corner
-        supercell_data = np.zeros(np.array(thresholded_data.shape) * 2)
-        for transformation in transformations:
-            transformed_indices = (voxel_indices + transformation).astype(int)
-            x = transformed_indices[:, 0]
-            y = transformed_indices[:, 1]
-            z = transformed_indices[:, 2]
-            supercell_data[x, y, z] = raveled_data
-        # convert data into labeled features
-        supercell_data, _ = label(supercell_data, structure)
+        transformations = self.charge_grid.frac_to_grid(transformations)
+
         # The unit cell can be connected to neighboring unit cells in 26 directions.
         # however, we only need to consider half of these as the others are symmetrical.
         connections = [
@@ -560,16 +555,18 @@ class BadElfToolkit:
         # each feature. We will take the highest dimensionality.
         dimensionalities = []
         for coord in feature_indices:
-            # create count for the number of connections
+            # get the labels at each transformation
+            trans_labels = []
+            for trans in transformations:
+                x,y,z = trans + coord
+                trans_labels.append(labels[x,y,z])
+            
+            # count number of connections
             connections_num = 0
             for connection in connections:
-                # Get voxel coordinates at the first transformation
-                x, y, z = (coord + transformations[connection[0]]).astype(int)
-                # get voxel coordinates at the second transformation
-                x1, y1, z1 = (coord + transformations[connection[1]]).astype(int)
                 # get the feature label at each voxel
-                label1 = supercell_data[x, y, z]
-                label2 = supercell_data[x1, y1, z1]
+                label1 = trans_labels[connection[0]]
+                label2 = trans_labels[connection[1]]
                 # If the labels are the same, the unit cell is connected in this
                 # direction
                 if label1 == label2:
@@ -595,9 +592,10 @@ class BadElfToolkit:
             grid (Grid):
                 The ELF Grid object with only values associated with electrides.
         """
-        electride_indices = self.electride_indices
+        # TODO: This whole method should probably be rewritten in Numba
         # If we have no electrides theres no reason to continue so we stop here
-        if len(electride_indices) == 0:
+        logging.info("Finding electride dimensionality cutoffs")
+        if self.nelectrides == 0:
             return None, None
 
         ###############################################################################
@@ -605,26 +603,19 @@ class BadElfToolkit:
         # sites and is zero everywhere else.
         ###############################################################################
 
-        # read in ELF data and regrid so that it is the same size as the
-        # charge grid
-        elf_grid = self.reference_grid.copy()
-        # elf_grid = elf_grid.regrid(desired_resolution=self.charge_grid.voxel_resolution)
-        voxel_assignment_array = self.voxel_assignments_array
-        # Get array where values are ELF values when voxels belong to electrides
-        # and are 0 otherwise
-        elf_array = np.where(
-            np.isin(voxel_assignment_array, electride_indices), elf_grid.total, 0
-        )
-        elf_grid.total = elf_array
-        elf_grid.structure = self.electride_structure.copy()
+        # Create a mask at electrides
+        electride_indices = [i for i in range(len(self.structure), len(self.electride_structure))]
+        # NOTE: even if we have shared features, these indices are still correct
+        # so long as the electride sites come first
+        electride_mask = np.isin(self.atom_labels, electride_indices)
+
 
         #######################################################################
         # This section scans across different cutoffs to determine what dimensionalities
         # exist in the electride ELF
         #######################################################################
-        logging.info("Finding dimensionality cutoffs")
         logging.info("Calculating dimensionality at 0 ELF")
-        highest_dimension = self._get_ELF_dimensionality(elf_grid, 0)
+        highest_dimension = self._get_ELF_dimensionality(electride_mask, 0)
         dimensions = [i for i in range(0, highest_dimension)]
         dimensions.reverse()
         # Create lists for the refined dimensions
@@ -644,7 +635,7 @@ class BadElfToolkit:
                 # check what our current dimension is. If we are at a higher dimension
                 # we need to raise the cutoff. If we are at a lower dimension or at
                 # the dimension we need to lower it
-                current_dimension = self._get_ELF_dimensionality(elf_grid, guess)
+                current_dimension = self._get_ELF_dimensionality(electride_mask, guess)
                 if current_dimension > dimension:
                     guess += i
                 elif current_dimension < dimension:
@@ -846,7 +837,7 @@ the shared features. Atom/electride surface distances may be smaller than expect
         if self._avg_surface_dists is None:
             self._get_min_avg_surface_dists()
         return self._avg_surface_dists
-        
+    
     @property
     def electrides_per_formula(self):
         if self._electrides_per_formula is None:
@@ -865,6 +856,10 @@ the shared features. Atom/electride surface distances may be smaller than expect
             ) = self.structure.composition.get_reduced_composition_and_factor()
             self._electrides_per_reduced_formula = self.electrides_per_formula / formula_reduction_factor
         return self._electrides_per_reduced_formula
+    
+    @property
+    def electride_formula(self):
+        return f"{self.structure.formula} e{round(self.electrides_per_formula)}"
     
     @property
     def total_charge(self):
@@ -899,6 +894,7 @@ the shared features. Atom/electride surface distances may be smaller than expect
             results["oxidation_states"] = None
         
         for result in [
+            "species",
             "structure",
             "labeled_structure",
             "electride_structure",
@@ -906,10 +902,12 @@ the shared features. Atom/electride surface distances may be smaller than expect
             "all_electride_dims",
             "all_electride_dim_cutoffs",
             "electride_dimensionality",
+            "species",
             "charges",
             "volumes",
             "min_surface_dists",
             "avg_surface_dists",
+            "electride_formula",
             "electrides_per_formula",
             "electrides_per_reduced_formula",
             "total_charge",
@@ -919,7 +917,7 @@ the shared features. Atom/electride surface distances may be smaller than expect
         if use_json:
             # get serializable versions of each attribute
             for key in ["structure", "labeled_structure", "electride_structure"]:
-                results[key] = results[key].to_json()
+                results[key] = results[key].to(fmt="POSCAR")
             for key in ["charges", "volumes", "oxidation_states", "min_surface_dists", "avg_surface_dists"]:
                 if results[key] is None:
                     continue # skip oxidation states if they fail
@@ -1207,6 +1205,7 @@ class SpinBadElfToolkit:
         # Properties that will be calculated and cached
         self._electride_structure = None
         self._labeled_structure = None
+        self._species = None
         
         self._electride_dim = None
         
@@ -1291,6 +1290,14 @@ class SpinBadElfToolkit:
                     electride_structure.append(site.specie.symbol, site.frac_coords)
             self._electride_structure = electride_structure
         return self._electride_structure
+    
+    @property
+    def nelectrides(self):
+        return len(self.electride_structure) - len(self.structure)
+    
+    @property
+    def species(self) -> list[str]:
+        return [i.specie.symbol for i in self.electride_structure]
     
     @property
     def electride_dimensionality(self):
@@ -1381,6 +1388,11 @@ class SpinBadElfToolkit:
         return self._electrides_per_reduced_formula
     
     @property
+    def electride_formula(self):
+        return f"{self.structure.formula} e{round(self.electrides_per_formula)}"
+    
+    
+    @property
     def total_charge(self):
         if self._total_charge is None:
             self._total_charge = self.charges.sum()
@@ -1406,6 +1418,7 @@ class SpinBadElfToolkit:
         results["oxidation_states"] = self.get_oxidation_states(potcar_path)
         
         for result in [
+            "species",
             "structure",
             "labeled_structure",
             "electride_structure",
@@ -1413,6 +1426,7 @@ class SpinBadElfToolkit:
             "electride_dimensionality",
             "charges",
             "volumes",
+            "electride_formula",
             "electrides_per_formula",
             "electrides_per_reduced_formula",
             "total_charge",
@@ -1422,7 +1436,7 @@ class SpinBadElfToolkit:
         if use_json:
             # get serializable versions of each attribute
             for key in ["structure", "labeled_structure", "electride_structure"]:
-                results[key] = results[key].to_json()
+                results[key] = results[key].to(fmt="POSCAR")
             for key in ["charges", "volumes", "oxidation_states"]:
                 results[key] = results[key].tolist()        
         return results
