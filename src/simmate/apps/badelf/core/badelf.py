@@ -233,7 +233,7 @@ class BadElfToolkit:
             # case the user provided their own
             electride_structure = self.structure.copy()
             for site in self.labeled_structure:
-                if site.specie.symbol in FeatureType.bare_types:
+                if site.specie.symbol in FeatureType.bare_species:
                     electride_structure.append(FeatureType.bare_electron.dummy_species, site.frac_coords)
             self._electride_structure = electride_structure
         return self._electride_structure
@@ -801,7 +801,7 @@ class BadElfToolkit:
         # get POTCAR info
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            potcars = Potcar.from_file(self.directory / "POTCAR")
+            potcars = Potcar.from_file(potcar_path)
         nelectron_data = {}
         # the result is a list because there can be multiple element potcars
         # in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)
@@ -810,7 +810,7 @@ class BadElfToolkit:
         # get valence electrons for each site in the structure
         valence = np.zeros(len(self.electride_structure), dtype=np.float64)
         for i, site in enumerate(self.structure):
-            valence[i] = potcar[site.specie.symbol]
+            valence[i] = nelectron_data[site.specie.symbol]
         # subtract charges from valence to get oxidation
         oxidation = valence - self.charges
         return oxidation
@@ -895,6 +895,8 @@ the shared features. Atom/electride surface distances may be smaller than expect
         # only try to calculate oxidation state if this was a spin dependent system
         if self._spin_system == "total":
             results["oxidation_states"] = self.get_oxidation_states(potcar_path)
+        else:
+            results["oxidation_states"] = None
         
         for result in [
             "structure",
@@ -1116,8 +1118,8 @@ class SpinBadElfToolkit:
             "x_diff_weight": 0.0,
             "porous_adjustment": False,
             },
-        spin_elf_labeler_kwargs: dict = {},
-        spin_elf_labeler: ElfLabeler = None,
+        elf_labeler_kwargs: dict = {},
+        elf_labeler: SpinElfLabeler = None,
         **kwargs
     ):
         # make sure our grids are spin polarized
@@ -1133,27 +1135,28 @@ class SpinBadElfToolkit:
         # labeler and link it to our badelf objects
         if labeled_structure_up is None:
             # we want to attach a SpinElfLabeler to our badelf objects
-            if spin_elf_labeler is None:
-                spin_elf_labeler = SpinElfLabeler(
+            if elf_labeler is None:
+                elf_labeler = SpinElfLabeler(
                     charge_grid=charge_grid,
                     reference_grid=reference_grid,
                     crystalnn_kwargs=crystalnn_kwargs,
-                    **spin_elf_labeler_kwargs
+                    **elf_labeler_kwargs
                     )
-            self.elf_labeler = spin_elf_labeler
+
+            self.elf_labeler = elf_labeler
             # link charge grids
-            self.reference_grid_up = spin_elf_labeler.reference_grid_up
-            self.reference_grid_down = spin_elf_labeler.reference_grid_down
-            self.charge_grid_up = spin_elf_labeler.charge_grid_up
-            self.charge_grid_down = spin_elf_labeler.charge_grid_down
-            self.equal_spin = spin_elf_labeler._equal_spin
+            self.reference_grid_up = elf_labeler.reference_grid_up
+            self.reference_grid_down = elf_labeler.reference_grid_down
+            self.charge_grid_up = elf_labeler.charge_grid_up
+            self.charge_grid_down = elf_labeler.charge_grid_down
+            self.equal_spin = elf_labeler.equal_spin
             # link labelers
-            self._elf_labeler_up = spin_elf_labeler.elf_labeler_up
-            self._elf_labeler_down = spin_elf_labeler.elf_labeler_down
+            self.elf_labeler_up = elf_labeler.elf_labeler_up
+            self.elf_labeler_down = elf_labeler.elf_labeler_down
         else:
             # We won't be using a labeler so we need to split the grids
-            self._elf_labeler_up = None
-            self._elf_labeler_down = None
+            self.elf_labeler_up = None
+            self.elf_labeler_down = None
             self.equal_spin = False
             if reference_grid.is_spin_polarized:
                 self.reference_grid_up, self.reference_grid_down = (
@@ -1173,29 +1176,29 @@ class SpinBadElfToolkit:
                     self.equal_spin = True
                 
         # Now check if we should run a spin polarized badelf calc or not
-        if self.equal_spin:
+        if not self.equal_spin:
             self.badelf_up = BadElfToolkit(
                 reference_grid=self.reference_grid_up,
                 charge_grid=self.charge_grid_up,
                 labeled_structure=labeled_structure_up,
-                elf_labeler=self._elf_labeler_up
+                elf_labeler=self.elf_labeler_up,
                 **kwargs
             )
             self.badelf_down = BadElfToolkit(
                 reference_grid=self.reference_grid_down,
                 charge_grid=self.charge_grid_down,
                 labeled_structure=labeled_structure_down,
-                elf_labeler=self._elf_labeler_down,
+                elf_labeler=self.elf_labeler_down,
                 **kwargs
             )
             self.badelf_up._spin_system = "up"
             self.badelf_down._spin_system = "down"
         else:
             self.badelf_up = BadElfToolkit(
-                reference_grid=reference_grid,
-                charge_grid=charge_grid,
+                reference_grid=self.reference_grid_up,
+                charge_grid=self.charge_grid_up,
                 labeled_structure=labeled_structure_up,
-                elf_labeler=self._elf_labeler_up
+                elf_labeler=self.elf_labeler_up,
                 **kwargs
             )
             self.badelf_up._spin_system = "half"
@@ -1272,37 +1275,21 @@ class SpinBadElfToolkit:
         different coordinates are labeled separately
         """
         if self._electride_structure is None:
-            # start with only atoms
-            labeled_structure = self.structure.copy()
-            # get up and downs structures
-            structure_up = self.badelf_up.electride_structure
-            structure_down = self.badelf_down.electride_structure
-            # get species from the spin up system
-            new_species = []
-            new_coords = []
-            for site in structure_up[len(self.structure) :]:
-                species = site.specie.symbol
-                # add frac coords no matter what
-                new_coords.append(site.frac_coords)
-                # if this site is in the spin-down structure, it exists in both and
-                # we add the site with the original species name
-                if site in structure_down:
-                    new_species.append(species)
-                else:
-                    # otherwise, we rename the species
-                    new_species.append(species + "xu")
-            # do the same for the spin down system
-            for site in structure_down[len(self.structure) :]:
-                # only add the structure if it didn't exist in the spin up system
-                if site not in structure_up:
-                    species = site.specie.symbol
-                    new_species.append(species + "xd")
-                    new_coords.append(site.frac_coords)
-            # add our sites
-            for species, coords in zip(new_species, new_coords):
-                labeled_structure.append(species, coords)
-            self._electride_structure = labeled_structure
-
+            # create our elecride structure from our labeled structure.
+            # NOTE: We don't just use the structure from the elf labeler in
+            # case the user provided their own
+            electride_structure = self.structure.copy()
+            # get bare species including up/down spin
+            all_bare_species = []
+            for species in FeatureType.bare_species:
+                all_bare_species.append(species)
+                all_bare_species.append(species + "xu")
+                all_bare_species.append(species + "xd")
+            # add any bare electron/electrides to our structure
+            for site in self.labeled_structure:
+                if site.specie.symbol in all_bare_species:
+                    electride_structure.append(site.specie.symbol, site.frac_coords)
+            self._electride_structure = electride_structure
         return self._electride_structure
     
     @property
@@ -1360,7 +1347,7 @@ class SpinBadElfToolkit:
         # get POTCAR info
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            potcars = Potcar.from_file(self.directory / "POTCAR")
+            potcars = Potcar.from_file(potcar_path)
         nelectron_data = {}
         # the result is a list because there can be multiple element potcars
         # in the file (e.g. for NaCl, POTCAR = POTCAR_Na + POTCAR_Cl)
@@ -1369,7 +1356,7 @@ class SpinBadElfToolkit:
         # get valence electrons for each site in the structure
         valence = np.zeros(len(self.electride_structure), dtype=np.float64)
         for i, site in enumerate(self.structure):
-            valence[i] = potcar[site.specie.symbol]
+            valence[i] = nelectron_data[site.specie.symbol]
         # subtract charges from valence to get oxidation
         oxidation = valence - self.charges
         return oxidation

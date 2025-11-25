@@ -70,7 +70,7 @@ class SpinElfAnalysis(ElfAnalysis):
         # update entry
         new_row.analysis_up = labeler_up
         new_row.analysis_down = labeler_down
-        new_row.differing_spin = not labeler._equal_spin
+        new_row.differing_spin = not labeler.equal_spin
         new_row.save()
         return new_row
 
