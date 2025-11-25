@@ -210,7 +210,7 @@ class BadElfToolkit:
         if self._labeled_structure is None:
             labeled_structure = self.elf_labeler.get_feature_structure(
                 included_features=FeatureType.valence_types)
-            self._labeled_structure = self._get_sorted_structure(labeled_structure)
+            self._labeled_structure = labeled_structure
         return self._labeled_structure
     
     @property
