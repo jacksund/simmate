@@ -892,7 +892,9 @@ the shared features. Atom/electride surface distances may be smaller than expect
         }
         results["method_kwargs"] = method_kwargs
         
-        results["oxidation_states"] = self.get_oxidation_states(potcar_path)
+        # only try to calculate oxidation state if this was a spin dependent system
+        if self._spin_system == "total":
+            results["oxidation_states"] = self.get_oxidation_states(potcar_path)
         
         for result in [
             "structure",
@@ -1443,8 +1445,14 @@ class SpinBadElfToolkit:
     
     def write_results_summary(self, filepath: Path | str = "badelf_results_summary.json", **kwargs):
         filepath = Path(filepath)
+        # write total summary
         with open(filepath, "w") as json_file:
             json.dump(self.to_dict(use_json=True, **kwargs), json_file, indent=4)
+        # write spin up and spin down summaries
+        filepath_up = filepath.parent / f"{filepath.stem}_up{filepath.suffix}"
+        filepath_down = filepath.parent / f"{filepath.stem}_down{filepath.suffix}"
+        self.badelf_up.write_results_summary(filepath=filepath_up)
+        self.badelf_down.write_results_summary(filepath=filepath_down)
 
 
     @classmethod
@@ -1475,8 +1483,8 @@ class SpinBadElfToolkit:
             A SpinBadElfToolkit instance.
         """
 
-        reference_grid = Grid.from_vasp(reference_file)
-        charge_grid = Grid.from_vasp(charge_file)
+        reference_grid = Grid.from_vasp(reference_file, total_only=False)
+        charge_grid = Grid.from_vasp(charge_file, total_only=False)
         return cls(
             reference_grid=reference_grid,
             charge_grid=charge_grid,
