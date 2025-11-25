@@ -449,18 +449,25 @@ class BadElfToolkit:
     def all_electride_dims(self):
         if self._all_electride_dims is None:
             self._get_electride_dimensionality()
+        # if there are no electrides we want to return None, but we don't want
+        # to rerun the search each time. I mark the dims as -1 to avoid this
+        if self._all_electride_dims == -1:
+            return None
         return self._all_electride_dims
     
     @property
     def all_electride_dim_cutoffs(self):
         if self._all_electride_dim_cutoffs is None:
             self._get_electride_dimensionality()
+        if self._all_electride_dim_cutoffs == -1:
+            return None
         return self._all_electride_dim_cutoffs
             
     @property
     def electride_dimensionality(self):
-        if self._electride_dim is None:
+        if self._electride_dim is None and self.all_electride_dims is not None:
             self._electride_dim = self.all_electride_dims[0]
+
         return self._electride_dim
 
     def _get_ELF_dimensionality(
@@ -596,7 +603,8 @@ class BadElfToolkit:
         # If we have no electrides theres no reason to continue so we stop here
         logging.info("Finding electride dimensionality cutoffs")
         if self.nelectrides == 0:
-            return None, None
+            self._all_electride_dims = -1
+            self._all_electride_dim_cutoffs = -1
 
         ###############################################################################
         # This section preps an ELF grid that only contains values from the electride
