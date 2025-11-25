@@ -63,7 +63,7 @@ class BadElfToolkit:
             class.
 
     """
-    _spin_system = "total"
+    spin_system = "total"
 
     def __init__(
         self,
@@ -896,7 +896,7 @@ the shared features. Atom/electride surface distances may be smaller than expect
         results["method_kwargs"] = method_kwargs
         
         # only try to calculate oxidation state if this was a spin dependent system
-        if self._spin_system == "total":
+        if self.spin_system == "total":
             results["oxidation_states"] = self.get_oxidation_states(potcar_path)
         else:
             results["oxidation_states"] = None
@@ -920,6 +920,7 @@ the shared features. Atom/electride surface distances may be smaller than expect
             "electrides_per_reduced_formula",
             "total_charge",
             "total_volume",
+            "spin_system",
                 ]:
             results[result] = getattr(self, result, None)
         if use_json:
@@ -1111,7 +1112,7 @@ class SpinBadElfToolkit:
     to individually handle spin-up and spin-down components of the
     ELF and charge density.
     """
-    _spin_system = "combined"
+    spin_system = "combined"
 
     def __init__(
         self,
@@ -1197,8 +1198,8 @@ class SpinBadElfToolkit:
                 elf_labeler=self.elf_labeler_down,
                 **kwargs
             )
-            self.badelf_up._spin_system = "up"
-            self.badelf_down._spin_system = "down"
+            self.badelf_up.spin_system = "up"
+            self.badelf_down.spin_system = "down"
         else:
             self.badelf_up = BadElfToolkit(
                 reference_grid=self.reference_grid_up,
@@ -1207,7 +1208,7 @@ class SpinBadElfToolkit:
                 elf_labeler=self.elf_labeler_up,
                 **kwargs
             )
-            self.badelf_up._spin_system = "half"
+            self.badelf_up.spin_system = "half"
             self.badelf_down = self.badelf_up
             
         # Properties that will be calculated and cached
@@ -1439,6 +1440,7 @@ class SpinBadElfToolkit:
             "electrides_per_reduced_formula",
             "total_charge",
             "total_volume",
+            "spin_system",
                 ]:
             results[result] = getattr(self, result, None)
         if use_json:
