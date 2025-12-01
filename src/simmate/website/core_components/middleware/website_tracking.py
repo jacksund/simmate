@@ -20,13 +20,14 @@ class WebsitePageVisitMiddleware:
         url_parameters = parse_request_get(request)
         user = request.user if not isinstance(request.user, AnonymousUser) else None
 
-        # note: we don't want to save AJAX requests (i.e. Django Unicorn)
+        # note: we don't want to save AJAX requests (i.e. HTMX)
         # because this is essentially tracking mouse clicks -- and would slow
         # down our dynamic pages.
         excluded_urls = [
-            "/unicorn/message/",
+            "/htmx/",
             # !!! TODO: account for other providers (e.g. google)
-            "/accounts/microsoft/login/callback",
+            "/accounts/login/",
+            "/accounts/microsoft/login/",
         ]
         if not any([url_path.startswith(u) for u in excluded_urls]):
             visit = WebsitePageVisit(
