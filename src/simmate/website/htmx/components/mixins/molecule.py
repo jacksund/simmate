@@ -108,7 +108,8 @@ class MoleculeInput:
 
         if self.form_mode == "create" and self.molecule_match_tables:
             matches = self.check_datasets(molecule_obj)
-            setattr(self, f"{input_name}_matches", matches)
+            # TODO: f"{input_name}__molecule_matches"
+            setattr(self, "molecule_matches", matches)
 
         # draw mol image
         self.js_actions = [

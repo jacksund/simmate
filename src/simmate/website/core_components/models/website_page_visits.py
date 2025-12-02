@@ -129,9 +129,12 @@ class WebsitePageVisit(DatabaseTable):
         # For bar plotting, use the left edge of each bin
         hist_x = bin_edges[:-1]
         hist_y = hist_counts
-        bin_width_ms = (
-            hist_x[1] - hist_x[0]
-        ).total_seconds() * 1000  # width in milliseconds
+        if hist_x.empty:
+            bin_width_ms = 10_000
+        else:
+            bin_width_ms = (
+                hist_x[1] - hist_x[0]
+            ).total_seconds() * 1000  # width in milliseconds
 
         # --- Plotting ---
 
