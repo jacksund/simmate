@@ -391,11 +391,11 @@ def htmx_selectbox(
     # BUG-FIX
     # the searchbar breaks when the dropdown is in a model or offcanvas. So
     # this must be set to patch that via the `data-dropdown-parent` attr
-    # popout_parent_id = {
-    #     "searchpopout": "offcanvasQuickSearch",
-    #     "updatemanypopout": "offcanvasUpdater",
-    #     "createpopout": "offcanvasAddEntry",
-    # }.get(context["component"].component_id, None)
+    popout_parent_id = {
+        "searchpopout": "offcanvasQuickSearch",
+        "updatemanypopout": "offcanvasUpdater",
+        "createpopout": "offcanvasAddEntry",
+    }.get(component.component_key, None)
 
     return locals()
 
