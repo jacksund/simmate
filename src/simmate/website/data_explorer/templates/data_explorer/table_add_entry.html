@@ -13,7 +13,7 @@
                     Need to upload many entries at once? Switch to the <a href="{% url 'data_explorer:table-entry-new-many' table.table_name %}"><b>bulk upload form <i class="bi bi-box-arrow-up-right"></i></b></a>
                 </div>
             {% endif %}
-            {% htmx_component table.html_form_component key="createpopout" form_mode="create" redirect_mode="refresh" %}
+            {% htmx_component table.html_form_component component_key="createpopout" form_mode="create" redirect_mode="refresh" %}
         </div>
     </div>
 </div>

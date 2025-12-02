@@ -21,6 +21,8 @@ class HtmxComponent:
 
     component_id: str = None
 
+    component_key: str = None
+
     post_data: dict = None
 
     form_data: dict = None
