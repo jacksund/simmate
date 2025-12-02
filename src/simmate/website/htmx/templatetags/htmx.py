@@ -523,7 +523,8 @@ def htmx_molecule_input(
     else:
         molecule = None
 
-    molecule_matches = component.form_data.get(f"{name}__molecule_matches", None)
+    # TODO: use f"{name}__molecule_matches"
+    molecule_matches = getattr(component, "molecule_matches", None)
 
     return locals()
 
