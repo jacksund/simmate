@@ -236,12 +236,12 @@ nav:
                 #    - Featurizers: full_guides/toolkit/crystal_structures/many_structures/featurizers.md
 
         - Extras:
-            - Simmate Open Collective: 
-                - Overview: full_guides/open_collective/overview.md
-                - Architecture: full_guides/open_collective/architecture.md
-                - Financial Strategy: full_guides/open_collective/financial_strategy.md
-                - Data Integrity Safeguards:  full_guides/open_collective/data_integrity_safeguards.md
-                - How to participate & earn: full_guides/open_collective/how_to_participate_and_earn.md
+            # - Simmate Open Collective: 
+            #    - Overview: full_guides/open_collective/overview.md
+            #    - Architecture: full_guides/open_collective/architecture.md
+            #    - Financial Strategy: full_guides/open_collective/financial_strategy.md
+            #    - Data Integrity Safeguards:  full_guides/open_collective/data_integrity_safeguards.md
+            #    - How to participate & earn: full_guides/open_collective/how_to_participate_and_earn.md
             - Settings & Configs: full_guides/extras/configuration.md
             - Contributing Code:
                 - First time setup: full_guides/contributing/first_time_setup.md

@@ -11,7 +11,7 @@ from .wallets import EthereumWallet
 class EthereumTransaction(DatabaseTable):
 
     class Meta:
-        db_table = "etherscan__transactions"
+        db_table = "ethereum__transactions"
 
     # disable cols
     source = None
@@ -49,14 +49,11 @@ class EthereumTransaction(DatabaseTable):
         on_delete=table_column.PROTECT,
     )
 
-    token_options = [
+    asset_options = [
         "ETH",
         "USDC",
-        "USDT",
-        "USDS",
-        "DAI",
     ]
-    token = table_column.CharField(max_length=10, blank=True, null=True)
+    asset = table_column.CharField(max_length=10, blank=True, null=True)
 
     amount = table_column.FloatField(blank=True, null=True)
 
