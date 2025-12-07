@@ -1,4 +1,4 @@
-# The Simmate Open Collective
+# Data Integrity Safegaurds
 
 
 ### Summary

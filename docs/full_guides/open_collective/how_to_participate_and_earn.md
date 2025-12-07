@@ -1,3 +1,3 @@
-# The Simmate Open Collective
+# How to Participate & Earn
 
 this is a placeholder
