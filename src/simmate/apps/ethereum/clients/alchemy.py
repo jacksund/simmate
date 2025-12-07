@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import time
-from datetime import datetime
 
 import pandas
 import requests
-from rich.progress import track
 
 from simmate.configuration import settings
 
@@ -55,130 +52,12 @@ class AlchemyClient:
     @classmethod
     def get_all_transaction_data(cls) -> pandas.DataFrame:
         all_data = []
-        for ens_name, address in cls.address_map.items():
+        for ens_name, address in EthereumMappings.wallet_addresses.items():
             logging.info(f"Loading transactions for '{ens_name}'")
             data = cls.get_all_transactions(address=address)
             data["ens_name"] = ens_name
             all_data.append(data)
         return pandas.concat(all_data)
-
-    @classmethod
-    def get_all_balance_data(cls) -> pandas.DataFrame:
-        all_data = []
-        for ens_name, address in cls.address_map.items():
-            logging.info(f"Loading balances for '{ens_name}'")
-            balances = cls.get_all_balances(address=address)
-            # flatten balances dict into a single dict
-            balances_flat = {}
-            for chain, tokens in balances.items():
-                for token, amount in tokens.items():
-                    if chain != "Ethereum":
-                        key = f"{token}_{chain}"
-                    else:
-                        key = token
-                    balances_flat[key] = amount
-            balances_flat["address"] = address
-            balances_flat["ens_name"] = ens_name
-            all_data.append(balances_flat)
-        return pandas.DataFrame(all_data)
-
-    # -------------------------------------------------------------------------
-
-    @classmethod
-    def get_response(
-        cls,
-        method: str,
-        params: list,
-        chain: str = "Ethereum",
-        recursive: bool = True,
-    ):
-
-        chain_name = cls.chain_map[chain]
-        api_url = f"https://{chain_name}.g.alchemy.com/v2/{cls.api_key}"
-        payload = {
-            "jsonrpc": "2.0",
-            "method": method,
-            "params": params,
-        }
-
-        response = requests.post(api_url, json=payload)
-        response.raise_for_status()
-        data = response.json()
-
-        assert "result" in data.keys()
-
-        # TODO: catch errors that give 200 return code but error message response
-
-        # time.sleep(0.34)  # to avoid ratelimit of 500 CU/s
-
-        # perform a recursive call if the results are over multiple pages
-        if recursive and "pageKey" in data["result"].keys():
-            logging.info("API Results are paginated. Enumerating next.")
-
-            full_results = cls.get_response(
-                method=method,
-                chain=chain,
-                params=[
-                    {
-                        **params[0],
-                        # current page key + original query is used to grab next page
-                        "pageKey": data["result"]["pageKey"],  # must come last
-                    }
-                ],
-            )
-            # note: use "maxCount": hex(10) to practice pagination
-
-            for concat_key in ["transfers"]:
-                data["result"][concat_key] += full_results["result"][concat_key]
-            data["result"].pop("pageKey")
-
-        return data
-
-    def get_address_from_ens(ens_name: str) -> str:
-        # !!! temp solution. Need lookup API when available
-        return settings.etherscan.addresses[ens_name]
-
-    def get_ens_from_address(address: str) -> str:
-        # !!! temp solution. Need lookup API when available
-        for ens_name, ens_addr in settings.etherscan.addresses.items():
-            if ens_addr == address:
-                return ens_name
-
-    # -------------------------------------------------------------------------
-
-    @classmethod
-    def get_balances_for_chain(cls, address: str, chain: str) -> dict:
-        # https://www.alchemy.com/docs/data/token-api/token-api-endpoints/alchemy-get-token-balances
-        api_params = [
-            address,
-            list(EthereumMappings.token_addresses[chain].values()),  # tokenSpec
-        ]
-        balances = cls.get_response(
-            method="alchemy_getTokenBalances",
-            params=api_params,
-            chain=chain,
-        )
-        df = pandas.DataFrame(balances["result"]["tokenBalances"])
-
-        # convert hex strings to actual asset amounts
-        token_names = []
-        token_amounts = []
-        for row in df.itertuples():
-            token_name = [
-                name
-                for name, address in EthereumMappings.token_addresses[chain].items()
-                if address == row.contractAddress
-            ][0]
-            precision = EthereumMappings.token_precisions[token_name]
-            token_amount = int(row.tokenBalance, 16) / precision
-            token_names.append(token_name)
-            token_amounts.append(token_amount)
-        df["token_name"] = token_names
-        df["token_amount"] = token_amounts
-
-        return df
-
-    # -------------------------------------------------------------------------
 
     @classmethod
     def get_transactions_for_chain(cls, address: str, chain: str) -> pandas.DataFrame:
@@ -225,5 +104,149 @@ class AlchemyClient:
             + to_transactions["result"]["transfers"]
         )
         return pandas.DataFrame(all_transactions)
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_all_balance_data(cls) -> pandas.DataFrame:
+        all_data = []
+        for ens_name, address in EthereumMappings.wallet_addresses.items():
+            logging.info(f"Loading balances for '{ens_name}'")
+            balances = cls.get_all_balances(address=address)
+            # flatten balances dict into a single dict
+            balances_flat = {}
+            for chain, tokens in balances.items():
+                for token, amount in tokens.items():
+                    if chain != "Ethereum":
+                        key = f"{token}_{chain}"
+                    else:
+                        key = token
+                    balances_flat[key] = amount
+            balances_flat["address"] = address
+            balances_flat["ens_name"] = ens_name
+            all_data.append(balances_flat)
+        return pandas.DataFrame(all_data)
+
+    @classmethod
+    def get_all_balances(cls, address: str) -> dict:
+        balances = {}
+        for chain in cls.chain_map.keys():
+            logging.info(f"Loading from '{chain}' chain")
+            chain_balances = cls.get_balances_for_chain(address, chain)[
+                ["token_name", "token_amount"]
+            ].to_dict(orient="records")
+            balances[chain] = {
+                e["token_name"]: e["token_amount"]
+                for e in chain_balances
+                if e["token_amount"] > 0
+            }
+        return balances
+
+    @classmethod
+    def get_balances_for_chain(cls, address: str, chain: str) -> dict:
+        # https://www.alchemy.com/docs/data/token-api/token-api-endpoints/alchemy-get-token-balances
+        api_params = [
+            address,
+            list(EthereumMappings.token_addresses[chain].values()),  # tokenSpec
+        ]
+        balances = cls.get_response(
+            method="alchemy_getTokenBalances",
+            params=api_params,
+            chain=chain,
+        )
+
+        # Native token (ETH) must be done separately
+        api_params = [
+            address,
+            "NATIVE_TOKEN",  # tokenSpec
+        ]
+        native_balance = cls.get_response(
+            method="alchemy_getTokenBalances",
+            params=api_params,
+            chain=chain,
+        )
+        balances["result"]["tokenBalances"] += native_balance["result"]["tokenBalances"]
+
+        df = pandas.DataFrame(balances["result"]["tokenBalances"])
+
+        # convert hex strings to actual asset amounts
+        token_names = []
+        token_amounts = []
+        for row in df.itertuples():
+            if row.contractAddress != "null":
+                token_name = [
+                    name
+                    for name, address in EthereumMappings.token_addresses[chain].items()
+                    if address == row.contractAddress
+                ][0]
+            else:
+                token_name = "ETH"
+            precision = EthereumMappings.token_precisions[token_name]
+            token_amount = int(row.tokenBalance, 16) / precision
+            token_names.append(token_name)
+            token_amounts.append(token_amount)
+        df["token_name"] = token_names
+        df["token_amount"] = token_amounts
+
+        return df
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_response(
+        cls,
+        method: str,
+        params: list,
+        chain: str = "Ethereum",
+        recursive: bool = True,
+    ):
+
+        chain_name = cls.chain_map[chain]
+        api_url = f"https://{chain_name}.g.alchemy.com/v2/{cls.api_key}"
+        payload = {
+            "jsonrpc": "2.0",
+            "method": method,
+            "params": params,
+        }
+
+        response = requests.post(api_url, json=payload)
+        response.raise_for_status()
+        data = response.json()
+        assert "result" in data.keys()
+
+        # TODO: catch errors that give 200 return code but error message response
+
+        # perform a recursive call if the results are over multiple pages
+        if recursive and "pageKey" in data["result"].keys():
+            logging.info("API Results are paginated. Enumerating next.")
+
+            full_results = cls.get_response(
+                method=method,
+                chain=chain,
+                params=[
+                    {
+                        **params[0],
+                        # current page key + original query is used to grab next page
+                        "pageKey": data["result"]["pageKey"],  # must come last
+                    }
+                ],
+            )
+            # note: use "maxCount": hex(10) to practice pagination
+
+            for concat_key in ["transfers"]:
+                data["result"][concat_key] += full_results["result"][concat_key]
+            data["result"].pop("pageKey")
+
+        return data
+
+    def get_address_from_ens(ens_name: str) -> str:
+        # !!! temp solution. Need lookup API when available
+        return settings.etherscan.addresses[ens_name]
+
+    def get_ens_from_address(address: str) -> str:
+        # !!! temp solution. Need lookup API when available
+        for ens_name, ens_addr in settings.etherscan.addresses.items():
+            if ens_addr == address:
+                return ens_name
 
     # -------------------------------------------------------------------------
