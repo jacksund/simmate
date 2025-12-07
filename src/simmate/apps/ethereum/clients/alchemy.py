@@ -54,8 +54,21 @@ class AlchemyClient:
         all_data = []
         for ens_name, address in EthereumMappings.wallet_addresses.items():
             logging.info(f"Loading transactions for '{ens_name}'")
-            data = cls.get_all_transactions(address=address)
+            data = cls.get_transactions(address=address)
             data["ens_name"] = ens_name
+            all_data.append(data)
+        return pandas.concat(all_data)
+
+    @classmethod
+    def get_transactions(cls, address: str):
+        all_data = []
+        for chain in cls.chain_map:
+            logging.info(f"Loading from '{chain}' chain")
+            data = cls.get_transactions_for_chain(
+                chain=chain,
+                address=address,
+            )
+            data["chain"] = chain
             all_data.append(data)
         return pandas.concat(all_data)
 
@@ -112,7 +125,7 @@ class AlchemyClient:
         all_data = []
         for ens_name, address in EthereumMappings.wallet_addresses.items():
             logging.info(f"Loading balances for '{ens_name}'")
-            balances = cls.get_all_balances(address=address)
+            balances = cls.get_balances(address=address)
             # flatten balances dict into a single dict
             balances_flat = {}
             for chain, tokens in balances.items():
@@ -128,7 +141,7 @@ class AlchemyClient:
         return pandas.DataFrame(all_data)
 
     @classmethod
-    def get_all_balances(cls, address: str) -> dict:
+    def get_balances(cls, address: str) -> dict:
         balances = {}
         for chain in cls.chain_map.keys():
             logging.info(f"Loading from '{chain}' chain")
