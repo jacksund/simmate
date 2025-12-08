@@ -156,6 +156,13 @@ def apps(request):
         urls_path = get_app_submodule(app_name, "urls")
         if urls_path:
             app_config = get_class(app_name)
+
+            if (
+                hasattr(app_config, "hide_in_website")
+                and app_config.hide_in_website == True
+            ):
+                continue
+
             extra_apps.append(
                 {
                     "verbose_name": app_config.verbose_name,
