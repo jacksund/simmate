@@ -340,11 +340,6 @@ class SimmateSettings:
                     "subject_prefix": "[Simmate] ",
                     "account_verification": "none",  # when creating new accounts
                 },
-                # These people get an email when DEBUG=False
-                "admins": [
-                    # for example:
-                    # ("janedoe", "janedoe@gmail.com"),
-                ],
                 # whether to use ChemDraw.js or the free/open-source fallback Ketcher.
                 # Note, chemdraw_js requires providing static files + license
                 "chemdraw_js": False,
