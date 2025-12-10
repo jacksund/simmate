@@ -294,19 +294,12 @@ class SearchResults(models.QuerySet):
         return JsonResponse(self.to_api_dict(**kwargs))
 
     def to_csv_response(self, mode: str = "api", **kwargs) -> HttpResponse:
-        # TODO: this is the code once the htmx ui updates are merged:
-        # if mode == "curated":
-        #   df = self.model.get_curated_df(self)
-        # elif mode == "api":
-        #   df = self.to_dataframe()
-        # else:
-        #   rasie Exception("Unknown `mode` for `to_csv_response`: {mode}")
-        # Until then....
-        df = (
-            self.to_curated_dataframe()
-            if hasattr(self.model, "get_curated_df")
-            else self.to_dataframe()
-        )
+        if mode == "curated":
+          df = self.model.get_curated_df(self)
+        elif mode == "api":
+          df = self.to_dataframe()
+        else:
+          raise Exception(f"Unknown `mode` for `to_csv_response`: {mode}")
 
         # https://stackoverflow.com/questions/54729411/
         response = HttpResponse(content_type="text/csv")
