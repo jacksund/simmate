@@ -49,7 +49,7 @@ class ElfAnalysis(Structure):
     features in the system.
     """
 
-    quasi_atom_structure = table_column.JSONField(blank=True, null=True)
+    electride_structure = table_column.JSONField(blank=True, null=True)
     """
     The labeled structure with dummy atoms representing the location of quasi
     atoms (e.g. electrides, bare electrons, etc.)
@@ -135,7 +135,7 @@ class ElfAnalysis(Structure):
             graph = graph.to_json()
         results["bifurcation_graph"] = graph
         results["labeled_structure"] = labeler.labeled_structure.to_json()
-        results["quasi_atom_structure"] = labeler.quasi_atom_structure.to_json()
+        results["electride_structure"] = labeler.electride_structure.to_json()
         results["atom_elf_radii"] = [float(i) for i in labeler.atom_elf_radii]
         results["atom_elf_radii_types"] = [str(i) for i in labeler.atom_elf_radii_types]
         results["spin_system"] = labeler._spin_system
@@ -191,7 +191,7 @@ class ElfAnalysis(Structure):
         feature_model = self.elf_features.model
         # Let's iterate through the ELF features and save these to the database.
         struc_len = len(labeler.structure)
-        quasi_atom_count = 0
+        electride_count = 0
         for node_idx, node in enumerate(labeler.bifurcation_graph.irreducible_nodes):
             # get dict of all info for this feature
             new_row_dict = {}
@@ -206,8 +206,8 @@ class ElfAnalysis(Structure):
             # update values not stored directly in dict
             new_row_dict["analysis"] = self
             if node.feature_type in FeatureType.bare_types:
-                new_row_dict["quasi_atom_structure_index"] = struc_len + quasi_atom_count
-                quasi_atom_count += 1
+                new_row_dict["electride_structure_index"] = struc_len + electride_count
+                electride_count += 1
             new_row_dict["labeled_structure_index"] = struc_len + node_idx
             new_row = feature_model(**new_row_dict)
             new_row.save()

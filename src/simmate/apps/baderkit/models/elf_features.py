@@ -110,7 +110,7 @@ class ElfFeatures(DatabaseTable):
     to
     """
     
-    quasi_atom_structure_index = table_column.IntegerField(blank=True, null=True)
+    electride_structure_index = table_column.IntegerField(blank=True, null=True)
     """
     The index of the dummy atom in the quasi atom structure that this feature belongs
     to
@@ -155,13 +155,13 @@ class ElfFeatures(DatabaseTable):
     The coordination number of this feature including quasi atoms (i.e. electrides)
     """
     
-    coord_quasi_atom_indices = table_column.JSONField(blank=True, null=True)
+    coord_electride_indices = table_column.JSONField(blank=True, null=True)
     """
     The labeled structure indices of each of the coordinated atoms in the
     quasi-atom structure
     """
     
-    coord_quasi_atom_species = table_column.JSONField(blank=True, null=True)
+    coord_electride_species = table_column.JSONField(blank=True, null=True)
     """
     The symbol of each of the coordinated atoms in the quasi-atom structure
     """
