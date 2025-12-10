@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Literal
 
 import numpy as np
+from numpy.typing import NDArray
 import psutil
 from pymatgen.analysis.local_env import CrystalNN
 from pymatgen.io.vasp import Potcar
@@ -28,41 +29,88 @@ from simmate.toolkit import Structure
 class BadElfToolkit:
     """
     A set of tools for performing BadELF, VoronELF, or Zero-Flux analysis on
-    outputs from a VASP calculation. This class only performs analysis
-    on one spin at a time.
+    outputs from a VASP calculation. This class handles the full workflow from
+    labeling ELF features, to locating separating planes at atom radii, to integrating
+    charge. For more traditional ELF analysis, we recommend using the ElfLabeler
+    class in the [BaderKit](https://github.com/SWeav02/baderkit) package.
+    
+    This class only performs analysis on one spin system.
 
-    Args:
-        reference_grid (Grid):
-            A badelf app Grid like object used for partitioning the unit cell
-            volume. Usually contains ELF.
-        charge_grid (Grid):
-            A badelf app Grid like object used for summing charge. Usually
-            contains charge density.
-        directory (Path):
-            The Path to perform the analysis in.
-        threads (int):
-            The number of threads to use for voxel assignment.
-            Defaults to 0.9*the total number of threads available.
-        algorithm (str):
-            The algorithm to use for partitioning. Options are "badelf", "voronelf",
-            or "zero-flux".
-        find_electrides (bool):
-            Whether or not to search for electride sites. Usually set to true.
-        labeled_structure :
-            A pymatgen structure object with dummy atoms representing
-            electride, covalent, and metallic features
-        shared_feature_separation_method (str):
-            The method of assigning charge from shared ELF features
-            such as covalent or metallic bonds.
-        shared_feature_algorithm (str):
-            The algorithm used to partition covalent bonds found in the
-            structure. Only used for separation methods other than the
-            plane method.
-        elf_labeler_kwargs (dict):
-            A dictionary of keyword arguments to pass to the ElfAnalyzerToolkit
-            class.
+    Parameters
+    ----------
+    reference_grid : Grid
+        A badelf app Grid like object used for partitioning the unit cell
+        volume. Usually contains ELF.
+    charge_grid : Grid
+        A badelf app Grid like object used for summing charge. Usually
+        contains charge density.
+    threads : int, optional
+        The number of threads to use for voxel assignment.
+        Defaults to 0.9*the total number of threads available.
+    algorithm : Literal["badelf", "voronelf", "zero-flux"], optional
+        The algorithm to use for partitioning electrides from the nearby
+        atoms. The default is "badelf".
+            badelf:
+                Separates electrides using zero-flux surfaces then uses
+                planes at atom radii to separate atoms. This may give more reasonable
+                results for atoms, particularly in ionic solids.
+            voronelf:
+                Separates both electrides and atoms using planes at atomic/electride
+                radii. This is not recommended for electrides that are not
+                spherical, but may provide better results for those that are.
+            zero-flux:
+                Separates electrides and atoms using zero-flux surface. This
+                is the most traditional ELF analysis, but may display some
+                bias towards atoms with higher ELF values. Results for electride
+                sites are identical to BadELF, and the method can be significantly
+                faster.
+    shared_feature_splitting_method : Literal[            "plane", "pauling", "equal", "dist", "nearest"        ], optional
+        The method of assigning charge from shared ELF features
+        such as covalent or metallic bonds. The default is "plane".
+            plane:
+                Distributes charge based on the voronoi surface belonging to 
+                each atom. Charge will not be assigned to electrides unless
+                the voronelf method is used, and this method cannot be used
+                with the zero-flux method.
+            pauling:
+                Distributes charge to neighboring atoms (calculated using CrystalNN)
+                based on the pualing electronegativity of each species normalized
+                such that their sum is equal to 1. If no EN is found for the
+                atom a default of 2.2 is used (including for electrides).
+            equal:
+                Charge is distributed equaly to each neighboring atom/electride
+                (calculated using CrystalNN)
+            dist:
+                Charge is distributed such that more charge is given to the
+                closest atoms. Portions are determined by normalizing the sum
+                of (1/dist) to each neighboring atom.
+            nearest:
+                Gives all charge to the nearest atom or electride site.
+    labeled_structure : Structure, optional
+        A pymatgen structure object with dummy atoms representing
+        electride, covalent, and metallic features. If provided, the ElfLabeler
+        will not be used.
+        
+        Symbols must be as follows:
+            electride: "Le"
+            covalent: "Z"
+            metallic: "M"
+            
+    crystalnn_kwargs : dict, optional
+        The keyword arguments for CrystalNN to determine which atoms/electrides
+        neighbor metallic/covalent bonds.
+        The default is {
+            "distance_cutoffs": None,
+            "x_diff_weight": 0.0,
+            "porous_adjustment": False,            
+            }.
+    elf_labeler : dict | ElfLabeler, optional
+        Keyword arguments to pass to the ElfLabeler class. This includes
+        parameters controlling cutoffs for electrides. Alternatively, an
+        ElfLabeler class can be passed directly. The default is {}.
 
     """
+    
     spin_system = "total"
 
     def __init__(
@@ -80,8 +128,7 @@ class BadElfToolkit:
             "x_diff_weight": 0.0,
             "porous_adjustment": False,
             },
-        elf_labeler_kwargs: dict = {},
-        elf_labeler: ElfLabeler = None,
+        elf_labeler: dict | ElfLabeler = {},
     ):
         assert reference_grid.structure == charge_grid.structure, "Grid structures must be the same."
         
@@ -118,24 +165,33 @@ class BadElfToolkit:
         
         # if a labeled structure is provided, use that instead of the elf labeler
         if labeled_structure is not None:
+            # set the structure and set elf_labeler to None
             self._labeled_structure = self._get_sorted_structure(labeled_structure)
             self.elf_labeler = None
-            self.elf_labeler_kwargs = None
-            self.bader = Bader(**self.elf_labeler_kwargs)
+            # if we have elf_labeler kwargs, pass them to the necessary Bader object
+            if type(elf_labeler) == dict:
+                self.bader = Bader(**elf_labeler)
+                self.elf_labeler_kwargs = elf_labeler
+            else:
+                self.bader = Bader()
+                self.elf_labeler_kwargs = None
         else:
+            # We want to use the ElfLabeler. We check if an ElfLabeler class is
+            # provided or a dict of kwargs
             self._labeled_structure = None
-            if elf_labeler is None:
-                self.elf_labeler_kwargs = elf_labeler_kwargs
+            if type(elf_labeler) == dict:
+                self.elf_labeler_kwargs = elf_labeler
                 self.elf_labeler = ElfLabeler(
                     charge_grid=charge_grid,
                     reference_grid=reference_grid,
                     crystalnn_kwargs=crystalnn_kwargs,
-                    **self.elf_labeler_kwargs
+                    **self.elf_labeler
                     )
             else:
                 # use provided elf labeler
-                self.elf_labeler_kwargs = None
+                self.elf_labeler = None
                 self.elf_labeler = elf_labeler
+            # connect the same bader class.
             self.bader = self.elf_labeler.bader
             
         # Properties that will be calculated and cached
@@ -178,6 +234,21 @@ class BadElfToolkit:
 
     @staticmethod
     def _get_sorted_structure(structure: Structure) -> Structure:
+        """
+        Sorts a labeled structure such that atoms come first followed by electrides
+        and then covalent/metallic features.
+
+        Parameters
+        ----------
+        structure : Structure
+            The labeled structure to sort.
+
+        Returns
+        -------
+        Structure
+            The sorted structure.
+
+        """
         # For our partitioning scheme, we need the structure to be ordered as
         # atoms, electrides, other. This is so that the labeled grid points map
         # to structure indices.
@@ -206,7 +277,16 @@ class BadElfToolkit:
         return new_structure
         
     @property
-    def labeled_structure(self):
+    def labeled_structure(self) -> Structure:
+        """
+
+        Returns
+        -------
+        Structure
+            The system's structure including dummy atoms representing electride
+            sites and covalent/metallic bonds.
+
+        """
         if self._labeled_structure is None:
             labeled_structure = self.elf_labeler.get_feature_structure(
                 included_features=FeatureType.valence_types)
@@ -215,6 +295,15 @@ class BadElfToolkit:
     
     @property
     def structure(self) -> Structure:
+        """
+
+        Returns
+        -------
+        Structure
+            The unlabeled structure representing the system, i.e. the structure
+            with no dummy atoms.
+
+        """
         if self._structure is None:
             # NOTE: We don't just use the structure from one of the grids in
             # case for some reason they differ from a provided structure from
@@ -227,7 +316,16 @@ class BadElfToolkit:
         return structure
     
     @property
-    def electride_structure(self):
+    def electride_structure(self) -> Structure:
+        """
+
+        Returns
+        -------
+        Structure
+            The system's structure including dummy atoms representing electride
+            sites.
+
+        """
         if self._electride_structure is None:
             # create our elecride structure from our labeled structure.
             # NOTE: We don't just use the structure from the elf labeler in
@@ -240,15 +338,41 @@ class BadElfToolkit:
         return self._electride_structure
     
     @property
-    def nelectrides(self):
+    def nelectrides(self) -> int:
+        """
+
+        Returns
+        -------
+        int
+            The number of electride sites (electride maxima) present in the system.
+
+        """
         return len(self.electride_structure) - len(self.structure)
     
     @property
     def species(self) -> list[str]:
+        """
+
+        Returns
+        -------
+        list[str]
+            The species of each atom/dummy atom in the electride structure. Covalent
+            and metallic features are not included.
+
+        """
         return [i.specie.symbol for i in self.electride_structure]
     
     @property
     def plane_partitioning_structure(self) -> Structure:
+        """
+
+        Returns
+        -------
+        Structure
+            A structure including each atom/dummy atom that is separated using a
+            plane rather than zero-flux surface.
+
+        """
         if self._plane_partitioning_structure is None:
             # we want a structure that contains all of the atoms and features
             # we plan to separate using planes.
@@ -268,9 +392,20 @@ class BadElfToolkit:
         return self._plane_partitioning_structure
     
     @property
-    def zero_flux_feature_labels(self):
+    def zero_flux_feature_labels(self) -> NDArray:
+        """
+
+        Returns
+        -------
+        NDArray
+            An array representing which atoms/dummy atoms each voxel point is 
+            assigned to.
+
+        """
         if self._zero_flux_feature_labels is None:
             if self.elf_labeler is not None:
+                # Use the ElfLabeler as it assigns basins more accurately rather
+                # than simply assigning to the nearest atom.
                 self._zero_flux_feature_labels = self.elf_labeler.get_feature_labels(
                     included_features=FeatureType.valence_types,
                     return_structure=False
@@ -280,22 +415,32 @@ class BadElfToolkit:
         return self._zero_flux_feature_labels
 
     @property
-    def partitioning(self):
+    def partitioning(self) -> dict:
         """
-        The partitioning planes for the structure as a dictionary of dataframes.
-        None if the zero-flux method is selected
+
+        Returns
+        -------
+        dict
+            The partitioning planes for the structure as a dictionary of dataframes.
+            None if the zero-flux method is selected.
+
         """
         if self._partitioning is None:
             self._partitioning = self._get_partitioning()
         return self._partitioning
 
-    def _get_partitioning(self):
+    def _get_partitioning(self) -> dict:
         """
+        
         Gets the partitioning used in the badelf and voronelf algorithms.
 
-        Returns:
+        Returns
+        -------
+        partitioning : dict
             Dictionary relating sites to the planes surrounding them. None
             if the zero-flux algorithm is selected.
+            
+
         """
         if self.algorithm == "zero-flux":
             print(
@@ -318,41 +463,60 @@ class BadElfToolkit:
         return partitioning
 
     @property
-    def atom_labels(self):
+    def atom_labels(self) -> NDArray:
         """
-        A 3D array with the same shape as the charge grid indicating
-        which atom/electride each grid point is assigned to
+
+        Returns
+        -------
+        NDArray
+            A 3D array with the same shape as the charge grid indicating
+            which atom/electride each grid point is assigned to.
+
         """
         if self._atom_labels is None:
             self._get_voxel_assignments()
         return self._atom_labels
 
     @property
-    def multi_atom_fracs(self):
+    def multi_atom_fracs(self) -> NDArray:
         """
-        An (N,M) shaped array with indices i,j where i is the voxel index
-        (these are sub indices, full indices are stored in multi_site_indices)
-        and j is the site. A 1 indicates that this voxel is partially shared by
-        this site
+
+        Returns
+        -------
+        NDArray
+            An (N,M) shaped array with indices i,j where i is the voxel index
+            (these are sub indices, full indices are stored in multi_site_indices)
+            and j is the site. A 1 indicates that this voxel is partially shared by
+            this site.
+
         """
         if self._multi_atom_fracs is None:
             self._get_voxel_assignments()
         return self._multi_atom_fracs
 
     @property
-    def multi_atom_mask(self):
+    def multi_atom_mask(self) -> NDArray:
         """
-        The corresponding voxel indices for the multi_atom_fracs
-        array.
+
+        Returns
+        -------
+        NDArray
+           The corresponding voxel indices for the multi_atom_fracs array.
+
         """
         if self._multi_atom_mask is None and self._multi_atom_fracs is None:
             self._get_voxel_assignments()
         return self._multi_atom_mask
 
-    def _get_voxel_assignments(self):
+    def _get_voxel_assignments(self) -> None:
         """
-        Gets a dataframe of voxel assignments. The dataframe has columns
-        [x, y, z, charge, sites]
+
+        Returns
+        -------
+        None
+            Gets a dataframe of voxel assignments. The dataframe has columns
+            [x, y, z, charge, sites].
+
         """
         algorithm = self.algorithm
         if algorithm == "zero-flux":
@@ -446,7 +610,16 @@ class BadElfToolkit:
         logging.info("Finished voxel assignment")
     
     @property
-    def all_electride_dims(self):
+    def all_electride_dims(self) -> list | None:
+        """
+
+        Returns
+        -------
+        list
+            The possible dimensions the electride takes on from an ELF value of
+            0 to 1. If no electrides are present the value will be None.
+
+        """
         if self._all_electride_dims is None:
             self._get_electride_dimensionality()
         # if there are no electrides we want to return None, but we don't want
@@ -456,7 +629,16 @@ class BadElfToolkit:
         return self._all_electride_dims
     
     @property
-    def all_electride_dim_cutoffs(self):
+    def all_electride_dim_cutoffs(self) -> list:
+        """
+
+        Returns
+        -------
+        list
+            The highest ELF value where each dimensionality in the "all_electride_dims"
+            property exists.
+
+        """
         if self._all_electride_dim_cutoffs is None:
             self._get_electride_dimensionality()
         if self._all_electride_dim_cutoffs == -1:
@@ -464,7 +646,15 @@ class BadElfToolkit:
         return self._all_electride_dim_cutoffs
             
     @property
-    def electride_dimensionality(self):
+    def electride_dimensionality(self) -> int:
+        """
+
+        Returns
+        -------
+        int
+            The dimensionality of the electride volume at a value of 0 ELF.
+
+        """
         if self._electride_dim is None and self.all_electride_dims is not None:
             self._electride_dim = self.all_electride_dims[0]
 
@@ -472,10 +662,11 @@ class BadElfToolkit:
 
     def _get_ELF_dimensionality(
             self,
-            electride_mask: np.array,
+            electride_mask: NDArray,
             cutoff: float,
-            ):
+            ) -> int:
         """
+        
         This algorithm works by checking if the voxels with values above the cutoff
         are connected to the equivalent voxel in the unit cell one transformation
         over. This is done primarily using scipy.ndimage.label which determines
@@ -485,12 +676,23 @@ class BadElfToolkit:
         and corners. If a connection in that direction is found, the total number
         of connections increases. Dimensionalities of 0,1,2, and 3 are represented
         by 0,1,4,and 13 connections respectively.
+        
+        NOTE: This can be made much faster with numba using an algorithm similar
+        to that used in BaderKit to determine which atoms are surrounded. However,
+        this would require a lot of time.
 
-        Args:
-            cutoff (float):
-                The minimum elf value to consider as a connection.
-            grid (Grid):
-                The ELF Grid object with only values associated with electrides.
+        Parameters
+        ----------
+        electride_mask : np.array
+            The ELF Grid object with only values associated with electrides.
+        cutoff : float
+            The minimum elf value to consider as a connection.
+
+        Returns
+        -------
+        int
+            The dimensionality at the ELF cutoff.
+
         """
         # Remove data below our cutoff
         mask = electride_mask & (self.reference_grid.total >= cutoff)
@@ -589,15 +791,12 @@ class BadElfToolkit:
 
         return max(dimensionalities)
 
-    def _get_electride_dimensionality(self):
+    def _get_electride_dimensionality(self) -> None:
         """
-        Finds the dimensionality (e.g. 0D, 1D, etc.) of an electride by labeling
-        features in the ELF at various cutoffs and determining if they are
-        connected to nearby unit cells.
+        
+        Gets the electride dimensionalities and range of ELF values that they
+        exist at.
 
-        Args:
-            grid (Grid):
-                The ELF Grid object with only values associated with electrides.
         """
         # TODO: This whole method should probably be rewritten in Numba
         # If we have no electrides theres no reason to continue so we stop here
@@ -659,18 +858,50 @@ class BadElfToolkit:
         self._all_electride_dim_cutoffs = final_connections
         
     @property
-    def charges(self):
+    def charges(self) -> NDArray:
+        """
+
+        Returns
+        -------
+        NDArray
+            The charge associated with each atom and electride site in the system.
+
+        """
         if self._charges is None:
             self._get_charges_volumes()
         return self._charges
     
     @property
-    def volumes(self):
+    def volumes(self) -> NDArray:
+        """
+
+        Returns
+        -------
+        NDArray
+            The volume associated with each atom and electride site in the system.
+
+        """
         if self._volumes is None:
             self._get_charges_volumes()
         return self._volumes
     
-    def _get_site_coordination(self, site_idx):
+    def _get_site_coordination(self, site_idx: int) -> list:
+        """
+        Gets the coordination of a site in the labeled structure using CrystalNN.
+        Only atoms/electrides are considered as potential neighbors.
+
+        Parameters
+        ----------
+        site_idx : int
+            The index of the labeled structure.
+
+        Returns
+        -------
+        list
+            The indices (in the electride_structure property) coordinated with 
+            the requested species.
+
+        """
         # for atoms/electrides we use the electride structure
         if site_idx < len(self.electride_structure):
             coordination = self.cnn.get_nn_info(
@@ -678,14 +909,19 @@ class BadElfToolkit:
             )
         # for covalent/metallic features we use a dummy atom
         else:
-            structure = self.structure.copy()
+            structure = self.electride_structure.copy()
             structure.append("H-", self.labeled_structure.frac_coords[site_idx])
             coordination = self.cnn.get_nn_info(
                 structure, -1
             )
         return [int(i["site_index"]) for i in coordination]
     
-    def _get_charges_volumes(self):
+    def _get_charges_volumes(self) -> None:
+        """
+        
+        Calculates the charge and volume associated with each atom/electride
+
+        """
         # TODO: Similar to the bader method this would be much faster if I rewrote
         # it in Numba
         all_charges = np.zeros(len(self.labeled_structure))
@@ -792,6 +1028,21 @@ class BadElfToolkit:
         self._volumes = volumes
         
     def get_oxidation_states(self, potcar_path: Path | str = "POTCAR"):
+        """
+        Calculates the oxidation state of each atom/electride using the
+        electron counts of the neutral atoms provided in a POTCAR.
+
+        Parameters
+        ----------
+        potcar_path : Path | str, optional
+            The Path to the POTCAR file. The default is "POTCAR".
+
+        Returns
+        -------
+        oxidation : list
+            The oxidation states of each atom/electride.
+
+        """
         # Check if POTCAR exists in path. If not, throw warning
         potcar_path = Path(potcar_path)
         if not potcar_path.exists():
@@ -814,7 +1065,13 @@ class BadElfToolkit:
         oxidation = valence - self.charges
         return oxidation
         
-    def _get_min_avg_surface_dists(self):
+    def _get_min_avg_surface_dists(self) -> None:
+        """
+        
+        Calculates the minimum and average distance from each atom and electride
+        to the partitioning surface.
+
+        """
         if self.shared_feature_splitting_method != "plane":
             logging.warning("""
 Shared feature splitting methods other than 'plane' result in surfaces surrounding
@@ -835,19 +1092,45 @@ the shared features. Atom/electride surface distances may be smaller than expect
         )
 
     @property
-    def min_surface_dists(self):
+    def min_surface_dists(self) -> NDArray:
+        """
+
+        Returns
+        -------
+        NDArray
+            The minimum distance from each atom or electride center to the partioning
+            surface.
+
+        """
         if self._min_surface_dists is None:
             self._get_min_avg_surface_dists()
         return self._min_surface_dists
     
     @property
-    def avg_surface_dists(self):
+    def avg_surface_dists(self) -> NDArray:
+        """
+
+        Returns
+        -------
+        NDArray
+            The average distance from each atom or electride center to the partitioning
+            surface.
+
+        """
         if self._avg_surface_dists is None:
             self._get_min_avg_surface_dists()
         return self._avg_surface_dists
     
     @property
-    def electrides_per_formula(self):
+    def electrides_per_formula(self) -> float:
+        """
+
+        Returns
+        -------
+        float
+            The number of electride electrons for the full structure formula.
+
+        """
         if self._electrides_per_formula is None:
             electrides_per_unit = 0
             for i in range(len(self.structure),len(self.electride_structure)):
@@ -856,7 +1139,15 @@ the shared features. Atom/electride surface distances may be smaller than expect
         return self._electrides_per_formula
     
     @property
-    def electrides_per_reduced_formula(self):
+    def electrides_per_reduced_formula(self) -> float:
+        """
+
+        Returns
+        -------
+        float
+            The number of electrons in the reduced formula of the structure.
+
+        """
         if self._electrides_per_reduced_formula is None:
             (
                 _,
@@ -866,24 +1157,67 @@ the shared features. Atom/electride surface distances may be smaller than expect
         return self._electrides_per_reduced_formula
     
     @property
-    def electride_formula(self):
+    def electride_formula(self) -> str:
+        """
+
+        Returns
+        -------
+        str
+            A string representation of the electride formula, rounding partial charge
+            to the nearest integer.
+
+        """
         return f"{self.structure.formula} e{round(self.electrides_per_formula)}"
     
     @property
-    def total_charge(self):
+    def total_charge(self) -> float:
+        """
+
+        Returns
+        -------
+        float
+            The total charge integrated in the system. This should match the
+            number of electrons from the POTCAR. If it does not there may be a
+            serious problem.
+
+        """
         if self._total_charge is None:
             self._total_charge = self.charges.sum()
         return self._total_charge
     
     @property
     def total_volume(self):
+        """
+
+        Returns
+        -------
+        float
+            The total volume integrated in the system. This should match the
+            volume of the structure. If it does not there may be a serious problem.
+
+        """
         if self._total_volume is None:
             self._total_volume = self.volumes.sum()
         return self._total_volume
                 
-    def to_dict(self, potcar_path: Path | str = "POTCAR", use_json: bool = True):
+    def to_dict(self, potcar_path: Path | str = "POTCAR", use_json: bool = True) -> dict:
         """
-        Returns a summary of results in dictionary form
+        
+        Gets a dictionary summary of the BadELF analysis.
+
+        Parameters
+        ----------
+        potcar_path : Path | str, optional
+            The Path to a POTCAR file. This must be provided for oxidation states
+            to be calculated, and they will be None otherwise. The default is "POTCAR".
+        use_json : bool, optional
+            Convert all entries to JSONable data types. The default is True.
+
+        Returns
+        -------
+        dict
+            A summary of the BadELF analysis in dictionary form.
+
         """
         results = {}
         # collect method kwargs
@@ -933,10 +1267,36 @@ the shared features. Atom/electride surface distances may be smaller than expect
                 results[key] = results[key].tolist()        
         return results
                 
-    def to_json(self, **kwargs):
+    def to_json(self, **kwargs) -> str:
+        """
+        Creates a JSON string representation of the results, typically for writing
+        results to file.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Keyword arguments for the to_dict method.
+
+        Returns
+        -------
+        str
+            A JSON string representation of the BadELF results.
+
+        """
         return json.dumps(self.to_dict(use_json=True, **kwargs))
     
-    def write_results_summary(self, filepath: Path | str = "badelf_results_summary.json", **kwargs):
+    def write_results_summary(self, filepath: Path | str = "badelf_results_summary.json", **kwargs) -> None:
+        """
+        Writes results of the analysis to file in a JSON format.
+
+        Parameters
+        ----------
+        filepath : Path | str, optional
+            The Path to write the results to. The default is "badelf_results_summary.json".
+        **kwargs : dict
+            keyword arguments for the to_dict method.
+
+        """
         filepath = Path(filepath)
         with open(filepath, "w") as json_file:
             json.dump(self.to_dict(use_json=True, **kwargs), json_file, indent=4)
@@ -986,32 +1346,30 @@ the shared features. Atom/electride surface distances may be smaller than expect
             output_format: str | Format = None,
             prefix_override: str = None,
             ):
-        """
-        Writes an ELFCAR or CHGCAR for a given species. Writes to the default
-        directory provided to the BadelfToolkit class.
 
-        Args:
-            directory : str | Path
-                The directory to write the files in. If None, the active directory
-                is used.
-            write_reference : bool, optional
-                Whether or not to write the reference data rather than the charge data.
-                Default is True.
-            species (str):
-                The species to write data for.
-            include_dummy_atoms : bool, optional
-                Whether or not to add dummy files to the structure. The default is False.
-            output_format : str | Format, optional
-                The format to write with. If None, writes to source format stored in
-                the Grid objects metadata.
-                Defaults to None.
-            prefix_override : str, optional
-                The string to add at the front of the output path. If None, defaults
-                to the VASP file name equivalent to the data type stored in the
-                grid.
-                
-        Returns:
-            None
+        """
+        Writes an ELFCAR or CHGCAR for a given species.
+
+        Parameters
+        ----------
+        directory : str | Path, optional
+            The directory to write the result to. The default is None.
+        write_reference : bool, optional
+            Whether or not to write the reference data rather than the charge data. 
+            The default is True.
+        species : str, optional
+            The species to write. The default is "Le" (the electrides).
+        include_dummy_atoms : bool, optional
+            Whether or not to include . The default is True.
+        output_format : str | Format, optional
+            The format to write with. If None, writes to source format stored in
+            the Grid objects metadata.
+            Defaults to None.
+        prefix_override : str, optional
+            The string to add at the front of the output path. If None, defaults
+            to the VASP file name equivalent to the data type stored in the
+            grid.
+
         """
         if directory is None:
             directory = Path(".")
@@ -1051,31 +1409,31 @@ the shared features. Atom/electride surface distances may be smaller than expect
         prefix_override: str = None,
     ):
         """
+        
         Writes an ELFCAR or CHGCAR for a given atom/electride. Writes to the default
         directory provided to the BadelfToolkit class.
 
-        Args:
-            atom_index (int):
-                The index of the atom/electride to write for.
-            directory : str | Path
-                The directory to write the files in. If None, the active directory
-                is used.
-            write_reference : bool, optional
-                Whether or not to write the reference data rather than the charge data.
-                Default is True.
-            include_dummy_atoms : bool, optional
-                Whether or not to add dummy files to the structure. The default is False.
-            output_format : str | Format, optional
-                The format to write with. If None, writes to source format stored in
-                the Grid objects metadata.
-                Defaults to None.
-            prefix_override : str, optional
-                The string to add at the front of the output path. If None, defaults
-                to the VASP file name equivalent to the data type stored in the
-                grid.
-                
-        Returns:
-            None
+        Parameters
+        ----------
+        atom_index : int
+            The index of the atom/electride to write for.
+        directory : str | Path
+            The directory to write the files in. If None, the active directory
+            is used.
+        write_reference : bool, optional
+            Whether or not to write the reference data rather than the charge data.
+            Default is True.
+        include_dummy_atoms : bool, optional
+            Whether or not to add dummy files to the structure. The default is False.
+        output_format : str | Format, optional
+            The format to write with. If None, writes to source format stored in
+            the Grid objects metadata.
+            Defaults to None.
+        prefix_override : str, optional
+            The string to add at the front of the output path. If None, defaults
+            to the VASP file name equivalent to the data type stored in the
+            grid.
+
         """
         if directory is None:
             directory = Path(".")
@@ -1125,10 +1483,47 @@ class SpinBadElfToolkit:
             "x_diff_weight": 0.0,
             "porous_adjustment": False,
             },
-        elf_labeler_kwargs: dict = {},
         elf_labeler: SpinElfLabeler = None,
         **kwargs
     ):
+        """
+        An extension of the BadElfToolkit that performs separate calculations on
+        the spin-up and spin-down systems.
+
+        Parameters
+        ----------
+        reference_grid : Grid
+            A badelf app Grid like object used for partitioning the unit cell
+            volume. Usually contains ELF.
+        charge_grid : Grid
+            A badelf app Grid like object used for summing charge. Usually
+            contains charge density.
+        labeled_structure_up : Structure, optional
+            A pymatgen structure object with dummy atoms representing
+            electride, covalent, and metallic features in the spin-up system. 
+            If provided, the ElfLabeler will not be used. Symbols should follow
+            the same conventions as in the ElfLabeler.
+        labeled_structure_down : Structure, optional
+            A pymatgen structure object with dummy atoms representing
+            electride, covalent, and metallic features in the spin-down system. 
+            If provided, the ElfLabeler will not be used. Symbols should follow
+            the same conventions as in the ElfLabeler.
+        crystalnn_kwargs : dict, optional
+            The keyword arguments for CrystalNN to determine which atoms/electrides
+            neighbor metallic/covalent bonds.
+            The default is {
+                "distance_cutoffs": None,
+                "x_diff_weight": 0.0,
+                "porous_adjustment": False,            
+                }.elf_labeler_kwargs : dict, optional
+        elf_labeler : dict | SpinElfLabeler, optional
+            Keyword arguments to pass to the SpinElfLabeler class. This includes
+            parameters controlling cutoffs for electrides. Alternatively, a
+            SpinElfLabeler class can be passed directly. The default is {}.
+        **kwargs : dict
+            Any additional keyword arguments to pass to the ElfLabeler class.
+
+        """
         # make sure our grids are spin polarized
         assert reference_grid.is_spin_polarized, "Provided grid is not spin polarized. Use the standard BadElfToolkit."
 
@@ -1142,12 +1537,12 @@ class SpinBadElfToolkit:
         # labeler and link it to our badelf objects
         if labeled_structure_up is None:
             # we want to attach a SpinElfLabeler to our badelf objects
-            if elf_labeler is None:
+            if type(elf_labeler) is dict:
                 elf_labeler = SpinElfLabeler(
                     charge_grid=charge_grid,
                     reference_grid=reference_grid,
                     crystalnn_kwargs=crystalnn_kwargs,
-                    **elf_labeler_kwargs
+                    **elf_labeler
                     )
 
             self.elf_labeler = elf_labeler
@@ -1238,10 +1633,30 @@ class SpinBadElfToolkit:
         
     @property
     def structure(self):
+        """
+
+        Returns
+        -------
+        Structure
+            The unlabeled structure representing the system, i.e. the structure
+            with no dummy atoms.
+
+        """
         return self.badelf_up.structure
     
     @property
     def labeled_structure(self):
+        """
+
+        Returns
+        -------
+        Structure
+            The system's structure including dummy atoms representing electride
+            sites and covalent/metallic bonds. Features unique to the spin-up/spin-down
+            systems will have xu or xd appended to the species name respectively.
+            Features that exist in both will have nothing appended.
+
+        """
         if self._labeled_structure is None:
             # start with only atoms
             labeled_structure = self.structure.copy()
@@ -1278,9 +1693,15 @@ class SpinBadElfToolkit:
     @property
     def electride_structure(self) -> Structure:
         """
-        The combined quasi atom structure from both the spin-up and spin-down system. Features
-        found at the same fractional coordinates are combined, while those at
-        different coordinates are labeled separately
+
+        Returns
+        -------
+        Structure
+            The system's structure including dummy atoms representing electride
+            sites. Electrides unique to the spin-up/spin-down
+            systems will have xu or xd appended to the species name respectively.
+            Electrides that exist in both will have nothing appended.
+
         """
         if self._electride_structure is None:
             # create our elecride structure from our labeled structure.
@@ -1302,14 +1723,41 @@ class SpinBadElfToolkit:
     
     @property
     def nelectrides(self):
+        """
+
+        Returns
+        -------
+        int
+            The number of electride sites (electride maxima) present in the system.
+
+        """
         return len(self.electride_structure) - len(self.structure)
     
     @property
     def species(self) -> list[str]:
+        """
+
+        Returns
+        -------
+        list[str]
+            The species of each atom/dummy atom in the electride structure. Covalent
+            and metallic features are not included.
+
+        """
         return [i.specie.symbol for i in self.electride_structure]
     
     @property
     def electride_dimensionality(self):
+        """
+
+        Returns
+        -------
+        int
+            The dimensionality of the electride volume at a value of 0 ELF. If
+            the dimensionality differes between the spin-up/spin-down results, the
+            largest dimensionality is selected.
+
+        """
         return max(self.badelf_up.electride_dimensionality, self.badelf_down.electride_dimensionality)
 
     def _get_charges_and_volumes(self):
@@ -1344,17 +1792,52 @@ class SpinBadElfToolkit:
     
     @property
     def charges(self):
+        """
+
+        Returns
+        -------
+        NDArray
+            The charge associated with each atom and electride site in the system.
+            If an electride site appears in both spin systems, the assigned charge
+            is the sum.
+
+        """
         if self._charges is None:
             self._get_charges_and_volumes()
         return self._charges
     
     @property
     def volumes(self):
+        """
+
+        Returns
+        -------
+        NDArray
+            The volume associated with each atom and electride site in the system.
+            The volume is taken as the average of the two systems, and may not have
+            a physical meaning.
+
+        """
         if self._volumes is None:
             self._get_charges_and_volumes()
         return self._volumes
     
     def get_oxidation_states(self, potcar_path: Path | str = "POTCAR"):
+        """
+        Calculates the oxidation state of each atom/electride using the
+        electron counts of the neutral atoms provided in a POTCAR.
+
+        Parameters
+        ----------
+        potcar_path : Path | str, optional
+            The Path to the POTCAR file. The default is "POTCAR".
+
+        Returns
+        -------
+        oxidation : list
+            The oxidation states of each atom/electride.
+
+        """
         # Check if POTCAR exists in path. If not, throw warning
         potcar_path = Path(potcar_path)
         if not potcar_path.exists():
@@ -1379,6 +1862,14 @@ class SpinBadElfToolkit:
 
     @property
     def electrides_per_formula(self):
+        """
+
+        Returns
+        -------
+        float
+            The number of electride electrons for the full structure formula.
+
+        """
         if self._electrides_per_formula is None:
             electrides_per_unit = 0
             for i in range(len(self.structure),len(self.electride_structure)):
@@ -1388,6 +1879,14 @@ class SpinBadElfToolkit:
     
     @property
     def electrides_per_reduced_formula(self):
+        """
+
+        Returns
+        -------
+        float
+            The number of electrons in the reduced formula of the structure.
+
+        """
         if self._electrides_per_reduced_formula is None:
             (
                 _,
@@ -1398,17 +1897,45 @@ class SpinBadElfToolkit:
     
     @property
     def electride_formula(self):
+        """
+
+        Returns
+        -------
+        str
+            A string representation of the electride formula, rounding partial charge
+            to the nearest integer.
+
+        """
         return f"{self.structure.formula} e{round(self.electrides_per_formula)}"
     
     
     @property
     def total_charge(self):
+        """
+
+        Returns
+        -------
+        float
+            The total charge integrated in the system. This should match the
+            number of electrons from the POTCAR. If it does not there may be a
+            serious problem.
+
+        """
         if self._total_charge is None:
             self._total_charge = self.charges.sum()
         return self._total_charge
     
     @property
     def total_volume(self):
+        """
+
+        Returns
+        -------
+        float
+            The total volume integrated in the system. This should match the
+            volume of the structure. If it does not there may be a serious problem.
+
+        """
         if self._total_volume is None:
             self._total_volume = self.volumes.sum()
         return self._total_volume
@@ -1418,7 +1945,22 @@ class SpinBadElfToolkit:
             potcar_path: Path | str = "POTCAR", 
             use_json: bool = True):
         """
-        Returns a summary of results in dictionary form
+        
+        Gets a dictionary summary of the BadELF analysis.
+
+        Parameters
+        ----------
+        potcar_path : Path | str, optional
+            The Path to a POTCAR file. This must be provided for oxidation states
+            to be calculated, and they will be None otherwise. The default is "POTCAR".
+        use_json : bool, optional
+            Convert all entries to JSONable data types. The default is True.
+
+        Returns
+        -------
+        dict
+            A summary of the BadELF analysis in dictionary form.
+
         """
         results = {}
 
@@ -1452,9 +1994,35 @@ class SpinBadElfToolkit:
         return results
                 
     def to_json(self, **kwargs):
+        """
+        Creates a JSON string representation of the results, typically for writing
+        results to file.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Keyword arguments for the to_dict method.
+
+        Returns
+        -------
+        str
+            A JSON string representation of the BadELF results.
+
+        """
         return json.dumps(self.to_dict(use_json=True, **kwargs))
     
     def write_results_summary(self, filepath: Path | str = "badelf_results_summary.json", **kwargs):
+        """
+        Writes results of the analysis to file in a JSON format.
+
+        Parameters
+        ----------
+        filepath : Path | str, optional
+            The Path to write the results to. The default is "badelf_results_summary.json".
+        **kwargs : dict
+            keyword arguments for the to_dict method.
+
+        """
         filepath = Path(filepath)
         # write total summary
         with open(filepath, "w") as json_file:
@@ -1511,25 +2079,28 @@ class SpinBadElfToolkit:
             **kwargs,
             ):
         """
-        Writes an ELFCAR or CHGCAR for a given species. Writes to the default
-        directory provided to the BadelfToolkit class.
+        Writes an ELFCAR or CHGCAR for a given species.
 
-        Args:
-            directory : str | Path
-                The directory to write the files in. If None, the active directory
-                is used.
-            species (str):
-                The species to write data for.
-            prefix_override : str, optional
-                The string to add at the front of the output path. If None, defaults
-                to the VASP file name equivalent to the data type stored in the
-                grid.
-            write_reference : bool, optional
-                Whether or not to write the reference data rather than the charge data.
-                Default is True.
-                
-        Returns:
-            None
+        Parameters
+        ----------
+        directory : str | Path, optional
+            The directory to write the result to. The default is None.
+        write_reference : bool, optional
+            Whether or not to write the reference data rather than the charge data. 
+            The default is True.
+        species : str, optional
+            The species to write. The default is "Le" (the electrides).
+        include_dummy_atoms : bool, optional
+            Whether or not to include . The default is True.
+        output_format : str | Format, optional
+            The format to write with. If None, writes to source format stored in
+            the Grid objects metadata.
+            Defaults to None.
+        prefix_override : str, optional
+            The string to add at the front of the output path. If None, defaults
+            to the VASP file name equivalent to the data type stored in the
+            grid.
+
         """
         
         if directory is None:
