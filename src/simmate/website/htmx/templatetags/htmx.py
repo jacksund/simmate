@@ -218,6 +218,7 @@ def htmx_checkbox(
     side_text: str = "Yes/True",
     defer: bool = True,
     required: bool = False,
+    switch_mode: bool = True,
 ):
     """
     Display a checkbox widget.
