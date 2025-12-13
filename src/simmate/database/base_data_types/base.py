@@ -295,11 +295,11 @@ class SearchResults(models.QuerySet):
 
     def to_csv_response(self, mode: str = "api", **kwargs) -> HttpResponse:
         if mode == "curated":
-          df = self.model.get_curated_df(self)
+            df = self.model.get_curated_df(self)
         elif mode == "api":
-          df = self.to_dataframe()
+            df = self.to_dataframe()
         else:
-          raise Exception(f"Unknown `mode` for `to_csv_response`: {mode}")
+            raise Exception(f"Unknown `mode` for `to_csv_response`: {mode}")
 
         # https://stackoverflow.com/questions/54729411/
         response = HttpResponse(content_type="text/csv")
