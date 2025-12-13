@@ -9,6 +9,7 @@
                value="{{ current_value }}"
            {% endif %}
            placeholder="{{ placeholder }}"
+           step={{ step_size }}
            {% if max_length %}maxlength="{{ max_length }}"{% endif %}
            {% if not dynamically_set %}hx-preserve{% endif %}
            {% if not defer %}{% htmx_post %}{% endif %}

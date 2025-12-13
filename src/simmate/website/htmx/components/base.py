@@ -19,6 +19,10 @@ LOCAL_COMPONENT_CACHE = LRUCache(maxsize=10_000)
 
 class HtmxComponent:
 
+    template_name: str = None
+
+    # -------------------------------------------------------------------------
+
     component_id: str = None
 
     component_key: str = None

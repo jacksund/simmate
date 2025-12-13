@@ -294,19 +294,12 @@ class SearchResults(models.QuerySet):
         return JsonResponse(self.to_api_dict(**kwargs))
 
     def to_csv_response(self, mode: str = "api", **kwargs) -> HttpResponse:
-        # TODO: this is the code once the htmx ui updates are merged:
-        # if mode == "curated":
-        #   df = self.model.get_curated_df(self)
-        # elif mode == "api":
-        #   df = self.to_dataframe()
-        # else:
-        #   rasie Exception("Unknown `mode` for `to_csv_response`: {mode}")
-        # Until then....
-        df = (
-            self.to_curated_dataframe()
-            if hasattr(self.model, "get_curated_df")
-            else self.to_dataframe()
-        )
+        if mode == "curated":
+            df = self.model.get_curated_df(self)
+        elif mode == "api":
+            df = self.to_dataframe()
+        else:
+            raise Exception(f"Unknown `mode` for `to_csv_response`: {mode}")
 
         # https://stackoverflow.com/questions/54729411/
         response = HttpResponse(content_type="text/csv")
@@ -1779,16 +1772,16 @@ class DatabaseTable(models.Model):
             elif filter_name in filter_methods_args:
                 continue  # these are only used via method_kwargs above
 
-            # ex: a `tags` m2m column and the filter is `tag_ids=[1,2,3,...]`.
-            elif filter_name.endswith("_ids") and hasattr(cls, f"{filter_name[:-4]}s"):
-                relation = f"{filter_name[:-4]}s__id"  # eg `tags__id`
+            # ex: a `tags` m2m column and the filter is `tags__ids=[1,2,3,...]`.
+            elif filter_name.endswith("__ids") and hasattr(cls, f"{filter_name[:-5]}"):
+                relation = f"{filter_name[:-5]}__id"  # eg `tags__id`
                 # Note: filter_methods like `filter_tag_ids` would take priority
                 # and should be used when possible
                 if filter_value == []:
                     queryset = queryset.filter(**{relation: []})
                 else:
                     # By default we filter down to entries that have all of the
-                    # listed ids linked. So a tag_ids=[1,3] query would match
+                    # listed ids linked. So a tags__ids=[1,3] query would match
                     # entries where tag_ids=[1,2,3,4,5] but NOT tag_ids=[2,3,4,5].
                     # For alternative ways to filter (e.g. using `tags__in` or
                     # a full list match) a custom filter method should be defined

@@ -112,7 +112,11 @@ def table_entries(request, table_name):
 
     elif view_format == "csv":
         objects = table.filter_from_request(request, paginate=False)
-        return objects.to_csv_response()
+        return objects.to_csv_response(mode="api")
+
+    elif view_format == "curated-csv":
+        objects = table.filter_from_request(request, paginate=False)
+        return objects.to_csv_response(mode="curated")
 
     # TODO: add support for CIF, SDF, and other mol/crystal formats
 
