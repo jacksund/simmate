@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from simmate.configuration import settings
 from simmate.database.base_data_types import DatabaseTable, table_column
 
 
@@ -35,8 +36,10 @@ class EthereumWallet(DatabaseTable):
     usdc_balance = table_column.FloatField(blank=True, null=True)
 
     stablecoin_options = [
+        "USDT",
         "USDC",
         "USDS",
+        "DAI",
     ]
     stablecoin_total_balance = table_column.FloatField(blank=True, null=True)
 
@@ -45,18 +48,68 @@ class EthereumWallet(DatabaseTable):
     # -------------------------------------------------------------------------
 
     @classmethod
+    def _load_data(cls):
+
+        backend = settings.ethereum.backend
+
+        # There are many ways to get ETH blockchain data, even via setting up
+        # a private node. We often use third-party providers, where the downside
+        # is that their pricing models can change + the free tier can be limited.
+
+        if backend == "alchemy":
+            cls._load_data_from_alchemy()
+
+        elif backend == "etherscan":
+            cls._load_data_from_etherscan()
+
+        else:
+            raise Exception(f"Unknown Ethereum backend: {backend}")
+
+    @classmethod
     def _load_data_from_alchemy(cls):
 
-        from ..client.alchemy import AlchemyClient
+        from ..clients.alchemy import AlchemyClient
 
         wallet_balances = AlchemyClient.get_all_balance_data()
 
-        # transactions = EtherscanClient.get_all_transaction_data()
+        for wallet in wallet_balances.to_dict(orient="records"):
+            assets = {
+                k: v
+                for k, v in wallet.items()
+                if v != 0 and k not in ["address", "ens_name"]
+            }
+            ethereum_balance = sum(
+                [v for k, v in assets.items() if k == "ETH" or k.startswith("ETH_")]
+            )
+            usdc_balance = sum(
+                [v for k, v in assets.items() if k == "USDC" or k.startswith("USDC_")]
+            )
+            stablecoin_total_balance = sum(
+                [
+                    v
+                    for k, v in assets.items()
+                    if k in cls.stablecoin_options
+                    or any([k.startswith(f"{sc}_") for sc in cls.stablecoin_options])
+                ]
+            )
+            cls.objects.update_or_create(
+                id=wallet["address"],
+                defaults=dict(
+                    ens_name=wallet["ens_name"],
+                    assets=assets,
+                    ethereum_balance=ethereum_balance,
+                    usdc_balance=usdc_balance,
+                    stablecoin_total_balance=stablecoin_total_balance,
+                    # assets_total_value_usd -- TODO using price_catalog
+                ),
+            )
+
+        #
 
     @classmethod
     def _load_data_from_etherscan(cls):
 
-        from ..client.etherscan import EtherscanClient
+        from ..clients.etherscan import EtherscanClient
 
         wallet_balances = EtherscanClient.get_all_balance_data()
 

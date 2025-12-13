@@ -356,9 +356,15 @@ class SimmateSettings:
                     "image": f"jacksund/bader:v{simmate.__version__}",
                 },
             },
-            "etherscan": {
-                "api_key": None,
+            "ethereum": {
                 "addresses": {},
+                "backend": "alchemy",
+                "alchemy": {
+                    "api_key": None,
+                },
+                "etherscan": {
+                    "api_key": None,
+                },
             },
             "vasp": {
                 "default_command": "vasp_std > vasp.out",

@@ -2,6 +2,7 @@
 
 import logging
 
+import numpy
 import pandas
 import requests
 
@@ -12,7 +13,7 @@ from ..mappings import EthereumMappings
 
 class AlchemyClient:
 
-    api_key = settings.alchemy.api_key
+    api_key = settings.ethereum.alchemy.api_key
 
     # used in building the base api endpoint like https://eth-mainnet.g.alchemy.com/v2/
     chain_map = {
@@ -116,7 +117,40 @@ class AlchemyClient:
             from_transactions["result"]["transfers"]
             + to_transactions["result"]["transfers"]
         )
-        return pandas.DataFrame(all_transactions)
+
+        df = pandas.DataFrame(all_transactions)
+
+        if df.empty:
+            return df
+
+        # doublecheck contract addresses and amounts
+        token_verified_list = []
+        amount_normalized_list = []
+        for t_data in df.rawContract:
+
+            # Get token name
+            token_address = t_data.get("address", None)
+            if token_address == None:
+                token_name = "ETH"
+            else:
+                token_name = [
+                    name
+                    for name, t_address in EthereumMappings.token_addresses[
+                        chain
+                    ].items()
+                    if t_address.lower() == token_address.lower()
+                ][0]
+            token_verified_list.append(token_name)
+
+            # convert to proper units
+            precision = EthereumMappings.token_precisions[token_name]
+            token_amount = int(t_data["value"], 16) / precision
+            amount_normalized_list.append(token_amount)
+
+        df["token_verified"] = token_verified_list
+        df["amount_verified"] = amount_normalized_list
+
+        return df
 
     # -------------------------------------------------------------------------
 
@@ -138,7 +172,9 @@ class AlchemyClient:
             balances_flat["address"] = address
             balances_flat["ens_name"] = ens_name
             all_data.append(balances_flat)
-        return pandas.DataFrame(all_data)
+        df = pandas.DataFrame(all_data)
+        df = df.replace({numpy.nan: 0})
+        return df
 
     @classmethod
     def get_balances(cls, address: str) -> dict:

@@ -26,7 +26,7 @@ class EtherscanClient:
     """
 
     api_url = "https://api.etherscan.io/v2/api"  # v2 endpoint
-    api_key = settings.etherscan.api_key
+    api_key = settings.ethereum.etherscan.api_key
 
     chain_map = {
         "Ethereum": 1,
