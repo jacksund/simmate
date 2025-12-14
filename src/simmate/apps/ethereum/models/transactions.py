@@ -60,7 +60,11 @@ class EthereumTransaction(DatabaseTable):
     asset_options = list(EthereumMappings.token_precisions.keys())
     asset = table_column.CharField(max_length=10, blank=True, null=True)
 
-    amount = table_column.DecimalField(decimal_places=18, default=0)
+    amount = table_column.DecimalField(
+        max_digits=30,
+        decimal_places=18,
+        default=0,
+    )
 
     value_usd_original = table_column.FloatField(blank=True, null=True)
     # value at time of transaction

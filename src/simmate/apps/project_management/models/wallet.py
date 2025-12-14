@@ -48,9 +48,21 @@ class Wallet(DatabaseTable):
         null=True,
     )
 
-    usdc_balance = table_column.DecimalField(decimal_places=6, default=0)
+    usdc_balance = table_column.DecimalField(
+        max_digits=30,
+        decimal_places=6,
+        default=0,
+    )
 
-    token_balance = table_column.DecimalField(decimal_places=6, default=0)
+    token_balance = table_column.DecimalField(
+        max_digits=30,
+        decimal_places=6,
+        default=0,
+    )
 
     # only for workers & validators
-    collateral_balance = table_column.DecimalField(decimal_places=6, default=0)
+    collateral_balance = table_column.DecimalField(
+        max_digits=30,
+        decimal_places=6,
+        default=0,
+    )
