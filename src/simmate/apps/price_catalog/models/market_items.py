@@ -60,12 +60,17 @@ class MarketItem(DatabaseTable):
 
     price = table_column.FloatField(blank=True, null=True)
 
+    # per kg
+    # per share
+    # per kW/hr
     price_unit = table_column.TextField(blank=True, null=True)
 
     global_abundance = table_column.FloatField(blank=True, null=True)
+
     # count
     # kg
     # infinite (for indexes/housing)
+    global_abundance_unit = table_column.TextField(blank=True, null=True)
 
     market_cap = table_column.FloatField(blank=True, null=True)
     # price * global_abundance
@@ -198,9 +203,10 @@ class MarketItem(DatabaseTable):
 
     @classmethod
     def _load_data(cls):
-        MarketItem._load_yfinance_data()
-        MarketItem._load_fred_data()
-        MarketItem.update_price_history_calcs()
+        cls._load_wikipedia_data()
+        cls._load_yfinance_data()
+        cls._load_fred_data()
+        cls.update_price_history_calcs()
 
     @classmethod
     def _load_fred_data(cls):
@@ -328,8 +334,29 @@ class MarketItem(DatabaseTable):
 
     @classmethod
     def _load_wikipedia_data(cls):
+
         raise NotImplementedError()
-        pass  # https://en.wikipedia.org/wiki/Prices_of_chemical_elements
+
+        from ..data import WIKIPEDIA_PRICES_OF_ELEMENTS_DATA
+
+        for row in WIKIPEDIA_PRICES_OF_ELEMENTS_DATA.itertuples():
+            market_item, _ = cls.objects.update_or_create(
+                name=row.name,
+                defaults=dict(
+                    category="Chemical Elements",
+                    ticker_source="Wikipedia",
+                    ticker=row.symbol,
+                    price=row.price_per_kg,
+                    price_unit="per kg",
+                    price_per_kg=row.price_per_kg,
+                    global_abundance=row.total_mass_kg,
+                    global_abundance_unit="kg",
+                    market_cap=row.price_per_kg * row.total_mass_kg,
+                    global_abundance_kg=row.total_mass_kg,
+                    global_abundance_mg_per_kg_crust=row.abundance_mg_kg,
+                    # TODO: store metadata of year + source + price_per_l + tec
+                ),
+            )
 
     # -------------------------------------------------------------------------
 
