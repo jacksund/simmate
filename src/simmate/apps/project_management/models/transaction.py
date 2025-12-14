@@ -20,6 +20,7 @@ class Transaction(DatabaseTable):
         "Complete",
         "Canceled",
         "Denied",
+        "Failed",
         "Under Review",
     ]
     status = table_column.CharField(max_length=30, blank=True, null=True)
@@ -27,25 +28,59 @@ class Transaction(DatabaseTable):
     transaction_type_options = [
         "funding",
         "transfer",
-        "refund",
         "payment",
+        "refund",
+        "penalty",
         "admin_adjustment",
     ]
     transaction_type = table_column.CharField(max_length=30, blank=True, null=True)
 
-    # add a metadata column? or store info in the source?
-    # funding_type_options = [
-    #     "Ethereum",
-    #     "Stripe",
-    #     "Venmo",
-    #     "Promotion",
-    #     "Other",
-    # ]
-    # payment_type_options = [
-    #     "Compute Costs",
-    #     "Compute Earnings",
-    #     "Other",
-    # ]
+    funding_options = [
+        "Ethereum",
+        "Stripe",
+        "Venmo",
+        "Promotion",
+        "Other",
+    ]
+    transfer_options = [
+        "Account Transfer",  # e.g., user switches from github account to gmail one
+        "Allowance Distribution",  # e.g., Project transferring to sub-Projects
+        "Consolidation",  # e.g., many wallets combining to single one
+        "Add Collateral",
+        "Remove Collateral",
+        "Other",
+    ]
+    payment_options = [
+        "Compute Costs",
+        "Compute Earnings",
+        "Other",
+    ]
+    refund_options = [
+        "Failed Workflow",
+        "Bugged Workflow",
+        "Other",
+    ]
+    penalty_options = [
+        "Penalized Worker",
+        "Penalized Validator",
+        "Penalized User",
+        "Banned Account",
+        "Other",
+    ]
+    admin_adjustment_options = [
+        "Issue Fix",
+        "Other",
+    ]
+    transaction_subtype = set(
+        funding_options
+        + transfer_options
+        + payment_options
+        + penalty_options
+        + admin_adjustment_options
+    )
+    transaction_subtype = table_column.CharField(max_length=30, blank=True, null=True)
+
+    # TODO: link to things like ETH transactoin in source column? Or separate column?
 
     sending_user = table_column.ForeignKey(
         User,
@@ -76,8 +111,14 @@ class Transaction(DatabaseTable):
         null=True,
     )
 
-    usdc_amount = table_column.FloatField(blank=True, null=True)
+    # Note: we use decimal_places=6 to match the USDC precision on ETH
+    usdc_amount = table_column.DecimalField(decimal_places=6, default=0)
 
-    token_amount = table_column.FloatField(blank=True, null=True)
+    token_amount = table_column.DecimalField(decimal_places=6, default=0)
+    # these have no monetary value and user can edit freely
+
+    collateral_amount = table_column.DecimalField(decimal_places=6, default=0)
+    # This is always an internal transaction (to/from are the same wallet).
+    # it simply transfers funds between usdc_amount <-> collateral_amount
 
     comments = table_column.TextField(blank=True, null=True)

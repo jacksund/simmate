@@ -191,7 +191,7 @@ class SimmateSettings:
                 "simmate.apps.configs.EmoleculesConfig",
                 "simmate.apps.configs.EnamineConfig",
                 "simmate.apps.configs.EppoGdConfig",
-                "simmate.apps.configs.EtherscanConfig",
+                "simmate.apps.configs.EthereumConfig",
                 "simmate.apps.configs.EvolutionConfig",
                 "simmate.apps.configs.JarvisConfig",
                 "simmate.apps.configs.MaterialsProjectConfig",
@@ -263,8 +263,8 @@ class SimmateSettings:
                         "simmate.apps.evolution.models.ChemicalSystemSearch",
                     ],
                     "Business and Finance": [
-                        "simmate.apps.etherscan.models.EthereumWallet",
-                        "simmate.apps.etherscan.models.EthereumTransaction",
+                        "simmate.apps.ethereum.models.EthereumWallet",
+                        "simmate.apps.ethereum.models.EthereumTransaction",
                         "simmate.apps.price_catalog.models.MarketItem",
                     ],
                     "Other": [
@@ -356,9 +356,15 @@ class SimmateSettings:
                     "image": f"jacksund/bader:v{simmate.__version__}",
                 },
             },
-            "etherscan": {
-                "api_key": None,
+            "ethereum": {
                 "addresses": {},
+                "backend": "alchemy",
+                "alchemy": {
+                    "api_key": None,
+                },
+                "etherscan": {
+                    "api_key": None,
+                },
             },
             "vasp": {
                 "default_command": "vasp_std > vasp.out",

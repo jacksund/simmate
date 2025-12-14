@@ -49,6 +49,7 @@ class Project(DatabaseTable):
         "Active",
         "Inactive",
         "Requires Update",
+        "Staged for Deletion",
     )
     status = table_column.CharField(
         max_length=25,
@@ -99,6 +100,22 @@ class Project(DatabaseTable):
     and labs, so they are more general, whereas individual simmate instances
     may want a more well-defined list.
     """
+
+    # -------------------------------------------------------------------------
+
+    parent_project = table_column.ForeignKey(
+        "self",
+        on_delete=table_column.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="child_projects",
+    )
+
+    num_child_projects_recursive = table_column.IntegerField(blank=True, null=True)
+    # a fully iterated version (children + their children)
+
+    is_top_level = table_column.BooleanField(blank=True, null=True)
+    # True when "parent_project" is null
 
     # -------------------------------------------------------------------------
 

@@ -71,8 +71,8 @@ class EppoGdConfig(AppConfig):
     name = "simmate.apps.eppo_gd"
 
 
-class EtherscanConfig(AppConfig):
-    name = "simmate.apps.etherscan"
+class EthereumConfig(AppConfig):
+    name = "simmate.apps.ethereum"
 
 
 class EvolutionConfig(AppConfig):

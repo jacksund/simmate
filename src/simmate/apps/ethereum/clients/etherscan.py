@@ -10,6 +10,8 @@ from rich.progress import track
 
 from simmate.configuration import settings
 
+from ..mappings import EthereumMappings
+
 
 class EtherscanClient:
     """
@@ -24,62 +26,11 @@ class EtherscanClient:
     """
 
     api_url = "https://api.etherscan.io/v2/api"  # v2 endpoint
-    api_key = settings.etherscan.api_key
-
-    address_map = settings.etherscan.addresses
+    api_key = settings.ethereum.etherscan.api_key
 
     chain_map = {
         "Ethereum": 1,
         "Base": 8453,
-    }
-
-    token_map = {
-        "Ethereum": {
-            # Stablecoins (1 token = $1)
-            "USDC": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",  # Circle
-            "USDT": "0xdAC17F958D2ee523a2206206994597C13D831ec7",  # Tether
-            "DAI": "0x6B175474E89094C44Da98b954EedeAC495271d0F",  # DAO
-            "USDS": "0xdC035D45d973E3EC169d2276DDab16f1e407384F",  # Sky
-            # Wrapped Assets
-            "WBTC": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",  # Wrapped Bitcoin
-            "cbBTC": "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",  # Coinbase Wrapped Bitcoin
-            # Governance / Ownership
-            "UNI": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",  # Uniswap
-            "COMP": "0xc00e94Cb662C3520282E6f5717214004A7f26888",  # Compound
-            "POOL": "0x0cEC1A9154Ff802e7934Fc916Ed7Ca50bDE6844e",  # PoolTogether
-            # Lending
-            "AWETH": "0x4d5f47fa6a74757f35c14fd3a6ef8e3c9bc514e8",  # Aave v3 WETH
-            # Staking
-            "RETH": "0xae78736cd615f374d3085123a210448e74fc6393",  # Rocket Pool ETH
-            "stETH": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",  # Lido Staked ETH
-        },
-        "Base": {
-            # Stablecoins
-            "USDC": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-            "USDS": "0x820c137fa70c8691f0e44dc420a5e53c168921dc",
-            # Wrapped Assets
-            "WBTC": "0x0555e30da8f98308edb960aa94c0db47230d2b9c",
-            "cbBTC": "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",
-            # Governance / Ownership
-            "COMP": "0x9e1028f5f1d5ede59748ffcee5532509976840e0",
-            "POOL": "0xd652c5425aea2afd5fb142e120fecf79e18fafc3",
-            "AERO": "0x940181a94a35a4569e4529a3cdfb74e38fd98631",  # Aerodrome
-            # Staking
-            "rETH": "0xb6fe221fe9eef5aba221c348ba20a1bf5e73624c",
-        },
-    }
-
-    token_precision_map = {
-        "ETH": 1e18,
-        "USDC": 1e6,
-        "USDT": 1e6,
-        "DAI": 1e18,
-        "USDS": 1e18,
-        "WBTC": 1e8,
-        "rETH": 1e18,
-        "UNI": 1e18,
-        "COMP": 1e18,
-        "POOL": 1e18,
     }
 
     transaction_type_map = {
@@ -113,7 +64,7 @@ class EtherscanClient:
     @classmethod
     def get_all_transaction_data(cls) -> pandas.DataFrame:
         all_data = []
-        for ens_name, address in cls.address_map.items():
+        for ens_name, address in EthereumMappings.wallet_addresses.items():
             logging.info(f"Loading transactions for '{ens_name}'")
             data = cls.get_all_transactions(address=address)
             data["ens_name"] = ens_name
@@ -123,7 +74,7 @@ class EtherscanClient:
     @classmethod
     def get_all_balance_data(cls) -> pandas.DataFrame:
         all_data = []
-        for ens_name, address in cls.address_map.items():
+        for ens_name, address in EthereumMappings.wallet_addresses.items():
             logging.info(f"Loading balances for '{ens_name}'")
             balances = cls.get_all_balances(address=address)
             # flatten balances dict into a single dict
@@ -168,7 +119,7 @@ class EtherscanClient:
             data["result"] = None
         elif data.get("status") != "1":
             raise Exception(f"Etherscan Error: {data}")
-        time.sleep(0.21)  # to avoid ratelimit of 5 requests per second
+        time.sleep(0.34)  # to avoid ratelimit of 3 requests per second
         return data
 
     def get_address_from_ens(ens_name: str) -> str:
@@ -185,8 +136,18 @@ class EtherscanClient:
 
     @classmethod
     def get_all_balances(cls, address: str) -> dict:
+
+        # OPTIMIZE: this calls the api once for each token we check which is
+        # very inefficient. There is a bulk pull endpoint but it is only
+        # available in the pro plan:
+        # https://docs.etherscan.io/api-reference/endpoint/addresstokenbalance
+        # response = cls.get_response(
+        #     action="addresstokenbalance",
+        #     address=address,
+        # )
+
         balances = {}
-        for chain, tokens in cls.token_map.items():
+        for chain, tokens in EthereumMappings.token_addresses.items():
             logging.info(f"Loading from '{chain}' chain")
             chain_balances = {}
             for token in track(tokens):
@@ -212,7 +173,7 @@ class EtherscanClient:
         )
         # result is in wei
         balance_wei = int(response["result"])
-        balance_eth = balance_wei / cls.token_precision_map["ETH"]
+        balance_eth = balance_wei / EthereumMappings.token_precisions["ETH"]
         return balance_eth
 
     @classmethod
@@ -226,13 +187,15 @@ class EtherscanClient:
     ) -> float:
         response = cls.get_response(
             action="tokenbalance",
-            contractaddress=cls.token_map[chain][token],
+            contractaddress=EthereumMappings.token_addresses[chain][token],
             address=address,
             tag=tag,
             chain=chain,
             **kwargs,
         )
-        balance_token = int(response["result"]) / cls.token_precision_map[token]
+        balance_token = (
+            int(response["result"]) / EthereumMappings.token_precisions[token]
+        )
         return balance_token
 
     # -------------------------------------------------------------------------
@@ -329,7 +292,7 @@ class EtherscanClient:
             else:
                 # now rest of tokens
                 verified_token_found = False
-                for chain, tokens in cls.token_map.items():
+                for chain, tokens in EthereumMappings.token_addresses.items():
                     for token_symbol, token_address in tokens.items():
                         if token_address == row.contractAddress:
                             verified_token_found = True
@@ -344,7 +307,8 @@ class EtherscanClient:
 
             # convert to proper units
             amount_normalized = (
-                int(row.value) / cls.token_precision_map[token_symbol.split("_")[0]]
+                int(row.value)
+                / EthereumMappings.token_precisions[token_symbol.split("_")[0]]
             )
             amount_normalized_list.append(amount_normalized)
 
