@@ -112,12 +112,24 @@ class Transaction(DatabaseTable):
     )
 
     # Note: we use decimal_places=6 to match the USDC precision on ETH
-    usdc_amount = table_column.DecimalField(decimal_places=6, default=0)
+    usdc_amount = table_column.DecimalField(
+        max_digits=30,
+        decimal_places=6,
+        default=0,
+    )
 
-    token_amount = table_column.DecimalField(decimal_places=6, default=0)
+    token_amount = table_column.DecimalField(
+        max_digits=30,
+        decimal_places=6,
+        default=0,
+    )
     # these have no monetary value and user can edit freely
 
-    collateral_amount = table_column.DecimalField(decimal_places=6, default=0)
+    collateral_amount = table_column.DecimalField(
+        max_digits=30,
+        decimal_places=6,
+        default=0,
+    )
     # This is always an internal transaction (to/from are the same wallet).
     # it simply transfers funds between usdc_amount <-> collateral_amount
 

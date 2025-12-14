@@ -226,7 +226,7 @@ class AlchemyClient:
                 token_name = [
                     name
                     for name, address in EthereumMappings.token_addresses[chain].items()
-                    if address == row.contractAddress
+                    if address == row.contractAddress.lower()
                 ][0]
             else:
                 token_name = "ETH"

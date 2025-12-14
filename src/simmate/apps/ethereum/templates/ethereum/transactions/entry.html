@@ -1,0 +1,71 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    <div class="row pt-3">
+        <div class="col-xl-12">
+            <div class="row py-2">
+                <div>
+                    <table class="table table-centered table-striped mb-0 border">
+                        <tbody>
+                            <tr>
+                                <td>Hash:Type:ID</td>
+                                <td>{{ table_entry.id }}</td>
+                            </tr>
+                            <tr>
+                                <td>Hash</td>
+                                <td>
+                                    <a href="{{ table_entry.external_link }}" target="_blank">
+                                        {{ table_entry.hash }}  <small><i class="bi bi-box-arrow-up-right"></i></small>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>From</td>
+                                <td>
+                                    {% if table_entry.from_address.ens_name %}
+                                        {% foreign_key_link table_entry.from_address "ens_name" %}
+                                    {% else %}
+                                        {% foreign_key_link table_entry.from_address %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>To</td>
+                                <td>
+                                    {% if table_entry.to_address.ens_name %}
+                                        {% foreign_key_link table_entry.to_address "ens_name" %}
+                                    {% else %}
+                                        {% foreign_key_link table_entry.to_address %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Chain</td>
+                                <td>{{ table_entry.chain }}</td>
+                            </tr>
+                            <tr>
+                                <td>Asset</td>
+                                <td>{{ table_entry.asset }}</td>
+                            </tr>
+                            <tr>
+                                <td>Amount</td>
+                                <td>
+                                    {% if table_entry.asset == "ETH" %}
+                                        &Xi;{{ table_entry.amount|floatformat:6 }}
+                                    {% elif table_entry.asset == "USDC" %}
+                                        ${{ table_entry.amount|floatformat:2 }}
+                                    {% else %}
+                                        {{ table_entry.amount|floatformat:6 }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Date</td>
+                                <td>{{ table_entry.created_at_original|date:"M. jS Y @ P T" }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

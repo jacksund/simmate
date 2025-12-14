@@ -10,18 +10,18 @@ class EthereumMappings:
     token_addresses = {
         "Ethereum": {
             # Stablecoins (1 token = $1)
-            "USDC": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",  # Circle
-            "USDT": "0xdAC17F958D2ee523a2206206994597C13D831ec7",  # Tether
-            "DAI": "0x6B175474E89094C44Da98b954EedeAC495271d0F",  # DAO
-            "USDS": "0xdC035D45d973E3EC169d2276DDab16f1e407384F",  # Sky
+            "USDC": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",  # Circle
+            "USDT": "0xdac17f958d2ee523a2206206994597c13d831ec7",  # Tether
+            "DAI": "0x6b175474e89094c44da98b954eedeac495271d0f",  # DAO
+            "USDS": "0xdc035d45d973e3ec169d2276ddab16f1e407384f",  # Sky
             # Wrapped Assets
-            "wETH": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",  # Wrapped ETH
+            "wETH": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",  # Wrapped ETH
             "WBTC": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",  # Wrapped Bitcoin
             "cbBTC": "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",  # Coinbase Wrapped Bitcoin
             # Governance / Ownership
-            "UNI": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",  # Uniswap
-            "COMP": "0xc00e94Cb662C3520282E6f5717214004A7f26888",  # Compound
-            "POOL": "0x0cEC1A9154Ff802e7934Fc916Ed7Ca50bDE6844e",  # PoolTogether
+            "UNI": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",  # Uniswap
+            "COMP": "0xc00e94cb662c3520282e6f5717214004a7f26888",  # Compound
+            "POOL": "0x0cec1a9154ff802e7934fc916ed7ca50bde6844e",  # PoolTogether
             # Lending
             "AWETH": "0x4d5f47fa6a74757f35c14fd3a6ef8e3c9bc514e8",  # Aave v3 WETH
             # Staking

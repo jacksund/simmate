@@ -17,6 +17,12 @@ class EthereumWallet(DatabaseTable):
 
     external_website = "https://etherscan.io/"  # even if we pull from alchemy
 
+    html_entries_template = "ethereum/wallets/table.html"
+    html_entry_template = "ethereum/wallets/entry.html"
+
+    # html_form_component = "ethereum-wallet-form"
+    # html_enabled_forms = ["search"]
+
     # -------------------------------------------------------------------------
 
     id = table_column.CharField(max_length=50, primary_key=True)
@@ -31,9 +37,17 @@ class EthereumWallet(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    ethereum_balance = table_column.DecimalField(decimal_places=18, default=0)
+    ethereum_balance = table_column.DecimalField(
+        max_digits=30,  # up to 1 trillion ETH even though total supply is ~120mil
+        decimal_places=18,  # down to 1 wei
+        default=0,
+    )
 
-    usdc_balance = table_column.DecimalField(decimal_places=6, default=0)
+    usdc_balance = table_column.DecimalField(
+        max_digits=30,  # absolute overkill on max but why not
+        decimal_places=6,  # actualy precision of USDC on blockchain
+        default=0,
+    )
 
     stablecoin_options = [
         "USDT",
@@ -41,9 +55,23 @@ class EthereumWallet(DatabaseTable):
         "USDS",
         "DAI",
     ]
-    stablecoin_total_balance = table_column.DecimalField(decimal_places=18, default=0)
+    stablecoin_total_balance = table_column.DecimalField(
+        max_digits=30,
+        decimal_places=18,
+        default=0,
+    )
 
-    assets_total_value_usd = table_column.DecimalField(decimal_places=18, default=0)
+    assets_total_value_usd = table_column.DecimalField(
+        max_digits=30,
+        decimal_places=18,
+        default=0,
+    )
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_web_queryset(cls):
+        return cls.objects.filter(ens_name__isnull=False)
 
     # -------------------------------------------------------------------------
 
