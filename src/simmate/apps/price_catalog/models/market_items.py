@@ -17,6 +17,20 @@ class MarketItem(DatabaseTable):
     class Meta:
         db_table = "price_catalog__market_items"
 
+    html_display_name = "Market Data & Price Catalog"
+    html_description_short = (
+        "Prices and economic indicators spanning common chemicals, stocks, "
+        "commodities, cryptocurrencies, and macroeconomic metrics."
+    )
+
+    html_entries_template = "price_catalog/market_items/table.html"
+    html_entry_template = "price_catalog/market_items/entry.html"
+
+    # html_form_component = "market-item-form"
+    # html_enabled_forms = ["search"]
+
+    # -------------------------------------------------------------------------
+
     category_options = [
         "Chemical Elements",
         "Fuels & Energy",
@@ -44,20 +58,17 @@ class MarketItem(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
+    price = table_column.FloatField(blank=True, null=True)
+
+    price_unit = table_column.TextField(blank=True, null=True)
+
     global_abundance = table_column.FloatField(blank=True, null=True)
     # count
     # kg
     # infinite (for indexes/housing)
 
-    price = table_column.FloatField(blank=True, null=True)
-
-    price_10y_stats = table_column.JSONField(blank=True, null=True)
-    # Start
-    # Current
-    # Min
-    # Max
-    # % change
-    # % change normalized for inflation
+    market_cap = table_column.FloatField(blank=True, null=True)
+    # price * global_abundance
 
     # -------------------------------------------------------------------------
 
@@ -68,6 +79,23 @@ class MarketItem(DatabaseTable):
     global_abundance_mg_per_kg_crust = table_column.FloatField(blank=True, null=True)
 
     price_per_kg = table_column.FloatField(blank=True, null=True)
+
+    # -------------------------------------------------------------------------
+
+    # Price history stats
+
+    # start ($)
+    # current ($)
+    # min ($)
+    # max ($)
+    # change (%)
+    # change_normalized (%) for inflation
+
+    price_1y_stats = table_column.JSONField(blank=True, null=True)
+
+    price_5y_stats = table_column.JSONField(blank=True, null=True)
+
+    price_10y_stats = table_column.JSONField(blank=True, null=True)
 
     # -------------------------------------------------------------------------
 
@@ -167,6 +195,12 @@ class MarketItem(DatabaseTable):
         fig.show(renderer="browser")
 
     # -------------------------------------------------------------------------
+
+    @classmethod
+    def _load_data(cls):
+        MarketItem._load_yfinance_data()
+        MarketItem._load_fred_data()
+        MarketItem.update_price_history_calcs()
 
     @classmethod
     def _load_fred_data(cls):
@@ -294,6 +328,7 @@ class MarketItem(DatabaseTable):
 
     @classmethod
     def _load_wikipedia_data(cls):
+        raise NotImplementedError()
         pass  # https://en.wikipedia.org/wiki/Prices_of_chemical_elements
 
     # -------------------------------------------------------------------------

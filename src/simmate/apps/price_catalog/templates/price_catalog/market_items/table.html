@@ -1,0 +1,61 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=75 %}
+    {% table_header "category" min_width=150 %}
+    {% table_header "ticker_source" "Source" min_width=100 %}
+    {% table_header "name" min_width=150 %}
+    {% table_header "price" min_width=125 %}
+    {% table_header "price_1y_stats__change" "1y" min_width=75 %}
+    {% table_header "price_5y_stats__change" "5y" min_width=75 %}
+    {% table_header "price_10y_stats__change" "10y" min_width=75 %}
+    {% table_header "global_abundance" min_width=175 %}
+    {% table_header "market_cap" min_width=125 %}
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry %}</td>
+    <td>{{ entry.category }}</td>
+    <td>{{ entry.ticker_source }}</td>
+    <td>{{ entry.name }}</td>
+    <td>
+        {% if entry.price_per_kg %}
+            ${{ entry.price_per_kg }} per kg
+        {% elif entry.price and entry.price_unit %}
+            ${{ entry.price }} {{ entry.price_unit }}
+        {% else %}
+            ---
+        {% endif %}
+    </td>
+    <td>
+        {% if entry.price_1y_stats.change %}
+            {{ entry.price_1y_stats.change }}%
+        {% else %}
+            ---
+        {% endif %}
+    </td>
+    <td>
+        {% if entry.price_5y_stats.change %}
+            {{ entry.price_5y_stats.change }}%
+        {% else %}
+            ---
+        {% endif %}
+    </td>
+    <td>
+        {% if entry.price_10y_stats.change %}
+            {{ entry.price_10y_stats.change }}%
+        {% else %}
+            ---
+        {% endif %}
+    </td>
+    <td>
+        {% if entry.global_abundance_mg_per_kg_crust %}
+            ${{ entry.price_per_kg }} mg per kg Earth's crust
+        {% elif entry.global_abundance_kg %}
+            ${{ entry.price_per_kg }} kg
+        {% elif entry.global_abundance %}
+            {{ entry.global_abundance }}
+        {% else %}
+            ---
+        {% endif %}
+    </td>
+    <td>---</td>
+{% endblock %}
