@@ -31,9 +31,9 @@ class EthereumWallet(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    ethereum_balance = table_column.FloatField(blank=True, null=True)
+    ethereum_balance = table_column.DecimalField(decimal_places=18, default=0)
 
-    usdc_balance = table_column.FloatField(blank=True, null=True)
+    usdc_balance = table_column.DecimalField(decimal_places=6, default=0)
 
     stablecoin_options = [
         "USDT",
@@ -41,9 +41,9 @@ class EthereumWallet(DatabaseTable):
         "USDS",
         "DAI",
     ]
-    stablecoin_total_balance = table_column.FloatField(blank=True, null=True)
+    stablecoin_total_balance = table_column.DecimalField(decimal_places=18, default=0)
 
-    assets_total_value_usd = table_column.FloatField(blank=True, null=True)
+    assets_total_value_usd = table_column.DecimalField(decimal_places=18, default=0)
 
     # -------------------------------------------------------------------------
 
