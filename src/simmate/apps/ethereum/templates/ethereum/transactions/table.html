@@ -1,27 +1,27 @@
 {% extends "data_explorer/table_entries_base.html" %}
 {% block table_headers %}
-    {% table_header "id" "Hash:Type:ID" min_width=700 %}
-    {% table_header "from_address" "From" min_width=400 %}
-    {% table_header "from_address" "To" min_width=400 %}
+    {% table_header "id" "Hash:Type:ID" min_width=150 %}
+    {% table_header "from_address" "From" min_width=150 %}
+    {% table_header "from_address" "To" min_width=150 %}
     {% table_header "chain" "Chain" min_width=150 %}
     {% table_header "asset" "Asset" min_width=150 %}
     {% table_header "amount" "Amount" min_width=150 %}
     {% table_header "created_at_original" "Date" min_width=250 %}
 {% endblock %}
 {% block table_rows %}
-    <td>{% foreign_key_link entry %}</td>
+    <td>{% foreign_key_link entry truncate_chars=10 %}</td>
     <td>
         {% if entry.from_address.ens_name %}
             {% foreign_key_link entry.from_address "ens_name" %}
         {% else %}
-            {% foreign_key_link entry.from_address %}
+            {% foreign_key_link entry.from_address truncate_chars=10 %}
         {% endif %}
     </td>
     <td>
         {% if entry.to_address.ens_name %}
             {% foreign_key_link entry.to_address "ens_name" %}
         {% else %}
-            {% foreign_key_link entry.to_address %}
+            {% foreign_key_link entry.to_address truncate_chars=10 %}
         {% endif %}
     </td>
     <td>{{ entry.chain }}</td>

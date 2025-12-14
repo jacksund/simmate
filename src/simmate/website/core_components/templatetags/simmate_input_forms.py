@@ -102,6 +102,7 @@ def foreign_key_link(
     entry,  # db_object
     display_column: str = None,
     mode: str = "text",  # other options are "pill" and "block"
+    truncate_chars: int = "inf",
 ):
     return locals()
 
