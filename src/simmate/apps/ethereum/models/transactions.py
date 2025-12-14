@@ -23,6 +23,12 @@ class EthereumTransaction(DatabaseTable):
 
     external_website = "https://etherscan.io/"
 
+    html_entries_template = "ethereum/transactions/table.html"
+    html_entry_template = "ethereum/transactions/entry.html"
+
+    # html_form_component = "ethereum-transaction-form"
+    # html_enabled_forms = ["search"]
+
     # -------------------------------------------------------------------------
 
     id = table_column.CharField(max_length=75, primary_key=True)
@@ -57,6 +63,12 @@ class EthereumTransaction(DatabaseTable):
         on_delete=table_column.PROTECT,
     )
 
+    chain_options = [
+        "Ethereum",
+        "Base",
+    ]
+    chain = table_column.CharField(max_length=25, blank=True, null=True)
+
     asset_options = list(EthereumMappings.token_precisions.keys())
     asset = table_column.CharField(max_length=10, blank=True, null=True)
 
@@ -71,6 +83,15 @@ class EthereumTransaction(DatabaseTable):
 
     value_usd = table_column.FloatField(blank=True, null=True)
     # value based on todays prices
+
+    # -------------------------------------------------------------------------
+
+    @property
+    def external_link(self) -> str:
+        if self.chain == "Ethereum":
+            return f"https://etherscan.io/tx/{self.hash}/"
+        elif self.chain == "Base":
+            return f"https://basescan.org/tx/{self.hash}/"
 
     # -------------------------------------------------------------------------
 
@@ -119,6 +140,7 @@ class EthereumTransaction(DatabaseTable):
                     hash=transaction["hash"],  # those of the same swap with match
                     from_address_id=from_address,
                     to_address_id=to_address,
+                    chain=transaction["chain"],
                     asset=transaction["token_verified"],
                     amount=transaction["amount_verified"],
                     created_at_original=created_at_original,

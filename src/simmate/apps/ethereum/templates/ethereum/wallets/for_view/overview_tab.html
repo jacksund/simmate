@@ -1,0 +1,44 @@
+<div class="tab-pane show active" id="overview-section">
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="row py-2">
+                <div>
+                    <table class="table table-centered table-striped mb-0 border">
+                        <tbody>
+                            <tr>
+                                <td>EVM Address</td>
+                                <td>{{ table_entry.id }}</td>
+                            </tr>
+                            <tr>
+                                <td>ENS</td>
+                                <td>
+                                    {% if table_entry.ens_name %}
+                                        {{ table_entry.ens_name }}
+                                    {% else %}
+                                        ---
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ETH</td>
+                                <td>&Xi;{{ table_entry.ethereum_balance|floatformat:6 }}</td>
+                            </tr>
+                            <tr>
+                                <td>USDC</td>
+                                <td>${{ table_entry.usdc_balance|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Stablecoins</td>
+                                <td>${{ table_entry.stablecoin_total_balance|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Assets</td>
+                                <td>${{ table_entry.assets_total_value_usd|floatformat:2 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

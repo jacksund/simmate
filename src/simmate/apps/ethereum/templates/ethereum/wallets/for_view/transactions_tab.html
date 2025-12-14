@@ -1,0 +1,15 @@
+<div class="tab-pane" id="tags-section">
+    <div class="col-xl-12">
+        {% if transactions__count %}
+            {% include "ethereum/transactions/table.html" with entries=transactions wallet_view=True truncated=transactions__truncated %}
+        {% else %}
+            <small>No transactions involving Simmate wallets.</small>
+        {% endif %}
+    </div>
+    <div class="text-center py-2">
+        <a role="button"
+           class="btn btn-outline-primary btn-sm"
+           target="_blank"
+           href="{% url 'data_explorer:table' 'EthereumWallet' %}?from_wallet_id={{ table_entry.id }}">View All <i class="mdi mdi-open-in-new"></i></a>
+    </div>
+</div>
