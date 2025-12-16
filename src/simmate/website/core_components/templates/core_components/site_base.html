@@ -105,8 +105,10 @@
         {% if not fullpage_dashboard %}
             {# This is the main portion of the webpage #}
             {# TODO: include "core_components/sidebar_left.html" #}
+            {# BUG-FIX: overflow-achor needed for HtmxComponent.retarget() #}
             <div id="main_body_container"
-                 class="container{% if full_width_body %}-flex{% endif %} min-vh-100 py-3">
+                 class="container{% if full_width_body %}-flex{% endif %} min-vh-100 py-3"
+                 style="overflow-anchor: none">
                 {% block body %}{% endblock %}
             </div>
         {% else %}
