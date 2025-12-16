@@ -127,13 +127,20 @@ class HtmxComponent:
         )
         response["HX-Retarget"] = f"#{self.component_id}"
 
-        # BUG: the whole window jumps to the bottom of the div and I can't
-        # figure out how to disable this, even with the hx-swap and hx-reswap
-        # features suggested in the docs:
+        # BUG: the whole window jumps to the bottom of the div and the suggested
+        # fixes in the docs (such as `hx-swap="outerHTML show:none"`) do not
+        # work as intended:
         #   https://htmx.org/attributes/hx-swap/
-        #
         # The fix ended up being adding the `style="overflow-anchor: none"` to
-        # a div at the retarget's div level or higher
+        # a div at the retarget's div
+        # Explaination from gemini 3:
+        # Modern browsers (Chrome/Firefox) attempt to keep your scroll position
+        # "anchored" to content they think you are looking at. When HTMX swaps
+        # a large div, the browser might get confused about where you are
+        # relative to the page and jump to compensate. Apply this CSS to fix:
+        # #my-retarget-div {
+        #     overflow-anchor: none;
+        # }
         return response
 
     # -------------------------------------------------------------------------
