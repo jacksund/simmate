@@ -70,7 +70,12 @@ def hash_options(options: list[tuple]) -> str:
     """
     # for speed, we only hash the keys, which are shorter and should be
     # consistent with all their values anyways
-    return str(hash(";".join([str(k) for k, _ in options])))
+    if not options:
+        return str(hash(""))
+    elif isinstance(options[0], tuple):
+        return str(hash(";".join([str(k) for k, _ in options])))
+    else:
+        return str(hash(";".join([str(k) for k in options])))
 
 
 def parse_multiselect(select_list: any) -> list:
