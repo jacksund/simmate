@@ -45,7 +45,9 @@ class HtmxComponent:
         self.component_id = get_uuid_starting_with_letter()
         self.form_data = {}
         self.initial_context = context
-        self.request = context.request  # is updated with new request every new call
+        self.request = (
+            context.request if context else None
+        )  # updated with new request every new call
         # this part allows us to pass kwargs to the html tag and apply them to attrs
         # ex: form_mode="example" --> apply to python obj on init
         for key, value in kwargs.items():
@@ -66,7 +68,9 @@ class HtmxComponent:
         }
         # **self.initial_context.flatten(),  # include this?
 
-    def handle_request(self, request, method_name: str = None) -> HttpResponse:
+    def handle_request(
+        self, request: HttpRequest, method_name: str = None
+    ) -> HttpResponse:
 
         self.request = request  # for easy access elsewhere
 
@@ -109,6 +113,35 @@ class HtmxComponent:
                 self.template_name,
                 self.get_context(),
             )
+
+    # -------------------------------------------------------------------------
+
+    def retarget(self, request: HttpRequest = None) -> HttpResponse:
+        # for when another component switches hx-target and actually wants
+        # this component to rerender instead. Useful for parent-child components
+        # where the child wants to trigger a parent rerender
+        response = render(
+            request if request else self.request,  # doesn't do anything really
+            self.template_name,
+            self.get_context(),
+        )
+        response["HX-Retarget"] = f"#{self.component_id}"
+
+        # BUG: the whole window jumps to the bottom of the div and the suggested
+        # fixes in the docs (such as `hx-swap="outerHTML show:none"`) do not
+        # work as intended:
+        #   https://htmx.org/attributes/hx-swap/
+        # The fix ended up being adding the `style="overflow-anchor: none"` to
+        # a div at the retarget's div
+        # Explaination from gemini 3:
+        # Modern browsers (Chrome/Firefox) attempt to keep your scroll position
+        # "anchored" to content they think you are looking at. When HTMX swaps
+        # a large div, the browser might get confused about where you are
+        # relative to the page and jump to compensate. Apply this CSS to fix:
+        # #my-retarget-div {
+        #     overflow-anchor: none;
+        # }
+        return response
 
     # -------------------------------------------------------------------------
 
