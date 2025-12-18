@@ -93,17 +93,20 @@ class PricedItem(DatabaseTable):
     # Price history stats
 
     # start ($)
-    # current ($)
     # min ($)
     # max ($)
     # change (%)
     # change_inflation_adj (%) for inflation
+
+    years_ago_options = [1, 5, 10, 25]
 
     price_1y_stats = table_column.JSONField(blank=True, null=True)
 
     price_5y_stats = table_column.JSONField(blank=True, null=True)
 
     price_10y_stats = table_column.JSONField(blank=True, null=True)
+
+    price_25y_stats = table_column.JSONField(blank=True, null=True)
 
     # -------------------------------------------------------------------------
 
@@ -236,12 +239,11 @@ class PricedItem(DatabaseTable):
         # and normalize it to buying power so that we can scale other data
         buying_power_data = cls.get_buying_power_series()
 
-        for years_ago in [1, 5, 10, 25]:
+        for entry in track(cls.objects.all()):
 
-            logging.info(f"Updating {years_ago}-year data cache")
-            year_ago_dt = cls.get_years_ago_datetime(years_ago)
+            for years_ago in cls.years_ago_options:
 
-            for entry in track(cls.objects.all()):
+                year_ago_dt = cls.get_years_ago_datetime(years_ago)
 
                 entry_closest = (
                     entry.price_points.filter(date__gte=year_ago_dt)
@@ -252,7 +254,7 @@ class PricedItem(DatabaseTable):
                 # check that the date is within at least 6months
                 if (
                     entry_closest.date - year_ago_dt
-                ).total_seconds() >= 60 * 24 * 30 * 6:
+                ).total_seconds() >= 60 * 60 * 24 * 30 * 6:
                     continue
 
                 price_closest = entry_closest.price
@@ -311,6 +313,22 @@ class PricedItem(DatabaseTable):
                     ],
                 )
 
+                # update parent object
+                entry.price = entry.price_points.order_by("-date").first().price
+                all_prices = [p.price for p in price_objs]
+                stats = {
+                    "start": price_closest,
+                    "min": min(all_prices),
+                    "max": max(all_prices),
+                    "change": ((entry.price - price_closest) / price_closest) * 100,
+                    "change_inflation_adj": (
+                        (entry.price - price_inflation_adj_closest) / price_closest
+                    )
+                    * 100,
+                }
+                setattr(entry, f"price_{years_ago}y_stats", stats)
+                entry.save()
+
     @staticmethod
     def interp_w_datetime(original_x, original_y, new_x):
         # DEPREC: from scipy.interpolate import interp1d
@@ -340,7 +358,7 @@ class PricedItem(DatabaseTable):
         # cls._load_wikipedia_data()
         cls._load_yfinance_data()
         cls._load_fred_data()
-        cls.update_price_points_calcs()
+        # cls.update_price_points_calcs()
 
     @classmethod
     def _load_fred_data(cls):
