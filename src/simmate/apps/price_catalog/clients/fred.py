@@ -24,7 +24,7 @@ class FredClient:
         # Make sure you look at this link to see the full tree of these tickers
         # and how they relate to one another (some are subcategories of others)
         # https://fred.stlouisfed.org/release/tables?rid=46&eid=142872#snid=142874
-        "Chemicals & Allied Products": "WPU06",
+        "Chemicals": "WPU06",  # & Allied Products
         "Industrial Chemicals": "WPU061",
         #
         "Inorganic Chemicals": "WPU0613",
@@ -35,7 +35,7 @@ class FredClient:
         # "Carbon Dioxide": "WPU06790302",
         "Nitrogen": "WPU06790303",
         "Oxygen": "WPU06790304",
-        "Aluminum Compounds": "WPU06130209",
+        "Aluminum": "WPU06130209",  # Aluminum containing compounds
         # "Sulfuric Acid": "WPU0613020T1",
         # "NaCl": "WPU06130271",  # Rock Salt
         # "Ethanol": "WPU06140341",

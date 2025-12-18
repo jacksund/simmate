@@ -263,9 +263,9 @@ class SimmateSettings:
                         "simmate.apps.evolution.models.ChemicalSystemSearch",
                     ],
                     "Business and Finance": [
+                        "simmate.apps.price_catalog.models.PricedItem",
                         "simmate.apps.ethereum.models.EthereumWallet",
                         "simmate.apps.ethereum.models.EthereumTransaction",
-                        "simmate.apps.price_catalog.models.MarketItem",
                     ],
                     "Other": [
                         "simmate.apps.eppo_gd.models.EppoCode",
@@ -277,7 +277,7 @@ class SimmateSettings:
                         "simmate.apps.chembl.models.ChemblDocument",
                         "simmate.apps.emolecules.models.EmoleculesSupplierOffer",
                         "simmate.apps.evolution.models.SteadystateSource",
-                        "simmate.apps.price_catalog.models.PriceHistory",
+                        "simmate.apps.price_catalog.models.PricePoint",
                     ],
                     # "Chemical Inventory & Tracking": [],
                     # "Computational Assay Tracking": [],
