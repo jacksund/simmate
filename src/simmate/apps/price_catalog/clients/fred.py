@@ -18,6 +18,26 @@ class FredClient:
         "Electricity": "CUSR0000SEHF01",  # or APU000072610
         "Housing": "CSUSHPINSA",
         "Consumer Price Index": "CPIAUCSL",  # use for inflation metrics
+        # Producer Price Index (PPI):
+        #   sections for "Industrial Chemicals" or "Chemicals and Allied Products"
+        # Make sure you look at this link to see the full tree of these tickers
+        # and how they relate to one another (some are subcategories of others)
+        # https://fred.stlouisfed.org/release/tables?rid=46&eid=142872#snid=142874
+        "Chemicals & Allied Products": "WPU06",
+        "Industrial Chemicals": "WPU061",
+        #
+        "Inorganic Chemicals": "WPU0613",
+        "Organic Chemicals": "WPU0614",
+        "Industrial Gases": "WPU067903",
+        #
+        "Carbon": "WPU06790918",  # Carbon Black
+        "Carbon Dioxide": "WPU06790302",
+        "Nitrogen": "WPU06790303",
+        "Oxygen": "WPU06790304",
+        "Aluminum Compounds": "WPU06130209",
+        "Sulfuric Acid": "WPU0613020T1",
+        "NaCl": "WPU06130271",  # Rock Salt
+        "Ethanol": "WPU06140341",
     }
 
     @classmethod
@@ -41,7 +61,7 @@ class FredClient:
     @staticmethod
     def get_ticker_data(ticker: str):
         """
-        Uses the Yahoo ticker value to grab data. Can be any ticker in the live site
+        Uses the FRED ticker value to grab data. Can be any ticker in the live site
         such as `SPY` or `GOOGL`
         """
         url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={ticker}"
