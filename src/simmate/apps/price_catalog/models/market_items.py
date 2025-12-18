@@ -32,7 +32,10 @@ class MarketItem(DatabaseTable):
     # -------------------------------------------------------------------------
 
     category_options = [
+        "Chemical Index",
         "Chemical Elements",
+        # "Chemical Solvents",
+        # "Chemical Reagents",
         "Fuels & Energy",
         "Crops & Livestock",
         "Cryptocurrency",

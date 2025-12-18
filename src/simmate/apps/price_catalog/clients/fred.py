@@ -18,6 +18,7 @@ class FredClient:
         "Electricity": "CUSR0000SEHF01",  # or APU000072610
         "Housing": "CSUSHPINSA",
         "Consumer Price Index": "CPIAUCSL",  # use for inflation metrics
+        #
         # Producer Price Index (PPI):
         #   sections for "Industrial Chemicals" or "Chemicals and Allied Products"
         # Make sure you look at this link to see the full tree of these tickers
@@ -31,13 +32,13 @@ class FredClient:
         "Industrial Gases": "WPU067903",
         #
         "Carbon": "WPU06790918",  # Carbon Black
-        "Carbon Dioxide": "WPU06790302",
+        # "Carbon Dioxide": "WPU06790302",
         "Nitrogen": "WPU06790303",
         "Oxygen": "WPU06790304",
         "Aluminum Compounds": "WPU06130209",
-        "Sulfuric Acid": "WPU0613020T1",
-        "NaCl": "WPU06130271",  # Rock Salt
-        "Ethanol": "WPU06140341",
+        # "Sulfuric Acid": "WPU0613020T1",
+        # "NaCl": "WPU06130271",  # Rock Salt
+        # "Ethanol": "WPU06140341",
     }
 
     @classmethod
