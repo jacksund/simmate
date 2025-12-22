@@ -1,4 +1,14 @@
 {% extends "data_explorer/table_entries_base.html" %}
+{% block table_report %}
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6"></div>
+            <div class="col-md-6 d-flex flex-column"></div>
+        </div>
+    </div>
+    {% htmx_component "priced-items-report" %}
+    {% alert theme="info" message="Percentages shown are adjusted for inflation using the Consumer Price Index." %}
+{% endblock %}
 {% block table_headers %}
     {% table_header "category" min_width=150 %}
     {% table_header "name" min_width=150 %}

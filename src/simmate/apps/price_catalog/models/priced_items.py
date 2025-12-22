@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import logging
 from datetime import datetime
 
 import numpy
@@ -14,6 +13,8 @@ from simmate.database.base_data_types import DatabaseTable, table_column
 
 
 class PricedItem(DatabaseTable):
+    # This page is intended for evaluating long-term trends, not live trading -
+    # so prices are only updated & sync'd at the start of each month.
 
     class Meta:
         db_table = "price_catalog__priced_items"
@@ -110,30 +111,54 @@ class PricedItem(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
+    enable_html_report = True
+    report_df_columns = ["id"]
+
     @classmethod
-    def get_figure(cls):
+    def get_report_from_df(cls, df: pandas.DataFrame):
+        return {"test": 123}
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_report_figure(
+        cls,
+        names: list[str],
+        percent: bool = False,
+        inflation_adj: bool = False,
+        years_ago_norm: int = None,
+    ):
 
         from .price_points import PricePoint
 
-        data = PricePoint.objects.order_by("priced_item__name", "date").to_dataframe(
-            [
-                "priced_item__name",
-                "date",
-                # "price",
-                # "price_inflation_adj",
-                # "delta_10y",
-                # "delta_10y_inflation_adj",
-                # "delta_10y_percent",
-                "delta_10y_percent_inflation_adj",
-            ]
+        if years_ago_norm:
+            price_mode = f"delta_{years_ago_norm}y"
+            if percent:
+                price_mode += "_percent"
+            if inflation_adj:
+                price_mode += "_inflation_adj"
+            date_cutoff = cls.get_years_ago_datetime(years_ago_norm)
+
+        else:
+            price_mode = "price"
+            date_cutoff = cls.get_years_ago_datetime(100)
+
+        data = (
+            PricePoint.objects.filter(
+                priced_item__name__in=names,
+                date__gte=date_cutoff,
+            )
+            .order_by("priced_item__name", "date")
+            .to_dataframe(["priced_item__name", price_mode, "date"])
         )
-        fig = plotly_express.line(
+
+        figure = plotly_express.line(
             data,
             x="date",
-            y="delta_10y_percent_inflation_adj",
+            y=price_mode,
             color="priced_item__name",
         )
-        fig.show(renderer="browser")
+        return figure
 
     def get_price_figure(self, inflation_adj: bool = False):
 
@@ -358,7 +383,7 @@ class PricedItem(DatabaseTable):
         # cls._load_wikipedia_data()
         cls._load_yfinance_data()
         cls._load_fred_data()
-        # cls.update_price_points_calcs()
+        cls.update_price_points_calcs()
 
     @classmethod
     def _load_fred_data(cls):
