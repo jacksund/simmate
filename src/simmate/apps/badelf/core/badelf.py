@@ -49,42 +49,42 @@ class BadElfToolkit:
         Defaults to 0.9*the total number of threads available.
     algorithm : Literal["badelf", "voronelf", "zero-flux"], optional
         The algorithm to use for partitioning electrides from the nearby
-        atoms. The default is "badelf".
-            badelf:
+        atoms.
+            'badelf' (default)
                 Separates electrides using zero-flux surfaces then uses
                 planes at atom radii to separate atoms. This may give more reasonable
                 results for atoms, particularly in ionic solids.
-            voronelf:
+            'voronelf'
                 Separates both electrides and atoms using planes at atomic/electride
                 radii. This is not recommended for electrides that are not
                 spherical, but may provide better results for those that are.
-            zero-flux:
+            'zero-flux'
                 Separates electrides and atoms using zero-flux surface. This
                 is the most traditional ELF analysis, but may display some
                 bias towards atoms with higher ELF values. Results for electride
                 sites are identical to BadELF, and the method can be significantly
                 faster.
-    shared_feature_splitting_method : Literal[            "plane", "pauling", "equal", "dist", "nearest"        ], optional
+    shared_feature_splitting_method : Literal["plane", "pauling", "equal", "dist", "nearest"], optional
         The method of assigning charge from shared ELF features
         such as covalent or metallic bonds. The default is "plane".
-            plane:
+            'plane' (default)
                 Distributes charge based on the voronoi surface belonging to 
                 each atom. Charge will not be assigned to electrides unless
                 the voronelf method is used, and this method cannot be used
                 with the zero-flux method.
-            pauling:
+            'pauling'
                 Distributes charge to neighboring atoms (calculated using CrystalNN)
                 based on the pualing electronegativity of each species normalized
                 such that their sum is equal to 1. If no EN is found for the
                 atom a default of 2.2 is used (including for electrides).
-            equal:
+            'equal'
                 Charge is distributed equaly to each neighboring atom/electride
                 (calculated using CrystalNN)
-            dist:
+            'dist'
                 Charge is distributed such that more charge is given to the
                 closest atoms. Portions are determined by normalizing the sum
                 of (1/dist) to each neighboring atom.
-            nearest:
+            'nearest'
                 Gives all charge to the nearest atom or electride site.
     labeled_structure : Structure, optional
         A pymatgen structure object with dummy atoms representing
@@ -185,11 +185,11 @@ class BadElfToolkit:
                     charge_grid=charge_grid,
                     reference_grid=reference_grid,
                     crystalnn_kwargs=crystalnn_kwargs,
-                    **self.elf_labeler
+                    **elf_labeler
                     )
             else:
                 # use provided elf labeler
-                self.elf_labeler = None
+                self.elf_labeler_kwargs = None
                 self.elf_labeler = elf_labeler
             # connect the same bader class.
             self.bader = self.elf_labeler.bader
@@ -1235,6 +1235,9 @@ the shared features. Atom/electride surface distances may be smaller than expect
         else:
             results["oxidation_states"] = None
         
+        # get charges first to ensure good logging
+        self.charges
+        
         for result in [
             "species",
             "structure",
@@ -1483,7 +1486,7 @@ class SpinBadElfToolkit:
             "x_diff_weight": 0.0,
             "porous_adjustment": False,
             },
-        elf_labeler: SpinElfLabeler = None,
+        elf_labeler: SpinElfLabeler | dict = {},
         **kwargs
     ):
         """
@@ -2024,6 +2027,7 @@ class SpinBadElfToolkit:
 
         """
         filepath = Path(filepath)
+
         # write total summary
         with open(filepath, "w") as json_file:
             json.dump(self.to_dict(use_json=True, **kwargs), json_file, indent=4)
