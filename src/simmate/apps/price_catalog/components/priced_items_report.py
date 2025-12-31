@@ -63,10 +63,16 @@ class PricedItemsReport(HtmxComponent):
             )
 
         elif self.form_data["years_ago_norm"] == "max":
-            self.figure = self.priced_item.get_price_figure()
+            self.figure = self.priced_item.get_price_figure(
+                inflation_adj=self.form_data["use_inflation_adj"],
+            )
 
         else:
-            self.figure = self.priced_item.get_delta_10y_figure()
+            self.figure = self.priced_item.get_delta_figure(
+                years_ago=self.form_data["years_ago_norm"],
+                percent=self.form_data["use_percent"],
+                inflation_adj=self.form_data["use_inflation_adj"],
+            )
 
     # -------------------------------------------------------------------------
 
@@ -79,3 +85,4 @@ class PricedItemsReport(HtmxComponent):
         if self.form_data["years_ago_norm"] != "max":
             self.form_data["item_names"] = []
             # self.form_data["use_percent"] = True
+            # self.form_data["use_inflation_adj"] = True

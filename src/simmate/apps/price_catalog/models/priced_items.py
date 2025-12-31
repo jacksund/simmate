@@ -175,21 +175,41 @@ class PricedItem(DatabaseTable):
         figure.update_layout(yaxis_tickprefix="$")
         return figure
 
-    def get_delta_10y_figure(self, inflation_adj: bool = False):
+    def get_delta_figure(
+        self,
+        years_ago: int,
+        percent: bool = False,
+        inflation_adj: bool = False,
+    ):
 
-        ten_years_ago = self.get_years_ago_datetime(10)
-        y_col = (
-            "delta_10y_percent"
-            if not inflation_adj
-            else "delta_10y_percent_inflation_adj"
-        )
+        if years_ago not in self.years_ago_options:
+            raise Exception(
+                f"`years_ago` must be set to one of {self.years_ago_options}"
+            )
+
+        date_cutoff = self.get_years_ago_datetime(years_ago)
+
+        y_col = f"delta_{years_ago}y"
+        if percent:
+            y_col += "_percent"
+        if inflation_adj:
+            y_col += "_inflation_adj"
         columns = ["date", y_col]
-        data = self.price_points.filter(date__gte=ten_years_ago).to_dataframe(columns)
+
+        data = (
+            self.price_points.filter(date__gte=date_cutoff)
+            .order_by("date")
+            .to_dataframe(columns)
+        )
 
         # Separate positive and negative parts
         rel_change = data[y_col]
-        pos = numpy.where(rel_change > 0, rel_change, 0) / 100
-        neg = numpy.where(rel_change < 0, rel_change, 0) / 100
+        pos = numpy.where(rel_change > 0, rel_change, 0)
+        neg = numpy.where(rel_change < 0, rel_change, 0)
+
+        if percent:
+            pos = pos / 100
+            neg = neg / 100
 
         figure = plotly_go.Figure()
 
@@ -227,7 +247,10 @@ class PricedItem(DatabaseTable):
             )
         )
 
-        figure.update_layout(yaxis_tickformat=".0%")
+        if percent:
+            figure.update_layout(yaxis_tickformat=".0%")
+        else:
+            figure.update_layout(yaxis_tickprefix="$")
 
         return figure
 
