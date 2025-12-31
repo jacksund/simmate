@@ -166,19 +166,18 @@ class PricedItem(DatabaseTable):
         columns = ["date", y_col]
         data = self.price_points.order_by("date").to_dataframe(columns)
 
-        fig = plotly_express.area(
+        figure = plotly_express.area(
             data,
             x="date",
             y=y_col,
         )
 
-        fig.update_layout(yaxis_tickprefix="$")
-
-        fig.show(renderer="browser")
+        figure.update_layout(yaxis_tickprefix="$")
+        return figure
 
     def get_delta_10y_figure(self, inflation_adj: bool = False):
 
-        ten_years_ago = self.get_10y_datetime()
+        ten_years_ago = self.get_years_ago_datetime(10)
         y_col = (
             "delta_10y_percent"
             if not inflation_adj
@@ -192,9 +191,9 @@ class PricedItem(DatabaseTable):
         pos = numpy.where(rel_change > 0, rel_change, 0) / 100
         neg = numpy.where(rel_change < 0, rel_change, 0) / 100
 
-        fig = plotly_go.Figure()
+        figure = plotly_go.Figure()
 
-        fig.add_trace(
+        figure.add_trace(
             plotly_go.Scatter(
                 x=data.date,
                 y=pos,
@@ -205,7 +204,7 @@ class PricedItem(DatabaseTable):
             )
         )
 
-        fig.add_trace(
+        figure.add_trace(
             plotly_go.Scatter(
                 x=data.date,
                 y=neg,
@@ -217,7 +216,7 @@ class PricedItem(DatabaseTable):
         )
 
         # Black line at Zero
-        fig.add_trace(
+        figure.add_trace(
             plotly_go.Scatter(
                 x=data.date,
                 y=[0] * len(data),
@@ -228,9 +227,9 @@ class PricedItem(DatabaseTable):
             )
         )
 
-        fig.update_layout(yaxis_tickformat=".0%")
+        figure.update_layout(yaxis_tickformat=".0%")
 
-        fig.show(renderer="browser")
+        return figure
 
     # -------------------------------------------------------------------------
 

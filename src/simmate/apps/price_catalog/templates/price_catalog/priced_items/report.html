@@ -1,8 +1,14 @@
 {% extends "htmx/form_base.html" %}
 {% block form %}
-    {% htmx_selectbox name="item_names" show_label=False multiselect=True defer=False %}
-    {% htmx_selectbox name="years_ago_norm" label="Normalize to X years ago" defer=False %}
-    {% htmx_checkbox name="use_percent" show_label=False side_text="Percent (%)" defer=False %}
-    {% htmx_checkbox name="use_inflation_adj" show_label=False side_text="Adjust for Inflation" defer=False %}
     {{ component.figure|plotly_figure }}
+    <div class="row align-items-center pt-3">
+        <div class="col-4">{% htmx_button_select name="years_ago_norm" show_label=False defer=False %}</div>
+        {% if component.form_data.years_ago_norm != "max" %}
+            <div class="col-3">{% htmx_checkbox name="use_percent" show_label=False side_text="Percent (%)" defer=False %}</div>
+        {% endif %}
+        <div class="col-3">
+            {% htmx_checkbox name="use_inflation_adj" show_label=False side_text="Adjust for Inflation (CPI)" defer=False %}
+        </div>
+        <div class="col-2">{% htmx_selectbox name="item_names" show_label=False multiselect=True defer=False %}</div>
+    </div>
 {% endblock %}

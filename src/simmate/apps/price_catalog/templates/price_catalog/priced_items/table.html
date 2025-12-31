@@ -1,13 +1,12 @@
 {% extends "data_explorer/table_entries_base.html" %}
 {% block table_report %}
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6"></div>
-            <div class="col-md-6 d-flex flex-column"></div>
+    <div class="col-12">
+        <div class="alert alert-info d-flex align-items-center mb-0 p-2"
+             role="alert">
+            <i class="bi bi-info-circle"></i>&nbsp;&nbsp;
+            <div>Percentages are adjusted for inflation using the Consumer Price Index</div>
         </div>
     </div>
-    {% htmx_component "priced-items-report" %}
-    {% alert theme="info" message="Percentages shown are adjusted for inflation using the Consumer Price Index." %}
 {% endblock %}
 {% block table_headers %}
     {% table_header "category" min_width=150 %}
@@ -32,66 +31,73 @@
             ---
         {% endif %}
     </td>
-    <td>
-        {% if entry.price_1y_stats.change_inflation_adj > 0 %}
-            <span class="text-success">
-                <i class="bi bi-caret-up-fill"></i>{{ entry.price_1y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
-            </span>
-        {% elif entry.price_1y_stats.change_inflation_adj < 0 %}
-            <span class="text-danger">
-                <i class="bi bi-caret-down-fill"></i>{{ entry.price_1y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
-            </span>
-        {% elif entry.price_1y_stats.change_inflation_adj == 0 %}
-            0
-        {% else %}
-            ---
-        {% endif %}
-    </td>
-    <td>
-        {% if entry.price_5y_stats.change_inflation_adj > 0 %}
-            <span class="text-success">
-                <i class="bi bi-caret-up-fill"></i>{{ entry.price_5y_stats.change_inflation_adj|floatformat:1|intcomma }}%
-            </span>
-        {% elif entry.price_5y_stats.change_inflation_adj < 0 %}
-            <span class="text-danger">
-                <i class="bi bi-caret-down-fill"></i>{{ entry.price_5y_stats.change_inflation_adj|floatformat:1|intcomma }}%
-            </span>
-        {% elif entry.price_5y_stats.change_inflation_adj == 0 %}
-            0
-        {% else %}
-            ---
-        {% endif %}
-    </td>
-    <td>
-        {% if entry.price_10y_stats.change_inflation_adj > 0 %}
-            <span class="text-success">
-                <i class="bi bi-caret-up-fill"></i>{{ entry.price_10y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
-            </span>
-        {% elif entry.price_10y_stats.change_inflation_adj < 0 %}
-            <span class="text-danger">
-                <i class="bi bi-caret-down-fill"></i>{{ entry.price_10y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
-            </span>
-        {% elif entry.price_10y_stats.change_inflation_adj == 0 %}
-            0
-        {% else %}
-            ---
-        {% endif %}
-    </td>
-    <td>
-        {% if entry.price_25y_stats.change_inflation_adj > 0 %}
-            <span class="text-success">
-                <i class="bi bi-caret-up-fill"></i>{{ entry.price_25y_stats.change_inflation_adj|floatformat:1|intcomma }}%
-            </span>
-        {% elif entry.price_25y_stats.change_inflation_adj < 0 %}
-            <span class="text-danger">
-                <i class="bi bi-caret-down-fill"></i>{{ entry.price_25y_stats.change_inflation_adj|floatformat:1|intcomma }}%
-            </span>
-        {% elif entry.price_25y_stats.change_inflation_adj == 0 %}
-            0
-        {% else %}
-            ---
-        {% endif %}
-    </td>
+    {% if entry.name == "Consumer Price Index" %}
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+    {% else %}
+        <td>
+            {% if entry.price_1y_stats.change_inflation_adj > 0 %}
+                <span class="text-success">
+                    <i class="bi bi-caret-up-fill"></i>{{ entry.price_1y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                </span>
+            {% elif entry.price_1y_stats.change_inflation_adj < 0 %}
+                <span class="text-danger">
+                    <i class="bi bi-caret-down-fill"></i>{{ entry.price_1y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                </span>
+            {% elif entry.price_1y_stats.change_inflation_adj == 0 %}
+                0
+            {% else %}
+                ---
+            {% endif %}
+        </td>
+        <td>
+            {% if entry.price_5y_stats.change_inflation_adj > 0 %}
+                <span class="text-success">
+                    <i class="bi bi-caret-up-fill"></i>{{ entry.price_5y_stats.change_inflation_adj|floatformat:1|intcomma }}%
+                </span>
+            {% elif entry.price_5y_stats.change_inflation_adj < 0.0 %}
+                <span class="text-danger">
+                    <i class="bi bi-caret-down-fill"></i>{{ entry.price_5y_stats.change_inflation_adj|floatformat:1|intcomma }}%
+                </span>
+            {% elif entry.price_5y_stats.change_inflation_adj == 0 %}
+                0
+            {% else %}
+                ---
+            {% endif %}
+        </td>
+        <td>
+            {% if entry.price_10y_stats.change_inflation_adj > 0 %}
+                <span class="text-success">
+                    <i class="bi bi-caret-up-fill"></i>{{ entry.price_10y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                </span>
+            {% elif entry.price_10y_stats.change_inflation_adj < 0 %}
+                <span class="text-danger">
+                    <i class="bi bi-caret-down-fill"></i>{{ entry.price_10y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                </span>
+            {% elif entry.price_10y_stats.change_inflation_adj == 0 %}
+                0
+            {% else %}
+                ---
+            {% endif %}
+        </td>
+        <td>
+            {% if entry.price_25y_stats.change_inflation_adj > 0 %}
+                <span class="text-success">
+                    <i class="bi bi-caret-up-fill"></i>{{ entry.price_25y_stats.change_inflation_adj|floatformat:1|intcomma }}%
+                </span>
+            {% elif entry.price_25y_stats.change_inflation_adj < 0 %}
+                <span class="text-danger">
+                    <i class="bi bi-caret-down-fill"></i>{{ entry.price_25y_stats.change_inflation_adj|floatformat:1|intcomma }}%
+                </span>
+            {% elif entry.price_25y_stats.change_inflation_adj == 0 %}
+                0
+            {% else %}
+                ---
+            {% endif %}
+        </td>
+    {% endif %}
     <td>
         {% if entry.global_abundance_mg_per_kg_crust %}
             ${{ entry.price_per_kg }} mg per kg Earth's crust

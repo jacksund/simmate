@@ -1,2 +1,122 @@
 {% extends "data_explorer/table_entry.html" %}
-{% block entrycontent %}to-do{% endblock %}
+{% block entrycontent %}
+    <div class="row align-items-center pt-4">
+        <div class="col-3">
+            <h2>{{ table_entry.name }}</h2>
+            <table class="table table-centered table-striped mb-0 border">
+                <tbody>
+                    <tr>
+                        <td>Category</td>
+                        <td>{{ table_entry.category }}</td>
+                    </tr>
+                    <tr>
+                        <td>Price</td>
+                        <td>
+                            {% if table_entry.price_per_kg %}
+                                ${{ table_entry.price_per_kg|floatformat:2 }} per kg
+                            {% elif table_entry.price %}
+                                ${{ table_entry.price|floatformat:2|intcomma }} {# entry.price_unit #}
+                            {% else %}
+                                ---
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>1y</td>
+                        <td>
+                            {% if table_entry.price_1y_stats.change_inflation_adj > 0 %}
+                                <span class="text-success">
+                                    <i class="bi bi-caret-up-fill"></i>{{ table_entry.price_1y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                                </span>
+                            {% elif table_entry.price_1y_stats.change_inflation_adj < 0 %}
+                                <span class="text-danger">
+                                    <i class="bi bi-caret-down-fill"></i>{{ table_entry.price_1y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                                </span>
+                            {% elif table_entry.price_1y_stats.change_inflation_adj == 0 %}
+                                0
+                            {% else %}
+                                ---
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>5y</td>
+                        <td>
+                            {% if table_entry.price_5y_stats.change_inflation_adj > 0 %}
+                                <span class="text-success">
+                                    <i class="bi bi-caret-up-fill"></i>{{ table_entry.price_5y_stats.change_inflation_adj|floatformat:1|intcomma }}%
+                                </span>
+                            {% elif table_entry.price_5y_stats.change_inflation_adj < 0.0 %}
+                                <span class="text-danger">
+                                    <i class="bi bi-caret-down-fill"></i>{{ table_entry.price_5y_stats.change_inflation_adj|floatformat:1|intcomma }}%
+                                </span>
+                            {% elif table_entry.price_5y_stats.change_inflation_adj == 0 %}
+                                0
+                            {% else %}
+                                ---
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>10y</td>
+                        <td>
+                            {% if table_entry.price_10y_stats.change_inflation_adj > 0 %}
+                                <span class="text-success">
+                                    <i class="bi bi-caret-up-fill"></i>{{ table_entry.price_10y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                                </span>
+                            {% elif table_entry.price_10y_stats.change_inflation_adj < 0 %}
+                                <span class="text-danger">
+                                    <i class="bi bi-caret-down-fill"></i>{{ table_entry.price_10y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                                </span>
+                            {% elif table_entry.price_10y_stats.change_inflation_adj == 0 %}
+                                0
+                            {% else %}
+                                ---
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>25y</td>
+                        <td>
+                            {% if table_entry.price_25y_stats.change_inflation_adj > 0 %}
+                                <span class="text-success">
+                                    <i class="bi bi-caret-up-fill"></i>{{ table_entry.price_25y_stats.change_inflation_adj|floatformat:1|intcomma }}%
+                                </span>
+                            {% elif table_entry.price_25y_stats.change_inflation_adj < 0 %}
+                                <span class="text-danger">
+                                    <i class="bi bi-caret-down-fill"></i>{{ table_entry.price_25y_stats.change_inflation_adj|floatformat:1|intcomma }}%
+                                </span>
+                            {% elif table_entry.price_25y_stats.change_inflation_adj == 0 %}
+                                0
+                            {% else %}
+                                ---
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Global Abundance</td>
+                        <td>
+                            {% if table_entry.global_abundance_mg_per_kg_crust %}
+                                ${{ table_entry.price_per_kg }} mg per kg Earth's crust
+                            {% elif table_entry.global_abundance_kg %}
+                                ${{ table_entry.price_per_kg }} kg
+                            {% elif table_entry.global_abundance %}
+                                {{ table_entry.global_abundance }}
+                            {% else %}
+                                ---
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Market Cap</td>
+                        <td>---</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div>
+                <small><em>* percents are adjusted for inflation</em></small>
+            </div>
+        </div>
+        <div class="col-9">{% htmx_component "priced-items-report" %}</div>
+    </div>
+{% endblock %}
