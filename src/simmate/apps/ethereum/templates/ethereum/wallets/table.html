@@ -1,15 +1,15 @@
 {% extends "data_explorer/table_entries_base.html" %}
 {% block table_headers %}
-    {% table_header "id" "ETH Address" min_width=400 %}
+    {% table_header "id" "ETH Address" min_width=150 %}
     {% table_header "ens_name" "ENS" min_width=200 %}
-    {% table_header "ethereum_balance" "ETH" min_width=200 %}
-    {% table_header "usdc_balance" "USDC" min_width=200 %}
+    {% table_header "ethereum_balance" "ETH" min_width=150 %}
+    {% table_header "usdc_balance" "USDC" min_width=150 %}
     {% table_header "stablecoin_total_balance" "Total Stablecoins" min_width=200 %}
-    {% table_header "assets_total_value_usd" "Total Assets" min_width=200 %}
+    {% table_header "assets_total_value_usd" "Total Assets" min_width=150 %}
     {% table_header "updated_at" "Updated" min_width=250 %}
 {% endblock %}
 {% block table_rows %}
-    <td>{% foreign_key_link entry %}</td>
+    <td>{% foreign_key_link entry truncate_chars=10 %}</td>
     <td>
         {% if entry.ens_name %}
             <b>{{ entry.ens_name }}</b>

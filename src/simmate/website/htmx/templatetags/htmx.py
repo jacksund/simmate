@@ -313,6 +313,71 @@ def htmx_radio(
 
 
 @register.inclusion_tag(
+    filename="htmx/input_elements/button_select.html",
+    takes_context=True,
+)
+def htmx_button_select(
+    context: dict,
+    name: str,
+    options: list[tuple[any, str]] = [],
+    label: str = None,
+    show_label: bool = True,
+    defer: bool = True,
+    required: bool = False,
+):
+    """
+    Display a button select widget (i.e., a button group of options)
+    """
+    # options should be a list of tuples: (value, display)
+
+    component = context["component"]
+
+    if not label:
+        label = name.replace("_", " ").title()
+
+    if not options:
+        default_name = f"{name}_options"
+        if default_name in context:
+            options = options = context[default_name]
+        elif hasattr(component, default_name):
+            options = getattr(component, default_name)
+        elif default_name in component.form_data:
+            options = component.form_data[default_name]
+        elif hasattr(component, "table") and hasattr(
+            getattr(component, "table"), default_name
+        ):
+            options = getattr(getattr(component, "table"), default_name)
+        else:
+            options = []
+
+    # check whether the list of options is a simple list or a list of tuples.
+    # If it is the latter, then we have a list of (value, display) options, which
+    # is commonly used when foreign keys are involved. For example with users,
+    # where options are given as [(1, "jacksund"), (2, "janedoe"), ...]
+    if options and isinstance(options[0], (list, tuple)):
+        tuple_mode = True  # we assume they have the correct format
+
+    # grab the initial value to render in the form
+    if name in context:
+        initial_value = context[name]
+    elif name in component.form_data:
+        initial_value = component.form_data[name]
+    elif hasattr(component, name):
+        initial_value = getattr(component, name)
+    elif (
+        hasattr(component, "table_entry")
+        and component.table_entry is not None
+        and hasattr(component.table_entry, name)
+        and getattr(component.table_entry, name) is not None
+    ):
+        initial_value = getattr(component.table_entry, name)
+    else:
+        initial_value = None
+
+    return locals()
+
+
+@register.inclusion_tag(
     filename="htmx/input_elements/selectbox.html",
     takes_context=True,
 )

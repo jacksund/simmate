@@ -1,0 +1,21 @@
+{# djlint:off #}
+<div class="my-2">
+    {% include "core_components/basic_elements/label.html" %}
+    <div class="px-2 btn-group" role="group">
+        {% for option in options %}
+            <input id="{{ context.component.component_id }}-{{ name }}-{{ option.0 }}"
+                   name="{{ name }}"
+                   class="btn-check"
+                   type="radio"
+                   value="{{ option.0 }}"
+                   {% if not defer %}{% htmx_post %}{% endif %}
+                   {% if disabled %}disabled{% endif %}
+                   {% if required %}required{% endif %} 
+                   {% if initial_value and option.0 == initial_value %}checked{% endif %}>
+            <label class="btn btn-outline-primary" for="{{ context.component.component_id }}-{{ name }}-{{ option.0 }}">
+                {{ option.1 }}
+            </label>
+        {% endfor %}
+    </div>
+</div>
+{# djlint:on #}

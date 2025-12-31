@@ -1,8 +1,27 @@
-{% if report %}
-    <div id="search_results_report">
-        {% block table_report %}{% endblock %}
+<div id="search_results_report">
+    {% block table_report %}{% endblock %}
+</div>
+<div class="col-12">
+    <div class="alert alert-secondary d-flex align-items-center mt-2 p-2"
+         role="alert">
+        <i class="bi bi-info-circle"></i>&nbsp;&nbsp;
+        <div>
+            Showing <b>{{ page.start_index }}-{{ page.end_index }}</b> of
+            <b>
+                {# linting is disabled for this line to stop it from adding a space #}
+                {# djlint:off #}
+                        {% if total == 10000 %}&gt;{% endif %}{{ total|intcomma }}
+                {# djlint:on #}
+            </b> filtered results.
+            {% if total == 10000 %}
+                We limit searches to 10k results for our Web UI and API. Switch to Python or SQL if you need the full dataset.
+            {% endif %}
+            <a class="text-dark text-decoration-underline" href=".">
+                Clear Filters <i class="bi bi-arrow-clockwise"></i>
+            </a>
+        </div>
     </div>
-{% endif %}
+</div>
 <form id="select_search_results"
       action="#"
       method="post"
