@@ -110,6 +110,10 @@ class PriceCatalogConfig(AppConfig):
 class ProjectManagementConfig(AppConfig):
     name = "simmate.apps.project_management"
 
+    def ready(self):
+        # signals a wallet creation for new users
+        import simmate.apps.project_management.signals
+
 
 class QuantumEspressoConfig(AppConfig):
     name = "simmate.apps.quantum_espresso"

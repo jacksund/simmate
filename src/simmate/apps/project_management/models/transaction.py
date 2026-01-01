@@ -32,6 +32,7 @@ class Transaction(DatabaseTable):
         "refund",
         "penalty",
         "admin_adjustment",
+        "user_adjustment",  # for token balance only
     ]
     transaction_type = table_column.CharField(max_length=30, blank=True, null=True)
 
@@ -71,12 +72,18 @@ class Transaction(DatabaseTable):
         "Issue Fix",
         "Other",
     ]
+    user_adjustment_options = [
+        "Add Tokens",
+        "Remove Tokens",
+        "Other",
+    ]
     transaction_subtype = set(
         funding_options
         + transfer_options
         + payment_options
         + penalty_options
         + admin_adjustment_options
+        + user_adjustment_options
     )
     transaction_subtype = table_column.CharField(max_length=30, blank=True, null=True)
 

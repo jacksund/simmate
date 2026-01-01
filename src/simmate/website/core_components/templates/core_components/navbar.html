@@ -103,7 +103,7 @@
                         data-bs-toggle="modal"
                         data-bs-target="#usdcModal">
                     <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
-                    <b>5.00</b>
+                    <b>{{ user.wallet.usdc_balance|floatformat:2|intcomma }}</b>
                 </button>
                 {# Simmate Token button #}
                 <button type="button"
@@ -111,7 +111,7 @@
                         data-bs-toggle="modal"
                         data-bs-target="#simmateModal">
                     <img src="{% static 'images/simmate-token-icon.svg' %}" alt="" height="24">
-                    <b>1,215.01</b>
+                    <b>{{ user.wallet.token_balance|floatformat:0|intcomma }}</b>
                 </button>
                 {# user name + profile button #}
                 <a class="btn btn-outline-light me-2" href="{% url 'profile' %}">
