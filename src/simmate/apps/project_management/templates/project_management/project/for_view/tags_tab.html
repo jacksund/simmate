@@ -1,19 +1,19 @@
 <div class="tab-pane" id="tags-section">
     <div class="col-xl-12">
         {% if tags__count %}
-            {% include "projects/tag/table.html" with entries=tags project_view=True truncated=tags__truncated %}
+            {% include "project_management/tag/table.html" with entries=tags project_view=True truncated=tags__truncated %}
         {% else %}
             <small>No tags linked.</small>
         {% endif %}
     </div>
     <div class="text-center py-2">
         <a role="button"
-           class="btn btn-outline-success btn-sm"
+           class="btn btn-success btn-sm"
            target="_blank"
-           href="{% url 'data_explorer:table-entry-new' 'Tag' %}?tag_type=%22project-specific%22&project_id={{ table_entry.id }}">Add New <i class="mdi mdi-plus"></i></a>
+           href="{% url 'data_explorer:table-entry-new' 'Tag' %}?tag_type=%22project-specific%22&project_id={{ table_entry.id }}"><i class="bi bi-plus-circle py-1"></i>&nbsp;&nbsp;Add</a>
         <a role="button"
-           class="btn btn-outline-primary btn-sm"
+           class="btn btn-primary btn-sm"
            target="_blank"
-           href="{% url 'data_explorer:table' 'Tag' %}?project_id={{ table_entry.id }}">View All <i class="mdi mdi-open-in-new"></i></a>
+           href="{% url 'data_explorer:table' 'Tag' %}?project_id={{ table_entry.id }}"><i class="bi bi-box-arrow-up-right py-1"></i>&nbsp;&nbsp;View All</a>
     </div>
 </div>

@@ -16,15 +16,15 @@ class Tag(DatabaseTable):
         "like hypotheses, targets, & orders. "
     )
 
-    html_entries_template = "projects/tag/table.html"
-    html_entry_template = "projects/tag/view.html"
+    html_entries_template = "project_management/tag/table.html"
+    html_entry_template = "project_management/tag/view.html"
 
-    # html_form_component = "tag-form"
-    # html_enabled_forms = [
-    #     "search",
-    #     "create",
-    #     "update",
-    # ]
+    html_form_component = "tag-form"
+    html_enabled_forms = [
+        "search",
+        "create",
+        "update",
+    ]
 
     # TODO: Maybe allow FilteredScope objects to be linked to these for
     # auto-tagging things in other tables
