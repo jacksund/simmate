@@ -103,7 +103,7 @@
                         data-bs-toggle="modal"
                         data-bs-target="#usdcModal">
                     <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
-                    <b>5.00</b>
+                    <b>{{ user.wallet.usdc_balance|floatformat:2|intcomma }}</b>
                 </button>
                 {# Simmate Token button #}
                 <button type="button"
@@ -111,7 +111,7 @@
                         data-bs-toggle="modal"
                         data-bs-target="#simmateModal">
                     <img src="{% static 'images/simmate-token-icon.svg' %}" alt="" height="24">
-                    <b>1,215.01</b>
+                    <b>{{ user.wallet.token_balance|floatformat:0|intcomma }}</b>
                 </button>
                 {# user name + profile button #}
                 <a class="btn btn-outline-light me-2" href="{% url 'profile' %}">
@@ -202,24 +202,7 @@
                         <h5 class="modal-title">Adjust Token Balance</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <form method="post" action="#">
-                        {% csrf_token %}
-                        <div class="modal-body">
-                            <div class="alert alert-success text-center">
-                                <a href="{% url 'pricing' %}" class="alert-link"><small>Simmate tokens are free, so you can add (or remove) as much as you'd like. Please read our Pricing page for how these are used <i class="bi bi-box-arrow-up-right"></i></small></a>
-                            </div>
-                            <input type="number"
-                                   class="form-control"
-                                   id="tokenAmount"
-                                   name="tokenAmount"
-                                   step="1"
-                                   placeholder="1,000">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-success">Submit</button>
-                        </div>
-                    </form>
+                    {% htmx_component "token-balance-form" %}
                 </div>
             </div>
         </div>

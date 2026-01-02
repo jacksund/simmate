@@ -1,8 +1,7 @@
 {% extends "data_explorer/table_entries_base.html" %}
 {% block table_headers %}
-    {% table_header "id" "ID" min_width=60 %}
-    {% table_header "name" "Project" min_width=125 %}
     {% table_header "discipline" min_width=125 %}
+    {% table_header "name" "Project" min_width=125 %}
     {% table_header "status" min_width=150 %}
     <th style="min-width:150px">Leader(s)</th>
     <th style="min-width:150px">Members (#)</th>
@@ -11,11 +10,8 @@
     {% table_header "updated_at" "Updated" min_width=115 %}
 {% endblock %}
 {% block table_rows %}
-    <td>{% foreign_key_link entry %}</td>
-    <td>
-        <b>{{ entry.name }}</b>
-    </td>
     <td>{{ entry.discipline }}</td>
+    <td>{% foreign_key_link entry "name" %}</td>
     <td>
         {% if entry.status == "Under Review" %}
             {% status_bar "Under Review" "secondary" %}
@@ -38,7 +34,7 @@
         {% endfor %}
     </td>
     <td>{{ entry.members.count }}</td>
-    <td>{{ entry.description }}</td>
+    <td>{{ entry.description|truncatechars:40 }}</td>
     <td>{{ entry.created_at|date:"Y-m-d" }}</td>
     <td>{{ entry.updated_at|date:"Y-m-d" }}</td>
 {% endblock %}

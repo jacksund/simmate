@@ -15,6 +15,11 @@ class Transaction(DatabaseTable):
     html_display_name = "Wallet Transactions"
     html_description_short = "The full ledger of wallet transactions"
 
+    html_entries_template = "project_management/transaction/table.html"
+    html_entry_template = "project_management/transaction/view.html"
+
+    # -------------------------------------------------------------------------
+
     status_options = [
         "Pending",
         "Complete",
@@ -26,12 +31,12 @@ class Transaction(DatabaseTable):
     status = table_column.CharField(max_length=30, blank=True, null=True)
 
     transaction_type_options = [
-        "funding",
-        "transfer",
-        "payment",
-        "refund",
-        "penalty",
-        "admin_adjustment",
+        "Fund",
+        "Transfer",
+        "Payment",
+        "Refund",
+        "Penalty",
+        "Adjust",
     ]
     transaction_type = table_column.CharField(max_length=30, blank=True, null=True)
 
@@ -67,8 +72,10 @@ class Transaction(DatabaseTable):
         "Banned Account",
         "Other",
     ]
-    admin_adjustment_options = [
-        "Issue Fix",
+    adjustment_options = [
+        "Issue Fix (by admin)",
+        "Add Tokens",
+        "Remove Tokens",
         "Other",
     ]
     transaction_subtype = set(
@@ -76,7 +83,7 @@ class Transaction(DatabaseTable):
         + transfer_options
         + payment_options
         + penalty_options
-        + admin_adjustment_options
+        + adjustment_options
     )
     transaction_subtype = table_column.CharField(max_length=30, blank=True, null=True)
 

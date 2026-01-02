@@ -26,10 +26,10 @@
         {% endif %}
         <div class="row">
             <div class="col-12">
-                {% htmx_selectbox name="leader_ids" label="Leaders" options=component.user_options multiselect=True %}
+                {% htmx_selectbox name="leaders__ids" label="Leaders" options=component.user_options multiselect=True %}
             </div>
             <div class="col-12">
-                {% htmx_selectbox name="member_ids" label="Members" options=component.user_options multiselect=True %}
+                {% htmx_selectbox name="members__ids" label="Members" options=component.user_options multiselect=True %}
             </div>
         </div>
     </div>

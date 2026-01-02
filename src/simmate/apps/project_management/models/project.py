@@ -155,3 +155,38 @@ class Project(DatabaseTable):
         }
 
     # -------------------------------------------------------------------------
+
+    # This section is DEPRECIATED in favor of form mix-ins
+
+    @property
+    def tag_options(self) -> list[tuple]:
+
+        from .tag import Tag
+
+        # query for all tags directly linked
+        project_tags = self.tags.order_by("name").values_list("id", "name").all()
+
+        # add in generic tags after specific ones
+        generic_tags = (
+            Tag.objects.filter(tag_type="all-projects")
+            .order_by("name")
+            .values_list("id", "name")
+            .all()
+        )
+
+        # reformat into tuple of (value, display)
+        return [
+            (id, tag_name) for id, tag_name in list(project_tags) + list(generic_tags)
+        ]
+
+    @classmethod
+    @property
+    def project_options(cls) -> list[tuple]:
+
+        # query for all tags
+        projects = cls.objects.order_by("name").values_list("id", "name").all()
+
+        # reformat into tuple of (value, display)
+        return [(id, name) for id, name in projects]
+
+    # -------------------------------------------------------------------------
