@@ -1,5 +1,5 @@
 {% extends "core_components/site_base.html" %}
-{% block tabtitle %}About - Simmate{% endblock %}
+{% block tabtitle %}Pricing - Simmate{% endblock %}
 {% block body %}
     {% load static %}
     <div class="container my-4 text">
@@ -213,14 +213,14 @@
                 <table class="table table-striped align-middle">
                     <thead class="table-primary">
                         <tr>
-                            <th scope="col" style="width: 24%">Workflow</th>
+                            <th scope="col" style="width: 22%">Workflow</th>
                             <th scope="col" style="width: 13%">CPU Time (hrs)</th>
-                            <th scope="col" style="width: 13%">
+                            <th scope="col" style="width: 14%">
                                 Cost Estimate (
                                 <img src="/static/images/usdc-icon.svg" height="20">
                                 )
                             </th>
-                            <th scope="col" style="width: 16%">
+                            <th scope="col" style="width: 17%">
                                 Cost Estimate w. Personal Compute (
                                 <img src="/static/images/usdc-icon.svg" height="20">
                                 )
@@ -380,13 +380,26 @@
                                     <span class="badge text-bg-success">no minimum</span>
                                 </p>
                                 <p>
-                                    Pegged 1:1 with the USD, USDC enables secure, peer-to-peer, and worldwide
-                                    payments on the Ethereum blockchain. Currently, we
-                                    only support USDC on Ethereum and Base chains, but reach out if you
-                                    would like us to add support for other stablecoins and/or chains.
-                                    And if you are new to cryptocurrencies and USDC, we recommend that beginners use
-                                    <a href="https://www.base.org/" target="_blank">the Base app</a> to
-                                    create a wallet and send USDC. There is no minimum payment with USDC.
+                                    If you are new to cryptocurrencies, we recommend that you first read
+                                    our <a href="#" target="_blank">Beginner's Guide to Ethereum and USDC</a>.
+                                    For experienced users, you must simply (1) link your wallet address
+                                    to your Simmate account and then (2) send USDC to the
+                                    <a href="#" target="_blank">simmate.eth ENS wallet</a>
+                                    to fund your account. Your Simmate account is <u>not</u> self-custody, so
+                                    this is the equivalent of funding a Coinbase or Kraken account.
+                                    Only Ethereum and Base chains are supported at this time.
+                                    {% comment %}
+                                        <a href="https://www.circle.com/usdc">USDC (USD-Circle)</a> is a cryptocurrency token, and for every USDC in
+                                        existance, <a href="https://www.circle.com/">Circle</a> holds $1 in bonds and cash-equivalents.
+                                        This means that 1 USDC is always equal to (and redeemable for) $1 USD.
+                                        Because it is tokenized, USDC enables secure peer-to-peer payments on the Ethereum 
+                                        blockchain to anyone & anywhere in world.
+                                        Compare this to traditional USD payments where you need a third-party to
+                                        send a payment to someone else - i.e., you go through a bank, credit card provider, or
+                                        (for online payments) companies like Stripe/Venmo.
+                                        By using USDC, Simmate can more easily accept payments and even pay out USDC to
+                                        compute providers -- all without needed your bank information.
+                                    {% endcomment %}
                                 </p>
                             </li>
                             <li>
@@ -397,15 +410,16 @@
                                     <span class="badge text-bg-danger">$25 minimum</span>
                                 </p>
                                 <p>
-                                    In the US, Venmo is well established and convienient method for small
-                                    transactions. Just like with Stripe, Simmate enforces a minimum payment
-                                    of $25 and 4% fee for Venmo transactions to negate
-                                    <a href="https://help.venmo.com/cs/articles/business-profile-transaction-fees-vhel221"
-                                       target="_blank">Venmo’s fees</a> and
-                                    to encourage users to switch to USDC. Payment made via Venmo must be
+                                    In the US, Venmo is a well established and convienient method for small
+                                    transactions. Payment made via Venmo must be
                                     manually added to the Simmate system by a member of our team - so there
                                     will be a delay in the funds showing in your balance of up to 5 days.
                                     For this reason, we ask that users fund via Venmo only as a last resort.
+                                    And just like with Stripe, we enforce a minimum payment
+                                    of $25 and 4% fee for Venmo transactions to negate
+                                    <a href="https://help.venmo.com/cs/articles/business-profile-transaction-fees-vhel221"
+                                       target="_blank">Venmo’s fees</a> and
+                                    to encourage users to switch to USDC.
                                 </p>
                             </li>
                         </ul>
