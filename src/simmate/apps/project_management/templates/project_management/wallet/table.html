@@ -1,0 +1,31 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=60 %}
+    {% table_header "wallet_type" min_width=100 %}
+    {% table_header "user__username" "User" min_width=100 %}
+    {% table_header "project__name" "Project" min_width=100 %}
+    {% table_header "usdc_balance" "USDC" min_width=100 %}
+    {% table_header "token_balance" "Tokens" min_width=100 %}
+    {% table_header "collateral_balance" "USDC (collateral)" min_width=100 %}
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry %}</td>
+    <td>{{ entry.wallet_type }}</td>
+    <td>
+        {% if entry.user %}
+            {{ entry.user.username }}
+        {% else %}
+            ---
+        {% endif %}
+    </td>
+    <td>
+        {% if entry.project %}
+            {{ entry.project.name }}
+        {% else %}
+            ---
+        {% endif %}
+    </td>
+    <td>{{ entry.usdc_balance|floatformat:2|intcomma }}</td>
+    <td>{{ entry.token_balance|floatformat:0|intcomma }}</td>
+    <td>{{ entry.collateral_balance|floatformat:2|intcomma }}</td>
+{% endblock %}
