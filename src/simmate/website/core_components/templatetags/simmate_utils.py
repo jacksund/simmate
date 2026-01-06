@@ -6,6 +6,7 @@ from textwrap import dedent
 import markdown as MarkdownConverter
 from django import template
 from django.utils.safestring import mark_safe
+from plotly.graph_objects import Figure
 
 from simmate.database.base_data_types import Structure as DatabaseStructure
 from simmate.toolkit import Structure as ToolkitStructure
@@ -159,10 +160,11 @@ def structure_to_url(structure):
 
 
 @register.filter(name="plotly_figure")
-def plotly_figure(figure):
+def plotly_figure(figure: Figure):
     """
     Converts a plotly figure object to an html element for the frontend.
     """
+    # if isinstance(figure, Figure):
     hmtl = figure.to_html(
         full_html=False,
         include_plotlyjs=False,
