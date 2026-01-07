@@ -6,12 +6,12 @@ from simmate.workflows.base_flow_types import Workflow
 
 from simmate.database import connect
 
-from simmate.apps.baderkit.models.baderkit import BaderkitChargeAnalysis
+from simmate.apps.baderkit.models.bader import Bader as BaderModel
 
-class BaderkitChargeAnalysis__Baderkit__Bader(Workflow):
+class Bader__Baderkit__Bader(Workflow):
     required_files = ["AECCAR0", "AECCAR2", "CHGCAR", "POTCAR"]
     use_database = True
-    database_table = BaderkitChargeAnalysis
+    database_table = BaderModel
     use_previous_directory = ["AECCAR0", "AECCAR2", "CHGCAR", "POTCAR"]
     # parent_workflows = [
     #     "population-analysis.vasp-baderkit.bader-warren-lab",

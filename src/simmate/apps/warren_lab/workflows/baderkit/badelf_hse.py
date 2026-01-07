@@ -13,7 +13,7 @@ class BadElf__Badelf__BadelfHse(StagedWorkflow):
 
     subworkflow_names = [
         "static-energy.vasp.warren-lab-prebadelf-hse",
-        "bad-elf.badelf.badelf",
+        "spin-badelf.badelf.badelf",
     ]
 
     files_to_copy = ["CHGCAR", "ELFCAR", "POTCAR"]

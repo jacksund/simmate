@@ -14,7 +14,7 @@ class BadElf__Badelf__BadelfPbesol(StagedWorkflow):
 
     subworkflow_names = [
         "static-energy.vasp.warren-lab-prebadelf-pbesol",
-        "bad-elf.badelf.badelf",
+        "spin-badelf.badelf.badelf",
     ]
 
     files_to_copy = ["CHGCAR", "ELFCAR", "POTCAR"]

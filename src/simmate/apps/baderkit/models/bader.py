@@ -8,9 +8,9 @@ from pandas import DataFrame
 
 from simmate.database.base_data_types import Structure, Calculation, table_column
 
-from baderkit.core import Bader
+from baderkit.core import Bader as BaderClass
 
-class BaderkitChargeAnalysis(Structure, Calculation):
+class Bader(Structure, Calculation):
     """
     This table contains results from a Bader charge analysis run using
     the BaderKit package.
@@ -154,7 +154,7 @@ class BaderkitChargeAnalysis(Structure, Calculation):
         super().write_output_summary(directory)
         self.write_summary_dataframe(directory)
 
-    def update_from_baderkit(self, bader: Bader, directory: Path):
+    def update_from_baderkit(self, bader: BaderClass, directory: Path):
         """
         A basic workup process that takes a BaderKit Bader class and
         reads the necessary data

@@ -126,8 +126,7 @@ class ElfFeatures(DatabaseTable):
     """
     The average distance from the average maximum of this feature to the each
     point on its partitioning surface
-    """
-    
+    """    
     
     dist_beyond_atom = table_column.FloatField(blank=True, null=True)
     """

@@ -2,24 +2,24 @@
 import os
 from pathlib import Path
 
-from baderkit.core import ElfLabeler
 from baderkit.core.labelers.bifurcation_graph.enum_and_styling import FeatureType
 
 from simmate.database import connect
 
 from simmate.workflows.base_flow_types import Workflow
-from simmate.apps.baderkit.models import ElfAnalysisCalculation
+from simmate.apps.baderkit.models import ElfAnalysisCalculation, SpinElfAnalysisCalculation
 
 
-class ElfAnalysisCalculation__Baderkit__ElfAnalysis(Workflow):
+class ElfAnalysisBase(Workflow):
     """
-    Labels chemical features in the ELF and calculates various properties.
-    Assumes the system is not spin separated.
+    The base class for running the ElfLabeler from baderkit. This should
+    not be run directly, but inherited from.
+    
     """
-
+    
+    labeler_class = None
     required_files = ["CHGCAR", "ELFCAR", "POTCAR"]
-    use_database = True
-    database_table = ElfAnalysisCalculation
+    use_database = False
     use_previous_directory = ["CHGCAR", "ELFCAR", "POTCAR"]
 
     @classmethod
@@ -33,7 +33,7 @@ class ElfAnalysisCalculation__Baderkit__ElfAnalysis(Workflow):
     ):
 
         # Get the badelf toolkit object for running badelf.
-        labeler = ElfLabeler.from_vasp(
+        labeler = cls.labeler_class.from_vasp(
             charge_filename=directory / "CHGCAR",
             reference_filename=directory / "ELFCAR",
             **kwargs
@@ -55,7 +55,7 @@ class ElfAnalysisCalculation__Baderkit__ElfAnalysis(Workflow):
                 filename = directory / "bifurcation_plot.html"
                 )
             labeler.labeled_structure.to(directory/"POSCAR_labeled", "POSCAR")
-            labeler.electride_structure.to(directory/"POSCAR_quasi", "POSCAR")
+            labeler.electride_structure.to(directory/"POSCAR_e", "POSCAR")
             # write quasi atom volume
             included = FeatureType.bare_types
             labeler.write_features_by_type_sum(
@@ -63,7 +63,20 @@ class ElfAnalysisCalculation__Baderkit__ElfAnalysis(Workflow):
                 directory = directory
                 )
 
+class ElfAnalysis__Baderkit__ElfAnalysis(ElfAnalysisBase):
+    """
+    Labels chemical features in the ELF and calculates various properties.
+    Assumes the system is not spin separated.
+    """
 
+    use_database = True
+    database_table = ElfAnalysisCalculation
 
+class ElfAnalysis__Baderkit__SpinElfAnalysis(Workflow):
+    """
+    Labels chemical features in the ELF and calculates various properties.
+    Assumes the system is spin separated.
+    """
 
-
+    use_database = True
+    database_table = SpinElfAnalysisCalculation

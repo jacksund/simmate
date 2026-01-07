@@ -71,7 +71,21 @@ class ElfAnalysis(Structure):
     
     oxidation_states = table_column.JSONField(blank=True, null=True)
     """
-    A list of calculated oxidation states for each quasi atom.
+    A list of calculated oxidation states for each atom. 
+    
+    These are in the same order as the species in the structure entry.
+    
+    WARNING: For calculations on spin up/down systems, this will not be accurate.
+    The oxidation states calculated in the SpinElfAnalysis table should be used
+    instead
+    """
+    
+    oxidation_states_e = table_column.JSONField(blank=True, null=True)
+    """
+    A list of calculated oxidation states for each atom, including electride
+    sites as quasi-atoms.
+    
+    These are in the same order as the species in the electride_structure entry.
     
     WARNING: For calculations on spin up/down systems, this will not be accurate.
     The oxidation states calculated in the SpinElfAnalysis table should be used
@@ -80,8 +94,22 @@ class ElfAnalysis(Structure):
 
     charges = table_column.JSONField(blank=True, null=True)
     """
-    A list of total "valence" electron counts for each atom and quasi
-    atom.
+    A list of total "valence" electron counts for each atom.
+    
+    These are in the same order as the species in the structure entry.
+    
+    WARNING: this count is dependent on the potentials used. For example, 
+    Yttrium could have used a potential where 2 or even 10 electrons are used 
+    as the basis for the calculation. Use 'oxidation_states' for a more 
+    consistent and accurate count of valence electrons
+    """
+    
+    charges_e = table_column.JSONField(blank=True, null=True)
+    """
+    A list of total "valence" electron counts for each atom, including
+    electride sites as quasi-atoms.
+    
+    These are in the same order as the species in the electride_structure entry.
     
     WARNING: this count is dependent on the potentials used. For example, 
     Yttrium could have used a potential where 2 or even 10 electrons are used 
@@ -91,7 +119,44 @@ class ElfAnalysis(Structure):
     
     volumes = table_column.JSONField(blank=True, null=True)
     """
-    A list of volumes from the oxidation analysis (i.e. the bader volume)
+    A list of volumes for each atom.
+    
+    These are in the same order as the species in the structure entry.
+    """
+    
+    volumes_e = table_column.JSONField(blank=True, null=True)
+    """
+    A list of volumes for each atom, including electride sites as quasi-atoms.
+    
+    These are in the same order as the species in the electride_structure entry.
+    """
+    
+    electride_formula = table_column.CharField(
+        blank=True,
+        null=True,
+        max_length=25,
+    )
+    """
+    The approximate formula for the structure including the electrides.
+    The value is rounded to the nearest integer.
+    """
+
+    electrides_per_formula = table_column.FloatField(blank=True, null=True)
+    """
+    The total number of electrons assigned to electride sites for this structures
+    formula unit.
+    """
+
+    electrides_per_reduced_formula = table_column.FloatField(blank=True, null=True)
+    """
+    The total number of electrons assigned to electride sites for this structures
+    reduced formula unit.
+    """
+
+    nelectrides = table_column.IntegerField(blank=True, null=True)
+    """
+    The total number of electrides that were found when searching the maxima
+    found using pybader.
     """
     
     spin_system = table_column.CharField(
@@ -129,42 +194,16 @@ class ElfAnalysis(Structure):
             as_dict=True
             )
         
-        results = {}
-        graph = getattr(labeler, "bifurcation_graph", None)
-        if graph is not None:
-            graph = graph.to_json()
-        results["bifurcation_graph"] = graph
-        results["labeled_structure"] = labeler.labeled_structure.to_json()
-        results["electride_structure"] = labeler.electride_structure.to_json()
-        results["atom_elf_radii"] = [float(i) for i in labeler.atom_elf_radii]
-        results["atom_elf_radii_types"] = [str(i) for i in labeler.atom_elf_radii_types]
-        results["spin_system"] = labeler._spin_system
+        if (directory/"POTCAR").exists():
+            labeler_dict = labeler.to_dict(directory / "POTCAR")
+        else:
+            labeler_dict = labeler.to_dict()
             
-        oxidation_states, charges, volumes = labeler.get_oxidation_and_volumes_from_potcar(
-            potcar_path = directory / "POTCAR",
-            **kwargs
-            )
-        results["oxidation_states"] = oxidation_states.tolist()
-        results["charges"] = charges.tolist()
-        results["volumes"] = volumes.tolist()
-        
-        # add setting kwargs
-        method_kwargs = {}
-        for attr in [
-            "ignore_low_pseudopotentials",
-            "shared_shell_ratio",
-            "combine_shells",
-            "min_covalent_charge",
-            "min_covalent_angle",
-            "min_electride_charge",
-            "min_electride_depth",
-            "min_electride_dist_beyond_atom",
-            "min_electride_volume",
-            "min_electride_elf_value",
-            "crystalnn_kwargs"
-                ]:
-            method_kwargs[attr] = getattr(labeler, attr, None)
-        results["method_kwargs"] = method_kwargs
+        results = {}
+        model_columns = cls.model.get_column_names()
+        for key in model_columns:
+            results[key] = getattr(labeler_dict, key, None)
+            
         # create a new entry
         new_row = cls(
             **structure_dict,

@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from .baderkit import BaderkitChargeAnalysis
+from .bader import Bader
+from .badelf import (
+    Badelf,
+    BadelfCalculation
+    )
+from .spin_badelf import (
+    SpinBadelf,
+    SpinBadelfCalculation
+    )
 from .elf_analysis import (
     ElfAnalysis, 
     ElfAnalysisCalculation, 
