@@ -9,6 +9,7 @@ from simmate.database.base_data_types import (
     table_column,
 )
 from .badelf import Badelf
+from simmate.apps.baderkit.models.spin_elf_analysis import SpinElfAnalysis
 
 class SpinBadelf(Badelf):
     """
@@ -16,6 +17,8 @@ class SpinBadelf(Badelf):
     It intentionally does not inherit from the Calculation
     table as the results may not be calculated from a dedicated workflow.
     """
+    _analysis_model = SpinElfAnalysis
+    
     class Meta:
         app_label = "baderkit"
     
@@ -28,12 +31,25 @@ class SpinBadelf(Badelf):
     )
     
     badelf_down = table_column.ForeignKey(
-        "baderkit.ElfAnalysis",
+        "baderkit.Badelf",
         on_delete=table_column.CASCADE,
         related_name="spin_badelf",
         blank=True,
         null=True,
     )
+    
+    # elf_analysis = table_column.ForeignKey(
+    #     "baderkit.SpinElfAnalysis",
+    #     on_delete=table_column.CASCADE,
+    #     related_name="badelf",
+    #     blank=True,
+    #     null=True,
+    # )
+    """
+    The SpinElfAnalysis table entry from this calculation which includes
+    more detailed information on each chemical feature found in the
+    system.
+    """
     
     differing_spin = table_column.BooleanField(blank=True, null=True)
     """
@@ -66,6 +82,12 @@ class SpinBadelf(Badelf):
         # create spin up/down entries
         badelf_up = Badelf.from_badelf(badelf.badelf_up, directory)
         badelf_down = Badelf.from_badelf(badelf.badelf_down, directory)   
+        
+        # connect labelers
+        badelf_up.elf_analysis = new_row.elf_analysis.analysis_up
+        badelf_down.elf_analysis = new_row.elf_analysis.analysis_down
+        badelf_up.save()
+        badelf_down.save()
 
         # update entry
         new_row.badelf_up = badelf_up
@@ -73,6 +95,7 @@ class SpinBadelf(Badelf):
         new_row.differing_spin = not badelf.equal_spin
         new_row.save()
         return new_row
+    
 
 class SpinBadelfCalculation(Calculation):
     """
@@ -82,7 +105,7 @@ class SpinBadelfCalculation(Calculation):
     class Meta:
         app_label = "baderkit"
     
-    analysis = table_column.ForeignKey(
+    badelf = table_column.ForeignKey(
         "baderkit.SpinBadElf",
         on_delete=table_column.CASCADE,
         related_name="calculation",
@@ -90,9 +113,9 @@ class SpinBadelfCalculation(Calculation):
         null=True,
     )
     
-    def update_from_spin_badelf(self, badelf: SpinBadelfClass, directory: Path, **kwargs):
+    def update_from_badelf(self, badelf: SpinBadelfClass, directory: Path, **kwargs):
         # create an entry in the SpinBadelf table
         badelf_entry = SpinBadelf.from_badelf(badelf, directory)
         # link to table
-        self.analysis = badelf_entry
+        self.badelf = badelf_entry
         self.save()

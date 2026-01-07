@@ -90,7 +90,7 @@ class SpinElfAnalysisCalculation(Calculation):
         null=True,
     )
     
-    def update_from_spin_labeler(self, labeler: SpinElfLabeler, directory: Path, **kwargs):
+    def update_from_labeler(self, labeler: SpinElfLabeler, directory: Path, **kwargs):
         # create an entry in the SpinElfAnalysis table
         labeler = SpinElfAnalysis.from_labeler(labeler, directory)
         # link to table

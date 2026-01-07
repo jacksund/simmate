@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 from baderkit.core.labelers.bifurcation_graph.enum_and_styling import FeatureType
+from baderkit.core import ElfLabeler, SpinElfLabeler
 
 from simmate.database import connect
 
@@ -27,7 +28,6 @@ class ElfAnalysisBase(Workflow):
         cls,
         source: dict = None,
         directory: Path = None,
-        write_files: bool = True,
         run_id = None,
         **kwargs,
     ):
@@ -50,18 +50,17 @@ class ElfAnalysisBase(Workflow):
             os.remove(directory / file)
             
         # write summary plot, structures, etc.
-        if write_files:
-            labeler.write_bifurcation_plot(
-                filename = directory / "bifurcation_plot.html"
-                )
-            labeler.labeled_structure.to(directory/"POSCAR_labeled", "POSCAR")
-            labeler.electride_structure.to(directory/"POSCAR_e", "POSCAR")
-            # write quasi atom volume
-            included = FeatureType.bare_types
-            labeler.write_features_by_type_sum(
-                included_types=included,
-                directory = directory
-                )
+        labeler.write_bifurcation_plot(
+            filename = directory / "bifurcation_plot.html"
+            )
+        labeler.labeled_structure.to(directory/"POSCAR_labeled", "POSCAR")
+        labeler.electride_structure.to(directory/"POSCAR_e", "POSCAR")
+        # write quasi atom volume
+        included = FeatureType.bare_types
+        labeler.write_features_by_type_sum(
+            included_types=included,
+            directory = directory
+            )
 
 class ElfAnalysis__Baderkit__ElfAnalysis(ElfAnalysisBase):
     """
@@ -71,8 +70,9 @@ class ElfAnalysis__Baderkit__ElfAnalysis(ElfAnalysisBase):
 
     use_database = True
     database_table = ElfAnalysisCalculation
+    labeler_class = ElfLabeler
 
-class ElfAnalysis__Baderkit__SpinElfAnalysis(Workflow):
+class ElfAnalysis__Baderkit__SpinElfAnalysis(ElfAnalysisBase):
     """
     Labels chemical features in the ELF and calculates various properties.
     Assumes the system is spin separated.
@@ -80,3 +80,4 @@ class ElfAnalysis__Baderkit__SpinElfAnalysis(Workflow):
 
     use_database = True
     database_table = SpinElfAnalysisCalculation
+    labeler_class = SpinElfLabeler

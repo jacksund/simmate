@@ -21,6 +21,8 @@ from simmate.database.base_data_types import (
     Structure,
     table_column,
 )
+from simmate.apps.baderkit.models.elf_radii import ElfRadii
+from simmate.apps.baderkit.models.elf_features import ElfFeatures
 
 class ElfAnalysis(Structure):
     """
@@ -60,11 +62,7 @@ class ElfAnalysis(Structure):
     The radii of each atom in the structure calculated from the ELF
     """
     
-    atom_elf_radii_types = table_column.CharField(
-        blank=True,
-        null=True,
-        max_length=25,
-    )
+    atom_elf_radii_types = table_column.JSONField(blank=True, null=True)
     """
     The type of bond with the nearest neighbor, covalent or ionic
     """
@@ -200,10 +198,13 @@ class ElfAnalysis(Structure):
             labeler_dict = labeler.to_dict()
             
         results = {}
-        model_columns = cls.model.get_column_names()
+        model_columns = cls.get_column_names()
         for key in model_columns:
-            results[key] = getattr(labeler_dict, key, None)
-            
+            # skip columns in the structure dict
+            if key in structure_dict.keys():
+                continue
+            results[key] = labeler_dict.get(key, None)
+
         # create a new entry
         new_row = cls(
             **structure_dict,
@@ -227,7 +228,8 @@ class ElfAnalysis(Structure):
         # pull all the data together and save it to the database. We
         # are saving this to an ElfIonicRadii datatable. To access this
         # model, we need to use "elf_features.model".
-        feature_model = self.elf_features.model
+        # feature_model = self.elf_features.model
+        feature_model = ElfFeatures
         # Let's iterate through the ELF features and save these to the database.
         struc_len = len(labeler.structure)
         electride_count = 0
@@ -253,7 +255,7 @@ class ElfAnalysis(Structure):
             
     def update_elf_radii(self, labeler: ElfLabeler | SpinElfLabeler):
         # get radii model
-        radii_model = self.atom_nn_elf_radii.model
+        # radii_model = self.atom_nn_elf_radii.model
         # get radii info
         site_indices, neigh_indices, neigh_frac_coords, neigh_dists = labeler.nearest_neighbor_data
         site_frac_coords = labeler.structure.frac_coords[site_indices]
@@ -268,10 +270,10 @@ class ElfAnalysis(Structure):
                 site_frac_coords = site_frac_coords[idx].tolist(),
                 neigh_frac_coords = neigh_frac_coords[idx].tolist(),
                 radius_type = str(bond_types[idx]),
-                spin_system = labeler._spin_system,
+                spin_system = labeler.spin_system,
                 analysis = self,
                 )
-            new_radii = radii_model(**radii_dict)
+            new_radii = ElfRadii(**radii_dict)
             new_radii.save()        
             
 class ElfAnalysisCalculation(Calculation):

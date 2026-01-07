@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 from pathlib import Path
 
 from baderkit.core import Badelf, SpinBadelf
@@ -17,9 +18,8 @@ class BadelfBase(Workflow):
     not be run directly, but inherited from.
     """
     required_files = ["CHGCAR", "ELFCAR", "POTCAR"]
-
+    use_previous_directory = ["CHGCAR", "ELFCAR", "POTCAR"]
     use_database = False
-    
     badelf_class = None
 
     @classmethod
@@ -27,8 +27,6 @@ class BadelfBase(Workflow):
         cls,
         source: dict = None,
         directory: Path = None,
-        write_electride_files: bool = False,
-        write_labeled_structures: bool = True,
         run_id: str = None,
         **kwargs,
     ):
@@ -39,16 +37,25 @@ class BadelfBase(Workflow):
             reference_file=directory / "ELFCAR",
             **kwargs
         )
-        # write results
-        if write_electride_files:
-            badelf_tools.write_species_volume(directory=directory)
-            badelf_tools.write_species_volume(directory=directory, write_reference=False)
+        # update database
+        analysis_datatable = cls.database_table.objects.get(run_id=run_id)
+        analysis_datatable.update_from_badelf(
+            badelf=badelf_tools,
+            directory=directory,
+            **kwargs
+            )
         
-        if write_labeled_structures:
-            badelf_tools.labeled_structure.to("POSCAR_labeled")
-            badelf_tools.electride_structure.to("POSCAR_e")
+        # write results
+        badelf_tools.write_species_volume(directory=directory)
+        # badelf_tools.write_species_volume(directory=directory, write_reference=False)
+        badelf_tools.labeled_structure.to(directory/"POSCAR_labeled", "POSCAR")
+        badelf_tools.electride_structure.to(directory/"POSCAR_e", "POSCAR")
 
         badelf_tools.write_json(directory / "badelf.json")
+        
+        # remove the ELFCAR, CHGCAR, and POTCAR copies for space
+        for file in cls.use_previous_directory:
+            os.remove(directory / file)
 
 
 class Badelf__Baderkit__Badelf(BadelfBase):

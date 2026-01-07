@@ -9,12 +9,14 @@ from simmate.database.base_data_types import (
     Structure,
     table_column,
 )
-
+from simmate.apps.baderkit.models.elf_analysis import ElfAnalysis
 
 class Badelf(Structure):
     """
     This table contains results from a BadELF analysis.
     """
+    
+    _analysis_model = ElfAnalysis
     
     method_kwargs = table_column.JSONField(blank=True, null=True)
     """
@@ -59,13 +61,13 @@ class Badelf(Structure):
     A list of atom or electride volumes from the oxidation analysis
     """
 
-    min_surface_dists = table_column.JSONField(blank=True, null=True)
+    min_surface_distances = table_column.JSONField(blank=True, null=True)
     """
     A list of minimum distances from the origin of an atom or electride 
     to the bader/plane surface.
     """
     
-    avg_surface_dists = table_column.JSONField(blank=True, null=True)
+    avg_surface_distances = table_column.JSONField(blank=True, null=True)
     """
     A list of average distances from the origin of an atom or electride 
     to the bader/plane surface.
@@ -74,12 +76,6 @@ class Badelf(Structure):
     elf_maxima = table_column.JSONField(blank=True, null=True)
     """
     A list of ELF maxima for each atom and electride in the system.
-    """
-    
-    electride_indices = table_column.JSONField(blank=True, null=True)
-    """
-    The indices in each entry (e.g. charges, volumes) that correspond
-    to electrides
     """
     
     electride_formula = table_column.CharField(
@@ -126,12 +122,6 @@ class Badelf(Structure):
     The ELF values at which the bare electron volume reduces dimensionality.
     """
 
-    coord_envs = table_column.JSONField(blank=True, null=True)
-    """
-    A list of coordination environments for the atoms and electrides in the
-    labeled structure
-    """
-
     electride_structure = table_column.JSONField(blank=True, null=True)
     """
     A PyMatGen Structure JSON with dummy atoms (E) representing electrides.
@@ -141,6 +131,8 @@ class Badelf(Structure):
         "baderkit.ElfAnalysis",
         on_delete=table_column.CASCADE,
         related_name="badelf",
+        blank=True,
+        null=True,
     )
     """
     The ElfAnalysis table entry from this calculation which includes
@@ -209,9 +201,12 @@ class Badelf(Structure):
             badelf_dict = badelf.to_dict()
             
         results = {}
-        model_columns = cls.model.get_column_names()
+        model_columns = cls.get_column_names()
         for key in model_columns:
-            results[key] = getattr(badelf_dict, key, None)
+            # skip columns in the structure dict
+            if key in structure_dict.keys():
+                continue
+            results[key] = badelf_dict.get(key, None)
             
         # create a new entry
         new_row = cls(
@@ -220,14 +215,15 @@ class Badelf(Structure):
             )
         new_row.save()
 
-        # update elf features
-        new_row.update_elf_analysis(badelf)
+        # update elf features (unless it is updated elsewhere)
+        if new_row.spin_system != "half":
+            new_row.update_elf_analysis(badelf, directory)
 
         return new_row
                 
     def update_elf_analysis(self, badelf: BadelfClass, directory: Path):
         # get the labeler model
-        labeler_model = self.elf_analysis.model
+        labeler_model = self._analysis_model
         # create a new entry
         labeler_entry = labeler_model.from_labeler(badelf.elf_labeler, directory=directory)
         # update key
@@ -242,7 +238,7 @@ class BadelfCalculation(Calculation):
     class Meta:
         app_label = "baderkit"
     
-    analysis = table_column.ForeignKey(
+    badelf = table_column.ForeignKey(
         "baderkit.Badelf",
         on_delete=table_column.CASCADE,
         related_name="calculation",
@@ -254,5 +250,5 @@ class BadelfCalculation(Calculation):
         # create an entry in the ElfAnalysis table
         badelf = Badelf.from_badelf(badelf, directory, **kwargs)
         # link to table
-        self.analysis = badelf
+        self.badelf = badelf
         self.save()

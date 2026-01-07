@@ -139,28 +139,28 @@ class ElfFeatures(DatabaseTable):
     The coordination number of this feature
     """
     
-    coord_atom_indices = table_column.JSONField(blank=True, null=True)
+    coord_indices = table_column.JSONField(blank=True, null=True)
     """
     The structure indices of each of the coordinated atoms
     """
     
-    coord_atom_species = table_column.JSONField(blank=True, null=True)
+    coord_species = table_column.JSONField(blank=True, null=True)
     """
     The symbol of each of the coordinated atoms
     """
     
-    quasi_coord_number = table_column.IntegerField(blank=True, null=True)
+    coord_number_e = table_column.IntegerField(blank=True, null=True)
     """
     The coordination number of this feature including quasi atoms (i.e. electrides)
     """
     
-    coord_electride_indices = table_column.JSONField(blank=True, null=True)
+    coord_indices_e = table_column.JSONField(blank=True, null=True)
     """
     The labeled structure indices of each of the coordinated atoms in the
     quasi-atom structure
     """
     
-    coord_electride_species = table_column.JSONField(blank=True, null=True)
+    coord_species_e = table_column.JSONField(blank=True, null=True)
     """
     The symbol of each of the coordinated atoms in the quasi-atom structure
     """
