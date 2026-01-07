@@ -1,9 +1,9 @@
-{% comment %}
- This script removes extra fields from API forms on GET method. 
-  - https://stackoverflow.com/questions/5904437/
-  - https://stackoverflow.com/questions/46834539/
-{% endcomment %}
 <script>
+    {% comment %}
+     This script removes extra fields from API forms on GET method. 
+      - https://stackoverflow.com/questions/5904437/
+      - https://stackoverflow.com/questions/46834539/
+{% endcomment %}
     $(function() {
         var form = $('form')[0];
         $(form).submit(function() {

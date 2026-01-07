@@ -80,6 +80,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `toolkit.datastores` and `toolkit.dataframes` helper modules
 - added molecular and poc apps to the list of df
 - allow conditional postgres-rdkit extension with settings flag
+- added `startup_method` hook to simmate workers
 
 **Refactors**
 
@@ -91,6 +92,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - `website.engine` apps and others are condensed into `core_components`, `data_explorer`, and `workflows` apps
 - refactored `toolkit.featurizers` module
 - moved all of `simmate.engine` module into `simmate.workflows`
+- deprec django-unicorn in favor of htmx
 
 **Fixes**
 

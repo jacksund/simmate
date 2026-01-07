@@ -1,0 +1,15 @@
+<div class="row">
+    <div class="col-md-4">
+        {% htmx_selectbox name="project_id" options=component.project_options defer=False include=include %}
+    </div>
+    {% if component.hypothesis_options %}
+        <div class="col-md-8">{% htmx_selectbox name="hypothesis_id" options=component.hypothesis_options %}</div>
+    {% endif %}
+</div>
+{% if component.tag_options %}
+    <div class="row">
+        <div class="col-md-12">
+            {% htmx_selectbox name="tags__ids" label="Tags" options=component.tag_options dynamic_options=True multiselect=True %}
+        </div>
+    </div>
+{% endif %}

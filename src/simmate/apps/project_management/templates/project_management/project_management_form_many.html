@@ -1,0 +1,12 @@
+<td>{% htmx_selectbox name="project_id" options=component.project_options show_label=False defer=False %}</td>
+{# bug: need the id because selectbox isn't going away for some reason... #}
+<td id="{{ component.component_id }}-hypothesis-id">
+    {% if component.hypothesis_options %}
+        {% htmx_selectbox name="hypothesis_id" options=component.hypothesis_options dynamic_options=True show_label=False %}
+    {% endif %}
+</td>
+<td id="{{ component.component_id }}-tag-id">
+    {% if component.tag_options %}
+        {% htmx_selectbox  name="tags__ids" label="Tags" options=component.tag_options dynamic_options=True multiselect=True show_label=False %}
+    {% endif %}
+</td>

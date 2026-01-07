@@ -15,10 +15,6 @@ class HtmxConfig(AppConfig):
     name = "simmate.website.htmx"
 
 
-class UnicornConfig(AppConfig):
-    name = "simmate.website.unicorn"
-
-
 class WorkflowsConfig(AppConfig):
     name = "simmate.website.workflows"
 

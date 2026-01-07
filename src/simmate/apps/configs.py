@@ -73,8 +73,8 @@ class EppoGdConfig(AppConfig):
     name = "simmate.apps.eppo_gd"
 
 
-class EtherscanConfig(AppConfig):
-    name = "simmate.apps.etherscan"
+class EthereumConfig(AppConfig):
+    name = "simmate.apps.ethereum"
 
 
 class EvolutionConfig(AppConfig):
@@ -111,6 +111,10 @@ class PriceCatalogConfig(AppConfig):
 
 class ProjectManagementConfig(AppConfig):
     name = "simmate.apps.project_management"
+
+    def ready(self):
+        # signals a wallet creation for new users
+        import simmate.apps.project_management.signals
 
 
 class QuantumEspressoConfig(AppConfig):

@@ -20,10 +20,10 @@ class Project(DatabaseTable):
     html_display_name = "Projects"
     html_description_short = "List of different chemistry projects"
 
-    html_entries_template = "projects/project/table.html"
-    html_entry_template = "projects/project/view.html"
+    html_entries_template = "project_management/project/table.html"
+    html_entry_template = "project_management/project/view.html"
 
-    html_form_view = "project-form"
+    html_form_component = "project-form"
     html_enabled_forms = [
         "search",
         "create",
@@ -44,15 +44,15 @@ class Project(DatabaseTable):
     to fill out this information & how much detail they wish to provide
     """
 
-    status_choices = (
-        ("PR", "Pending Review"),
-        ("A", "Active"),
-        ("IA", "Inactive"),
-        ("RU", "Requires Update"),
+    status_options = (
+        "Under Review",
+        "Active",
+        "Inactive",
+        "Requires Update",
+        "Staged for Deletion",
     )
     status = table_column.CharField(
-        max_length=3,
-        choices=status_choices,
+        max_length=25,
         blank=True,
         null=True,
     )
@@ -103,16 +103,19 @@ class Project(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # has related - molecule_scopes
+    parent_project = table_column.ForeignKey(
+        "self",
+        on_delete=table_column.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="child_projects",
+    )
 
-    molecule_scope_base = table_column.JSONField(blank=True, null=True)
-    """
-    A list of filters to apply when querying all MoleculeScopes.
-    (e.g., range of allowed mol wts, max functional groups, etc.)
-    """
-    # TODO: would I ever want to move this to the MoleculeScope model and
-    # allow filters/limit to vary on a per-molecule-scope basis? I don't do this
-    # for now, because it's easier on users to just have a universal default.
+    num_child_projects_recursive = table_column.IntegerField(blank=True, null=True)
+    # a fully iterated version (children + their children)
+
+    is_top_level = table_column.BooleanField(blank=True, null=True)
+    # True when "parent_project" is null
 
     # -------------------------------------------------------------------------
 
@@ -145,23 +148,45 @@ class Project(DatabaseTable):
         tags = self.tags.order_by("-id").all()[:tags__limit]
         tags__truncated = bool(len(tags) >= tags__limit)
 
-        hypotheses__limit = 10
-        hypotheses__count = self.hypotheses.all()[:count_limit].count()
-        hypotheses = (
-            self.hypotheses.prefetch_related("tags")
-            .select_related("created_by", "driven_by")
-            .order_by("-id")
-            .all()[:hypotheses__limit]
-        )
-        hypotheses__truncated = bool(len(hypotheses) >= hypotheses__limit)
-
         return {
             "tags": tags,
             "tags__count": tags__count,
             "tags__truncated": tags__truncated,
-            "hypotheses": hypotheses,
-            "hypotheses__count": hypotheses__count,
-            "hypotheses__truncated": hypotheses__truncated,
         }
+
+    # -------------------------------------------------------------------------
+
+    # This section is DEPRECIATED in favor of form mix-ins
+
+    @property
+    def tag_options(self) -> list[tuple]:
+
+        from .tag import Tag
+
+        # query for all tags directly linked
+        project_tags = self.tags.order_by("name").values_list("id", "name").all()
+
+        # add in generic tags after specific ones
+        generic_tags = (
+            Tag.objects.filter(tag_type="all-projects")
+            .order_by("name")
+            .values_list("id", "name")
+            .all()
+        )
+
+        # reformat into tuple of (value, display)
+        return [
+            (id, tag_name) for id, tag_name in list(project_tags) + list(generic_tags)
+        ]
+
+    @classmethod
+    @property
+    def project_options(cls) -> list[tuple]:
+
+        # query for all tags
+        projects = cls.objects.order_by("name").values_list("id", "name").all()
+
+        # reformat into tuple of (value, display)
+        return [(id, name) for id, name in projects]
 
     # -------------------------------------------------------------------------

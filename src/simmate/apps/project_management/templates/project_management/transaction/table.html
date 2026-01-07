@@ -1,0 +1,41 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=60 %}
+    {% table_header "status" min_width=100 %}
+    {% table_header "transaction_type" "Type" min_width=100 %}
+    {% table_header "transaction_subtype" "Subtype" min_width=100 %}
+    {% table_header "sending_user__username" "User" min_width=100 %}
+    {% table_header "from_wallet__id" "From" min_width=100 %}
+    {% table_header "to_wallet__id" "To" min_width=100 %}
+    {% table_header "usdc_amount" "USDC" min_width=100 %}
+    {% table_header "token_amount" "Tokens" min_width=100 %}
+    {% table_header "collateral_amount" "USDC (collateral)" min_width=165 %}
+    {% table_header "created_at" "Date" min_width=115 %}
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry %}</td>
+    <td>
+        {% if entry.status == "Pending" %}
+            {% status_bar "Pending" "secondary" %}
+        {% elif entry.status == "Complete" %}
+            {% status_bar "Complete" "success" %}
+        {% elif entry.status == "Canceled" %}
+            {% status_bar "Canceled" "danger" %}
+        {% elif entry.status == "Denied" %}
+            {% status_bar "Denied" "danger" %}
+        {% elif entry.status == "Failed" %}
+            {% status_bar "Failed" "danger" %}
+        {% elif entry.status == "Under Review" %}
+            {% status_bar "Under Review" "warning" %}
+        {% endif %}
+    </td>
+    <td>{{ entry.transaction_type }}</td>
+    <td>{{ entry.transaction_subtype }}</td>
+    <td>{{ entry.sending_user.username }}</td>
+    <td>{% foreign_key_link entry.from_wallet %}</td>
+    <td>{% foreign_key_link entry.to_wallet %}</td>
+    <td>{{ entry.usdc_amount|floatformat:2|intcomma }}</td>
+    <td>{{ entry.token_amount|floatformat:0|intcomma }}</td>
+    <td>{{ entry.collateral_amount|floatformat:2|intcomma }}</td>
+    <td>{{ entry.created_at|date:"Y-m-d" }}</td>
+{% endblock %}

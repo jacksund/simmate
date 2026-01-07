@@ -3,3 +3,4 @@
 from .base import ClusteringEngine
 from .butina import Butina
 from .identity import Identity
+from .kmeans import Kmeans

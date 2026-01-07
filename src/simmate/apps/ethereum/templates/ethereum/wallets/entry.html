@@ -1,0 +1,10 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    <div class="pt-3">
+        {% include "ethereum/wallets/for_view/tabs_header.html" %}
+        <div class="tab-content">
+            {% include "ethereum/wallets/for_view/overview_tab.html" %}
+            {% include "ethereum/wallets/for_view/transactions_tab.html" %}
+        </div>
+    </div>
+{% endblock %}

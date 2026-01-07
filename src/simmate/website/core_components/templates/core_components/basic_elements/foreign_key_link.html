@@ -3,11 +3,11 @@
        {% if mode == "pill" %} class="badge bg-primary rounded-pill" {% elif mode == "block" %} type="button" class="btn btn-secondary btn-sm col-10 m-0" {% endif %}
        {% if open_in_new %}target="_blank"{% endif %}>
         {% if display_column %}
-            {{ entry|getattribute:display_column }}
+            {{ entry|getattribute:display_column|truncatechars:truncate_chars }}
         {% else %}
-            {{ entry.id }}
+            {{ entry.id|truncatechars:truncate_chars }}
         {% endif %}
-        <i class="mdi mdi-open-in-new"></i>
+        <small><i class="bi bi-box-arrow-up-right"></i></small>
     </a>
 {% else %}
     --

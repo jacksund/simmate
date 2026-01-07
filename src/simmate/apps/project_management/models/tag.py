@@ -16,10 +16,10 @@ class Tag(DatabaseTable):
         "like hypotheses, targets, & orders. "
     )
 
-    html_entries_template = "projects/tag/table.html"
-    html_entry_template = "projects/tag/view.html"
+    html_entries_template = "project_management/tag/table.html"
+    html_entry_template = "project_management/tag/view.html"
 
-    html_form_view = "tag-form"
+    html_form_component = "tag-form"
     html_enabled_forms = [
         "search",
         "create",

@@ -1,10 +1,12 @@
 <th {% if min_width %}style="min-width:{{ min_width }}px"{% endif %}>
-    <a class="text-light" href="{% update_url order_by=link %}">
-        <small>{{ text_display }}</small>
+    <a class="text-dark" href="{% update_url order_by=link %}">
+        {{ text_display }}
         {% if arrow == "up" %}
-            <i class="mdi mdi-arrow-up"></i>
+            <i class="bi bi-sort-up"></i>
         {% elif arrow == "down" %}
-            <i class="mdi mdi-arrow-down"></i>
+            <i class="bi bi-sort-down"></i>
+        {% else %}
+            <i class="bi bi-filter"></i>
         {% endif %}
     </a>
 </th>

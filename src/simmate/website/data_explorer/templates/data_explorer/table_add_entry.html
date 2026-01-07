@@ -1,4 +1,3 @@
-{% load unicorn %}
 <div class="offcanvas offcanvas-end w-75" id="offcanvasAddEntry">
     <div class="offcanvas-header bg-dark text-light">
         <h5>Add New Entry</h5>
@@ -8,14 +7,13 @@
     </div>
     <div class="offcanvas-body">
         <div>
-            {% csrf_token %}
-            {% if table.html_form_view and "create_many" in table.html_enabled_forms %}
+            {% if table.html_form_component and "create_many" in table.html_enabled_forms %}
                 <div class="alert alert-info" role="alert">
-                    <i class="mdi mdi-information mx-2"></i>
-                    Need to upload a bunch of entries at once? Switch to the <a href="{% url 'data_explorer:table-entry-new-many' table.table_name %}"><b>bulk upload form</b></a>.
+                    <i class="bi bi-info-circle mx-2"></i>
+                    Need to upload many entries at once? Switch to the <a href="{% url 'data_explorer:table-entry-new-many' table.table_name %}"><b>bulk upload form <i class="bi bi-box-arrow-up-right"></i></b></a>
                 </div>
             {% endif %}
-            {% unicorn table.html_form_view key="createpopout" form_mode="create" redirect_mode="refresh" %}
+            {% htmx_component table.html_form_component component_key="createpopout" form_mode="create" redirect_mode="refresh" %}
         </div>
     </div>
 </div>

@@ -1,0 +1,37 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    {% include "data_explorer/general_search_options.html" %}
+    <div class="container mt-4 border border-3 border-secondary rounded py-2">
+        <h3>
+            <span class="badge bg-secondary">1. Project Info</span>
+        </h3>
+        <div class="row">
+            <div class="col-md-4">
+                {% if component.form_mode == "search" %}
+                    {% htmx_text_input name="name" %}
+                {% else %}
+                    {% htmx_text_input name="name" label="Project Name" placeholder="ex: X23 or Zeus" dynamically_set=True %}
+                    {% htmx_button method_name="suggest_new_name" label="get random name" icon="dice-5" small=True %}
+                {% endif %}
+            </div>
+            <div class="col-md-4">{% htmx_selectbox name="discipline" %}</div>
+            <div class="col-md-4">{% htmx_selectbox name="status" %}</div>
+        </div>
+        {% if component.form_mode != "search" %}
+            <div class="row">
+                <div class="col-sm">
+                    {% htmx_text_area name="description" placeholder="A quick description about this project and its scope" %}
+                </div>
+            </div>
+        {% endif %}
+        <div class="row">
+            <div class="col-12">
+                {% htmx_selectbox name="leaders__ids" label="Leaders" options=component.user_options multiselect=True %}
+            </div>
+            <div class="col-12">
+                {% htmx_selectbox name="members__ids" label="Members" options=component.user_options multiselect=True %}
+            </div>
+        </div>
+    </div>
+    {% include "data_explorer/dynamic_submit_button.html" %}
+{% endblock %}

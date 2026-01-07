@@ -84,8 +84,15 @@ nav:
     
     - Getting Started: 
         
-        - Overview: getting_started/overview.md
+        - Introduction: getting_started/introduction.md
         
+        # - 1. Public Website:
+        #     - Quick Start: getting_started/public_website/quick_start.md
+        #     - a) Exploring & managing data: getting_started/installation/data.md
+        #     - b) Your first workflow run: getting_started/installation/workflow.md
+        #     - c) Connect your own compute: getting_started/installation/add_compute.md
+        #     - (extra) Intro to USDC: getting_started/installation/crypto.md
+
         - 1. Installation:
             - Quick Start: getting_started/installation/quick_start.md
             - a) Install Anaconda: getting_started/installation/install_anaconda.md
@@ -171,7 +178,7 @@ nav:
                 - Backend Mix-ins: full_guides/website/creating_components/backend_mixins.md
             - Setup & Config: full_guides/website/setup_and_config.md
             - REST API: full_guides/website/rest_api.md
-
+        
         - Workflows:
             - Naming Conventions: full_guides/workflows/naming_conventions.md
             - Basic Use: full_guides/workflows/basic_use.md
@@ -179,6 +186,9 @@ nav:
             - Creating nested workflows: full_guides/workflows/creating_nested_workflows.md
             - Creating "S3" workflows: full_guides/workflows/creating_s3_workflows.md
 
+        - Computational Resources:
+            - Basic Use: full_guides/computational_resources/basic_use.md
+        
         - Database:
             - Overview: full_guides/database/overview.md
             - Basic use: full_guides/database/basic_use.md
@@ -224,15 +234,22 @@ nav:
                 #     - Common Analyses: full_guides/toolkit/crystal_structures/single_structure/analyses.md
                 # - Many Structures: 
                 #    - Featurizers: full_guides/toolkit/crystal_structures/many_structures/featurizers.md
+
         - Extras:
-            - Configuration: full_guides/extras/configuration.md
-            - Contributing:
+            # - Simmate Open Collective: 
+            #    - Overview: full_guides/open_collective/overview.md
+            #    - Architecture: full_guides/open_collective/architecture.md
+            #    - Financial Strategy: full_guides/open_collective/financial_strategy.md
+            #    - Data Integrity Safeguards:  full_guides/open_collective/data_integrity_safeguards.md
+            #    - How to participate & earn: full_guides/open_collective/how_to_participate_and_earn.md
+            - Settings & Configs: full_guides/extras/configuration.md
+            - Contributing Code:
                 - First time setup: full_guides/contributing/first_time_setup.md
                 # - Testing: full_guides/extras/testing.md
                 - Creating & submitting changes: full_guides/contributing/creating_and_submitting_changes.md
                 - Extra notes & tips: full_guides/contributing/extra.md
                 - Maintainer notes: full_guides/contributing/maintainer_notes.md
-            - Utilities: full_guides/extras/utilities.md
+            # - Utilities: full_guides/extras/utilities.md
 
     - Parameters: parameters.md
 

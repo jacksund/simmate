@@ -1,0 +1,12 @@
+{# djlint:off #}
+{% if method_name %}
+    hx-post="{% url 'htmx:component_method' component_id method_name %}{% if method_kwargs %}?{{ method_kwargs }}{% endif %}"
+{% else %}
+    hx-post="{% url 'htmx:component' component_id %}"
+{% endif %}
+hx-target="{{ target }}"
+hx-include="{{ include }}"
+hx-indicator="#loading-spinner"
+hx-swap="{{ swap }}"
+hx-trigger="{{ trigger }}"
+{# djlint:on #}

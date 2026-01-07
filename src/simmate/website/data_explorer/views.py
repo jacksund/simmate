@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 
 from simmate.configuration import settings
@@ -112,18 +111,14 @@ def table_entries(request, table_name):
         )
 
     elif view_format == "csv":
-        # CSV is a unique case where we do a bulk download (up to 10k rows or
-        # whatever limit is set by filter_from_config).
         objects = table.filter_from_request(request, paginate=False)
+        return objects.to_csv_response(mode="api")
 
-        # https://stackoverflow.com/questions/54729411/
-        df = objects.to_dataframe()
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = (
-            f"attachment; filename={table_name}_queryset.csv"
-        )
-        df.to_csv(path_or_buf=response, index=False)
-        return response
+    elif view_format == "curated-csv":
+        objects = table.filter_from_request(request, paginate=False)
+        return objects.to_csv_response(mode="curated")
+
+    # TODO: add support for CIF, SDF, and other mol/crystal formats
 
     else:
         raise Exception(f"Unknown 'format' GET arg given: {view_format}")
@@ -171,11 +166,13 @@ def table_search(request, table_name):
 def table_entry_new(request, table_name):
 
     table = get_table_safe(table_name)
-    if not table.html_form_view:
-        raise NotImplementedError("This model does not have an 'entry-new' view yet!")
+    if not table.html_form_component:
+        raise NotImplementedError(
+            "This model does not have an 'entry-new' component yet!"
+        )
 
     context = {
-        "unicorn_component_name": table.html_form_view,
+        "component_name": table.html_form_component,
         "page_title": table_name,
         "page_title_icon": "mdi-database",
         "breadcrumbs": ["Data", table_name, "Form"],
@@ -185,12 +182,12 @@ def table_entry_new(request, table_name):
 
 
 def table_entry_new_many(request, table_name):
-    # We can just use the entry-new view because our underlying unicorn
-    # view will dynamically determine this using the URL path
+    # We can just use the entry-new view because our underlying htmx form
+    # will dynamically determine the form mode using the URL path
     return table_entry_new(request, table_name)
 
 
 def table_entry_update(request, table_name, table_entry_id):
-    # We can just use the entry-new view because our underlying unicorn
-    # view will dynamically determine this using the URL path
+    # We can just use the entry-new view because our underlying htmx form
+    # will dynamically determine the form mode using the URL path
     return table_entry_new(request, table_name)

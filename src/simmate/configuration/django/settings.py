@@ -52,12 +52,6 @@ INSTALLED_APPS = [
     # note: there are extra apps installed based on configuration. See the
     # allauth section at the bottom of this page for more.
     #
-    # Django unicorn acts as a frontend framework for making dyanmic webpages
-    # (i.e. AJAX calls can be made to update the views)
-    # "django_unicorn",
-    "simmate.website.configs.UnicornConfig",  # fork of django_unicorn
-    "simmate.website.configs.HtmxConfig",  # refacto of unicorn onto htmx
-    #
     # Django simple history lets you track history of changes (and who made
     # those changes) for a given model. This is important for models that users
     # interact with and edit in the UI
@@ -78,6 +72,7 @@ INSTALLED_APPS = [
     # Any extra apps from the user (such as django-table2 or some other package)
     *settings.extra_django_apps,
     # Simmate apps + user apps
+    "simmate.website.configs.HtmxConfig",  # for dynamic webpages (AJAX calls)
     "simmate.website.configs.CoreComponentsConfig",
     "simmate.website.configs.DataExplorerConfig",
     "simmate.website.configs.WorkflowsConfig",
@@ -102,7 +97,9 @@ EMAIL_HOST_PASSWORD = settings.website.email.host_password
 DEFAULT_FROM_EMAIL = settings.website.email.from_email
 EMAIL_SUBJECT_PREFIX = settings.website.email.subject_prefix
 EMAIL_TIMEOUT = settings.website.email.timeout
-ADMINS = settings.website.admins
+
+# Note: we no longer use this. We instead default to emailing superusers
+# ADMINS = settings.website.admins
 
 # --------------------------------------------------------------------------------------
 
@@ -158,7 +155,6 @@ TEMPLATES = [
                 "simmate.website.core_components.templatetags.simmate_input_forms",
                 "simmate.website.core_components.templatetags.simmate_settings",
                 "simmate.website.core_components.templatetags.simmate_utils",
-                "simmate.website.unicorn.templatetags.unicorn",
                 "simmate.website.htmx.templatetags.htmx",
             ],
         },
@@ -358,32 +354,80 @@ os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 # -----------------------------------------------------------------------------
 
-# For advanced users, we let them override Django settings directly.
-# But by default, nothing is changed.
-locals().update(settings.django_settings)
+# Config console logs
+
+# This is a fork of the default LOGGING settings for django
+# https://github.com/django/django/blob/334308efae8e0c7b1523d5583af32b674a098eba/django/utils/log.py#L18
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse",
+        },
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
+        },
+    },
+    "formatters": {
+        "django.server": {
+            "()": "django.utils.log.ServerFormatter",
+            "format": "[{server_time}] {message}",
+            "style": "{",
+        }
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "filters": ["require_debug_true"],
+            "class": "logging.StreamHandler",
+        },
+        "django.server": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "django.server",
+        },
+        # "mail_admins": {
+        #     "level": "ERROR",
+        #     "filters": ["require_debug_false"],
+        #     "class": "django.utils.log.AdminEmailHandler",
+        # },
+        # This is a customized version of AdminEmailHandler
+        "mail_super_users": {
+            "level": "ERROR",
+            "filters": ["require_debug_false"],
+            "class": "simmate.website.core_components.logging.SuperUserEmailHandler",
+            "include_html": True,
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "mail_super_users"],
+            "level": "INFO",
+        },
+        "django.server": {
+            "handlers": ["django.server"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
 
 # To print out all SQL queries. Also consider switching to use Silk:
 #   https://github.com/jazzband/django-silk
 # https://stackoverflow.com/questions/4375784/how-to-log-all-sql-queries-in-django
 if settings.website.log_sql:
-    LOGGING = {
-        "version": 1,
-        "filters": {
-            "require_debug_true": {
-                "()": "django.utils.log.RequireDebugTrue",
-            }
-        },
-        "handlers": {
-            "console": {
-                "level": "DEBUG",
-                "filters": ["require_debug_true"],
-                "class": "logging.StreamHandler",
-            }
-        },
-        "loggers": {
+    LOGGING["loggers"].update(
+        {
             "django.db.backends": {
                 "level": "DEBUG",
                 "handlers": ["console"],
             }
-        },
-    }
+        }
+    )
+
+# -----------------------------------------------------------------------------
+
+# For advanced users, we let them override Django settings directly.
+# But by default, nothing is changed.
+locals().update(settings.django_settings)

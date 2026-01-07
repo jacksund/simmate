@@ -1,0 +1,113 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_report %}
+    <div class="col-12">
+        <div class="alert alert-info d-flex align-items-center mb-0 p-2"
+             role="alert">
+            <i class="bi bi-info-circle"></i>&nbsp;&nbsp;
+            <div>Percentages are adjusted for inflation using the Consumer Price Index</div>
+        </div>
+    </div>
+{% endblock %}
+{% block table_headers %}
+    {% table_header "category" min_width=150 %}
+    {% table_header "name" min_width=150 %}
+    {% table_header "price" min_width=125 %}
+    {% table_header "price_1y_stats__change" "1y" min_width=75 %}
+    {% table_header "price_5y_stats__change" "5y" min_width=75 %}
+    {% table_header "price_10y_stats__change" "10y" min_width=75 %}
+    {% table_header "price_25y_stats__change" "25y" min_width=75 %}
+    {% table_header "global_abundance" min_width=175 %}
+    {% table_header "market_cap" min_width=125 %}
+{% endblock %}
+{% block table_rows %}
+    <td>{{ entry.category }}</td>
+    <td>{% foreign_key_link entry "name" %}</td>
+    <td>
+        {% if entry.price_per_kg %}
+            ${{ entry.price_per_kg|floatformat:2 }} per kg
+        {% elif entry.price %}
+            ${{ entry.price|floatformat:2|intcomma }} {# entry.price_unit #}
+        {% else %}
+            ---
+        {% endif %}
+    </td>
+    {% if entry.name == "Consumer Price Index" %}
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+    {% else %}
+        <td>
+            {% if entry.price_1y_stats.change_inflation_adj > 0 %}
+                <span class="text-success">
+                    <i class="bi bi-caret-up-fill"></i>{{ entry.price_1y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                </span>
+            {% elif entry.price_1y_stats.change_inflation_adj < 0 %}
+                <span class="text-danger">
+                    <i class="bi bi-caret-down-fill"></i>{{ entry.price_1y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                </span>
+            {% elif entry.price_1y_stats.change_inflation_adj == 0 %}
+                0
+            {% else %}
+                ---
+            {% endif %}
+        </td>
+        <td>
+            {% if entry.price_5y_stats.change_inflation_adj > 0 %}
+                <span class="text-success">
+                    <i class="bi bi-caret-up-fill"></i>{{ entry.price_5y_stats.change_inflation_adj|floatformat:1|intcomma }}%
+                </span>
+            {% elif entry.price_5y_stats.change_inflation_adj < 0.0 %}
+                <span class="text-danger">
+                    <i class="bi bi-caret-down-fill"></i>{{ entry.price_5y_stats.change_inflation_adj|floatformat:1|intcomma }}%
+                </span>
+            {% elif entry.price_5y_stats.change_inflation_adj == 0 %}
+                0
+            {% else %}
+                ---
+            {% endif %}
+        </td>
+        <td>
+            {% if entry.price_10y_stats.change_inflation_adj > 0 %}
+                <span class="text-success">
+                    <i class="bi bi-caret-up-fill"></i>{{ entry.price_10y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                </span>
+            {% elif entry.price_10y_stats.change_inflation_adj < 0 %}
+                <span class="text-danger">
+                    <i class="bi bi-caret-down-fill"></i>{{ entry.price_10y_stats.change_inflation_adj|floatformat:1|intcomma  }}%
+                </span>
+            {% elif entry.price_10y_stats.change_inflation_adj == 0 %}
+                0
+            {% else %}
+                ---
+            {% endif %}
+        </td>
+        <td>
+            {% if entry.price_25y_stats.change_inflation_adj > 0 %}
+                <span class="text-success">
+                    <i class="bi bi-caret-up-fill"></i>{{ entry.price_25y_stats.change_inflation_adj|floatformat:1|intcomma }}%
+                </span>
+            {% elif entry.price_25y_stats.change_inflation_adj < 0 %}
+                <span class="text-danger">
+                    <i class="bi bi-caret-down-fill"></i>{{ entry.price_25y_stats.change_inflation_adj|floatformat:1|intcomma }}%
+                </span>
+            {% elif entry.price_25y_stats.change_inflation_adj == 0 %}
+                0
+            {% else %}
+                ---
+            {% endif %}
+        </td>
+    {% endif %}
+    <td>
+        {% if entry.global_abundance_mg_per_kg_crust %}
+            ${{ entry.price_per_kg }} mg per kg Earth's crust
+        {% elif entry.global_abundance_kg %}
+            ${{ entry.price_per_kg }} kg
+        {% elif entry.global_abundance %}
+            {{ entry.global_abundance }}
+        {% else %}
+            ---
+        {% endif %}
+    </td>
+    <td>---</td>
+{% endblock %}

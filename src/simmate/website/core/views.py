@@ -123,7 +123,7 @@ def home_default_view(request):
         "page_title": "The Simmate Website",
         "breadcrumbs": ["Home"],
     }
-    template = "home/home.html"
+    template = "core_components/home.html"
     return render(request, template, context)
 
 
@@ -156,6 +156,13 @@ def apps(request):
         urls_path = get_app_submodule(app_name, "urls")
         if urls_path:
             app_config = get_class(app_name)
+
+            if (
+                hasattr(app_config, "hide_in_website")
+                and app_config.hide_in_website == True
+            ):
+                continue
+
             extra_apps.append(
                 {
                     "verbose_name": app_config.verbose_name,

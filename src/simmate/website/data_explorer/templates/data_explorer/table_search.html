@@ -17,11 +17,7 @@
                 </small>
             </div>
         </div>
-        <div>
-            {% load unicorn %}
-            {% csrf_token %}
-            {% unicorn table.html_form_view key="searchpopout" form_mode="search" %}
-        </div>
+        <div>{% htmx_component table.html_form_component component_key="searchpopout" form_mode="search" %}</div>
     </div>
 </div>
 <button class="btn btn-dark"

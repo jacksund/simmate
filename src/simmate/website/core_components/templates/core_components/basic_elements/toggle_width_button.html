@@ -1,0 +1,23 @@
+{# TODO: All pages start in wide mode but we should cache user preference for page reloads #}
+<button id="toggle_width_button" type="button" class="btn btn-outline-dark">
+    <i class="bi bi-arrows-angle-expand"></i>
+</button>
+<script>
+    // Get references to the button and the target element
+    const toggleWidthButton = document.getElementById('toggle_width_button');
+    const mainBodyContainer = document.getElementById('main_body_container');
+    
+    // Listen for a click event on the button
+    toggleWidthButton.addEventListener('click', () => {
+        // Toggle the two classes on the target element.
+        // .toggle() will add the class if it's missing, or remove it if it's present.
+        mainBodyContainer.classList.toggle('container');
+        mainBodyContainer.classList.toggle('container-flex');
+        mainBodyContainer.classList.toggle('px-4');
+
+        // Find the icon within the button and toggle its classes as well
+        const icon = toggleWidthButton.querySelector('i');
+        icon.classList.toggle('bi-arrows-angle-expand');
+        icon.classList.toggle('bi-arrows-angle-contract');
+    });
+</script>
