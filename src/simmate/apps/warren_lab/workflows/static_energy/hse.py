@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.warren_lab.workflows.relaxation.hse import (
-    Relaxation__Vasp__WarrenLabHse,
+    Relaxation__Vasp__HseWarren,
 )
 
 HSE_STATIC_SETTINGS = dict(
@@ -18,7 +18,7 @@ HSE_STATIC_SETTINGS = dict(
 )
 
 
-class StaticEnergy__Vasp__WarrenLabHse(Relaxation__Vasp__WarrenLabHse):
+class StaticEnergy__Vasp__HseWarren(Relaxation__Vasp__HseWarren):
     """
     Performs a static energy calculation based on the settings for Warren Lab
     HSE functional relaxation.

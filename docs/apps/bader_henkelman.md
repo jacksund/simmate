@@ -6,7 +6,7 @@
 
 Bader Charge Analysis ("Bader" for short) is a technique for partitioning charge density to predict oxidation states. This module is specifically tailored for the [Henkelman Group](http://theory.cm.utexas.edu/henkelman/)'s code that performs this analysis. You can access their open-source code [here](http://theory.cm.utexas.edu/henkelman/code/bader/).
 
-Meanwhile, Simmate's Bader app builds workflows and utilities on top of the Bader code from the Henkelman Lab. Typically, other workflows oversee the execution of the workflows registered in this app. For example, workflows in the `Warren Lab` app combine Bader, VASP, and rational settings. Hence, beginners are recommended to start with other apps.
+Meanwhile, Simmate's Bader app builds workflows and utilities on top of the Bader code from the Henkelman Lab. Typically, other workflows oversee the execution of the workflows registered in this app. For example, workflows in the `materials_project` app combine Bader, VASP, and rational settings. Hence, beginners are recommended to start with other apps.
 
 --------------------------------------------------------------------------------
 

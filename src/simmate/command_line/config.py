@@ -59,17 +59,16 @@ def add(app_name: str, custom: bool = False):
                 "simmate.apps.configs.AflowConfig",
             ]
         )
-    elif app_name == "badelf":
-        settings.add_apps_and_update(
-            [
-                "simmate.apps.configs.BadelfConfig",
-                "simmate.apps.configs.BaderConfig",
-            ]
-        )
     elif app_name == "bader":
         settings.add_apps_and_update(
             [
                 "simmate.apps.configs.BaderConfig",
+            ]
+        )
+    elif app_name == "baderkit":
+        settings.add_apps_and_update(
+            [
+                "simmate.apps.configs.BaderkitConfig",
             ]
         )
     elif app_name == "clease":
@@ -133,8 +132,7 @@ def add(app_name: str, custom: bool = False):
         settings.add_apps_and_update(
             [
                 "simmate.apps.configs.VaspConfig",
-                "simmate.apps.configs.BaderConfig",
-                "simmate.apps.configs.BadelfConfig",
+                "simmate.apps.configs.BaderkitConfig",
                 "simmate.apps.configs.WarrenLabConfig",
             ]
         )
@@ -195,6 +193,11 @@ def test(app_name: str):
 
     elif app_name == "bader":
         from simmate.apps.bader.configuration import test_config
+
+        passed = test_config()
+
+    elif app_name == "baderkit":
+        from simmate.apps.baderkit.configuration import test_config
 
         passed = test_config()
 

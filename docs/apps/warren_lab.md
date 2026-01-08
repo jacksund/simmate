@@ -9,7 +9,7 @@
 
 The Warren Lab App is a product of Scott Warren's Materials Discovery Lab at the University of North Carolina (Chapel Hill). Our lab focuses on electrides, fluoride-ion batteries, and 2D materials. 
 
-The `Warren Lab` application incorporates workflows for our lab's preferred DFT settings and common analyses. Registering this app will introduce numerous new workflow presets that build on several other apps (VASP, Bader, BadELF, etc.).
+The `Warren Lab` application incorporates workflows for our lab's preferred DFT settings and common analyses. Registering this app will introduce numerous new workflow presets that build on several other apps (VASP, BaderKit, etc.).
 
 --------------------------------------------------------------------------------
 
@@ -56,33 +56,48 @@ simmate config test warren_lab
 ### VASP (Relaxation)
 
 ```
-relaxation.vasp.warren-lab-hse
-relaxation.vasp.warren-lab-hse-with-wavecar
-relaxation.vasp.warren-lab-hsesol
-relaxation.vasp.warren-lab-pbe
-relaxation.vasp.warren-lab-pbe-metal
-relaxation.vasp.warren-lab-pbe-with-wavecar
-relaxation.vasp.warren-lab-pbesol
-relaxation.vasp.warren-lab-scan
+relaxation.vasp.hse-warren
+relaxation.vasp.hse-with-wavecar-warren
+relaxation.vasp.hsesol-warren
+relaxation.vasp.pbe-metal-warren
+relaxation.vasp.pbe-warren
+relaxation.vasp.pbesol-warren
+relaxation.vasp.pbesol-with-wavecar-warren
+relaxation.vasp.scan-warren
 ```
 
 ### VASP (Static Energy)
 
 ```
-static-energy.vasp.warren-lab-hse
-static-energy.vasp.warren-lab-hsesol
-static-energy.vasp.warren-lab-pbe
-static-energy.vasp.warren-lab-pbe-metal
-static-energy.vasp.warren-lab-pbesol
-static-energy.vasp.warren-lab-prebadelf-hse
-static-energy.vasp.warren-lab-prebadelf-pbesol
-static-energy.vasp.warren-lab-scan
+static-energy.vasp.hse-warren
+static-energy.vasp.hsesol-warren
+static-energy.vasp.pbe-metal-warren
+static-energy.vasp.pbe-warren
+static-energy.vasp.pbesol-warren
+static-energy.vasp.relaxation-static-hse-hse-warren
+static-energy.vasp.relaxation-static-pbe-hse-warren
+static-energy.vasp.relaxation-static-pbe-pbe-warren
+static-energy.vasp.scan-warren
+```
+
+### Bader
+
+```
+bader.vasp-baderkit.bader-warren
 ```
 
 ### BadELF
 
 ```
-bad-elf-analysis.badelf.badelf-pbesol
+badelf.vasp-baderkit.spin-badelf-hse-warren
+badelf.vasp-baderkit.spin-badelf-pbesol-warren
+```
+
+### ElfLabeler
+
+```
+elf-analysis.vasp-baderkit.elf-radii-warren
+elf-analysis.vasp-baderkit.spin-elf-analysis-warren
 ```
 
 --------------------------------------------------------------------------------

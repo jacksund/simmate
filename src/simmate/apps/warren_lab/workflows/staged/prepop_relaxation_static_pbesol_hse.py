@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.warren_lab.workflows.relaxation.pbesol import (
-    Relaxation__Vasp__WarrenLabPbesol,
+    Relaxation__Vasp__PbesolWarren,
 )
 from simmate.workflows.base_flow_types import StagedWorkflow
 
@@ -10,7 +10,7 @@ from simmate.workflows.base_flow_types import StagedWorkflow
 # Copying the WAVECAR will make this much faster, but this requires that a
 # WAVECAR exists. However, we generally don't want all relaxation calculations
 # to save the WAVECAR so we make a custom workflow here.
-class Relaxation__Vasp__WarrenLabPbesolWithWavecar(Relaxation__Vasp__WarrenLabPbesol):
+class Relaxation__Vasp__PbesolWithWavecarWarren(Relaxation__Vasp__PbesolWarren):
     """
     This workflow is the same as the typical PBEsol relaxation but with the added
     tag in the INCAR for writing the WAVECAR. This is intended to be used with
@@ -20,7 +20,7 @@ class Relaxation__Vasp__WarrenLabPbesolWithWavecar(Relaxation__Vasp__WarrenLabPb
     _incar_updates = dict(LWAVE=True)
 
 
-class StaticEnergy__Vasp__WarrenLabRelaxationStaticPbeHse(StagedWorkflow):
+class StaticEnergy__Vasp__RelaxationStaticPbeHseWarren(StagedWorkflow):
     """
     Runs a PBEsol quality structure relaxation, an HSE quality static energy
     calculation.This method will also write the ELFCAR and CHGCAR files

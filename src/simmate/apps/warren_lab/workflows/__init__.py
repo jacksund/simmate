@@ -2,33 +2,33 @@
 
 from simmate.database import connect
 
-from .badelf import (
-    BadElf__Badelf__BadelfHse,
-    BadElf__Badelf__BadelfPbesol,
-    BadElf__Badelf__BadelfTest,
-    StaticEnergy__Vasp__WarrenLabPrebadelfHse,
-    StaticEnergy__Vasp__WarrenLabPrebadelfPbesol,
+from .baderkit import (
+    Badelf__VaspBaderkit__SpinBadelfHseWarren,
+    Badelf__VaspBaderkit__SpinBadelfPbesolWarren,
+    Bader__VaspBaderkit__BaderWarren,
+    ElfAnalysis__VaspBaderkit__ElfRadiiWarren,
+    ElfAnalysis__VaspBaderkit__SpinElfAnalysisWarren,
 )
 from .relaxation import (
-    Relaxation__Vasp__WarrenLabHse,
-    Relaxation__Vasp__WarrenLabHsesol,
-    Relaxation__Vasp__WarrenLabPbe,
-    Relaxation__Vasp__WarrenLabPbeMetal,
-    Relaxation__Vasp__WarrenLabPbesol,
-    Relaxation__Vasp__WarrenLabScan,
+    Relaxation__Vasp__HsesolWarren,
+    Relaxation__Vasp__HseWarren,
+    Relaxation__Vasp__PbeMetalWarren,
+    Relaxation__Vasp__PbesolWarren,
+    Relaxation__Vasp__PbeWarren,
+    Relaxation__Vasp__ScanWarren,
 )
 from .staged import (
-    Relaxation__Vasp__WarrenLabHseWithWavecar,
-    Relaxation__Vasp__WarrenLabPbesolWithWavecar,
-    StaticEnergy__Vasp__WarrenLabRelaxationStaticHseHse,
-    StaticEnergy__Vasp__WarrenLabRelaxationStaticPbeHse,
-    StaticEnergy__Vasp__WarrenLabRelaxationStaticPbePbe,
+    Relaxation__Vasp__HseWithWavecarWarren,
+    Relaxation__Vasp__PbesolWithWavecarWarren,
+    StaticEnergy__Vasp__RelaxationStaticHseHseWarren,
+    StaticEnergy__Vasp__RelaxationStaticPbeHseWarren,
+    StaticEnergy__Vasp__RelaxationStaticPbePbeWarren,
 )
 from .static_energy import (
-    StaticEnergy__Vasp__WarrenLabHse,
-    StaticEnergy__Vasp__WarrenLabHsesol,
-    StaticEnergy__Vasp__WarrenLabPbe,
-    StaticEnergy__Vasp__WarrenLabPbeMetal,
-    StaticEnergy__Vasp__WarrenLabPbesol,
-    StaticEnergy__Vasp__WarrenLabScan,
+    StaticEnergy__Vasp__HsesolWarren,
+    StaticEnergy__Vasp__HseWarren,
+    StaticEnergy__Vasp__PbeMetalWarren,
+    StaticEnergy__Vasp__PbesolWarren,
+    StaticEnergy__Vasp__PbeWarren,
+    StaticEnergy__Vasp__ScanWarren,
 )

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.warren_lab.workflows.relaxation.pbe import (
-    Relaxation__Vasp__WarrenLabPbe,
+    Relaxation__Vasp__PbeWarren,
 )
 
 PBE_STATIC_SETTINGS = dict(
@@ -18,7 +18,7 @@ PBE_STATIC_SETTINGS = dict(
 # energy workflows
 
 
-class StaticEnergy__Vasp__WarrenLabPbe(Relaxation__Vasp__WarrenLabPbe):
+class StaticEnergy__Vasp__PbeWarren(Relaxation__Vasp__PbeWarren):
     """
     Performs a static energy calculation based on the settings for Warren Lab
     PBE.

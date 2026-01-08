@@ -39,7 +39,7 @@ from simmate.apps.vasp.inputs.potcar_mappings import PBE_POTCAR_MAPPINGS
 from simmate.apps.vasp.workflows.base import VaspWorkflow
 
 
-class Relaxation__Vasp__WarrenLabPbe(VaspWorkflow):
+class Relaxation__Vasp__PbeWarren(VaspWorkflow):
     """
     Runs a VASP geometry optimization using preferred settings from the Warren lab.
 

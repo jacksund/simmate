@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.warren_lab.workflows.relaxation.hse import (
-    Relaxation__Vasp__WarrenLabHse,
+    Relaxation__Vasp__HseWarren,
 )
 
 
-class Relaxation__Vasp__WarrenLabHsesol(Relaxation__Vasp__WarrenLabHse):
+class Relaxation__Vasp__HsesolWarren(Relaxation__Vasp__HseWarren):
     """
     Runs a VASP relaxation calculation using Warren Lab HSEsol settings.
     """
