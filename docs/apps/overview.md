@@ -14,8 +14,8 @@ Apps are installable Simmate add-ons. Each one adds support for a third-party so
 | App                   | Type                              | CLI                | Workflows          | Data               |
 | --------------------- | --------------------------------- | ------------------ | ------------------ | ------------------ |
 | AFLOW                 | :simple-crystal: `crystal`        | --                 | --                 | :white_check_mark: |
-| BadELF                | :simple-crystal: `crystal`        | --                 | --                 | :white_check_mark: |
 | Bader (henkelman)     | :simple-crystal: `crystal`        | --                 | :white_check_mark: | --                 |
+| Baderkit              | :simple-crystal: `crystal`        | --                 | :white_check_mark: | --                 |
 | BCPC                  | :simple-moleculer: `molecule`     | --                 | --                 | :white_check_mark: |
 | CAS Registry          | :simple-moleculer: `molecule`     | --                 | --                 | :white_check_mark: |
 | ChEMBL                | :simple-moleculer: `molecule`     | --                 | --                 | :white_check_mark: |

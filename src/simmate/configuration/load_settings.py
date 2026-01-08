@@ -177,8 +177,8 @@ class SimmateSettings:
             "apps": [
                 "simmate.apps.configs.AflowConfig",
                 # "simmate.apps.configs.AnalysisDashboardConfig",
-                # "simmate.apps.configs.BadelfConfig",
                 "simmate.apps.configs.BaderConfig",
+                # "simmate.apps.configs.BaderkitConfig",
                 "simmate.apps.configs.BcpcConfig",
                 # "simmate.apps.configs.BioviaCosmoConfig",
                 "simmate.apps.configs.CasRegistryConfig",

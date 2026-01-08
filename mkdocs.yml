@@ -256,14 +256,8 @@ nav:
     - Apps: 
         - Overview: apps/overview.md
         - AFLOW: apps/aflow.md
-        - BadELF: 
-            - Background: apps/badelf/background.md
-            - Quick Start: apps/badelf/quick_start.md
-            - Running in Python: apps/badelf/python.md
-            - ElfAnalyzerToolkit: 
-                - Background: apps/badelf/finder/background.md
-                - Usage: apps/badelf/finder/elf_analyzer.md
         - 'Bader (henkelman)': apps/bader_henkelman.md
+        - baderkit: apps/baderkit.md
         - BCPC: apps/bcpc.md
         - CAS Registry: apps/cas_registry.md
         - Chembl: apps/chembl.md

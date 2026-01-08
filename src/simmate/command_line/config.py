@@ -186,12 +186,7 @@ def test(app_name: str):
 
     # OPTIMIZE: this code can be refactored and condensed. but it works for now
 
-    if app_name == "badelf":
-        from simmate.apps.bader.configuration import test_config
-
-        passed = test_config()
-
-    elif app_name == "bader":
+    if app_name == "bader":
         from simmate.apps.bader.configuration import test_config
 
         passed = test_config()

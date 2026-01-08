@@ -11,7 +11,7 @@ def test_config(run_calcs: bool = False):
     """
 
     # 1 - check that Simmate app is registered
-    is_registered = check_app_reg("simmate.apps.configs.BadelfConfig")
+    is_registered = check_app_reg("simmate.apps.configs.MaterialsProjectConfig")
 
     # 2 - check app dependancies
     has_vasp = test_vasp_config()
@@ -23,4 +23,4 @@ def test_config(run_calcs: bool = False):
 
     # 4 - read out result of all tests
     passed_all = bool(is_registered and has_bader and has_vasp)
-    show_test_results("BadELF", passed_all)
+    show_test_results("Materials Project", passed_all)

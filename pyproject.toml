@@ -47,10 +47,10 @@ dependencies=[
     # While we wish we could use pip+uv, it causes too many issues for users,
     # so we will only support conda-based installs for now.
 ]
-# likewise, our optional-dependencies also live there. For example, BADELF
-# optional deps live in `/env/conda/badelf.yaml`
+# likewise, our optional-dependencies also live there. For example, baderkit
+# optional deps live in `/env/conda/baderkit.yaml`
 # [project.optional-dependencies]
-# BADELF = [...]
+# BADERKIT = [...]
 
 [project.urls]
 homepage = "https://simmate.org/"

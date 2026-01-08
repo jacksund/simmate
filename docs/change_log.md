@@ -81,6 +81,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added molecular and poc apps to the list of df
 - allow conditional postgres-rdkit extension with settings flag
 - added `startup_method` hook to simmate workers
+- added `baderkit` app
 
 **Refactors**
 
@@ -93,6 +94,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - refactored `toolkit.featurizers` module
 - moved all of `simmate.engine` module into `simmate.workflows`
 - deprec django-unicorn in favor of htmx
+- deprec badelf app as it is now a standalone python package (baderkit)
 
 **Fixes**
 
