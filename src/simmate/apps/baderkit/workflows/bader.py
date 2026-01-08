@@ -28,7 +28,6 @@ class Bader__Baderkit__Bader(Workflow):
         source: dict = None,
         directory: Path = None,
         run_id=None,
-        baderkit_kwargs: dict = {},
         **kwargs,
     ):
         # create CHGCAR_sum grid
@@ -41,7 +40,7 @@ class Bader__Baderkit__Bader(Workflow):
         bader = Bader(
             charge_grid=charge_grid,
             reference_grid=reference_grid,
-            **baderkit_kwargs,
+            **kwargs,
         )
         # get the table for this workflow and update entry
         datatable = cls.database_table.objects.get(run_id=run_id)
