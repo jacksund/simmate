@@ -8,7 +8,9 @@ from simmate.database.base_data_types import (
     Calculation,
     table_column,
 )
+
 from .elf_analysis import ElfAnalysis
+
 
 class SpinElfAnalysis(ElfAnalysis):
     """
@@ -16,9 +18,10 @@ class SpinElfAnalysis(ElfAnalysis):
     calculation. It intentionally does not inherit from the Calculation
     table as the results may not be calculated from a dedicated workflow.
     """
+
     class Meta:
         app_label = "baderkit"
-    
+
     analysis_up = table_column.ForeignKey(
         "baderkit.ElfAnalysis",
         on_delete=table_column.CASCADE,
@@ -26,7 +29,7 @@ class SpinElfAnalysis(ElfAnalysis):
         blank=True,
         null=True,
     )
-    
+
     analysis_down = table_column.ForeignKey(
         "baderkit.ElfAnalysis",
         on_delete=table_column.CASCADE,
@@ -34,12 +37,12 @@ class SpinElfAnalysis(ElfAnalysis):
         blank=True,
         null=True,
     )
-    
+
     differing_spin = table_column.BooleanField(blank=True, null=True)
     """
     Whether the spin up and spin down differ in the ELF and charge density
     """
-    
+
     def update_from_directory(self, directory):
         """
         The base database workflow will try and register data from the local
@@ -49,23 +52,18 @@ class SpinElfAnalysis(ElfAnalysis):
         update_from_directory method here.
         """
         pass
-    
+
     @classmethod
-    def from_labeler(
-            cls, 
-            labeler: SpinElfLabeler,
-            directory: Path,
-            **kwargs
-            ):
+    def from_labeler(cls, labeler: SpinElfLabeler, directory: Path, **kwargs):
         """
         Creates a new row from a SpinElfLabeler object
         """
         # get initial row from ElfLabeler method
         new_row = super().from_labeler(labeler, directory)
-        
+
         # create spin up/down entries
         labeler_up = ElfAnalysis.from_labeler(labeler.elf_labeler_up, directory)
-        labeler_down = ElfAnalysis.from_labeler(labeler.elf_labeler_down, directory)   
+        labeler_down = ElfAnalysis.from_labeler(labeler.elf_labeler_down, directory)
 
         # update entry
         new_row.analysis_up = labeler_up
@@ -74,14 +72,16 @@ class SpinElfAnalysis(ElfAnalysis):
         new_row.save()
         return new_row
 
+
 class SpinElfAnalysisCalculation(Calculation):
     """
-    This table contains results from a spin-separated ELF topology 
-    analysis calculation. The results should be from a dedicated workflow. 
+    This table contains results from a spin-separated ELF topology
+    analysis calculation. The results should be from a dedicated workflow.
     """
+
     class Meta:
         app_label = "baderkit"
-    
+
     analysis = table_column.ForeignKey(
         "baderkit.SpinElfAnalysis",
         on_delete=table_column.CASCADE,
@@ -89,7 +89,7 @@ class SpinElfAnalysisCalculation(Calculation):
         blank=True,
         null=True,
     )
-    
+
     def update_from_labeler(self, labeler: SpinElfLabeler, directory: Path, **kwargs):
         # create an entry in the SpinElfAnalysis table
         labeler = SpinElfAnalysis.from_labeler(labeler, directory)

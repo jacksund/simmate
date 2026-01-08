@@ -4,20 +4,21 @@ from pathlib import Path
 
 from baderkit.core import Badelf as BadelfClass
 
+from simmate.apps.baderkit.models.elf_analysis import ElfAnalysis
 from simmate.database.base_data_types import (
     Calculation,
     Structure,
     table_column,
 )
-from simmate.apps.baderkit.models.elf_analysis import ElfAnalysis
+
 
 class Badelf(Structure):
     """
     This table contains results from a BadELF analysis.
     """
-    
+
     _analysis_model = ElfAnalysis
-    
+
     method_kwargs = table_column.JSONField(blank=True, null=True)
     """
     The settings used for this BadELF calculation
@@ -27,18 +28,18 @@ class Badelf(Structure):
     """
     The oxidation states for each atom and electride in the system.
     """
-    
+
     species = table_column.JSONField(blank=True, null=True)
     """
     The species in the structure.
     """
-    
+
     labeled_structure = table_column.JSONField(blank=True, null=True)
     """
     The labeled structure with dummy atoms representing the location of chemical
     features in the system.
     """
-    
+
     electride_structure = table_column.JSONField(blank=True, null=True)
     """
     The labeled structure with dummy atoms representing the location of quasi
@@ -55,7 +56,7 @@ class Badelf(Structure):
     as the basis for the calculation. Use 'oxidation_states' for a more 
     consistent and accurate count of valence electrons
     """
-    
+
     volumes = table_column.JSONField(blank=True, null=True)
     """
     A list of atom or electride volumes from the oxidation analysis
@@ -66,18 +67,18 @@ class Badelf(Structure):
     A list of minimum distances from the origin of an atom or electride 
     to the bader/plane surface.
     """
-    
+
     avg_surface_distances = table_column.JSONField(blank=True, null=True)
     """
     A list of average distances from the origin of an atom or electride 
     to the bader/plane surface.
     """
-    
+
     elf_maxima = table_column.JSONField(blank=True, null=True)
     """
     A list of ELF maxima for each atom and electride in the system.
     """
-    
+
     electride_formula = table_column.CharField(
         blank=True,
         null=True,
@@ -110,7 +111,7 @@ class Badelf(Structure):
     """
     The dimensionality of the electride network in the structure.
     """
-    
+
     all_electride_dims = table_column.JSONField(blank=True, null=True)
     """
     All dimensionalities the electride network has at varying ELF values
@@ -139,7 +140,7 @@ class Badelf(Structure):
     more detailed information on each chemical feature found in the
     system.
     """
-    
+
     total_charge = table_column.FloatField(blank=True, null=True)
     """
     The total number of electrons involved in the charge density partitioning.
@@ -150,13 +151,13 @@ class Badelf(Structure):
     as the basis for the calculation. Use 'oxidation_states' for a more 
     consistent and accurate count of valence electrons
     """
-    
+
     total_volume = table_column.FloatField(blank=True, null=True)
     """
     The total volume of all atoms and electrides in the system.
     The value should match the total volume of the system.
     """
-    
+
     spin_system = table_column.CharField(
         blank=True,
         null=True,
@@ -178,28 +179,20 @@ class Badelf(Structure):
         update_from_directory method here.
         """
         pass
-    
+
     @classmethod
-    def from_badelf(
-            cls, 
-            badelf: BadelfClass,
-            directory: Path,
-            **kwargs
-            ):
+    def from_badelf(cls, badelf: BadelfClass, directory: Path, **kwargs):
         """
         Creates a new row from an Elfbadelf object
         """
         # get structure dict info
-        structure_dict = cls._from_toolkit(
-            structure=badelf.structure,
-            as_dict=True
-            )
-        
-        if (directory/"POTCAR").exists():
+        structure_dict = cls._from_toolkit(structure=badelf.structure, as_dict=True)
+
+        if (directory / "POTCAR").exists():
             badelf_dict = badelf.to_dict(directory / "POTCAR")
         else:
             badelf_dict = badelf.to_dict()
-            
+
         results = {}
         model_columns = cls.get_column_names()
         for key in model_columns:
@@ -207,12 +200,9 @@ class Badelf(Structure):
             if key in structure_dict.keys():
                 continue
             results[key] = badelf_dict.get(key, None)
-            
+
         # create a new entry
-        new_row = cls(
-            **structure_dict,
-            **results
-            )
+        new_row = cls(**structure_dict, **results)
         new_row.save()
 
         # update elf features (unless it is updated elsewhere)
@@ -220,24 +210,28 @@ class Badelf(Structure):
             new_row.update_elf_analysis(badelf, directory)
 
         return new_row
-                
+
     def update_elf_analysis(self, badelf: BadelfClass, directory: Path):
         # get the labeler model
         labeler_model = self._analysis_model
         # create a new entry
-        labeler_entry = labeler_model.from_labeler(badelf.elf_labeler, directory=directory)
+        labeler_entry = labeler_model.from_labeler(
+            badelf.elf_labeler, directory=directory
+        )
         # update key
         self.elf_analysis = labeler_entry
         self.save()
-        
+
+
 class BadelfCalculation(Calculation):
     """
     This table contains results from an ELF topology analysis calculation.
-    The results should be from a dedicated workflow. 
+    The results should be from a dedicated workflow.
     """
+
     class Meta:
         app_label = "baderkit"
-    
+
     badelf = table_column.ForeignKey(
         "baderkit.Badelf",
         on_delete=table_column.CASCADE,
@@ -245,7 +239,7 @@ class BadelfCalculation(Calculation):
         blank=True,
         null=True,
     )
-    
+
     def update_from_badelf(self, badelf: BadelfClass, directory: Path, **kwargs):
         # create an entry in the ElfAnalysis table
         badelf = Badelf.from_badelf(badelf, directory, **kwargs)

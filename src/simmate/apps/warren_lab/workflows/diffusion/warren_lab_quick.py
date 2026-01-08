@@ -13,7 +13,7 @@ from simmate.apps.vasp.workflows.diffusion import (
 # BULK UNITCELL RELAXATION
 
 
-class Relaxation__Vasp__WarrenLabQuick(VaspWorkflow):
+class Relaxation__Vasp__QuickWarren(VaspWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS
     _incar = dict(
@@ -45,7 +45,7 @@ class Relaxation__Vasp__WarrenLabQuick(VaspWorkflow):
 # BULK UNITCELL STATIC ENERGY
 
 
-class StaticEnergy__Vasp__WarrenLabQuick(Relaxation__Vasp__WarrenLabQuick):
+class StaticEnergy__Vasp__QuickWarren(Relaxation__Vasp__QuickWarren):
     _incar_updates = dict(IBRION=-1, NSW=0)
 
 
@@ -54,7 +54,7 @@ class StaticEnergy__Vasp__WarrenLabQuick(Relaxation__Vasp__WarrenLabQuick):
 # ENDPOINT SUPERCELL RELAXATIONS
 
 
-class Relaxation__Vasp__WarrenLabQuickNebEndpoint(VaspWorkflow):
+class Relaxation__Vasp__QuickNebEndpointWarren(VaspWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS
     _incar = dict(
@@ -88,8 +88,8 @@ class Relaxation__Vasp__WarrenLabQuickNebEndpoint(VaspWorkflow):
 # ENDPOINT SUPERCELL STATIC ENERGY
 
 
-class StaticEnergy__Vasp__WarrenLabQuickNebEndpoint(
-    Relaxation__Vasp__WarrenLabQuickNebEndpoint
+class StaticEnergy__Vasp__QuickNebEndpointWarren(
+    Relaxation__Vasp__QuickNebEndpointWarren
 ):
     _incar_updates = dict(IBRION=-1, NSW=0)
 
@@ -99,7 +99,7 @@ class StaticEnergy__Vasp__WarrenLabQuickNebEndpoint(
 # NEB FROM IMAGES
 
 
-class Diffusion__Vasp__WarrenLabQuickCiNebFromImages(VaspNebFromImagesWorkflow):
+class Diffusion__Vasp__QuickCiNebFromImagesWarren(VaspNebFromImagesWorkflow):
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS
     _incar = dict(
@@ -133,10 +133,10 @@ class Diffusion__Vasp__WarrenLabQuickCiNebFromImages(VaspNebFromImagesWorkflow):
 # SINGLE PATH NEB
 
 
-class Diffusion__Vasp__WarrenLabQuickNebSinglePath(SinglePathWorkflow):
-    endpoint_relaxation_workflow = Relaxation__Vasp__WarrenLabQuickNebEndpoint
-    endpoint_energy_workflow = StaticEnergy__Vasp__WarrenLabQuickNebEndpoint
-    from_images_workflow = Diffusion__Vasp__WarrenLabQuickCiNebFromImages
+class Diffusion__Vasp__QuickNebSinglePathWarren(SinglePathWorkflow):
+    endpoint_relaxation_workflow = Relaxation__Vasp__QuickNebEndpointWarren
+    endpoint_energy_workflow = StaticEnergy__Vasp__QuickNebEndpointWarren
+    from_images_workflow = Diffusion__Vasp__QuickCiNebFromImagesWarren
 
 
 # -----------------------------------------------------------------------------
@@ -144,10 +144,10 @@ class Diffusion__Vasp__WarrenLabQuickNebSinglePath(SinglePathWorkflow):
 # ALL PATHS NEB
 
 
-class Diffusion__Vasp__NebAllPathsWarrenLabQuick(NebAllPathsWorkflow):
-    bulk_relaxation_workflow = Relaxation__Vasp__WarrenLabQuick
-    bulk_static_energy_workflow = StaticEnergy__Vasp__WarrenLabQuick
-    single_path_workflow = Diffusion__Vasp__WarrenLabQuickNebSinglePath
+class Diffusion__Vasp__NebAllPathsQuickWarren(NebAllPathsWorkflow):
+    bulk_relaxation_workflow = Relaxation__Vasp__QuickWarren
+    bulk_static_energy_workflow = StaticEnergy__Vasp__QuickWarren
+    single_path_workflow = Diffusion__Vasp__QuickNebSinglePathWarren
 
 
 # -----------------------------------------------------------------------------

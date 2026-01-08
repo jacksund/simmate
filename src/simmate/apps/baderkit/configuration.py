@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from simmate.configuration.utilities import check_app_reg, show_test_results, check_command_exists
+from simmate.configuration.utilities import (
+    check_app_reg,
+    check_command_exists,
+    show_test_results,
+)
 
 
 def test_config(run_calcs: bool = False):

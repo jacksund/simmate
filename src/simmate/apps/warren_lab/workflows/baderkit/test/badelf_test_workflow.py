@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.warren_lab.workflows.static_energy.pbesol import (
-    StaticEnergy__Vasp__WarrenLabPbesol,
+    StaticEnergy__Vasp__PbesolWarren,
 )
 from simmate.workflows.base_flow_types import StagedWorkflow
 
 
-class StaticEnergy__Vasp__WarrenLabPrebadelfTest(StaticEnergy__Vasp__WarrenLabPbesol):
+class StaticEnergy__Vasp__PrebadelfTestWarren(StaticEnergy__Vasp__PbesolWarren):
     """
     Runs a static energy calculation with low settings for testing the badelf
     algorithm
@@ -27,7 +27,7 @@ class StaticEnergy__Vasp__WarrenLabPrebadelfTest(StaticEnergy__Vasp__WarrenLabPb
     )
 
 
-class BadElf__Badelf__BadelfTest(StagedWorkflow):
+class Badelf__Badelf__BadelfTestWarren(StagedWorkflow):
     """
     Runs a static energy calculation using very low settings followed by a
     badelf run. This is intended for testing only and is not recommended for

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-from .hse import (
-    StaticEnergy__Vasp__WarrenLabHse,
-)
-from .pbesol import (
-    StaticEnergy__Vasp__WarrenLabPbesol,
-)
-from .scan import StaticEnergy__Vasp__WarrenLabScan
-
 from simmate.apps.vasp.inputs.potcar_mappings import PBE_GW_POTCAR_MAPPINGS
 
+from .hse import (
+    StaticEnergy__Vasp__HseWarren,
+)
+from .pbesol import (
+    StaticEnergy__Vasp__PbesolWarren,
+)
+from .scan import StaticEnergy__Vasp__ScanWarren
 
-class StaticEnergy__Vasp__WarrenLabPrebadelfPbesol(StaticEnergy__Vasp__WarrenLabPbesol):
+
+class StaticEnergy__Vasp__PrebadelfPbesolWarren(StaticEnergy__Vasp__PbesolWarren):
     """
     Runs a static energy calculation with a high-density FFT grid under settings
     from the Warren Lab. Results can be used for BadELF analysis.
@@ -19,6 +19,7 @@ class StaticEnergy__Vasp__WarrenLabPrebadelfPbesol(StaticEnergy__Vasp__WarrenLab
     use the full workflow, which runs this calculation AND the following bader
     analysis for you. This S3Task is only the first step of that workflow.
     """
+
     potcar_mappings = PBE_GW_POTCAR_MAPPINGS
 
     _incar_updates = dict(
@@ -35,7 +36,7 @@ class StaticEnergy__Vasp__WarrenLabPrebadelfPbesol(StaticEnergy__Vasp__WarrenLab
     )
 
 
-class StaticEnergy__Vasp__WarrenLabPrebadelfHse(StaticEnergy__Vasp__WarrenLabHse):
+class StaticEnergy__Vasp__PrebadelfHseWarren(StaticEnergy__Vasp__HseWarren):
     """
     Runs a static energy calculation with a high-density FFT grid under HSE
     settings from the Warren Lab. Results can be used for BadELF analysis.
@@ -44,6 +45,7 @@ class StaticEnergy__Vasp__WarrenLabPrebadelfHse(StaticEnergy__Vasp__WarrenLabHse
     use the full workflow, which runs this calculation AND the following bader
     analysis for you. This S3Task is only the first step of that workflow.
     """
+
     potcar_mappings = PBE_GW_POTCAR_MAPPINGS
 
     _incar_updates = dict(
@@ -58,8 +60,9 @@ class StaticEnergy__Vasp__WarrenLabPrebadelfHse(StaticEnergy__Vasp__WarrenLabHse
         LELF=True,  # Writes the ELFCAR
         NPAR=1,  # Must be set if LELF is set
     )
-    
-class StaticEnergy__Vasp__WarrenLabPrebadelfScan(StaticEnergy__Vasp__WarrenLabScan):
+
+
+class StaticEnergy__Vasp__PrebadelfScanWarren(StaticEnergy__Vasp__ScanWarren):
     """
     Runs a static energy calculation with a high-density FFT grid under r2SCAN
     settings from the Warren Lab. Results can be used for BadELF analysis.
@@ -68,6 +71,7 @@ class StaticEnergy__Vasp__WarrenLabPrebadelfScan(StaticEnergy__Vasp__WarrenLabSc
     use the full workflow, which runs this calculation AND the following bader
     analysis for you. This S3Task is only the first step of that workflow.
     """
+
     potcar_mappings = PBE_GW_POTCAR_MAPPINGS
 
     _incar_updates = dict(

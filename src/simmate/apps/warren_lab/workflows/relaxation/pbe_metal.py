@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.warren_lab.workflows.relaxation.pbe import (
-    Relaxation__Vasp__WarrenLabPbe,
+    Relaxation__Vasp__PbeWarren,
 )
 
 
-class Relaxation__Vasp__WarrenLabPbeMetal(Relaxation__Vasp__WarrenLabPbe):
+class Relaxation__Vasp__PbeMetalWarren(Relaxation__Vasp__PbeWarren):
     """
     Runs a VASP relaxation calculation using Warren Lab PBE functional settings
     with some adjusted settings to accomodate metals.

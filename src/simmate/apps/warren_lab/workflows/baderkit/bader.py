@@ -2,20 +2,22 @@
 
 from pathlib import Path
 
-from simmate.apps.baderkit.workflows import BaderkitChargeAnalysis__Baderkit__Bader
+from simmate.apps.baderkit.workflows import Bader__Baderkit__Bader
+from simmate.apps.vasp.inputs.potcar_mappings import PBE_GW_POTCAR_MAPPINGS
 from simmate.apps.warren_lab.workflows.static_energy import (
-    StaticEnergy__Vasp__WarrenLabPbesol
+    StaticEnergy__Vasp__PbesolWarren,
 )
 from simmate.toolkit import Structure
 from simmate.workflows import Workflow
-from simmate.apps.vasp.inputs.potcar_mappings import PBE_GW_POTCAR_MAPPINGS
 
-class PopulationAnalysis__VaspBaderkit__WarrenLabBader(Workflow):
+
+class Bader__VaspBaderkit__BaderWarren(Workflow):
     """
     Runs a static energy calculation using an extra-fine FFT grid and then
     carries out Bader analysis on the resulting charge density.
     """
-    use_database = False # nested workflows save separately
+
+    use_database = False  # nested workflows save separately
 
     @classmethod
     def run_config(
@@ -26,8 +28,8 @@ class PopulationAnalysis__VaspBaderkit__WarrenLabBader(Workflow):
         directory: Path = None,
         **kwargs,
     ):
-        prebader_dir = directory / StaticEnergy__Vasp__PrebaderWarrenLab.name_full
-        result = StaticEnergy__Vasp__PrebaderWarrenLab.run(
+        prebader_dir = directory / StaticEnergy__Vasp__PrebaderWarren.name_full
+        result = StaticEnergy__Vasp__PrebaderWarren.run(
             structure=structure,
             command=command,
             source=source,
@@ -35,16 +37,15 @@ class PopulationAnalysis__VaspBaderkit__WarrenLabBader(Workflow):
         ).result()
 
         # And run the bader analysis on the resulting chg denisty
-        bader_dir = directory / BaderkitChargeAnalysis__Baderkit__Bader.name_full
-        BaderkitChargeAnalysis__Baderkit__Bader.run(
+        bader_dir = directory / Bader__Baderkit__Bader.name_full
+        Bader__Baderkit__Bader.run(
             directory=bader_dir,
             previous_directory=prebader_dir,
             source=result,
         ).result()
 
 
-
-class StaticEnergy__Vasp__PrebaderWarrenLab(StaticEnergy__Vasp__WarrenLabPbesol):
+class StaticEnergy__Vasp__PrebaderWarren(StaticEnergy__Vasp__PbesolWarren):
     """
     Runs a static energy calculation with a high-density FFT grid under settings
     from the Warren Lab. Results can be used for Bader analysis.
@@ -54,6 +55,7 @@ class StaticEnergy__Vasp__PrebaderWarrenLab(StaticEnergy__Vasp__WarrenLabPbesol)
     analysis for you. This S3Task is only the first step of that workflow.
 
     """
+
     potcar_mappings = PBE_GW_POTCAR_MAPPINGS
 
     # The key thing for bader analysis is that we need a very fine FFT mesh. Other

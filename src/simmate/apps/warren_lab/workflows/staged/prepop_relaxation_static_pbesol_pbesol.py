@@ -3,7 +3,7 @@
 from simmate.workflows.base_flow_types import StagedWorkflow
 
 
-class StaticEnergy__Vasp__WarrenLabRelaxationStaticPbePbe(StagedWorkflow):
+class StaticEnergy__Vasp__RelaxationStaticPbePbeWarren(StagedWorkflow):
     """
     Runs an PBEsol quality structure relaxation and PBEsol quality static energy
     calculation.This method will also write the ELFCAR and CHGCAR files necessary

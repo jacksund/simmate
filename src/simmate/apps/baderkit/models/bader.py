@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
 import logging
+from pathlib import Path
 
 import numpy as np
+from baderkit.core import Bader as BaderClass
 from pandas import DataFrame
 
-from simmate.database.base_data_types import Structure, Calculation, table_column
+from simmate.database.base_data_types import Calculation, Structure, table_column
 
-from baderkit.core import Bader as BaderClass
 
 class Bader(Structure, Calculation):
     """
@@ -49,7 +49,7 @@ class Bader(Structure, Calculation):
     as the basis for the calculation. Use 'oxidation_states' for a more 
     consistent and accurate count of valence electrons
     """
-    
+
     atom_volumes = table_column.JSONField(blank=True, null=True)
     """
     A list of site volumes from the oxidation analysis (i.e. the bader volume)
@@ -58,29 +58,29 @@ class Bader(Structure, Calculation):
     atom_min_surface_distances = table_column.JSONField(blank=True, null=True)
     """
     The minimum distance from each atom to its partitioning surface.
-    """    
-    
+    """
+
     atom_avg_surface_distances = table_column.JSONField(blank=True, null=True)
     """
     The average distance from each atom to the points on its partitioning
     surface
     """
-    
+
     basin_maxima_frac = table_column.JSONField(blank=True, null=True)
     """
     The fractional coordinates of each basin maximum
     """
-    
+
     basin_maxima_charge_values = table_column.JSONField(blank=True, null=True)
     """
     The value of the charge density at each basin maximum
     """
-    
+
     basin_maxima_ref_values = table_column.JSONField(blank=True, null=True)
     """
     The value of the reference grid at each basin maximum
     """
-    
+
     basin_charges = table_column.JSONField(blank=True, null=True)
     """
     The charge associated with each bader basin.
@@ -89,7 +89,7 @@ class Bader(Structure, Calculation):
     Yttrium could have used a potential where 2 or even 10 electrons are used 
     as the basis for the calculation.
     """
-    
+
     basin_volumes = table_column.JSONField(blank=True, null=True)
     """
     A list of basin volumes from the oxidation analysis (i.e. the bader volume)
@@ -98,19 +98,19 @@ class Bader(Structure, Calculation):
     basin_min_surface_distances = table_column.JSONField(blank=True, null=True)
     """
     The minimum distance from each basin maximum to its partitioning surface.
-    """    
-    
+    """
+
     basin_avg_surface_distances = table_column.JSONField(blank=True, null=True)
     """
     The average distance from each basin maximum to the points on its partitioning
     surface
     """
-    
+
     basin_atoms = table_column.JSONField(blank=True, null=True)
     """
     The atom site indices each basin is assigned to
     """
-    
+
     basin_atom_dists = table_column.JSONField(blank=True, null=True)
     """
     The distance from each basin's maximum to the site it is assigned to
@@ -160,11 +160,8 @@ class Bader(Structure, Calculation):
         reads the necessary data
         """
         # get structure dict info
-        structure_dict = self._from_toolkit(
-            structure=bader.structure,
-            as_dict=True
-            )
-        
+        structure_dict = self._from_toolkit(structure=bader.structure, as_dict=True)
+
         data = {}
         # try and load each column in the table
         for entry in self.get_column_names():
@@ -176,20 +173,22 @@ class Bader(Structure, Calculation):
             if isinstance(test_attr, np.ndarray):
                 test_attr = test_attr.tolist()
             data[entry] = test_attr
-            
+
         # add extra data
         data["element_list"] = [i.specie.symbol for i in bader.structure]
         data["method_kwargs"] = dict(
-            method = bader.method,
-            vacuum_tol = bader.vacuum_tol,
-            basin_tol = bader.basin_tol
-            )
+            method=bader.method, vacuum_tol=bader.vacuum_tol, basin_tol=bader.basin_tol
+        )
         # try to calculate oxidation states
         try:
-            data["oxidation_states"] = bader.get_oxidation_from_potcar(directory / "POTCAR").tolist()
+            data["oxidation_states"] = bader.get_oxidation_from_potcar(
+                directory / "POTCAR"
+            ).tolist()
         except:
-            logging.warning("No POTCAR found in file. Oxidation states will not be calculated")
-        
+            logging.warning(
+                "No POTCAR found in file. Oxidation states will not be calculated"
+            )
+
         # update entry
         data.update(**structure_dict)
         self.update_from_fields(**data)

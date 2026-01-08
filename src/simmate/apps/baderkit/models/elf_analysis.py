@@ -12,17 +12,18 @@ use ForeignKeys to point to the corresponding ElfAnalysis table.
 
 from pathlib import Path
 
+import numpy as np
 from baderkit.core import ElfLabeler, SpinElfLabeler
 from baderkit.core.labelers.bifurcation_graph.enum_and_styling import FeatureType
-import numpy as np
 
+from simmate.apps.baderkit.models.elf_features import ElfFeatures
+from simmate.apps.baderkit.models.elf_radii import ElfRadii
 from simmate.database.base_data_types import (
     Calculation,
     Structure,
     table_column,
 )
-from simmate.apps.baderkit.models.elf_radii import ElfRadii
-from simmate.apps.baderkit.models.elf_features import ElfFeatures
+
 
 class ElfAnalysis(Structure):
     """
@@ -30,21 +31,21 @@ class ElfAnalysis(Structure):
     does not inherit from the Calculation table as the results may not
     be generated from a dedicated workflow.
     """
-    
+
     class Meta:
         app_label = "baderkit"
-    
+
     method_kwargs = table_column.JSONField(blank=True, null=True)
     """
     The settings used when labeling features in the structure
     """
-    
+
     bifurcation_graph = table_column.JSONField(blank=True, null=True)
     """
     The bifurcation graph representing where features appear and connect
     in the ELF
     """
-    
+
     labeled_structure = table_column.JSONField(blank=True, null=True)
     """
     The labeled structure with dummy atoms representing the location of chemical
@@ -56,17 +57,17 @@ class ElfAnalysis(Structure):
     The labeled structure with dummy atoms representing the location of quasi
     atoms (e.g. electrides, bare electrons, etc.)
     """
-    
+
     atom_elf_radii = table_column.JSONField(blank=True, null=True)
     """
     The radii of each atom in the structure calculated from the ELF
     """
-    
+
     atom_elf_radii_types = table_column.JSONField(blank=True, null=True)
     """
     The type of bond with the nearest neighbor, covalent or ionic
     """
-    
+
     oxidation_states = table_column.JSONField(blank=True, null=True)
     """
     A list of calculated oxidation states for each atom. 
@@ -77,7 +78,7 @@ class ElfAnalysis(Structure):
     The oxidation states calculated in the SpinElfAnalysis table should be used
     instead
     """
-    
+
     oxidation_states_e = table_column.JSONField(blank=True, null=True)
     """
     A list of calculated oxidation states for each atom, including electride
@@ -101,7 +102,7 @@ class ElfAnalysis(Structure):
     as the basis for the calculation. Use 'oxidation_states' for a more 
     consistent and accurate count of valence electrons
     """
-    
+
     charges_e = table_column.JSONField(blank=True, null=True)
     """
     A list of total "valence" electron counts for each atom, including
@@ -114,21 +115,21 @@ class ElfAnalysis(Structure):
     as the basis for the calculation. Use 'oxidation_states' for a more 
     consistent and accurate count of valence electrons
     """
-    
+
     volumes = table_column.JSONField(blank=True, null=True)
     """
     A list of volumes for each atom.
     
     These are in the same order as the species in the structure entry.
     """
-    
+
     volumes_e = table_column.JSONField(blank=True, null=True)
     """
     A list of volumes for each atom, including electride sites as quasi-atoms.
     
     These are in the same order as the species in the electride_structure entry.
     """
-    
+
     electride_formula = table_column.CharField(
         blank=True,
         null=True,
@@ -156,7 +157,7 @@ class ElfAnalysis(Structure):
     The total number of electrides that were found when searching the maxima
     found using pybader.
     """
-    
+
     spin_system = table_column.CharField(
         blank=True,
         null=True,
@@ -175,28 +176,20 @@ class ElfAnalysis(Structure):
         update_from_directory method here.
         """
         pass
-    
+
     @classmethod
-    def from_labeler(
-            cls, 
-            labeler: ElfLabeler,
-            directory: Path,
-            **kwargs
-            ):
+    def from_labeler(cls, labeler: ElfLabeler, directory: Path, **kwargs):
         """
         Creates a new row from an ElfLabeler object
         """
         # get structure dict info
-        structure_dict = cls._from_toolkit(
-            structure=labeler.structure,
-            as_dict=True
-            )
-        
-        if (directory/"POTCAR").exists():
+        structure_dict = cls._from_toolkit(structure=labeler.structure, as_dict=True)
+
+        if (directory / "POTCAR").exists():
             labeler_dict = labeler.to_dict(directory / "POTCAR")
         else:
             labeler_dict = labeler.to_dict()
-            
+
         results = {}
         model_columns = cls.get_column_names()
         for key in model_columns:
@@ -206,18 +199,15 @@ class ElfAnalysis(Structure):
             results[key] = labeler_dict.get(key, None)
 
         # create a new entry
-        new_row = cls(
-            **structure_dict,
-            **results
-            )
+        new_row = cls(**structure_dict, **results)
         new_row.save()
 
         # update elf features
         new_row.update_elf_features(labeler)
-        
+
         # update radii
         new_row.update_elf_radii(labeler)
-        
+
         return new_row
 
     def update_elf_features(self, labeler: ElfLabeler | SpinElfLabeler):
@@ -252,38 +242,42 @@ class ElfAnalysis(Structure):
             new_row_dict["labeled_structure_index"] = struc_len + node_idx
             new_row = feature_model(**new_row_dict)
             new_row.save()
-            
+
     def update_elf_radii(self, labeler: ElfLabeler | SpinElfLabeler):
         # get radii model
         # radii_model = self.atom_nn_elf_radii.model
         # get radii info
-        site_indices, neigh_indices, neigh_frac_coords, neigh_dists = labeler.nearest_neighbor_data
+        site_indices, neigh_indices, neigh_frac_coords, neigh_dists = (
+            labeler.nearest_neighbor_data
+        )
         site_frac_coords = labeler.structure.frac_coords[site_indices]
         radii = labeler.atom_nn_elf_radii
         bond_types = labeler.atom_nn_elf_radii_types
         # create radii entries
         for idx in range(len(site_indices)):
             radii_dict = dict(
-                site_index = site_indices[idx],
-                neigh_index = neigh_indices[idx],
-                radius = radii[idx],
-                site_frac_coords = site_frac_coords[idx].tolist(),
-                neigh_frac_coords = neigh_frac_coords[idx].tolist(),
-                radius_type = str(bond_types[idx]),
-                spin_system = labeler.spin_system,
-                analysis = self,
-                )
+                site_index=site_indices[idx],
+                neigh_index=neigh_indices[idx],
+                radius=radii[idx],
+                site_frac_coords=site_frac_coords[idx].tolist(),
+                neigh_frac_coords=neigh_frac_coords[idx].tolist(),
+                radius_type=str(bond_types[idx]),
+                spin_system=labeler.spin_system,
+                analysis=self,
+            )
             new_radii = ElfRadii(**radii_dict)
-            new_radii.save()        
-            
+            new_radii.save()
+
+
 class ElfAnalysisCalculation(Calculation):
     """
     This table contains results from an ELF topology analysis calculation.
-    The results should be from a dedicated workflow. 
+    The results should be from a dedicated workflow.
     """
+
     class Meta:
         app_label = "baderkit"
-    
+
     analysis = table_column.ForeignKey(
         "baderkit.ElfAnalysis",
         on_delete=table_column.CASCADE,
@@ -291,13 +285,10 @@ class ElfAnalysisCalculation(Calculation):
         blank=True,
         null=True,
     )
-    
+
     def update_from_labeler(self, labeler: ElfLabeler, directory: Path, **kwargs):
         # create an entry in the ElfAnalysis table
         labeler = ElfAnalysis.from_labeler(labeler, directory)
         # link to table
         self.analysis = labeler
         self.save()
-
-
-

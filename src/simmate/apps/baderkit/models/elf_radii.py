@@ -56,14 +56,9 @@ class ElfRadii(DatabaseTable):
         total - calculation not spin separate
         average - average of a spin separated system
     """
-    
+
     analysis = table_column.ForeignKey(
         "baderkit.ElfAnalysis",
         on_delete=table_column.CASCADE,
         related_name="atom_nn_elf_radii",
     )
-        
-        
-        
-        
-        

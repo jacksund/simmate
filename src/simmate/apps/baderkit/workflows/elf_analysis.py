@@ -2,22 +2,24 @@
 import os
 from pathlib import Path
 
-from baderkit.core.labelers.bifurcation_graph.enum_and_styling import FeatureType
 from baderkit.core import ElfLabeler, SpinElfLabeler
+from baderkit.core.labelers.bifurcation_graph.enum_and_styling import FeatureType
 
+from simmate.apps.baderkit.models import (
+    ElfAnalysisCalculation,
+    SpinElfAnalysisCalculation,
+)
 from simmate.database import connect
-
 from simmate.workflows.base_flow_types import Workflow
-from simmate.apps.baderkit.models import ElfAnalysisCalculation, SpinElfAnalysisCalculation
 
 
 class ElfAnalysisBase(Workflow):
     """
     The base class for running the ElfLabeler from baderkit. This should
     not be run directly, but inherited from.
-    
+
     """
-    
+
     labeler_class = None
     required_files = ["CHGCAR", "ELFCAR", "POTCAR"]
     use_database = False
@@ -28,7 +30,7 @@ class ElfAnalysisBase(Workflow):
         cls,
         source: dict = None,
         directory: Path = None,
-        run_id = None,
+        run_id=None,
         **kwargs,
     ):
 
@@ -36,31 +38,28 @@ class ElfAnalysisBase(Workflow):
         labeler = cls.labeler_class.from_vasp(
             charge_filename=directory / "CHGCAR",
             reference_filename=directory / "ELFCAR",
-            **kwargs
+            **kwargs,
         )
         # update the database
         analysis_datatable = cls.database_table.objects.get(run_id=run_id)
         analysis_datatable.update_from_labeler(
-            labeler=labeler,
-            directory=directory,
-            **kwargs
-            )
+            labeler=labeler, directory=directory, **kwargs
+        )
+
+        # write summary plot, structures, etc.
+        labeler.write_bifurcation_plot(filename=directory / "bifurcation_plot.html")
+        labeler.labeled_structure.to(directory / "POSCAR_labeled", "POSCAR")
+        labeler.electride_structure.to(directory / "POSCAR_e", "POSCAR")
+        labeler.write_json(directory / "labeler.json", potcar_path=directory / "POTCAR")
+        # write quasi atom volume
+        labeler.write_features_by_type(
+            included_types=[FeatureType.electride], directory=directory
+        )
+
         # remove the ELFCAR, CHGCAR, and POTCAR copies for space
         for file in cls.use_previous_directory:
             os.remove(directory / file)
-            
-        # write summary plot, structures, etc.
-        labeler.write_bifurcation_plot(
-            filename = directory / "bifurcation_plot.html"
-            )
-        labeler.labeled_structure.to(directory/"POSCAR_labeled", "POSCAR")
-        labeler.electride_structure.to(directory/"POSCAR_e", "POSCAR")
-        # write quasi atom volume
-        included = FeatureType.bare_types
-        labeler.write_features_by_type_sum(
-            included_types=included,
-            directory = directory
-            )
+
 
 class ElfAnalysis__Baderkit__ElfAnalysis(ElfAnalysisBase):
     """
@@ -71,6 +70,7 @@ class ElfAnalysis__Baderkit__ElfAnalysis(ElfAnalysisBase):
     use_database = True
     database_table = ElfAnalysisCalculation
     labeler_class = ElfLabeler
+
 
 class ElfAnalysis__Baderkit__SpinElfAnalysis(ElfAnalysisBase):
     """

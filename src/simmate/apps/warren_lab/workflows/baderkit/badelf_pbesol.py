@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.badelf.models import BadElf
-from simmate.database import connect
+from simmate.apps.warren_lab.workflows.static_energy.pre_bader_badelf import (
+    StaticEnergy__Vasp__PrebadelfPbesolWarren,
+)
 from simmate.workflows.base_flow_types import StagedWorkflow
 
 
-class BadElf__Badelf__BadelfPbesol(StagedWorkflow):
+class Badelf__VaspBaderkit__SpinBadelfPbesolWarren(StagedWorkflow):
     """
     Runs a static energy calculation using an extra-fine FFT grid using vasp
     and then carries out Badelf and Bader analysis on the resulting charge density.
@@ -13,10 +14,8 @@ class BadElf__Badelf__BadelfPbesol(StagedWorkflow):
     """
 
     subworkflow_names = [
-        "static-energy.vasp.warren-lab-prebadelf-pbesol",
-        "spin-badelf.badelf.badelf",
+        StaticEnergy__Vasp__PrebadelfPbesolWarren,
+        "badelf.baderkit.spin-badelf",
     ]
 
-    files_to_copy = ["CHGCAR", "ELFCAR", "POTCAR"]
-
-    database_table = BadElf
+    use_database = False
