@@ -387,8 +387,8 @@ def download_app_data(app_name: str, **kwargs):
         OqmdStructure.load_remote_archive(**kwargs)
 
     elif app_name in [
-        "badelf",
         "bader",
+        "baderkit",
         "evolution",
         "quantum_espresso",
         "rdkit",

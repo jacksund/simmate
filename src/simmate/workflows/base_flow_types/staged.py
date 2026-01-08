@@ -82,16 +82,17 @@ class StagedWorkflow(Workflow):
 
             for i, current_task in enumerate(cls.subworkflows[1:]):
                 # Now we copy the requested files from one to the next
-                previous_directory = Path(f"{result.directory}")
+                # previous_directory = Path(f"{result.directory}")
                 new_directory = directory / current_task.name_full
-                os.makedirs(new_directory, exist_ok=True)
-                for file in cls.files_to_copy:
-                    shutil.copyfile(previous_directory / file, new_directory / file)
+                # os.makedirs(new_directory, exist_ok=True)
+                # for file in cls.files_to_copy:
+                #     shutil.copyfile(previous_directory / file, new_directory / file)
 
                 try:
                     state = current_task.run(
                         structure=result,  # this is the result of the last run
                         directory=new_directory,
+                        previous_directory=result.directory,
                         **subworkflow_kwargs,
                     )
                     result = state.result()
@@ -158,7 +159,15 @@ class StagedWorkflow(Workflow):
         # import locally to avoid circular import
         from simmate.workflows.utilities import get_workflow
 
-        return [get_workflow(name) for name in cls.subworkflow_strings]
+        workflows = []
+        for name in cls.subworkflow_names:
+            if inspect.isclass(name):
+                # This object should be a workflow
+                workflows.append(name)
+            else:
+                # This object should already be a string
+                workflows.append(get_workflow(name))
+        return workflows
 
     @classmethod
     @property

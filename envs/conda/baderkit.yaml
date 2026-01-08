@@ -1,0 +1,5 @@
+name: simmate_dev
+channels:
+    - conda-forge
+dependencies:
+    - baderkit >= 0.8.0
