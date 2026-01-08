@@ -23,17 +23,17 @@ class Bader__VaspBaderkit__BaderWarren(Workflow):
     def run_config(
         cls,
         structure: Structure,
-        command: str = None,
         source: dict = None,
         directory: Path = None,
+        subworkflow_kwargs: dict = {},
         **kwargs,
     ):
         prebader_dir = directory / StaticEnergy__Vasp__PrebaderWarren.name_full
         result = StaticEnergy__Vasp__PrebaderWarren.run(
             structure=structure,
-            command=command,
             source=source,
             directory=prebader_dir,
+            **subworkflow_kwargs,
         ).result()
 
         # And run the bader analysis on the resulting chg denisty
@@ -42,6 +42,7 @@ class Bader__VaspBaderkit__BaderWarren(Workflow):
             directory=bader_dir,
             previous_directory=prebader_dir,
             source=result,
+            **subworkflow_kwargs,
         ).result()
 
 

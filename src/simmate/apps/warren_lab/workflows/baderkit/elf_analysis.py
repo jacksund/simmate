@@ -25,7 +25,6 @@ class ElfAnalysis__VaspBaderkit__SpinElfAnalysisWarren(Workflow):
     def run_config(
         cls,
         structure: Structure,
-        command: str = None,
         source: dict = None,
         directory: Path = None,
         subworkflow_kwargs: dict = {},
@@ -34,7 +33,6 @@ class ElfAnalysis__VaspBaderkit__SpinElfAnalysisWarren(Workflow):
         static_dir = directory / StaticEnergy__Vasp__PrebadelfScanWarren.name_full
         result = StaticEnergy__Vasp__PrebadelfScanWarren.run(
             structure=structure,
-            command=command,
             source=source,
             directory=static_dir,
             **subworkflow_kwargs,

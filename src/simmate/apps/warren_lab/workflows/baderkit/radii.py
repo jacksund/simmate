@@ -30,18 +30,18 @@ class ElfAnalysis__VaspBaderkit__ElfRadiiWarren(Workflow):
     def run_config(
         cls,
         structure: Structure,
-        command: str = None,
         source: dict = None,
         directory: Path = None,
+        subworkflow_kwargs: dict = {},
         **kwargs,
     ):
         # First we run a static energy calculation
         static_dir = directory / StaticEnergy__Vasp__PreRadiiWarren.name_full
         result = StaticEnergy__Vasp__PreRadiiWarren.run(
             structure=structure,
-            command=command,
             source=source,
             directory=static_dir,
+            **subworkflow_kwargs,
         ).result()
 
         # Next we run a Bader analysis
@@ -58,6 +58,7 @@ class ElfAnalysis__VaspBaderkit__ElfRadiiWarren(Workflow):
             directory=analysis_dir,
             previous_directory=static_dir,
             source=result,
+            **subworkflow_kwargs,
         ).result()
 
 
