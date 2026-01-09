@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crystal Structure Visualizer</title>
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Crystal Structure Visualizer</title>
+        <style>
         body { margin: 0; overflow: hidden; font-family: sans-serif; background: #fff; }
         #viz-container { width: 100vw; height: 100vh; }
         #ui { 
@@ -14,18 +14,16 @@
         }
         .legend-item { margin-top: 5px; font-size: 14px; display: flex; align-items: center; }
         .dot { font-size: 20px; margin-right: 8px; }
-    </style>
-
-    <script type="importmap">
+        </style>
+        <script type="importmap">
         {
             "imports": {
                 "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
                 "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
             }
         }
-    </script>
-
-    <script type="module">
+        </script>
+        <script type="module">
         import * as THREE from 'three';
         import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
 
@@ -111,20 +109,23 @@
                 renderer.setSize(container.clientWidth, container.clientHeight);
             });
         };
-    </script>
-</head>
-<body>
-
-    <div id="ui">
-        <strong>LiCoO₂ Structure</strong>
-        <div class="legend-item"><span class="dot" style="color:#CC80FF">●</span> Lithium</div>
-        <div class="legend-item"><span class="dot" style="color:#F090A0">●</span> Cobalt</div>
-        <div class="legend-item"><span class="dot" style="color:#FF0D0D">●</span> Oxygen</div>
-    </div>
-
-    <div id="viz-container"></div>
-
-    <script type="text/javascript">
+        </script>
+    </head>
+    <body>
+        <div id="ui">
+            <strong>LiCoO₂ Structure</strong>
+            <div class="legend-item">
+                <span class="dot" style="color:#CC80FF">●</span> Lithium
+            </div>
+            <div class="legend-item">
+                <span class="dot" style="color:#F090A0">●</span> Cobalt
+            </div>
+            <div class="legend-item">
+                <span class="dot" style="color:#FF0D0D">●</span> Oxygen
+            </div>
+        </div>
+        <div id="viz-container"></div>
+        <script type="text/javascript">
         // Data and execution moved here
         const myCrystalData = {
             "lattice": [[2.8, 0, 0], [-1.4, 2.4, 0], [0, 0, 14.0]],
@@ -146,6 +147,6 @@
                 window.initCrystalVisualizer(targetDiv, myCrystalData);
             }
         });
-    </script>
-</body>
+        </script>
+    </body>
 </html>

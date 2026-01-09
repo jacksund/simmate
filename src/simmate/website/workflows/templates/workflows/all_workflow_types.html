@@ -1,25 +1,260 @@
 {% extends "core_components/site_base.html" %}
 {% block tabtitle %}Workflows - Simmate{% endblock %}
 {% block body %}
-    <section class="jumbotron text-center">
+    <section class="jumbotron text-center my-3">
         <div class="container">
             <h1 class="jumbotron-heading">Workflows</h1>
             <p class="lead text-muted">Explore workflows, submit new runs, and view past results.</p>
         </div>
     </section>
-    <div class="row g-4 pt-3">
-        {% for workflow_type, workflow_description in workflows_metadata.items %}
-            <div class="col-md-4">
-                <div class="card border-primary h-100">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title text-primary">{{ workflow_type }}</h5>
-                        <p class="card-text">{{ workflow_description }}</p>
-                        <a role="button"
-                           class="btn btn-primary btn-sm mt-auto"
-                           href="{% url 'workflows_of_given_type' workflow_type %}">Explore <i class="bi bi-box-arrow-in-right"></i></a>
-                    </div>
-                </div>
+    <div class="row my-3">
+        <div class="container-fluid">
+            <h4 class="mb-3">
+                <i class="bi bi-star-fill"></i> Favorites
+            </h4>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th style="width: 25%">Workflow Type</th>
+                            <th style="width: 40%">Primary Objective</th>
+                            <th style="width: 15%">Computational Cost</th>
+                            <th style="width: 20%">Output</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="4">No workflows have been favorited yet!</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-        {% endfor %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="container-fluid my-3">
+            <h4 class="mb-3">
+                <i class="bi bi-mortarboard-fill"></i> Beginner
+            </h4>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th style="width: 25%">Workflow Type</th>
+                            <th style="width: 40%">Primary Objective</th>
+                            <th style="width: 15%">Computational Cost</th>
+                            <th style="width: 20%">Output</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="ps-4">
+                                <a href="#"
+                                   style="style"
+                                   None="display: block; width: 100%; height: 100%; padding: 0; text-decoration: none">
+                                    <b>Static-Energy</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                                <div>
+                                    <small class="text-muted">static-energy.vasp.materials-project</small>
+                                </div>
+                            </td>
+                            <td>Electronic ground state energy at fixed coordinates.</td>
+                            <td>
+                                <span class="badge rounded-pill bg-info-subtle text-info border border-info">Very Low</span>
+                            </td>
+                            <td>Total Energy, Electron Density</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">
+                                <a href="#"
+                                   style="style"
+                                   None="display: block; width: 100%; height: 100%; padding: 0; text-decoration: none">
+                                    <b>Relaxation</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                                <div>
+                                    <small class="text-muted">static-energy.vasp.materials-project</small>
+                                </div>
+                            </td>
+                            <td>Geometry optimization to find local energy minimum.</td>
+                            <td>
+                                <span class="badge rounded-pill bg-info-subtle text-info border border-info">Very Low</span>
+                            </td>
+                            <td>Optimized Coordinates</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">
+                                <a href="#"
+                                   style="display: block;
+                                          width: 100%;
+                                          height: 100%;
+                                          padding: 0;
+                                          text-decoration: none">
+                                    <b>Population Analysis</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                                <div>
+                                    <small class="text-muted">static-energy.vasp.materials-project</small>
+                                </div>
+                            </td>
+                            <td>Detailed electronic dispersion and state density</td>
+                            <td>
+                                <span class="badge rounded-pill bg-success-subtle text-success border border-success">Low</span>
+                            </td>
+                            <td>Band Gap (eV)</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">
+                                <a href="#"
+                                   style="display: block;
+                                          width: 100%;
+                                          height: 100%;
+                                          padding: 0;
+                                          text-decoration: none">
+                                    <b>DOS & Band-Structure</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                                <div>
+                                    <small class="text-muted">static-energy.vasp.materials-project</small>
+                                </div>
+                            </td>
+                            <td>Detailed electronic dispersion and state density</td>
+                            <td>
+                                <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning">Medium</span>
+                            </td>
+                            <td>Band Gap (eV)</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">
+                                <a href="#"
+                                   style="display: block;
+                                          width: 100%;
+                                          height: 100%;
+                                          padding: 0;
+                                          text-decoration: none">
+                                    <b>Diffusion (NEB)</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                                <div>
+                                    <small class="text-muted">static-energy.vasp.materials-project</small>
+                                </div>
+                            </td>
+                            <td>Nudged Elastic Band calculation for migration barriers</td>
+                            <td>
+                                <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger">High</span>
+                            </td>
+                            <td>Activation Energy</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">
+                                <a href="#"
+                                   style="display: block;
+                                          width: 100%;
+                                          height: 100%;
+                                          padding: 0;
+                                          text-decoration: none">
+                                    <b>Molecular Dynamics (AIMD)</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                                <div>
+                                    <small class="text-muted">static-energy.vasp.materials-project</small>
+                                </div>
+                            </td>
+                            <td>Finite temperature time-dependent simulations</td>
+                            <td>
+                                <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger">High</span>
+                            </td>
+                            <td>Trajectories, MSD</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">
+                                <a href="#"
+                                   style="display: block;
+                                          width: 100%;
+                                          height: 100%;
+                                          padding: 0;
+                                          text-decoration: none">
+                                    <b>Fixed-Composition Search</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                                <div>
+                                    <small class="text-muted">static-energy.vasp.materials-project</small>
+                                </div>
+                            </td>
+                            <td>
+                                Structural exploration of a fixed stoichiometry (LiCoO<sub>2</sub>)
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger">High</span>
+                            </td>
+                            <td>Phase Stability</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">
+                                <a href="#"
+                                   style="display: block;
+                                          width: 100%;
+                                          height: 100%;
+                                          padding: 0;
+                                          text-decoration: none">
+                                    <b>Chemical System Search</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                                <div>
+                                    <small class="text-muted">static-energy.vasp.materials-project</small>
+                                </div>
+                            </td>
+                            <td>Data-mining across a chemical space (Li-Co-O)</td>
+                            <td>
+                                <span class="badge rounded-pill bg-dark-subtle text-dark border border-dark">Very High</span>
+                            </td>
+                            <td>Phase Diagrams</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="container-fluid">
+            <h4 class="mb-3">
+                <i class="bi bi-beaker-fill"></i> All
+            </h4>
+            <div class="table-responsive mb-5">
+                <table class="table table-striped align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th style="min-width:25px"></th>
+                            <th style="min-width:150px">Type</th>
+                            <th style="min-width:125px">App(s)</th>
+                            <th style="min-width:150px">Preset</th>
+                            <th style="min-width:150px">Total Runs (#)</th>
+                            <th style="min-width:150px">Runs in last 30 days (#)</th>
+                            <th style="min-width:150px">
+                                <img src="/static/images/usdc-icon.svg" height="25">
+                                (median)
+                            </th>
+                            <th style="min-width:25px"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <a type="button" class="px-0 btn" href="#">
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                </a>
+                            </td>
+                            <td>static-energy</td>
+                            <td>vasp</td>
+                            <td>materials-project</td>
+                            <td>204,533</td>
+                            <td>10,203</td>
+                            <td>$0.0003</td>
+                            <td>
+                                <a type="button" class="my-2 btn btn-sm btn-outline-primary" href="#">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="9">No workflows match your search criteria.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 {% endblock %}
