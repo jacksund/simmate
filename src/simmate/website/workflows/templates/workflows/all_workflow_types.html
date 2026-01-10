@@ -7,30 +7,6 @@
             <p class="lead text-muted">Explore workflows, submit new runs, and view past results</p>
         </div>
     </section>
-    <div class="row my-3">
-        <div class="container-fluid">
-            <h4 class="mb-3">
-                <i class="bi bi-star-fill"></i> Favorites
-            </h4>
-            <div class="table-responsive">
-                <table class="table table-striped align-middle">
-                    <thead class="table-primary">
-                        <tr>
-                            <th style="width: 25%">Workflow Type</th>
-                            <th style="width: 40%">Primary Objective</th>
-                            <th style="width: 15%">Computational Cost</th>
-                            <th style="width: 20%">Output</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="4">No workflows have been favorited yet!</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
     <div class="row">
         <div class="container-fluid my-3">
             <h4 class="mb-3">
@@ -48,41 +24,35 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="ps-4">
+                            <td class="ps-4 py-3">
                                 <a href="#"
                                    style="style"
                                    None="display: block; width: 100%; height: 100%; padding: 0; text-decoration: none">
                                     <b>Static-Energy</b> <i class="bi bi-box-arrow-in-right"></i>
                                 </a>
-                                <div>
-                                    <small class="text-muted">static-energy.vasp.materials-project</small>
-                                </div>
                             </td>
-                            <td>Electronic ground state energy at fixed coordinates.</td>
+                            <td>Electronic ground state energy at fixed coordinates</td>
                             <td>
                                 <span class="badge rounded-pill bg-info-subtle text-info border border-info">Very Low</span>
                             </td>
-                            <td>Total Energy, Electron Density</td>
+                            <td>Total Energy</td>
                         </tr>
                         <tr>
-                            <td class="ps-4">
+                            <td class="ps-4 py-3">
                                 <a href="#"
                                    style="style"
                                    None="display: block; width: 100%; height: 100%; padding: 0; text-decoration: none">
                                     <b>Relaxation</b> <i class="bi bi-box-arrow-in-right"></i>
                                 </a>
-                                <div>
-                                    <small class="text-muted">static-energy.vasp.materials-project</small>
-                                </div>
                             </td>
-                            <td>Geometry optimization to find local energy minimum.</td>
+                            <td>Geometry optimization to find local energy minimum</td>
                             <td>
                                 <span class="badge rounded-pill bg-info-subtle text-info border border-info">Very Low</span>
                             </td>
                             <td>Optimized Coordinates</td>
                         </tr>
                         <tr>
-                            <td class="ps-4">
+                            <td class="ps-4 py-3">
                                 <a href="#"
                                    style="display: block;
                                           width: 100%;
@@ -91,18 +61,15 @@
                                           text-decoration: none">
                                     <b>Population Analysis</b> <i class="bi bi-box-arrow-in-right"></i>
                                 </a>
-                                <div>
-                                    <small class="text-muted">static-energy.vasp.materials-project</small>
-                                </div>
                             </td>
                             <td>Detailed electronic dispersion and state density</td>
                             <td>
                                 <span class="badge rounded-pill bg-success-subtle text-success border border-success">Low</span>
                             </td>
-                            <td>Band Gap (eV)</td>
+                            <td>Electron Density</td>
                         </tr>
                         <tr>
-                            <td class="ps-4">
+                            <td class="ps-4 py-3">
                                 <a href="#"
                                    style="display: block;
                                           width: 100%;
@@ -111,9 +78,6 @@
                                           text-decoration: none">
                                     <b>DOS & Band-Structure</b> <i class="bi bi-box-arrow-in-right"></i>
                                 </a>
-                                <div>
-                                    <small class="text-muted">static-energy.vasp.materials-project</small>
-                                </div>
                             </td>
                             <td>Detailed electronic dispersion and state density</td>
                             <td>
@@ -122,18 +86,15 @@
                             <td>Band Gap (eV)</td>
                         </tr>
                         <tr>
-                            <td class="ps-4">
+                            <td class="ps-4 py-3">
                                 <a href="#"
                                    style="display: block;
                                           width: 100%;
                                           height: 100%;
                                           padding: 0;
                                           text-decoration: none">
-                                    <b>Diffusion (NEB)</b> <i class="bi bi-box-arrow-in-right"></i>
+                                    <b>Diffusion</b> <i class="bi bi-box-arrow-in-right"></i>
                                 </a>
-                                <div>
-                                    <small class="text-muted">static-energy.vasp.materials-project</small>
-                                </div>
                             </td>
                             <td>Nudged Elastic Band calculation for migration barriers</td>
                             <td>
@@ -142,18 +103,15 @@
                             <td>Activation Energy</td>
                         </tr>
                         <tr>
-                            <td class="ps-4">
+                            <td class="ps-4 py-3">
                                 <a href="#"
                                    style="display: block;
                                           width: 100%;
                                           height: 100%;
                                           padding: 0;
                                           text-decoration: none">
-                                    <b>Molecular Dynamics (AIMD)</b> <i class="bi bi-box-arrow-in-right"></i>
+                                    <b>Molecular Dynamics</b> <i class="bi bi-box-arrow-in-right"></i>
                                 </a>
-                                <div>
-                                    <small class="text-muted">static-energy.vasp.materials-project</small>
-                                </div>
                             </td>
                             <td>Finite temperature time-dependent simulations</td>
                             <td>
@@ -162,7 +120,7 @@
                             <td>Trajectories, MSD</td>
                         </tr>
                         <tr>
-                            <td class="ps-4">
+                            <td class="ps-4 py-3">
                                 <a href="#"
                                    style="display: block;
                                           width: 100%;
@@ -171,12 +129,9 @@
                                           text-decoration: none">
                                     <b>Fixed-Composition Search</b> <i class="bi bi-box-arrow-in-right"></i>
                                 </a>
-                                <div>
-                                    <small class="text-muted">static-energy.vasp.materials-project</small>
-                                </div>
                             </td>
                             <td>
-                                Structural exploration of a fixed stoichiometry (LiCoO<sub>2</sub>)
+                                Structure prediction of a fixed stoichiometry (LiCoO<sub>2</sub>)
                             </td>
                             <td>
                                 <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger">High</span>
@@ -184,7 +139,7 @@
                             <td>Phase Stability</td>
                         </tr>
                         <tr>
-                            <td class="ps-4">
+                            <td class="ps-4 py-3">
                                 <a href="#"
                                    style="display: block;
                                           width: 100%;
@@ -193,11 +148,8 @@
                                           text-decoration: none">
                                     <b>Chemical System Search</b> <i class="bi bi-box-arrow-in-right"></i>
                                 </a>
-                                <div>
-                                    <small class="text-muted">static-energy.vasp.materials-project</small>
-                                </div>
                             </td>
-                            <td>Data-mining across a chemical space (Li-Co-O)</td>
+                            <td>Structure prediction across a chemical space (Li-Co-O)</td>
                             <td>
                                 <span class="badge rounded-pill bg-dark-subtle text-dark border border-dark">Very High</span>
                             </td>

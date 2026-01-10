@@ -5,7 +5,7 @@
             name="{{ name }}"
             class="select2 {% if multiselect %}select2-multiple{% endif %} form-control {% if allow_custom_input %}select2-dynamic{% endif %}"
             data-toggle="select2"
-            data-placeholder="Choose one ..."
+            data-placeholder="{{ placeholder }}"
             {% if multiselect %}multiple="multiple"{% endif %}
             {% if popout_parent_id %}data-dropdown-parent="#{{ popout_parent_id }}"{% endif %}
             {% if not defer %}
