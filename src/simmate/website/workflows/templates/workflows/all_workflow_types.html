@@ -4,7 +4,7 @@
     <section class="jumbotron text-center my-3">
         <div class="container">
             <h1 class="jumbotron-heading">Workflows</h1>
-            <p class="lead text-muted">Explore workflows, submit new runs, and view past results.</p>
+            <p class="lead text-muted">Explore workflows, submit new runs, and view past results</p>
         </div>
     </section>
     <div class="row my-3">
@@ -213,48 +213,7 @@
             <h4 class="mb-3">
                 <i class="bi bi-beaker-fill"></i> All
             </h4>
-            <div class="table-responsive mb-5">
-                <table class="table table-striped align-middle">
-                    <thead class="table-primary">
-                        <tr>
-                            <th style="min-width:25px"></th>
-                            <th style="min-width:150px">Type</th>
-                            <th style="min-width:125px">App(s)</th>
-                            <th style="min-width:150px">Preset</th>
-                            <th style="min-width:150px">Total Runs (#)</th>
-                            <th style="min-width:150px">Runs in last 30 days (#)</th>
-                            <th style="min-width:150px">
-                                <img src="/static/images/usdc-icon.svg" height="25">
-                                (median)
-                            </th>
-                            <th style="min-width:25px"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <a type="button" class="px-0 btn" href="#">
-                                    <i class="bi bi-star-fill text-warning"></i>
-                                </a>
-                            </td>
-                            <td>static-energy</td>
-                            <td>vasp</td>
-                            <td>materials-project</td>
-                            <td>204,533</td>
-                            <td>10,203</td>
-                            <td>$0.0003</td>
-                            <td>
-                                <a type="button" class="my-2 btn btn-sm btn-outline-primary" href="#">
-                                    <i class="bi bi-box-arrow-up-right"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="9">No workflows match your search criteria.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            {% htmx_component "workflow-search-form" %}
         </div>
     </div>
 {% endblock %}

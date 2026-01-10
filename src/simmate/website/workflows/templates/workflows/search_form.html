@@ -1,0 +1,111 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    <div class="row">
+        <div class="col-4">{% htmx_text_input name="text_search" show_label=False placeholder="Search..." defer=False %}</div>
+        <div class="col-5">
+            {% htmx_selectbox name="tags" show_label=False options=component.tags_options multiselect=True defer=False %}
+        </div>
+        <div class="col-3">
+            {% htmx_checkbox name="recommended_only" show_label=False side_text="Recommended Workflows Only" defer=False %}
+        </div>
+    </div>
+    <div>
+        <small>* metrics are reported as the median of all past runs</small>
+    </div>
+    <div class="mb-2">
+        <small>
+            ** accuracy rating is based on many factors such as level of theory, convergence criteria, and % error (vs. experimental values).
+            Read more <a href="#">here</a>
+        </small>
+    </div>
+    <div class="table-responsive mb-5">
+        <table class="table table-striped align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th style="min-width:50px"></th>
+                    <th style="min-width:200px">
+                        <a class="text-dark" href="#">
+                            Type
+                            <i class="bi bi-filter"></i>
+                        </a>
+                    </th>
+                    <th style="min-width:200px">
+                        <a class="text-dark" href="#">
+                            App(s)
+                            <i class="bi bi-filter"></i>
+                        </a>
+                    </th>
+                    <th style="min-width:250px">
+                        <a class="text-dark" href="#">
+                            Preset
+                            <i class="bi bi-filter"></i>
+                        </a>
+                    </th>
+                    <th style="min-width:125px">
+                        <a class="text-dark" href="#">
+                            Accuracy Rating
+                            <i class="bi bi-filter"></i>
+                        </a>
+                    </th>
+                    <th style="min-width:125px">
+                        <a class="text-dark" href="#">
+                            CPU Time
+                            <i class="bi bi-filter"></i>
+                        </a>
+                    </th>
+                    <th style="min-width:125px">
+                        <a class="text-dark" href="#">
+                            Real Time
+                            <i class="bi bi-filter"></i>
+                        </a>
+                    </th>
+                    <th style="min-width:125px">
+                        <a class="text-dark" href="#">
+                            Cost
+                            <img src="/static/images/usdc-icon.svg" height="25">
+                            <i class="bi bi-filter"></i>
+                        </a>
+                    </th>
+                    <th style="min-width:15px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if component.workflows %}
+                    {% for workflow in component.workflows %}
+                        <tr>
+                            <td>
+                                <a type="button" class="px-0 btn" href="#">
+                                    <i class="bi bi-heart text-danger"></i>
+                                </a>
+                            </td>
+                            <td>{{ workflow.name_type }}</td>
+                            <td>{{ workflow.name_app }}</td>
+                            <td>{{ workflow.name_preset }}</td>
+                            <td>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-half text-warning"></i>
+                                <i class="bi bi-star text-warning"></i>
+                            </td>
+                            <td>28.2 min</td>
+                            <td>14.2 min</td>
+                            <td>$0.0003</td>
+                            <td>
+                                <a type="button"
+                                   class="btn btn-sm btn-outline-primary"
+                                   href="{% url 'workflow_detail' workflow.name_type workflow.name_app workflow.name_preset %}">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9">No workflows match your search criteria.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
