@@ -1,0 +1,64 @@
+<div class="tab-pane" id="parameters-section">
+    <div class="row m-5">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Required</th>
+                        <th>Default</th>
+                        <th>Docs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {# Required Parameters #}
+                    {% for parameter in workflow.parameter_names_required %}
+                        <tr>
+                            <td>{{ parameter }}</td>
+                            <td>
+                                <i class="bi bi-check-circle-fill"></i>
+                            </td>
+                            <td></td>
+                            <td>
+                                <a type="button"
+                                   class="btn btn-sm btn-outline-primary"
+                                   href="https://jacksund.github.io/simmate/parameters/#{{ parameter }}"
+                                   target="_blank">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {# Optional Parameters #}
+                    {% for parameter, default_value in workflow.parameter_defaults.items %}
+                        <tr>
+                            <td>{{ parameter }}</td>
+                            <td></td>
+                            <td>
+                                {% if default_value is None %}
+                                    <span class="text-muted">(automatically set)</span>
+                                {% else %}
+                                    {{ default_value }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a type="button"
+                                   class="btn btn-sm btn-outline-primary"
+                                   href="https://jacksund.github.io/simmate/parameters/#{{ parameter }}"
+                                   target="_blank">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p>
+                <small>Read through our
+                    <a href="https://jacksund.github.io/simmate/parameters/" target="_blank">our parameter documentation</a>
+                    for more information.
+                </small>
+            </p>
+        </div>
+    </div>
+</div>

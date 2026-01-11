@@ -1,0 +1,171 @@
+{% extends "core_components/site_base.html" %}
+{% block tabtitle %}Workflows - Simmate{% endblock %}
+{% block body %}
+    <section class="jumbotron text-center my-3">
+        <div class="container">
+            <h1 class="jumbotron-heading">Workflows</h1>
+            <p class="lead text-muted">Explore workflows, submit new runs, and view past results</p>
+        </div>
+    </section>
+    <div class="row">
+        <div class="container-fluid my-3">
+            <h4 class="mb-3">
+                <i class="bi bi-mortarboard-fill"></i> Beginner
+            </h4>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th style="width: 25%">Workflow Type</th>
+                            <th style="width: 40%">Primary Objective</th>
+                            <th style="width: 15%">Computational Cost</th>
+                            <th style="width: 20%">Output</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <a href="#"
+                                   style="style"
+                                   None="display: block; width: 100%; height: 100%; padding: 0; text-decoration: none">
+                                    <b>Static Energy</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                            </td>
+                            <td>Electronic ground state energy at fixed coordinates</td>
+                            <td>
+                                <span class="badge rounded-pill bg-info-subtle text-info border border-info">Very Low</span>
+                            </td>
+                            <td>Total Energy</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <a href="#"
+                                   style="style"
+                                   None="display: block; width: 100%; height: 100%; padding: 0; text-decoration: none">
+                                    <b>Relaxation</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                            </td>
+                            <td>Geometry optimization to find local energy minimum</td>
+                            <td>
+                                <span class="badge rounded-pill bg-info-subtle text-info border border-info">Very Low</span>
+                            </td>
+                            <td>Optimized Coordinates</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <a href="#"
+                                   style="display: block;
+                                          width: 100%;
+                                          height: 100%;
+                                          padding: 0;
+                                          text-decoration: none">
+                                    <b>Population Analysis</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                            </td>
+                            <td>Detailed electronic dispersion and state density</td>
+                            <td>
+                                <span class="badge rounded-pill bg-success-subtle text-success border border-success">Low</span>
+                            </td>
+                            <td>Electron Density</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <a href="#"
+                                   style="display: block;
+                                          width: 100%;
+                                          height: 100%;
+                                          padding: 0;
+                                          text-decoration: none">
+                                    <b>DOS & Band-Structure</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                            </td>
+                            <td>Detailed electronic dispersion and state density</td>
+                            <td>
+                                <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning">Medium</span>
+                            </td>
+                            <td>Band Gap (eV)</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <a href="#"
+                                   style="display: block;
+                                          width: 100%;
+                                          height: 100%;
+                                          padding: 0;
+                                          text-decoration: none">
+                                    <b>Diffusion</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                            </td>
+                            <td>Nudged Elastic Band calculation for migration barriers</td>
+                            <td>
+                                <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger">High</span>
+                            </td>
+                            <td>Activation Energy</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <a href="#"
+                                   style="display: block;
+                                          width: 100%;
+                                          height: 100%;
+                                          padding: 0;
+                                          text-decoration: none">
+                                    <b>Molecular Dynamics</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                            </td>
+                            <td>Finite temperature time-dependent simulations</td>
+                            <td>
+                                <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger">High</span>
+                            </td>
+                            <td>Trajectories, MSD</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <a href="#"
+                                   style="display: block;
+                                          width: 100%;
+                                          height: 100%;
+                                          padding: 0;
+                                          text-decoration: none">
+                                    <b>Fixed-Composition Search</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                            </td>
+                            <td>
+                                Structure prediction of a fixed stoichiometry (LiCoO<sub>2</sub>)
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger">High</span>
+                            </td>
+                            <td>Phase Stability</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <a href="#"
+                                   style="display: block;
+                                          width: 100%;
+                                          height: 100%;
+                                          padding: 0;
+                                          text-decoration: none">
+                                    <b>Chemical System Search</b> <i class="bi bi-box-arrow-in-right"></i>
+                                </a>
+                            </td>
+                            <td>Structure prediction across a chemical space (Li-Co-O)</td>
+                            <td>
+                                <span class="badge rounded-pill bg-dark-subtle text-dark border border-dark">Very High</span>
+                            </td>
+                            <td>Phase Diagrams</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="container-fluid">
+            <h4 class="mb-3">
+                <i class="bi bi-star-fill"></i> All
+            </h4>
+            {% htmx_component "workflow-search-form" %}
+        </div>
+    </div>
+{% endblock %}

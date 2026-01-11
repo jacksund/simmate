@@ -25,7 +25,7 @@ def get_all_components(
     from simmate.database import connect
 
     app_components = []
-    for app_name in apps_to_search:
+    for app_name in apps_to_search + ["simmate.website.configs.WorkflowsConfig"]:
         # check if there is a components module for this app and load it if so
         components_path = get_app_submodule(app_name, "components")
         if not components_path:

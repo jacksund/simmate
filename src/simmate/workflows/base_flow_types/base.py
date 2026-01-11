@@ -3,6 +3,7 @@
 import inspect
 import json
 import logging
+import platform
 import re
 import uuid
 from functools import wraps
@@ -606,6 +607,27 @@ class Workflow:
 
     @classmethod
     @property
+    def name_python(cls) -> str:
+        """
+        Standardized name of the workflow in python, which is just the class name.
+        ex: `Static_Energy__VASP__Matproj`
+
+        listed as a attr for django templates
+        """
+        return str(cls.__name__)
+
+    @classmethod
+    @property
+    def python_path(cls) -> str:
+        """
+        Python path to the source code of the workflow
+
+        listed as a attr for django templates
+        """
+        return str(cls.__module__)
+
+    @classmethod
+    @property
     def tags(cls) -> list[str]:
         """
         Lists of tags to submit a the workflow with when using run_cloud.
@@ -730,13 +752,23 @@ class Workflow:
         )
 
     @classmethod
+    def get_config_markdown(cls):
+        """
+        Takes the result of get_config and converts it to a yaml + markdown format.
+        This method is used by the web ui
+        """
+        config = cls.get_config()
+        config_yaml = yaml.dump(config, sort_keys=False)
+        return f"``` yaml\n{config_yaml}```"
+
+    @classmethod
     def show_config(cls):
         """
         Takes the result of get_config and prints it in a yaml format that is
         easier to read.
         """
         config = cls.get_config()
-        print(yaml.dump(config))
+        print(yaml.dump(config, sort_keys=False))
 
     # -------------------------------------------------------------------------
     # Properties/method that configure registration of workflow runs and the
@@ -1236,6 +1268,130 @@ class Workflow:
                 )
 
         return parameters_cleaned
+
+    # -------------------------------------------------------------------------
+    # Config settings for the web ui
+    # -------------------------------------------------------------------------
+
+    is_hidden: bool = False
+    """
+    Whether the workflow is hidden from users in the web ui
+    """
+
+    is_recommended: bool = False
+    """
+    Whether the workflow is recommended for users in the web ui
+    """
+
+    accuracy_rating: float = None
+    """
+    accuracy rating is based on many factors such as level of theory, convergence 
+    criteria, and % error (vs. experimental values). Read more at:
+        - ...
+    
+    Ratings are on a scale of 0-5, which allows us to render the rating as 'stars'
+    in the web ui.
+    """
+
+    @classmethod
+    @property
+    def median_cost_usdc(cls) -> float:
+        """
+        Gives the median cost in USDC for all past workflow runs.
+
+        The web ui uses this regularly, so it is cached on a monthly-basis
+        """
+        return None  # TODO
+
+    @classmethod
+    @property
+    def median_real_time(cls) -> float:
+        """
+        Gives the median real time in seconds for all past workflow runs. This
+        will be less than the median CPU when the calculation is parallelized.
+
+        The web ui uses this regularly, so it is cached on a monthly-basis
+        """
+        return None  # TODO
+
+    @classmethod
+    @property
+    def median_cpu_time(cls) -> float:
+        """
+        Gives the median CPU time in seconds for all past workflow runs.
+
+        The web ui uses this regularly, so it is cached on a monthly-basis
+        """
+        return None  # TODO
+
+    # -------------------------------------------------------------------------
+    # Config settings for predicting CPU time and USDC pricing based on
+    # past workflow runs. This is primarily used in the web ui + open collective
+    # -------------------------------------------------------------------------
+
+    cpu_to_usdc_factor: float = 1
+    """
+    Factor to scale predicted CPU time to a USDC cost. This exists because some
+    workflows run on more expensive hardware. 
+    
+    For example, even if two workflows generally take the same CPU time to complete,
+    one might be more expensive than the other because it was ran on a node
+    with a high core count, more RAM, or generated a lot more data to store.
+    """
+
+    # cpu_time_predict_method: str = None
+    # TODO: add in some default methods like...
+    #   - fixed value
+    #   - median of past runs
+    #   - structure-based
+    #   - composition-based
+    #   - other (e.g. combo of structure-based and past runs data)
+
+    @classmethod
+    def predict_cpu_time(cls, **kwargs) -> float:
+        """
+        Given all kwargs that will be passed to `run_config` (such as structure),
+        it will predict the CPU time (in seconds)
+        """
+        # accepts all kwargs that run_config would (such as structure)
+
+        # TODO: use cpu_time_predict_method to build in default calc methods
+        return None
+
+    @classmethod
+    def get_usdc_price(cls, **kwargs):
+        # accepts all kwargs that run_config would (such as structure)
+
+        # this is a default method that can be overwritten
+        cpu_time = cls.predict_cpu_time(**kwargs)
+        return (
+            cpu_time * cls.cpu_to_usdc_factor * settings.website.pricing.usdc_per_cpu_hr
+            if cpu_time
+            else None
+        )
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    @property
+    def source_code_link(cls) -> str:
+        """
+        Gives the link to the source code in github
+        """
+        local_filename = inspect.getfile(cls)
+        source_path = (
+            local_filename.split("\\simmate\\")[-1].replace("\\", "/")
+            if platform.system() == "Windows"
+            else local_filename.split("/simmate/")[-1]
+        )
+        return (
+            f"https://github.com/jacksund/simmate/tree/main/src/simmate/{source_path}"
+        )
+
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
 def workflow(

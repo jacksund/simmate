@@ -13,7 +13,13 @@ class StaticEnergy__QuantumEspresso__LowQuality(StagedWorkflow):
     afterwards because ettings are still below MIT and Materials Project quality.
     """
 
-    # !!! Needs to be implemented
+    is_recommended = True
+
+    accuracy_rating = 1.5
+
+    # -------------------------------------------------------------------------
+
+    # TODO
     exclude_from_archives = []
 
     description_doc_short = "runs a series of relaxations (00-04 quality)"

@@ -14,7 +14,7 @@
         {% for section_name, datasets in data_config.items %}
             {% if datasets and section_name != "HIDDEN" %}
                 {# Section Heading #}
-                <h3 class="mt-4 pb-2 text-primary">{{ section_name }}</h3>
+                <h4 class="mt-4 pb-2">{{ section_name }}</h4>
                 {# Start of the table for the current section #}
                 <div class="table-responsive mb-5">
                     <table class="table table-striped align-middle">
@@ -31,8 +31,7 @@
                                     <td>
                                         {% if dataset.is_redistribution_allowed or not LOCK_DATA_REDISTRIBUTION %}
                                             {# the extra style is to make the link be the entire cell #}
-                                            <a class="text-dark"
-                                               href="{% url 'data_explorer:table' dataset.table_name %}"
+                                            <a href="{% url 'data_explorer:table' dataset.table_name %}"
                                                style="display: block;
                                                       width: 100%;
                                                       height: 100%;

@@ -20,7 +20,13 @@ class Relaxation__Vasp__MatprojPbesol(Relaxation__Vasp__Matproj):
     settings.
     """
 
+    is_recommended = True
+
+    accuracy_rating = 2.5
+
     description_doc_short = "based on pymatgen's MPMetalRelaxSet"
+
+    # -------------------------------------------------------------------------
 
     # Tell VASP to use PBEsol instead of base PBE
     _incar_updates = dict(GGA="PS")

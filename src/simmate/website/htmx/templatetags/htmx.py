@@ -387,6 +387,7 @@ def htmx_selectbox(
     options: list[str] = [],
     label: str = None,
     show_label: bool = True,
+    placeholder: str = "Select an option...",
     help_text: str = None,
     dynamic_options: bool = False,
     allow_custom_input: bool = False,

@@ -1,0 +1,184 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    <div class="row">
+        {% comment %}
+            <div class="col-4">{% htmx_text_input name="text_search" show_label=False placeholder="Search with AI..." defer=False %}</div>
+        {% endcomment %}
+        <div class="col-5">
+            {% htmx_selectbox name="tags" show_label=False placeholder="Filter by tags..." options=component.tags_options multiselect=True defer=False %}
+        </div>
+        <div class="col-3">
+            {% htmx_checkbox name="recommended_only" show_label=False side_text="Recommended Only <i class='bi bi-patch-check text-primary'></i>" defer=False %}
+            {# htmx_checkbox name="favorites_only" show_label=False side_text="Favorites Only <i class='bi bi-heart-fill text-danger'></i>" defer=False #}
+        </div>
+    </div>
+    <div>
+        <small>* metrics are reported as the median of all past runs</small>
+    </div>
+    <div class="mb-2">
+        <small>
+            ** accuracy rating is based on many factors such as level of theory, convergence criteria, and % error (vs. experimental values).
+            Read more <a href="#">here</a>
+        </small>
+    </div>
+    <div>
+        <b>Showing {{ component.nworkflows_show }} of {{ component.nworkflows }}</b>
+    </div>
+    <div class="table-responsive mb-5">
+        <table class="table table-striped align-middle">
+            <thead class="table-primary">
+                <tr>
+                    {% with ob=component.form_data.order_by.0 %}
+                        <th></th>
+                        <th style="min-width:200px">
+                            {% if ob == "name_type" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>Type</b>" grouped=True order_by_value="-name_type" %}
+                            {% elif ob == "-name_type" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>Type</b>" grouped=True order_by_value="name_type" %}
+                            {% else %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>Type</b>" grouped=True order_by_value="name_type" %}
+                            {% endif %}
+                        </th>
+                        <th style="min-width:200px">
+                            {% if ob == "name_app" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>App(s)</b>" grouped=True order_by_value="-name_app" %}
+                            {% elif ob == "-name_app" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>App(s)</b>" grouped=True order_by_value="name_app" %}
+                            {% else %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>App(s)</b>" grouped=True order_by_value="name_app" %}
+                            {% endif %}
+                        </th>
+                        <th style="min-width:200px">
+                            {% if ob == "name_preset" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>Preset</b>" grouped=True order_by_value="-name_preset" %}
+                            {% elif ob == "-name_preset" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>Preset</b>" grouped=True order_by_value="name_preset" %}
+                            {% else %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>Preset</b>" grouped=True order_by_value="name_preset" %}
+                            {% endif %}
+                        </th>
+                        <th style="min-width:140px">
+                            {% if ob == "accuracy_rating" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>Accuracy</b>" grouped=True order_by_value="-accuracy_rating" %}
+                            {% elif ob == "-accuracy_rating" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>Accuracy</b>" grouped=True order_by_value="accuracy_rating" %}
+                            {% else %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>Accuracy</b>" grouped=True order_by_value="accuracy_rating" %}
+                            {% endif %}
+                        </th>
+                        <th style="min-width:140px">
+                            {% if ob == "median_cpu_time" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>CPU Time</b>" grouped=True order_by_value="-median_cpu_time" %}
+                            {% elif ob == "-median_cpu_time" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>CPU Time</b>" grouped=True order_by_value="median_cpu_time" %}
+                            {% else %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>CPU Time</b>" grouped=True order_by_value="median_cpu_time" %}
+                            {% endif %}
+                        </th>
+                        <th style="min-width:140px">
+                            {% if ob == "median_real_time" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>Real Time</b>" grouped=True order_by_value="-median_real_time" %}
+                            {% elif ob == "-median_real_time" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>Real Time</b>" grouped=True order_by_value="median_real_time" %}
+                            {% else %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>Real Time</b>" grouped=True order_by_value="median_real_time" %}
+                            {% endif %}
+                        </th>
+                        <th style="min-width:140px">
+                            {% if ob == "median_cost_usdc" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="-median_cost_usdc" %}
+                            {% elif ob == "-median_cost_usdc" %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="median_cost_usdc" %}
+                            {% else %}
+                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="median_cost_usdc" %}
+                            {% endif %}
+                        </th>
+                        <th></th>
+                    {% endwith %}
+                </tr>
+            </thead>
+            <tbody>
+                {% if component.workflows_show %}
+                    {% for workflow in component.workflows_show %}
+                        <tr>
+                            {% comment %}
+                                <td>
+                                    <a type="button" class="px-0 btn" href="#">
+                                        <i class="bi bi-heart text-danger"></i>
+                                    </a>
+                                </td>
+                            {% endcomment %}
+                            <td>
+                                {% if workflow.is_recommended %}<i class="bi bi-patch-check text-primary"></i>{% endif %}
+                            </td>
+                            <td>{{ workflow.name_type }}</td>
+                            <td>{{ workflow.name_app }}</td>
+                            <td>{{ workflow.name_preset }}</td>
+                            <td>
+                                {% if workflow.accuracy_rating %}
+                                    {% for i in "12345" %}
+                                        {% with forloop.counter as current_star %}
+                                            {% if workflow.accuracy_rating >= current_star %}
+                                                <i class="bi bi-star-fill text-warning"></i>
+                                            {% elif workflow.accuracy_rating > current_star|add:"-1" %}
+                                                <i class="bi bi-star-half text-warning"></i>
+                                            {% else %}
+                                                <i class="bi bi-star text-warning"></i>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endfor %}
+                                {% else %}
+                                    --
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if workflow.median_cpu_time %}
+                                    {% if workflow.median_cpu_time > 1 %}
+                                        {{ workflow.median_cpu_time|floatformat:0 }} s
+                                    {% else %}
+                                        &lt;1 s
+                                    {% endif %}
+                                {% else %}
+                                    --
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if workflow.median_real_time %}
+                                    {% if workflow.median_real_time > 1 %}
+                                        {{ workflow.median_real_time|floatformat:0 }} s
+                                    {% else %}
+                                        &lt;1 s
+                                    {% endif %}
+                                {% else %}
+                                    --
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if workflow.median_cost_usdc %}
+                                    {% if workflow.median_cost_usdc > 0.01 %}
+                                        ${{ workflow.median_cost_usdc|floatformat:2 }}
+                                    {% else %}
+                                        &lt;$0.01
+                                    {% endif %}
+                                {% else %}
+                                    --
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a type="button"
+                                   class="btn btn-sm btn-outline-primary"
+                                   href="{% url 'workflow_detail' workflow.name_full %}">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="10">No workflows match your search criteria.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -243,11 +243,8 @@ class VaspWorkflow(S3Workflow, StructureWorkflow):
         settings for users to inspect.
         """
         return {
-            key: getattr(cls, key)
-            for key in [
-                "__module__",
-                "functional",
-                "incar",
-                "potcar_mappings",
-            ]
+            "incar": cls.incar,
+            "functional": cls.functional,
+            "potcar_mappings": cls.potcar_mappings,
+            "error_handlers": [e.name for e in cls.error_handlers],
         }
