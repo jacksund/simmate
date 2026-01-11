@@ -607,6 +607,27 @@ class Workflow:
 
     @classmethod
     @property
+    def name_python(cls) -> str:
+        """
+        Standardized name of the workflow in python, which is just the class name.
+        ex: `Static_Energy__VASP__Matproj`
+
+        listed as a attr for django templates
+        """
+        return str(cls.__name__)
+
+    @classmethod
+    @property
+    def python_path(cls) -> str:
+        """
+        Python path to the source code of the workflow
+
+        listed as a attr for django templates
+        """
+        return str(cls.__module__)
+
+    @classmethod
+    @property
     def tags(cls) -> list[str]:
         """
         Lists of tags to submit a the workflow with when using run_cloud.
@@ -731,13 +752,23 @@ class Workflow:
         )
 
     @classmethod
+    def get_config_markdown(cls):
+        """
+        Takes the result of get_config and converts it to a yaml + markdown format.
+        This method is used by the web ui
+        """
+        config = cls.get_config()
+        config_yaml = yaml.dump(config, sort_keys=False)
+        return f"``` yaml\n{config_yaml}```"
+
+    @classmethod
     def show_config(cls):
         """
         Takes the result of get_config and prints it in a yaml format that is
         easier to read.
         """
         config = cls.get_config()
-        print(yaml.dump(config))
+        print(yaml.dump(config, sort_keys=False))
 
     # -------------------------------------------------------------------------
     # Properties/method that configure registration of workflow runs and the
