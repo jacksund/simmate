@@ -3,6 +3,7 @@
 import inspect
 import json
 import logging
+import platform
 import re
 import uuid
 from functools import wraps
@@ -1263,7 +1264,7 @@ class Workflow:
 
     @classmethod
     @property
-    def median_cost_usdc(cls) -> list[str]:
+    def median_cost_usdc(cls) -> float:
         """
         Gives the median cost in USDC for all past workflow runs.
 
@@ -1273,7 +1274,7 @@ class Workflow:
 
     @classmethod
     @property
-    def median_real_time(cls) -> list[str]:
+    def median_real_time(cls) -> float:
         """
         Gives the median real time in seconds for all past workflow runs. This
         will be less than the median CPU when the calculation is parallelized.
@@ -1284,7 +1285,7 @@ class Workflow:
 
     @classmethod
     @property
-    def median_cpu_time(cls) -> list[str]:
+    def median_cpu_time(cls) -> float:
         """
         Gives the median CPU time in seconds for all past workflow runs.
 
@@ -1336,6 +1337,24 @@ class Workflow:
             cpu_time * cls.cpu_to_usdc_factor * settings.website.pricing.usdc_per_cpu_hr
             if cpu_time
             else None
+        )
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    @property
+    def source_code_link(cls) -> str:
+        """
+        Gives the link to the source code in github
+        """
+        local_filename = inspect.getfile(cls)
+        source_path = (
+            local_filename.split("\\simmate\\")[-1].replace("\\", "/")
+            if platform.system() == "Windows"
+            else local_filename.split("/simmate/")[-1]
+        )
+        return (
+            f"https://github.com/jacksund/simmate/tree/main/src/simmate/{source_path}"
         )
 
 

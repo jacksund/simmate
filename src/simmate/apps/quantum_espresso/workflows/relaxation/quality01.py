@@ -20,7 +20,11 @@ class Relaxation__QuantumEspresso__Quality01(Relaxation__QuantumEspresso__Qualit
     calculation as a second step.
     """
 
+    accuracy_rating = 0
+
     description_doc_short = "bare-bones settings for randomly-created structures"
+
+    # -------------------------------------------------------------------------
 
     control = dict(
         pseudo_dir__auto=True,  # uses the default directory for pseudopotentials

@@ -20,9 +20,13 @@ class Relaxation__QuantumEspresso__Quality02(Relaxation__QuantumEspresso__Qualit
     calculation as a third step.
     """
 
+    accuracy_rating = 0.5
+
     description_doc_short = (
         "slightly less bare-bones settings for randomly-created structures"
     )
+
+    # -------------------------------------------------------------------------
 
     symmetry_precision = 0.1
 

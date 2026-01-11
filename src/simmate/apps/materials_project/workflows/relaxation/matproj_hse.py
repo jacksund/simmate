@@ -48,7 +48,13 @@ class Relaxation__Vasp__MatprojHse(VaspWorkflow):
     Runs a VASP relaxation calculation using Materials Project HSE settings.
     """
 
+    is_recommended = True
+
+    accuracy_rating = 4.5
+
     description_doc_short = "based on pymatgen's MPHSERelaxSet"
+
+    # -------------------------------------------------------------------------
 
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS

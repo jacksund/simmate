@@ -54,7 +54,13 @@ class Relaxation__Vasp__Matproj(VaspWorkflow):
     settings.
     """
 
+    is_recommended = True
+
+    accuracy_rating = 2.5
+
     description_doc_short = "based on pymatgen's MPRelaxSet"
+
+    # -------------------------------------------------------------------------
 
     functional = "PBE"
     potcar_mappings = PBE_POTCAR_MAPPINGS
