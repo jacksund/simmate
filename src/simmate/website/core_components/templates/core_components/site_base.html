@@ -54,6 +54,15 @@
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
         {# Load the RDKit JS file #}
         <script src="https://unpkg.com/@rdkit/rdkit@2024.3.5-1.0.0/dist/RDKit_minimal.js"></script>
+        {# ThreeJS Javascript #}
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+                }
+            }
+        </script>
         {% if chemdraw_js %}
             <script src="{% static "chemdrawweb/chemdrawweb.js" %}"></script>
             <script>var ChemDrawLicenseURL = '{% static "/licenses/ChemDraw-JS-License.xml" %}';</script>
@@ -88,6 +97,7 @@
                 src="{% static 'js/bootstrap_utils.2025_09_23.js' %}"></script>
         <script type="text/javascript"
                 src="{% static 'js/htmx_utils.2025_09_25.js' %}"></script>
+        <script type="module" src="{% static 'js/threejs_utils.2026_01_11.js' %}"></script>
         {# Some pages may require extra lines in the header such as loading extra libraries #}
         {% block extraheader %}{% endblock %}
     </head>
