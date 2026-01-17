@@ -308,7 +308,7 @@ class SearchResults(models.QuerySet):
             f"attachment; filename={date_str}_simmate_{self.model.__name__}.csv"
         )
         df.to_csv(path_or_buf=response, index=False)
-        return response
+        return
 
     # -------------------------------------------------------------------------
 
@@ -1887,6 +1887,9 @@ class DatabaseTable(models.Model):
     @property
     def html_extra_entry_context(self) -> dict:
         return {}
+
+    def to_threejs_json(self):
+        return self.to_toolkit().to_threejs_json()
 
     # -------------------------------------------------------------------------
     # Methods for reports and plotting.

@@ -116,6 +116,9 @@ const ELEMENT_COLORS_JMOL = {
 
 // Creates a 3D structure/molecule viewport in ThreeJS
 function add_threejs_render(target_div_id, data) {
+
+    data = JSON.parse(data);
+    
     const container = document.getElementById(target_div_id);
     
     const scene = new THREE.Scene();

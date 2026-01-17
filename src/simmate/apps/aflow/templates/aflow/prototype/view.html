@@ -18,21 +18,11 @@
              class="border rounded-3 border-5"
              style="width: 600px;
                     height: 600px"></div>
+        DATA: {{ table_entry.to_threejs_json }}
         <script type="text/javascript">
-            // Data and execution moved here
-            const myCrystalData = {
-                "lattice": [[2.8, 0, 0], [-1.4, 2.4, 0], [0, 0, 14.0]],
-                "atoms": [
-                    ["Co", 1.25, [0, 0, 0]], 
-                    ["O",  0.60, [1.4, 0.8, 1.2]], ["O",  0.60, [-1.4, 0.8, 1.2]], ["O",  0.60, [0, -1.6, 1.2]],
-                    ["O",  0.60, [1.4, -0.8, -1.2]], ["O",  0.60, [-1.4, -0.8, -1.2]], ["O",  0.60, [0, 1.6, -1.2]],
-                    ["Li", 1.45, [0, 0, 4.6]]
-                ],
-                "bonds": [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6]]
-            };
             
-            // Note: Since the header script is a module, it is deferred.
-            // We wait for the window to load to ensure initCrystalVisualizer is defined.
+            const myCrystalData = {{ table_entry.to_threejs_json|safe }};
+
             window.addEventListener('load', () => {
                 if (window.add_threejs_render) {
                     window.add_threejs_render('viz-container', myCrystalData);
