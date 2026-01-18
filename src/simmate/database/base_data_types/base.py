@@ -1888,9 +1888,6 @@ class DatabaseTable(models.Model):
     def html_extra_entry_context(self) -> dict:
         return {}
 
-    def to_threejs_json(self):
-        return self.to_toolkit().to_threejs_json()
-
     # -------------------------------------------------------------------------
     # Methods for reports and plotting.
     # -------------------------------------------------------------------------

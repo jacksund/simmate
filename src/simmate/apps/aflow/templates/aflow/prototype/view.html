@@ -1,33 +1,4 @@
 {% extends "data_explorer/table_entry.html" %}
 {% block entrycontent %}
-    <h1>START RENDER AREA</h1>
-    <div>
-        <div id="ui">
-            <strong>LiCoO₂ Structure</strong>
-            <div class="legend-item">
-                <span class="dot" style="color:#CC80FF">●</span> Lithium
-            </div>
-            <div class="legend-item">
-                <span class="dot" style="color:#F090A0">●</span> Cobalt
-            </div>
-            <div class="legend-item">
-                <span class="dot" style="color:#FF0D0D">●</span> Oxygen
-            </div>
-        </div>
-        <div id="viz-container"
-             class="border rounded-3 border-5"
-             style="width: 600px;
-                    height: 600px"></div>
-        DATA: {{ table_entry.to_threejs_json }}
-        <script type="text/javascript">
-            
-            const myCrystalData = {{ table_entry.to_threejs_json|safe }};
-
-            window.addEventListener('load', () => {
-                if (window.add_threejs_render) {
-                    window.add_threejs_render('viz-container', myCrystalData);
-                }
-            });
-        </script>
-    </div>
+    <div>{% draw_structure table_entry %}</div>
 {% endblock %}

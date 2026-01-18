@@ -182,7 +182,17 @@ class Structure(PymatgenStructure):
         sanitize: bool = False,
         supercell: int = None,
         radius_mode: str | float = 0.75,  # number means all atoms fixed
+        color_map: dict | str = "JMOL",
     ) -> str:
+
+        if isinstance(color_map, dict):
+            pass  # already have an element map
+
+        elif color_map == "JMOL":
+            from ..visualization.coloring import ELEMENT_COLORS_JMOL_HEX as color_map
+
+        else:
+            raise Exception(f"Unknown color map: {color_map}")
 
         render_structure = self.get_sanitized_structure() if sanitize else self.copy()
         render_structure.add_oxidation_state_by_guess()
@@ -221,7 +231,7 @@ class Structure(PymatgenStructure):
             # TODO: handle unordered structures (self.is_ordered=False)
 
             # first store this base site to our site collection.
-            sites_to_draw.append((element, radius, site.coords.tolist()))
+            sites_to_draw.append((color_map[element], radius, site.coords.tolist()))
             jimage_ref[f"{site_index}-(0, 0, 0)"] = len(sites_to_draw) - 1
 
             # if we don't want edge elements, we just stick to the main sites
@@ -258,7 +268,7 @@ class Structure(PymatgenStructure):
                 for x in permutation:
                     shift_vector = numpy.add(shift_vector, lattice_matrix[x])
                 new_coords = site.coords + shift_vector
-                sites_to_draw.append((element, radius, new_coords.tolist()))
+                sites_to_draw.append((color_map[element], radius, new_coords.tolist()))
                 # when it comes times for bonding, we need to know the index
                 # and jimage combo for this site. Storing this in a reference
                 # dict is more efficient than iterating all possible sites and
@@ -288,7 +298,7 @@ class Structure(PymatgenStructure):
                 for x in permutation:
                     shift_vector = numpy.subtract(shift_vector, lattice_matrix[x])
                 new_coords = site.coords + shift_vector
-                sites_to_draw.append((element, radius, new_coords.tolist()))
+                sites_to_draw.append((color_map[element], radius, new_coords.tolist()))
                 #
                 jimage_vector = [0, 0, 0]
                 for x in permutation:

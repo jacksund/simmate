@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import urllib
 from textwrap import dedent
 
 import markdown as MarkdownConverter
@@ -130,10 +129,10 @@ def sdfdoodle(obj):
 
 
 @register.inclusion_tag(
-    filename="core_components/chem_elements/draw_3d_structure.html",
+    filename="core_components/chem_elements/draw_structure.html",
     takes_context=True,
 )
-def structure_3d(
+def draw_structure(
     context: dict,
     structure: ToolkitStructure | DatabaseStructure,
 ):
@@ -144,8 +143,6 @@ def structure_3d(
     sending this info to the frontend JS to be built and rendered with Three.js
     """
 
-    # if we are given a structure that is a database table instance, we simply
-    # grab the structure string
     if isinstance(structure, DatabaseStructure):
         structure = structure.to_toolkit()
     elif isinstance(structure, ToolkitStructure):
@@ -153,7 +150,17 @@ def structure_3d(
     else:
         raise Exception(f"Unknown structure type provided: {type(structure)}")
 
-    return {"structure": structure, "structure_serialized": structure.to_threejs_json()}
+    from simmate.toolkit.visualization.coloring import (
+        ELEMENT_COLORS_JMOL_HEX as color_map,
+    )
+
+    return {
+        "structure": structure,
+        "structure_serialized": structure.to_threejs_json(),  # TODO: use kwargs
+        "color_map": {
+            e.symbol: hex(color_map[e.symbol])[2:] for e in structure.composition
+        },
+    }
 
 
 @register.filter(name="plotly_figure")
