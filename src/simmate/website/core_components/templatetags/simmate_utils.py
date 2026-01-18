@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import urllib
 from textwrap import dedent
 
 import markdown as MarkdownConverter
@@ -129,34 +128,39 @@ def sdfdoodle(obj):
     return obj.replace("\n", "\\n")
 
 
-@register.filter(name="structure_url")
-def structure_to_url(structure):
+@register.inclusion_tag(
+    filename="core_components/chem_elements/draw_structure.html",
+    takes_context=True,
+)
+def draw_structure(
+    context: dict,
+    structure: ToolkitStructure | DatabaseStructure,
+):
     """
-    Converts a toolkit Structure to a URL GET query. For example, a structure
-    would return "?structure='...'". This is useful for when we want
-    to pass a crystal structure directly from a URL -- which is what is
-    done for our crystal structure viewer.
+    Converts a toolkit Structure into a rendered 3D viewport.
+
+    This is done by serializing the structure lattice, sites, and bonds and then
+    sending this info to the frontend JS to be built and rendered with Three.js
     """
 
-    # if we are given a structure that is a database table instance, we simply
-    # grab the structure string
     if isinstance(structure, DatabaseStructure):
-        structure_string = structure.structure
+        structure = structure.to_toolkit()
     elif isinstance(structure, ToolkitStructure):
-        # !!! This code should be located within a method on the toolkit class
-        storage_format = "POSCAR" if structure.is_ordered else "CIF"
-        structure_string = structure.to(fmt=storage_format)
-        # !!!
+        pass  # already good to go with toolkit
     else:
-        raise Exception("Unknown format provided.")
+        raise Exception(f"Unknown structure type provided: {type(structure)}")
 
-    # Take the output and convert it a URL query format
-    url_query = urllib.parse.urlencode(dict(structure_string=structure_string))
+    from simmate.toolkit.visualization.coloring import (
+        ELEMENT_COLORS_JMOL_HEX as color_map,
+    )
 
-    # Because we added new html to our script, we need to have Django check it
-    # ensure it safe before returning. Read more about this here:
-    # https://docs.djangoproject.com/en/3.2/howto/custom-template-tags/#filters-and-auto-escaping
-    return mark_safe(url_query)
+    return {
+        "structure": structure,
+        "structure_serialized": structure.to_threejs_json(),  # TODO: use kwargs
+        "color_map": {
+            e.symbol: hex(color_map[e.symbol])[2:] for e in structure.composition
+        },
+    }
 
 
 @register.filter(name="plotly_figure")

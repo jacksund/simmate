@@ -1,0 +1,34 @@
+<div class="viz-wrapper"
+     style="position: relative;
+            width: 600px;
+            height: 600px">
+    <div id="ui"
+         style="position: absolute;
+                top: 10px;
+                left: 10px;
+                z-index: 10;
+                background: rgba(255, 255, 255, 0.8);
+                padding: 10px;
+                border-radius: 5px;
+                pointer-events: none">
+        <strong>{{ structure.composition.to_html_string|safe }}</strong>
+        {% for element, element_color in color_map.items %}
+            <div class="legend-item">
+                <span class="dot" style="color:#{{ element_color }}">●</span> {{ element }}
+            </div>
+        {% endfor %}
+    </div>
+    <div id="viz-container"
+         class="border rounded-3 border-5"
+         style="width: 100%;
+                height: 100%"></div>
+    <script type="text/javascript">
+        const myCrystalData = {{ structure.to_threejs_json|safe }};
+    
+        window.addEventListener('load', () => {
+            if (window.add_threejs_render) {
+                window.add_threejs_render('viz-container', myCrystalData);
+            }
+        });
+    </script>
+</div>

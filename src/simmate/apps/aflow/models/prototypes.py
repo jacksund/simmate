@@ -22,8 +22,7 @@ class AflowPrototype(Structure):
     class Meta:
         db_table = "aflow__prototypes"
 
-    # disable cols
-    source = None
+    # -------------------------------------------------------------------------
 
     html_display_name = "AFLOW Prototypes"
     html_description_short = (
@@ -31,9 +30,16 @@ class AflowPrototype(Structure):
         " for Materials Discovery"
     )
 
+    html_entries_template = "aflow/prototype/table.html"
+    html_entry_template = "aflow/prototype/view.html"
+
+    # -------------------------------------------------------------------------
+
     external_website = "https://www.aflowlib.org/prototype-encyclopedia/"
     source_doi = "https://doi.org/10.1016/j.commatsci.2017.01.017"
     is_redistribution_allowed = False
+
+    # -------------------------------------------------------------------------
 
     remote_archive_link = "https://archives.simmate.org/AflowPrototype-2023-07-06.zip"
     archive_fields = [
@@ -43,6 +49,11 @@ class AflowPrototype(Structure):
         "strukturbericht_symbol",
         "nsites_wyckoff",
     ]
+
+    # -------------------------------------------------------------------------
+
+    # disable cols
+    source = None
 
     mineral_name = table_column.CharField(max_length=75, blank=True, null=True)
     """

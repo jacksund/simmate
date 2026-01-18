@@ -308,7 +308,7 @@ class SearchResults(models.QuerySet):
             f"attachment; filename={date_str}_simmate_{self.model.__name__}.csv"
         )
         df.to_csv(path_or_buf=response, index=False)
-        return response
+        return
 
     # -------------------------------------------------------------------------
 
