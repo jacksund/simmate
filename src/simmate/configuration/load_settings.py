@@ -308,6 +308,7 @@ class SimmateSettings:
                 # whether to use the username or first+last name when displaying
                 # users accross the website, such as in option menus
                 "user_format": "username",
+                # to enable USDC portions of the UI
             },
             # app-specific configs
             # TODO: consider moving these to the respective apps

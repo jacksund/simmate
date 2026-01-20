@@ -332,6 +332,13 @@ class Workflow:
             **parameters_serialized,
         )
 
+        # For the web ui, I need the database object of where the results will
+        # be so that I can give the user a link monitor.
+        if cls.use_database and "run_id" in parameters_serialized:
+            state.results_db_entry = cls.database_table.objects.get(
+                run_id=parameters_serialized["run_id"]
+            )
+
         logging.info(f"Successfully submitted (workitem_id={state.pk})")
 
         return state

@@ -46,7 +46,7 @@ def alert(
 )
 def draw_molecule(
     context: dict,
-    molecule: any,
+    molecule: DatabaseMolecule | ToolkitMolecule,
     div_id: str = None,
     width: int = 150,
     height: int = 150,
@@ -103,6 +103,7 @@ def foreign_key_link(
     display_column: str = None,
     mode: str = "text",  # other options are "pill" and "block"
     truncate_chars: int = "inf",
+    open_in_new: bool = False,
 ):
     return locals()
 

@@ -27,7 +27,7 @@
                     {% endif %}
                 </option>
             {% else %}
-                <option value="NONE">Choose one...</option>
+                <option value="NONE">{{ placeholder }}</option>
             {% endif %}
             {% if tuple_mode %}
                 {% for option_val, option_display in options %}

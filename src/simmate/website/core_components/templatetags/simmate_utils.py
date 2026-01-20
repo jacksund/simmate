@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import uuid
 from textwrap import dedent
 
 import markdown as MarkdownConverter
@@ -135,6 +136,8 @@ def sdfdoodle(obj):
 def draw_structure(
     context: dict,
     structure: ToolkitStructure | DatabaseStructure,
+    div_id: str = None,
+    dynamic: bool = False,
 ):
     """
     Converts a toolkit Structure into a rendered 3D viewport.
@@ -142,6 +145,10 @@ def draw_structure(
     This is done by serializing the structure lattice, sites, and bonds and then
     sending this info to the frontend JS to be built and rendered with Three.js
     """
+
+    # javascript requires unique ids
+    if not div_id:
+        div_id = uuid.uuid4().hex
 
     if isinstance(structure, DatabaseStructure):
         structure = structure.to_toolkit()
@@ -155,11 +162,13 @@ def draw_structure(
     )
 
     return {
+        "div_id": div_id,
         "structure": structure,
         "structure_serialized": structure.to_threejs_json(),  # TODO: use kwargs
         "color_map": {
             e.symbol: hex(color_map[e.symbol])[2:] for e in structure.composition
         },
+        "dynamic": dynamic,
     }
 
 
