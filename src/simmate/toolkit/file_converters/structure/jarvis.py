@@ -22,7 +22,6 @@ new_molecule_object = JarvisAtomsAdaptor.get_molecule(new_jarvis_object)
 ```
 """
 
-
 from pymatgen.io.jarvis import JarvisAtomsAdaptor
 
 __all__ = ["JarvisAtomsAdaptor"]

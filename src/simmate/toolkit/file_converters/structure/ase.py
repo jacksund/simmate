@@ -23,7 +23,6 @@ new_molecule_object = AseAtomsAdaptor.get_molecule(new_ase_object)
 ```
 """
 
-
 from pymatgen.io.ase import AseAtomsAdaptor
 
 __all__ = ["AseAtomsAdaptor"]
