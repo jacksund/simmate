@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pathlib import Path
-
+import logging
 from rdkit.Chem import AllChem, Draw
 
 from .molecule import Molecule
@@ -141,7 +141,21 @@ class Reaction:
         # OPTIMIZE: this calls RunReactants one set at a time
         rdkit_rxn = self.template_rdkit_reaction
         rdkit_reactants = tuple([r.rdkit_molecule for r in reactants])
-        rdkit_products = rdkit_rxn.RunReactants(tuple(rdkit_reactants))[0]
+        rdkit_product_pathways = rdkit_rxn.RunReactants(tuple(rdkit_reactants))
+        
+        num_pathways = len(rdkit_product_pathways)
+        if num_pathways == 0:
+            # failed to find any products. Might be issue in smarts query
+            # check that  is_smart_match to each reactants:
+            # [r.is_smarts_match(t) for t, r in zip(self.template_reactants, reactants)]
+            raise Exception("Failed to template reaction")
+            
+        elif num_pathways == 1:
+            # normal result where there is only one outcome
+            pass
+        
+        elif num_pathways > 1:
+            logging.warning(f"Found {num_pathways} potential products for single set of reactants")
 
         # BUG: rdkit doesn't fully initialize the mol objs... causing downstream
         # methods like mol.get_morgan_fingerprint() to fail. To fix this,
@@ -150,7 +164,7 @@ class Reaction:
         #   return [Molecule.from_rdkit(p) for p in rdkit_products]
         return [
             Molecule.from_smiles(Molecule.from_rdkit(p).to_smiles())
-            for p in rdkit_products
+            for ps in rdkit_product_pathways for p in ps
         ]
 
     # -------------------------------------------------------------------------

@@ -513,6 +513,7 @@ def htmx_molecule_input(
     load_button: bool = True,
     defer: bool = True,
     many_molecules: bool = False,
+    export_format: str = "mol",  # or 'smiles'
     # TODO:
     # initial_value: bool = None,
     #

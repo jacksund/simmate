@@ -38,7 +38,7 @@
                     {# this defer works, but it is annoying because there is a loading bar every time you make an edit #}
                     {% if not defer %}{% htmx_post %}{% endif %}>
                 </input>
-                <script>enable_mol_autowrite('{{ name }}-{{ component.component_id }}', '{{ name }}-{{ component.component_id }}-hidden');</script>
+                <script>enable_mol_autowrite('{{ name }}-{{ component.component_id }}', '{{ name }}-{{ component.component_id }}-hidden', '{{ export_format }}');</script>
             </div>
         {% endif %}
         {% if load_button %}
