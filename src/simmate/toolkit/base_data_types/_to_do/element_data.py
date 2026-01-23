@@ -16,7 +16,6 @@ base class uses. This file is therefore an exception to our coding philophosy du
 the specific use-case.
 """
 
-
 # --------------------------------------------------------------------------------------
 
 

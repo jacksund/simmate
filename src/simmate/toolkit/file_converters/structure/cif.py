@@ -33,7 +33,6 @@ cif_data.get_structures()
 ```
 """
 
-
 from pymatgen.io.cif import CifParser, CifWriter
 
 __all__ = ["CifParser", "CifWriter"]

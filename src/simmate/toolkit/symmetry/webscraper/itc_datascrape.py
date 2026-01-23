@@ -13,7 +13,6 @@ spacegroup 166, I can see:
 
 """
 
-
 import pandas as pd
 from rich.progress import track
 

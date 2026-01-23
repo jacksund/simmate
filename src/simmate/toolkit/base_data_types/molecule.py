@@ -75,7 +75,7 @@ class Molecule:
         self.rdkit_molecule = rdkit_molecule
 
         if not self.num_atoms:
-            raise Exception("Empty molecule! Not allowed")
+            raise self.EmptyMoleculeError("Empty molecule! Not allowed")
 
     def __repr__(self):
         """
@@ -1693,3 +1693,8 @@ class Molecule:
             }
             for atom in self.rdkit_molecule.GetAtoms()
         ]
+
+    # -------------------------------------------------------------------------
+
+    class EmptyMoleculeError(Exception):
+        pass

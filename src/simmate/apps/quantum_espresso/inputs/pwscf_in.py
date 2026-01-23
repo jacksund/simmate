@@ -768,15 +768,13 @@ class PwscfInput:
                 if hasattr(self, modifier_fxn_name):
                     modifier_fxn = getattr(self, modifier_fxn_name)
                 else:
-                    raise AttributeError(
-                        """
+                    raise AttributeError("""
                         It looks like you used a keyword modifier that hasn't
                         been defined yet! If you want something like `ENCUT__per_atom`,
                         then you need to make sure there is a `keyword_modifier_per_atom`
                         method available. "auto" modifiers are a special case where,
                         `ENCUT__auto` needs the method to be `keyword_modifier_ENCUT`.
-                        """
-                    )
+                        """)
 
                 # now that we have the modifier function, let's use it to update
                 # our value for this keyword.
