@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import numpy
-from pymatgen.analysis.diffusion.neb.pathfinder import DistinctPathFinder, IDPPSolver
+from pymatgen.analysis.diffusion.neb.pathfinder import (
+    DistinctPathFinder,
+    IDPPSolver,
+)
 from pymatgen.analysis.diffusion.neb.pathfinder import (
     MigrationHop as PymatgenMigrationHop,
 )
