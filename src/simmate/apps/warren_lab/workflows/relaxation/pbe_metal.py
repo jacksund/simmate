@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warren_lab.workflows.relaxation.pbe import (
-    Relaxation__Vasp__PbeWarren,
-)
+from simmate.apps.warren_lab.workflows.relaxation.pbe import Relaxation__Vasp__PbeWarren
 
 
 class Relaxation__Vasp__PbeMetalWarren(Relaxation__Vasp__PbeWarren):

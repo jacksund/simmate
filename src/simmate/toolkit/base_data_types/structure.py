@@ -181,7 +181,7 @@ class Structure(PymatgenStructure):
         bonding_method: str = "CrystalNN",
         sanitize: bool = False,
         supercell: int = None,
-        radius_mode: str | float = 0.75,  # number means all atoms fixed
+        radius_mode: str | float = 1.00,  # number means all atoms fixed
         color_map: dict | str = "JMOL",
     ) -> str:
 

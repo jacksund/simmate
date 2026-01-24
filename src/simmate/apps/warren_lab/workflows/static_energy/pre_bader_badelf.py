@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 from simmate.apps.vasp.inputs.potcar_mappings import PBE_GW_POTCAR_MAPPINGS
 
-from .hse import (
-    StaticEnergy__Vasp__HseWarren,
-)
-from .pbesol import (
-    StaticEnergy__Vasp__PbesolWarren,
-)
+from .hse import StaticEnergy__Vasp__HseWarren
+from .pbesol import StaticEnergy__Vasp__PbesolWarren
 from .scan import StaticEnergy__Vasp__ScanWarren
 
 

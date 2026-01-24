@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warren_lab.workflows.relaxation.hse import (
-    Relaxation__Vasp__HseWarren,
-)
+from simmate.apps.warren_lab.workflows.relaxation.hse import Relaxation__Vasp__HseWarren
 
 
 class Relaxation__Vasp__HsesolWarren(Relaxation__Vasp__HseWarren):

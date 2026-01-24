@@ -4,10 +4,7 @@ from pathlib import Path
 
 from baderkit.core import SpinElfLabeler
 
-from simmate.database.base_data_types import (
-    Calculation,
-    table_column,
-)
+from simmate.database.base_data_types import Calculation, table_column
 
 from .elf_analysis import ElfAnalysis
 

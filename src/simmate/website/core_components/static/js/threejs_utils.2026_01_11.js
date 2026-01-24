@@ -5,6 +5,9 @@ import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
 // Creates a 3D structure/molecule viewport in ThreeJS
 function add_threejs_render(target_div_id, data) {
     
+    // if we have a str then it is JSON, otherwise we already have a dict
+    data = typeof data === 'string' ? JSON.parse(data) : data;
+    
     const container = document.getElementById(target_div_id);
     
     const scene = new THREE.Scene();
@@ -39,7 +42,7 @@ function add_threejs_render(target_div_id, data) {
         const mesh = new THREE.Mesh(sphereGeo, mat);
         mesh.scale.setScalar(radius * 0.75);
         const outline = new THREE.Mesh(sphereGeo, outlineMat);
-        outline.scale.setScalar(radius * 0.75 + 0.04);
+        outline.scale.setScalar(radius * 0.75 + 0.06);
         group.add(mesh, outline);
         group.position.set(...coords);
         crystalGroup.add(group);
@@ -50,7 +53,7 @@ function add_threejs_render(target_div_id, data) {
     data.bonds.forEach(([iA, iB]) => {
         const start = atomPositions[iA], end = atomPositions[iB];
         const vec = new THREE.Vector3().subVectors(end, start);
-        const bondGeo = new THREE.CylinderGeometry(0.08, 0.08, vec.length(), 8);
+        const bondGeo = new THREE.CylinderGeometry(0.12, 0.12, vec.length(), 8);
         const bond = new THREE.Mesh(bondGeo, bondMat);
         bond.position.copy(start).add(vec.clone().multiplyScalar(0.5));
         bond.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), vec.clone().normalize());

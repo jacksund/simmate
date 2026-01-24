@@ -111,27 +111,3 @@ def load_data(filename: Path = "database_dump.json"):
     from simmate.database.utilities import load_database_from_json
 
     load_database_from_json(filename=filename)
-
-
-@database_app.command()
-def load_remote_archives(parallel: bool = False):
-    """
-    Loads all third-party data into the database
-
-    This utility helps with initializing a new database build.
-
-    :WARNING:
-    This can take several hours to run and there is no pause/continuation
-    implemented. This runs substantially faster when you are using a cloud
-    database backend (e.g. Postgres) and use the `--parallel` flag.
-
-    If you are using SQLite, we highly recommend using loading the prebuild
-    when you run `simmate database reset` instead.
-
-    - `--parallel`: (not allowed for SQLite3) loads data using parallel processing
-    """
-
-    from simmate.database import connect
-    from simmate.database.utilities import load_remote_archives
-
-    load_remote_archives(parallel=parallel)

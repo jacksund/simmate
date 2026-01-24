@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warren_lab.workflows.relaxation.pbe import (
-    Relaxation__Vasp__PbeWarren,
-)
+from simmate.apps.warren_lab.workflows.relaxation.pbe import Relaxation__Vasp__PbeWarren
 
 PBE_STATIC_SETTINGS = dict(
     IBRION=-1,  # (optional) locks everything between ionic steps

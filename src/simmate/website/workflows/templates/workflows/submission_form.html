@@ -1,0 +1,211 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    {% load static %}
+    <div class="row my-5">
+        <div class="col-3 border-end border-secondary-subtle">
+            {% if not component.is_structure_confirmed %}
+                <div class="p-2 bg-secondary-subtle">
+                    <h5 class="m-0">
+                        <i class="bi bi-1-circle"></i> Load Structure
+                    </h5>
+                </div>
+                <div class="p-2">
+                    <h5 class="m-0">
+                        <i class="bi bi-2-circle"></i> Price Check
+                    </h5>
+                </div>
+                <div class="p-2">
+                    <h5 class="m-0">
+                        <i class="bi bi-3-circle"></i> Review & Submit
+                    </h5>
+                </div>
+            {% elif not component.is_pricing_confirmed %}
+                <div class="p-2 text-success">
+                    <h5 class="m-0">
+                        <i class="bi bi-1-circle"></i> Load Structure <i class="bi bi-check-circle-fill"></i>
+                    </h5>
+                </div>
+                <div class="p-2 bg-secondary-subtle">
+                    <h5 class="m-0">
+                        <i class="bi bi-2-circle"></i> Price Check
+                    </h5>
+                </div>
+                <div class="p-2">
+                    <h5 class="m-0">
+                        <i class="bi bi-3-circle"></i> Review & Submit
+                    </h5>
+                </div>
+            {% elif not component.is_submission_confirmed %}
+                <div class="p-2 text-success">
+                    <h5 class="m-0">
+                        <i class="bi bi-1-circle"></i> Load Structure <i class="bi bi-check-circle-fill"></i>
+                    </h5>
+                </div>
+                <div class="p-2 text-success">
+                    <h5 class="m-0">
+                        <i class="bi bi-2-circle"></i> Price Check <i class="bi bi-check-circle-fill"></i>
+                    </h5>
+                </div>
+                <div class="p-2 bg-secondary-subtle">
+                    <h5 class="m-0">
+                        <i class="bi bi-3-circle"></i> Review & Submit
+                    </h5>
+                </div>
+            {% else %}
+                <div class="p-2 text-success">
+                    <h5 class="m-0">
+                        <i class="bi bi-1-circle"></i> Load Structure <i class="bi bi-check-circle-fill"></i>
+                    </h5>
+                </div>
+                <div class="p-2 text-success">
+                    <h5 class="m-0">
+                        <i class="bi bi-2-circle"></i> Price Check <i class="bi bi-check-circle-fill"></i>
+                    </h5>
+                </div>
+                <div class="p-2 text-success">
+                    <h5 class="m-0">
+                        <i class="bi bi-3-circle"></i> Review & Submit <i class="bi bi-check-circle-fill"></i>
+                    </h5>
+                </div>
+            {% endif %}
+            <div class="text-muted p-4">
+                <small>refresh the page to restart</small>
+            </div>
+        </div>
+        <div class="col-9 ">
+            {% if not component.form_data.structure %}
+                <div class="row ps-5">
+                    {% alert theme="info" message="Please provide a structure using one of the options below." %}
+                </div>
+                {% comment %}
+                    <div class="row ps-5 py-4">
+                        <div class="pb-2">
+                            <b>Option 1: Load example structure</b>
+                        </div>
+                        {% htmx_button method_name="load_example_input" icon="download" theme="secondary" small=True label="Load LiCoO<sub>2</sub>" %}
+                        <div class="text-muted">
+                            <small>
+                                ** you will not be able to submit the workflow (because the result is already in our database), but this will allow you
+                                to move forward with the workflow submission to see what it is like.
+                            </small>
+                        </div>
+                    </div>
+                {% endcomment %}
+                <div class="row ps-5 py-4">
+                    <div class="pb-2">
+                        <b>Option 1: Load from Database</b>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">{% htmx_selectbox name="database_table" placeholder="Choose table..." show_label=False %}</div>
+                        <div class="col-4">
+                            {% htmx_text_input name="database_id" placeholder="Enter ID... (ex: mp-123)" show_label=False %}
+                        </div>
+                        <div class="col-1">
+                            {% htmx_button method_name="load_database_input" icon="download" theme="secondary" small=True show_label=False %}
+                        </div>
+                    </div>
+                    <div>or</div>
+                    <div class="row">
+                        <div class="col-11">
+                            {% htmx_text_input name="database_url" placeholder="Paste link to structure (ex: https://simmate.org/data/MatprojStructure/1234/)" show_label=False %}
+                        </div>
+                        <div class="col-1">
+                            {% htmx_button method_name="load_url_input" icon="download" theme="secondary" small=True show_label=False %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row ps-5 py-4">
+                    <div class="pb-2">
+                        <b>Option 2: Load from File</b> <small>(CIF or POSCAR)</small>
+                    </div>
+                    {% htmx_file_upload name="structure_file" show_label=False defer=False %}
+                </div>
+                {% comment %}
+                    <div class="row ps-5 py-4">
+                        <div class="pb-2">
+                            <b>Option 4: Build from Prototype</b>
+                        </div>
+                    </div>
+                {% endcomment %}
+            {% elif not component.is_submission_confirmed %}
+                <div class="row ps-5 py-4">
+                    <div class="col-8">
+                        {% draw_structure component.form_data.structure div_id="submission_form_structure" dynamic=True %}
+                    </div>
+                    <div class="col-4">
+                        {% if not component.is_structure_confirmed %}
+                            {% alert theme="success" message="Successfully loaded structure" %}
+                            Confirm that this is your intended structure before continuing to the next step.
+                            {% htmx_button method_name="confirm_structure" theme="success" icon="check-circle" %}
+                        {% elif not component.is_pricing_confirmed %}
+                            <div class="text-center py-3">
+                                <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
+                                0.00 (free)
+                            </div>
+                            {% htmx_button method_name="confirm_pricing" theme="success" icon="check-circle" %}
+                        {% elif not component.is_submission_confirmed %}
+                            <div class="table-responsive">
+                                <table class="table table-striped align-middle">
+                                    <tbody>
+                                        <tr>
+                                            <td>Price</td>
+                                            <td>
+                                                <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
+                                                (free)
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Est. Real Time *</td>
+                                            <td>60 seconds</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Est. CPU Time</td>
+                                            <td>3 min</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            {# TO-DO: move this to when user sets up their USDC wallet in their profile #}
+                            {% htmx_checkbox name="accept_conditions" switch_mode=False show_label=False side_text="I accept the <a href='#' target='_blank'>Simmate Terms of Service <i class='bi bi-box-arrow-up-right'></i></a>" %}
+                            {% htmx_checkbox name="acknowledge_openness" switch_mode=False show_label=False side_text="I acknowledge that my submission and all results will be publicly available to other users" %}
+                            <div class="pt-3">
+                                {% htmx_button method_name="confirm_submission" label="Submit" theme="warning" icon="rocket-takeoff" %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                {# foreign_key_link component.status open_in_new=True #}
+                {# foreign_key_link component.status.results_db_entry open_in_new=True #}
+                <div class="row ps-5 py-4">
+                    <div class="card border-success shadow-sm">
+                        <div class="card-body p-5 text-center">
+                            <div class="mb-4">
+                                <i class="bi bi-rocket-takeoff-fill text-success"
+                                   style="font-size: 3rem"></i>
+                            </div>
+                            <h2 class="card-title h4">Workflow Successfully Submitted</h2>
+                            <p class="card-text text-muted mx-auto" style="max-width: 500px;">
+                                Thank you for contributing to our open-collective research!
+                            </p>
+                            <div class="mt-4 pt-5 border-top">
+                                <a href="{{ component.status.results_db_entry.get_absolute_url }}"
+                                   class="btn btn-success px-4 me-2">
+                                    <i class="bi bi-bar-chart"></i>&nbsp;&nbsp;
+                                    Go to Results
+                                </a>
+                                <a class="btn btn-secondary px-4" href="{% url 'profile' %}">
+                                    <i class="bi bi-person-circle"></i>&nbsp;&nbsp;
+                                    Go to Profile page
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="py-3">
+                        {% alert theme="info" message="Refreshing this page will clear this form for a new submission. You will be able to find all of your past submissions on your Profile page, and you can find all results in the Data tab." %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

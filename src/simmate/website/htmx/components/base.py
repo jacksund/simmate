@@ -9,6 +9,7 @@ from cachetools import LRUCache
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 
+from simmate.toolkit import Molecule, Structure
 from simmate.utilities import dotdict, str_to_datatype
 from simmate.website.utilities import parse_request_get
 
@@ -339,9 +340,22 @@ class HtmxComponent:
                     df.replace({numpy.nan: None}, inplace=True)
                     files_parsed.append(df)
 
+                elif file.name == "POSCAR":
+                    structure = Structure.from_str(
+                        file.read().decode("utf-8", errors="replace"),
+                        fmt="poscar",
+                    )
+                    files_parsed.append(structure)
+
+                elif file.name.endswith(".cif"):
+                    structure = Structure.from_str(
+                        file.read().decode("utf-8", errors="replace"),
+                        fmt="cif",
+                    )
+                    files_parsed.append(structure)
+
                 # TODO: other common types like yaml, json, and chemistry formats
                 else:
-                    breakpoint()
                     files_parsed.append(file)
 
             if len(files_parsed) == 0:
