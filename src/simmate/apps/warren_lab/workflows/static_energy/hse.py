@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warren_lab.workflows.relaxation.hse import (
-    Relaxation__Vasp__HseWarren,
-)
+from simmate.apps.warren_lab.workflows.relaxation.hse import Relaxation__Vasp__HseWarren
 
 HSE_STATIC_SETTINGS = dict(
     IBRION=-1,  # (optional) locks everything between ionic steps

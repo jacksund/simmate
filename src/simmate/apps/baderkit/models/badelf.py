@@ -5,11 +5,7 @@ from pathlib import Path
 from baderkit.core import Badelf as BadelfClass
 
 from simmate.apps.baderkit.models.elf_analysis import ElfAnalysis
-from simmate.database.base_data_types import (
-    Calculation,
-    Structure,
-    table_column,
-)
+from simmate.database.base_data_types import Calculation, Structure, table_column
 
 
 class Badelf(Structure):

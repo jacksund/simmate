@@ -406,52 +406,6 @@ def download_app_data(app_name: str, **kwargs):
     )
 
 
-def load_remote_archives(**kwargs):
-    """
-    Goes through all third-party databases and loads their most recent remote
-    archives (if available). This utility helps with initializing a new
-    database build.
-
-    Accepts the same parameters as the `load_remote_archive` method
-
-    WARNING:
-    This can take several hours to run and there is no pause/continuation
-    implemented. This runs substantially faster when you are using a cloud
-    database backend (e.g. Postgres) and use `parallel=True`.
-
-    If you are using SQLite, we highly recommend using `load_default_sqlite3_build`
-    instead of this utility, which downloads a full database that was built using
-    this method.
-    """
-    logging.warning(
-        "the 'load-remote-archives' method is depreciated and will be removed in 'v0.19.0'"
-    )
-
-    from simmate.apps.aflow.models import AflowPrototype
-    from simmate.apps.cod.models import CodStructure
-    from simmate.apps.jarvis.models import JarvisStructure
-    from simmate.apps.materials_project.models import MatprojStructure
-    from simmate.apps.oqmd.models import OqmdStructure
-
-    logging.info("Loading AFLOW Prototypes")
-    AflowPrototype.load_remote_archive(**kwargs)
-
-    logging.info("Loading JARVIS data")
-    JarvisStructure.load_remote_archive(**kwargs)
-
-    logging.info("Loading MatProj data")
-    MatprojStructure.load_remote_archive(**kwargs)
-    MatprojStructure.update_all_stabilities()
-
-    logging.info("Loading OQMD data")
-    OqmdStructure.load_remote_archive(**kwargs)
-
-    logging.info("Loading COD data")
-    CodStructure.load_remote_archive(**kwargs)  # BUG: this crashes the IDE.
-
-    logging.info("Success! Your database now contains all third-party data.")
-
-
 def load_default_sqlite3_build():
     """
     Loads a sqlite3 database archive that has all third-party data already

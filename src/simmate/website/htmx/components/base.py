@@ -342,7 +342,15 @@ class HtmxComponent:
 
                 elif file.name == "POSCAR":
                     structure = Structure.from_str(
-                        file.read().decode("utf-8"), fmt="poscar"
+                        file.read().decode("utf-8", errors="replace"),
+                        fmt="poscar",
+                    )
+                    files_parsed.append(structure)
+
+                elif file.name.endswith(".cif"):
+                    structure = Structure.from_str(
+                        file.read().decode("utf-8", errors="replace"),
+                        fmt="cif",
                     )
                     files_parsed.append(structure)
 

@@ -5,10 +5,7 @@ from pathlib import Path
 from baderkit.core import SpinBadelf as SpinBadelfClass
 
 from simmate.apps.baderkit.models.spin_elf_analysis import SpinElfAnalysis
-from simmate.database.base_data_types import (
-    Calculation,
-    table_column,
-)
+from simmate.database.base_data_types import Calculation, table_column
 
 from .badelf import Badelf
 

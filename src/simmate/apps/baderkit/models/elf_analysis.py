@@ -18,11 +18,7 @@ from baderkit.core.labelers.bifurcation_graph.enum_and_styling import FeatureTyp
 
 from simmate.apps.baderkit.models.elf_features import ElfFeatures
 from simmate.apps.baderkit.models.elf_radii import ElfRadii
-from simmate.database.base_data_types import (
-    Calculation,
-    Structure,
-    table_column,
-)
+from simmate.database.base_data_types import Calculation, Structure, table_column
 
 
 class ElfAnalysis(Structure):

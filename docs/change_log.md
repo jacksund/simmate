@@ -95,6 +95,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - moved all of `simmate.engine` module into `simmate.workflows`
 - deprec django-unicorn in favor of htmx
 - deprec badelf app as it is now a standalone python package (baderkit)
+- `load_remote_archives` is removed in favor of `database download`
 
 **Fixes**
 

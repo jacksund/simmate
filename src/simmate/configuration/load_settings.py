@@ -248,6 +248,12 @@ class SimmateSettings:
                         "simmate.apps.oqmd.models.OqmdStructure",
                     ],
                     "Workflow Results": [
+                        "simmate.database.workflow_results.StaticEnergy",
+                        "simmate.database.workflow_results.Relaxation",
+                        "simmate.database.workflow_results.PopulationAnalysis",
+                        "simmate.database.workflow_results.DiffusionAnalysis",
+                        "simmate.database.workflow_results.DensityofStatesCalc",
+                        "simmate.database.workflow_results.BandStructureCalc",
                         "simmate.apps.evolution.models.FixedCompositionSearch",
                         "simmate.apps.evolution.models.VariableNsitesCompositionSearch",
                         "simmate.apps.evolution.models.ChemicalSystemSearch",
@@ -267,6 +273,10 @@ class SimmateSettings:
                         "simmate.apps.emolecules.models.EmoleculesSupplierOffer",
                         "simmate.apps.evolution.models.SteadystateSource",
                         "simmate.apps.price_catalog.models.PricePoint",
+                        "simmate.database.workflow_results.IonicStep",
+                        "simmate.database.workflow_results.MigrationHop",
+                        "simmate.database.workflow_results.MigrationImage",
+                        "simmate.database.workflow_results.DynamicsIonicStep",
                     ],
                 },
                 # django extras
@@ -308,7 +318,6 @@ class SimmateSettings:
                 # whether to use the username or first+last name when displaying
                 # users accross the website, such as in option menus
                 "user_format": "username",
-                # to enable USDC portions of the UI
             },
             # app-specific configs
             # TODO: consider moving these to the respective apps

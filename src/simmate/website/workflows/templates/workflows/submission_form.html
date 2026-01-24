@@ -82,7 +82,7 @@
                         <div class="pb-2">
                             <b>Option 1: Load example structure</b>
                         </div>
-                        {% htmx_button method_name="load_example_input" icon="upload" theme="secondary" small=True label="Load LiCoO<sub>2</sub>" %}
+                        {% htmx_button method_name="load_example_input" icon="download" theme="secondary" small=True label="Load LiCoO<sub>2</sub>" %}
                         <div class="text-muted">
                             <small>
                                 ** you will not be able to submit the workflow (because the result is already in our database), but this will allow you
@@ -98,10 +98,10 @@
                     <div class="row">
                         <div class="col-4">{% htmx_selectbox name="database_table" placeholder="Choose table..." show_label=False %}</div>
                         <div class="col-4">
-                            {% htmx_text_input name="database_table_entry_id" placeholder="Enter ID... (ex: mp-123)" show_label=False %}
+                            {% htmx_text_input name="database_id" placeholder="Enter ID... (ex: mp-123)" show_label=False %}
                         </div>
                         <div class="col-1">
-                            {% htmx_button method_name="load_database_input" icon="upload" theme="secondary" small=True show_label=False %}
+                            {% htmx_button method_name="load_database_input" icon="download" theme="secondary" small=True show_label=False %}
                         </div>
                     </div>
                     <div>or</div>
@@ -110,7 +110,7 @@
                             {% htmx_text_input name="database_url" placeholder="Paste link to structure (ex: https://simmate.org/data/MatprojStructure/1234/)" show_label=False %}
                         </div>
                         <div class="col-1">
-                            {% htmx_button method_name="load_url_input" icon="upload" theme="secondary" small=True show_label=False %}
+                            {% htmx_button method_name="load_url_input" icon="download" theme="secondary" small=True show_label=False %}
                         </div>
                     </div>
                 </div>

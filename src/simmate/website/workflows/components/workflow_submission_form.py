@@ -2,6 +2,7 @@
 
 from django.http import HttpResponseRedirect
 
+from simmate.database.base_data_types import DatabaseTable
 from simmate.toolkit import Structure
 from simmate.website.htmx.components import HtmxComponent
 from simmate.workflows.base_flow_types import Workflow
@@ -26,9 +27,12 @@ class WorkflowSubmissionForm(HtmxComponent):
     # ]
 
     database_table_options = [
-        ("matproj", "Materials Project"),
-        ("jarvis", "JARVIS"),
-        ("aflow", "AFLOW"),
+        ("AflowStructure", "AFLOW"),
+        ("CodStructure", "COD"),
+        ("JarvisStructure", "JARVIS"),
+        ("MatprojStructure", "Materials Project"),
+        ("OqmdStructure", "OQMD"),
+        # TODO: consider pulling dynamically to include tables of past workflow results
     ]
 
     is_structure_confirmed: bool = False
@@ -72,13 +76,9 @@ class WorkflowSubmissionForm(HtmxComponent):
 
         self.is_submission_confirmed = True
 
-    def on_change_hook__structure_file(self):
+    # -------------------------------------------------------------------------
 
-        structure = self.form_data.pop("structure_file")
-
-        if not isinstance(structure, Structure):
-            raise Exception("Non-structure file provided")
-
+    def _set_structure(self, structure: Structure):
         self.form_data["structure"] = structure
 
         self.js_actions = [
@@ -89,3 +89,31 @@ class WorkflowSubmissionForm(HtmxComponent):
                 ]
             }
         ]
+
+    def on_change_hook__structure_file(self):
+
+        structure = self.form_data.pop("structure_file")
+
+        if not isinstance(structure, Structure):
+            raise Exception("Non-structure file provided")
+
+    # -------------------------------------------------------------------------
+
+    def load_database_input(self):
+        structure = DatabaseTable.from_dict(
+            {
+                "database_table": self.form_data["database_table"],
+                "database_id": self.form_data["database_id"],
+            }
+        ).to_toolkit()
+        self._set_structure(structure)
+
+    def load_url_input(self):
+        url_decomp = [x for x in self.form_data["database_url"].split("/") if x]
+        structure = DatabaseTable.from_dict(
+            {
+                "database_table": url_decomp[-2],
+                "database_id": url_decomp[-1],
+            }
+        ).to_toolkit()
+        self._set_structure(structure)
