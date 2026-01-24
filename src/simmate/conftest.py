@@ -13,7 +13,6 @@ This file helps share fixtures accross files as described
 [here](https://docs.pytest.org/en/6.2.x/fixture.html#conftest-py-sharing-fixtures-across-multiple-files).
 """
 
-
 import shutil
 from pathlib import Path
 
