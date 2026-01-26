@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import uuid
+
 import pytest
 from pandas import DataFrame
 
@@ -15,9 +17,11 @@ def test_static_energy_table(structure):
     Dynamics.show_columns()
     DynamicsIonicStep.show_columns()
 
+    run_id = uuid.uuid4()
+
     # test writing to database
     structure_db = Dynamics.from_run_context(
-        run_id="example-id-123",
+        run_id=run_id,
         workflow_name="example.test.workflow",
         workflow_version="1.2.3",
         structure=structure,
@@ -27,11 +31,11 @@ def test_static_energy_table(structure):
     # try grabbing the calculation again and make sure it loaded from the
     # database rather than creating a new entry
     structure_db2 = Dynamics.from_run_context(
-        run_id="example-id-123",
+        run_id=run_id,
         workflow_name="example.test.workflow",
         workflow_version="1.2.3",
     )
-    assert structure_db.id == structure_db.id
+    assert structure_db.id == structure_db2.id
 
     # test converting back to toolkit and ensuring the structure is the
     # same as before

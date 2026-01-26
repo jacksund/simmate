@@ -19,8 +19,6 @@ def workflow_detail(request, workflow_name):
 
     # TODO: grab some metadata about this calc. For example...
     # ncalculations = workflow.all_results.objects.count()
-    # nflows_submitted = workflow.nflows_submitted
-    # workflow.database_table
 
     context = {
         "workflow": workflow,

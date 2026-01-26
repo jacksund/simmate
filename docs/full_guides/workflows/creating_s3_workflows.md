@@ -52,8 +52,7 @@ class Example__Echo__SayHello(S3Workflow):
     command = "echo Hello"
 
 # behaves like a normal workflow
-state = Example__Echo__SayHello.run()
-result = state.result()
+result = Example__Echo__SayHello.run()
 ```
 
 !!! tip

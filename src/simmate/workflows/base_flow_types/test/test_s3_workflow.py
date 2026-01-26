@@ -97,9 +97,7 @@ def test_s3workflow_methods(tmp_path):
     workflow.show_config()  # a print statment w. nothing else to check
 
     # Test basic run
-    state = workflow.run(directory=tmp_path)
-    result = state.result()
-    assert state.is_completed()
+    result = workflow.run(directory=tmp_path)
     assert result == {"corrections": []}
 
 
@@ -248,17 +246,3 @@ def test_s3workflow_8(tmp_path):
         Customized__Testing__DummyWorkflow.run_config,
         directory=tmp_path,
     )
-
-
-# !!! Unitests to use with Prefect Executor
-# Test as a subflow
-# from prefect import flow
-# @flow
-# def test():
-#     state = workflow.run()
-#     return state.result()
-# state = test(return_state=True)
-# result = state.result()
-# assert state.is_completed()
-# assert result["directory"].exists()
-# shutil.rmtree(result["directory"])

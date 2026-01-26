@@ -181,7 +181,7 @@ class S3Workflow(Workflow):
         # each unique task.run() call. Otherwise we grab the default from the
         # class attribute.
         # Note: the default command might be already grabbed because the
-        # `_load_input_and_register` was called at a higher level (in _run_full)
+        # `_load_input_and_register` was called at a higher level (in run)
         command = cls.get_final_command(
             # we pass everything and let the method decide what's needed
             command=command,

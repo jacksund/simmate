@@ -56,12 +56,11 @@ class StagedWorkflow(Workflow):
             # get kwargs if they exist
 
             current_task = cls.subworkflows[0]
-            state = current_task.run(
+            result = current_task.run(
                 structure=structure,
                 directory=directory / current_task.name_full,
                 **subworkflow_kwargs,
             )
-            result = state.result()
             # append info to workflow lists
             subworkflow_ids.append(result.id)
         except Exception as e:
@@ -89,13 +88,12 @@ class StagedWorkflow(Workflow):
                 #     shutil.copyfile(previous_directory / file, new_directory / file)
 
                 try:
-                    state = current_task.run(
+                    result = current_task.run(
                         structure=result,  # this is the result of the last run
                         directory=new_directory,
                         previous_directory=result.directory,
                         **subworkflow_kwargs,
                     )
-                    result = state.result()
                     # append info to workflow lists
                     subworkflow_ids.append(result.id)
                 except:

@@ -12,7 +12,7 @@ result = workflow.run(
     updated_settings={
         "incar": {"NPAR": 1, "ENCUT": 600},
     },
-).result()
+)
 ```
 
 # Example input YAML
@@ -113,13 +113,12 @@ class Customized__Toolkit__UserConfig(Workflow):
         input_parameters.pop("source")
 
         # now run the task with the remaining parameters
-        state = NewWorkflow.run(
+        result = NewWorkflow.run(
             source={
                 "customized": True,
                 "updated_settings": updated_settings,
             },
             **input_parameters,
         )
-        result = state.result()
 
         return result

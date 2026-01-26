@@ -98,8 +98,7 @@ Simmate comes with ready-to-use workflows for most common calculated properties,
     from simmate.workflows.utilities import get_workflow
     
     workflow = get_workflow("relaxation.vasp.matproj")
-    status = workflow.run(structure="NaCl.cif")
-    result = status.result()
+    result = workflow.run(structure="NaCl.cif")
     ```
 
 === "website"

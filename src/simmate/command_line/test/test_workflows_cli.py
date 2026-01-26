@@ -6,7 +6,6 @@ from simmate.apps.vasp.inputs import Potcar
 from simmate.command_line.workflows import workflows_app
 from simmate.conftest import make_dummy_files
 from simmate.workflows import Workflow
-from simmate.workflows.base_flow_types.base import DummyState
 
 
 def test_workflows_list_all(command_line_runner):
@@ -101,7 +100,7 @@ def test_workflows_run(command_line_runner, structure, mocker, tmp_path):
     mocker.patch.object(
         Workflow,
         "run",
-        return_value=DummyState(None),
+        return_value=None,
     )
     # the code above can be modified for a prefect executor
     # from prefect.states import Completed
@@ -155,7 +154,7 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmp_path):
     mocker.patch.object(
         Workflow,
         "run",
-        return_value=DummyState(None),
+        return_value=None,
     )
     # the code above can be modified for a prefect executor
     # from prefect.states import Completed
@@ -178,7 +177,7 @@ def test_workflows_run_yaml(command_line_runner, structure, mocker, tmp_path):
     mocker.patch.object(
         Workflow,
         "run_cloud",
-        return_value=DummyState(None),
+        return_value=None,
     )
     # the code above can be modified for a prefect executor
     # from prefect.states import Completed

@@ -77,7 +77,7 @@ class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
             command=command,
             source=source,
             directory=prebadelf_dir,
-        ).result()
+        )
 
         # And run the bader analysis on the resulting chg denisty + elfcar
         badelf_dir = directory / PopulationAnalysis__Bader__Badelf.name_full
@@ -85,7 +85,7 @@ class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
             structure=structure_w_empties,
             directory=badelf_dir,
             previous_directory=prebadelf_dir,
-        ).result()
+        )
 
         # The from_vasp_directory method that loads results into the database
         # requires the following files to be in the main directory:

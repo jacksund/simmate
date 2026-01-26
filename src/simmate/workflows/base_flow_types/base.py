@@ -23,28 +23,7 @@ from simmate.utilities import (
     get_directory,
     make_archive,
 )
-from simmate.workflows.execution import SimmateExecutor, WorkItem
-
-
-class DummyState:
-    """
-    This class is meant to emulate Prefect States. By wrapping a result into
-    State, we enable higher-level features that depend on a call to
-    `state.result()`.
-
-    This class should not be used directly as it is automatically applied with
-    the `Workflow.run` method
-    """
-
-    def __init__(self, result):
-        self._result = result
-
-    def result(self):
-        return self._result
-
-    @staticmethod
-    def is_completed():
-        return True
+from simmate.workflows.execution import SimmateExecutor
 
 
 class Workflow:
@@ -80,7 +59,7 @@ class Workflow:
     `_register_calculation`.
     """
 
-    _parameter_methods: list[str] = ["run_config", "_run_full"]
+    _parameter_methods: list[str] = ["run_config", "run"]
     """
     List of methods that allow unique input parameters. This helps track where
     `**kwargs` are passed and let's us gather the inputs in one place.
@@ -165,30 +144,14 @@ class Workflow:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def run(cls, **kwargs) -> DummyState:
-        """
-        The highest-level method to run a workflow. This includes calling
-        `run_config` and all of the extra steps involved (such as registering
-        a calculation to the database and creating the working directory).
-
-        For advanced users, we recommend reading through the `_run_full` method
-        to see the full workflow logic.
-        """
-        # Note: this is a separate method and wrapper around run_full because
-        # we want to allow Prefect executor to overwrite this method.
-        result = cls._run_full(**kwargs)
-        state = DummyState(result)
-        return state
-
-    @classmethod
-    def _run_full(
+    def run(
         cls,
         run_id: str = None,
         directory: Path | str = None,
         compress_output: bool = False,
         source: dict = None,
         **kwargs,
-    ):
+    ) -> any:
         """
 
         The full logic for a workflow run. This deserialize input parameters,
@@ -225,22 +188,28 @@ class Workflow:
             This is useful if you want to label results in your database.
 
         """
-        # This method is isolated only because we want to wrap it as a prefect
-        # workflow in some cases.
+
         logging.info(f"Starting '{cls.name_full}'")
-        kwargs_cleaned = cls._load_input_and_register(
+        kwargs_cleaned, calculation = cls._load_input_and_register(
             run_id=run_id,
             directory=directory,
             compress_output=compress_output,
             source=source,
             started_at=timezone.now(),
+            status="Running",
             **kwargs,
         )
 
-        # Finally run the core part of the workflow. This should return a
-        # dictionary object if we have "use_database=True", but can be
-        # any python object if "use_database=False"
-        results = cls.run_config(**kwargs_cleaned)
+        try:
+            # Finally run the core part of the workflow. This should return a
+            # dictionary object if we have "use_database=True", but can be
+            # any python object if "use_database=False"
+            results = cls.run_config(**kwargs_cleaned)
+
+        except Exception as e:
+            calculation.status = "Failed"
+            calculation.save()
+            raise e
 
         # save the result to the database
         if cls.use_database:
@@ -261,6 +230,7 @@ class Workflow:
                 results=results if results != None else {},
                 directory=kwargs_cleaned["directory"],
                 run_id=kwargs_cleaned["run_id"],
+                status="Completed",
                 finished_at=timezone.now(),
             )
 
@@ -310,9 +280,10 @@ class Workflow:
         # If we are submitting using a filename, we don't want to
         # submit to a cluster and have the job fail because it doesn't have
         # access to the file. We therefore go through the full load_input process
-        kwargs_cleaned = cls._load_input_and_register(
+        kwargs_cleaned, calculation = cls._load_input_and_register(
             setup_directory=False,
             write_metadata=False,
+            status="Pending",
             **kwargs,
         )
 
@@ -327,17 +298,15 @@ class Workflow:
             tags = cls.tags if settings.database_backend != "sqlite3" else ["simmate"]
 
         state = SimmateExecutor.submit(
-            cls._run_full,  # should this be the run method...?
+            cls.run,
             tags=tags,
             **parameters_serialized,
         )
 
         # For the web ui, I need the database object of where the results will
         # be so that I can give the user a link monitor.
-        if cls.use_database and "run_id" in parameters_serialized:
-            state.results_db_entry = cls.database_table.objects.get(
-                run_id=parameters_serialized["run_id"]
-            )
+        if cls.use_database:
+            state.results_db_entry = calculation
 
         logging.info(f"Successfully submitted (workitem_id={state.pk})")
 
@@ -358,7 +327,7 @@ class Workflow:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def run_from_file(cls, filename: Path) -> DummyState:
+    def run_from_file(cls, filename: Path) -> any:
         """
         Runs a workflow locally where parameters are loaded from a yaml or toml file
         """
@@ -367,7 +336,7 @@ class Workflow:
         return state
 
     @classmethod
-    def run_cloud_from_file(cls, filename: Path):
+    def run_cloud_from_file(cls, filename: Path) -> any:
         """
         Submits a workflow to cloud for remote running where parameters are loaded
         from a yaml or toml file
@@ -413,23 +382,6 @@ class Workflow:
         # and just return the workflow class itself.
         else:
             return cls, parameters
-
-    # -------------------------------------------------------------------------
-    # Methods that interact with the Executor class in order to see what
-    # has been submitted to cloud.
-    # -------------------------------------------------------------------------
-
-    @classmethod
-    @property
-    def nflows_submitted(cls) -> int:
-        """
-        Queries the Simmate database to see how many workflows are in a
-        running or pending state.
-        """
-        return WorkItem.objects.filter(
-            status__in=["P", "R"],
-            tags=cls.tags,
-        ).count()
 
     # -------------------------------------------------------------------------
     # Methods that help with accessing the database and saving results
@@ -503,6 +455,7 @@ class Workflow:
     def _update_database_with_results(
         cls,
         results: dict,
+        status: str,
         run_id: str,
         directory: Path,
         finished_at: timezone.datetime,
@@ -537,12 +490,14 @@ class Workflow:
                     calculation=calculation,
                     results=results,
                     directory=directory,
+                    status=status,
                 )
         # Otherwise we hand this off to the database object
         else:
             calculation.update_from_results(
                 results=results,
                 directory=directory,
+                status=status,
             )
 
         # write the output summary to file
@@ -960,8 +915,11 @@ class Workflow:
             parameters_cleaned.get("run_id", None) or cls._get_new_run_id()
         )
 
-        if cls.use_database:
+        calculation = (
             cls._register_calculation(**parameters_cleaned)
+            if cls.use_database
+            else None
+        )
 
         # ---------------------------------------------------------------------
 
@@ -1013,8 +971,9 @@ class Workflow:
         # ---------------------------------------------------------------------
 
         # Finally we just want to return the dictionary of cleaned parameters
-        # to be used by the workflow
-        return parameters_cleaned
+        # to be used by the workflow.run_config, as well as the calc_db object
+        # so that we can update the status along the way
+        return parameters_cleaned, calculation
 
     @staticmethod
     def _get_new_run_id():
@@ -1052,7 +1011,7 @@ class Workflow:
                 table_columns.append(field.name)
                 table_columns.append(f"{field.name}_id")
 
-        for parameter in cls.parameter_names:
+        for parameter in cls.parameter_names + ["status"]:
             if parameter in table_columns:
                 parameters_to_register.append(parameter)
 

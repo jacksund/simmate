@@ -43,23 +43,19 @@ class ElectronicStructureWorkflow(Workflow):
             source=source,
             # For band-structures, unit cells should be in the standardized format
             standardize_structure="primitive",
-        ).result()  # block until complete
+        )
 
-        dos_state = cls.density_of_states_workflow.run(
+        dos_result = cls.density_of_states_workflow.run(
             structure=static_result,
             command=command,
             directory=directory / cls.density_of_states_workflow.name_full,
         )
 
-        bs_state = cls.band_structure_workflow.run(
+        bs_result = cls.band_structure_workflow.run(
             structure=static_result,
             command=command,
             directory=directory / cls.band_structure_workflow.name_full,
         )
 
-        # block until complete
-        dos_state.result()
-        bs_state.result()
-
         # TODO:
-        # workup dos_state.result() and bs_state.result() into single figure
+        # workup dos_result and bs_result into single figure

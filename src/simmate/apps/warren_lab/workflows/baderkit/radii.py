@@ -42,7 +42,7 @@ class ElfAnalysis__VaspBaderkit__ElfRadiiWarren(Workflow):
             source=source,
             directory=static_dir,
             **subworkflow_kwargs,
-        ).result()
+        )
 
         # Next we run a Bader analysis
         bader_dir = directory / Bader__Baderkit__Bader.name_full
@@ -59,7 +59,7 @@ class ElfAnalysis__VaspBaderkit__ElfRadiiWarren(Workflow):
             previous_directory=static_dir,
             source=result,
             **subworkflow_kwargs,
-        ).result()
+        )
 
 
 class StaticEnergy__Vasp__PreRadiiWarren(StaticEnergy__Vasp__PbesolWarren):

@@ -60,11 +60,10 @@ class Restart__Toolkit__Automatic(Workflow):
         }
 
         # now instead of calling the workflow's run method, we use its run_restart
-        state = workflow.run(
+        result = workflow.run(
             directory=directory_new_cleaned,
             is_restart=True,
             **input_parameters,
         )
-        result = state.result()
 
         return result

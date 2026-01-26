@@ -77,7 +77,7 @@ class NebFromEndpointWorkflow(Workflow):
         )
 
         # Relax the starting supercell structure
-        endpoint_start_state = cls.endpoint_relaxation_workflow.run(
+        endpoint_start_result = cls.endpoint_relaxation_workflow.run(
             structure=supercell_start,
             command=command,  # subcommands["command_supercell"]
             directory=directory / f"{cls.endpoint_relaxation_workflow.name_full}.start",
@@ -85,26 +85,22 @@ class NebFromEndpointWorkflow(Workflow):
         )
 
         # Relax the ending supercell structure
-        endpoint_end_state = cls.endpoint_relaxation_workflow.run(
+        endpoint_end_result = cls.endpoint_relaxation_workflow.run(
             structure=supercell_end,
             command=command,  # subcommands["command_supercell"]
             directory=directory / f"{cls.endpoint_relaxation_workflow.name_full}.end",
             is_restart=is_restart,
         )
 
-        # wait for the endpoint relaxations to finish
-        endpoint_start_result = endpoint_start_state.result()
-        endpoint_end_result = endpoint_end_state.result()
-
         # interpolate / empirically relax the endpoint structures
         images = get_migration_images_from_endpoints(
             supercell_start=endpoint_start_result,
             supercell_end=endpoint_end_result,
             nimages=nimages,
-        ).result()
+        )
 
         # Run NEB on this set of images
-        neb_state = cls.from_images_workflow.run(
+        neb_result = cls.from_images_workflow.run(
             migration_images=images,
             command=command,  # subcommands["command_neb"]
             directory=directory,
@@ -118,4 +114,4 @@ class NebFromEndpointWorkflow(Workflow):
             run_id=run_id,
         )
 
-        return neb_state.result()
+        return neb_result

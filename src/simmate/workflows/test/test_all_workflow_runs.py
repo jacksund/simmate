@@ -111,22 +111,21 @@ def test_all_workflow_runs(tmp_path, sample_structures):
         ]
         for workflow_name in dynamics_flows:
             workflow = get_workflow(workflow_name)
-            state = workflow.run(
+            result = workflow.run(
                 structure=structure,
                 command="mpirun -n 14 vasp_std > vasp.out",
                 nsteps=50,
                 temperature_start=400,
                 temperature_end=400,
             )
-            if state.is_completed():
-                successful_flows.append(workflow_name)
+        successful_flows.append(workflow_name)
 
         # TEST NEB FLOWS
         # For diffusion, we look at I- diffusion in Y2CI2 (takes roughly 1 hr)
         structure = sample_structures["Y2CI2_mp-1206803_primitive"]
         workflow_name = "diffusion.vasp.neb-all-paths-mit"
         workflow = get_workflow(workflow_name)
-        state = workflow.run(
+        result = workflow.run(
             structure=structure,
             migrating_specie="I",
             command="mpirun -n 14 vasp_std > vasp.out",
@@ -135,9 +134,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
             max_atoms=25,
             min_length=4,
         )
-        state.result()
-        if state.is_completed():
-            successful_flows.append(workflow_name)
+        successful_flows.append(workflow_name)
 
         # TEST BadELF FLOWS
         structure = sample_structures["Ca2N_mp-2686_primitive"]
@@ -150,16 +147,14 @@ def test_all_workflow_runs(tmp_path, sample_structures):
         # which can be used for partitioning, each of which needs to be tested
         algorithms = ["badelf", "voronelf", "zero-flux"]
         for algorithm in algorithms:
-            state = workflow.run(
+            result = workflow.run(
                 structure=structure,
                 command="mpirun -n 14 vasp_std > vasp.out",
                 algorithm=algorithm,
                 cores=14,
                 check_for_covalency=False,
             )
-            state.result()
-            if state.is_completed():
-                successful_flows.append(workflow_name)
+            successful_flows.append(workflow_name)
 
     # check which flows either (1) failed or (2) weren't tested
     all_flows = get_all_workflow_names()

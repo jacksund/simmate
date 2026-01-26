@@ -34,7 +34,7 @@ class Bader__VaspBaderkit__BaderWarren(Workflow):
             source=source,
             directory=prebader_dir,
             **subworkflow_kwargs,
-        ).result()
+        )
 
         # And run the bader analysis on the resulting chg denisty
         bader_dir = directory / Bader__Baderkit__Bader.name_full
@@ -43,7 +43,7 @@ class Bader__VaspBaderkit__BaderWarren(Workflow):
             previous_directory=prebader_dir,
             source=result,
             **subworkflow_kwargs,
-        ).result()
+        )
 
 
 class StaticEnergy__Vasp__PrebaderWarren(StaticEnergy__Vasp__PbesolWarren):

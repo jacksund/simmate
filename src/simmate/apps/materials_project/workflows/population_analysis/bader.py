@@ -32,14 +32,14 @@ class PopulationAnalysis__VaspBader__BaderMatproj(Workflow):
             command=command,
             source=source,
             directory=prebader_dir,
-        ).result()
+        )
 
         # And run the bader analysis on the resulting chg denisty
         bader_dir = directory / PopulationAnalysis__Bader__Bader.name_full
         PopulationAnalysis__Bader__Bader.run(
             directory=bader_dir,
             previous_directory=prebader_dir,
-        ).result()
+        )
 
         # The from_vasp_directory method that loads results into the database
         # requires the following files to be in the main directory:

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import uuid
 from datetime import timedelta
 
 import cloudpickle  # needed to serialize Prefect workflow runs and tasks
@@ -45,8 +46,6 @@ class SimmateExecutor:
         tags: list[str] = [],
         **kwargs,
     ) -> WorkItem:
-        # The *args and **kwargs input separates args into a tuple and kwargs into
-        # a dictionary for me, which makes their storage very easy!
 
         # BUG-FIX: sqlite can't filter tags properly so we add a rule that
         # all tags must have the same number of characters AND be all lower-case.
@@ -63,6 +62,9 @@ class SimmateExecutor:
                         "Read the `tags` parameter docs for more information."
                     )
 
+        # Pull the run_id and use it as this item's UUID
+        run_id = kwargs["run_id"] if "run_id" in kwargs else uuid.uuid4()
+
         # make the WorkItem where all of the provided inputs are pickled and
         # save the workitem to the database.
         # Pickling is just converting them to a byte string format
@@ -71,6 +73,7 @@ class SimmateExecutor:
         # adding another WorkItem at the same time.
         # TODO - should I put pickling in a "try" in case it fails?
         workitem = WorkItem.objects.create(
+            id=run_id,
             fxn=cloudpickle.dumps(fxn),
             args=cloudpickle.dumps(args),
             kwargs=cloudpickle.dumps(kwargs),
@@ -95,7 +98,7 @@ class SimmateExecutor:
             time.sleep(10)
             for key, workitem in workitems.items():
                 print((key, workitem, workitem.pk, workitem.done()))
-                # print(future.result())
+
             return {key: workitem.result() for key, workitem in workitems.items()}
         # otherwise this is a list of futures, so return a list of results
         else:

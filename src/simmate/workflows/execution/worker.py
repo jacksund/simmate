@@ -162,6 +162,7 @@ class SimmateWorker:
                     WorkItem.objects.select_for_update(skip_locked=True)
                     .filter(status="P")
                     .filter_by_tags(self.tags)
+                    .order_by("created_at")
                     .first()
                 )
 
