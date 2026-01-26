@@ -107,13 +107,12 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
 
         # if structure creation was successful, run the workflow for it
         if new_structure:
-            state = search_db.subworkflow.run(
+            result = search_db.subworkflow.run(
                 structure=new_structure,
                 source=source,
                 directory=directory,  # BUG: consider making subfolder
                 **search_db.subworkflow_kwargs,
             )
-            result = state.result()
             # NOTE: we tell the workflow to use the same directory. There is
             # good chance the user indicates that they want to compress the
             # folder to.

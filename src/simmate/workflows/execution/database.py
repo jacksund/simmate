@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import uuid
 
 import cloudpickle
 from django.db import transaction
@@ -24,6 +25,11 @@ class WorkItem(DatabaseTable):
     class Meta:
         app_label = "workflows"
         db_table = "workflow_engine__work_items"
+
+    id = table_column.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    """
+    The universally unique ID used for the run.
+    """
 
     tags = table_column.JSONField(default=list)
     """

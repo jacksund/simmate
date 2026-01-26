@@ -76,7 +76,7 @@ class SinglePathWorkflow(Workflow):
 
         if relax_endpoints:
             # Relax the starting supercell structure
-            endpoint_start_state = cls.endpoint_relaxation_workflow.run(
+            supercell_start = cls.endpoint_relaxation_workflow.run(
                 structure=supercell_start,
                 command=command,  # subcommands["command_supercell"]
                 directory=directory
@@ -85,7 +85,7 @@ class SinglePathWorkflow(Workflow):
             )
 
             # Relax the ending supercell structure
-            endpoint_end_state = cls.endpoint_relaxation_workflow.run(
+            supercell_end = cls.endpoint_relaxation_workflow.run(
                 structure=supercell_end,
                 command=command,  # subcommands["command_supercell"]
                 directory=directory
@@ -93,26 +93,19 @@ class SinglePathWorkflow(Workflow):
                 is_restart=is_restart,
             )
 
-            # wait for the endpoint relaxations to finish and use them to
-            # update the structures we are using
-            supercell_start = endpoint_start_state.result()
-            supercell_end = endpoint_end_state.result()
-
         # Run static-energy calculations for the endpoints
-        start_energy = cls.endpoint_energy_workflow.run(
+        supercell_start = cls.endpoint_energy_workflow.run(
             structure=supercell_start,
             command=command,  # subcommands["command_supercell"]
             directory=directory / f"{cls.endpoint_energy_workflow.name_full}.start",
             is_restart=is_restart,
         )
-        end_energy = cls.endpoint_energy_workflow.run(
+        supercell_end = cls.endpoint_energy_workflow.run(
             structure=supercell_end,
             command=command,  # subcommands["command_supercell"]
             directory=directory / f"{cls.endpoint_energy_workflow.name_full}.end",
             is_restart=is_restart,
         )
-        supercell_start = start_energy.result()
-        supercell_end = end_energy.result()
 
         # use the endpoints to generate intermediate images
         # Make sure we have toolkit objects, and if not, convert them
@@ -131,7 +124,7 @@ class SinglePathWorkflow(Workflow):
         )
 
         # Run NEB on this set of images
-        neb_state = cls.from_images_workflow.run(
+        neb_images = cls.from_images_workflow.run(
             migration_images=images,
             command=command,  # subcommands["command_neb"]
             source=source,
@@ -145,4 +138,3 @@ class SinglePathWorkflow(Workflow):
             # `update_database_from_results` method below
             run_id=run_id,
         )
-        neb_images = neb_state.result()

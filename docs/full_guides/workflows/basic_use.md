@@ -109,8 +109,7 @@ To execute a workflow on your local machine, use the `run` approach:
     from simmate.workflows.utilities import get_workflow
     
     workflow = get_workflow("relaxation.vasp.matproj")
-    status = workflow.run(structure="NaCl.cif")
-    result = status.result()
+    result = workflow.run(structure="NaCl.cif")
     ```
 
 === "website"
@@ -196,9 +195,8 @@ Navigate to the directory where the calculation was run to find output files (if
 Access the result directly in python. Workflows can return `any` - however, workflows that save to a database table will return the actual database object. 
 
 === "python"
-    ``` python
-    status = workflow.run(...)
-    result = state.result()  # (1)
+    ``` python 
+    result = workflow.run(...) # (1)
     ```
 
     1. Returns a `Database` object. In some cases, you can convert to a `toolkit` structure using `result.to_toolkit()`

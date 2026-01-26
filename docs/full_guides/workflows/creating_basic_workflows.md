@@ -21,8 +21,7 @@ from simmate.workflows import workflow
 def add(x, y, **kwargs):
     return x + y
 
-status = add.run(x=1, y=2)
-result = status.result()
+result = add.run(x=1, y=2)
 ```
 
 As you build more advanced workflows, you may want to switch to a class-based format. To do this, you must:
@@ -45,8 +44,7 @@ class Math__Basic__Add(Workflow):
     def run_config(x, y, **kwargs):
         return x + y
 
-status = Math__Basic__Add.run(x=1, y=2)
-result = status.result()
+result = Math__Basic__Add.run(x=1, y=2)
 ```
 
 !!! tip
@@ -104,8 +102,7 @@ You can use any of these inputs to assist with your workflow. Alternatively, jus
         print(run_id)
         print(**kwargs)  # to view others
 
-    status = add.run()  # We don't have to provide `run_id`
-    result = status.result()
+    result = add.run()  # We don't have to provide `run_id`
     ```
 
 ------------------------------------------------------------

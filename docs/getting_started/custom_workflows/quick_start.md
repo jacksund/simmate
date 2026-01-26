@@ -24,8 +24,7 @@ def add(x, y, **kwargs):
     print(f"Extra kwargs: {kwargs}")  # add this new line!
     return x + y
 
-status = add.run(x=1, y=2)
-result = status.result()
+result = add.run(x=1, y=2)
 ```
 
     !!! note
@@ -53,8 +52,7 @@ result = status.result()
         new_structure = structure.get_primitive_structure()
         new_structure.to(directory / "primitive.cif", fmt="cif")
 
-    status = write_primitive.run(structure="POSCAR")  # (1)
-    result = status.result()
+    result = write_primitive.run(structure="POSCAR")  # (1)
     ```
 
     1. Note how (a) we provided `POSCAR` (str) but our function converted it to a `toolkit.Structure` object; and (b) we didn't provide a `directory` but Simmate built one for us. Common input parameters adhere to the rules listed in the Parameters section of our documentation.
@@ -63,7 +61,7 @@ result = status.result()
         Try out some more advanced examples by going through our Full guides. For example, try running this workflow with...
 
         ``` python
-        status = write_primitive.run(
+        result = write_primitive.run(
             structure={
                 "database_table": "MatprojStructure",
                 "database_id": "mp-123",
@@ -71,7 +69,6 @@ result = status.result()
             directory="MyNewFolder",
             compress_output=True,
         )
-        result = status.result()
         ```
 
         This pulled our structure from the database, specified the name of the folder we wanted to make, and that we wanted the final folder converted to a `zip` file once it's done.
@@ -92,8 +89,7 @@ result = status.result()
             new_structure.to(directory / "primitive.cif", fmt="cif")
     
     # running is the same as before
-    status = Example__Python__WritePrimitive.run(structure="POSCAR")
-    result = status.result()
+    result = Example__Python__WritePrimitive.run(structure="POSCAR")
     ```
 
     !!! note

@@ -21,13 +21,9 @@ class Example__Python__MyFavoriteSettings(Workflow):
         
         for n in range(10):
             structure.perturb(0.05)  # in-place modification
-            state = another_workflow.run(structure=structure)
-            result = state.result()
+            result = another_workflow.run(structure=structure)
             # ... process the result
 ```
-
-!!! note
-    The `state.result()` call is used just like in a regular workflow run. The usage remains the same.
 
 ## Running Multiple Workflows
 
@@ -99,14 +95,12 @@ class Example__Python__MyFavoriteSettings(Workflow):
     def run_config(structure, directory, **kwargs):
     
         subworkflow_1 = get_workflow("relaxation.vasp.mit")
-        state_1 = subworkflow_1.run(structure=structure)
-        result_1 = state_1.result()
+        result_1 = subworkflow_1.run(structure=structure)
         
         subworkflow_2 = get_workflow("static-energy.vasp.mit")
-        state_2 = subworkflow_2.run(
+        result_2 = subworkflow_2.run(
             structure=result_1,  # use the final structure of the last calculation
         )
-        result_2 = state_2.result()
         
         if result_2.energy_per_atom > 0:
             print("Structure is very unstable even after relaxing!")
@@ -114,7 +108,7 @@ class Example__Python__MyFavoriteSettings(Workflow):
             structure_new.scale_lattice(
                 volume=structure.volume * 1.2,
             )
-            state_2 = subworkflow_2.run(
+            result_2 = subworkflow_2.run(
                 structure=structure_new,  # use the modified structure
             )
 ```

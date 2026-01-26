@@ -83,7 +83,7 @@ class NebAllPathsWorkflow(Workflow):
                 command=command,  # subcommands["command_bulk"]
                 directory=directory / cls.bulk_relaxation_workflow.name_full,
                 is_restart=is_restart,
-            ).result()
+            )
 
             # run a static energy calculation on the relaxed structure
             bulk_static_energy_result = cls.bulk_static_energy_workflow.run(
@@ -91,7 +91,7 @@ class NebAllPathsWorkflow(Workflow):
                 command=command,  # subcommands["command_bulk"]
                 directory=directory / cls.bulk_static_energy_workflow.name_full,
                 is_restart=is_restart,
-            ).result()
+            )
 
             # update the input structure with the relaxed one
             structure = bulk_static_energy_result.to_toolkit()
@@ -114,7 +114,7 @@ class NebAllPathsWorkflow(Workflow):
 
         # Run NEB single_path workflow for all these.
         for i, hop in enumerate(migration_hops):
-            state = cls.single_path_workflow.run(
+            result = cls.single_path_workflow.run(
                 # !!! The hop object gives an ugly output. Should I use the
                 # database dictionary instead?
                 migration_hop=hop,
@@ -133,4 +133,3 @@ class NebAllPathsWorkflow(Workflow):
                 diffusion_analysis_id=current_calc.id,
                 relax_endpoints=relax_endpoints,
             )
-            state.result()  # wait until the job finishes

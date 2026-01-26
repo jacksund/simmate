@@ -218,21 +218,19 @@ class BioviaCosmo(Workflow):
         ].values()
 
         cosmoconf_dir = directory / cosmoconf_workflow.name_full
-        status = cosmoconf_workflow.run(
+        cosmoconf_workflow.run(
             molecule=molecule,
             directory=cosmoconf_dir,
         )
-        status.result()
 
         cosmotherm_dir = (
             directory / Solubility__CosmoTherm__LogPowFromCtdPreset.name_full
         )
-        status = Solubility__CosmoTherm__LogPowFromCtdPreset.run(
+        log_p_dict = Solubility__CosmoTherm__LogPowFromCtdPreset.run(
             cosmoconf_dir=cosmoconf_dir / cosmoconf_subdir,
             ctd_preset=cosmotherm_preset,
             directory=cosmotherm_dir,
         )
-        log_p_dict = status.result()
 
         return log_p_dict
 

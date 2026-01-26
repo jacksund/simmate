@@ -27,8 +27,7 @@ class Math__Basic__Add(Workflow):
         return x + y
 
 # running is the same as before
-status = Math__Basic__Add.run(x=1, y=2)
-result = status.result()
+result = Math__Basic__Add.run(x=1, y=2)
 ```
 
 Nothing has changed with our workflow -- it just looks a little more complex. Writing workflows in this way might seem silly at first, but class-based workflows make advanced features MUCH easier to implement. 

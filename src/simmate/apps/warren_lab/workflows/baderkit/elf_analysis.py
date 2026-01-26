@@ -36,7 +36,7 @@ class ElfAnalysis__VaspBaderkit__SpinElfAnalysisWarren(Workflow):
             source=source,
             directory=static_dir,
             **subworkflow_kwargs,
-        ).result()
+        )
 
         # And run the ELF analysis on the resulting ELFCAR/CHGCAR
         analysis_dir = directory / ElfAnalysis__Baderkit__SpinElfAnalysis.name_full
@@ -45,4 +45,4 @@ class ElfAnalysis__VaspBaderkit__SpinElfAnalysisWarren(Workflow):
             previous_directory=static_dir,
             source=result,
             **subworkflow_kwargs,
-        ).result()
+        )

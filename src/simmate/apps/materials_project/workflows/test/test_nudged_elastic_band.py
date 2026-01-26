@@ -25,13 +25,12 @@ def test_neb_all_paths(sample_structures, tmp_path, mocker):
     structure = sample_structures["Y2CI2_mp-1206803_primitive"]
 
     # run the workflow and make sure it handles data properly.
-    state = Diffusion__Vasp__NebAllPathsMit.run(
+    Diffusion__Vasp__NebAllPathsMit.run(
         structure=structure,
         migrating_specie="I",
         # command="dummycmd1; dummycmd2; dummycmd3",
         directory=tmp_path,
     )
-    assert state.is_completed()
 
     # estabilish filenames that we make and commonly reference
     path_dir = "diffusion.vasp.neb-single-path-mit.00"

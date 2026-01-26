@@ -281,11 +281,7 @@ def run_quick(context: Context, workflow_name: str):
     workflow = get_workflow(workflow_name)
     kwargs_cleaned = parse_parameters(context=context)
 
-    result = workflow.run(**kwargs_cleaned)
-
-    # Let the user know everything succeeded
-    if result.is_completed():
-        logging.info("Success! All results are also stored in your database.")
+    workflow.run(**kwargs_cleaned)
 
 
 @workflows_app.command()
@@ -296,7 +292,7 @@ def run(filename: Path):
 
     from simmate.workflows import Workflow
 
-    Workflow.run_from_file(filename).result()
+    Workflow.run_from_file(filename)
 
 
 @workflows_app.command()
@@ -308,4 +304,4 @@ def run_cloud(filename: Path):
 
     from simmate.workflows import Workflow
 
-    Workflow.run_cloud_from_file(filename).result()
+    Workflow.run_cloud_from_file(filename)

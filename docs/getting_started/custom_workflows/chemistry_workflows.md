@@ -17,8 +17,7 @@ def write_primitive(structure, directory, **kwargs):
     new_structure = structure.get_primitive_structure()
     new_structure.to(directory / "primitive.cif", fmt="cif")
 
-status = write_primitive.run(structure="POSCAR")
-result = status.result()
+result = write_primitive.run(structure="POSCAR")
 ```
 
 !!! note
@@ -32,7 +31,7 @@ There are several advanced things going in this workflow.
 These advanced feature work let's us run our workflow in new ways. For example, we could run the workflow like so:
 
 ``` python
-status = write_primitive.run(
+result = write_primitive.run(
     structure={
         "database_table": "MatprojStructure",
         "database_id": "mp-123",
@@ -40,7 +39,6 @@ status = write_primitive.run(
     directory="MyNewFolder",
     compress_output=True,
 )
-result = status.result()
 ```
 
 This time, we pulled our structure from the database, specified the name of the folder we wanted to make, and that we wanted the final folder converted to a `zip` file once it's done.

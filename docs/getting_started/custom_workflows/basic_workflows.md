@@ -59,8 +59,7 @@ result = add(x=1, y=2)
 This code won't work anymore, because we've now changed our function into a `Workflow`. From earlier tutorials, we learned that workflows must be called with `.run()` instead. Therefore our code becomes:
 
 ``` python
-status = add.run(x=1, y=2)
-result = status.result()
+result = add.run(x=1, y=2)
 ```
 
 !!! note
@@ -77,8 +76,7 @@ from simmate.workflows import workflow
 def add(x, y, **kwargs):
     return x + y
 
-status = add.run(x=1, y=2)
-result = status.result()
+result = add.run(x=1, y=2)
 ```
 
 Just like with our original function, we should see `result = 3`.
@@ -101,8 +99,7 @@ def add(x, y, **kwargs):
     print(f"Extra kwargs: {kwargs}")  # add this new line!!!
     return x + y
 
-status = add.run(x=1, y=2)
-result = status.result()
+result = add.run(x=1, y=2)
 ```
 
 When we run this again, we will see a print statement will output something similar to this: 

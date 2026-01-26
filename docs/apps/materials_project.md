@@ -140,8 +140,7 @@ static-energy.vasp.prebader-matproj
         workflow_name = "static-energy.vasp.matproj"
         workflow = get_workflow(workflow_name)
         
-        status = workflow.run(structure="my_example.cif")  # replace with your own file
-        result = status.result()
+        result = workflow.run(structure="my_example.cif")  # replace with your own file
         ```
 
 --------------------------------------------------------------------------------
