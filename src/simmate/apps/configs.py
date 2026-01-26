@@ -79,6 +79,10 @@ class EvolutionConfig(AppConfig):
     name = "simmate.apps.evolution"
 
 
+class InventoryManagementConfig(AppConfig):
+    name = "simmate.apps.inventory_management"
+
+
 class JarvisConfig(AppConfig):
     name = "simmate.apps.jarvis"
 
