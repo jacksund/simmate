@@ -1086,7 +1086,7 @@ class DatabaseTable(models.Model):
         data_from_dir = self.from_directory(directory, as_dict=True)
         self.update_from_toolkit(**data_from_dir)
 
-    def update_from_results(self, results: dict, directory: Path, status: str):
+    def update_from_results(self, results: dict, directory: Path):
         """
         Updates a database from the results of a workflow run.
 
@@ -1095,7 +1095,7 @@ class DatabaseTable(models.Model):
         """
 
         # First update using the results dictionary
-        self.update_from_toolkit(directory=str(directory), status=status, **results)
+        self.update_from_toolkit(directory=str(directory), **results)
 
         # Many calculations and datatables will have a "from_directory" method
         # that loads data from files. We use this to grab extra fields and

@@ -190,7 +190,7 @@ class Workflow:
         """
 
         logging.info(f"Starting '{cls.name_full}'")
-        kwargs_cleaned, calculation = cls._load_input_and_register(
+        kwargs_cleaned, database_entry = cls._load_input_and_register(
             run_id=run_id,
             directory=directory,
             compress_output=compress_output,
@@ -207,8 +207,8 @@ class Workflow:
             results = cls.run_config(**kwargs_cleaned)
 
         except Exception as e:
-            calculation.status = "Failed"
-            calculation.save()
+            database_entry.status = "Failed"
+            database_entry.save()
             raise e
 
         # save the result to the database
@@ -230,8 +230,6 @@ class Workflow:
                 results=results if results != None else {},
                 directory=kwargs_cleaned["directory"],
                 run_id=kwargs_cleaned["run_id"],
-                status="Completed",
-                finished_at=timezone.now(),
             )
 
         # if requested, compresses the directory to a zip file and then removes
@@ -455,10 +453,8 @@ class Workflow:
     def _update_database_with_results(
         cls,
         results: dict,
-        status: str,
         run_id: str,
         directory: Path,
-        finished_at: timezone.datetime,
     ) -> Calculation:
         """
         Take the output of the `run_config` and any extra information and
@@ -473,7 +469,8 @@ class Workflow:
             run_id=run_id,
             workflow_name=cls.name_full,
             workflow_version=cls.version,
-            finished_at=finished_at,
+            finished_at=timezone.now(),
+            status="Completed",
         )
 
         # Now update the calculation entry with our results. Typically, all of this
@@ -490,14 +487,12 @@ class Workflow:
                     calculation=calculation,
                     results=results,
                     directory=directory,
-                    status=status,
                 )
         # Otherwise we hand this off to the database object
         else:
             calculation.update_from_results(
                 results=results,
                 directory=directory,
-                status=status,
             )
 
         # write the output summary to file
@@ -742,6 +737,7 @@ class Workflow:
         cls,
         setup_directory: bool = True,
         write_metadata: bool = True,
+        status: str = None,
         **parameters: any,
     ) -> dict:
         """
@@ -916,7 +912,7 @@ class Workflow:
         )
 
         calculation = (
-            cls._register_calculation(**parameters_cleaned)
+            cls._register_calculation(status=status, **parameters_cleaned)
             if cls.use_database
             else None
         )

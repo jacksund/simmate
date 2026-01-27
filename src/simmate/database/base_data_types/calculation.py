@@ -142,6 +142,7 @@ class Calculation(DatabaseTable):
         workflow_version: str = None,
         started_at: datetime = None,
         finished_at: datetime = None,
+        status: str = None,
         **kwargs,  # other parameters you'd normally pass to 'from_toolkit'
     ):
         """
@@ -194,6 +195,10 @@ class Calculation(DatabaseTable):
             calculation.total_time = (
                 calculation.finished_at - calculation.started_at
             ).total_seconds()
+            calculation.save()
+
+        if status and calculation.status != status:
+            calculation.status = status
             calculation.save()
 
         return calculation
