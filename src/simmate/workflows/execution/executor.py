@@ -11,7 +11,8 @@ from rich import print
 from rich.progress import track
 
 from simmate.configuration import settings
-from simmate.workflows.execution.database import WorkItem
+
+from .work_item import WorkItem
 
 
 class SimmateExecutor:

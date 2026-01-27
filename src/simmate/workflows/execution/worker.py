@@ -4,12 +4,15 @@ import logging
 import time
 import traceback
 
-import cloudpickle  # needed to serialize Prefect workflow runs and tasks
+import cloudpickle
+from django.contrib.auth.models import User
 from django.db import transaction
 from rich import print
 
+from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.utilities import get_class
-from simmate.workflows.execution.database import WorkItem
+
+from .work_item import WorkItem
 
 # This string is just something fancy to display in the console when a worker
 # starts up.
@@ -25,77 +28,128 @@ HEADER_ART = r"""
 """
 
 
-class SimmateWorker:
+class SimmateWorker(DatabaseTable):
     """
     The default worker that connect to Simmate database for workflows submitted
     via the `run_cloud` method.
     """
 
-    # Consider making this a database object so that we can track workers in
-    # the UI and know how many are running. If linked to the database, we could
-    # even send an update for the worker to shut down.
+    class Meta:
+        app_label = "workflows"
+        db_table = "workflow_engine__workers"
 
-    # Ideally, this worker would involve multiple threads threads going. One
-    # thread would update the queue database with a "heartbeat" to let it know
-    # that it is still working on tasks. The other thread will run the given
-    # workitems in serial. I could even allow for more threads so that this
-    # worker can run multiple workitems at once and in parallel.
-    # However, if this level of implementation is needed, we should instead
-    # switch to using Prefect, which has it built in.
+    # -------------------------------------------------------------------------
 
-    def __init__(
-        self,
-        # limit of tasks and lifetime of the worker
-        nitems_max: int = None,
-        timeout: float = None,
-        # wait_on_timeout=False, # TODO
-        # settings on what to do when the queue is empty
-        close_on_empty_queue: bool = False,
-        waittime_on_empty_queue: float = 15,
-        tags: list[str] = ["simmate"],
-        startup_method: str = None,
-    ):
-        """
-        Configures a worker that connects to the default executor backend.
-        By default the worker will run endlessly.
+    status_options = [
+        "Setting Up",
+        "Running",
+        "Stale Heartbeat",
+        "Crashed",  # for zombie workers determined by scheduler
+        "Stopped",
+    ]
+    status = table_column.CharField(
+        max_length=10,
+        blank=True,
+        null=True,
+    )
+    """
+    Current status of the worker
+    """
 
-        #### Parameters:
+    last_heartbeat_at = table_column.DateTimeField(blank=True, null=True)
 
-        - `nitems_max`:
-            The maximum number of workitems to run before closing down
-            if no limit was set, we can go to infinity.
+    shutdown_flag = table_column.BooleanField(default=False)
+    """
+    Flag that when it is set to True, it will have the worker shut down at the
+    next check-in/heartbeat. This is typically after a job completes
+    """
 
-        - `timeout`:
-            Don't start a new workitem after this time. The worker will be shut down.
-            if no timeout was set, use infinity so we wait forever.
+    # -------------------------------------------------------------------------
 
-        - `close_on_empty_queue`:
-            whether to close if the queue is empty
+    # total_up_time
 
-        - `waittime_on_empty_queue`:
-            if the queue is found to be empty, check the queue again after
-            this time sleeping.
+    # total_cpu_time
 
-        - `tags`:
-            the tags to query tasks for. If no tags were given, the worker will
-            query for tasks that have NO tags
+    # up_time_efficiency
 
-        """
-        self.tags = tags
-        self.nitems_max = nitems_max or float("inf")
-        self.timeout = timeout or float("inf")
-        self.close_on_empty_queue = close_on_empty_queue
-        self.waittime_on_empty_queue = waittime_on_empty_queue
-        self.startup_method = startup_method
+    # total_jobs
 
-        # whether to wait on the running workitems to finish before shutting down
-        # the timedout worker.
-        # self.wait_on_timeout = wait_on_timeout # # TODO
+    # -------------------------------------------------------------------------
+
+    owner = table_column.ForeignKey(
+        User,
+        on_delete=table_column.PROTECT,
+        related_name="workers",
+        blank=True,
+        null=True,
+    )
+
+    ncores = table_column.FloatField(blank=True, null=True)
+
+    ram = table_column.FloatField(blank=True, null=True)
+
+    computer_system = table_column.CharField(
+        max_length=75,
+        blank=True,
+        null=True,
+    )
+
+    directory = table_column.CharField(
+        max_length=250,
+        blank=True,
+        null=True,
+    )
+
+    # -------------------------------------------------------------------------
+
+    # kwargs used to start the worker
+
+    # limit of tasks and lifetime of the worker
+    tags = table_column.JSONField(default=["simmate"])
+    """
+    the tags to query tasks for. If no tags were given, the worker will
+    query for tasks that have NO tags
+    """
+
+    nitems_max = table_column.IntegerField(blank=True, null=True)
+    """
+    The maximum number of workitems to run before closing down
+    if no limit was set, we can go to infinity.
+    """
+
+    timeout = table_column.FloatField(blank=True, null=True)
+    """
+    Don't start a new workitem after this time. The worker will be shut down.
+    if no timeout was set, use infinity so we wait forever.
+    """
+
+    # settings on what to do when the queue is empty
+    close_on_empty_queue = table_column.BooleanField(default=False)
+    """
+    whether to close if the queue is empty
+    """
+
+    waittime_on_empty_queue = table_column.FloatField(default=15)
+    """
+    if the queue is found to be empty, check the queue again after
+    this time sleeping
+    """
+
+    startup_method = table_column.TextField(blank=True, null=True)
+    """
+    The python path to a method that should be called before running any items.
+    This is typically only used for specialized workers that need a cache-warmup
+    """
+
+    # -------------------------------------------------------------------------
 
     def start(self):
         """
         Starts the worker process to begin working through WorkItems
         """
+
+        nitems_max = self.nitems_max if self.nitems_max else float("inf")
+        timeout = self.timeout if self.timeout else float("inf")
 
         # print the header in the console to let the user know the worker started
         print("[bold dark_cyan]" + HEADER_ART)
@@ -119,8 +173,7 @@ class SimmateWorker:
         while True:
             # check for timeout before starting a new workitem and exit
             # if we've hit the limit.
-            if (time.time() - time_start) > self.timeout:
-                # TODO - check wait_on_timeout if running in parallel.
+            if (time.time() - time_start) > timeout:
                 logging.info(
                     "The time-limit for this worker has been hit. Shutting down."
                 )
@@ -128,9 +181,9 @@ class SimmateWorker:
 
             # check the number of jobs completed so far, and exit if we hit
             # the limit
-            if ntasks_finished >= self.nitems_max:
+            if ntasks_finished >= nitems_max:
                 logging.info(
-                    f"Maximum number of WorkItems reached ({self.nitems_max}). "
+                    f"Maximum number of WorkItems reached ({nitems_max}). "
                     "Shutting down."
                 )
                 return
@@ -298,6 +351,48 @@ class SimmateWorker:
         worker = cls(
             nitems_max=1,
             close_on_empty_queue=True,
+            waittime_on_empty_queue=5,
             tags=["simmate"],
         )
         worker.start()
+
+
+# -----------------------------------------------------------------------------
+
+# Typically workers have a heartbeat thread that can separately check in with
+# the database so that users can see it is still up and running. However,
+# this introduces context switching and other complexities that I would like
+# to avoid with DFT programs on HPC. It's much cleaner to have a single python
+# thread. If time tests show heartbeat threads are a non-issue, I can use
+# a decorator like this:
+#
+# import threading
+# from contextlib import ContextDecorator
+#
+# class worker_heartbeat(ContextDecorator):
+#     # then add to method with...     @worker_heartbeat(interval=300)
+#
+#     def __init__(self, interval=5):
+#         self.interval = interval
+#         self.stop_signal = threading.Event()
+#         self.thread = None
+#
+#     def _heartbeat_logic(self):
+#         while not self.stop_signal.is_set():
+#             logging.info("heartbeat is active")  # or ping database
+#             self.stop_signal.wait(timeout=self.interval)
+#
+#     def __enter__(self):
+#         self.stop_signal.clear()
+#         self.thread = threading.Thread(
+#             target=self._heartbeat_logic,
+#             daemon=True,  # ensures thread exit when main thread errors
+#         )
+#         self.thread.start()
+#         return self
+#
+#     def __exit__(self, exc_type, exc_val, exc_tb):
+#         self.stop_signal.set()
+#         if self.thread:
+#             self.thread.join()
+#         logging.info("heartbeat stopped")

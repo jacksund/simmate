@@ -26,6 +26,8 @@ class WorkItem(DatabaseTable):
         app_label = "workflows"
         db_table = "workflow_engine__work_items"
 
+    source = None
+
     id = table_column.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     """
     The universally unique ID used for the run.
@@ -97,9 +99,15 @@ class WorkItem(DatabaseTable):
     the output of fxn(*args, **kwargs)
     """
 
-    source = None
+    worker = table_column.ForeignKey(
+        "workflows.SimmateWorker",
+        on_delete=table_column.SET_NULL,
+        related_name="work_items",
+        blank=True,
+        null=True,
+    )
     """
-    Source column is not needed so setting this to None disable the column
+    The worker that picked up and started the item.
     """
 
     # TODO: Consider creating a separate table for Worker and linking it to this
