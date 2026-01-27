@@ -40,6 +40,14 @@ class SimmateWorker(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
+    html_display_name = "Workers"
+    html_description_short = (
+        "Workers are individual compute resources that pick up and run "
+        "items that have been submitted to the queue."
+    )
+
+    # -------------------------------------------------------------------------
+
     status_options = [
         "Setting Up",
         "Running",
@@ -105,7 +113,7 @@ class SimmateWorker(DatabaseTable):
     # kwargs used to start the worker
 
     # limit of tasks and lifetime of the worker
-    tags = table_column.JSONField(default=["simmate"])
+    tags = table_column.JSONField(default=list)
     """
     the tags to query tasks for. If no tags were given, the worker will
     query for tasks that have NO tags
@@ -148,8 +156,16 @@ class SimmateWorker(DatabaseTable):
         Starts the worker process to begin working through WorkItems
         """
 
+        # separate vars so that we aren't saving 'inf' to database
         nitems_max = self.nitems_max if self.nitems_max else float("inf")
         timeout = self.timeout if self.timeout else float("inf")
+
+        if not self.tags:
+            self.tags = ["simmate"]
+
+        # save worker entry to database
+        self.status = "Running"
+        self.save()
 
         # print the header in the console to let the user know the worker started
         print("[bold dark_cyan]" + HEADER_ART)
@@ -227,7 +243,7 @@ class SimmateWorker(DatabaseTable):
                 # update the status to running before starting it so no other
                 # worker tries to grab the same WorkItem
                 workitem.status = "R"
-                # TODO: indicate that the WorkItem is with this Worker (relationship)
+                workitem.worker = self
                 workitem.save()
 
             # Print out the job ID that is being ran for the user to see
