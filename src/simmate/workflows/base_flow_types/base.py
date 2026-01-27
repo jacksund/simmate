@@ -742,6 +742,7 @@ class Workflow:
         cls,
         setup_directory: bool = True,
         write_metadata: bool = True,
+        status: str = None,
         **parameters: any,
     ) -> dict:
         """
@@ -916,7 +917,7 @@ class Workflow:
         )
 
         calculation = (
-            cls._register_calculation(**parameters_cleaned)
+            cls._register_calculation(status=status, **parameters_cleaned)
             if cls.use_database
             else None
         )
