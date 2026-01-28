@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from tempfile import mkstemp
 
-from simmate.workflows.execution.cluster.base import Cluster
+from .base import Cluster
 
 
 class LocalCluster(Cluster):

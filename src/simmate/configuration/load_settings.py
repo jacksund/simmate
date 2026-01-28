@@ -233,7 +233,7 @@ class SimmateSettings:
                     ],
                     "Compute Resources": [
                         "simmate.workflows.execution.WorkItem",
-                        # "simmate.workflows.execution.Worker",
+                        "simmate.workflows.execution.SimmateWorker",
                     ],
                     "Inventory Management": [
                         "simmate.apps.inventory_management.models.Substance",

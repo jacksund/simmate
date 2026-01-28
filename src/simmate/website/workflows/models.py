@@ -6,4 +6,4 @@
 
 # Rather than retyping all of the logic from this file, I use the copy method here.
 from simmate.database.workflow_results import *
-from simmate.workflows.execution.database import WorkItem
+from simmate.workflows.execution import SimmateWorker, WorkItem

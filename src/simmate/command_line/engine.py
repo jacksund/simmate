@@ -60,12 +60,12 @@ def start_worker(
     from simmate.workflows import Worker
 
     worker = Worker(
-        nitems_max,
-        timeout,
-        close_on_empty_queue,
-        waittime_on_empty_queue,
-        tag,  # this is actually "tags" --> a list of strings
-        startup_method,
+        nitems_max=nitems_max,
+        timeout=timeout,
+        close_on_empty_queue=close_on_empty_queue,
+        waittime_on_empty_queue=waittime_on_empty_queue,
+        tags=tag,  # this is actually "tags" --> a list of strings
+        startup_method=startup_method,
     )
     worker.start()
 

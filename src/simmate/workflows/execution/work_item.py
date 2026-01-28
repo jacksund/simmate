@@ -26,6 +26,18 @@ class WorkItem(DatabaseTable):
         app_label = "workflows"
         db_table = "workflow_engine__work_items"
 
+    # -------------------------------------------------------------------------
+
+    html_display_name = "Work Items (Job Queue)"
+    html_description_short = (
+        "Work items are individual tasks submitted to the Worker queue. "
+        "For workflows, 1 call to workflow.run_cloud = 1 work item."
+    )
+
+    # -------------------------------------------------------------------------
+
+    source = None
+
     id = table_column.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     """
     The universally unique ID used for the run.
@@ -67,6 +79,8 @@ class WorkItem(DatabaseTable):
     a task as problematic if 2 workers give CommandNotFound errors.
     """
 
+    # -------------------------------------------------------------------------
+
     # For serialization, I just use the pickle module, but in the future, I may
     # want to do a priority of MsgPk >> JSON >> Pickle. I could check if the given
     # object(s) has a serialize() method, check if has a to_json() method, and then
@@ -96,15 +110,18 @@ class WorkItem(DatabaseTable):
     """
     the output of fxn(*args, **kwargs)
     """
+    # -------------------------------------------------------------------------
 
-    source = None
+    worker = table_column.ForeignKey(
+        "workflows.SimmateWorker",
+        on_delete=table_column.SET_NULL,
+        related_name="work_items",
+        blank=True,
+        null=True,
+    )
     """
-    Source column is not needed so setting this to None disable the column
+    The worker that picked up and started the item.
     """
-
-    # TODO: Consider creating a separate table for Worker and linking it to this
-    # table via a foreign key.
-    # worker_id = table_column.CharField(max_length=50, blank=True, null=True)
 
     # -------------------------------------------------------------------------
     # The methods below turn this into a future-like object
