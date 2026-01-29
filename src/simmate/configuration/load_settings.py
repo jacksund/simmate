@@ -237,6 +237,7 @@ class SimmateSettings:
                     ],
                     "Inventory Management": [
                         "simmate.apps.inventory_management.models.Substance",
+                        "simmate.apps.inventory_management.models.Mixture",
                         "simmate.apps.inventory_management.models.Batch",
                         "simmate.apps.inventory_management.models.Container",
                         "simmate.apps.inventory_management.models.StorageLocation",
