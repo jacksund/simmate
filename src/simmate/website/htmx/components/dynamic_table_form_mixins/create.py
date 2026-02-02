@@ -27,9 +27,15 @@ class CreateMixin:
         self.check_required_inputs()
 
     def unmount_for_create(self):
+        table_cols = self.table.get_column_names(
+            id_mode=True,
+            include_to_many_relations=True,
+        )
         direct_data = {}
         to_many_data = {}  # e.g., "tags__ids" or "users__ids"
         for key, value in self.form_data.items():
+            if key not in table_cols:
+                continue
             if key.endswith("__ids"):
                 to_many_data[key[:-5]] = value
             else:
