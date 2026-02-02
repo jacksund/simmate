@@ -207,8 +207,9 @@ class Workflow:
             results = cls.run_config(**kwargs_cleaned)
 
         except Exception as e:
-            database_entry.status = "Failed"
-            database_entry.save()
+            if cls.use_database:
+                database_entry.status = "Failed"
+                database_entry.save()
             raise e
 
         # save the result to the database
