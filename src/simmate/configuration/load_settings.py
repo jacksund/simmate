@@ -344,6 +344,38 @@ class SimmateSettings:
                     "image": f"jacksund/bader:v{simmate.__version__}",
                 },
             },
+            "chatbot": {
+                "endpoint": None,
+                "api_key": None,
+                "model": None,
+                "version": None,
+                # For chatbot to access simmate database.
+                # Make sure this is a read-only user & limited access!
+                # format as: "postgresql://user:password@host:port/db_name"
+                "sql_uri": None,
+                "verbose": False,
+            },
+            "chemspace": {
+                "mode": "ftp",  # or s3
+                "s3": {
+                    "url": None,
+                    "access_key": None,
+                    "secret_key": None,
+                    "buckets": {},  # use the format {'bucket_name': 'prefix'}
+                },
+                "ftp": {
+                    # There is a free community-wide account here:
+                    # https://chem-space.com/dld-file/freedom%20space/i/freedom-space/Freedom_Space_4.0.pdf
+                    "host": None,
+                    "user": None,
+                    "password": None,
+                },
+            },
+            "emolecules": {
+                "file_server": None,
+                "user": None,
+                "password": None,
+            },
             "ethereum": {
                 "addresses": {},
                 "backend": "alchemy",
