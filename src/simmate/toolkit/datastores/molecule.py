@@ -51,10 +51,18 @@ class MoleculeStore:
     Use the `directory` property for the more robust Path object
     """
 
+    # -------------------------------------------------------------------------
+
     chunk_size: int = 1_000_000
     """
     Number of molecule (i.e. rows) per chunked parquet file
     """
+
+    compression_mode: str = "lz4"  # or "zstd" for slower but smaller files
+
+    # -------------------------------------------------------------------------
+
+    smiles_stored: str = "original_and_cleaned"  # or "original_only" or "cleaned_only"
 
     metadata_columns: list[str] = []
 
@@ -67,6 +75,10 @@ class MoleculeStore:
     ]
 
     method_columns: dict = {}  # to_inchi_key included automatically
+
+    morgan_fingerprint_cache: bool = False
+
+    pattern_fingerprint_cache: bool = True
 
     explicit_h_mode: bool = False
     """
@@ -200,7 +212,10 @@ class MoleculeStore:
             chunk_filename = (
                 cls.directory / f"{str(current_chunk_index).zfill(10)}.parquet"
             )
-            chunk.write_parquet(chunk_filename, compression="lz4")
+            chunk.write_parquet(
+                chunk_filename,
+                compression=cls.compression_mode,
+            )
             current_chunk_index += 1
 
     @classmethod
@@ -209,58 +224,63 @@ class MoleculeStore:
         df: polars.DataFrame,
         parallel: bool = True,
     ) -> polars.DataFrame:
-        # General properties from Molecule obj attributes
-        logging.info("Calculating properties...")
-        properties = PropertyGrabber.featurize_many(
-            molecules=df["smiles"],
-            properties=cls.property_columns,
-            parallel=parallel,
-            dataframe_format="polars",
-        )
-        df = polars.concat([df, properties], how="horizontal")
-        del properties
 
-        logging.info("Calculating method-based properties...")
-        extra_method_cols = {_get_smiles_with_h: {}} if cls.explicit_h_mode else {}
-        method_features = MethodCaller.featurize_many(
-            molecules=df["smiles"],
-            method_map={
-                # Inchi key for exact-match searches
-                "to_inchi_key": {},
-                **cls.method_columns,
-                **extra_method_cols,
-            },
-            parallel=parallel,
-            dataframe_format="polars",
-        )
-        if cls.explicit_h_mode:
-            # because we have a new smiles column in method_features
-            df = df.rename({"smiles": "smiles_original"})
-            # df = df.drop("smiles")
-        df = polars.concat([df, method_features], how="horizontal")
-        del method_features
+        if cls.property_columns:
+            logging.info("Calculating properties...")
+            properties = PropertyGrabber.featurize_many(
+                molecules=df["smiles"],
+                properties=cls.property_columns,
+                parallel=parallel,
+                dataframe_format="polars",
+            )
+            df = polars.concat([df, properties], how="horizontal")
+            del properties
+
+        if cls.method_columns:
+            logging.info("Calculating method-based properties...")
+            extra_method_cols = {_get_smiles_with_h: {}} if cls.explicit_h_mode else {}
+            method_features = MethodCaller.featurize_many(
+                molecules=df["smiles"],
+                method_map={
+                    # Inchi key for exact-match searches
+                    "to_inchi_key": {},
+                    **cls.method_columns,
+                    **extra_method_cols,
+                },
+                parallel=parallel,
+                dataframe_format="polars",
+            )
+            if cls.explicit_h_mode:
+                # because we have a new smiles column in method_features
+                df = df.rename({"smiles": "smiles_original"})
+                # df = df.drop("smiles")
+            df = polars.concat([df, method_features], how="horizontal")
+            del method_features
 
         # Pattern fingerprint for substructure searches
-        logging.info("Calculating pattern fingerprints...")
-        fingerprints = PatternFingerprint.featurize_many(
-            molecules=df["smiles"],
-            parallel=parallel,
-            vector_type="base64",
-            explicit_h=cls.explicit_h_mode,
-        )
-        df = df.with_columns(polars.Series("pattern_fingerprint", fingerprints))
-        del fingerprints
+        if cls.pattern_fingerprint_cache:
+            logging.info("Calculating pattern fingerprints...")
+            fingerprints = PatternFingerprint.featurize_many(
+                molecules=df["smiles"],
+                parallel=parallel,
+                vector_type="base64",
+                explicit_h=cls.explicit_h_mode,
+            )
+            df = df.with_columns(polars.Series("pattern_fingerprint", fingerprints))
+            del fingerprints
 
-        # TODO:
-        # Morgan fingerprint for similirity searches
-        # logging.info("Calculating morgan fingerprints...")
-        # fingerprints = MorganFingerprint.featurize_many(
-        #     molecules=df["smiles"],
-        #     parallel=True,
-        #     vector_type="base64",
-        # )
-        # df = df.with_columns(polars.Series("morgan_fingerprint", fingerprints))
-        # del fingerprints
+        if cls.morgan_fingerprint_cache:
+            raise NotImplementedError()
+            # TODO:
+            # Morgan fingerprint for similirity searches
+            # logging.info("Calculating morgan fingerprints...")
+            # fingerprints = MorganFingerprint.featurize_many(
+            #     molecules=df["smiles"],
+            #     parallel=True,
+            #     vector_type="base64",
+            # )
+            # df = df.with_columns(polars.Series("morgan_fingerprint", fingerprints))
+            # del fingerprints
 
         return df
 
