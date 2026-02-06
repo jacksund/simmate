@@ -6,6 +6,7 @@ import logging
 import time
 from traceback import format_exc
 
+from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from rich import print
 from schedule import Scheduler
@@ -124,9 +125,16 @@ class SimmateScheduler(Scheduler):
             job._schedule_next_run()
 
             # if emails are configured, send an alert of the failure
+            # TODO: maybe use SuperUserEmailHandler
             email = EmailMessage(
                 subject="[SIMMATE] Scheduled job failure",
                 body=error_msg,
-                to=[a[1] for a in settings.website.admins],  # get admin emails
+                to=list(
+                    User.objects.filter(
+                        is_superuser=True,
+                        is_active=True,
+                        email__isnull=False,
+                    ).values_list("email", flat=True)
+                ),  # get admin emails
             )
             email.send(fail_silently=True)
