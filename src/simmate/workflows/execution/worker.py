@@ -46,6 +46,9 @@ class SimmateWorker(DatabaseTable):
         "items that have been submitted to the queue."
     )
 
+    html_entries_template = "workflows/workers/table.html"
+    # html_entry_template = "workflows/workers//view.html"
+
     # -------------------------------------------------------------------------
 
     source = None

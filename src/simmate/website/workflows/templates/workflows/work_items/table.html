@@ -1,0 +1,39 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=150 %}
+    {% table_header "status" min_width=150 %}
+    {% table_header "worker" min_width=150 %}
+    {% table_header "tags" min_width=150 %}
+    {% table_header "command_not_found_failures" "CNF Failures" min_width=100 %}
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry "id" truncate_chars=10 %}</td>
+    <td>
+        {% if entry.status == "P" %}
+            {% status_bar "Pending" "secondary" %}
+        {% elif entry.status == "R" %}
+            {% status_bar "Running" "primary" %}
+        {% elif entry.status == "C" %}
+            {% status_bar "Cancelled" "warning" %}
+        {% elif entry.status == "E" %}
+            {% status_bar "Errored" "danger" %}
+        {% elif entry.status == "F" %}
+            {% status_bar "Finished" "success" %}
+        {% endif %}
+    </td>
+    <td>
+        {% if entry.worker %}
+            {% foreign_key_link entry.worker %}
+        {% else %}
+            -
+        {% endif %}
+    </td>
+    <td>
+        {% for tag in entry.tags %}
+            <span class="badge rounded-pill text-bg-primary align-middle">{{ tag }}</span>
+        {% empty %}
+            -
+        {% endfor %}
+    </td>
+    <td>{{ entry.command_not_found_failures }}</td>
+{% endblock %}
