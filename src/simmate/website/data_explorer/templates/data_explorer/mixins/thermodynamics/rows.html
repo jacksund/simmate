@@ -1,0 +1,21 @@
+<td class="text-center">
+    {% if entry.is_stable %}
+        <i class="bi bi-check-circle-fill text-primary"></i>
+    {% else %}
+        --
+    {% endif %}
+</td>
+<td>
+    {% if entry.energy_above_hull is not None %}
+        {{ entry.energy_above_hull|floatformat:3 }}
+    {% else %}
+        --
+    {% endif %}
+</td>
+<td>
+    {% if entry.formation_energy_per_atom is not None %}
+        {{ entry.formation_energy_per_atom|floatformat:3 }}
+    {% else %}
+        --
+    {% endif %}
+</td>

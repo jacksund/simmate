@@ -1,9 +1,7 @@
 {# <td>{{ entry.formula_full|chemical_formula }}</td> #}
 <td>{{ entry.formula_reduced|chemical_formula }}</td>
 {# <td>{{ entry.formula_anonymous|chemical_formula }}</td> #}
-<td>
-    {% foreign_key_link entry.spacegroup "symbol" %}
-</td>
+<td>{% foreign_key_link entry.spacegroup "symbol" %}</td>
 {# <td>{{ entry.chemical_system }}</td> #}
 <td>{{ entry.nelements }}</td>
 <td>{{ entry.nsites }}</td>

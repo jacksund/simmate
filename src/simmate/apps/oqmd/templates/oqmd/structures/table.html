@@ -1,0 +1,9 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=150 %}
+    {% include "data_explorer/mixins/structure/columns.html" %}
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry "id" %}</td>
+    {% include "data_explorer/mixins/structure/rows.html" %}
+{% endblock %}

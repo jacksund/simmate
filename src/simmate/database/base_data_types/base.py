@@ -1368,7 +1368,7 @@ class DatabaseTable(models.Model):
         if not parallel:
             # If user doesn't want parallelization, we run these in the main
             # thread and monitor progress
-            db_objects = [load_single_entry(entry) for entry in track(entries)]
+            db_objects = [load_single_entry(entry) for entry in track(entries[:1_000])]
 
         # otherwise we use dask to submit these in batches!
         else:
