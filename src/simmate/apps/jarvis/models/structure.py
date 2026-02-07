@@ -14,32 +14,21 @@ class JarvisStructure(Structure):
     class Meta:
         db_table = "jarvis__structures"
 
-    # disable cols
-    source = None
+    # -------------------------------------------------------------------------
 
     html_display_name = "JARVIS"
     html_description_short = (
         "Joint Automated Repository for Various Integrated Simulations"
     )
 
+    html_entries_template = "jarvis/structures/table.html"
+    html_entry_template = "jarvis/structures/view.html"
+
+    # -------------------------------------------------------------------------
+
     external_website = "https://jarvis.nist.gov/"
     source_doi = "https://doi.org/10.1038/s41524-020-00440-1"
     is_redistribution_allowed = True
-
-    remote_archive_link = "https://archives.simmate.org/JarvisStructure-2023-07-07.zip"
-    archive_fields = ["energy_above_hull"]
-
-    id = table_column.CharField(max_length=25, primary_key=True)
-    """
-    The id used to represent the structure (ex: "jvasp-12345")
-    """
-
-    # TODO: contact their team to ask about reporting energy instead. That way
-    # we can use the Thermodynamics mixin instead of manually listing this.
-    energy_above_hull = table_column.FloatField(blank=True, null=True)
-    """
-    The energy above hull, as reported by the JARVIS database (no units given)
-    """
 
     @property
     def external_link(self) -> str:
@@ -54,8 +43,30 @@ class JarvisStructure(Structure):
 
     # -------------------------------------------------------------------------
 
+    remote_archive_link = "https://archives.simmate.org/JarvisStructure-2023-07-07.zip"
+    archive_fields = ["energy_above_hull"]
+
+    # -------------------------------------------------------------------------
+
+    # disable cols
+    source = None
+
+    id = table_column.CharField(max_length=25, primary_key=True)
+    """
+    The id used to represent the structure (ex: "jvasp-12345")
+    """
+
+    # TODO: contact their team to ask about reporting energy instead. That way
+    # we can use the Thermodynamics mixin instead of manually listing this.
+    energy_above_hull = table_column.FloatField(blank=True, null=True)
+    """
+    The energy above hull, as reported by the JARVIS database (no units given)
+    """
+
+    # -------------------------------------------------------------------------
+
     @classmethod
-    def _load_all_structures(cls):
+    def _load_data(cls):
         """
         Only use this function if you are part of the Simmate dev team!
         Users should instead access data via the load_remote_archive method.

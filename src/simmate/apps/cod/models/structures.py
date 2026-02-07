@@ -16,18 +16,40 @@ class CodStructure(Structure):
     class Meta:
         db_table = "cod__structures"
 
-    # disable cols
-    source = None
+    # -------------------------------------------------------------------------
 
     html_display_name = "COD"
     html_description_short = "The Crystallography Open Database"
+
+    html_entries_template = "cod/structures/table.html"
+    html_entry_template = "cod/structures/view.html"
+
+    # -------------------------------------------------------------------------
 
     external_website = "https://www.crystallography.net/cod/"
     source_doi = "https://doi.org/10.1107/S0021889809016690"
     is_redistribution_allowed = True
 
+    @property
+    def external_link(self) -> str:
+        """
+        URL to this structure in the COD website.
+        """
+        # All COD structures have their data mapped to a URL in the same way
+        # ex: http://www.crystallography.net/cod/12345.html"
+        # we store the id as "cod-123" so we need to convert this to uppercase
+        id_formatted = self.id.split("-")[-1]
+        return f"http://www.crystallography.net/cod/{id_formatted}.html"
+
+    # -------------------------------------------------------------------------
+
     remote_archive_link = "https://archives.simmate.org/CodStructure-2023-07-10.zip"
     archive_fields = ["is_ordered", "has_implicit_hydrogens"]
+
+    # -------------------------------------------------------------------------
+
+    # disable cols
+    source = None
 
     # These fields overwrite the default Structure fields due to a bug.
     chemical_system = table_column.TextField()
@@ -58,21 +80,10 @@ class CodStructure(Structure):
     because of the absence of hydrogens.
     """
 
-    @property
-    def external_link(self) -> str:
-        """
-        URL to this structure in the COD website.
-        """
-        # All COD structures have their data mapped to a URL in the same way
-        # ex: http://www.crystallography.net/cod/12345.html"
-        # we store the id as "cod-123" so we need to convert this to uppercase
-        id_formatted = self.id.split("-")[-1]
-        return f"http://www.crystallography.net/cod/{id_formatted}.html"
-
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_all_structures(
+    def _load_data(
         cls,
         base_directory: str | Path = "cod/cif/",
         only_add_new_cifs: bool = True,

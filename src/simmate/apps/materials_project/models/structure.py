@@ -16,15 +16,31 @@ class MatprojStructure(Structure, Thermodynamics):
     class Meta:
         db_table = "materials_project__structures"
 
-    # disable cols
-    source = None
+    # -------------------------------------------------------------------------
 
     html_display_name = "Materials Project"
     html_description_short = "The Materials Project at Berkeley National Labs"
 
+    html_entries_template = "materials_project/structures/table.html"
+    html_entry_template = "materials_project/structures/view.html"
+
+    # -------------------------------------------------------------------------
+
     external_website = "https://materialsproject.org/"
     source_doi = "https://doi.org/10.1063/1.4812323"
     is_redistribution_allowed = True
+
+    @property
+    def external_link(self) -> str:
+        """
+        URL to this structure in the Materials Project website.
+        """
+        # All Materials Project structures have their data mapped to a URL in
+        # the same way. For example...
+        #   https://materialsproject.org/materials/mp-12345/
+        return f"https://materialsproject.org/materials/{self.id}/"
+
+    # -------------------------------------------------------------------------
 
     remote_archive_link = "https://archives.simmate.org/MatprojStructure-2023-07-07.zip"
     archive_fields = [
@@ -35,6 +51,11 @@ class MatprojStructure(Structure, Thermodynamics):
         "total_magnetization",
         "is_theoretical",
     ]
+
+    # -------------------------------------------------------------------------
+
+    # disable cols
+    source = None
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """
@@ -72,22 +93,14 @@ class MatprojStructure(Structure, Thermodynamics):
     Whether the material is from a theoretical structure. False indicates
     that it is experimentally known.
     """
+    # TODO: reverse to be is_experimental
 
     updated_at = table_column.DateTimeField(blank=True, null=True)
     """
     Timestamp of when this row was was lasted changed / updated by the 
     Materials Project
     """
-
-    @property
-    def external_link(self) -> str:
-        """
-        URL to this structure in the Materials Project website.
-        """
-        # All Materials Project structures have their data mapped to a URL in
-        # the same way. For example...
-        #   https://materialsproject.org/materials/mp-12345/
-        return f"https://materialsproject.org/materials/{self.id}/"
+    # TODO: change to updated_at_original
 
     # -------------------------------------------------------------------------
 

@@ -1,0 +1,51 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=150 %}
+    {% table_header "is_theoretical" min_width=150 %}
+    {% include "data_explorer/mixins/structure/columns.html" %}
+    {% include "data_explorer/mixins/thermodynamics/columns.html" %}
+    {% table_header "band_gap" "Band Gap (eV)" min_width=150 %}
+    {% table_header "is_gap_direct" "Is Band Gap Direct" min_width=200 %}
+    {% table_header "is_magnetic" "Is Magnetic" min_width=150 %}
+    {% table_header "total_magnetization" "Total Mag." min_width=150 %}
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry "id" %}</td>
+    <td class="text-center">
+        {% if entry.is_theoretical %}
+            <i class="bi bi-check-circle-fill text-primary"></i>
+        {% else %}
+            --
+        {% endif %}
+    </td>
+    {% include "data_explorer/mixins/structure/rows.html" %}
+    {% include "data_explorer/mixins/thermodynamics/rows.html" %}
+    <td class="text-center">
+        {% if entry.band_gap is not None %}
+            {{ entry.band_gap|floatformat:3 }}
+        {% else %}
+            --
+        {% endif %}
+    </td>
+    <td class="text-center">
+        {% if entry.is_gap_direct %}
+            <i class="bi bi-check-circle-fill text-primary"></i>
+        {% else %}
+            --
+        {% endif %}
+    </td>
+    <td class="text-center">
+        {% if entry.is_magnetic %}
+            <i class="bi bi-check-circle-fill text-primary"></i>
+        {% else %}
+            --
+        {% endif %}
+    </td>
+    <td>
+        {% if entry.total_magnetization is not None %}
+            {{ entry.total_magnetization|floatformat:5 }}
+        {% else %}
+            --
+        {% endif %}
+    </td>
+{% endblock %}

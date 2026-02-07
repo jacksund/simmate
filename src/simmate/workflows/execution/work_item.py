@@ -28,11 +28,14 @@ class WorkItem(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    html_display_name = "Work Items (Job Queue)"
+    html_display_name = "Work Items"
     html_description_short = (
         "Work items are individual tasks submitted to the Worker queue. "
         "For workflows, 1 call to workflow.run_cloud = 1 work item."
     )
+
+    html_entries_template = "workflows/work_items/table.html"
+    # html_entry_template = "workflows/work_items//view.html"
 
     # -------------------------------------------------------------------------
 

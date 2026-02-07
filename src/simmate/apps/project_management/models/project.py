@@ -30,6 +30,8 @@ class Project(DatabaseTable):
         "update",
     ]
 
+    # -------------------------------------------------------------------------
+
     source = None  # disable col
 
     name = table_column.CharField(max_length=25)

@@ -39,6 +39,15 @@ class AflowPrototype(Structure):
     source_doi = "https://doi.org/10.1016/j.commatsci.2017.01.017"
     is_redistribution_allowed = False
 
+    @property
+    def external_link(self) -> str:
+        """
+        URL to this prototype in the AFLOW website.
+        """
+        # All COD structures have their data mapped to a URL in the same way
+        # ex: http://www.aflowlib.org/prototype-encyclopedia/A2B_hP9_150_ef_bd.html"
+        return f"http://www.aflowlib.org/prototype-encyclopedia/{self.aflow_id}.html"
+
     # -------------------------------------------------------------------------
 
     remote_archive_link = "https://archives.simmate.org/AflowPrototype-2023-07-06.zip"
@@ -102,19 +111,10 @@ class AflowPrototype(Structure):
         else:
             return f"{self.formula_reduced} Structure-type"
 
-    @property
-    def external_link(self) -> str:
-        """
-        URL to this prototype in the AFLOW website.
-        """
-        # All COD structures have their data mapped to a URL in the same way
-        # ex: http://www.aflowlib.org/prototype-encyclopedia/A2B_hP9_150_ef_bd.html"
-        return f"http://www.aflowlib.org/prototype-encyclopedia/{self.aflow_id}.html"
-
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_all_prototypes(cls):
+    def _load_data(cls):
         """
         Only use this function if you are part of the Simmate dev team!
         Users should instead access data via the load_remote_archive method.

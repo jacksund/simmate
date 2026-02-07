@@ -1,0 +1,34 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" "EPPO Code" min_width=150 %}
+    {% table_header "preferred_name" min_width=200 %}
+    {% table_header "family" min_width=125 %}
+    {% table_header "genus" min_width=125 %}
+    {% table_header "species" min_width=125 %}
+    {% table_header "common_names" "Common Names" min_width=200 %}
+    {% table_header "eppo_source" "Source" min_width=150 %}
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry %}</td>
+    <td>{{ entry.preferred_name }}</td>
+    <td>{{ entry.family|default:"-" }}</td>
+    <td>{{ entry.genus|default:"-" }}</td>
+    <td>{{ entry.species|default:"-" }}</td>
+    <td>
+        {% for name in entry.common_names %}
+            {{ name }}
+            {% if not forloop.last %},{% endif %}
+        {% empty %}
+            -
+        {% endfor %}
+    </td>
+    <td>
+        {% if entry.eppo_source == "eppo_global_db" %}
+            {% status_bar "EPPO Global DB" "success" %}
+        {% elif entry.eppo_source == "simmate_user" %}
+            {% status_bar "User Defined" "info" %}
+        {% else %}
+            {% status_bar entry.eppo_source|default:"Unknown" "secondary" %}
+        {% endif %}
+    </td>
+{% endblock %}
