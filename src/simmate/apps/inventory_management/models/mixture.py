@@ -30,7 +30,7 @@ class Mixture(DatabaseTable):
         "solid mix",
         "other",
     ]
-    mixture_type_type = table_column.CharField(
+    mixture_type = table_column.CharField(
         max_length=15,
         blank=True,
         null=True,

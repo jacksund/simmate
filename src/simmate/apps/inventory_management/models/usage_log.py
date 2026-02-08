@@ -12,6 +12,8 @@ class UsageLog(DatabaseTable):
     class Meta:
         db_table = "inventory_management__usage_logs"
 
+    # -------------------------------------------------------------------------
+
     html_display_name = "Containers Usage Logs"
     html_description_short = (
         "Instances where a user interacts with a container, such as removing "
