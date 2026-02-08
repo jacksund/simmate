@@ -17,14 +17,22 @@ class Spacegroup(DatabaseTable):
     class Meta:
         app_label = "core_components"
 
+    # -------------------------------------------------------------------------
+
+    html_display_name = "Symmetry Spacegroups"
+    html_description_short = (
+        "Contains information for the 230 international spacegroups, also "
+        "known as Hermann-Mauguin notations."
+    )
+
+    html_entries_template = "workflows/static_energy/table.html"
+    html_entry_template = "workflows/static_energy/view.html"
+
+    # -------------------------------------------------------------------------
+
+    # disable cols
     id = None
     source = None
-    """
-    The source column is disabled for this table because this is common
-    information.
-    """
-
-    # NOTE: International spacegroup info is also known as Hermann-Mauguin
 
     number = table_column.IntegerField(primary_key=True)
     """

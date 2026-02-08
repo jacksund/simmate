@@ -3,6 +3,8 @@
 import random
 import string
 
+from django.contrib.auth.models import User
+
 from simmate.database.base_data_types import DatabaseTable, table_column
 
 
@@ -54,7 +56,7 @@ class Substance(DatabaseTable):
         - the use of letters also helps to distinguish this format from others
           (such as real phone numbers). It gives the ID a "recognizable brand"
           where users can see it and go "that looks like a simmate substance id"
-        - vowels and Y are excluded from letters these to prevent accidental 
+        - vowels and Y are excluded from letters to prevent accidental 
           formation of real words, which in some cases can have 
           negative consequences (profanity, politics, voilence, etc)
     """
@@ -75,6 +77,100 @@ class Substance(DatabaseTable):
     )
 
     description = table_column.TextField(blank=True, null=True)
+
+    # -------------------------------------------------------------------------
+
+    # SPECIAL CASES - most entries should have these all set to False
+
+    is_theoretical = table_column.BooleanField(blank=True, null=True, default=False)
+    """
+    Whether the substance has been experimentally synthesized before or if is a
+    purely theoretical compound.
+
+    We allow theoretical compounds to be registered for cases such as predicted
+    thermodynamic stability as well as targeted synthesis tracking. Private
+    servers may also use this more generally such as for tracking a full 
+    list of candidate compounds.
+    """
+
+    is_delisted = table_column.BooleanField(blank=True, null=True, default=False)
+    """
+    Whether the substance has been removed from the catalog.
+    
+    When an entry needs to be removed, we can wipe the data, keep the ID in
+    place (to avoid future conflicts/confusion), and set the entry as `is_delisted=True`.
+    
+    This can happen with accidental duplicates, typos, and general cleanup.
+    """
+
+    is_private = table_column.BooleanField(blank=True, null=True, default=False)
+    """
+    Whether this is a private substance, where the substance is intentionally
+    kept secret. Do not confuse with `is_unknown` where the substance
+    is truly unknown even by the submitter.
+    
+    so that private entities can register/reserve a unique ID. This
+    makes it so that you have a private instance in sync with the public
+    registry without revealing your substance. Therefore when the substance
+    is made public + registered to this table, there are not conflicting 
+    records of what the ID is (+ ensures their ID isn't already taken)
+    """
+
+    is_unknown = table_column.BooleanField(blank=True, null=True, default=False)
+    """
+    This exists for when you have a batch that contains a substance unknown by 
+    the submitter and there is no reasonable guess as to what the substance 
+    is. You should also have reason to believe the unknown is a single novel
+    compound.
+    
+    Once the compound is known...
+    - if it is in fact a new substace, associated batches retains this substance 
+      ID and the entry is updated with the structure
+    - if the substance ends up being something already registered, this ID 
+      becomes delisted and all associated batches have their link switched
+      to the correct ID.
+    
+    In 99.9% of cases, you are better off assigning an educated guess to a batch,
+    such as saying "I think I synthesized ___ but will switch the substance ID 
+    if I characterize it and find it to be something else". If it ends up
+    being an unwanted unknown (e.g., a failed synthesis), keep the targeted
+    substance ID and update your batch comments + purity metadata to indicate
+    this -- there is no need for a unique substance ID for each failed reaction.
+    
+    The most common case where you need to register an unknown substance is
+    when you have assay data for it before any guess/characterization can be
+    done.
+    """
+
+    # -------------------------------------------------------------------------
+
+    registered_by = table_column.ForeignKey(
+        User,
+        on_delete=table_column.PROTECT,
+        related_name="registered_substances",
+        blank=True,
+        null=True,
+    )
+    """
+    The user that submitted the regstration of this substance, effectively being
+    the first to reserve the unique ID.
+    
+    In the open collective, Simmate makes registration cost $1 per substance - 
+    but keep in mind that registration is only ever needed for novel materials 
+    because any already experimentally known + theoretically stable substances 
+    are automatically added by our team.
+    
+    We put the $1 fee in place in order to deter users from abusing the public
+    forms with too many submissions. Otherwise, users would not be able 
+    to register new substances without manual intervetion/review by our team
+    (which would slow down teams & make them wait to register something new).
+    
+    In cases where waiting is okay, you can also send our team a request to get
+    your substance added for free (excluding `is_private=True` submissions).
+
+    If the substance also needs to be delisted, this field can be used to refund
+    the user.
+    """
 
     # -------------------------------------------------------------------------
 
@@ -197,6 +293,10 @@ class Substance(DatabaseTable):
         blank=True,
         null=True,
     )
+
+    # -------------------------------------------------------------------------
+
+    extra_metadata = table_column.JSONField(blank=True, null=True)
 
     # -------------------------------------------------------------------------
 
