@@ -231,15 +231,12 @@ class SimmateSettings:
                         "simmate.apps.project_management.models.Transaction",
                         # "simmate.website.core_components.models.SimmateUser",
                     ],
-                    "Compute Resources": [
-                        "simmate.workflows.execution.WorkItem",
-                        "simmate.workflows.execution.SimmateWorker",
-                    ],
                     "Inventory Management": [
                         "simmate.apps.inventory_management.models.Substance",
                         "simmate.apps.inventory_management.models.Mixture",
                         "simmate.apps.inventory_management.models.Batch",
                         "simmate.apps.inventory_management.models.Container",
+                        "simmate.apps.inventory_management.models.UsageLog",
                         "simmate.apps.inventory_management.models.StorageLocation",
                     ],
                     "Crystalline Catalogs": [
@@ -279,16 +276,19 @@ class SimmateSettings:
                         "simmate.apps.ethereum.models.EthereumWallet",
                         "simmate.apps.ethereum.models.EthereumTransaction",
                     ],
+                    "Compute Resources": [
+                        "simmate.workflows.execution.WorkItem",
+                        "simmate.workflows.execution.SimmateWorker",
+                    ],
                     "Other": [
                         "simmate.apps.eppo_gd.models.EppoCode",
+                        "simmate.database.base_data_types.symmetry.Spacegroup",
                     ],
                     "HIDDEN": [
-                        "simmate.database.base_data_types.symmetry.Spacegroup",
                         "simmate.apps.chembl.models.ChemblAssayResult",
                         "simmate.apps.chembl.models.ChemblDocument",
                         "simmate.apps.emolecules.models.EmoleculesSupplierOffer",
                         "simmate.apps.evolution.models.SteadystateSource",
-                        # "simmate.apps.inventory_management.models.Component",
                         "simmate.apps.price_catalog.models.PricePoint",
                         "simmate.database.workflow_results.IonicStep",
                         "simmate.database.workflow_results.MigrationHop",

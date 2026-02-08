@@ -1,0 +1,24 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=60 %}
+    {% table_header "is_mixture" min_width=100 %}
+    {% table_header "mixture_id" "Mixture ID" min_width=125 %}
+    {% table_header "substance_id" "Substance ID" min_width=125 %}
+    {% table_header "purity" min_width=100 %}
+    {% table_header "expires_at" min_width=125 %}
+    {% table_header "supplier" min_width=150 %}
+    {% table_header "supplier_catalog_number" min_width=125 %}
+    <th style="min-width:300px">Comments</th>
+    <th style="min-width:50px">Edit</th>
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry %}</td>
+    <td>{% foreign_key_link entry.mixture %}</td>
+    <td>{% foreign_key_link entry.substance %}</td>
+    <td>{{ entry.purity|floatformat:3|default:"--" }}%</td>
+    <td>{{ entry.expires_at|default:"--" }}</td>
+    <td>{{ entry.supplier|default:"--" }}</td>
+    <td>{{ entry.supplier_catalog_number|default:"--" }}</td>
+    <td>{{ entry.comments|truncatechars:100 }}</td>
+    {% update_entry_link entry %}
+{% endblock %}

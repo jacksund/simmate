@@ -1,0 +1,58 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=60 %}
+    <th style="min-width:100px">Flags</th>
+    {% table_header "substance_type" min_width=125 %}
+    {% table_header "common_name" min_width=100 %}
+    {% table_header "iupac_name" min_width=100 %}
+    {% table_header "bcpc" "BCPC" min_width=100 %}
+    {% table_header "cas_number" "CAS #" min_width=100 %}
+    {% table_header "chembl" "Chembl" min_width=100 %}
+    {% table_header "chemspace" "ChemSpace" min_width=100 %}
+    {% table_header "emolecules" "eMolecules" min_width=100 %}
+    {% table_header "enamine" "Enamine" min_width=100 %}
+    {% table_header "pdb" "PDB" min_width=100 %}
+    {% table_header "ppdb" "PPDB" min_width=100 %}
+    {% table_header "pubchem_cid" "PubChem (CID)" min_width=100 %}
+    {% table_header "aflow" "AFLOW" min_width=100 %}
+    {% table_header "cod" "COD" min_width=100 %}
+    {% table_header "jarvis" "JARVIS" min_width=100 %}
+    {% table_header "materials_project" "Materials Project" min_width=100 %}
+    {% table_header "oqmd" "OQMD" min_width=100 %}
+    <th style="min-width:50px">Synonyms</th>
+    {% table_header "description" min_width=200 %}
+    <th style="min-width:50px">Edit</th>
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry "id" %}</td>
+    <td>
+        {% if entry.is_theoretical %}<span class="badge text-info mr-1" title="Theoretical">Theo</span>{% endif %}
+        {% if entry.is_private %}<span class="badge text-dark mr-1" title="Private">Priv</span>{% endif %}
+        {% if entry.is_unknown %}<span class="badge text-warning mr-1" title="Unknown Structure">Unk</span>{% endif %}
+        {% if entry.is_delisted %}<span class="badge text-danger">Delisted</span>{% endif %}
+        {% if not entry.is_theoretical and not entry.is_private and not entry.is_unknown and not entry.is_delisted %}
+            <span class="badge text-secondary small">Standard</span>
+        {% endif %}
+    </td>
+    <td>{{ entry.substance_type }}</td>
+    <td>{{ entry.registered_by.username|default:"Simmate Team" }}</td>
+    <td>{{ entry.common_name|default:"--" }}</td>
+    <td>{{ entry.iupac_name|default:"--" }}</td>
+    <td>{{ entry.bcpc|default:"--" }}</td>
+    <td>{{ entry.cas_number|default:"--" }}</td>
+    <td>{{ entry.chembl|default:"--" }}</td>
+    <td>{{ entry.chemspace|default:"--" }}</td>
+    <td>{{ entry.emolecules|default:"--" }}</td>
+    <td>{{ entry.enamine|default:"--" }}</td>
+    <td>{{ entry.pdb|default:"--" }}</td>
+    <td>{{ entry.ppdb|default:"--" }}</td>
+    <td>{{ entry.pubchem_cid|default:"--" }}</td>
+    <td>{{ entry.aflow|default:"--" }}</td>
+    <td>{{ entry.cod|default:"--" }}</td>
+    <td>{{ entry.jarvis|default:"--" }}</td>
+    <td>{{ entry.materials_project|default:"--" }}</td>
+    <td>{{ entry.oqmd|default:"--" }}</td>
+    <td>{{ entry.synonyms|default:"--" }}</td>
+    <td>{{ entry.description|truncatechars:50|default:"--" }}</td>
+    {% update_entry_link entry %}
+{% endblock %}

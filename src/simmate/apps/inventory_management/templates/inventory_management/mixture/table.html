@@ -1,0 +1,19 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=60 %}
+    {% table_header "common_name" min_width=100 %}
+    {% table_header "mixture_type" min_width=100 %}
+    {% table_header "description" min_width=200 %}
+    <th style="min-width:150px">Substances</th>
+    <th style="min-width:150px">Synonyms</th>
+    <th style="min-width:50px">Edit</th>
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry %}</td>
+    <td>{{ entry.common_name|default:"--" }}</td>
+    <td>{{ entry.mixture_type|default:"--" }}</td>
+    <td>{{ entry.description|truncatechars:100 }}</td>
+    <td>{{ entry.substances.all }}</td>
+    <td>{{ entry.synonyms|default:"--" }}</td>
+    {% update_entry_link entry %}
+{% endblock %}
