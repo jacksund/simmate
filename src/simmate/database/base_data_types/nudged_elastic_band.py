@@ -31,6 +31,7 @@ class DiffusionAnalysis(Structure, Calculation):
     """
     (if relevent) Whether vacancy or interstitial diffusion was used.
     """
+    # TODO: chance to diffusion_type: vacancy, intersititial, surface, etc
 
     atomic_fraction = table_column.FloatField(blank=True, null=True)
     """

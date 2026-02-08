@@ -18,12 +18,10 @@
         <small><i class="bi bi-box-arrow-up-right"></i></small>
     </a>
 </td>
-<td>
-    {{ entry.workflow_version }}
-</td>
-<td>{{ entry.queue_time|floatformat:1|default:"-" }}</td>
-<td>{{ entry.total_time|floatformat:1|default:"-" }}</td>
-<td>{{ entry.computer_system|default:"-" }}</td>
+<td>{{ entry.workflow_version }}</td>
+<td>{{ entry.queue_time|floatformat:1|default:"--" }}</td>
+<td>{{ entry.total_time|floatformat:1|default:"--" }}</td>
+<td>{{ entry.computer_system|default:"--" }}</td>
 <td>
     {% if entry.corrections %}
         <span class="badge text-warning">{{ entry.corrections|length }}</span>
