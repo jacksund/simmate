@@ -8,12 +8,24 @@ class StorageLocation(DatabaseTable):
     class Meta:
         db_table = "inventory_management__storage_locations"
 
+    # -------------------------------------------------------------------------
+
     html_display_name = "Storage Locations"
     html_description_short = (
         "Specific areas where chemical containers are stored. Locations can be "
         "anything from an entire building to a specific cabinet. Locations "
         "can also have 'parent locations' to allow folder-like organization."
     )
+
+    html_entries_template = "inventory_management/storage_location/table.html"
+    html_entry_template = "inventory_management/storage_location/view.html"
+
+    html_form_component = "storage-location-form"
+    html_enabled_forms = [
+        "search",
+        "create",
+        "update",
+    ]
 
     # -------------------------------------------------------------------------
 
