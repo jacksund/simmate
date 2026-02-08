@@ -19,6 +19,8 @@ class Calculation(DatabaseTable):
         abstract = True
         app_label = "workflows"
 
+    # -------------------------------------------------------------------------
+
     archive_fields = [
         "workflow_name",
         "workflow_version",
@@ -30,15 +32,7 @@ class Calculation(DatabaseTable):
         "finished_at",
     ]
 
-    api_filters = {
-        "workflow_name": ["exact"],
-        "workflow_version": ["exact"],
-        "computer_system": ["exact"],
-        "directory": ["exact"],
-        "run_id": ["exact"],
-        "total_time": ["range"],
-        "queue_time": ["range"],
-    }
+    # -------------------------------------------------------------------------
 
     started_at = table_column.DateTimeField(blank=True, null=True)
     """

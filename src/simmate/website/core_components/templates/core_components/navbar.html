@@ -1,163 +1,171 @@
 {% load static %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary border-bottom py-1 sticky-top shadow">
-    <div class="container">
-        {# Simmate Logo / Home button #}
-        <a href="{% url 'home' %}" class="navbar-brand">
-            <span class="d-none d-md-block bg-light px-3 rounded-pill">
-                <img src="{% static 'images/simmate-logo-dark.svg' %}" height="35">
-            </span>
-            <span class="d-md-none">
-                <img src="{% static 'images/simmate-icon.svg' %}" height="36">
-            </span>
-        </a>
-        <button class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    {# todo: add 'active' class to whichever section is active + highlighted #}
-                    <a class="nav-link" href="{% url 'apps' %}"><i class="bi bi-speedometer2"></i> Apps</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'data_explorer:home' %}"><i class="bi bi-bar-chart"></i> Data</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'workflows' %}"><i class="bi bi-diagram-3"></i> Workflows</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-three-dots"></i> Extras
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <h6 class="dropdown-header">General</h6>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'about' %}"><i class="bi bi-info-circle"></i> About</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item"
-                               href="https://github.com/jacksund/simmate/"
-                               target="_blank"><i class="bi bi-github"></i> Github</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'pricing' %}"><i class="bi bi-currency-dollar"></i> Pricing</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="#"><i class="bi bi-piggy-bank"></i> Finances</a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <h6 class="dropdown-header">Guides</h6>
-                        </li>
-                        <li>
-                            <a class="dropdown-item"
-                               href="https://jacksund.github.io/simmate/home/"
-                               target="_blank"><i class="bi bi-book"></i> All Docs</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item"
-                               href="https://jacksund.github.io/simmate/full_guides/website/rest_api/"
-                               target="_blank"><i class="bi bi-braces"></i> REST API</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item"
-                               href="https://jacksund.github.io/simmate/full_guides/toolkit/molecules/overview/"
-                               target="_blank"><i class="bi bi-tools"></i> Toolkit</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="#"><i class="bi bi-cpu"></i> Contribue & Earn</a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <h6 class="dropdown-header">Help</h6>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'contact' %}"><i class="bi bi-envelope"></i> Contact</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item"
-                               href="https://github.com/jacksund/simmate/issues/new/"
-                               target="_blank"><i class="bi bi-bug"></i> Report a Bug</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'faqs' %}"><i class="bi bi-question-circle"></i> FAQs</a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-        <div class="d-flex">
-            {% if user.is_authenticated %}
-                {# USDC button #}
-                <button type="button"
-                        class="btn btn-light rounded-4 py-0 px-2 me-2"
-                        data-bs-toggle="modal"
-                        data-bs-target="#usdcModal">
-                    <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
-                    <b>{{ user.wallet.usdc_balance|floatformat:2|intcomma }}</b>
-                </button>
-                {# Simmate Token button #}
-                <button type="button"
-                        class="btn btn-light rounded-4 py-0 px-2 me-2"
-                        data-bs-toggle="modal"
-                        data-bs-target="#simmateModal">
-                    <img src="{% static 'images/simmate-token-icon.svg' %}" alt="" height="24">
-                    <b>{{ user.wallet.token_balance|floatformat:0|intcomma }}</b>
-                </button>
-                {# user name + profile button #}
-                <a class="btn btn-outline-light me-2" href="{% url 'profile' %}">
-                    <i class="bi bi-person-circle"></i>&nbsp;&nbsp;
-                    {% if user.first_name %}
-                        {{ user.first_name }} {{ user.last_name }}
-                    {% else %}
-                        {{ user.username }}
-                    {% endif %}
-                </a>
-                {# logout button #}
-                <a class="btn btn-outline-light me-2"
-                   data-bs-toggle="modal"
-                   data-bs-target="#logoutModal">
-                    <i class="bi bi-door-open"></i>
-                </a>
-            {% else %}
-                <a class="btn btn-outline-light me-2" href="{% url 'account_login' %}"><i class="bi bi-key-fill"></i> Login</a>
-                {% simmate_setting "website.require_login_internal" as REQUIRE_LOGIN_INTERNAL %}
-                {% if not REQUIRE_LOGIN_INTERNAL %}
-                    <a class="btn btn-outline-light me-2" href="{% url 'account_signup' %}"><i class="bi bi-person-plus"></i> Sign Up</a>
-                {% endif %}
-            {% endif %}
-            {# light/dark mode button. Disabled for now #}
-            {% comment %}
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary border-0" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-circle-half"></i>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <button class="dropdown-item" data-bs-theme-value="light">
-                                <i class="bi bi-brightness-high"></i> Light
-                            </button>
-                        </li>
-                        <li>
-                            <button class="dropdown-item" data-bs-theme-value="dark">
-                                <i class="bi bi-moon-stars"></i> Dark
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            {% endcomment %}
-        </div>
+<div class="sticky-top shadow">
+    <div class="bg-warning text-dark text-center py-1 small fw-bold">
+        <i class="bi bi-cone-striped"></i>
+        This site is under early construction. Data is reset periodically,
+        pricing is disabled, and limited compute is available.
+        <i class="bi bi-cone-striped"></i>
     </div>
-</nav>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary py-1">
+        <div class="container">
+            {# Simmate Logo / Home button #}
+            <a href="{% url 'home' %}" class="navbar-brand">
+                <span class="d-none d-md-block bg-light px-3 rounded-pill">
+                    <img src="{% static 'images/simmate-logo-dark.svg' %}" height="35">
+                </span>
+                <span class="d-md-none">
+                    <img src="{% static 'images/simmate-icon.svg' %}" height="36">
+                </span>
+            </a>
+            <button class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        {# todo: add 'active' class to whichever section is active + highlighted #}
+                        <a class="nav-link" href="{% url 'apps' %}"><i class="bi bi-speedometer2"></i> Apps</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'data_explorer:home' %}"><i class="bi bi-bar-chart"></i> Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'workflows' %}"><i class="bi bi-diagram-3"></i> Workflows</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots"></i> Extras
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <h6 class="dropdown-header">General</h6>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'about' %}"><i class="bi bi-info-circle"></i> About</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                   href="https://github.com/jacksund/simmate/"
+                                   target="_blank"><i class="bi bi-github"></i> Github</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'pricing' %}"><i class="bi bi-currency-dollar"></i> Pricing</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#"><i class="bi bi-piggy-bank"></i> Finances</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <h6 class="dropdown-header">Guides</h6>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                   href="https://jacksund.github.io/simmate/home/"
+                                   target="_blank"><i class="bi bi-book"></i> All Docs</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                   href="https://jacksund.github.io/simmate/full_guides/website/rest_api/"
+                                   target="_blank"><i class="bi bi-braces"></i> REST API</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                   href="https://jacksund.github.io/simmate/full_guides/toolkit/molecules/overview/"
+                                   target="_blank"><i class="bi bi-tools"></i> Toolkit</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#"><i class="bi bi-cpu"></i> Contribue & Earn</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <h6 class="dropdown-header">Help</h6>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'contact' %}"><i class="bi bi-envelope"></i> Contact</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                   href="https://github.com/jacksund/simmate/issues/new/"
+                                   target="_blank"><i class="bi bi-bug"></i> Report a Bug</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'faqs' %}"><i class="bi bi-question-circle"></i> FAQs</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class="d-flex">
+                {% if user.is_authenticated %}
+                    {# USDC button #}
+                    <button type="button"
+                            class="btn btn-light rounded-4 py-0 px-2 me-2"
+                            data-bs-toggle="modal"
+                            data-bs-target="#usdcModal">
+                        <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
+                        <b>{{ user.wallet.usdc_balance|floatformat:2|intcomma }}</b>
+                    </button>
+                    {# Simmate Token button #}
+                    <button type="button"
+                            class="btn btn-light rounded-4 py-0 px-2 me-2"
+                            data-bs-toggle="modal"
+                            data-bs-target="#simmateModal">
+                        <img src="{% static 'images/simmate-token-icon.svg' %}" alt="" height="24">
+                        <b>{{ user.wallet.token_balance|floatformat:0|intcomma }}</b>
+                    </button>
+                    {# user name + profile button #}
+                    <a class="btn btn-outline-light me-2" href="{% url 'profile' %}">
+                        <i class="bi bi-person-circle"></i>&nbsp;&nbsp;
+                        {% if user.first_name %}
+                            {{ user.first_name }} {{ user.last_name }}
+                        {% else %}
+                            {{ user.username }}
+                        {% endif %}
+                    </a>
+                    {# logout button #}
+                    <a class="btn btn-outline-light me-2"
+                       data-bs-toggle="modal"
+                       data-bs-target="#logoutModal">
+                        <i class="bi bi-door-open"></i>
+                    </a>
+                {% else %}
+                    <a class="btn btn-outline-light me-2" href="{% url 'account_login' %}"><i class="bi bi-key-fill"></i> Login</a>
+                    {% simmate_setting "website.require_login_internal" as REQUIRE_LOGIN_INTERNAL %}
+                    {% if not REQUIRE_LOGIN_INTERNAL %}
+                        <a class="btn btn-outline-light me-2" href="{% url 'account_signup' %}"><i class="bi bi-person-plus"></i> Sign Up</a>
+                    {% endif %}
+                {% endif %}
+                {# light/dark mode button. Disabled for now #}
+                {% comment %}
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary border-0" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-circle-half"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <button class="dropdown-item" data-bs-theme-value="light">
+                                    <i class="bi bi-brightness-high"></i> Light
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" data-bs-theme-value="dark">
+                                    <i class="bi bi-moon-stars"></i> Dark
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                {% endcomment %}
+            </div>
+        </div>
+    </nav>
+</div>
 <div>
     {# the popout models need to be kept in this separate div bc they don't behave well inside the navbar when sticky-top is active #}
     {% if user.is_authenticated %}

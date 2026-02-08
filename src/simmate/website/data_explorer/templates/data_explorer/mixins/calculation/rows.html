@@ -1,0 +1,35 @@
+<td>{{ entry.run_id|truncatechars:10 }}</td>
+<td>
+    {% if entry.status == "Completed" %}
+        {% status_bar "Completed" "success" %}
+    {% elif entry.status == "Running" %}
+        {% status_bar "Running" "primary" %}
+    {% elif entry.status == "Failed" %}
+        {% status_bar "Failed" "danger" %}
+    {% elif entry.status == "Canceled" %}
+        {% status_bar "Canceled" "warning" %}
+    {% else %}
+        {% status_bar entry.status|default:"Pending" "secondary" %}
+    {% endif %}
+</td>
+<td>
+    <a href="{% url 'workflow_detail' entry.workflow_name %}">
+        {{ entry.workflow_name }}
+        <small><i class="bi bi-box-arrow-up-right"></i></small>
+    </a>
+</td>
+<td>{{ entry.workflow_version }}</td>
+<td>{{ entry.queue_time|floatformat:1|default:"--" }}</td>
+<td>{{ entry.total_time|floatformat:1|default:"--" }}</td>
+<td>{{ entry.computer_system|default:"--" }}</td>
+<td>
+    {% if entry.corrections %}
+        <span class="badge text-warning">{{ entry.corrections|length }}</span>
+    {% else %}
+        0
+    {% endif %}
+</td>
+<td>{{ entry.created_at|date:"M. jS Y @ P T" }}</td>
+<td>{{ entry.started_at|date:"M. jS Y @ P T"|default:"-" }}</td>
+<td>{{ entry.finished_at|date:"M. jS Y @ P T"|default:"-" }}</td>
+<td>{{ entry.updated_at|date:"M. jS Y @ P T" }}</td>

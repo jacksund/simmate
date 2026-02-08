@@ -47,11 +47,18 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
     the final IonicStep.
     """
 
+    class Meta:
+        app_label = "workflows"
+
+    # -------------------------------------------------------------------------
+
     html_display_name = "Relaxation"
     html_description_short = "Results for Relaxation Calculations"
 
-    class Meta:
-        app_label = "workflows"
+    html_entries_template = "workflows/relaxation/table.html"
+    html_entry_template = "workflows/relaxation/view.html"
+
+    # -------------------------------------------------------------------------
 
     exclude_from_summary = ["structure_start", "structure_final"]
 
@@ -62,6 +69,8 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
         "conduction_band_minimum",
         "valence_band_maximum",
     ]
+
+    # -------------------------------------------------------------------------
 
     # OPTIMIZE: should I include this electronic data?
     # This data here is something we only get for the final structure, so it
@@ -127,6 +136,8 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
         blank=True,
         null=True,
     )
+
+    # -------------------------------------------------------------------------
 
     def write_output_summary(self, directory: Path):
         super().write_output_summary(directory)

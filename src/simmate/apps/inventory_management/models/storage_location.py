@@ -11,8 +11,8 @@ class StorageLocation(DatabaseTable):
     html_display_name = "Storage Locations"
     html_description_short = (
         "Specific areas where chemical containers are stored. Locations can be "
-        "any from an entire building to a specific cabinet, and also locations "
-        "can have 'parent locations' to allow folder-like organization."
+        "anything from an entire building to a specific cabinet. Locations "
+        "can also have 'parent locations' to allow folder-like organization."
     )
 
     # -------------------------------------------------------------------------

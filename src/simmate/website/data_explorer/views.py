@@ -92,7 +92,7 @@ def table_entries(request, table_name):
             # "entries": page.object_list,  # page.paginator.object_list gives ALL results
             "page_title": table_name,
             "page_title_icon": "mdi-database",
-            "breadcrumbs": ["Data", table_name],
+            "breadcrumbs": ["Data", table.html_display_name],
             "title_json_link": True,
             **table.html_extra_table_context,
             # make left sidebar compact (only icons) when there's a quick-search
@@ -135,7 +135,11 @@ def table_entry(request, table_name, table_entry_id):
         context = {
             "table_entry": table_entry,
             "page_title": "Table Entry",
-            "breadcrumbs": ["Data", table_name, table_entry_id],
+            "breadcrumbs": [
+                "Data",
+                table_entry.html_display_name,
+                table_entry_id,
+            ],
             "title_json_link": True,
             **table_entry.html_extra_entry_context,
         }
