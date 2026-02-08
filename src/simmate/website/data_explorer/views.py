@@ -136,7 +136,7 @@ def table_entry(request, table_name, table_entry_id):
             "table_entry": table_entry,
             "page_title": "Table Entry",
             "breadcrumbs": [
-                "Data", 
+                "Data",
                 table_entry.html_display_name,
                 table_entry_id,
             ],
