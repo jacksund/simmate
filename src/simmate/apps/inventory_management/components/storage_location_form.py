@@ -2,35 +2,27 @@
 
 from simmate.website.htmx.components import DynamicTableForm
 
-from ..models import Project, Tag
+from ..models import StorageLocation
 
 
-class TagForm(DynamicTableForm):
+class StorageLocationForm(DynamicTableForm):
 
-    table = Tag
+    table = StorageLocation
 
-    template_name = "project_management/tag/form.html"
-
-    # -------------------------------------------------------------------------
-
-    def mount_extra(self):
-        self.project_options = Project.project_options
-
-    def update_tag_type(self):
-        if self.form_data.get("tag_type") == "project-specific":
-            self.js_actions = [
-                {"refresh_select2": []},
-            ]
+    template_name = "inventory_management/storage_location/form.html"
 
     # -------------------------------------------------------------------------
 
     # CREATE
 
     required_inputs = [
-        "tag_type",
         "name",
+        "temperature_celsius",
         "description",
     ]
+
+    def mount_for_create(self):
+        self.update_form("temperature_celsius", 20)
 
     # -------------------------------------------------------------------------
 

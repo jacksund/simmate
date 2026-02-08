@@ -1,0 +1,29 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    {% include "data_explorer/general_search_options.html" %}
+    {% if component.form_mode == "create" %}
+        {% alert theme="warning" message="This form is only useful when you are moving an existing batch to a new container. If you have a new batch of something, it is easier to create your container(s) within the Batch creation form." %}
+    {% endif %}
+    <div class="container mt-4 border border-3 border-secondary rounded py-2">
+        <h3>
+            <span class="badge bg-secondary">1. Container Info</span>
+        </h3>
+        <div class="row">
+            <div class="col-md-4">{% htmx_number_input name="batch_id" label="Batch ID" placeholder="1234" %}</div>
+            <div class="col-md-4">
+                {% htmx_selectbox name="location_id" label="Storage Location" options=component.location_options %}
+            </div>
+            <div class="col-md-4">{% htmx_text_input name="barcode" placeholder="(optional) use scanner" %}</div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                {% htmx_number_input name="initial_amount" label="Amount" placeholder="the initial amount of material" %}
+            </div>
+            <div class="col-md-4">{% htmx_selectbox name="amount_units" options=component.table.amount_units_options %}</div>
+        </div>
+        <div class="row">
+            <div class="col-sm">{% include "core_components/forms/comments.html" %}</div>
+        </div>
+    </div>
+    {% include "data_explorer/dynamic_submit_button.html" %}
+{% endblock %}
