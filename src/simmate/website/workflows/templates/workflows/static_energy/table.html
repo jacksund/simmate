@@ -1,0 +1,15 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=150 %}
+    {% include "data_explorer/mixins/structure/columns.html" %}
+    {% include "data_explorer/mixins/thermodynamics/columns.html" %}
+    {% include "data_explorer/mixins/forces/columns.html" %}
+    {% include "data_explorer/mixins/calculation/columns.html" %}
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry "id" %}</td>
+    {% include "data_explorer/mixins/structure/rows.html" %}
+    {% include "data_explorer/mixins/thermodynamics/rows.html" %}
+    {% include "data_explorer/mixins/forces/rows.html" %}
+    {% include "data_explorer/mixins/calculation/rows.html" %}
+{% endblock %}
