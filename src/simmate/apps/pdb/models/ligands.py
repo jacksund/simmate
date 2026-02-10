@@ -30,9 +30,6 @@ class PdbLigand(Molecule):
     class Meta:
         db_table = "pdb__ligands"
 
-    # disable cols
-    source = None
-
     html_display_name = "PDB Ligands"
     html_description_short = (
         "Ligands (i.e. small molecules) found in the Protein Data Bank"
@@ -102,7 +99,7 @@ class PdbLigand(Molecule):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls):
+    def load_source_data(cls):
         """
         This link gives directions for archive locations:
 

@@ -9,9 +9,6 @@ class EthereumWallet(DatabaseTable):
     class Meta:
         db_table = "ethereum__wallets"
 
-    # disable cols
-    source = None
-
     html_display_name = "Ethereum Wallets"
     html_description_short = "Ethereum addresses monitored via Etherscan.io and Alchemy"
 
@@ -76,7 +73,7 @@ class EthereumWallet(DatabaseTable):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls):
+    def load_source_data(cls):
 
         backend = settings.ethereum.backend
 

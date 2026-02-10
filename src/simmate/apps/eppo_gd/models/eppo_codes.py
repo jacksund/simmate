@@ -46,9 +46,6 @@ class EppoCode(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     id = table_column.CharField(max_length=25, primary_key=True)
     """
     The ID is the actual EPPO code. Typically these are no more than 6 characters
@@ -153,16 +150,13 @@ class EppoCode(DatabaseTable):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(
+    def load_source_data(
         cls,
         eppo_codes: list[str] = None,
         update_only: bool = False,
         **kwargs,
     ):
         """
-        Only use this function if you are part of the Simmate dev team!
-        Users should instead access data via the load_remote_archive method.
-
         Loads all EPPO codes directly for the EPPO website into the local
         Simmate database.
         """

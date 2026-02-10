@@ -401,7 +401,7 @@ class PricedItem(DatabaseTable):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls):
+    def load_source_data(cls):
         # cls._load_wikipedia_data()
         cls._load_yfinance_data()
         cls._load_fred_data()

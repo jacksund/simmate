@@ -22,9 +22,6 @@ class UsageLog(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     container = table_column.ForeignKey(
         Container,
         on_delete=table_column.CASCADE,

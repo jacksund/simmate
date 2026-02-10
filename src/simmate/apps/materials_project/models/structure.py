@@ -54,9 +54,6 @@ class MatprojStructure(Structure, Thermodynamics):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     id = table_column.CharField(max_length=25, primary_key=True)
     """
     The id used to represent the structure (ex: "mp-12345")

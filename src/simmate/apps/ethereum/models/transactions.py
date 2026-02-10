@@ -15,8 +15,7 @@ class EthereumTransaction(DatabaseTable):
     class Meta:
         db_table = "ethereum__transactions"
 
-    # disable cols
-    source = None
+    # -------------------------------------------------------------------------
 
     html_display_name = "Ethereum Transactions"
     html_description_short = "Ethereum transactions monitored via Etherscan.io"
@@ -96,7 +95,7 @@ class EthereumTransaction(DatabaseTable):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls):
+    def load_source_data(cls):
 
         backend = settings.ethereum.backend
 

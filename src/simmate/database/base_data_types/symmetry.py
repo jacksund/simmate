@@ -30,9 +30,7 @@ class Spacegroup(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    id = None
-    source = None
+    id = None  # TODO: need to switch pk to this
 
     number = table_column.IntegerField(primary_key=True)
     """
@@ -54,8 +52,10 @@ class Spacegroup(DatabaseTable):
     Point group symbol
     """
 
+    # -------------------------------------------------------------------------
+
     @classmethod
-    def _load_database_from_toolkit(cls):
+    def load_source_data(cls):
         """
         Loads spacegroup data into the database table.
 

@@ -26,9 +26,6 @@ class Substance(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     id = table_column.CharField(max_length=12, primary_key=True)
     """
     The unique ID assigned to each substance.

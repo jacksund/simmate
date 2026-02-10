@@ -48,9 +48,6 @@ class CodStructure(Structure):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     # These fields overwrite the default Structure fields due to a bug.
     chemical_system = table_column.TextField()
     formula_full = table_column.TextField()
@@ -83,7 +80,7 @@ class CodStructure(Structure):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(
+    def load_source_data(
         cls,
         base_directory: str | Path = "cod/cif/",
         only_add_new_cifs: bool = True,
@@ -91,9 +88,6 @@ class CodStructure(Structure):
         batch_timeout: float = 30 * 60,
     ):
         """
-        Only use this function if you are part of the Simmate dev team!
-        Users should instead access data via the load_remote_archive method.
-
         This method pulls COD data into the Simmate database.
 
         Loads all structures directly for the COD database into the local

@@ -234,7 +234,7 @@ def reset_database(
         update_database(apps_to_migrate, show_logs=False)
 
         logging.info("Loading default data...")
-        Spacegroup._load_database_from_toolkit()
+        Spacegroup.load_source_data()
 
     # Let the user know everything succeeded
     logging.info("Success! Your database has been reset. :sparkles:")

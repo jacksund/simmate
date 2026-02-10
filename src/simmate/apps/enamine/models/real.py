@@ -20,9 +20,6 @@ class EnamineRealMolecule(Molecule):
     class Meta:
         db_table = "enamine__real__molecules"
 
-    # disable cols
-    source = None
-
     html_display_name = "Enamine REAL"
     html_description_short = (
         "The largest enumerated database of synthetically feasible molecules"
@@ -67,15 +64,12 @@ class EnamineRealMolecule(Molecule):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(
+    def load_source_data(
         cls,
         input_file: str | Path = "Enamine_Diverse_REAL_drug-like_48.2M.cxsmiles",
         chunk_file: bool = False,
     ):
         """
-        Only use this function if you are part of the Simmate dev team!
-        Users should instead access data via the load_remote_archive method.
-
         Loads all structures directly for the eMolecules database into the local
         Simmate database.
 

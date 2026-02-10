@@ -28,8 +28,6 @@ class Wallet(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    source = None  # disable col
-
     wallet_type_options = [
         "project",
         "user",
@@ -82,7 +80,7 @@ class Wallet(DatabaseTable):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls):
+    def load_source_data(cls):
 
         # ensure default wallets exist
         for wallet in [

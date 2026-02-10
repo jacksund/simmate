@@ -26,9 +26,6 @@ class EmoleculesMolecule(Molecule):
     class Meta:
         db_table = "emolecules__molecules"
 
-    # disable cols
-    source = None
-
     html_display_name = "eMolecules"
     html_description_short = "A vendor catalog of chemicals"
 
@@ -104,7 +101,7 @@ class EmoleculesMolecule(Molecule):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(
+    def load_source_data(
         cls,
         update_only: bool = True,
         building_blocks: bool = True,

@@ -29,8 +29,6 @@ class Tag(DatabaseTable):
     # TODO: Maybe allow FilteredScope objects to be linked to these for
     # auto-tagging things in other tables
 
-    source = None  # disable col
-
     tag_type_options = [
         "project-specific",
         "all-projects",

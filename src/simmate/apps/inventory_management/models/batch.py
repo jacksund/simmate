@@ -31,9 +31,6 @@ class Batch(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     is_mixture = table_column.BooleanField(blank=True, null=True)
 
     substance = table_column.ForeignKey(

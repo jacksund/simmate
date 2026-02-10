@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from pathlib import Path
+import shutil
 
 import numpy
 import pandas
 from rich.progress import track
 
 from simmate.apps.rdkit.models import Molecule
+from simmate.configuration import settings
 from simmate.database.base_data_types import table_column
 from simmate.toolkit import Molecule as ToolkitMolecule
+from simmate.utilities import download_file, get_directory
 
 
 class ChemblMolecule(Molecule):
@@ -26,9 +28,6 @@ class ChemblMolecule(Molecule):
 
     class Meta:
         db_table = "chembl__molecules"
-
-    # disable cols
-    source = None
 
     html_display_name = "ChEMBL"
     html_description_short = (
@@ -47,6 +46,11 @@ class ChemblMolecule(Molecule):
     
     Note, this is NOT the primary key. Instead, we use 'molregno' which is 
     chembl's internal identifer and often their own primary key too.
+    """
+
+    is_invalid_molecule = table_column.BooleanField(blank=True, null=True)
+    """
+    whether the molecule was loaded successfully into the simmate database
     """
 
     molecule_type = table_column.CharField(max_length=25, blank=True, null=True)
@@ -89,36 +93,6 @@ class ChemblMolecule(Molecule):
     """
     # NUM_RO5_VIOLATIONS
 
-    pka_acidic_max = table_column.FloatField(blank=True, null=True)
-    """
-    The most acidic pKa calculated using ChemAxon v17.29.0
-    """
-    # CX_MOST_APKA
-
-    pka_basic_max = table_column.FloatField(blank=True, null=True)
-    """
-    The most basic pKa calculated using ChemAxon v17.29.0
-    """
-    # CX_MOST_BPKA
-
-    log_p_chemaxon = table_column.FloatField(blank=True, null=True)
-    """
-    The calculated octanol/water partition coefficient using ChemAxon v17.29.0
-    """
-    # CX_LOGP
-
-    log_d_chemaxon = table_column.FloatField(blank=True, null=True)
-    """
-    The calculated octanol/water distribution coefficient at pH7.4 using ChemAxon v17.29.0
-    """
-    # CX_LOGD
-
-    acid_base_type = table_column.CharField(max_length=30, blank=True, null=True)
-    """
-    Indicates whether the compound is an acid/base/neutral
-    """
-    # MOLECULAR_SPECIES
-
     num_h_acceptors_lipinski = table_column.IntegerField(blank=True, null=True)
     """
     Number of hydrogen bond acceptors calculated according to Lipinski's original 
@@ -132,12 +106,6 @@ class ChemblMolecule(Molecule):
     rules (i.e., NH + OH count)
     """
     # HBD_LIPINSKI
-
-    rule_of_5_violations_lipinski = table_column.IntegerField(blank=True, null=True)
-    """
-    Number of violations of Lipinski's rule of five using HBA_LIPINSKI and HBD_LIPINSKI counts
-    """
-    # NUM_LIPINSKI_RO5_VIOLATIONS
 
     natural_product_likeness = table_column.FloatField(blank=True, null=True)
     """
@@ -174,7 +142,7 @@ class ChemblMolecule(Molecule):
         return f"https://www.ebi.ac.uk/chembl/compound_report_card/{self.id}/"
 
     @classmethod
-    def _load_data(cls, database_file: str | Path = "chembl_33.db"):
+    def load_source_data(cls):
         """
         Only use this function if you are part of the Simmate dev team!
         Users should instead access data via the load_remote_archive method.
@@ -185,31 +153,34 @@ class ChemblMolecule(Molecule):
         ChEMBL distributes their database as manual downloads in a variety of
         formats, where we choose to use their SQLite download.
 
+        For example:
+            https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_36_sqlite.tar.gz
+
+        Once downloaded, unpacked the compressed file in to the
+        ~/simmate/chembl/ directory where this method will pick it up.
+
         [See all options here](https://chembl.gitbook.io/chembl-interface-documentation/downloads)
         """
         import sqlite3
 
+        database_file = cls.download_source_data()
         connection = sqlite3.connect(database_file)
         cursor = connection.cursor()
+
+        logging.info("Pulling molecule data from ChEMBL db...")
         query = """
         SELECT
             S1.molregno,
             S1.canonical_smiles,
          	D1.chembl_id,
             D1.molecule_type,
-            P1.QED_WEIGHTED,
-            P1.ALOGP,
-            P1.RO3_PASS,
-            P1.NUM_RO5_VIOLATIONS,
-            P1.CX_MOST_APKA,
-            P1.CX_MOST_BPKA,
-            P1.CX_LOGP,
-            P1.CX_LOGD,
-            P1.MOLECULAR_SPECIES,
-            P1.HBA_LIPINSKI,
-            P1.HBD_LIPINSKI,
-            P1.NUM_LIPINSKI_RO5_VIOLATIONS,
-            P1.NP_LIKENESS_SCORE
+            P1.qed_weighted,
+            P1.alogp,
+            P1.ro3_pass,
+            P1.num_ro5_violations,
+            P1.hba,
+            P1.hbd,
+            P1.np_likeness_score
         FROM
          	compound_structures S1
         LEFT JOIN 
@@ -245,42 +216,41 @@ class ChemblMolecule(Molecule):
         failed_rows = []
         db_objs = []
         for i, entry in track(data.iterrows(), total=len(data)):
+
             try:
                 molecule = ToolkitMolecule.from_smiles(entry.canonical_smiles)
-
-                # RO3 is given as Y, N, or (NULL) -- but we want a boolean
-                if entry.ro3_pass == "Y":
-                    ro3_pass = True
-                elif entry.ro3_pass == "N":
-                    ro3_pass = False
-                else:
-                    ro3_pass = None
-
-                # now convert the entry to a database object
-                molecule_db = cls.from_toolkit(
-                    id=entry.molregno,
+                molecule_kwargs = cls.from_toolkit(
                     molecule=molecule,
-                    molecule_original=entry.canonical_smiles,
-                    chembl_id=entry.chembl_id,
-                    molecule_type=entry.molecule_type,
-                    drug_likeness=entry.qed_weighted,
-                    alog_p_chembl=entry.alogp,
-                    rule_of_3_pass=ro3_pass,  # see fix above
-                    rule_of_5_violations=entry.num_ro5_violations,
-                    pka_acidic_max=entry.cx_most_apka,
-                    pka_basic_max=entry.cx_most_bpka,
-                    log_p_chemaxon=entry.cx_logp,
-                    log_d_chemaxon=entry.cx_logd,
-                    acid_base_type=entry.molecular_species,
-                    num_h_acceptors_lipinski=entry.hba_lipinski,
-                    num_h_donors_lipinski=entry.hbd_lipinski,
-                    rule_of_5_violations_lipinski=entry.num_lipinski_ro5_violations,
-                    natural_product_likeness=entry.np_likeness_score,
+                    is_invalid_molecule=False,
+                    as_dict=True,
                 )
-
-                db_objs.append(molecule_db)
             except:
-                failed_rows.append(entry)
+                molecule_kwargs = {"is_invalid_molecule": True}
+
+            # RO3 is given as Y, N, or (NULL) -- but we want a boolean
+            if entry.ro3_pass == "Y":
+                ro3_pass = True
+            elif entry.ro3_pass == "N":
+                ro3_pass = False
+            else:
+                ro3_pass = None
+
+            # now convert the entry to a database object
+            molecule_db = cls.from_toolkit(
+                id=entry.molregno,
+                molecule_original=entry.canonical_smiles,
+                chembl_id=entry.chembl_id,
+                molecule_type=entry.molecule_type,
+                drug_likeness=entry.qed_weighted,
+                alog_p_chembl=entry.alogp,
+                rule_of_3_pass=ro3_pass,  # see fix above
+                rule_of_5_violations=entry.num_ro5_violations,
+                num_h_acceptors_lipinski=entry.hba,
+                num_h_donors_lipinski=entry.hbd,
+                natural_product_likeness=entry.np_likeness_score,
+                **molecule_kwargs,
+            )
+            db_objs.append(molecule_db)
 
             # save every time we have 1000 structures
             if len(db_objs) >= 1000:
@@ -304,3 +274,38 @@ class ChemblMolecule(Molecule):
 
         logging.info(f"Done! There are now {cls.objects.count()} molecules.")
         return failed_rows
+
+    @classmethod
+    def download_source_data(cls):
+
+        target_dir = get_directory(settings.config_directory / "chembl")
+
+        version = 36
+        db_name = f"chembl_{version}"
+        db_filename = target_dir / f"{db_name}.db"
+
+        if db_filename.exists():
+            return db_filename
+
+        base_url = "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/"
+        filename = f"{db_name}_sqlite.tar.gz"
+        download_filename = target_dir / filename
+
+        logging.info("Downloading ChEMBL db...")
+        if not download_filename.exists():
+            download_file(
+                url=base_url + filename,
+                dest_path=download_filename,
+            )
+
+        logging.info("Unpacking ChEMBL db...")
+        shutil.unpack_archive(download_filename, target_dir)
+        shutil.move(
+            target_dir / db_name / f"{db_name}_sqlite" / db_filename.name,
+            target_dir,
+        )
+        shutil.rmtree(target_dir / db_name)
+        download_filename.unlink()
+
+        logging.info("ChEMBL data ready.")
+        return db_filename

@@ -2,7 +2,6 @@
 
 import logging
 import sqlite3
-from pathlib import Path
 
 import numpy
 import pandas
@@ -54,20 +53,19 @@ class ChemblDocument(DatabaseTable):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(
-        cls,
-        database_file: str | Path = "chembl_33.db",
-    ):
+    def load_source_data(cls):
         """
-        Only use this function if you are part of the Simmate dev team!
-        Users should instead access data via the load_remote_archive method.
-
         Loads all document metadata directly from the ChEMBL database into the local
         Simmate database.
         """
 
-        logging.info("Loading data from source database...")
+        from .molecules import ChemblMolecule
+
+        database_file = ChemblMolecule.download_source_data()
         connection = sqlite3.connect(database_file)
+        cursor = connection.cursor()
+
+        logging.info("Pulling document data from ChEMBL db...")
         cursor = connection.cursor()
         query = """
             SELECT
@@ -121,3 +119,11 @@ class ChemblDocument(DatabaseTable):
 
         logging.info("Done!")
         return failed_rows
+
+    @classmethod
+    def _download_source_data(
+        cls,
+        url: str = "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/",
+        filename: str = "chembl_36_sqlite.tar.gz",
+    ):
+        pass

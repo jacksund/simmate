@@ -51,8 +51,6 @@ class SimmateWorker(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    source = None
-
     status_options = [
         "Setting Up",
         "Idle",

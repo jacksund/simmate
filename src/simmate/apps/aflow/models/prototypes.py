@@ -61,9 +61,6 @@ class AflowPrototype(Structure):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     mineral_name = table_column.CharField(max_length=75, blank=True, null=True)
     """
     Common mineral name for this prototype (e.g. "rocksalt"). Note, not all 
@@ -114,11 +111,8 @@ class AflowPrototype(Structure):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls):
+    def load_source_data(cls):
         """
-        Only use this function if you are part of the Simmate dev team!
-        Users should instead access data via the load_remote_archive method.
-
         This method is for pulling AFLOW data into the Simmate database.
         """
         # AFLOW's supported REST API can be accessed via "AFLUX API". This is a separate

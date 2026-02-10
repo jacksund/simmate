@@ -52,9 +52,6 @@ class OqmdStructure(Structure):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     id = table_column.CharField(max_length=25, primary_key=True)
     """
     The id used to represent the structure (ex: "oqmd-12345")
@@ -69,7 +66,7 @@ class OqmdStructure(Structure):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(
+    def load_source_data(
         cls,
         base_directory: str = "oqmd",
         only_add_new_cifs: bool = True,

@@ -30,9 +30,6 @@ class BcpcIsoPesticide(Molecule):
     class Meta:
         db_table = "bcpc__iso_pesticides__molecules"
 
-    # disable cols
-    source = None
-
     html_display_name = "ISO Pesticides"
     html_description_short = "A compendium of pesticides with common names."
 
@@ -72,11 +69,8 @@ class BcpcIsoPesticide(Molecule):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls, update_only: bool = False, **kwargs):
+    def load_source_data(cls, update_only: bool = False, **kwargs):
         """
-        Only use this function if you are part of the Simmate dev team!
-        Users should instead access data via the load_remote_archive method.
-
         Loads all molecules directly for the BCPC website into the local
         Simmate database.
         """

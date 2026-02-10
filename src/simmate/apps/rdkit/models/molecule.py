@@ -370,6 +370,13 @@ class Molecule(DatabaseTable):
         if not isinstance(molecule, ToolkitMolecule):
             molecule = ToolkitMolecule.from_dynamic(molecule)
 
+        # rdkit features only if installed
+        rdkit_kwargs = (
+            {"rdkit_mol": molecule.to_smiles()}
+            if settings.postgres_rdkit_extension
+            else {}
+        )
+
         # Given a toolkit molecule object, this will return a database molecule
         # object, but will NOT save it to the database yet. The kwargs input
         # is only if you inherit from this class and add extra fields.
@@ -389,8 +396,7 @@ class Molecule(DatabaseTable):
             functional_groups=molecule.get_fragments(),
             molecular_weight=molecule.molecular_weight,
             molecular_weight_exact=molecule.molecular_weight_exact,
-            # rdkit features
-            rdkit_mol=molecule.to_smiles(),  # OPTIMIZE
+            **rdkit_kwargs,
             **kwargs,  # this allows subclasses to add fields with ease
         )
         # If as_dict is false, we build this into an Object. Otherwise, just

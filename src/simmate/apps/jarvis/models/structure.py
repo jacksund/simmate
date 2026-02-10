@@ -48,9 +48,6 @@ class JarvisStructure(Structure):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     id = table_column.CharField(max_length=25, primary_key=True)
     """
     The id used to represent the structure (ex: "jvasp-12345")
@@ -66,11 +63,8 @@ class JarvisStructure(Structure):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls):
+    def load_source_data(cls):
         """
-        Only use this function if you are part of the Simmate dev team!
-        Users should instead access data via the load_remote_archive method.
-
         This method pulls JARVIS data into the Simmate database.
 
         JARVIS has a python package "jarvis-tools" that let's us pull some of

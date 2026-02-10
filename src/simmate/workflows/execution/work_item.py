@@ -39,8 +39,6 @@ class WorkItem(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    source = None
-
     id = table_column.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     """
     The universally unique ID used for the run.
