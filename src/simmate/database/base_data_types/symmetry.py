@@ -30,6 +30,8 @@ class Spacegroup(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
+    id = None  # TODO: need to switch pk to this
+
     number = table_column.IntegerField(primary_key=True)
     """
     International space group number
