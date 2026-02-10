@@ -82,7 +82,7 @@ class Wallet(DatabaseTable):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls):
+    def load_source_data(cls):
 
         # ensure default wallets exist
         for wallet in [

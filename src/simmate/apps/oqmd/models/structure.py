@@ -69,7 +69,7 @@ class OqmdStructure(Structure):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(
+    def load_source_data(
         cls,
         base_directory: str = "oqmd",
         only_add_new_cifs: bool = True,

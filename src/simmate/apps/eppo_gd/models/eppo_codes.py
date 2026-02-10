@@ -153,16 +153,13 @@ class EppoCode(DatabaseTable):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(
+    def load_source_data(
         cls,
         eppo_codes: list[str] = None,
         update_only: bool = False,
         **kwargs,
     ):
         """
-        Only use this function if you are part of the Simmate dev team!
-        Users should instead access data via the load_remote_archive method.
-
         Loads all EPPO codes directly for the EPPO website into the local
         Simmate database.
         """

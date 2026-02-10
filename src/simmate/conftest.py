@@ -173,7 +173,7 @@ def django_db_setup(
         )
 
         # populate spacegroup data
-        Spacegroup._load_database_from_toolkit()
+        Spacegroup.load_source_data()
 
         # now add test structures
         for name, structure in sample_structures.items():

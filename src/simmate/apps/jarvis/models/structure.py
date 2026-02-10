@@ -66,11 +66,8 @@ class JarvisStructure(Structure):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls):
+    def load_source_data(cls):
         """
-        Only use this function if you are part of the Simmate dev team!
-        Users should instead access data via the load_remote_archive method.
-
         This method pulls JARVIS data into the Simmate database.
 
         JARVIS has a python package "jarvis-tools" that let's us pull some of

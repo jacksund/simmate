@@ -72,11 +72,8 @@ class BcpcIsoPesticide(Molecule):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls, update_only: bool = False, **kwargs):
+    def load_source_data(cls, update_only: bool = False, **kwargs):
         """
-        Only use this function if you are part of the Simmate dev team!
-        Users should instead access data via the load_remote_archive method.
-
         Loads all molecules directly for the BCPC website into the local
         Simmate database.
         """

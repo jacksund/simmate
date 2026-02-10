@@ -6,6 +6,7 @@ from .files import (
     chunk_read,
     copy_directory,
     copy_files_from_directory,
+    download_file,
     empty_directory,
     get_directory,
     make_archive,

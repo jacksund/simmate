@@ -46,7 +46,7 @@ class AflowStructure(Structure, Thermodynamics):
 
     # -------------------------------------------------------------------------
 
-    def _load_data(cls):
+    def load_source_data(cls):
         """
         Loads all structures directly for the AFLOW database into the local
         Simmate database.

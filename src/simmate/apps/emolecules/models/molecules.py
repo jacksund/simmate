@@ -104,7 +104,7 @@ class EmoleculesMolecule(Molecule):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(
+    def load_source_data(
         cls,
         update_only: bool = True,
         building_blocks: bool = True,

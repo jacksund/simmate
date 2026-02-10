@@ -5,6 +5,9 @@ import time
 from pathlib import Path
 from tempfile import mkdtemp
 
+import requests
+from rich.progress import track
+
 
 def get_directory(directory: Path | str = None) -> Path:
     """
@@ -400,3 +403,36 @@ def chunk_read(
                     delimiter_count += 1
             lines = "".join(lines)
             yield lines.split(delimiter)
+
+
+def download_file(
+    url: str,
+    dest_path: str | Path,
+    chunk_size: int = 1048576,  # 1MB chunks
+) -> Path:
+    """
+    Downloads a large file from a URL to a local destination using streaming.
+
+    This function uses a streaming GET request to ensure memory efficiency,
+    writing the file in chunks rather than loading it entirely into RAM.
+    A progress bar is displayed in the terminal via the rich library.
+    """
+
+    dest_path = Path(dest_path)
+
+    with requests.get(url, stream=True) as response:
+        response.raise_for_status()
+        total_size = int(response.headers.get("content-length", 0))
+
+        # Calculate total iterations for the progress bar
+        # We use max(1, ...) to avoid division by zero if total_size is unknown
+        total_chunks = total_size // chunk_size if total_size else None
+
+        with open(dest_path, "wb") as f:
+            for chunk in track(
+                response.iter_content(chunk_size=chunk_size),
+                total=total_chunks,
+            ):
+                f.write(chunk)
+
+    return dest_path

@@ -102,7 +102,7 @@ class PdbLigand(Molecule):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls):
+    def load_source_data(cls):
         """
         This link gives directions for archive locations:
 

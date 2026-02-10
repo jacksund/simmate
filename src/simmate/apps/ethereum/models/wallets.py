@@ -76,7 +76,7 @@ class EthereumWallet(DatabaseTable):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls):
+    def load_source_data(cls):
 
         backend = settings.ethereum.backend
 

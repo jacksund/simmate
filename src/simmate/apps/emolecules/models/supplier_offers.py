@@ -117,8 +117,8 @@ class EmoleculesSupplierOffer(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # NOTE: The `_load_data` calls for this class are actually within the
-    # `Emolecules._load_data` method. This is because that's where the necessary
+    # NOTE: The `load_source_data` calls for this class are actually within the
+    # `Emolecules.load_source_data` method. This is because that's where the necessary
     # downloads are handled and it was easier to code out.
 
     @classmethod
@@ -130,7 +130,7 @@ class EmoleculesSupplierOffer(DatabaseTable):
 
         logging.info("Loading metadata...")
         vendor_offers = pandas.read_csv(metadata_file, sep="\t")
-        all_ids = set(Emolecules.objects.values_list("id", flat=True).all())
+        all_ids = set(EmoleculesMolecule.objects.values_list("id", flat=True).all())
 
         # To make things faster so that we can bulk upload, we want to remove
         # all "offers" in the dataframe that don't have a matching emol id in
@@ -209,7 +209,7 @@ class EmoleculesSupplierOffer(DatabaseTable):
         custom_offers = pandas.read_csv(custom_file, sep="\t|,", engine="python")
         custom_offers.rename(columns={" tier_num": "tier_num"}, inplace=True)
 
-        all_ids = set(Emolecules.objects.values_list("id", flat=True).all())
+        all_ids = set(EmoleculesMolecule.objects.values_list("id", flat=True).all())
 
         # To make things faster so that we can bulk upload, we want to remove
         # all "offers" in the dataframe that don't have a matching emol id in

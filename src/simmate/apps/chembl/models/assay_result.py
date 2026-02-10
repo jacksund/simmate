@@ -153,9 +153,8 @@ class ChemblAssayResult(DatabaseTable):
     """
 
     @classmethod
-    def _load_data(
+    def load_source_data(
         cls,
-        database_file: str | Path = "chembl_33.db",
         update_only: bool = False,
         limit: int = 250_000,  # very large table so we limit by default
     ):
@@ -173,6 +172,10 @@ class ChemblAssayResult(DatabaseTable):
         """
         import sqlite3
 
+        database_file = ChemblMolecule.download_source_data()
+        connection = sqlite3.connect(database_file)
+        cursor = connection.cursor()
+
         # if we are only updating, grab the highest activity id to use as our
         # starting point.
         if update_only and cls.objects.exists():
@@ -184,9 +187,8 @@ class ChemblAssayResult(DatabaseTable):
             )
         else:
             min_activity_id = -1
-
-        connection = sqlite3.connect(database_file)
-        cursor = connection.cursor()
+        
+        logging.info("Pulling assay data from ChEMBL db...")
         query = f"""
             SELECT
               a1.activity_id,
