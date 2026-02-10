@@ -443,11 +443,6 @@ class MigrationImage(Structure):
     means the structures are more similar, with 0 being an exact match.
     """
 
-    # We don't need the source column for the MigrationImage class because we
-    # instead stored the source on the DiffusionAnalysis object. This line
-    # deletes the source column from our Structure mix-in.
-    source = None
-
     migration_hop = table_column.ForeignKey(
         MigrationHop,
         on_delete=table_column.CASCADE,

@@ -18,9 +18,6 @@ class ChemSpaceFreedomSpaceMolecule(Molecule):
     # is now what we'd want. It is roughly 7.5mil compounds:
     #   https://chem-space.com/compounds#screening-compounds
 
-    # disable cols
-    source = None
-
     html_display_name = "ChemSpace Freedom"
     html_description_short = (
         "A diverse set of 201M compounds, 73% of which comply with Ro5."

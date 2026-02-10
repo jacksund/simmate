@@ -187,7 +187,7 @@ class ChemblAssayResult(DatabaseTable):
             )
         else:
             min_activity_id = -1
-        
+
         logging.info("Pulling assay data from ChEMBL db...")
         query = f"""
             SELECT

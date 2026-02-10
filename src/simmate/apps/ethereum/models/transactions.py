@@ -15,8 +15,7 @@ class EthereumTransaction(DatabaseTable):
     class Meta:
         db_table = "ethereum__transactions"
 
-    # disable cols
-    source = None
+    # -------------------------------------------------------------------------
 
     html_display_name = "Ethereum Transactions"
     html_description_short = "Ethereum transactions monitored via Etherscan.io"

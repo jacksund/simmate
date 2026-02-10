@@ -20,9 +20,6 @@ class EnamineRealMolecule(Molecule):
     class Meta:
         db_table = "enamine__real__molecules"
 
-    # disable cols
-    source = None
-
     html_display_name = "Enamine REAL"
     html_description_short = (
         "The largest enumerated database of synthetically feasible molecules"

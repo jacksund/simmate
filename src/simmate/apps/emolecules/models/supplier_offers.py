@@ -21,9 +21,6 @@ class EmoleculesSupplierOffer(DatabaseTable):
     class Meta:
         db_table = "emolecules__supplier_offers"
 
-    # disable cols
-    source = None
-
     html_display_name = "eMolecules Building Blocks Offers"
     html_description_short = "A vendor catalog of chemical 'building-blocks'"
 

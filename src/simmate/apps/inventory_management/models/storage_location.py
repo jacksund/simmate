@@ -29,9 +29,6 @@ class StorageLocation(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     name = table_column.CharField(max_length=255, blank=True, null=True)
 
     temperature_celsius = table_column.IntegerField(

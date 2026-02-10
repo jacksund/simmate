@@ -48,9 +48,6 @@ class CodStructure(Structure):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     # These fields overwrite the default Structure fields due to a bug.
     chemical_system = table_column.TextField()
     formula_full = table_column.TextField()

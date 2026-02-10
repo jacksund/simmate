@@ -29,9 +29,6 @@ class ChemblMolecule(Molecule):
     class Meta:
         db_table = "chembl__molecules"
 
-    # disable cols
-    source = None
-
     html_display_name = "ChEMBL"
     html_description_short = (
         "a manually curated database of bioactive molecules with drug-like properties."

@@ -32,9 +32,6 @@ class Container(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     batch = table_column.ForeignKey(
         Batch,
         on_delete=table_column.CASCADE,

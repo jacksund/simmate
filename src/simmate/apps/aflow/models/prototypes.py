@@ -61,9 +61,6 @@ class AflowPrototype(Structure):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     mineral_name = table_column.CharField(max_length=75, blank=True, null=True)
     """
     Common mineral name for this prototype (e.g. "rocksalt"). Note, not all 

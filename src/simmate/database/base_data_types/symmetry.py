@@ -30,10 +30,6 @@ class Spacegroup(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    id = None
-    source = None
-
     number = table_column.IntegerField(primary_key=True)
     """
     International space group number

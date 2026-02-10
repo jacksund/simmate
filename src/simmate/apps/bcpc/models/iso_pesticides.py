@@ -30,9 +30,6 @@ class BcpcIsoPesticide(Molecule):
     class Meta:
         db_table = "bcpc__iso_pesticides__molecules"
 
-    # disable cols
-    source = None
-
     html_display_name = "ISO Pesticides"
     html_description_short = "A compendium of pesticides with common names."
 

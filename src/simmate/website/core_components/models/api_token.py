@@ -24,7 +24,6 @@ class ApiToken(DatabaseTable):
 
     # disable default cols
     id = None  # we want the api key itself to be the primary key
-    source = None
 
     key = table_column.CharField(max_length=40, primary_key=True)
 

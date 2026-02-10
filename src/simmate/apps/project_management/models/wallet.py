@@ -28,8 +28,6 @@ class Wallet(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    source = None  # disable col
-
     wallet_type_options = [
         "project",
         "user",

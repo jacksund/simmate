@@ -50,9 +50,6 @@ class CasRegistryMolecule(Molecule):
     class Meta:
         db_table = "cas_registry__molecules"
 
-    # disable cols
-    source = None
-
     html_display_name = "CAS Registry"
     html_description_short = (
         "A *limited* catalog of commercial chemicals and their associated CAS "

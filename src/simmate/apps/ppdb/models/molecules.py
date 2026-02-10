@@ -27,9 +27,6 @@ class PpdbMolecule(Molecule):
     class Meta:
         db_table = "ppdb__molecules"
 
-    # disable cols
-    source = None
-
     html_display_name = "PPDB"
     html_description_short = "The Pesticide Properties Database."
 

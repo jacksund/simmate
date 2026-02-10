@@ -58,13 +58,13 @@ class ChemblDocument(DatabaseTable):
         Loads all document metadata directly from the ChEMBL database into the local
         Simmate database.
         """
-        
+
         from .molecules import ChemblMolecule
 
         database_file = ChemblMolecule.download_source_data()
         connection = sqlite3.connect(database_file)
         cursor = connection.cursor()
-        
+
         logging.info("Pulling document data from ChEMBL db...")
         cursor = connection.cursor()
         query = """

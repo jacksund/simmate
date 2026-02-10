@@ -21,7 +21,6 @@ class WebsitePageVisit(DatabaseTable):
     # the extra simmate methods such as the plotly figure rendering
     created_at = None
     updated_at = None
-    source = None
 
     user = table_column.ForeignKey(
         User,

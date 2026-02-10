@@ -32,8 +32,6 @@ class Project(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    source = None  # disable col
-
     name = table_column.CharField(max_length=25)
     """
     The short-hand project name (ex: "Zeus")

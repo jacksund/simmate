@@ -20,9 +20,6 @@ class Mixture(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     mixture_type_options = [
         "solution",  # solid in liquid mix
         "liquid mix",

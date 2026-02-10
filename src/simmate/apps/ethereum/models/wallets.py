@@ -9,9 +9,6 @@ class EthereumWallet(DatabaseTable):
     class Meta:
         db_table = "ethereum__wallets"
 
-    # disable cols
-    source = None
-
     html_display_name = "Ethereum Wallets"
     html_description_short = "Ethereum addresses monitored via Etherscan.io and Alchemy"
 

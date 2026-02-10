@@ -46,9 +46,6 @@ class EppoCode(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # disable cols
-    source = None
-
     id = table_column.CharField(max_length=25, primary_key=True)
     """
     The ID is the actual EPPO code. Typically these are no more than 6 characters
