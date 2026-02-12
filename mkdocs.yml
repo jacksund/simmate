@@ -251,7 +251,66 @@ nav:
                 - Maintainer notes: full_guides/contributing/maintainer_notes.md
             # - Utilities: full_guides/extras/utilities.md
 
-    - Parameters: parameters.md
+    - Parameters:
+        - Overview: parameters/overview.md
+        - angle_tolerance: parameters/angle_tolerance.md
+        - chemical_system: parameters/chemical_system.md
+        - command: parameters/command.md
+        - composition: parameters/composition.md
+        - compress_output: parameters/compress_output.md
+        - copy_previous_directory: parameters/copy_previous_directory.md
+        - diffusion_analysis_id: parameters/diffusion_analysis_id.md
+        - directory: parameters/directory.md
+        - directory_new: parameters/directory_new.md
+        - directory_old: parameters/directory_old.md
+        - fitness_field: parameters/fitness_field.md
+        - input_parameters: parameters/input_parameters.md
+        - is_restart: parameters/is_restart.md
+        - max_atoms: parameters/max_atoms.md
+        - max_path_length: parameters/max_path_length.md
+        - max_stoich_factor: parameters/max_stoich_factor.md
+        - max_supercell_atoms: parameters/max_supercell_atoms.md
+        - max_structures: parameters/max_structures.md
+        - migrating_specie: parameters/migrating_specie.md
+        - migration_hop: parameters/migration_hop.md
+        - migration_images: parameters/migration_images.md
+        - min_atoms: parameters/min_atoms.md
+        - min_supercell_atoms: parameters/min_supercell_atoms.md
+        - min_supercell_vector_lengths: parameters/min_supercell_vector_lengths.md
+        - nfirst_generation: parameters/nfirst_generation.md
+        - nimages: parameters/nimages.md
+        - nsteadystate: parameters/nsteadystate.md
+        - nsteps: parameters/nsteps.md
+        - percolation_mode: parameters/percolation_mode.md
+        - relax_bulk: parameters/relax_bulk.md
+        - relax_endpoints: parameters/relax_endpoints.md
+        - run_id: parameters/run_id.md
+        - search_id: parameters/search_id.md
+        - selector_kwargs: parameters/selector_kwargs.md
+        - selector_name: parameters/selector_name.md
+        - singleshot_sources: parameters/singleshot_sources.md
+        - sleep_step: parameters/sleep_step.md
+        - source: parameters/source.md
+        - standardize_structure: parameters/standardize_structure.md
+        - steadystate_source_id: parameters/steadystate_source_id.md
+        - steadystate_sources: parameters/steadystate_sources.md
+        - stop_conditions: parameters/stop_conditions.md
+        - structure: parameters/structure.md
+        - subworkflow_kwargs: parameters/subworkflow_kwargs.md
+        - subworkflow_name: parameters/subworkflow_name.md
+        - supercell_end: parameters/supercell_end.md
+        - supercell_start: parameters/supercell_start.md
+        - symmetry_precision: parameters/symmetry_precision.md
+        - tags: parameters/tags.md
+        - temperature_end: parameters/temperature_end.md
+        - temperature_start: parameters/temperature_start.md
+        - time_step: parameters/time_step.md
+        - updated_settings: parameters/updated_settings.md
+        - vacancy_mode: parameters/vacancy_mode.md
+        - validator_kwargs: parameters/validator_kwargs.md
+        - validator_name: parameters/validator_name.md
+        - workflow_base: parameters/workflow_base.md
+        - write_summary_files: parameters/write_summary_files.md
 
     - Apps: 
         - Overview: apps/overview.md
