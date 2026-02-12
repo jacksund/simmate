@@ -1,4 +1,4 @@
-## structure
+
 The crystal structure to be used for the analysis. The input can be anything compatible with the `Structure` toolkit class. Accepted inputs include:
 
 **a filename (cif or poscar) (recommended)**

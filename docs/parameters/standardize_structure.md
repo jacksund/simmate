@@ -1,4 +1,4 @@
-## standardize_structure
+
 This parameter determines whether to standardize the structure during our setup(). This means running symmetry analysis on the structure to reduce the symmetry and convert it to some standardized form. There are three different forms to choose from and thus 3 different values that `standardize_structure` can be set to:
 
 - `primitive`: for the standard primitive unitcell

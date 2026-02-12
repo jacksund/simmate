@@ -1,4 +1,4 @@
-## composition
+
 The composition input can be anything compatible with the `Composition` toolkit class. Note that compositions are sensitive to atom counts / multiplicity. There is a difference between giving `Ca2N` and `Ca4N2` in several workflows. Accepted inputs include:
 
 **a string (recommended)**

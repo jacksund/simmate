@@ -1,4 +1,4 @@
-## source
+
 (experimental feature; advanced users only)
 This parameter indicates where the input data (and other parameters) came from. The source could be a number of things including a third party id, a structure from a different Simmate database table, a transformation of another structure, a creation method, or a custom submission by the user.
 

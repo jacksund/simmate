@@ -1,4 +1,4 @@
-## nsteps
+
 This parameter sets the total number of steps for the calculation. For instance, in molecular dynamics workflows, the simulation will stop after this many steps.
 
 === "yaml"

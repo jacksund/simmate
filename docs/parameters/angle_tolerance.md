@@ -1,6 +1,4 @@
 
-# angle_tolerance
-
 This parameter is used to determine if the angles between sites are symmetrically equivalent when `standardize_structure=True`. The value is in degrees.
 
 === "yaml"

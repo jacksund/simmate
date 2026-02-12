@@ -1,4 +1,4 @@
-## relax_endpoints
+
 This parameter determines whether the endpoint structures for an NEB diffusion pathway should be relaxed before running the rest of the workflow.
 
 === "yaml"

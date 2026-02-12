@@ -1,4 +1,4 @@
-## is_restart
+
 (experimental feature)
 This parameter indicates whether the calculation is a restarted workflow run. The default is False. If set to true, the workflow will go through the given directory (which must be provided) and determine where to resume.
 

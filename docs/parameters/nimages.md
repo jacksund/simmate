@@ -1,4 +1,4 @@
-## nimages
+
 The number of images (or structures) to use in the analysis. This does NOT include the endpoint images (start/end structures). More is better, but computationally expensive. We recommend keeping this value odd in order to ensure there is an image at the midpoint.
 
 === "yaml"

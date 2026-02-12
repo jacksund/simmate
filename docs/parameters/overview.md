@@ -1,7 +1,6 @@
 # Workflow Parameters
 
-
-### About
+## About
 
 This section provides a detailed overview of all unique parameters for all workflows.
 
@@ -18,7 +17,7 @@ To identify the parameters allowed for a specific workflow, use the `explore` co
     workflow.show_parameters()
     ```
 
-### File vs. Python formats
+## File vs. Python formats
 
 When switching from Python to YAML, make sure you adjust the input format of your parameters. This is especially important if you use python a `list` or `dict` for one of your input parameters. Further, if you have complex input parameters (e.g. nested lists, matricies, etc.), we recommend using a TOML input file instead:
 

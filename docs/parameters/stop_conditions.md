@@ -1,4 +1,4 @@
-## stop_conditions
+
 (experimental feature; advanced users only)
 This parameter provides a set of stop conditions that will be checked periodically to determine if a FixedComposition evolutionary search should be stopped. It should be defined as a dictionary where each key is the string name of a StopCondition and the value is any kwargs that are needed to instantiate the class.
 

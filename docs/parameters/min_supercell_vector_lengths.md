@@ -1,4 +1,3 @@
-## min_supercell_vector_lengths
 
 When generating a supercell, this is the minimum length for each lattice vector of the generated cell (in Angstroms). For workflows such as NEB, larger is better but more computationally expensive.
 

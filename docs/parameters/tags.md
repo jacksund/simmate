@@ -1,4 +1,3 @@
-## tags
 
 When submitting workflows via the `run_cloud` command, tags are 'labels' that help control which workers are allowed to pick up and run the submitted workflow. Workers should be started with matching tags in order for these scheduled flows to run.
 

@@ -1,4 +1,4 @@
-## validator_name
+
 (experimental feature; advanced users only)
 This parameter is the base validator class that should be used. The class will be initialized using `MyValidator(**validator_kwargs)`. The input should be given as a string.
 

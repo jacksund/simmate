@@ -1,4 +1,3 @@
-## write_summary_files
 
 This parameter determines whether or not to write output files. For some workflows, writing output files can cause excessive load on the database and possibly make the calculation IO bound. In cases such as this, you can set this to `False`.
 

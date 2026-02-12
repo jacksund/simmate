@@ -1,4 +1,4 @@
-## steadystate_sources
+
 (experimental feature; advanced users only)
 This parameter is a dictionary of sources that will be scheduled at a "steady-state", meaning there will always be a set number of individuals scheduled/running for this type of structure source. This should be defined as a dictionary where each is `{"source_name": percent}`. The percent determines the number of steady stage calculations that will be running for this at any given time. It will be a percent of the `nsteadystate` parameter, which sets the total number of individuals to be scheduled/running. For example, if `nsteadystate=40` and we add a source of `{"RandomSymStructure": 0.30, ...}`, this means 0.25*40=10 randomly-created individuals will be running/submitted at all times. The source can be from either the `toolkit.creator` or `toolkit.transformations` modules.
 

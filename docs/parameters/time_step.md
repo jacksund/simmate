@@ -1,4 +1,4 @@
-## time_step
+
 For molecular dynamics simulations, this is time time between each ionic step (in femtoseconds).
 
 === "yaml"

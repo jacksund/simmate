@@ -1,4 +1,4 @@
-## temperature_start
+
 For molecular dynamics simulations, this is the temperature to begin the simulation at (in Kelvin).
 
 === "yaml"

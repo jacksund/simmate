@@ -1,4 +1,4 @@
-## migration_hop
+
 (advanced users only)
 The atomic path that should be analyzed. Inputs are anything compatible with the `MigrationHop` class of the `simmate.toolkit.diffusion` module. This includes:
 

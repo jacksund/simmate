@@ -1,4 +1,4 @@
-## migration_images
+
 The full set of images (including endpoint images) that should be analyzed. Inputs are anything compatible with the `MigrationImages` class of the `simmate.toolkit.diffusion` module, which is effectively a list of `structure` inputs. This includes:
 
 **`MigrationImages` object**
