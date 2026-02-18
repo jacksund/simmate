@@ -1,4 +1,5 @@
-<div class="text-center pt-2">
+<div id="{{ component.component_id }}-submit-button"
+     class="text-center pt-2">
     {% if component.form_errors %}
         <div>
             {% for error in component.form_errors %}
@@ -9,7 +10,9 @@
     {% if component.form_mode == "update_many" %}
         {% if not component.is_update_many_confirmed %}
             <div>There is no undo button! Are you sure you want to update all these entries?</div>
-            {% htmx_button method_name="confirm_update_many" include="#select_search_results" %}
+            {% with target_id="#"|add:component.component_id|add:"-submit-button" %}
+                {% htmx_button method_name="confirm_update_many" include="#select_search_results" target=target_id %}
+            {% endwith %}
         {% else %}
             <div>
                 This will update <b>{{ component.entry_ids_to_update|length }}</b> entries.

@@ -481,6 +481,7 @@ def htmx_button(
     small: bool = False,
     javascript_only: bool = False,
     include: str = None,
+    target: str = None,
     grouped: bool = False,
     **method_kwargs,
 ):

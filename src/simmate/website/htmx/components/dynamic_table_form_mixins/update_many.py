@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from django.shortcuts import render
+
 
 class UpdateManyMixin:
 
@@ -55,6 +57,13 @@ class UpdateManyMixin:
 
         if self.entry_ids_to_update:
             self.is_update_many_confirmed = True
+
+        # for quick partial update and to avoid resetting the rest of the form
+        return render(
+            self.request,
+            "data_explorer/dynamic_submit_button.html",
+            self.get_context(),
+        )
 
     def check_form_for_update_many(self):
         self.check_max_update_many()
