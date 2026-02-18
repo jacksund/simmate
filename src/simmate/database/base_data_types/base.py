@@ -646,13 +646,8 @@ class DatabaseTable(models.Model):
         """
         Grabs table metadata and column descriptions into a single dictionary
         """
-
-        # !!! source is kinda the verbose name for third-party
-        # data, but I should standardize how user-friendly names are set.
-        name = cls.source if isinstance(cls.source, str) else cls.table_name
-
         return {
-            "name": name,
+            "name": cls.html_display_name if cls.html_display_name else cls.table_name,
             "table_info": {
                 "sql_name": cls._meta.db_table,
                 "python_name": cls.table_name,
