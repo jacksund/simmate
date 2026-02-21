@@ -312,14 +312,14 @@ class Substance(DatabaseTable):
         """
         Generates a unique and readable ID in the format:
             {3 Letters}-{3 Numbers}-{4 Numbers}
-        
+
         Letters are not allow to be vowels or the letter Y. Numbers are 0-9.
         """
         letters_group = "".join(random.choices(cls._LETTERS, k=3))
         num_group_1 = "".join(random.choices(string.digits, k=3))
         num_group_2 = "".join(random.choices(string.digits, k=4))
         return f"{letters_group}-{num_group_1}-{num_group_2}"
-    
+
     def generate_unique_id(cls, existing_ids: list[str] = None) -> str:
 
         if not existing_ids:
@@ -332,7 +332,7 @@ class Substance(DatabaseTable):
                 found_unique_id = True
 
         return new_id
-    
+
     # -------------------------------------------------------------------------
 
     # DEV NOTES: I was playing with the idea of a check digit, but end up
@@ -347,12 +347,12 @@ class Substance(DatabaseTable):
     #   The check digit lets us confirm it is valid before hitting the database
     #   and save on compute time with invalid IDs. Only letters are used in
     #   the check because codes look cleaner and more consistent.
-    
+
     # generate_id method would have this at the end:
     #   partial_id = f"{letters_group}-{num_group_1}-{num_group_2}"
     #   check_digit = cls.calculate_luhn_consonant(partial_id)
     #   return f"{check_digit}-{partial_id}"
-    
+
     # @classmethod
     # def calculate_luhn_consonant(cls, partial_id: str) -> str:
     #     """
