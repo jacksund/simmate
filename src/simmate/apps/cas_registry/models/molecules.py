@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import requests
-
 from simmate.apps.rdkit.models import Molecule
 from simmate.database.base_data_types import table_column
-from simmate.toolkit import Molecule as ToolkitMolecule
-
-PUBCHEM_URL_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest"
 
 
 class CasRegistryMolecule(Molecule):
@@ -109,56 +104,6 @@ class CasRegistryMolecule(Molecule):
         # ex: https://pubchem.ncbi.nlm.nih.gov/compound/50-78-2
         return f"https://pubchem.ncbi.nlm.nih.gov/compound/{self.id}/"
 
-    @staticmethod
-    def validate_cas_number(cas_number: str) -> bool:
-        """
-        The final number in CAS numbers have are actually a check digit, which
-        can help verify if you have a legitamate CAS number.
-
-        This method check to see if the CAS number passes the "valid" check
-        and is necessary when using third-party sources such as PubChem.
-
-        Read more about validation at:
-        https://www.cas.org/support/documentation/chemical-substances/checkdig
-        """
-        # "A CAS Registry Number includes up to 10 digits which are separated
-        # into 3 groups by hyphens. The first part of the number, starting from
-        # the left, has 2 to 7 digits; the second part has 2 digits. The final
-        # part consists of a single check digit.
-        chunks = cas_number.split("-")
-
-        # check 1: must have 3 sections
-        if len(chunks) != 3:
-            return False  # FAILS
-
-        # check 2: each section must be numerical and an integer
-        try:
-            primary, secondary, check_digit = [int(c) for c in chunks]
-        except:
-            return False  # FAILS
-
-        # check 3: secondary digit must be 2 digits (i.e. under 100)
-        if secondary >= 100:
-            return False
-        # if the secondary value is 1-9, then we need a leading zero. which is why
-        # we format the string below
-
-        # check 4: final section must be 1 number
-        if check_digit >= 10:
-            return False  # FAILS
-
-        # check 4: make sure check_digit is expected value. See the formula at...
-        #   https://www.cas.org/support/documentation/chemical-substances/checkdig
-        rn_flat = str(primary) + f"{secondary:02d}"
-        expected_check_digit = (
-            sum([(len(rn_flat) - n) * int(i) for n, i in enumerate(rn_flat)]) % 10
-        )
-        if check_digit != expected_check_digit:
-            return False
-
-        # if all checks above passed
-        return True
-
     # -------------------------------------------------------------------------
 
     # CAS numbers that don't actually exist but are useful to keep in the
@@ -237,34 +182,10 @@ class CasRegistryMolecule(Molecule):
     def _search_cas_pubchem(cls, cas_number: str) -> dict:
         """
         Uses the PubChem REST API to get molecule information using a CAS number.
-
-        You can do this with PubChemPy, but that package hasn't been updated
-        since 2016, and it's pretty outdated. We just implement our version
-        here that uses requests instead of urlopen
         """
+        from simmate.apps.pubchem.client import PubChemClient
 
-        # Another helpful endpoint but it doesn't give us Title:
-        # f"/pug/compound/name/{cas_number}/JSON"
-
-        # Endpoint that gives us exactly the data we need and nothing more
-        cid_api_url = (
-            PUBCHEM_URL_BASE
-            + f"/pug/compound/name/{cas_number}/property/Title,CanonicalSMILES/JSON"
-        )
-        cid_response = requests.get(cid_api_url)
-        cid_data = cid_response.json()
-
-        # parse out into Simmate format
-        props = cid_data["PropertyTable"]["Properties"][0]
-        smiles = props["CanonicalSMILES"]
-        cid_data_cleaned = {
-            # "cas": cas_number,  # added elsewhere
-            "pubchem_id": props["CID"],
-            "common_name": props["Title"],
-            "molecule": ToolkitMolecule.from_smiles(smiles),
-            "molecule_original": smiles,
-        }
-        return cid_data_cleaned
+        return PubChemClient.get_data_from_cas_number(cas_number)
 
     # -------------------------------------------------------------------------
 
@@ -312,126 +233,13 @@ class CasRegistryMolecule(Molecule):
         molecule: Molecule,
         force_update: bool = False,
     ) -> str:
+        from simmate.apps.pubchem.client import PubChemClient
 
-        # We can't do a direct lookup of CAS from a molecule, so we need
-        # to instead look up the CID --> look up synonyms --> get CAS
-        query_inchi_key = molecule.to_inchi_key()
-        mol_api_url = (
-            PUBCHEM_URL_BASE
-            + f"/pug/compound/inchikey/{query_inchi_key}/property/Title,CanonicalSMILES/JSON"
+        cas_number = PubChemClient.get_cas_from_molecule(molecule)
+        return cls.search_cas(
+            cas_number=cas_number,
+            backend="PubChem",
+            force_update=force_update,
         )
-        mol_response = requests.get(mol_api_url)
-        mol_data = mol_response.json()
-
-        # pull out the CIDs
-        # BUG: we just use the 1st result and ignore others
-        query_cid = mol_data["PropertyTable"]["Properties"][0]["CID"]
-
-        # grab synonyms for this CID
-        syn_api_url = PUBCHEM_URL_BASE + f"/pug/compound/cid/{query_cid}/synonyms/JSON"
-        syn_response = requests.get(syn_api_url)
-        syn_data = syn_response.json()
-
-        # go through synonyms and grab valid CAS numbers
-        synoyms = syn_data["InformationList"]["Information"][0]["Synonym"]
-        cas_numbers = [c for c in synoyms if cls.validate_cas_number(c)]
-
-        # revert to searching via cas which is more robust
-        # !!! we just use the first cas number that works
-        for cas_number in cas_numbers:
-            try:
-                return cls.search_cas(
-                    cas_number=cas_number,
-                    backend="PubChem",
-                    force_update=force_update,
-                )
-            except:
-                continue
 
     # -------------------------------------------------------------------------
-
-    # TODO: These methods are to parset the *full* PubChem webpage. This should
-    # move to the PubChem table.
-
-    @classmethod
-    def _get_pubchem_data(cls, cid: str):
-        raise NotImplementedError()
-
-        api_url_base = "https://pubchem.ncbi.nlm.nih.gov/rest"
-
-        # Step 2: call the API endpoint using the CID, which gives us much
-        # more data to work with
-        cid_api_url = api_url_base + f"/pug_view/data/compound/{cid}/JSON/"
-        cid_response = requests.get(cid_api_url)
-        cid_data = cid_response.json()
-
-        cid_data_cleaned = cls._parse_pubchem_response(cid_data)
-
-        return cid_data_cleaned
-
-    @classmethod
-    def _parse_pubchem_response(cls, cid_data: dict) -> dict:
-        """
-        Takes the full page response and parses out + flattens data into the
-        format used by the Simmate table
-        """
-
-        records = cid_data["Record"]
-
-        cleaned_data = {
-            "pubchem_id": records["RecordNumber"],
-            "common_name": records["RecordTitle"],
-        }
-
-        smiles = cls._get_smiles(records)
-        cleaned_data["molecule"] = ToolkitMolecule.from_smiles(smiles)
-        cleaned_data["molecule_original"] = smiles
-
-        # TODO: add other properties that need more cleaning. Might use LLM
-        # physcial_state = cls._get_physical_state(records)
-
-        return cleaned_data
-
-    @classmethod
-    def _get_nested_section(cls, section: dict, heading_path: list[str]):
-
-        if not heading_path:  # empty path ends recursion
-            return section
-
-        next_heading = heading_path[0]
-        for subsection in section["Section"]:
-            if next_heading == subsection["TOCHeading"]:
-                return cls._get_nested_section(subsection, heading_path[1:])
-
-    @classmethod
-    def _get_smiles(cls, records):
-        return cls._get_nested_section(
-            records,
-            [
-                "Names and Identifiers",
-                "Computed Descriptors",
-                "Canonical SMILES",
-            ],
-        )["Information"][0]["Value"]["StringWithMarkup"][0]["String"]
-
-    @classmethod
-    def _get_physical_state(cls, records):
-        raise NotImplementedError()
-
-        # OPTIMIZE: it might be more efficient to pass ALL metadata and ask it
-        # to determine ALL properties in a single prompt + API call
-
-        section = cls._get_nested_section(
-            records,
-            [
-                "Chemical and Physical Properties",
-                "Experimental Properties",
-                "Physical Description",  # or "Color / Form"?
-            ],
-        )
-
-        prompt = (
-            "Given the following information, is this compound a solid, liquid, "
-            f"or gas? Make your answer a single word. \n\n {section}"
-        )
-        # Then call the llm to get an answer

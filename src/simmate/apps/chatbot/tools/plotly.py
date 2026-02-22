@@ -2,9 +2,8 @@
 
 import re
 
-import streamlit
-from langchain.agents import tool
-from langchain.prompts import PromptTemplate
+from langchain.tools import tool
+from langchain_core.prompts import PromptTemplate
 from langchain_experimental.tools.python.tool import PythonAstREPLTool, sanitize_input
 from plotly.graph_objects import Figure
 
@@ -54,6 +53,8 @@ def get_plotly_figure(question: str, dataframe_id: int) -> Figure:
     """
 
     # TODO: grab required dataframe based on user request
+    import streamlit
+
     from .streamlit import get_streamlit_dataframe
 
     df = get_streamlit_dataframe(dataframe_id)

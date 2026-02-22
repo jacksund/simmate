@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import pandas
-from langchain.agents import tool
 from langchain.agents.agent_types import AgentType
+from langchain.tools import tool
 from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe_agent
 
 from simmate.configuration import settings

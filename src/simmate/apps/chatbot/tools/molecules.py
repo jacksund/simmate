@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from langchain.agents import tool
+from langchain.tools import tool
 
 from simmate.toolkit import Molecule
 
