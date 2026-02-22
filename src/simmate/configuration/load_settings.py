@@ -346,15 +346,17 @@ class SimmateSettings:
                 },
             },
             "chatbot": {
-                "endpoint": None,
-                "api_key": None,
+                "provider": None,
                 "model": None,
-                "version": None,
                 # For chatbot to access simmate database.
                 # Make sure this is a read-only user & limited access!
                 # format as: "postgresql://user:password@host:port/db_name"
                 "sql_uri": None,
-                "verbose": False,
+                # anything else is used as a kwarg to init the llm client.
+                # For example:
+                # "endpoint": None,
+                # "api_key": None,
+                # "version": None,
             },
             "chemspace": {
                 "mode": "ftp",  # or s3

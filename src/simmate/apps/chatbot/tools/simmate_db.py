@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from langchain.agents import tool
+from langchain.tools import tool
 from pandas import DataFrame
 
 from ..chains import get_ask_db_chain, get_data_from_db_chain
