@@ -1,0 +1,6622 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://simmate.org/change_log/">
+      
+      
+        <link rel="prev" href="../apps/surflex/">
+      
+      
+      
+      <link rel="icon" href="../images/simmate-icon.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+    
+    
+      
+        <title>Updates - Simmate Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.a40c8224.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#check-your-installed-version" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Simmate Documentation" class="md-header__button md-logo" aria-label="Simmate Documentation" data-md-component="logo">
+      
+  <img src="../images/simmate-icon.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Simmate Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Updates
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jacksund/simmate" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../home/" class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../getting_started/introduction/" class="md-tabs__link">
+          
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../full_guides/overview/" class="md-tabs__link">
+          
+  
+  Full Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../parameters/overview/" class="md-tabs__link">
+          
+  
+  Parameters
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../apps/overview/" class="md-tabs__link">
+          
+  
+  Apps
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+    
+  
+  Updates
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Simmate Documentation" class="md-nav__button md-logo" aria-label="Simmate Documentation" data-md-component="logo">
+      
+  <img src="../images/simmate-icon.svg" alt="logo">
+
+    </a>
+    Simmate Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jacksund/simmate" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../home/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/introduction/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    1. Installation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            1. Installation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/installation/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/installation/install_anaconda/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Install Anaconda
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/installation/command_line/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) Intro to the command line
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/installation/create_your_env/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    c) Create your environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/installation/explore_simmate_cli/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    d) Explore Simmate commands
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/installation/local_server_setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    e) Set up a Local Server
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    2. Workflows
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            2. Workflows
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/workflows/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/workflows/configure_database/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Configure the database
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/workflows/make_a_structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) Make a input structure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/workflows/view_all_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    c) View all workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/workflows/configure_qe/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    d) Configure QE
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/workflows/running_the_workflow/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    e) Run a workflow
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/workflows/submit_to_a_cluster/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    (extra) Submit to a cluster
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    3. Toolkit
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            3. Toolkit
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/toolkit/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/toolkit/intro_to_spyder/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Intro to Python (& Spyder)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/toolkit/the_structure_class/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) The Structure class
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/toolkit/advanced_classes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    e) Advanced classes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    4. Database
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            4. Database
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/database/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/database/dbeaver/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) View data w. DBeaver
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/database/intro_to_python_inheritance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) How tables are built
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/database/access_workflow_data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    c) Workflow data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/database/access_thirdparty_data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    d) Third-party data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    5. Custom workflows
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            5. Custom workflows
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/custom_workflows/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/custom_workflows/basic_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Basic workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/custom_workflows/chemistry_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) Chemistry workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/custom_workflows/class_based_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) Class-based workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    6. Custom apps & tables
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            6. Custom apps & tables
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/custom_tables_and_apps/create_a_custom_app/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Create an app
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/custom_tables_and_apps/create_a_custom_table/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) Create a custom table
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/custom_tables_and_apps/using_app_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    c) Adding app workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    7. Use a cloud database
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            7. Use a cloud database
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/use_a_cloud_database/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quickstart
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/use_a_cloud_database/private_vs_collab/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Private vs shared
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/use_a_cloud_database/build_a_postgres_database/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    b) Building a database
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_9" id="__nav_2_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    8. Computational resources
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            8. Computational resources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/add_computational_resources/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quickstart
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/add_computational_resources/intro_to_workers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    a) Intro to workers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/wrap_up/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Wrap up
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Extra Examples
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            Extra Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/example_scripts/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/example_scripts/example-001/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Example-001
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/example_scripts/example-002/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Example-002
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Full Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Full Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Apps
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            Apps
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/apps/basic_use/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic Use
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/apps/creating_custom_apps/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating custom apps
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Website
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Website
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/creating_views/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating views
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3_2" id="__nav_3_3_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Creating components
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            Creating components
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/creating_components/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3_2_2" id="__nav_3_3_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Frontend Elements
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_3_3_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Frontend Elements
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/creating_components/frontend_elements/text_input/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    text_input
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/creating_components/frontend_elements/text_area/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    text_area
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/creating_components/frontend_elements/number_input/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    number_input
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/creating_components/frontend_elements/button/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    button
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/creating_components/frontend_elements/radio/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    radio
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/creating_components/frontend_elements/molecule_input/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    molecule_input
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/creating_components/frontend_elements/selectbox/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    selectbox
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/creating_components/frontend_elements/checkbox/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    checkbox
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/creating_components/frontend_elements/search_box/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    search_box
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/creating_components/backend_mixins/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Backend Mix-ins
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/setup_and_config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Setup & Config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/website/rest_api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    REST API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Workflows
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            Workflows
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/workflows/naming_conventions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Naming Conventions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/workflows/basic_use/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic Use
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/workflows/creating_basic_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating basic workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/workflows/creating_nested_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating nested workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/workflows/creating_s3_workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating "S3" workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Computational Resources
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            Computational Resources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/computational_resources/basic_use.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic Use
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Database
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            Database
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/database/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/database/basic_use/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic use
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/database/workflow_data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workflow data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/database/third_party_data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Third-party data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/database/contributing_data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/database/custom_tables/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating custom tables
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Toolkit
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7">
+            <span class="md-nav__icon md-icon"></span>
+            Toolkit
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_1" id="__nav_3_7_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Molecules
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_7_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7_1">
+            <span class="md-nav__icon md-icon"></span>
+            Molecules
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/molecules/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_1_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_1_2" id="__nav_3_7_1_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Single Molecule
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_3_7_1_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7_1_2">
+            <span class="md-nav__icon md-icon"></span>
+            Single Molecule
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/molecules/single_molecule/quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/molecules/single_molecule/molecule_loading/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Molecule Loading
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/molecules/single_molecule/molecule_exporting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Molecule Exporting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/molecules/single_molecule/cleaning_and_prep/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cleaning & Prep
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/molecules/single_molecule/common_properties/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Common Properties
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/molecules/single_molecule/common_analyses/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Common Analyses
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/molecules/single_molecule/smarts_sets/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SMARTS sets
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_1_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_1_3" id="__nav_3_7_1_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Many Molecules
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_3_7_1_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7_1_3">
+            <span class="md-nav__icon md-icon"></span>
+            Many Molecules
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/molecules/many_molecules/featurizers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Featurizers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/molecules/many_molecules/clustering/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Clustering
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/molecules/many_molecules/mapping/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ChemSpace Mapping
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/molecules/many_molecules/similarity/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Similarity & Diversity
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_2" id="__nav_3_7_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Crystal Structures
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            Crystal Structures
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/crystal_structures/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_2_2" id="__nav_3_7_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    PyMatGen Help
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_3_7_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            PyMatGen Help
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/crystal_structures/pymatgen/structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Structure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/crystal_structures/pymatgen/lattice/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Lattice
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/crystal_structures/pymatgen/sites/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sites
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/toolkit/crystal_structures/pymatgen/composition/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Composition
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_8" id="__nav_3_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Extras
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_8">
+            <span class="md-nav__icon md-icon"></span>
+            Extras
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/extras/configuration.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Settings & Configs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_8_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_8_2" id="__nav_3_8_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Contributing Code
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_8_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_8_2">
+            <span class="md-nav__icon md-icon"></span>
+            Contributing Code
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/contributing/first_time_setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    First time setup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/contributing/creating_and_submitting_changes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating & submitting changes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/contributing/extra/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Extra notes & tips
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../full_guides/contributing/maintainer_notes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Maintainer notes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Parameters
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Parameters
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/angle_tolerance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    angle_tolerance
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/chemical_system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    chemical_system
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/command/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    command
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/composition/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    composition
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/compress_output/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    compress_output
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/copy_previous_directory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    copy_previous_directory
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/diffusion_analysis_id/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    diffusion_analysis_id
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/directory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    directory
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/directory_new/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    directory_new
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/directory_old/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    directory_old
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/fitness_field/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    fitness_field
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/input_parameters/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    input_parameters
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/is_restart/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    is_restart
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/max_atoms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    max_atoms
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/max_path_length/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    max_path_length
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/max_stoich_factor/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    max_stoich_factor
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/max_supercell_atoms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    max_supercell_atoms
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/max_structures/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    max_structures
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/migrating_specie/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    migrating_specie
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/migration_hop/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    migration_hop
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/migration_images/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    migration_images
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/min_atoms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    min_atoms
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/min_supercell_atoms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    min_supercell_atoms
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/min_supercell_vector_lengths/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    min_supercell_vector_lengths
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/nfirst_generation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    nfirst_generation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/nimages/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    nimages
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/nsteadystate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    nsteadystate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/nsteps/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    nsteps
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/percolation_mode/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    percolation_mode
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/relax_bulk/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    relax_bulk
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/relax_endpoints/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    relax_endpoints
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/run_id/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    run_id
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/search_id/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    search_id
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/selector_kwargs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    selector_kwargs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/selector_name/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    selector_name
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/singleshot_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    singleshot_sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/sleep_step/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    sleep_step
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    source
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/standardize_structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    standardize_structure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/steadystate_source_id/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    steadystate_source_id
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/steadystate_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    steadystate_sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/stop_conditions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    stop_conditions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    structure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/subworkflow_kwargs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    subworkflow_kwargs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/subworkflow_name/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    subworkflow_name
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/supercell_end/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    supercell_end
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/supercell_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    supercell_start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/symmetry_precision/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    symmetry_precision
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/tags/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    tags
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/temperature_end/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    temperature_end
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/temperature_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    temperature_start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/time_step/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    time_step
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/updated_settings/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    updated_settings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/vacancy_mode/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    vacancy_mode
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/validator_kwargs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    validator_kwargs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/validator_name/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    validator_name
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/workflow_base/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    workflow_base
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/write_summary_files/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    write_summary_files
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Apps
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Apps
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/aflow/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AFLOW
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/bader_henkelman/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bader (henkelman)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/baderkit/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    baderkit
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/bcpc/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    BCPC
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/cas_registry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CAS Registry
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/chembl/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Chembl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/chemspace/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ChemSpace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/cod/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    COD
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/emolecules/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    eMolecules
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/enamine/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Enamine
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/eppo_gd/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    EPPO Global Database
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/evolution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Evolutionary Searches
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/jarvis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    JARVIS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/materials_project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Materials Project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/oqmd/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    OQMD
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/pdb/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PDB
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/ppdb/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PPDB
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/quantum_espresso/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quantum Espresso
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/rdkit/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    RDKit
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_21" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_21" id="__nav_5_21_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    VASP
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_21_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_21">
+            <span class="md-nav__icon md-icon"></span>
+            VASP
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/vasp/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/vasp/installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/vasp/workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/warren_lab/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Warren Lab
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_23" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_23" id="__nav_5_23_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    ++ Experimental Apps
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_23_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_23">
+            <span class="md-nav__icon md-icon"></span>
+            ++ Experimental Apps
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/biovia_cosmo/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    BIOVIA COMSO
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/clease/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CLEASE
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/deepmd/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DeepMD
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/openeye_omega/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    OpenEye OMEGA
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/schrodinger/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Schrodinger
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/surflex/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Surflex
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Updates
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Updates
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#check-your-installed-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Check your installed version
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading-to-the-latest-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrading to the Latest Version
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-version-numbers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Version Numbers
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upcoming-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upcoming Release
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0180-20250420" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.18.0 (2025.04.20)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0170-20240520" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.17.0 (2024.05.20)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0160-20240127" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.16.0 (2024.01.27)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0150-20240104" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.15.0 (2024.01.04)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0140-20230706" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.14.0 (2023.07.06)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0130-20230306" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.13.0 (2023.03.06)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0120-20221023" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.12.0 (2022.10.23)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0110-20220910" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.11.0 (2022.09.10)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0100-20220829" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.10.0 (2022.08.29)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v090-20220817" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.9.0 (2022.08.17)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v080-20220811" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.8.0 (2022.08.11)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v070-20220719" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.7.0 (2022.07.19)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v060-20220625" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.6.0 (2022.06.25)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v050-20220530" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.5.0 (2022.05.30)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v040-20220424" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.4.0 (2022.04.24)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v030-20220419" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.3.0 (2022.04.19)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v020-20220415" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.2.0 (2022.04.15)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v014-20220412" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.1.4 (2022.04.12)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v000-20220328" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.0.0 (2022.03.28)
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#check-your-installed-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Check your installed version
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading-to-the-latest-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrading to the Latest Version
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-version-numbers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Version Numbers
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upcoming-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upcoming Release
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0180-20250420" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.18.0 (2025.04.20)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0170-20240520" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.17.0 (2024.05.20)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0160-20240127" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.16.0 (2024.01.27)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0150-20240104" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.15.0 (2024.01.04)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0140-20230706" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.14.0 (2023.07.06)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0130-20230306" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.13.0 (2023.03.06)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0120-20221023" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.12.0 (2022.10.23)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0110-20220910" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.11.0 (2022.09.10)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0100-20220829" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.10.0 (2022.08.29)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v090-20220817" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.9.0 (2022.08.17)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v080-20220811" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.8.0 (2022.08.11)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v070-20220719" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.7.0 (2022.07.19)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v060-20220625" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.6.0 (2022.06.25)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v050-20220530" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.5.0 (2022.05.30)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v040-20220424" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.4.0 (2022.04.24)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v030-20220419" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.3.0 (2022.04.19)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v020-20220415" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.2.0 (2022.04.15)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v014-20220412" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.1.4 (2022.04.12)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v000-20220328" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.0.0 (2022.03.28)
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Updates</h1>
+
+<hr />
+<h2 id="check-your-installed-version">Check your installed version<a class="headerlink" href="#check-your-installed-version" title="Permanent link">&para;</a></h2>
+<p>When importing simmate and establishing a connection to the database, a warning message will be displayed if your version is not the most recent one. You can also verify this via the command-line:</p>
+<div class="highlight"><pre><span></span><code>simmate<span class="w"> </span>version
+</code></pre></div>
+<hr />
+<h2 id="upgrading-to-the-latest-version">Upgrading to the Latest Version<a class="headerlink" href="#upgrading-to-the-latest-version" title="Permanent link">&para;</a></h2>
+<p>We strongly advise installing simmate in a fresh conda environment instead of updating it within your current environment:
+<div class="highlight"><pre><span></span><code>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>my_env<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11<span class="w"> </span>simmate
+</code></pre></div></p>
+<p>Ensure that the expected version is installed:
+<div class="highlight"><pre><span></span><code>simmate<span class="w"> </span>version
+</code></pre></div></p>
+<p>Update your database to be compatible with the new installation:
+<div class="highlight"><pre><span></span><code>simmate<span class="w"> </span>database<span class="w"> </span>update
+</code></pre></div></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The command <code>simmate database update</code> is only effective from <code>v0.15.0</code> onwards. Earlier versions of simmate necessitate a complete database reset when updating versions. So, if your original database version is <code>v0.14.0</code> or earlier, you must run <code>simmate database reset</code>.</p>
+</div>
+<hr />
+<h2 id="understanding-version-numbers">Understanding Version Numbers<a class="headerlink" href="#understanding-version-numbers" title="Permanent link">&para;</a></h2>
+<p>Our releases follow <a href="https://semver.org/">semantic versioning</a>. This implies that versions (e.g., <code>v1.2.3</code>) correspond to <code>MAJOR.MINOR.PATCH</code>. Each version number increases following these changes:</p>
+<ul>
+<li><code>MAJOR</code> = incompatible API changes</li>
+<li><code>MINOR</code> = addition of new functionality (without API changes)</li>
+<li><code>PATCH</code> = bug fixes and documentation updates (without API changes)</li>
+</ul>
+<p>There is one significant exception to the above rules -- <code>MAJOR=0</code> releases. Any <code>v0.x.y</code> release is considered developmental, where APIs are subject to change and are not deemed stable.</p>
+<hr />
+<h2 id="upcoming-release">Upcoming Release<a class="headerlink" href="#upcoming-release" title="Permanent link">&para;</a></h2>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>To view ongoing changes that haven't been finalized or merged yet, check our <a href="https://github.com/jacksund/simmate/pulls">active pull-requests</a> on GitHub</p>
+</div>
+<!-- (hidden message for maintainer to use between releases)
+- no new changes have been merged into the `main` branch yet
+**Enhancements**
+**Refactors**
+**Fixes**
+-->
+
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>added frontend framework and docs, based off of a fork of <code>django-unicorn</code></li>
+<li>added custom API token generation and auth backend</li>
+<li>added <code>CSV</code> download button on the <code>Data</code> web views</li>
+<li>added <code>api_view</code> decorator for basic REST endpoints </li>
+<li>added <code>file_upload</code> web component</li>
+<li>added export of SDF metadata</li>
+<li>added <code>foriegn_key_link</code> util</li>
+<li>added <code>tags</code> support in dynamic components</li>
+<li>added html table and entry context hooks</li>
+<li>added <code>loading_spinner</code> tag for unicorn components</li>
+<li>added <code>plotly_figure</code> filter tag for rendering plots</li>
+<li>added <code>report</code> features to database tables and data_explorer views</li>
+<li>added <code>StatusTracking</code> model to <code>database.base_data_types</code></li>
+<li>added <code>is_dueterated</code> methods to <code>Molecule</code></li>
+<li>added web scrape of news archive for <code>apps.bcpc</code></li>
+<li>added <code>apps.ppdb</code></li>
+<li>added dev apps <code>chatbot</code> and <code>analysis_dashboard</code></li>
+<li>added <code>database.external_connectors</code> utils</li>
+<li>added proof of concept htmx app for frontend forms</li>
+<li>added <code>toolkit.datastores</code> and <code>toolkit.dataframes</code> helper modules</li>
+<li>added molecular and poc apps to the list of df</li>
+<li>allow conditional postgres-rdkit extension with settings flag</li>
+<li>added <code>startup_method</code> hook to simmate workers</li>
+<li>added <code>baderkit</code> app</li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li>refactored website's workflow tab to use new API backend</li>
+<li>removed <code>django-contrib-comments</code>, <code>django-crispy-forms</code>, <code>dj-database-url</code>, <code>django-filter</code>, and <code>djangorestframework</code> dependencies</li>
+<li>update <code>breadcrumbs</code> tag to include deprec <code>breadcrumb_active</code></li>
+<li>workflows results in the web ui now exists within the Data tab. The workflow tab has been limited to submission, docs, and analytics</li>
+<li><code>DynamicApiView</code> was split up into separate views for easier debugging and future enhancements</li>
+<li><code>website.engine</code> apps and others are condensed into <code>core_components</code>, <code>data_explorer</code>, and <code>workflows</code> apps</li>
+<li>refactored <code>toolkit.featurizers</code> module</li>
+<li>moved all of <code>simmate.engine</code> module into <code>simmate.workflows</code></li>
+<li>deprec django-unicorn in favor of htmx</li>
+<li>deprec badelf app as it is now a standalone python package (baderkit)</li>
+<li><code>load_remote_archives</code> is removed in favor of <code>database download</code></li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+<li>fix Data tab in website view failing to load due to molecule template</li>
+<li>fix workflow names that have captial letters next to eachother (e.g, <code>LogDWorkflow</code> --&gt; <code>log-d-workflow</code>)</li>
+<li>fix <code>parse_multiselect</code> util when nested in a <code>create_many</code> form</li>
+<li>fix <code>unicorn.loading</code> activity when <code>Unicorn.call()</code> js is called</li>
+<li>fix <code>to_sdf</code> export</li>
+</ul>
+<hr />
+<h2 id="v0180-20250420">v0.18.0 (2025.04.20)<a class="headerlink" href="#v0180-20250420" title="Permanent link">&para;</a></h2>
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>added a molecular toolkit, which is a wrapper around <code>rdkit</code> that cleans up the python api</li>
+<li>updated Data web pages and UI to be more user friendly</li>
+<li>added frontend framework for building dynamic web forms/pages</li>
+<li>enabled data management from web ui -- allowing users to create and update a dataset from the ui</li>
+<li>added chemdraw support and beta apps for molecular datasets (eMolecules, Enamine, Chemspace, etc)</li>
+<li>added Quantum Espresso support</li>
+<li>added rdkit-postgres cartridge support</li>
+<li>large updates to the <code>BadELF</code> app to support materials with covalent and metallic character</li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li><code>django_unicorn</code> dependency was forked and refactored into a custom interal version</li>
+<li>REST APIs for data views no longer use <code>django_rest_framework</code></li>
+<li>add the <code>simmate.apps.dev</code> module for early-stage, experimental apps</li>
+<li>the <code>database.third_parties</code> module is now moved into individual apps: <code>materials_project</code>, <code>jarvis</code>, <code>aflow</code>, and <code>oqmd</code></li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+<li>many misc fixes to the website UI and settings config</li>
+</ul>
+<hr />
+<h2 id="v0170-20240520">v0.17.0 (2024.05.20)<a class="headerlink" href="#v0170-20240520" title="Permanent link">&para;</a></h2>
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>add api authentication via tokens for private Simmate servers</li>
+<li>add tips for docker installations &amp; permissions</li>
+<li>allow custom django apps to be added to <code>INSTALLED_APPS</code> via <code>extra_django_apps</code></li>
+<li>allow override of django settings via <code>django_settings</code></li>
+<li>add several web UI components (e.g. select2 elements for forms)</li>
+<li>add "Table Info" page and utils for dynamically building database docs</li>
+<li><code>badelf</code> app was reworked and now uses <code>pybader</code> for its core engine</li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li>update docs for creating new Simmate apps with URLs</li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+<li>fix <code>show_columns</code> bug when there are relations to basic django models (like <code>User</code>)</li>
+<li>catch incorrect use of <code>simmate database reset</code> when using the maintenance database</li>
+<li>fix typo in setting email env vars</li>
+</ul>
+<hr />
+<h2 id="v0160-20240127">v0.16.0 (2024.01.27)<a class="headerlink" href="#v0160-20240127" title="Permanent link">&para;</a></h2>
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>added <code>dotdict</code> utility for easy dot-access with nested dictionary objects</li>
+<li>all settings can be added via environment variables for cloud-based deployments</li>
+<li>add <code>@workflow</code> decorator for easily creating basic workflows</li>
+<li>add <code>_incar_updates</code> to <code>VaspWorkflow</code>s for cleaner inheritance &amp; syntax</li>
+<li>add Docker builds for Quantum Espresso to help new users</li>
+<li>add Docker builds for Bader to help new users</li>
+<li>add <code>simmate config</code> command to help inspect and update settings</li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li>Fully reimplemented how all settings are loaded</li>
+<li>Revised all documentation and tutorials</li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+<li>fix bug where user-provided <code>command</code> parameter is not properly loaded</li>
+</ul>
+<p><strong>0.16.1 (2024.01.28)</strong></p>
+<ul>
+<li>fix bugs for Docker-QE runs</li>
+<li>fix typos in Getting Started tutorials</li>
+</ul>
+<hr />
+<h2 id="v0150-20240104">v0.15.0 (2024.01.04)<a class="headerlink" href="#v0150-20240104" title="Permanent link">&para;</a></h2>
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>Allow custom html templates and static files that override those shipped by default</li>
+<li>add <code>simmate engine</code> commands like <code>stats-detail</code> and <code>workitems</code> that show details of workitems in the database</li>
+<li>updated third-party archives (Materials Project, COD, JARVIS, OQMD)</li>
+<li>eased database updates between simmate versions by using django migrations</li>
+<li>added <code>bypass_nones</code> utility to help handle imperfect datasets where not all entries have a column</li>
+<li>misc updates to the website interface, especially to the <code>data explorer</code> pages</li>
+<li>add Microsoft allauth support to sign in use external account</li>
+<li>allow "login required" access to server via evironment variables (disabled by default)</li>
+<li>allow "internal only" access to server via evironment variables (disabled by default)</li>
+<li>add <code>django-simple-history</code> support to track user changes on specific models</li>
+<li>add <code>@check_db_conn</code> decorator to help with database connection closures/timeouts</li>
+<li>add <code>simmate engine start-schedules</code> which let's you configure periodic tasks for individual apps (e.g. check a table for updates every 5 minutes). Includes error handling and email alerts. (Note: this a quick alternative to full Prefect system)</li>
+<li>add warren_lab app with Warren Lab preferred VASP settings</li>
+<li>add badelf app with class oriented tools for performing BadELF analyses</li>
+<li>add basic quantum espresso support</li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li>remove mamba support now that libmamba is default conda solver</li>
+<li>switch CI from mamba back to conda</li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+<li>fix bug where workers incorrectly grab substring tag matches (e.g. a worker submited with the tag <code>ex</code> would incorrectly grab jobs like <code>ex-01</code> or <code>ex-02</code>)</li>
+</ul>
+<p><strong>0.15.1 (2024.01.11)</strong></p>
+<ul>
+<li>refactor &amp; fix bugs for <code>warren_lab</code> and <code>badelf</code> apps</li>
+</ul>
+<hr />
+<h2 id="v0140-20230706">v0.14.0 (2023.07.06)<a class="headerlink" href="#v0140-20230706" title="Permanent link">&para;</a></h2>
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>add <code>django-unicorn</code> to deps to enable dynamic fullstack web UIs</li>
+<li>add ChemDoodle js/css to website headers for use elsewhere</li>
+<li>add "Example Scripts" section to doc website with several new scripts</li>
+<li>many updates to the web UI to accomodate molecular datasets and workflows</li>
+<li>add <code>simmate engine</code> commands to help with tags and different queues</li>
+<li>add docs to help with simmate workers, clusters, and tagging</li>
+<li>add <code>simmate-vasp</code> command for common VASP utilities like testing config, plotting, and prepping inputs</li>
+<li>add utilities to chunk larger than memory datafiles (csv, sdf, cifs, etc.)</li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li>VASP potcar references to "element mappings" is now standarized to "potcar mappings"</li>
+<li>refactor docs with new "Apps" section</li>
+<li>full refactor of <code>simmate engine</code> commands. many have been shortened/renamed</li>
+<li>restrategized workflows that use output files from others. The <code>copy_previous_directory</code> input parameter has been removed and replaced with workflow attributes like <code>use_previous_directory</code> and <code>has_prerequisite</code>, combined with an optional <code>previous_directory</code> parameter.</li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+<li>fix bug where hyphens aren't allowed in the database name</li>
+<li>fix guide for DO database setup</li>
+<li>fix incorrect evolutionary search imports</li>
+<li>hide pymatgen POTCAR warnings</li>
+<li>fix github CI bug for MacOS being unstable</li>
+<li>fix bug for zombie jobs causing evolutionary search to hang</li>
+<li>fix premature triggering of frozen error</li>
+</ul>
+<hr />
+<h2 id="v0130-20230306">v0.13.0 (2023.03.06)<a class="headerlink" href="#v0130-20230306" title="Permanent link">&para;</a></h2>
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>add <code>relax_bulk</code> and <code>relax_endpoints</code> parameters to optionally turn off pre-relaxations in NEB</li>
+<li>add CLEASE app for cluster expanison calculations (these workflows are highly experimental at the moment - so use with caution)</li>
+<li>update "bad-elf" workflow to accept an empty-atom template structure or a list
+of empty sites</li>
+<li>add python 3.11 support</li>
+<li><code>simmate database reset</code> now supports Postgres (requires admin user)</li>
+<li>docker images are now published to DockerHub and Github packages</li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li><code>calculators</code> module is now the <code>apps</code> module and terminology is changed throughout the repo</li>
+<li>many dependencies are reworked to optional dependencies as all <code>apps</code> are now optional</li>
+<li><code>workflow_engine</code> module has been renamed to <code>engine</code> to help shorten commands and import lines</li>
+<li>rework CI to use mamba instead of conda</li>
+<li>pull out dependencies for some apps that are now optional</li>
+<li>reorganize <code>Incar</code> class and move some functionality to general <code>utilities</code></li>
+<li>NEB module is reorganized to help with building custom sets</li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+<li>fix site ordering in NEB supercell structures</li>
+<li>improve installation speed and guide users to conda alternatives like mamba</li>
+<li>clean up docs and fix several links</li>
+<li>apps are now registered to the web UI</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The refactoring of simmate "apps" led to many breaking changes in the python API.
+We strongly recommend clearing your <code>~/simmate/</code> directory, especially the
+<code>my_env-apps.yaml</code> file because app names have changed.</p>
+</div>
+<p><strong>0.13.1 (2023.03.11)</strong></p>
+<ul>
+<li>recover from <code>connection already closed</code> errors after long workflow runs</li>
+<li>fix bug where <code>simmate database reset</code> fails when there is no database <code>postgres</code> available</li>
+<li>update django regression of <code>django.db.backends.postgresql_psycopg2</code> to <code>django.db.backends.postgresql</code></li>
+<li>fix bug where simmate cannot read vasp results due atypical number (e.g. -0.33328-312)</li>
+<li>fix bug where postgres cannot json serialize bs or dos results (int64 numbers)</li>
+<li>fix incorrect pointing of VASP potcars in matproj presets</li>
+<li>from <code>from_directory</code> method of the <code>Relaxation</code> database class</li>
+<li>fix HSE bandstructure and DOS kpoint file writing</li>
+</ul>
+<p><strong>0.13.2 (2023.03.20)</strong></p>
+<ul>
+<li>fix pickling error for <code>workflow.run_cloud</code> command</li>
+<li><code>simmate.website.third_parties</code> module is now the <code>data_explorer</code> module. With this, you can now specify custom database tables to appear in the "Data" section for the web UI</li>
+</ul>
+<hr />
+<h2 id="v0120-20221023">v0.12.0 (2022.10.23)<a class="headerlink" href="#v0120-20221023" title="Permanent link">&para;</a></h2>
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>add structure creators for <code>ASE</code>, <code>GASP</code>, <code>PyXtal</code>, <code>AIRSS</code>, <code>CALYPSO</code>, <code>USPEX</code>, and <code>XtalOpt</code> as well as documentation for creators.</li>
+<li>add <code>simmate version</code> command</li>
+<li>changelog and update guide added to documentation website</li>
+<li>add <code>show-stats</code>, <code>delete-finished</code>, and <code>delete-all</code> commands to <code>workflow-engine</code></li>
+<li>add <code>Cluster</code> base class + commands that allow submitting a steady-state cluster via subprocesses or slurm</li>
+<li>add <code>started_at</code>, <code>created_at</code>, <code>total_time</code>, and <code>queue_time</code> columns to <code>Calculation</code> tables</li>
+<li>add <code>exlcude_from_archives</code> field to workflows to optionally delete files when compressing outputs to zip archives</li>
+<li>various improvements added for evolutionary search workflows, such as parameter optimization, new output files, and website views</li>
+<li>add <code>Fingerprint</code> database table and integrate it with <code>Fingerprint</code> validator</li>
+<li>support &gt;2 element hull diargrams and complex chemical systems</li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li>optimize <code>get_series</code> method of <code>relaxation.vasp.staged</code></li>
+<li>reorganize <code>selectors</code> module for evolutionary structure prediction</li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+<li>fix dynamic loading of toolkit structures from third-party databases</li>
+<li>fix race condition with workers and empty queues</li>
+<li>increases default query rate for <code>state.result()</code> to lessen database load</li>
+</ul>
+<hr />
+<h2 id="v0110-20220910">v0.11.0 (2022.09.10)<a class="headerlink" href="#v0110-20220910" title="Permanent link">&para;</a></h2>
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>REST API fields can now be specified directly with the <code>api_filters</code> attribute of any <code>DatabaseTable</code> class &amp; fields from mix-ins are automatically added</li>
+<li>add <code>archive_fields</code> attribute that sets the "raw data" for the database table &amp; fields from mix-ins are automatically added</li>
+<li>accept <code>TOML</code> input files in addition to <code>YAML</code></li>
+<li>convergence plots and extras are now written for many workflow types (such as relaxations)</li>
+<li>when <code>use_database=True</code>, output files are automatically written and the workup method is directly paired with the database table.</li>
+<li>NEB workflow now accepts parameters to tune how distinct pathways are determined, including the max pathway length and cutoffs at 1D percolation.</li>
+<li>add <code>MatplotlibFigure</code> and <code>PlotlyFigure</code> classes to help with writing output files and also implementing these figures in the website UI</li>
+<li>update website to include workflow calculator types and add API links</li>
+<li>custom projects and database tables are now registered with Simmate and a intro guide has been added</li>
+<li>continued updates for <code>structure-prediction</code> workflows</li>
+<li>add inspection of methods for default input values and display them in metadata</li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li>the <code>website.core_components.filters</code> module has been absorbed into the <code>DatabaseTable</code> class/module</li>
+<li>yaml input for custom workflows now matches the python input format</li>
+<li>workup methods are largely depreciated and now database entries are returned when a workflow has <code>use_database=True</code></li>
+<li>several NEB input parameters have been renamed to accurate depict their meaning.</li>
+<li>customized workflow runs now save in the original database table under the "-custom" workflow name</li>
+<li><code>structure_string</code> column renamed to <code>structure</code> to simplify api logic</li>
+<li>clean up <code>toolkit.validators</code> module and establish fingerprint base class</li>
+<li><code>calculators</code> and <code>workflows</code> modules are now based on simmate apps</li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+<li>fix bug in windows dev env where <code>simmate run-server</code> fails to find python path</li>
+<li>fix bug in <code>workflows explore</code> command where 'vasp' is the assumed calculator name</li>
+<li>fix broken example code in custom workflow docs</li>
+<li>fix broken website links and workflow views</li>
+</ul>
+<p><strong>0.11.1 (2022.09.12)</strong></p>
+<ul>
+<li>fix transaction error with workers on a PostGres backend</li>
+</ul>
+<hr />
+<h2 id="v0100-20220829">v0.10.0 (2022.08.29)<a class="headerlink" href="#v0100-20220829" title="Permanent link">&para;</a></h2>
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>add NEB base classes to inherit from for making new subflows</li>
+<li>improve formatting of logging and cli using <code>typer</code> and <code>rich</code></li>
+<li>cli now supports auto-completion to help with long commands</li>
+<li>add <code>convergence_limit</code> parameter to evolutionary search that works alongside <code>limit_best_survival</code>. This will absorb minor changes in energy with equivalent structures from prolonging the search.</li>
+<li>add <code>ExtremeSymmetry</code> transformation to attempt symmetry reduction on disordered structure</li>
+<li>account for structures in <code>fixed-composition</code> having fewer nsites than input becuase of symmetry reduction during relaxation. Also, add <code>min_structures_exact</code> parameter to ensure we have at least N structures with the expected number of sites</li>
+<li>add experimental <code>variable-composition</code> (variable refers to nsites, not stoichiometry) and <code>binary-composition</code> evolutionary searches</li>
+<li>allow custom workflows to run from yaml</li>
+<li>update MatProj data to new api, and add severl new columns for data (e.g. mag + band gap)</li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li>isolate optional dependencies so that our install is smaller</li>
+<li>remove click in favor of higher-level package (typer)</li>
+<li><code>pre_standardize_structure</code> and <code>pre_sanitize_structure</code> functionality is now merged in to a <code>standardize_structure</code> parameter that accepts different mode. <code>symmetry_tolerance</code> and <code>angle_tolerance</code> parameters can also modify the symmetry analysis done.</li>
+<li>metadata files are now numbered to allow multiple metadata files in the same directory</li>
+<li>refactor &amp; clean up transformation module for readability</li>
+<li>remove <code>SimmateFuture</code> class and merge functionality into <code>WorkItem</code></li>
+<li>switch from pdoc to mkdocs for documentation and remove <code>get_doc_from_readme</code>. Code and doc organization are now decoupled.</li>
+<li>rename run commands based on user preference. the <code>run</code> is now <code>run-quick</code>. <code>run-yaml</code> is now <code>run</code>. <code>run-cloud</code> now assumes a yaml input.</li>
+<li>remove <code>tqdm</code> dependency in favor of <code>rich.progress</code></li>
+<li>refactor transformations to static methods</li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+<li>fix <code>module not found</code> error by adding ASE to dependencies</li>
+<li>fix bug with postgres database trying to delete sqlite locally</li>
+<li>fix dask throwing errors with logging</li>
+<li>fix bug where <code>fixed-composition</code> searches fail to detect individuals that have been symmetrically reduced (and therefore have fewer nsites than expected)</li>
+<li>fix evolutionary search failures when writing output files while files are opened/locked</li>
+<li>fix NEB workflows failing due to Walltime handler</li>
+<li>fix NEB workflows hints for <code>workup</code> failure due to missing start/end image folders</li>
+</ul>
+<hr />
+<h2 id="v090-20220817">v0.9.0 (2022.08.17)<a class="headerlink" href="#v090-20220817" title="Permanent link">&para;</a></h2>
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>improve the warning associated with workflow failure because of "command not found" issues</li>
+<li>workers now ignore and reset tasks that fail with "command not found". 2 workers failing with this error will result in the WorkItem being canceled</li>
+<li><code>RandomWySites</code> can now generate wyckoff combinations lazily (or up front) depending on use case</li>
+<li>add <code>simmate utilities</code> command group with <code>archive-old-runs</code></li>
+<li>add <code>start-cluster</code> command for starting many local workers</li>
+<li>add <code>structure-prediction</code> workflows</li>
+<li>add plotting/output utilities to <code>EvolutionarySearch</code> and <code>relaxation.vasp.staged</code></li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li>evolutionary search now delay creations, transformations, and validation until runtime (used to be at time of structure submission)</li>
+<li><code>directory</code>, <code>compress_ouput</code>, and <code>run_id</code> are now default input parameters for subclasses of <code>Workflow</code>. If these are unused, the <code>run_config</code> must include <code>**kwargs</code></li>
+<li>add <code>isort</code> for organizing module imports throughout package</li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+<li>fixed when <code>source</code> is not being registered by several workflows</li>
+<li>fix docker image for installing anaconda, blender, and simmate on ubuntu</li>
+</ul>
+<hr />
+<h2 id="v080-20220811">v0.8.0 (2022.08.11)<a class="headerlink" href="#v080-20220811" title="Permanent link">&para;</a></h2>
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>NEB workflows now accept parameters for changing supercell size and number of images used</li>
+<li>add HSE workflows for static energy, relaxation, and DOS/BS electronic states</li>
+<li>add NPT and MatProj molecular dynamics workflows</li>
+<li>add SCAN workflows for static energy and relaxation</li>
+<li>test files can be provided within zip files, fixing excessive line counts on git commits</li>
+<li>add simmate worker that can run "out-of-box" and requires no set up</li>
+<li>add logging for useful debugging and monitoring of workflows</li>
+<li>pinned dependencies to maximum versions and manage with dependabot</li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li>to simplify the creation of new workflows, <code>S3Task</code> is now <code>S3Workflow</code> and database tables are dynamically determined using the workflow name</li>
+<li>workflows of a given type (e.g. relaxation or static-energy) now share database tables in order to simplify overall database architecture</li>
+<li>migrate from <code>os.path</code> to <code>pathlib.Path</code> throughout package</li>
+<li>isolate prefect use to separate executors</li>
+<li>updated tutorials for new workflow engine and workers</li>
+<li>remove use of <code>setup.py</code> in favor of <code>pyproject.toml</code></li>
+</ul>
+<hr />
+<h2 id="v070-20220719">v0.7.0 (2022.07.19)<a class="headerlink" href="#v070-20220719" title="Permanent link">&para;</a></h2>
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>add guide for installing VASP v5 to Ubuntu v22.04 (<a href="https://github.com/scott-materials">@scott-materials</a>, <a href="https://github.com/jacksund/simmate/issues/183">#183</a>)</li>
+<li>add <code>simmate database load-remote-archives</code> command and <code>load_remote_archives</code> utility that populates all tables from <code>database.third_parties</code></li>
+<li>add <code>load_default_sqlite3_build</code> utility that downloads a pre-built database with all third-party data present. This is an alternative to calling <code>load_all_remote_archives</code> if you are using sqlite3 and saves a significant amount of time for users.</li>
+<li>standardize workflow naming. Note this breaks from python naming conventions for classes (<a href="https://github.com/jacksund/simmate/issues/150">#150</a>)</li>
+<li>dynamically determine <code>register_kwargs</code> and rename property to <code>parameters_to_register</code></li>
+<li>add full-run unittests that call workflows and vasp (without emulation)</li>
+<li>add walltime error handler that properly shuts down calculations when a SLURM job is about to expire</li>
+<li>add option to restart workflows from a checkpoint</li>
+<li>automatically build api documentation using github actions</li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li>refactor <code>start-worker</code> command to use prefect instead of the experimental django executor</li>
+<li>remove experimental <code>workflow_engine.executor</code></li>
+<li>move contents of <code>configuration.django.database</code> to <code>database.utilities</code></li>
+<li>upgraded to Prefect v2 ("Orion"). This involved the refactoring the entire <code>workflow_engine</code> module, and therefore the entire workflow library. (<a href="https://github.com/jacksund/simmate/pull/185">#185</a>).</li>
+</ul>
+<p><strong>0.7.1 (2022.07.19)</strong></p>
+<ul>
+<li>fix incorrect handling of prefect v2 futures by workflows</li>
+</ul>
+<p><strong>0.7.2 (2022.08.03)</strong></p>
+<ul>
+<li>fix missing SVG files for web UI (<a href="https://github.com/jacksund/simmate/pull/196">#196</a>).</li>
+</ul>
+<p><strong>0.7.3 (2022.08.04)</strong></p>
+<ul>
+<li>fix incorrect passing of <code>source</code> in NEB all-paths workflow causing it to fail</li>
+</ul>
+<hr />
+<h2 id="v060-20220625">v0.6.0 (2022.06.25)<a class="headerlink" href="#v060-20220625" title="Permanent link">&para;</a></h2>
+<p><strong>Enhancements</strong></p>
+<ul>
+<li>add <code>AflowPrototypes</code> to the <code>database.third_parties</code> module (only includes data distributed through pymatgen)</li>
+<li>add new modules to <code>toolkit.structure_prediction</code> and <code>toolkit.creation</code>, including ones to provide <code>known</code>, <code>substitution</code>, and <code>prototype</code> based structures.</li>
+<li>add <code>created_at</code> and <code>updated_at</code> columns to all database tables</li>
+<li>check if there is a newer version of Simmate available and let the user know about the update</li>
+<li>add experimental <code>badelf</code> workflow for determining electride character</li>
+<li>add <code>electronic-structure</code> workflow which carries out both DOS and BS calculations</li>
+<li>add <code>database_obj</code> attribute to the <code>toolkit.Structure</code> base class that is dynamically set</li>
+</ul>
+<p><strong>Refactors</strong></p>
+<ul>
+<li>standardize <code>database_table</code> attribute for workflows by merging <code>calculation_table</code> and <code>result_table</code> attributes (<a href="https://github.com/jacksund/simmate/issues/102">#102</a>)</li>
+<li>removed use of <code>-s</code>, <code>-c</code>, and <code>-d</code> shortcuts from the <code>workflows</code> commands</li>
+<li>refactor <code>relaxation/staged</code> workflow to run in single parent directory</li>
+<li>refactor evolutionary search algorithm (alpha feature)</li>
+<li>condense where parsing/deserialization of workflow parameters occurs to the refactored the <code>load_input_and_register</code> task. Originally, this would occur in multiple places (e.g. in the CLI module before submission, in the workflow run_cloud method, in the LoadInputAndRegister task, etc.) and involved boilerplate code. (<a href="https://github.com/jacksund/simmate/pull/173">#173</a>)</li>
+<li>refactor experimental features <code>register_kwargs</code> and <code>customized</code> workflows</li>
+<li>refactor <code>LoadInputAndRegister</code> and <code>SaveOutputTask</code> to <code>load_input_and_register</code> and <code>save_result</code></li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+<li>fix import for <code>visualization.structure.blender</code> module (<a href="https://github.com/bocklund">@bocklund</a>, <a href="https://github.com/jacksund/simmate/issues/180">#180</a>)</li>
+<li>fix bug where <code>command</code> or <code>directory</code> improperly passes <code>None</code> when they are not set in the <code>simmate workflows run</code> command</li>
+<li>fix bug where <code>update_all_stabilities</code> grabs incomplete calculations (<a href="https://github.com/jacksund/simmate/pull/177">#177</a>)</li>
+<li>fix bug where SCF calculation is not completed before the non-SCF DOS or BS calculation and causes the workflows to fail (<a href="https://github.com/jacksund/simmate/issues/171">#171</a>)</li>
+<li>fix bug for Bader workflow by registering the prebader workflow (<a href="https://github.com/jacksund/simmate/pull/174">#174</a>)</li>
+<li>fix bug where <code>source</code> is not determined with yaml-file submissions (<a href="https://github.com/jacksund/simmate/issues/172">#172</a>)</li>
+</ul>
+<hr />
+<h2 id="v050-20220530">v0.5.0 (2022.05.30)<a class="headerlink" href="#v050-20220530" title="Permanent link">&para;</a></h2>
+<ul>
+<li>update CI to test all OSs and pin pytest&lt;7.1 as temporary fix for <a href="https://github.com/jacksund/simmate/issues/162">#162</a></li>
+<li>fix spelling typos in <code>keyword_modifiers</code> (<a href="https://github.com/laurenmm">@laurenmm</a>, <a href="https://github.com/jacksund/simmate/pull/165">#165</a>)</li>
+<li>users can now apply their own unique keyword modifiers to Incars -- such as how we allow "__per_atom" or "__smart_ismear" tags on Incar settings. This change involved refactoring how <code>keyword_modifiers</code> are implemented for the <code>vasp.inputs.Incar</code> class. Rather than static methods attached to the base class, modifiers are now dynamically applied using the <code>add_keyword_modifier</code> classmethod.</li>
+<li>large update of <code>calculators.vasp.tasks</code> module where many new presets are reimplemented from <a href="https://pymatgen.org/pymatgen.io.vasp.sets.html"><code>pymatgen.io.vasp.sets</code></a>. This includes robust unit testing to confirm that generated inputs match between simmate and pymatgen (see <a href="https://github.com/jacksund/simmate/issues/157">#157</a> for a list of presets)</li>
+<li>catch error with vasp freezing when <code>Brmix</code> handler switches to kerker mixing (<a href="https://github.com/becca9835">@becca9835</a>, <a href="https://github.com/jacksund/simmate/issues/159">#159</a>)</li>
+</ul>
+<hr />
+<h2 id="v040-20220424">v0.4.0 (2022.04.24)<a class="headerlink" href="#v040-20220424" title="Permanent link">&para;</a></h2>
+<ul>
+<li>add <code>description_doc_short</code> + <code>show_parameters</code> to workflows and use these to update the UI</li>
+<li>add django-allauth dependency for account management and google/github sign-ins</li>
+<li>archive directory as <code>simmate_attempt_01.zip</code> whenever an error handler is triggered</li>
+<li>depreciate the workflow parameter <code>use_prev_directory</code> in favor of <code>copy_previous_directory</code></li>
+</ul>
+<hr />
+<h2 id="v030-20220419">v0.3.0 (2022.04.19)<a class="headerlink" href="#v030-20220419" title="Permanent link">&para;</a></h2>
+<ul>
+<li>add highly customizable VASP workflow</li>
+<li>add Bader analysis and ELF workflows</li>
+<li>update module readmes to warn of experimental features</li>
+<li>reorganize <code>toolkit</code> module</li>
+</ul>
+<hr />
+<h2 id="v020-20220415">v0.2.0 (2022.04.15)<a class="headerlink" href="#v020-20220415" title="Permanent link">&para;</a></h2>
+<ul>
+<li>start the CHANGELOG!</li>
+<li>refactor API views and add <code>SimmateAPIViewSet</code> class</li>
+<li>refactor <code>simmate start-project</code> command and underlying methods</li>
+<li>refactor <code>simmate workflow-engine run-cluster</code> command and underlying methods</li>
+<li>continue outlining <code>file_converters</code> module</li>
+</ul>
+<hr />
+<h2 id="v014-20220412">v0.1.4 (2022.04.12)<a class="headerlink" href="#v014-20220412" title="Permanent link">&para;</a></h2>
+<ul>
+<li>web interface styling</li>
+<li>minor bug fixes</li>
+</ul>
+<hr />
+<h2 id="v000-20220328">v0.0.0 (2022.03.28)<a class="headerlink" href="#v000-20220328" title="Permanent link">&para;</a></h2>
+<ul>
+<li>initial release</li>
+<li>adding tests and docs</li>
+</ul>
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "content.code.annotate"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.60a45f97.min.js"></script>
+      
+    
+  </body>
+</html>

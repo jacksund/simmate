@@ -1,0 +1,50 @@
+# This yaml file configures DigitalOcean's app platform. It was made many
+# manually following along with the guide in the web interface (see the README)
+# and then copying over the resulting app-spec.
+# For details on the specification see... 
+#   https://docs.digitalocean.com/products/app-platform/references/app-specification-reference/
+
+# This is the app spec for the working version. I store it here
+# for future reference
+databases:
+- engine: PG
+  name: db-test-dockerstatic
+  num_nodes: 1
+  size: basic-xs
+  version: "12"
+envs:
+- key: DJANGO_ALLOWED_HOSTS
+  scope: RUN_AND_BUILD_TIME
+  value: ${APP_DOMAIN}
+- key: DEBUG
+  scope: RUN_AND_BUILD_TIME
+  value: "False"
+- key: DJANGO_SECRET_KEY
+  scope: RUN_AND_BUILD_TIME
+  type: SECRET
+  value: EV[1:UzGN6BEKhJRtaJsUxJvjSa8xG1Wp9z6x:+4DPyGS1zXN61KVHMwWiIt64UCVTO13jjD3KL0yMVDr9yM2GPzUBeZmJObCkDTJEztPZnif919oSeyhaCHVa8ez/]
+name: seal-app
+region: nyc
+services:
+- http_port: 8080
+  image:
+    registry: jacksund
+    registry_type: DOCKER_HUB
+    repository: simmate
+    tag: v0.9.0
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  name: jacksund-simmate
+  routes:
+  - path: /
+static_sites:
+- environment_slug: python
+  github:
+    branch: fix-docker
+    deploy_on_push: true
+    repo: jacksund/simmate
+  name: simmate-static
+  output_dir: /src/simmate/website/static
+  routes:
+  - path: /static
+  source_dir: /
