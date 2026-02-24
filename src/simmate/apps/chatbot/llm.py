@@ -1,56 +1,22 @@
 # -*- coding: utf-8 -*-
 
-import time
 
 from langchain_core.language_models.chat_models import BaseChatModel
 
 from simmate.configuration import settings
 
 
-def typewriter(text: str, speed: int):
-    """
-    Writes the most recent chatbot message using a typewriter effect.
-
-    The original function is from:
-       https://discuss.streamlit.io/t/st-write-typewritter/43111/2
-    """
-    import streamlit
-
-    tokens = text.split()
-    container = streamlit.empty()
-    for index in range(len(tokens) + 1):
-        curr_full_text = " ".join(tokens[:index])
-        container.markdown(curr_full_text)
-        time.sleep(1 / speed)
-
-
 def get_llm(**kwargs) -> BaseChatModel:
     """
-    Inits LLM using Simmate config settings
-
-    select model here:
-    https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models
-
-    select version here:
-    https://learn.microsoft.com/en-US/azure/ai-services/openai/reference
+    Connects to your large-language model (llm) using the config in the Simmate settings
 
     Example settings:
-
     ``` yaml
     chatbot:
-      endpoint: https://myendpoint.azure-api.net/
-      model: gpt-4-turbo
-      version: '2024-02-01'
-      api_key: a1b2c3d4....
-    ```
-
-    Calling the model:
-
-    ``` python
-    from simmate.apps.chatbot.utilities import get_llm
-
-    llm = get_llm()
-    response = llm.invoke("hello world!")
+        provider: "Google-GenAI"
+        model: "gemini-2.5-flash-lite"
+        api_key: a1b2c3d4....
+        temperature: 0
     ```
     """
 
