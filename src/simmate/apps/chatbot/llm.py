@@ -56,25 +56,13 @@ def get_llm(**kwargs) -> BaseChatModel:
                 "`conda install -c conda-forge langchain-google-genai`"
             )
 
-        llm = ChatGoogleGenerativeAI(
+        return ChatGoogleGenerativeAI(
             **llm_config,
             # typical kwargs:
             # google_api_key
             # model
             # temperature
         )
-        return llm
-
-        # TODO:
-        # enable url_context and google searching
-        # tools = [
-        #     {
-        #         "url_context": {},
-        #         "google_search": {},
-        #     }
-        # ]
-        # llm_with_tools = llm.bind_tools(tools)
-        # return llm_with_tools
 
     else:
         raise Exception(

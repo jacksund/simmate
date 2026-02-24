@@ -4,6 +4,7 @@ import re
 
 import pandas as pd
 from langchain.prompts import PromptTemplate
+from langchain.tools import tool
 from langchain_experimental.tools.python.tool import PythonAstREPLTool, sanitize_input
 from plotly.graph_objects import Figure
 
@@ -41,7 +42,9 @@ PLOTLY_SCRIPT_CACHE = {}
 
 
 def get_plotly_script(
-    user_request: str, df: pd.DataFrame, use_cache: bool = False
+    user_request: str,
+    df: pd.DataFrame,
+    use_cache: bool = False,
 ) -> str:
     """
     Generates a pure-python script needed to generate the desired Figure from
@@ -84,7 +87,9 @@ def get_plotly_script(
 
 @tool(return_direct=True)
 def get_plotly_figure(
-    user_request: str, df: pd.DataFrame, use_cache: bool = False
+    user_request: str,
+    df: pd.DataFrame,
+    use_cache: bool = False,
 ) -> Figure:
     """
     Generates a plot using a user's request/question and the id of the dataframe
@@ -112,7 +117,7 @@ def get_plotly_figure(
         globals={},
         locals={"df": df},
     )
-    stdout = python_repl.run(script)
+    python_repl.run(script)
     # BUG: I should be able to use this lower level util instead of PythonAstREPLTool
     # but it doesn't properly pass locals for some reason
     #   from langchain_experimental.utilities import PythonREPL
