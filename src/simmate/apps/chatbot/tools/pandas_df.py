@@ -7,7 +7,7 @@ from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe
 
 from simmate.configuration import settings
 
-from ..utilities import get_llm
+from ..llm import get_llm
 
 
 @tool
@@ -29,18 +29,3 @@ def analyze_dataframe(question: str, dataset: dict) -> str:
     )
     response = agent.invoke(question)
     return response["output"]
-
-
-# FOR TESTING ONLY -- TO BE DEPRECIATED
-@tool(return_direct=True)
-def get_titanic_dataset() -> pandas.DataFrame:
-    """
-    Loads a dataset on the Titanic's Passengers.
-
-    To the chatbot: This should only be used when loading the dataset. If you
-    see dataframes already in chat history (e.g., "(( DATAFRAME 2 ))"), then
-    do not call this tool again
-    """
-    return pandas.read_csv(
-        "https://raw.githubusercontent.com/pandas-dev/pandas/main/doc/data/titanic.csv"
-    )
