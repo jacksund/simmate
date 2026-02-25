@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import requests
+import logging
 
+import requests
+from bs4 import BeautifulSoup
+
+from simmate.configuration import settings
 from simmate.toolkit import Molecule
+from simmate.utilities import download_file, get_directory
 
 
 class PubChemClient:
@@ -158,21 +163,67 @@ class PubChemClient:
     @classmethod
     def _get_physical_state(cls, records):
         raise NotImplementedError()
-
         # OPTIMIZE: it might be more efficient to pass ALL metadata and ask it
         # to determine ALL properties in a single prompt + API call. But also
         # this might lead to more errors...
-        section = cls._get_nested_section(
-            records,
-            [
-                "Chemical and Physical Properties",
-                "Experimental Properties",
-                "Physical Description",  # or "Color / Form"?
-            ],
-        )
-
-        prompt = (
-            "Given the following information, is this compound a solid, liquid, "
-            f"or gas? Make your answer a single word. \n\n {section}"
-        )
+        # section = cls._get_nested_section(
+        #     records,
+        #     [
+        #         "Chemical and Physical Properties",
+        #         "Experimental Properties",
+        #         "Physical Description",  # or "Color / Form"?
+        #     ],
+        # )
+        # prompt = (
+        #     "Given the following information, is this compound a solid, liquid, "
+        #     f"or gas? Make your answer a single word. \n\n {section}"
+        # )
         # Then call the llm to get an answer
+
+    # -------------------------------------------------------------------------
+
+    PUBCHEM_FTP_URL = "https://ftp.ncbi.nlm.nih.gov/pubchem/Compound/CURRENT-Full/SDF/"
+
+    @classmethod
+    def get_compound_file_list(cls) -> list[str]:
+        """Parses the HTML directory listing to find all .gz files."""
+        response = requests.get(cls.PUBCHEM_FTP_URL)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+        # Look for links ending in .sdf.gz
+        links = [
+            a["href"]
+            for a in soup.find_all("a", href=True)
+            if a["href"].endswith(".sdf.gz")
+        ]
+        return links
+
+    @classmethod
+    def download_all_compounds(cls):
+
+        logging.info("Starting download of PubChem data...")
+
+        target_dir = get_directory(settings.config_directory / "pubchem")
+
+        # 1. Get the list of all available files
+        all_files = cls.get_compound_file_list()
+        logging.info(f"Found {len(all_files)} files to download.")
+
+        # 2. Iterate and download
+        for filename in all_files:
+
+            full_url = f"{cls.PUBCHEM_FTP_URL}{filename}"
+            local_path = target_dir / filename
+
+            # Check if file already exists to avoid redundant downloads
+            if local_path.exists():
+                logging.info(f"Skipping {filename} (already exists)")
+                continue
+
+            logging.info(f"Downloading {filename}...")
+            try:
+                download_file(full_url, local_path)
+            except Exception as e:
+                logging.warning(f"Error downloading {filename}: {e}")
+
+        logging.info("Done!")
