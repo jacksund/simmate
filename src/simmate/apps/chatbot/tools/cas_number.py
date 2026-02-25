@@ -4,6 +4,8 @@ import json
 
 from langchain.tools import tool
 
+from simmate.apps.pubchem.client import PubChemClient
+
 from ..llm import get_llm
 from .web_search import search_web_for_context
 
@@ -19,8 +21,7 @@ Respond with only the chemical name.
 """
 
 LOOKUP_PROMPT = """
-Please provide the CAS Number for the following chemical compound: 
-- {compound_name}
+Please provide the CAS Number for the following chemical compound: {compound_name}
 
 Return your response strictly in the following JSON format:
 {{"cas_number": "string", "confidence": integer, "comment": "string or null"}}
@@ -42,13 +43,6 @@ Use the context below in assist in your answer. The context is pulled from a web
 def lookup_cas_number(compound_name: str) -> dict:
     """
     Search for the CAS (Chemical Abstracts Service) Registry Number of a given chemical compound.
-
-    Args:
-        compound_name (str): The common name, IUPAC name, or trade name of the chemical.
-
-    Returns:
-        dict: A dictionary containing the 'cas_number', a 'confidence' score (0-100),
-              and a 'comment' explaining any ambiguity or alternative isomers.
     """
 
     llm = get_llm()
@@ -61,13 +55,27 @@ def lookup_cas_number(compound_name: str) -> dict:
     # TODO
 
     # 2. search the cas or pubchem web api
-    # TODO
+    try:
+        cid_data = PubChemClient.get_data_from_name(compound_name_clean)
+        if cid_data["cas_number"]:
+            # TODO: have a follow-up llm check?
+            return {
+                "cas_number": cid_data["cas_number"],
+                "confidence": 90,
+                "comment": (
+                    "Found using PubChem API name search. However, PubChem often "
+                    "has multiple CAS numbers listed for a given compound, so this "
+                    "is not guaranteed to be correct."
+                ),
+            }
+    except:
+        pass
 
     # 3. do a deeper web search
     # TODO query web specifically for trusted sites like vendors/pubchem/cas
     try:
         web_context = search_web_for_context.run(
-            f"What is the CAS number for {compound_name}"
+            f"What is the CAS number for {compound_name_clean}?"
         )
     except:
         web_context = "(no search results recieved)"
@@ -78,4 +86,5 @@ def lookup_cas_number(compound_name: str) -> dict:
     )
     response = llm.invoke(filled_prompt)
     # TODO: assert format
+    # TODO: validate by looking up in pubchem or cas
     return json.loads(response.content)

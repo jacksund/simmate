@@ -10,8 +10,8 @@ from ..llm import get_llm
 @tool
 def search_web_for_context(
     query: str,
-    max_results: int = 5,
-    page_trunc_limit: int = 15_000,
+    max_results: int = 3,
+    page_trunc_limit: int = 5_000,
 ) -> dict:
     """
     Searches the web for context about a specific question and provides the
@@ -21,7 +21,7 @@ def search_web_for_context(
     # 1. Perform web search and extract URLs
     search = DuckDuckGoSearchResults()
     # Access the wrapper directly to get a list of dictionaries with 'link' keys
-    search_results = search.api_wrapper.results(query, max_results=5)
+    search_results = search.api_wrapper.results(query, max_results=max_results)
     urls = [result["link"] for result in search_results]
     if not urls:
         return {"answer": "No relevant search results found.", "sources": []}
