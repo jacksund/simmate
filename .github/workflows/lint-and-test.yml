@@ -43,29 +43,20 @@ jobs:
       - name: Initial setup
         uses: actions/checkout@v3
 
-      - name: Create conda env and install deps
-        uses: conda-incubator/setup-miniconda@v3
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          auto-update-conda: true
-          environment-file: envs/conda/ci.yaml
           python-version: ${{ matrix.python-version }}
-          auto-activate-base: false
-          activate-environment: simmate_dev
-          channel-priority: strict
-          # ensure we are using conda-forge and never the default channel
-          miniforge-version: latest
-          channels: conda-forge
-          conda-remove-defaults: "true"
-      # The lines "shell: bash -l {0}" ensure we use the created env below
-      - name: Install Simmate
-        shell: bash -l {0}
-        run: |
-          pip install -e .
+
+      - name: Install dependencies
+        run: uv sync
+
       # --editable is needed because we need test files too
+      - name: Install Simmate
+        run: uv pip install -e .
+
       - name: Run default tests
-        shell: bash -l {0}
-        run: |
-          pytest --durations=15
+        run: uv run pytest --durations=15
 
   docker-build:
     name: Docker
