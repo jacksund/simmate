@@ -51,21 +51,6 @@ def run_server(port: int = 8000):
     at http://localhost:8000/ (aka http://127.0.0.1:8000/)
     """
 
-    # BUG: windows dev version is throwing issues with this code section here,
-    # so I just switch to using subprocess below.
-    # ---> Error while finding module specification for '__main__'
-    # (ValueError: __main__.__spec__ is None)
-    #
-    # logging prints ugly duplicates as it sets up simmate and also a
-    # static server for it.
-    # logging.warning(
-    #     "Seeing duplicate messages is normal and expected. "
-    #     "This is because the test server sets up + tears down Simmate on a cycle."
-    # )
-    # from django.core.management import call_command
-    # from simmate.database import connect
-    # call_command("runserver")
-
     import subprocess
 
     logging.info("Setting up local test server...")
