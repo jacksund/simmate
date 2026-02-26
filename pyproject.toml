@@ -22,7 +22,7 @@ dependencies = [
     # Core dependencies
     "numpy>=1.22.0,<1.24.2",
     "pandas>=2.0.0,<2.1.4",
-    "django>=4.0.0,<4.2.8",
+    "django>=4.2.8,<5.0",
     "typer>=0.6.0,<0.7.1",
     "psycopg2-binary>=2.8.0,<3.0.0",
     # BUG-FIX for typer
