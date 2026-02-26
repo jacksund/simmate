@@ -63,7 +63,7 @@ RUN uv python install 3.11 && \
 
 # Install Python dependencies
 COPY pyproject.toml .
-RUN uv sync
+RUN uv sync --no-install-project
 
 # Copy source and install in editable mode
 COPY . simmate_source
