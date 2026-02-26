@@ -24,6 +24,7 @@ class PubChemClient:
     def _get_data_from_endpoint(cls, url: str) -> dict:
         cid_api_url = cls.PUBCHEM_URL_BASE + url + cls.PUBCHEM_DATA_ENDPOINT
         cid_response = requests.get(cid_api_url)
+        cid_response.raise_for_status()
         cid_data = cid_response.json()
 
         # parse out into Simmate format
@@ -35,6 +36,12 @@ class PubChemClient:
             "molecule": Molecule.from_smiles(smiles),
             "molecule_original": smiles,
         }
+
+        # extra url hit for synonyms & other metadata once we have the CID
+        # OPTIMIZE: see methods below for grabbing a comopunds FULL dataset
+        # For now I just want cas_number
+        cid_data_cleaned["cas_number"] = cls.get_cas_from_cid(props["CID"])
+
         return cid_data_cleaned
 
     # -------------------------------------------------------------------------
@@ -57,26 +64,12 @@ class PubChemClient:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def get_cas_from_molecule(
-        cls,
-        molecule: Molecule,
-        force_update: bool = False,
-    ) -> str:
+    def get_cas_from_cid(cls, cid: int) -> str:
 
         from simmate.apps.cas_registry.utilities import validate_cas_number
 
-        # We can't do a direct lookup of CAS from a molecule, so we need
-        # to instead look up the CID --> look up synonyms --> get CAS
-        mol_data = cls.get_data_from_molecule(molecule)
-
-        # pull out the CIDs
-        # BUG: we just use the 1st result and ignore others
-        query_cid = mol_data["pubchem_id"]
-
         # grab synonyms for this CID
-        syn_api_url = (
-            cls.PUBCHEM_URL_BASE + f"/pug/compound/cid/{query_cid}/synonyms/JSON"
-        )
+        syn_api_url = cls.PUBCHEM_URL_BASE + f"/pug/compound/cid/{cid}/synonyms/JSON"
         syn_response = requests.get(syn_api_url)
         syn_data = syn_response.json()
 
@@ -92,9 +85,6 @@ class PubChemClient:
                 return cas_number
             except:
                 continue
-
-        # if we hit this point, we failed to get the CAS number
-        raise Exception("Failed to find CAS Number")
 
     # -------------------------------------------------------------------------
 
