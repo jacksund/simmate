@@ -539,8 +539,6 @@ class SimmateSettings:
 
     # -------------------------------------------------------------------------
 
-    # Fixed settings that are automatically set
-
     @cached_property
     def conda_env(self) -> str:
         """
@@ -557,11 +555,17 @@ class SimmateSettings:
         """
         We check for all settings in the user's home directory and in a
         folder named "~/simmate/".
+
         For windows, this would be something like...
           C:\\Users\\exampleuser\\simmate\\extra_applications
+
+        You can overwrite this with an ENV varaible named `SIMMATE_CONFIG_DIR`
         """
-        # we use `get_directory` in order to create the folder if it does not exist.
-        return get_directory(Path.home() / "simmate")
+        config_dir = os.getenv("SIMMATE_CONFIG_DIR", None)
+        if config_dir:
+            return get_directory(config_dir)
+        else:
+            return get_directory(Path.home() / "simmate")
 
     @cached_property
     def django_directory(self) -> str:
