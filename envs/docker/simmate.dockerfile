@@ -7,8 +7,9 @@ WORKDIR /root/
 # Set early to keep layer sizes down
 # =============================================================================
 
-ENV PATH=/root/.venv/bin:/root/.local/bin:$PATH \
-    VIRTUAL_ENV=/root/.venv \
+ENV PATH=/root/simmate/.venv/bin:/root/.local/bin:$PATH \
+    VIRTUAL_ENV=/root/simmate/.venv \
+    UV_WORKING_DIR=/root/simmate \
     DJANGO_SETTINGS_MODULE="simmate.configuration.django.settings" \
     DEBUG=False
 
@@ -52,22 +53,13 @@ RUN wget https://download.blender.org/release/Blender3.1/blender-3.1.0-linux-x64
 # Install uv — adds to ~/.local/bin, which is already on PATH
 RUN curl -Ls https://astral.sh/uv/install.sh | sh
 
-# Install Python 3.11 and create a virtual environment
-# The venv is added to PATH and VIRTUAL_ENV is set above
-RUN uv python install 3.11 && \
-    uv venv /root/.venv --python 3.11
-
 # =============================================================================
 # Simmate
 # =============================================================================
 
-# Install Python dependencies
-COPY pyproject.toml .
-RUN uv sync --no-install-project
-
-# Copy source and install in editable mode
-COPY . simmate_source
-RUN uv pip install -e ./simmate_source && \
+# Copy source and install Python dependencies
+COPY . simmate
+RUN uv sync && \
     django-admin collectstatic --noinput
 
 # =============================================================================
