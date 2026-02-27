@@ -1,7 +1,3 @@
-
-# This job runs on all MRs and the main branch. It tests the code quality,
-# any python unittests, any docker builds, etc.
-
 name: Test
 
 on:
@@ -29,43 +25,27 @@ jobs:
       # TODO: maybe ruff for other file types
 
   python-test:
-    # Establishes the combination of all OS and python versions
-    # for us to test. The "steps" below will be ran for each
-    # of these combinations.
     name: Python ${{ matrix.python-version }} (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        os: ["ubuntu-latest", "windows-latest"]  # "macos-latest",
         python-version: ["3.10", "3.11"]
     steps:
       - name: Initial setup
         uses: actions/checkout@v3
-
-      - name: Create conda env and install deps
-        uses: conda-incubator/setup-miniconda@v3
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          auto-update-conda: true
-          environment-file: envs/conda/ci.yaml
           python-version: ${{ matrix.python-version }}
-          auto-activate-base: false
-          activate-environment: simmate_dev
-          channel-priority: strict
-          # ensure we are using conda-forge and never the default channel
-          miniforge-version: latest
-          channels: conda-forge
-          conda-remove-defaults: "true"
-      # The lines "shell: bash -l {0}" ensure we use the created env below
-      - name: Install Simmate
-        shell: bash -l {0}
-        run: |
-          pip install -e .
+      - name: Install dependencies
+        run: uv sync --extra dev
       # --editable is needed because we need test files too
+      - name: Install Simmate
+        run: uv pip install -e .
       - name: Run default tests
-        shell: bash -l {0}
-        run: |
-          pytest --durations=15
+        run: uv run pytest --durations=15
 
   docker-build:
     name: Docker

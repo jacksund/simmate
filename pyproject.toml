@@ -1,27 +1,7 @@
 
-# This file establishes the info needed to install simmate via pip, how to
-# upload it to PyPI, and how to run python packages like pytest and coverage.
-
-# For more information on this file and how to make similar ones, see:
-#    https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
-#    https://github.com/pypa/sampleproject
-
-# For the details on conda-forge installation see:
-#    https://github.com/conda-forge/simmate-feedstock
-
-# Note, for utilities like pytest and coverage, we prefer to use this file
-# over files like "pytest.ini" because pyproject.toml has more uses that
-# we may need in the future (i.e. it can use other modules).
-
-# -----------------------------------------------------------------------------
-
 [build-system]
-# These are the assumed default build requirements from pip:
-# https://pip.pypa.io/en/stable/reference/pip/#pep-517-and-518-support
 requires = ["setuptools>=64.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
-
-# -----------------------------------------------------------------------------
 
 [project]
 name="simmate"
@@ -37,27 +17,101 @@ classifiers=[
     "Programming Language :: Python :: 3.11",
     "Operating System :: OS Independent",
 ]
-requires-python=">=3.10"
-dependencies=[
-    # NOTE!!!
-    # We manage our dependencies over in `/env/conda`.
-    #
-    # We have decided to move away from pip-based installations because some of
-    # our dependencies (such as rdkit) have problematic installations via pypi.
-    # While we wish we could use pip+uv, it causes too many issues for users,
-    # so we will only support conda-based installs for now.
+requires-python=">=3.10, <3.12"
+dependencies = [
+    # Core dependencies
+    "numpy>=1.22.0,<1.24.2",
+    "pandas>=2.0.0,<2.1.4",
+    "django>=4.2.8,<5.0",
+    "typer>=0.6.0,<0.7.1",
+    "psycopg2-binary>=2.8.0,<3.0.0",
+    # BUG-FIX for typer
+    # https://github.com/fastapi/typer/discussions/1215
+    # https://github.com/fastapi/typer/pull/1222
+    "click<8.2.0",
+    # Material/Crystal-based dependencies
+    "pymatgen>=2022.1.9,<2023.5.32",
+    "pymatgen-analysis-diffusion>=2021.4.29,<=2023.8.15",
+    "matminer>=0.9.3,<=0.9.3",
+    "ase>=3.22.1,<=3.23.0",
+    # Molecule-based dependencies
+    "rdkit>=2024.03.1,<=2024.03.1",
+    "ipython>=8.22.2,<=8.29.0",
+    "umap-learn>=0.5.5,<=0.5.5",
+    # Extra (smaller) dependencies & utilities
+    "django-allauth>=0.56.0,<=0.63.3",
+    "django-simple-history>=3.11.0,<=3.11.0",
+    "pyyaml>=6.0,<=6.0.1",
+    "plotly>=5.4.0,<5.19.0",
+    "markdown>=3.4.1,<=3.5.1",
+    "requests>=2.28.1,<=2.32.3",
+    "scikit-learn>=1.1.1,<1.5.1",
+    "cloudpickle>=2.1.0,<=3.0.0",
+    "rich>=11.0,<=13.5.2",
+    "toml>=0.10.2,<=0.10.2",
+    "schedule>=1.2.0,<=1.2.0",
+    "xmltodict>=0.13.0,<=0.13.0",
+    "dask>=2023.6.1,<2024.4.3",
+    "distributed>=2023.6.1,<2024.4.3",
+    "beautifulsoup4>=4.0.0,<=4.13.5",
+    "cachetools>=6.0.0,<=6.2.0",
 ]
-# likewise, our optional-dependencies also live there. For example, baderkit
-# optional deps live in `/env/conda/baderkit.yaml`
-# [project.optional-dependencies]
-# BADERKIT = [...]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=6.2.5,<=7.3.2",
+    "pytest-django>=4.5.2,<=4.8.0",
+    "pytest-mock>=3.7.0,<3.14.1",
+    "pytest-xdist>=2.5.0,<3.4.0",
+    "coverage>=6.2,<7.4.4",
+    # Formatting & Linting
+    "black>=26.1.0,<27.0.0",
+    "isort>=7.0.0,<8.0.0",
+    "djlint>=1.36.4,<1.37.0",
+    # Docs
+    "mkdocs-material>=9.5.44,<9.6.0",
+    "mkdocstrings>=0.25.2,<=0.26.0",
+    "mkdocstrings-python>=1.10.9,<1.11.0",
+    "mkdocs-autorefs>=1.3.1,<1.4.0",  # BUG-FIX
+]
+# App-specific deps
+# baderkit = [
+#     "baderkit>=0.8.0",
+# ]
+# clease = [
+#     "clease>1.0.3,<=1.0.6",
+# ]
+# materials_project = [
+#     "mp-api>=0.26.3,<0.39.2",
+# ]
+# price_catalog = [
+#     "yfinance",
+# ]
+# # other notes
+# extras = [
+#     "spyder",            # Recommended IDE for development
+#     "dask-jobqueue",     # for submitting on HPC clusters
+#     "numba",             # for speed-up of basic calcs
+#     "psycopg2-binary",   # for Postgres connections (added -binary to fix bug)
+#     "selenium",          # for web scraping (slow but robust)
+#     "gunicorn",          # for website server (Django+DigitalOcean) # NOT WINDOWS
+#     "pygraphviz",        # pygraphviz on conda. for viewing django tables
+#     "fabric",            # for remote ssh connections
+#     "django-extensions", # simple tools to help with django development
+#     "bokeh",             # for the dask dashboard
+#     "h5py",              # for reading QE's binary output files
+#     # OpenEye needs to point to a different source & a license is required:
+#     #   pip install -i https://pypi.anaconda.org/OpenEye/simple OpenEye-toolkits
+#     # "OpenEye-toolkits @ https://pypi.anaconda.org/OpenEye/simple",
+#     # ^^^ BUG: must be commented out for pypi uploads to work
+# ]
 
 [project.urls]
 homepage = "https://simmate.org/"
 repository = "https://github.com/jacksund/simmate"
 documentation = "https://jacksund.github.io/simmate/home/"
 
-# command line interface
 [project.scripts]
 simmate = "simmate.command_line.base_command:simmate_app"
 simmate-vasp = "simmate.apps.vasp.command_line.base_command:vasp_app"
@@ -66,9 +120,9 @@ simmate-qe = "simmate.apps.quantum_espresso.command_line.base_command:qe_app"
 [tool.setuptools.packages.find]
 where = ["src"]
 
-# All files that aren't *.py need to be defined explicitly.
 [tool.setuptools]
 include-package-data = true
+
 [tool.setuptools.package-data]
 simmate = [
     "**/*.md",
@@ -82,21 +136,9 @@ simmate = [
     "**/*.css",
     "**/*.js",
 ]
-# Note, the default is to include everything, but I don't want to ship test
-# files. I could switch this to use exclude-package-data in the future.
-# https://setuptools.pypa.io/en/latest/userguide/datafiles.html#exclude-package-data
 
-# -----------------------------------------------------------------------------
-
-# These settings initialize pytest and django-pytest.
 [tool.pytest.ini_options]
-
-# Tell django-pytest settings for a dummy database and also website interaction.
-# To disable django-pytest, add "-p no:django" to your pytest command
 DJANGO_SETTINGS_MODULE = "simmate.configuration.django.settings_test"
-
-# We classify all tests so that we can run different subgroups of tests. You can
-# run the tests marked with "slow"... "pytest -m slow"
 markers = [
     "blender: requires blender installed",
     "vasp: requires vasp installed",
@@ -104,17 +146,7 @@ markers = [
     "prefect_db: requires access to the prefect database",
     "slow: test is slow (>30s) and unstable in in the CI",
 ]
-
-# By default, we only want to run unmarked tests. The simplest way to do this
-# without adding extra files is to just list "not <marker1> and not <marker2" 
-# for all of them. We also want migrations to be built from scratch, not past 
-# migration folders.
-# I manually remove -m when testing coverage, but am unsure if there's a better
-# way to do this.
 addopts = "--no-migrations --durations=15 -m 'not blender and not vasp'"
-
-# There are a number of warnings that are expected when running our tests.
-# We remove these from our output for clarity.
 filterwarnings = [
     "ignore:cannot collect test class*:Warning",
     "ignore:Issues encountered while parsing CIF*:Warning",
@@ -124,28 +156,9 @@ filterwarnings = [
     # "ignore:*is an unconverged VASP run*:Warning", BUG: why won't this regex work?
 ]
 
-# -----------------------------------------------------------------------------
-
-# These settings initialize the python coverage module. With this file, you can
-# just use "coverage run" in the  base directory without configuring any
-# other settings in the command.
 [tool.coverage.run]
-
-# all tests are written using pytest, so we always need this module set
 command_line = "-m pytest"
-
-# when testing coverage, we want to ignore the test files themselves.
 omit = ["*/test_*", "*/conftest.py", "*/*_test.py"]
-
-# consider adding for coverage of templates
-# plugins = django_coverage_plugin  
-
-# -----------------------------------------------------------------------------
-
-# isort is a tool for organizing imports at the top of python files. By default,
-# it conflicts with the black formatter we use, so we need to configure it here.
 
 [tool.isort]
 profile = "black"
-
-# -----------------------------------------------------------------------------

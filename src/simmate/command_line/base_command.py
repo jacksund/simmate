@@ -51,26 +51,11 @@ def run_server(port: int = 8000):
     at http://localhost:8000/ (aka http://127.0.0.1:8000/)
     """
 
-    # BUG: windows dev version is throwing issues with this code section here,
-    # so I just switch to using subprocess below.
-    # ---> Error while finding module specification for '__main__'
-    # (ValueError: __main__.__spec__ is None)
-    #
-    # logging prints ugly duplicates as it sets up simmate and also a
-    # static server for it.
-    # logging.warning(
-    #     "Seeing duplicate messages is normal and expected. "
-    #     "This is because the test server sets up + tears down Simmate on a cycle."
-    # )
-    # from django.core.management import call_command
-    # from simmate.database import connect
-    # call_command("runserver")
-
     import subprocess
 
     logging.info("Setting up local test server...")
     subprocess.run(
-        f"django-admin runserver {port} --settings=simmate.configuration.django.settings --insecure",
+        f"django-admin runserver {port} --settings=simmate.configuration.django.settings --insecure --noreload",
         shell=True,
     )
     # BUG: we added the "--insecure" flag in order to serve static files with
@@ -79,6 +64,8 @@ def run_server(port: int = 8000):
     # BUG: normally the 8000 port is used, but we allow it to be overwritten
     # to 80 so that some allauth endpoints work for local testing. For example,
     # Microsoft AD doesn't allow redirect to the 8000 port.
+    # BUG: --noreload is a temp patch for windows until we update to django v5:
+    #   https://github.com/django/django/pull/17203
 
 
 @simmate_app.command()
