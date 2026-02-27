@@ -4,7 +4,6 @@ WORKDIR /root/
 
 # =============================================================================
 # Environment Variables
-# Set early to keep layer sizes down
 # =============================================================================
 
 ENV PATH=/root/simmate/.venv/bin:/root/.local/bin:$PATH \
@@ -60,6 +59,7 @@ RUN curl -Ls https://astral.sh/uv/install.sh | sh
 # Copy source and install Python dependencies
 COPY . simmate
 RUN uv sync && \
+    uv pip install gunicorn && \
     django-admin collectstatic --noinput
 
 # =============================================================================
