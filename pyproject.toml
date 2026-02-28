@@ -21,59 +21,55 @@ requires-python=">=3.10, <3.12"
 dependencies = [
     # Core dependencies
     "numpy>=1.22.0,<1.24.2",
-    "pandas>=2.0.0,<2.1.4",
-    "django>=4.2.8,<5.0",
-    "typer>=0.6.0,<0.7.1",
-    "psycopg2-binary>=2.8.0,<3.0.0",
-    # BUG-FIX for typer
-    # https://github.com/fastapi/typer/discussions/1215
-    # https://github.com/fastapi/typer/pull/1222
-    "click<8.2.0",
+    "pandas>=2.0.0,<3.0.0",
+    "django>=5.2.11,<6.0.0",
+    "typer>=0.24.1,<0.25.0",
+    "psycopg2-binary>=2.9.11,<3.0.0",
     # Material/Crystal-based dependencies
     "pymatgen>=2022.1.9,<2023.5.32",
     "pymatgen-analysis-diffusion>=2021.4.29,<=2023.8.15",
-    "matminer>=0.9.3,<=0.9.3",
-    "ase>=3.22.1,<=3.23.0",
+    "matminer>=0.9.3,<0.10.0",
+    "ase>=3.22.1,<3.23.0",
     # Molecule-based dependencies
-    "rdkit>=2024.03.1,<=2024.03.1",
-    "ipython>=8.22.2,<=8.29.0",
-    "umap-learn>=0.5.5,<=0.5.5",
+    "rdkit>=2025.9.5,<2025.9.6",
+    "ipython>=8.22.2,<10.0.0",  # displaying rdkit images
     # Extra (smaller) dependencies & utilities
-    "django-allauth>=0.56.0,<=0.63.3",
-    "django-simple-history>=3.11.0,<=3.11.0",
-    "pyyaml>=6.0,<=6.0.1",
-    "plotly>=5.4.0,<5.19.0",
-    "markdown>=3.4.1,<=3.5.1",
-    "requests>=2.28.1,<=2.32.3",
-    "scikit-learn>=1.1.1,<1.5.1",
-    "cloudpickle>=2.1.0,<=3.0.0",
-    "rich>=11.0,<=13.5.2",
-    "toml>=0.10.2,<=0.10.2",
-    "schedule>=1.2.0,<=1.2.0",
-    "xmltodict>=0.13.0,<=0.13.0",
-    "dask>=2023.6.1,<2024.4.3",
-    "distributed>=2023.6.1,<2024.4.3",
-    "beautifulsoup4>=4.0.0,<=4.13.5",
-    "cachetools>=6.0.0,<=6.2.0",
+    "django-allauth>=0.63.3,<0.64.0",
+    "django-simple-history>=3.11.0,<3.12.0",
+    "pyyaml>=6.0.3,<7.0.0",
+    "plotly>=6.5.0,<7.0.0",
+    "markdown>=3.4.1,<4.0.0",
+    "requests>=2.32.5,<3.0.0",
+    "scikit-learn>=1.1.1,<2.0.0",
+    "cloudpickle>=3.1.2,<=4.0.0",
+    "rich>=14.3.3,<15.0.0",
+    "toml>=0.10.2,<0.11.0",
+    "schedule>=1.2.2,<2.0.0",
+    "xmltodict>=1.0.4,<2.0.0",
+    "dask>=2026.1.2,<2026.1.3",  # deprec
+    "distributed>=2026.1.2,<2026.1.3",  # deprec
+    "beautifulsoup4>=4.0.0,<5.0.0",
+    "cachetools>=7.0.1,<8.0.0",
+    "umap-learn>=0.5.5,<0.6.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     # Testing
-    "pytest>=6.2.5,<=7.3.2",
-    "pytest-django>=4.5.2,<=4.8.0",
-    "pytest-mock>=3.7.0,<3.14.1",
-    "pytest-xdist>=2.5.0,<3.4.0",
-    "coverage>=6.2,<7.4.4",
+    "pytest>=9.0.0,<10.0.0",
+    "pytest-django>=4.12.0,<5.0.0",
+    "pytest-mock>=3.14.0,<4.0.0",
+    "pytest-xdist>=3.6.0,<4.0.0",
+    "coverage>=7.13.4,<8.0.0",
     # Formatting & Linting
     "black>=26.1.0,<27.0.0",
-    "isort>=7.0.0,<8.0.0",
-    "djlint>=1.36.4,<1.37.0",
+    "isort>=8.0.0,<9.0.0",
+    "djlint>=1.36.4,<2.0.0",
     # Docs
-    "mkdocs-material>=9.5.44,<9.6.0",
-    "mkdocstrings>=0.25.2,<=0.26.0",
-    "mkdocstrings-python>=1.10.9,<1.11.0",
-    "mkdocs-autorefs>=1.3.1,<1.4.0",  # BUG-FIX
+    "mkdocs-material>=9.7.3,<10.0.0",
+    "mkdocstrings>=1.0.3,<2.0.0",
+    "mkdocstrings-python>=2.0.3,<3.0.0",
+    "mkdocs-autorefs>=1.4.4,<2.0.0",  # BUG-FIX
 ]
 # App-specific deps
 # baderkit = [
@@ -87,24 +83,6 @@ dev = [
 # ]
 # price_catalog = [
 #     "yfinance",
-# ]
-# # other notes
-# extras = [
-#     "spyder",            # Recommended IDE for development
-#     "dask-jobqueue",     # for submitting on HPC clusters
-#     "numba",             # for speed-up of basic calcs
-#     "psycopg2-binary",   # for Postgres connections (added -binary to fix bug)
-#     "selenium",          # for web scraping (slow but robust)
-#     "gunicorn",          # for website server (Django+DigitalOcean) # NOT WINDOWS
-#     "pygraphviz",        # pygraphviz on conda. for viewing django tables
-#     "fabric",            # for remote ssh connections
-#     "django-extensions", # simple tools to help with django development
-#     "bokeh",             # for the dask dashboard
-#     "h5py",              # for reading QE's binary output files
-#     # OpenEye needs to point to a different source & a license is required:
-#     #   pip install -i https://pypi.anaconda.org/OpenEye/simple OpenEye-toolkits
-#     # "OpenEye-toolkits @ https://pypi.anaconda.org/OpenEye/simple",
-#     # ^^^ BUG: must be commented out for pypi uploads to work
 # ]
 
 [project.urls]
