@@ -16,12 +16,10 @@ class StaticEnergy__Vasp__Matproj(Relaxation__Vasp__Matproj):
     """
 
     _incar_updates = dict(
-        IBRION=-1,  # (optional) locks everything between ionic steps
-        NSW=0,  # this is the main static energy setting
-        LAECHG=True,
+        NSW=0,
         LCHARG=True,
-        LORBIT=11,
-        LVHAR=True,
-        LWAVE=False,
-        ALGO="Normal",  # was "Fast" before
+        LREAL=False,
+        #
+        IBRION="__remove__",
+        ISIF="__remove__",
     )

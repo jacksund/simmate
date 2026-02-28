@@ -12,9 +12,13 @@ class StaticEnergy__Vasp__MatprojScan(Relaxation__Vasp__MatprojScan):
     """
 
     _incar_updates = dict(
-        NSW=0,  # this is the main static energy setting
+        ALGO="Fast",
+        NSW=0,
         LREAL=False,
-        LORBIT=11,
         LVHAR=True,
         ISMEAR=-5,
+        #
+        EDIFFG="__remove__",
+        IBRION="__remove__",
+        ISIF="__remove__",   
     )

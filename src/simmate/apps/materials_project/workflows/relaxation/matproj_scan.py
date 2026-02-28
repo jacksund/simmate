@@ -59,6 +59,7 @@ class Relaxation__Vasp__MatprojScan(VaspWorkflow):
         ENCUT=680,
         IBRION=2,
         ISIF=3,
+        ISMEAR=0,
         ISPIN=2,
         LORBIT=11,
         LASPH=True,
@@ -66,7 +67,7 @@ class Relaxation__Vasp__MatprojScan(VaspWorkflow):
         LMIXTAU=True,
         LCHARG=True,
         LAECHG=True,
-        LELF=True,
+        LELF=False,
         LWAVE=False,
         LVTOT=True,
         METAGGA="R2scan",
@@ -110,7 +111,6 @@ class Relaxation__Vasp__MatprojScan(VaspWorkflow):
         # WARNING -- pymatgen has built in logic to determine kspacing and
         # smearing method, where they default to metallic systems.
         KSPACING=0.22,
-        ISMEAR=2,
         SIGMA=0.2,
         # The actual logic in pymatgen looks closer to...
         # multiple_keywords__smart_ismear={
