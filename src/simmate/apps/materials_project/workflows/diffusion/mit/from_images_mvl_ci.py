@@ -35,4 +35,5 @@ class Diffusion__Vasp__NebFromImagesMvlCi(Diffusion__Vasp__NebFromImagesMit):
         NSW=200,
         POTIM=0,
         SPRING=-5,
+        LDAU=False,
     )
