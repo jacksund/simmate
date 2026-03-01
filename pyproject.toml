@@ -17,7 +17,7 @@ classifiers=[
     "Programming Language :: Python :: 3.11",
     "Operating System :: OS Independent",
 ]
-requires-python=">=3.10, <3.12"
+requires-python=">=3.11, <3.12"
 dependencies = [
     # Core dependencies
     "numpy>=2.0.0,<3.0.0",
@@ -28,7 +28,7 @@ dependencies = [
     # Material/Crystal-based dependencies
     "pymatgen>=2025.10.7,<2025.10.8",
     "pymatgen-analysis-diffusion>=2025.11.15,<2025.11.16",
-    "matminer>=0.9.3,<0.10.0",
+    "matminer>=0.10.0,<0.11.0",
     "ase>=3.22.1,<3.23.0",
     # Molecule-based dependencies
     "rdkit>=2025.9.5,<2025.9.6",
