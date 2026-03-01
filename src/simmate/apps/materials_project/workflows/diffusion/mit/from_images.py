@@ -24,7 +24,15 @@ class Diffusion__Vasp__NebFromImagesMit(
     """
 
     _incar_updates = dict(
-        IBRION=1,
+        ALGO="Normal",
+        EDIFF=5e-5,
+        EDIFFG=-0.02,
+        IBRION=3,
+        IOPT="1",
+        ISIF=2,
+        LORBIT="0",
+        NSW=200,
+        POTIM=0.0,
         ISYM=0,
         LCHARG=False,
         IMAGES__auto=True,

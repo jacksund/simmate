@@ -21,6 +21,7 @@ class MatplotlibFigure(Figure):
             directory = Path.cwd()
         figure = cls.get_plot(parent_class, **kwargs)
         filename = directory / f"{cls.name}.png"
+        figure = getattr(figure, "figure", figure)  # in case it is axes obj
         figure.savefig(filename)
 
     @classmethod

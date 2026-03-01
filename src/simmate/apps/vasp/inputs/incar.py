@@ -48,6 +48,7 @@ class Incar(dict):
         "LNONCOLLINEAR": bool,
         "KGAMMA": bool,
         # FLOATS
+        "ENCUT": float,
         "EDIFF": float,
         "SIGMA": float,
         "TIME": float,
@@ -79,7 +80,6 @@ class Incar(dict):
         "NPAR": int,
         "LDAUPRINT": int,
         "LMAXMIX": int,
-        "ENCUT": int,
         "NSIM": int,
         "NKRED": int,
         "NUPDOWN": int,

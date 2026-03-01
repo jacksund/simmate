@@ -124,7 +124,7 @@ class Oszicar:
                 # the energy changes are getting worse -- which is not the case
                 # because we only look at the first step!
                 if not self.ionic_steps:
-                    ionic_step["energy_change"] = numpy.NaN
+                    ionic_step["energy_change"] = numpy.nan
                 # take whatever ionic_step that was made above and add it to our
                 # results list!
                 self.ionic_steps.append(ionic_step)
@@ -166,7 +166,7 @@ class Oszicar:
                 # are reading an incomplete file. We still want all the
                 # electronic steps available in the final class so we store
                 # the incomplete ionic step here. This is useful for ErrorHandlers.
-                # We use numpy.NaN instead of None so errors aren't through
+                # We use numpy.nan instead of None so errors aren't through
                 # elsewhere that expect a float value.
                 if line_number == len(lines) - 1:
                     # BUG: we don't know what the data should be here (see the
@@ -174,9 +174,9 @@ class Oszicar:
                     # the first format as it is most common. We are filling this
                     # data with "None" values anyways so it shouldn't matter.
                     ionic_step = {
-                        "energy": numpy.NaN,  # F (total_free_energy)
-                        "energy_sigma_zero": numpy.NaN,  # E0
-                        "energy_change": numpy.NaN,  # dE
+                        "energy": numpy.nan,  # F (total_free_energy)
+                        "energy_sigma_zero": numpy.nan,  # E0
+                        "energy_change": numpy.nan,  # dE
                         "electronic_steps": electronic_steps,
                     }
                     self.ionic_steps.append(ionic_step)
@@ -199,9 +199,9 @@ def try_float(value: str) -> float:
     """
     BUG: sometimes VASP prints a value like '-0.33328-312' which
     can't be converted to a float. I need a try/except here to
-    catch this case and return a numpy.NAN instead.
+    catch this case and return a numpy.nan instead.
     """
     try:
         return float(value)
     except:
-        return numpy.NaN
+        return numpy.nan

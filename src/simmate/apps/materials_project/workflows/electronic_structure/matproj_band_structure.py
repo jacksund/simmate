@@ -21,7 +21,6 @@ class ElectronicStructure__Vasp__MatprojBandStructure(
 
     parent_workflows = ["electronic-structure.vasp.matproj-full"]
     _incar_updates = dict(
-        IBRION=-1,
         LCHARG=False,
         LORBIT=11,
         LWAVE=False,
@@ -29,6 +28,8 @@ class ElectronicStructure__Vasp__MatprojBandStructure(
         ISYM=0,
         ICHARG=11,
         ISMEAR=0,
-        SIGMA=0.01,
+        SIGMA=0.2,
         MAGMOM__smart_magmom="__remove__",
+        IBRION="__remove__",
+        ISIF="__remove__",
     )

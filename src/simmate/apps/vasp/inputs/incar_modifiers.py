@@ -249,10 +249,8 @@ def keyword_modifier_smart_quad_efg(structure: Structure, quad_efg_config):
 
     isotopes = {ist.split("-")[0]: ist for ist in isotopes}
     quad_efg = [
-        Species(element.symbol).get_nmr_quadrupole_moment(
-            isotopes.get(element.symbol, None)
-        )
-        for element in structure.composition.elements
+        float(Species(sp.name).get_nmr_quadrupole_moment(isotopes.get(sp.name)))
+        for sp in structure.species
     ]
 
     # there is a unit (mbarn) attached to each so we clear these

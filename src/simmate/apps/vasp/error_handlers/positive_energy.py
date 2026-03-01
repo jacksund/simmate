@@ -43,7 +43,7 @@ class PositiveEnergy(ErrorHandler):
             # still going. We therefore check the most recent energy and not
             # the final energy.
             for ionic_step in reversed(oszicar.ionic_steps):
-                # where ionic steps are not complete, we have numpy.NAN values
+                # where ionic steps are not complete, we have numpy.nan values
                 if not numpy.isnan(ionic_step["energy_sigma_zero"]):
                     break
 

@@ -23,8 +23,12 @@ class ElectronicStructure__Vasp__MatprojBandStructureHse(
     _incar_updates = dict(
         NSW=0,
         ISMEAR=0,
-        SIGMA=0.05,
+        SIGMA=0.01,
         ISYM=3,
         LCHARG=False,
         NELMIN=5,
+        #
+        IBRION="__remove__",
+        ISIF="__remove__",
+        LASPH="__remove__",
     )

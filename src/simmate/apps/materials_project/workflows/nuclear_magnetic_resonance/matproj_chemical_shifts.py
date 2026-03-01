@@ -19,7 +19,7 @@ class Nmr__Vasp__MatprojChemicalShifts(StaticEnergy__Vasp__Matproj):
         LCHARG=False,
         LNMR_SYM_RED=True,
         NELMIN=10,
-        NSLPLINE=True,
-        PREC="ACCURATE",
+        NLSPLINE=True,
+        PREC="Accurate",
         SIGMA=0.01,
     )

@@ -19,7 +19,6 @@ class ElectronicStructure__Vasp__MatprojDensityOfStates(
 
     parent_workflows = ["electronic-structure.vasp.matproj-full"]
     _incar_updates = dict(
-        IBRION=-1,
         LCHARG=False,
         LORBIT=11,
         LWAVE=False,
@@ -29,4 +28,6 @@ class ElectronicStructure__Vasp__MatprojDensityOfStates(
         ISMEAR=-5,
         NEDOS=2001,
         MAGMOM__smart_magmom="__remove__",
+        IBRION="__remove__",
+        ISIF="__remove__",
     )

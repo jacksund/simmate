@@ -25,4 +25,8 @@ class ElectronicStructure__Vasp__MatprojDensityOfStatesHse(
         ISYM=3,
         LCHARG=False,
         NELMIN=5,
+        NEDOS=2000,
+        IBRION="__remove__",
+        ISIF="__remove__",
+        LASPH="__remove__",
     )

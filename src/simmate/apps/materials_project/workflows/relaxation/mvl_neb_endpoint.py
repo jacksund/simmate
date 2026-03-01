@@ -32,6 +32,7 @@ class Relaxation__Vasp__MvlNebEndpoint(Relaxation__Vasp__Mit):
         ISMEAR=0,
         ISYM=0,
         LCHARG=False,
+        LDAU=False,
         # LDAU=False,
         NELMIN=4,
         multiple_keywords__smart_ldau="__remove__",

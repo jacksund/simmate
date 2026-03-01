@@ -55,10 +55,10 @@ class Dynamics__Vasp__Mit(DynamicsWorkflow, Relaxation__Vasp__Mit):
         ISPIN=1,  # pymatgen makes this a kwarg but we fix it to pmg's default
         PREC="Low",
         NBLOCK=1,  # same as VASP default but pymatgen sets this
-        # We no longer want these configs
+        LDAU=False,
+        #
         ENCUT="__remove__",
         MAGMOM__smart_magmom="__remove__",
-        multiple_keywords__smart_ldau="__remove__",
     )
 
     # For now, I turn off all error handlers.

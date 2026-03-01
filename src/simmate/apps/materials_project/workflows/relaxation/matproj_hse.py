@@ -69,6 +69,7 @@ class Relaxation__Vasp__MatprojHse(VaspWorkflow):
         ISIF=3,
         ISMEAR=0,
         ISPIN=2,
+        LASPH=True,
         LHFCALC=True,
         LORBIT=11,
         LREAL="Auto",

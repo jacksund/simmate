@@ -148,6 +148,13 @@ def test_pymatgen_input_sets(
         percent_diff = (ediff_pymatgen - ediff_simmate) / ediff_pymatgen
         if abs(percent_diff) < 1:
             diff.pop("EDIFF")
+    if "EDIFF_PER_ATOM" in diff and "EDIFF__per_atom" in simmate_workflow.incar:
+        _, ediff_pymatgen = diff["EDIFF_PER_ATOM"]
+        ediff_pymatgen = float(ediff_pymatgen)
+        ediff_simmate = simmate_workflow.incar["EDIFF__per_atom"]
+        percent_diff = (ediff_pymatgen - ediff_simmate) / ediff_pymatgen
+        if abs(percent_diff) < 1:
+            diff.pop("EDIFF_PER_ATOM")
 
     # ensure incars are the same (there are no differences)
     assert diff == {}
