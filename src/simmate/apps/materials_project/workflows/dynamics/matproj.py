@@ -44,6 +44,7 @@ class Dynamics__Vasp__Matproj(DynamicsWorkflow, Relaxation__Vasp__Matproj):
         ISMEAR=0,
         NELMIN=4,
         LREAL=True,
+        LDAU=False,
         BMIX=1,
         MAXMIX=20,
         NELM=500,

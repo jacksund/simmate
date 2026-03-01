@@ -13,13 +13,13 @@ class Nmr__Vasp__MatprojFieldGradient(StaticEnergy__Vasp__Matproj):
     """
 
     _incar_updates = dict(
-        ALGO="FAST",
+        ALGO="Fast",
         EDIFF=-1.0e-10,
         ISYM=0,
         LCHARG=False,
         LEFG=True,
         QUAD_EFG__smart_quad_efg=True,
         NELMIN=10,
-        PREC="ACCURATE",
+        PREC="Accurate",
         SIGMA=0.01,
     )

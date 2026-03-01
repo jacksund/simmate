@@ -20,5 +20,5 @@ class StaticEnergy__Vasp__MatprojScan(Relaxation__Vasp__MatprojScan):
         #
         EDIFFG="__remove__",
         IBRION="__remove__",
-        ISIF="__remove__",   
+        ISIF="__remove__",
     )
