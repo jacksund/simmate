@@ -29,9 +29,9 @@ Return your response strictly in the following JSON format:
 Guidelines:
 - cas_number: Provide the standard hyphenated CAS number. Or null if it cannot be found.
 - confidence: An integer from 0–100 representing your certainty that this specific CAS number matches the compound name.
-- comment: Provide a brief explanation such as a source or why confidence is below 100 (e.g., potential isomers, ambiguous naming, or multiple registry numbers).
+- comment: Provide a brief explanation such as the source of your confidence (e.g., where you found the CAS) or why confidence is below 100 (e.g., potential isomers, ambiguous naming, or multiple registry numbers).
 
-Do not include any text, headers, or explanations outside of the JSON object.
+Do not include any text, headers, codeblock, or explanations besides the JSON object.
 
 Use the context below in assist in your answer. The context is pulled from a web search:
 
@@ -86,5 +86,15 @@ def lookup_cas_number(compound_name: str) -> dict:
     )
     response = llm.invoke(filled_prompt)
     # TODO: assert format
+    if response.content.contains("```"):
+        response_json = response.content.strip("```json\n").strip("```")
+    else:
+        response_json = response.content
+
+    try:
+        response_data =  json.loads(response_json)
+    except:
+        raise Exception("Invalid JSON in response: {}")
+    
     # TODO: validate by looking up in pubchem or cas
-    return json.loads(response.content)
+    return response_data
