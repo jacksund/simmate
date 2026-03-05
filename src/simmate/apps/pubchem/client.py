@@ -40,7 +40,7 @@ class PubChemClient:
         # extra url hit for synonyms & other metadata once we have the CID
         # OPTIMIZE: see methods below for grabbing a comopunds FULL dataset
         # For now I just want cas_number
-        cid_data_cleaned["cas_number"] = cls.get_cas_from_cid(props["CID"])
+        # cid_data_cleaned["cas_number"] = cls.get_cas_from_cid(props["CID"])
 
         return cid_data_cleaned
 

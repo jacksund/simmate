@@ -83,6 +83,7 @@ chatbot = [
     "langchain-experimental>=0.4.1,<0.5.0",
     "langchain-google-genai>=4.2.1,<5.0.0",
     "langchain-openai>=1.1.10,<2.0.0",
+    "ddgs>=9.11.1,<10.0.0",
 ]
 price_catalog = [
     "yfinance>=1.2.0,<2.0.0",
