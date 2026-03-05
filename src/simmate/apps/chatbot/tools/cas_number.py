@@ -4,6 +4,8 @@ import json
 
 from langchain.tools import tool
 
+from simmate.apps.cas_registry.client import CasRegistryClient
+from simmate.apps.cas_registry.models import CasRegistryMolecule
 from simmate.apps.pubchem.client import PubChemClient
 
 from ..llm import get_llm
@@ -41,7 +43,7 @@ Use the context below in assist in your answer. The context is pulled from a web
 
 
 @tool
-def lookup_cas_number(compound_name: str) -> dict:
+def lookup_cas_number(compound_name: str, clean_name: bool = False) -> dict:
     """
     Search for the CAS (Chemical Abstracts Service) Registry Number of a given chemical compound.
     """
@@ -49,19 +51,36 @@ def lookup_cas_number(compound_name: str) -> dict:
     llm = get_llm()
 
     # 0. convert to list of names that are robust to searching in dbs/apis
-    filled_prompt = CHEMICAL_NAMES_PROMPT.format(compound_name=compound_name)
-    response = llm.invoke(filled_prompt).content
-    names = [n.strip() for n in response.content.split(";")]
+    if clean_name:
+        filled_prompt = CHEMICAL_NAMES_PROMPT.format(compound_name=compound_name)
+        response = llm.invoke(filled_prompt).content
+        names = [n.strip() for n in response.content.split(";")]
+    else:
+        names = [compound_name]
 
     # Only use the first name for now:
     compound_name_clean = names[0]
 
     # 1. check if we already have this in the simmate db
-    # TODO
+    query = CasRegistryMolecule.objects.filter(common_name=compound_name_clean)
+    if query.exists():
+        return {
+            "cas_number": query.first().id,
+            "confidence": 100,
+            "comment": (
+                "This was pulled directly from the Simmate database's CAS Reg. cache, "
+                "where the cache is populated directly from the official CAS API."
+            ),
+        }
 
     # 2. search cas api
-    # https://commonchemistry.cas.org/api-overview
-    # TODO
+    results = CasRegistryClient.search(query=compound_name_clean, size=1)
+    if results:
+        return {
+            "cas_number": results[0]["rn"],
+            "confidence": 100,
+            "comment": "Found this CAS number by searching the official CAS API",
+        }
 
     # 3. search pubchem api
     try:
@@ -105,4 +124,6 @@ def lookup_cas_number(compound_name: str) -> dict:
         raise Exception("Invalid JSON in response: {}")
 
     # TODO: validate by looking up in cas api + asking llm to confirm name match
+    # CasRegistryClient.detail
+
     return response_data
