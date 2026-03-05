@@ -9,15 +9,16 @@ from simmate.apps.pubchem.client import PubChemClient
 from ..llm import get_llm
 from .web_search import search_web_for_context
 
-SIMPLIFY_PROMPT = """
+CHEMICAL_NAMES_PROMPT = """
 Here is a compound name and/or description: {compound_name}
 
-Convert this to a chemical name suitable for searching a web form or chemical 
-synonyms database. Keep the name as-is if it is already appropriate. Do not 
-simplify or alter specificity, as this will be used to look up the 
-compound's CAS number.
+Convert this to a list of chemical names suitable for searching PubChem with. 
+Include the name as-is if it is already appropriate. Your list should include
+the IUPAC name if possible. Only give a maximum of 5 different names. Order
+the names so that the one most likely to give an accurate PubChem search result
+comes first.
 
-Respond with only the chemical name.
+Respond with only the list of chemical names, separated with semicolons (;).
 """
 
 LOOKUP_PROMPT = """
@@ -48,17 +49,24 @@ def lookup_cas_number(compound_name: str) -> dict:
     llm = get_llm()
 
     # 0. convert to list of names that are robust to searching in dbs/apis
-    filled_prompt = SIMPLIFY_PROMPT.format(compound_name=compound_name)
-    compound_name_clean = llm.invoke(filled_prompt).content
+    filled_prompt = CHEMICAL_NAMES_PROMPT.format(compound_name=compound_name)
+    response = llm.invoke(filled_prompt).content
+    names = [n.strip() for n in response.content.split(";")]
+
+    # Only use the first name for now:
+    compound_name_clean = names[0]
 
     # 1. check if we already have this in the simmate db
     # TODO
 
-    # 2. search the cas or pubchem web api
+    # 2. search cas api
+    # https://commonchemistry.cas.org/api-overview
+    # TODO
+
+    # 3. search pubchem api
     try:
         cid_data = PubChemClient.get_data_from_name(compound_name_clean)
         if cid_data["cas_number"]:
-            # TODO: have a follow-up llm check?
             return {
                 "cas_number": cid_data["cas_number"],
                 "confidence": 90,
@@ -92,9 +100,9 @@ def lookup_cas_number(compound_name: str) -> dict:
         response_json = response.content
 
     try:
-        response_data =  json.loads(response_json)
+        response_data = json.loads(response_json)
     except:
         raise Exception("Invalid JSON in response: {}")
-    
-    # TODO: validate by looking up in pubchem or cas
+
+    # TODO: validate by looking up in cas api + asking llm to confirm name match
     return response_data

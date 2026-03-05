@@ -345,6 +345,11 @@ class SimmateSettings:
                     "image": f"jacksund/bader:v{simmate.__version__}",
                 },
             },
+            "cas_registry": {
+                # access is free for non-commercial use:
+                # https://www.cas.org/services/commonchemistry-api
+                "api_key": None,
+            },
             "chatbot": {
                 "provider": None,
                 "model": None,
