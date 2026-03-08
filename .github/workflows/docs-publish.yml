@@ -13,7 +13,7 @@ jobs:
     # --------
     # NOTE: this section is copied from lint-and-test.yml
     - name: Install uv
-      uses: astral-sh/setup-uv@v5
+      uses: astral-sh/setup-uv@v7
       with:
         python-version: 3.11
     - name: Install dependencies
