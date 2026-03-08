@@ -61,7 +61,7 @@ jobs:
       - name: Initial setup
         uses: actions/checkout@v6
       - name: Build Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
         with:
           context: .
           file: ./envs/docker/${{ matrix.image-name }}.dockerfile
