@@ -13,6 +13,64 @@ from ..utilities import get_component
 register = template.Library()
 
 
+def _get_input_label(name: str, label: str) -> str:
+    return label if label else name.replace("_", " ").title()
+
+
+def _get_input_value(context, name: str) -> any:
+    component = context.get("component")
+    if not component:
+        return context.get(name)
+
+    # Priority of where we grab the value from:
+    # 1. explicit override in the template context
+    # 2. the component's form data (current state of the form)
+    # 3. the component's attribute (default value)
+    # 4. the component's table entry (value from the database)
+    if name in context:
+        return context[name]
+    elif name in component.form_data:
+        return component.form_data[name]
+    elif hasattr(component, name):
+        return getattr(component, name)
+    elif (
+        hasattr(component, "table_entry")
+        and component.table_entry is not None
+        and hasattr(component.table_entry, name)
+        and getattr(component.table_entry, name) is not None
+    ):
+        return getattr(component.table_entry, name)
+    else:
+        return None
+
+
+def _get_input_options(context, name, options=None):
+    if options:
+        return options
+
+    component = context.get("component")
+    if not component:
+        return []
+
+    default_name = f"{name}_options"
+    if default_name in context:
+        options = context[default_name]
+    elif hasattr(component, default_name):
+        options = getattr(component, default_name)
+    elif default_name in component.form_data:
+        options = component.form_data[default_name]
+    elif hasattr(component, "table") and hasattr(
+        getattr(component, "table"), default_name
+    ):
+        options = getattr(getattr(component, "table"), default_name)
+    else:
+        options = []
+    return options
+
+
+# -----------------------------------------------------------------------------
+
+
 @register.inclusion_tag(filename="htmx/cdn.html")
 def htmx_cdn_script():
     return  # html is static so no vars passed
@@ -53,14 +111,21 @@ def htmx_post(
     method_kwargs: dict = None,
 ):
     if not component_id:
-        # BUG: not sure why context is nested here. Maybe because I call this
-        # tag within other inclusion tags?
-        component_id = context["context"]["component"].component_id
+        # We may be in a nested context (e.g. htmx_post is called inside another
+        # inclusion tag's template), so we look for 'component' in the context
+        # or the original context if it's tucked away under a 'context' key.
+        component = context.get("component")
+        if not component and "context" in context:
+            component = context["context"].get("component")
+
+        if component:
+            component_id = component.component_id
+
     if not target:
         target = f"#{component_id}"
     if not include:
         include = f"#{component_id}"
-    swap = "none" if javascript_only else "outerHTML"
+    swap = "outerHTML" if not javascript_only else "none"
     return locals()
 
 
@@ -87,27 +152,8 @@ def htmx_text_input(
     """
     Display a single-line text input widget.
     """
-    if not label:
-        label = name.replace("_", " ").title()
-
-    # grab the current value to render in the form
-    component = context["component"]
-    if name in context:
-        current_value = context[name]
-    elif hasattr(component, name):
-        current_value = getattr(component, name)
-    elif name in component.form_data:
-        current_value = component.form_data[name]
-    elif (
-        hasattr(component, "table_entry")
-        and component.table_entry is not None
-        and hasattr(component.table_entry, name)
-        and getattr(component.table_entry, name) is not None
-    ):
-        current_value = getattr(component.table_entry, name)
-    else:
-        current_value = None
-
+    label = _get_input_label(name, label)
+    current_value = _get_input_value(context, name)
     return locals()
 
 
@@ -130,27 +176,8 @@ def htmx_text_area(
     """
     Display a multi-line text input widget.
     """
-    if not label:
-        label = name.replace("_", " ").title()
-
-    # grab the current value to render in the form
-    component = context["component"]
-    if name in context:
-        current_value = context[name]
-    elif hasattr(component, name):
-        current_value = getattr(component, name)
-    elif name in component.form_data:
-        current_value = component.form_data[name]
-    elif (
-        hasattr(component, "table_entry")
-        and component.table_entry is not None
-        and hasattr(component.table_entry, name)
-        and getattr(component.table_entry, name) is not None
-    ):
-        current_value = getattr(component.table_entry, name)
-    else:
-        current_value = None
-
+    label = _get_input_label(name, label)
+    current_value = _get_input_value(context, name)
     return locals()
 
 
@@ -175,32 +202,14 @@ def htmx_number_input(
     """
     Display a numeric input widget.
     """
-    if not label:
-        label = name.replace("_", " ").title()
+    label = _get_input_label(name, label)
+    current_value = _get_input_value(context, name)
 
     if not step_size:
         step_size = 1 if is_int else "any"
 
     if not placeholder:
         placeholder = "123" if is_int else "0.123"
-
-    # grab the current value to render in the form
-    component = context["component"]
-    if name in context:
-        current_value = context[name]
-    elif hasattr(component, name):
-        current_value = getattr(component, name)
-    elif name in component.form_data:
-        current_value = component.form_data[name]
-    elif (
-        hasattr(component, "table_entry")
-        and component.table_entry is not None
-        and hasattr(component.table_entry, name)
-        and getattr(component.table_entry, name) is not None
-    ):
-        current_value = getattr(component.table_entry, name)
-    else:
-        current_value = None
 
     return locals()
 
@@ -223,27 +232,8 @@ def htmx_checkbox(
     """
     Display a checkbox widget.
     """
-    if not label:
-        label = name.replace("_", " ").title()
-
-    # grab the current value to render in the form
-    component = context["component"]
-    if name in context:
-        current_value = context[name]
-    elif hasattr(component, name):
-        current_value = getattr(component, name)
-    elif name in component.form_data:
-        current_value = component.form_data[name]
-    elif (
-        hasattr(component, "table_entry")
-        and component.table_entry is not None
-        and hasattr(component.table_entry, name)
-        and getattr(component.table_entry, name) is not None
-    ):
-        current_value = getattr(component.table_entry, name)
-    else:
-        current_value = None
-
+    label = _get_input_label(name, label)
+    current_value = _get_input_value(context, name)
     return locals()
 
 
@@ -263,27 +253,9 @@ def htmx_radio(
     """
     Display a radio select widget.
     """
-    # options should be a list of tuples: (value, display)
-
-    component = context["component"]
-
-    if not label:
-        label = name.replace("_", " ").title()
-
-    if not options:
-        default_name = f"{name}_options"
-        if default_name in context:
-            options = options = context[default_name]
-        elif hasattr(component, default_name):
-            options = getattr(component, default_name)
-        elif default_name in component.form_data:
-            options = component.form_data[default_name]
-        elif hasattr(component, "table") and hasattr(
-            getattr(component, "table"), default_name
-        ):
-            options = getattr(getattr(component, "table"), default_name)
-        else:
-            options = []
+    label = _get_input_label(name, label)
+    options = _get_input_options(context, name, options)
+    initial_value = _get_input_value(context, name)
 
     # check whether the list of options is a simple list or a list of tuples.
     # If it is the latter, then we have a list of (value, display) options, which
@@ -291,23 +263,6 @@ def htmx_radio(
     # where options are given as [(1, "jacksund"), (2, "janedoe"), ...]
     if options and isinstance(options[0], (list, tuple)):
         tuple_mode = True  # we assume they have the correct format
-
-    # grab the initial value to render in the form
-    if name in context:
-        initial_value = context[name]
-    elif name in component.form_data:
-        initial_value = component.form_data[name]
-    elif hasattr(component, name):
-        initial_value = getattr(component, name)
-    elif (
-        hasattr(component, "table_entry")
-        and component.table_entry is not None
-        and hasattr(component.table_entry, name)
-        and getattr(component.table_entry, name) is not None
-    ):
-        initial_value = getattr(component.table_entry, name)
-    else:
-        initial_value = None
 
     return locals()
 
@@ -328,27 +283,9 @@ def htmx_button_select(
     """
     Display a button select widget (i.e., a button group of options)
     """
-    # options should be a list of tuples: (value, display)
-
-    component = context["component"]
-
-    if not label:
-        label = name.replace("_", " ").title()
-
-    if not options:
-        default_name = f"{name}_options"
-        if default_name in context:
-            options = options = context[default_name]
-        elif hasattr(component, default_name):
-            options = getattr(component, default_name)
-        elif default_name in component.form_data:
-            options = component.form_data[default_name]
-        elif hasattr(component, "table") and hasattr(
-            getattr(component, "table"), default_name
-        ):
-            options = getattr(getattr(component, "table"), default_name)
-        else:
-            options = []
+    label = _get_input_label(name, label)
+    options = _get_input_options(context, name, options)
+    initial_value = _get_input_value(context, name)
 
     # check whether the list of options is a simple list or a list of tuples.
     # If it is the latter, then we have a list of (value, display) options, which
@@ -356,23 +293,6 @@ def htmx_button_select(
     # where options are given as [(1, "jacksund"), (2, "janedoe"), ...]
     if options and isinstance(options[0], (list, tuple)):
         tuple_mode = True  # we assume they have the correct format
-
-    # grab the initial value to render in the form
-    if name in context:
-        initial_value = context[name]
-    elif name in component.form_data:
-        initial_value = component.form_data[name]
-    elif hasattr(component, name):
-        initial_value = getattr(component, name)
-    elif (
-        hasattr(component, "table_entry")
-        and component.table_entry is not None
-        and hasattr(component.table_entry, name)
-        and getattr(component.table_entry, name) is not None
-    ):
-        initial_value = getattr(component.table_entry, name)
-    else:
-        initial_value = None
 
     return locals()
 
@@ -399,29 +319,14 @@ def htmx_selectbox(
     """
     Display a selectbox widget.
     """
-    component = context["component"]
+    label = _get_input_label(name, label)
+    if label.endswith(" Id"):
+        label = label[:-3]
+    elif label.endswith(" Ids"):
+        label = label[:-4]
 
-    if not label:
-        label = name.replace("_", " ").title()
-        if label.endswith(" Id"):
-            label = label[:-3]
-        elif label.endswith(" Ids"):
-            label = label[:-4]
-
-    if not options:
-        default_name = f"{name}_options"
-        if default_name in context:
-            options = options = context[default_name]
-        elif hasattr(component, default_name):
-            options = getattr(component, default_name)
-        elif default_name in component.form_data:
-            options = component.form_data[default_name]
-        elif hasattr(component, "table") and hasattr(
-            getattr(component, "table"), default_name
-        ):
-            options = getattr(getattr(component, "table"), default_name)
-        else:
-            options = []
+    options = _get_input_options(context, name, options)
+    initial_value = _get_input_value(context, name)
 
     # check whether the list of options is a simple list or a list of tuples.
     # If it is the latter, then we have a list of (value, display) options, which
@@ -433,23 +338,6 @@ def htmx_selectbox(
     if method_name:
         defer = False
 
-    # grab the initial value to render in the form
-    if name in context:
-        initial_value = context[name]
-    elif hasattr(component, name):
-        initial_value = getattr(component, name)
-    elif name in component.form_data:
-        initial_value = component.form_data[name]
-    elif (
-        hasattr(component, "table_entry")
-        and component.table_entry is not None
-        and hasattr(component.table_entry, name)
-        and getattr(component.table_entry, name) is not None
-    ):
-        initial_value = getattr(component.table_entry, name)
-    else:
-        initial_value = None
-
     # Needed because select2 is within an "ignore" div but we also want to
     # replace the full select box if the options are changed at all
     if dynamic_options:
@@ -458,6 +346,7 @@ def htmx_selectbox(
     # BUG-FIX
     # the searchbar breaks when the dropdown is in a model or offcanvas. So
     # this must be set to patch that via the `data-dropdown-parent` attr
+    component = context["component"]
     popout_parent_id = {
         "searchpopout": "offcanvasQuickSearch",
         "updatemanypopout": "offcanvasUpdater",
@@ -539,10 +428,8 @@ def htmx_molecule_input(
     """
     Display a ChemDraw.js (or ChemDoodle.js) input widget.
     """
-    component = context["component"]
-
-    if not label:
-        label = name.replace("_", " ").title()
+    label = _get_input_label(name, label)
+    molecule = _get_input_value(context, name)
 
     sketcher_input_name = f"{name}__molecule_sketcher"
     text_input_name = f"{name}__molecule_text"
@@ -575,24 +462,7 @@ def htmx_molecule_input(
             sketcher_input_label = f"Option {noption}: {sketcher_input_label}"
             noption += 1
 
-    # molecule = component.form_data.get(name, None)  # gives molecule_obj
-    # grab the initial value to render in the form
-    if name in component.form_data:
-        molecule = component.form_data[name]
-    elif name in context:
-        molecule = context[name]
-    elif hasattr(component, name):
-        molecule = getattr(component, name)
-    elif (
-        hasattr(component, "table_entry")
-        and component.table_entry is not None
-        and hasattr(component.table_entry, name)
-        and getattr(component.table_entry, name) is not None
-    ):
-        molecule = getattr(component.table_entry, name)
-    else:
-        molecule = None
-
+    component = context["component"]
     # TODO: use f"{name}__molecule_matches"
     molecule_matches = getattr(component, "molecule_matches", None)
 
@@ -618,11 +488,7 @@ def htmx_file_upload(
     """
     Display a file upload widget.
     """
-    component = context["component"]
-
-    if not label:
-        label = name.replace("_", " ").title()
-
+    label = _get_input_label(name, label)
     return locals()
 
 
