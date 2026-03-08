@@ -16,7 +16,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: Initial setup
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Black
         uses: psf/black@stable
       - name: iSort
@@ -34,7 +34,7 @@ jobs:
         python-version: ["3.11"]
     steps:
       - name: Initial setup
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
@@ -59,7 +59,7 @@ jobs:
       packages: write
     steps:
       - name: Initial setup
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Build Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:

@@ -9,7 +9,7 @@ jobs:
     name: Deploy Docs to Github Pages
     steps:
     - name: Initial setup
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
     # --------
     # NOTE: this section is copied from lint-and-test.yml
     - name: Install uv
