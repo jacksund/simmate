@@ -166,27 +166,27 @@ class HtmxComponent:
 
     @classmethod
     @property
-    def on_change_hooks(self):
-        if self._on_change_hooks_cache == False:
-            self._on_change_hooks_cache = [
+    def on_change_hooks(cls):
+        if cls._on_change_hooks_cache == False:
+            cls._on_change_hooks_cache = [
                 m[16:]
-                for m in dir(self)
-                if m.startswith("on_change_hook__") and callable(getattr(self, m))
+                for m in dir(cls)
+                if m.startswith("on_change_hook__") and callable(getattr(cls, m))
             ]
-        return self._on_change_hooks_cache
+        return cls._on_change_hooks_cache
 
     _search_hooks_cache: list[str] = False
 
     @classmethod
     @property
-    def search_hooks(self):
-        if self._on_change_hooks_cache == False:
-            self._on_change_hooks_cache = [
-                m[16:]
-                for m in dir(self)
-                if m.startswith("search_hook__") and callable(getattr(self, m))
+    def search_hooks(cls):
+        if cls._search_hooks_cache == False:
+            cls._search_hooks_cache = [
+                m[13:]
+                for m in dir(cls)
+                if m.startswith("search_hook__") and callable(getattr(cls, m))
             ]
-        return self._on_change_hooks_cache
+        return cls._search_hooks_cache
 
     # -------------------------------------------------------------------------
 
@@ -261,112 +261,93 @@ class HtmxComponent:
     post_data_mappings: dict = {}
 
     def parse_post_data(self):
-
-        # TODO: allow other more robust parsing methods. For example:
-        #   1. a pydantic class
-        #   2. django form class
-
-        # BUG:
-        # For now, I don't want the boilerplate associated with those methods,
-        # so I naively try parsing to the correct format. This can lead to bugs
-        # though -- such as someone typing "false" into a text field and it
-        # incorrectly being converted to a boolean when it should stay as a str.
-        # As another example, we might have a multiselect with one or zero items
-        # selected. This default parser would incorrectly convert to None or
-        # a single type, rather than [] or ["example"]
-
         result = {}
-        # note: all values are given as a list for requst.POST
         for key, values in self.request.POST.lists():
+            self._parse_post_item(key, values, result)
 
-            target_type = self.post_data_mappings.get(key, None)
-
-            # special case where we infer "example_ids" is a list of integers
-            # BUG: sometimes ids can be strings causing error below
-            if target_type is None and key.endswith("_ids"):
-                target_type = list[int]
-
-            # BUG-FIX: we pass things like `user_ids__blankmultiselect` because
-            # post data will not include when we have an empty multiselect input.
-            # We want to make sure this key shows in the post data because it
-            # allows us to unset values (such as removing all tags)
-            #   https://github.com/select2/select2/issues/6055
-            if key.endswith("__blankmultiselect"):
-                if key[:-18] not in self.request.POST.keys():
-                    result[key[:-18]] = []
-                else:
-                    continue  # skip as it is not needed
-
-            # if it isn't explicitly given as a list type AND it has only 0 or 1
-            # entries in the list, then we assume it should not be a list.
-            elif get_origin(target_type) != list and len(values) == 1:
-                result[key] = str_to_datatype(
-                    key,
-                    values[0],
-                    {key: target_type},
-                    allow_type_guessing=True,
-                )
-
-            # we have a list and it must be one of...
-            # list[bool], list[str], list[float], list[int]
-            # grab inner type (e.g. list[str] -> str)
-            else:
-                target_subtype = get_args(target_type)[-1] if target_type else None
-                result[key] = [
-                    str_to_datatype(
-                        key,
-                        value,
-                        {key: target_subtype},
-                        allow_type_guessing=True,
-                    )
-                    for value in values
-                ]
-
-        # Separately parse any files uploaded in the form
         for key, files in self.request.FILES.lists():
-
-            files_parsed = []
-            for file in files:
-                if file.content_type == "text/csv":
-                    df = pandas.read_csv(file)
-                    df.replace({numpy.nan: None}, inplace=True)
-                    files_parsed.append(df)
-
-                elif (
-                    file.content_type
-                    == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                ):
-                    df = pandas.read_excel(file)
-                    df.replace({numpy.nan: None}, inplace=True)
-                    files_parsed.append(df)
-
-                elif file.name == "POSCAR":
-                    structure = Structure.from_str(
-                        file.read().decode("utf-8", errors="replace"),
-                        fmt="poscar",
-                    )
-                    files_parsed.append(structure)
-
-                elif file.name.endswith(".cif"):
-                    structure = Structure.from_str(
-                        file.read().decode("utf-8", errors="replace"),
-                        fmt="cif",
-                    )
-                    files_parsed.append(structure)
-
-                # TODO: other common types like yaml, json, and chemistry formats
-                else:
-                    files_parsed.append(file)
-
-            if len(files_parsed) == 0:
-                continue
-            elif len(files_parsed) == 1:
-                # BUG: what if allow_multiple=True but only one was uploaded?
-                result[key] = files_parsed[0]
-            else:
-                result[key] = files_parsed
+            self._parse_file_item(key, files, result)
 
         return dotdict(result)
+
+    def _parse_post_item(self, key, values, result):
+        target_type = self.post_data_mappings.get(key, None)
+
+        # special case where we infer "example_ids" is a list of integers
+        if target_type is None and key.endswith("_ids"):
+            target_type = list[int]
+
+        # BUG-FIX: we pass things like `user_ids__blankmultiselect`
+        if key.endswith("__blankmultiselect"):
+            real_key = key[:-18]
+            if real_key not in self.request.POST:
+                result[real_key] = []
+            return
+
+        # if it isn't explicitly given as a list type AND it has only 0 or 1
+        # entries in the list, then we assume it should not be a list.
+        if get_origin(target_type) != list and len(values) == 1:
+            result[key] = str_to_datatype(
+                key,
+                values[0],
+                {key: target_type},
+                allow_type_guessing=True,
+            )
+        # we have a list and it must be one of...
+        # list[bool], list[str], list[float], list[int]
+        else:
+            target_subtype = get_args(target_type)[-1] if target_type else None
+            result[key] = [
+                str_to_datatype(
+                    key,
+                    value,
+                    {key: target_subtype},
+                    allow_type_guessing=True,
+                )
+                for value in values
+            ]
+
+    def _parse_file_item(self, key, files, result):
+        files_parsed = []
+        for file in files:
+            files_parsed.append(self._parse_single_file(file))
+
+        if not files_parsed:
+            return
+
+        if len(files_parsed) == 1:
+            result[key] = files_parsed[0]
+        else:
+            result[key] = files_parsed
+
+    def _parse_single_file(self, file):
+        if file.content_type == "text/csv":
+            df = pandas.read_csv(file)
+            df.replace({numpy.nan: None}, inplace=True)
+            return df
+
+        if (
+            file.content_type
+            == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ):
+            df = pandas.read_excel(file)
+            df.replace({numpy.nan: None}, inplace=True)
+            return df
+
+        if file.name == "POSCAR":
+            return Structure.from_str(
+                file.read().decode("utf-8", errors="replace"),
+                fmt="poscar",
+            )
+
+        if file.name.endswith(".cif"):
+            return Structure.from_str(
+                file.read().decode("utf-8", errors="replace"),
+                fmt="cif",
+            )
+
+        # default to returning the original file object
+        return file
 
     # -------------------------------------------------------------------------
 
