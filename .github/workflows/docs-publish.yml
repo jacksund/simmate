@@ -9,11 +9,11 @@ jobs:
     name: Deploy Docs to Github Pages
     steps:
     - name: Initial setup
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
     # --------
     # NOTE: this section is copied from lint-and-test.yml
     - name: Install uv
-      uses: astral-sh/setup-uv@v5
+      uses: astral-sh/setup-uv@v7
       with:
         python-version: 3.11
     - name: Install dependencies
