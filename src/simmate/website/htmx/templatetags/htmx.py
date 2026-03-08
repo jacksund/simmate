@@ -13,13 +13,11 @@ from ..utilities import get_component
 register = template.Library()
 
 
-def _get_input_label(name, label):
-    if label:
-        return label
-    return name.replace("_", " ").title()
+def _get_input_label(name: str, label: str) -> str:
+    return label if label else name.replace("_", " ").title()
 
 
-def _get_input_value(context, name):
+def _get_input_value(context, name: str) -> any:
     component = context.get("component")
     if not component:
         return context.get(name)
@@ -68,6 +66,9 @@ def _get_input_options(context, name, options=None):
     else:
         options = []
     return options
+
+
+# -----------------------------------------------------------------------------
 
 
 @register.inclusion_tag(filename="htmx/cdn.html")

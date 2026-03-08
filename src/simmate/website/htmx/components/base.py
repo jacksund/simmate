@@ -271,13 +271,29 @@ class HtmxComponent:
         return dotdict(result)
 
     def _parse_post_item(self, key, values, result):
+
+        # TODO: allow other more robust parsing methods. For example:
+        #   1. a pydantic class
+        #   2. django form class
+        # For now, I don't want the boilerplate associated with those methods,
+        # so I naively try parsing to the correct format. This can lead to bugs
+        # though -- such as someone typing "false" into a text field and it
+        # incorrectly being converted to a boolean when it should stay as a str.
+        # As another example, we might have a multiselect with one or zero items
+        # selected. This default parser would incorrectly convert to None or
+        # a single type, rather than [] or ["example"]
+
         target_type = self.post_data_mappings.get(key, None)
 
         # special case where we infer "example_ids" is a list of integers
         if target_type is None and key.endswith("_ids"):
             target_type = list[int]
 
-        # BUG-FIX: we pass things like `user_ids__blankmultiselect`
+        # BUG-FIX: we pass things like `user_ids__blankmultiselect` because
+        # post data will not include when we have an empty multiselect input.
+        # We want to make sure this key shows in the post data because it
+        # allows us to unset values (such as removing all tags)
+        #   https://github.com/select2/select2/issues/6055
         if key.endswith("__blankmultiselect"):
             real_key = key[:-18]
             if real_key not in self.request.POST:
@@ -314,8 +330,7 @@ class HtmxComponent:
 
         if not files_parsed:
             return
-
-        if len(files_parsed) == 1:
+        elif len(files_parsed) == 1:
             result[key] = files_parsed[0]
         else:
             result[key] = files_parsed
@@ -334,20 +349,23 @@ class HtmxComponent:
             df.replace({numpy.nan: None}, inplace=True)
             return df
 
-        if file.name == "POSCAR":
+        elif file.name == "POSCAR":
             return Structure.from_str(
                 file.read().decode("utf-8", errors="replace"),
                 fmt="poscar",
             )
 
-        if file.name.endswith(".cif"):
+        elif file.name.endswith(".cif"):
             return Structure.from_str(
                 file.read().decode("utf-8", errors="replace"),
                 fmt="cif",
             )
 
+        # TODO: other common types like yaml, json, and chemistry formats
+
         # default to returning the original file object
-        return file
+        else:
+            return file
 
     # -------------------------------------------------------------------------
 
