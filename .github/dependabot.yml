@@ -1,7 +1,11 @@
 version: 2
-enable-beta-ecosystems: true
 updates:
-  - package-ecosystem: "conda"
-    directory: "/envs/conda/"
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "monthly"
