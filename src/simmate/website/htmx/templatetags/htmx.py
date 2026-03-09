@@ -154,6 +154,7 @@ def htmx_text_input(
     """
     label = _get_input_label(name, label)
     current_value = _get_input_value(context, name)
+    component = context.get("component")
     return locals()
 
 
@@ -178,6 +179,7 @@ def htmx_text_area(
     """
     label = _get_input_label(name, label)
     current_value = _get_input_value(context, name)
+    component = context.get("component")
     return locals()
 
 
@@ -211,6 +213,7 @@ def htmx_number_input(
     if not placeholder:
         placeholder = "123" if is_int else "0.123"
 
+    component = context.get("component")
     return locals()
 
 
@@ -234,6 +237,7 @@ def htmx_checkbox(
     """
     label = _get_input_label(name, label)
     current_value = _get_input_value(context, name)
+    component = context.get("component")
     return locals()
 
 
@@ -264,6 +268,7 @@ def htmx_radio(
     if options and isinstance(options[0], (list, tuple)):
         tuple_mode = True  # we assume they have the correct format
 
+    component = context.get("component")
     return locals()
 
 
@@ -294,6 +299,7 @@ def htmx_button_select(
     if options and isinstance(options[0], (list, tuple)):
         tuple_mode = True  # we assume they have the correct format
 
+    component = context.get("component")
     return locals()
 
 
@@ -381,6 +387,8 @@ def htmx_button(
         label = method_name.replace("_", " ").title()
 
     method_kwargs = urllib.parse.urlencode(method_kwargs)
+
+    component = context.get("component")
 
     return locals()
 
@@ -489,6 +497,7 @@ def htmx_file_upload(
     Display a file upload widget.
     """
     label = _get_input_label(name, label)
+    component = context.get("component")
     return locals()
 
 
