@@ -32,10 +32,10 @@ from simmate.workflows.base_flow_types import S3Workflow
 @pytest.fixture(autouse=True, scope="session")
 def setup_scratch_directory(tmp_path_factory):
     """
-    Sets the SIMMATE__SCRATCH_DIR environment variable to a temporary directory
-    for the duration of the test session. This ensures that any workflow runs
-    or tasks that create "simmate-task-*" folders do so in a temporary location
-    rather than the current working directory.
+    Sets the scratch_dir setting to a temporary directory for the duration of
+    the test session. This ensures that any workflow runs or tasks that create
+    "simmate-task-*" folders do so in a temporary location rather than the
+    current working directory.
     """
     scratch_dir = tmp_path_factory.mktemp("simmate_scratch")
     settings.final_settings["scratch_dir"] = str(scratch_dir)
