@@ -201,6 +201,7 @@ class SimmateSettings:
             "extra_django_apps": [],
             "database": self._default_database,
             "postgres_rdkit_extension": False,
+            "scratch_dir": Path.cwd(),
             "website": {
                 # Sometimes we lock down the website to registered/approved users.
                 # By default, we allow anonymous users to explore because this makes things like
@@ -650,6 +651,7 @@ class SimmateSettings:
         "SIMMATE__QUANTUM_ESPRESSO__DOCKER__ENABLE": bool,
         "SIMMATE__VASP__DOCKER__ENABLE": bool,
         "SIMMATE__POSTGRES_RDKIT_EXTENSION": bool,
+        "SIMMATE__SCRATCH_DIR": str,
     }
 
 

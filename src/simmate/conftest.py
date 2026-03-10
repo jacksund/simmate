@@ -21,11 +21,26 @@ from django.contrib.auth.models import User
 from typer.testing import CliRunner
 
 from simmate.apps.vasp.inputs import Potcar
+from simmate.configuration import settings
 from simmate.database.base_data_types import Spacegroup
 from simmate.toolkit import Composition, Structure, base_data_types
 from simmate.utilities import get_directory
 from simmate.website.test_app.models import TestStructure
 from simmate.workflows.base_flow_types import S3Workflow
+
+
+@pytest.fixture(autouse=True, scope="session")
+def setup_scratch_directory(tmp_path_factory):
+    """
+    Sets the SIMMATE__SCRATCH_DIR environment variable to a temporary directory
+    for the duration of the test session. This ensures that any workflow runs
+    or tasks that create "simmate-task-*" folders do so in a temporary location
+    rather than the current working directory.
+    """
+    scratch_dir = tmp_path_factory.mktemp("simmate_scratch")
+    settings.final_settings["scratch_dir"] = str(scratch_dir)
+    yield scratch_dir
+
 
 COMPOSITIONS_STRS = [
     "Fe1",
