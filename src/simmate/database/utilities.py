@@ -9,7 +9,7 @@ from django.apps import apps
 from django.core.management import call_command
 from django.db.utils import DatabaseError
 
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.utilities import get_directory
 
 # Lists off which apps to update/create. By default, I do all apps that are installed
@@ -166,7 +166,7 @@ def reset_database(
     # wrapping the django-extensions function for this instead:
     #   https://django-extensions.readthedocs.io/en/latest/reset_db.html
     # An example command to call this (when django-extensions is installed) is...
-    #   django-admin reset_db --settings=simmate.configuration.django.settings
+    #   django-admin reset_db --settings=simmate.config.django.settings
     # Note: this does not remove migration files or reapply migrating after
 
     if settings.database_backend == "sqlite3":

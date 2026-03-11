@@ -42,7 +42,7 @@ def get_directory(directory: Path | str = None) -> Path:
         # create a directory in the current working directory. Note, even though
         # we are creating a "TemporaryDirectory" here, this directory is never
         # actually deleted. Note, Path() gives the working directory
-        from simmate.configuration import settings
+        from simmate.config import settings
 
         directory_new = mkdtemp(prefix="simmate-task-", dir=settings.scratch_dir)
         directory_cleaned = Path(directory_new)

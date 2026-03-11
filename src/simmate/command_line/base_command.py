@@ -55,7 +55,7 @@ def run_server(port: int = 8000):
 
     logging.info("Setting up local test server...")
     subprocess.run(
-        f"django-admin runserver {port} --settings=simmate.configuration.django.settings --insecure --noreload",
+        f"django-admin runserver {port} --settings=simmate.config.django.settings --insecure --noreload",
         shell=True,
     )
     # BUG: we added the "--insecure" flag in order to serve static files with
@@ -77,11 +77,11 @@ def start_project():
     import logging
     import shutil
 
-    from simmate import configuration  # needed for the filepath
+    from simmate import config  # needed for the filepath
 
     # This directory is where our template folder is located. We find this
     # by looking at the import path to see where python installed it.
-    config_directory = Path(configuration.__file__).absolute().parent
+    config_directory = Path(config.__file__).absolute().parent
 
     # We add on "project_template" to this file path as that's our full template
     template_directory = config_directory / "example_project"

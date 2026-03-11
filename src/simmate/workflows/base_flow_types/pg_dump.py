@@ -3,7 +3,7 @@
 import os
 from pathlib import Path
 
-from simmate.configuration import settings
+from simmate.config import settings
 
 from .s3 import S3Workflow
 

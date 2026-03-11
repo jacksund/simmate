@@ -147,7 +147,7 @@ simmate config show --user-only
 
 3. Ensure Simmate can locate and load your app in Python:
 ``` python
-from simmate.configuration import settings
+from simmate.config import settings
 
 print(settings.apps)  # you should see your new app!
 ```
@@ -184,7 +184,7 @@ We won't cover publishing packages in our guides (because it's an advanced topic
 
 Advanced users may want to have full control over django settings. Before you mess with Simmate's default settings for Django, we highly recommend reading through our `settings.py` file located here:
 
-- https://github.com/jacksund/simmate/blob/main/src/simmate/configuration/django/settings.py
+- https://github.com/jacksund/simmate/blob/main/src/simmate/config/django/settings.py
 
 You can update hard-coded django settings using the simmate setting file (`~/simmate/settings.yaml`) like so:
 

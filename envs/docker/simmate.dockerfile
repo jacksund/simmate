@@ -9,7 +9,7 @@ WORKDIR /root/
 ENV PATH=/root/simmate/.venv/bin:/root/.local/bin:$PATH \
     VIRTUAL_ENV=/root/simmate/.venv \
     UV_WORKING_DIR=/root/simmate \
-    DJANGO_SETTINGS_MODULE="simmate.configuration.django.settings" \
+    DJANGO_SETTINGS_MODULE="simmate.config.django.settings" \
     DEBUG=False
 
 # =============================================================================

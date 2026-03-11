@@ -24,11 +24,11 @@ def get_dask_client(**kwargs) -> Client:
     except ValueError:
         # This preload script connects each worker to the Simmate database
         client = Client(
-            preload="simmate.configuration.dask.connect_to_database",
+            preload="simmate.config.dask.connect_to_database",
             **kwargs,
         )
         # TODO: To all default job-queue clusters, consider using...
-        # from simmate.configuration.dask.setup_cluster import run_cluster
+        # from simmate.config.dask.setup_cluster import run_cluster
         # cluster = run_cluster(...)
         # client = Client(cluster.scheduler.address)
 

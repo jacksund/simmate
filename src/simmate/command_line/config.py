@@ -29,7 +29,7 @@ def write(filename: Path = None):
     - `filename`: file name to write settings to
     """
 
-    from simmate.configuration import settings
+    from simmate.config import settings
 
     settings.write_settings(filename=filename)
 
@@ -40,7 +40,7 @@ def show(user_only: bool = False):
     Takes the final simmate settings and prints them in a yaml format that is
     easier to read.
     """
-    from simmate.configuration import settings
+    from simmate.config import settings
 
     settings.show_settings(user_only=user_only)
 
@@ -51,7 +51,7 @@ def add(app_name: str, custom: bool = False):
     Adds a specified Simmate app to the list of registered apps
     """
 
-    from simmate.configuration import settings
+    from simmate.config import settings
 
     if app_name == "aflow":
         settings.add_apps_and_update(
@@ -172,7 +172,7 @@ def update(config: str):
     Updates Simmate settings using dot-notation
     """
 
-    from simmate.configuration import settings
+    from simmate.config import settings
 
     config_cleaned = settings._parse_input(config)
     settings.write_updated_settings(config_cleaned)
@@ -187,32 +187,32 @@ def test(app_name: str):
     # OPTIMIZE: this code can be refactored and condensed. but it works for now
 
     if app_name == "bader":
-        from simmate.apps.bader.configuration import test_config
+        from simmate.apps.bader.config import test_config
 
         passed = test_config()
 
     elif app_name == "baderkit":
-        from simmate.apps.baderkit.configuration import test_config
+        from simmate.apps.baderkit.config import test_config
 
         passed = test_config()
 
     elif app_name == "materials_project":
-        from simmate.apps.materials_project.configuration import test_config
+        from simmate.apps.materials_project.config import test_config
 
         passed = test_config()
 
     elif app_name == "quantum_espresso":
-        from simmate.apps.quantum_espresso.configuration import test_config
+        from simmate.apps.quantum_espresso.config import test_config
 
         passed = test_config()
 
     elif app_name == "vasp":
-        from simmate.apps.vasp.configuration import test_config
+        from simmate.apps.vasp.config import test_config
 
         passed = test_config()
 
     elif app_name == "warren_lab":
-        from simmate.apps.warren_lab.configuration import test_config
+        from simmate.apps.warren_lab.config import test_config
 
         passed = test_config()
 

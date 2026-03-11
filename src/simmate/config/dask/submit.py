@@ -3,7 +3,7 @@
 from dask.distributed import TimeoutError, wait
 from rich.progress import track
 
-from simmate.configuration.dask.client import get_dask_client
+from simmate.config.dask.client import get_dask_client
 
 
 def batch_submit(

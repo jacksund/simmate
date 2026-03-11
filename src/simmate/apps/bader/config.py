@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from simmate.configuration import settings
-from simmate.configuration.utilities import (
+from simmate.config import settings
+from simmate.config.utilities import (
     check_app_reg,
     check_command_exists,
     show_test_results,

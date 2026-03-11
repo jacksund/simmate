@@ -31,7 +31,7 @@ def reset(confirm_delete: bool = False, use_prebuilt: bool = None):
     - `--use-prebuilt` and `--no-use-prebuilt`: automatically say yes/no to a
     prebuilt database. This only applies if you are using sqlite.
     """
-    from simmate.configuration import settings
+    from simmate.config import settings
 
     database_name = str(settings.database.name)
     print(f"\nUsing {database_name}")

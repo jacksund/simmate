@@ -6,7 +6,7 @@ import numpy
 import oracledb
 import pandas
 
-from simmate.configuration import settings
+from simmate.config import settings
 
 
 class OracleDB:

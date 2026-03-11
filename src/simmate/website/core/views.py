@@ -12,7 +12,7 @@ from simmate.apps.cod.models import CodStructure
 from simmate.apps.jarvis.models import JarvisStructure
 from simmate.apps.materials_project.models import MatprojStructure
 from simmate.apps.oqmd.models import OqmdStructure
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.utilities import get_app_submodule, get_class
 from simmate.website.data_explorer.forms import ChemicalSystemForm
 

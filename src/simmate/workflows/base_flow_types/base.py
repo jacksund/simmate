@@ -15,7 +15,7 @@ import yaml
 from django.utils import timezone
 
 import simmate
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.database.base_data_types import Calculation
 from simmate.utilities import (
     copy_directory,

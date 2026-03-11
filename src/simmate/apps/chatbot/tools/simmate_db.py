@@ -8,7 +8,7 @@ from langchain_community.utilities.sql_database import truncate_word
 from langchain_core.output_parsers.list import CommaSeparatedListOutputParser
 from langchain_experimental.sql import SQLDatabaseSequentialChain
 
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.database.utilities import get_all_table_docs
 
 from ..llm import get_llm

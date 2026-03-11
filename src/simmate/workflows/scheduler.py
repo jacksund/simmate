@@ -11,7 +11,7 @@ from django.core.mail import EmailMessage
 from rich import print
 from schedule import Scheduler
 
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.utilities import get_app_submodule
 
 # This string is just something fancy to display in the console when the process

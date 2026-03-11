@@ -39,9 +39,7 @@ def setup_django():
     # The code below is the equiv of running 'python manage.py shell'
     # This sets up all of django for its full use. You can being importing
     # models after this is setup.
-    os.environ.setdefault(
-        "DJANGO_SETTINGS_MODULE", "simmate.configuration.django.settings"
-    )
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "simmate.config.django.settings")
     django.setup()
     logging.info("Configuration complete :rocket:")
 
@@ -49,9 +47,9 @@ def setup_django():
 # When I import this module, it automatically configures django for us, including
 # connecting to the database(s). Without this file, I would instead need these two
 #  lines in every single file before I import models:
-#   from simmate.configuration.django import setup
+#   from simmate.config.django import setup
 #   setup_django() # ensures setup
 # With this init, I instead only need to have one line:
-#   from simmate.configuration.django import setup
+#   from simmate.config.django import setup
 # Thus this "module" is more of a script.
 setup_django()

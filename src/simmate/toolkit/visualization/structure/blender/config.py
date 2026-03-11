@@ -22,7 +22,7 @@ import yaml
 
 
 def get_blender_command():
-    # First we look in the simmate configuration directory and check if it
+    # First we look in the simmate config directory and check if it
     # has been set there.
     #   [home_directory] ~/simmate/blender.yaml
     blender_filename = Path.home() / "simmate" / "blender.yaml"
@@ -51,7 +51,7 @@ def find_blender_installation():
     """
     Finds the full path to the Blender installation so that we can call blender
     from the command-line. This also adds it's location to the simmate
-    configuration folder so that we don't need to search for it every time.
+    config folder so that we don't need to search for it every time.
     """
 
     # The operating system (Windows, OSX, or Linux) will give us the best guess
@@ -110,7 +110,7 @@ def find_blender_installation():
 
     # We should now have our blender_command set from above. So that we don't need
     # to search for the Blender installation every time we call a visualization
-    # function, we want to save the path to a configuration file in /simmate
+    # function, we want to save the path to a config file in /simmate
 
     # We store the command inside the config directory which is located at...
     #   [home_directory] ~/simmate/blender.yaml

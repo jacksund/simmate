@@ -27,7 +27,7 @@ jobqueue:
         memory: 4GB
         processes: 1
         ### IMPORTANT: this preload option is required for all Simmate workflows
-        extra: ["--preload simmate.configuration.dask.connect_to_database"]
+        extra: ["--preload simmate.config.dask.connect_to_database"]
         ###
         
         # SLURM job options

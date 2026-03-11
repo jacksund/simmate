@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.database.base_data_types import DatabaseTable, table_column
 
 

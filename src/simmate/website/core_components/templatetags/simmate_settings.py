@@ -3,7 +3,7 @@
 from django import template
 from django.conf import settings as django_settings
 
-from simmate.configuration import settings as simmate_settings
+from simmate.config import settings as simmate_settings
 
 register = template.Library()
 
