@@ -248,6 +248,7 @@ nav:
                 # - Testing: full_guides/extras/testing.md
                 - Creating & submitting changes: full_guides/contributing/creating_and_submitting_changes.md
                 - Extra notes & tips: full_guides/contributing/extra.md
+                - AI Assistants: full_guides/contributing/ai_assistants.md
                 - Maintainer notes: full_guides/contributing/maintainer_notes.md
             # - Utilities: full_guides/extras/utilities.md
 
