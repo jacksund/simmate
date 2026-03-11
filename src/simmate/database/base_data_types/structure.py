@@ -3,7 +3,7 @@
 from django.db.models import Func
 from scipy.constants import Avogadro
 
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.database.base_data_types import (
     DatabaseTable,
     SearchResults,

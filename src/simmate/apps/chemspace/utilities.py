@@ -8,7 +8,7 @@ import boto3
 from botocore.config import Config
 from rich.progress import track
 
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.utilities import get_directory
 
 

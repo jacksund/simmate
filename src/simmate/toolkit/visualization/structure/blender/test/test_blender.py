@@ -4,7 +4,7 @@ import platform
 
 import pytest
 
-from simmate.toolkit.visualization.structure.blender.configuration import (
+from simmate.toolkit.visualization.structure.blender.config import (
     BlenderNotInstalledError,
     get_blender_command,
 )

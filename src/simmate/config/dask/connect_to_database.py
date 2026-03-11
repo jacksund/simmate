@@ -8,7 +8,7 @@ You can use this script like so...
 
 ``` python
     from dask.distributed import Client
-    client = Client(preload="simmate.configuration.dask.connect_to_database")
+    client = Client(preload="simmate.config.dask.connect_to_database")
 ```
 
 Note, there is also a high-level utility for this, which can be easier to
@@ -133,6 +133,6 @@ ContentType.objects.count()
 # OR...
 # from dask.distributed import Client
 # client = Client(cluster.scheduler.address)
-# from simmate.configuration.dask.connect_to_database import DjangoPlugin
+# from simmate.config.dask.connect_to_database import DjangoPlugin
 # plugin = DjangoPlugin()
 # client.register_worker_plugin(plugin)

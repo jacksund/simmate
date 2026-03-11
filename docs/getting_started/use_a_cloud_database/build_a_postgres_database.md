@@ -85,7 +85,7 @@ database:
 ```
 1. Verify that you can connect to this database on your local computer by running the following in Spyder:
 ``` python
-from simmate.configuration import settings
+from simmate.config import settings
 
 print(settings.database)  # this should display your connect info!
 ```

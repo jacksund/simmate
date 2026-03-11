@@ -8,7 +8,7 @@ from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
     SSSP_PBE_EFFICIENCY_MAPPINGS,
     SSSP_PBE_PRECISION_MAPPINGS,
 )
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.toolkit import Structure
 from simmate.utilities import get_docker_command
 from simmate.workflows.base_flow_types import S3Workflow, StructureWorkflow

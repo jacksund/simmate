@@ -50,7 +50,7 @@ def run_cluster(
     if cluster_type == "Local":
         cluster = LocalCluster(
             n_workers=n_workers,
-            preload="simmate.configuration.dask.connect_to_database",
+            preload="simmate.config.dask.connect_to_database",
             **cluster_kwargs,
         )
 

@@ -27,7 +27,7 @@ All apps follow the same folder structure, where every folder is optional (and i
 
 ```
 ├── example_app
-│   ├── configuration
+│   ├── config
 │   ├── command_line
 │   ├── inputs
 │   ├── outputs

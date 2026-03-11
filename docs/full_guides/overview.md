@@ -27,13 +27,10 @@ These modules include:
 
 - `apps`: Runs specific analyses or third-party programs (e.g., VASP, which performs DFT calculations)
 - `command_line`: Provides common functions as terminal commands
-- `configuration`: Contains default Simmate settings and methods for modifying them
+- `config`: Contains default Simmate settings and methods for modifying them
 - `database`: Sets up data table structures and methods for accessing these tables
-- `engine`: Offers tools for running calculations and managing errors
-- `file_converters`: Includes methods for converting between file types (e.g., POSCAR to CIF)
 - `toolkit`: Houses core methods and classes for Simmate (e.g., the `Structure` class)
 - `utilities`: Contains simple functions used across other modules
-- `visualization`: Provides methods for visualizing structures and data
 - `website`: Powers the simmate.org website
 - `workflows`: Contains tools defining each calculation type (e.g., a structure optimization)
 

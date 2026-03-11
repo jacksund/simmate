@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from simmate.apps.bader.toolkit import Grid
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.toolkit import Structure
 from simmate.utilities import get_docker_command
 from simmate.workflows.base_flow_types import S3Workflow

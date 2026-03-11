@@ -3,7 +3,7 @@
 from django.db import migrations
 
 from simmate.apps.rdkit.operations import RDKitExtension
-from simmate.configuration import settings
+from simmate.config import settings
 
 
 class Migration(migrations.Migration):

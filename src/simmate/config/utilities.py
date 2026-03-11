@@ -3,7 +3,7 @@
 import logging
 import shutil
 
-from simmate.configuration import settings
+from simmate.config import settings
 
 
 def check_app_reg(app_config_str: str) -> bool:
@@ -38,7 +38,7 @@ def check_command_exists(command: str) -> bool:
 
 def show_test_results(app_name: str, passed: bool):
     """
-    Simple utility that logs a message for users based on whether configuration
+    Simple utility that logs a message for users based on whether config
     checks pass
     """
     if passed:

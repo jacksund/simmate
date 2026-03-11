@@ -3,7 +3,7 @@
 
 from langchain_core.language_models.chat_models import BaseChatModel
 
-from simmate.configuration import settings
+from simmate.config import settings
 
 
 def get_llm(**kwargs) -> BaseChatModel:

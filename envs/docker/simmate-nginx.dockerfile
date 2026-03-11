@@ -1,7 +1,7 @@
 
 FROM public.ecr.aws/nginx/nginx:stable-alpine
 
-# Replace the default configuration file with our own
+# Replace the default config file with our own
 RUN rm /etc/nginx/conf.d/default.conf
 COPY envs/configs/nginx.conf /etc/nginx/conf.d
 

@@ -21,7 +21,7 @@ import logging
 import tarfile
 import urllib
 
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.utilities import get_directory
 
 

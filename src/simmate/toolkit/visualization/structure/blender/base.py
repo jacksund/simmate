@@ -4,7 +4,7 @@ import json
 import subprocess
 from pathlib import Path
 
-from simmate.toolkit.visualization.structure.blender.configuration import (
+from simmate.toolkit.visualization.structure.blender.config import (
     get_blender_command,
 )
 

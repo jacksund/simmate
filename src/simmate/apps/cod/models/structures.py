@@ -125,7 +125,7 @@ class CodStructure(Structure):
         """
         from rich.progress import track
 
-        from simmate.configuration.dask import batch_submit
+        from simmate.config.dask import batch_submit
 
         base_directory = Path(base_directory)
 

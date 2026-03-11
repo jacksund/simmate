@@ -3,8 +3,8 @@
 import logging
 
 from simmate.apps.quantum_espresso.inputs.potentials_sssp import check_psuedo_setup
-from simmate.configuration import settings
-from simmate.configuration.utilities import (
+from simmate.config import settings
+from simmate.config.utilities import (
     check_app_reg,
     check_command_exists,
     show_test_results,

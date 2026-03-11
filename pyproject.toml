@@ -126,7 +126,7 @@ simmate = [
 ]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "simmate.configuration.django.settings_test"
+DJANGO_SETTINGS_MODULE = "simmate.config.django.settings_test"
 markers = [
     "blender: requires blender installed",
     "vasp: requires vasp installed",

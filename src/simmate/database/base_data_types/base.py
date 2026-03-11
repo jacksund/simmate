@@ -24,7 +24,7 @@ from django.utils.module_loading import import_string
 from django.utils.timezone import datetime, now, timedelta
 from rich.progress import track
 
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.database.utilities import check_db_conn
 from simmate.utilities import chunk_list, get_attributes_doc
 
@@ -1284,7 +1284,7 @@ class DatabaseTable(models.Model):
         # otherwise we use dask to submit these in batches!
         else:
 
-            from simmate.configuration.dask import batch_submit
+            from simmate.config.dask import batch_submit
 
             db_objects = batch_submit(
                 function=load_single_entry,

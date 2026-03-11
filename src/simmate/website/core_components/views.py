@@ -6,7 +6,7 @@ from pathlib import Path
 
 from django.shortcuts import render
 
-from simmate.configuration.django import settings
+from simmate.config.django import settings
 from simmate.toolkit import Structure
 from simmate.toolkit.visualization.structure.blender import make_blender_structure
 from simmate.utilities import get_directory

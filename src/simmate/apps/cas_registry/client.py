@@ -2,7 +2,7 @@ import logging
 
 import requests
 
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.toolkit import Molecule
 
 

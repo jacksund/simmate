@@ -20,7 +20,7 @@ simmate/
 │   └── simmate/
 │       ├── apps/           # Specialized modules (VASP, Materials Project, etc.)
 │       ├── command_line/   # Typer CLI entry points
-│       ├── configuration/  # Django and Simmate settings
+│       ├── config/  # Django and Simmate settings
 │       ├── database/       # Django models and ORM infrastructure
 │       ├── toolkit/        # Scientific objects (Structure, Molecule, etc.)
 │       ├── utilities/      # General helper functions
@@ -52,7 +52,7 @@ simmate/
 
 Apps follow a consistent (though optional) layout depending on their purpose (simulation, database access, or UI).
 
-- **`configuration.py`**: App-specific settings and logic.
+- **`config.py`**: App-specific settings and logic.
 - **`models.py` / `models/`**: Django models for database tables.
 - **`migrations/`**: Auto-generated database migration files.
 - **`workflows/`**: App-specific workflows (must be imported in `__init__.py`).

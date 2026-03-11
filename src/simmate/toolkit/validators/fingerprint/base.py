@@ -264,7 +264,7 @@ class FingerprintValidator(Validator):
                 # fingerprints to the database. We add distinct to keep our
                 # query smaller and just grab one. Distinct is also not supported
                 # by sqlite
-                from simmate.configuration import settings
+                from simmate.config import settings
 
                 if settings.database.engine != "django.db.backends.sqlite3":
                     query = query.distinct("database_id")
@@ -299,7 +299,7 @@ class FingerprintValidator(Validator):
 
         # OPTIMIZE: I attempted to calculate fingerprints with Dask, but without
         # any luck. Ends up crashing in many scenarios.
-        # from simmate.configuration.dask import get_dask_client
+        # from simmate.config.dask import get_dask_client
         # with get_dask_client() as client:
         #     futures = [client.submit(self._get_fingerprint, s) for s in new_structures]
         #     fingerprints = [future.result() for future in track(futures)]

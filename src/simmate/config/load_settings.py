@@ -130,7 +130,7 @@ class SimmateSettings:
         else:
             raise Exception(
                 "Updating your Simmate settings is only allowed when using"
-                f"a YAML configuration. You are using {self.settings_source}."
+                f"a YAML config. You are using {self.settings_source}."
             )
 
         logging.info("Updating the following settings:\n")

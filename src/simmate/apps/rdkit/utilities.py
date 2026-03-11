@@ -2,7 +2,7 @@
 
 import simmate.apps.rdkit.models.custom_fields.bfp
 import simmate.apps.rdkit.models.custom_fields.mol
-from simmate.configuration import settings
+from simmate.config import settings
 
 
 def get_rdkit_ext_fields():

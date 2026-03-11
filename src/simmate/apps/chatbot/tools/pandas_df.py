@@ -5,7 +5,7 @@ from langchain.agents.agent_types import AgentType
 from langchain.tools import tool
 from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe_agent
 
-from simmate.configuration import settings
+from simmate.config import settings
 
 from ..llm import get_llm
 

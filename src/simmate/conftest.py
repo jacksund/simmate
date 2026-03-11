@@ -21,7 +21,7 @@ from django.contrib.auth.models import User
 from typer.testing import CliRunner
 
 from simmate.apps.vasp.inputs import Potcar
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.database.base_data_types import Spacegroup
 from simmate.toolkit import Composition, Structure, base_data_types
 from simmate.utilities import get_directory

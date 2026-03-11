@@ -5,7 +5,7 @@ from django.contrib.postgres import indexes
 from django.db.models import Func
 
 from simmate.apps.rdkit.models import custom_fields
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.database.base_data_types import DatabaseTable, SearchResults, table_column
 from simmate.toolkit import Molecule as ToolkitMolecule
 

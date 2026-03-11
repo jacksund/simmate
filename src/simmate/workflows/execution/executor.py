@@ -10,7 +10,7 @@ from django.utils import timezone
 from rich import print
 from rich.progress import track
 
-from simmate.configuration import settings
+from simmate.config import settings
 
 from .work_item import WorkItem
 

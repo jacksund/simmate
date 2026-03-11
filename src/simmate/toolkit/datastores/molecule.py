@@ -5,7 +5,7 @@ from pathlib import Path
 
 import polars
 
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.toolkit import Molecule
 from simmate.utilities import chunk_list, filter_polars_df, get_directory
 

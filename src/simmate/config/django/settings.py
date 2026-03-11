@@ -7,7 +7,7 @@ database backend being used.
 
 import os
 
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.utilities import get_directory
 
 # --------------------------------------------------------------------------------------

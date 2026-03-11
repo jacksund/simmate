@@ -5,7 +5,7 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.toolkit import Molecule
 from simmate.utilities import download_file, get_directory
 

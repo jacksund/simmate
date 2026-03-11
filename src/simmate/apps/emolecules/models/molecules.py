@@ -12,7 +12,7 @@ from requests.auth import HTTPBasicAuth
 from rich.progress import track
 
 from simmate.apps.rdkit.models import Molecule
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.database.base_data_types import table_column
 from simmate.toolkit import Molecule as ToolkitMolecule
 from simmate.utilities import chunk_list, get_directory

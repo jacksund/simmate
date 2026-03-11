@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 from simmate.apps.biovia_cosmo.models import LogPow as LogPowTable
-from simmate.configuration import settings
+from simmate.config import settings
 from simmate.toolkit import Molecule
 from simmate.workflows import Workflow
 from simmate.workflows.base_flow_types import S3Workflow
