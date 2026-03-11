@@ -144,8 +144,12 @@ cython_debug/
 # PyCharm / JetBrains
 # .idea/
 
-# Aider (AI coding agent)
-.aider*
-
 # uv
 uv.lock
+
+# AI Tools
+.aider*
+.gemini/
+.cursor/
+.claude/
+.codex/
