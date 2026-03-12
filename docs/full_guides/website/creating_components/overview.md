@@ -1,128 +1,117 @@
+# Creating Web Components
 
-## What are web components?
+**Components** allow you to build interactive web pages using Python and HTML without writing JavaScript. They function like mini-views that update instantly when users interact with them.
 
-**Components let you build interactive web pages using Python and HTML**, without needing JavaScript (we handle that part for you). So components work like mini Django views that automatically update when users interact with them.
+While standard Django views are static, components use [HTMX](https://htmx.org/) to handle real-time updates—such as updating a list or a dashboard—without a full page refresh.
 
-We need components because Django views are static HTML by default. In other words, once your view+template is loaded, it does not change until you (i) open a new link or (ii) refresh your page. So components come into play when you want to click a button and have the web page altered in some way -- such as checking a box and then having extra form options show up. For this, our HTML needs to include some JavaScript that updates the page for us -- all without refreshing the web page. Simmate web components integrate this JavaScript+AJAX calls, so that you can build things out in Python instead. This enables real-time interactivity in our web pages.
+---
 
---------------------------
+## When to Use Components
+Use components only when you need real-time interactivity. Static HTML and standard Django views are preferred for simpler pages. Ideal use cases include:
 
-## Do I need components?
+*   Dynamic submission forms that change based on user input.
+*   Dashboards requiring real-time data updates.
+*   Interactive scientific elements like molecule sketchers or live filters.
 
-Avoid overcomplicating things if you can. You can achieve quite a bit just with static HTML that ships with Django, and the only time you need components are when you have...
+---
 
-- a dynamic submission form (e.g., one that changes as a user fills it out)
-- a need for real-time data analytics (e.g., manually refreshing your webpage isn't cutting it)
+## How It Works
 
-Even if this applies to you, make sure you are already comfortable with HTML and [`Django Templates`](https://docs.djangoproject.com/en/5.2/topics/templates/) before messing with components.
+All interactive components are centered on the `HtmxComponent` class. Each component consists of a **Python Class** (logic) and an **HTML Template** (layout).
 
-!!! tip
-    A beginner-friendly alternative for building dynamic web pages is [Streamlit](https://streamlit.io/). You can then make the app available within your Simmate app using an `iframe`:
-    ``` html+django
-    <iframe src="{{ dashboard_url }}?embed=true"
-            style="height:150vh;
-                   width:100%;
-                   border:none">
-    </iframe>
-    ```
+### Registration and Rendering
 
---------------------------
+1.  **Discovery**: Components are automatically found if placed in your app's `components/` directory. Simmate converts class names (e.g., `TodoComponent`) to tags (e.g., `todo-component`).
+2.  **Initial Render**: Using `{% htmx_component 'todo-component' %}` initializes the class, runs the `mount()` method, and renders the HTML.
+3.  **Caching**: The instance is cached with a unique `component_id`. This allows Simmate to remember the component's state across multiple interactions.
 
-## Django-Unicorn vs. Simmate
+### Managing State and Input
 
-Simmate originally used [Django-Unicorn](https://www.django-unicorn.com/) to build out interactive pages. However, in order to address some of our use cases and loose bugs, we eventually forked & refactored their codebase -- and now maintain our [own internal copy](https://github.com/jacksund/simmate/tree/main/src/simmate/website/unicorn). Still, nearly all features from Django-Unicorn's [examples](https://www.django-unicorn.com/examples/todo) and [documentation](https://www.django-unicorn.com/docs/) are still available.
+*   **Persistent State**: Any attribute defined on your class (e.g., `self.tasks`) stays in memory as long as the user remains on the page.
+*   **User Inputs (`form_data`)**: Values from tags like `{% htmx_text_input %}` are automatically synced to the `self.form_data` dictionary. Use this to read user input or reset fields after an action.
+*   **Interactivity**: When a user clicks a button or interacts with an element, an AJAX request is sent. Simmate retrieves the cached object, updates `form_data`, executes the requested Python method, and re-renders the component instantly.
 
---------------------------
+---
 
-## Basic Example
 
-In your app, you can set up the following:
+## Basic Example: A Todo List
+
+In your app, set up the following structure. Note that templates are namespaced within a folder named after your app:
+
+```text
+my_app/
+├── components/
+│   ├── __init__.py
+│   └── todo.py
+├── templates/
+│   └── my_app/
+│       ├── todo.html
+│       └── home.html
+├── urls.py
+└── views.py
 ```
-├── example_app
-│   ├── components
-│   │   ├── __init__.py
-│   │   └── todo.py
-│   ├── templates
-│   │   ├── unicorn
-│   │   │   └── todo.html
-│   │   └── my_homepage.html
-│   ├── urls.py
-│   └── views.py
+
+### 1. The Python Logic
+Define your state and methods in `my_app/components/todo.py`:
+
+```python
+from simmate.website.htmx.components import HtmxComponent
+
+class TodoComponent(HtmxComponent):
+    template_name = "my_app/todo.html"
+    
+    def mount(self):
+        """Initializes state when the component first renders."""
+        self.tasks = []
+
+    def add_task(self):
+        """Logic triggered by a button click."""
+        new_task = self.form_data.get("task")
+        if new_task:
+            self.tasks.append(new_task)
+            self.form_data["task"] = ""  # Clear the input field
 ```
 
-And for each file & it's contents:
+### 2. The Component Template
+Create the layout in `my_app/templates/my_app/todo.html`:
 
-
-=== "urls.py"
-    ``` python
-    from django.urls import path
-    from . import views
+```html+django
+<div id="{{ component.component_id }}">
+    <h3>My Todo List</h3>
     
-    urlpatterns = [
-        path('', views.home, name='home'),
-    ]
-    ```
+    {% htmx_text_input name="task" placeholder="Enter a new task..." %}
+    {% htmx_button method_name="add_task" label="Add Task" %}
 
-=== "views.py"
-    ``` python
-    from django.shortcuts import render
-    
-    def home(request):
-        context = {"name": "Jane Doe"}
-        return render(request, "my_homepage.html", context)
-    ```
+    <ul>
+        {% for t in component.tasks %}
+            <li>{{ t }}</li>
+        {% empty %}
+            <li>No tasks yet!</li>
+        {% endfor %}
+    </ul>
+</div>
+```
 
-=== "todo.py"
-    ``` python
-    from simmate.website.core_components.components import DynamicFormComponent
-    
-    
-    class TodoView(DynamicFormComponent):
-        task = ""
-        tasks = []
-    
-        def add(self):
-            self.tasks.append(self.task)
-            self.task = ""
-    ```
+### 3. Usage in a View
+Render the component in your main template (`my_app/templates/my_app/home.html`):
 
-=== "my_homepage.html"
-    ``` html+django
-    <!DOCTYPE html>
-    <html>
-        <head>
-            <title>Home Page</title>
-        </head>
-        <body>
-            <h1>Hello, {{ name }}! This is the home page rendered from a template.</h1>
-            <div>
-                {% load unicorn %}
-                {% unicorn 'todo' %}
-            </div>
-        </body>
-    </html>
-    ```
+```html+django
+{% extends "core_components/site_base.html" %}
 
-=== "todo.html"
-    ``` html+django
-    <div>
-        <form unicorn:submit.prevent="add">
-            <input type="text" unicorn:model.lazy="task" placeholder="New task" id="task"></input>
-        </form>
-        <button unicorn:click="add">Add</button>
-        <p>
-            {% if tasks %}
-                <ul>
-                    {% for task in tasks %}
-                        <li>{{ task }}</li>
-                    {% endfor %}
-                </ul>
-                <button unicorn:click="$reset">Clear all tasks</button>
-            {% else %}
-                No tasks!
-            {% endif %}
-        </p>
+{% block body %}
+    <div class="container">
+        {% htmx_component 'todo-component' %}
     </div>
-    ```
+{% endblock %}
+```
 
---------------------------
+---
+
+## Lifecycle Hooks
+
+Override these methods to control component behavior:
+
+*   `mount()`: Called once during the first initialization.
+*   `pre_parse()`: Called before AJAX POST data is processed.
+*   `post_parse()`: Called after POST data is applied to `self.form_data`.
+*   `process()`: The default method triggered if an interactive element (like a button) does not specify a `method_name`.

@@ -7,7 +7,7 @@
 
 <!-- 
 I use html format above to center the objects. Otherwise I could simple markdown like this:
-![Simmate Logo](https://github.com/jacksund/simmate/blob/main/logo/simmate.svg?raw=true)
+![Simmate Logo](https://github.com/jacksund/simmate/blob/main/src/simmate/website/core_components/static/images/simmate-logo-dark.svg?raw=true)
 Read here for info on markdown, badges, and more:
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
 [Shields Badges](https://shields.io/)

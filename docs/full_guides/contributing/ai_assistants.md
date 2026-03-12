@@ -15,12 +15,22 @@ This project is designed for both direct use in research and as a platform for b
 simmate/
 ├── .github/                # CI/CD and contribution templates
 ├── docs/                   # MkDocs documentation
+│   ├── full_guides/        # Deep-dive guides (CRITICAL for building new apps)
+│   │   ├── apps/           # Creating and using custom apps
+│   │   ├── compute_setup/  # HPC, Kubernetes, and local resources
+│   │   ├── contributing/   # Developer setup and AI guidelines
+│   │   ├── database/       # ORM, custom tables, and data management
+│   │   ├── toolkit/        # Scientific objects (Structure, Molecule)
+│   │   ├── website/        # UI, HTMX components, and REST API
+│   │   └── workflows/      # Custom workflow creation
+│   ├── apps/               # Quickstart guides for specific apps
+│   └── getting_started/    # Tutorial series for new users
 ├── envs/                   # Docker and Helm configuration
 ├── src/
 │   └── simmate/
 │       ├── apps/           # Specialized modules (VASP, Materials Project, etc.)
 │       ├── command_line/   # Typer CLI entry points
-│       ├── config/  # Django and Simmate settings
+│       ├── config/         # Django/Simmate settings (Source of truth: load_settings.py)
 │       ├── database/       # Django models and ORM infrastructure
 │       ├── toolkit/        # Scientific objects (Structure, Molecule, etc.)
 │       ├── utilities/      # General helper functions
@@ -113,3 +123,4 @@ Scientific logic independent of the database.
 
 - **Surgical Edits:** Favor `replace` for targeted changes in large files.
 - **Dependencies:** Verify `pyproject.toml` before assuming a library is available.
+- **Documentation:** Always refer to `docs/full_guides/` when building new apps or workflows. These guides provide essential architectural patterns, naming conventions, and best practices.

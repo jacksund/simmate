@@ -6,15 +6,15 @@ Displays a search box widget that combines a selectbox (optional), a single-line
 === "frontend (html+django)"
 
     ```html+django
-    {% search_box name="search_query" %}
+    {% htmx_search_box name="search_query" %}
     ```
 
 === "backend (python)"
 
     ```python
-    from simmate.website.core_components.components import DynamicFormComponent
+    from simmate.website.htmx.components import HtmxComponent
 
-    class ExampleView(DynamicFormComponent):
+    class ExampleView(HtmxComponent):
         search_query = ""
     ```
 
