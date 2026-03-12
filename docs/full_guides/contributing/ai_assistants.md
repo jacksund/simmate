@@ -30,7 +30,7 @@ simmate/
 │   └── simmate/
 │       ├── apps/           # Specialized modules (VASP, Materials Project, etc.)
 │       ├── command_line/   # Typer CLI entry points
-│       ├── config/  # Django and Simmate settings
+│       ├── config/         # Django/Simmate settings (Source of truth: load_settings.py)
 │       ├── database/       # Django models and ORM infrastructure
 │       ├── toolkit/        # Scientific objects (Structure, Molecule, etc.)
 │       ├── utilities/      # General helper functions

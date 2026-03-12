@@ -159,6 +159,7 @@ nav:
             - Creating custom apps: full_guides/apps/creating_custom_apps.md
 
         - Website:
+            - Setup & Config: full_guides/website/setup_and_config.md
             - Creating views: full_guides/website/creating_views.md
             - Creating components: 
                 - Overview: full_guides/website/creating_components/overview.md
@@ -176,7 +177,6 @@ nav:
                     # - alert: full_guides/website/creating_components/frontend_elements/alert.md
                     # - draw_molecule: full_guides/website/creating_components/frontend_elements/draw_molecule.md
                 - Backend Mix-ins: full_guides/website/creating_components/backend_mixins.md
-            - Setup & Config: full_guides/website/setup_and_config.md
             - REST API: full_guides/website/rest_api.md
         
         - Workflows:

@@ -1,19 +1,31 @@
+# Creating Web Views
+
+Simmate uses the [Django web framework](https://www.djangoproject.com/) for its website. This guide covers how to create standard Django views and templates while integrating them into the Simmate ecosystem.
+
+--------------------------
 
 ## Django vs. Simmate
 
-Simmate does not do anything special with views—we just use the [Django web framework](https://www.djangoproject.com/). You can follow [Django's official guides](https://docs.djangoproject.com/en/5.2/topics/http/) to create web views, URLs, and templates.
+Simmate does not do anything special with views—we use standard Django practices. You can follow [Django's official guides](https://docs.djangoproject.com/en/5.2/topics/http/) for in-depth tutorials on views, URLs, and templates.
 
-However, Simmate provides a powerful system for embedding **interactive web components** within these standard views using HTMX.
+However, Simmate provides:
+
+1.  **A Base Template:** `core_components/site_base.html` provides the standard navbar, footer, and styling (Bootstrap, HTMX, Plotly, etc.).
+2.  **Automatic Registration:** Your app's `urls.py` is automatically included in the main website.
+3.  **HTMX Integration:** Easily embed interactive components.
 
 --------------------------
 
 ## Basic Example
 
-In your app, set up the following:
+In your app, follow Django's best practices for template organization by namespacing them within a folder named after your app. This prevents template name collisions during collection.
+
+**Recommended Structure:**
 ```text
 my_app/
 ├── templates/
-│   └── my_homepage.html
+│   └── my_app/
+│       └── home.html
 ├── urls.py
 └── views.py
 ```
@@ -40,55 +52,47 @@ from django.shortcuts import render
 
 def home(request):
     context = {"name": "Jane Doe"}
-    return render(request, "my_homepage.html", context)
+    return render(request, "my_app/home.html", context)
 ```
 
 ### 3. The Template
 
-In `my_app/templates/my_homepage.html`:
+In `my_app/templates/my_app/home.html`, extend the Simmate base template and fill in the `tabtitle` and `body` blocks.
 
 ```html+django
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Home Page</title>
-    </head>
-    <body>
-        <h1>Hello, {{ name }}!</h1>
-        <p>This is a standard Django view.</p>
-    </body>
-</html>
+{% extends "core_components/site_base.html" %}
+
+{% block tabtitle %}My App Home - Simmate{% endblock %}
+
+{% block body %}
+    <h1>Hello, {{ name }}!</h1>
+    <p>This is a standard Django view using the Simmate base template.</p>
+{% endblock %}
 ```
 
 --------------------------
 
 ## Integrating Interactive Components
 
-To add a Simmate component to your view, follow these steps:
+To add an interactive Simmate component to your view, follow these steps:
 
-1.  **Load the `htmx` tag library** in your template.
-2.  **Add the HTMX script** in the `<head>` (via `{% htmx_cdn_script %}`).
-3.  **Embed the component** using the `{% htmx_component %}` tag.
+1.  **Embed the component** using the `{% htmx_component %}` tag.
+
+Note that `core_components/site_base.html` already includes the HTMX library and necessary scripts. Furthermore, Simmate automatically loads the `htmx` and several other tag libraries for you, so you do not need to use `{% load htmx %}` in your templates.
 
 ### Example Template with Component
 
 ```html+django
-{% load htmx %}
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Home Page</title>
-        {% htmx_cdn_script %}
-    </head>
-    <body>
-        <h1>Hello, {{ name }}!</h1>
-        
+{% extends "core_components/site_base.html" %}
+
+{% block body %}
+    <h1>My App Dashboard</h1>
+    
+    <div class="card p-3 shadow-sm border border-secondary rounded">
         <!-- Embedding an interactive component -->
-        <div class="card p-3 shadow-sm border border-secondary rounded">
-            {% htmx_component 'my-interactive-form' %}
-        </div>
-    </body>
-</html>
+        {% htmx_component 'my-interactive-form' %}
+    </div>
+{% endblock %}
 ```
 
 For more details on building the component itself, see the [Creating Components guide](/full_guides/website/creating_components/overview.md).
@@ -103,4 +107,4 @@ For example, if your app is named `my_app`, it will be available at:
 
 - `http://127.0.0.1:8000/apps/my_app/`
 
-Everything in your `urls.py` will be mapped to a namespace matching your app's name.
+Everything in your `urls.py` will be mapped to a namespace matching your app's name. You can link to your home page using `{% url 'my_app:home' %}`.
