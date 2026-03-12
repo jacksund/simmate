@@ -1660,6 +1660,18 @@ class DatabaseTable(models.Model):
         queryset = cls.objects if not use_web_queryset else cls.get_web_queryset()
         for filter_name, filter_value in filters.items():
 
+            # to prevent crazy joins, we can limit the number of double-underscores
+            # (which indicate a join or field lookup) in a filter.
+            # Example: `user__first_name__isnull` has 2 double-underscores.
+            # `a__b__c__d` is allowed, but `a__b__c__d__e` is not.
+            max_joins = settings.website.max_filter_joins
+            if max_joins is not None and filter_name.count("__") > max_joins:
+                raise Exception(
+                    f"The filter '{filter_name}' contains too many double-underscores. "
+                    f"A maximum of {max_joins} is allowed to prevent excessively "
+                    "complex database joins."
+                )
+
             # if we have a filter method, we apply it to our queryset right away
             if f"filter_{filter_name}" in filter_methods:
                 # The args can be given one of two ways:

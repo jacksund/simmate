@@ -336,6 +336,11 @@ class SimmateSettings:
                 # whether to use the username or first+last name when displaying
                 # users accross the website, such as in option menus
                 "user_format": "username",
+                # To prevent crazy joins, we can limit the number of double-underscores
+                # (which indicate a join or field lookup) in a filter.
+                # Example: `user__first_name__isnull` has 2 double-underscores.
+                # `a__b__c__d` has 3. A value of None means no limit.
+                "max_filter_joins": None,
             },
             # app-specific configs
             # TODO: consider moving these to the respective apps

@@ -1,283 +1,104 @@
 
-## What are web components?
+## Component Lifecycle
 
-**Components let you build interactive web pages using Python and HTML**, without needing JavaScript (we handle that part for you). So components work like mini Django views that automatically update when users interact with them.
+Each `HtmxComponent` has several hooks you can override to control its behavior:
 
-We need components because Django views are static HTML by default. In other words, once your view+template is loaded, it does not change until you (i) open a new link or (ii) refresh your page. So components come into play when you want to click a button and have the web page altered in some way -- such as checking a box and then having extra form options show up. For this, our HTML needs to include some JavaScript that updates the page for us -- all without refreshing the web page. Simmate web components integrate this JavaScript+AJAX calls, so that you can build things out in Python instead. This enables real-time interactivity in our web pages.
-
---------------------------
-
-## Do I need components?
-
-Avoid overcomplicating things if you can. You can achieve quite a bit just with static HTML that ships with Django, and the only time you need components are when you have...
-
-- a dynamic submission form (e.g., one that changes as a user fills it out)
-- a need for real-time data analytics (e.g., manually refreshing your webpage isn't cutting it)
-
-Even if this applies to you, make sure you are already comfortable with HTML and [`Django Templates`](https://docs.djangoproject.com/en/5.2/topics/templates/) before messing with components.
-
-!!! tip
-    A beginner-friendly alternative for building dynamic web pages is [Streamlit](https://streamlit.io/). You can then make the app available within your Simmate app using an `iframe`:
-    ``` html
-    <iframe src="{{ dashboard_url }}?embed=true"
-            style="height:150vh;
-                   width:100%;
-                   border:none">
-    </iframe>
-    ```
+-   `mount()`: Called when the component is first initialized (e.g., when the page is first loaded). Use this for setting initial state.
+-   `pre_parse()`: Called before POST data is parsed from an AJAX request.
+-   `post_parse()`: Called after POST data is parsed and applied to the component's attributes.
+-   `process()`: The default method called during an AJAX request if no specific `method_name` is provided.
 
 --------------------------
 
-## Django-Unicorn vs. Simmate
+## Form Handling with `DynamicTableForm`
 
-Simmate originally used [Django-Unicorn](https://www.django-unicorn.com/) to build out interactive pages. However, in order to address some of our use cases and loose bugs, we eventually forked & refactored their codebase -- and now maintain our [own internal copy](https://github.com/jacksund/simmate/tree/main/src/simmate/website/unicorn). Still, nearly all features from Django-Unicorn's [examples](https://www.django-unicorn.com/examples/todo) and [documentation](https://www.django-unicorn.com/docs/) are still available.
+For components that interact with the database, Simmate provides the `DynamicTableForm` class. This handles common CRUD operations (Create, Read, Update, Delete) automatically.
 
---------------------------
+### Example: Project Form
 
-## Basic Example
+In `my_app/components/project_form.py`:
 
-In your app, you can set up the following:
-```
-├── example_app
-│   ├── components
-│   │   ├── __init__.py
-│   │   └── todo.py
-│   ├── templates
-│   │   ├── unicorn
-│   │   │   └── todo.html
-│   │   └── my_homepage.html
-│   ├── urls.py
-│   └── views.py
+```python
+from simmate.website.htmx.components import DynamicTableForm
+from ..models import Project
+
+class ProjectForm(DynamicTableForm):
+    table = Project
+    template_name = "my_app/project_form.html"
+    
+    # Required fields for creating a new project
+    required_inputs = ["name", "description"]
+
+    # Custom validation hook
+    def check_form_hook(self):
+        if len(self.form_data.get("name", "")) < 3:
+            self.form_errors.append("Project name must be at least 3 characters.")
 ```
 
-And for each file & it's contents:
+### Form Modes
 
+`DynamicTableForm` uses the `form_mode` attribute to determine its behavior. Common modes include:
 
-=== "urls.py"
-    ``` python
-    from django.urls import path
-    from . import views
+-   `"create"`: Creates a new row in the database.
+-   `"update"`: Updates an existing row.
+-   `"search"`: Filters data based on input values.
+
+### Registering with your Model
+
+To make your form available in the Simmate Data Explorer, add these attributes to your Django model:
+
+```python
+class Project(DatabaseTable):
+    # ... fields ...
     
-    urlpatterns = [
-        path('', views.home, name='home'),
-    ]
-    ```
-
-=== "views.py"
-    ``` python
-    from django.shortcuts import render
-    
-    def home(request):
-        context = {"name": "Jane Doe"}
-        return render(request, "my_homepage.html", context)
-    ```
-
-=== "todo.py"
-    ``` python
-    from simmate.website.core_components.components import DynamicFormComponent
-    
-    
-    class TodoView(UnicornView):
-        task = ""
-        tasks = []
-    
-        def add(self):
-            self.tasks.append(self.task)
-            self.task = ""
-    ```
-
-=== "my_homepage.html"
-    ``` html
-    <!DOCTYPE html>
-    <html>
-        <head>
-            <title>Home Page</title>
-        </head>
-        <body>
-            <h1>Hello, {{ name }}! This is the home page rendered from a template.</h1>
-            <div>
-                {% load unicorn %}
-                {% unicorn 'todo' %}
-            </div>
-        </body>
-    </html>
-    ```
-
-=== "todo.html"
-    ``` html
-    <div>
-        <form unicorn:submit.prevent="add">
-            <input type="text" unicorn:model.lazy="task" placeholder="New task" id="task"></input>
-        </form>
-        <button unicorn:click="add">Add</button>
-        <p>
-            {% if tasks %}
-                <ul>
-                    {% for task in tasks %}
-                        <li>{{ task }}</li>
-                    {% endfor %}
-                </ul>
-                <button unicorn:click="$reset">Clear all tasks</button>
-            {% else %}
-                No tasks!
-            {% endif %}
-        </p>
-    </div>
-    ```
+    html_form_component = "project-form"
+    html_enabled_forms = ["create", "update", "search"]
+```
 
 --------------------------
 
-## Page Elements
+## Component Mixins
 
-- `frontend` --> `html (+js)`
-- `backend` --> `python`
+You can extend components with pre-built mixins:
 
-### text_input
+-   `UserInput`: Provides a `user_options` property to easily populate user selection boxes.
+-   `MoleculeInput`: Integration with molecule sketchers.
 
-=== "frontend"
+### Example with Mixins
 
-    ``` html
-    {% text_input name="example" %}
-    ```
+```python
+from simmate.website.htmx.components import DynamicTableForm, UserInput
 
-=== "backend"
+class ProjectForm(DynamicTableForm, UserInput):
+    table = Project
+    # ...
+```
 
-    ``` python
-    example = "some default text"
-    ```
+In your template:
+```html+django
+{% htmx_selectbox name="leader" options=component.user_options %}
+```
 
-### text_area
+--------------------------
 
-=== "frontend"
+## Advanced Backend Logic
 
-    ``` html
-    {% text_area name="example" %}
-    ```
+### Triggering JS from Python
 
-=== "backend"
+You can add actions to `self.js_actions` to trigger JavaScript on the frontend after an AJAX call.
 
-    ``` python
-    example = "some default text"
-    ```
+```python
+def my_method(self):
+    self.js_actions.append({"type": "alert", "message": "Task completed!"})
+```
 
-### number_input
+### Parent-Child Communication
 
-=== "frontend"
+Use `self.retarget()` to force a parent component (or any other div) to re-render in response to a child component's action.
 
-    ``` html
-    {% number_input name="example" %}
-    ```
-
-=== "backend"
-
-    ``` python
-    example = 123
-    ```
-
-### checkbox
-
-=== "frontend"
-
-    ``` html
-    {% checkbox name="example" %}
-    ```
-
-=== "backend"
-
-    ``` python
-    example = True
-    ```
-
-### button
-
-=== "frontend"
-
-    ``` html
-    {% button name="example" %}
-    ```
-
-=== "backend"
-
-    ``` python
-    def example(self):
-        # ... any python code 
-    ```
-
-### selectbox
-
-=== "frontend"
-
-    ``` html
-    {% selectbox name="example" %}
-    ```
-
-=== "backend"
-
-    ``` python
-    example = None
-    example_options = [
-        ("label 1", "value 1"),
-        ("label 2", "value 2"),
-        ("label 3", "value 3"),
-        # ...
-    ]
-    ```
-
-### radio
-
-=== "frontend"
-
-    ``` html
-    {% radio name="example" %}
-    ```
-
-=== "backend"
-
-    ``` python
-    example = None
-    example_options = [
-        ("label 1", "value 1"),
-        ("label 2", "value 2"),
-        ("label 3", "value 3"),
-        # ...
-    ]
-    ```
-
-### molecule_input
-
-=== "frontend"
-
-    ``` html
-    {% molecule_input %}
-    ```
-
-=== "backend"
-
-    ``` python
-    from simmate.website.core_components.components import (
-        DynamicFormComponent,
-        MoleculeInput,
-    )
-
-
-    class TargetFormView(DynamicFormComponent, MoleculeInput):
-
-        class Meta:
-            javascript_exclude = (
-                # ...
-                *DynamicFormComponent.Meta.javascript_exclude,
-                *MoleculeInput.Meta.javascript_exclude,
-            )
-    ```
-
-search_box
-alert
-draw_molecule
-canvas
-
-
-## Backend Mix-ins
-
-#### test 1
-
-#### test 2
+```python
+def child_action(self):
+    # Perform some logic...
+    # Then tell the parent component to refresh
+    return self.parent.retarget()
+```

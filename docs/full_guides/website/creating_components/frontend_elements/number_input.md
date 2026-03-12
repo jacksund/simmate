@@ -6,15 +6,15 @@ Displays a numeric input widget and maps its value to the backend as either a `f
 === "frontend (html+django)"
 
     ``` html+django
-    {% number_input name="my_input" %}
+    {% htmx_number_input name="my_input" %}
     ```
 
 === "backend (python)"
 
     ``` python
-    from simmate.website.core_components.components import DynamicFormComponent
+    from simmate.website.htmx.components import HtmxComponent
 
-    class ExampleView(DynamicFormComponent):
+    class ExampleView(HtmxComponent):
         my_input = 1234
  
     ```
@@ -27,9 +27,10 @@ Displays a numeric input widget and maps its value to the backend as either a `f
 | `label`       | The display label for the input field. If not provided, the `name` may be used as the label.<br><small>*Type: `str`, Default: `None`*</small>                     |
 | `show_label`  | Whether to display the label alongside the input field.<br><small>*Type: `bool`, Default: `True`*</small>                                                         |
 | `help_text`   | Optional helper text to be shown alongside the input field.<br><small>*Type: `str`, Default: `None`*</small>                                                      |
-| `placeholder` | The placeholder text to display when input field is empty.<br><small>*Type: `str`, Default: `"Enter details..."`*</small>                                         |
+| `placeholder` | The placeholder text to display when input field is empty.<br><small>*Type: `str`, Default: `"123` if `is_int` else `0.123`*</small>                              |
 | `maximum`     | Maximum value allowed to be entered by user. `None` means no limit. <br><small>*Type: `float`, Default: `None`*</small>                                           |
 | `minimum`     | Minimum value allowed to be entered by user. `None` means no limit. <br><small>*Type: `float`, Default: `None`*</small>                                           |
 | `is_int`      | Whether the input is an integer (set to `True`) or a float (set to `False`). <br><small>*Type: `bool`, Default: `False`*</small>                                  |
-| `step_size`   | Descrete step size of the number. `None` means it is a continuos float value with no limit on digits. <br><small>*Type: `int`, Default: `None`*</small>           |
+| `step_size`   | Descrete step size of the number. `None` means it is a continuos float value with no limit on digits. <br><small>*Type: `float`, Default: `1` if `is_int` else `"any"`*</small>   |
 | `defer`       | Whether to defer processing or submission of the input value.<br><small>*Type: `bool`, Default: `True`*</small>                                                   |
+| `required`    | Whether the field is required for form submission.<br><small>*Type: `bool`, Default: `False`*</small>                                                             |

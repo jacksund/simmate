@@ -1,151 +1,153 @@
 # Simmate REST API
 
 !!! warning
-    This section is only for experts! If you're aiming to extract data from Simmate, we suggest using our Python client, as outlined in [the database guides](/full_guides/database/overview.md). The REST API is mainly for teams that cannot use Simmate's python package but still need to extract data. Be aware that data extraction via our REST API is heavily throttled, making it unsuitable for large data retrievals.
+    **This section is for developers and advanced users.** 
+    If you are using Python, we strongly recommend using the [Simmate Python Client](/full_guides/database/overview.md) instead. The REST API is primarily for teams that cannot use our Python package but still need to extract data. **Note:** Data extraction via the REST API is heavily throttled and not suitable for large-scale data retrieval.
 
 ------------------------------------------------------------
 
-## About
+## Overview
 
-"REST API" stands for "**Re**presentational **S**tate **T**ransfer (REST) **A**pplication **P**rogramming **I**nterfaces (API)". In simpler terms, it's a way to access databases through a website URL.
+The Simmate REST API allows you to access database tables directly through URL endpoints. It follows REST principles and returns data in structured JSON format. 
 
-------------------------------------------------------------
+To explore the API, you can use the Materials Project dataset as an example:
 
-## Example Endpoint
+- **Web View**: [simmate.org/data/MatprojStructure/](http://simmate.org/data/MatprojStructure/)
+- **API View**: [simmate.org/data/MatprojStructure/?format=json](http://simmate.org/data/MatprojStructure/?format=json)
 
-To better understand our API, we'll use the Materials Project data as an example. You can view this data at [`/data/MatprojStructure/`](http://simmate.org/data/MatprojStructure/). Keep in mind, nearly every URL within Simmate's `Data` tab has REST API functionality and behaves the same as this dataset.
+Nearly every URL in Simmate's **Data** tab supports this functionality.
 
-------------------------------------------------------------
+--------------------------
 
-## API Usage
+## Basic Usage
 
-Consider a typical URL and webpage:
-```
-http://simmate.org/data/MatprojStructure/
-```
+To retrieve data as JSON, append `?format=json` to any data URL.
 
-This link takes you to a webpage where you can browse all Materials Project structures. However, this URL also serves as a REST API. To access it, simply add `?format=api` to the URL. Try this link:
-```
-http://simmate.org/data/MatprojStructure/?format=api
-```
-
-Likewise, adding `?format=json` will return data in a JSON dictionary:
-```
+### Browsing a table
+To list entries from a table, use the base table URL:
+```text
 http://simmate.org/data/MatprojStructure/?format=json
 ```
 
-This also applies to individual entries. For example, to access all data for the structure with id `mp-1`, use...
+**Example Table JSON Response:**
+```json
+{
+    "count": 154718,
+    "next": "http://simmate.org/data/MatprojStructure/?format=json&page=2",
+    "previous": null,
+    "results": [
+        {
+            "id": "mp-1",
+            "formula_full": "Cs1",
+            "spacegroup": 229,
+            ...
+        },
+        ...
+    ]
+}
 ```
-http://simmate.org/data/MatprojStructure/mp-1/?format=api
+
+### Accessing a single entry
+To access all data for a specific entry (e.g., id `mp-1`):
+```text
 http://simmate.org/data/MatprojStructure/mp-1/?format=json
 ```
 
-The output should look like...
-``` json
+**Example Entry JSON Response:**
+```json
 {
     "id": "mp-1",
-    "structure": "...(hidden for clarity)",
+    "structure": "...(structure data)...",
     "nsites": 1,
     "nelements": 1,
     "elements": ["Cs"],
     "chemical_system": "Cs",
-    "density": 1.9350390306525629,
-    "density_atomic": 0.00876794537479071,
-    "volume": 114.05180544066401,
-    "volume_molar": 68.68360262958124,
+    "density": 1.935,
     "formula_full": "Cs1",
-    "formula_reduced": "Cs",
-    "formula_anonymous": "A",
-    "energy": -0.85663276,
-    "energy_per_atom": -0.85663276,
-    "energy_above_hull": null,
-    "is_stable": null,
-    "decomposes_to": null,
-    "formation_energy": null,
-    "formation_energy_per_atom": null,
     "spacegroup": 229,
+    ...
 }
 ```
 
-------------------------------------------------------------
+--------------------------
 
 ## Filtering Results
 
-Our URLs also support advanced filtering. For instance, to search for all structures with the spacegroup 229 in the Cr-N chemical system, the URL becomes...
+Simmate supports advanced filtering using [Django ORM lookup syntax](https://docs.djangoproject.com/en/5.2/ref/models/querysets/#field-lookups).
+
+### Field Lookups
+Use double underscores (`__`) to perform specific comparisons:
+
+- **Range**: `energy_per_atom__gte=-5.0` (Greater than or equal to)
+- **Nullity**: `description__isnull=True`
+- **Text**: `formula_full__icontains=Fe` (Case-insensitive search)
+
+### Chaining Relations
+You can also filter across database relationships:
+
+- `user__username=jacksund`
+- `user__first_name__isnull=False`
+
+!!! note
+    To maintain server performance, some Simmate servers limit the number of double underscores allowed in a single filter. For instance, **simmate.org has a limit of 3** (e.g., `a__b__c__d` is okay, but `a__b__c__d__e` is not). This prevents excessively complex database joins.
+
+### Complete Example
+Search for structures with spacegroup 229 in the Cr-N chemical system:
+```text
+http://simmate.org/data/MatprojStructure/?chemical_system=Cr-N&spacegroup__number=229&format=json
 ```
-http://simmate.org/data/MatprojStructure/?chemical_system=Cr-N&spacegroup__number=229
+
+--------------------------
+
+## Pagination & Ordering
+
+### Pagination
+To avoid server overload, results are limited to 12 per page. Navigate using the `page` parameter:
+```text
+http://simmate.org/data/MatprojStructure/?format=json&page=2
+```
+The response includes `next` and `previous` links to help you traverse the dataset.
+
+### Ordering
+Order results by any column using the `ordering` parameter. Use a minus sign (`-`) for descending order:
+```text
+http://simmate.org/data/MatprojStructure/?ordering=-density&format=json
 ```
 
-Conditions are specified by adding a question mark (`?`) to the URL, followed by `example_key=desired_value`. Additional conditions are separated by `&`, resulting in `key1=value1&key2=value2&key3=value3`, etc. You can also add `format=api` to this.
+--------------------------
 
-However, for complex or advanced cases, we recommend using the `simmate.database` module, as it provides more robust filtering capabilities.
+## Authentication
 
-------------------------------------------------------------
-
-## Pagination of Results
-
-To avoid server overload, Simmate currently returns a maximum of 12 results at a time. Pagination is automatically managed using the `page=...` keyword in the URL. In the HTML, API, and JSON views, links to the next page of results are always provided. For instance, in the JSON view, the returned data includes `next` and `previous` URLs.
-
-------------------------------------------------------------
-
-## Ordering Results
-
-You can set the order of returned data by adding `ordering=example_column` to your URL. To reverse the order, use `ordering=-example_column` (note the "`-`" before the column name). For example:
-
-```
-http://simmate.org/data/MatprojStructure/?ordering=density_atomic
-```
-
-------------------------------------------------------------
-
-## Programmer access & API Keys
-
-### Public Website
-The public Simmate website does not require you to be authenticated to access our API endpoints. You can therefore call API endpoints anonymously:
+### Public Website (simmate.org)
+Public endpoints on simmate.org do not require authentication for anonymous browsing.
 
 === "python requests"
-
     ```python
     import requests
-
     url = 'http://simmate.org/data/MatprojStructure/?format=json'
     response = requests.get(url)
-
-    print(response.text)
+    print(response.json())
     ```
 
 === "curl"
-    ``` bash
-    curl -X GET http://localhost/data/ChemblMolecule/?format=api
+    ```bash
+    curl -X GET http://simmate.org/data/MatprojStructure/?format=json
     ```
 
 ### Private Servers
+Private or team-managed servers may require an API key, which can be found on your **Profile** page. Include the key in your request header:
 
-Some private servers, do require authenticated users to ensure data security. For these, you can access endpoints by providing an API key.
+=== "python requests"
+    ```python
+    import requests
+    url = 'http://my-server.org/data/MyTable/?format=json'
+    headers = {'Authorization': 'Token YOUR_API_KEY_HERE'}
+    response = requests.get(url, headers=headers)
+    print(response.json())
+    ```
 
-1. find your API key in the `Profile` page of the website and select the `View API Key` at the bottom of the page. The key will be something like...
-```
-59ced7225bb41d51b7bc78c1e269542eaa99c72f
-```
-
-2. make sure you provide the API as a header in your requests:
-
-    === "python requests"
-
-        ```python
-        import requests
-
-        url = 'http://simmate.org/data/MatprojStructure/?format=json'
-        headers = {'Authorization': 'Token 59ced7225bb41d51b7bc78c1e269542eaa99c72f'}
-
-        response = requests.get(url, headers=headers)
-
-        print(response.text)
-        ```
-
-    === "curl"
-        ``` bash
-        curl -X GET http://simmate.org/data/MatprojStructure/?format=json -H 'Authorization: Token 59ced7225bb41d51b7bc78c1e269542eaa99c72f'
-        ```
-
-------------------------------------------------------------
+=== "curl"
+    ```bash
+    curl -X GET http://my-server.org/data/MyTable/?format=json \
+         -H "Authorization: Token YOUR_API_KEY_HERE"
+    ```
