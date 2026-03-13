@@ -2,56 +2,63 @@
 
 ## Finding & Installing Apps
 
-**One app at a time**
+**Core Apps (Pre-installed)**
 
-1. Browse the full list in the [`Apps`](/apps/overview.md) tab above :material-arrow-up::material-arrow-up::material-arrow-up:
-2. Follow the installation directions for each app you would like to use
+Most official Simmate apps (Vasp, Materials Project, etc.) are pre-installed and registered by default. You can start using their workflows and data immediately.
 
-**All apps at once**
+**Custom or Specialized Apps**
 
-!!! danger
-    This guide is not yet available. For now, go through each app installation one at a time. We will eventually add a guide on how to install all of them at once, which will help advanced users setup production systems quickly.
+1. Browse the full list of apps in the [`Apps`](/apps/overview.md) tab above.
+2. If an app is not in your defaults (see below), follow its specific installation directions.
+
+**Restoring Default Apps**
+
+By default, Simmate registers its core apps automatically. You can see your active apps under the `apps` key of your settings. If you've previously removed apps and want to restore the defaults, you can reset your `~/simmate/settings.yaml` or manually add them back using `simmate config add`.
 
 ## View installed apps
 
-Run the command:
+To see which apps are currently registered with your Simmate installation, run:
 
 ``` bash
 simmate config show
 ```
 
-And in the output, your list of installed app configs will be shown under the `apps` key:
+In the output, your installed app configs are listed under the `apps` key:
 
 ``` bash
 # example output
 apps:
+- simmate.apps.configs.AflowConfig
+- simmate.apps.configs.BaderConfig
+- simmate.apps.configs.BcpcConfig
+- simmate.apps.configs.CodConfig
+- simmate.apps.configs.EvolutionConfig
+- simmate.apps.configs.InventoryManagementConfig
+- simmate.apps.configs.JarvisConfig
+- simmate.apps.configs.MaterialsProjectConfig
+- simmate.apps.configs.OqmdConfig
+- simmate.apps.configs.PriceCatalogConfig
+- simmate.apps.configs.ProjectManagementConfig
 - simmate.apps.configs.QuantumEspressoConfig
 - simmate.apps.configs.VaspConfig
-- simmate.apps.configs.BaderConfig
-- simmate.apps.configs.EvolutionConfig
-- simmate.apps.configs.MaterialsProjectConfig
-- simmate.apps.configs.AflowConfig
-- simmate.apps.configs.CodConfig
-- simmate.apps.configs.JarvisConfig
-- simmate.apps.configs.OqmdConfig
 ```
 
 ## Uninstall an app
 
 !!! warning
-    Removing an app does **not** remove its tables from your database.
+    Removing an app from your settings does **not** remove its tables from your database.
 
-Go to your `~/simmate/settings.yaml` file, and remove the target config(s) from the `apps:` list.
+To uninstall an app, go to your `~/simmate/settings.yaml` file and remove the target config(s) from the `apps:` list.
 
 
 ## Accessing tables
 
-:material-arrow-left::material-arrow-left::material-arrow-left: refer to [our database guide](/full_guides/workflows/basic_use.md) in the sidebar for basic use.
+:material-arrow-left::material-arrow-left::material-arrow-left: Refer to [our database guide](/full_guides/database/basic_use.md) in the sidebar for in-depth usage.
 
-All of an app's tables and datasets are packaged within its `models` module, such as `simmate.apps.example.models`. This is because Simmate uses [Django ORM](https://docs.djangoproject.com/en/5.1/topics/db/queries/) under the hood, and following with their terminology, a `model` is effectively the definition of a single database table.
+All of an app's tables and datasets are packaged within its `models` module (e.g., `simmate.apps.example.models`). Simmate uses the [Django ORM](https://docs.djangoproject.com/en/5.1/topics/db/queries/), where a `model` represents a single database table.
 
 !!! example
-    We can then load the Materials Project structures table from `simmate.apps.materials_project.models`:
+    To load the Materials Project structures table:
 
     ``` python
     from simmate.apps.materials_project.models import MatprojStructure
@@ -59,12 +66,12 @@ All of an app's tables and datasets are packaged within its `models` module, suc
 
 ## Accessing workflows
 
-:material-arrow-left::material-arrow-left::material-arrow-left: refer to [our workflows guide](/full_guides/workflows/basic_use.md) in the sidebar for basic use.
+:material-arrow-left::material-arrow-left::material-arrow-left: Refer to [our workflows guide](/full_guides/workflows/basic_use.md) in the sidebar for in-depth usage.
 
-In addition, advanced python users may choose to import a workflow directly (rather than use the `get_workflow` utility). All of an app's workflows are packaged within its `workflow` module, such as `simmate.apps.example.workflows`.
+Advanced users can import a workflow class directly rather than using the `get_workflow` utility. All of an app's workflows are packaged within its `workflows` module.
 
 !!! example
-    `static-energy.vasp.mat-proj` is converted to `StaticEnergy__Vasp__MatProj` following [our workflow naming conventions](/full_guides/workflows/naming_conventions.md). We can then pull this workflow class from `simmate.apps.materials_project.workflows`:
+    `static-energy.vasp.mat-proj` is converted to `StaticEnergy__Vasp__MatProj` following [our workflow naming conventions](/full_guides/workflows/naming_conventions.md). You can import it from:
 
     ``` python
     from simmate.apps.materials_project.workflows import StaticEnergy__Vasp__MatProj

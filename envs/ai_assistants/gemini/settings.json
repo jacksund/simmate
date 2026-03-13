@@ -1,0 +1,27 @@
+{
+  "context": {
+    "fileName": "ai_assistants.md",
+    "includeDirectories": [
+      "docs/full_guides/contributing"
+    ]
+  },
+  "experimental": {
+    "plan": true,
+    "modelSteering": true
+  },
+  "general": {
+    "defaultApprovalMode": "auto_edit"
+  },
+  "ui": {
+    "showStatusInTitle": true,
+    "hideTips": true,
+    "footer": {
+      "hideSandboxStatus": true,
+      "hideContextPercentage": false
+    },
+    "loadingPhrases": "witty"
+  },
+  "security": {
+    "enablePermanentToolApproval": true
+  }
+}
