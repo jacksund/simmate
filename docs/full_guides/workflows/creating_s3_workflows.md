@@ -116,12 +116,14 @@ For a comprehensive example of a subclass, refer to `simmate.apps.vasp.workflows
 `S3Workflows` can automatically detect and fix errors that occur during the `execute` stage. This is done using `ErrorHandler` objects.
 
 To add error handling to your workflow:
+
 1. Define one or more `ErrorHandler` classes.
 2. Add them to the `error_handlers` attribute of your workflow.
 
 #### Creating an Error Handler
 
 An `ErrorHandler` needs to define:
+
 - `check`: A method that returns `True` if an error is detected.
 - `correct`: A method that performs corrective actions (e.g., modifying input files).
 

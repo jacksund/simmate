@@ -33,6 +33,7 @@ Here are several ways workflow names can be represented:
 When converting a workflow name from basic text to Python, periods should be replaced with double underscores (`__`) and phrases should be converted to pascal case. The placement of hyphens (`-`) is determined by capital letters.
 
 !!! example
+
     - `static-energy.vasp.matproj`
     - `StaticEnergy__Vasp__MatProj`
     - https://simmate.org/workflows/static-energy/vasp/matproj

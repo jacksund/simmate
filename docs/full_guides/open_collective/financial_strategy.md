@@ -156,6 +156,7 @@ While earnings from all validators are pooled (see below), workers are only paid
 for the individual workflows that they actually ran. If you ran the workflow,
 you get the results - no need to share with other workers. This is because there
 are different types of workfers and resource requirements (not all CPU time is equal 
+
 - some calcs require a more powerful setup with many cores + more RAM).
 
 Because workers are only paid for what they run and anyone can be set up a worker,

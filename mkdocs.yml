@@ -246,8 +246,13 @@ nav:
             - Creating nested workflows: full_guides/workflows/creating_nested_workflows.md
             - Creating "S3" workflows: full_guides/workflows/creating_s3_workflows.md
 
-        - Computational Resources:
-            - Basic Use: full_guides/computational_resources/basic_use.md
+        - Compute:
+            - Basic Use: full_guides/compute/basic_use.md
+            - HPC: full_guides/compute/hpc_slurm.md
+            - Cloud: full_guides/compute/cloud_kubernetes.md
+            - Monitoring: full_guides/compute/monitoring_and_cleanup.md
+            - Advanced: full_guides/compute/advanced_config.md
+            - Schedules: full_guides/compute/schedules.md
         
         - Database:
             - Basic use: full_guides/database/basic_use.md

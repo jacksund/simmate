@@ -9,6 +9,7 @@ When you've made significant changes to a method, you might need to find all its
 ```
 *.csv, *.dat, *.log, *.tmp, *.bak, *.orig, *.egg-info, *.svg, *.xml, OUTCAR, *.js, *.html
 ```
+
 4. Set `Search in` to the `src/simmate` directory to limit the search to source code.
 
 ## Command-Line Git

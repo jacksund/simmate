@@ -22,11 +22,13 @@ class Relaxation__Vasp__StagedExample(StagedWorkflow):
 ```
 
 When you call `Relaxation__Vasp__StagedExample.run(structure=my_structure)`, Simmate will:
+
 1. Run `quality00` using `my_structure`.
 2. Take the final structure from `quality00` and use it as input for `quality01`.
 3. Take the final structure from `quality01` and use it as input for `quality02`.
 
 `StagedWorkflow` also handles:
+
 - Creating subdirectories for each step (e.g., `quality00`, `quality01`, etc.).
 - Copying necessary files between steps (using `files_to_copy`).
 - Aggregating results from all steps into a single database entry.
