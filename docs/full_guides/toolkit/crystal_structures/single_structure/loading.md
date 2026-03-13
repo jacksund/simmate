@@ -1,18 +1,15 @@
 # Loading Structures
 
-!!! danger
-    The simmate toolkit is still in early development and not ready for use. Stick to the "PyMatgen Help" section for now.
-
 --------------------------------------------------------------------------------
 
 ## Introduction
 
-To load a structure, call a `from_` method of `Structure`. 
+To load a structure, call the `from_file`, `from_dynamic`, or `from_str` methods of `Structure`. 
 
-For instance, `from_cif` for a CIF input, `from_poscar` for a POSCAR input, and `from_pymatgen` for a PyMatGen object. Choose the method that corresponds to your input type, or use the `from_dynamic` strategy if you're unsure or have a variety of input types.
+Simmate leverages PyMatGen for many of its I/O operations, but wraps them to provide a more intuitive and unified API. 
 
 !!! tip
-    `from_dynamic` is the simplest and most convenient method, but it may not always work! If you know your structure's format, use the specific method for it.
+    `from_dynamic` is the simplest and most convenient method, as it determines the input type (file, string, dict, etc.) and calls the appropriate underlying method.
 
 --------------------------------------------------------------------------------
 
@@ -40,7 +37,7 @@ input_03 = {
 }
 
 # `from_dynamic` will determine the format and convert it
-for new_input in [input_01, input_02, input_03]
+for new_input in [input_01, input_02, input_03]:
     structure = Structure.from_dynamic(new_input)
 ```
 
@@ -53,35 +50,29 @@ for new_input in [input_01, input_02, input_03]
 
 ### Files
 
-File-based inputs accept a filename as a string or a `pathlib.Path` object.
+File-based inputs accept a filename as a string or a `pathlib.Path` object. Simmate's `Structure` class inherits from PyMatGen's `Structure`, so it supports all formats that PyMatGen does.
 
 ``` python
 from simmate.toolkit import Structure
 
-structure = Structure.from_cif_file("example.sdf")
+structure = Structure.from_file("example.cif")
 ```
 
-| TYPE               | METHOD              |
-| ------------------ | ------------------- |
-| (dynamic loading)  | `from_file`         |
-|                    |                     |
-| CIF                | `from_cif_file`     |
-| CSSR               | `from_cssr_file`    |
-| Netcdf             | `from_cdf_file`     |
-|                    |                     |
-| POSCAR (& CONTCAR) | `from_poscar_file`  |
-| CHGCAR             | `from_chgcar_file`  |
-| LOCPOT             | `from_locpot_file`  |
-| vasprun.xml        | `from_vasprun_file` |
+Commonly supported formats include:
+
+-   CIF
+-   POSCAR / CONTCAR
+-   CSSR
+-   Netcdf (via `.cdf`)
 
 !!! tip
-    Each of these methods has a corresponding submethod for loading this format directly from text/str, detailed in the section below. For instance, `from_cif` takes a string, while `from_cif_file` takes a `.cif` file.
+    If you have a file and are unsure of the format, `from_file` (or `from_dynamic`) is usually smart enough to figure it out based on the file extension or content.
 
 --------------------------------------------------------------------------------
 
 ### Raw text / strings
 
-You can read a python string variable directly. These methods are primarily used for testing and debugging.
+You can read a python string variable directly. This is particularly useful for small test cases or when receiving data via a network.
 
 ``` python
 from simmate.toolkit import Structure
@@ -99,89 +90,70 @@ direct
 0.500000 0.500000 0.500000 Cl
 """
 
-structure = Structure.from_poscar(poscar_str)
+structure = Structure.from_str(poscar_str, fmt="poscar")
 ```
-
-| TYPE               | METHOD         |
-| ------------------ | -------------- |
-| CIF                | `from_cif`     |
-| CSSR               | `from_cssr`    |
-| Netcdf             | `from_cdf`     |
-|                    |                |
-| POSCAR (& CONTCAR) | `from_poscar`  |
-| CHGCAR             | `from_chgcar`  |
-| LOCPOT             | `from_locpot`  |
-| vasprun.xml        | `from_vasprun` |
-
-!!! tip
-    Each of these methods has a corresponding submethod for loading this format directly from a file, detailed in the section above. For instance, `from_cif` takes a string, while `from_cif_file` takes a `.cif` file.
 
 --------------------------------------------------------------------------------
 
 ### Python Objects
 
-Methods are available to convert other popular python objects, such as those from PyMatGen:
+Since `simmate.toolkit.Structure` inherits from `pymatgen.core.Structure`, you can use them interchangeably in most cases. If you specifically need to convert a PyMatGen object to a Simmate one (to access Simmate-specific methods), you can use `from_dynamic`:
 
 ``` python
 from simmate.toolkit import Structure
-from pymatgen import Structure as PmgStructure
+from pymatgen.core import Structure as PmgStructure
 
-# CIF -> PyMatGen -> Simmate [[ NOT RECOMMENDED ]]
 pmg_structure = PmgStructure.from_file("example.cif")
-structure = Structure.from_pymatgen(pmg_structure)
-
-# CIF -> Simmate  [[ RECOMMENDED ]]
-structure = Structure.from_file("example.cif")
+structure = Structure.from_dynamic(pmg_structure)
 ```
-
-| TYPE                        | METHOD                        |
-| --------------------------- | ----------------------------- |
-| PyMatGen `Structure` object | `from_pymatgen`               |
-| ASE `Atoms` object          | `from_ase`                    |
 
 --------------------------------------------------------------------------------
 
 ### Python Dictionaries
 
-!!! warning
-    Loading from python dictionaries is still in progress.
+Simmate (and PyMatGen) supports loading from standardized dictionaries:
 
-    For now, do the following:
+``` python
+from simmate.toolkit import Structure
 
-    ``` python
-    from simmate.toolkit import Structure
+data = {
+    "lattice": [
+        [3.48543651, 0.0, 2.01231771],
+        [1.16181217, 3.28610106, 2.01231771],
+        [0.0, 0.0, 4.02463542],
+    ],
+    "species": ["Na", "Cl"],
+    "coords": [
+        [0.0000, 0.0000, 0.0000],
+        [0.5000, 0.5000, 0.5000],
+    ],
+}
 
-    data = {
-        "lattice": [
-            [3.48543651, 0.0, 2.01231771],
-            [1.16181217, 3.28610106, 2.01231771],
-            [0.0, 0.0, 4.02463542],
-        ],
-        "species": ["Na", "Cl"],
-        "coords": [
-            [0.0000, 0.0000, 0.0000],
-            [0.5000, 0.5000, 0.5000],
-        ],
-    }
-
-    structure = Structure(**data)
-    ```
+structure = Structure.from_dict(data)
+# or alternatively
+structure = Structure(**data)
+```
 
 --------------------------------------------------------------------------------
 
 ### Database Entries
 
-!!! warning
-    Loading from database metadata is still in progress. Refer to our guides on Python ORM 
-    to access datasets as `Structure` objects quickly.
+Simmate provides specialized methods to load structures directly from database entries or metadata.
 
-    For example:
-    ``` python
-    from simmate.database import connect
-    from simmate.apps.materials_project.models import MatprojStructure
+``` python
+from simmate.toolkit import Structure
 
-    structure_db = MatprojStructure.objects.get(id=123)
-    structure = structure_db.to_toolkit()
-    ```
+# From a database dictionary (containing table_name and pk)
+db_dict = {
+    "database_table": "MatprojStructure",
+    "database_id": 123,
+}
+structure = Structure.from_database_dict(db_dict)
+
+# From a database object directly
+from simmate.apps.materials_project.models import MatprojStructure
+db_obj = MatprojStructure.objects.get(id=123)
+structure = Structure.from_database_object(db_obj)
+```
 
 --------------------------------------------------------------------------------

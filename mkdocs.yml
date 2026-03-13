@@ -261,38 +261,33 @@ nav:
                 - Overview: full_guides/toolkit/molecules/overview.md
                 - Single Molecule: 
                     - Quick Start: full_guides/toolkit/molecules/single_molecule/quick_start.md
-                    - Molecule Loading: full_guides/toolkit/molecules/single_molecule/molecule_loading.md
-                    - Molecule Exporting: full_guides/toolkit/molecules/single_molecule/molecule_exporting.md
-                    - Cleaning & Prep: full_guides/toolkit/molecules/single_molecule/cleaning_and_prep.md
-                    - Common Properties: full_guides/toolkit/molecules/single_molecule/common_properties.md
-                    - Common Analyses: full_guides/toolkit/molecules/single_molecule/common_analyses.md
+                    - Loading: full_guides/toolkit/molecules/single_molecule/loading.md
+                    - Exporting: full_guides/toolkit/molecules/single_molecule/exporting.md
+                    - Reactions: full_guides/toolkit/molecules/single_molecule/reaction.md
+                    - Cleaning: full_guides/toolkit/molecules/single_molecule/cleaning.md
+                    - Common Properties: full_guides/toolkit/molecules/single_molecule/properties.md
+                    - Common Analyses: full_guides/toolkit/molecules/single_molecule/analyses.md
                     - SMARTS sets: full_guides/toolkit/molecules/single_molecule/smarts_sets.md
-                    # - API: toolkit/molecules/single_molecule/api.md
                 - Many Molecules:
-                    # - Quick Start: full_guides/toolkit/molecules/many_molecules/quick_start.md
-                    # - Working with Pandas: full_guides/toolkit/molecules/many_molecules/pandas.md
                     - Featurizers: full_guides/toolkit/molecules/many_molecules/featurizers.md
-                    # - Filters: full_guides/toolkit/molecules/many_molecules/filters.md
                     - Clustering: full_guides/toolkit/molecules/many_molecules/clustering.md
                     - ChemSpace Mapping: full_guides/toolkit/molecules/many_molecules/mapping.md
                     - Similarity & Diversity: full_guides/toolkit/molecules/many_molecules/similarity.md
-                # - Database Molecules: full_guides/toolkit/molecules/database_molecules.md
             - Crystal Structures:
                 - Overview: full_guides/toolkit/crystal_structures/overview.md
+                # - Single Structure:
+                #     - Loading: full_guides/toolkit/crystal_structures/single_structure/loading.md
+                #     - Exporting: full_guides/toolkit/crystal_structures/single_structure/exporting.md
+                #     - Composition: full_guides/toolkit/crystal_structures/single_structure/composition.md
+                #     - Common Properties: full_guides/toolkit/crystal_structures/single_structure/properties.md
+                #     - Common Analyses: full_guides/toolkit/crystal_structures/single_structure/analyses.md
+                # - Many Structures: 
+                #    - Featurizers: full_guides/toolkit/crystal_structures/many_structures/featurizers.md
                 - PyMatGen Help: 
                     - Structure: full_guides/toolkit/crystal_structures/pymatgen/structure.md
                     - Lattice: full_guides/toolkit/crystal_structures/pymatgen/lattice.md
                     - Sites: full_guides/toolkit/crystal_structures/pymatgen/sites.md
                     - Composition: full_guides/toolkit/crystal_structures/pymatgen/composition.md
-                   # - API: full_guides/toolkit/crystal_structures/single_structure/api.md
-                # - Single Structure:
-                #     - Structure Loading: full_guides/toolkit/crystal_structures/single_structure/loading.md
-                #     - Structure Exporting: full_guides/toolkit/crystal_structures/single_structure/exporting.md
-                #     - Cleaning & Prep: full_guides/toolkit/crystal_structures/single_structure/cleaning.md
-                #     - Common Properties: full_guides/toolkit/crystal_structures/single_structure/properties.md
-                #     - Common Analyses: full_guides/toolkit/crystal_structures/single_structure/analyses.md
-                # - Many Structures: 
-                #    - Featurizers: full_guides/toolkit/crystal_structures/many_structures/featurizers.md
 
         - Extras:
             # - Simmate Open Collective: 
