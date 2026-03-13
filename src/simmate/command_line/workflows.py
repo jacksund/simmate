@@ -180,7 +180,7 @@ def explore(include_subflows: bool = False):
 
     endnote = Markdown(
         "To understand each parameter, you can read through "
-        "[our parameter docs](https://jacksund.github.io/simmate/parameters/)"
+        "[our parameter docs](https://jacksund.github.io/simmate/full_guides/workflows/parameters/overview/)"
         ", which give full descriptions and examples."
     )
     console.print(endnote)
