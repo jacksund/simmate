@@ -2,7 +2,7 @@
 
 !!! warning
     **This section is for developers and advanced users.** 
-    If you are using Python, we strongly recommend using the [Simmate Python Client](/full_guides/database/overview.md) instead. The REST API is primarily for teams that cannot use our Python package but still need to extract data. **Note:** Data extraction via the REST API is heavily throttled and not suitable for large-scale data retrieval.
+    If you are using Python, we strongly recommend using the [Simmate Python Client](/full_guides/database/basic_use.md) instead. The REST API is primarily for teams that cannot use our Python package but still need to extract data. **Note:** Data extraction via the REST API is heavily throttled and not suitable for large-scale data retrieval.
 
 ------------------------------------------------------------
 

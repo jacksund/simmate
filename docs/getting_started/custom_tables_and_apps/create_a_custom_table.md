@@ -20,7 +20,7 @@ class MyCustomTable2(Structure, Calculation):
 ```
 
     !!! tip
-        We only demonstrate `Structure` and `Calculation` in the examples shown, but there are many more `base_data_types` you can utilize. Make sure to review our guides in the [`simmate.database`](/full_guides/database/overview.md) module for more information.
+        We only demonstrate `Structure` and `Calculation` in the examples shown, but there are many more `base_data_types` you can utilize. Make sure to review our guides in the [`simmate.database`](/full_guides/database/basic_use.md) module for more information.
     
     !!! info
         In Django (which Simmate uses under the hood), a `DatabaseTable` is referred to as a `Model`. Therefore, a model and table can be considered the same. As we're using Django, the file name `models.py` must remain as-is. That's where Django searches for your custom database tables.

@@ -190,12 +190,11 @@ nav:
             - Basic Use: full_guides/computational_resources/basic_use.md
         
         - Database:
-            - Overview: full_guides/database/overview.md
             - Basic use: full_guides/database/basic_use.md
             - Workflow data: full_guides/database/workflow_data.md
             - Third-party data: full_guides/database/third_party_data.md
-            - Contributing data: full_guides/database/contributing_data.md
-            - Creating custom tables: full_guides/database/custom_tables.md
+            - Creating Data Apps: full_guides/database/creating_data_apps.md
+            - Creating New Tables: full_guides/database/creating_tables.md
 
         - Toolkit:
             - Molecules:

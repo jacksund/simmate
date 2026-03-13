@@ -22,6 +22,20 @@
     "loadingPhrases": "witty"
   },
   "security": {
-    "enablePermanentToolApproval": true
+    "enablePermanentToolApproval": true,
+    "toolAllowlist": [
+       "ls",
+       "mkdir",
+       "cd",
+       "pwd",
+       "cat",
+       "grep",
+       "touch",
+       "mv",
+       "git status",
+       "git commit",
+       "git diff",
+       "git add"
+    ]
   }
 }
