@@ -1,39 +1,22 @@
 # Full Guides
 
-!!! note
-    Before using the full guides, ensure you have either completed our [introductory tutorials](/getting_started/overview.md) or have a good understanding of Python.
+These guides provide a deep dive into how Simmate works. While the [Getting Started tutorials](/getting_started/introduction.md) cover the basics, these pages are for users who want to build custom tools, manage large calculations, or develop new software.
 
-## Organization Overview
+---
 
-The structure of our guides and code may not always match. We've found that separating the two helps newcomers navigate Simmate without having to grasp all its components at once.
+## The Simmate Stack
 
-### Documentation
+Simmate is built in layers, starting with a scientific toolkit and building up to automated workflows and web interfaces. These guides follow that structure from the top (user interfaces) to the bottom (core code):
 
-Our guides are arranged in order to mirror the typical user journey with Simmate. Users generally start with high-level features (the website interface) and progressively delve into lower-level features (the toolkit and Python objects). The documentation mirrors this progression.
+1. **[Apps](/full_guides/apps/basic_use.md)**: Extensions that add support for new programs (like VASP) or custom features.
+2. **[Website](/full_guides/website/setup_and_config.md)**: The user interface for viewing data and monitoring your work.
+3. **[Workflows](/full_guides/workflows/basic_use.md)**: The engine that automates multi-step calculations and fixes common errors.
+4. **[Compute](/full_guides/compute/basic_use.md)**: The system for running jobs on your local machine, clusters, or the cloud.
+5. **[Database](/full_guides/database/basic_use.md)**: How scientific data is stored, organized, and searched.
+6. **[Toolkit](/full_guides/toolkit/crystal_structures/overview.md)**: The core Python objects for molecules and crystal structures.
 
-``` mermaid
-graph LR
-  A[Website] --> B[Workflows];
-  B --> C[Database];
-  C --> D[Toolkit];
-  D --> E[Extras];
-```
+---
 
-### Source Code
+## Contributing
 
-For our python modules, `simmate` is the base module, housing all the code that our package operates on. Each subfolder (or Python "module") provides detailed information about its contents.
-
-These modules include:
-
-- `apps`: Runs specific analyses or third-party programs (e.g., VASP, which performs DFT calculations)
-- `command_line`: Provides common functions as terminal commands
-- `config`: Contains default Simmate settings and methods for modifying them
-- `database`: Sets up data table structures and methods for accessing these tables
-- `toolkit`: Houses core methods and classes for Simmate (e.g., the `Structure` class)
-- `utilities`: Contains simple functions used across other modules
-- `website`: Powers the simmate.org website
-- `workflows`: Contains tools defining each calculation type (e.g., a structure optimization)
-
-Additionally, there's one extra file:
-
-- `conftest`: Runs Simmate tests and is intended solely for contributing developers
+We welcome community contributions! If you want to help add features or fix bugs, see our [Contributing Guide](/full_guides/contributing/first_time_setup.md) to get started.
