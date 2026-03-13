@@ -77,6 +77,7 @@ Apps follow a consistent (though optional) layout depending on their purpose (si
 ## Toolkit Details (`src/simmate/toolkit/`)
 
 Scientific logic independent of the database.
+
 - **`base_data_types/`**: Core objects (`Structure`, `Molecule`, `Composition`) wrapping Pymatgen/RDKit.
 - **`symmetry/`**: Analysis, spacegroup detection, and standardization.
 - **`transformations/`**: Manipulation (strain, supercells, substitutions).

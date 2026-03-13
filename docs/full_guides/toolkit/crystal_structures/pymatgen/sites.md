@@ -60,6 +60,7 @@ for site in structure:
 - `to_unit_cell`
 
 ### Position
+
 - `x`
 - `y`
 - `z`
@@ -72,6 +73,7 @@ for site in structure:
 - `lattice` (matches between all sites in `Structure`)
 
 ### Basic Properties
+
 - `is_ordered`
 - `is_periodic_image`
 - `properties`

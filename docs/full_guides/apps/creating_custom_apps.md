@@ -23,42 +23,46 @@ With this in mind, it is helpful to know that all of our Simmate apps are really
 
 ## Folder Structure
 
-All apps follow the same folder structure, where every folder is optional (and in practice, most apps only contain a few of these folders):
+All apps follow the same folder structure. While almost every folder is optional, we recommend using sub-folders (packages) for `models` and `workflows` once your app grows:
 
 ```
 ├── example_app
-│   ├── config
-│   ├── command_line
-│   ├── inputs
-│   ├── outputs
-│   ├── error_handlers
-│   ├── migrations
-│   ├── models
-│   ├── schedules
-│   ├── templates
-│   ├── urls
-│   ├── views
-│   └── workflows
+│   ├── command_line/    # custom CLI commands
+│   ├── components/      # HTMX/UI components
+│   ├── migrations/      # Database migrations
+│   ├── models/          # Database tables
+│   │   ├── __init__.py
+│   │   ├── table_1.py
+│   │   └── table_2.py
+│   ├── schedules/       # periodic/timed tasks
+│   ├── templates/       # HTML files
+│   ├── workflows/       # Automated tasks
+│   │   ├── __init__.py
+│   │   ├── flow_1.py
+│   │   └── flow_2.py
+│   ├── config.py        # App configuration
+│   ├── urls.py          # URL routing
+│   └── views.py          # Web views
 ```
 
-There are no restrictions on adding extra python modules to your app. In fact, some of our apps include extra functionality, such as utilities or toolkit add-ons.
+There are no restrictions on adding extra python modules to your app. In fact, some of our apps include extra functionality, such as `inputs`, `outputs`, or `error_handlers`.
 
 
 ## Generate Example App Files
 
 1. To start a new app, navigate to your desired folder for code storage and run:
 ``` bash
-simmate create-app
+simmate start-project
 ```
 
-2. You will then see a new folder named `my_new_project`:
+2. You will then see a new folder named `my_simmate_project`:
 ```
-my_new_project/
+my_simmate_project/
 ├── pyproject.toml
 ├── README.md
 └── example_app
     ├── __init__.py
-    ├── apps.py
+    ├── config.py
     ├── models.py
     ├── tests.py
     ├── urls.py
@@ -69,7 +73,7 @@ my_new_project/
 3. Edit the files to start building out your new app
 
 !!! tip
-    Once you get the hang of building apps, all of the code in these files will be annoying to go through & delete. There's nothing wrong with building your app out one file at a time, and ingoring the `simmate create-app` command.
+    Once you get the hang of building apps, all of the code in these files will be annoying to go through & delete. There's nothing wrong with building your app out one file at a time, and ingoring the `simmate start-project` command.
 
 
 ## Register Your App
@@ -77,7 +81,7 @@ my_new_project/
 Add your app's config to Simmate's list of registered apps:
 
 ``` bash
-simmate config add 'example_app.apps.ExampleAppConfig'
+simmate config add 'example_app.config.ExampleAppConfig'
 ```
 
 !!! note
@@ -86,49 +90,59 @@ simmate config add 'example_app.apps.ExampleAppConfig'
 
 ## Adding Tables
 
-Add any `Database` table (or django `Model`) to the app's `models.py` file. If you make a models folder instead (`my_app/models`), make sure your final tables are imported within `my_app/models/__init__.py`.
+You can add database tables (Django `Models`) to your app in two ways:
+
+1.  **A single file:** Add your models directly to `models.py`.
+2.  **A folder:** Create a `models/` folder with an `__init__.py` and several sub-modules (e.g., `structures.py`, `results.py`).
+
+If you use a folder, you **must** import your tables into `models/__init__.py` so Simmate can find them:
 
 ``` python
 # in `my_app/models/__init__.py`
 from .structures import MyStructureTable
-from .test_results import MyTestResults
+from .results import MyTestResults
 ```
 
 !!! note
-    Simmate uses [Django](https://docs.djangoproject.com/en/5.2/topics/db/models/) to detect and maintain models, so all the same rules apply.
+    Simmate uses the [Django ORM](https://docs.djangoproject.com/en/5.2/topics/db/models/) to manage database tables, so all standard Django model rules apply.
     
 !!! tip
-    Read more about custom tables in our [Database guides](/full_guides/database/custom_tables.md)
+    Learn more about defining tables in our [Database guides](/full_guides/database/custom_tables.md).
 
 ## Adding Workflows
 
-Add any `Workflow` to the app's `workflows.py` file AND list them in the `__all__` global variable.:
-``` python
-# in workflows.py
-__all__ = [
-    "MyExample__Workflow__Test123",
-    "MyExample__Workflow__Test321",
-]
+Similarly, you can organize your workflows as a single file or a folder:
 
-# (then the workflows are defined below)
-```
+1.  **A single file:** Add workflows to `workflows.py` and list them in the `__all__` variable.
+2.  **A folder:** Create a `workflows/` folder with an `__init__.py` and several sub-modules.
 
-If you make `my_app/workflows` a folder, make sure your final tables are imported within `my_app/workflows/__init__.py`
+If you use a folder, import your workflows into `workflows/__init__.py`:
+
 ``` python
 # in `my_app/workflows/__init__.py`
-from .flow_abc import MyExample__Workflow__TestABC
-from .flow_def import MyExample__Workflow__TestDEF
+from .relaxation import Relaxation__Vasp__MyCustom
+from .static_energy import StaticEnergy__Vasp__MyCustom
 ```
 
 !!! tip
-    Read more about custom tables in our [Workflow guides](/full_guides/workflows/creating_basic_workflows.md)
+    Read more about building custom workflows in our [Workflow guides](/full_guides/workflows/creating_basic_workflows.md).
 
 
 ## Adding Web UI (urls/views)
 
-Build your `urls.py`, `views.py`, and `templates/*.html` files following [official Django docs](https://docs.djangoproject.com/en/5.2/). Everything in your `urls.py` will be mapped to a namespace matching your app's name.
+Build your `urls.py`, `views.py`, and `templates/` files following [official Django docs](https://docs.djangoproject.com/en/5.2/). 
 
-For example, if you app was called `example_app` and this was your `urls.py`:
+We recommend following Django's best practice of namespacing your templates within a subfolder named after your app (e.g. `my_app/templates/my_app/home.html`). You should also extend Simmate's base template to get the standard styling and navbar:
+
+```html+django
+{% extends "core_components/site_base.html" %}
+
+{% block body %}
+    <h1>Hello from My App!</h1>
+{% endblock %}
+```
+
+Everything in your `urls.py` will be automatically mapped to a namespace matching your app's name. For example, if your app was called `example_app` and this was your `urls.py`:
 
 ``` python
 from django.urls import path
@@ -147,4 +161,4 @@ You could view them in the Simmate website at:
 - `http://127.0.0.1:8000/apps/example_app/my-custom-view/`
 
 !!! tip
-    Read more about custom tables in our [Workflow guides](/full_guides/website/creating_views.md)
+    Read more about custom views in our [Website guides](/full_guides/website/creating_views.md)

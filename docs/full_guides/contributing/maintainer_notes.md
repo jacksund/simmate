@@ -83,26 +83,32 @@ The Hyper theme, as outlined in our main docs [here](/full_guides/website/setup_
 ``` bash
 cd Hyper_v4.6.0/Bootstrap_5x/Hyper/
 ```
+
 3. Install prerequisites into a new conda environment and activate it:
 ``` bash
 conda create -n hyper -c conda-forge nodejs yarn git
 conda activate hyper
 ```
+
 4. Install gulp using npm (conda install of gulp doesn't work):
 ``` bash
 npm install gulp -g
 ```
+
 5. In the main directory, install all Hyper dependencies using the `yarn.lock` file:
 ``` bash
 yarn install
 ```
+
 6. Edit themes/colors in the following files (e.g., change primary to `#0072ce`):
 ```
 /src/assests/scss/config/saas/
 >> go into each folder's _variables.scss
 ```
+
 7. Build the assets:
 ``` bash
 gulp build
 ```
+
 8. Upload assets (in `dist` folder) to your CDN for serving.

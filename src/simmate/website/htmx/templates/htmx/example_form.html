@@ -1,6 +1,7 @@
-{# <form hx-post="/htmx/component/{{ component.component_id }}/{{ method_to_call }}/" hx-indicator="#loading-spinner" hx-swap="outerHTML"> #}
-<form id="{{ component.component_id }}"
-      hx-post="{% url 'htmx:component' component.component_id %}"
+{% extends "htmx/form_base.html" %}
+
+{% block form %}
+<form hx-post="{% url 'htmx:component' component.component_id %}"
       hx-indicator="#loading-spinner"
       hx-swap="outerHTML">
     {% htmx_text_input name="name" %}
@@ -25,7 +26,5 @@
     <div>ID: {{ component.component_id }}</div>
     <div>Data: {{ component.post_data }}</div>
     <div>Actions: {{ component.js_actions }}</div>
-    {% if component.js_actions %}
-        {% htmx_js_actions component.js_actions %}
-    {% endif %}
 </form>
+{% endblock %}

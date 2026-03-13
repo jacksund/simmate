@@ -76,7 +76,9 @@ class TodoComponent(HtmxComponent):
 Create the layout in `my_app/templates/my_app/todo.html`:
 
 ```html+django
-<div id="{{ component.component_id }}">
+{% extends "htmx/form_base.html" %}
+
+{% block form %}
     <h3>My Todo List</h3>
     
     {% htmx_text_input name="task" placeholder="Enter a new task..." %}
@@ -89,7 +91,7 @@ Create the layout in `my_app/templates/my_app/todo.html`:
             <li>No tasks yet!</li>
         {% endfor %}
     </ul>
-</div>
+{% endblock %}
 ```
 
 ### 3. Usage in a View
