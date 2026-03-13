@@ -5,9 +5,9 @@
 
 ------------------------------------------------------------
 
-## Basic Workflows
+## Using the `@workflow` Decorator
 
-Any python function can be a workflow. There are two steps to convert it:
+The easiest way to create a workflow is by using the `@workflow` decorator on a Python function. There are two steps to convert a function:
 
 1. add the `@workflow` decorator
 2. include `**kwargs` as an input
@@ -23,6 +23,26 @@ def add(x, y, **kwargs):
 
 result = add.run(x=1, y=2)
 ```
+
+The `@workflow` decorator also accepts several optional parameters to help with [naming conventions](naming_conventions.md) and database integration:
+
+- `app_name`: The name of the app this workflow belongs to (defaults to "Basic")
+- `type_name`: The type of analysis (defaults to "Toolkit")
+- `use_database`: Whether to save results to a database table (defaults to `False`)
+
+``` python
+@workflow(
+    app_name="Math",
+    type_name="Basic",
+    use_database=False,
+)
+def add(x, y, **kwargs):
+    return x + y
+```
+
+------------------------------------------------------------
+
+## Using Class-based Workflows
 
 As you build more advanced workflows, you may want to switch to a class-based format. To do this, you must:
 
@@ -80,18 +100,16 @@ result = Math__Basic__Add.run(x=1, y=2)
 
 ------------------------------------------------------------
 
-## Extra `**kwargs` provided
+## Extra `**kwargs` Provided
 
-In the workflows above, we used `**kwargs` in each of our workflows. This is because Simmate automatically passes default parameters to the `run_config` method -- even if you didn't define them as inputs when calling `run()`. 
+Simmate automatically passes default parameters to your `run_config` or decorated function. These are used to track and organize the calculation:
 
-We do this to allow all workflows to access key information about the run. These parameters are:
+- `run_id`: A unique ID for tracking the run (e.g., in the database).
+- `directory`: The `pathlib.Path` where the calculation takes place.
+- `compress_output`: Whether to zip the directory when finished.
+- `source`: Information about where the inputs came from (experimental).
 
-- `run_id`: a unique id for tracking a calculation
-- `directory`: a unique folder name where the calculation will take place
-- `compress_output`: whether to compress the directory to a zip file when completed
-- `source`: where the input of this calculation came from *(experimental feature)*
-
-You can use any of these inputs to assist with your workflow. Alternatively, just add `**kwargs` to your function and ignore them.
+You should include `**kwargs` in your function signature to accept these parameters, even if you don't use them.
 
 !!! example
     ``` python

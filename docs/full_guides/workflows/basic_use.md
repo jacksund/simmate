@@ -121,7 +121,7 @@ To execute a workflow on your local machine, use the `run` approach:
 
 ## Run a Workflow (Cloud)
 
-Workflows can also be executed on a remote cluster. It's important to understand the differences between local and cloud runs:
+Workflows can also be executed on a remote cluster. The `run_cloud` command adds the job to a queue for a `Worker` to pick up.
 
 === "local (run)"
     ``` mermaid
@@ -139,7 +139,7 @@ Workflows can also be executed on a remote cluster. It's important to understand
       F[launch a worker with 'start-worker' command] --> D;
     ```
 
-To schedule a workflow to run on a remote cluster, ensure your computational resources are configured. Then, use the `run_cloud` method:
+To schedule a workflow, ensure your computational resources are configured, then use `run_cloud`:
 
 === "command line"
     ``` yaml
@@ -161,12 +161,13 @@ To schedule a workflow to run on a remote cluster, ensure your computational res
     status = workflow.run_cloud(
         structure="NaCl.cif", 
         command="mpirun -n 4 vasp_std > vasp.out",
+        tags=["my-tag-1", "my-tag-2"],
     )
 
-    result = state.result() # (1)
+    result = status.result() # (1)
     ```
 
-    1. This will block and wait for the job to finish
+    1. This will block and wait for the job to finish. This is optional, and you can also use `status.pk` to get the database ID of the run.
 
 !!! warning
     The `run-cloud` command/method only **schedules** the workflow. It won't 

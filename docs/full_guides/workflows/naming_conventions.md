@@ -34,7 +34,7 @@ When converting a workflow name from basic text to Python, periods should be rep
 
 !!! example
     - `static-energy.vasp.matproj`
-    - `StaticEnergy__VASP__MatProj`
+    - `StaticEnergy__Vasp__MatProj`
     - https://simmate.org/workflows/static-energy/vasp/matproj
 
 ------------------------------------------------------------

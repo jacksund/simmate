@@ -79,7 +79,7 @@ class Example__Echo__SayHello(S3Workflow):
         
         print("I'm setting things up!")
         print(f"My new setting value is {cls.some_new_setting}")
-        print(f"My new parameter value is {custom_parmeter}")
+        print(f"My new parameter value is {custom_parameter}")
         
         return  # no need to return anything. Nothing will be done with it.
 
@@ -113,7 +113,59 @@ For a comprehensive example of a subclass, refer to `simmate.apps.vasp.workflows
 
 ### Custom Error Handling
 
-Custom error handling is currently under development. Please contact our team if you need this guide prioritized.
+`S3Workflows` can automatically detect and fix errors that occur during the `execute` stage. This is done using `ErrorHandler` objects.
+
+To add error handling to your workflow:
+1. Define one or more `ErrorHandler` classes.
+2. Add them to the `error_handlers` attribute of your workflow.
+
+#### Creating an Error Handler
+
+An `ErrorHandler` needs to define:
+- `check`: A method that returns `True` if an error is detected.
+- `correct`: A method that performs corrective actions (e.g., modifying input files).
+
+``` python
+from simmate.workflows.error_handler import ErrorHandler
+
+class MyCustomHandler(ErrorHandler):
+    
+    # Files to check and messages to look for
+    filename_to_check = "vasp.out"
+    possible_error_messages = ["Internal error: Segmentation fault"]
+
+    def correct(self, directory):
+        # This method is called if `check` returns True.
+        # We can modify files in the directory to fix the error.
+        incar_file = directory / "INCAR"
+        # ... logic to modify INCAR ...
+        return "Applied fix for segmentation fault"
+```
+
+#### Using Error Handlers in a Workflow
+
+``` python
+class Relaxation__Vasp__MyExample(VaspWorkflow):
+    
+    error_handlers = [MyCustomHandler]
+    
+    # ... other settings ...
+```
+
+#### Monitoring During Execution
+
+By default, error handlers are checked after the command finishes. However, some errors can be caught *while the program is still running*. To enable this, set `is_monitor = True` on your handler:
+
+``` python
+class MyMonitorHandler(ErrorHandler):
+    is_monitor = True
+    # ... check and correct methods ...
+```
+
+When a monitor handler detects an error, Simmate will terminate the running process, apply the fix, and restart the calculation.
+
+!!! tip
+    Monitoring is extremely useful for catching non-converging calculations or other issues that would otherwise waste hours of CPU time.
 
 ## Alternatives to S3Workflow
 
