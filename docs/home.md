@@ -7,7 +7,7 @@
 
 ## Before you begin
 
-This website is your go-to resource for all our tutorials and guides. You might want to explore:
+This website is your go-to resource for all our tutorials and guides. You might also want to explore:
 
 - Our main website at [simmate.org](https://simmate.org/)
 - Our source code at [github.com/jacksund/simmate](https://github.com/jacksund/simmate)
@@ -22,7 +22,7 @@ You can mix & match these apps to meet your research needs and to even build out
 
 ## Our Tech Stack
 
-For experienced developers, Simmate is essentially a collection of chemistry-focused [Django](https://www.djangoproject.com/) apps built using our custom toolkit. At the lowest level, the toolkit acts as a wrapper and extension of [Pymatgen](https://pymatgen.org/) and [RDKit](https://www.rdkit.org/). Our frontend framework is powered by [htmx](https://htmx.org/) for dynamic pages, while the database backend uses [SQLite](https://www.sqlite.org/) by default and [PostgreSQL](https://www.postgresql.org/) for production environments. There is much more built-in, including a custom workflow orchestration system, so be sure to explore!
+Simmate is essentially a collection of chemistry-focused [Django](https://www.djangoproject.com/) apps built using our custom toolkit. At the lowest level, the toolkit acts as a wrapper and extension of [Pymatgen](https://pymatgen.org/) and [RDKit](https://www.rdkit.org/). Our frontend framework is powered by [htmx](https://htmx.org/) for dynamic pages, while the database backend uses [SQLite](https://www.sqlite.org/) by default and [PostgreSQL](https://www.postgresql.org/) for production environments. There is much more built-in, including a custom workflow orchestration system, so be sure to explore!
 
 ## A Sneak Peek of Features
 
