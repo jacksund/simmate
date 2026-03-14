@@ -294,23 +294,15 @@ nav:
                     - Sites: full_guides/toolkit/crystal_structures/pymatgen/sites.md
                     - Composition: full_guides/toolkit/crystal_structures/pymatgen/composition.md
 
-        - Extras:
-            # - Simmate Open Collective: 
-            #    - Overview: full_guides/open_collective/overview.md
-            #    - Architecture: full_guides/open_collective/architecture.md
-            #    - Financial Strategy: full_guides/open_collective/financial_strategy.md
-            #    - Data Integrity Safeguards:  full_guides/open_collective/data_integrity_safeguards.md
-            #    - How to participate & earn: full_guides/open_collective/how_to_participate_and_earn.md
-            - Settings & Configs: full_guides/extras/configuration.md
-            - Contributing Code:
-                - First time setup: full_guides/contributing/first_time_setup.md
-                # - Testing: full_guides/extras/testing.md
-                - Creating & submitting changes: full_guides/contributing/creating_and_submitting_changes.md
-                - Extra notes & tips: full_guides/contributing/extra.md
-                - AI Assistants: full_guides/contributing/ai_assistants.md
-                - Maintainer notes: full_guides/contributing/maintainer_notes.md
-            # - Utilities: full_guides/extras/utilities.md
-
+        - Contributing:
+            - First time setup: full_guides/contributing/first_time_setup.md
+            # - Testing: full_guides/extras/testing.md
+            - Creating & submitting changes: full_guides/contributing/creating_and_submitting_changes.md
+            - Extra notes & tips: full_guides/contributing/extra.md
+            - AI Assistants: full_guides/contributing/ai_assistants.md
+            - Maintainer notes: full_guides/contributing/maintainer_notes.md
+        - Config: full_guides/configuration.md
+    
     - Apps: 
         - Overview: apps/overview.md
         - AFLOW: apps/aflow.md

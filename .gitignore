@@ -153,3 +153,5 @@ uv.lock
 .cursor/
 .claude/
 .codex/
+
+gha-creds-*.json
