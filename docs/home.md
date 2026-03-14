@@ -2,51 +2,12 @@
 
 <!-- This displays the Simmate Logo -->
 <p align="center" href=https://simmate.org>
-   <img src="https://github.com/jacksund/simmate/blob/main/src/simmate/website/core_components/static/images/simmate-logo-dark.svg?raw=true" width="80%" style="max-width: 1000px;">
+   <img src="https://raw.githubusercontent.com/jacksund/simmate/refs/heads/main/src/simmate/website/core_components/static/images/simmate-logo-dark.svg" width="80%" style="max-width: 1000px;">
 </p>
-
-<!-- 
-I use html format above to center the objects. Otherwise I could simple markdown like this:
-![Simmate Logo](https://github.com/jacksund/simmate/blob/main/src/simmate/website/core_components/static/images/simmate-logo-dark.svg?raw=true)
-Read here for info on markdown, badges, and more:
-[Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
-[Shields Badges](https://shields.io/)
--->
-
-<!-- This displays the dynamic badges -->
-<p align="center">
-<!-- Conda-forge OS support -->
-<a href="https://anaconda.org/conda-forge/simmate">
-    <img src="https://img.shields.io/badge/-Windows | Mac | Linux-00666b">
-</a>
-<!-- Pricing statement for begineers that are new to github -->
-<a href="https://anaconda.org/conda-forge/simmate">
-    <img src="https://img.shields.io/badge/-Free & Open Source-00666b">
-</a>
-<!-- link to JOSS paper -->
-<a href="https://doi.org/10.21105/joss.04364">
-    <img src="https://img.shields.io/badge/-DOI:10.21105/joss.04364-00666b">
-</a>
-
-</br>
-<!-- Link to Githbub -->
-<a href="https://github.com/jacksund/simmate">
-    <img src="https://img.shields.io/badge/-Source Code-/?logo=github&color=00666b&logoColor=white">
-</a>
-<!-- Link to Website -->
-<a href="https://simmate.org/">
-    <img src="https://img.shields.io/badge/-Website-/?logo=iCloud&color=00666b&logoColor=white">
-</a>
-<!-- link to change-log -->
-<a href="https://jacksund.github.io/simmate/change_log/">
-    <img src="https://img.shields.io/badge/-Changes & Updates-/?logo=git-extensions&color=00666b&logoColor=white">
-</a>
-</p>
-
 
 ## Before you begin
 
-This website is your go-to resource for all our tutorials and guides. Before diving in, you might want to explore:
+This website is your go-to resource for all our tutorials and guides. You might also want to explore:
 
 - Our main website at [simmate.org](https://simmate.org/)
 - Our source code at [github.com/jacksund/simmate](https://github.com/jacksund/simmate)
@@ -55,11 +16,15 @@ This website is your go-to resource for all our tutorials and guides. Before div
 
 Simmate is a full-stack framework for chemistry research. It helps you calculate properties and explore third-party databases for both for molecular and crystalline systems. For experts, it also provides a toolbox to build out your own chemistry applications.
 
-The computational side of chemistry research can be intimidating because there are so many programs to choose from, and it's challenging to select and combine them for your specific project. Simmate aims to be a link between the many diverse programs, databases, and utilities out there, and in turn, simplify the setup and execution of chemistry projects. Third-party datasets and tools are ingetrated into Simmate as "apps", where there is a growing list of [supported software and databases](/apps/overview.md). 
+The computational side of chemistry research can be intimidating because there are so many programs to choose from, and it's challenging to select and combine them for your specific project. Simmate aims to be a link between the many diverse programs, databases, and utilities out there, and in turn, simplify the setup and execution of chemistry projects. Third-party datasets and tools are integrated into Simmate as "apps", where there is a growing list of [supported software and databases](/apps/overview.md). 
 
 You can mix & match these apps to meet your research needs and to even build out your own custom applications. Simmate includes a core chemical toolkit, workflow management system, database ORM, and web component library -- giving you a framework with essential frontend and backend tools. Our goal is for Simmate to be "batteries-included", so all of these apps & tools are available within the base installation. To learn more about Simmate's scope & design, as well as how it compares to other popular chemistry frameworks, visit [our comparisons page](https://github.com/jacksund/simmate/tree/main/benchmarks).
 
-## A Sneak-Peak of Features
+## Our Tech Stack
+
+Simmate is essentially a collection of chemistry-focused [Django](https://www.djangoproject.com/) apps built using our custom toolkit. At the lowest level, the toolkit acts as a wrapper and extension of [Pymatgen](https://pymatgen.org/) and [RDKit](https://www.rdkit.org/). Our frontend framework is powered by [htmx](https://htmx.org/) for dynamic pages, while the database backend uses [SQLite](https://www.sqlite.org/) by default and [PostgreSQL](https://www.postgresql.org/) for production environments. There is much more built-in, including a custom workflow orchestration system, so be sure to explore!
+
+## A Sneak Peek of Features
 
 ### Prebuilt Workflows
 Simmate comes with ready-to-use workflows for most common calculated properties, ranging from simple XRD pattern prediction to intensive dynamic simulations. All workflows can be submitted via a website user-interface, the command-line, or custom python scripts:
@@ -139,7 +104,7 @@ Simmate can easily scale along with your project, whether you're on a single com
 
 
 ### Full-Feature Database
-Simmate's database can manage your perosnal data while also integrating with third-party databases such as COD, Materials Project, JARVIS, and others. It automatically constructs tables with common data types by including a wide range of standard columns. You can then access this data through a web interface, REST API, SQL, or Python ORM:
+Simmate's database can manage your personal data while also integrating with third-party databases such as COD, Materials Project, JARVIS, and others. It automatically constructs tables with common data types by including a wide range of standard columns. You can then access this data through a web interface, REST API, SQL, or Python ORM:
 
 === "python"
 
@@ -186,7 +151,7 @@ Simmate's database can manage your perosnal data while also integrating with thi
     ```
 
 ### Beginner-Friendly Toolkit
-Simmate includes a `toolkit` that builds off popular packages in the chemistry community, specifically [`rdkit`](https://www.rdkit.org/) for molecules and [`pymatgen`](https://pymatgen.org/) for periodic crystals. The end result is a toolkit for rapidly prototyping analyses. Here is an eample script that is straightforward & clean with Simmate's toolkit, but less intuitive & Pythonic for others:
+Simmate includes a `toolkit` that builds off popular packages in the chemistry community, specifically [`rdkit`](https://www.rdkit.org/) for molecules and [`pymatgen`](https://pymatgen.org/) for periodic crystals. The end result is a toolkit for rapidly prototyping analyses. Here is an example script that is straightforward & clean with Simmate's toolkit, but less intuitive & Pythonic for others:
 
 === "simmate-toolkit"
     ``` python
