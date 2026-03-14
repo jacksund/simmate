@@ -144,11 +144,21 @@ nav:
             - a) Intro to workers: getting_started/add_computational_resources/intro_to_workers.md
         
         - Wrap up: getting_started/wrap_up.md
-        
-        - Extra Examples:
-            - Overview: getting_started/example_scripts/overview.md
-            - Example-001: getting_started/example_scripts/example-001.md
-            - Example-002: getting_started/example_scripts/example-002.md
+    
+    # - Examples:
+    #     - Overview: examples/overview.md
+    #     - Data Mining & CIF Export: examples/data_mining_and_cif_export.md
+    #     - Symmetry-Breaking Strains: examples/symmetry_breaking_strains.md
+    #     - Structure Loading & I/O: examples/structure_loading_and_io.md
+    #     - Molecule Filtering: examples/molecule_filtering.md
+    #     - Running Workflows via YAML: examples/running_workflows_via_yaml.md
+    #     - Chemical Composition Analysis: examples/chemical_composition_analysis.md
+    #     - Single-Step VASP Relaxation: examples/single_step_vasp_relaxation.md
+    #     - High-Throughput VASP Runs: examples/high_throughput_vasp_runs.md
+    #     - VASP + Bader Charge Analysis: examples/vasp_plus_bader_charge_analysis.md
+    #     - Machine Learning Featurization: examples/machine_learning_featurization.md
+    #     - Advanced NEB Path Finding: examples/advanced_neb_path_finding.md
+    #     - Custom Evolutionary Search: examples/custom_evolutionary_search.md
     
     - Full Guides:
         
