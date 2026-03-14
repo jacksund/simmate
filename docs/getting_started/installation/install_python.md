@@ -9,13 +9,17 @@ Before installing Simmate, you need a tool to manage your Python "environments."
 We recommend choosing based on your comfort level with coding:
 
 ### Option 1: uv (Recommended)
+
 **Best for:** Most users, including those comfortable with (or willing to learn) the command line.
+
 - **Speed:** Extremely fast. What takes Anaconda 10 minutes to "solve," uv can often do in seconds.
 - **Simplicity:** A single, lightweight tool that handles everything.
-- **Installation:** Follow the [uv installation guide](https://docs.astral.sh/uv/getting-started/installation/) and then skip to the [Command-line tutorial](command_line.md).
+- **Installation:** Continue with the instructions below.
 
 ### Option 2: Anaconda
+
 **Best for:** Absolute beginners who prefer a graphical interface (buttons and menus) to get started.
+
 - **Ease of Use:** Includes **Anaconda Navigator**, a visual dashboard for managing your software.
 - **Trade-off:** It is a much larger download and can be significantly slower when installing new packages.
 - **Installation:** Continue with the instructions below.
@@ -30,6 +34,26 @@ In an ideal world, you could download Simmate like any other desktop app and be 
 2. **Another program** might require an older version, like Python 3.8.
 
 An environment manager (like uv or Anaconda) isolates these projects into separate "folders" or **environments**. This prevents them from conflicting and ensures your software always works as expected.
+
+---
+
+## Installing uv (Recommended)
+
+If you've decided to go with **uv**, follow these steps to get set up. For a complete guide, visit the [official uv installation page](https://docs.astral.sh/uv/getting-started/installation/).
+
+Open your terminal and run the command for your operating system:
+
+=== "macOS & Linux"
+    ``` bash
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    ```
+
+=== "Windows"
+    ``` powershell
+    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+    ```
+
+After running the command, you may need to restart your terminal for the `uv` command to become available. You can verify it's working by typing `uv --version`.
 
 ---
 
