@@ -12,9 +12,18 @@ simmate version
 
 ## Upgrading to the Latest Version
 
-We strongly advise installing simmate in a fresh conda environment instead of updating it within your current environment:
+We strongly advise installing Simmate in a fresh environment instead of updating it within your current one. 
+
+For **conda** users:
 ``` shell
 conda create -n my_env -c conda-forge python=3.11 simmate
+```
+
+For **uv** users:
+``` shell
+uv venv
+source .venv/bin/activate
+uv pip install simmate
 ```
 
 Ensure that the expected version is installed:
