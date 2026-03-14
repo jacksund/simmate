@@ -5,26 +5,28 @@
 
 1. Fork the Simmate repository to your Github profile (e.g., `yourname/simmate`). The button to fork is at the top right of [Simmate's home github page](https://github.com/jacksund/simmate), near the "star repo" button.
 
-2. Clone `yourname/simmate` to your local desktop. We recommend using [GitKraken](https://www.gitkraken.com/) and cloning to a folder named `~/Documents/github/`. GitKraken is free for public repositories (including Simmate), but is also part of [Github's free Student/Teacher packages](https://education.github.com/). Their [6-minute beginner video](https://www.youtube.com/watch?v=ub9GfRziCtU) provides a quick start guide.
+2. Clone `yourname/simmate` to your local desktop. We recommend using [GitKraken](https://www.gitkraken.com/) and cloning to a folder named `~/Documents/git/`. GitKraken is free for public repositories (including Simmate), but is also part of [Github's free Student/Teacher packages](https://education.github.com/). Their [6-minute beginner video](https://www.youtube.com/watch?v=ub9GfRziCtU) provides a quick start guide.
 
 3. Navigate to the cloned Simmate repository:
 ``` shell
-cd ~/Documents/github/simmate
+cd ~/Documents/git/simmate
 ```
 
-4. Create your conda environment using our conda file. This will install Spyder and name your new environment `simmate_dev`. We highly recommend using Spyder as your IDE for consistency with the rest of the team.
+4. Install [uv](https://docs.astral.sh/uv/) and use it to create your virtual environment and install all dependencies:
 ``` shell
-conda env update -f envs/conda/dev.yaml
-conda install -n simmate_dev -c conda-forge spyder -y
-conda activate simmate_dev
+uv sync --all-extras
 ```
 
-5. Install Simmate in development mode to your `simmate_dev` environment.
+5. Activate your new virtual environment. 
 ``` shell
-pip install -e .
+# Windows
+.venv\Scripts\activate
+
+# Mac/Linux
+source .venv/bin/activate
 ```
 
-6. When resetting your database, refrain from using the prebuilt database. It is best practice to have an empty database when developing.
+6. It is best practice to have an fresh, empty database when developing:
 ``` bash
 simmate database reset --confirm-delete --no-use-prebuilt
 ```
@@ -36,8 +38,8 @@ simmate database reset --confirm-delete --no-use-prebuilt
 pytest
 ```
 
-8. In GitKraken, you will start with `main` branch of your repository (`yourname/simmate`) checked out. Create a new branch and name it according to the changes you will make (e.g. `fix-example-app`).
+8. In GitKraken, you will start with `main` branch of your repository (`yourname/simmate`) checked out. Create a new branch and name it according to the changes you will make (e.g. `my-new-feature`).
 
-9. In Spyder, navigate to `Projects` > `New Project...`. Select `existing directory`, choose your `~/Documents/github/simmate` directory, and then `create` your Project!
+9. Open the `simmate` folder in your preferred IDE (we recommend [Spyder](https://www.spyder-ide.org/) or [VS Code](https://code.visualstudio.com/)). Ensure your IDE is using the Python interpreter from the `.venv` folder you just created.
 
 10.  You're now set to explore the source code and modify or add files! Continue to the next section for guidance on formatting, testing, and submitting your changes to our team.
