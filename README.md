@@ -5,7 +5,9 @@
 
 ## About
 
-Simmate is a full-stack framework for chemistry research. It helps you calculate properties and explore third-party databases for both for molecular and crystalline systems. For experts, it also provides a toolbox to build out your own chemistry applications.
+Simmate is a full-stack framework for chemistry research. It helps you calculate properties and explore third-party databases for both for molecular and crystalline systems. It also provides a toolbox to build out your own chemistry applications.
+
+To be more precise for experienced devs... this repo is essentially a collection of chemistry-based [Django](https://www.djangoproject.com/) apps that are built out using our custom toolkit. At the lowest level, the toolkit acts a wrapper+extension of [pymatgen](https://pymatgen.org/) and [rdkit](https://www.rdkit.org/). Meanwhile, our frontend framework is built on top of [htmx](https://htmx.org/) to make pages dynamic, while the database backend uses [sqlite](https://sqlite.org/) as the default for beginners + [postgres](https://www.postgresql.org/) for production systems. There is a lot more built in to the codebase (including a custom workflow orchestration system) so make sure you explore!
 
 ## Before exploring the code
 
@@ -16,25 +18,12 @@ This Github repo holds all of our source code. Before getting started here, you 
 
 ## Ready to jump in?
 
-Install with:
+You can install Simmate using either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [conda](https://conda-forge.org/download/): 
 ``` bash
 uv pip install simmate
 ```
-
-Confirm the install worked:
 ``` bash
-simmate --help
-```
-
-Build your new database:
-
-``` bash
-simmate database reset
-```
-
-Then start your local web server:
-``` bash
-simmate run-server
+conda install -c conda-forge simmate
 ```
 
 ## Need help or have a suggestion?
