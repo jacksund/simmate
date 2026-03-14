@@ -2,30 +2,45 @@
 
 ## Quick Start
 
-1. Download and install [anaconda](https://www.anaconda.com/products/distribution)
+1. Download and install your preferred package manager:
 
-    !!! warning
-        Anaconda requires a license if you work at a company with >200 employees (academic instituitions exlcuded). If this applies to you, download [miniforge](https://github.com/conda-forge/miniforge) instead, which is free & open-source for everyone. The conda commands below will be the same.
+    === "uv (Recommended)"
+        Visit the [uv installation page](https://docs.astral.sh/uv/getting-started/installation/) and follow the instructions for your operating system.
 
-2. Set up a conda environment, install Simmate within it, and activate it
-``` shell
-conda create -n my_env -c conda-forge python=3.11 simmate
-conda activate my_env
-```
+    === "Anaconda / Miniforge"
+        Visit the [Anaconda download page](https://www.anaconda.com/products/distribution) or [Miniforge page](https://github.com/conda-forge/miniforge) and install.
 
-3. Run the help command to verify the installation
-``` bash
-simmate --help
-```
+        !!! warning
+            Anaconda requires a license for companies with >200 employees (academic institutions are excluded). If this applies to you, use Miniforge instead.
 
-4. For first-time setup, initialize your local database (SQLite)
-``` bash
-simmate database reset
-```
+2. Create a virtual environment and install Simmate:
 
-5. Start the local dev server and keep this command running
-``` bash
-simmate run-server
-```
+    === "uv"
+        ``` bash
+        uv venv my_env
+        source my_env/bin/activate  # On Windows use: my_env\Scripts\activate
+        uv pip install simmate
+        ```
 
-6. Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) to access your local server
+    === "conda"
+        ``` bash
+        conda create -n my_env -c conda-forge python=3.11 simmate
+        conda activate my_env
+        ```
+
+3. Verify the installation:
+    ``` bash
+    simmate --help
+    ```
+
+4. Initialize your local database (SQLite):
+    ``` bash
+    simmate database reset
+    ```
+
+5. Start the local server:
+    ``` bash
+    simmate run-server
+    ```
+
+6. Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) to access your local dashboard.

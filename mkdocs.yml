@@ -95,7 +95,7 @@ nav:
 
         - 1. Installation:
             - Quick Start: getting_started/installation/quick_start.md
-            - a) Install Anaconda: getting_started/installation/install_anaconda.md
+            - a) Installing Python: getting_started/installation/install_python.md
             - b) Intro to the command line: getting_started/installation/command_line.md
             - c) Create your environment: getting_started/installation/create_your_env.md
             - d) Explore Simmate commands: getting_started/installation/explore_simmate_cli.md
