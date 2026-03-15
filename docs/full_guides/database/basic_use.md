@@ -9,7 +9,7 @@ Analyzing data in Simmate follows a common workflow:
 
 ----------------------------------------------------------------------
 
-## Quick Start Example
+## Quickstart Example
 
 Here's a complete script illustrating how to filter and convert data from the Materials Project:
 

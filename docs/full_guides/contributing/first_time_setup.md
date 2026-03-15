@@ -5,7 +5,7 @@
 
 1. Fork the Simmate repository to your Github profile (e.g., `yourname/simmate`). The button to fork is at the top right of [Simmate's home github page](https://github.com/jacksund/simmate), near the "star repo" button.
 
-2. Clone `yourname/simmate` to your local desktop. We recommend using [GitKraken](https://www.gitkraken.com/) and cloning to a folder named `~/Documents/git/`. GitKraken is free for public repositories (including Simmate), but is also part of [Github's free Student/Teacher packages](https://education.github.com/). Their [6-minute beginner video](https://www.youtube.com/watch?v=ub9GfRziCtU) provides a quick start guide.
+2. Clone `yourname/simmate` to your local desktop. We recommend using [GitKraken](https://www.gitkraken.com/) and cloning to a folder named `~/Documents/git/`. GitKraken is free for public repositories (including Simmate), but is also part of [Github's free Student/Teacher packages](https://education.github.com/). Their [6-minute beginner video](https://www.youtube.com/watch?v=ub9GfRziCtU) provides a quickstart guide.
 
 3. Navigate to the cloned Simmate repository:
 ``` shell

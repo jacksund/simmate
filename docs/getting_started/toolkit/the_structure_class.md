@@ -25,7 +25,7 @@ This becomes incredibly powerful when we start building out functionality and an
 
 In materials science, the most commonly used class is for crystal structures. In Simmate, this class is called `Structure`. 
 
-A crystal structure always consists of a lattice and a list of atomic sites. This is exactly what we have in our `POSCAR` file from tutorial 2. 
+A crystal structure always consists of a lattice and a list of atomic sites. This is exactly what we have in our `POSCAR` file from tutorial 3. 
 
 Let's use Simmate to create an object of the `Structure`. Enter this line into the Python console:
 

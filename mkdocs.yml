@@ -87,61 +87,67 @@ nav:
         - Introduction: getting_started/introduction.md
         
         # - 1. Public Website:
-        #     - Quick Start: getting_started/public_website/quick_start.md
+        #     - Quickstart: getting_started/public_website/quickstart.md
         #     - a) Exploring & managing data: getting_started/installation/data.md
         #     - b) Your first workflow run: getting_started/installation/workflow.md
         #     - c) Connect your own compute: getting_started/installation/add_compute.md
         #     - (extra) Intro to USDC: getting_started/installation/crypto.md
 
         - 1. Installation:
-            - Quick Start: getting_started/installation/quick_start.md
-            - a) Install Anaconda: getting_started/installation/install_anaconda.md
+            - Quickstart: getting_started/installation/quickstart.md
+            - a) Installing Python: getting_started/installation/install_python.md
             - b) Intro to the command line: getting_started/installation/command_line.md
             - c) Create your environment: getting_started/installation/create_your_env.md
             - d) Explore Simmate commands: getting_started/installation/explore_simmate_cli.md
-            - e) Set up a Local Server: getting_started/installation/local_server_setup.md
             
-        - 2. Workflows:
-            - Quick Start: getting_started/workflows/quick_start.md
-            - a) Configure the database: getting_started/workflows/configure_database.md
-            - b) Make a input structure: getting_started/workflows/make_a_structure.md
-            - c) View all workflows: getting_started/workflows/view_all_workflows.md
-            - d) Configure QE: getting_started/workflows/configure_qe.md
-            - e) Run a workflow: getting_started/workflows/running_the_workflow.md
+        - 2. Initial Setup & Tour:
+            - Quickstart: getting_started/initial_setup/quickstart.md
+            - a) Configure the database: getting_started/initial_setup/configure_database.md
+            - b) Exploring Apps & Data: getting_started/initial_setup/explore_apps.md
+            - c) Submitting a Workflow: getting_started/initial_setup/run_a_workflow.md
+
+        - 3. Workflows:
+            - Quickstart: getting_started/workflows/quickstart.md
+            - a) Make an input structure: getting_started/workflows/make_a_structure.md
+            - b) View all workflows: getting_started/workflows/view_all_workflows.md
+            - c) Configure QE: getting_started/workflows/configure_qe.md
+            - d) Run a workflow: getting_started/workflows/running_the_workflow.md
             - (extra) Submit to a cluster: getting_started/workflows/submit_to_a_cluster.md
         
-        - 3. Toolkit:
-            - Quick Start: getting_started/toolkit/quick_start.md
+        - 4. Toolkit:
+            - Quickstart: getting_started/toolkit/quickstart.md
             - a) Intro to Python (& Spyder): getting_started/toolkit/intro_to_spyder.md
             - b) The Structure class: getting_started/toolkit/the_structure_class.md
+            - c) The Molecule class: getting_started/toolkit/the_molecule_class.md
+            - d) The Composition class: getting_started/toolkit/the_composition_class.md
             - e) Advanced classes: getting_started/toolkit/advanced_classes.md
         
-        - 4. Database:
-            - Quick Start: getting_started/database/quick_start.md
+        - 5. Database:
+            - Quickstart: getting_started/database/quickstart.md
             - a) View data w. DBeaver: getting_started/database/dbeaver.md
             - b) How tables are built: getting_started/database/intro_to_python_inheritance.md
             - c) Workflow data: getting_started/database/access_workflow_data.md
             - d) Third-party data: getting_started/database/access_thirdparty_data.md
         
-        - 5. Custom workflows:
-            - Quick Start: getting_started/custom_workflows/quick_start.md
-            - a) Basic workflows: getting_started/custom_workflows/basic_workflows.md
-            - b) Chemistry workflows: getting_started/custom_workflows/chemistry_workflows.md
-            - b) Class-based workflows: getting_started/custom_workflows/class_based_workflows.md
-        
-        - 6. Custom apps & tables:
-            - a) Create an app: getting_started/custom_tables_and_apps/create_a_custom_app.md
-            - b) Create a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
-            - c) Adding app workflows: getting_started/custom_tables_and_apps/using_app_workflows.md
-        
-        - 7. Use a cloud database:
-            - Quickstart: getting_started/use_a_cloud_database/quick_start.md
+        - 6. Use a cloud database:
+            - Quickstart: getting_started/use_a_cloud_database/quickstart.md
             - a) Private vs shared: getting_started/use_a_cloud_database/private_vs_collab.md
             - b) Building a database: getting_started/use_a_cloud_database/build_a_postgres_database.md
+            - c) Connect to Postgres: getting_started/use_a_cloud_database/connect_to_postgres.md
         
-        - 8. Computational resources:
-            - Quickstart: getting_started/add_computational_resources/quick_start.md
-            - a) Intro to workers: getting_started/add_computational_resources/intro_to_workers.md
+        - 7. Computational resources:
+            - Quickstart: getting_started/add_computational_resources/quickstart.md
+            - a) Why use workers?: getting_started/add_computational_resources/1_what_are_workers.md
+            - b) Running locally: getting_started/add_computational_resources/2_running_locally.md
+            - c) Monitoring jobs: getting_started/add_computational_resources/3_monitoring_and_managing.md
+            - d) Parallel clusters: getting_started/add_computational_resources/4_scaling_to_clusters.md
+            - e) HPC & Clouds: getting_started/add_computational_resources/5_hpc_and_clouds.md
+        
+        - 8. Custom Apps:
+            - Quickstart: getting_started/custom_apps/quickstart.md
+            - a) Create an app: getting_started/custom_apps/create_an_app.md
+            - b) Custom workflows: getting_started/custom_apps/custom_workflows.md
+            - c) Custom tables: getting_started/custom_apps/custom_tables.md
         
         - Wrap up: getting_started/wrap_up.md
     
@@ -277,7 +283,7 @@ nav:
             - Molecules:
                 - Overview: full_guides/toolkit/molecules/overview.md
                 - Single Molecule: 
-                    - Quick Start: full_guides/toolkit/molecules/single_molecule/quick_start.md
+                    - Quickstart: full_guides/toolkit/molecules/single_molecule/quickstart.md
                     - Loading: full_guides/toolkit/molecules/single_molecule/loading.md
                     - Exporting: full_guides/toolkit/molecules/single_molecule/exporting.md
                     - Reactions: full_guides/toolkit/molecules/single_molecule/reaction.md

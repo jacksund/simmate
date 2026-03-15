@@ -172,7 +172,7 @@ To schedule a workflow, ensure your computational resources are configured, then
 !!! warning
     The `run-cloud` command/method only **schedules** the workflow. It won't 
     run until you add computational resources (or `Workers`). To do this, you
-    must read through the ["Computational Resources"](/getting_started/add_computational_resources/quick_start.md) documentation.
+    must read through the ["Computational Resources"](/getting_started/add_computational_resources/quickstart.md) documentation.
 
 ------------------------------------------------------------
 

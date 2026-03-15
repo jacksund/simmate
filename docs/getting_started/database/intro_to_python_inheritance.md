@@ -6,7 +6,7 @@
 
 Before we proceed, let's quickly review the progress we've made so far...
 
-- [x] We established our database at `~/simmate/my_env-database.sqlite`
+- [x] We established our database at `~/simmate/my_env-database.sqlite3`
 - [x] We ran a `quantum-espresso` workflow that stored results in our database
 - [x] We introduced Python classes, focusing on the significance of the `Structure` class
 
@@ -24,10 +24,11 @@ All datatables are represented by a class, and the general format is as follows:
 from simmate.database.base_data_types import DatabaseTable, table_column
 
 class MyExampleTable(DatabaseTable):
-   column_01 = table_column.CharField()  # CharField --> text storage
-   column_02 = table_column.BoolField()  # BoolField --> True/False storage
-   column_03 = table_column.FloatField()  # FloatField --> number/decimal storage
+   column_01 = table_column.CharField(max_length=50)  # text storage
+   column_02 = table_column.BooleanField()  # True/False storage
+   column_03 = table_column.FloatField()  # number/decimal storage
 ```
+
 
 The corresponding table (populated with random data) would look like this:
 
@@ -53,17 +54,17 @@ First, we define a table with common data (let's use `Person` as an example).
 from simmate.database.base_data_types import DatabaseTable, table_column
 
 class Person(DatabaseTable):
-   name = table_columns.CharField()
-   age = table_columns.IntField()
-   height = table_columns.FloatField()
+   name = table_column.CharField(max_length=100)
+   age = table_column.IntegerField()
+   height = table_column.FloatField()
 ```
 
 Next, we create a separate table that includes this data and more:
 
 ```python
 class Student(Person):  # <--- note we have Person here instead of DatabaseTable
-   year = table_columns.IntField()  # e.g. class of 2020
-   gpa = table_columns.FloatField()
+   year = table_column.IntegerField()  # e.g. class of 2020
+   gpa = table_column.FloatField()
 ```
 
 The `Student` datatable now looks like this:

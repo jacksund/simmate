@@ -60,18 +60,45 @@ plt.show()
 
 ----------------------------------------------------------------------
 
-## Example 3: Matching Structures
+## Example 3: R-group Decomposition
 
-Pymatgen is currently the most extensive package and offers the most toolkit-like features. For instance, it's common to compare two structures to determine if they are symmetrically equivalent (within a given tolerance). You provide it with two structures, and it will return True or False based on whether they match:
+If you have a set of molecules with a common core structure (a scaffold), you might want to identify the different R-groups attached to that core. This is a powerful tool for analyzing drug-like molecules.
 
 ```python
-from pymatgen.analysis.structure_matcher import StructureMatcher
+from simmate.toolkit import Molecule
 
-matcher = StructureMatcher()
+# Load a molecule and define a scaffold (the part you want to keep)
+molecule = Molecule.from_smiles("OC1=CC=C(O)C=C1")  # Hydroquinone
+scaffold = Molecule.from_smiles("C1=CC=CC=C1")     # Benzene
 
-# Now let's compare our two random structures!
-# This should return False. You can verify this in your Spyder variable explorer.
-is_matching = matcher.fit(structure1, structure2)  
+# Identify the groups attached to the benzene ring
+r_groups = molecule.get_r_groups(scaffold)
+
+# Explore the results
+print(r_groups)
 ```
+
+----------------------------------------------------------------------
+
+## Example 4: Matching Structures & Molecules
+
+Comparing two objects to determine if they are equivalent is a common task. Simmate provides simple, unified ways to do this:
+
+=== "Crystals"
+    Using `StructureMatcher` from PyMatGen:
+    ```python
+    from pymatgen.analysis.structure_matcher import StructureMatcher
+
+    matcher = StructureMatcher()
+    is_matching = matcher.fit(structure1, structure2)  
+    ```
+
+=== "Molecules"
+    Using Simmate's built-in comparison (based on InChI keys):
+    ```python
+    mol1 = Molecule.from_smiles("C")
+    mol2 = Molecule.from_smiles("C")
+    is_matching = (mol1 == mol2)
+    ```
 
 ----------------------------------------------------------------------

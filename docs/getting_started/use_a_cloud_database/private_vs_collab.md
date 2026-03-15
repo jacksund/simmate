@@ -10,9 +10,9 @@ If you're part of a team, only **ONE** member needs to set up and manage **ONE**
 
 -------------------------------------------------------------------------------
 
-## Collaborating with the Warren Lab
+## Collaborating via the Public Website
 
-Ideally, the entire scientific community could work together, sharing their results. Our Simmate team encourages as many labs as possible to collaborate. If you're interested in joining this effort, simply email **simmate.team@gmail.com**. As a team member, you won't need to set up or manage any cloud database.
+Ideally, the entire scientific community could work together, sharing their results. Our Simmate team encourages as many labs as possible to collaborate through our public website ([simmate.org](https://simmate.org/)). This operates as an open collective: all data contributed is public, and our team handles all database management responsibilities. This means you won't need to set up or manage any cloud database yourself. For more details on this collaborative effort, please refer to our homepage at [simmate.org](https://simmate.org/).
 
 -------------------------------------------------------------------------------
 
@@ -31,25 +31,28 @@ In summary, only establish your own cloud database if:
 
 If you're collaborating with someone who has already set up a database, connecting to it will be straightforward. 
 
-Once you have your cloud database's connection parameters, create the file `~/simmate/my_env-settings.yaml` (if it isn't there already) and input the connection parameters provided by your point-person. For example, the following can be added to your settings file:
-``` yaml
-database:
-  ENGINE: django.db.backends.postgresql
-  HOST: simmate-database-do-user-8843535-0.b.db.ondigitalocean.com
-  NAME: simmate-database-00-pool
-  USER: doadmin
-  PASSWORD: ryGEc5PDxC2IHDSM
-  PORT: 25061
-  OPTIONS:
-    sslmode: require
+Once you have your cloud database's connection parameters, update your settings. The easiest way is through the command line (replace with your actual details):
+``` shell
+simmate config update "database.engine=django.db.backends.postgresql"
+simmate config update "database.host=simmate-db.example.com"
+simmate config update "database.name=simmate_db"
+simmate config update "database.user=doadmin"
+simmate config update "database.password=your_password"
+simmate config update "database.port=25061"
+simmate config update "database.options.sslmode=require"
 ```
 
-That's all! When you run a new workflow, results will be saved to this cloud database instead of your local file.
-
-!!! danger
-    If your lab uses postgres, ensure you have the necessary database dependencies installed. For postgres, execute the command:
-    ``` shell
-    conda install -n my_env -c conda-forge psycopg2
-    ```
+Alternatively, you can manually update the file `~/simmate/settings.yaml` (or `{conda_env}-settings.yaml`) with the following content:
+``` yaml
+database:
+  engine: django.db.backends.postgresql
+  host: simmate-db.example.com
+  name: simmate-db-pool
+  user: doadmin
+  password: your_password
+  port: 25061
+  options:
+    sslmode: require
+```
 
 -------------------------------------------------------------------------------

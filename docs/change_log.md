@@ -12,9 +12,18 @@ simmate version
 
 ## Upgrading to the Latest Version
 
-We strongly advise installing simmate in a fresh conda environment instead of updating it within your current environment:
+We strongly advise installing Simmate in a fresh environment instead of updating it within your current one. 
+
+For **conda** users:
 ``` shell
 conda create -n my_env -c conda-forge python=3.11 simmate
+```
+
+For **uv** users:
+``` shell
+uv venv
+source .venv/bin/activate
+uv pip install simmate
 ```
 
 Ensure that the expected version is installed:
@@ -49,15 +58,25 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 !!! tip
     To view ongoing changes that haven't been finalized or merged yet, check our [active pull-requests](https://github.com/jacksund/simmate/pulls) on GitHub
 
-<!-- (hidden message for maintainer to use between releases)
-- no new changes have been merged into the `main` branch yet
-**Enhancements**
-**Refactors**
-**Fixes**
--->
-
 **Enhancements**
 
+- switched from `conda` to `uv` as the default environment and package manager
+- added `scratch_dir` setting to support local scratch directories for workflows
+- added `inventory_management` app for tracking laboratory inventory
+- added `pubchem` client with support for bulk downloads
+- added `chemspace` datastore for molecular screening
+- added `worker` database table to track active workers and their status
+- added workflow submission forms to the web UI
+- added `threejs` viewport for 3D molecular and crystal visualization
+- added `kmeans` clustering and reaction enumeration to toolkit
+- added `project_management` and `business` apps for open-source project tracking
+- added `etherscan` and `price_catalog` apps for project financial tracking
+- added support for SMILES export via ChemDraw JS
+- added `humanize` support and customizable table text sizes in web UI
+- added `web_traffic` reports to the administrative dashboard
+- added `htmx` retargeting support for dynamic UI updates
+- added `docker` and `helm` configuration files for cloud deployments
+- added `ai_assistant` contribution guides for developers using AI tools
 - added frontend framework and docs, based off of a fork of `django-unicorn`
 - added custom API token generation and auth backend
 - added `CSV` download button on the `Data` web views
@@ -78,13 +97,19 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `database.external_connectors` utils
 - added proof of concept htmx app for frontend forms
 - added `toolkit.datastores` and `toolkit.dataframes` helper modules
-- added molecular and poc apps to the list of df
 - allow conditional postgres-rdkit extension with settings flag
 - added `startup_method` hook to simmate workers
 - added `baderkit` app
 
 **Refactors**
 
+- migrated frontend from `django-unicorn` to `htmx` for improved performance and simplicity
+- massive documentation overhaul, including new guides for contributing, website setup, and full guide series
+- refactored `engine` module into `workflows` to consolidate logic
+- renamed the internal `config` module for better organization
+- updated workflow columns in the database for enhanced metadata tracking
+- refactored `htmx` template tags and components for better modularity
+- reorganized `dev` apps and updated the `data explorer` UI
 - refactored website's workflow tab to use new API backend
 - removed `django-contrib-comments`, `django-crispy-forms`, `dj-database-url`, `django-filter`, and `djangorestframework` dependencies
 - update `breadcrumbs` tag to include deprec `breadcrumb_active`
@@ -92,13 +117,19 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - `DynamicApiView` was split up into separate views for easier debugging and future enhancements
 - `website.engine` apps and others are condensed into `core_components`, `data_explorer`, and `workflows` apps
 - refactored `toolkit.featurizers` module
-- moved all of `simmate.engine` module into `simmate.workflows`
 - deprec django-unicorn in favor of htmx
 - deprec badelf app as it is now a standalone python package (baderkit)
 - `load_remote_archives` is removed in favor of `database download`
 
 **Fixes**
 
+- fixed `run_cloud` typo in workflow submission
+- patched `m2m` (many-to-many) API filters
+- fixed `select2` and modal popout bugs
+- fixed `html_report` generation and status tracking typos
+- patched breadcrumb closing tags and CSS styling in web UI
+- fixed web UI bugs for workflow results and data tables
+- updated `plotlyjs` CDN and default themes
 - fix Data tab in website view failing to load due to molecule template
 - fix workflow names that have captial letters next to eachother (e.g, `LogDWorkflow` --> `log-d-workflow`)
 - fix `parse_multiselect` util when nested in a `create_many` form

@@ -196,7 +196,7 @@ def list_all(include_subflows: bool = False):
 
     from simmate.workflows.utilities import get_all_workflow_names
 
-    print("These are the workflows that have been registerd:")
+    print("These are the workflows that have been registered:")
     all_workflows = get_all_workflow_names(exclude_subflows=not include_subflows)
     for i, workflow in enumerate(all_workflows):
         workflow_number = str(i + 1).zfill(2)

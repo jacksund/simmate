@@ -318,7 +318,7 @@ class SimmateWorker(DatabaseTable):
                             # with another worker, we likely have a problematic task
                             if nfailures == 2:
                                 logging.warning(
-                                    "This is the 2nd occurance with this task causing "
+                                    "This is the 2nd occurrence with this task causing "
                                     "a 'command not found' problem. In case this a typo "
                                     "in your command, we are marking the task as CANCELLED "
                                     "to prevent it from shutting down other workers."

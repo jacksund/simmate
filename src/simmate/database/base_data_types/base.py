@@ -525,7 +525,7 @@ class DatabaseTable(models.Model):
 
         Note, we use "table_name" instead of "name" because users may want
         a column titled "name", which would break features. To reduce
-        occurance of of this issue, we use "table_name" instead.
+        occurrence of of this issue, we use "table_name" instead.
         """
         return cls.__name__
 

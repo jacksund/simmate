@@ -1,4 +1,4 @@
-# Single-Molecule Quick Start
+# Single-Molecule Quickstart
 
 --------------------------------------------------------------------------------
 
