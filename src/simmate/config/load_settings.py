@@ -398,6 +398,9 @@ class SimmateSettings:
                     "api_key": None,
                 },
             },
+            "materials_project": {
+                "api_key": None,
+            },
             "vasp": {
                 "default_command": "vasp_std > vasp.out",
                 "parallelization": {
@@ -653,6 +656,7 @@ class SimmateSettings:
         "SIMMATE__BADER__DOCKER__ENABLE": bool,
         "SIMMATE__QUANTUM_ESPRESSO__DOCKER__ENABLE": bool,
         "SIMMATE__VASP__DOCKER__ENABLE": bool,
+        "SIMMATE__MATERIALS_PROJECT__API_KEY": str,
         "SIMMATE__POSTGRES_RDKIT_EXTENSION": bool,
         "SIMMATE__SCRATCH_DIR": str,
     }
