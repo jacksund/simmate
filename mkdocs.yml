@@ -99,47 +99,51 @@ nav:
             - b) Intro to the command line: getting_started/installation/command_line.md
             - c) Create your environment: getting_started/installation/create_your_env.md
             - d) Explore Simmate commands: getting_started/installation/explore_simmate_cli.md
-            - e) Set up a Local Server: getting_started/installation/local_server_setup.md
             
-        - 2. Workflows:
+        - 2. Initial Setup & Tour:
+            - Quick Start: getting_started/initial_setup/quick_start.md
+            - a) Configure the database: getting_started/initial_setup/configure_database.md
+            - b) Exploring Apps & Data: getting_started/initial_setup/explore_apps.md
+            - c) Submitting a Workflow: getting_started/initial_setup/run_a_workflow.md
+
+        - 3. Workflows:
             - Quick Start: getting_started/workflows/quick_start.md
-            - a) Configure the database: getting_started/workflows/configure_database.md
-            - b) Make a input structure: getting_started/workflows/make_a_structure.md
-            - c) View all workflows: getting_started/workflows/view_all_workflows.md
-            - d) Configure QE: getting_started/workflows/configure_qe.md
-            - e) Run a workflow: getting_started/workflows/running_the_workflow.md
+            - a) Make an input structure: getting_started/workflows/make_a_structure.md
+            - b) View all workflows: getting_started/workflows/view_all_workflows.md
+            - c) Configure QE: getting_started/workflows/configure_qe.md
+            - d) Run a workflow: getting_started/workflows/running_the_workflow.md
             - (extra) Submit to a cluster: getting_started/workflows/submit_to_a_cluster.md
         
-        - 3. Toolkit:
+        - 4. Toolkit:
             - Quick Start: getting_started/toolkit/quick_start.md
             - a) Intro to Python (& Spyder): getting_started/toolkit/intro_to_spyder.md
             - b) The Structure class: getting_started/toolkit/the_structure_class.md
             - e) Advanced classes: getting_started/toolkit/advanced_classes.md
         
-        - 4. Database:
+        - 5. Database:
             - Quick Start: getting_started/database/quick_start.md
             - a) View data w. DBeaver: getting_started/database/dbeaver.md
             - b) How tables are built: getting_started/database/intro_to_python_inheritance.md
             - c) Workflow data: getting_started/database/access_workflow_data.md
             - d) Third-party data: getting_started/database/access_thirdparty_data.md
         
-        - 5. Custom workflows:
+        - 6. Custom workflows:
             - Quick Start: getting_started/custom_workflows/quick_start.md
             - a) Basic workflows: getting_started/custom_workflows/basic_workflows.md
             - b) Chemistry workflows: getting_started/custom_workflows/chemistry_workflows.md
             - b) Class-based workflows: getting_started/custom_workflows/class_based_workflows.md
         
-        - 6. Custom apps & tables:
+        - 7. Custom apps & tables:
             - a) Create an app: getting_started/custom_tables_and_apps/create_a_custom_app.md
             - b) Create a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
             - c) Adding app workflows: getting_started/custom_tables_and_apps/using_app_workflows.md
         
-        - 7. Use a cloud database:
+        - 8. Use a cloud database:
             - Quickstart: getting_started/use_a_cloud_database/quick_start.md
             - a) Private vs shared: getting_started/use_a_cloud_database/private_vs_collab.md
             - b) Building a database: getting_started/use_a_cloud_database/build_a_postgres_database.md
         
-        - 8. Computational resources:
+        - 9. Computational resources:
             - Quickstart: getting_started/add_computational_resources/quick_start.md
             - a) Intro to workers: getting_started/add_computational_resources/intro_to_workers.md
         

@@ -3,15 +3,54 @@
 ## Quick Start
 
 !!! tip
-    The majority of this guide covers initial setup for first-time users. For subsequent workflow runs, only steps 8-10 are necessary.
+    Most of this guide is for first-time setup. Only steps 7 and 8 are necessary for any subsequent workflow runs.
 
-1. Initialize your Simmate database, which will be created at `~/simmate/my_env-database.sqlite3` and where `my_env` is the name of your active conda environment:
+----------------------------------------------------------------------
+
+### 1. Database Setup
+Initialize your Simmate database (if you haven't already from the "Initial Setup" guide). 
+
+!!! warning
+    Running `simmate database reset` will delete any existing data in your database.
+
 ```bash
 simmate database reset
 ```
 
-2. Create a structure file for sodium chloride, which we will use to practice calculations. Name it `POSCAR` and add the following text to it:
+### 2. Explore Workflows
+View a list of all available workflows and explore them interactively:
+```bash
+# List all names
+simmate workflows list-all
+
+# Explore documentation and parameters
+simmate workflows explore
 ```
+
+### 3. Configure Quantum Espresso (QE)
+Simmate uses Quantum Espresso for these tutorials. Ensure it is installed and configured:
+
+- **Option A (Recommended for beginners):** Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and enable Docker in Simmate:
+    ```bash
+    simmate config update "quantum_espresso.docker.enable=True"
+    ```
+- **Option B:** Install QE manually and ensure `pw.x` is in your `PATH`.
+
+### 4. Load Potentials
+Download the SSSP pseudopotential library:
+```bash
+simmate-qe setup sssp
+```
+
+### 5. Test Configuration
+Verify everything is ready:
+```bash
+simmate config test quantum_espresso
+```
+
+### 6. Create an Input Structure
+Create a file named `POSCAR` (no extension) and add the following coordinates for Sodium Chloride:
+``` text
 Na1 Cl1
 1.0
 3.485437 0.000000 2.012318
@@ -24,52 +63,22 @@ direct
 0.500000 0.500000 0.500000 Cl
 ```
 
-3. Use the following command to view a list of all available workflows:
-```bash
-simmate workflows list-all
-```
-
-4. Learn about all workflows interactively with the following command:
-``` bash
-simmate workflows explore
-```
-
-    !!! note
-        There are a variety of software options for QM, DFT, or other analyses (e.g., VASP, Abinit, QE, LAMMPS, etc.). In this tutorial, we will use Quantum Espresso because we have Docker images for those who don't have it installed. If you prefer another program, check the `Apps` section in our guides for specific instructions.
-
-
-5. Make sure you have Quantum Espresso (QE) installed using one of two options:
-      - (*for beginners*) Install [Docker-Desktop](https://www.docker.com/products/docker-desktop/). Then run the following command:
-          ``` bash
-          simmate config update "quantum_espresso.docker.enable=True"
-          ```
-      - (*for experts*) Install QE using [offical guides](https://www.quantum-espresso.org/) and make sure `pw.x` is in the path
-
-        !!! tip
-            If you choose Docker and need help, see our guides [here](/getting_started/workflows/configure_qe.md#1-install-qe-using-docker) for installation and common errors.
-
-6. To run calculations with QE, we need psuedopotentials. Simmate helps load these from the popular [SSSP library](https://www.materialscloud.org/discover/sssp/):
-``` bash
-simmate-qe setup sssp
-```
-
-7. Make sure QE is fully configured and ready to use:
-``` bash
-simmate config test quantum_espresso
-```
-
-8. With everything configured, you can submit your workflow using the website interface, command-line, or Python. Here, we'll use a settings file in YAML format. Create a file named `example.yaml` with the following content:
-``` yaml
+### 7. Create a Workflow Config
+Create a file named `example.yaml` to define your calculation:
+```yaml
 workflow_name: static-energy.quantum-espresso.quality00
 structure: POSCAR
 ```
 
-9. Run the workflow configuration file we just created:
-``` bash
+### 8. Run the Workflow
+Execute the workflow using the YAML file:
+```bash
 simmate workflows run example.yaml
 ```
 
-10. The run will create a new folder (e.g. `simmate-task-abcd1234`) for your run. Inside, you'll find files named `simmate_metadata.yaml` and `simmate_summary.yaml` which contain some quick information. Some workflows (like `band-structure` calculations) will also generate plots for you.
-
-    !!! tip
-        While the plots and summary files are useful for quick testing, more detailed information is stored in our database. We'll cover how to access your database in a subsequent tutorial.
+### 9. Review Results
+Check the newly created folder (e.g., `simmate-task-abcd1234`) for a summary of the results:
+```bash
+# View the summary file
+cat simmate-task-*/simmate_summary.yaml
+```

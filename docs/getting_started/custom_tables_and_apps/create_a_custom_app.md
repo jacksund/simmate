@@ -118,7 +118,7 @@ of its existence. We need to inform Simmate to load it.
 
 ## Registering Your App
 
-1. If you have explored the `Apps` section of our documentaion, you will see that many apps are registerd using the `simmate config add` command. We can use this command to register our app. Simply write out the python path to our `Config`:
+1. If you have explored the `Apps` section of our documentaion, you will see that many apps are registered using the `simmate config add` command. We can use this command to register our app. Simply write out the python path to our `Config`:
 ``` bash
 simmate config add 'example_app.apps.ExampleAppConfig'
 ```
@@ -157,7 +157,7 @@ print(settings.apps)  # you should see your new app!
 from simmate.database import connect
 ```
 
-5. You now have registerd your app with Simmate and confirmed everything is working :rocket:
+5. You now have registered your app with Simmate and confirmed everything is working :rocket:
 
 -------------------------------------------------------------------------------
 

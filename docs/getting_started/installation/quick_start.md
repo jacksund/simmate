@@ -32,15 +32,3 @@
     ``` bash
     simmate --help
     ```
-
-4. Initialize your local database (SQLite):
-    ``` bash
-    simmate database reset
-    ```
-
-5. Start the local server:
-    ``` bash
-    simmate run-server
-    ```
-
-6. Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) to access your local dashboard.

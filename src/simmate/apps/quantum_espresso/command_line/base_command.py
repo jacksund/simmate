@@ -8,7 +8,10 @@ import typer
 
 from simmate.apps.quantum_espresso.command_line.setup import setup_app
 
-qe_app = typer.Typer(rich_markup_mode="markdown")
+qe_app = = typer.Typer(
+    rich_markup_mode="markdown",
+    add_completion=False,
+)
 
 
 @qe_app.callback(no_args_is_help=True)

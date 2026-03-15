@@ -125,7 +125,7 @@ To load QE into your environment, you typically need to run a 'load module' comm
 Then check that the `pw.x` command is found and QE configured correctly:
 
 ``` bash
-simmate-qe test
+simmate config test quantum_espresso
 ```
 
 If the potentials are missing, you have Simmate download and configure them:
