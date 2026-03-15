@@ -17,7 +17,7 @@ This script demonstrates how to automate a series of VASP calculations across ma
 - [x] Configure a database ([guide](/getting_started/workflows/configure_database.md))
 - [x] Load Materials Project data ([guide](/database/access_thirdparty_data.md))
 - [x] Simulation software installed (VASP)
-- [x] Simmate workers running ([guide](/getting_started/add_computational_resources/quick_start.md))
+- [x] Simmate workers running ([guide](/getting_started/add_computational_resources/quickstart.md))
 
 ## The script :rocket:
 

@@ -1,6 +1,6 @@
 # Installation
 
-## Quick Start
+## Quickstart
 
 1. Download and install your preferred package manager:
 

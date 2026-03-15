@@ -38,7 +38,7 @@ For option 3, we provide several starting points in the Simmate repository under
 * **Docker:** See `envs/docker/docker-compose.yaml` for a containerized setup.
 * **Kubernetes:** See `envs/helm/` for a Helm chart to deploy Simmate on a cluster.
 
-Ensure you have also completed the base Simmate tutorials, particularly the ones on [setting up a cloud database](/getting_started/use_a_cloud_database/quick_start.md) and [setting up computational resources](/getting_started/add_computational_resources/quick_start.md).
+Ensure you have also completed the base Simmate tutorials, particularly the ones on [setting up a cloud database](/getting_started/use_a_cloud_database/quickstart.md) and [setting up computational resources](/getting_started/add_computational_resources/quickstart.md).
 
 !!! warning
     For any production server, ensure you update your `SECRET_KEY`, `ALLOWED_HOSTS`, and `CSRF_TRUSTED_ORIGINS` settings. See the [General Settings](#general-settings) section below.

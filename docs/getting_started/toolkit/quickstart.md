@@ -3,7 +3,7 @@
 !!! tip
     Simmate's toolkit is built on top of [PyMatGen](https://pymatgen.org/) (for crystals) and [RDKit](https://www.rdkit.org/) (for molecules). This tutorial serves as a guide to using these packages through a simplified, unified interface.
 
-## Quick Start
+## Quickstart
 
 ### 1. Crystals (Structures)
 

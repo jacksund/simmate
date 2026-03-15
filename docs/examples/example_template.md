@@ -18,7 +18,7 @@ This script does x, y, z using a, b, c...
 
 - [x] use a postgres database ([guide](/getting_started/use_a_cloud_database/build_a_postgres_database.md))
 - [x] load the matproj database into your postgres database
-- [x] start a bunch of simmate workers (or a "cluster") ([guide](/getting_started/add_computational_resources/quick_start.md))
+- [x] start a bunch of simmate workers (or a "cluster") ([guide](/getting_started/add_computational_resources/quickstart.md))
 
 
 ## The script :rocket:

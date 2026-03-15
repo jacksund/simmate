@@ -1,6 +1,6 @@
 # Initial Setup & Tour
 
-## Quick Start
+## Quickstart
 
 1. Initialize your database using the prebuilt option. When prompted, type **yes** to download the prebuilt database.
     ``` bash

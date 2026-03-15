@@ -1,6 +1,6 @@
 # Explore & Run Workflows
 
-## Quick Start
+## Quickstart
 
 !!! tip
     Most of this guide is for first-time setup. Only steps 7 and 8 are necessary for any subsequent workflow runs.

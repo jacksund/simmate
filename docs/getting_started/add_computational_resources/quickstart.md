@@ -1,9 +1,9 @@
 # Distributed Computational Resources
 
-## Quick Start
+## Quickstart
 
 !!! tip
-    While this section is intended for distributing workflows accross many computers, you can stick to your local laptop for this Quick Start and learning the basics.
+    While this section is intended for distributing workflows accross many computers, you can stick to your local laptop for this Quickstart and learning the basics.
 
 !!! warning
     If you are running everything on your local computer, you can use the default database (`sqlite`) for now. *HOWEVER*... SQLite can not handle parallelization - so you may see errors/crashes with highly parallel workloads. Limit the number of workers you start.
