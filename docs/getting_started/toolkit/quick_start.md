@@ -1,56 +1,52 @@
 # Analyzing & Modifying Structures
 
 !!! tip
-    Simmate toolkit still uses [pymatgen](https://pymatgen.org/). Therefore, this tutorial also serves as a guide to using their package. See also:
-
-    - outline of all available methods & properties (see `Full Guides` > `Toolkit`)
-    - [PyMatGen's official guides & API reference](https://pymatgen.org/usage.html)
+    Simmate's toolkit is built on top of [PyMatGen](https://pymatgen.org/) (for crystals) and [RDKit](https://www.rdkit.org/) (for molecules). This tutorial serves as a guide to using these packages through a simplified, unified interface.
 
 ## Quick Start
 
-1. Ensure you have the `POSCAR` file of NaCl from the previous tutorial.
+### 1. Crystals (Structures)
 
-2. You can load the structure into python:
+Load a structure from a file (like the `POSCAR` from the previous tutorial) and access its properties:
+
 ```python
 from simmate.toolkit import Structure
 
+# Load from a file
 structure = Structure.from_file("POSCAR")
-```
 
-4. Access various properties of the structure, lattice, and composition:
-```python
-# explore structure-based properties
-structure.density
-structure.distance_matrix
-structure.cart_coords
-structure.num_sites
+# Access properties
+print(f"Density: {structure.density}")
+print(f"Volume: {structure.lattice.volume}")
+print(f"Formula: {structure.composition.reduced_formula}")
 
-# access the structure's composition and its properties
-composition = structure.composition
-composition.reduced_formula
-composition.elements
-
-# access the structure's lattice and its properties
-lattice = structure.lattice
-lattice.volume
-lattice.matrix
-lattice.beta
-```
-
-5. Create new structures using some transformation or analysis:
-```python
-structure.add_oxidation_state_by_guess()
+# Modify and export
 structure.make_supercell([2,2,2])
+structure.to(filename="NaCl_supercell.cif", fmt="cif")
 ```
 
-6. Export your final structure to a new file format:
+### 2. Molecules
+
+Load a molecule from a SMILES string and explore its features:
+
 ```python
-structure.to(filename="NaCl.cif", fmt="cif")
+from simmate.toolkit import Molecule
+
+# Load from a SMILES string (e.g., Caffeine)
+molecule = Molecule.from_smiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
+
+# Access properties
+print(f"Molecular Weight: {molecule.molecular_weight}")
+print(f"Number of Rings: {molecule.num_rings}")
+print(f"LogP: {molecule.log_p_rdkit}")
+
+# Export to a file
+molecule.to_sdf_file("caffeine.sdf")
 ```
 
 ## Extra Examples
 
-Looking for advanced features? Simmate is gradually incorporating these into our toolkit module, but many more are available through [PyMatGen](https://pymatgen.org/) and [MatMiner](https://hackingmaterials.lbl.gov/matminer/) (which are preinstalled for you).
+Looking for advanced features? Simmate incorporates many analytical tools directly into our toolkit, but even more are available through the underlying packages.
 
 ### Random Structure Creation
 
@@ -66,24 +62,39 @@ creator = RandomSymStructure(composition)
 structure = creator.create_structure(spacegroup=166)
 ```
 
-### Fingerprints (MatMiner)
+### Fingerprints
 
-Matminer is useful for analyzing structures and creating machine-learning inputs. One common analysis is the generating a RDF fingerprint to help analyze bonding and compare structures:
+Fingerprints are useful for comparing structures or molecules and creating machine-learning inputs.
 
-```python
-from matminer.featurizers.structure.rdf import RadialDistributionFunction
+=== "Crystals"
+    ```python
+    # Using MatMiner (preinstalled with simmate)
+    from matminer.featurizers.structure.rdf import RadialDistributionFunction
+    
+    rdf_analyzer = RadialDistributionFunction(bin_size=0.1)
+    rdf = rdf_analyzer.featurize(structure)
+    ```
 
-rdf_analyzer = RadialDistributionFunction(bin_size=0.1)
-rdf = rdf_analyzer.featurize(structure)
-```
+=== "Molecules"
+    ```python
+    # Built-in to Simmate's Molecule class
+    fingerprint = molecule.fingerprint
+    ```
 
-### Structure Matching (PyMatGen)
+### Structure/Molecule Matching
 
-Pymatgen currently offers the most functionality. One common function is checking if two structures are symmetrically equivalent (under some tolerance):
+Check if two objects are equivalent:
 
-```python
-from pymatgen.analysis.structure_matcher import StructureMatcher
+=== "Crystals"
+    ```python
+    from pymatgen.analysis.structure_matcher import StructureMatcher
+    
+    matcher = StructureMatcher()
+    is_matching = matcher.fit(structure1, structure2)
+    ```
 
-matcher = StructureMatcher()
-is_matching = matcher.fit(structure1, structure2)
-```
+=== "Molecules"
+    ```python
+    # Molecules can be compared directly
+    is_matching = (molecule1 == molecule2)
+    ```

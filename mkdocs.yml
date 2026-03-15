@@ -118,6 +118,8 @@ nav:
             - Quick Start: getting_started/toolkit/quick_start.md
             - a) Intro to Python (& Spyder): getting_started/toolkit/intro_to_spyder.md
             - b) The Structure class: getting_started/toolkit/the_structure_class.md
+            - c) The Molecule class: getting_started/toolkit/the_molecule_class.md
+            - d) The Composition class: getting_started/toolkit/the_composition_class.md
             - e) Advanced classes: getting_started/toolkit/advanced_classes.md
         
         - 5. Database:
