@@ -65,7 +65,7 @@ result = add.run(x=1, y=2)
 !!! note
     Our workflow run returned a `status` instead of our `result`. This is because (in advanced cases) we will be *submitting* workflows to a cluster, rather than running them directly. In such cases, it is common to submit workflow runs and check the result later.
 
-    This will be covered in the final Simmate tutorial on `Computational Resources`.
+    This was covered in the earlier Simmate tutorial on `Computational resources`.
 
 And here is our final script:
 

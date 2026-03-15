@@ -57,17 +57,20 @@ search_results = table.objects.filter(
 ).all()
 ```
 
-In the previous example, we converted this list of results into a dataframe for easier viewing. You can also convert each row into a toolkit `Structure`. Feel free to experiment with each:
+In the previous example, we converted results into a dataframe for easier viewing. You can also convert results into toolkit structures:
 
 ``` python
-# You can convert this list of objects to a dataframe like we did above
+# You can convert this list of database objects to a dataframe
 data = search_results.to_dataframe()
 
-# Or you can convert to a list of structure objects (ToolkitStructure)
+# Or you can convert to a list of toolkit structures
 structures = search_results.to_toolkit()
+
+# Or just grab the first result and convert it
+single_structure = search_results.first().to_toolkit()
 ```
 
 !!! note
-    This may not seem very exciting now as we only have one row/structure in our table, but we'll explore more advanced filtering in the next section.
+    Converting database results to `ToolkitStructure` objects is useful when you want to use Simmate's scientific tools, such as symmetry analysis or structure transformations.
 
 ----------------------------------------------------------------------

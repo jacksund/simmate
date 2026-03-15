@@ -129,25 +129,25 @@ nav:
             - c) Workflow data: getting_started/database/access_workflow_data.md
             - d) Third-party data: getting_started/database/access_thirdparty_data.md
         
-        - 6. Custom workflows:
+        - 6. Use a cloud database:
+            - Quickstart: getting_started/use_a_cloud_database/quick_start.md
+            - a) Private vs shared: getting_started/use_a_cloud_database/private_vs_collab.md
+            - b) Building a database: getting_started/use_a_cloud_database/build_a_postgres_database.md
+        
+        - 7. Computational resources:
+            - Quickstart: getting_started/add_computational_resources/quick_start.md
+            - a) Intro to workers: getting_started/add_computational_resources/intro_to_workers.md
+        
+        - 8. Custom workflows:
             - Quick Start: getting_started/custom_workflows/quick_start.md
             - a) Basic workflows: getting_started/custom_workflows/basic_workflows.md
             - b) Chemistry workflows: getting_started/custom_workflows/chemistry_workflows.md
             - b) Class-based workflows: getting_started/custom_workflows/class_based_workflows.md
         
-        - 7. Custom apps & tables:
+        - 9. Custom apps & tables:
             - a) Create an app: getting_started/custom_tables_and_apps/create_a_custom_app.md
             - b) Create a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
             - c) Adding app workflows: getting_started/custom_tables_and_apps/using_app_workflows.md
-        
-        - 8. Use a cloud database:
-            - Quickstart: getting_started/use_a_cloud_database/quick_start.md
-            - a) Private vs shared: getting_started/use_a_cloud_database/private_vs_collab.md
-            - b) Building a database: getting_started/use_a_cloud_database/build_a_postgres_database.md
-        
-        - 9. Computational resources:
-            - Quickstart: getting_started/add_computational_resources/quick_start.md
-            - a) Intro to workers: getting_started/add_computational_resources/intro_to_workers.md
         
         - Wrap up: getting_started/wrap_up.md
     
