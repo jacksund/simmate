@@ -16,7 +16,7 @@ With this in mind, it is helpful to know that all of our Simmate apps are really
 ## Step-by-Step Tutorials
 
 1. [Django's official tutorial](https://docs.djangoproject.com/en/5.2/intro/)
-2. [Simmate's getting-start guide](/getting_started/custom_tables_and_apps/create_a_custom_app.md)
+2. [Simmate's getting-start guide](/getting_started/custom_apps/create_an_app.md)
 
 !!! tip
     `django` is installed for you when you install `simmate`, so you can start their tutorials without any additional setup.

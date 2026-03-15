@@ -10,7 +10,7 @@ We recommend creating a [GitHub account](https://github.com/join) before startin
 
 Depending on your experience level, you can expect to spend:
 
-- **Python Experts:** Tutorials 1–5 take less than 1 hour in total. Tutorials 6–9 take 2–3 hours total.
+- **Python Experts:** Tutorials 1–5 take less than 1 hour in total. Tutorials 6–8 take 2–3 hours total.
 - **Beginners:** If you are new to coding, we suggest dedicating 1–2 hours per tutorial to fully understand the concepts.
 
 ## Software Requirements

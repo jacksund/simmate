@@ -137,18 +137,17 @@ nav:
         
         - 7. Computational resources:
             - Quickstart: getting_started/add_computational_resources/quickstart.md
-            - a) Intro to workers: getting_started/add_computational_resources/intro_to_workers.md
+            - a) Why use workers?: getting_started/add_computational_resources/1_what_are_workers.md
+            - b) Running locally: getting_started/add_computational_resources/2_running_locally.md
+            - c) Monitoring jobs: getting_started/add_computational_resources/3_monitoring_and_managing.md
+            - d) Parallel clusters: getting_started/add_computational_resources/4_scaling_to_clusters.md
+            - e) HPC & Clouds: getting_started/add_computational_resources/5_hpc_and_clouds.md
         
-        - 8. Custom workflows:
-            - Quickstart: getting_started/custom_workflows/quickstart.md
-            - a) Basic workflows: getting_started/custom_workflows/basic_workflows.md
-            - b) Chemistry workflows: getting_started/custom_workflows/chemistry_workflows.md
-            - b) Class-based workflows: getting_started/custom_workflows/class_based_workflows.md
-        
-        - 9. Custom apps & tables:
-            - a) Create an app: getting_started/custom_tables_and_apps/create_a_custom_app.md
-            - b) Create a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
-            - c) Adding app workflows: getting_started/custom_tables_and_apps/using_app_workflows.md
+        - 8. Custom Apps:
+            - Quickstart: getting_started/custom_apps/quickstart.md
+            - a) Create an app: getting_started/custom_apps/create_an_app.md
+            - b) Custom workflows: getting_started/custom_apps/custom_workflows.md
+            - c) Custom tables: getting_started/custom_apps/custom_tables.md
         
         - Wrap up: getting_started/wrap_up.md
     

@@ -2,58 +2,65 @@
 
 ## Quickstart
 
-!!! tip
-    While this section is intended for distributing workflows accross many computers, you can stick to your local laptop for this Quickstart and learning the basics.
+This guide shows you how to submit jobs to a queue and start multiple workers to process them.
 
-!!! warning
-    If you are running everything on your local computer, you can use the default database (`sqlite`) for now. *HOWEVER*... SQLite can not handle parallelization - so you may see errors/crashes with highly parallel workloads. Limit the number of workers you start.
+!!! warning "Database Requirement"
+    If you followed the previous tutorial, you should already be on a **Postgres database**. 
 
-    If your computational resources are distributed across different computers, ensure you've set up a cloud database, such as a Postgres database on DigitalOcean. Further, all workers need access to your database in order to function.
+    If you are still using the default **SQLite** database, you **cannot** run multiple workers at once. SQLite will crash if more than one process tries to write to it. For parallel workflows, ensure you've set up a cloud database (like Postgres).
 
-
-1. For remote resources, ensure all simmate installations are connected to the same database. In other words, make sure the `config` matches accross computers. This step is unnecessary if you are on a single computer.
+### 1. Match Your Config
+If you are using multiple computers, ensure they are all connected to the same database:
 ``` bash
 simmate config show --user-only
 ```
-    
-    !!! note
-        If you are using a custom app (w. tables or workflows), ensure all resources have this app installed
 
-1. Create your workflow settings as you normally do. Here we will use a `YAML` file, but you can use Python or the CLI as well:
-``` yaml
-# in example.yaml
+### 2. Submit a Job
+Switch from the `run` command to `run-cloud`. This "schedules" the workflow in your database rather than running it immediately.
+``` bash
+# example.yaml
 workflow_name: static-energy.quantum-espresso.quality00
-structure: POSCAR
+structure: NaCl.cif
 ```
-
-1. Schedule your simmate workflows by switching from the `run` to the `run-cloud` command (in python use the `run_cloud()` method instead of `run()`). This workflow will be scheduled but won't run until a worker is started:
 ``` bash
 simmate workflows run-cloud example.yaml
 ```
 
-1. Start a worker wherever you want to run the workflow with the following command. This "singleflow" worker will start, run one workflow, then shut down:
-``` bash
-simmate engine start-singleflow-worker
-```
-
-    !!! danger
-        If you are on a cluster, `start-worker` should be called within your submit script (e.g., inside `submit.sh` for SLURM). Avoid running workers on the head node.
-
-1. For more control over the number of workflows ran or to run a worker indefinitely, use the command:
+### 3. Start One Worker
+Before starting a full cluster, try starting a single worker to process your job. This worker will stay "on duty" until you stop it (Ctrl+C).
 ``` bash
 simmate engine start-worker
 ```
 
-    !!! tip
-        By default, any worker can pick up any workflow submission. To better control which workers run which workflows, use tags. Workers will only pick up submissions that have matching tags. See the Full Guides for more information.
-
-1. Expand your cluster! Start workers wherever you want, and start as many as you need. Just ensure you follow steps 4 and 5 for every worker. If you need to start multiple workers simultaneously, you can use the `start-cluster` command as well.
+### 4. Start a Cluster
+Once you're comfortable with one worker, you can start a cluster of workers to process many jobs at once. On your local machine, this command starts 3 workers that will run in parallel:
 ``` bash
-# starts 5 local workers
-simmate engine start-cluster 5
+simmate engine start-cluster 3 --type local
 ```
 
-    !!! tip
-        For HPC clusters, you can also utilize commands such as `simmate engine start-cluster 5 --type slurm` 
+### 5. HPC Clusters (Optional)
+If you are on a SLURM cluster, you can submit workers to the cluster queue directly. 
 
-1. To allow others to use your cluster, simply connect them to the same database.
+!!! note
+    The `slurm` cluster type requires a `submit.sh` file to be present in your current directory. Simmate uses this file as a template to submit multiple workers to the queue.
+
+``` bash
+# Submits 3 workers to the SLURM queue using submit.sh
+simmate engine start-cluster 3 --type slurm
+```
+
+!!! tip "Single-Flow Workers"
+    On some HPC clusters, it's better to start a worker that runs **one** job and then shuts down. This helps with resource allocation. Your `submit.sh` would then look like this:
+    ```bash
+    #!/bin/bash
+    # (Your SBATCH settings here...)
+    simmate engine start-singleflow-worker
+    ```
+
+### 6. Monitor Your Jobs
+You can check the status of your submitted jobs at any time:
+```bash
+simmate engine stats
+```
+
+For more details on managing clusters and monitoring jobs, see the **Full Guides** on Compute.
