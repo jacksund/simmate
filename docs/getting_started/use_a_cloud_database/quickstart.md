@@ -4,9 +4,9 @@
 
 ## Quick Guide
 
-1. **Consider collaborating!** The public Simmate website is an open collective where all data is sharing publically, even new workflow submissions. By using the public site, our team will handle the management responsibility for the database, and all data contributed becomes public for the community to use.
+1. **Consider collaborating!** The public Simmate website is an open collective where all data is shared publicly, even new workflow submissions. By using the public site, our team will handle the management responsibility for the database, and all data contributed becomes public for the community to use.
 
-2. **Establish a cloud database.** Simmate uses **Postgres** as the primary database engine for production system. You have two main options for setting a Postgres database:
+2. **Establish a cloud database.** Simmate uses **Postgres** as the primary database engine for production systems. You have two main options for setting up a Postgres database:
 
     *   **Managed Cloud (Recommended):** The easiest way to set up a Postgres database for beginners is with [DigitalOcean](https://m.do.co/c/8aeef2ea807c). A basic 10GB database (~$15/month) is plenty to get started with, and if you use our referral link, you'll get $200 in free credit for your first 60 days.
         <br>
