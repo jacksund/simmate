@@ -36,6 +36,7 @@ class HighThroughputResult(Structure, Calculation):
 ```
 
 By inheriting from `Structure` and `Calculation`, your table will automatically include columns for:
+
 - Lattice parameters (a, b, c, alpha, beta, gamma)
 - Volume and Density
 - Chemical System and Composition
