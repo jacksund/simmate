@@ -1,81 +1,54 @@
-# Switching to the Command-line
+# The Command-line
 
-While the Anaconda Navigator interface is a good entry point for beginners, the command-line is much faster and more powerful. Don't panic, it's simpler than it seems. Even if you're not familiar with coding, you can learn the command-line basics in a few minutes.
+While graphical interfaces like Anaconda Navigator are a good entry point, the command-line is much faster and more powerful. Don't panic—it's simpler than it seems. Even if you're new to coding, you can learn the basics in just a few minutes.
 
-----------------------------------------------------------------------
+---
 
-## Running our first command
+## Opening Your Terminal
 
-Let's get started with our command-line:
+Let's get started:
 
-- On Windows, search for and open "Anaconda Powershell Prompt" (or just Powershell) using your Start menu.
-- On Mac and Linux, search for and open the app named "Terminal"
+- **Windows:** Search for "PowerShell" or "Anaconda PowerShell Prompt" in your Start menu.
+- **macOS & Linux:** Open the "Terminal" app.
 
-You should see something like this:
+You should see a window similar to this:
 
-<!-- This is an image of an empty terminal with anaconda installed -->
 <p align="center" style="margin-bottom:40px;">
 <img src="https://www.shaileshjha.com/wp-content/uploads/2020/03/anaconda_powershell_prompt-800x450.jpg"  height=330 style="max-height: 330px;">
 </p>
 
-You'll notice `(base)` at the start of the line. This represents our current anaconda environment and shows we installed Anaconda correctly. Following that, you'll see the "current working directory", which is the folder we currently have open. On Windows, this will be your user folder (e.g. `C:\Users\johnsmith`), and for Mac/Linux, you'll see `~` which is shorthand for your user folder (e.g. `home/johnsmith`).
+If you installed Anaconda, you'll see `(base)` at the start of the line. If you're using **uv**, your prompt might look slightly different. The rest of the line shows your "current working directory"—the folder you currently have open. On Windows, this is usually `C:\Users\YourName`, and on macOS/Linux, you'll see `~`, which is shorthand for your home folder.
 
-Now, type in the command `cd Desktop` and press enter. This will open your Desktop folder. Then enter the command `ls`, which will list all files and folders on your Desktop. 
+### First Commands
 
-``` shell
-# run these two commands
+Type `cd Desktop` and press **Enter** to "change directory" to your Desktop. Then type `ls` (or `dir` on some Windows setups) to list its files.
+
+``` bash
 cd Desktop
 ls
 ```
 
 !!! tip
-    Think of each command as a "button". For instance, the command `cd` stands for "change directory". When you use it, it opens a new folder to view its contents -- just like double-clicking a folder to open it.
+    Think of commands as "buttons." For example, `cd` is like double-clicking a folder to open it.
 
-----------------------------------------------------------------------
+---
 
-## Mastering new commands
+## Mastering New Commands
 
-!!! tip
-    For more basic commands, refer to [this cheat sheet](https://www.git-tower.com/blog/command-line-cheat-sheet/) or take [a comprehensive tutorial](https://www.codecademy.com/learn/learn-the-command-line). Remembering commands will come gradually, so keep this cheat-sheet handy. We strongly suggest that you spend 30 minutes going through these links after completing this tutorial.
+Knowing what to type can be challenging at first. Most tools have a base command (like `uv` or `conda`) that you can follow with `--help` to see what it can do.
 
-The challenging part with the command-line is knowing what to type. However, most programs have a single command that forms the base of more advanced one. For anaconda, the command is `conda`. If you're unsure about its function or usage, simply add `--help` to it. Type in the command `conda --help` and you'll see an output like this:
+Try running the help command for your chosen tool:
 
-``` shell
-conda --help
-```
+=== "uv"
+    ``` bash
+    uv --help
+    ```
 
-``` shell
-usage: conda [-h] [-V] command ...
+=== "conda"
+    ``` bash
+    conda --help
+    ```
 
-conda is a tool for managing and deploying applications, environments and packages.
+You'll see a list of subcommands like `create`, `install`, or `run`. Don't feel like you need to memorize these! You can always check the help page, search online, or ask an AI assistant for the specific command you need.
 
-Options:
-
-positional arguments:
-  command
-    clean        Remove unused packages and caches.
-    compare      Compare packages between conda environments.
-    config       Modify configuration values in .condarc. This is modeled after the git config command. Writes to the user .
-    ...
-
-optional arguments:
-  -h, --help     Show this help message and exit.
-  -V, --version  Show the conda version number and exit.
-
-conda commands available from other packages:
-  build
-  content-trust
-  ...
-```
-
-Don't get overwhelmed by the amount of information displayed. Each line conveys a simple concept. 
-
-For instance, the line `-h, --help     Show this help message and exit.` explains what the `conda --help` command does! It also indicates that we could have used `conda -h` for the same output.
-
-This help message also reveals other "subcommands" available. One is `create` which creates a new environment. To learn more about that, we can run the command `conda create --help`. 
-
-There's a lot here... But remember, you don't need to memorize all of this. Just remember how to access this help page when you need it. Or even easier, give a quick Google search or ask an AI chatbot for command help.
-
-Next, we'll use these commands to create our environment and install Simmate.
-
-----------------------------------------------------------------------
+Next, we'll use these tools to create an environment and install Simmate.

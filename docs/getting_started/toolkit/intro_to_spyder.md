@@ -12,7 +12,7 @@ However, we *strongly* recommend dedicating 2-3 days to learn Python fundamental
 
 ## Where to write Python code
 
-Remember from the Installation tutorial: Anaconda provided several programs on their home screen, including Jupyter Notebook, Spyder, and others. These programs allow you to write your own Python code. Just as there are various platforms for writing papers, like Microsoft Word, Google Docs, and LibreOffice, these programs offer different ways to write Python. 
+Remember from the Installation tutorial: **uv** and **Anaconda** provide ways to manage your Python environment. Once you have an environment, you need a program to write your code in. Just as there are various platforms for writing papers, like Microsoft Word, Google Docs, and LibreOffice, there are various programs for writing Python (called IDEs).
 
 Our team prefers Spyder, and we highly recommend it to our users. We will use Spyder in this tutorial.
 
@@ -21,11 +21,32 @@ Our team prefers Spyder, and we highly recommend it to our users. We will use Sp
 ## Launching Spyder
 
 !!! tip 
-    If you're already comfortable with Python or have completed the Codecademy python course, you can quickly familiarize yourself with Spyder by watching their intro videos. [There are 3 videos, each under 4 minutes long](https://docs.spyder-ide.org/current/videos/first-steps-with-spyder.html).
+    If you're already comfortable with Python or have completed a python course, you can quickly familiarize yourself with Spyder by watching their intro videos. [There are 3 videos, each under 4 minutes long](https://docs.spyder-ide.org/current/videos/first-steps-with-spyder.html).
 
-If you followed the installation tutorial, Spyder should already be installed and ready to use. 
+### i. Opening the App
 
-To launch it, search for Spyder in your computer's apps (use the search bar at the bottom-left of your screen on Windows 10) and select `Spyder (my_env)`. 
+Launch Spyder from your computer's apps (use the search bar at the bottom-left of your screen on Windows).
+
+=== "uv / Standalone"
+    Open the **Spyder** app you downloaded from their website.
+
+=== "conda"
+    Select **Spyder (my_env)** from your apps list.
+
+### ii. Connecting your Environment
+
+If you used **uv** (or the standalone Spyder installer), you must tell Spyder to use the `my_env` environment you created earlier. 
+
+!!! tip "Connecting uv to Spyder"
+    1. In Spyder, go to **Tools** > **Preferences** > **Python interpreter**.
+    2. Select **Use the following Python interpreter**.
+    3. Click the folder icon and find your `my_env` folder.
+        - **Windows:** `C:\Users\YourName\my_env\Scripts\python.exe`
+        - **Mac/Linux:** `/Users/YourName/my_env/bin/python`
+    4. Click **Apply** and then **OK**.
+    5. Restart the Python console (click the `x` on the `Console 1/A` tab at the bottom-right).
+
+----------------------------------------------------------------------
 
 Spyder will be empty when you first launch it. Here's a glimpse of what Spyder looks like when it's in use:
 

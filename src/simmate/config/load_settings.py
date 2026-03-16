@@ -97,9 +97,7 @@ class SimmateSettings:
         Settings can be a dictionary, "final", or "user".
         """
         if not filename:
-            filename = (
-                settings.config_directory / f"_{settings.conda_env}-settings.yaml"
-            )
+            filename = self.config_directory / f"_{self.conda_env}-settings.yaml"
 
         if settings == "final":
             settings = self.final_settings

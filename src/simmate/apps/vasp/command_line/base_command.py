@@ -9,7 +9,10 @@ import typer
 from simmate.apps.vasp.command_line.inputs import inputs_app
 from simmate.apps.vasp.command_line.plot import plot_app
 
-vasp_app = typer.Typer(rich_markup_mode="markdown")
+vasp_app = typer.Typer(
+    rich_markup_mode="markdown",
+    add_completion=False,
+)
 
 
 @vasp_app.callback(no_args_is_help=True)

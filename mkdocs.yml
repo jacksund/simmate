@@ -87,73 +87,91 @@ nav:
         - Introduction: getting_started/introduction.md
         
         # - 1. Public Website:
-        #     - Quick Start: getting_started/public_website/quick_start.md
+        #     - Quickstart: getting_started/public_website/quickstart.md
         #     - a) Exploring & managing data: getting_started/installation/data.md
         #     - b) Your first workflow run: getting_started/installation/workflow.md
         #     - c) Connect your own compute: getting_started/installation/add_compute.md
         #     - (extra) Intro to USDC: getting_started/installation/crypto.md
 
         - 1. Installation:
-            - Quick Start: getting_started/installation/quick_start.md
-            - a) Install Anaconda: getting_started/installation/install_anaconda.md
+            - Quickstart: getting_started/installation/quickstart.md
+            - a) Installing Python: getting_started/installation/install_python.md
             - b) Intro to the command line: getting_started/installation/command_line.md
             - c) Create your environment: getting_started/installation/create_your_env.md
             - d) Explore Simmate commands: getting_started/installation/explore_simmate_cli.md
-            - e) Set up a Local Server: getting_started/installation/local_server_setup.md
             
-        - 2. Workflows:
-            - Quick Start: getting_started/workflows/quick_start.md
-            - a) Configure the database: getting_started/workflows/configure_database.md
-            - b) Make a input structure: getting_started/workflows/make_a_structure.md
-            - c) View all workflows: getting_started/workflows/view_all_workflows.md
-            - d) Configure QE: getting_started/workflows/configure_qe.md
-            - e) Run a workflow: getting_started/workflows/running_the_workflow.md
+        - 2. Initial Setup & Tour:
+            - Quickstart: getting_started/initial_setup/quickstart.md
+            - a) Configure the database: getting_started/initial_setup/configure_database.md
+            - b) Exploring Apps & Data: getting_started/initial_setup/explore_apps.md
+            - c) Submitting a Workflow: getting_started/initial_setup/run_a_workflow.md
+
+        - 3. Workflows:
+            - Quickstart: getting_started/workflows/quickstart.md
+            - a) Make an input structure: getting_started/workflows/make_a_structure.md
+            - b) View all workflows: getting_started/workflows/view_all_workflows.md
+            - c) Configure QE: getting_started/workflows/configure_qe.md
+            - d) Run a workflow: getting_started/workflows/running_the_workflow.md
             - (extra) Submit to a cluster: getting_started/workflows/submit_to_a_cluster.md
         
-        - 3. Toolkit:
-            - Quick Start: getting_started/toolkit/quick_start.md
+        - 4. Toolkit:
+            - Quickstart: getting_started/toolkit/quickstart.md
             - a) Intro to Python (& Spyder): getting_started/toolkit/intro_to_spyder.md
             - b) The Structure class: getting_started/toolkit/the_structure_class.md
+            - c) The Molecule class: getting_started/toolkit/the_molecule_class.md
+            - d) The Composition class: getting_started/toolkit/the_composition_class.md
             - e) Advanced classes: getting_started/toolkit/advanced_classes.md
         
-        - 4. Database:
-            - Quick Start: getting_started/database/quick_start.md
+        - 5. Database:
+            - Quickstart: getting_started/database/quickstart.md
             - a) View data w. DBeaver: getting_started/database/dbeaver.md
             - b) How tables are built: getting_started/database/intro_to_python_inheritance.md
             - c) Workflow data: getting_started/database/access_workflow_data.md
             - d) Third-party data: getting_started/database/access_thirdparty_data.md
         
-        - 5. Custom workflows:
-            - Quick Start: getting_started/custom_workflows/quick_start.md
-            - a) Basic workflows: getting_started/custom_workflows/basic_workflows.md
-            - b) Chemistry workflows: getting_started/custom_workflows/chemistry_workflows.md
-            - b) Class-based workflows: getting_started/custom_workflows/class_based_workflows.md
-        
-        - 6. Custom apps & tables:
-            - a) Create an app: getting_started/custom_tables_and_apps/create_a_custom_app.md
-            - b) Create a custom table: getting_started/custom_tables_and_apps/create_a_custom_table.md
-            - c) Adding app workflows: getting_started/custom_tables_and_apps/using_app_workflows.md
-        
-        - 7. Use a cloud database:
-            - Quickstart: getting_started/use_a_cloud_database/quick_start.md
+        - 6. Use a cloud database:
+            - Quickstart: getting_started/use_a_cloud_database/quickstart.md
             - a) Private vs shared: getting_started/use_a_cloud_database/private_vs_collab.md
             - b) Building a database: getting_started/use_a_cloud_database/build_a_postgres_database.md
+            - c) Connect to Postgres: getting_started/use_a_cloud_database/connect_to_postgres.md
         
-        - 8. Computational resources:
-            - Quickstart: getting_started/add_computational_resources/quick_start.md
-            - a) Intro to workers: getting_started/add_computational_resources/intro_to_workers.md
+        - 7. Computational resources:
+            - Quickstart: getting_started/add_computational_resources/quickstart.md
+            - a) Why use workers?: getting_started/add_computational_resources/1_what_are_workers.md
+            - b) Running locally: getting_started/add_computational_resources/2_running_locally.md
+            - c) Monitoring jobs: getting_started/add_computational_resources/3_monitoring_and_managing.md
+            - d) Parallel clusters: getting_started/add_computational_resources/4_scaling_to_clusters.md
+            - e) HPC & Clouds: getting_started/add_computational_resources/5_hpc_and_clouds.md
+        
+        - 8. Custom Apps:
+            - Quickstart: getting_started/custom_apps/quickstart.md
+            - a) Create an app: getting_started/custom_apps/create_an_app.md
+            - b) Custom workflows: getting_started/custom_apps/custom_workflows.md
+            - c) Custom tables: getting_started/custom_apps/custom_tables.md
         
         - Wrap up: getting_started/wrap_up.md
-        
-        - Extra Examples:
-            - Overview: getting_started/example_scripts/overview.md
-            - Example-001: getting_started/example_scripts/example-001.md
-            - Example-002: getting_started/example_scripts/example-002.md
+    
+    # - Examples:
+    #     - Overview: examples/overview.md
+    #     - Data Mining & CIF Export: examples/data_mining_and_cif_export.md
+    #     - Symmetry-Breaking Strains: examples/symmetry_breaking_strains.md
+    #     - Structure Loading & I/O: examples/structure_loading_and_io.md
+    #     - Molecule Filtering: examples/molecule_filtering.md
+    #     - Running Workflows via YAML: examples/running_workflows_via_yaml.md
+    #     - Chemical Composition Analysis: examples/chemical_composition_analysis.md
+    #     - Single-Step VASP Relaxation: examples/single_step_vasp_relaxation.md
+    #     - High-Throughput VASP Runs: examples/high_throughput_vasp_runs.md
+    #     - VASP + Bader Charge Analysis: examples/vasp_plus_bader_charge_analysis.md
+    #     - Machine Learning Featurization: examples/machine_learning_featurization.md
+    #     - Advanced NEB Path Finding: examples/advanced_neb_path_finding.md
+    #     - Custom Evolutionary Search: examples/custom_evolutionary_search.md
     
     - Full Guides:
         
         - Overview: full_guides/overview.md
-        
+
+        - Config: full_guides/configuration.md
+
         - Apps:
             - Basic Use: full_guides/apps/basic_use.md
             - Creating custom apps: full_guides/apps/creating_custom_apps.md
@@ -265,7 +283,7 @@ nav:
             - Molecules:
                 - Overview: full_guides/toolkit/molecules/overview.md
                 - Single Molecule: 
-                    - Quick Start: full_guides/toolkit/molecules/single_molecule/quick_start.md
+                    - Quickstart: full_guides/toolkit/molecules/single_molecule/quickstart.md
                     - Loading: full_guides/toolkit/molecules/single_molecule/loading.md
                     - Exporting: full_guides/toolkit/molecules/single_molecule/exporting.md
                     - Reactions: full_guides/toolkit/molecules/single_molecule/reaction.md
@@ -294,23 +312,12 @@ nav:
                     - Sites: full_guides/toolkit/crystal_structures/pymatgen/sites.md
                     - Composition: full_guides/toolkit/crystal_structures/pymatgen/composition.md
 
-        - Extras:
-            # - Simmate Open Collective: 
-            #    - Overview: full_guides/open_collective/overview.md
-            #    - Architecture: full_guides/open_collective/architecture.md
-            #    - Financial Strategy: full_guides/open_collective/financial_strategy.md
-            #    - Data Integrity Safeguards:  full_guides/open_collective/data_integrity_safeguards.md
-            #    - How to participate & earn: full_guides/open_collective/how_to_participate_and_earn.md
-            - Settings & Configs: full_guides/extras/configuration.md
-            - Contributing Code:
-                - First time setup: full_guides/contributing/first_time_setup.md
-                # - Testing: full_guides/extras/testing.md
-                - Creating & submitting changes: full_guides/contributing/creating_and_submitting_changes.md
-                - Extra notes & tips: full_guides/contributing/extra.md
-                - AI Assistants: full_guides/contributing/ai_assistants.md
-                - Maintainer notes: full_guides/contributing/maintainer_notes.md
-            # - Utilities: full_guides/extras/utilities.md
-
+        - Contributing:
+            - First time setup: full_guides/contributing/first_time_setup.md
+            - Creating & submitting changes: full_guides/contributing/creating_and_submitting_changes.md
+            - Maintainer notes: full_guides/contributing/maintainer_notes.md
+            - README for AI Assistants: full_guides/contributing/ai_assistants.md
+    
     - Apps: 
         - Overview: apps/overview.md
         - AFLOW: apps/aflow.md

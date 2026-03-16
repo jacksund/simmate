@@ -7,8 +7,8 @@ Simmate's open collective generates revenue from several sources:
 - [x] Users pay for workflow runs
 - [x] Grants fund specific projects and app development
 - [x] Interest earned on internal funds
-- [x] Instituitions & Labs pay for private server managment
-- [x] Penalized Collatoral (rare and negligible) 
+- [x] Institutions & Labs pay for private server management
+- [x] Penalized Collateral (rare and negligible) 
 
 Each source's revenue is distributed differently, but collectively, all revenue
 is paid out to the following entities:
@@ -28,7 +28,7 @@ which is a staging area for the funds until the workflow completes successfully 
 for accuracy. A community "worker" will then pick up and run the workflow. 
 If the workflow fails, funds are returned to the original user, and if the workflow succeeds, 
 the user can immediately see the results. The results will then undergo a review process to ensure workers 
-are behaving accuractely and honestly (see our page on [Data Integrity Safegaurds](#)). And after 
+are behaving accurately and honestly (see our page on [Data Integrity Safeguards](#)). And after 
 passing integrity checks, the money can be released from the escrow holding account and split: 
 
 - 85% goes to the worker
@@ -40,11 +40,11 @@ passing integrity checks, the money can be released from the escrow holding acco
 ### Grants 
 
 The Simmate team and collaborators apply for grants to help support development and research. 
-But not all grants are publically disclosed to Simmate's open collective -- because grants may
+But not all grants are publicly disclosed to Simmate's open collective -- because grants may
 be individual funding (e.g., [NSF-GFRP](https://www.nsfgrfp.org/) for 
 student research) or compute funding for a specific research topic (which enters Simmate as 
 user-submitted workflows).
-Meanwhile, grants that directly support Simmate infrastructure are publically disclosed. This includes
+Meanwhile, grants that directly support Simmate infrastructure are publicly disclosed. This includes
 grants that support cloud costs and core development (developer salaries). These funds are
 added to the Simmate Treasury and appear in the [ledger](#).
 
@@ -69,7 +69,7 @@ the backed funds all sit in two places:
 Interest rates vary for each but, generally, the rates both follow US government bond rates. Specifically, funds
 are primarily backed by short-term U.S. Treasury Bills, so interest rates are typically in the range of **3-5%**.
 
-The accrued 3-5% interest earned is paid out monthy:
+The accrued 3-5% interest earned is paid out monthly:
 
 - 75% goes to workers and validators to serve as a bonus/incentive
 - 25% goes into the Simmate treasury
@@ -88,15 +88,15 @@ Ideally, this revenue stream is sufficient to cover 100% of developer salaries,
 but if that is not the case, the Simmate Treasury is used to supplement pay (and those
 supplementary payments are public accessible).
 
-### Penalized Collatoral
+### Penalized Collateral
 
 Workers and validators provide collateral to discourage them from providing any 
-malicious or dishonest workflow results (see our page on [Data Integrity Safegaurds](#)).
-If a worker or validator is found to acting dishonestly, their collatoral is penalized
+malicious or dishonest workflow results (see our page on [Data Integrity Safeguards](#)).
+If a worker or validator is found to acting dishonestly, their collateral is penalized
 and transferred to validator pool.
 
-Note, this is a very rare occurance that collatoral is penalized. In fact, we have
-never had to issue any penalities to worker and validator collatoral -- all issues 
+Note, this is a very rare occurrence that collateral is penalized. In fact, we have
+never had to issue any penalties to worker and validator collateral -- all issues 
 so far have been honest mistakes or technical errors. We still include this
 in our list of "revenue" sources for completeness & for those that wish to
 know where funds would move if this were ever to occur.
@@ -109,7 +109,7 @@ know where funds would move if this were ever to occur.
 
 The treasury fund is managed directly by the Simmate team, and because it is central to
 the health & longevity of the entire open collective, all treasury transactions are
-publically available in the ledger [here](#), and we provide quartly reports [here](#).
+publicly available in the ledger [here](#), and we provide quarterly reports [here](#).
 
 In the ledger, you can see that treasury is funded through several sources:
 
@@ -121,7 +121,7 @@ And these funds are used to collectively cover...
 
 - cloud infrastructure costs
 - insurance (refunds, bug bounties, & emergency funds)
-- research (Simmate-sponsered grants)
+- research (Simmate-sponsored grants)
 - promotions & incentives
 - developer salaries (when Private Server revenue is insufficient)
 
@@ -131,10 +131,10 @@ is needed to grow resources required to support them. This involves storing and
 serving many TB of data as well as maintaining backups. There are also the Simmate
 webservers and services that require funds.
 
-We aim to avoid using treasury funds for developement (specifically developer salaries),
+We aim to avoid using treasury funds for development (specifically developer salaries),
 and instead, fund development through our support of Private Servers (see above).
 
-And if there is ever a surplus of funds in the treasury, our team explorers ways to
+And if there is ever a surplus of funds in the treasury, our team explores ways to
 help grow the ecosystem, such as through new developer, funding research, or creating
 promotions. For example, we can use small portions of the fund as incentives where needed 
 (such as attracting more users, workers, validators, or developers).
@@ -155,7 +155,7 @@ from workflow runs go.
 While earnings from all validators are pooled (see below), workers are only paid
 for the individual workflows that they actually ran. If you ran the workflow,
 you get the results - no need to share with other workers. This is because there
-are different types of workfers and resource requirements (not all CPU time is equal 
+are different types of workers and resource requirements (not all CPU time is equal 
 
 - some calcs require a more powerful setup with many cores + more RAM).
 
@@ -173,13 +173,13 @@ Payouts are made for each workflow as soon as a validator confirms the results.
 ### Validator Pool
 
 Validators confirm that the results from Workers are accurate and honest by re-running 
-5% of all workflows (see our page on [Data Integrity Safegaurds](#)).
+5% of all workflows (see our page on [Data Integrity Safeguards](#)).
 Because they are providing compute power just like Workers, Validators earn revenue 
 through the same sources (though in different ratios):
 
 - 10% from *all* workflow runs (even though only 5% are actually repeated)
 - 75% of interest accrued
-- 100% penalized collatoral of other compute
+- 100% penalized collateral of other compute
 
 Note that validators make ~2x the $/CPU earnings vs workers because they receive 10% 
 of the earnings but only did 5% cpu time (Exact calc: total funds / total compute → 10/(5/105) vs 85/(100/105) → 2.35x). 
@@ -201,7 +201,7 @@ for several reasons:
 
 - validators only repeat 5% of all calculations, and we need a mechanism on how to distribute revenue from each of the remaining 95% of jobs
 - revenue becomes much more predictable when pooled, which is desirable when you're providing compute
-- it allows us to evenly distribute penalized collatoral to those that help identify bad actors
+- it allows us to evenly distribute penalized collateral to those that help identify bad actors
 
 Thus, validator earnings are pooled in the "Validator Escrow Pool" and then shared 
 with individual validators proportionally to their provided compute power. Payouts

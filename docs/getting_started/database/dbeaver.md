@@ -20,9 +20,9 @@ Ultimately, DBeaver will let us view data as if we were in Excel:
 
 ## Install DBeaver
 
-Download install [DBeaver Lite](https://dbeaver.io/download/). It is free, and you do not need to make an account.
+Download and install [DBeaver Community Edition](https://dbeaver.io/download/). It is free, and you do not need to make an account.
 
-DBeaver is just a regular desktop app, so open it up once installed. You'll see a variety of components when you first open it (but they will be empty at first):
+DBeaver is a regular desktop app, so open it once installed. You'll see several components, but they will be empty initially:
 
 ![DBeaver interface](https://dbeaver.com/wp-content/uploads/wikidocs_cache/images/ug/appwindow-with-markup.png)
 
@@ -30,13 +30,16 @@ DBeaver is just a regular desktop app, so open it up once installed. You'll see 
 
 ## Connect to the Simmate Database
 
-1. Select the "New Database Connection" button. This button is in the toolbar at the top of the page and looks like this: ![new db button](https://dbeaver.com/wp-content/uploads/wikidocs_cache/images/ug/new-connection-wizard-button.png)
+1. Select the "New Database Connection" button in the toolbar: ![new db button](https://dbeaver.com/wp-content/uploads/wikidocs_cache/images/ug/new-connection-wizard-button.png)
 
-2. In the pop-up, you'll see a TON of database types that you can connect to. Search for "SQLite", select it, and then hit "Next". Its icon looks like this: ![new db button](https://www.sqlite.org/images/sqlite370_banner.gif){ width="50" }
+2. Search for "SQLite", select it, and hit "Next". ![new db button](https://www.sqlite.org/images/sqlite370_banner.gif){ width="50" }
 
-3. Keep the `Connect by:` setting as `Host`. Then click the `Open ...` button and find your SQLite file. Remember, this file is located at `~/simmate/my_env-database.sqlite3`. Once selected, you can hit `Test Connection ...` (and install any necessary drivers if prompted). Hit `Finish` when everything looks good!
+3. Keep the `Connect by:` setting as `Host`. Click `Open ...` and navigate to your database file. It is typically located at `~/simmate/my_env-database.sqlite3` (where `my_env` is your conda environment name).
 
-4. You'll now see your Simmate database in the `Database Navigator`! (left side panel)
+4. Click `Test Connection ...` (install any requested drivers) and hit `Finish`.
+
+5. Your database will now appear in the `Database Navigator` on the left.
+
 
 ----------------------------------------------------------------------
 

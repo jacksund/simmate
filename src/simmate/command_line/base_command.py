@@ -15,7 +15,10 @@ from simmate.command_line.engine import engine_app
 from simmate.command_line.utilities import utilities_app
 from simmate.command_line.workflows import workflows_app
 
-simmate_app = typer.Typer(rich_markup_mode="markdown")
+simmate_app = typer.Typer(
+    rich_markup_mode="markdown",
+    add_completion=False,
+)
 
 
 @simmate_app.callback(no_args_is_help=True)

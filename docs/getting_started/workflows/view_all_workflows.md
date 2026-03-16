@@ -1,7 +1,7 @@
 # Exploring Available Workflows
 
 !!! warning
-    Keep in mind that only the *default* Simmate workflows will show in this section! To explore others, you'll need to through the [Apps](/apps/overview.md) tab of our documentation.
+    Keep in mind that only the *default* Simmate workflows will show in this section! To explore others, you'll need to go through the [Apps](/apps/overview.md) tab of our documentation.
 
 ----------------------------------------------------------------------
 
@@ -19,15 +19,15 @@ The output will resemble the following:
 
 ```
 These are the workflows that have been registered:
-        (01) customized.vasp.user-config
+        (01) customized.toolkit.user-config
         (02) diffusion.vasp.neb-all-paths-mit
-        (03) diffusion.vasp.neb-from-endpoints-mit
-        (04) diffusion.vasp.neb-from-images-mit
-        (05) diffusion.vasp.neb-single-path-mit
-        (06) dynamics.vasp.matproj
-        (07) dynamics.vasp.mit
-        (08) dynamics.vasp.mvl-npt
-        (09) electronic-structure.vasp.matproj-full
+        (03) dynamics.vasp.matproj
+        (04) electronic-structure.vasp.matproj-full
+        (05) relaxation.quantum-espresso.quality01
+        (06) relaxation.vasp.matproj
+        (07) static-energy.quantum-espresso.quality00
+        (08) static-energy.vasp.mit
+        (09) structure-prediction.toolkit.chemical-system
   ... << additional workflows truncated for brevity >>
 ```
 
