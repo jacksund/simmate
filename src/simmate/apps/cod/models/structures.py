@@ -7,7 +7,7 @@ from simmate.database.base_data_types import Structure, table_column
 
 class CodStructure(Structure):
     """
-    Crystal structures from the [COD](http://www.crystallography.net/cod/) database.
+    Crystal structures from the [COD](https://www.crystallography.net/cod/) database.
 
     Currently, this table only stores the strucure, plus comments on whether the
     sturcture is ordered or has implicit hydrogens.
@@ -36,10 +36,10 @@ class CodStructure(Structure):
         URL to this structure in the COD website.
         """
         # All COD structures have their data mapped to a URL in the same way
-        # ex: http://www.crystallography.net/cod/12345.html"
+        # ex: https://www.crystallography.net/cod/12345.html"
         # we store the id as "cod-123" so we need to convert this to uppercase
         id_formatted = self.id.split("-")[-1]
-        return f"http://www.crystallography.net/cod/{id_formatted}.html"
+        return f"https://www.crystallography.net/cod/{id_formatted}.html"
 
     # -------------------------------------------------------------------------
 
@@ -48,28 +48,17 @@ class CodStructure(Structure):
 
     # -------------------------------------------------------------------------
 
-    # These fields overwrite the default Structure fields due to a bug.
-    chemical_system = table_column.TextField()
-    formula_full = table_column.TextField()
-    formula_reduced = table_column.TextField()
-    formula_anonymous = table_column.TextField()
-    # BUG: We can't use CharField for the COD database because there are a number
-    # of structures that have 20+ elements in them and are disordered. The disordered
-    # aspect throws issues in pymatgen where formulas can be returned as long
-    # floats (ex: Ca2.1234567N). Until this is fixed and cleaned up, I'll
-    # need to use TextField instead of CharField for these fields.
-
     id = table_column.CharField(max_length=25, primary_key=True)
     """
     The id used to represent the structure (ex: "cod-12345")
     """
 
-    is_ordered = table_column.BooleanField()
+    is_ordered = table_column.BooleanField(blank=True, null=True)
     """
     whether the structure contains disordered sites (i.e. mixed occupancies)
     """
 
-    has_implicit_hydrogens = table_column.BooleanField()
+    has_implicit_hydrogens = table_column.BooleanField(blank=True, null=True)
     """
     whether the structure has implicit Hydrogens. This means there should be
     Hydrogens in the structure, but they weren't explicitly drawn. Note,
@@ -96,13 +85,13 @@ class CodStructure(Structure):
         the Simmate database successfully.
 
         Make sure you have downloaded the
-        [COD archive]([here](http://www.crystallography.net/archives/))
+        [COD archive]([here](https://www.crystallography.net/archives/))
         and have it upacked to match your base_directory input.
 
         --- extra notes
 
         The COD let's you download all of their data as a zip file
-        [here](http://www.crystallography.net/archives/). While they do have a
+        [here](https://www.crystallography.net/archives/). While they do have a
         REST API, it looks like they prefer you to use the zip file if you want
         all structures and metadata. This is a big download even when compressed
         (18GB), so it's a slow process -- but more importantly a stable one. For
@@ -203,27 +192,38 @@ class CodStructure(Structure):
         # Structure.from_file because we wanted the extra data too.
         # The COD has a lot of structures that aren't formatted properly
         # and various errors are thrown throughout the loading process.
-        # for now, I just skip the ones that give issues.
-        # !!! I should take a closer look at failed cifs in the future.
+        # For entries that fail, we mark them as invalid.
         try:
             structure = cif.get_structures()[0]
-        except ValueError as error:
-            # There is a common error where no structure is found, but
-            # if this error ends up being something different, we should
-            # make sure it's raised for visibility.
-            if error.args != ("Invalid cif file with no structures!",):
-                raise error
-            # otherwise exit
-            return
+            is_invalid_structure = False
 
-        if (
-            "Structure has implicit hydrogens defined, parsed structure"
-            " unlikely to be suitable for use in calculations unless"
-            " hydrogens added." in cif.warnings
-        ):
-            has_implicit_hydrogens = True
+            # BUG: We have several structures that are disordered and have 20+
+            # elements in them. These throw issues in pymatgen where formulas
+            # can be returned as long floats (ex: Ca2.1234567N), which exceeds
+            # our database column limits (CharField). Until this is fixed
+            # in pymatgen or we clean up these entries, we mark large or
+            # complex structures as invalid.
+            if len(structure) > 100 or len(structure.composition) > 10:
+                structure = None
+                is_invalid_structure = True
+
+        except Exception:
+            structure = None
+            is_invalid_structure = True
+
+        if structure:
+            if (
+                "Structure has implicit hydrogens defined, parsed structure"
+                " unlikely to be suitable for use in calculations unless"
+                " hydrogens added." in cif.warnings
+            ):
+                has_implicit_hydrogens = True
+            else:
+                has_implicit_hydrogens = False
+            is_ordered = structure.is_ordered
         else:
-            has_implicit_hydrogens = False
+            has_implicit_hydrogens = None
+            is_ordered = None
 
         # Compile all of our data into a dictionary
         entry_dict = {
@@ -231,8 +231,9 @@ class CodStructure(Structure):
             # the remaining number is the id
             "id": "cod-" + cif_filepath.stem,
             "structure": structure,
-            "is_ordered": structure.is_ordered,
+            "is_ordered": is_ordered,
             "has_implicit_hydrogens": has_implicit_hydrogens,
+            "is_invalid_structure": is_invalid_structure,
             # OPTMIZE: right now I use the title of the paper,
             # but I would much rather use the DOI as it's shorter
             # and more useful. But a lot of cifs are missing the

@@ -1892,6 +1892,8 @@ class DatabaseTable(models.Model):
         if "is_invalid_molecule" in cls.get_column_names():
             filters["is_invalid_molecule"] = False
             filters["is_empty_molecule"] = False
+        if "is_invalid_structure" in cls.get_column_names():
+            filters["is_invalid_structure"] = False
         ids_to_update = cls.objects.filter(**filters).values_list("id", flat=True).all()
 
         logging.info(

@@ -212,6 +212,11 @@ class Structure(DatabaseTable):
     odd use of quotes '"C"' is required here!
     """
 
+    is_invalid_structure = table_column.BooleanField(blank=True, null=True)
+    """
+    Whether the structure was loaded successfully into the simmate database.
+    """
+
     density = table_column.FloatField(blank=True, null=True)
     """
     The density of the crystal in g/cm^3
