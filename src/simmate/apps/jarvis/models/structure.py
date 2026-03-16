@@ -99,19 +99,31 @@ class JarvisStructure(Structure):
         for entry in track(data):
             # The structure is in the atoms field as a dictionary. We pull
             # this data out and convert it to a pymatgen Structure object
-            structure = ToolkitStructure(
-                lattice=entry["atoms"]["lattice_mat"],
-                species=entry["atoms"]["elements"],
-                coords=entry["atoms"]["coords"],
-                coords_are_cartesian=entry["atoms"]["cartesian"],
-            )
+            try:
+                structure = ToolkitStructure(
+                    lattice=entry["atoms"]["lattice_mat"],
+                    species=entry["atoms"]["elements"],
+                    coords=entry["atoms"]["coords"],
+                    coords_are_cartesian=entry["atoms"]["cartesian"],
+                )
 
-            # now convert the entry to a database object
-            structure_db = cls.from_toolkit(
-                id=entry["jid"].lower(),
-                structure=structure,
-                energy_above_hull=entry["ehull"] if entry["ehull"] != "na" else None,
-            )
+                # now convert the entry to a database object
+                structure_db = cls.from_toolkit(
+                    id=entry["jid"].lower(),
+                    structure=structure,
+                    energy_above_hull=(
+                        entry["ehull"] if entry["ehull"] != "na" else None
+                    ),
+                )
+            except Exception:
+                structure_db = cls.from_toolkit(
+                    id=entry["jid"].lower(),
+                    structure=None,
+                    energy_above_hull=(
+                        entry["ehull"] if entry["ehull"] != "na" else None
+                    ),
+                    is_invalid_structure=True,
+                )
 
             db_objects.append(structure_db)
 
