@@ -1872,8 +1872,17 @@ class DatabaseTable(models.Model):
         # local import to avoid circular dependency
         from simmate.workflows.utilities import get_workflow
 
-        # grab the workflow mapped to this column
-        workflow_name = cls.workflow_columns[column_name]
+        # grab the workflow mapped to this column.
+        # Config can be a simple string (single column) or a dict with
+        # "workflow_name" and "columns" (multi-column from one workflow).
+        column_config = cls.workflow_columns[column_name]
+        if isinstance(column_config, dict):
+            workflow_name = column_config["workflow_name"]
+            # maps db_column_name -> result_key in the workflow output dict
+            columns_mapping = column_config["columns"]
+        else:
+            workflow_name = column_config
+            columns_mapping = None
         workflow = get_workflow(workflow_name)
 
         # BUG: I assume inputs are the common ones for now...
@@ -1887,7 +1896,14 @@ class DatabaseTable(models.Model):
                 "us to add additional support."
             )
 
-        filters = {f"{column_name}__isnull": True} if update_only else {}
+        filters = {}
+        if update_only:
+            if columns_mapping:
+                # filter where ALL of the mapped columns are null
+                for db_col in columns_mapping:
+                    filters[f"{db_col}__isnull"] = True
+            else:
+                filters[f"{column_name}__isnull"] = True
         # some tables allow "broken" entries, which we always want to skip
         if "is_invalid_molecule" in cls.get_column_names():
             filters["is_invalid_molecule"] = False
@@ -1920,9 +1936,20 @@ class DatabaseTable(models.Model):
                         compress_output=True,
                     )
                     logging.info("Saving results to db")
-                    for entry, entry_result in zip(objs_to_update, results):
-                        setattr(entry, column_name, entry_result)
-                    cls.objects.bulk_update(objs_to_update, [column_name])
+                    if columns_mapping:
+                        # Multi-column workflow: results is a dict keyed
+                        # by result_key, each value is a list of values
+                        for db_col, result_key in columns_mapping.items():
+                            for entry, val in zip(objs_to_update, results[result_key]):
+                                setattr(entry, db_col, val)
+                        cls.objects.bulk_update(
+                            objs_to_update,
+                            list(columns_mapping.keys()),
+                        )
+                    else:
+                        for entry, entry_result in zip(objs_to_update, results):
+                            setattr(entry, column_name, entry_result)
+                        cls.objects.bulk_update(objs_to_update, [column_name])
             except:
                 logging.warning("BATCH FAILED")
                 continue
