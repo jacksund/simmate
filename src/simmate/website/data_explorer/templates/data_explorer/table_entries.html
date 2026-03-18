@@ -17,7 +17,8 @@
                 <tr>
                     <td>{{ entry.id }}</td>
                     <td>
-                        <a href="{{ entry.id }}">simmate</a> / <a href="{{ entry.external_link }}" target="_blank">provider</a>
+                        <a href="{{ entry.id }}">simmate</a>
+                        {% if entry.external_link %}/ <a href="{{ entry.external_link }}" target="_blank">provider</a>{% endif %}
                     </td>
                     <td>{{ entry.formula_full | chemical_formula }}</td>
                     <td>{{ entry.spacegroup.number }}</td>

@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.base_data_types import (
+    DatabaseTable,
+    ThirdPartyData,
+    table_column,
+)
 
 from ..client import EppoWebScrapper
 
@@ -15,7 +19,7 @@ _MAJOR_CROP_CODES = [
 ]
 
 
-class EppoCode(DatabaseTable):
+class EppoCode(ThirdPartyData, DatabaseTable):
     """
     EPPO Codes are labels to provide all pest-specific information that has been
     produced or collected by the European and Mediterranean Plant Protection

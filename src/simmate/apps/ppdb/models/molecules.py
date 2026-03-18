@@ -5,12 +5,12 @@ import logging
 from rich.progress import track
 
 from simmate.apps.rdkit.models import Molecule
-from simmate.database.base_data_types import table_column
+from simmate.database.base_data_types import ThirdPartyData, table_column
 
 from ..web_scraper import PpdbWebScraper
 
 
-class PpdbMolecule(Molecule):
+class PpdbMolecule(ThirdPartyData, Molecule):
     """
     The PPDB is the 'Pesticide Properties DataBase' from a team at the
     University of Hertfordshire.

@@ -16,4 +16,5 @@ from .status_tracking import StatusTracking
 from .structure import Structure
 from .symmetry import Spacegroup
 from .thermodynamics import Thermodynamics
+from .third_party_data import ThirdPartyData
 from .workflow_populator import WorkflowPopulator

@@ -5,11 +5,11 @@ from pathlib import Path
 import pandas
 from rich.progress import track
 
-from simmate.database.base_data_types import Structure, table_column
+from simmate.database.base_data_types import Structure, ThirdPartyData, table_column
 from simmate.toolkit import Structure as ToolkitStructure
 
 
-class OqmdStructure(Structure):
+class OqmdStructure(ThirdPartyData, Structure):
     """
     Crystal structures from the [OQMD](http://oqmd.org/) database.
 

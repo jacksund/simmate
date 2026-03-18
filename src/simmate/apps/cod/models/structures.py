@@ -8,11 +8,11 @@ from pymatgen.io.cif import CifParser
 from rich.progress import track
 
 from simmate.config import settings
-from simmate.database.base_data_types import Structure, table_column
+from simmate.database.base_data_types import Structure, ThirdPartyData, table_column
 from simmate.utilities.other import chunk_list
 
 
-class CodStructure(Structure):
+class CodStructure(ThirdPartyData, Structure):
     """
     Crystal structures from the [COD](https://www.crystallography.net/cod/) database.
 

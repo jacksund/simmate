@@ -2,11 +2,11 @@
 
 from rich.progress import track
 
-from simmate.database.base_data_types import Structure, table_column
+from simmate.database.base_data_types import Structure, ThirdPartyData, table_column
 from simmate.toolkit import Structure as ToolkitStructure
 
 
-class JarvisStructure(Structure):
+class JarvisStructure(ThirdPartyData, Structure):
     """
     Crystal structures from the [JARVIS](https://jarvis.nist.gov/) database.
 

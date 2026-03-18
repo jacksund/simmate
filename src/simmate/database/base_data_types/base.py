@@ -26,7 +26,7 @@ from rich.progress import track
 
 from simmate.config import settings
 from simmate.database.utilities import check_db_conn
-from simmate.utilities import chunk_list, get_attributes_doc
+from simmate.utilities import get_attributes_doc
 
 # The "as table_column" line does NOTHING but rename a module.
 # I have this because I want to use "table_column.CharField(...)" instead
@@ -426,26 +426,6 @@ class DatabaseTable(models.Model):
     )
     """
     Timestamp of when this row was was lasted changed / updated
-    """
-
-    source_doi: str = None
-    """
-    Source paper that must be referenced if this data is used. If this is None,
-    please refer to the `source` attribute for further details on what to 
-    reference.
-    """
-
-    external_website: str = None
-    """
-    The homepage of the source website, if the data is loaded from a third-party
-    """
-
-    remote_archive_link: str = None
-    """
-    The URL that is used to download the archive and then populate this table.
-    Many tables have pre-existing data that you can download and load into 
-    your local database, so if this attribute is set, you can use the 
-    `load_remote_archive` method.
     """
 
     # I override the default manager with the one we define above, which has
@@ -1309,8 +1289,8 @@ class DatabaseTable(models.Model):
             logging.warning(
                 "this data is NOT from the Simmate team, so be sure "
                 "to visit the provider's website and to cite their work."
-                f" This data is from {cls.source} and the following paper "
-                f"should be cited: {cls.source_doi}"
+                f" This data is from {getattr(cls, 'source', 'the provider')} "
+                f"and the following paper should be cited: {getattr(cls, 'source_doi', '---')}"
             )
 
         # Predetermine the file name, which is just the ending of the URL

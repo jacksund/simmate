@@ -3,10 +3,15 @@
 from rich.progress import track
 
 from simmate.config import settings
-from simmate.database.base_data_types import Structure, Thermodynamics, table_column
+from simmate.database.base_data_types import (
+    Structure,
+    Thermodynamics,
+    ThirdPartyData,
+    table_column,
+)
 
 
-class MatprojStructure(Structure, Thermodynamics):
+class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
     """
     Crystal structures from the [Materials Project](https://materialsproject.org/)
     database.

@@ -14,11 +14,11 @@ from pymatgen.io.cif import CifFile
 from rich.progress import track
 
 from simmate.apps.rdkit.models import Molecule
-from simmate.database.base_data_types import table_column
+from simmate.database.base_data_types import ThirdPartyData, table_column
 from simmate.toolkit import Molecule as ToolkitMolecule
 
 
-class PdbLigand(Molecule):
+class PdbLigand(ThirdPartyData, Molecule):
     """
     Small molecules from the [Protein Data Bank (PDB)](https://www.wwpdb.org/).
 

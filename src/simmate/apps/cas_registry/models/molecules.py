@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.rdkit.models import Molecule
-from simmate.database.base_data_types import table_column
+from simmate.database.base_data_types import ThirdPartyData, table_column
 
 
-class CasRegistryMolecule(Molecule):
+class CasRegistryMolecule(ThirdPartyData, Molecule):
     """
     Molecules & Compounds from the
     [CAS Common Chemistry database](https://www.cas.org/about-us)
