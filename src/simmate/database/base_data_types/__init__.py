@@ -5,6 +5,7 @@
 # isort: skip_file
 
 from .base import DatabaseTable, table_column, SearchResults
+from .workflow_populator import WorkflowPopulator
 
 from .filtered_scope import FilteredScope
 from .status_tracking import StatusTracking
