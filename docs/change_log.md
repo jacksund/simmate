@@ -101,6 +101,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - allow conditional postgres-rdkit extension with settings flag
 - added `startup_method` hook to simmate workers
 - added `baderkit` app
+- added `simmate database start`, `stop`, and `remove` commands for managing a Postgres database via Docker
 
 **Refactors**
 
