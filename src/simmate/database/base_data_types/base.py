@@ -1159,9 +1159,7 @@ class DatabaseTable(models.Model):
         cls,
         filename: str | Path = None,
         delete_on_completion: bool = False,
-        confirm_override: bool = False,
         parallel: bool = False,
-        confirm_sqlite_parallel: bool = False,
     ):
         """
         Reads a compressed zip file made by `objects.to_archive` and loads the data
@@ -1183,33 +1181,16 @@ class DatabaseTable(models.Model):
             Whether to delete the archive file once all data is loaded into the
             database. Defaults to False
 
-        - `confirm_override`:
-            If the table already has data in it, the user must take particular
-            care to downloading new data. This flag makes sure the user has
-            made the proper checks to run this action. Default is False.
-
         - `parallel`:
             Whether to load the data in parallel. If true, this will start
             a local Dask cluster and each data row will be submitted as a task
             to the cluster. This provides substansial speed-ups for loading
             large datasets into the dataset. Default is False.
-
-        - `confirm_sqlite_parallel`:
-            If the database backend is sqlite, this parameter ensures the user
-            knows what they are doing and know the risks of parallelization.
-            Default is False.
         """
 
         # We disable warnings while loading archives because pymatgen prints
         # a lot of them (for things like rounding or electronegativity alerts).
         warnings.filterwarnings("ignore")
-
-        # make sure the user actually wants to do this!
-        cls._confirm_override(
-            confirm_override,
-            parallel,
-            confirm_sqlite_parallel,
-        )
 
         # generate the file name if one wasn't given
         if not filename:
@@ -1307,9 +1288,7 @@ class DatabaseTable(models.Model):
     def load_remote_archive(
         cls,
         remote_archive_link: str = None,
-        confirm_override: bool = False,
         parallel: bool = False,
-        confirm_sqlite_parallel: bool = False,
     ):
         """
         Downloads a compressed zip file made by `objects.to_archive` and loads
@@ -1325,29 +1304,12 @@ class DatabaseTable(models.Model):
             The URL for that the archive will be downloaded from. If not supplied,
             it will default to the table's remote_archive_link attribute.
 
-        - `confirm_override`:
-            If the table already has data in it, the user must take particular
-            care to downloading new data. This flag makes sure the user has
-            made the proper checks to run this action.
-
         - `parallel`:
             Whether to load the data in parallel. If true, this will start
             a local Dask cluster and each data row will be submitted as a task
             to the cluster. This provides substansial speed-ups for loading
             large datasets into the dataset. Default is False.
-
-        - `confirm_sqlite_parallel`:
-            If the database backend is sqlite, this parameter ensures the user
-            knows what they are doing and know the risks of parallelization.
-            Default is False.
         """
-
-        # make sure the user actually wants to do this!
-        cls._confirm_override(
-            confirm_override,
-            parallel,
-            confirm_sqlite_parallel,
-        )
 
         # confirm that we have a link to download from
         if not remote_archive_link:
@@ -1381,83 +1343,9 @@ class DatabaseTable(models.Model):
         cls.load_archive(
             archive_filename,
             delete_on_completion=True,
-            confirm_override=True,  # we already confirmed this above
             parallel=parallel,
-            confirm_sqlite_parallel=True,  # we already confirmed this above
         )
         logging.info("Done.")
-
-    @classmethod
-    def _confirm_override(
-        cls,
-        confirm_override: bool,
-        parallel: bool,
-        confirm_sqlite_parallel: bool,
-    ):
-        """
-        A utility to make sure the user wants to load new data into their table
-        and (if they are using sqlite) that they are aware of the risks of
-        parallelizing their loading.
-
-        This utility should not be called directly, as it is used within
-        load_archive and load_remote_archive.
-        """
-        # first check if the table has data in it already. We raise errors
-        # to stop the user from doing unneccessary and potentiall destructive
-        # downloads
-        if cls.objects.exists() and not confirm_override:
-            # if the user has a third-party app, we can be more specific with
-            # our error message.
-            if cls._meta.app_label in [
-                "aflow",
-                "cod",
-                "jarvis",
-                "materials_project",
-                "oqmd",
-            ]:
-                raise Exception(
-                    "It looks like you're using a third-party database table and "
-                    "that the table already has data in it! This means you already "
-                    "called load_remote_archive and don't need to do it again. "
-                    "If you are trying reload a newer version of this data, make "
-                    "sure you empty this table first. This can be done by "
-                    "reseting your database or manually deleting all objects "
-                    "with `ExampleTable.objects.all().delete()`"
-                )
-
-            # otherwise warning the user of overwriting data with matching
-            # primary keys -- and ask them to use confirm_override.
-            raise Exception(
-                "It looks like this table already has data in it! By loading an "
-                "archive, you could potentially overwrite this data. Make sure "
-                "common mistake that you have unique primary keys between your current "
-                "data and the archive -- if there is a duplicate primary key, it "
-                "will overwrite your data. If you are confident the data is safe "
-                "to load into your database, run this command again with "
-                "confirm_override=True."
-            )
-
-        # Django and Dask can only handle so much for the parallelization
-        # of database writing with SQLite. So if the user has SQLite as their
-        # backend, we need to stop them from using this feature.
-        if (
-            parallel
-            and not confirm_sqlite_parallel
-            and "sqlite3" in str(settings.database_backend)
-        ):
-            raise Exception(
-                "It looks like you are trying to run things in parallel but are "
-                "using the default database backend (sqlite3), which is not "
-                "always stable for massively parallel methods. You can still "
-                "do this, but this message serves as a word of caution. "
-                "You If you see error messages pop up saying 'database is "
-                "locked', then your database is not stable at the rate you're "
-                "trying to write data. This is a sign that you should either "
-                "(1) switch to a different database backend such as Postgres "
-                "or (2) reduce the parallelization of your tasks. If you are "
-                "comfortable with these warnings and know what you're doing, "
-                "set confirm_sqlite_parallel=True."
-            )
 
     # -------------------------------------------------------------------------
     # Methods that set up the REST API and filters that can be queried with

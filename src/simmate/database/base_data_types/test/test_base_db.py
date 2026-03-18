@@ -56,35 +56,24 @@ def test_archive():
 
     # Also try to load an archive that doesn't exist yet
     with pytest.raises(FileNotFoundError):
-        TestDatabaseTable.load_archive(
-            confirm_override=True,
-        )
+        TestDatabaseTable.load_archive()
 
     # write to a file
     TestDatabaseTable.objects.to_archive()
 
-    # try reloading without confirming override
-    with pytest.raises(Exception):
-        TestDatabaseTable.load_archive()
-
-    # try again with confirmation. This is also our last test so we can
+    # reload the archive. This is also our last test so we can
     # delete the archive when we're done
     TestDatabaseTable.load_archive(
-        confirm_override=True,
         delete_on_completion=True,
     )
 
     # Our test table doesn't have the remote_archive_link label set.
     with pytest.raises(Exception):
-        TestDatabaseTable.load_remote_archive(
-            confirm_override=True,
-        )
+        TestDatabaseTable.load_remote_archive()
 
     # now add the attribute and try again
     # NOTE: This is a live CDN! If my CDN server goes down, this test will fail
     TestDatabaseTable.remote_archive_link = (
         "https://archives.simmate.org/TestDatabaseTable-2022-02-08.zip"
     )
-    TestDatabaseTable.load_remote_archive(
-        confirm_override=True,
-    )
+    TestDatabaseTable.load_remote_archive()

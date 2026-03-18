@@ -37,6 +37,5 @@ def test_thermo_table(structure, tmp_path):
     TestThermodynamics.objects.to_archive(archive_filename)
     TestThermodynamics.load_archive(
         archive_filename,
-        confirm_override=True,
         delete_on_completion=True,
     )
