@@ -5,10 +5,11 @@ import warnings
 
 from rich.progress import track
 
-from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.toolkit.visualization.plotting import PlotlyFigure
 from simmate.utilities import get_chemical_subsystems
+
+from .base import DatabaseTable, table_column
 
 # BUG: This prints a tqdm error so we silence it here.
 with warnings.catch_warnings(record=True):

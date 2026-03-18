@@ -1,29 +1,19 @@
 # -*- coding: utf-8 -*-
 
-# The order that we import these different modules is important to prevent
-# circular imports errors, so we prevent isort from changing this file.
-# isort: skip_file
-
-from .base import DatabaseTable, table_column, SearchResults
-from .workflow_populator import WorkflowPopulator
-
-from .filtered_scope import FilteredScope
-from .status_tracking import StatusTracking
-
-from .symmetry import Spacegroup
-from .structure import Structure
-from .calculation import Calculation
-from .fingerprint import FingerprintPool, Fingerprint
-from .forces import Forces
-from .thermodynamics import Thermodynamics
-
-from .static_energy import StaticEnergy
-from .relaxation import Relaxation, IonicStep
-from .dynamics import Dynamics, DynamicsIonicStep
-
-# from .nested import NestedCalculation
 from .band_structure import BandStructure, BandStructureCalc
+from .base import DatabaseTable, SearchResults, table_column
+from .calculation import Calculation
 from .density_of_states import DensityofStates, DensityofStatesCalc
-from .population_analysis import PopulationAnalysis
-
+from .dynamics import Dynamics, DynamicsIonicStep
+from .filtered_scope import FilteredScope
+from .fingerprint import Fingerprint, FingerprintPool
+from .forces import Forces
 from .nudged_elastic_band import DiffusionAnalysis, MigrationHop, MigrationImage
+from .population_analysis import PopulationAnalysis
+from .relaxation import IonicStep, Relaxation
+from .static_energy import StaticEnergy
+from .status_tracking import StatusTracking
+from .structure import Structure
+from .symmetry import Spacegroup
+from .thermodynamics import Thermodynamics
+from .workflow_populator import WorkflowPopulator

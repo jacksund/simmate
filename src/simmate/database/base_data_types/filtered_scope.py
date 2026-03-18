@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from .base import DatabaseTable, table_column
 
 # !!! This mixin is at the outlining & planning stage. Do not use in prod yet.
 

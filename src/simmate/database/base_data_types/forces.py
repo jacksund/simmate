@@ -2,8 +2,9 @@
 
 import numpy
 
-from simmate.database.base_data_types import DatabaseTable, table_column
 from simmate.toolkit import Structure as ToolkitStructure
+
+from .base import DatabaseTable, table_column
 
 
 class Forces(DatabaseTable):

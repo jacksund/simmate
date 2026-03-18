@@ -7,13 +7,11 @@ from pymatgen.electronic_structure.dos import CompleteDos
 from pymatgen.electronic_structure.plotter import DosPlotter
 from pymatgen.io.vasp.outputs import Vasprun
 
-from simmate.database.base_data_types import (
-    Calculation,
-    DatabaseTable,
-    Structure,
-    table_column,
-)
 from simmate.toolkit.visualization.plotting import MatplotlibFigure
+
+from .base import DatabaseTable, table_column
+from .calculation import Calculation
+from .structure import Structure
 
 
 class DensityofStates(DatabaseTable):

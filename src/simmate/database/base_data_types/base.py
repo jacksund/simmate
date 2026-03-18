@@ -759,8 +759,9 @@ class DatabaseTable(models.Model):
 
         # EXPERIMNETAL: adding workflow URL
         try:
-            from simmate.database.base_data_types import Calculation
             from simmate.workflows.utilities import get_workflow
+
+            from .calculation import Calculation
 
             if isinstance(self, Calculation):
                 workflow = get_workflow(self.workflow_name)
