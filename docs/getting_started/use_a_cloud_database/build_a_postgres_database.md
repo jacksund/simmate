@@ -47,24 +47,35 @@ If you want to test Postgres locally for free before moving to the cloud, Docker
 To start a Postgres server locally, run the following command in your terminal:
 
 ``` bash
-docker run \
-    --name simmate-postgres \
-    -e POSTGRES_PASSWORD=mysecretpassword \
-    -v ~/simmate/postgres_data:/var/lib/postgresql/data \
-    -p 5432:5432 \
-    -d postgres
+simmate database start
 ```
 
-#### 2. Understanding the Docker Command
+This command will automatically download the required Postgres image, start a container named `simmate_db`, and update your Simmate settings to connect to it.
 
-For beginners, here is a breakdown of what each part of the command does:
+To stop and remove the container when you are finished, run:
 
-*   `docker run`: Tells Docker to start a new container.
-*   `--name simmate-postgres`: Gives your container a friendly name so you can find it later.
-*   `-e POSTGRES_PASSWORD=mysecretpassword`: Sets an environment variable (`-e`) for the database password. **You should change this to something more secure.**
-*   `-v ~/simmate/postgres_data:/var/lib/postgresql/data`: This "mounts a volume" (`-v`). It maps a folder on your computer (`~/simmate/postgres_data`) to the folder where Postgres stores data inside the container. This ensures your database results are saved to your actual hard drive even if the container is stopped or deleted.
-*   `-p 5432:5432`: Maps the container's port to your computer's port (`-p`). 5432 is the default port for Postgres.
-*   `-d postgres`: Tells Docker to run the container in the background ("detached" mode) using the official `postgres` image.
+``` bash
+simmate database stop
+```
+
+!!! tip "What is happening under the hood?"
+    The `simmate database start` command is a shortcut for a longer `docker` command. For beginners, here is a breakdown of what that command does:
+    
+    ``` bash
+    docker run \
+        --name simmate_db \
+        -e POSTGRES_PASSWORD=postgres \
+        -v ~/simmate/database:/var/lib/postgresql/data \
+        -p 5432:5432 \
+        -d informaticsmatters/rdkit-cartridge-debian:Release_2025_03_3
+    ```
+
+    *   `docker run`: Tells Docker to start a new container.
+    *   `--name simmate_db`: Gives your container a friendly name so you can find it later.
+    *   `-e POSTGRES_PASSWORD=postgres`: Sets an environment variable (`-e`) for the database password. 
+    *   `-v ~/simmate/database:/var/lib/postgresql/data`: This "mounts a volume" (`-v`). It maps a folder on your computer (`~/simmate/database`) to the folder where Postgres stores data inside the container. This ensures your database results are saved to your actual hard drive even if the container is stopped or deleted.
+    *   `-p 5432:5432`: Maps the container's port to your computer's port (`-p`). 5432 is the default port for Postgres.
+    *   `-d ...`: Tells Docker to run the container in the background ("detached" mode) using an official Postgres image that includes [RDKit](https://www.rdkit.org/) support.
 
 -------------------------------------------------------------------------------
 

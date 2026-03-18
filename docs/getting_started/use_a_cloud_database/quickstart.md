@@ -14,8 +14,15 @@
 
     *   **Local Docker (For Practice):** If you want to test Postgres locally for free before moving to the cloud:
         ``` bash
-        docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -v ~/simmate/database_volume:/var/lib/postgresql/data -d postgres
+        simmate database start
         ```
+        *(This command automatically handles step 3 below!)*
+
+        !!! tip "What is happening under the hood?"
+            The command above is a shortcut for:
+            ``` bash
+            docker run --name simmate_db -e POSTGRES_PASSWORD=postgres -v ~/simmate/database:/var/lib/postgresql/data -d informaticsmatters/rdkit-cartridge-debian:Release_2025_03_3
+            ```
 
 3. **Update your Simmate settings.** You can update your settings directly from the command line (replace with your actual details):
 ``` shell

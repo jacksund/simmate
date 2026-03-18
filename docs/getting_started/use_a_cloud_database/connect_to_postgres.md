@@ -21,14 +21,15 @@ sslmode = require
 ```
 
 ### For Docker (Option B):
-The default connection details for the command used in the previous step are:
+The default connection details for `simmate database start` are:
 ```
 username = postgres
-password = mysecretpassword
+password = postgres
 host = localhost
 port = 5432
-database = postgres
+database = simmate_local_dev
 ```
+*(Note: `simmate database start` automatically configures these settings for you!)*
 
 ## 2. Configuring Simmate
 

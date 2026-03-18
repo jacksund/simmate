@@ -490,7 +490,7 @@ def start_postgres_docker(
         "engine": "django.db.backends.postgresql",
         "host": "localhost",
         "port": port,
-        "name": "simmate_sandbox",
+        "name": "simmate_local_dev",  # fixed to deter misuse of dev setup
         "user": "postgres",
         "password": password,
     }
@@ -501,33 +501,18 @@ def start_postgres_docker(
 
 def stop_postgres_docker():
     """
-    Stops the Postgres container 'simmate_db'
+    Stops and removes the Postgres container 'simmate_db'
     """
 
-    # Define the docker command
+    # Define the docker commands
     stop_command = ["docker", "stop", "simmate_db"]
-
-    # execute the command
-    logging.info("Stopping Postgres container via Docker...")
-    try:
-        subprocess.run(stop_command, check=True, capture_output=True)
-        logging.info("Success! Container 'simmate_db' has been stopped.")
-    except subprocess.CalledProcessError as error:
-        logging.error(f"Failed to stop container: {error.stderr.decode()}")
-
-
-def remove_postgres_docker():
-    """
-    Removes the Postgres container 'simmate_db'
-    """
-
-    # Define the docker command
     remove_command = ["docker", "rm", "simmate_db"]
 
-    # execute the command
-    logging.info("Removing Postgres container via Docker...")
+    # execute the commands
+    logging.info("Stopping and removing Postgres container via Docker...")
     try:
+        subprocess.run(stop_command, check=True, capture_output=True)
         subprocess.run(remove_command, check=True, capture_output=True)
-        logging.info("Success! Container 'simmate_db' has been removed.")
+        logging.info("Success! Container 'simmate_db' has been stopped and removed.")
     except subprocess.CalledProcessError as error:
-        logging.error(f"Failed to remove container: {error.stderr.decode()}")
+        logging.error(f"Failed to stop/remove container: {error.stderr.decode()}")

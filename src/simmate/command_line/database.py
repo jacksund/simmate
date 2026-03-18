@@ -34,27 +34,11 @@ def start(
 @database_app.command()
 def stop():
     """
-    Stops the Postgres database container
+    Stops and removes the Postgres database container
     """
     from simmate.database.utilities import stop_postgres_docker
 
     stop_postgres_docker()
-
-
-@database_app.command()
-def remove(confirm: bool = False):
-    """
-    Removes the Postgres database container
-    """
-    if not confirm:
-        typer.confirm(
-            "Are you sure you want to remove the 'simmate_db' container?",
-            abort=True,
-        )
-
-    from simmate.database.utilities import remove_postgres_docker
-
-    remove_postgres_docker()
 
 
 @database_app.command()
