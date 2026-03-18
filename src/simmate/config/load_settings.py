@@ -10,7 +10,6 @@ from simmate import website  # needed to specify location of built-in apps
 from simmate.utilities import (
     deep_update,
     dotdict,
-    get_conda_env,
     get_directory,
     str_to_datatype,
 )
@@ -97,7 +96,7 @@ class SimmateSettings:
         Settings can be a dictionary, "final", or "user".
         """
         if not filename:
-            filename = self.config_directory / f"_{self.conda_env}-settings.yaml"
+            filename = self.config_directory / "settings.yaml"
 
         if settings == "final":
             settings = self.final_settings
@@ -122,7 +121,7 @@ class SimmateSettings:
         # want to set environment variables perminantly via Simmate.
         if self.settings_source is None:
             # default to most-specific config file
-            source = self.config_directory / f"{self.conda_env}-settings.yaml"
+            source = self.config_directory / "settings.yaml"
         elif isinstance(self.settings_source, Path):
             source = self.settings_source
         else:
@@ -425,11 +424,7 @@ class SimmateSettings:
     @cached_property
     def _default_database(self) -> Path:
         # we want to use sqlite3 as our default backend
-        # if the user is in the (base) env or not using conda, then we will have a
-        # value of "-database.sqlite3", which is why we need strip() here.
-        db_filename = (
-            self.config_directory / f"{self.conda_env}-database.sqlite3".strip("-")
-        )
+        db_filename = self.config_directory / "database.sqlite3"
         return {
             "engine": "django.db.backends.sqlite3",
             "name": db_filename,
@@ -474,8 +469,7 @@ class SimmateSettings:
 
         1. environment variables
         2. settings.yaml
-        3. {conda env}-settings.yaml
-        4. nothing (use the default)
+        3. nothing (use the default)
 
         We do NOT allow for a mixture of these. This because tracking down where
         a setting came from would be tricky if there are both environment variables
@@ -493,12 +487,7 @@ class SimmateSettings:
         if settings_file.exists():
             return settings_file
 
-        # 3. my_env-settings.yaml file
-        settings_file = self.config_directory / f"{self.conda_env}-settings.yaml"
-        if settings_file.exists():
-            return settings_file
-
-        # 4. Using 100% defaults
+        # 3. Using 100% defaults
         return None
 
     def _get_env_settings(self) -> dict:
@@ -530,9 +519,6 @@ class SimmateSettings:
                 value=value,
                 type_mappings=self._input_mappings,
             )
-            # OPTIMIZE: There might be better ways to do this, such as
-            # inspecting the attribute. Example with 'conda_env':
-            #   SimmateSettings.conda_env.func.__annotations__["return"]
 
             # split the variable name into basic keys. Note, how we
             # throw out the first key because it is always "simmate".
@@ -550,17 +536,6 @@ class SimmateSettings:
         return user_settings
 
     # -------------------------------------------------------------------------
-
-    @cached_property
-    def conda_env(self) -> str:
-        """
-        Name of the conda environment being used.
-
-        Some settings depend on the conda env name. This makes switching
-        between different databases and settings as easy as activating different
-        conda environments
-        """
-        return get_conda_env()
 
     @cached_property
     def config_directory(self) -> Path:
@@ -618,9 +593,7 @@ class SimmateSettings:
             type_mappings=self._input_mappings,
         )
         # OPTIMIZE: There might be better ways to do this, such as
-        # inspecting the attribute. Example with 'conda_env':
-        #   SimmateSettings.conda_env.func.__annotations__["return"]
-
+        # inspecting the attribute.
         current_level[last_key] = value_cleaned
 
         return final_dict

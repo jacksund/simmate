@@ -27,7 +27,7 @@ simmate config update "database.password=your_password"
 simmate config update "database.port=25061"
 simmate config update "database.options.sslmode=require"
 ```
-Alternatively, you can manually update the file `~/simmate/settings.yaml` (or `{conda_env}-settings.yaml`) with your connection details that align with the [Django format](https://docs.djangoproject.com/en/5.1/ref/settings/#databases). Your settings file should look like this:
+Alternatively, you can manually update the file `~/simmate/settings.yaml` with your connection details that align with the [Django format](https://docs.djangoproject.com/en/5.1/ref/settings/#databases). Your settings file should look like this:
 ``` yaml
 database:
   engine: django.db.backends.postgresql

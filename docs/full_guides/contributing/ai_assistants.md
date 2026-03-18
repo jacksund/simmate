@@ -24,7 +24,8 @@ simmate/
 │   │   ├── website/        # UI, HTMX components, and REST API
 │   │   └── workflows/      # Custom workflow creation
 │   ├── apps/               # Quickstart guides for specific apps
-│   └── getting_started/    # Tutorial series for new users
+│   ├── getting_started/    # Tutorial series for new users
+│   └── change_log.md       # Change log for tracking updates
 ├── envs/                   # Docker and Helm configuration
 ├── src/
 │   └── simmate/
@@ -125,3 +126,4 @@ Scientific logic independent of the database.
 - **Surgical Edits:** Favor `replace` for targeted changes in large files.
 - **Dependencies:** Verify `pyproject.toml` before assuming a library is available.
 - **Documentation:** Always refer to `docs/full_guides/` when building new apps or workflows. These guides provide essential architectural patterns, naming conventions, and best practices.
+- **Change Log:** Always document your changes in the changelog.

@@ -60,6 +60,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 **Enhancements**
 
+- added support for `SIMMATE_CONFIG_DIR` environment variable to allow multiple configurations on the same computer
 - switched from `conda` to `uv` as the default environment and package manager
 - added `scratch_dir` setting to support local scratch directories for workflows
 - added `inventory_management` app for tracking laboratory inventory
@@ -108,7 +109,8 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - refactored `engine` module into `workflows` to consolidate logic
 - renamed the internal `config` module for better organization
 - updated workflow columns in the database for enhanced metadata tracking
-- refactored `htmx` template tags and components for better modularity
+- removed legacy `{conda_env}` support from configuration and database naming in favor of `SIMMATE_CONFIG_DIR`
+- refactor `htmx` template tags and components for better modularity
 - reorganized `dev` apps and updated the `data explorer` UI
 - refactored website's workflow tab to use new API backend
 - removed `django-contrib-comments`, `django-crispy-forms`, `dj-database-url`, `django-filter`, and `djangorestframework` dependencies

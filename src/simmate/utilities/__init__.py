@@ -22,7 +22,6 @@ from .other import (
     get_attributes_doc,
     get_chemical_subsystems,
     get_class,
-    get_conda_env,
     get_docker_command,
     get_hash_key,
     get_latest_version,

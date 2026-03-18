@@ -25,12 +25,11 @@ simmate config show --user-only
 Simmate builds its final configuration by merging user-defined settings with built-in defaults. When looking for user overrides, it checks the following sources in order of priority:
 
 1. **Environment Variables**: Any variable prefixed with `SIMMATE__` (e.g., `SIMMATE__DATABASE__NAME`).
-2. **`settings.yaml`**: A global configuration file in your Simmate directory.
-3. **`{conda_env}-settings.yaml`**: A file named after your active Conda environment (e.g., `my_env-settings.yaml`).
-4. **Defaults**: If no overrides are found, Simmate uses its internal default values.
+2. **`settings.yaml`**: A configuration file in your Simmate directory.
+3. **Defaults**: If no overrides are found, Simmate uses its internal default values.
 
 !!! danger "No Mixing of Sources"
-    Simmate does not allow mixing sources. For example, if any environment variable starting with `SIMMATE__` is set, Simmate will **ignore all YAML files**. Likewise, if `settings.yaml` exists, any `{conda_env}-settings.yaml` file will be ignored. This prevents confusion about where a specific setting originated.
+    Simmate does not allow mixing sources. For example, if any environment variable starting with `SIMMATE__` is set, Simmate will **ignore all YAML files**. This prevents confusion about where a specific setting originated.
 
 ---
 
@@ -64,10 +63,7 @@ apps:
 Simmate uses the Django ORM and supports multiple database backends. 
 
 **SQLite (Default)**
-The default is a local SQLite database stored in your configuration directory. To allow multiple projects to coexist, the database file is named after your active Conda environment:
-
-- No environment: `database.sqlite3`
-- Environment `my_env`: `my_env-database.sqlite3`
+The default is a local SQLite database named `database.sqlite3` stored in your configuration directory. To allow multiple projects to coexist on the same machine, you can change your `SIMMATE_CONFIG_DIR` environment variable to point to different directories.
 
 **PostgreSQL**
 For production or shared environments, PostgreSQL is recommended:
@@ -159,7 +155,7 @@ To export your current configuration to a YAML file:
 ```bash
 simmate config write
 ```
-By default, this writes to a file named `_{conda_env}-settings.yaml` in your config directory.
+By default, this writes to a file named `settings.yaml` in your config directory.
 
 **Update a Setting**
 You can update settings directly using dot-notation:
