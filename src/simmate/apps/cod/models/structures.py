@@ -48,7 +48,7 @@ class CodStructure(Structure):
 
     # -------------------------------------------------------------------------
 
-    remote_archive_link = "https://archives.simmate.org/CodStructure-2023-07-10.zip"
+    remote_archive_link = "https://archives.simmate.org/CodStructure-2026-03-17.zip"
     archive_fields = ["is_ordered", "has_implicit_hydrogens"]
 
     # -------------------------------------------------------------------------
@@ -73,7 +73,7 @@ class CodStructure(Structure):
         cls,
         base_directory: str | Path = None,
         only_add_new_cifs: bool = True,
-        chunk_size: int = 15000,
+        chunk_size: int = 5000,
     ):
         """
         This method pulls COD data into the Simmate database.
@@ -140,8 +140,8 @@ class CodStructure(Structure):
         try:
             cif = CifParser(cif_path, occupancy_tolerance=float("inf"))
             structure = cif.get_structures()[0]
-            # Mark complex structures as invalid to avoid database column limits
-            if len(structure) > 100 or len(structure.composition) > 10:
+            # Mark overly complex structures as invalid to avoid database blowup
+            if len(structure) > 500 or len(structure.composition) > 10:
                 raise ValueError("Structure too complex")
             is_invalid_structure = False
         except Exception:
