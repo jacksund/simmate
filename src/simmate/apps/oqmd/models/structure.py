@@ -42,8 +42,7 @@ class OqmdStructure(Structure):
         """
         # Links to the OQMD dashboard for this structure. An example is...
         #   http://oqmd.org/materials/entry/10435
-        id_number = self.id.split("-")[-1]  # this removes the "oqmd-" from the id
-        return f"http://oqmd.org/materials/entry/{id_number}"
+        return f"http://oqmd.org/materials/entry/{self.id}"
 
     # -------------------------------------------------------------------------
 
@@ -51,11 +50,6 @@ class OqmdStructure(Structure):
     archive_fields = ["formation_energy"]
 
     # -------------------------------------------------------------------------
-
-    id = table_column.CharField(max_length=25, primary_key=True)
-    """
-    The id used to represent the structure (ex: "oqmd-12345")
-    """
 
     # OQMD did not provide energy so the Thermodynamics mix-in can't be used
     formation_energy = table_column.FloatField(blank=True, null=True)
@@ -114,22 +108,29 @@ class OqmdStructure(Structure):
             filename = base_directory / row.filename
             with filename.open() as file:
                 contents = file.read()
-            structure = ToolkitStructure.from_str(contents, "poscar")
 
             # save the data to the Simmate database
             # now convert the entry to a database object
             try:
+                structure = ToolkitStructure.from_str(contents, "poscar")
                 structure_db = cls.from_toolkit(
-                    id="oqmd-" + str(row.entry_id),
+                    id=row.entry_id,
                     structure=structure,
                     formation_energy=row.formationenergy,
                 )
-                db_objects.append(structure_db)
             # A few structures fail because of the symmetry analyzer can't determine
             # the spacegroup. These are...
             # 1443135, 1443014, 1451986, 1452015, 1452024
-            except:
+            except Exception:
+                structure_db = cls.from_toolkit(
+                    id=row.entry_id,
+                    structure=None,
+                    formation_energy=row.formationenergy,
+                    is_invalid_structure=True,
+                )
                 failed_entries.append(row.entry_id)
+
+            db_objects.append(structure_db)
 
         # and save it to our database
         cls.objects.bulk_create(

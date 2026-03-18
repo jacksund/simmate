@@ -74,9 +74,9 @@ dev = [
     "spyder-kernels==3.1.*",
 ]
 # App-specific deps
-# baderkit = [
-#     "baderkit>=0.8.0",
-# ]
+baderkit = [
+    "baderkit>=0.9.0,<0.10.0",
+]
 chatbot = [
     "langchain>=1.2.10,<2.0.0",
     "langchain-community>=0.4.1,<0.5.0",
@@ -84,6 +84,9 @@ chatbot = [
     "langchain-google-genai>=4.2.1,<5.0.0",
     "langchain-openai>=1.1.10,<2.0.0",
     "ddgs>=9.11.1,<10.0.0",
+]
+jarvis = [
+    "jarvis-tools>=2026.1.10",
 ]
 price_catalog = [
     "yfinance>=1.2.0,<2.0.0",
