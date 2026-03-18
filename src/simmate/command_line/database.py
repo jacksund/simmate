@@ -19,6 +19,29 @@ def base_command():
 
 
 @database_app.command()
+def start(
+    password: str = typer.Option("postgres", help="The password for the postgres user"),
+    port: int = typer.Option(5432, help="The port to expose the database on"),
+):
+    """
+    Sets up a Postgres database using Docker
+    """
+    from simmate.database.utilities import start_postgres_docker
+
+    start_postgres_docker(password=password, port=port)
+
+
+@database_app.command()
+def stop():
+    """
+    Stops and removes the Postgres database container
+    """
+    from simmate.database.utilities import stop_postgres_docker
+
+    stop_postgres_docker()
+
+
+@database_app.command()
 def reset(confirm_delete: bool = False, use_prebuilt: bool = None):
     """
     Removes any existing data and sets up a clean database
