@@ -107,6 +107,6 @@ To share this database with teammates, you can export your configuration to a fi
 ``` bash
 simmate config write
 ```
-This will create a file (e.g., `settings.yaml` or `{conda_env}-settings.yaml`) in your `~/simmate` directory. Your teammates can place this file in their own Simmate directory to instantly connect to the same shared database.
+This will create a file (e.g., `settings.yaml`) in your `~/simmate` directory. Your teammates can place this file in their own Simmate directory to instantly connect to the same shared database.
 
 -------------------------------------------------------------------------------
