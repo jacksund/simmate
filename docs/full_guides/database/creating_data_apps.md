@@ -21,8 +21,8 @@ When you create a Data App, you're not just sharing a CSV or JSON file. You're g
 First, [create a Simmate App](../apps/creating_custom_apps.md) and define your table in `models.py`.
 
 ``` python
-from simmate.database.base_data_types import (
-    table_column, 
+from simmate.database.core import table_column
+from simmate.database.mixins import (
     Structure, 
     Thermodynamics,
 )

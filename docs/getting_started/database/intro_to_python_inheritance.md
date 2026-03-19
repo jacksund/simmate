@@ -21,7 +21,7 @@ Let's start with the basics: what does the table you saw in DBeaver actually loo
 All datatables are represented by a class, and the general format is as follows:
 
 ```python
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 class MyExampleTable(DatabaseTable):
    column_01 = table_column.CharField(max_length=50)  # text storage
@@ -51,7 +51,7 @@ However, if we have multiple tables with similar data, this process can become r
 First, we define a table with common data (let's use `Person` as an example).
 
 ```python
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 class Person(DatabaseTable):
    name = table_column.CharField(max_length=100)

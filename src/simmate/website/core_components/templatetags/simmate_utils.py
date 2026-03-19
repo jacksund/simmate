@@ -8,7 +8,7 @@ from django import template
 from django.utils.safestring import mark_safe
 from plotly.graph_objects import Figure
 
-from simmate.database.base_data_types import Structure as DatabaseStructure
+from simmate.database.mixins import Structure as DatabaseStructure
 from simmate.toolkit import Structure as ToolkitStructure
 
 register = template.Library()

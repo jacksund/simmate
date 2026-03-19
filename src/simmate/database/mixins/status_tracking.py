@@ -4,7 +4,7 @@ import plotly.express as plotly_express
 from django.utils import timezone
 from pandas import DataFrame
 
-from .base import DatabaseTable, table_column
+from ..core import DatabaseTable, table_column
 
 
 class StatusTracking(DatabaseTable):

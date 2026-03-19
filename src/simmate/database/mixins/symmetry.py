@@ -3,7 +3,7 @@
 from pymatgen.symmetry.groups import SpaceGroup as PymatgenSpacegroup
 from rich.progress import track
 
-from .base import DatabaseTable, table_column
+from ..core import DatabaseTable, table_column
 
 # NOTE: This class is *not* meant to store data about each spacegroup, but instead
 # is just to help with querying Structures. If you want all spacegroup data

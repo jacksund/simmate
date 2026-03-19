@@ -13,7 +13,8 @@ from rich.progress import track
 
 from simmate.apps.rdkit.models import Molecule
 from simmate.config import settings
-from simmate.database.base_data_types import ThirdPartyData, table_column
+from simmate.database.core import table_column
+from simmate.database.mixins import ThirdPartyData
 from simmate.toolkit import Molecule as ToolkitMolecule
 from simmate.utilities import chunk_list, get_directory
 

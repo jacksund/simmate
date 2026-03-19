@@ -6,7 +6,7 @@ import streamlit as st
 from pandas.api.types import is_datetime64_any_dtype, is_numeric_dtype
 
 from simmate.database import connect
-from simmate.database.base_data_types import DatabaseTable
+from simmate.database.core import DatabaseTable
 from simmate.toolkit import Molecule
 
 from .plot_constructors.utilities import (

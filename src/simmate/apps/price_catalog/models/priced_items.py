@@ -9,7 +9,7 @@ import plotly.graph_objects as plotly_go
 from django.utils.timezone import make_aware
 from rich.progress import track
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 
 class PricedItem(DatabaseTable):

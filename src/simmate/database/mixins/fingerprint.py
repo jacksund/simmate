@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .base import DatabaseTable, table_column
+from ..core import DatabaseTable, table_column
 
 
 class FingerprintPool(DatabaseTable):

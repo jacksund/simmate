@@ -12,7 +12,7 @@ from simmate.toolkit.diffusion import MigrationHop as ToolkitMigrationHop
 from simmate.toolkit.diffusion import MigrationImages
 from simmate.toolkit.visualization.plotting import MatplotlibFigure
 
-from .base import table_column
+from ..core import table_column
 from .calculation import Calculation
 from .structure import Structure
 

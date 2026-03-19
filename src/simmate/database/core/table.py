@@ -292,7 +292,7 @@ class DatabaseTable(models.Model, HTMLMixin, ArchiveMixin):
         Grabs the mix-in Tables that were used to make this class. This will
         be mix-ins like Structure, Forces, etc.
 
-        These are typically all from the `simmate.database.base_data_types`
+        These are typically all from the `simmate.database.mixins`
         module. Custom mix-ins can be provided
         """
         return [
@@ -317,7 +317,7 @@ class DatabaseTable(models.Model, HTMLMixin, ArchiveMixin):
         For example, a table made from...
 
         ``` python
-        from simmate.database.base_data_types import (
+        from simmate.database.mixins import (
             table_column,
             Structure,
             Forces,

@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db import transaction as django_db_transaction
 from django.db.models import F, Sum
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 from .project import Project
 

@@ -5,7 +5,8 @@ import traceback
 import warnings
 from pathlib import Path
 
-from simmate.database.base_data_types import Calculation, table_column
+from simmate.database.core import table_column
+from simmate.database.mixins import Calculation
 from simmate.toolkit import Composition
 from simmate.utilities import get_chemical_subsystems, get_directory
 

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import (
+from simmate.database.core import table_column
+from simmate.database.mixins import (
     Structure,
     Thermodynamics,
     ThirdPartyData,
-    table_column,
 )
 
 

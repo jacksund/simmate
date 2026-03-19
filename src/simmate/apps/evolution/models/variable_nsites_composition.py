@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import Calculation, table_column
+from simmate.database.core import table_column
+from simmate.database.mixins import Calculation
 
 
 class VariableNsitesCompositionSearch(Calculation):

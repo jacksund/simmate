@@ -22,7 +22,7 @@ from typer.testing import CliRunner
 
 from simmate.apps.vasp.inputs import Potcar
 from simmate.config import settings
-from simmate.database.base_data_types import Spacegroup
+from simmate.database.mixins import Spacegroup
 from simmate.toolkit import Composition, Structure, base_data_types
 from simmate.utilities import get_directory
 from simmate.website.test_app.models import TestStructure

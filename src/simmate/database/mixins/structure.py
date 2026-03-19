@@ -8,11 +8,7 @@ from simmate.toolkit import Structure as ToolkitStructure
 from simmate.toolkit.validators.fingerprint import PartialCrystalNNFingerprint
 from simmate.utilities import get_chemical_subsystems
 
-from .base import (
-    DatabaseTable,
-    table_column,
-)
-from .search_results import SearchResults
+from ..core import DatabaseTable, SearchResults, table_column
 from .symmetry import Spacegroup
 
 
@@ -285,7 +281,7 @@ class Structure(DatabaseTable):
     """
     Spacegroup information. Points to a separate database table that has additional
     columns:
-    `simmate.database.base_data_types.symmetry.Spacegroup`
+    `simmate.database.mixins.symmetry.Spacegroup`
     """
 
     # TODO:

@@ -229,7 +229,7 @@ def reset_database(
     # Because this is our first time building the database, we also want to
     # load the Spacegroup metadata for us to query Structures by.
     else:
-        from simmate.database.base_data_types import Spacegroup
+        from simmate.database.mixins import Spacegroup
 
         logging.info("Building empty database...")
         update_database(apps_to_migrate, show_logs=False)
@@ -336,7 +336,7 @@ def get_table(table_name: str):  # returns subclass of DatabaseTable
     # local import is required to prevent circular dep. This is also a higher
     # level util for users, so we establish db connection for them upfront
     from simmate.database import connect
-    from simmate.database.base_data_types import DatabaseTable
+    from simmate.database.core import DatabaseTable
 
     return DatabaseTable.get_table(table_name=table_name)
 

@@ -2,7 +2,7 @@
 
 import logging
 
-from simmate.database.base_data_types import DatabaseTable
+from simmate.database.core import DatabaseTable
 from simmate.toolkit import Molecule
 
 

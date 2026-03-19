@@ -7,7 +7,7 @@ import plotly.graph_objects as plotly_go
 from django.contrib.auth.models import User
 from plotly.subplots import make_subplots
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 
 class WebsitePageVisit(DatabaseTable):

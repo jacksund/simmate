@@ -6,7 +6,7 @@ In Simmate, you define database tables by inheriting from **Mix-ins**. These mix
 
 ## Mix-in Types
 
-Simmate provides a hierarchy of mix-ins in the `simmate.database.base_data_types` module.
+Simmate provides a hierarchy of mix-ins in the `simmate.database.core` and `simmate.database.mixins` modules.
 
 ### Low-Level Mix-ins
 These are the building blocks for any table:
@@ -32,8 +32,8 @@ These combine multiple low-level mix-ins for common workflow results:
 To create a new table, you should first [create a Simmate App](../apps/creating_custom_apps.md). Then, add your table to the app's `models.py` file.
 
 ``` python
-from simmate.database.base_data_types import (
-    table_column,
+from simmate.database.core import table_column
+from simmate.database.mixins import (
     Structure,
     Thermodynamics,
     Calculation,

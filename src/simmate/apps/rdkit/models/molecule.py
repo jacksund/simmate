@@ -6,7 +6,7 @@ from django.db.models import Func
 
 from simmate.apps.rdkit.models import custom_fields
 from simmate.config import settings
-from simmate.database.base_data_types import DatabaseTable, SearchResults, table_column
+from simmate.database.core import DatabaseTable, SearchResults, table_column
 from simmate.toolkit import Molecule as ToolkitMolecule
 
 

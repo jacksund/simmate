@@ -6,11 +6,8 @@ from pathlib import Path
 import pandas
 from rich.progress import track
 
-from simmate.database.base_data_types import (
-    DatabaseTable,
-    ThirdPartyData,
-    table_column,
-)
+from simmate.database.core import DatabaseTable, table_column
+from simmate.database.mixins import ThirdPartyData
 from simmate.utilities import chunk_list, get_hash_key
 
 from .molecules import EmoleculesMolecule
