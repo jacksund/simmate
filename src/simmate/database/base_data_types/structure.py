@@ -10,9 +10,9 @@ from simmate.utilities import get_chemical_subsystems
 
 from .base import (
     DatabaseTable,
-    SearchResults,
     table_column,
 )
+from .search_results import SearchResults
 from .symmetry import Spacegroup
 
 
