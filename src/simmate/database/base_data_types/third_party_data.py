@@ -20,14 +20,6 @@ class ThirdPartyData:
     The homepage of the source website, if the data is loaded from a third-party
     """
 
-    remote_archive_link: str = None
-    """
-    The URL that is used to download the archive and then populate this table.
-    Many tables have pre-existing data that you can download and load into 
-    your local database, so if this attribute is set, you can use the 
-    `load_remote_archive` method.
-    """
-
     is_redistribution_allowed: bool = True
     """
     Whether this data can be redistribution by the Simmate team. This is used

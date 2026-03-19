@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import inspect
-import json
-import logging
 import shutil
 import textwrap
 import urllib
-import warnings
 from functools import cache
 from pathlib import Path
 
@@ -22,11 +19,13 @@ from django.shortcuts import get_object_or_404
 from django.urls import resolve, reverse
 from django.utils.module_loading import import_string
 from django.utils.timezone import datetime, now, timedelta
-from rich.progress import track
 
 from simmate.config import settings
 from simmate.database.utilities import check_db_conn
 from simmate.utilities import get_attributes_doc
+
+from .archive import ArchiveMixin
+from .html_mixin import HTMLMixin
 
 # The "as table_column" line does NOTHING but rename a module.
 # I have this because I want to use "table_column.CharField(...)" instead
@@ -390,7 +389,7 @@ class SearchResults(models.QuerySet):
 DatabaseTableManager = models.Manager.from_queryset(SearchResults)
 
 
-class DatabaseTable(models.Model):
+class DatabaseTable(models.Model, HTMLMixin, ArchiveMixin):
     """
     The base class for defining a table in the Simmate database. All tables and
     mixins inherit from this class.
@@ -402,6 +401,8 @@ class DatabaseTable(models.Model):
 
     class Meta:
         abstract = True
+
+    # -------------------------------------------------------------------------
 
     id = table_column.AutoField(primary_key=True)
     """
@@ -439,20 +440,6 @@ class DatabaseTable(models.Model):
     # TODO: switch to...
     # https://docs.djangoproject.com/en/5.0/topics/db/managers/#creating-a-manager-with-queryset-methods
     # objects = SearchResults.as_manager()
-
-    archive_fields: list[str] = []
-    """
-    The base information for this database table and only these fields are stored
-    when the `to_archive` method is used. Columns excluded from this list can 
-    be calculated quickly and will therefore not be stored. Therefore, this list
-    can be thought of as the "raw data".
-    
-    The columns from mix-ins will automatically be added. If you would like to
-    remove one of these columns, you can add "--" to the start of the column
-    name (e.g. "--energy" will not store the energy).
-    
-    To see all archive fields, see the `archive_fieldset` property.
-    """
 
     exclude_from_summary: list[str] = []
     """
@@ -1064,258 +1051,8 @@ class DatabaseTable(models.Model):
         return all_data if as_dict else cls(**all_data)
 
     # -------------------------------------------------------------------------
-    # Methods creating new archives
-    # -------------------------------------------------------------------------
-
-    @classmethod
-    def to_archive(cls, filename: Path | str = None):
-        """
-        Writes the entire database table to an archive file. If you prefer
-        a subset of entries for the archive, use the to_archive method
-        on your SearchResults instead (e.g. MyTable.objects.filter(...).to_archive())
-        """
-        cls.objects.all().to_archive(filename)
-
-    @classmethod
-    @property
-    def archive_fieldset(cls) -> list[str]:
-        all_fields = ["id", "updated_at", "created_at", "source"]
-
-        # If calling this method on the base class, just return the sole mix-in.
-        if cls == DatabaseTable:
-            return all_fields
-
-        # Otherwise we need to go through the mix-ins and add their fields to
-        # the list
-        all_fields += [
-            field for mixin in cls.get_mixins() for field in mixin.archive_fields
-        ]
-
-        # Sometimes a column will be disabled by adding "--" in front of the
-        # column name. For example, "--band_gap" would exclude storing the band
-        # gap in the archive. We look for any columns that start with this
-        # and then remove them
-        for field in cls.archive_fields:
-            if field.startswith("--"):
-                all_fields.remove(field.removeprefix("--"))
-            else:
-                all_fields.append(field)
-
-        # Some tables delete the columns that a mixin or base table provides.
-        # For example, the "source" column is deleted sometimes because
-        # the entire table comes from a fixed source (e.g. JARVIS or the
-        # MatProj). We check this with all default columns, just in case.
-        all_fields = [f for f in all_fields if f in cls.get_column_names()]
-
-        # and remove accidental duplicate cols if any
-        all_fields = list(set(all_fields))
-
-        return all_fields
-
-    # -------------------------------------------------------------------------
-    # Methods that handle loading results from archives
-    # -------------------------------------------------------------------------
-
-    # @transaction.atomic  # We can't have an atomic transaction if we use Dask
-    @classmethod
-    def load_archive(
-        cls,
-        filename: str | Path = None,
-        delete_on_completion: bool = False,
-        parallel: bool = False,
-    ):
-        """
-        Reads a compressed zip file made by `objects.to_archive` and loads the data
-        back into the Simmate database.
-
-        Typically, users won't call this method directly, but instead use the
-        `load_remote_archive` method, which handles downloading the archive
-        file from the Simmate website for you.
-
-        #### Parameters
-
-        - `filename`:
-            The filename to write the zip file to. By defualt, None will try to
-            find a file named "MyExampleTableName-2022-01-25.zip", where the date
-            corresponds to version/timestamp. If multiple files match this format
-            the most recent date will be used.
-
-        - `delete_on_completion`:
-            Whether to delete the archive file once all data is loaded into the
-            database. Defaults to False
-
-        - `parallel`:
-            Whether to load the data in parallel. If true, this will start
-            a local Dask cluster and each data row will be submitted as a task
-            to the cluster. This provides substansial speed-ups for loading
-            large datasets into the dataset. Default is False.
-        """
-
-        # We disable warnings while loading archives because pymatgen prints
-        # a lot of them (for things like rounding or electronegativity alerts).
-        warnings.filterwarnings("ignore")
-
-        # generate the file name if one wasn't given
-        if not filename:
-            # The name will be something like "MyExampleTable-2022-01-25.zip".
-            # We go through all files that match "MyExampleTable-*.zip" and then
-            # grab the most recent date.
-            matching_files = [
-                file
-                for file in Path.cwd().iterdir()
-                if file.name.startswith(cls.table_name) and file.suffix == ".zip"
-            ]
-            # make sure there is at least one file
-            if not matching_files:
-                raise FileNotFoundError(
-                    f"No file found matching the {cls.table_name}-*.zip format"
-                )
-            # sort the files by date and grab the first
-            matching_files.sort(reverse=True)
-            filename = matching_files[0]
-
-        # Turn the filename into the full path -- which makes a number of
-        # manipulations easier below.
-        filename = Path(filename).absolute()
-
-        # uncompress the zip file to the same directory that it is located in
-        shutil.unpack_archive(
-            filename,
-            extract_dir=filename.parent,
-        )
-
-        # We will now have a csv file of the same name, which we load into
-        # a pandas dataframe
-        csv_filename = filename.with_suffix(".csv")  # was ".zip"
-        df = pandas.read_csv(csv_filename)
-
-        # BUG: NaN values throw errors when read into SQL databases, so we
-        # convert all NaN entries to None. This hacky line was taken from
-        #   https://stackoverflow.com/questions/39279824/
-        df = df.astype(object).where(df.notna(), None)
-
-        # convert the dataframe to a list of dictionaries that we will iterate
-        # through.
-        entries = df.to_dict(orient="records")
-
-        # to enable parallelization, we define a function to load a single
-        # entry (or row) of data. This allows us to submit the function to Dask.
-        def load_single_entry(entry):
-            """
-            Quick utility function that load a single entry to the database.
-            We have this as a internal function in order to allow submitting
-            this function to Dask (for parallelization).
-            """
-
-            # BUG: some columns don't properly convert to python objects, but
-            # it seems inconsistent when this is done... For now I just manually
-            # convert JSON columns
-            json_parsing_columns = ["site_forces", "lattice_stress"]
-            for column in json_parsing_columns:
-                if column in entry:
-                    if entry[column]:  # sometimes it has a value of None
-                        entry[column] = json.loads(entry[column])
-            # OPTIMIZE: consider applying this to the df column for faster loading
-
-            return cls.from_toolkit(**entry)
-
-        # now iterate through all entries to save them to the database
-        if not parallel:
-            # If user doesn't want parallelization, we run these in the main
-            # thread and monitor progress
-            db_objects = [load_single_entry(entry) for entry in track(entries)]
-
-        # otherwise we use dask to submit these in batches!
-        else:
-
-            from simmate.config.dask import batch_submit
-
-            db_objects = batch_submit(
-                function=load_single_entry,
-                args_list=entries,
-                batch_size=15000,
-            )
-
-        cls.objects.bulk_create(
-            db_objects,
-            batch_size=15000,
-            ignore_conflicts=True,
-        )
-
-        # We can now delete the files. The zip file is only deleted if requested.
-        csv_filename.unlink()
-        if delete_on_completion:
-            filename.unlink()  # the zip archive
-
-    @classmethod
-    def load_remote_archive(
-        cls,
-        remote_archive_link: str = None,
-        parallel: bool = False,
-    ):
-        """
-        Downloads a compressed zip file made by `objects.to_archive` and loads
-        the data back into the Simmate database.
-
-        This method should only be called once -- when you have a completely
-        empty database. After this call, all data will be stored locally and
-        you don't need to call this method again (even accross python sessions).
-
-        #### Parameters
-
-        - `remote_archive_link`:
-            The URL for that the archive will be downloaded from. If not supplied,
-            it will default to the table's remote_archive_link attribute.
-
-        - `parallel`:
-            Whether to load the data in parallel. If true, this will start
-            a local Dask cluster and each data row will be submitted as a task
-            to the cluster. This provides substansial speed-ups for loading
-            large datasets into the dataset. Default is False.
-        """
-
-        # confirm that we have a link to download from
-        if not remote_archive_link:
-            # if no link was given we take the input value from class attribute
-            if not cls.remote_archive_link:
-                raise Exception(
-                    "This table does not have a default link to load the archive "
-                    " from. You must provide a remote_archive_link."
-                )
-            remote_archive_link = cls.remote_archive_link
-
-        # tell the user where the data comes from
-        if cls._meta.app_label == "data_explorer":
-            logging.warning(
-                "this data is NOT from the Simmate team, so be sure "
-                "to visit the provider's website and to cite their work."
-                f" This data is from {getattr(cls, 'source', 'the provider')} "
-                f"and the following paper should be cited: {getattr(cls, 'source_doi', '---')}"
-            )
-
-        # Predetermine the file name, which is just the ending of the URL
-        archive_filename = remote_archive_link.split("/")[-1]
-
-        # Download the archive zip file from the URL to the current working dir
-        logging.info("Downloading archive file...")
-        urllib.request.urlretrieve(remote_archive_link, archive_filename)
-        logging.info("Done.")
-
-        # now that the archive is downloaded, we can load it into our db
-        logging.info("Loading data into Simmate database")
-        cls.load_archive(
-            archive_filename,
-            delete_on_completion=True,
-            parallel=parallel,
-        )
-        logging.info("Done.")
-
-    # -------------------------------------------------------------------------
     # Methods that set up the REST API and filters that can be queried with
     # -------------------------------------------------------------------------
-
-    # !!! DEV -- This section is currently a mixture of depreciated and experimental
-    # methods. Users should avoid until these methods become stable
 
     @classmethod
     def get_web_queryset(cls):
@@ -1596,35 +1333,6 @@ class DatabaseTable(models.Model):
     # Methods that link to the website UI
     # -------------------------------------------------------------------------
 
-    # experimental overrides for templates used by the Data Explorer app
-
-    is_redistribution_allowed: bool = True
-
-    html_display_name: str = None
-    html_description_short: str = None
-    html_tabtitle_label_col: str = "id"
-
-    html_about_template: str = "data_explorer/table_about.html"
-    html_table_template: str = "data_explorer/table.html"
-    html_entry_template: str = "data_explorer/table_entry.html"
-    html_entries_template: str = "data_explorer/table_entries.html"
-
-    # This take the views below and just put them within the main body
-    html_search_template: str = "htmx/full_page_component.html"
-    html_entry_form_template: str = "htmx/full_page_component.html"
-
-    # HTMX views (side panels in the table view of the Data Explorer app)
-    html_form_component: str = None
-    html_enabled_forms: list[str] = []
-    # options: "search", "create", "update", "create_many", "create_many_entry", "update_many"
-
-    @property
-    def html_tabtitle_label(self) -> str:
-        """
-        Provides a label to put in the tab title. By default, this uses the id
-        """
-        return str(getattr(self, self.html_tabtitle_label_col))
-
     @classmethod
     @property
     def url_table(self) -> str:
@@ -1652,50 +1360,6 @@ class DatabaseTable(models.Model):
             "data_explorer:table-entry",
             kwargs={"table_name": self.table_name, "table_entry_id": self.pk},
         )
-
-    @classmethod
-    @property
-    def html_extra_table_context(cls) -> dict:
-        return {}
-
-    @property
-    def html_extra_entry_context(self) -> dict:
-        return {}
-
-    # -------------------------------------------------------------------------
-    # Methods for reports and plotting.
-    # -------------------------------------------------------------------------
-
-    # Note, many methods associated with this section would normally be
-    # attached to custom QuerySet/SearchResults subclasses, but that leads
-    # to extra boiler plate.
-
-    enable_html_report: bool = False
-    report_df_columns: list[str] = None
-
-    @classmethod
-    def get_report(cls, data_source: SearchResults | Page = None) -> dict:
-        """
-        Gives a dictionary of report information, such as statistical values
-        or plotly figures.
-
-        If data_source is left as None, the entire table is used
-        """
-
-        # convert to a SearchResults/queryset obj
-        if data_source == None:
-            data_source = cls.objects  # use full table by default
-        elif isinstance(data_source, SearchResults):
-            pass  # queryset ready to go
-        elif isinstance(data_source, Page):
-            data_source = data_source.paginator.object_list
-
-        df = data_source.to_dataframe(cls.report_df_columns)
-        return cls.get_report_from_df(df)
-
-    @classmethod
-    def get_report_from_df(cls, df: pandas.DataFrame) -> dict:
-        raise NotImplementedError("A `get_report_from_df` method must be provided")
 
     # -------------------------------------------------------------------------
 
