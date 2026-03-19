@@ -3,7 +3,7 @@
 import platform
 from datetime import datetime
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from .base import DatabaseTable, table_column
 
 
 class Calculation(DatabaseTable):

@@ -13,12 +13,12 @@ from rich.progress import track
 
 from simmate.apps.rdkit.models import Molecule
 from simmate.config import settings
-from simmate.database.base_data_types import table_column
+from simmate.database.base_data_types import ThirdPartyData, table_column
 from simmate.toolkit import Molecule as ToolkitMolecule
 from simmate.utilities import chunk_list, get_directory
 
 
-class EmoleculesMolecule(Molecule):
+class EmoleculesMolecule(ThirdPartyData, Molecule):
     """
     Molecules from the [eMolecules](https://www.emolecules.com/) database.
     """

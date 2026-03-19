@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import Structure, table_column
+from simmate.database.base_data_types import Structure, ThirdPartyData, table_column
 
 
-class AflowPrototype(Structure):
+class AflowPrototype(ThirdPartyData, Structure):
     """
     A collection of prototype crystal structures from the AFLOW library.
 

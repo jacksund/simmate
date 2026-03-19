@@ -4,15 +4,16 @@ from django.db.models import Func
 from scipy.constants import Avogadro
 
 from simmate.config import settings
-from simmate.database.base_data_types import (
-    DatabaseTable,
-    SearchResults,
-    Spacegroup,
-    table_column,
-)
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.toolkit.validators.fingerprint import PartialCrystalNNFingerprint
 from simmate.utilities import get_chemical_subsystems
+
+from .base import (
+    DatabaseTable,
+    table_column,
+)
+from .search_results import SearchResults
+from .symmetry import Spacegroup
 
 
 # UNDER DEV -- Not used elsewhere yet

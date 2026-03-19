@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import Structure, Thermodynamics, table_column
+from simmate.database.base_data_types import (
+    Structure,
+    Thermodynamics,
+    ThirdPartyData,
+    table_column,
+)
 
 
-class AflowStructure(Structure, Thermodynamics):
+class AflowStructure(ThirdPartyData, Structure, Thermodynamics):
     """
     Crystal structures from the [AFLOW](http://aflowlib.org/) database.
 

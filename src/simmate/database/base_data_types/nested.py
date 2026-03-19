@@ -3,7 +3,9 @@
 import logging
 from pathlib import Path
 
-from simmate.database.base_data_types import Calculation, Structure, table_column
+from .base import table_column
+from .calculation import Calculation
+from .structure import Structure
 
 
 class NestedCalculation(Structure, Calculation):

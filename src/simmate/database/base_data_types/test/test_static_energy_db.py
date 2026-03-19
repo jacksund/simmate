@@ -55,6 +55,5 @@ def test_static_energy_table(structure, tmp_path):
     StaticEnergy.objects.to_archive(archive_filename)
     StaticEnergy.load_archive(
         archive_filename,
-        confirm_override=True,
         delete_on_completion=True,
     )

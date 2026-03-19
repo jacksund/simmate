@@ -9,13 +9,11 @@ from pymatgen.electronic_structure.bandstructure import (
 from pymatgen.electronic_structure.plotter import BSPlotter
 from pymatgen.io.vasp.outputs import Vasprun
 
-from simmate.database.base_data_types import (
-    Calculation,
-    DatabaseTable,
-    Structure,
-    table_column,
-)
 from simmate.toolkit.visualization.plotting import MatplotlibFigure
+
+from .base import DatabaseTable, table_column
+from .calculation import Calculation
+from .structure import Structure
 
 
 class BandStructure(DatabaseTable):

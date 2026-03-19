@@ -50,6 +50,5 @@ def test_calculation_archives():
     TestCalculation.objects.to_archive()
 
     TestCalculation.load_archive(
-        confirm_override=True,
         delete_on_completion=True,
     )

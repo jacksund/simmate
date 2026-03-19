@@ -5,12 +5,12 @@ import logging
 from rich.progress import track
 
 from simmate.apps.rdkit.models import Molecule
-from simmate.database.base_data_types import table_column
+from simmate.database.base_data_types import ThirdPartyData, table_column
 
 from ..web_scraper import BcpcWebScraper
 
 
-class BcpcIsoPesticide(Molecule):
+class BcpcIsoPesticide(ThirdPartyData, Molecule):
     """
     This is the "Compendium of Pesticide Common Names" pulled from the
     British Crop Production Council (BCPC) website.

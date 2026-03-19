@@ -24,14 +24,13 @@ from plotly.subplots import make_subplots
 
 from simmate.apps.quantum_espresso.outputs import PwscfXml
 from simmate.apps.vasp.outputs import Vasprun
-from simmate.database.base_data_types import (
-    Calculation,
-    Forces,
-    Structure,
-    Thermodynamics,
-    table_column,
-)
 from simmate.toolkit.visualization.plotting import PlotlyFigure
+
+from .base import table_column
+from .calculation import Calculation
+from .forces import Forces
+from .structure import Structure
+from .thermodynamics import Thermodynamics
 
 
 class Relaxation(Structure, Thermodynamics, Forces, Calculation):

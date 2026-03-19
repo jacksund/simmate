@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.rdkit.models import Molecule
-from simmate.database.base_data_types import table_column
+from simmate.database.base_data_types import ThirdPartyData, table_column
 
 
-class ChemSpaceFreedomSpaceMolecule(Molecule):
+class ChemSpaceFreedomSpaceMolecule(ThirdPartyData, Molecule):
     """
     Molecules from the
     [ChemSpace "Freedom Space"](https://chem-space.com/compounds/freedom-space)

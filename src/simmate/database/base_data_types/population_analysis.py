@@ -5,7 +5,9 @@ from pathlib import Path
 from pandas import DataFrame
 
 from simmate.apps.bader.outputs import ACF
-from simmate.database.base_data_types import StaticEnergy, table_column
+
+from .base import table_column
+from .static_energy import StaticEnergy
 
 
 class PopulationAnalysis(StaticEnergy):

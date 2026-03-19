@@ -6,13 +6,17 @@ from pathlib import Path
 import pandas
 from rich.progress import track
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.base_data_types import (
+    DatabaseTable,
+    ThirdPartyData,
+    table_column,
+)
 from simmate.utilities import chunk_list, get_hash_key
 
 from .molecules import EmoleculesMolecule
 
 
-class EmoleculesSupplierOffer(DatabaseTable):
+class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
     """
     Vendors and their prices for 'building-block' molecules from the
     [eMolecules](https://www.emolecules.com/) database.

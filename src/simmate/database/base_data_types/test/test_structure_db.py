@@ -41,6 +41,5 @@ def test_structure_queries():
 def test_structure_archives():
     TestStructure.objects.to_archive()
     TestStructure.load_archive(
-        confirm_override=True,
         delete_on_completion=True,
     )
