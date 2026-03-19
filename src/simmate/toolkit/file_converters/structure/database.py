@@ -54,7 +54,7 @@ database_structure = toolkit_structure.database_object
 """
 
 from simmate.database import connect
-from simmate.database.base_data_types import Structure as DatabaseStructure
+from simmate.database.mixins import Structure as DatabaseStructure
 from simmate.toolkit import Structure as ToolkitStructure
 
 
@@ -133,7 +133,7 @@ class DatabaseAdapter:
         """
         Loads a toolkit structure from a string -- specifically strings that
         are stored in the 'structure' column for
-        simmate.database.base_data_types.Structure.
+        simmate.database.mixins.Structure.
         """
         # Dev note: this method should be merged with the Toolkit.from_str method.
         # I only have this separate for now because pymatgen's from_str doesn't

@@ -5,32 +5,29 @@ import uuid
 import pytest
 from pandas import DataFrame
 
-from simmate.database.base_data_types import Dynamics, DynamicsIonicStep
+from simmate.database.mixins import StaticEnergy
 from simmate.toolkit import Structure
-
-# from pymatgen.io.vasp.outputs import Vasprun
 
 
 @pytest.mark.django_db
-def test_static_energy_table(structure):
+def test_static_energy_table(structure, tmp_path):
     # test writing columns
-    Dynamics.show_columns()
-    DynamicsIonicStep.show_columns()
+    StaticEnergy.show_columns()
 
     run_id = uuid.uuid4()
 
     # test writing to database
-    structure_db = Dynamics.from_run_context(
+    structure_db = StaticEnergy.from_run_context(
         run_id=run_id,
         workflow_name="example.test.workflow",
-        workflow_version="1.2.3",
         structure=structure,
+        workflow_version="1.2.3",
     )
     structure_db.save()
 
     # try grabbing the calculation again and make sure it loaded from the
     # database rather than creating a new entry
-    structure_db2 = Dynamics.from_run_context(
+    structure_db2 = StaticEnergy.from_run_context(
         run_id=run_id,
         workflow_name="example.test.workflow",
         workflow_version="1.2.3",
@@ -43,8 +40,20 @@ def test_static_energy_table(structure):
     assert structure == structure_new
 
     # test converting search results to dataframe and to toolkit
-    df = Dynamics.objects.to_dataframe()
+    df = StaticEnergy.objects.to_dataframe()
     assert isinstance(df, DataFrame)
-    structures = Dynamics.objects.to_toolkit()
+    structures = StaticEnergy.objects.to_toolkit()
     assert isinstance(structures, list)
     assert isinstance(structures[0], Structure)
+
+    # update the database entry using a Vasprun result.
+    # from pymatgen.io.vasp.outputs import Vasprun
+    # TODO:
+
+    # test writing and reloading these from and archive
+    archive_filename = tmp_path / "archive.zip"
+    StaticEnergy.objects.to_archive(archive_filename)
+    StaticEnergy.load_archive(
+        archive_filename,
+        delete_on_completion=True,
+    )

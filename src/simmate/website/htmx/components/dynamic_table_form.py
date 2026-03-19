@@ -2,7 +2,7 @@
 
 from django.shortcuts import redirect
 
-from simmate.database.base_data_types import DatabaseTable
+from simmate.database.core import DatabaseTable
 from simmate.website.utilities import parse_request_get
 
 from .base import HtmxComponent

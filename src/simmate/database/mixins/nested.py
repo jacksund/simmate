@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-from .base import table_column
+from ..core import table_column
 from .calculation import Calculation
 from .structure import Structure
 

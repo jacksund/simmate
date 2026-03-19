@@ -3,7 +3,7 @@
 from simmate.apps.quantum_espresso.outputs import PwscfXml
 from simmate.apps.vasp.outputs import Vasprun
 
-from .base import table_column
+from ..core import table_column
 from .calculation import Calculation
 from .forces import Forces
 from .structure import Structure

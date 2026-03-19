@@ -66,7 +66,7 @@ class FingerprintValidator(Validator):
             # fingerprints -- both from different fingerprint featurizers AND
             # using different settings for a given featurizer. We therefore
             # need to store the init kwargs with each fingerprint in the database
-            from simmate.database.base_data_types import FingerprintPool
+            from simmate.database.mixins import FingerprintPool
             from simmate.workflows import Workflow
 
             self.init_kwargs = Workflow._serialize_parameters(

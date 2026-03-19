@@ -5,7 +5,7 @@ import os
 
 from django.conf import settings
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 
 class ApiToken(DatabaseTable):

@@ -7,7 +7,8 @@ import numpy as np
 from baderkit.core import Bader as BaderClass
 from pandas import DataFrame
 
-from simmate.database.base_data_types import Calculation, Structure, table_column
+from simmate.database.core import table_column
+from simmate.database.mixins import Calculation, Structure
 
 
 class Bader(Structure, Calculation):

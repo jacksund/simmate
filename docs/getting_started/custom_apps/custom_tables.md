@@ -11,7 +11,7 @@ In your Simmate App, you'll find a `models.py` file. This is where you define yo
 ### Basic Table Example
 
 ``` python
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 class MyResearchSample(DatabaseTable):
     sample_id = table_column.CharField(max_length=50)
@@ -28,7 +28,8 @@ For scientific data, you often want to store things like crystal structures or c
 ### Scientific Table Example
 
 ``` python
-from simmate.database.base_data_types import Structure, Calculation, table_column
+from simmate.database.core import table_column
+from simmate.database.mixins import Structure, Calculation
 
 class HighThroughputResult(Structure, Calculation):
     custom_input = table_column.FloatField()

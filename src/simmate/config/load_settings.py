@@ -280,7 +280,7 @@ class SimmateSettings:
                     ],
                     "Other": [
                         "simmate.apps.eppo_gd.models.EppoCode",
-                        "simmate.database.base_data_types.symmetry.Spacegroup",
+                        "simmate.database.mixins.Spacegroup",
                     ],
                     "HIDDEN": [
                         "simmate.apps.chembl.models.ChemblAssayResult",

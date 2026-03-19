@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from simmate.config import settings
-from simmate.database.base_data_types import (
-    DatabaseTable,
-    ThirdPartyData,
-    table_column,
-)
+from simmate.database.core import DatabaseTable, table_column
+from simmate.database.mixins import ThirdPartyData
 
 
 class EthereumWallet(ThirdPartyData, DatabaseTable):

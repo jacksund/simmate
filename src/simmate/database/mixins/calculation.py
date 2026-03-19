@@ -3,7 +3,7 @@
 import platform
 from datetime import datetime
 
-from .base import DatabaseTable, table_column
+from ..core import DatabaseTable, table_column
 
 
 class Calculation(DatabaseTable):

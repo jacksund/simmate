@@ -7,7 +7,7 @@ from rich import print
 import simmate.toolkit.creators as creation_module
 import simmate.toolkit.transformations as transform_module
 import simmate.toolkit.transformations.from_ase as ase_transform_module
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 from simmate.toolkit import Composition
 from simmate.workflows.execution import WorkItem
 

@@ -9,12 +9,8 @@ terminology, a django 'model' is the same thing as a 'database table'.
 See our online documentation for more information.
 """
 
-from simmate.database.base_data_types import (
-    Calculation,
-    DatabaseTable,
-    Structure,
-    table_column,
-)
+from simmate.database.core import DatabaseTable, table_column
+from simmate.database.mixins import Calculation, Structure
 
 
 # OPTION 1:

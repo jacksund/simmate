@@ -16,7 +16,7 @@ from django.utils import timezone
 
 import simmate
 from simmate.config import settings
-from simmate.database.base_data_types import Calculation
+from simmate.database.mixins import Calculation
 from simmate.utilities import (
     copy_directory,
     copy_files_from_directory,
@@ -391,7 +391,7 @@ class Workflow:
     def database_table(cls) -> Calculation:
         """
         The database table where calculation information (such as the run_id)
-        is stored. The table should use `simmate.database.base_data_types.Calculation`
+        is stored. The table should use `simmate.database.mixins.Calculation`
         as one of its mix-ins.
         """
         # OPTIMIZE: a mapping dictionary or some standardized way to name
@@ -401,37 +401,37 @@ class Workflow:
         flow_preset = cls.name_preset
 
         if flow_type == "relaxation":
-            from simmate.database.base_data_types import Relaxation
+            from simmate.database.mixins import Relaxation
 
             return Relaxation
         elif flow_type == "static-energy":
-            from simmate.database.base_data_types import StaticEnergy
+            from simmate.database.mixins import StaticEnergy
 
             return StaticEnergy
         elif flow_type == "electronic-structure":
             if "band-structure" in flow_preset:
-                from simmate.database.base_data_types import BandStructureCalc
+                from simmate.database.mixins import BandStructureCalc
 
                 return BandStructureCalc
             elif "density-of-states" in flow_preset:
-                from simmate.database.base_data_types import DensityofStatesCalc
+                from simmate.database.mixins import DensityofStatesCalc
 
                 return DensityofStatesCalc
         elif flow_type == "population-analysis":
-            from simmate.database.base_data_types import PopulationAnalysis
+            from simmate.database.mixins import PopulationAnalysis
 
             return PopulationAnalysis
         elif flow_type == "dynamics":
-            from simmate.database.base_data_types import Dynamics
+            from simmate.database.mixins import Dynamics
 
             return Dynamics
         elif flow_type == "diffusion":
             if "from-images" in flow_preset or "single-path" in flow_preset:
-                from simmate.database.base_data_types import MigrationHop
+                from simmate.database.mixins import MigrationHop
 
                 return MigrationHop
             elif "all-paths" in flow_preset:
-                from simmate.database.base_data_types import DiffusionAnalysis
+                from simmate.database.mixins import DiffusionAnalysis
 
                 return DiffusionAnalysis
 

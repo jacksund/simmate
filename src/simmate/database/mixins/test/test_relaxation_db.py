@@ -5,7 +5,7 @@ import uuid
 import pytest
 from pandas import DataFrame
 
-from simmate.database.base_data_types import IonicStep, Relaxation
+from simmate.database.mixins import IonicStep, Relaxation
 from simmate.toolkit import Structure
 
 # from pymatgen.io.vasp.outputs import Vasprun

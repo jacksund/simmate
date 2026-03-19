@@ -28,7 +28,8 @@ simmate config add "example_app.apps.ExampleAppConfig"
 In `models.py`:
 
 ``` python
-from simmate.database.base_data_types import Structure, Calculation, table_column
+from simmate.database.core import table_column
+from simmate.database.mixins import Structure, Calculation
 
 class MyResultTable(Structure, Calculation):
     custom_field = table_column.FloatField()

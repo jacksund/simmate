@@ -6,7 +6,7 @@ import uuid
 import cloudpickle
 from django.db import transaction
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 
 class WorkItem(DatabaseTable):

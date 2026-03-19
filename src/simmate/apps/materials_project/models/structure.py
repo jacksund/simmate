@@ -3,11 +3,11 @@
 from rich.progress import track
 
 from simmate.config import settings
-from simmate.database.base_data_types import (
+from simmate.database.core import table_column
+from simmate.database.mixins import (
     Structure,
     Thermodynamics,
     ThirdPartyData,
-    table_column,
 )
 
 

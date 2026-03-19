@@ -8,7 +8,7 @@ from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.toolkit.visualization.plotting import PlotlyFigure
 
-from .base import table_column
+from ..core import table_column
 from .calculation import Calculation
 from .forces import Forces
 from .structure import Structure

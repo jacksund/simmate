@@ -2,7 +2,7 @@
 
 import pytest
 
-from simmate.database.base_data_types import Spacegroup
+from simmate.database.mixins import Spacegroup
 
 
 @pytest.mark.django_db

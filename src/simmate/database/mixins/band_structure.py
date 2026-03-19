@@ -11,7 +11,7 @@ from pymatgen.io.vasp.outputs import Vasprun
 
 from simmate.toolkit.visualization.plotting import MatplotlibFigure
 
-from .base import DatabaseTable, table_column
+from ..core import DatabaseTable, table_column
 from .calculation import Calculation
 from .structure import Structure
 

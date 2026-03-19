@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.rdkit.models import Molecule
-from simmate.database.base_data_types import ThirdPartyData, table_column
+from simmate.database.core import table_column
+from simmate.database.mixins import ThirdPartyData
 
 
 class ChemSpaceFreedomSpaceMolecule(ThirdPartyData, Molecule):

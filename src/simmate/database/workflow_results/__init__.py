@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import (
+from simmate.database.mixins import (
     BandStructureCalc,
     DensityofStatesCalc,
     DiffusionAnalysis,

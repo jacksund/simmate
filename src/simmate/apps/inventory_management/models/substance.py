@@ -5,7 +5,7 @@ import string
 
 from django.contrib.auth.models import User
 
-from simmate.database.base_data_types import DatabaseTable, table_column
+from simmate.database.core import DatabaseTable, table_column
 
 
 class Substance(DatabaseTable):
