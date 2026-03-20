@@ -11,7 +11,7 @@ from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
 from simmate.config import settings
 from simmate.toolkit import Structure
 from simmate.utilities import get_docker_command
-from simmate.workflows.base_flow_types import S3Workflow, StructureWorkflow
+from simmate.workflows.common import S3Workflow, StructureWorkflow
 
 
 # TODO: add StructureInputWorkflow mixin which can be made from VaspWorkflow class

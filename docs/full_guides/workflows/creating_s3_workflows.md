@@ -44,7 +44,7 @@ Unlike custom `Workflows` where we define a `run_config` method, `S3Workflows` h
 For instance, let's use the `echo` command to print something:
 
 ``` python
-from simmate.workflows.base_flow_types import S3Workflow
+from simmate.workflows.common import S3Workflow
 
 class Example__Echo__SayHello(S3Workflow):
     use_database = False  # no custom table for now
@@ -63,7 +63,7 @@ result = Example__Echo__SayHello.run()
 If you need to write input files or read output files, you'll need to update your `setup` and `workup` methods:
 
 ``` python
-from simmate.workflows.base_flow_types import S3Workflow
+from simmate.workflows.common import S3Workflow
 
 class Example__Echo__SayHello(S3Workflow):
     
@@ -128,7 +128,7 @@ An `ErrorHandler` needs to define:
 - `correct`: A method that performs corrective actions (e.g., modifying input files).
 
 ``` python
-from simmate.workflows.error_handler import ErrorHandler
+from simmate.workflows.core import ErrorHandler
 
 class MyCustomHandler(ErrorHandler):
     

@@ -6,7 +6,7 @@ from pathlib import Path
 from simmate.apps.vasp.inputs import Incar, Kpoints, Poscar, Potcar
 from simmate.config import settings
 from simmate.toolkit import Structure
-from simmate.workflows.base_flow_types import S3Workflow, StructureWorkflow
+from simmate.workflows.common import S3Workflow, StructureWorkflow
 
 
 def get_default_parallel_settings():

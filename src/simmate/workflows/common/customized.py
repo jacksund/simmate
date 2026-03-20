@@ -40,7 +40,7 @@ input_parameters:
 
 import logging
 
-from .base import Workflow
+from ..core import Workflow
 from .s3 import S3Workflow
 
 

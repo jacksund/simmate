@@ -2,7 +2,7 @@
 
 import requests
 
-from .base import Workflow
+from ..core import Workflow
 
 
 class WebApiWorkflow(Workflow):

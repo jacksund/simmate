@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflows.base_flow_types import StagedWorkflow
+from simmate.workflows.common import StagedWorkflow
 
 
 class StaticEnergy__Vasp__EvoTutorial(StagedWorkflow):

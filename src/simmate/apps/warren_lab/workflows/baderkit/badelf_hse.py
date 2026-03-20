@@ -3,7 +3,7 @@
 from simmate.apps.warren_lab.workflows.static_energy.pre_bader_badelf import (
     StaticEnergy__Vasp__PrebadelfHseWarren,
 )
-from simmate.workflows.base_flow_types import StagedWorkflow
+from simmate.workflows.common import StagedWorkflow
 
 
 class Badelf__VaspBaderkit__SpinBadelfHseWarren(StagedWorkflow):

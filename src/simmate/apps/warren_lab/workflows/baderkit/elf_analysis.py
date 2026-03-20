@@ -9,7 +9,7 @@ from simmate.apps.warren_lab.workflows.static_energy.pre_bader_badelf import (
     StaticEnergy__Vasp__PrebadelfScanWarren,
 )
 from simmate.toolkit import Structure
-from simmate.workflows.base_flow_types import Workflow
+from simmate.workflows.core import Workflow
 
 
 class ElfAnalysis__VaspBaderkit__SpinElfAnalysisWarren(Workflow):

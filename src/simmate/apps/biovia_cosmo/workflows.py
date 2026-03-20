@@ -10,7 +10,7 @@ from simmate.apps.biovia_cosmo.models import LogPow as LogPowTable
 from simmate.config import settings
 from simmate.toolkit import Molecule
 from simmate.workflows import Workflow
-from simmate.workflows.base_flow_types import S3Workflow
+from simmate.workflows.common import S3Workflow
 
 __all__ = [
     "ConformerGeneration__CosmoConf__BpSvpAm1",

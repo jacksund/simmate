@@ -88,22 +88,24 @@ Scientific logic independent of the database.
 
 ## Database Architecture (`src/simmate/database/`)
 
-- **`base_data_types/`**: Abstract and concrete models for standard calculation types (e.g., `StaticEnergy`, `Relaxation`, `Dynamics`).
+- **`core/`**: Fundamental base models for all database tables (e.g., `DatabaseTable`, `SearchResults`).
+- **`mixins/`**: Standardized reusable model mixins for scientific data (e.g., `Structure`, `Relaxation`, `Calculation`).
 - **`workflow_results/`**: Re-exports base types for app models.
 - **`external_connectors/`**: Legacy syncing scripts (use `client.py` in apps for new work).
 - **Key Classes:**
-    - `DatabaseTable`: Mixin with `from_toolkit()` for ORM-to-Scientific conversion.
+    - `DatabaseTable`: Base model with `from_toolkit()` and `to_toolkit()` support, as well as HTML/Archive mixins.
     - `Calculation`: Extends `DatabaseTable` with job metadata (`run_id`, `status`).
-    - `Structure` (model): Mixin that adds `to_toolkit()` and stores core structure data.
+    - `Structure` (mixin): Adds `to_toolkit()` and stores core structure data (lattice, sites).
 
 ## Workflows and Execution (`src/simmate/workflows/`)
 
-- **`base_flow_types/`**: 
+- **`core/`**:
     - `Workflow`: Base class for any automated task.
+    - `ErrorHandler`: Interface for fixing simulation failures.
+- **`common/`**:
     - `S3Workflow`: Handles file-based codes (VASP/QE) with automated I/O.
     - `StagedWorkflow`: Manages multi-stage/chained runs.
 - **`execution/`**: Backend for job submission and worker management.
-- **`error_handler.py`**: Interface for fixing simulation failures.
 
 ## Coding Conventions
 

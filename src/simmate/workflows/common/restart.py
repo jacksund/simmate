@@ -7,7 +7,7 @@ import yaml
 from simmate.utilities import copy_directory
 from simmate.workflows.utilities import get_workflow
 
-from .base import Workflow
+from ..core import Workflow
 
 
 class Restart__Toolkit__Automatic(Workflow):

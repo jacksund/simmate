@@ -7,7 +7,7 @@ Workflows can incorporate any Python code, enabling them to invoke other workflo
 For sequential calculations where each step uses the result of the previous one (e.g., a series of relaxations with increasing quality), Simmate provides the `StagedWorkflow` class. This is the preferred way to chain workflows.
 
 ``` python
-from simmate.workflows.base_flow_types import StagedWorkflow
+from simmate.workflows.common import StagedWorkflow
 
 class Relaxation__Vasp__StagedExample(StagedWorkflow):
     """

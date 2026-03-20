@@ -102,7 +102,7 @@ This is because the calculation involves the following information, respectively
 This builds out the massive table for us. Then, during analysis, you can go in and select which columns you actually are interested in from the many available.
 
 !!! tip
-    Experienced python users: take a look at our source code for the `StaticEnergy` table [here](https://github.com/jacksund/simmate/blob/main/src/simmate/database/base_data_types/static_energy.py). You'll see we just provide these data types as mix-ins.
+    Experienced python users: take a look at our source code for the `StaticEnergy` table [here](https://github.com/jacksund/simmate/blob/main/src/simmate/database/mixins/static_energy.py). You'll see we just provide these data types as mix-ins.
 
 
 !!! warning

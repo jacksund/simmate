@@ -297,7 +297,7 @@ class SimmateWorker(DatabaseTable):
                     )
 
                     # local import to prevent circular import issues
-                    from simmate.workflows.base_flow_types.s3 import (
+                    from simmate.workflows.common.s3 import (
                         CommandNotFoundError,
                     )
 
