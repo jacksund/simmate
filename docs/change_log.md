@@ -90,7 +90,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `loading_spinner` tag for unicorn components
 - added `plotly_figure` filter tag for rendering plots
 - added `report` features to database tables and data_explorer views
-- added `StatusTracking` model to `database.base_data_types`
+- added StatusTracking model to `database.core`
 - added `is_dueterated` methods to `Molecule`
 - added web scrape of news archive for `apps.bcpc`
 - added `apps.ppdb`
@@ -105,6 +105,8 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 **Refactors**
 
+- refactored `database.base_data_types` into `database.core` and `database.mixins`
+- refactored `workflows.base_flow_types` into `workflows.core` and `workflows.common`
 - migrated frontend from `django-unicorn` to `htmx` for improved performance and simplicity
 - massive documentation overhaul, including new guides for contributing, website setup, and full guide series
 - refactored `engine` module into `workflows` to consolidate logic
