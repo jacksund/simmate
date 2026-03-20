@@ -288,7 +288,9 @@ class ArchiveMixin:
 
         # Download the archive zip file from the URL if it doesn't already exist
         if archive_path.exists():
-            logging.info(f"Archive already exists at {archive_path}. Skipping download.")
+            logging.info(
+                f"Archive already exists at {archive_path}. Skipping download."
+            )
         else:
             logging.info(f"Downloading archive file to {archive_path}...")
             # ensure the directory exists
