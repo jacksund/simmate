@@ -16,6 +16,7 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
 
     class Meta:
         app_label = "workflow_explorer"
+        db_table = "workflows_staticenergy"
 
     # -------------------------------------------------------------------------
 

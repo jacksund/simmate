@@ -48,6 +48,7 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
 
     class Meta:
         app_label = "workflow_explorer"
+        db_table = "workflows_relaxation"
 
     # -------------------------------------------------------------------------
 
@@ -359,6 +360,7 @@ class IonicStep(Structure, Thermodynamics, Forces):
 
     class Meta:
         app_label = "workflow_explorer"
+        db_table = "workflows_ionicstep"
 
     archive_fields = ["number"]
 

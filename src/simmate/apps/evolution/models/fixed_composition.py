@@ -40,6 +40,7 @@ class FixedCompositionSearch(Calculation):
 
     class Meta:
         app_label = "workflow_explorer"
+        db_table = "workflows_fixedcompositionsearch"
 
     # !!! consider making a composition-based mixin
     composition = table_column.CharField(max_length=50, null=True, blank=True)

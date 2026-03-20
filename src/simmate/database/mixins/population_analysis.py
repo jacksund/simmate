@@ -21,6 +21,7 @@ class PopulationAnalysis(StaticEnergy):
 
     class Meta:
         app_label = "workflow_explorer"
+        db_table = "workflows_populationanalysis"
 
     exclude_from_summary = [
         "oxidation_states",
