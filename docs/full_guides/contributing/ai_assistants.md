@@ -97,6 +97,16 @@ Scientific logic independent of the database.
     - `Calculation`: Extends `DatabaseTable` with job metadata (`run_id`, `status`).
     - `Structure` (mixin): Adds `to_toolkit()` and stores core structure data (lattice, sites).
 
+## Website Architecture (`src/simmate/website/`)
+
+The web interface is built with Django and HTMX.
+
+- **`server/`**: The root Django project containing settings, URLs, ASGI, and WSGI configurations.
+- **`core/`**: Shared components, templates, static files, and base models for the UI.
+- **`data_explorer/`**: App for searching and exploring database tables.
+- **`workflow_explorer/`**: App for submitting workflows and viewing results/analytics.
+- **`htmx/`**: Base classes and utilities for HTMX-based components.
+
 ## Workflows and Execution (`src/simmate/workflows/`)
 
 - **`core/`**:
