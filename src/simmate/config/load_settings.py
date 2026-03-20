@@ -333,6 +333,9 @@ class SimmateSettings:
                 # whether to use the username or first+last name when displaying
                 # users accross the website, such as in option menus
                 "user_format": "username",
+                # whether to show finance-related features in the web UI
+                # (e.g. balances, pricing links, etc.)
+                "show_finances": False,
                 # To prevent crazy joins, we can limit the number of double-underscores
                 # (which indicate a join or field lookup) in a filter.
                 # Example: `user__first_name__isnull` has 2 double-underscores.
@@ -622,6 +625,7 @@ class SimmateSettings:
         "SIMMATE__WEBSITE__REQUIRE_LOGIN": bool,
         "SIMMATE__WEBSITE__REQUIRE_LOGIN_EXCEPTIONS": list[str],
         "SIMMATE__WEBSITE__REQUIRE_LOGIN_INTERNAL": bool,
+        "SIMMATE__WEBSITE__SHOW_FINANCES": bool,
         "SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__CLIENT_ID": str,
         "SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__SECRET": str,
         "SIMMATE__WEBSITE__CHEMDRAW_JS": bool,

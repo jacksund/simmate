@@ -1,9 +1,10 @@
 {% load static %}
 <div class="sticky-top shadow">
+    {% simmate_setting "website.show_finances" as SHOW_FINANCES %}
     <div class="bg-warning text-dark text-center py-1 small fw-bold">
         <i class="bi bi-cone-striped"></i>
         This site is under early construction. Data is reset periodically,
-        pricing is disabled, and limited compute is available.
+        {% if SHOW_FINANCES %}pricing is disabled, and{% endif %} limited compute is available.
         <i class="bi bi-cone-striped"></i>
     </div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary py-1">
@@ -51,12 +52,14 @@
                                    href="https://github.com/jacksund/simmate/"
                                    target="_blank"><i class="bi bi-github"></i> Github</a>
                             </li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'pricing' %}"><i class="bi bi-currency-dollar"></i> Pricing</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="#"><i class="bi bi-piggy-bank"></i> Finances</a>
-                            </li>
+                            {% if SHOW_FINANCES %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'pricing' %}"><i class="bi bi-currency-dollar"></i> Pricing</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#"><i class="bi bi-piggy-bank"></i> Finances</a>
+                                </li>
+                            {% endif %}
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -78,9 +81,11 @@
                                    href="https://jacksund.github.io/simmate/full_guides/toolkit/molecules/overview/"
                                    target="_blank"><i class="bi bi-tools"></i> Toolkit</a>
                             </li>
-                            <li>
-                                <a class="dropdown-item" href="#"><i class="bi bi-cpu"></i> Contribue & Earn</a>
-                            </li>
+                            {% if SHOW_FINANCES %}
+                                <li>
+                                    <a class="dropdown-item" href="#"><i class="bi bi-cpu"></i> Contribue & Earn</a>
+                                </li>
+                            {% endif %}
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -104,22 +109,24 @@
             </div>
             <div class="d-flex">
                 {% if user.is_authenticated %}
-                    {# USDC button #}
-                    <button type="button"
-                            class="btn btn-light rounded-4 py-0 px-2 me-2"
-                            data-bs-toggle="modal"
-                            data-bs-target="#usdcModal">
-                        <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
-                        <b>{{ user.wallet.usdc_balance|floatformat:2|intcomma }}</b>
-                    </button>
-                    {# Simmate Token button #}
-                    <button type="button"
-                            class="btn btn-light rounded-4 py-0 px-2 me-2"
-                            data-bs-toggle="modal"
-                            data-bs-target="#simmateModal">
-                        <img src="{% static 'images/simmate-token-icon.svg' %}" alt="" height="24">
-                        <b>{{ user.wallet.token_balance|floatformat:0|intcomma }}</b>
-                    </button>
+                    {% if SHOW_FINANCES %}
+                        {# USDC button #}
+                        <button type="button"
+                                class="btn btn-light rounded-4 py-0 px-2 me-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#usdcModal">
+                            <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
+                            <b>{{ user.wallet.usdc_balance|floatformat:2|intcomma }}</b>
+                        </button>
+                        {# Simmate Token button #}
+                        <button type="button"
+                                class="btn btn-light rounded-4 py-0 px-2 me-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#simmateModal">
+                            <img src="{% static 'images/simmate-token-icon.svg' %}" alt="" height="24">
+                            <b>{{ user.wallet.token_balance|floatformat:0|intcomma }}</b>
+                        </button>
+                    {% endif %}
                     {# user name + profile button #}
                     <a class="btn btn-outline-light me-2" href="{% url 'profile' %}">
                         <i class="bi bi-person-circle"></i>&nbsp;&nbsp;
@@ -169,51 +176,53 @@
 <div>
     {# the popout models need to be kept in this separate div bc they don't behave well inside the navbar when sticky-top is active #}
     {% if user.is_authenticated %}
-        {# USDC modal #}
-        <div class="modal fade" id="usdcModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content text-center">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Fund USDC Balance</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="alert alert-success">
-                            <a href="{% url 'pricing' %}" class="alert-link">Please read our Pricing page before sending <i class="bi bi-box-arrow-up-right"></i></a>
+        {% if SHOW_FINANCES %}
+            {# USDC modal #}
+            <div class="modal fade" id="usdcModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content text-center">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Fund USDC Balance</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/444px-QR_code_for_mobile_English_Wikipedia.svg.png"
-                             alt="USDC QR Code"
-                             class="img-fluid mb-3"
-                             style="max-width:400px">
-                        <h3>simmate.eth</h3>
-                        <div class="input-group mb-3">
-                            <input type="text"
-                                   class="form-control text-center text-secondary"
-                                   id="walletAddress"
-                                   value="0x1234...ABCD"
-                                   readonly>
-                            <button class="btn btn-outline-secondary"
-                                    type="button"
-                                    onclick="navigator.clipboard.writeText('SimmatewalletAddress12345')">
-                                <i class="bi bi-clipboard"></i> Copy
-                            </button>
+                        <div class="modal-body">
+                            <div class="alert alert-success">
+                                <a href="{% url 'pricing' %}" class="alert-link">Please read our Pricing page before sending <i class="bi bi-box-arrow-up-right"></i></a>
+                            </div>
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/444px-QR_code_for_mobile_English_Wikipedia.svg.png"
+                                 alt="USDC QR Code"
+                                 class="img-fluid mb-3"
+                                 style="max-width:400px">
+                            <h3>simmate.eth</h3>
+                            <div class="input-group mb-3">
+                                <input type="text"
+                                       class="form-control text-center text-secondary"
+                                       id="walletAddress"
+                                       value="0x1234...ABCD"
+                                       readonly>
+                                <button class="btn btn-outline-secondary"
+                                        type="button"
+                                        onclick="navigator.clipboard.writeText('SimmatewalletAddress12345')">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        {# Simmate Token modal #}
-        <div class="modal fade" id="simmateModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Adjust Token Balance</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            {# Simmate Token modal #}
+            <div class="modal fade" id="simmateModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Adjust Token Balance</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        {% htmx_component "token-balance-form" %}
                     </div>
-                    {% htmx_component "token-balance-form" %}
                 </div>
             </div>
-        </div>
+        {% endif %}
         {# logout confirmation modal #}
         <div class="modal fade" id="logoutModal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">

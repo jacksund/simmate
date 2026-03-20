@@ -32,7 +32,9 @@ def get_all_workflows(
     By default, this will grab all installed 'settings.apps'
     """
     if not exclude_utilities:
-        apps_to_search = apps_to_search + ["simmate.website.configs.WorkflowExplorerConfig"]
+        apps_to_search = apps_to_search + [
+            "simmate.website.configs.WorkflowExplorerConfig"
+        ]
 
     app_workflows = []
     for app_name in apps_to_search:

@@ -75,6 +75,7 @@
                                 {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>CPU Time</b>" grouped=True order_by_value="median_cpu_time" %}
                             {% endif %}
                         </th>
+                        {% simmate_setting "website.show_finances" as SHOW_FINANCES %}
                         <th style="min-width:140px">
                             {% if ob == "median_real_time" %}
                                 {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>Real Time</b>" grouped=True order_by_value="-median_real_time" %}
@@ -84,15 +85,17 @@
                                 {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>Real Time</b>" grouped=True order_by_value="median_real_time" %}
                             {% endif %}
                         </th>
-                        <th style="min-width:140px">
-                            {% if ob == "median_cost_usdc" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="-median_cost_usdc" %}
-                            {% elif ob == "-median_cost_usdc" %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="median_cost_usdc" %}
-                            {% else %}
-                                {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="median_cost_usdc" %}
-                            {% endif %}
-                        </th>
+                        {% if SHOW_FINANCES %}
+                            <th style="min-width:140px">
+                                {% if ob == "median_cost_usdc" %}
+                                    {% htmx_button method_name="set_order_by" theme="" icon="sort-down" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="-median_cost_usdc" %}
+                                {% elif ob == "-median_cost_usdc" %}
+                                    {% htmx_button method_name="set_order_by" theme="" icon="sort-up" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="median_cost_usdc" %}
+                                {% else %}
+                                    {% htmx_button method_name="set_order_by" theme="" icon="filter" label="<b>Cost <img src='/static/images/usdc-icon.svg' height='25'></b>" grouped=True order_by_value="median_cost_usdc" %}
+                                {% endif %}
+                            </th>
+                        {% endif %}
                         <th></th>
                     {% endwith %}
                 </tr>
@@ -153,17 +156,19 @@
                                     --
                                 {% endif %}
                             </td>
-                            <td>
-                                {% if workflow.median_cost_usdc %}
-                                    {% if workflow.median_cost_usdc > 0.01 %}
-                                        ${{ workflow.median_cost_usdc|floatformat:2 }}
+                            {% if SHOW_FINANCES %}
+                                <td>
+                                    {% if workflow.median_cost_usdc %}
+                                        {% if workflow.median_cost_usdc > 0.01 %}
+                                            ${{ workflow.median_cost_usdc|floatformat:2 }}
+                                        {% else %}
+                                            &lt;$0.01
+                                        {% endif %}
                                     {% else %}
-                                        &lt;$0.01
+                                        --
                                     {% endif %}
-                                {% else %}
-                                    --
-                                {% endif %}
-                            </td>
+                                </td>
+                            {% endif %}
                             <td>
                                 <a type="button"
                                    class="btn btn-sm btn-outline-primary"
@@ -175,7 +180,7 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="10">No workflows match your search criteria.</td>
+                        <td colspan="{% if SHOW_FINANCES %}10{% else %}9{% endif %}">No workflows match your search criteria.</td>
                     </tr>
                 {% endif %}
             </tbody>

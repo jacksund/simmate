@@ -11,10 +11,13 @@
     <div>
         {% include "workflow_explorer/for_detail/tabs_header.html" %}
         <div class="tab-content">
+            {% simmate_setting "website.show_finances" as SHOW_FINANCES %}
             {% include "workflow_explorer/for_detail/about_tab.html" %}
             {% include "workflow_explorer/for_detail/config_tab.html" %}
             {% include "workflow_explorer/for_detail/parameters_tab.html" %}
-            {% include "workflow_explorer/for_detail/pricing_tab.html" %}
+            {% if SHOW_FINANCES %}
+                {% include "workflow_explorer/for_detail/pricing_tab.html" %}
+            {% endif %}
             {% include "workflow_explorer/for_detail/results_tab.html" %}
             {% include "workflow_explorer/for_detail/submit_tab.html" %}
         </div>

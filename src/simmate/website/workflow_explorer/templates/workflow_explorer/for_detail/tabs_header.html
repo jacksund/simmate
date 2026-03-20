@@ -17,6 +17,7 @@
             <span class="d-none d-md-block">Config</span>
         </a>
     </li>
+    {% simmate_setting "website.show_finances" as SHOW_FINANCES %}
     <li class="nav-item">
         <a href="#parameters-section"
            data-bs-toggle="tab"
@@ -26,15 +27,17 @@
             <span class="d-none d-md-block">Parameters</span>
         </a>
     </li>
-    <li class="nav-item">
-        <a href="#pricing-section"
-           data-bs-toggle="tab"
-           aria-expanded="false"
-           class="nav-link">
-            <i class="mdi mdi-account-circle d-md-none d-block"></i>
-            <span class="d-none d-md-block">Pricing</span>
-        </a>
-    </li>
+    {% if SHOW_FINANCES %}
+        <li class="nav-item">
+            <a href="#pricing-section"
+               data-bs-toggle="tab"
+               aria-expanded="false"
+               class="nav-link">
+                <i class="mdi mdi-account-circle d-md-none d-block"></i>
+                <span class="d-none d-md-block">Pricing</span>
+            </a>
+        </li>
+    {% endif %}
     <li class="nav-item">
         <a href="#results-section"
            data-bs-toggle="tab"

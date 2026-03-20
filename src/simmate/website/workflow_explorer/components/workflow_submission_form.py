@@ -2,6 +2,7 @@
 
 from django.http import HttpResponseRedirect
 
+from simmate.config import settings
 from simmate.database.core import DatabaseTable
 from simmate.toolkit import Structure
 from simmate.website.htmx.components import HtmxComponent
@@ -59,6 +60,8 @@ class WorkflowSubmissionForm(HtmxComponent):
 
     def confirm_structure(self):
         self.is_structure_confirmed = True
+        if not settings.website.show_finances:
+            self.is_pricing_confirmed = True
 
     def confirm_pricing(self):
         self.is_pricing_confirmed = True

@@ -1,6 +1,7 @@
 {% extends "htmx/form_base.html" %}
 {% block form %}
     {% load static %}
+    {% simmate_setting "website.show_finances" as SHOW_FINANCES %}
     <div class="row my-5">
         <div class="col-3 border-end border-secondary-subtle">
             {% if not component.is_structure_confirmed %}
@@ -9,14 +10,16 @@
                         <i class="bi bi-1-circle"></i> Load Structure
                     </h5>
                 </div>
+                {% if SHOW_FINANCES %}
+                    <div class="p-2">
+                        <h5 class="m-0">
+                            <i class="bi bi-2-circle"></i> Price Check
+                        </h5>
+                    </div>
+                {% endif %}
                 <div class="p-2">
                     <h5 class="m-0">
-                        <i class="bi bi-2-circle"></i> Price Check
-                    </h5>
-                </div>
-                <div class="p-2">
-                    <h5 class="m-0">
-                        <i class="bi bi-3-circle"></i> Review & Submit
+                        <i class="bi bi-{% if SHOW_FINANCES %}3{% else %}2{% endif %}-circle"></i> Review & Submit
                     </h5>
                 </div>
             {% elif not component.is_pricing_confirmed %}
@@ -41,14 +44,16 @@
                         <i class="bi bi-1-circle"></i> Load Structure <i class="bi bi-check-circle-fill"></i>
                     </h5>
                 </div>
-                <div class="p-2 text-success">
-                    <h5 class="m-0">
-                        <i class="bi bi-2-circle"></i> Price Check <i class="bi bi-check-circle-fill"></i>
-                    </h5>
-                </div>
+                {% if SHOW_FINANCES %}
+                    <div class="p-2 text-success">
+                        <h5 class="m-0">
+                            <i class="bi bi-2-circle"></i> Price Check <i class="bi bi-check-circle-fill"></i>
+                        </h5>
+                    </div>
+                {% endif %}
                 <div class="p-2 bg-secondary-subtle">
                     <h5 class="m-0">
-                        <i class="bi bi-3-circle"></i> Review & Submit
+                        <i class="bi bi-{% if SHOW_FINANCES %}3{% else %}2{% endif %}-circle"></i> Review & Submit
                     </h5>
                 </div>
             {% else %}
@@ -57,14 +62,16 @@
                         <i class="bi bi-1-circle"></i> Load Structure <i class="bi bi-check-circle-fill"></i>
                     </h5>
                 </div>
+                {% if SHOW_FINANCES %}
+                    <div class="p-2 text-success">
+                        <h5 class="m-0">
+                            <i class="bi bi-2-circle"></i> Price Check <i class="bi bi-check-circle-fill"></i>
+                        </h5>
+                    </div>
+                {% endif %}
                 <div class="p-2 text-success">
                     <h5 class="m-0">
-                        <i class="bi bi-2-circle"></i> Price Check <i class="bi bi-check-circle-fill"></i>
-                    </h5>
-                </div>
-                <div class="p-2 text-success">
-                    <h5 class="m-0">
-                        <i class="bi bi-3-circle"></i> Review & Submit <i class="bi bi-check-circle-fill"></i>
+                        <i class="bi bi-{% if SHOW_FINANCES %}3{% else %}2{% endif %}-circle"></i> Review & Submit <i class="bi bi-check-circle-fill"></i>
                     </h5>
                 </div>
             {% endif %}
@@ -138,22 +145,26 @@
                             Confirm that this is your intended structure before continuing to the next step.
                             {% htmx_button method_name="confirm_structure" theme="success" icon="check-circle" %}
                         {% elif not component.is_pricing_confirmed %}
-                            <div class="text-center py-3">
-                                <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
-                                0.00 (free)
-                            </div>
+                            {% if SHOW_FINANCES %}
+                                <div class="text-center py-3">
+                                    <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
+                                    0.00 (free)
+                                </div>
+                            {% endif %}
                             {% htmx_button method_name="confirm_pricing" theme="success" icon="check-circle" %}
                         {% elif not component.is_submission_confirmed %}
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle">
                                     <tbody>
-                                        <tr>
-                                            <td>Price</td>
-                                            <td>
-                                                <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
-                                                (free)
-                                            </td>
-                                        </tr>
+                                        {% if SHOW_FINANCES %}
+                                            <tr>
+                                                <td>Price</td>
+                                                <td>
+                                                    <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
+                                                    (free)
+                                                </td>
+                                            </tr>
+                                        {% endif %}
                                         <tr>
                                             <td>Est. Real Time *</td>
                                             <td>60 seconds</td>

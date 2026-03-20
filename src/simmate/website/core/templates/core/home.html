@@ -12,6 +12,7 @@
             </h2>
         </div>
     </div>
+    {% simmate_setting "website.show_finances" as SHOW_FINANCES %}
     <div class="row align-items-center">
         <div class="col-md-12 px-5">
             <h3>Our mission</h3>
@@ -21,8 +22,8 @@
                 academics repeatedly perform the same calculations in isolation,
                 so we sought to build a platform
                 for open collaboration. This is why in our
-                public website you only pay for computational resources that
-                are not your own, and all workflow results are
+                public website {% if SHOW_FINANCES %}you only pay for computational resources that
+                are not your own, and {% endif %}all workflow results are
                 openly accessible to everyone.
                 However, for the majority of researchers that work with
                 confidential data, we still wish to collaborate
@@ -68,37 +69,39 @@
                  height="300">
         </div>
     </div>
-    <hr class="my-5">
-    <div class="row align-items-center">
-        <div class="col-md-5">
-            <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
-                 height="300">
+    {% if SHOW_FINANCES %}
+        <hr class="my-5">
+        <div class="row align-items-center">
+            <div class="col-md-5">
+                <img src="https://matplotlib.org/stable/_images/sphx_glr_pyplot_005.png"
+                     height="300">
+            </div>
+            <div class="col-md-7">
+                <h3>
+                    <i class="bi bi-coin"></i> Earnings are accessible to anyone*
+                </h3>
+                <p class="lead">
+                    You can earn when you contribute computer resources for
+                    others to use. And to make everything as transparent & fair as possible,
+                    we make our financial data public - so you can trust that the science
+                    is coming first.
+                </p>
+                <p class="lead">
+                    <small>
+                        <em>
+                            * payouts depend on several factors, such the demand created by
+                            other users and how much compute you provided.
+                            Make sure you read and understand our
+                            <a href="#" target="_blank">
+                                pay distribution strategy
+                                <i class="bi bi-box-arrow-up-right"></i>
+                            </a>.
+                        </em>
+                    </small>
+                </p>
+            </div>
         </div>
-        <div class="col-md-7">
-            <h3>
-                <i class="bi bi-coin"></i> Earnings are accessible to anyone*
-            </h3>
-            <p class="lead">
-                You can earn when you contribute computer resources for
-                others to use. And to make everything as transparent & fair as possible,
-                we make our financial data public - so you can trust that the science
-                is coming first.
-            </p>
-            <p class="lead">
-                <small>
-                    <em>
-                        * payouts depend on several factors, such the demand created by
-                        other users and how much compute you provided.
-                        Make sure you read and understand our
-                        <a href="#" target="_blank">
-                            pay distribution strategy
-                            <i class="bi bi-box-arrow-up-right"></i>
-                        </a>.
-                    </em>
-                </small>
-            </p>
-        </div>
-    </div>
+    {% endif %}
     <hr class="my-5">
     <div class="row align-items-center">
         <div class="col-md-7">
