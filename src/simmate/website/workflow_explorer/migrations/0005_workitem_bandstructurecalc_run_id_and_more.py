@@ -8,7 +8,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("workflow_explorer", "0004_delete_workitem_remove_bandstructurecalc_run_id_and_more"),
+        (
+            "workflow_explorer",
+            "0004_delete_workitem_remove_bandstructurecalc_run_id_and_more",
+        ),
     ]
 
     operations = [
