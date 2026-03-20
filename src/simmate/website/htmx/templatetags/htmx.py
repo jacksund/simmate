@@ -506,7 +506,7 @@ def htmx_file_upload(
 # TODO
 
 # @register.inclusion_tag(
-#     filename="core_components/input_elements/search_box.html",
+#     filename="core/input_elements/search_box.html",
 #     takes_context=True,
 # )
 # def search_box(

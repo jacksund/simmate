@@ -1,4 +1,4 @@
-{% extends "core_components/site_base.html" %}
+{% extends "core/site_base.html" %}
 {% block tabtitle %}{{ table.table_name }} Data - Simmate{% endblock %}
 {% block body %}
     <div class="row">
@@ -79,7 +79,7 @@
                        target="_blank"><i class="bi bi-database"></i> SQL</a>
                 </li>
             </ul>
-            {% include "core_components/basic_elements/toggle_width_button.html" %}
+            {% include "core/basic_elements/toggle_width_button.html" %}
         </div>
     </div>
     {# Search Results #}

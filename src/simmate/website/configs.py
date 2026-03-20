@@ -3,8 +3,8 @@
 from django.apps import AppConfig
 
 
-class CoreComponentsConfig(AppConfig):
-    name = "simmate.website.core_components"
+class CoreConfig(AppConfig):
+    name = "simmate.website.core"
 
 
 class DataExplorerConfig(AppConfig):

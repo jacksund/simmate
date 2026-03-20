@@ -227,7 +227,7 @@ class SimmateSettings:
                         "simmate.apps.project_management.models.Tag",
                         "simmate.apps.project_management.models.Wallet",
                         "simmate.apps.project_management.models.Transaction",
-                        # "simmate.website.core_components.models.SimmateUser",
+                        # "simmate.website.core.models.SimmateUser",
                     ],
                     "Inventory Management": [
                         "simmate.apps.inventory_management.models.Substance",

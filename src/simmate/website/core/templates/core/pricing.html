@@ -1,0 +1,461 @@
+{% extends "core/site_base.html" %}
+{% block tabtitle %}Pricing - Simmate{% endblock %}
+{% block body %}
+    {% load static %}
+    <div class="container my-4 text">
+        <div class="alert alert-success shadow-sm border-0" role="alert">
+            <h5 class="alert-heading fw-bold mb-4">TL;DR</h5>
+            <p>
+                Simmate is entirely <a href="https://github.com/jacksund/simmate" target="_blank"><strong>open-source</strong> <i class="bi bi-box-arrow-up-right"></i></a>, and all data is shared freely. So costs occur only when...
+            </p>
+            <ul>
+                <li>You run workflows using our cloud resources</li>
+                <li>You have our team set up & maintain a private server</li>
+            </ul>
+            <p class="p-0 m-0">
+                <img src="/static/images/usdc-icon.svg" height="20">
+                USDC is for compute costs (1 USDC = $1)
+            </p>
+            <p class="pt-0 mt-1">
+                <img src="/static/images/simmate-token-icon.svg" height="20">
+                Tokens are free & for budget tracking
+            </p>
+        </div>
+    </div>
+    <hr>
+    <div class="p-3 pb-md-4 mx-auto text-center">
+        <h1 class="display-4 fw-normal text-body-emphasis">Hosting Options</h1>
+    </div>
+    <div class="row row-cols-1 row-cols-md-3 mb-3">
+        <div class="col">
+            <div class="card rounded-3 shadow-sm mb-4 mt-5">
+                <div class="card-header py-3 text-center">
+                    <h4 class="my-0 fw-normal">Self-Hosted</h4>
+                </div>
+                <div class="card-body">
+                    <h1 class="card-title pricing-card-title text-center">Free</h1>
+                    <ul class="my-4">
+                        {# djlint:off #}
+                    <li class="my-3">
+                        <b class="text-secondary">Who it’s for</b><br>
+                        Individual researchers, hobbyists, and groups with their own servers. Python & Docker experience is recommended,
+                        but we try to write our guides for total begineers too.
+                    </li>
+                    <li class="my-3">
+                        <b class="text-secondary">Costs</b><br>
+                        None. Everything is open-source, so you can download & run things locally.
+                    </li>
+                    <li class="my-3">
+                        <b class="text-secondary">Upkeep</b><br>
+                        Server setup is optional, and you would handle installation, updates, and maintenance.
+                    </li>
+                        {# djlint:on #}
+                    </ul>
+                    <a class="w-100 btn btn-lg btn-secondary"
+                       href="https://jacksund.github.io/simmate/getting_started/overview/"
+                       target="_blank">View Tutorials</a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card rounded-3 shadow-sm border-primary mb-4">
+                <div class="card-header py-3 text-center text-bg-primary border-primary">
+                    <h4 class="my-0 fw-normal">Official Simmate Website</h4>
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title pricing-card-title text-center m-0">
+                        ~50¢<small class="text-body-secondary fw-light ">/cpu/hr</small>
+                    </h3>
+                    <h6 class="text-secondary text-center">when using Simmate's cloud compute</h6>
+                    <div class="text-center py-1">
+                        <div class="position-relative my-3"
+                             style="max-width: 250px;
+                                    margin: 1rem auto">
+                            <hr>
+                            <span class="position-absolute top-50 start-50 translate-middle bg-body px-2"><b>OR</b></span>
+                        </div>
+                    </div>
+                    <h3 class="card-title pricing-card-title text-center m-0">You get paid</h3>
+                    <h6 class="text-secondary text-center">when allowing others to use your compute</h6>
+                    <ul class="my-4 pt-1">
+                        {# djlint:off #}
+                    <li class="my-3">
+                        <b class="text-secondary">Who it’s for</b><br>
+                        Beginners & small groups that want to be part of our open collective. Keep in mind that all results are public and shared with others.
+                    </li>
+                    <li class="my-3">
+                        <b class="text-secondary">Costs</b><br>
+                        Pay-as-you-go for cloud compute. Price per workflow varies, so read our <b>Compute Costs</b> section below.
+                    </li>
+                    <li class="my-3">
+                        <b class="text-secondary">Upkeep</b><br>
+                        Managed by the Simmate team and always up-to-date.
+                    </li>
+                        {# djlint:on #}
+                    </ul>
+                    {% if user.is_authenticated %}
+                        <a class="w-100 btn btn-lg btn-primary" href="{% url 'profile' %}">Start exploring</a>
+                    {% else %}
+                        <a class="w-100 btn btn-lg btn-primary" href="#">Sign up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card rounded-3 shadow-sm mb-4 mt-5">
+                <div class="card-header py-3 text-center">
+                    <h4 class="my-0 fw-normal">Privately Hosted & Managed</h4>
+                </div>
+                <div class="card-body">
+                    <h1 class="card-title pricing-card-title text-center">Quote Required</h1>
+                    <h6 class="text-secondary text-center">Starting at $2,500/month</h6>
+                    <ul class="my-4">
+                        {# djlint:off #}
+                    <li class="my-3">
+                        <b class="text-secondary">Who it’s for</b><br>
+                        Companies, labs, or enterprises needing dedicated infrastructure that is managed by the Simmate team.
+                    </li>
+                    <li class="my-3">
+                        <b class="text-secondary">Costs</b><br>
+                        Pricing varies based on resources required, custom app development, etc.
+                    </li>
+                    <li class="my-3">
+                        <b class="text-secondary">Upkeep</b><br>
+                        The Simmate team will maintain your infrastructure on private servers.
+                    </li>
+                        {# djlint:on #}
+                    </ul>
+                    <a class="w-100 btn btn-lg btn-secondary" href="{% url 'contact' %}">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="p-3 pb-md-4 mx-auto">
+        <h1 class="display-4 fw-normal text-body-emphasis text-center">Data Access</h1>
+        <div class="p-4">
+            <p class="mb-3">All data is accessible for free.</p>
+            <p class="mb-3">
+                And if you are on our public website, free data access includes *all* calculations ever
+                submitted by *all* users. We recognize that this is undesirable for many research groups,
+                but be aware you can still download Simmate and manage your database+compute privately.
+                The public site will remain focused on our mission of openness.
+            </p>
+            <p class="mb-3">
+                Also, note that many of our datasets are made available through third-parties —
+                such as the Materials Project, OQMD, JARVIS, and more. We will never
+                charge for the access of data that is already free & open. Be sure to thank
+                and properly attribute the original communities!
+            </p>
+            <div class="alert alert-warning" role="alert">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <i class="bi bi-exclamation-triangle fs-3"></i>
+                    </div>
+                    <div class="col">
+                        Proprietary datasets (such as AFLOW, eMolecules, Enamine, and more)
+                        are only available in the <span class="fw-semibold">Self-Hosted</span>
+                        version of Simmate.
+                        This is because those third-parties do not allow redistribution of their data,
+                        and Simmate is not affliated with any of these parties.
+                        While we cannot display this data on our public website, the Simmate python
+                        package still lets you download datasets <em>directly</em> from third-party
+                        providers for your private use. The data's original Terms & Conditions will still apply.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="p-3 mx-auto">
+        <h1 class="display-4 fw-normal text-body-emphasis text-center">Compute Costs</h1>
+        <div class="p-4">
+            <p>
+                Compute costs are based on the total resources and time used by a workflow run.
+                The price is listed after providing your input structure(s)/molecules(s), and
+                payment is carried out as soon as the workflow is submitted. Note, a refund is
+                made in cases where the calculation fails or after a
+                review when results are unsatisfactory.
+            </p>
+            <p>
+                It is important to recognize that price is not determined until you
+                provide all input parameters, including your structure/molecule.
+                This is because total CPU usage can vary even for identical workflows
+                (e.g., due to differences in convergence). However, expected CPU time
+                heavily depends on the submitted structure/molecule, meaning we can
+                provide fair pricing before you submit.
+                Paying at the start of calculations is counter to how other cloud
+                platforms typically bill users. Is it more common to charge users
+                after a calculation completes or even at a fixed rate throughout
+                the compute run. We opt for the pay-first, run-second setup for
+                several reasons:
+            </p>
+            <ul class="mb-3">
+                <li>Users can submit with confidence and avoid surprises.</li>
+                <li>Clear pricing allows for easier project budgeting and management.</li>
+                <li>We never need to wastefully terminate workflows mid-run due to insufficient funds.</li>
+                <li>A minimum threshhold can be set in $/cpu/hr to automatically refund users when needed.</li>
+                <li>It reduces our administrative overhead, keeping the platform simple and fair.</li>
+            </ul>
+            <p class="mb-3">
+                Overall, this is why each workflow provides cost estimates and historical runtime data on its submission page.
+            </p>
+            <p class="mb-3">
+                Currently, all computations run on Kubernetes Pods hosted on DigitalOcean, so
+                our pricing aligns closely with <a href="https://www.digitalocean.com/pricing/kubernetes"
+    target="_blank">DigitalOcean’s rates</a>,
+                averaging about <strong>$0.50 per CPU hour</strong>.
+            </p>
+            <h3 class="mt-4 pb-2 text-primary">
+                Example prices using LiCoO<sub>2</sub>
+            </h3>
+            <div class="table-responsive mb-2">
+                <table class="table table-striped align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th scope="col" style="width: 22%">Workflow</th>
+                            <th scope="col" style="width: 13%">CPU Time (hrs)</th>
+                            <th scope="col" style="width: 14%">
+                                Cost Estimate w. Cloud Compute
+                                <img src="/static/images/usdc-icon.svg" height="20">
+                            </th>
+                            <th scope="col" style="width: 17%">
+                                Cost Estimate w. Personal Compute
+                                <img src="/static/images/usdc-icon.svg" height="20">
+                            </th>
+                            <th scope="col" style="width: 50%">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Static Energy</td>
+                            <td>0.001</td>
+                            <td>$0.0005</td>
+                            <td>$0.000075</td>
+                            <td>
+                                <small>
+                                    Single-point SCF calculation of the 4-atom primitive cell.
+                                    Used to determine the baseline electronic energy without ionic movement.
+                                </small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Relaxation</td>
+                            <td>0.005</td>
+                            <td>$0.0025</td>
+                            <td>$0.000375</td>
+                            <td>
+                                <small>
+                                    Full geometry optimization of the unit cell to find equilibrium
+                                    lattice parameters and internal atomic positions.
+                                </small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>DOS & Band-Structure</td>
+                            <td>0.5</td>
+                            <td>$0.75</td>
+                            <td>$0.1125</td>
+                            <td>
+                                <small>
+                                    Electronic property suite: high-k-mesh SCF followed by a non-SCF
+                                    line-mode calculation to map the band gap and density of states.
+                                </small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Li<sup>+</sup> Diffusion (NEB)
+                            </td>
+                            <td>12</td>
+                            <td>$6</td>
+                            <td>$0.90</td>
+                            <td>
+                                <small>
+                                    Nudged Elastic Band (NEB) with 5 images to calculate the migration
+                                    barrier of a lithium ion moving between octahedral sites.
+                                </small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Molecular Dynamics (AIMD)</td>
+                            <td>40</td>
+                            <td>$20</td>
+                            <td>$3.00</td>
+                            <td>
+                                <small>
+                                    Ab-initio Molecular Dynamics (AIMD) on a 3x3x1 supercell.
+                                    Simulates 2 ps of thermal trajectory at 300K to study lattice stability.
+                                </small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Fixed-Composition Search (Li<sub>3</sub>Co<sub>3</sub>O<sub>6</sub>)
+                            </td>
+                            <td>50</td>
+                            <td>$25</td>
+                            <td>$3.75</td>
+                            <td>
+                                <small>
+                                    Fix-composition structure search to find the most stable LiCoO<sub>2</sub>
+                                    polymorphs for up to 12-atom unitcells. This involves ~200-300 individual structure relaxations.
+                                </small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Chemical System Search (Li-Co-O)</td>
+                            <td>500</td>
+                            <td>$250</td>
+                            <td>$37.50</td>
+                            <td>
+                                <small>
+                                    Global structure search to find stable Li-Co-O
+                                    polymorphs, involving >5,000 individual structure relaxations for unitcells with up to 12 atoms.
+                                </small>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="alert alert-info" role="alert">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <i class="bi bi-exclamation-triangle fs-3"></i>
+                    </div>
+                    <div class="col">
+                        <b>You save 85% (& can even earn USDC) by providing compute resources as "Simmate Workers".</b> The remaining 15% is
+                        still charged to help pay for things such as validation+storage of all results. Read more about Simmate's
+                        overall financial strategy on our <b><a class="text-dark" href="#">Finances <i class="bi bi-box-arrow-up-right"></i></a></b> page and
+                        how to set up workers on our <b><a class="text-dark" href="#">Contribute & Earn <i class="bi bi-box-arrow-up-right"></i></a></b> page.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="p-3 pb-md-4 mx-auto row">
+        <h1 class="display-4 fw-normal text-body-emphasis text-center">Digital Currencies</h1>
+        <div class="p-3 pb-md-4 mx-auto col-6">
+            <h1 class="display-5 fw-normal text-body-emphasis d-flex justify-content-center align-items-center">
+                <img src="/static/images/usdc-icon.svg" height="50" class="me-2">
+                USDC
+            </h1>
+            <h5 class="text-muted text-center mb-3">1 USDC = $1 for compute costs & workflows</h5>
+            <div class="alert alert-secondary" role="alert">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <p>
+                            USDC is used to pay for compute costs when you are using
+                            Simmate's computational resources, rather than supplying your own.
+                        </p>
+                        <p>
+                            Configure your preferred payment method on your
+                            <a href="{% url 'profile' %}">Profile page</a>, where you
+                            are given the following options:
+                        </p>
+                        <ul>
+                            <li>
+                                <b>Stripe Checkout <small>(card, Google Pay, Apple Pay, etc.)</small></b>
+                                <p class="m-0">
+                                    <span class="badge text-bg-secondary">most popular</span>
+                                    <span class="badge text-bg-warning">5% fee</span>
+                                    <span class="badge text-bg-warning">$25 minimum</span>
+                                </p>
+                                <p>
+                                    This is the most straightforward method as it supports familiar payment options
+                                    such as credit and debit cards.
+                                    Simmate enforces a minimum payment of $25 and 5% fee for Stripe transactions to negate
+                                    <a href="https://stripe.com/pricing" target="_blank">Stripe’s fees</a> and
+                                    to encourage users to switch to USDC.
+                                </p>
+                            </li>
+                            <li>
+                                <b>USDC stablecoin</b>
+                                <p class="m-0">
+                                    <span class="badge text-bg-primary">recommended</span>
+                                    <span class="badge text-bg-success">no fee</span>
+                                    <span class="badge text-bg-success">no minimum</span>
+                                </p>
+                                <p>
+                                    If you are new to cryptocurrencies, we recommend that you first read
+                                    our <a href="#" target="_blank">Beginner's Guide to Ethereum and USDC</a>.
+                                    For experienced users, you must simply (1) link your wallet address
+                                    to your Simmate account and then (2) send USDC to the
+                                    <a href="#" target="_blank">simmate.eth ENS wallet</a>
+                                    to fund your account. Your Simmate account is <u>not</u> self-custody, so
+                                    this is the equivalent of funding a Coinbase or Kraken account.
+                                    Only Ethereum and Base chains are supported at this time.
+                                    {% comment %}
+                                        <a href="https://www.circle.com/usdc">USDC (USD-Circle)</a> is a cryptocurrency token, and for every USDC in
+                                        existance, <a href="https://www.circle.com/">Circle</a> holds $1 in bonds and cash-equivalents.
+                                        This means that 1 USDC is always equal to (and redeemable for) $1 USD.
+                                        Because it is tokenized, USDC enables secure peer-to-peer payments on the Ethereum 
+                                        blockchain to anyone & anywhere in world.
+                                        Compare this to traditional USD payments where you need a third-party to
+                                        send a payment to someone else - i.e., you go through a bank, credit card provider, or
+                                        (for online payments) companies like Stripe/Venmo.
+                                        By using USDC, Simmate can more easily accept payments and even pay out USDC to
+                                        compute providers -- all without needed your bank information.
+                                    {% endcomment %}
+                                </p>
+                            </li>
+                            <li>
+                                <b>Venmo</b>
+                                <p class="m-0">
+                                    <span class="badge text-bg-danger">not recommended</span>
+                                    <span class="badge text-bg-warning">5% fee</span>
+                                    <span class="badge text-bg-warning">$25 minimum</span>
+                                </p>
+                                <p>
+                                    In the US, Venmo is a well established and convienient method for small
+                                    transactions. Payment made via Venmo must be
+                                    manually added to the Simmate system by a member of our team - so there
+                                    will be a delay in the funds showing in your balance of up to 5 days.
+                                    For this reason, we ask that users fund via Venmo only as a last resort.
+                                    And just like with Stripe, we enforce a minimum payment
+                                    of $25 and 5% fee for Venmo transactions to negate
+                                    <a href="https://help.venmo.com/cs/articles/business-profile-transaction-fees-vhel221"
+                                       target="_blank">Venmo’s fees</a> and
+                                    to encourage users to switch to USDC.
+                                </p>
+                            </li>
+                        </ul>
+                        <p>
+                            ** Regardless of the original funding method used, withdrawls are only available via
+                            USDC on the Ethereum and Base chains. All withdrawls are reviewed by our team before
+                            processing.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-3 pb-md-4 mx-auto col-6 border-right">
+            <h1 class="display-5 fw-normal text-body-emphasis d-flex justify-content-center align-items-center">
+                <img src="/static/images/simmate-token-icon.svg" height="50" class="me-2">
+                Tokens
+            </h1>
+            <h5 class="text-muted text-center mb-3">
+                1 Token = $1 of estimated costs <em>outside</em> of Simmate
+            </h5>
+            <div class="alert alert-secondary" role="alert">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <p>
+                            Simmate tokens have no physical value and are only used for planning and budgeting.
+                            Your token balance is unlimited since Tokens are purely theoretical, and you can adjust your balance in the navbar.
+                        </p>
+                        <p>
+                            As an example of how tokens are used, let's say you submit a molecule to the "Synthesis Tracker" app,
+                            indicating that you plan to run a synthesis of it. This costs nothing to submit & track
+                            in the website, but you may still want to record the total costs of actually running this
+                            synthesis in the lab (e.g., labor, reagents, etc.). You track these costs using Tokens.
+                            And as you record many syntheses and assay runs, you will be able to track real-world costs
+                            dedicated to specific projects, regions chemical chemical space, or specific hypotheses.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

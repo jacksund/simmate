@@ -73,7 +73,7 @@ INSTALLED_APPS = [
     *settings.extra_django_apps,
     # Simmate apps + user apps
     "simmate.website.configs.HtmxConfig",  # for dynamic webpages (AJAX calls)
-    "simmate.website.configs.CoreComponentsConfig",
+    "simmate.website.configs.CoreConfig",
     "simmate.website.configs.DataExplorerConfig",
     "simmate.website.configs.WorkflowsConfig",
     "simmate.apps.configs.RdkitConfig",  # enables rdkit ext when using postgres
@@ -119,14 +119,14 @@ MIDDLEWARE = [
     # adds specific authentication methods, such as login by email
     "allauth.account.middleware.AccountMiddleware",
     # add token-based authentication for programmatic access (e.g, REST API)
-    "simmate.website.core_components.middleware.TokenAuthenticationMiddleware",
+    "simmate.website.core.middleware.TokenAuthenticationMiddleware",
     # tracks page visits accross the website
-    "simmate.website.core_components.middleware.WebsitePageVisitMiddleware",
+    "simmate.website.core.middleware.WebsitePageVisitMiddleware",
     # Note: extras such as RequireLoginMiddleware are added conditionally below
 ]
 
-# "core" here is based on the name of my main django folder
-ROOT_URLCONF = "simmate.website.core.urls"
+# "server" here is based on the name of my main django folder
+ROOT_URLCONF = "simmate.website.server.urls"
 
 TEMPLATES = [
     {
@@ -136,7 +136,7 @@ TEMPLATES = [
             # note: this dir is automatically picked up because it's within an
             # app, but we need it to come BEFORE some other apps (such as allauth)
             # in order to properly override default templates.
-            settings.django_directory / "core_components" / "templates",
+            settings.django_directory / "core" / "templates",
             # Then APP_DIRS are checked in order
         ],
         "APP_DIRS": True,
@@ -152,17 +152,17 @@ TEMPLATES = [
             # a bunch of templates.
             "builtins": [
                 "django.contrib.humanize.templatetags.humanize",
-                "simmate.website.core_components.templatetags.simmate_input_forms",
-                "simmate.website.core_components.templatetags.simmate_settings",
-                "simmate.website.core_components.templatetags.simmate_utils",
+                "simmate.website.core.templatetags.simmate_input_forms",
+                "simmate.website.core.templatetags.simmate_settings",
+                "simmate.website.core.templatetags.simmate_utils",
                 "simmate.website.htmx.templatetags.htmx",
             ],
         },
     },
 ]
 
-# "core" here is based on the name of my main django folder
-WSGI_APPLICATION = "simmate.website.core.wsgi.application"
+# "server" here is based on the name of my main django folder
+WSGI_APPLICATION = "simmate.website.server.wsgi.application"
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -332,9 +332,7 @@ if not settings.website.debug:
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 if settings.website.require_login:
-    MIDDLEWARE.append(
-        "simmate.website.core_components.middleware.RequireLoginMiddleware"
-    )
+    MIDDLEWARE.append("simmate.website.core.middleware.RequireLoginMiddleware")
 
 LOGIN_REQUIRED_URLS = (r"/(.*)$",)
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (
@@ -396,7 +394,7 @@ LOGGING = {
         "mail_super_users": {
             "level": "ERROR",
             "filters": ["require_debug_false"],
-            "class": "simmate.website.core_components.logging.SuperUserEmailHandler",
+            "class": "simmate.website.core.logging.SuperUserEmailHandler",
             "include_html": True,
         },
     },

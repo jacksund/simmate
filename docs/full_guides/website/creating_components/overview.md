@@ -98,7 +98,7 @@ Create the layout in `my_app/templates/my_app/todo.html`:
 Render the component in your main template (`my_app/templates/my_app/home.html`):
 
 ```html+django
-{% extends "core_components/site_base.html" %}
+{% extends "core/site_base.html" %}
 
 {% block body %}
     <div class="container">

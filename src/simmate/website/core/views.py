@@ -1,208 +1,110 @@
 # -*- coding: utf-8 -*-
 
-import importlib
+import tempfile
+import time
+from pathlib import Path
 
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
-from django.db.models import F
 from django.shortcuts import render
 
-from simmate.apps.aflow.models import AflowStructure
-from simmate.apps.cod.models import CodStructure
-from simmate.apps.jarvis.models import JarvisStructure
-from simmate.apps.materials_project.models import MatprojStructure
-from simmate.apps.oqmd.models import OqmdStructure
-from simmate.config import settings
-from simmate.utilities import get_app_submodule, get_class
-from simmate.website.data_explorer.forms import ChemicalSystemForm
-
-# -----------------------------------------------------------------------------
-
-# this section is wacky because we want to dynamically set the home and profile
-# fxn/views using either a default or some env variable (which allows people
-# to override it)
+from simmate.config.django import settings
+from simmate.toolkit import Structure
+from simmate.toolkit.visualization.structure.blender import make_blender_structure
+from simmate.utilities import get_directory
 
 
-@login_required
-def profile_default_view(request):
-    # !!! For future reference, you can grab user-associated data via...
-    # data = request.user.relateddata.all()
+def structure_viewer(request):
+    # Grabs all data after the '?' in the URL
+    query = request.GET.dict()
 
-    context = {"breadcrumbs": [request.user.username]}
-    template = "account/profile.html"
+    # convert the query to a Structure object
+    structure_string = query.get("structure", "")
+    structure = Structure.from_database_string(structure_string)
+
+    # We want to make a 3d structure file. We make this so it...
+    #   1. has a random name that ends with ".glb"
+    #   2. is a temporary file (deletes once finished)
+    #   3. is located in the static root folder
+    # Note we make this file in the static directory because we want to use
+    # "load_static" to grab it in the template
+    temp_dir = get_directory(
+        settings.STATIC_ROOT
+    )  # use get_dir to ensure folder exists
+    temp_file = tempfile.NamedTemporaryFile(
+        dir=temp_dir,
+        suffix=".glb",
+        # BUG (the fix is below): if delete=True, this sets up a race condition
+        # of when the user recieves the file versus when it is deleted.
+        delete=False,
+    )
+    temp_filname_base = Path(temp_file.name).name
+
+    # BUG FIX: Because we can make these temporary files automatically delete,
+    # we need to prevent 3D files from building up over time and taking up
+    # room on the server/disk. We therefore automatically delete any files that
+    # are older than N seconds. This process can be slow, but it adds minimal
+    # overhead to the blender-creation process.
+    detete_old_3d_files()
+
+    # Use blender to create a temporary glb file. Note, the output here
+    # may be useful for debugging, but it isn't used at the moment.
+    output = make_blender_structure(structure, filename=temp_file.name)
+
+    # we pass the base name to the template so that it knows where the static
+    # file is located (template assumes static directory)
+    context = {"3d_structure_filename": temp_filname_base}
+    template = "core/chem_elements/structure_viewer.html"
     return render(request, template, context)
 
 
-@login_required
-def profile(request):
-    if not settings.website.profile_view:
-        return profile_default_view(request)  # This is the function above
-    else:
-        # we assume the view is named "profile" inside this module
-        profile_module = importlib.import_module(settings.website.profile_view)
-        profile_view = getattr(profile_module, "profile")
-        return profile_view(request)
+def test_viewer(request):
+    # grab cif filenames to test with
+    from simmate.toolkit import base_data_types
 
+    structure_dir = Path(base_data_types.__file__).parent / "test" / "test_structures"
+    cif_filenames = [f.absolute() for f in structure_dir.iterdir()]
 
-def home_default_view(request):
-    # The default homepage is a bulk query for crystal structures. For internal
-    # websites, a different homepage (e.g. a chatbot) is used instead.
+    structure = Structure.from_file(cif_filenames[0])
 
-    # The home page is also an html "form" because users submit queries from
-    # here. So we need to handle form submissions properly.
-
-    # first check if the webpage is accessed via a POST method
-    if request.method == "POST":
-        # if it is, that means a user is trying to submit a query
-        # let's grab the data and validate it before running the query
-        form = ChemicalSystemForm(request.POST)
-        # see if all of the data is valid
-        if form.is_valid():
-            # grab the cleaned data from the form
-            cleaned_data = form.cleaned_data
-
-            # check which databases the user wants to search and collect the
-            # proper models into a list that we query with below
-            databases_to_search = []
-            for database, database_model in (
-                ("aflow", AflowStructure),
-                ("cod", CodStructure),
-                ("jarvis", JarvisStructure),
-                ("materials_project", MatprojStructure),
-                ("oqmd", OqmdStructure),
-            ):
-                # if the user requested this database, the value will be true
-                if cleaned_data[database]:
-                    databases_to_search.append(database_model)
-
-            # Note, this value is converted to a list of systems once cleaned.
-            chemical_systems = cleaned_data["chemical_system"]
-
-            # now go through each database, search for the requested system
-            # and then pool them all together. We limit each database to 50
-            # results. Note the += below means we compile into a single list
-            structures = []
-            nstructures_possible = 0
-            for database_model in databases_to_search:
-                # Now we can make the query! We also dont want to load the
-                # structure json -- so that everything runs faster.
-                search_results = database_model.objects.filter(
-                    chemical_system__in=chemical_systems
-                ).defer("structure")
-
-                # if the database provides the hull energy, we want to sort
-                # the structures by that (putting highest priority on stable ones)
-                if hasattr(database_model, "energy_above_hull"):
-                    # if there isn't a hull energy value, place these last
-                    search_results = search_results.order_by(
-                        F("energy_above_hull").asc(nulls_last=True)
-                    )
-
-                # now add the search results to the output
-                # for performance, we limit each database to 50 structures
-                structures += search_results.all()[:50]
-
-                # We also tell the user how many results are possible if there
-                # wasn't any limit on the structures returned
-                nstructures_possible += database_model.objects.filter(
-                    chemical_system__in=chemical_systems,
-                ).count()
-
-    # if the page is grabbed via a 'GET' method, send an empty form
-    else:
-        # otherwise we are giving an empty form and no result structures
-        form = ChemicalSystemForm()
-        structures = None
-        nstructures_possible = None
-
-    # now let's put the data and template together to send the user
-    context = {
-        "chemical_system_form": form,
-        "structures": structures,
-        "nstructures_possible": nstructures_possible,
-        "page_title": "The Simmate Website",
-        "breadcrumbs": ["Home"],
-    }
-    template = "core_components/home.html"
+    context = {"structure": structure}
+    template = "core/test.html"
     return render(request, template, context)
 
 
-def home(request):
-    if not settings.website.home_view:
-        return home_default_view(request)  # This is the function above
-    else:
-        # we assume the view is named "home" inside this module
-        home_module = importlib.import_module(settings.website.home_view)
-        home_view = getattr(home_module, "home")
-        return home_view(request)
+def detete_old_3d_files(time_cutoff: float = 60):
+    """
+    Goes through the static directory and finds all "tmp***.glb" files that
+    are older than a given time cutoff. Each of these files is then deleted.
 
+    #### Parameters
 
-# -----------------------------------------------------------------------------
+    - `time_cutoff`:
+        The time (in seconds) required to determine whether a file is old or not.
+        The default is 60 seconds.
+    """
+    # load the full path to the desired directory
+    directory = settings.DJANGO_DIRECTORY / "static"
 
+    # grab all files/folders in this directory and then limit this list to those
+    # that are...
+    #   1. NOT folders
+    #   2. start with "tmp"
+    #   3. end with ".glb"
+    #   3. haven't been modified for at least time_cutoff
+    filenames = []
+    for filename in directory.iterdir():
+        filename_full = filename.absolute()
+        if (
+            not filename_full.is_dir()
+            and filename.name.startswith("tmp")
+            and filename.suffix == ".glb"
+            and time.time() - filename_full.lstat().st_mtime > time_cutoff
+        ):
+            filenames.append(filename_full)
 
-def loginstatus(request):
-    context = {"breadcrumbs": ["Login Status"]}
-    template = "account/loginstatus.html"
-    return render(request, template, context)
-
-
-def permission_denied(request):
-    raise PermissionDenied
-
-
-def apps(request):
-    extra_apps = []
-    for app_name in settings.apps:
-        urls_path = get_app_submodule(app_name, "urls")
-        if urls_path:
-            app_config = get_class(app_name)
-
-            if (
-                hasattr(app_config, "hide_in_website")
-                and app_config.hide_in_website == True
-            ):
-                continue
-
-            extra_apps.append(
-                {
-                    "verbose_name": app_config.verbose_name,
-                    "short_name": app_config.name.split(".")[-1],
-                    "description_short": app_config.description_short,
-                }
-            )
-    context = {
-        "extra_apps": extra_apps,
-        "breadcrumbs": ["Apps"],
-    }
-    template = "core_components/apps.html"
-    return render(request, template, context)
-
-
-def extras(request):
-    context = {"breadcrumbs": ["Extras"]}
-    template = "core_components/extras.html"
-    return render(request, template, context)
-
-
-def about(request):
-    context = {"breadcrumbs": ["About"]}
-    template = "core_components/about.html"
-    return render(request, template, context)
-
-
-def contact(request):
-    context = {"breadcrumbs": ["Extras"]}
-    template = "core_components/contact.html"
-    return render(request, template, context)
-
-
-def pricing(request):
-    context = {"breadcrumbs": ["Pricing"]}
-    template = "core_components/pricing.html"
-    return render(request, template, context)
-
-
-def faqs(request):
-    context = {"breadcrumbs": ["FAQs"]}
-    template = "core_components/faqs.html"
-    return render(request, template, context)
+    # now go through this list and delete the files that met the criteria.
+    # If the file fails to be deleted, we just ingore it and move on
+    for filename in filenames:
+        try:
+            filename.unlink()
+        except:
+            continue

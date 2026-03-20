@@ -15,7 +15,7 @@ from ..core import DatabaseTable, table_column
 
 class Spacegroup(DatabaseTable):
     class Meta:
-        app_label = "core_components"
+        app_label = "core"
 
     # -------------------------------------------------------------------------
 

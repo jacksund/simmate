@@ -135,7 +135,7 @@ Build your `urls.py`, `views.py`, and `templates/` files following [official Dja
 We recommend following Django's best practice of namespacing your templates within a subfolder named after your app (e.g. `my_app/templates/my_app/home.html`). You should also extend Simmate's base template to get the standard styling and navbar:
 
 ```html+django
-{% extends "core_components/site_base.html" %}
+{% extends "core/site_base.html" %}
 
 {% block body %}
     <h1>Hello from My App!</h1>
