@@ -10,6 +10,8 @@ from pathlib import Path
 import pandas
 from rich.progress import track
 
+from simmate.config import settings
+
 
 class ArchiveMixin:
     """
@@ -126,99 +128,108 @@ class ArchiveMixin:
 
         # We disable warnings while loading archives because pymatgen prints
         # a lot of them (for things like rounding or electronegativity alerts).
-        warnings.filterwarnings("ignore")
+        # We use a context manager to ensure we don't affect the rest of the
+        # user's session.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
 
-        # generate the file name if one wasn't given
-        if not filename:
-            # The name will be something like "MyExampleTable-2022-01-25.zip".
-            # We go through all files that match "MyExampleTable-*.zip" and then
-            # grab the most recent date.
-            matching_files = [
-                file
-                for file in Path.cwd().iterdir()
-                if file.name.startswith(cls.table_name) and file.suffix == ".zip"
-            ]
-            # make sure there is at least one file
-            if not matching_files:
-                raise FileNotFoundError(
-                    f"No file found matching the {cls.table_name}-*.zip format"
-                )
-            # sort the files by date and grab the first
-            matching_files.sort(reverse=True)
-            filename = matching_files[0]
+            # generate the file name if one wasn't given
+            if not filename:
+                # The name will be something like "MyExampleTable-2022-01-25.zip".
+                # We go through all files that match "MyExampleTable-*.zip" and then
+                # grab the most recent date.
+                matching_files = [
+                    file
+                    for file in Path.cwd().iterdir()
+                    if file.name.startswith(cls.table_name) and file.suffix == ".zip"
+                ]
+                # make sure there is at least one file
+                if not matching_files:
+                    raise FileNotFoundError(
+                        f"No file found matching the {cls.table_name}-*.zip format"
+                    )
+                # sort the files by date and grab the first
+                matching_files.sort(reverse=True)
+                filename = matching_files[0]
 
-        # Turn the filename into the full path -- which makes a number of
-        # manipulations easier below.
-        filename = Path(filename).absolute()
+            # Turn the filename into the full path -- which makes a number of
+            # manipulations easier below.
+            filename = Path(filename).absolute()
 
-        # uncompress the zip file to the same directory that it is located in
-        shutil.unpack_archive(
-            filename,
-            extract_dir=filename.parent,
-        )
-
-        # We will now have a csv file of the same name, which we load into
-        # a pandas dataframe
-        csv_filename = filename.with_suffix(".csv")  # was ".zip"
-        df = pandas.read_csv(csv_filename)
-
-        # BUG: NaN values throw errors when read into SQL databases, so we
-        # convert all NaN entries to None. This hacky line was taken from
-        #   https://stackoverflow.com/questions/39279824/
-        df = df.astype(object).where(df.notna(), None)
-
-        # convert the dataframe to a list of dictionaries that we will iterate
-        # through.
-        entries = df.to_dict(orient="records")
-
-        # to enable parallelization, we define a function to load a single
-        # entry (or row) of data. This allows us to submit the function to Dask.
-        def load_single_entry(entry):
-            """
-            Quick utility function that load a single entry to the database.
-            We have this as a internal function in order to allow submitting
-            this function to Dask (for parallelization).
-            """
-
-            # BUG: some columns don't properly convert to python objects, but
-            # it seems inconsistent when this is done... For now I just manually
-            # convert JSON columns
-            json_parsing_columns = ["site_forces", "lattice_stress"]
-            for column in json_parsing_columns:
-                if column in entry:
-                    if entry[column]:  # sometimes it has a value of None
-                        entry[column] = json.loads(entry[column])
-            # OPTIMIZE: consider applying this to the df column for faster loading
-
-            return cls.from_toolkit(**entry)
-
-        # now iterate through all entries to save them to the database
-        if not parallel:
-            # If user doesn't want parallelization, we run these in the main
-            # thread and monitor progress
-            db_objects = [load_single_entry(entry) for entry in track(entries)]
-
-        # otherwise we use dask to submit these in batches!
-        else:
-
-            from simmate.config.dask import batch_submit
-
-            db_objects = batch_submit(
-                function=load_single_entry,
-                args_list=entries,
-                batch_size=15000,
+            # uncompress the zip file to the same directory that it is located in
+            shutil.unpack_archive(
+                filename,
+                extract_dir=filename.parent,
             )
 
-        cls.objects.bulk_create(
-            db_objects,
-            batch_size=15000,
-            ignore_conflicts=True,
-        )
+            # We will now have a csv file of the same name, which we load into
+            # a pandas dataframe
+            csv_filename = filename.with_suffix(".csv")  # was ".zip"
+            df = pandas.read_csv(csv_filename)
 
-        # We can now delete the files. The zip file is only deleted if requested.
-        csv_filename.unlink()
-        if delete_on_completion:
-            filename.unlink()  # the zip archive
+            # BUG: NaN values throw errors when read into SQL databases, so we
+            # convert all NaN entries to None. This hacky line was taken from
+            #   https://stackoverflow.com/questions/39279824/
+            df = df.astype(object).where(df.notna(), None)
+
+            # convert the dataframe to a list of dictionaries that we will iterate
+            # through.
+            entries = df.to_dict(orient="records")
+
+            # to enable parallelization, we define a function to load a single
+            # entry (or row) of data. This allows us to submit the function to Dask.
+            def load_single_entry(entry):
+                """
+                Quick utility function that load a single entry to the database.
+                We have this as a internal function in order to allow submitting
+                this function to Dask (for parallelization).
+                """
+                # We disable warnings while loading archives because pymatgen prints
+                # a lot of them (for things like rounding or electronegativity alerts).
+                # This is especially important for parallel workers which may not
+                # inherit the warning filter from the main process.
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+
+                    # BUG: some columns don't properly convert to python objects, but
+                    # it seems inconsistent when this is done... For now I just manually
+                    # convert JSON columns
+                    json_parsing_columns = ["site_forces", "lattice_stress"]
+                    for column in json_parsing_columns:
+                        if column in entry:
+                            if entry[column]:  # sometimes it has a value of None
+                                entry[column] = json.loads(entry[column])
+                    # OPTIMIZE: consider applying this to the df column for faster loading
+
+                    return cls.from_toolkit(**entry)
+
+            # now iterate through all entries to save them to the database
+            if not parallel:
+                # If user doesn't want parallelization, we run these in the main
+                # thread and monitor progress
+                db_objects = [load_single_entry(entry) for entry in track(entries)]
+
+            # otherwise we use dask to submit these in batches!
+            else:
+
+                from simmate.config.dask import batch_submit
+
+                db_objects = batch_submit(
+                    function=load_single_entry,
+                    args_list=entries,
+                    batch_size=15000,
+                )
+
+            cls.objects.bulk_create(
+                db_objects,
+                batch_size=15000,
+                ignore_conflicts=True,
+            )
+
+            # We can now delete the files. The zip file is only deleted if requested.
+            csv_filename.unlink()
+            if delete_on_completion:
+                filename.unlink()  # the zip archive
 
     @classmethod
     def load_remote_archive(
@@ -269,16 +280,30 @@ class ArchiveMixin:
         # Predetermine the file name, which is just the ending of the URL
         archive_filename = remote_archive_link.split("/")[-1]
 
-        # Download the archive zip file from the URL to the current working dir
-        logging.info("Downloading archive file...")
-        urllib.request.urlretrieve(remote_archive_link, archive_filename)
-        logging.info("Done.")
+        # Determine the target directory for the download
+        # Example: ~/simmate/cod/archive/CodStructure-2026-03-20.zip
+        app_label = cls._meta.app_label
+        archive_dir = settings.config_directory / app_label / "archive"
+        archive_path = archive_dir / archive_filename
+
+        # Download the archive zip file from the URL if it doesn't already exist
+        if archive_path.exists():
+            logging.info(
+                f"Archive already exists at {archive_path}. Skipping download."
+            )
+        else:
+            logging.info(f"Downloading archive file to {archive_path}...")
+            # ensure the directory exists
+            archive_dir.mkdir(parents=True, exist_ok=True)
+            # download the file
+            urllib.request.urlretrieve(remote_archive_link, archive_path)
+            logging.info("Done.")
 
         # now that the archive is downloaded, we can load it into our db
         logging.info("Loading data into Simmate database")
         cls.load_archive(
-            archive_filename,
-            delete_on_completion=True,
+            archive_path,
+            delete_on_completion=False,
             parallel=parallel,
         )
         logging.info("Done.")

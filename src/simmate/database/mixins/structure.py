@@ -155,7 +155,7 @@ class Structure(DatabaseTable):
 
     exclude_from_summary = ["structure", "elements"]
 
-    archive_fields = ["structure"]
+    archive_fields = ["structure", "is_invalid_structure"]
 
     # NOTE: below is for legacy implementation of compositional API searches.
     # This is kept for reference as we migrate to the new api

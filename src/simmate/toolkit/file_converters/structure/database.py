@@ -159,7 +159,7 @@ class DatabaseAdapter:
         elif storage_format == "CIF":
             from pymatgen.io.cif import CifParser
 
-            parser = CifParser.from_string(
+            parser = CifParser.from_str(
                 structure_string,
                 occupancy_tolerance=float("inf"),
             )
