@@ -25,8 +25,8 @@ class Spacegroup(DatabaseTable):
         "known as Hermann-Mauguin notations."
     )
 
-    html_entries_template = "workflows/static_energy/table.html"
-    html_entry_template = "workflows/static_energy/view.html"
+    html_entries_template = "workflow_explorer/static_energy/table.html"
+    html_entry_template = "workflow_explorer/static_energy/view.html"
 
     # -------------------------------------------------------------------------
 

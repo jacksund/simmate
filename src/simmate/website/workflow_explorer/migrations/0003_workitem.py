@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         (
-            "workflows",
+            "workflow_explorer",
             "0002_remove_fixedcompositionsearch_best_survival_cutoff_and_more",
         ),
     ]

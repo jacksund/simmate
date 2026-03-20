@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("workflows", "0007_remove_dynamicsionicstep_source_and_more"),
+        ("workflow_explorer", "0007_remove_dynamicsionicstep_source_and_more"),
     ]
 
     operations = [

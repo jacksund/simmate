@@ -114,6 +114,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - updated workflow columns in the database for enhanced metadata tracking
 - removed legacy `{conda_env}` support from configuration and database naming in favor of `SIMMATE_CONFIG_DIR`
 - refactor `htmx` template tags and components for better modularity
+- renamed `simmate.website.workflows` to `simmate.website.workflow_explorer` and updated all associated configurations, imports, model labels, and templates
 - reorganized `dev` apps and updated the `data explorer` UI
 - refactored website's workflow tab to use new API backend
 - removed `django-contrib-comments`, `django-crispy-forms`, `dj-database-url`, `django-filter`, and `djangorestframework` dependencies
@@ -121,7 +122,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - workflows results in the web ui now exists within the Data tab. The workflow tab has been limited to submission, docs, and analytics
 - `DynamicApiView` was split up into separate views for easier debugging and future enhancements
 - renamed `website.core` to `website.server` and `website.core_components` to `website.core` to better align with standard Django architectural conventions
-- `website.engine` apps and others are condensed into `core`, `data_explorer`, and `workflows` apps
+- `website.engine` apps and others are condensed into `core`, `data_explorer`, and `workflow_explorer` apps
 - refactored `toolkit.featurizers` module
 - deprec django-unicorn in favor of htmx
 - deprec badelf app as it is now a standalone python package (baderkit)

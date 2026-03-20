@@ -15,8 +15,8 @@ class HtmxConfig(AppConfig):
     name = "simmate.website.htmx"
 
 
-class WorkflowsConfig(AppConfig):
-    name = "simmate.website.workflows"
+class WorkflowExplorerConfig(AppConfig):
+    name = "simmate.website.workflow_explorer"
 
 
 class TestAppConfig(AppConfig):

@@ -413,7 +413,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="migration_hops",
-                        to="workflows.diffusionanalysis",
+                        to="workflow_explorer.diffusionanalysis",
                     ),
                 ),
             ],
@@ -595,7 +595,7 @@ class Migration(migrations.Migration):
                         parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        to="workflows.staticenergy",
+                        to="workflow_explorer.staticenergy",
                     ),
                 ),
                 ("oxidation_states", models.JSONField(blank=True, null=True)),
@@ -607,7 +607,7 @@ class Migration(migrations.Migration):
                 ("vacuum_volume", models.FloatField(blank=True, null=True)),
                 ("nelectrons", models.FloatField(blank=True, null=True)),
             ],
-            bases=("workflows.staticenergy",),
+            bases=("workflow_explorer.staticenergy",),
         ),
         migrations.CreateModel(
             name="SteadystateSource",
@@ -633,7 +633,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="steadystate_sources",
-                        to="workflows.fixedcompositionsearch",
+                        to="workflow_explorer.fixedcompositionsearch",
                     ),
                 ),
             ],
@@ -736,7 +736,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="relaxations_as_final",
-                        to="workflows.ionicstep",
+                        to="workflow_explorer.ionicstep",
                     ),
                 ),
             ],
@@ -786,7 +786,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="migration_images",
-                        to="workflows.migrationhop",
+                        to="workflow_explorer.migrationhop",
                     ),
                 ),
                 (
@@ -806,7 +806,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="structures",
-                to="workflows.relaxation",
+                to="workflow_explorer.relaxation",
             ),
         ),
         migrations.AddField(
@@ -880,7 +880,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="structures",
-                        to="workflows.dynamics",
+                        to="workflow_explorer.dynamics",
                     ),
                 ),
                 (

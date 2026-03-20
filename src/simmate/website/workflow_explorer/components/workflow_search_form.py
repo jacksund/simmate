@@ -8,7 +8,7 @@ from simmate.workflows.utilities import get_all_workflows
 
 class WorkflowSearchForm(HtmxComponent):
 
-    template_name = "workflows/search_form.html"
+    template_name = "workflow_explorer/search_form.html"
 
     tags_options: list[str] = None  # set in mount()
 

@@ -17,7 +17,7 @@ class Calculation(DatabaseTable):
 
     class Meta:
         abstract = True
-        app_label = "workflows"
+        app_label = "workflow_explorer"
 
     # -------------------------------------------------------------------------
 

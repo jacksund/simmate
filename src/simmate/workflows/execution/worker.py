@@ -35,7 +35,7 @@ class SimmateWorker(DatabaseTable):
     """
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
         db_table = "workflow_engine__workers"
 
     # -------------------------------------------------------------------------
@@ -46,8 +46,8 @@ class SimmateWorker(DatabaseTable):
         "items that have been submitted to the queue."
     )
 
-    html_entries_template = "workflows/workers/table.html"
-    # html_entry_template = "workflows/workers//view.html"
+    html_entries_template = "workflow_explorer/workers/table.html"
+    # html_entry_template = "workflow_explorer/workers//view.html"
 
     # -------------------------------------------------------------------------
 

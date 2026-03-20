@@ -18,7 +18,7 @@ class NestedCalculation(Structure, Calculation):
     """
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
 
     subworkflow_names = table_column.JSONField(blank=True, null=True)
     """

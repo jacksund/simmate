@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("workflows", "0006_simmateworker_workitem_worker"),
+        ("workflow_explorer", "0006_simmateworker_workitem_worker"),
     ]
 
     operations = [

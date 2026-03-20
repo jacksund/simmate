@@ -84,8 +84,14 @@ urlpatterns = [
     # All local calculations are stored at this endpoint
     path(
         route="workflows/",
-        view=include("simmate.website.workflows.urls"),
-        name="workflows",
+        view=include(
+            (
+                "simmate.website.workflow_explorer.urls",
+                "simmate.website.workflow_explorer",
+            ),
+            namespace="workflow_explorer",
+        ),
+        name="workflow_explorer",
     ),
     #
     # This app includes core functionality, such as views for crystal structures

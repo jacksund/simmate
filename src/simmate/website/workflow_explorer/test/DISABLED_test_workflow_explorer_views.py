@@ -36,14 +36,14 @@ ALL_WORKFLOWS = get_workflows_to_test()
 
 
 def test_workflows_view(client):
-    response = client.get("/workflows/")
+    response = client.get("/workflow_explorer/")
     assert response.status_code == 200
-    assertTemplateUsed(response, "workflows/all.html")
+    assertTemplateUsed(response, "workflow_explorer/all.html")
 
 
 @pytest.mark.parametrize("workflow_type", get_all_workflow_types())
 def test_workflows_by_type_view(client, workflow_type):
-    # grabs f"/workflows/{workflow_type}/"
+    # grabs f"/workflow_explorer/{workflow_type}/"
     url = reverse(
         "workflows_of_given_type",
         kwargs={"workflow_type": workflow_type},
@@ -51,7 +51,7 @@ def test_workflows_by_type_view(client, workflow_type):
 
     response = client.get(url)
     assert response.status_code == 200
-    assertTemplateUsed(response, "workflows/by_type.html")
+    assertTemplateUsed(response, "workflow_explorer/by_type.html")
 
 
 @pytest.mark.django_db
@@ -70,7 +70,7 @@ def test_workflow_detail_view(client, workflow):
         return
 
     # list view
-    # grabs f"/workflows/{type}/{app}/{preset}/")
+    # grabs f"/workflow_explorer/{type}/{app}/{preset}/")
     url = reverse(
         "workflow_detail",
         kwargs={
@@ -82,14 +82,14 @@ def test_workflow_detail_view(client, workflow):
 
     response = client.get(url)
     assert response.status_code == 200
-    assertTemplateUsed(response, "workflows/detail.html")
+    assertTemplateUsed(response, "workflow_explorer/detail.html")
 
     # detail view - found
-    # grabs... "/workflows/static-energy/vasp/mit/1/"
+    # grabs... "/workflow_explorer/static-energy/vasp/mit/1/"
     # TODO: how should I populate with test data?
 
     # detail view - not found
-    # grabs... "/workflows/static-energy/vasp/mit/999/"
+    # grabs... "/workflow_explorer/static-energy/vasp/mit/999/"
     url = reverse(
         "workflow_run_detail",
         kwargs={
@@ -102,7 +102,7 @@ def test_workflow_detail_view(client, workflow):
 
     response = client.get(url)
     assert response.status_code == 404
-    # assertTemplateUsed(response, "workflows/detail_run.html")
+    # assertTemplateUsed(response, "workflow_explorer/detail_run.html")
 
 
 # TODO: @pytest.mark.parametrize("workflow", ALL_WORKFLOWS)
@@ -122,7 +122,7 @@ def test_workflow_submit_view(client, sample_structures, mocker):
     # loading blank page
     response = client.get(url)
     assert response.status_code == 200
-    assertTemplateUsed(response, "workflows/submit.html")
+    assertTemplateUsed(response, "workflow_explorer/submit.html")
 
     # grab a test structure to submit
     structure = sample_structures["C_mp-48_primitive"]

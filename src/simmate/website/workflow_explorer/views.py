@@ -9,7 +9,7 @@ def home(request):
     context = {
         "breadcrumbs": ["Workflows"],
     }
-    template = "workflows/home.html"
+    template = "workflow_explorer/home.html"
     return render(request, template, context)
 
 
@@ -25,5 +25,5 @@ def workflow_detail(request, workflow_name):
         "page_title": workflow_name,
         "breadcrumbs": ["Workflows", workflow_name],
     }
-    template = "workflows/workflow_detail.html"
+    template = "workflow_explorer/workflow_detail.html"
     return render(request, template, context)

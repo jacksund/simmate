@@ -23,7 +23,7 @@ class DiffusionAnalysis(Structure, Calculation):
     html_description_short = "Results for Diffusion Analysis Calculations"
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
 
     migrating_specie = table_column.CharField(max_length=4, blank=True, null=True)
     """
@@ -157,7 +157,7 @@ class DiffusionAnalysis(Structure, Calculation):
 
 class MigrationHop(Calculation):
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
 
     archive_fields = [
         "site_start",
@@ -410,7 +410,7 @@ class MigrationHop(Calculation):
 
 class MigrationImage(Structure):
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
 
     archive_fields = [
         "number",

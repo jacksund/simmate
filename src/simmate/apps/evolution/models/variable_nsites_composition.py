@@ -14,7 +14,7 @@ class VariableNsitesCompositionSearch(Calculation):
     )
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
 
     # OPTIMIZE: This is really just a copy/paste of the fixed-composition
     # workflow, where we aren't using the table directly in the search and

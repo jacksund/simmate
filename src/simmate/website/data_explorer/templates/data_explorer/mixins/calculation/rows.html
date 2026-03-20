@@ -13,7 +13,7 @@
     {% endif %}
 </td>
 <td>
-    <a href="{% url 'workflow_detail' entry.workflow_name %}">
+    <a href="{% url 'workflow_explorer:workflow_detail' entry.workflow_name %}">
         {{ entry.workflow_name }}
         <small><i class="bi bi-box-arrow-up-right"></i></small>
     </a>

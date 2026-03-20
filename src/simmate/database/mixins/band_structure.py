@@ -140,7 +140,7 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
     html_description_short = "Results for Band Structure Calculations"
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
 
     @classmethod
     def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):

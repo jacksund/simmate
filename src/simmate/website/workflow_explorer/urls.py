@@ -2,13 +2,13 @@
 
 from django.urls import path
 
-from simmate.website.workflows import views
+from simmate.website.workflow_explorer import views
 
 urlpatterns = [
     path(
         route="",
         view=views.home,
-        name="workflows",
+        name="home",
     ),
     path(
         route="<workflow_name>/",

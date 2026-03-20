@@ -26,7 +26,7 @@ class ChemicalSystemSearch(Calculation):
     )
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
 
     chemical_system = table_column.CharField(max_length=10, null=True, blank=True)
     subworkflow_name = table_column.CharField(max_length=200, null=True, blank=True)

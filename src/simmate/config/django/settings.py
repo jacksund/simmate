@@ -75,7 +75,7 @@ INSTALLED_APPS = [
     "simmate.website.configs.HtmxConfig",  # for dynamic webpages (AJAX calls)
     "simmate.website.configs.CoreConfig",
     "simmate.website.configs.DataExplorerConfig",
-    "simmate.website.configs.WorkflowsConfig",
+    "simmate.website.configs.WorkflowExplorerConfig",
     "simmate.apps.configs.RdkitConfig",  # enables rdkit ext when using postgres
     *settings.apps,
 ]

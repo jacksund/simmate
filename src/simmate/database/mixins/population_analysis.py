@@ -20,7 +20,7 @@ class PopulationAnalysis(StaticEnergy):
     html_description_short = "Results for Population Analysis Calculations"
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
 
     exclude_from_summary = [
         "oxidation_states",

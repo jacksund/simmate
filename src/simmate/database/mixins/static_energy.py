@@ -15,15 +15,15 @@ from .thermodynamics import Thermodynamics
 class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
 
     # -------------------------------------------------------------------------
 
     html_display_name = "Static Energy"
     html_description_short = "Results for Static Energy Calculations"
 
-    html_entries_template = "workflows/static_energy/table.html"
-    html_entry_template = "workflows/static_energy/view.html"
+    html_entries_template = "workflow_explorer/static_energy/table.html"
+    html_entry_template = "workflow_explorer/static_energy/view.html"
 
     # -------------------------------------------------------------------------
 

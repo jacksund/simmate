@@ -11,7 +11,7 @@ from simmate.workflows.utilities import get_workflow
 
 class WorkflowSubmissionForm(HtmxComponent):
 
-    template_name = "workflows/submission_form.html"
+    template_name = "workflow_explorer/submission_form.html"
 
     # both set in mount()
     workflow_name: str = None

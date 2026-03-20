@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("workflows", "0005_workitem_bandstructurecalc_run_id_and_more"),
+        ("workflow_explorer", "0005_workitem_bandstructurecalc_run_id_and_more"),
     ]
 
     operations = [
@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="work_items",
-                to="workflows.simmateworker",
+                to="workflow_explorer.simmateworker",
             ),
         ),
     ]
