@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.warren_lab.workflows.relaxation.hse import Relaxation__Vasp__HseWarren
-from simmate.workflows.base_flow_types import StagedWorkflow
+from simmate.workflows.common import StagedWorkflow
 
 
 class Relaxation__Vasp__HseWithWavecarWarren(Relaxation__Vasp__HseWarren):

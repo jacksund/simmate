@@ -23,7 +23,8 @@ from simmate.utilities import (
     get_directory,
     make_archive,
 )
-from simmate.workflows.execution import SimmateExecutor
+
+from ..execution import SimmateExecutor
 
 
 class Workflow:

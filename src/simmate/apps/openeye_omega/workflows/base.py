@@ -5,7 +5,7 @@ from pathlib import Path
 from simmate.apps.openeye_omega.inputs import OmegaParm
 from simmate.toolkit import Molecule
 from simmate.toolkit.file_converters import SmilesAdapter
-from simmate.workflows.base_flow_types import S3Workflow
+from simmate.workflows.common import S3Workflow
 
 
 class OmegaWorkflow(S3Workflow):

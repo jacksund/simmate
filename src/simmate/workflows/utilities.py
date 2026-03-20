@@ -18,7 +18,7 @@ import yaml
 from simmate.config import settings
 from simmate.utilities import get_app_submodule, get_directory, make_archive
 
-from .base_flow_types import Workflow
+from .core import Workflow
 
 
 def get_all_workflows(

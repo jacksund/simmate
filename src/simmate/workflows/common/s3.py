@@ -12,8 +12,7 @@ import pandas
 
 from simmate.utilities import get_directory, make_error_archive
 
-from ..error_handler import ErrorHandler
-from .base import Workflow
+from ..core import ErrorHandler, Workflow
 
 
 class S3Workflow(Workflow):

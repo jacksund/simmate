@@ -5,7 +5,7 @@ from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 from simmate.toolkit import Structure
 
-from .base import Workflow
+from ..core import Workflow
 
 
 class StructureWorkflow(Workflow):

@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from simmate.database.core import DatabaseTable
 from simmate.toolkit import Structure
 from simmate.website.htmx.components import HtmxComponent
-from simmate.workflows.base_flow_types import Workflow
+from simmate.workflows.core import Workflow
 from simmate.workflows.utilities import get_workflow
 
 

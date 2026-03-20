@@ -26,7 +26,7 @@ from simmate.database.mixins import Spacegroup
 from simmate.toolkit import Composition, Structure, base_data_types
 from simmate.utilities import get_directory
 from simmate.website.test_app.models import TestStructure
-from simmate.workflows.base_flow_types import S3Workflow
+from simmate.workflows.common import S3Workflow
 
 
 @pytest.fixture(autouse=True, scope="session")

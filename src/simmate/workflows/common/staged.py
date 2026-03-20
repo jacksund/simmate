@@ -14,7 +14,7 @@ from plotly.subplots import make_subplots
 from simmate.toolkit import Structure
 from simmate.toolkit.visualization.plotting import PlotlyFigure
 
-from .base import Workflow
+from ..core import Workflow
 
 
 class StagedWorkflow(Workflow):

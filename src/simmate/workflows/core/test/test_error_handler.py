@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from simmate.workflows.error_handler import ErrorHandler
+from simmate.workflows.core import ErrorHandler
 
 
 class CheckREADME(ErrorHandler):
