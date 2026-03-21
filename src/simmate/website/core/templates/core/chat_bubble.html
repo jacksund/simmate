@@ -1,7 +1,8 @@
 {% extends "htmx/form_base.html" %}
 {% block form %}
     <!-- Chat Card -->
-    <div class="{% if not component.is_open %}d-none{% endif %} position-fixed bottom-0 end-0 m-3 z-3" id="chatBubbleContainer">
+    <div class="{% if not component.is_open %}d-none{% endif %} position-fixed bottom-0 end-0 m-3 z-3"
+         id="chatBubbleContainer">
         <div class="card shadow-lg"
              style="width: 350px;
                     max-height: 500px;
@@ -29,7 +30,8 @@
                 {% endfor %}
             </div>
             <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
-                <form class="w-100" {% htmx_post trigger="submit" method_name="submit_message" %}>
+                <form class="w-100"
+                      {% htmx_post trigger="submit" method_name="submit_message" %}>
                     <div class="input-group">
                         <input type="text"
                                class="form-control"
@@ -46,17 +48,17 @@
             </div>
         </div>
     </div>
-
     <!-- Chat Toggle Button -->
-    <div class="{% if component.is_open %}d-none{% endif %} position-fixed bottom-0 end-0 m-3 z-3" id="chatButtonContainer">
+    <div class="{% if component.is_open %}d-none{% endif %} position-fixed bottom-0 end-0 m-3 z-3"
+         id="chatButtonContainer">
         <button class="btn btn-primary rounded-circle shadow-lg d-flex justify-content-center align-items-center"
-                style="width: 60px; height: 60px"
+                style="width: 60px;
+                       height: 60px"
                 type="button"
                 {% htmx_post trigger="click" method_name="toggle_chat" %}>
             <i class="bi bi-chat-dots-fill fs-3"></i>
         </button>
     </div>
-
     {# Automatically scroll to the bottom of the chat #}
     <script>
         (function() {
