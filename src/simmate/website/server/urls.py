@@ -67,6 +67,11 @@ urlpatterns = [
     # If you want to change this defualt, then set LOGIN_REDIRECT_URL in
     # the settings.py file
     path(route="accounts/profile/", view=views.profile, name="profile"),
+    path(
+        route="accounts/profile/mark-as-read/",
+        view=views.mark_notifications_as_read,
+        name="mark_notifications_as_read",
+    ),
     # When you sign out, you are sent to LOGOUT_REDIRECT_URL (set in settings.py)
     path(route="accounts/loginstatus/", view=views.loginstatus, name="loginstatus"),
     #

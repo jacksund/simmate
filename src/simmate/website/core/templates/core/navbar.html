@@ -129,12 +129,21 @@
                         </button>
                     {% endif %}
                     {# user name + profile button #}
-                    <a class="btn btn-outline-light me-2" href="{% url 'profile' %}">
+                    <a class="btn btn-outline-light me-2 position-relative"
+                       href="{% url 'profile' %}">
                         <i class="bi bi-person-circle"></i>&nbsp;&nbsp;
                         {% if user.first_name %}
                             {{ user.first_name }} {{ user.last_name }}
                         {% else %}
                             {{ user.username }}
+                        {% endif %}
+                        {% unread_notifications_count user as unread_count %}
+                        {% if unread_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ unread_count }}
+                                {% if unread_count > 99 %}+{% endif %}
+                                <span class="visually-hidden">unread notifications</span>
+                            </span>
                         {% endif %}
                     </a>
                     {# logout button #}
