@@ -57,11 +57,13 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if dataset.num_rows_cache is not None %}
-                                            {{ dataset.num_rows_cache|floatformat:0|intcomma }}
-                                        {% else %}
-                                            <span class="text-muted fst-italic">---</span>
-                                        {% endif %}
+                                        {% with counts_dict|getitem:dataset.table_name as row_count %}
+                                            {% if row_count is not None %}
+                                                {{ row_count|floatformat:0|intcomma }}
+                                            {% else %}
+                                                <span class="text-muted fst-italic">---</span>
+                                            {% endif %}
+                                        {% endwith %}
                                     </td>
                                     <td>
                                         <small>{{ dataset.html_description_short }}</small>
