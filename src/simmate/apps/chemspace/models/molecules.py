@@ -21,7 +21,10 @@ class ChemSpaceFreedomSpaceMolecule(ThirdPartyData, Molecule):
 
     html_display_name = "ChemSpace Freedom"
     html_description_short = (
-        "A diverse set of 201M compounds, 73% of which comply with Ro5."
+        "A vast catalog of commercially available chemical building blocks and "
+        "lead-like compounds from ChemSpace. This dataset focuses on the "
+        "'Freedom Space'—a collection of billions of accessible molecules for "
+        "rapid procurement."
     )
     is_redistribution_allowed = False
 

@@ -19,10 +19,9 @@ class ChemicalSystemSearch(Calculation):
 
     html_display_name = "Chemical System Searches"
     html_description_short = (
-        "All evolutionary searches ran for a given chemical system (e.g. Na-Cl or Ca-N-Cl). "
-        "This are also known as variable composition searches, where both the composition "
-        " and total atom counts are allowed to change."
-        "This is essentially many variable nsites composition searches in one."
+        "Comprehensive searches across an entire chemical system (e.g., Na-Cl) "
+        "to identify all stable phases and compositions. This builds a complete "
+        "phase diagram by combining many fixed-composition searches."
     )
 
     class Meta:

@@ -22,7 +22,10 @@ class JarvisStructure(ThirdPartyData, Structure):
 
     html_display_name = "JARVIS"
     html_description_short = (
-        "Joint Automated Repository for Various Integrated Simulations"
+        "A collection of materials data for high-throughput discovery from "
+        "NIST's JARVIS project. This dataset focuses on 2D and 3D materials "
+        "with high-fidelity calculations of electronic, optical, and "
+        "mechanical properties."
     )
 
     html_entries_template = "jarvis/structures/table.html"

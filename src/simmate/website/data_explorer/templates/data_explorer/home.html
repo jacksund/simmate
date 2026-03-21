@@ -29,7 +29,7 @@
                             {% for dataset in datasets %}
                                 <tr>
                                     <td>
-                                        {% if dataset.is_redistribution_allowed or not LOCK_DATA_REDISTRIBUTION %}
+                                        {% if dataset.is_redistribution_allowed != False or not LOCK_DATA_REDISTRIBUTION %}
                                             {# the extra style is to make the link be the entire cell #}
                                             <a href="{% url 'data_explorer:table' dataset.table_name %}"
                                                style="display: block;

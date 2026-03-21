@@ -34,9 +34,10 @@ class EppoCode(ThirdPartyData, DatabaseTable):
 
     html_display_name = "EPPO Global Database"
     html_description_short = (
-        "EPPO codes and metadata for >95k species of interest to agriculture. "
-        "Codes are loaded 'lazily' from EPPO GD, and so this is not a complete list "
-        "of crops, pests, and pathogens."
+        "A standardized coding system for organisms, including plants, pests, "
+        "and pathogens, maintained by the European and Mediterranean Plant "
+        "Protection Organization (EPPO). These codes ensure unambiguous "
+        "identification in agricultural and biological research."
     )
     is_redistribution_allowed = True
 

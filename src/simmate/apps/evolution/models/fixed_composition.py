@@ -33,9 +33,10 @@ class FixedCompositionSearch(Calculation):
 
     html_display_name = "Fixed-Composition Searches"
     html_description_short = (
-        "All evolutionary searches ran for a given fixed-composition. "
-        "Fixed means the composition and atom count are the same for all "
-        "structures evaluated (e.g., Na1Cl1 or Ca4N2Cl1)."
+        "Evolutionary search results for discovering the most stable crystal "
+        "structure of a specific chemical formula. This workflow explores a "
+        "wide range of symmetries and configurations to find the global "
+        "energy minimum."
     )
 
     class Meta:

@@ -21,8 +21,9 @@ class PricedItem(DatabaseTable):
 
     html_display_name = "Market Data & Price Catalog"
     html_description_short = (
-        "Prices and economic indicators spanning common chemicals, stocks, "
-        "commodities, cryptocurrencies, and macroeconomic metrics."
+        "A catalog of prices and economic indicators spanning chemicals, "
+        "stocks, commodities, and more. This data helps in tracking the "
+        "costs of laboratory reagents and broader macroeconomic trends."
     )
 
     html_entries_template = "price_catalog/priced_items/table.html"

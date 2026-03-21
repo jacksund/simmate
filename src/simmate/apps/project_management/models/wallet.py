@@ -20,7 +20,9 @@ class Wallet(DatabaseTable):
 
     html_display_name = "Wallets"
     html_description_short = (
-        "Digital accounts that contain USDC or Token assets for budgeting and spending."
+        "Digital accounts that contain USDC or Token assets for budgeting "
+        "and spending. Wallets help track and limit the resources "
+        "allocated to specific projects or users."
     )
 
     html_entries_template = "project_management/wallet/table.html"

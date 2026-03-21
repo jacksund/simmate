@@ -21,8 +21,9 @@ class Spacegroup(DatabaseTable):
 
     html_display_name = "Symmetry Spacegroups"
     html_description_short = (
-        "Contains information for the 230 international spacegroups, also "
-        "known as Hermann-Mauguin notations."
+        "Mathematical descriptions of the symmetry present in crystalline "
+        "materials. Spacegroups categorize structures into 230 unique types "
+        "based on their translational and point symmetry operations."
     )
 
     html_entries_template = "workflow_explorer/static_energy/table.html"
