@@ -133,5 +133,8 @@
         {% include "core/footer.html" %}
         {# Sometimes we load extra javascript at the bottom of the page #}
         {% block extrafooter %}{% endblock %}
+        
+        {# Chat Bubble Component #}
+        {% htmx_component "chat-bubble" %}
     </body>
 </html>
