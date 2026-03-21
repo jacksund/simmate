@@ -7,6 +7,6 @@
            hx-post="{% url 'htmx:component' component.component_id %}"
            hx-encoding="multipart/form-data"
            {% if file_type %}accept="{{ file_type }}"{% endif %}
-           {% if not defer %}{% htmx_post %}{% endif %}
+           {% if not defer %}{% htmx_post indicator=indicator %}{% endif %}
            {% if allow_multiple %}multiple{% endif %}>
 </div>

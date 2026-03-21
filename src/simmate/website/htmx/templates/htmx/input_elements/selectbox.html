@@ -9,7 +9,7 @@
             {% if multiselect %}multiple="multiple"{% endif %}
             {% if popout_parent_id %}data-dropdown-parent="#{{ popout_parent_id }}"{% endif %}
             {% if not defer %}
-                {% htmx_post method_name=method_name trigger="select2-change" include=include %}
+                {% htmx_post indicator=indicator method_name=method_name trigger="select2-change" include=include %}
                 onchange="htmx.trigger(this, 'select2-change')"
             {% endif %}
             >

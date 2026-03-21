@@ -6,7 +6,7 @@
 {% endif %}
 hx-target="{{ target }}"
 hx-include="{{ include }}"
-hx-indicator="#loading-spinner"
+{% if indicator and indicator != "None" %}hx-indicator="{{ indicator }}"{% endif %}
 hx-swap="{{ swap }}"
 hx-trigger="{{ trigger }}"
 {# djlint:on #}

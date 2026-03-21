@@ -8,7 +8,7 @@
            rows="{{ nrows }}"
            placeholder="{{ placeholder }}"
            hx-preserve
-           {% if not defer %}{% htmx_post %}{% endif %}
+           {% if not defer %}{% htmx_post indicator=indicator %}{% endif %}
            {% if disabled %}disabled{% endif %}
            {% if required %}required{% endif %}>{% if current_value %}{{ current_value }}{% endif %}</textarea>
 </div>

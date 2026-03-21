@@ -109,6 +109,7 @@ def htmx_post(
     javascript_only: str = False,
     method_name: str = None,
     method_kwargs: dict = None,
+    indicator: str = "#loading-spinner-corner",
 ):
     if not component_id:
         # We may be in a nested context (e.g. htmx_post is called inside another
@@ -148,6 +149,7 @@ def htmx_text_input(
     dynamically_set: bool = False,
     defer: bool = True,
     required: bool = False,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a single-line text input widget.
@@ -173,6 +175,7 @@ def htmx_text_area(
     nrows: int = 4,
     defer: bool = True,
     required: bool = False,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a multi-line text input widget.
@@ -200,6 +203,7 @@ def htmx_number_input(
     step_size: float | int = None,
     defer: bool = True,
     required: bool = False,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a numeric input widget.
@@ -231,6 +235,7 @@ def htmx_checkbox(
     defer: bool = True,
     required: bool = False,
     switch_mode: bool = True,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a checkbox widget.
@@ -253,6 +258,7 @@ def htmx_radio(
     show_label: bool = True,
     defer: bool = True,
     required: bool = False,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a radio select widget.
@@ -284,6 +290,7 @@ def htmx_button_select(
     show_label: bool = True,
     defer: bool = True,
     required: bool = False,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a button select widget (i.e., a button group of options)
@@ -321,6 +328,7 @@ def htmx_selectbox(
     defer: bool = True,
     method_name: str = None,  # fxn_to_call -- presumes defer=False
     include: str = None,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a selectbox widget.
@@ -378,6 +386,7 @@ def htmx_button(
     include: str = None,
     target: str = None,
     grouped: bool = False,
+    indicator: str = "#loading-spinner-corner",
     **method_kwargs,
 ):
     """
@@ -432,6 +441,7 @@ def htmx_molecule_input(
     allow_custom_input: bool = False,
     custom_input_label: str = "Custom Input",
     custom_input_placeholder: str = "12345",
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a ChemDraw.js (or ChemDoodle.js) input widget.
@@ -492,6 +502,7 @@ def htmx_file_upload(
     defer: bool = False,
     file_type: str = None,  # only accept CSV files. Comma sep for others
     allow_multiple: bool = False,
+    indicator: str = "#loading-spinner-corner",
 ):
     """
     Display a file upload widget.
