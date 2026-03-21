@@ -3,8 +3,8 @@
 from django.apps import AppConfig
 
 
-class CoreComponentsConfig(AppConfig):
-    name = "simmate.website.core_components"
+class CoreConfig(AppConfig):
+    name = "simmate.website.core"
 
 
 class DataExplorerConfig(AppConfig):
@@ -15,8 +15,8 @@ class HtmxConfig(AppConfig):
     name = "simmate.website.htmx"
 
 
-class WorkflowsConfig(AppConfig):
-    name = "simmate.website.workflows"
+class WorkflowExplorerConfig(AppConfig):
+    name = "simmate.website.workflow_explorer"
 
 
 class TestAppConfig(AppConfig):

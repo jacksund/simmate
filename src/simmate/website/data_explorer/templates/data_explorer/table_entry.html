@@ -1,4 +1,4 @@
-{% extends "core_components/site_base.html" %}
+{% extends "core/site_base.html" %}
 {% block tabtitle %}{{ table_entry.table_name }} {{ table_entry.html_tabtitle_label }} - Simmate{% endblock %}
 {% block body %}
     {% include "data_explorer/table_entry_header.html" %}
@@ -6,25 +6,25 @@
     {% block entrycontent %}
         {# If no default page is et, then we iterate through the fundamental mixins and pull the proper components #}
         {% if "Calculation" in table_mixins %}
-            {% include "core_components/base_data_types/calculation.html" %}
+            {% include "core/base_data_types/calculation.html" %}
         {% endif %}
         {% if "Structure" in table_mixins %}
-            {% include "core_components/base_data_types/structure.html" %}
+            {% include "core/base_data_types/structure.html" %}
         {% endif %}
         {% if "Thermodynamics" in table_mixins %}
-            {% include "core_components/base_data_types/thermodynamics.html" %}
+            {% include "core/base_data_types/thermodynamics.html" %}
         {% endif %}
         {% if "Forces" in table_mixins %}
-            {% include "core_components/base_data_types/forces.html" %}
+            {% include "core/base_data_types/forces.html" %}
         {% endif %}
         {% if "BandStructure" in table_mixins %}
-            {% include "core_components/base_data_types/band-structure.html" %}
+            {% include "core/base_data_types/band-structure.html" %}
         {% endif %}
         {% if "DensityofStates" in table_mixins %}
-            {% include "core_components/base_data_types/density-of-states.html" %}
+            {% include "core/base_data_types/density-of-states.html" %}
         {% endif %}
         {% if "Molecule" in table_mixins %}
-            {% include "core_components/base_data_types/molecule.html" %}
+            {% include "core/base_data_types/molecule.html" %}
         {% endif %}
         {# Add any extra columns using default formatting #}
         {% if extra_columns %}

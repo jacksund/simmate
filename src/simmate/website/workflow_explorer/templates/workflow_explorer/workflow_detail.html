@@ -1,0 +1,25 @@
+{% extends "core/site_base.html" %}
+{% block tabtitle %}{{ workflow.name_full }} - Simmate{% endblock %}
+{% block body %}
+    <div class="text-center my-3">
+        <h1>
+            {% if workflow.is_recommended %}<i class="bi bi-patch-check text-primary"></i>{% endif %}
+            <span class="badge text-bg-primary">{{ workflow.name_full }}</span>
+            {% if workflow.is_recommended %}<i class="bi bi-patch-check text-primary"></i>{% endif %}
+        </h1>
+    </div>
+    <div>
+        {% include "workflow_explorer/for_detail/tabs_header.html" %}
+        <div class="tab-content">
+            {% simmate_setting "website.show_finances" as SHOW_FINANCES %}
+            {% include "workflow_explorer/for_detail/about_tab.html" %}
+            {% include "workflow_explorer/for_detail/config_tab.html" %}
+            {% include "workflow_explorer/for_detail/parameters_tab.html" %}
+            {% if SHOW_FINANCES %}
+                {% include "workflow_explorer/for_detail/pricing_tab.html" %}
+            {% endif %}
+            {% include "workflow_explorer/for_detail/results_tab.html" %}
+            {% include "workflow_explorer/for_detail/submit_tab.html" %}
+        </div>
+    </div>
+{% endblock %}

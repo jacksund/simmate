@@ -29,7 +29,8 @@ class Dynamics(Structure, Calculation):
     html_description_short = "Results for Molecular Dynamics Calculations"
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
+        db_table = "workflows_dynamics"
 
     temperature_start = table_column.IntegerField(blank=True, null=True)
     """
@@ -143,7 +144,8 @@ class DynamicsIonicStep(Structure, Thermodynamics, Forces):
     """
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
+        db_table = "workflows_dynamicsionicstep"
 
     archive_fields = ["number"]
 

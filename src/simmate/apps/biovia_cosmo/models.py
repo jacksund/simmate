@@ -7,6 +7,6 @@ from simmate.database.mixins import Calculation
 
 class LogPow(Molecule, Calculation):
     # class Meta:
-    #     app_label = "workflows"  <-- future app once open-sourced
+    #     app_label = "workflow_explorer"  <-- future app once open-sourced
 
     log_p = table_column.FloatField(null=True, blank=True)

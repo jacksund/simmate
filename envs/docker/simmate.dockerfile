@@ -75,4 +75,4 @@ CMD ["gunicorn", \
      "--worker-tmp-dir", "/dev/shm", \
      "--bind", "0.0.0.0:8000", \
      "--access-logfile", "gunicorn_logging.out", \
-     "simmate.website.core.wsgi"]
+     "simmate.website.server.wsgi"]

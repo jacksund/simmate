@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("core_components", "0001_initial"),
+        ("core", "0001_initial"),
     ]
 
     operations = [
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.PROTECT,
-                        to="core_components.spacegroup",
+                        to="core.spacegroup",
                     ),
                 ),
             ],
@@ -118,7 +118,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.PROTECT,
-                        to="core_components.spacegroup",
+                        to="core.spacegroup",
                     ),
                 ),
             ],
@@ -169,7 +169,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.PROTECT,
-                        to="core_components.spacegroup",
+                        to="core.spacegroup",
                     ),
                 ),
             ],
@@ -209,7 +209,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.PROTECT,
-                        to="core_components.spacegroup",
+                        to="core.spacegroup",
                     ),
                 ),
             ],
@@ -266,7 +266,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.PROTECT,
-                        to="core_components.spacegroup",
+                        to="core.spacegroup",
                     ),
                 ),
             ],
@@ -332,7 +332,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.PROTECT,
-                        to="core_components.spacegroup",
+                        to="core.spacegroup",
                     ),
                 ),
             ],

@@ -115,7 +115,8 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
     html_description_short = "Results for Density of States Calculations"
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
+        db_table = "workflows_densityofstatescalc"
 
     @classmethod
     def from_vasp_run(cls, vasprun: Vasprun, as_dict: bool = False):

@@ -10,7 +10,7 @@ Simmate does not do anything special with views—we use standard Django practic
 
 However, Simmate provides:
 
-1.  **A Base Template:** `core_components/site_base.html` provides the standard navbar, footer, and styling (Bootstrap, HTMX, Plotly, etc.).
+1.  **A Base Template:** `core/site_base.html` provides the standard navbar, footer, and styling (Bootstrap, HTMX, Plotly, etc.).
 2.  **Automatic Registration:** Your app's `urls.py` is automatically included in the main website.
 3.  **HTMX Integration:** Easily embed interactive components.
 
@@ -60,7 +60,7 @@ def home(request):
 In `my_app/templates/my_app/home.html`, extend the Simmate base template and fill in the `tabtitle` and `body` blocks.
 
 ```html+django
-{% extends "core_components/site_base.html" %}
+{% extends "core/site_base.html" %}
 
 {% block tabtitle %}My App Home - Simmate{% endblock %}
 
@@ -78,12 +78,12 @@ To add an interactive Simmate component to your view, follow these steps:
 
 1.  **Embed the component** using the `{% htmx_component %}` tag.
 
-Note that `core_components/site_base.html` already includes the HTMX library and necessary scripts. Furthermore, Simmate automatically loads the `htmx` and several other tag libraries for you, so you do not need to use `{% load htmx %}` in your templates.
+Note that `core/site_base.html` already includes the HTMX library and necessary scripts. Furthermore, Simmate automatically loads the `htmx` and several other tag libraries for you, so you do not need to use `{% load htmx %}` in your templates.
 
 ### Example Template with Component
 
 ```html+django
-{% extends "core_components/site_base.html" %}
+{% extends "core/site_base.html" %}
 
 {% block body %}
     <h1>My App Dashboard</h1>

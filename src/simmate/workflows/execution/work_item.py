@@ -23,7 +23,7 @@ class WorkItem(DatabaseTable):
     """
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
         db_table = "workflow_engine__work_items"
 
     # -------------------------------------------------------------------------
@@ -34,8 +34,8 @@ class WorkItem(DatabaseTable):
         "For workflows, 1 call to workflow.run_cloud = 1 work item."
     )
 
-    html_entries_template = "workflows/work_items/table.html"
-    # html_entry_template = "workflows/work_items//view.html"
+    html_entries_template = "workflow_explorer/work_items/table.html"
+    # html_entry_template = "workflow_explorer/work_items//view.html"
 
     # -------------------------------------------------------------------------
 
@@ -114,7 +114,7 @@ class WorkItem(DatabaseTable):
     # -------------------------------------------------------------------------
 
     worker = table_column.ForeignKey(
-        "workflows.SimmateWorker",
+        "workflow_explorer.SimmateWorker",
         on_delete=table_column.SET_NULL,
         related_name="work_items",
         blank=True,

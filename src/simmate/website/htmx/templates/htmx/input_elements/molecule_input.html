@@ -1,5 +1,5 @@
 <div class="my-2">
-    {% include "core_components/basic_elements/label.html" %}
+    {% include "core/basic_elements/label.html" %}
     {% if molecule is None %}
         {% if many_molecules %}
             {% alert theme="danger" message="This section assumes all individual components are their own molecule, which means it will incorrectly split up salts and make things like Na+ or Cl- their own entries. Until this is fixed, avoid using the create_many form for such compounds." %}

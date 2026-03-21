@@ -47,15 +47,16 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
     """
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
+        db_table = "workflows_relaxation"
 
     # -------------------------------------------------------------------------
 
     html_display_name = "Relaxation"
     html_description_short = "Results for Relaxation Calculations"
 
-    html_entries_template = "workflows/relaxation/table.html"
-    html_entry_template = "workflows/relaxation/view.html"
+    html_entries_template = "workflow_explorer/relaxation/table.html"
+    html_entry_template = "workflow_explorer/relaxation/view.html"
 
     # -------------------------------------------------------------------------
 
@@ -358,7 +359,8 @@ class IonicStep(Structure, Thermodynamics, Forces):
     """
 
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
+        db_table = "workflows_ionicstep"
 
     archive_fields = ["number"]
 

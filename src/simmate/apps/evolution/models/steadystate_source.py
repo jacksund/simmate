@@ -14,7 +14,8 @@ from simmate.workflows.execution import WorkItem
 
 class SteadystateSource(DatabaseTable):
     class Meta:
-        app_label = "workflows"
+        app_label = "workflow_explorer"
+        db_table = "workflows_steadystatesource"
 
     name = table_column.CharField(max_length=50)
     kwargs = table_column.JSONField(default=dict)

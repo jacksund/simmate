@@ -12,7 +12,7 @@ class FingerprintPool(DatabaseTable):
     """
 
     class Meta:
-        app_label = "core_components"
+        app_label = "core"
         # unique_together = ["method", "init_kwargs", "database_table"]
 
     method = table_column.JSONField(blank=True, null=True)
@@ -44,7 +44,7 @@ class Fingerprint(DatabaseTable):
     """
 
     class Meta:
-        app_label = "core_components"
+        app_label = "core"
 
     database_id = table_column.IntegerField(blank=True, null=True)
     """
