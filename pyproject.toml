@@ -84,11 +84,11 @@ chatbot = [
     "langchain-openai>=1.1.10,<2.0.0",
     "ddgs>=9.11.1,<10.0.0",
 ]
+clease = [
+    "clease>=1.2.0,<2.0.0",
+]
 jarvis = [
     "jarvis-tools>=2026.1.10",
-]
-price_catalog = [
-    "yfinance>=1.2.0,<2.0.0",
 ]
 lab_automation = [
     "opencv-python>=4.13.0.92",
