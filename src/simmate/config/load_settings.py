@@ -186,7 +186,6 @@ class SimmateSettings:
                 "simmate.apps.configs.EvolutionConfig",
                 "simmate.apps.configs.InventoryManagementConfig",
                 "simmate.apps.configs.JarvisConfig",
-                "simmate.apps.configs.LabAutomationConfig",
                 "simmate.apps.configs.MaterialsProjectConfig",
                 "simmate.apps.configs.OqmdConfig",
                 "simmate.apps.configs.PdbConfig",
