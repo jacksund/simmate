@@ -7,7 +7,7 @@ from simmate.database.core import DatabaseTable
 from simmate.toolkit import Structure
 from simmate.website.htmx.components import HtmxComponent
 from simmate.workflows.core import Workflow
-from simmate.workflows.utilities import get_workflow
+from simmate.workflows.utils import get_workflow
 
 
 class WorkflowSubmissionForm(HtmxComponent):

@@ -7,7 +7,7 @@ from rich.progress import track
 
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.toolkit.visualization.plotting import PlotlyFigure
-from simmate.utilities import get_chemical_subsystems
+from simmate.utils import get_chemical_subsystems
 
 from ..core import DatabaseTable, table_column
 

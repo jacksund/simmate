@@ -10,10 +10,10 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonRes
 from django.shortcuts import render
 
 from simmate.toolkit import Molecule, Structure
-from simmate.utilities import dotdict, str_to_datatype
-from simmate.website.utilities import parse_request_get
+from simmate.utils import dotdict, str_to_datatype
+from simmate.website.utils import parse_request_get
 
-from .utilities import get_uuid_starting_with_letter, htmx_redirect
+from .utils import get_uuid_starting_with_letter, htmx_redirect
 
 LOCAL_COMPONENT_CACHE = LRUCache(maxsize=10_000)
 

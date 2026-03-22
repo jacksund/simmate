@@ -8,7 +8,7 @@ from rich.progress import track
 
 from simmate.database.core import DatabaseTable, table_column
 from simmate.database.mixins import ThirdPartyData
-from simmate.utilities import chunk_list, get_hash_key
+from simmate.utils import chunk_list, get_hash_key
 
 from .molecules import EmoleculesMolecule
 

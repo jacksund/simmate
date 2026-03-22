@@ -26,7 +26,7 @@ def start(
     """
     Sets up a Postgres database using Docker
     """
-    from simmate.database.utilities import start_postgres_docker
+    from simmate.database.utils import start_postgres_docker
 
     start_postgres_docker(password=password, port=port)
 
@@ -36,7 +36,7 @@ def stop():
     """
     Stops and removes the Postgres database container
     """
-    from simmate.database.utilities import stop_postgres_docker
+    from simmate.database.utils import stop_postgres_docker
 
     stop_postgres_docker()
 
@@ -81,7 +81,7 @@ def reset(confirm_delete: bool = False, use_prebuilt: bool = None):
         )
 
     from simmate.database import connect
-    from simmate.database.utilities import reset_database
+    from simmate.database.utils import reset_database
 
     reset_database(use_prebuilt=use_prebuilt)
 
@@ -91,7 +91,7 @@ def update():
     """Updates the database with any changes made"""
 
     from simmate.database import connect
-    from simmate.database.utilities import update_database
+    from simmate.database.utils import update_database
 
     update_database()
 
@@ -103,7 +103,7 @@ def download(app_name: str):
     """
 
     from simmate.database import connect
-    from simmate.database.utilities import download_app_data
+    from simmate.database.utils import download_app_data
 
     download_app_data(app_name)
 
@@ -117,7 +117,7 @@ def dump_data(filename: Path = "database_dump.json", exclude: list[str] = []):
     """
 
     from simmate.database import connect
-    from simmate.database.utilities import dump_database_to_json
+    from simmate.database.utils import dump_database_to_json
 
     dump_database_to_json(filename=filename, exclude=exclude)
 
@@ -131,6 +131,6 @@ def load_data(filename: Path = "database_dump.json"):
     """
 
     from simmate.database import connect
-    from simmate.database.utilities import load_database_from_json
+    from simmate.database.utils import load_database_from_json
 
     load_database_from_json(filename=filename)

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from simmate.utilities import str_to_datatype
+from simmate.utils import str_to_datatype
 
 
 class OmegaParm(dict):

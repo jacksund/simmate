@@ -9,7 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.timezone import datetime, now, timedelta
 
 from simmate.config import settings
-from simmate.database.utilities import check_db_conn
+from simmate.database.utils import check_db_conn
 
 
 class SearchResults(models.QuerySet):

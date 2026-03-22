@@ -106,7 +106,7 @@ def start_cluster(
 
     """
 
-    from simmate.workflows.execution.utilities import start_cluster
+    from simmate.workflows.execution.utils import start_cluster
 
     start_cluster(
         nworkers=nworkers,

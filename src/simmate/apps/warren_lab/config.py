@@ -2,7 +2,7 @@
 
 from simmate.apps.baderkit.config import test_config as test_bader_config
 from simmate.apps.vasp.config import test_config as test_vasp_config
-from simmate.config.utilities import check_app_reg, show_test_results
+from simmate.config.utils import check_app_reg, show_test_results
 
 
 def test_config(run_calcs: bool = False):

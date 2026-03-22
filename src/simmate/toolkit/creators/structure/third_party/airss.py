@@ -5,7 +5,7 @@ import subprocess
 
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.structure.base import StructureCreator
-from simmate.utilities import get_directory
+from simmate.utils import get_directory
 
 
 class AirssStructure(StructureCreator):

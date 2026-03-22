@@ -3,7 +3,7 @@
 import logging
 
 from simmate.apps.vasp.inputs.potcar_mappings import FOLDER_MAPPINGS
-from simmate.config.utilities import (
+from simmate.config.utils import (
     check_app_reg,
     check_command_exists,
     show_test_results,

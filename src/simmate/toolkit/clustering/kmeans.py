@@ -5,7 +5,7 @@ from sklearn.cluster import KMeans as sk_KMeans
 from sklearn.cluster import kmeans_plusplus
 
 from .base import ClusteringEngine
-from .utilities import unflatten_cluster_ids
+from .utils import unflatten_cluster_ids
 
 
 class Kmeans(ClusteringEngine):

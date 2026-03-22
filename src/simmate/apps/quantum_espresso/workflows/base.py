@@ -10,7 +10,7 @@ from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
 )
 from simmate.config import settings
 from simmate.toolkit import Structure
-from simmate.utilities import get_docker_command
+from simmate.utils import get_docker_command
 from simmate.workflows.common import S3Workflow, StructureWorkflow
 
 

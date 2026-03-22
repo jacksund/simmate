@@ -10,7 +10,7 @@ from django.db import transaction
 from rich import print
 
 from simmate.database.core import DatabaseTable, table_column
-from simmate.utilities import get_class
+from simmate.utils import get_class
 
 from .work_item import WorkItem
 

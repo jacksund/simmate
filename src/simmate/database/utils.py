@@ -11,7 +11,7 @@ from django.core.management import call_command
 from django.db.utils import DatabaseError
 
 from simmate.config import settings
-from simmate.utilities import get_directory
+from simmate.utils import get_directory
 
 # Lists off which apps to update/create. By default, I do all apps that are installed
 # so this list is grabbed directly from django. I also grab the CUSTOM_APPS to
@@ -217,7 +217,7 @@ def reset_database(
     # instead of building the database from scratch, we instead download a
     # prebuilt database file.
     if settings.database_backend == "sqlite3" and use_prebuilt:
-        from simmate.database.utilities import load_default_sqlite3_build
+        from simmate.database.utils import load_default_sqlite3_build
 
         logging.info("Setting up prebuilt database...")
         load_default_sqlite3_build()
@@ -330,7 +330,7 @@ def get_table(table_name: str):  # returns subclass of DatabaseTable
 
     This is a wrapper around the `DatabaseTable.get_table` method. We make it
     available within the utils to match the pattern of the
-    `worklfows.utilities.get_workflow` utility that is commonly used elsewhere
+    `worklfows.utils.get_workflow` utility that is commonly used elsewhere
     """
 
     # local import is required to prevent circular dep. This is also a higher

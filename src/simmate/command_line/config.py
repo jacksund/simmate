@@ -14,7 +14,7 @@ config_app = typer.Typer(rich_markup_mode="markdown")
 
 
 @config_app.callback(no_args_is_help=True)
-def utilities():
+def config():
     """
     A group of commands for managing Simmate settings
     """

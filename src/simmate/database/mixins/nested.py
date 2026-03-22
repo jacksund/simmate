@@ -60,7 +60,7 @@ class NestedCalculation(Structure, Calculation):
 
     @property
     def subworkflows(self):
-        from simmate.workflows.utilities import get_workflow
+        from simmate.workflows.utils import get_workflow
 
         subworkflow_names = self.subworkflow_names
         return [get_workflow(name) for name in subworkflow_names]

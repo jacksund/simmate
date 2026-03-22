@@ -60,7 +60,7 @@ Simmate comes with ready-to-use workflows for most common calculated properties,
 
 === "python"
     ``` python
-    from simmate.workflows.utilities import get_workflow
+    from simmate.workflows.utils import get_workflow
     
     workflow = get_workflow("relaxation.vasp.matproj")
     result = workflow.run(structure="NaCl.cif")

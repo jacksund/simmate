@@ -6,7 +6,7 @@ from inspect import getmembers, isclass
 from django.utils.module_loading import import_string
 
 from simmate.config import settings
-from simmate.utilities import get_app_submodule
+from simmate.utils import get_app_submodule
 
 from .components import HtmxComponent
 

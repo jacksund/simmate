@@ -7,7 +7,7 @@ from django_pandas.io import read_frame
 from sklearn.model_selection import train_test_split
 
 from simmate.toolkit import Composition, Structure
-from simmate.utilities import get_directory
+from simmate.utils import get_directory
 
 
 class DeepmdDataset:

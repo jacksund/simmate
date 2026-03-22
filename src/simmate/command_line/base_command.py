@@ -12,7 +12,7 @@ import typer
 from simmate.command_line.config import config_app
 from simmate.command_line.database import database_app
 from simmate.command_line.engine import engine_app
-from simmate.command_line.utilities import utilities_app
+from simmate.command_line.utils import utils_app
 from simmate.command_line.workflows import workflows_app
 
 simmate_app = typer.Typer(
@@ -39,7 +39,7 @@ def version():
     Prints the version of simmate that is installed.
     """
     import simmate
-    from simmate.utilities import get_latest_version
+    from simmate.utils import get_latest_version
 
     print(f"Installed version: v{simmate.__version__}")
     print(f"Newest available: v{get_latest_version()}")
@@ -110,4 +110,4 @@ simmate_app.add_typer(config_app, name="config")
 simmate_app.add_typer(database_app, name="database")
 simmate_app.add_typer(engine_app, name="engine")
 simmate_app.add_typer(workflows_app, name="workflows")
-simmate_app.add_typer(utilities_app, name="utilities")
+simmate_app.add_typer(utils_app, name="utils")

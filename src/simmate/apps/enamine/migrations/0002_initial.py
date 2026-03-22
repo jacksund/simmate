@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 
-from simmate.apps.rdkit.utilities import get_rdkit_ext_fields
+from simmate.apps.rdkit.utils import get_rdkit_ext_fields
 
 
 class Migration(migrations.Migration):

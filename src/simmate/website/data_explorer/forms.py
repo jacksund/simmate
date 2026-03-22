@@ -2,7 +2,7 @@
 
 from django import forms
 
-from simmate.utilities import get_chemical_subsystems
+from simmate.utils import get_chemical_subsystems
 
 # NOTE TO DEV: This form is a special case where we are searching MANY tables
 # for information -- so it is therefore not a ModelForm and cannot use

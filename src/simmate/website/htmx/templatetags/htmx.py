@@ -6,9 +6,9 @@ import urllib
 from django import template
 from django.template.loader import render_to_string
 
-from simmate.website.utilities import hash_options
+from simmate.website.utils import hash_options
 
-from ..utilities import get_component
+from ..utils import get_component
 
 register = template.Library()
 

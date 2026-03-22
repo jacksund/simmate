@@ -8,7 +8,7 @@ from pathlib import Path
 from simmate.database.core import table_column
 from simmate.database.mixins import Calculation
 from simmate.toolkit import Composition
-from simmate.utilities import get_chemical_subsystems, get_directory
+from simmate.utils import get_chemical_subsystems, get_directory
 
 # BUG: This prints a tqdm error so we silence it here.
 with warnings.catch_warnings(record=True):
@@ -72,7 +72,7 @@ class ChemicalSystemSearch(Calculation):
 
     @property
     def subworkflow(self):
-        from simmate.workflows.utilities import get_workflow
+        from simmate.workflows.utils import get_workflow
 
         return get_workflow(self.subworkflow_name)
 

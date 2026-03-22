@@ -15,7 +15,7 @@ Note, there is also a high-level utility for this, which can be easier to
 remember:
 
 ``` python
-from simmate.utilities import get_dask_client
+from simmate.utils import get_dask_client
 client = get_dask_client()
 """
 

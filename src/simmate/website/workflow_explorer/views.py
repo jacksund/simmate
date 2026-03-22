@@ -2,7 +2,7 @@
 
 from django.shortcuts import render
 
-from simmate.workflows.utilities import get_workflow
+from simmate.workflows.utils import get_workflow
 
 
 def home(request):

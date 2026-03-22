@@ -18,8 +18,8 @@ from django.urls import resolve, reverse
 from django.utils.module_loading import import_string
 
 from simmate.config import settings
-from simmate.database.utilities import check_db_conn
-from simmate.utilities import get_attributes_doc
+from simmate.database.utils import check_db_conn
+from simmate.utils import get_attributes_doc
 
 from .archive import ArchiveMixin
 from .html_mixin import HTMLMixin
@@ -370,7 +370,7 @@ class DatabaseTable(models.Model, HTMLMixin, ArchiveMixin):
 
         # EXPERIMNETAL: adding workflow URL
         try:
-            from simmate.workflows.utilities import get_workflow
+            from simmate.workflows.utils import get_workflow
 
             from .calculation import Calculation
 
@@ -849,7 +849,7 @@ class DatabaseTable(models.Model, HTMLMixin, ArchiveMixin):
         # became too verbose and tedious. You'd need to list out "gt", "gte", and
         # any other field lookups allowed for EACH field... In practice, we want
         # to just allow anything and trust the user follows the docs correctly.
-        from simmate.website.utilities import parse_request_get
+        from simmate.website.utils import parse_request_get
 
         get_kwargs = parse_request_get(
             request,

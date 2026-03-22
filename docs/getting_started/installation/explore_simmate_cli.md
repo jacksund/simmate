@@ -25,7 +25,7 @@ The following output should be displayed:
 │ engine         A group of commands for starting up computational resources                 │
 │                (Workers, Clusters, and Schedulers)                                         │
 │ workflows      A group of commands for running workflows or viewing their settings         │
-│ utilities      A group of commands for various simple tasks (such as file handling)        │
+│ utils          A group of commands for various simple tasks (such as file handling)        │
 ╰────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 

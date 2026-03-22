@@ -4,8 +4,8 @@ from django.shortcuts import get_object_or_404, render
 
 from simmate.config import settings
 from simmate.database.core import DatabaseTable
-from simmate.database.utilities import get_table
-from simmate.website.utilities import get_pagination_urls
+from simmate.database.utils import get_table
+from simmate.website.utils import get_pagination_urls
 
 # -----------------------------------------------------------------------------
 

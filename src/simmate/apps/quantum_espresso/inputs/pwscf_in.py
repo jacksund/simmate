@@ -19,7 +19,7 @@ from simmate.apps.quantum_espresso.inputs.pwscf_in_modifiers import (
     keyword_modifier_smart_smear,
 )
 from simmate.toolkit import Structure
-from simmate.utilities import str_to_datatype
+from simmate.utils import str_to_datatype
 
 
 class PwscfInput:

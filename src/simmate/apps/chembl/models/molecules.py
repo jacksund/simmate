@@ -12,7 +12,7 @@ from simmate.config import settings
 from simmate.database.core import table_column
 from simmate.database.mixins import ThirdPartyData
 from simmate.toolkit import Molecule as ToolkitMolecule
-from simmate.utilities import download_file, get_directory
+from simmate.utils import download_file, get_directory
 
 
 class ChemblMolecule(ThirdPartyData, Molecule):

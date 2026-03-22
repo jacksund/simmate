@@ -21,7 +21,7 @@ from simmate.database.mixins import Calculation
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.validators import fingerprint as validator_module
 from simmate.toolkit.visualization.plotting import PlotlyFigure
-from simmate.utilities import get_directory
+from simmate.utils import get_directory
 from simmate.workflows.execution import WorkItem
 
 
@@ -167,7 +167,7 @@ class FixedCompositionSearch(Calculation):
         from simmate.apps.evolution.singleshot_sources.substitution import (
             get_structures_from_substitution_of_known,
         )
-        from simmate.apps.evolution.workflows.utilities import (
+        from simmate.apps.evolution.workflows.utils import (
             write_and_submit_structures,
         )
 
@@ -397,7 +397,7 @@ class FixedCompositionSearch(Calculation):
     @property
     def subworkflow(self):
         # local import to prevent circular import issues
-        from simmate.workflows.utilities import get_workflow
+        from simmate.workflows.utils import get_workflow
 
         # Initialize the workflow if a string was given.
         # Otherwise we should already have a workflow class.

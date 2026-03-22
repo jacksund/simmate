@@ -124,7 +124,7 @@ def explore(include_subflows: bool = False):
     # string, so we save this up front
     prefix = "\n\n[bold green]"
 
-    from simmate.workflows.utilities import (
+    from simmate.workflows.utils import (
         get_all_workflow_types,
         get_apps_by_type,
         get_workflow,
@@ -194,7 +194,7 @@ def list_all(include_subflows: bool = False):
     This lists off all available workflows.
     """
 
-    from simmate.workflows.utilities import get_all_workflow_names
+    from simmate.workflows.utils import get_all_workflow_names
 
     print("These are the workflows that have been registered:")
     all_workflows = get_all_workflow_names(exclude_subflows=not include_subflows)
@@ -212,7 +212,7 @@ def show_config(workflow_name: str):
     INCAR settings are selected.
     """
 
-    from simmate.workflows.utilities import get_workflow
+    from simmate.workflows.utils import get_workflow
 
     workflow = get_workflow(workflow_name)
 
@@ -232,7 +232,7 @@ def setup_only(context: Context, workflow_name: str):
     This is useful when you just want the input files to view/edit.
     """
 
-    from simmate.workflows.utilities import get_workflow
+    from simmate.workflows.utils import get_workflow
 
     workflow = get_workflow(workflow_name)
     kwargs_input = parse_parameters(context=context)
@@ -240,7 +240,7 @@ def setup_only(context: Context, workflow_name: str):
 
     # if no folder was given, just name it after the workflow. We also replace
     # spaces with underscores
-    from simmate.utilities import get_directory
+    from simmate.utils import get_directory
 
     directory = kwargs_cleaned.get("directory", None)
     if not directory:
@@ -276,7 +276,7 @@ def setup_only(context: Context, workflow_name: str):
 def run_quick(context: Context, workflow_name: str):
     """Runs a workflow using provided parameters as CLI arguments"""
 
-    from simmate.workflows.utilities import get_workflow
+    from simmate.workflows.utils import get_workflow
 
     workflow = get_workflow(workflow_name)
     kwargs_cleaned = parse_parameters(context=context)

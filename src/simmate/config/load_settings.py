@@ -7,7 +7,7 @@ import yaml
 
 import simmate
 from simmate import website  # needed to specify location of built-in apps
-from simmate.utilities import (
+from simmate.utils import (
     deep_update,
     dotdict,
     get_directory,

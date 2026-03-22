@@ -6,7 +6,7 @@ from pathlib import Path
 from rich.progress import track
 
 from simmate.toolkit import Structure
-from simmate.utilities import get_directory
+from simmate.utils import get_directory
 
 
 def write_and_submit_structures(

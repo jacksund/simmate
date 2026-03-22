@@ -17,7 +17,7 @@ from django.utils import timezone
 import simmate
 from simmate.config import settings
 from simmate.database.mixins import Calculation
-from simmate.utilities import (
+from simmate.utils import (
     copy_directory,
     copy_files_from_directory,
     get_directory,
@@ -369,7 +369,7 @@ class Workflow:
         if "workflow_name" in parameters.keys():
             # we are loading an external workflow, which will depend on this base
             # class. We need a local import to prevent circular-import bug.
-            from simmate.workflows.utilities import get_workflow
+            from simmate.workflows.utils import get_workflow
 
             workflow = get_workflow(
                 # we pop the workflow name so that it is also removed from the
@@ -1170,7 +1170,7 @@ class Workflow:
         if "workflow_base" in parameters.keys():
             # This is a non-modular import that can cause issues and slower
             # run times. We therefore import lazily.
-            from simmate.workflows.utilities import get_workflow
+            from simmate.workflows.utils import get_workflow
 
             # Make sure we have a workflow object
             parameters_cleaned["workflow_base"] = (

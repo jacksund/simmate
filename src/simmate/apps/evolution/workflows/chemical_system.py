@@ -17,10 +17,10 @@ from simmate.apps.evolution.singleshot_sources.prototypes import (
 from simmate.apps.evolution.workflows.fixed_composition import (
     StructurePrediction__Toolkit__FixedComposition,
 )
-from simmate.apps.evolution.workflows.utilities import write_and_submit_structures
+from simmate.apps.evolution.workflows.utils import write_and_submit_structures
 from simmate.toolkit import Composition
 from simmate.workflows import Workflow
-from simmate.workflows.utilities import get_workflow
+from simmate.workflows.utils import get_workflow
 
 
 class StructurePrediction__Toolkit__ChemicalSystem(Workflow):

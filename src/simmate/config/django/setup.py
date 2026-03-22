@@ -6,7 +6,7 @@ import os
 import django
 from django.conf import settings
 
-from simmate.utilities import check_if_using_latest_version
+from simmate.utils import check_if_using_latest_version
 
 
 def setup_django():

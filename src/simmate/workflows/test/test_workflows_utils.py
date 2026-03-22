@@ -4,7 +4,7 @@ import pytest
 
 from simmate.conftest import copy_test_files
 from simmate.workflows import Workflow
-from simmate.workflows.utilities import (
+from simmate.workflows.utils import (
     get_all_workflow_names,
     get_all_workflow_types,
     get_apps_by_type,
