@@ -18,8 +18,8 @@ class ChatBubble(HtmxComponent):
             self.chat_history = [
                 {
                     "sender": "bot",
-                    "text": "Hi there! How can we improve Simmate? Please leave your feedback or report any issues here.",
-                }
+                    "text": "Hi there! Please leave your feedback or report any issues here.",
+                },
             ]
 
     def toggle_chat(self):
@@ -44,7 +44,7 @@ class ChatBubble(HtmxComponent):
         self.chat_history.append(
             {
                 "sender": "bot",
-                "text": "Thank you for your feedback! It has been recorded.",
+                "text": "Thank you for your feedback! It has been recorded, and I have notified our team.",
             }
         )
 
