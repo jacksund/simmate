@@ -20,7 +20,7 @@ This script demonstrates how to run a single VASP relaxation using Simmate. We l
 
 ``` python
 from simmate.toolkit import Structure
-from simmate.workflows.utilities import get_workflow
+from simmate.workflows.utils import get_workflow
 
 # 1. Create a sample CIF file for this example
 # Normally you would already have a 'NaCl.cif' file.

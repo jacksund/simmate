@@ -9,7 +9,7 @@ from django.shortcuts import render
 from simmate.config.django import settings
 from simmate.toolkit import Structure
 from simmate.toolkit.visualization.structure.blender import make_blender_structure
-from simmate.utilities import get_directory
+from simmate.utils import get_directory
 
 
 def structure_viewer(request):

@@ -9,7 +9,7 @@ In the "Workflow" tutorial, we executed a calculation and stored the results in 
 The results database table is always linked to the workflow via the `database_table` attribute. Here's how to load it:
 
 ```python
-from simmate.workflows.utilities import get_workflow
+from simmate.workflows.utils import get_workflow
 
 workflow = get_workflow("static-energy.quantum-espresso.quality00")
 table = workflow.database_table

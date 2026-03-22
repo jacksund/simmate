@@ -3,7 +3,7 @@
 from django.http import HttpResponseRedirect
 
 from simmate.website.htmx.components import HtmxComponent
-from simmate.workflows.utilities import get_all_workflows
+from simmate.workflows.utils import get_all_workflows
 
 
 class WorkflowSearchForm(HtmxComponent):

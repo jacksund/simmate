@@ -8,11 +8,11 @@ from rdkit.Chem import rdSubstructLibrary
 from rich.progress import track
 
 from simmate.toolkit import Molecule, Reaction
-from simmate.utilities import filter_polars_df
+from simmate.utils import filter_polars_df
 
 from ..clustering import ClusteringEngine
 from ..featurizers import PatternFingerprint
-from ..featurizers.utilities import load_rdkit_fingerprint_from_base64
+from ..featurizers.utils import load_rdkit_fingerprint_from_base64
 from ..filters import AllowedElements
 from ..mapping import ChemSpaceMapper
 

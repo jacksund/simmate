@@ -113,6 +113,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - massive documentation overhaul, including new guides for contributing, website setup, and full guide series
 - refactored `engine` module into `workflows` to consolidate logic
 - renamed the internal `config` module for better organization
+- renamed all `utilities` modules and directories to `utils` throughout the codebase and updated all technical references in documentation
 - updated workflow columns in the database for enhanced metadata tracking
 - removed legacy `{conda_env}` support from configuration and database naming in favor of `SIMMATE_CONFIG_DIR`
 - refactor `htmx` template tags and components for better modularity
@@ -458,7 +459,7 @@ of empty sites
 - improve the warning associated with workflow failure because of "command not found" issues
 - workers now ignore and reset tasks that fail with "command not found". 2 workers failing with this error will result in the WorkItem being canceled
 - `RandomWySites` can now generate wyckoff combinations lazily (or up front) depending on use case
-- add `simmate utilities` command group with `archive-old-runs`
+- add `simmate.utils` command group with `archive-old-runs`
 - add `start-cluster` command for starting many local workers
 - add `structure-prediction` workflows
 - add plotting/output utilities to `EvolutionarySearch` and `relaxation.vasp.staged`
@@ -520,7 +521,7 @@ of empty sites
 
 - refactor `start-worker` command to use prefect instead of the experimental django executor
 - remove experimental `workflow_engine.executor`
-- move contents of `configuration.django.database` to `database.utilities`
+- move contents of `configuration.django.database` to `database.utils`
 - upgraded to Prefect v2 ("Orion"). This involved the refactoring the entire `workflow_engine` module, and therefore the entire workflow library. ([#185](https://github.com/jacksund/simmate/pull/185)).
 
 

@@ -9,18 +9,18 @@ from pathlib import Path
 
 import typer
 
-utilities_app = typer.Typer(rich_markup_mode="markdown")
+utils_app = typer.Typer(rich_markup_mode="markdown")
 
 
-@utilities_app.callback(no_args_is_help=True)
-def utilities():
+@utils_app.callback(no_args_is_help=True)
+def utils():
     """
     A group of commands for various simple tasks (such as file handling)
     """
     pass
 
 
-@utilities_app.command()
+@utils_app.command()
 def archive_old_runs(
     directory: Path = Path.cwd(),
     time_cutoff: float = 3 * 7 * 24 * 60 * 60,  # equal to 3 weeks
@@ -34,6 +34,6 @@ def archive_old_runs(
     order to consider the run "old"
     """
 
-    from simmate.utilities import archive_old_runs
+    from simmate.utils import archive_old_runs
 
     archive_old_runs(directory, time_cutoff)

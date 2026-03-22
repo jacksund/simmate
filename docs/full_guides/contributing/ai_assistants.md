@@ -34,7 +34,7 @@ simmate/
 │       ├── config/         # Django/Simmate settings (Source of truth: load_settings.py)
 │       ├── database/       # Django models and ORM infrastructure
 │       ├── toolkit/        # Scientific objects (Structure, Molecule, etc.)
-│       ├── utilities/      # General helper functions
+│       ├── utils/      # General helper functions
 │       ├── website/        # Django-based UI (and custom HTMX utils)
 │       ├── workflows/      # Core workflow engine and execution logic
 │       ├── conftest.py     # Shared Pytest fixtures

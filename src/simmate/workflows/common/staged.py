@@ -155,7 +155,7 @@ class StagedWorkflow(Workflow):
     @cache
     def subworkflows(cls):
         # import locally to avoid circular import
-        from simmate.workflows.utilities import get_workflow
+        from simmate.workflows.utils import get_workflow
 
         workflows = []
         for name in cls.subworkflow_names:

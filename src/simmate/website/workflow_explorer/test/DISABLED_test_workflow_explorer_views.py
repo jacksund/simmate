@@ -5,7 +5,7 @@ from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
 
 from simmate.workflows import Workflow
-from simmate.workflows.utilities import (
+from simmate.workflows.utils import (
     get_all_workflow_names,
     get_all_workflow_types,
     get_workflow,

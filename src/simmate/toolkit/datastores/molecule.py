@@ -7,7 +7,7 @@ import polars
 
 from simmate.config import settings
 from simmate.toolkit import Molecule
-from simmate.utilities import chunk_list, filter_polars_df, get_directory
+from simmate.utils import chunk_list, filter_polars_df, get_directory
 
 from ..dataframes import MoleculeDataFrame
 from ..featurizers import (
@@ -16,7 +16,7 @@ from ..featurizers import (
     PatternFingerprint,
     PropertyGrabber,
 )
-from ..featurizers.utilities import load_rdkit_fingerprint_from_base64
+from ..featurizers.utils import load_rdkit_fingerprint_from_base64
 
 
 class MoleculeStore:

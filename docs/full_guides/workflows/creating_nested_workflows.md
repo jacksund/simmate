@@ -43,7 +43,7 @@ You can also manually chain workflows within a `run_config` method. This is usef
 ### Transferring Results
 
 ``` python
-from simmate.workflows.utilities import get_workflow
+from simmate.workflows.utils import get_workflow
 from simmate.workflows import Workflow
 
 class Example__Python__CustomChain(Workflow):
@@ -86,7 +86,7 @@ class Example__Python__FileTransfer(Workflow):
 For situations where you don't want to wait for each workflow run to finish or need to submit hundreds of independent workflow runs, use the `run_cloud` command instead of `run`.
 
 ``` python
-from simmate.workflows.utilities import get_workflow
+from simmate.workflows.utils import get_workflow
 from simmate.workflows import Workflow
 
 class Example__Python__MyFavoriteSettings(Workflow):

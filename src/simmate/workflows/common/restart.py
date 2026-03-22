@@ -4,8 +4,8 @@ from pathlib import Path
 
 import yaml
 
-from simmate.utilities import copy_directory
-from simmate.workflows.utilities import get_workflow
+from simmate.utils import copy_directory
+from simmate.workflows.utils import get_workflow
 
 from ..core import Workflow
 

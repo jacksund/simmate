@@ -3,7 +3,7 @@
 from schedule import every, repeat
 
 from simmate.config import settings
-from simmate.database.utilities import get_table
+from simmate.database.utils import get_table
 
 from .models import TableCount
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.utilities import bypass_nones
+from simmate.utils import bypass_nones
 
 
 def test_bypass_nones():

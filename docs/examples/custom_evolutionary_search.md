@@ -20,7 +20,7 @@ This script demonstrates how to set up and customize a crystal structure predict
 ## The script :rocket:
 
 ``` python
-from simmate.workflows.utilities import get_workflow
+from simmate.workflows.utils import get_workflow
 
 # 1. Get the evolutionary search workflow
 # This runs a search for a fixed composition and number of sites.

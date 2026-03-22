@@ -214,7 +214,7 @@ Class-based workflows can leverage Python inheritance to borrow utilities and se
 Here is an example using a workflow from the `VASP` app:
 
 ``` python
-from simmate.workflows.utilities import get_workflow
+from simmate.workflows.utils import get_workflow
 
 original_workflow = get_workflow("static-energy.vasp.matproj")
 

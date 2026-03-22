@@ -16,7 +16,7 @@ from pathlib import Path
 import yaml
 
 from simmate.config import settings
-from simmate.utilities import get_app_submodule, get_directory, make_archive
+from simmate.utils import get_app_submodule, get_directory, make_archive
 
 from .core import Workflow
 

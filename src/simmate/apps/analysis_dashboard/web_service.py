@@ -9,7 +9,7 @@ from simmate.database import connect
 from simmate.database.core import DatabaseTable
 from simmate.toolkit import Molecule
 
-from .plot_constructors.utilities import (
+from .plot_constructors.utils import (
     get_plot_constructor,
     get_plot_constructor_options,
 )

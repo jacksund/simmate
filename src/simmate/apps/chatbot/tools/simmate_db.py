@@ -3,13 +3,13 @@
 import pandas as pd
 from langchain.prompts.prompt import PromptTemplate
 from langchain.tools import tool
-from langchain_community.utilities import SQLDatabase
-from langchain_community.utilities.sql_database import truncate_word
+from langchain_community.utils import SQLDatabase
+from langchain_community.utils.sql_database import truncate_word
 from langchain_core.output_parsers.list import CommaSeparatedListOutputParser
 from langchain_experimental.sql import SQLDatabaseSequentialChain
 
 from simmate.config import settings
-from simmate.database.utilities import get_all_table_docs
+from simmate.database.utils import get_all_table_docs
 
 from ..llm import get_llm
 

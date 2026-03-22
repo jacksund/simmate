@@ -16,7 +16,7 @@ from simmate.database import connect
 from simmate.database.workflow_results import StaticEnergy
 
 # OPTION 2: From the workflow object
-from simmate.workflows.utilities import get_workflow
+from simmate.workflows.utils import get_workflow
 workflow = get_workflow("static-energy.quantum-espresso.quality00")
 table = workflow.database_table  # yields the StaticEnergy class
 ```

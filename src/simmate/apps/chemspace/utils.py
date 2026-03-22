@@ -9,7 +9,7 @@ from botocore.config import Config
 from rich.progress import track
 
 from simmate.config import settings
-from simmate.utilities import get_directory
+from simmate.utils import get_directory
 
 
 def download_raw_files(ssl_verify: bool = True):

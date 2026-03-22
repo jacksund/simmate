@@ -6,7 +6,7 @@ from scipy.constants import Avogadro
 from simmate.config import settings
 from simmate.toolkit import Structure as ToolkitStructure
 from simmate.toolkit.validators.fingerprint import PartialCrystalNNFingerprint
-from simmate.utilities import get_chemical_subsystems
+from simmate.utils import get_chemical_subsystems
 
 from ..core import DatabaseTable, SearchResults, table_column
 from .symmetry import Spacegroup

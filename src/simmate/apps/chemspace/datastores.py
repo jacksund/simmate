@@ -38,7 +38,7 @@ class Chemspace_Freedom_Ro5_MoleculeStore(MoleculeStore):
 
     @classmethod
     def _load_data(cls, source_directory: str | Path):
-        # should use the output dir from .utilities.download_raw_files
+        # should use the output dir from .utils.download_raw_files
         source_directory = Path(source_directory)
         all_files = [p for p in source_directory.rglob("*.bz2") if p.is_file()]
         for i, file in enumerate(all_files):

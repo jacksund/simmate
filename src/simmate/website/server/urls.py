@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 from simmate.config import settings
-from simmate.utilities import get_app_submodule
+from simmate.utils import get_app_submodule
 from simmate.website.server import views
 
 

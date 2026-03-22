@@ -2,7 +2,7 @@
 
 import logging
 
-from simmate.utilities import chunk_list
+from simmate.utils import chunk_list
 
 
 class WorkflowPopulator:
@@ -49,7 +49,7 @@ class WorkflowPopulator:
             )
 
         # local import to avoid circular dependency
-        from simmate.workflows.utilities import get_workflow
+        from simmate.workflows.utils import get_workflow
 
         # grab the workflow mapped to this column.
         # Config can be a simple string (single column) or a dict with

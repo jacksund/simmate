@@ -4,7 +4,7 @@ import logging
 
 import pytest
 
-from simmate.workflows.utilities import get_all_workflow_names, get_workflow
+from simmate.workflows.utils import get_all_workflow_names, get_workflow
 
 
 # @pytest.mark.prefect_db

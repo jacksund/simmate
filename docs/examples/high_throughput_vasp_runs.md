@@ -27,7 +27,7 @@ This script demonstrates how to automate a series of VASP calculations across ma
 ``` python
 from simmate.database import connect
 from simmate.apps.materials_project.models import MatprojStructure
-from simmate.workflows.utilities import get_workflow
+from simmate.workflows.utils import get_workflow
 
 # 1. Query the structures we want to study
 # Here we find all ZnSnF6 structures with spacegroup 148.

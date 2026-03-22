@@ -64,7 +64,7 @@ class Spacegroup(DatabaseTable):
         called when you first set up your database and should never be called
         after that.
 
-        See `simmate.database.utilities.reset_database`
+        See `simmate.database.utils.reset_database`
         """
 
         db_objects = []

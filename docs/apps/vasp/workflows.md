@@ -131,7 +131,7 @@ The `VaspWorkflow` class, which includes many built-in features:
 You can also use Python inheritance to borrow utilities and settings from an existing workflow:
 
 ``` python
-from simmate.workflows.utilities import get_workflow
+from simmate.workflows.utils import get_workflow
 
 original_workflow = get_workflow("static-energy.vasp.matproj")
 

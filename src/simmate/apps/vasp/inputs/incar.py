@@ -15,7 +15,7 @@ from simmate.apps.vasp.inputs.incar_modifiers import (
     keyword_modifier_smart_quad_efg,
 )
 from simmate.toolkit import Structure
-from simmate.utilities import str_to_datatype
+from simmate.utils import str_to_datatype
 
 
 class Incar(dict):

@@ -7,7 +7,7 @@ import pandas
 from rich.progress import track
 
 from simmate.toolkit import Molecule
-from simmate.utilities import chunk_list
+from simmate.utils import chunk_list
 
 
 class Featurizer:

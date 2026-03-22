@@ -11,12 +11,12 @@
 
 === "python"
     ``` python
-    from simmate.workflows.utilities import get_all_workflow_names
+    from simmate.workflows.utils import get_all_workflow_names
 
     names = get_all_workflow_names()
     ```
 
-There are several more tools in `simmate.workflow.utilities` to help explore:
+There are several more tools in `simmate.workflows.utils` to help explore:
 
 | utility name                 |
 | ---------------------------- |
@@ -34,7 +34,7 @@ There are several more tools in `simmate.workflow.utilities` to help explore:
 
 === "python"
     ``` python
-    from simmate.workflows.utilities import get_workflow
+    from simmate.workflows.utils import get_workflow
     
     workflow_name = "static-energy.vasp.matproj"
     workflow = get_workflow(workflow_name)
@@ -106,7 +106,7 @@ To execute a workflow on your local machine, use the `run` approach:
 
 === "python"
     ``` python
-    from simmate.workflows.utilities import get_workflow
+    from simmate.workflows.utils import get_workflow
     
     workflow = get_workflow("relaxation.vasp.matproj")
     result = workflow.run(structure="NaCl.cif")
@@ -154,7 +154,7 @@ To schedule a workflow, ensure your computational resources are configured, then
 
 === "python"
     ``` python
-    from simmate.workflows.utilities import get_workflow
+    from simmate.workflows.utils import get_workflow
     
     workflow = get_workflow("static-energy.vasp.matproj")
     

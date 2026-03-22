@@ -8,7 +8,7 @@ from numpy.random import choice
 
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.creators.structure.base import StructureCreator
-from simmate.utilities import get_directory
+from simmate.utils import get_directory
 
 # This input is based off of...
 #   https://github.com/xtalopt/randSpg/blob/master/sample/randSpg.in

@@ -10,7 +10,7 @@ from rich.progress import track
 from simmate.config import settings
 from simmate.database.core import table_column
 from simmate.database.mixins import Structure, ThirdPartyData
-from simmate.utilities.other import chunk_list
+from simmate.utils.other import chunk_list
 
 
 class CodStructure(ThirdPartyData, Structure):

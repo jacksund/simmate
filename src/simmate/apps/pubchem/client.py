@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 from simmate.config import settings
 from simmate.toolkit import Molecule
-from simmate.utilities import download_file, get_directory
+from simmate.utils import download_file, get_directory
 
 
 class PubChemClient:
@@ -66,7 +66,7 @@ class PubChemClient:
     @classmethod
     def get_cas_from_cid(cls, cid: int) -> str:
 
-        from simmate.apps.cas_registry.utilities import validate_cas_number
+        from simmate.apps.cas_registry.utils import validate_cas_number
 
         # grab synonyms for this CID
         syn_api_url = cls.PUBCHEM_URL_BASE + f"/pug/compound/cid/{cid}/synonyms/JSON"

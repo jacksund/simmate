@@ -22,7 +22,7 @@ import tarfile
 import urllib
 
 from simmate.config import settings
-from simmate.utilities import get_directory
+from simmate.utils import get_directory
 
 
 def setup_sssp() -> bool:
