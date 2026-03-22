@@ -29,7 +29,11 @@ class PpdbMolecule(ThirdPartyData, Molecule):
         db_table = "ppdb__molecules"
 
     html_display_name = "PPDB"
-    html_description_short = "The Pesticide Properties Database."
+    html_description_short = (
+        "The Pesticide Properties DataBase (PPDB) provides comprehensive "
+        "information on the physical, chemical, and environmental properties "
+        "of pesticides, including toxicity and regulatory status."
+    )
 
     html_entries_template = "ppdb/molecules/table.html"
     html_entry_template = "ppdb/molecules/view.html"

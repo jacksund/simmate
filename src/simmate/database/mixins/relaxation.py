@@ -53,7 +53,11 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
     # -------------------------------------------------------------------------
 
     html_display_name = "Relaxation"
-    html_description_short = "Results for Relaxation Calculations"
+    html_description_short = (
+        "Results for geometry optimization (Relaxation) calculations. These "
+        "simulations iteratively adjust atomic positions and lattice parameters "
+        "to find the structure's lowest energy state."
+    )
 
     html_entries_template = "workflow_explorer/relaxation/table.html"
     html_entry_template = "workflow_explorer/relaxation/view.html"

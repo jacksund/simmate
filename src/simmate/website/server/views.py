@@ -5,7 +5,7 @@ import importlib
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import F
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 from simmate.apps.aflow.models import AflowStructure
 from simmate.apps.cod.models import CodStructure
@@ -14,6 +14,7 @@ from simmate.apps.materials_project.models import MatprojStructure
 from simmate.apps.oqmd.models import OqmdStructure
 from simmate.config import settings
 from simmate.utilities import get_app_submodule, get_class
+from simmate.website.core.models import Notification
 from simmate.website.data_explorer.forms import ChemicalSystemForm
 
 # -----------------------------------------------------------------------------
@@ -25,12 +26,30 @@ from simmate.website.data_explorer.forms import ChemicalSystemForm
 
 @login_required
 def profile_default_view(request):
-    # !!! For future reference, you can grab user-associated data via...
-    # data = request.user.relateddata.all()
+    notifications = request.user.notifications.all().order_by("-created_at")
 
-    context = {"breadcrumbs": [request.user.username]}
+    # Grouping logic: we group by notification_type
+    # We only group UNREAD notifications. Read ones are just listed.
+    from collections import defaultdict
+
+    unread_notifications = notifications.filter(is_read=False)
+    grouped_unread = defaultdict(list)
+    for n in unread_notifications:
+        grouped_unread[n.notification_type].append(n)
+
+    context = {
+        "notifications": notifications,
+        "grouped_unread": dict(grouped_unread),
+        "breadcrumbs": [request.user.username],
+    }
     template = "account/profile.html"
     return render(request, template, context)
+
+
+@login_required
+def mark_notifications_as_read(request):
+    request.user.notifications.filter(is_read=False).update(is_read=True)
+    return redirect("profile")
 
 
 @login_required

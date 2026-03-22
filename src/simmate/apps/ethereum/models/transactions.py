@@ -19,7 +19,11 @@ class EthereumTransaction(ThirdPartyData, DatabaseTable):
     # -------------------------------------------------------------------------
 
     html_display_name = "Ethereum Transactions"
-    html_description_short = "Ethereum transactions monitored via Etherscan.io"
+    html_description_short = (
+        "Individual ledger entries for activity on the Ethereum blockchain. "
+        "This provides a decentralized and transparent record of financial "
+        "interactions, such as payments and token transfers."
+    )
 
     external_website = "https://etherscan.io/"
 

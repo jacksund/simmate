@@ -1,0 +1,71 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    <!-- Chat Card -->
+    <div class="{% if not component.is_open %}d-none{% endif %} position-fixed bottom-0 end-0 m-3 z-3"
+         id="chatBubbleContainer">
+        <div class="card shadow-lg"
+             style="width: 350px;
+                    max-height: 500px;
+                    display: flex;
+                    flex-direction: column">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-chat-dots me-2"></i>Feedback</span>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        aria-label="Close"
+                        {% htmx_post trigger="click" method_name="toggle_chat" %}></button>
+            </div>
+            <div class="card-body overflow-auto"
+                 id="chat-messages-container"
+                 style="flex-grow: 1;
+                        max-height: 350px;
+                        background-color: #f8f9fa">
+                {% for message in component.chat_history %}
+                    <div class="d-flex flex-row justify-content-{% if message.sender == 'bot' %}start{% else %}end{% endif %} mb-3">
+                        <div class="p-2 {% if message.sender == 'bot' %}ms-2 rounded-3 bg-white border{% else %}me-2 rounded-3 bg-primary text-white{% endif %}"
+                             style="max-width: 85%">
+                            <p class="small mb-0">{{ message.text }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
+                <form class="w-100"
+                      {% htmx_post trigger="submit" method_name="submit_message" %}>
+                    <div class="input-group">
+                        <input type="text"
+                               class="form-control"
+                               placeholder="Type message..."
+                               name="message"
+                               value="{{ component.form_data.message|default:'' }}"
+                               autocomplete="off"
+                               required>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Chat Toggle Button -->
+    <div class="{% if component.is_open %}d-none{% endif %} position-fixed bottom-0 end-0 m-3 z-3"
+         id="chatButtonContainer">
+        <button class="btn btn-primary rounded-circle shadow-lg d-flex justify-content-center align-items-center"
+                style="width: 60px;
+                       height: 60px"
+                type="button"
+                {% htmx_post trigger="click" method_name="toggle_chat" %}>
+            <i class="bi bi-chat-dots-fill fs-3"></i>
+        </button>
+    </div>
+    {# Automatically scroll to the bottom of the chat #}
+    <script>
+        (function() {
+            const chatContainer = document.getElementById('chat-messages-container');
+            if (chatContainer) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        })();
+    </script>
+{% endblock %}

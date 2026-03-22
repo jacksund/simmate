@@ -4,8 +4,8 @@
     <div class="bg-warning text-dark text-center py-1 small fw-bold">
         <i class="bi bi-cone-striped"></i>
         This site is under early construction. Data is reset periodically,
-        {% if SHOW_FINANCES %}pricing is disabled, and{% endif %}
-        limited compute is available.
+        {% if SHOW_FINANCES %}pricing is disabled,{% endif %}
+        and limited compute is available.
         <i class="bi bi-cone-striped"></i>
     </div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary py-1">
@@ -129,12 +129,21 @@
                         </button>
                     {% endif %}
                     {# user name + profile button #}
-                    <a class="btn btn-outline-light me-2" href="{% url 'profile' %}">
+                    <a class="btn btn-outline-light me-2 position-relative"
+                       href="{% url 'profile' %}">
                         <i class="bi bi-person-circle"></i>&nbsp;&nbsp;
                         {% if user.first_name %}
                             {{ user.first_name }} {{ user.last_name }}
                         {% else %}
                             {{ user.username }}
+                        {% endif %}
+                        {% unread_notifications_count user as unread_count %}
+                        {% if unread_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ unread_count }}
+                                {% if unread_count > 99 %}+{% endif %}
+                                <span class="visually-hidden">unread notifications</span>
+                            </span>
                         {% endif %}
                     </a>
                     {# logout button #}

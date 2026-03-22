@@ -8,9 +8,9 @@ class VariableNsitesCompositionSearch(Calculation):
 
     html_display_name = "Variable nSites Searches"
     html_description_short = (
-        "All evolutionary searches ran for a given reduced composition. "
-        "This means the composition ratio is kept constant while atom count is "
-        "allowed to change. This is essentially many fixed-composition searches."
+        "Structure search results that explore different numbers of atoms per "
+        "unit cell while keeping the chemical composition fixed. This is useful "
+        "for finding complex phases and large-cell structures."
     )
 
     class Meta:

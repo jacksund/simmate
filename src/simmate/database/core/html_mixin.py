@@ -48,6 +48,19 @@ class HTMLMixin:
     def html_extra_table_context(cls) -> dict:
         return {}
 
+    @classmethod
+    @property
+    def num_rows_cache(cls) -> int | None:
+        """
+        The number of rows in this table, typically cached by a background process.
+        """
+        from simmate.website.data_explorer.models import TableCount
+
+        try:
+            return TableCount.objects.get(table_name=cls.table_name).row_count
+        except:
+            return None
+
     @property
     def html_extra_entry_context(self) -> dict:
         return {}

@@ -1,0 +1,48 @@
+<div class="tab-pane show active" id="overview-section">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">User Details</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tbody>
+                            <tr>
+                                <th scope="row" class="text-muted" style="width: 30%;">Username</th>
+                                <td>{{ user.username }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="text-muted">First Name</th>
+                                <td>{{ user.first_name|default:"---" }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="text-muted">Last Name</th>
+                                <td>{{ user.last_name|default:"---" }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="text-muted">Email</th>
+                                <td>{{ user.email|default:"---" }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="text-muted">Joined</th>
+                                <td>{{ user.date_joined|date:"F d, Y" }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm text-center py-4 bg-light border-0">
+                <div class="card-body">
+                    <i class="bi bi-gear text-secondary" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">Account Settings</h5>
+                    <p class="text-muted small">Update your profile information or change your password.</p>
+                    <a href="{% url 'account_change_password' %}"
+                       class="btn btn-outline-secondary btn-sm">Change Password</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

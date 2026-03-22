@@ -172,7 +172,7 @@ def draw_structure(
     }
 
 
-@register.filter(name="plotly_figure")
+@register.filter
 def plotly_figure(figure: Figure):
     """
     Converts a plotly figure object to an html element for the frontend.
@@ -183,3 +183,25 @@ def plotly_figure(figure: Figure):
         include_plotlyjs=False,
     )
     return mark_safe(hmtl)
+
+
+@register.filter
+def replace(value, arg):
+    """
+    Replaces a string with another string.
+    Usage: {{ value|replace:"old,new" }}
+    """
+    if "," not in arg:
+        return value
+    old, new = arg.split(",")
+    return value.replace(old, new)
+
+
+@register.simple_tag
+def unread_notifications_count(user):
+    """
+    Returns the number of unread notifications for a user.
+    """
+    if user.is_authenticated:
+        return user.notifications.filter(is_read=False).count()
+    return 0

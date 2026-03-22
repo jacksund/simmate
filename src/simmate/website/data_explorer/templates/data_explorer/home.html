@@ -29,7 +29,7 @@
                             {% for dataset in datasets %}
                                 <tr>
                                     <td>
-                                        {% if dataset.is_redistribution_allowed or not LOCK_DATA_REDISTRIBUTION %}
+                                        {% if dataset.is_redistribution_allowed != False or not LOCK_DATA_REDISTRIBUTION %}
                                             {# the extra style is to make the link be the entire cell #}
                                             <a href="{% url 'data_explorer:table' dataset.table_name %}"
                                                style="display: block;
@@ -57,11 +57,13 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if dataset.num_rows_cache is not None %}
-                                            {{ dataset.num_rows_cache|floatformat:0|intcomma }}
-                                        {% else %}
-                                            <span class="text-muted fst-italic">---</span>
-                                        {% endif %}
+                                        {% with counts_dict|getitem:dataset.table_name as row_count %}
+                                            {% if row_count is not None %}
+                                                {{ row_count|floatformat:0|intcomma }}
+                                            {% else %}
+                                                <span class="text-muted fst-italic">---</span>
+                                            {% endif %}
+                                        {% endwith %}
                                     </td>
                                     <td>
                                         <small>{{ dataset.html_description_short }}</small>

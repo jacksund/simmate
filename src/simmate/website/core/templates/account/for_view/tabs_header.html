@@ -1,0 +1,42 @@
+<ul class="nav nav-tabs nav-bordered mb-3">
+    <li class="nav-item">
+        <a href="#overview-section"
+           data-bs-toggle="tab"
+           aria-expanded="true"
+           class="nav-link active">
+            <i class="bi bi-person-circle d-md-none d-block"></i>
+            <span class="d-none d-md-block">Overview</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#notifications-section"
+           data-bs-toggle="tab"
+           aria-expanded="false"
+           class="nav-link">
+            <i class="bi bi-bell d-md-none d-block"></i>
+            <span class="d-none d-md-block">
+                Notifications
+                {% unread_notifications_count user as unread_count %}
+                {% if unread_count > 0 %}<span class="badge bg-danger rounded-pill">{{ unread_count }}</span>{% endif %}
+            </span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#projects-section"
+           data-bs-toggle="tab"
+           aria-expanded="false"
+           class="nav-link">
+            <i class="bi bi-briefcase d-md-none d-block"></i>
+            <span class="d-none d-md-block">Projects</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#inventory-section"
+           data-bs-toggle="tab"
+           aria-expanded="false"
+           class="nav-link">
+            <i class="bi bi-box-seam d-md-none d-block"></i>
+            <span class="d-none d-md-block">Inventory</span>
+        </a>
+    </li>
+</ul>

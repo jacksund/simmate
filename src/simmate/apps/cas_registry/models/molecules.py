@@ -48,8 +48,10 @@ class CasRegistryMolecule(ThirdPartyData, Molecule):
 
     html_display_name = "CAS Registry"
     html_description_short = (
-        "A *limited* catalog of commercial chemicals and their associated CAS "
-        "Registry Numbers"
+        "A collection of chemical substances identified by CAS Registry Numbers. "
+        "It provides a unique and universally recognized identity for millions "
+        "of elements, compounds, and polymers, serving as the gold standard "
+        "for chemical identification."
     )
 
     external_website = "https://www.cas.org/about-us"

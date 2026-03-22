@@ -32,7 +32,12 @@ class BcpcIsoPesticide(ThirdPartyData, Molecule):
         db_table = "bcpc__iso_pesticides__molecules"
 
     html_display_name = "ISO Pesticides"
-    html_description_short = "A compendium of pesticides with common names."
+    html_description_short = (
+        "A standardized set of pesticide active ingredients as defined by the "
+        "British Crop Production Council (BCPC). This compendium provides common "
+        "names, chemical identities, and classification for essential "
+        "agrochemicals."
+    )
 
     html_entries_template = "bcpc/iso_pesticides/table.html"
     html_entry_template = "bcpc/iso_pesticides/view.html"

@@ -81,17 +81,19 @@ a:focus {
 
 /* For the htmx loading spinner */
 
-#loading-spinner {
+#loading-spinner-full,
+#loading-spinner-corner {
   display: none; /* Hidden by default */
   pointer-events: none; /* Allow clicks through when hidden */
 }
 
-#loading-spinner.htmx-request {
+#loading-spinner-full.htmx-request,
+#loading-spinner-corner.htmx-request {
   display: block;
   pointer-events: all; /* Block clicks when visible */
 }
 
-.loading-overlay {
+.loading-overlay-full {
   position: fixed;
   top: 0;
   left: 0;
@@ -104,12 +106,35 @@ a:focus {
   z-index: 9999;
 }
 
+.loading-overlay-corner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: none;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  z-index: 9999;
+}
+
 .loading-spinner {
   border: 24px solid #f3f3f3;
   border-top: 24px solid #157046;
   border-radius: 50%;
   width: 120px;
   height: 120px;
+  animation: spin 1s linear infinite;
+}
+
+.loading-spinner-small {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #157046;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  margin: 20px;
   animation: spin 1s linear infinite;
 }
 

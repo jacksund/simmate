@@ -43,6 +43,11 @@ def get_table_entry_safe(table_name: str, table_entry_id: str | int) -> Database
 
 def home(request):
 
+    from simmate.website.data_explorer.models import TableCount
+
+    # Grab all counts at once to prevent N+1 queries
+    counts_dict = dict(TableCount.objects.values_list("table_name", "row_count"))
+
     # Uses the settings to build out Data sections + associated list of tables
     # within each section. There is also a HIDDEN section that is handled
     # the same here. The html template handles that case separately.
@@ -55,6 +60,7 @@ def home(request):
 
     context = {
         "data_config": data_config,
+        "counts_dict": counts_dict,
         "breadcrumbs": ["Data"],
     }
     template = "data_explorer/home.html"

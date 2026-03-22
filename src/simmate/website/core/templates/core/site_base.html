@@ -32,7 +32,7 @@
         {# Simmate CSS #}
         <link rel="stylesheet"
               type="text/css"
-              href='{% static "/css/simmate.2025_11_13.css" %}'>
+              href='{% static "/css/simmate.2026_03_21.css" %}'>
         {# CodeHilite CSS #}
         <link rel="stylesheet"
               type="text/css"
@@ -133,5 +133,7 @@
         {% include "core/footer.html" %}
         {# Sometimes we load extra javascript at the bottom of the page #}
         {% block extrafooter %}{% endblock %}
+        {# Chat Bubble Component #}
+        {% htmx_component "chat-bubble" %}
     </body>
 </html>

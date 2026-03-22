@@ -27,8 +27,10 @@ class AflowPrototype(ThirdPartyData, Structure):
 
     html_display_name = "AFLOW Prototypes"
     html_description_short = (
-        "Encyclopedia of Crystallographic Prototypes from the Automatic-FLOW"
-        " for Materials Discovery"
+        "A library of crystal structure templates (prototypes) from the AFLOW "
+        "Encyclopedia of Crystallographic Prototypes. These templates allow "
+        "researchers to rapidly generate new candidate materials by substituting "
+        "different elements into known symmetry sites."
     )
 
     html_entries_template = "aflow/prototype/table.html"

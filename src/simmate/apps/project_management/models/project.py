@@ -18,7 +18,11 @@ class Project(DatabaseTable):
         db_table = "project_management__projects"
 
     html_display_name = "Projects"
-    html_description_short = "List of different chemistry projects"
+    html_description_short = (
+        "A container for a collection of related chemistry tasks, hypotheses, "
+        "and results. Projects help group and manage scientific work into "
+        "discrete units."
+    )
 
     html_entries_template = "project_management/project/table.html"
     html_entry_template = "project_management/project/view.html"

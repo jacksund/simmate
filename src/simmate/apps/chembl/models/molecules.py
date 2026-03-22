@@ -32,7 +32,10 @@ class ChemblMolecule(ThirdPartyData, Molecule):
 
     html_display_name = "ChEMBL"
     html_description_short = (
-        "a manually curated database of bioactive molecules with drug-like properties."
+        "A manually curated database of bioactive molecules from ChEMBL, "
+        "providing drug-like properties and structure-activity relationships. "
+        "It includes data on chemical structures, biological assays, and "
+        "target interactions, making it a key resource for drug discovery."
     )
 
     external_website = "https://www.ebi.ac.uk/chembl/beta/"

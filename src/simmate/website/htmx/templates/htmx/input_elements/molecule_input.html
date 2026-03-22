@@ -36,7 +36,7 @@
                     id="{{ name }}-{{ component.component_id }}-hidden"
                     name="{{ sketcher_input_name }}"
                     {# this defer works, but it is annoying because there is a loading bar every time you make an edit #}
-                    {% if not defer %}{% htmx_post %}{% endif %}>
+                    {% if not defer %}{% htmx_post indicator=indicator %}{% endif %}>
                 </input>
                 <script>enable_mol_autowrite('{{ name }}-{{ component.component_id }}', '{{ name }}-{{ component.component_id }}-hidden', '{{ export_format }}');</script>
             </div>

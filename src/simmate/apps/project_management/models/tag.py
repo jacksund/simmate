@@ -12,8 +12,9 @@ class Tag(DatabaseTable):
 
     html_display_name = "Tags, Labels, & Categories"
     html_description_short = (
-        "Labels that help with organizing Project items "
-        "like hypotheses, targets, & orders. "
+        "Customizable labels that help with organizing project items like "
+        "hypotheses, targets, and orders. Tags allow for flexible "
+        "filtering and categorization."
     )
 
     html_entries_template = "project_management/tag/table.html"

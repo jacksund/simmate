@@ -11,7 +11,11 @@ class EthereumWallet(ThirdPartyData, DatabaseTable):
         db_table = "ethereum__wallets"
 
     html_display_name = "Ethereum Wallets"
-    html_description_short = "Ethereum addresses monitored via Etherscan.io and Alchemy"
+    html_description_short = (
+        "Ethereum blockchain addresses used for tracking decentralized "
+        "transactions and digital assets. These wallets can be used to manage "
+        "project-specific funds and rewards."
+    )
 
     external_website = "https://etherscan.io/"  # even if we pull from alchemy
 

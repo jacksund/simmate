@@ -8,7 +8,7 @@
                type="checkbox"
                {% if switch_mode %}role="switch"{% endif %}
                hx-preserve
-               {% if not defer %}{% htmx_post %}{% endif %}
+               {% if not defer %}{% htmx_post indicator=indicator %}{% endif %}
                {% if disabled %}disabled{% endif %}
                {% if required %}required{% endif %}
                {% if current_value %}checked{% endif %}>

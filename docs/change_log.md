@@ -102,6 +102,8 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `startup_method` hook to simmate workers
 - added `baderkit` app
 - added `simmate database start` and `stop` commands for managing a Postgres database via Docker
+- added `TableCount` caching for `data_explorer` homepage counts
+- added a user notification system to `website.core` with support for grouping and navbar badges
 
 **Refactors**
 

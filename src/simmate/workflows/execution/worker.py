@@ -42,8 +42,9 @@ class SimmateWorker(DatabaseTable):
 
     html_display_name = "Workers"
     html_description_short = (
-        "Workers are individual compute resources that pick up and run "
-        "items that have been submitted to the queue."
+        "Active compute processes (local or remote) that pull and execute items "
+        "from the task queue. This provides a real-time view of the computational "
+        "resources currently available to the Simmate ecosystem."
     )
 
     html_entries_template = "workflow_explorer/workers/table.html"
