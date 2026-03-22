@@ -87,6 +87,10 @@ class JarvisConfig(AppConfig):
     name = "simmate.apps.jarvis"
 
 
+class LabAutomationConfig(AppConfig):
+    name = "simmate.apps.lab_automation"
+
+
 class MaterialsProjectConfig(AppConfig):
     name = "simmate.apps.materials_project"
 
