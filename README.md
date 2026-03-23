@@ -25,15 +25,7 @@
 
 Simmate is a full-stack framework and ecosystem for chemistry research. It standardizes how researchers interact with dozens of popular tools and databases by providing a robust ORM, workflow library, and a web UI out of the box. For both molecular and crystalline systems, Simmate also provides a comprehensive toolbox to build your own custom chemistry applications.
 
-## Key Features
-
-- **Unified App Ecosystem:** Bridge dozens of third-party datasets (Materials Project, COD, ChEMBL) and software (VASP, Quantum Espresso) through a single, consistent API.
-- **Resilient Workflows:** Run complex, multi-step calculations with built-in error handling that automatically detects and fixes common simulation failures.
-- **Scalable Orchestration:** Effortlessly schedule and distribute thousands of jobs across local workstations, HPC clusters, or Kubernetes clusters.
-- **Scientific Database ORM:** Store, query, and manage your custom workflow results alongside third-party chemistry data using a powerful, built-in Django backend.
-- **Batteries-Included UI:** Instantly explore your data, monitor running workflows, and submit new jobs using the integrated web interface and REST API.
-
-**[A preview of features and code snippets is available on our documentation homepage.](https://jacksund.github.io/simmate/home/)**
+[A preview of features and code snippets is available on our documentation homepage.](https://jacksund.github.io/simmate/home/)
 
 ## Installation
 
