@@ -1,6 +1,8 @@
 <!-- Simmate Logo -->
-<p align="center" href=https://simmate.org>
-   <img src="https://raw.githubusercontent.com/jacksund/simmate/refs/heads/main/src/simmate/website/core/static/images/simmate-logo-dark.svg" width="700" style="max-width: 700px;">
+<p align="center">
+   <a href="https://simmate.org">
+      <img src="https://raw.githubusercontent.com/jacksund/simmate/refs/heads/main/src/simmate/website/core/static/images/simmate-logo-dark.svg" width="700" style="max-width: 700px;">
+   </a>
 </p>
 
 <p align="center">
@@ -21,22 +23,17 @@
 
 ## About
 
-Simmate is a full-stack framework for chemistry research. It helps you calculate properties and explore third-party databases for both molecular and crystalline systems. It also provides a toolbox to build out your own chemistry applications.
+Simmate is a full-stack framework and ecosystem for chemistry research. It standardizes how researchers interact with dozens of popular tools and databases by providing a robust ORM, workflow library, and a web UI out of the box. For both molecular and crystalline systems, Simmate also provides a comprehensive toolbox to build your own custom chemistry applications.
 
-## Before exploring the code
-
-This repo holds all of our source code. Before getting started here, you may want to check out...
-
-- our main website at [simmate.org](https://simmate.org/)
-- our tutorials, docs, and changelog at [jacksund.github.io/simmate](https://jacksund.github.io/simmate/home/)
+[A preview of features is available on our documentation homepage.](https://jacksund.github.io/simmate/home/)
 
 ## Installation
 
-You can install Simmate using either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [conda](https://conda-forge.org/download/): 
-``` bash
+You can install Simmate using either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [conda](https://conda-forge.org/download/):
+```bash
 uv pip install simmate
 ```
-``` bash
+```bash
 conda install -c conda-forge simmate
 ```
 
