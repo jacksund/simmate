@@ -33,7 +33,7 @@ Simmate is a full-stack framework and ecosystem for chemistry research. It stand
 - **Scientific Database ORM:** Store, query, and manage your custom workflow results alongside third-party chemistry data using a powerful, built-in Django backend.
 - **Batteries-Included UI:** Instantly explore your data, monitor running workflows, and submit new jobs using the integrated web interface and REST API.
 
-**[A preview of features and code snippets is available on our documentation homepage.](https://jacksund.github.io/simmate/home/#a-sneak-peek-of-features)**
+**[A preview of features and code snippets is available on our documentation homepage.](https://jacksund.github.io/simmate/home/)**
 
 ## Installation
 
