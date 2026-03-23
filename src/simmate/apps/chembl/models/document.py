@@ -91,31 +91,46 @@ class ChemblDocument(DatabaseTable):
         # BUG-FIX (nan-->None)
         data = data.replace({numpy.nan: None})
 
-        # convert to dictionaries
-        data = data.to_dict(orient="records")
-
         # autopopulate database columns for each molecule (no saving yet)
-        logging.info("Generating database objects...")
+        logging.info("Generating database objects and saving in batches...")
         failed_rows = []
-        for entry in track(data):
+        db_objs = []
+        for i, entry in track(data.iterrows(), total=len(data)):
             try:
                 # now convert the entry to a database object
-                cls.objects.update_or_create(
+                new_obj = cls(
                     id=entry["doc_id"],
-                    defaults=dict(
-                        published_at=entry["year"],
-                        document_type=entry["doc_type"],
-                        patent_id=entry["patent_id"],
-                        doi=entry["doc_id"],
-                        title=entry["title"],
-                        # BUG: https://stackoverflow.com/questions/517923/
-                        # authors=(
-                        #     entry["authors"].split(",") if entry["authors"] else None
-                        # ),
-                    ),
+                    published_at=entry["year"],
+                    document_type=entry["doc_type"],
+                    patent_id=entry["patent_id"],
+                    doi=entry["doi"],
+                    title=entry["title"],
+                    # BUG: https://stackoverflow.com/questions/517923/
+                    # authors=(
+                    #     entry["authors"].split(",") if entry["authors"] else None
+                    # ),
                 )
+                db_objs.append(new_obj)
             except:
-                failed_rows.append(entry)
+                failed_rows.append(entry.to_dict())
+
+            # save every time we have 1000 structures
+            if len(db_objs) >= 1000:
+                cls.objects.bulk_create(
+                    db_objs,
+                    batch_size=1000,
+                    ignore_conflicts=True,
+                )
+                db_objs = []  # reset for next batch
+
+        # one last save in case we exited the loop above with
+        # remaining structures
+        if db_objs:
+            cls.objects.bulk_create(
+                db_objs,
+                batch_size=1000,
+                ignore_conflicts=True,
+            )
 
         logging.info("Done!")
         return failed_rows

@@ -239,40 +239,60 @@ class ChemblAssayResult(DatabaseTable):
         # BUG-FIX (nan-->None)
         data = data.replace({numpy.nan: None})
 
-        # convert to dictionaries
-        data = data.to_dict(orient="records")
+        logging.info("Filtering for existing IDs...")
+        doc_ids = set(ChemblDocument.objects.values_list("id", flat=True).all())
+        mol_ids = set(ChemblMolecule.objects.values_list("id", flat=True).all())
+        data = data[data.doc_id.isin(doc_ids) & data.molregno.isin(mol_ids)]
 
         # autopopulate database columns for each molecule (no saving yet)
-        logging.info("Generating database objects...")
+        logging.info("Generating database objects and saving in batches...")
         failed_rows = []
-        for entry in track(data):
+        db_objs = []
+        for i, entry in track(data.iterrows(), total=len(data)):
             try:
                 # now convert the entry to a database object
-                cls.objects.update_or_create(
+                new_obj = cls(
                     id=entry["activity_id"],
-                    defaults=dict(
-                        chembl_document_id=entry["doc_id"],
-                        chembl_compound_id=entry["molregno"],
-                        value_relation=entry["standard_relation"],
-                        value=entry["standard_value"],
-                        value_units=entry["standard_units"],
-                        data_validity_check=bool(entry["standard_flag"]),
-                        value_type=entry["standard_type"],
-                        activity_comment=entry["activity_comment"],
-                        data_validity_comment=entry["data_validity_comment"],
-                        is_potential_duplicate=bool(entry["potential_duplicate"]),
-                        value_range_max=entry["standard_upper_value"],
-                        value_text=entry["standard_text_value"],
-                        mode_of_action_type=entry["action_type"],
-                        description=entry["assay_description"],
-                        target_organism=entry["assay_organism"],
-                        confidence_score=entry["confidence_score"],
-                        assay_type=entry["assay_type_description"],
-                        assay_type_standard=entry["bao_type"],
-                    ),
+                    chembl_document_id=entry["doc_id"],
+                    chembl_compound_id=entry["molregno"],
+                    value_relation=entry["standard_relation"],
+                    value=entry["standard_value"],
+                    value_units=entry["standard_units"],
+                    data_validity_check=bool(entry["standard_flag"]),
+                    value_type=entry["standard_type"],
+                    activity_comment=entry["activity_comment"],
+                    data_validity_comment=entry["data_validity_comment"],
+                    is_potential_duplicate=bool(entry["potential_duplicate"]),
+                    value_range_max=entry["standard_upper_value"],
+                    value_text=entry["standard_text_value"],
+                    mode_of_action_type=entry["action_type"],
+                    description=entry["assay_description"],
+                    target_organism=entry["assay_organism"],
+                    confidence_score=entry["confidence_score"],
+                    assay_type=entry["assay_type_description"],
+                    assay_type_standard=entry["bao_type"],
                 )
+                db_objs.append(new_obj)
             except:
-                failed_rows.append(entry)
+                failed_rows.append(entry.to_dict())
+
+            # save every time we have 1000 structures
+            if len(db_objs) >= 1000:
+                cls.objects.bulk_create(
+                    db_objs,
+                    batch_size=1000,
+                    ignore_conflicts=True,
+                )
+                db_objs = []  # reset for next batch
+
+        # one last save in case we exited the loop above with
+        # remaining structures
+        if db_objs:
+            cls.objects.bulk_create(
+                db_objs,
+                batch_size=1000,
+                ignore_conflicts=True,
+            )
 
         logging.info("Done!")
         return failed_rows
