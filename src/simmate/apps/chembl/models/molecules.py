@@ -42,6 +42,20 @@ class ChemblMolecule(ThirdPartyData, Molecule):
     source_doi = "https://doi.org/10.1093/nar/gky1075"
     is_redistribution_allowed = True
 
+    remote_archive_link = "https://archives.simmate.org/ChemblMolecule-2026-03-22.zip"
+    archive_fields = [
+        "chembl_id",
+        "is_invalid_molecule",
+        "molecule_type",
+        "drug_likeness",
+        "alog_p_chembl",
+        "rule_of_3_pass",
+        "rule_of_5_violations",
+        "num_h_acceptors_lipinski",
+        "num_h_donors_lipinski",
+        "natural_product_likeness",
+    ]
+
     # id is set to the 'molregno' in the chembl db (ex: 12345)
 
     chembl_id = table_column.CharField(max_length=25, blank=True, null=True)
