@@ -36,8 +36,14 @@ Update your database to be compatible with the new installation:
 simmate database update
 ```
 
-!!! warning
-    The command `simmate database update` is only effective from `v0.15.0` onwards. Earlier versions of simmate necessitate a complete database reset when updating versions. So, if your original database version is `v0.14.0` or earlier, you must run `simmate database reset`.
+!!! danger "Database Compatibility"
+    Simmate's API is currently in development (`v0.*.*`), and database migrations are only supported within specific version ranges. The `simmate database update` command is effective for:
+
+    - **v0.19.0 to Latest**: Fully compatible
+    - **v0.15.0 to v0.18.0**: Compatible within this range only
+    - **v0.0.0 to v0.14.0**: Incompatible (the update command did not exist)
+
+    Upgrading between these groups (e.g., from v0.18.0 to v0.19.0) requires `simmate database reset`. If you need assistance migrating data across incompatible versions, please reach out to our team.
 
 --------------------------------------------------------------------------------
 
@@ -57,6 +63,12 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 !!! tip
     To view ongoing changes that haven't been finalized or merged yet, check our [active pull-requests](https://github.com/jacksund/simmate/pulls) on GitHub
+
+- No new changes have been merged yet
+
+--------------------------------------------------------------------------------
+
+## v0.19.0 (2026.03.22)
 
 **Enhancements**
 
