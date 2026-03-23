@@ -64,7 +64,9 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 !!! tip
     To view ongoing changes that haven't been finalized or merged yet, check our [active pull-requests](https://github.com/jacksund/simmate/pulls) on GitHub
 
-- No new changes have been merged yet
+**Fixes**
+
+- patched connection contexts and closing in the `database.external_connectors` module
 
 --------------------------------------------------------------------------------
 

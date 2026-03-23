@@ -46,27 +46,30 @@ class SshServer:
 
     @classmethod
     def copy_local_to_remote(cls, local: str | Path, remote: str | Path) -> Path:
-        with cls.client.open_sftp() as sftp_client:
-            sftp_client.put(
-                remotepath=str(remote),
-                localpath=str(local),
-            )
+        with cls.client as client:
+            with client.open_sftp() as sftp_client:
+                sftp_client.put(
+                    remotepath=str(remote),
+                    localpath=str(local),
+                )
         return Path(remote)
 
     @classmethod
     def copy_remote_to_local(cls, local: str | Path, remote: str | Path) -> Path:
-        with cls.client.open_sftp() as sftp_client:
-            sftp_client.get(
-                remotepath=str(remote),
-                localpath=str(local),
-            )
+        with cls.client as client:
+            with client.open_sftp() as sftp_client:
+                sftp_client.get(
+                    remotepath=str(remote),
+                    localpath=str(local),
+                )
         return Path(local)
 
     @classmethod
     def call_command_remote(cls, command: str) -> str:
-        ssh_stdin, ssh_stdout, ssh_stderr = cls.client.exec_command(command)
-        # TODO: do I want to just return stdout? Raise an error if there is one?
-        return ssh_stdout.read()
+        with cls.client as client:
+            ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(command)
+            # TODO: do I want to just return stdout? Raise an error if there is one?
+            return ssh_stdout.read()
 
     # TODO:
     #   copy many files (rather than new sftp each file)
