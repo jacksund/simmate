@@ -25,7 +25,7 @@
 
 Simmate is a full-stack framework and ecosystem for chemistry research. It standardizes how researchers interact with dozens of popular tools and databases by providing a robust ORM, workflow library, and a web UI out of the box. For both molecular and crystalline systems, Simmate also provides a comprehensive toolbox to build your own custom chemistry applications.
 
-[A preview of features and code snippets is available on our documentation homepage.](https://jacksund.github.io/simmate/home/)
+[A preview of features is available on our documentation homepage.](https://jacksund.github.io/simmate/home/)
 
 ## Installation
 
