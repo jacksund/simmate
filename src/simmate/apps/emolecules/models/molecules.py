@@ -27,14 +27,6 @@ class EmoleculesMolecule(ThirdPartyData, Molecule):
     class Meta:
         db_table = "emolecules__molecules"
 
-    html_display_name = "eMolecules"
-    html_description_short = (
-        "A comprehensive, vendor-neutral catalog of chemicals from eMolecules. "
-        "It aggregates data from hundreds of suppliers to provide up-to-date "
-        "availability, pricing, and chemical information for procurement and "
-        "research."
-    )
-
     external_website = "https://www.emolecules.com/"
     source_doi = "https://www.emolecules.com/data-downloads"
     is_redistribution_allowed = False

@@ -25,19 +25,6 @@ class AflowPrototype(ThirdPartyData, Structure):
 
     # -------------------------------------------------------------------------
 
-    html_display_name = "AFLOW Prototypes"
-    html_description_short = (
-        "A library of crystal structure templates (prototypes) from the AFLOW "
-        "Encyclopedia of Crystallographic Prototypes. These templates allow "
-        "researchers to rapidly generate new candidate materials by substituting "
-        "different elements into known symmetry sites."
-    )
-
-    html_entries_template = "aflow/prototype/table.html"
-    html_entry_template = "aflow/prototype/view.html"
-
-    # -------------------------------------------------------------------------
-
     external_website = "https://www.aflowlib.org/prototype-encyclopedia/"
     source_doi = "https://doi.org/10.1016/j.commatsci.2017.01.017"
     is_redistribution_allowed = False

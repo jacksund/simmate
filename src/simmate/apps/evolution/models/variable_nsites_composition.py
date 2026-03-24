@@ -6,13 +6,6 @@ from simmate.database.mixins import Calculation
 
 class VariableNsitesCompositionSearch(Calculation):
 
-    html_display_name = "Variable nSites Searches"
-    html_description_short = (
-        "Structure search results that explore different numbers of atoms per "
-        "unit cell while keeping the chemical composition fixed. This is useful "
-        "for finding complex phases and large-cell structures."
-    )
-
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_variablensitescompositionsearch"

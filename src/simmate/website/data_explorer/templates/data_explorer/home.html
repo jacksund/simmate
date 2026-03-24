@@ -27,48 +27,49 @@
                         </thead>
                         <tbody>
                             {% for dataset in datasets %}
-                                <tr>
-                                    <td>
-                                        {% if dataset.is_redistribution_allowed != False or not LOCK_DATA_REDISTRIBUTION %}
-                                            {# the extra style is to make the link be the entire cell #}
-                                            <a href="{% url 'data_explorer:table' dataset.table_name %}"
-                                               style="display: block;
-                                                      width: 100%;
-                                                      height: 100%;
-                                                      padding: 0;
-                                                      text-decoration: none">
-                                                {{ dataset.html_display_name }} <i class="bi bi-box-arrow-in-right"></i>
-                                            </a>
-                                        {% else %}
-                                            <button type="button"
-                                                    class="text-danger text-start border-0 p-0 m-0"
-                                                    style="display: block;
-                                                           width: 100%;
-                                                           height: 100%;
-                                                           padding: 0;
-                                                           background-color: transparent;
-                                                           text-decoration: none"
-                                                    data-bs-toggle="popover"
-                                                    data-bs-placement="right"
-                                                    data-bs-title="Unavailable in Public Website"
-                                                    data-bs-content="Simmate does not have permission to redistribute data from this provider. However, you can still use our python package to download the data *directly* from the third-party source. In other words, we can't give you their data ourselves, so you must get the data from the provider and then use simmate locally to work with it. The original data's Terms & Conditions will still apply.">
-                                                {{ dataset.html_display_name }} <i class="bi bi-exclamation-triangle"></i>
-                                            </button>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% with counts_dict|getitem:dataset.table_name as row_count %}
-                                            {% if row_count is not None %}
-                                                {{ row_count|floatformat:0|intcomma }}
+                                {% with dataset.table as table %}
+                                    <tr>
+                                        <td>
+                                            {% if table.is_redistribution_allowed != False or not LOCK_DATA_REDISTRIBUTION %}
+                                                <a href="{% url 'data_explorer:table' table.table_name %}"
+                                                   style="display: block;
+                                                          width: 100%;
+                                                          height: 100%;
+                                                          padding: 0;
+                                                          text-decoration: none">
+                                                    {{ dataset.display_name }} <i class="bi bi-box-arrow-in-right"></i>
+                                                </a>
                                             {% else %}
-                                                <span class="text-muted fst-italic">---</span>
+                                                <button type="button"
+                                                        class="text-danger text-start border-0 p-0 m-0"
+                                                        style="display: block;
+                                                               width: 100%;
+                                                               height: 100%;
+                                                               padding: 0;
+                                                               background-color: transparent;
+                                                               text-decoration: none"
+                                                        data-bs-toggle="popover"
+                                                        data-bs-placement="right"
+                                                        data-bs-title="Unavailable in Public Website"
+                                                        data-bs-content="Simmate does not have permission to redistribute data from this provider. However, you can still use our python package to download the data *directly* from the third-party source. In other words, we can't give you their data ourselves, so you must get the data from the provider and then use simmate locally to work with it. The original data's Terms & Conditions will still apply.">
+                                                    {{ dataset.display_name }} <i class="bi bi-exclamation-triangle"></i>
+                                                </button>
                                             {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    <td>
-                                        <small>{{ dataset.html_description_short }}</small>
-                                    </td>
-                                </tr>
+                                        </td>
+                                        <td>
+                                            {% with dataset.num_rows_cache as row_count %}
+                                                {% if row_count is not None %}
+                                                    {{ row_count|floatformat:0|intcomma }}
+                                                {% else %}
+                                                    <span class="text-muted fst-italic">---</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        <td>
+                                            <small>{{ dataset.description_short }}</small>
+                                        </td>
+                                    </tr>
+                                {% endwith %}
                             {% endfor %}
                         </tbody>
                     </table>

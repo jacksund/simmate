@@ -136,13 +136,6 @@ class BandStructureCalc(Structure, BandStructure, Calculation):
     common data that results from such workflow calculations.
     """
 
-    html_display_name = "Band Structures"
-    html_description_short = (
-        "Results for electronic Band Structure calculations. These plots show "
-        "the relationship between electron energy and momentum (k-points) within "
-        "a crystal, identifying features like band gaps and effective masses."
-    )
-
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_bandstructurecalc"

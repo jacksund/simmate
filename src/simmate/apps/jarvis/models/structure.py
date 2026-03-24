@@ -20,19 +20,6 @@ class JarvisStructure(ThirdPartyData, Structure):
 
     # -------------------------------------------------------------------------
 
-    html_display_name = "JARVIS"
-    html_description_short = (
-        "A collection of materials data for high-throughput discovery from "
-        "NIST's JARVIS project. This dataset focuses on 2D and 3D materials "
-        "with high-fidelity calculations of electronic, optical, and "
-        "mechanical properties."
-    )
-
-    html_entries_template = "jarvis/structures/table.html"
-    html_entry_template = "jarvis/structures/view.html"
-
-    # -------------------------------------------------------------------------
-
     external_website = "https://jarvis.nist.gov/"
     source_doi = "https://doi.org/10.1038/s41524-020-00440-1"
     is_redistribution_allowed = True

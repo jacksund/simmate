@@ -31,14 +31,6 @@ class FixedCompositionSearch(Calculation):
     search and also has convient methods to analyze the data + write output files.
     """
 
-    html_display_name = "Fixed-Composition Searches"
-    html_description_short = (
-        "Evolutionary search results for discovering the most stable crystal "
-        "structure of a specific chemical formula. This workflow explores a "
-        "wide range of symmetries and configurations to find the global "
-        "energy minimum."
-    )
-
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_fixedcompositionsearch"

@@ -46,14 +46,6 @@ class CasRegistryMolecule(ThirdPartyData, Molecule):
     class Meta:
         db_table = "cas_registry__molecules"
 
-    html_display_name = "CAS Registry"
-    html_description_short = (
-        "A collection of chemical substances identified by CAS Registry Numbers. "
-        "It provides a unique and universally recognized identity for millions "
-        "of elements, compounds, and polymers, serving as the gold standard "
-        "for chemical identification."
-    )
-
     external_website = "https://www.cas.org/about-us"
     is_redistribution_allowed = False
 

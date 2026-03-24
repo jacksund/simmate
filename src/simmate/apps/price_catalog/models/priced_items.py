@@ -19,19 +19,6 @@ class PricedItem(DatabaseTable):
     class Meta:
         db_table = "price_catalog__priced_items"
 
-    html_display_name = "Market Data & Price Catalog"
-    html_description_short = (
-        "A catalog of prices and economic indicators spanning chemicals, "
-        "stocks, commodities, and more. This data helps in tracking the "
-        "costs of laboratory reagents and broader macroeconomic trends."
-    )
-
-    html_entries_template = "price_catalog/priced_items/table.html"
-    html_entry_template = "price_catalog/priced_items/entry.html"
-
-    # html_form_component = "priced-item-form"
-    # html_enabled_forms = ["search"]
-
     # -------------------------------------------------------------------------
 
     category_options = [
@@ -109,15 +96,6 @@ class PricedItem(DatabaseTable):
     price_10y_stats = table_column.JSONField(blank=True, null=True)
 
     price_25y_stats = table_column.JSONField(blank=True, null=True)
-
-    # -------------------------------------------------------------------------
-
-    enable_html_report = True
-    report_df_columns = ["id"]
-
-    @classmethod
-    def get_report_from_df(cls, df: pandas.DataFrame):
-        return {"test": 123}
 
     # -------------------------------------------------------------------------
 

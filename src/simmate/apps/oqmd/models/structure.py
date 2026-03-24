@@ -24,19 +24,6 @@ class OqmdStructure(ThirdPartyData, Structure):
 
     # -------------------------------------------------------------------------
 
-    html_display_name = "OQMD"
-    html_description_short = (
-        "The Open Quantum Materials Database (OQMD) provides high-throughput "
-        "calculations of thermodynamic and structural properties for a "
-        "comprehensive set of inorganic materials, with a focus on formation "
-        "energies and convex hull analysis."
-    )
-
-    html_entries_template = "oqmd/structures/table.html"
-    html_entry_template = "oqmd/structures/view.html"
-
-    # -------------------------------------------------------------------------
-
     external_website = "https://oqmd.org/"
     source_doi = "https://doi.org/10.1007/s11837-013-0755-4"
     is_redistribution_allowed = True

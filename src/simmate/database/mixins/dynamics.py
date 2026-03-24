@@ -15,7 +15,7 @@ from .structure import Structure
 from .thermodynamics import Thermodynamics
 
 
-class Dynamics(Structure, Calculation):
+class Dynamics(Structure, Thermodynamics, Calculation):
     """
     Holds results from a dynamics simulations -- often referred to as a molecular
     dynamics run.
@@ -25,14 +25,8 @@ class Dynamics(Structure, Calculation):
     `DynamicsIonicSteps`.
     """
 
-    html_display_name = "Dynamics"
-    html_description_short = (
-        "Results for Molecular Dynamics simulations, which model the movement "
-        "of atoms over time at specific temperatures. These are used to study "
-        "thermal stability, phase transitions, and kinetic behavior."
-    )
-
     class Meta:
+
         app_label = "workflow_explorer"
         db_table = "workflows_dynamics"
 

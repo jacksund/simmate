@@ -28,19 +28,6 @@ class WorkItem(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    html_display_name = "Work Items"
-    html_description_short = (
-        "Specific tasks or jobs that have been submitted to a queue for "
-        "execution by workers. This table tracks the lifecycle of a "
-        "calculation, including its parameters, status, and any errors "
-        "encountered."
-    )
-
-    html_entries_template = "workflow_explorer/work_items/table.html"
-    # html_entry_template = "workflow_explorer/work_items//view.html"
-
-    # -------------------------------------------------------------------------
-
     id = table_column.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     """
     The universally unique ID used for the run.

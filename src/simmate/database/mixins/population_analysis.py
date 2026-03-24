@@ -10,20 +10,14 @@ from ..core import table_column
 from .static_energy import StaticEnergy
 
 
-class PopulationAnalysis(StaticEnergy):
+class PopulationAnalysis(Structure, Thermodynamics, Calculation):
     """
     This table combines results from a static energy calculation and the follow-up
     oxidation analysis on the charge density.
     """
 
-    html_display_name = "Population Analysis"
-    html_description_short = (
-        "Results for electronic population analysis, which partitions electron "
-        "density into atomic charges. This helps in understanding oxidation "
-        "states and chemical bonding (e.g., via Bader or Mulliken analysis)."
-    )
-
     class Meta:
+
         app_label = "workflow_explorer"
         db_table = "workflows_populationanalysis"
 

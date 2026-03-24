@@ -11,6 +11,26 @@ class ContainerForm(DynamicTableForm):
 
     table = Container
 
+    template_names = {
+        "default": "data_explorer/table_about.html",
+        "entries": "inventory_management/container/table.html",
+        "entry": "inventory_management/container/view.html",
+    }
+
+    html_display_name = "Containers"
+    html_description_short = (
+        "Containers are specific vessels that contain part (or all) of a batch. A "
+        "single batch can have multiple containers because batches might need to be "
+        "split up and/or have different storage destinations."
+    )
+
+    html_form_component = "container-form"
+    html_enabled_forms = [
+        "search",
+        "create",
+        "update",
+    ]
+
     template_name = "inventory_management/container/form.html"
 
     # -------------------------------------------------------------------------

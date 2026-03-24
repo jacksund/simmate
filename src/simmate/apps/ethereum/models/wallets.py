@@ -10,20 +10,7 @@ class EthereumWallet(ThirdPartyData, DatabaseTable):
     class Meta:
         db_table = "ethereum__wallets"
 
-    html_display_name = "Ethereum Wallets"
-    html_description_short = (
-        "Ethereum blockchain addresses used for tracking decentralized "
-        "transactions and digital assets. These wallets can be used to manage "
-        "project-specific funds and rewards."
-    )
-
     external_website = "https://etherscan.io/"  # even if we pull from alchemy
-
-    html_entries_template = "ethereum/wallets/table.html"
-    html_entry_template = "ethereum/wallets/entry.html"
-
-    # html_form_component = "ethereum-wallet-form"
-    # html_enabled_forms = ["search"]
 
     # -------------------------------------------------------------------------
 

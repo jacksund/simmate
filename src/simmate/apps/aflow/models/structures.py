@@ -21,14 +21,6 @@ class AflowStructure(ThirdPartyData, Structure, Thermodynamics):
     class Meta:
         db_table = "aflow__structures"
 
-    html_display_name = "AFLOW"
-    html_description_short = (
-        "A database of computed and experimental crystal structures from the "
-        "Automatic-FLOW for Materials Discovery (AFLOW) repository. It includes "
-        "a vast collection of alloy and inorganic compounds with "
-        "high-throughput characterization."
-    )
-
     external_website = "http://www.aflowlib.org/"
     source_doi = "https://doi.org/10.1016/j.commatsci.2012.02.005"
     is_redistribution_allowed = False

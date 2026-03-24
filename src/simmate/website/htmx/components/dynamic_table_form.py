@@ -29,12 +29,133 @@ class DynamicTableForm(
 
     # -------------------------------------------------------------------------
 
-    template_names: dict = {}
+    template_names: dict = {
+        "default": "data_explorer/table_about.html",
+        "table": "data_explorer/table.html",
+        "entry": "data_explorer/table_entry.html",
+        "entries": "data_explorer/table_entries.html",
+        "create": "htmx/full_page_component.html",
+        "update": "htmx/full_page_component.html",
+        "create_many": "htmx/full_page_component.html",
+        "search": "htmx/full_page_component.html",
+    }
     """
     The location of the templates to use for this component. The keys should
     be form modes (with an option to have a 'default' key) and the values
     should be the template name.
     """
+
+    @property
+    def about_template(self):
+        return (
+            self.template_names["default"]
+            if "default" in self.template_names
+            else getattr(self.table, "html_about_template", "data_explorer/table_about.html")
+        )
+
+    @property
+    def table_template(self):
+        return (
+            self.template_names["table"]
+            if "table" in self.template_names
+            else getattr(self.table, "html_table_template", "data_explorer/table.html")
+        )
+
+    @property
+    def entry_template(self):
+        return (
+            self.template_names["entry"]
+            if "entry" in self.template_names
+            else getattr(self.table, "html_entry_template", "data_explorer/table_entry.html")
+        )
+
+    @property
+    def entries_template(self):
+        return (
+            self.template_names["entries"]
+            if "entries" in self.template_names
+            else getattr(self.table, "html_entries_template", "data_explorer/table_entries.html")
+        )
+
+    @property
+    def display_name(self):
+        return (
+            self.html_display_name
+            if self.html_display_name
+            else getattr(self.table, "html_display_name", self.table.table_name)
+        )
+
+    @property
+    def description_short(self):
+        return (
+            self.html_description_short
+            if self.html_description_short
+            else getattr(self.table, "html_description_short", "")
+        )
+
+    @property
+    def num_rows_cache(self) -> int | None:
+        """
+        The number of rows in this table, typically cached by a background process.
+        """
+        from simmate.website.data_explorer.models import TableCount
+
+        try:
+            return TableCount.objects.get(table_name=self.table.table_name).row_count
+        except:
+            return None
+
+    # HTMX views (side panels in the table view of the Data Explorer app)
+    html_form_component: str = None
+    html_enabled_forms: list[str] = []
+    # options: "search", "create", "update", "create_many", "create_many_entry", "update_many"
+
+    @property
+    def enabled_forms(self):
+        return (
+            self.html_enabled_forms
+            if self.html_enabled_forms
+            else getattr(self.table, "html_enabled_forms", [])
+        )
+
+    @property
+    def form_component(self):
+        return (
+            self.html_form_component
+            if self.html_form_component
+            else getattr(self.table, "html_form_component", None)
+        )
+
+    # Methods for reports and plotting.
+    enable_html_report: bool = False
+    report_df_columns: list[str] = None
+
+    def get_report(self, data_source=None) -> dict:
+        if not self.enable_html_report and not getattr(
+            self.table, "enable_html_report", False
+        ):
+            return {}
+
+        # convert to a SearchResults/queryset obj
+        if data_source == None:
+            data_source = self.table.objects  # use full table by default
+        elif hasattr(data_source, "paginator"):  # checks if it's a Page object
+            data_source = data_source.paginator.object_list
+
+        columns = (
+            self.report_df_columns
+            if self.report_df_columns
+            else getattr(self.table, "report_df_columns", None)
+        )
+        df = data_source.to_dataframe(columns)
+
+        # we prefer the method on the component, but fallback to the table
+        if hasattr(self, "get_report_from_df"):
+            return self.get_report_from_df(df)
+        elif hasattr(self.table, "get_report_from_df"):
+            return self.table.get_report_from_df(df)
+        else:
+            return {}
 
     @property
     def template_name(self):
@@ -130,10 +251,62 @@ class DynamicTableForm(
                 raise Exception(f"Unknown view type for dynamic form: {view_name}")
 
         # check that mode is actually allowed
-        if self.form_mode not in self.table.html_enabled_forms:
+        if self.form_mode not in self.enabled_forms:
             raise Exception(
                 f"The form mode '{self.form_mode}' is disabled for this table."
             )
+
+    def get_table_docs(self) -> dict:
+        """
+        Grabs table metadata and column descriptions into a single dictionary
+        """
+        import textwrap
+
+        return {
+            "name": self.display_name,
+            "table_info": {
+                "sql_name": self.table._meta.db_table,
+                "python_name": self.table.__name__,
+                "python_path": self.table.__module__,
+                "website_url": getattr(self.table, "url_table", None),
+            },
+            "table_description": textwrap.dedent(self.table.__doc__).strip(),
+            "column_descriptions": self.table.get_column_docs(),
+        }
+
+    def show_table_docs(self, print_out: bool = True) -> str:
+        """
+        Prints all docs about this table. While a GUI is much better for exploring
+        table docs, this method is more useful for outputting text that LLM
+        chatbots can use.
+        """
+        # OPTIMIZE: still need to figure out what format works best with chatbots
+
+        docs = self.get_table_docs()
+
+        # we build the string before printing anything out
+        final_str = ""
+
+        final_str += f"# {docs['name']}\n\n"
+
+        final_str += (
+            "## About\n\n"
+            f"\t- Python Class Name: {docs['table_info']['python_name']}\n"
+            f"\t- Python Import Path: {docs['table_info']['python_path']}\n"
+            f"\t- SQL Table Name: {docs['table_info']['sql_name']}\n"
+            f"\t- Website UI Location: {docs['table_info']['website_url']}\n\n"
+        )
+
+        final_str += "## Table Description\n\n" f"{docs['table_description']}\n\n"
+
+        final_str += "## Column Descriptions\n\n"
+        for col_name, col_descr in docs["column_descriptions"].items():
+            final_str += f"### `{col_name}`\n{col_descr}\n\n"
+
+        if print_out:
+            print(final_str)
+        else:
+            return final_str
 
     def mount_url_info(self):
         # grab parent url for resubmission. We include GET params unless the

@@ -13,25 +13,6 @@ class Container(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    html_display_name = "Containers"
-    html_description_short = (
-        "Containers are specific vessels that contain part (or all) of a batch. A "
-        "single batch can have multiple containers because batches might need to be "
-        "split up and/or have different storage destinations."
-    )
-
-    html_entries_template = "inventory_management/container/table.html"
-    html_entry_template = "inventory_management/container/view.html"
-
-    html_form_component = "container-form"
-    html_enabled_forms = [
-        "search",
-        "create",
-        "update",
-    ]
-
-    # -------------------------------------------------------------------------
-
     batch = table_column.ForeignKey(
         Batch,
         on_delete=table_column.CASCADE,

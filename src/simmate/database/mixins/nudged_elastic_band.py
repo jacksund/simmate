@@ -19,14 +19,6 @@ from .structure import Structure
 
 class DiffusionAnalysis(Structure, Calculation):
 
-    html_display_name = "Diffusion Analysis"
-    html_description_short = (
-        "Results for Diffusion Analysis, typically using the Nudged Elastic "
-        "Band (NEB) method. These simulations map the minimum energy path for "
-        "atoms or ions migrating through a structure, providing activation "
-        "barriers for diffusion."
-    )
-
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_diffusionanalysis"

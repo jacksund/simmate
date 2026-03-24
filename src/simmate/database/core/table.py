@@ -22,7 +22,6 @@ from simmate.database.utils import check_db_conn
 from simmate.utils import get_attributes_doc
 
 from .archive import ArchiveMixin
-from .html_mixin import HTMLMixin
 from .search_results import DatabaseTableManager, SearchResults
 
 # The "as table_column" line does NOTHING but rename a module.
@@ -33,7 +32,7 @@ from .search_results import DatabaseTableManager, SearchResults
 # Experts may find this annoying, so I'm sorry :(
 
 
-class DatabaseTable(models.Model, HTMLMixin, ArchiveMixin):
+class DatabaseTable(models.Model, ArchiveMixin):
     """
     The base class for defining a table in the Simmate database. All tables and
     mixins inherit from this class.

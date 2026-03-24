@@ -31,13 +31,6 @@ class PdbLigand(ThirdPartyData, Molecule):
     class Meta:
         db_table = "pdb__ligands"
 
-    html_display_name = "PDB Ligands"
-    html_description_short = (
-        "Small molecules, ions, and ligands found within the structures of the "
-        "Protein Data Bank (PDB). This dataset provides insights into how small "
-        "molecules interact with biological macromolecules like proteins and DNA."
-    )
-
     external_website = "https://www.wwpdb.org/"
     source_doi = "https://www.wwpdb.org/data/ccd"
     is_redistribution_allowed = True
