@@ -94,8 +94,8 @@ def table_about(request, table_name):
 
 def table_entries(request, table_name):
 
-    component_class = _SAFE_COMPONENTS[table_name]
-    table = component_class.table
+    component = _SAFE_COMPONENTS[table_name]
+    table = component.table
 
     view_format = request.GET.get("format", "html")  # default is html
 
@@ -103,23 +103,21 @@ def table_entries(request, table_name):
         page = table.filter_from_request(request)
         pagination_urls = get_pagination_urls(request, page)
         context = {
+            "component": component,
             "table": table,
             "page": page,
             "pagination_urls": pagination_urls,
             "total": page.paginator.count,  # often limited to 10k
-            "report": component_class.get_report(page),
+            "report": component.get_report(page),
             # "paginator": page.paginator,
             # "entries": page.object_list,  # page.paginator.object_list gives ALL results
             "page_title": table_name,
             "page_title_icon": "mdi-database",
-            "breadcrumbs": ["Data", component_class.display_name],
+            "breadcrumbs": ["Data", component.display_name],
             "title_json_link": True,
-            **getattr(component_class, "html_extra_table_context", {}),
-            # make left sidebar compact (only icons) when there's a quick-search
-            # view, so that we can put the search form on the right side
-            # "compact_sidebar": True if table.html_search_view else False,
+            **component.get_extra_table_context(request),
         }
-        template = component_class.table_template
+        template = component.table_template
         return render(request, template, context)
 
     elif view_format == "json":
@@ -146,7 +144,7 @@ def table_entries(request, table_name):
 
 def table_entry(request, table_name, table_entry_id):
 
-    component_class = _SAFE_COMPONENTS[table_name]
+    component = _SAFE_COMPONENTS[table_name]
     table_entry = get_table_entry_safe(table_name, table_entry_id)
 
     # move to proper view function based on requested format
@@ -158,13 +156,13 @@ def table_entry(request, table_name, table_entry_id):
             "page_title": "Table Entry",
             "breadcrumbs": [
                 "Data",
-                component_class.display_name,
+                component.display_name,
                 table_entry_id,
             ],
             "title_json_link": True,
-            **getattr(component_class, "extra_entry_context", {}),
+            **component.get_extra_entry_context(request, table_entry),
         }
-        template = component_class.entry_template
+        template = component.entry_template
         return render(request, template, context)
 
     elif view_format == "json":

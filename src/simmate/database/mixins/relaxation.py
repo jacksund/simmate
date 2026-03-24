@@ -39,7 +39,7 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
     IonicStep table which holds all of the structure/energy/forces for each
     ionic step.
 
-    WARNING: The Structure stored in this table here is the structure
+    WARNING: The Structure stored in this table here is the input structure
     until the calculation completes. After completed, the structure will
     be updated to the final structure. If you wish to ensure you're accessing
     the correct structure, use the `structure_final` attribute, which gives

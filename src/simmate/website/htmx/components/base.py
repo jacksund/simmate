@@ -51,7 +51,10 @@ class HtmxComponent:
         self.form_data = {}
         self.initial_context = context
         self.request = (
-            context.get("request", None) if context else None
+            # context.get("request", None) if context else None
+            context.request
+            if context
+            else None
         )  # updated with new request every new call
         # this part allows us to pass kwargs to the html tag and apply them to attrs
         # ex: form_mode="example" --> apply to python obj on init

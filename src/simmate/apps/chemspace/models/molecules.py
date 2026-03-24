@@ -18,6 +18,7 @@ class ChemSpaceFreedomSpaceMolecule(ThirdPartyData, Molecule):
     # TODO: Freedom space is now 5bil molecules... The "Screening Compound Catalog"
 
     external_website = "https://chem-space.com/compounds/freedom-space"
+    is_redistribution_allowed = False
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """

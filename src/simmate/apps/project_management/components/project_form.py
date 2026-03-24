@@ -34,14 +34,14 @@ class ProjectForm(DynamicTableForm, UserInput):
 
     # -------------------------------------------------------------------------
 
-    @property
-    def extra_entry_context(self) -> dict:
+    @classmethod
+    def get_extra_entry_context(cls, request, table_entry: Project) -> dict:
 
         count_limit = 50_000
 
         tags__limit = 10
-        tags__count = self.table_entry.tags.all()[:count_limit].count()
-        tags = self.table_entry.tags.order_by("-id").all()[:tags__limit]
+        tags__count = table_entry.tags.all()[:count_limit].count()
+        tags = table_entry.tags.order_by("-id").all()[:tags__limit]
         tags__truncated = bool(len(tags) >= tags__limit)
 
         return {

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import pandas
-
 from simmate.website.htmx.components import DynamicTableForm
 
 from ..models import PricedItem
@@ -23,6 +21,3 @@ class PricedItemTable(DynamicTableForm):
 
     enable_report = True
     report_df_columns = ["id"]
-
-    def get_report_from_df(self, df: pandas.DataFrame):
-        return {"test": 123}

@@ -2,9 +2,8 @@
 
 from schedule import every, repeat
 
-from simmate.config import settings
-
 from .models import TableCount
+from .views import get_data_explorer_components
 
 
 @repeat(every().day.at("02:00"))
@@ -16,8 +15,6 @@ def run_update_table_counts():
     caches their row counts in the TableCount model to prevent slow queries
     on the website's homepage.
     """
-    from .views import get_data_explorer_components
-
     for section_name, components in get_data_explorer_components().items():
         for component in components:
             table = component.table

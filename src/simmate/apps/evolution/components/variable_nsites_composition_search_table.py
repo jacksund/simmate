@@ -2,12 +2,7 @@
 
 from simmate.website.htmx.components import DynamicTableForm
 
-from ..models import (
-    ChemicalSystemSearch,
-    FixedCompositionSearch,
-    SteadystateSource,
-    VariableNsitesCompositionSearch,
-)
+from ..models import VariableNsitesCompositionSearch
 
 
 class VariableNsitesCompositionSearchTable(DynamicTableForm):

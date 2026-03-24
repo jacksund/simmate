@@ -25,9 +25,30 @@ class DynamicTableForm(
 ):
     """
     The abstract base class for dynamic front-end views.
+
+    HTMX views (side panels in the table view of the Data Explorer app)
+    options: "search", "create", "update", "create_many", "create_many_entry", "update_many"
     """
 
-    # -------------------------------------------------------------------------
+    form_mode: str = None
+    """
+    The mode the form is currently in. Options are "create", "update", 
+    "update_many", "create_many", "create_many_entry, and "search".
+    
+    In some cases this does not need to be set because it can be inferred from
+    the parent_url
+    """
+
+    table: DatabaseTable = None  # class object
+    """
+    The database table that this form is intended to create/update rows for
+    """
+
+    table_entry: DatabaseTable = None  # initialized object
+    """
+    If form_mode is "create" or "update", this is the single table entry that
+    is being created or updated. This is set dynamically by the class.
+    """
 
     template_names: dict = {
         "default": "data_explorer/table_about.html",
@@ -44,6 +65,16 @@ class DynamicTableForm(
     be form modes (with an option to have a 'default' key) and the values
     should be the template name.
     """
+
+    @property
+    def template_name(self):
+        return (
+            self.template_names.get(self.form_mode)
+            if self.form_mode in self.template_names
+            else self.template_names["default"]
+        )
+
+    # -------------------------------------------------------------------------
 
     @classmethod
     @property
@@ -87,8 +118,7 @@ class DynamicTableForm(
         except:
             return None
 
-    # HTMX views (side panels in the table view of the Data Explorer app)
-    # options: "search", "create", "update", "create_many", "create_many_entry", "update_many"
+    # -------------------------------------------------------------------------
 
     enabled_forms: list[str] = []
 
@@ -101,57 +131,27 @@ class DynamicTableForm(
     enable_report: bool = False
     report_df_columns: list[str] = None
 
-    def get_report(self, data_source=None) -> dict:
-        if not self.enable_report:
+    @classmethod
+    def get_report(cls, data_source=None) -> dict:
+
+        if not cls.enable_report:
             return {}
 
         # convert to a SearchResults/queryset obj
         if data_source == None:
-            data_source = self.table.objects  # use full table by default
+            data_source = cls.table.objects  # use full table by default
         elif hasattr(data_source, "paginator"):  # checks if it's a Page object
             data_source = data_source.paginator.object_list
 
-        columns = self.report_df_columns
+        columns = cls.report_df_columns
         df = data_source.to_dataframe(columns)
 
         # we prefer the method on the component, but fallback to the table
-        if hasattr(self, "get_report_from_df"):
-            return self.get_report_from_df(df)
+        if hasattr(cls, "get_report_from_df"):
+            return cls.get_report_from_df(df)
         else:
             return {}
 
-    @property
-    def template_name(self):
-        return (
-            self.template_names.get(self.form_mode)
-            if self.form_mode in self.template_names
-            else self.template_names["default"]
-        )
-
-    # -------------------------------------------------------------------------
-
-    form_mode: str = None
-    """
-    The mode the form is currently in. Options are "create", "update", 
-    "update_many", "create_many", "create_many_entry, and "search".
-    
-    In some cases this does not need to be set because it can be inferred from
-    the parent_url
-    """
-
-    table: DatabaseTable = None  # class object
-    """
-    The database table that this form is intended to create/update rows for
-    """
-
-    table_entry: DatabaseTable = None  # initialized object
-    """
-    If form_mode is "create" or "update", this is the single table entry that
-    is being created or updated. This is set dynamically by the class.
-    """
-
-    # -------------------------------------------------------------------------
-    # -------------------------------------------------------------------------
     # -------------------------------------------------------------------------
 
     def submit_form(self):
@@ -412,5 +412,15 @@ class DynamicTableForm(
             raise Exception(
                 f"Unknown redirect_mode for dynamic form: {self.redirect_mode}"
             )
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_extra_table_context(cls, request) -> dict:
+        return {}  # default to nothing extra
+
+    @classmethod
+    def get_extra_entry_context(cls, request, table_entry) -> dict:
+        return {}  # default to nothing extra
 
     # -------------------------------------------------------------------------

@@ -239,7 +239,7 @@ class DatabaseTable(models.Model, ArchiveMixin):
         Grabs table metadata and column descriptions into a single dictionary
         """
         return {
-            "name": cls.display_name if cls.display_name else cls.table_name,
+            "name": cls.table_name,
             "table_info": {
                 "sql_name": cls._meta.db_table,
                 "python_name": cls.table_name,
