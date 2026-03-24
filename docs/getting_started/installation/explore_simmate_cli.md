@@ -22,7 +22,7 @@ The following output should be displayed:
 │ start-project  Creates a new folder and fills it with an example Simmate app               │
 │ config         A group of commands for managing Simmate settings                           │
 │ database       A group of commands for managing your database                              │
-│ engine         A group of commands for starting up computational resources                 │
+│ compute        A group of commands for starting up computational resources                 │
 │                (Workers, Clusters, and Schedulers)                                         │
 │ workflows      A group of commands for running workflows or viewing their settings         │
 │ utils          A group of commands for various simple tasks (such as file handling)        │

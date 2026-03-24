@@ -64,6 +64,14 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 !!! tip
     To view ongoing changes that haven't been finalized or merged yet, check our [active pull-requests](https://github.com/jacksund/simmate/pulls) on GitHub
 
+**Enhancements**
+
+- improved CLI help texts and added rich markdown support across all command groups
+
+**Refactors**
+
+- renamed the `simmate engine` command group to `simmate compute` and updated internal modules/tests
+
 **Fixes**
 
 - patched connection contexts and closing in the `database.external_connectors` module

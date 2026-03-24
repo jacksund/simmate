@@ -11,7 +11,7 @@ In this tutorial, we'll start a worker on your computer and submit a job for it 
 Open a terminal and run the following command. This starts a worker that will stay "on duty" until you stop it (with `Ctrl+C`).
 
 ```bash
-simmate engine start-worker
+simmate compute start-worker
 ```
 
 Your worker is now polling the database: *"Any jobs? (... wait a little ...) Any jobs now?"* Since the queue is empty, it will just continue to wait.

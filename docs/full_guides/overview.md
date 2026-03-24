@@ -10,7 +10,7 @@ Simmate is built in layers, starting with a scientific toolkit and building up t
 
 1. **[Apps](/full_guides/apps/basic_use.md)**: Extensions that add support for new programs (like VASP) or custom features.
 2. **[Website](/full_guides/website/setup_and_config.md)**: The user interface for viewing data and monitoring your work.
-3. **[Workflows](/full_guides/workflows/basic_use.md)**: The engine that automates multi-step calculations and fixes common errors.
+3. **[Workflows](/full_guides/workflows/basic_use.md)**: The compute engine that automates multi-step calculations and fixes common errors.
 4. **[Compute](/full_guides/compute/basic_use.md)**: The system for running jobs on your local machine, clusters, or the cloud.
 5. **[Database](/full_guides/database/basic_use.md)**: How scientific data is stored, organized, and searched.
 6. **[Toolkit](/full_guides/toolkit/crystal_structures/overview.md)**: The core Python objects for molecules and crystal structures.

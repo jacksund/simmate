@@ -73,7 +73,7 @@ Apps follow a consistent (though optional) layout depending on their purpose (si
 - **`urls.py`, `views.py`, `templates/`**: Web UI components (Django/HTMX).
 - **`components/`**: HTMX-based UI components (via `simmate.website.htmx.components`).
 - **`client.py`**: API clients for external services (e.g., Materials Project, PubChem).
-- **`schedules/`**: Periodic tasks (used by `simmate engine start-schedules`).
+- **`schedules/`**: Periodic tasks (used by `simmate compute start-schedules`).
 
 ## Toolkit Details (`src/simmate/toolkit/`)
 

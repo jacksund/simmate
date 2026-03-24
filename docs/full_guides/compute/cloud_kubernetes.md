@@ -22,7 +22,7 @@ RUN pip install simmate
 COPY settings.yaml /root/.simmate/settings.yaml
 
 # Start the worker by default
-CMD ["simmate", "engine", "start-worker"]
+CMD ["simmate", "compute", "start-worker"]
 ```
 
 ---

@@ -11,7 +11,7 @@ In addition to one-off workflows, Simmate supports **periodic tasks** (schedules
 Simmate uses a single "scheduler" process to manage all periodic tasks. You only need to run one of these for your entire project.
 
 ```bash
-simmate engine start-schedules
+simmate compute start-schedules
 ```
 
 The scheduler process will:

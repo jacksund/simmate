@@ -6,24 +6,24 @@ Once you've submitted a few dozen (or hundred) jobs, you'll want to see how they
 
 ## 1. CLI Monitoring
 
-The `simmate engine` command group includes several tools to help you see what's happening in your queue:
+The `simmate compute` command group includes several tools to help you see what's happening in your queue:
 
 ### `stats`
 This gives you a quick overview of how many jobs are in each state (Pending, Running, Finished, etc.):
 ```bash
-simmate engine stats
+simmate compute stats
 ```
 
 ### `workitems`
 This shows a detailed table of every job in the queue, including its name, status, and tags:
 ```bash
-simmate engine workitems
+simmate compute workitems
 ```
 
 ### `delete-finished`
 If your queue gets too cluttered with finished jobs, you can clean them up:
 ```bash
-simmate engine delete-finished
+simmate compute delete-finished
 ```
 
 ---

@@ -57,7 +57,7 @@ class SteadystateSource(DatabaseTable):
             print("\n------------------------------------------------------------\n")
             print("Make sure you check your worker logs for more info.\n")
             print("You can preview ALL failed jobs in the command line:")
-            print("simmate engine show-error-summary\n")
+            print("simmate compute error-summary\n")
             print("Or view a specific error (w. full trackback) in python:")
             print("from simmate.workflows.execution import WorkItem")
             print(f"item = WorkItem.objects.get(id={failed_ids[0]})")

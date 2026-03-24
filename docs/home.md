@@ -99,7 +99,7 @@ Simmate can easily scale along with your project, whether you're on a single com
 
 === "add remote resources"
     ``` bash
-    simmate engine start-worker  # (1)
+    simmate compute start-worker  # (1)
     ```
 
     1. In a separate terminal or even on a remote HPC cluster, you can start a worker that will start running any scheduled jobs in your database.

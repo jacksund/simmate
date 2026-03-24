@@ -33,10 +33,10 @@ module load vasp
 
 # Start a worker that runs one job and then exits.
 # NOTE: This uses the default tag 'simmate'.
-simmate engine start-singleflow-worker
+simmate compute start-singleflow-worker
 
 # To use custom tags, use the full start-worker flags:
-# simmate engine start-worker --tag my-tag --nitems-max 1 --close-on-empty-queue
+# simmate compute start-worker --tag my-tag --nitems-max 1 --close-on-empty-queue
 ```
 
 Submit this script multiple times to start multiple workers:
@@ -49,7 +49,7 @@ Simmate provides a convenience command to submit many workers to SLURM at once.
 
 ```bash
 # Submits 100 workers to SLURM
-simmate engine start-cluster 100 --type slurm
+simmate compute start-cluster 100 --type slurm
 ```
 
 !!! note
