@@ -68,8 +68,8 @@ class TrinoDB:
                 f"https://login.microsoftonline.com/{self.tenant_id}/oauth2/v2.0/token",
                 data={
                     "grant_type": "client_credentials",
-                    "client_id": self.client_id,
-                    "client_secret": self.client_secret,
+                    "client_id": client_id,
+                    "client_secret": client_secret,
                     "scope": self.scope,
                 },
                 headers={"Content-Type": "application/x-www-form-urlencoded"},
@@ -81,13 +81,7 @@ class TrinoDB:
         else:
             raise Exception(f"Unknown auth_type: {auth_type}")
 
-        self.connection = connect(
-            host=self.host,
-            port=self.port,
-            auth=auth,
-            http_scheme="https",
-        )
-        self.cursor = self.connection.cursor()
+        self.auth = auth
 
     def get_query_data(self, query: str) -> pandas.DataFrame:
         """
@@ -98,11 +92,20 @@ class TrinoDB:
         # fetchall, fetchmany (+ chunksize), fetch (i.e. chunksize = 1)
         # fetch_type: str = "fetchall",
         # chunk_size: str = None,
-        self.cursor.execute(query)
-        data = pandas.DataFrame(
-            data=self.cursor.fetchall(),
-            columns=[c[0] for c in self.cursor.description],
-        )
+
+        with connect(
+            host=self.host,
+            port=self.port,
+            auth=self.auth,
+            http_scheme="https",
+        ) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(query)
+                data = pandas.DataFrame(
+                    data=cursor.fetchall(),
+                    columns=[c[0] for c in cursor.description],
+                )
+
         # ---- BUG FIXES -----------------------
         # BUG-FIX (nan-->None)
         data = data.replace({numpy.nan: None})

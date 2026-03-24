@@ -94,15 +94,8 @@ class OracleDB:
             port=self.port,
             service_name=self.service,  # aka "database"
         )
-        self.connection = oracledb.connect(
-            user=user,
-            password=password,
-            dsn=self.dsn,
-        )
-        self.cursor = self.connection.cursor()
-
-        # setup cursor for old db bug-fix
-        self._patch_cursor(self.cursor)
+        self.user = user
+        self.password = password
 
     def get_query_data(self, query: str, fetch_size: int = 1_000) -> pandas.DataFrame:
         """
@@ -113,21 +106,33 @@ class OracleDB:
         # fetchall, fetchmany (+ chunksize), fetch (i.e. chunksize = 1)
         # fetch_type: str = "fetchall",
         # chunk_size: str = None,
-        self.cursor.execute(query)
 
-        # below is the same as...
-        #   self._patch_fetch(self.cursor.fetchall())
-        # But fetching 1,000 at a time is more stable and often faster
-        fetch_data = []
-        new_data = True
-        while new_data:
-            new_data = self._patch_fetch(self.cursor.fetchmany(fetch_size))
-            fetch_data += new_data
+        with oracledb.connect(
+            user=self.user,
+            password=self.password,
+            dsn=self.dsn,
+        ) as connection:
+            with connection.cursor() as cursor:
 
-        data = pandas.DataFrame(
-            data=fetch_data,
-            columns=[c[0] for c in self.cursor.description],
-        )
+                # setup cursor for old db bug-fix
+                self._patch_cursor(cursor)
+
+                cursor.execute(query)
+
+                # below is the same as...
+                #   self._patch_fetch(cursor.fetchall())
+                # But fetching 1,000 at a time is more stable and often faster
+                fetch_data = []
+                new_data = True
+                while new_data:
+                    new_data = self._patch_fetch(cursor.fetchmany(fetch_size))
+                    fetch_data += new_data
+
+                data = pandas.DataFrame(
+                    data=fetch_data,
+                    columns=[c[0] for c in cursor.description],
+                )
+
         # ---- BUG FIXES -----------------------
         # BUG-FIX (nan-->None)
         data = data.replace({numpy.nan: None})
