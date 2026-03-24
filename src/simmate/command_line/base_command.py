@@ -12,6 +12,7 @@ import typer
 from simmate.command_line.compute import compute_app
 from simmate.command_line.config import config_app
 from simmate.command_line.database import database_app
+from simmate.command_line.dev import dev_app
 from simmate.command_line.utils import utils_app
 from simmate.command_line.workflows import workflows_app
 
@@ -24,11 +25,11 @@ simmate_app = typer.Typer(
 @simmate_app.callback(no_args_is_help=True)
 def base_command():
     """
-    Simmate: A "batteries-included" framework for chemistry and materials science. :fire::fire::rocket:
+    :sparkles: Simmate: A full-stack framework for chemistry research :sparkles:
 
-    This is the base command that all other Simmate commands stem from. For a
-    full list of commands, use `simmate --help`. For help with a specific command
-    group, use `simmate <group> --help` (e.g., `simmate database --help`).
+    This is the base command that all other Simmate commands stem from. For
+    help with a specific command group, use `simmate <group> --help`
+    (e.g., `simmate database --help`).
     """
     pass
 
@@ -112,6 +113,7 @@ def start_project():
 # # them to our base "simmate" command here.
 simmate_app.add_typer(config_app, name="config")
 simmate_app.add_typer(database_app, name="database")
+simmate_app.add_typer(dev_app, name="dev")
 simmate_app.add_typer(compute_app, name="compute")
 simmate_app.add_typer(workflows_app, name="workflows")
 simmate_app.add_typer(utils_app, name="utils")

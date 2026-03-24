@@ -129,8 +129,8 @@ The web interface is built with Django and HTMX.
 - **Fixtures:** Use `src/simmate/conftest.py` (e.g., `structure`, `composition`).
 - **Mocking:** Mock external scientific codes unless performing integration tests.
 - **Commands:**
-    - Test: `pytest .`
-    - Lint: `black .`, `isort .`, `djlint .`
+    - Test: `simmate dev test` (or `simmate dev test --full` for VASP)
+    - Lint: `simmate dev lint`
     - Migrations: `simmate database update` (generates and applies migrations).
 
 ## AI Agent Guidelines

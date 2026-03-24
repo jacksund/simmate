@@ -66,6 +66,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 **Enhancements**
 
+- added the `simmate dev` command group with tools for linting, testing, and workspace management
 - improved CLI help texts and added rich markdown support across all command groups
 
 **Refactors**
