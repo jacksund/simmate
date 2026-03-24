@@ -265,8 +265,7 @@ class SimmateSettings:
                         "simmate.apps.evolution.components.FixedCompositionSearchTable",
                         "simmate.apps.evolution.components.VariableNsitesCompositionSearchTable",
                         "simmate.apps.evolution.components.ChemicalSystemSearchTable",
-                        ],
-
+                    ],
                     "Business and Finance": [
                         "simmate.apps.price_catalog.components.PricedItemTable",
                         "simmate.apps.ethereum.components.EthereumWalletTable",
@@ -281,6 +280,7 @@ class SimmateSettings:
                         "simmate.database.mixins.components.SpacegroupTable",
                     ],
                     "HIDDEN": [
+                        "simmate.website.core.components.WebsitePageVisitTable",
                         "simmate.apps.chembl.components.ChemblAssayResultTable",
                         "simmate.apps.chembl.components.ChemblDocumentTable",
                         "simmate.apps.emolecules.components.EmoleculesSupplierOfferTable",

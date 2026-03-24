@@ -15,15 +15,14 @@ class TagForm(DynamicTableForm):
         "entry": "project_management/tag/view.html",
     }
 
-    html_display_name = "Tags, Labels, & Categories"
-    html_description_short = (
+    display_name = "Tags, Labels, & Categories"
+    description_short = (
         "Customizable labels that help with organizing project items like "
         "hypotheses, targets, and orders. Tags allow for flexible "
         "filtering and categorization."
     )
 
-    html_form_component = "tag-form"
-    html_enabled_forms = [
+    enabled_forms = [
         "search",
         "create",
         "update",

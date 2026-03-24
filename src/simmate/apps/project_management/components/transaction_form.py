@@ -14,8 +14,8 @@ class TransactionForm(DynamicTableForm):
         "entry": "project_management/transaction/view.html",
     }
 
-    html_display_name = "Wallet Transactions"
-    html_description_short = (
+    display_name = "Wallet Transactions"
+    description_short = (
         "A ledger of all financial activity within wallets, including payments, "
         "allocations, and rewards. This provides a full audit trail for all "
         "digital assets."

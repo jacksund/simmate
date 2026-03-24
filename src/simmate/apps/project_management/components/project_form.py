@@ -17,26 +17,25 @@ class ProjectForm(DynamicTableForm, UserInput):
         "entry": "project_management/project/view.html",
     }
 
-    html_display_name = "Projects"
-    html_description_short = (
+    display_name = "Projects"
+    description_short = (
         "A container for a collection of related chemistry tasks, hypotheses, "
         "and results. Projects help group and manage scientific work into "
         "discrete units."
     )
 
-    html_form_component = "project-form"
-    html_enabled_forms = [
+    enabled_forms = [
         "search",
         "create",
         "update",
     ]
 
-    html_tabtitle_label_col = "name"
+    tabtitle_label_col = "name"
 
     # -------------------------------------------------------------------------
 
     @property
-    def html_extra_entry_context(self) -> dict:
+    def extra_entry_context(self) -> dict:
 
         count_limit = 50_000
 

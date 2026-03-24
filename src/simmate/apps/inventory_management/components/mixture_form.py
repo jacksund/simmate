@@ -8,8 +8,8 @@ from ..models import Mixture
 class MixtureForm(DynamicTableForm):
     table = Mixture
 
-    html_display_name = "Mixtures"
-    html_description_short = (
+    display_name = "Mixtures"
+    description_short = (
         "Mixtures are the combination of two or more substances. "
         "For example, a solution would be a mixture of two substances: NaCl and water. "
         "This table includes mixtures of both specified and unspecified ratios, "

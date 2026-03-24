@@ -5,20 +5,20 @@ from django.shortcuts import get_object_or_404, render
 from simmate.config import settings
 from simmate.database.core import DatabaseTable
 from simmate.database.utils import get_table
+from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.htmx.utils import get_component
 from simmate.website.utils import get_pagination_urls
 
 # -----------------------------------------------------------------------------
 
-from simmate.website.htmx.utils import get_component
-from simmate.website.htmx.components import DynamicTableForm
 
 def get_data_explorer_components() -> dict:
     """
     Uses the settings to build out Data sections + associated list of components
     within each section.
     """
-    from simmate.website.htmx.utils import get_component
     from simmate.website.htmx.components import DynamicTableForm
+    from simmate.website.htmx.utils import get_component
 
     data_config = {}
     for section_name, entry_list in settings.website.data.items():
@@ -90,12 +90,15 @@ def home(request):
 
 
 def table_about(request, table_name):
-    component = _SAFE_COMPONENTS[table_name]
-    table = component.table
+    component_class = _SAFE_COMPONENTS[table_name]
+    table = component_class.table
+    # We instantiate the component so we can access its properties
+    component = component_class(context={"request": request})
+
     context = {
         "table": table,
         "table_docs": table.get_table_docs(),
-        # TODO: **component.html_extra_about_context,
+        **getattr(component, "extra_about_context", {}),
         "page_title": table_name,
         "breadcrumbs": ["Data", table_name, "About"],
     }
@@ -105,8 +108,11 @@ def table_about(request, table_name):
 
 def table_entries(request, table_name):
 
-    component = _SAFE_COMPONENTS[table_name]
-    table = component.table
+    component_class = _SAFE_COMPONENTS[table_name]
+    table = component_class.table
+    # We instantiate the component so we can access its properties
+    component = component_class(context={"request": request})
+
     view_format = request.GET.get("format", "html")  # default is html
 
     if view_format == "html":
@@ -156,8 +162,13 @@ def table_entries(request, table_name):
 
 def table_entry(request, table_name, table_entry_id):
 
-    component = _SAFE_COMPONENTS[table_name]
+    component_class = _SAFE_COMPONENTS[table_name]
     table_entry = get_table_entry_safe(table_name, table_entry_id)
+    # We instantiate the component so we can access its properties
+    component = component_class(
+        context={"request": request},
+        table_entry=table_entry,
+    )
 
     # move to proper view function based on requested format
     view_format = request.GET.get("format", "html")  # default is html
@@ -172,7 +183,7 @@ def table_entry(request, table_name, table_entry_id):
                 table_entry_id,
             ],
             "title_json_link": True,
-            **getattr(component, "html_extra_entry_context", {}),
+            **getattr(component, "extra_entry_context", {}),
         }
         template = component.entry_template
         return render(request, template, context)
@@ -212,7 +223,9 @@ def table_entry_new(request, table_name):
         "page_title_icon": "mdi-database",
         "breadcrumbs": ["Data", table_name, "Form"],
     }
-    template = getattr(component, "html_entry_form_template", "htmx/full_page_component.html")
+    template = getattr(
+        component, "entry_form_template", "htmx/full_page_component.html"
+    )
     return render(request, template, context)
 
 

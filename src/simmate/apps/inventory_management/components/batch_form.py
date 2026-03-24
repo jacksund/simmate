@@ -15,15 +15,14 @@ class BatchForm(DynamicTableForm):
         "entry": "inventory_management/batch/view.html",
     }
 
-    html_display_name = "Batches"
-    html_description_short = (
+    display_name = "Batches"
+    description_short = (
         "Batches are specific instances of a substance or mixture. For example, "
         "the product of a single synthesis or the delievery a purchased chemical "
         "would each be one batch. One batch can then be stored in one or more containers."
     )
 
-    html_form_component = "batch-form"
-    html_enabled_forms = [
+    enabled_forms = [
         "create",
         "update",
     ]

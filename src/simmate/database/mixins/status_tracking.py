@@ -178,7 +178,7 @@ class StatusTracking(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    enable_html_report = False  # disabled by default
+    enable_report = False  # disabled by default
     report_df_columns = [
         "created_at",
         "status",

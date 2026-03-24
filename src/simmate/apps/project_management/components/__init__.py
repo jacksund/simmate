@@ -3,6 +3,6 @@
 from .mixins import ProjectInput, ProjectManagementInput
 from .project_form import ProjectForm
 from .tag_form import TagForm
+from .token_balance_form import TokenBalanceForm
 from .transaction_form import TransactionForm
 from .wallet_form import WalletForm
-from .token_balance_form import TokenBalanceForm

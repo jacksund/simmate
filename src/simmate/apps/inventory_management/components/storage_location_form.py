@@ -15,15 +15,14 @@ class StorageLocationForm(DynamicTableForm):
         "entry": "inventory_management/storage_location/view.html",
     }
 
-    html_display_name = "Storage Locations"
-    html_description_short = (
+    display_name = "Storage Locations"
+    description_short = (
         "Specific areas where chemical containers are stored. Locations can be "
         "anything from an entire building to a specific cabinet. Locations "
         "can also have 'parent locations' to allow folder-like organization."
     )
 
-    html_form_component = "storage-location-form"
-    html_enabled_forms = [
+    enabled_forms = [
         "search",
         "create",
         "update",

@@ -8,8 +8,8 @@ from ..models import Substance
 class SubstanceForm(DynamicTableForm):
     table = Substance
 
-    html_display_name = "Chemical Substances"
-    html_description_short = (
+    display_name = "Chemical Substances"
+    description_short = (
         "A substance is a specific element or compound with uniform composition+structure. "
         "As a general rule of thumb, if there is a CAS number (from ACS) or "
         "CID (from PubChem) assigned to it, then it is likely a chemical substance. "

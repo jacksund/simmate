@@ -45,53 +45,35 @@ class DynamicTableForm(
     should be the template name.
     """
 
+    @classmethod
     @property
-    def about_template(self):
-        return (
-            self.template_names["default"]
-            if "default" in self.template_names
-            else getattr(self.table, "html_about_template", "data_explorer/table_about.html")
-        )
+    def about_template(cls):
+        return cls.template_names.get("default", "data_explorer/table_about.html")
 
+    @classmethod
     @property
-    def table_template(self):
-        return (
-            self.template_names["table"]
-            if "table" in self.template_names
-            else getattr(self.table, "html_table_template", "data_explorer/table.html")
-        )
+    def table_template(cls):
+        return cls.template_names.get("table", "data_explorer/table.html")
 
+    @classmethod
     @property
-    def entry_template(self):
-        return (
-            self.template_names["entry"]
-            if "entry" in self.template_names
-            else getattr(self.table, "html_entry_template", "data_explorer/table_entry.html")
-        )
+    def entry_template(cls):
+        return cls.template_names.get("entry", "data_explorer/table_entry.html")
 
+    @classmethod
     @property
-    def entries_template(self):
-        return (
-            self.template_names["entries"]
-            if "entries" in self.template_names
-            else getattr(self.table, "html_entries_template", "data_explorer/table_entries.html")
-        )
+    def entries_template(cls):
+        return cls.template_names.get("entries", "data_explorer/table_entries.html")
 
+    @classmethod
     @property
-    def display_name(self):
-        return (
-            self.html_display_name
-            if self.html_display_name
-            else getattr(self.table, "html_display_name", self.table.table_name)
-        )
+    def display_name(cls):
+        return cls.table.table_name
 
+    @classmethod
     @property
-    def description_short(self):
-        return (
-            self.html_description_short
-            if self.html_description_short
-            else getattr(self.table, "html_description_short", "")
-        )
+    def description_short(cls):
+        return ""
 
     @property
     def num_rows_cache(self) -> int | None:
@@ -106,34 +88,21 @@ class DynamicTableForm(
             return None
 
     # HTMX views (side panels in the table view of the Data Explorer app)
-    html_form_component: str = None
-    html_enabled_forms: list[str] = []
     # options: "search", "create", "update", "create_many", "create_many_entry", "update_many"
 
-    @property
-    def enabled_forms(self):
-        return (
-            self.html_enabled_forms
-            if self.html_enabled_forms
-            else getattr(self.table, "html_enabled_forms", [])
-        )
+    enabled_forms: list[str] = []
 
+    @classmethod
     @property
-    def form_component(self):
-        return (
-            self.html_form_component
-            if self.html_form_component
-            else getattr(self.table, "html_form_component", None)
-        )
+    def form_component(cls):
+        return cls.component_name
 
     # Methods for reports and plotting.
-    enable_html_report: bool = False
+    enable_report: bool = False
     report_df_columns: list[str] = None
 
     def get_report(self, data_source=None) -> dict:
-        if not self.enable_html_report and not getattr(
-            self.table, "enable_html_report", False
-        ):
+        if not self.enable_report:
             return {}
 
         # convert to a SearchResults/queryset obj
@@ -142,18 +111,12 @@ class DynamicTableForm(
         elif hasattr(data_source, "paginator"):  # checks if it's a Page object
             data_source = data_source.paginator.object_list
 
-        columns = (
-            self.report_df_columns
-            if self.report_df_columns
-            else getattr(self.table, "report_df_columns", None)
-        )
+        columns = self.report_df_columns
         df = data_source.to_dataframe(columns)
 
         # we prefer the method on the component, but fallback to the table
         if hasattr(self, "get_report_from_df"):
             return self.get_report_from_df(df)
-        elif hasattr(self.table, "get_report_from_df"):
-            return self.table.get_report_from_df(df)
         else:
             return {}
 
@@ -256,24 +219,6 @@ class DynamicTableForm(
                 f"The form mode '{self.form_mode}' is disabled for this table."
             )
 
-    def get_table_docs(self) -> dict:
-        """
-        Grabs table metadata and column descriptions into a single dictionary
-        """
-        import textwrap
-
-        return {
-            "name": self.display_name,
-            "table_info": {
-                "sql_name": self.table._meta.db_table,
-                "python_name": self.table.__name__,
-                "python_path": self.table.__module__,
-                "website_url": getattr(self.table, "url_table", None),
-            },
-            "table_description": textwrap.dedent(self.table.__doc__).strip(),
-            "column_descriptions": self.table.get_column_docs(),
-        }
-
     def show_table_docs(self, print_out: bool = True) -> str:
         """
         Prints all docs about this table. While a GUI is much better for exploring
@@ -282,7 +227,7 @@ class DynamicTableForm(
         """
         # OPTIMIZE: still need to figure out what format works best with chatbots
 
-        docs = self.get_table_docs()
+        docs = self.table.get_table_docs()
 
         # we build the string before printing anything out
         final_str = ""

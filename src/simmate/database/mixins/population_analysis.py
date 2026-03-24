@@ -10,7 +10,7 @@ from ..core import table_column
 from .static_energy import StaticEnergy
 
 
-class PopulationAnalysis(Structure, Thermodynamics, Calculation):
+class PopulationAnalysis(StaticEnergy):
     """
     This table combines results from a static energy calculation and the follow-up
     oxidation analysis on the charge density.
