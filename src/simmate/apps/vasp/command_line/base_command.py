@@ -18,11 +18,9 @@ vasp_app = typer.Typer(
 @vasp_app.callback(no_args_is_help=True)
 def base_command():
     """
-    A collection of utilities to help work with VASP
+    Commands and utilities for managing VASP calculations, input files,
+    and output visualizations.
     """
-    # When we call the command "simmate-vasp" this is where we start, and it then
-    # looks for all other functions that have the decorator "@simmate_vasp.command()"
-    # to decide what to do from there.
     pass
 
 

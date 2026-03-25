@@ -14,18 +14,31 @@ database_app = typer.Typer(rich_markup_mode="markdown")
 
 @database_app.callback(no_args_is_help=True)
 def base_command():
-    """A group of commands for managing your database"""
+    """
+    Commands for managing the Simmate database, including Postgres setup,
+    schema migrations, and data I/O.
+    """
     pass
 
 
 @database_app.command()
 def start(
-    password: str = typer.Option("postgres", help="The password for the postgres user"),
-    port: int = typer.Option(5432, help="The port to expose the database on"),
+    password: str = typer.Option(
+        "postgres",
+        help="The password for the `postgres` user in the Docker container.",
+    ),
+    port: int = typer.Option(
+        5432,
+        help="The port to expose the database on. Defaults to 5432.",
+    ),
 ):
     """
-    Sets up a Postgres database using Docker
+    Starts a Postgres database instance in a Docker container.
+
+    This is a quick way to set up a robust database for local use without
+    manual installation.
     """
+
     from simmate.database.utils import start_postgres_docker
 
     start_postgres_docker(password=password, port=port)
@@ -34,7 +47,7 @@ def start(
 @database_app.command()
 def stop():
     """
-    Stops and removes the Postgres database container
+    Stops and removes the Postgres database Docker container.
     """
     from simmate.database.utils import stop_postgres_docker
 
@@ -42,17 +55,22 @@ def stop():
 
 
 @database_app.command()
-def reset(confirm_delete: bool = False, use_prebuilt: bool = None):
+def reset(
+    confirm_delete: bool = typer.Option(
+        False,
+        "--confirm-delete",
+        help="Automatically confirm that you want to delete and reset the existing database.",
+    ),
+    use_prebuilt: bool = typer.Option(
+        None,
+        "--use-prebuilt/--no-use-prebuilt",
+        help="Whether to use a pre-populated database (SQLite only). If not provided, you will be prompted.",
+    ),
+):
     """
-    Removes any existing data and sets up a clean database
+    Wipes the existing database and initializes a fresh, empty schema.
 
-
-    - `--confirm-delete`: automatically confirms you want to delete the
-    existing database.
-    :warning::warning: Use this with caution.:warning::warning:
-
-    - `--use-prebuilt` and `--no-use-prebuilt`: automatically say yes/no to a
-    prebuilt database. This only applies if you are using sqlite.
+    :warning: **This action is irreversible.** All your data will be lost. :warning:
     """
     from simmate.config import settings
 
@@ -88,7 +106,9 @@ def reset(confirm_delete: bool = False, use_prebuilt: bool = None):
 
 @database_app.command()
 def update():
-    """Updates the database with any changes made"""
+    """
+    Updates the database schema to reflect any recent changes to Django models.
+    """
 
     from simmate.database import connect
     from simmate.database.utils import update_database
@@ -97,9 +117,14 @@ def update():
 
 
 @database_app.command()
-def download(app_name: str):
+def download(
+    app_name: str = typer.Argument(
+        ...,
+        help="The name of the app to download data for (e.g., 'cod').",
+    )
+):
     """
-    Downloads all data for a given Simmate app & loads it into the Simmate database
+    Downloads and populates the database with third-party data for a specific app.
     """
 
     from simmate.database import connect
@@ -109,11 +134,18 @@ def download(app_name: str):
 
 
 @database_app.command()
-def dump_data(filename: Path = "database_dump.json", exclude: list[str] = []):
+def dump_data(
+    filename: Path = typer.Option(
+        "database_dump.json",
+        help="The JSON file where the database contents should be written.",
+    ),
+    exclude: list[str] = typer.Option(
+        [],
+        help="List of apps or models to exclude from the dump. Use `--exclude example` for each item.",
+    ),
+):
     """
-    Takes the Simmate database and writes it to a json file
-
-    - `--filename` is the file to write the all the JSON data to
+    Exports the current database contents to a JSON file.
     """
 
     from simmate.database import connect
@@ -123,11 +155,14 @@ def dump_data(filename: Path = "database_dump.json", exclude: list[str] = []):
 
 
 @database_app.command()
-def load_data(filename: Path = "database_dump.json"):
+def load_data(
+    filename: Path = typer.Option(
+        "database_dump.json",
+        help="The JSON file containing the database contents to load.",
+    )
+):
     """
-    Takes a JSON database and loads it into the Simmate database
-
-    - `--filename` is the file to load the all the JSON data from
+    Imports database contents from a JSON file.
     """
 
     from simmate.database import connect

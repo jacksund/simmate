@@ -7,20 +7,20 @@ Simmate provides several CLI commands to monitor the status of your queue and ma
 To get a quick overview of how many jobs are in each state (Pending, Running, Finished, Errored, Canceled), use:
 
 ```bash
-simmate engine stats
+simmate compute stats
 ```
 
 For a more detailed breakdown, including stats for each specific workflow (categorized by tags), use:
 
 ```bash
-simmate engine stats-detail
+simmate compute stats-detail
 ```
 
 You can also filter these stats by time to see recent activity:
 
 ```bash
 # Show stats for jobs updated in the last 24 hours
-simmate engine stats-detail --recent 24
+simmate compute stats-detail --recent 24
 ```
 
 ---
@@ -30,20 +30,20 @@ simmate engine stats-detail --recent 24
 To see a list of individual jobs and their current status in a table format, use the `workitems` command:
 
 ```bash
-simmate engine workitems
+simmate compute workitems
 ```
 
 You can filter the list by status, tags, or recency:
 
 ```bash
 # Show only errored jobs
-simmate engine workitems --status E
+simmate compute workitems --status E
 
 # Show jobs with a specific tag
-simmate engine workitems --tag my-tag
+simmate compute workitems --tag my-tag
 
 # Show jobs updated in the last 12 hours
-simmate engine workitems --recent 12
+simmate compute workitems --recent 12
 ```
 
 ---
@@ -53,7 +53,7 @@ simmate engine workitems --recent 12
 When jobs fail, they are marked as `Errored` (E). To see a quick summary of the error messages for all failed jobs without digging into individual log files, run:
 
 ```bash
-simmate engine error-summary
+simmate compute error-summary
 ```
 
 This command will print the WorkItem ID followed by the exception message, making it easy to identify common failure modes across your cluster.
@@ -71,25 +71,25 @@ Over time, the `WorkItem` table can grow very large, which may eventually slow d
 This is the most common cleanup task. It removes entries for jobs that completed successfully.
 
 ```bash
-simmate engine delete-finished --confirm
+simmate compute delete-finished --confirm
 ```
 
 ### Deleting by Tag
 If you ran a test batch or a specific project that is now complete, you can delete those specific entries:
 
 ```bash
-simmate engine delete --tag test-runs --confirm
+simmate compute delete --tag test-runs --confirm
 ```
 
 !!! note
-    If you run `simmate engine delete --confirm` without any tags, it will delete all jobs that have **no** tags assigned to them.
+    If you run `simmate compute delete --confirm` without any tags, it will delete all jobs that have **no** tags assigned to them.
 
 ### Deleting Everything
 !!! danger
     This will delete **ALL** jobs from the queue, including those that are currently `Pending` or `Running`. Use this with caution.
 
 ```bash
-simmate engine delete-all --confirm
+simmate compute delete-all --confirm
 ```
 
 ---

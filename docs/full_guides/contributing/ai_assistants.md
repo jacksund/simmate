@@ -73,7 +73,7 @@ Apps follow a consistent (though optional) layout depending on their purpose (si
 - **`urls.py`, `views.py`, `templates/`**: Web UI components (Django/HTMX).
 - **`components/`**: HTMX-based UI components (via `simmate.website.htmx.components`).
 - **`client.py`**: API clients for external services (e.g., Materials Project, PubChem).
-- **`schedules/`**: Periodic tasks (used by `simmate engine start-schedules`).
+- **`schedules/`**: Periodic tasks (used by `simmate compute start-schedules`).
 
 ## Toolkit Details (`src/simmate/toolkit/`)
 
@@ -129,8 +129,8 @@ The web interface is built with Django and HTMX.
 - **Fixtures:** Use `src/simmate/conftest.py` (e.g., `structure`, `composition`).
 - **Mocking:** Mock external scientific codes unless performing integration tests.
 - **Commands:**
-    - Test: `pytest .`
-    - Lint: `black .`, `isort .`, `djlint .`
+    - Test: `simmate dev test` (or `simmate dev test --full` for VASP)
+    - Lint: `simmate dev lint`
     - Migrations: `simmate database update` (generates and applies migrations).
 
 ## AI Agent Guidelines

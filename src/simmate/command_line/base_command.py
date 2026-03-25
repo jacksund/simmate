@@ -9,9 +9,10 @@ from pathlib import Path
 
 import typer
 
+from simmate.command_line.compute import compute_app
 from simmate.command_line.config import config_app
 from simmate.command_line.database import database_app
-from simmate.command_line.engine import engine_app
+from simmate.command_line.dev import dev_app
 from simmate.command_line.utils import utils_app
 from simmate.command_line.workflows import workflows_app
 
@@ -24,34 +25,42 @@ simmate_app = typer.Typer(
 @simmate_app.callback(no_args_is_help=True)
 def base_command():
     """
-    This is the base command that all other Simmate commands stem from
-    :fire::fire::rocket:
+    :sparkles: Simmate: A full-stack framework for chemistry research :sparkles:
+
+    This is the base command that all other Simmate commands stem from. For
+    help with a specific command group, use `simmate <group> --help`
+    (e.g., `simmate database --help`).
     """
-    # When we call the command "simmate" this is where we start, and it then
-    # looks for all other functions that have the decorator "@simmate.command()"
-    # to decide what to do from there.
     pass
 
 
 @simmate_app.command()
 def version():
     """
-    Prints the version of simmate that is installed.
+    Displays the currently installed version of Simmate and checks for updates.
     """
     import simmate
     from simmate.utils import get_latest_version
 
     print(f"Installed version: v{simmate.__version__}")
-    print(f"Newest available: v{get_latest_version()}")
+    print(f"Newest available:  v{get_latest_version()}")
 
 
 @simmate_app.command()
-def run_server(port: int = 8000):
+def run_server(
+    port: int = typer.Option(
+        8000,
+        help="The port on which to run the local server. Default is 8000.",
+    )
+):
     """
-    Runs a local test server for the Simmate website interface
+    Starts a local development server for the Simmate Web UI.
 
-    While this command is running, you can then view the working website
-    at http://localhost:8000/ (aka http://127.0.0.1:8000/)
+    While the server is running, you can access the interface in your browser
+    at http://localhost:8000/.
+
+    This server is intended for local testing and data exploration. It should
+    **not** be used for production deployments.
     """
 
     import subprocess
@@ -61,20 +70,16 @@ def run_server(port: int = 8000):
         f"django-admin runserver {port} --settings=simmate.config.django.settings --insecure --noreload",
         shell=True,
     )
-    # BUG: we added the "--insecure" flag in order to serve static files with
-    # the DEBUG=False mode turned on. This makes the file serving slower though.
-    #   https://stackoverflow.com/questions/5836674/
-    # BUG: normally the 8000 port is used, but we allow it to be overwritten
-    # to 80 so that some allauth endpoints work for local testing. For example,
-    # Microsoft AD doesn't allow redirect to the 8000 port.
-    # BUG: --noreload is a temp patch for windows until we update to django v5:
-    #   https://github.com/django/django/pull/17203
 
 
 @simmate_app.command()
 def start_project():
     """
-    Creates a new folder and fills it with an example Simmate app
+    Initializes a new Simmate project directory from a template.
+
+    This command creates a `my_simmate_project` folder in your current directory,
+    pre-populated with an example application structure. This is the recommended
+    starting point for building custom Simmate apps.
     """
 
     import logging
@@ -108,6 +113,7 @@ def start_project():
 # # them to our base "simmate" command here.
 simmate_app.add_typer(config_app, name="config")
 simmate_app.add_typer(database_app, name="database")
-simmate_app.add_typer(engine_app, name="engine")
+simmate_app.add_typer(dev_app, name="dev")
+simmate_app.add_typer(compute_app, name="compute")
 simmate_app.add_typer(workflows_app, name="workflows")
 simmate_app.add_typer(utils_app, name="utils")
