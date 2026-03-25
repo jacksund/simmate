@@ -26,19 +26,6 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
 
     # -------------------------------------------------------------------------
 
-    html_display_name = "Materials Project"
-    html_description_short = (
-        "Computed properties of all known inorganic materials, provided by the "
-        "Materials Project at Berkeley National Labs. This is one of the most "
-        "widely used databases for thermodynamic stability and electronic "
-        "property screening."
-    )
-
-    html_entries_template = "materials_project/structures/table.html"
-    html_entry_template = "materials_project/structures/view.html"
-
-    # -------------------------------------------------------------------------
-
     external_website = "https://materialsproject.org/"
     source_doi = "https://doi.org/10.1063/1.4812323"
     is_redistribution_allowed = True

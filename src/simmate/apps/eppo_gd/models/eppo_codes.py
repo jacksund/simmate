@@ -32,19 +32,7 @@ class EppoCode(ThirdPartyData, DatabaseTable):
     class Meta:
         db_table = "eppo_gd__eppo_codes"
 
-    html_display_name = "EPPO Global Database"
-    html_description_short = (
-        "A standardized coding system for organisms, including plants, pests, "
-        "and pathogens, maintained by the European and Mediterranean Plant "
-        "Protection Organization (EPPO). These codes ensure unambiguous "
-        "identification in agricultural and biological research."
-    )
     is_redistribution_allowed = True
-
-    external_website = "https://gd.eppo.int/"
-
-    html_entries_template = "eppo_gd/eppo_codes/table.html"
-    # html_entry_template = "eppo_gd/eppo_codes/view.html"
 
     # -------------------------------------------------------------------------
 

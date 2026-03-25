@@ -25,13 +25,6 @@ class Dynamics(Structure, Calculation):
     `DynamicsIonicSteps`.
     """
 
-    html_display_name = "Dynamics"
-    html_description_short = (
-        "Results for Molecular Dynamics simulations, which model the movement "
-        "of atoms over time at specific temperatures. These are used to study "
-        "thermal stability, phase transitions, and kinetic behavior."
-    )
-
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_dynamics"

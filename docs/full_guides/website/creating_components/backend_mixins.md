@@ -43,16 +43,26 @@ class ProjectForm(DynamicTableForm):
 -   `"update"`: Updates an existing row.
 -   `"search"`: Filters data based on input values.
 
-### Registering with your Model
+`DynamicTableForm` uses several attributes to determine its behavior and appearance in the Simmate Data Explorer:
 
-To make your form available in the Simmate Data Explorer, add these attributes to your Django model:
+-   `display_name`: A human-readable name for the table (e.g., "My Projects").
+-   `description_short`: A brief description of the dataset.
+-   `enabled_forms`: A list of form modes to enable (e.g., `["create", "update", "search"]`).
+-   `template_names`: A dictionary mapping form modes to custom templates.
+
+### Example: Customizing the Form
 
 ```python
-class Project(DatabaseTable):
-    # ... fields ...
+class ProjectForm(DynamicTableForm):
+    table = Project
+    display_name = "Research Projects"
+    description_short = "Manage your lab's computational research projects."
+    enabled_forms = ["create", "update", "search"]
     
-    html_form_component = "project-form"
-    html_enabled_forms = ["create", "update", "search"]
+    template_names = {
+        "default": "my_app/project_about.html",
+        "entry": "my_app/project_view.html",
+    }
 ```
 
 --------------------------

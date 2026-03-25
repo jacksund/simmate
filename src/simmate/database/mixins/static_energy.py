@@ -20,19 +20,6 @@ class StaticEnergy(Structure, Thermodynamics, Forces, Calculation):
 
     # -------------------------------------------------------------------------
 
-    html_display_name = "Static Energy"
-    html_description_short = (
-        "Results for Static Energy calculations, which determine the total "
-        "energy of a fixed structure. These single-point calculations are "
-        "fundamental for comparing the relative stability of different "
-        "configurations."
-    )
-
-    html_entries_template = "workflow_explorer/static_energy/table.html"
-    html_entry_template = "workflow_explorer/static_energy/view.html"
-
-    # -------------------------------------------------------------------------
-
     archive_fields = [
         "valence_band_maximum",
         "conduction_band_minimum",

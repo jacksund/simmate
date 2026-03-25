@@ -20,6 +20,10 @@ LOCAL_COMPONENT_CACHE = LRUCache(maxsize=10_000)
 
 class HtmxComponent:
 
+    # Prevents Django from instantiating this class when accessing class attributes in templates
+    # (e.g., when accessing `dataset.table` where `dataset` is an uninstantiated HtmxComponent)
+    do_not_call_in_templates = True
+
     template_name: str = None
 
     # -------------------------------------------------------------------------
@@ -47,7 +51,10 @@ class HtmxComponent:
         self.form_data = {}
         self.initial_context = context
         self.request = (
-            context.request if context else None
+            # context.get("request", None) if context else None
+            context.request
+            if context
+            else None
         )  # updated with new request every new call
         # this part allows us to pass kwargs to the html tag and apply them to attrs
         # ex: form_mode="example" --> apply to python obj on init

@@ -16,19 +16,9 @@ class ChemSpaceFreedomSpaceMolecule(ThirdPartyData, Molecule):
         db_table = "chemspace__freedom_space__molecules"
 
     # TODO: Freedom space is now 5bil molecules... The "Screening Compound Catalog"
-    # is now what we'd want. It is roughly 7.5mil compounds:
-    #   https://chem-space.com/compounds#screening-compounds
-
-    html_display_name = "ChemSpace Freedom"
-    html_description_short = (
-        "A vast catalog of commercially available chemical building blocks and "
-        "lead-like compounds from ChemSpace. This dataset focuses on the "
-        "'Freedom Space'—a collection of billions of accessible molecules for "
-        "rapid procurement."
-    )
-    is_redistribution_allowed = False
 
     external_website = "https://chem-space.com/compounds/freedom-space"
+    is_redistribution_allowed = False
 
     id = table_column.CharField(max_length=25, primary_key=True)
     """

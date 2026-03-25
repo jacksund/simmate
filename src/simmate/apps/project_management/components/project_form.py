@@ -11,6 +11,45 @@ class ProjectForm(DynamicTableForm, UserInput):
 
     template_name = "project_management/project/form.html"
 
+    template_names = {
+        "default": "data_explorer/table_about.html",
+        "entries": "project_management/project/table.html",
+        "entry": "project_management/project/view.html",
+    }
+
+    display_name = "Projects"
+    description_short = (
+        "A container for a collection of related chemistry tasks, hypotheses, "
+        "and results. Projects help group and manage scientific work into "
+        "discrete units."
+    )
+
+    enabled_forms = [
+        "search",
+        "create",
+        "update",
+    ]
+
+    tabtitle_label_col = "name"
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_extra_entry_context(cls, request, table_entry: Project) -> dict:
+
+        count_limit = 50_000
+
+        tags__limit = 10
+        tags__count = table_entry.tags.all()[:count_limit].count()
+        tags = table_entry.tags.order_by("-id").all()[:tags__limit]
+        tags__truncated = bool(len(tags) >= tags__limit)
+
+        return {
+            "tags": tags,
+            "tags__count": tags__count,
+            "tags__truncated": tags__truncated,
+        }
+
     # -------------------------------------------------------------------------
 
     # CREATE

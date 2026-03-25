@@ -17,9 +17,6 @@ class Bader(Structure, Calculation):
     the BaderKit package.
     """
 
-    html_display_name = "BaderKit Charge Analysis"
-    html_description_short = "Results for BaderKit Charge Analysis Calculations"
-
     class Meta:
         app_label = "baderkit"
 

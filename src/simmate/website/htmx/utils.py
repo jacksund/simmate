@@ -58,18 +58,20 @@ def get_all_components(
             ]
 
     return (
-        app_components
-        if not as_dict
-        else {flow.component_name: flow for flow in app_components}
+        app_components if not as_dict else {c.component_name: c for c in app_components}
     )
 
 
 def get_component(component_name: str):  # -> subclass of HtmxComponent
     """
-    Given a component name (e.g. "project-form") or a full import
-    path of a component, this will load and return the corresponding
-    component class.
+    Given a component name (e.g. "project-form"), a full import
+    path of a component, or the component class itself, this will
+    load and return the corresponding component class.
     """
+
+    # if the class is already provided, just return it right away
+    if isclass(component_name) and issubclass(component_name, HtmxComponent):
+        return component_name
 
     # "." in the name indicates an import path
     if "." in component_name:

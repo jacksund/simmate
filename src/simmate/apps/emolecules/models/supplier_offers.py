@@ -22,9 +22,6 @@ class EmoleculesSupplierOffer(ThirdPartyData, DatabaseTable):
     class Meta:
         db_table = "emolecules__supplier_offers"
 
-    html_display_name = "eMolecules Building Blocks Offers"
-    html_description_short = "A vendor catalog of chemical 'building-blocks'"
-
     external_website = "https://www.emolecules.com/"
     source_doi = "https://www.emolecules.com/data-downloads"
     is_redistribution_allowed = False

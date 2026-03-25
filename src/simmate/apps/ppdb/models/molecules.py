@@ -28,16 +28,6 @@ class PpdbMolecule(ThirdPartyData, Molecule):
     class Meta:
         db_table = "ppdb__molecules"
 
-    html_display_name = "PPDB"
-    html_description_short = (
-        "The Pesticide Properties DataBase (PPDB) provides comprehensive "
-        "information on the physical, chemical, and environmental properties "
-        "of pesticides, including toxicity and regulatory status."
-    )
-
-    html_entries_template = "ppdb/molecules/table.html"
-    html_entry_template = "ppdb/molecules/view.html"
-
     external_website = "https://sitem.herts.ac.uk/aeru/ppdb/en/index.htm"
     source_doi = "https://sitem.herts.ac.uk/aeru/ppdb/en/atoz.htm"
     is_redistribution_allowed = False

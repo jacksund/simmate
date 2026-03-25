@@ -111,14 +111,6 @@ class DensityofStatesCalc(Structure, DensityofStates, Calculation):
     common data that results from such workflow calculations.
     """
 
-    html_display_name = "Density of States"
-    html_description_short = (
-        "Results for Density of States (DOS) calculations, which describe the "
-        "number of electronic states available at each energy level. This "
-        "analysis is crucial for understanding a material's electronic and "
-        "optical properties."
-    )
-
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_densityofstatescalc"

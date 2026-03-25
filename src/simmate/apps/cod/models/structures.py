@@ -26,19 +26,6 @@ class CodStructure(ThirdPartyData, Structure):
 
     # -------------------------------------------------------------------------
 
-    html_display_name = "COD"
-    html_description_short = (
-        "The Crystallography Open Database (COD) is an open-access collection "
-        "of crystal structures for organic, inorganic, metal-organic compounds, "
-        "and minerals. It serves as a primary resource for experimental "
-        "diffraction data."
-    )
-
-    html_entries_template = "cod/structures/table.html"
-    html_entry_template = "cod/structures/view.html"
-
-    # -------------------------------------------------------------------------
-
     external_website = "https://www.crystallography.net/cod/"
     source_doi = "https://doi.org/10.1107/S0021889809016690"
     is_redistribution_allowed = True

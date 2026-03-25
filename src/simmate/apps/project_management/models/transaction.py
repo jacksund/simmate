@@ -12,16 +12,6 @@ class Transaction(DatabaseTable):
     class Meta:
         db_table = "project_management__transactions"
 
-    html_display_name = "Wallet Transactions"
-    html_description_short = (
-        "A ledger of all financial activity within wallets, including payments, "
-        "allocations, and rewards. This provides a full audit trail for all "
-        "digital assets."
-    )
-
-    html_entries_template = "project_management/transaction/table.html"
-    html_entry_template = "project_management/transaction/view.html"
-
     # -------------------------------------------------------------------------
 
     status_options = [

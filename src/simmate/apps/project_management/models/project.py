@@ -17,23 +17,6 @@ class Project(DatabaseTable):
     class Meta:
         db_table = "project_management__projects"
 
-    html_display_name = "Projects"
-    html_description_short = (
-        "A container for a collection of related chemistry tasks, hypotheses, "
-        "and results. Projects help group and manage scientific work into "
-        "discrete units."
-    )
-
-    html_entries_template = "project_management/project/table.html"
-    html_entry_template = "project_management/project/view.html"
-
-    html_form_component = "project-form"
-    html_enabled_forms = [
-        "search",
-        "create",
-        "update",
-    ]
-
     # -------------------------------------------------------------------------
 
     name = table_column.CharField(max_length=25)
@@ -133,64 +116,5 @@ class Project(DatabaseTable):
             n for n in suggested_names if n not in existing_names
         ]
         return random.choice(suggested_names_cleaned)
-
-    # -------------------------------------------------------------------------
-
-    html_tabtitle_label_col = "name"
-
-    @classmethod
-    def get_web_queryset(cls):
-        return cls.objects.prefetch_related("leaders")
-
-    @property
-    def html_extra_entry_context(self) -> dict:
-
-        count_limit = 50_000
-
-        tags__limit = 10
-        tags__count = self.tags.all()[:count_limit].count()
-        tags = self.tags.order_by("-id").all()[:tags__limit]
-        tags__truncated = bool(len(tags) >= tags__limit)
-
-        return {
-            "tags": tags,
-            "tags__count": tags__count,
-            "tags__truncated": tags__truncated,
-        }
-
-    # -------------------------------------------------------------------------
-
-    # This section is DEPRECIATED in favor of form mix-ins
-
-    @property
-    def tag_options(self) -> list[tuple]:
-
-        from .tag import Tag
-
-        # query for all tags directly linked
-        project_tags = self.tags.order_by("name").values_list("id", "name").all()
-
-        # add in generic tags after specific ones
-        generic_tags = (
-            Tag.objects.filter(tag_type="all-projects")
-            .order_by("name")
-            .values_list("id", "name")
-            .all()
-        )
-
-        # reformat into tuple of (value, display)
-        return [
-            (id, tag_name) for id, tag_name in list(project_tags) + list(generic_tags)
-        ]
-
-    @classmethod
-    @property
-    def project_options(cls) -> list[tuple]:
-
-        # query for all tags
-        projects = cls.objects.order_by("name").values_list("id", "name").all()
-
-        # reformat into tuple of (value, display)
-        return [(id, name) for id, name in projects]
 
     # -------------------------------------------------------------------------

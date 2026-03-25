@@ -16,13 +16,6 @@ class PopulationAnalysis(StaticEnergy):
     oxidation analysis on the charge density.
     """
 
-    html_display_name = "Population Analysis"
-    html_description_short = (
-        "Results for electronic population analysis, which partitions electron "
-        "density into atomic charges. This helps in understanding oxidation "
-        "states and chemical bonding (e.g., via Bader or Mulliken analysis)."
-    )
-
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_populationanalysis"

@@ -3,7 +3,6 @@
 from django.db import migrations, models
 
 import simmate.database.core.archive
-import simmate.database.core.html_mixin
 
 
 class Migration(migrations.Migration):
@@ -33,7 +32,6 @@ class Migration(migrations.Migration):
             },
             bases=(
                 models.Model,
-                simmate.database.core.html_mixin.HTMLMixin,
                 simmate.database.core.archive.ArchiveMixin,
             ),
         ),

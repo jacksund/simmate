@@ -21,13 +21,6 @@ class EnamineRealMolecule(ThirdPartyData, Molecule):
     class Meta:
         db_table = "enamine__real__molecules"
 
-    html_display_name = "Enamine REAL"
-    html_description_short = (
-        "The Enamine REAL (REadily Accessible) database contains billions of "
-        "accessible compounds that can be synthesized quickly using established "
-        "chemical reactions. It is a premier resource for large-scale "
-        "virtual screening."
-    )
     is_redistribution_allowed = False
 
     external_website = (

@@ -25,26 +25,10 @@ class DynamicTableForm(
 ):
     """
     The abstract base class for dynamic front-end views.
+
+    HTMX views (side panels in the table view of the Data Explorer app)
+    options: "search", "create", "update", "create_many", "create_many_entry", "update_many"
     """
-
-    # -------------------------------------------------------------------------
-
-    template_names: dict = {}
-    """
-    The location of the templates to use for this component. The keys should
-    be form modes (with an option to have a 'default' key) and the values
-    should be the template name.
-    """
-
-    @property
-    def template_name(self):
-        return (
-            self.template_names.get(self.form_mode)
-            if self.form_mode in self.template_names
-            else self.template_names["default"]
-        )
-
-    # -------------------------------------------------------------------------
 
     form_mode: str = None
     """
@@ -66,8 +50,108 @@ class DynamicTableForm(
     is being created or updated. This is set dynamically by the class.
     """
 
+    template_names: dict = {
+        "default": "data_explorer/table_about.html",
+        "table": "data_explorer/table.html",
+        "entry": "data_explorer/table_entry.html",
+        "entries": "data_explorer/table_entries.html",
+        "create": "htmx/full_page_component.html",
+        "update": "htmx/full_page_component.html",
+        "create_many": "htmx/full_page_component.html",
+        "search": "htmx/full_page_component.html",
+    }
+    """
+    The location of the templates to use for this component. The keys should
+    be form modes (with an option to have a 'default' key) and the values
+    should be the template name.
+    """
+
+    @property
+    def template_name(self):
+        return (
+            self.template_names.get(self.form_mode)
+            if self.form_mode in self.template_names
+            else self.template_names["default"]
+        )
+
     # -------------------------------------------------------------------------
+
+    @classmethod
+    @property
+    def about_template(cls):
+        return cls.template_names.get("default", "data_explorer/table_about.html")
+
+    @classmethod
+    @property
+    def table_template(cls):
+        return cls.template_names.get("table", "data_explorer/table.html")
+
+    @classmethod
+    @property
+    def entry_template(cls):
+        return cls.template_names.get("entry", "data_explorer/table_entry.html")
+
+    @classmethod
+    @property
+    def entries_template(cls):
+        return cls.template_names.get("entries", "data_explorer/table_entries.html")
+
+    @classmethod
+    @property
+    def display_name(cls):
+        return cls.table.table_name
+
+    @classmethod
+    @property
+    def description_short(cls):
+        return ""
+
+    @property
+    def num_rows_cache(self) -> int | None:
+        """
+        The number of rows in this table, typically cached by a background process.
+        """
+        from simmate.website.data_explorer.models import TableCount
+
+        try:
+            return TableCount.objects.get(table_name=self.table.table_name).row_count
+        except:
+            return None
+
     # -------------------------------------------------------------------------
+
+    enabled_forms: list[str] = []
+
+    @classmethod
+    @property
+    def form_component(cls):
+        return cls.component_name
+
+    # Methods for reports and plotting.
+    enable_report: bool = False
+    report_df_columns: list[str] = None
+
+    @classmethod
+    def get_report(cls, data_source=None) -> dict:
+
+        if not cls.enable_report:
+            return {}
+
+        # convert to a SearchResults/queryset obj
+        if data_source == None:
+            data_source = cls.table.objects  # use full table by default
+        elif hasattr(data_source, "paginator"):  # checks if it's a Page object
+            data_source = data_source.paginator.object_list
+
+        columns = cls.report_df_columns
+        df = data_source.to_dataframe(columns)
+
+        # we prefer the method on the component, but fallback to the table
+        if hasattr(cls, "get_report_from_df"):
+            return cls.get_report_from_df(df)
+        else:
+            return {}
+
     # -------------------------------------------------------------------------
 
     def submit_form(self):
@@ -130,10 +214,44 @@ class DynamicTableForm(
                 raise Exception(f"Unknown view type for dynamic form: {view_name}")
 
         # check that mode is actually allowed
-        if self.form_mode not in self.table.html_enabled_forms:
+        if self.form_mode not in self.enabled_forms:
             raise Exception(
                 f"The form mode '{self.form_mode}' is disabled for this table."
             )
+
+    def show_table_docs(self, print_out: bool = True) -> str:
+        """
+        Prints all docs about this table. While a GUI is much better for exploring
+        table docs, this method is more useful for outputting text that LLM
+        chatbots can use.
+        """
+        # OPTIMIZE: still need to figure out what format works best with chatbots
+
+        docs = self.table.get_table_docs()
+
+        # we build the string before printing anything out
+        final_str = ""
+
+        final_str += f"# {docs['name']}\n\n"
+
+        final_str += (
+            "## About\n\n"
+            f"\t- Python Class Name: {docs['table_info']['python_name']}\n"
+            f"\t- Python Import Path: {docs['table_info']['python_path']}\n"
+            f"\t- SQL Table Name: {docs['table_info']['sql_name']}\n"
+            f"\t- Website UI Location: {docs['table_info']['website_url']}\n\n"
+        )
+
+        final_str += "## Table Description\n\n" f"{docs['table_description']}\n\n"
+
+        final_str += "## Column Descriptions\n\n"
+        for col_name, col_descr in docs["column_descriptions"].items():
+            final_str += f"### `{col_name}`\n{col_descr}\n\n"
+
+        if print_out:
+            print(final_str)
+        else:
+            return final_str
 
     def mount_url_info(self):
         # grab parent url for resubmission. We include GET params unless the
@@ -294,5 +412,15 @@ class DynamicTableForm(
             raise Exception(
                 f"Unknown redirect_mode for dynamic form: {self.redirect_mode}"
             )
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_extra_table_context(cls, request) -> dict:
+        return {}  # default to nothing extra
+
+    @classmethod
+    def get_extra_entry_context(cls, request, table_entry) -> dict:
+        return {}  # default to nothing extra
 
     # -------------------------------------------------------------------------

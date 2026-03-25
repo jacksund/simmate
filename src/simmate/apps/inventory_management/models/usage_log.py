@@ -14,14 +14,6 @@ class UsageLog(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    html_display_name = "Containers Usage Logs"
-    html_description_short = (
-        "Instances where a user interacts with a container, such as removing "
-        "some material for an experiment."
-    )
-
-    # -------------------------------------------------------------------------
-
     container = table_column.ForeignKey(
         Container,
         on_delete=table_column.CASCADE,

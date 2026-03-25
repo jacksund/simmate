@@ -10,25 +10,6 @@ class StorageLocation(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    html_display_name = "Storage Locations"
-    html_description_short = (
-        "Specific areas where chemical containers are stored. Locations can be "
-        "anything from an entire building to a specific cabinet. Locations "
-        "can also have 'parent locations' to allow folder-like organization."
-    )
-
-    html_entries_template = "inventory_management/storage_location/table.html"
-    html_entry_template = "inventory_management/storage_location/view.html"
-
-    html_form_component = "storage-location-form"
-    html_enabled_forms = [
-        "search",
-        "create",
-        "update",
-    ]
-
-    # -------------------------------------------------------------------------
-
     name = table_column.CharField(max_length=255, blank=True, null=True)
 
     temperature_celsius = table_column.IntegerField(

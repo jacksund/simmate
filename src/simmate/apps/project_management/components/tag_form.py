@@ -9,6 +9,25 @@ class TagForm(DynamicTableForm):
 
     table = Tag
 
+    template_names = {
+        "default": "data_explorer/table_about.html",
+        "entries": "project_management/tag/table.html",
+        "entry": "project_management/tag/view.html",
+    }
+
+    display_name = "Tags, Labels, & Categories"
+    description_short = (
+        "Customizable labels that help with organizing project items like "
+        "hypotheses, targets, and orders. Tags allow for flexible "
+        "filtering and categorization."
+    )
+
+    enabled_forms = [
+        "search",
+        "create",
+        "update",
+    ]
+
     template_name = "project_management/tag/form.html"
 
     # -------------------------------------------------------------------------

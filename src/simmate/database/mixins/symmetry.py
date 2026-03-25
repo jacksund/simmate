@@ -19,18 +19,6 @@ class Spacegroup(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    html_display_name = "Symmetry Spacegroups"
-    html_description_short = (
-        "Mathematical descriptions of the symmetry present in crystalline "
-        "materials. Spacegroups categorize structures into 230 unique types "
-        "based on their translational and point symmetry operations."
-    )
-
-    html_entries_template = "workflow_explorer/static_energy/table.html"
-    html_entry_template = "workflow_explorer/static_energy/view.html"
-
-    # -------------------------------------------------------------------------
-
     id = None  # TODO: need to switch pk to this
 
     number = table_column.IntegerField(primary_key=True)

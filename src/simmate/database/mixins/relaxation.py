@@ -39,7 +39,7 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
     IonicStep table which holds all of the structure/energy/forces for each
     ionic step.
 
-    WARNING: The Structure stored in this table here is the source structure
+    WARNING: The Structure stored in this table here is the input structure
     until the calculation completes. After completed, the structure will
     be updated to the final structure. If you wish to ensure you're accessing
     the correct structure, use the `structure_final` attribute, which gives
@@ -49,18 +49,6 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
     class Meta:
         app_label = "workflow_explorer"
         db_table = "workflows_relaxation"
-
-    # -------------------------------------------------------------------------
-
-    html_display_name = "Relaxation"
-    html_description_short = (
-        "Results for geometry optimization (Relaxation) calculations. These "
-        "simulations iteratively adjust atomic positions and lattice parameters "
-        "to find the structure's lowest energy state."
-    )
-
-    html_entries_template = "workflow_explorer/relaxation/table.html"
-    html_entry_template = "workflow_explorer/relaxation/view.html"
 
     # -------------------------------------------------------------------------
 

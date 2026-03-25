@@ -9,6 +9,24 @@ class BatchForm(DynamicTableForm):
 
     table = Batch
 
+    template_names = {
+        "default": "data_explorer/table_about.html",
+        "entries": "inventory_management/batch/table.html",
+        "entry": "inventory_management/batch/view.html",
+    }
+
+    display_name = "Batches"
+    description_short = (
+        "Batches are specific instances of a substance or mixture. For example, "
+        "the product of a single synthesis or the delievery a purchased chemical "
+        "would each be one batch. One batch can then be stored in one or more containers."
+    )
+
+    enabled_forms = [
+        "create",
+        "update",
+    ]
+
     template_name = "inventory_management/batch/form.html"
 
     # -------------------------------------------------------------------------

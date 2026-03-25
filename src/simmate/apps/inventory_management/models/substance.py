@@ -13,17 +13,6 @@ class Substance(DatabaseTable):
     class Meta:
         db_table = "inventory_management__substances"
 
-    html_display_name = "Chemical Substances"
-    html_description_short = (
-        "A substance is a specific element or compound with uniform composition+structure. "
-        "As a general rule of thumb, if there is a CAS number (from ACS) or "
-        "CID (from PubChem) assigned to it, then it is likely a chemical substance. "
-        "In addition, this table includes both specified and unspecified "
-        "stereochemical compounds, where flat structures and those with "
-        "'and'/'or' notations are separate entries. Allotropes are also "
-        "separate entries."
-    )
-
     # -------------------------------------------------------------------------
 
     id = table_column.CharField(max_length=12, primary_key=True)
