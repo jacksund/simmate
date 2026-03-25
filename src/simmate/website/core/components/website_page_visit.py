@@ -28,13 +28,15 @@ class WebsitePageVisitTable(DynamicTableForm):
     enable_report = True
     report_df_columns = ["user_id", "url_path", "timestamp"]
 
-    def get_report_from_df(self, df: pandas.DataFrame):
+    @classmethod
+    def get_report_from_df(cls, df: pandas.DataFrame):
         return {
-            "unique_users_and_traffic": self.get_unique_users_and_traffic(df),
-            "most_visited_pages": self.get_most_visited_pages(df),
+            "unique_users_and_traffic": cls.get_unique_users_and_traffic(df),
+            "most_visited_pages": cls.get_most_visited_pages(df),
         }
 
-    def get_most_visited_pages(self, df: pandas.DataFrame, ntop: int = 10):
+    @classmethod
+    def get_most_visited_pages(cls, df: pandas.DataFrame, ntop: int = 10):
         url_counts = df["url_path"].value_counts().nlargest(ntop)
         top_urls_df = pandas.DataFrame(
             {"url_path": url_counts.index, "visits": url_counts.values}
@@ -50,7 +52,8 @@ class WebsitePageVisitTable(DynamicTableForm):
         )
         return fig
 
-    def get_unique_users_and_traffic(self, df: pandas.DataFrame):
+    @classmethod
+    def get_unique_users_and_traffic(cls, df: pandas.DataFrame):
 
         # --- Data Preparation ---
 
