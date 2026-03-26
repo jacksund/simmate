@@ -41,6 +41,34 @@ Use the context below in assist in your answer. The context is pulled from a web
 {web_context}
 """
 
+VALIDATION_PROMPT = """
+I am looking for the CAS number for {compound_name}.
+I found the CAS number {cas_number}, which corresponds to the following name(s) in the CAS registry:
+- Common Name: {common_name}
+- Synonyms: {synonyms}
+
+Is it highly likely that {compound_name} and the names from the CAS registry refer to the same chemical compound?
+Consider synonyms, IUPAC names, and common names.
+
+Respond with only a JSON object:
+{{"is_match": boolean, "confidence": integer, "comment": "string"}}
+
+Guidelines:
+- is_match: true if the names refer to the same compound, false otherwise.
+- confidence: An integer from 0–100 representing your certainty of the match.
+- comment: Provide a brief explanation for your decision.
+"""
+
+
+def parse_json_response(content: str) -> dict:
+    """Extracts and parses JSON from a string, handling markdown blocks."""
+    if "```" in content:
+        content = content.split("```json")[-1].split("```")[0]
+    try:
+        return json.loads(content.strip())
+    except Exception:
+        raise ValueError(f"Invalid JSON response: {content}")
+
 
 @tool
 def lookup_cas_number(compound_name: str, clean_name: bool = False) -> dict:
@@ -53,8 +81,8 @@ def lookup_cas_number(compound_name: str, clean_name: bool = False) -> dict:
     # 0. convert to list of names that are robust to searching in dbs/apis
     if clean_name:
         filled_prompt = CHEMICAL_NAMES_PROMPT.format(compound_name=compound_name)
-        response = llm.invoke(filled_prompt).content
-        names = [n.strip() for n in response.content.split(";")]
+        response_content = llm.invoke(filled_prompt).content
+        names = [n.strip() for n in response_content.split(";")]
     else:
         names = [compound_name]
 
@@ -95,16 +123,15 @@ def lookup_cas_number(compound_name: str, clean_name: bool = False) -> dict:
                     "is not guaranteed to be correct."
                 ),
             }
-    except:
+    except Exception:
         pass
 
-    # 3. do a deeper web search
-    # TODO query web specifically for trusted sites like vendors/pubchem/cas
+    # 4. do a deeper web search
     try:
         web_context = search_web_for_context.run(
             f"What is the CAS number for {compound_name_clean}?"
         )
-    except:
+    except Exception:
         web_context = "(no search results recieved)"
 
     filled_prompt = LOOKUP_PROMPT.format(
@@ -112,18 +139,46 @@ def lookup_cas_number(compound_name: str, clean_name: bool = False) -> dict:
         web_context=web_context,
     )
     response = llm.invoke(filled_prompt)
-    # TODO: assert format
-    if response.content.contains("```"):
-        response_json = response.content.strip("```json\n").strip("```")
-    else:
-        response_json = response.content
+    response_data = parse_json_response(response.content)
+
+    # 5. Validate by looking up in CAS API + asking LLM to confirm name match
+    cas_number = response_data.get("cas_number")
+    if not cas_number:
+        return response_data
 
     try:
-        response_data = json.loads(response_json)
-    except:
-        raise Exception("Invalid JSON in response: {}")
+        cas_detail = CasRegistryClient.detail(cas_number)
+    except Exception:
+        # If lookup fails, it's a major red flag
+        return {
+            **response_data,
+            "confidence": min(response_data.get("confidence", 100), 10),
+            "comment": f"Note: CAS {cas_number} was found via web but not in official registry.",
+        }
 
-    # TODO: validate by looking up in cas api + asking llm to confirm name match
-    # CasRegistryClient.detail
+    # Ask the LLM to confirm if the name from the CAS registry matches the compound
+    cas_common_name = cas_detail.get("name")
+    cas_synonyms = cas_detail.get("synonyms", [])
 
-    return response_data
+    filled_validation_prompt = VALIDATION_PROMPT.format(
+        compound_name=compound_name_clean,
+        cas_number=cas_number,
+        common_name=cas_common_name,
+        synonyms="; ".join(cas_synonyms) if cas_synonyms else "(none listed)",
+    )
+    validation_response = llm.invoke(filled_validation_prompt)
+    validation_data = parse_json_response(validation_response.content)
+    if validation_data.get("is_match"):
+        return {
+            **response_data,
+            "confidence": validation_data.get(
+                "confidence", response_data["confidence"]
+            ),
+            "comment": validation_data.get("comment", response_data["comment"]),
+        }
+    else:
+        return {
+            **response_data,
+            "confidence": min(validation_data.get("confidence", 20), 20),
+            "comment": f"Validation failed: {validation_data.get('comment', '')} (Registry name: {cas_common_name})",
+        }

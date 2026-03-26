@@ -129,13 +129,12 @@ The web interface is built with Django and HTMX.
 - **Fixtures:** Use `src/simmate/conftest.py` (e.g., `structure`, `composition`).
 - **Mocking:** Mock external scientific codes unless performing integration tests.
 - **Commands:**
-    - Test: `simmate dev test` (or `simmate dev test --full` for VASP)
+    - Test: `simmate dev test`
     - Lint: `simmate dev lint`
     - Migrations: `simmate database update` (generates and applies migrations).
 
 ## AI Agent Guidelines
 
-- **Surgical Edits:** Favor `replace` for targeted changes in large files.
 - **Dependencies:** Verify `pyproject.toml` before assuming a library is available.
 - **Documentation:** Always refer to `docs/full_guides/` when building new apps or workflows. These guides provide essential architectural patterns, naming conventions, and best practices.
 - **Change Log:** Always document your changes in the changelog.

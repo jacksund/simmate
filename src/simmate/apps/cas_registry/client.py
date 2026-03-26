@@ -17,8 +17,9 @@ class CasRegistryClient:
 
     # -------------------------------------------------------------------------
 
+    @classmethod
     def search(
-        self,
+        cls,
         query: str,
         size: int = 10,
         offset: int = 0,
@@ -28,13 +29,14 @@ class CasRegistryClient:
         """
         params = {"q": query, "size": size, "offset": offset}
         response = requests.get(
-            f"{self.base_url}/search", params=params, headers=self.headers
+            f"{cls.base_url}/search", params=params, headers=cls.headers
         )
         response.raise_for_status()
         return response.json()
 
+    @classmethod
     def detail(
-        self,
+        cls,
         cas_rn: str,
         include_molecule: bool = True,
     ) -> dict:
@@ -43,7 +45,7 @@ class CasRegistryClient:
         """
         params = {"cas_rn": cas_rn}
         response = requests.get(
-            f"{self.base_url}/detail", params=params, headers=self.headers
+            f"{cls.base_url}/detail", params=params, headers=cls.headers
         )
         response.raise_for_status()
         data = response.json()
@@ -53,8 +55,9 @@ class CasRegistryClient:
 
         return data
 
+    @classmethod
     def export(
-        self,
+        cls,
         cas_rn: str = None,
         uri: str = None,
         include_molecule: bool = True,
@@ -68,7 +71,7 @@ class CasRegistryClient:
 
         params = {"uri": uri}
         response = requests.get(
-            f"{self.base_url}/export", params=params, headers=self.headers
+            f"{cls.base_url}/export", params=params, headers=cls.headers
         )
         response.raise_for_status()
 
@@ -83,12 +86,13 @@ class CasRegistryClient:
 
     # -------------------------------------------------------------------------
 
-    def detail_from_search(self, query: str, include_molecule: bool = True) -> dict:
+    @classmethod
+    def detail_from_search(cls, query: str, include_molecule: bool = True) -> dict:
         """
         Convenience method that searches for a term and returns the
         full detail for the first matching result.
         """
-        search_results = self.search(query, size=1)
+        search_results = cls.search(query, size=1)
         results = search_results.get("results", [])
 
         if not results:
@@ -96,4 +100,4 @@ class CasRegistryClient:
             return None
 
         cas_rn = results[0]["rn"]
-        return self.detail(cas_rn, include_molecule=include_molecule)
+        return cls.detail(cas_rn, include_molecule=include_molecule)
