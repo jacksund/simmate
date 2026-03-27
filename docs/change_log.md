@@ -68,6 +68,8 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 - added the `simmate dev` command group with tools for linting, testing, and workspace management
 - improved CLI help texts and added rich markdown support across all command groups
+- update `cas_registry` app to use the official API as the primary backend and 
+- add a validation step to the chatbot lookup tool to verify cas
 
 **Refactors**
 
