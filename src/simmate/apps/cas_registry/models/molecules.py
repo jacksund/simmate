@@ -112,7 +112,8 @@ class CasRegistryMolecule(ThirdPartyData, Molecule):
 
         # The client's search method is robust and handles SMILES, InChI, etc.
         # We start with InChIKey as it is most specific.
-        search_results = CasRegistryClient.search(molecule.to_inchi_key(), size=1)
+        inchi_key = molecule.to_inchi_key()
+        search_results = CasRegistryClient.search(f"InChIKey={inchi_key}", size=1)
         results = search_results.get("results", [])
 
         if not results:
