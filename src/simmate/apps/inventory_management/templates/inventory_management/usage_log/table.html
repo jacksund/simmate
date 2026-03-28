@@ -1,0 +1,17 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=60 %}
+    {% table_header "container__id" "Container" min_width=100 %}
+    {% table_header "user__username" "User" min_width=100 %}
+    {% table_header "amount_removed" min_width=125 %}
+    <th style="min-width:300px">Comments</th>
+    <th style="min-width:50px">Edit</th>
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry %}</td>
+    <td>{% foreign_key_link entry.container %}</td>
+    <td>{{ entry.user.username|default:"--" }}</td>
+    <td>{{ entry.amount_removed }}</td>
+    <td>{{ entry.comments|truncatechars:100|default:"--" }}</td>
+    {% update_entry_link entry %}
+{% endblock %}

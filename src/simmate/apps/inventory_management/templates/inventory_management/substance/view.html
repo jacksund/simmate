@@ -1,0 +1,128 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    <div class="row py-2">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right m-0">
+                    <a role="button"
+                       class="btn btn-outline-primary btn-sm"
+                       href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update <i class="mdi mdi-pencil-outline"></i></a>
+                </div>
+                <h3 class="m-0">Overview</h3>
+            </div>
+        </div>
+    </div>
+    <div class="row py-2">
+        <div class="col-12">
+            <table class="table table-centered table-striped mb-0 border">
+                <thead class="table-primary">
+                    <tr>
+                        <th style="width: 45%">Base Info</th>
+                        <th class="text-center"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ID</td>
+                        <td>{{ table_entry.id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Substance Type</td>
+                        <td>{{ table_entry.substance_type|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Common Name</td>
+                        <td>{{ table_entry.common_name|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>IUPAC Name</td>
+                        <td>{{ table_entry.iupac_name|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Registered By</td>
+                        <td>{{ table_entry.registered_by.username|default:"Simmate Team" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Flags</td>
+                        <td>
+                            {% if table_entry.is_primary %}<span class="badge bg-success">Primary</span>{% endif %}
+                            {% if table_entry.is_theoretical %}<span class="badge bg-info">Theoretical</span>{% endif %}
+                            {% if table_entry.is_metastable %}<span class="badge bg-secondary">Metastable</span>{% endif %}
+                            {% if table_entry.is_private %}<span class="badge bg-dark">Private</span>{% endif %}
+                            {% if table_entry.is_unknown %}<span class="badge bg-warning">Unknown</span>{% endif %}
+                            {% if table_entry.is_delisted %}<span class="badge bg-danger">Delisted</span>{% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Parent Substance</td>
+                        <td>
+                            {% if table_entry.parent %}
+                                <a href="{% url 'data_explorer:table-entry' 'inventory_management__substances' table_entry.parent_id %}">{{ table_entry.parent_id }}</a>
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Stereochem Type</td>
+                        <td>{{ table_entry.get_stereochem_type_display|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Description</td>
+                        <td>{{ table_entry.description|default:"--" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row py-2 mt-3">
+        <div class="col-12">
+            <table class="table table-centered table-striped mb-0 border">
+                <thead class="table-primary">
+                    <tr>
+                        <th style="width: 45%">External IDs</th>
+                        <th class="text-center"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>CAS Number</td>
+                        <td>{{ table_entry.cas_number|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>PubChem CID</td>
+                        <td>{{ table_entry.pubchem_cid|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>ChEMBL</td>
+                        <td>{{ table_entry.chembl|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>ChemSpace</td>
+                        <td>{{ table_entry.chemspace|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Materials Project</td>
+                        <td>{{ table_entry.materials_project|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>OQMD</td>
+                        <td>{{ table_entry.oqmd|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>AFLOW</td>
+                        <td>{{ table_entry.aflow|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>COD</td>
+                        <td>{{ table_entry.cod|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>JARVIS</td>
+                        <td>{{ table_entry.jarvis|default:"--" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

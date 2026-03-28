@@ -35,6 +35,15 @@ class Mixture(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
+    # TODO: If the mixture contains at least one stereoisomer
+    # ├── Racemate (1:1 Enantiomeric Mixture)
+    # ├── Enantiopure (Single Enantiomer)
+    # └── Scalemic (Enriched, but not 1:1 or 100%)
+    # OR... even enhanced stereochem that allows unknown. Might need separate
+    # column or even table to store the clean & enhanced smiles/molfile for these
+
+    # -------------------------------------------------------------------------
+
     substances = table_column.ManyToManyField(
         Substance,
         blank=True,
