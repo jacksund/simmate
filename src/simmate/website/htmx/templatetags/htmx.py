@@ -488,6 +488,38 @@ def htmx_molecule_input(
 
 
 @register.inclusion_tag(
+    filename="htmx/input_elements/structure_input.html",
+    takes_context=True,
+)
+def htmx_structure_input(
+    context: dict,
+    name: str = "structure",
+    label: str = None,
+    show_label: bool = True,
+    help_text: str = None,
+    allow_file_input: bool = True,
+    allow_database_input: bool = False,
+):
+    """
+    Display a structure input widget.
+    """
+    label = _get_input_label(name, label)
+    structure = _get_input_value(context, name)
+
+    file_name = f"{name}__file"
+    url_name = f"{name}__url"
+    database_id_name = f"{name}__database_id"
+    database_table_name = f"{name}__database_table"
+
+    component = context["component"]
+    viewer_id = f"{name}-{component.component_id}-viewer"
+
+    database_table_options = getattr(component, "database_table_options", [])
+
+    return locals()
+
+
+@register.inclusion_tag(
     filename="htmx/input_elements/file_upload.html",
     takes_context=True,
 )
