@@ -91,10 +91,10 @@ def reset(
     if settings.database_backend == "sqlite3" and use_prebuilt is None:
         use_prebuilt = typer.confirm(
             "\nIt looks like you are using the default database backend (sqlite3). \n"
-            "Would you like to use a prebuilt-database with all third-party data "
-            "already loaded? \n"
+            "Would you like to use a prebuilt-database with third-party data "
+            "already loaded in? \n"
             "If this is the first time you using the prebuild, this will "
-            "involve a ~3GB \ndownload and will unpack to roughly 20GB.\n\n"
+            "involve a ~3GB \ndownload and will unpack to ~20GB.\n\n"
             "We recommend answering 'yes' for beginners."
         )
 

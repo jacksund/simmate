@@ -66,11 +66,13 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 **Enhancements**
 
+- added create_prebuild function to database.utils for creating date-stamped SQLite3 database archives
 - added the `simmate dev` command group with tools for linting, testing, and workspace management
 - improved CLI help texts and added rich markdown support across all command groups
 - update `cas_registry` app to use the official API as the primary backend and add a validation step to the chatbot lookup tool to verify cas
 - improved `inventory_management` by adding Molecule and Structure tables for detailed substance tracking, linking substances to all other datasets, and beginning to build data explorer views
 - added `StructureInput` and `htmx_structure_input` to standardize crystal structure loading across forms
+- updated the OQMD data loading method to support the latest data provided by their team
 
 **Refactors**
 
