@@ -416,7 +416,7 @@ class Molecule(DatabaseTable):
         a django template <script> tag.
 
         We only have this as a property because we commonly access the SDF
-        in django templates when using chemdoodle.
+        in django templates when using Ketcher.
         """
         return self.to_toolkit().to_sdf().replace("\n", "\\n")
 

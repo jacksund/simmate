@@ -77,10 +77,12 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - renamed the `simmate engine` command group to `simmate compute` and updated internal modules/tests
 - refactored `website.data_explorer` to use HTMX components for all table entries, moving UI-specific features from `DatabaseTable` and `HTMLMixin` into `DynamicTableForm`
 - moved `chemspace.utils.download_raw_files` into `ChemSpaceFreedomSpaceMolecule.download_source_data`
+- switched from ChemDoodle to Ketcher as the default molecule sketcher
 
 **Fixes**
 
 - patched connection contexts and closing in the `database.external_connectors` module
+- fixed `htmx_molecule_input` for non-chemdraw sketcher
 
 --------------------------------------------------------------------------------
 

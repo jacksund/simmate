@@ -444,7 +444,7 @@ def htmx_molecule_input(
     indicator: str = "#loading-spinner-corner",
 ):
     """
-    Display a ChemDraw.js (or ChemDoodle.js) input widget.
+    Display a ChemDraw.js (or Ketcher.js) input widget.
     """
     label = _get_input_label(name, label)
     molecule = _get_input_value(context, name)
