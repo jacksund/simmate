@@ -69,20 +69,9 @@
             <script type="text/javascript"
                     src="{% static 'js/chemdraw_utils.2026_01_22.js' %}"></script>
         {% else %}
-            {# TODO: switch to ketcher as the default #}
-            {# Load ChemDoodle JS and CSS #}
-            <link rel="stylesheet"
-                  href="https://archives.simmate.org/assets/chemdoodle/ChemDoodleWeb.css"
-                  type="text/css">
+            {# Ketcher is the open-source fallback sketcher #}
             <script type="text/javascript"
-                    src="https://archives.simmate.org/assets/chemdoodle/ChemDoodleWeb.js"></script>
-            <link rel="stylesheet"
-                  href="https://archives.simmate.org/assets/chemdoodle/uis/jquery-ui-1.11.4.css"
-                  type="text/css">
-            <script type="text/javascript"
-                    src="https://archives.simmate.org/assets/chemdoodle/uis/ChemDoodleWeb-uis.js"></script>
-            <script type="text/javascript"
-                    src="{% static 'js/chemdoodle_utils.2024_09_03.js' %}"></script>
+                    src="{% static 'js/ketcher_utils.2026_03_28.js' %}"></script>
         {% endif %}
         {# Rest of Custom Simmate Javascript #}
         <script type="text/javascript"

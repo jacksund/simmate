@@ -1,0 +1,77 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    <div class="row py-2">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right m-0">
+                    <a role="button"
+                       class="btn btn-outline-primary btn-sm"
+                       href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update <i class="mdi mdi-pencil-outline"></i></a>
+                </div>
+                <h3 class="m-0">Overview</h3>
+            </div>
+        </div>
+    </div>
+    <div class="row py-2">
+        <div class="col-12">
+            <table class="table table-centered table-striped mb-0 border">
+                <thead class="table-primary">
+                    <tr>
+                        <th style="width: 45%">Base Info</th>
+                        <th class="text-center"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ID</td>
+                        <td>{{ table_entry.id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Batch</td>
+                        <td>
+                            {% if table_entry.batch %}
+                                <a role="button"
+                                   class="btn btn-light btn-sm border"
+                                   href="{% url 'data_explorer:table-entry' 'Batch' table_entry.batch.id %}">{{ table_entry.batch.id }}</a>
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Location</td>
+                        <td>
+                            {% if table_entry.location %}
+                                <a role="button"
+                                   class="btn btn-light btn-sm border"
+                                   href="{% url 'data_explorer:table-entry' 'StorageLocation' table_entry.location.id %}">{{ table_entry.location.name }}</a>
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Barcode</td>
+                        <td>{{ table_entry.barcode|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Initial Amount</td>
+                        <td>{{ table_entry.initial_amount|default:"--" }} {{ table_entry.amount_units|default:"" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Current Amount</td>
+                        <td>{{ table_entry.current_amount|default:"--" }} {{ table_entry.amount_units|default:"" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Is Depleted</td>
+                        <td>{{ table_entry.is_depleted|yesno:"Yes,No" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Comments</td>
+                        <td>{{ table_entry.comments|default:"--" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    <div class="row py-2">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right m-0">
+                    <a role="button"
+                       class="btn btn-outline-primary btn-sm"
+                       href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update <i class="mdi mdi-pencil-outline"></i></a>
+                </div>
+                <h3 class="m-0">Overview</h3>
+            </div>
+        </div>
+    </div>
+    <div class="row py-2">
+        <div class="col-12">
+            <table class="table table-centered table-striped mb-0 border">
+                <thead class="table-primary">
+                    <tr>
+                        <th style="width: 45%">Base Info</th>
+                        <th class="text-center"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ID</td>
+                        <td>{{ table_entry.id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>{{ table_entry.name|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Parent Location</td>
+                        <td>
+                            {% if table_entry.parent_location %}
+                                <a role="button"
+                                   class="btn btn-light btn-sm border"
+                                   href="{% url 'data_explorer:table-entry' 'StorageLocation' table_entry.parent_location.id %}">{{ table_entry.parent_location.name }}</a>
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Temperature (°C)</td>
+                        <td>{{ table_entry.temperature_celsius|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Description</td>
+                        <td>{{ table_entry.description|default:"--" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

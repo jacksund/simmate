@@ -60,6 +60,7 @@ class Substance(DatabaseTable):
         # out of scope:
         # "polymer",
         # "protein/biopolymer",
+        # "meta_material",
     ]
     substance_type = table_column.CharField(
         max_length=15,
@@ -173,81 +174,194 @@ class Substance(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    # TODO:
+    molecule = table_column.ForeignKey(
+        "Molecule",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
+        blank=True,
+        null=True,
+    )
+    """
+    The molecular structure associated with this substance. 
+    
+    Multiple substances can share the same molecule (e.g., different crystal 
+    phases of the same molecule), but each substance can have only one molecule.
+    """
 
-    # composition
-    # extra_metadata  (for "other" types)
-
-    # molecule
-    # has_stereochem
-    #
-    # Stereoisomer Classification
-    #     ├── Configurational (Bonds must break to interconvert)
-    #     │   ├── Enantiomers (Non-superimposable mirror images)
-    #     │   └── Diastereomers (Non-mirror images)
-    #     │       ├── Geometric Isomers (Cis/Trans or E/Z)
-    #     │       ├── Meso Compounds (Achiral due to internal symmetry)
-    #     │       └── Epimers/Anomers (Differ at specific centers)
-    #     │
-    #     └── Conformational (Rotation around single bonds)
-    #         ├── Rotamers (e.g., Staggered vs. Eclipsed)
-    #         ├── Atropisomers (Restricted rotation due to steric bulk)
-    #         └── Invertomers (Rapid atomic inversion, e.g., Amines)
-
-    # structure
-    # is_metastable_phase
-    # is_meta_material (if we decide to include these)
-
-    # is_primary_substance (if it is main ref for a given composition or compound)
-    # parent_substance (if has_stereochem and/or is_metastable_phase)
+    structure = table_column.ForeignKey(
+        "Structure",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
+        blank=True,
+        null=True,
+    )
+    """
+    The crystal structure associated with this substance.
+    """
 
     # -------------------------------------------------------------------------
 
-    bcpc = table_column.CharField(
-        max_length=20,
+    is_primary = table_column.BooleanField(
+        default=False,
+        blank=True,
+        null=True,
+    )
+    """
+    Whether the substance is the primary reference for a given composition or 
+    compound. This is typically the top-level "parent" and/or the most commonly 
+    occurring (and stable) phase.
+    """
+
+    parent = table_column.ForeignKey(
+        "Substance",
+        on_delete=table_column.SET_NULL,
+        related_name="children",
+        blank=True,
+        null=True,
+    )
+    """
+    The parent substance that this entry is derived from. For example, a 
+    specific stereoisomer or metastable phase would point to the more general 
+    "flat" or "stable" substance.
+    """
+
+    is_metastable = table_column.BooleanField(
+        default=False,
+        blank=True,
+        null=True,
+    )
+    """
+    Whether the substance is a metastable phase.
+    """
+
+    has_stereochem = table_column.BooleanField(
+        default=False,
+        blank=True,
+        null=True,
+    )
+    """
+    Whether the substance has stereochemistry.
+    """
+
+    stereomchem_type_options = [
+        "constitutional",  # for the flat/parent structure
+        # configurational
+        "enantiomer",
+        "diastereomer",
+        "geometric_isomer",
+        "meso_compound",
+        "epimer",
+        "anomer",
+        # conformational
+        "rotamer",
+        "atropisomer",
+        "invertomer",
+    ]
+    stereochem_type = table_column.JSONField(
+        blank=True,
+        null=True,
+    )
+    """
+    The specific stereochemical classification(s) of the substance.
+
+    Stereoisomer Classification (Same connectivity, different 3D arrangement)
+        ├── Configurational (Bonds must break to interconvert)
+        │   ├── Enantiomers (Non-superimposable mirror images)
+        │   └── Diastereomers (Non-mirror images)
+        │       ├── Geometric Isomers (cyclic Cis/Trans or double bond E/Z)
+        │       ├── Meso Compounds (Achiral due to internal symmetry)
+        │       └── Epimers/Anomers (Differ at specific centers)
+        │
+        └── Conformational (Rotation/flexing without breaking bonds)
+            ├── Rotamers (e.g., Staggered vs. Eclipsed)
+            ├── Atropisomers (Restricted rotation due to steric bulk)
+            ├── Ring Conformers (Chair, Boat, Envelope)
+            └── Invertomers (Rapid atomic inversion, e.g., Amines)
+    
+    Because this table also stores flat versions of stereoisomers, we include
+    `constitutional` as an extra type to label these ones that contain
+    unspecified stereochemistry
+    """
+    # is_prochiral # Prochiral (Can become chiral in a single step)
+
+    stereochem_key = table_column.CharField(
+        max_length=25,
+        blank=True,
+        null=True,
+    )
+    # TODO: key to add on to the inchi key to distinguish and query different
+    # isomers -- like cis/trans labels, but also need keys for other types
+    # and also combos. Need to think on this more... could even be integer ranking
+
+    # -------------------------------------------------------------------------
+
+    # Molecular datasets
+
+    bcpc = table_column.ForeignKey(
+        "bcpc.BcpcIsoPesticide",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
         blank=True,
         null=True,
     )
 
-    cas_number = table_column.CharField(
-        max_length=20,
+    cas_registry = table_column.ForeignKey(
+        "cas_registry.CasRegistryMolecule",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
         blank=True,
         null=True,
     )
 
-    chembl = table_column.CharField(
-        max_length=20,
+    chembl = table_column.ForeignKey(
+        "chembl.ChemblMolecule",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
         blank=True,
         null=True,
     )
 
-    chemspace = table_column.CharField(
-        max_length=20,
+    chemspace = table_column.ForeignKey(
+        "chemspace.ChemSpaceFreedomSpaceMolecule",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
         blank=True,
         null=True,
     )
 
-    emolecules = table_column.CharField(
-        max_length=20,
+    emolecules = table_column.ForeignKey(
+        "emolecules.EmoleculesMolecule",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
         blank=True,
         null=True,
     )
 
-    enamine = table_column.TextField(blank=True, null=True)
-
-    pdb = table_column.CharField(
-        max_length=20,
+    enamine = table_column.ForeignKey(
+        "enamine.EnamineRealMolecule",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
         blank=True,
         null=True,
     )
 
-    ppdb = table_column.CharField(
-        max_length=20,
+    pdb = table_column.ForeignKey(
+        "pdb.PdbLigand",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
         blank=True,
         null=True,
     )
 
-    pubchem_cid = table_column.CharField(
+    ppdb = table_column.ForeignKey(
+        "ppdb.PpdbMolecule",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
+        blank=True,
+        null=True,
+    )
+
+    pubchem = table_column.CharField(
         max_length=20,
         blank=True,
         null=True,
@@ -255,32 +369,44 @@ class Substance(DatabaseTable):
 
     # -------------------------------------------------------------------------
 
-    aflow = table_column.CharField(
-        max_length=20,
+    # Crystalline datasets
+
+    aflow = table_column.ForeignKey(
+        "aflow.AflowStructure",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
         blank=True,
         null=True,
     )
 
-    cod = table_column.CharField(
-        max_length=20,
+    cod = table_column.ForeignKey(
+        "cod.CodStructure",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
         blank=True,
         null=True,
     )
 
-    jarvis = table_column.CharField(
-        max_length=20,
+    jarvis = table_column.ForeignKey(
+        "jarvis.JarvisStructure",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
         blank=True,
         null=True,
     )
 
-    materials_project = table_column.CharField(
-        max_length=20,
+    materials_project = table_column.ForeignKey(
+        "materials_project.MatprojStructure",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
         blank=True,
         null=True,
     )
 
-    oqmd = table_column.CharField(
-        max_length=20,
+    oqmd = table_column.ForeignKey(
+        "oqmd.OqmdStructure",
+        on_delete=table_column.SET_NULL,
+        related_name="substances",
         blank=True,
         null=True,
     )

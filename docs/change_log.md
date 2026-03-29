@@ -68,18 +68,21 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 - added the `simmate dev` command group with tools for linting, testing, and workspace management
 - improved CLI help texts and added rich markdown support across all command groups
-- update `cas_registry` app to use the official API as the primary backend and 
-- add a validation step to the chatbot lookup tool to verify cas
+- update `cas_registry` app to use the official API as the primary backend and add a validation step to the chatbot lookup tool to verify cas
+- improved `inventory_management` by adding Molecule and Structure tables for detailed substance tracking, linking substances to all other datasets, and beginning to build data explorer views
+- added `StructureInput` and `htmx_structure_input` to standardize crystal structure loading across forms
 
 **Refactors**
 
 - renamed the `simmate engine` command group to `simmate compute` and updated internal modules/tests
 - refactored `website.data_explorer` to use HTMX components for all table entries, moving UI-specific features from `DatabaseTable` and `HTMLMixin` into `DynamicTableForm`
 - moved `chemspace.utils.download_raw_files` into `ChemSpaceFreedomSpaceMolecule.download_source_data`
+- switched from ChemDoodle to Ketcher as the default molecule sketcher
 
 **Fixes**
 
 - patched connection contexts and closing in the `database.external_connectors` module
+- fixed `htmx_molecule_input` for non-chemdraw sketcher
 
 --------------------------------------------------------------------------------
 

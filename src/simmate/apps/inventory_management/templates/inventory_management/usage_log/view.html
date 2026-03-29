@@ -1,0 +1,57 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    <div class="row py-2">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right m-0">
+                    <a role="button"
+                       class="btn btn-outline-primary btn-sm"
+                       href="{% url 'data_explorer:table-entry-update' table_entry.table_name table_entry.id %}">Update <i class="mdi mdi-pencil-outline"></i></a>
+                </div>
+                <h3 class="m-0">Overview</h3>
+            </div>
+        </div>
+    </div>
+    <div class="row py-2">
+        <div class="col-12">
+            <table class="table table-centered table-striped mb-0 border">
+                <thead class="table-primary">
+                    <tr>
+                        <th style="width: 45%">Base Info</th>
+                        <th class="text-center"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ID</td>
+                        <td>{{ table_entry.id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Container</td>
+                        <td>
+                            {% if table_entry.container %}
+                                <a role="button"
+                                   class="btn btn-light btn-sm border"
+                                   href="{% url 'data_explorer:table-entry' 'Container' table_entry.container.id %}">{{ table_entry.container.id }}</a>
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>User</td>
+                        <td>{{ table_entry.user.username|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Amount Removed</td>
+                        <td>{{ table_entry.amount_removed|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Comments</td>
+                        <td>{{ table_entry.comments|default:"--" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

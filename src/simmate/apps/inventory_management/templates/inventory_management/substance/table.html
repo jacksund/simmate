@@ -3,6 +3,7 @@
     {% table_header "id" "ID" min_width=60 %}
     <th style="min-width:100px">Flags</th>
     {% table_header "substance_type" min_width=125 %}
+    {% table_header "registered_by" min_width=125 %}
     {% table_header "common_name" min_width=100 %}
     {% table_header "iupac_name" min_width=100 %}
     {% table_header "bcpc" "BCPC" min_width=100 %}
@@ -26,11 +27,13 @@
 {% block table_rows %}
     <td>{% foreign_key_link entry "id" %}</td>
     <td>
+        {% if entry.is_primary %}<span class="badge text-success mr-1" title="Primary">Pri</span>{% endif %}
         {% if entry.is_theoretical %}<span class="badge text-info mr-1" title="Theoretical">Theo</span>{% endif %}
+        {% if entry.is_metastable %}<span class="badge text-secondary mr-1" title="Metastable">Met</span>{% endif %}
         {% if entry.is_private %}<span class="badge text-dark mr-1" title="Private">Priv</span>{% endif %}
         {% if entry.is_unknown %}<span class="badge text-warning mr-1" title="Unknown Structure">Unk</span>{% endif %}
         {% if entry.is_delisted %}<span class="badge text-danger">Delisted</span>{% endif %}
-        {% if not entry.is_theoretical and not entry.is_private and not entry.is_unknown and not entry.is_delisted %}
+        {% if not entry.is_primary and not entry.is_theoretical and not entry.is_metastable and not entry.is_private and not entry.is_unknown and not entry.is_delisted %}
             <span class="badge text-secondary small">Standard</span>
         {% endif %}
     </td>

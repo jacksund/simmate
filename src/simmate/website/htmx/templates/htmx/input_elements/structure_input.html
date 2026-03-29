@@ -1,0 +1,57 @@
+<div class="my-2">
+    {% include "core/basic_elements/label.html" %}
+    {% if structure is None %}
+        <div class="px-3 py-1">
+            {% if allow_database_input %}
+                <div class="pb-2">
+                    <b>Option 1: Load from Database</b>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        {% htmx_selectbox name=database_table_name options=database_table_options placeholder="Choose table..." show_label=False %}
+                    </div>
+                    <div class="col-4">
+                        {% htmx_text_input name=database_id_name placeholder="Enter ID... (ex: mp-123)" show_label=False %}
+                    </div>
+                    <div class="col-1">
+                        {% htmx_button method_name="load_structure" label="Load" icon="download" theme="secondary" small=True show_label=False input_name=name %}
+                    </div>
+                </div>
+                <div class="py-2">or</div>
+                <div class="row">
+                    <div class="col-11">
+                        {% htmx_text_input name=url_name placeholder="Paste link to structure (ex: https://simmate.org/data/MatprojStructure/1234/)" show_label=False %}
+                    </div>
+                    <div class="col-1">
+                        {% htmx_button method_name="load_structure" label="Load" icon="download" theme="secondary" small=True show_label=False input_name=name %}
+                    </div>
+                </div>
+            {% endif %}
+            {% if allow_file_input %}
+                <div class="{% if allow_database_input %}pt-4{% endif %}">
+                    <div class="pb-2">
+                        <b>
+                            {% if allow_database_input %}Option 2:{% endif %}
+                            Load from File</b> <small>(CIF or POSCAR)</small>
+                        </div>
+                        {% htmx_file_upload name=file_name show_label=False defer=False %}
+                    </div>
+                {% endif %}
+            </div>
+        {% elif structure == False %}
+            {% alert theme="danger" message="Failed to load the Structure. This typically happens due to invalid file formats or an incorrect ID." %}
+            <div class="text-center">
+                <b>Refresh the page to restart the form</b>
+            </div>
+        {% else %}
+            <div class="row">
+                <div class="col-8">
+                    <div style="height: 400px;">{% draw_structure structure div_id=viewer_id dynamic=True %}</div>
+                </div>
+                <div class="col-4">
+                    {% alert theme="success" message="Structure successfully loaded!" %}
+                    {% htmx_button method_name="unset_structure" label="Clear Structure" theme="secondary" icon="x-circle" input_name=name %}
+                </div>
+            </div>
+        {% endif %}
+    </div>

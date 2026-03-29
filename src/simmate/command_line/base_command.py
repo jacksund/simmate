@@ -65,7 +65,15 @@ def run_server(
 
     import subprocess
 
+    from simmate.config import settings
+    from simmate.website.core.utils import download_ketcher
+
     logging.info("Setting up local test server...")
+
+    # Ensure Ketcher is available locally to avoid CORS issues
+    if not settings.website.get("chemdraw_js", False):
+        download_ketcher()
+
     subprocess.run(
         f"django-admin runserver {port} --settings=simmate.config.django.settings --insecure --noreload",
         shell=True,
