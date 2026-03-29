@@ -4,6 +4,8 @@ import logging
 import shutil
 import subprocess
 import urllib
+import zipfile
+from datetime import datetime
 from pathlib import Path
 
 from django.apps import apps
@@ -516,3 +518,28 @@ def stop_postgres_docker():
         logging.info("Success! Container 'simmate_db' has been stopped and removed.")
     except subprocess.CalledProcessError as error:
         logging.error(f"Failed to stop/remove container: {error.stderr.decode()}")
+
+
+def create_prebuild():
+    """
+    Creates a date-stamped zip file of the current SQLite3 database.
+    The zip file is saved in the `<config dir>/sqlite-prebuilds/` directory.
+    """
+
+    if settings.database_backend != "sqlite3":
+        raise Exception("create_prebuild is only supported for SQLite3")
+
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    prebuild_name = f"prebuild-{current_date}"
+    db_filename = Path(settings.database.name)
+
+    if not db_filename.exists():
+        raise FileNotFoundError(f"Database file not found: {db_filename}")
+    archive_dir = get_directory(settings.config_directory / "sqlite-prebuilds")
+    zip_filename = archive_dir / f"{prebuild_name}.zip"
+
+    logging.info(f"Creating prebuild archive at {zip_filename}...")
+    with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        zip_file.write(db_filename, arcname=f"{prebuild_name}.sqlite3")
+
+    logging.info(f"Success! Prebuild created: {zip_filename.name}")
