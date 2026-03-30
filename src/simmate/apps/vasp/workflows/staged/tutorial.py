@@ -13,6 +13,8 @@ class StaticEnergy__Vasp__EvoTutorial(StagedWorkflow):
     will be VERY unreasonable.
     """
 
+    accuracy_rating = 0.5
+
     exclude_from_archives = [
         "CHG",
         "CHGCAR",

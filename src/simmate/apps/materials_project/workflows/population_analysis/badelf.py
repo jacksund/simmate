@@ -21,6 +21,8 @@ class PopulationAnalysis__VaspBader__BadelfMatproj(Workflow):
     as a reference when partitioning.
     """
 
+    accuracy_rating = 3
+
     @classmethod
     def run_config(
         cls,
@@ -119,6 +121,8 @@ class StaticEnergy__Vasp__PrebadelfMatproj(StaticEnergy__Vasp__Matproj):
     from the Materials Project. Results can be used for Bader analysis where
     the ELF is used as the reference instead of the CHGCAR.
     """
+
+    accuracy_rating = 3
 
     # The key thing for bader analysis is that we need a very fine FFT mesh. Other
     # than that, it's the same as a static energy calculation.

@@ -22,6 +22,8 @@ class Diffusion__Vasp__NebFromImagesMvlCi(Diffusion__Vasp__NebFromImagesMit):
     Henkelman group. See http://theory.cm.utexas.edu/vtsttools/
     """
 
+    accuracy_rating = 3
+
     _incar_updates = dict(
         EDIFF=5e-5,
         EDIFFG=-0.02,

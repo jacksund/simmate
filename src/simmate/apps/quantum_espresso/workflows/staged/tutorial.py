@@ -19,6 +19,8 @@ class Relaxation__QuantumEspresso__Lda00(Relaxation__QuantumEspresso__Quality00)
     testing and learning.
     """
 
+    accuracy_rating = 1
+
     description_doc_short = "barest-bones settings for randomly-created structures"
 
     # We use low quality PBE pseudopotentials
@@ -61,6 +63,8 @@ class Relaxation__QuantumEspresso__Lda01(Relaxation__QuantumEspresso__Quality01)
     testing and learning.
     """
 
+    accuracy_rating = 1
+
     description_doc_short = "barest-bones settings for randomly-created structures"
 
     system = dict(
@@ -98,6 +102,8 @@ class StaticEnergy__QuantumEspresso__Lda02(Relaxation__QuantumEspresso__Lda01):
     testing and learning.
     """
 
+    accuracy_rating = 1
+
     control = dict(
         pseudo_dir__auto=True,  # uses the default directory for pseudopotentials
         restart_mode="from_scratch",  # start from new calc rather than restart
@@ -125,6 +131,8 @@ class StaticEnergy__QuantumEspresso__EvoTutorial(StagedWorkflow):
     desireable to have calculations take very little time. The results
     will be VERY unreasonable.
     """
+
+    accuracy_rating = 0.5
 
     # !!! Needs to be implemented
     exclude_from_archives = []

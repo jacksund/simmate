@@ -11,6 +11,8 @@ class Dynamics__Vasp__MvlNpt(Dynamics__Vasp__Mit):
     [MVLNPTMDSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MVLNPTMDSet).
     """
 
+    accuracy_rating = 3
+
     _incar_updates = dict(
         ALGO="Fast",
         ISIF=3,

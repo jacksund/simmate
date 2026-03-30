@@ -73,6 +73,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - improved `inventory_management` by adding Molecule and Structure tables for detailed substance tracking, linking substances to all other datasets, and beginning to build data explorer views
 - added `StructureInput` and `htmx_structure_input` to standardize crystal structure loading across forms
 - updated the OQMD data loading method to support the latest data provided by their team
+- added draft of `accuracy_rating` to workflows to help beginners select the most appropriate settings
 
 **Refactors**
 

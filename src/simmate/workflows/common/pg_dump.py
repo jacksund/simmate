@@ -9,8 +9,11 @@ from .s3 import S3Workflow
 
 
 class Maintenance__Postgres__PgDump(S3Workflow):
+
     use_database = False
     monitor = False
+
+    is_hidden = True
 
     command = "pg_dump"
 

@@ -46,6 +46,8 @@ class Relaxation__Vasp__MatprojScan(VaspWorkflow):
     [MPScanRelaxSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MPScanRelaxSet).
     """
 
+    accuracy_rating = 4
+
     description_doc_short = "based on pymatgen's MPScanRelaxSet"
 
     functional = "PBE"

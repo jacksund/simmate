@@ -26,6 +26,8 @@ class Restart__Toolkit__Automatic(Workflow):
     No other inputs are allowed bc the simmate_metadata.yaml will be used.
     """
 
+    is_hidden = True
+
     @classmethod
     def run_config(cls, directory_old: Path, directory_new: Path = None, **kwargs):
         # First copy over the directory

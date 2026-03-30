@@ -23,6 +23,8 @@ class StructurePrediction__Toolkit__NewIndividual(Workflow):
     has_prerequisite = True
     use_database = False
 
+    is_hidden = True
+
     @staticmethod
     def run_config(
         search_id: int,

@@ -15,7 +15,7 @@ class StaticEnergy__QuantumEspresso__LowQuality(StagedWorkflow):
 
     is_recommended = True
 
-    accuracy_rating = 1.5
+    accuracy_rating = 0.5
 
     # -------------------------------------------------------------------------
 

@@ -25,6 +25,8 @@ class Dynamics__Vasp__Matproj(DynamicsWorkflow, Relaxation__Vasp__Matproj):
     calculation does not modify your input structure.
     """
 
+    accuracy_rating = 3
+
     _incar_updates = dict(
         # Unique to this task, we want to allow users to set these temperatures
         # but to keep with Simmate's strategy of showing all settings up-front,

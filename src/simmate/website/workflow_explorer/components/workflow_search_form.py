@@ -24,7 +24,7 @@ class WorkflowSearchForm(HtmxComponent):
             }
         )
         self.tags_options.sort()
-        self.form_data["recommended_only"] = True
+        self.form_data["recommended_only"] = False
         self.form_data["order_by"] = ["name_type", "name_app", "name_preset"]
         self.process()
 

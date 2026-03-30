@@ -17,6 +17,8 @@ class ElectronicStructure__Vasp__MatprojFull(ElectronicStructureWorkflow):
     runs DOS and BS at Materials Project settings
     """
 
+    accuracy_rating = 3
+
     static_energy_workflow = StaticEnergy__Vasp__Matproj
     band_structure_workflow = ElectronicStructure__Vasp__MatprojBandStructure
     density_of_states_workflow = ElectronicStructure__Vasp__MatprojDensityOfStates

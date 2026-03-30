@@ -199,6 +199,7 @@ nav:
         
         - Workflows:
             - Naming Conventions: full_guides/workflows/naming_conventions.md
+            - Accuracy Ratings: full_guides/workflows/accuracy_ratings.md
             - Basic Use: full_guides/workflows/basic_use.md
             - Parameters:
                 - Overview: full_guides/workflows/parameters/overview.md
