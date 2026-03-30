@@ -18,7 +18,7 @@ class Relaxation__Vasp__Quality01(VaspWorkflow):
     calculation as a second step.
     """
 
-    accuracy_rating = 0
+    accuracy_rating = 0.5
 
     description_doc_short = "bare-bones settings for randomly-created structures"
 

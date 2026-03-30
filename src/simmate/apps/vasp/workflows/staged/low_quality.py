@@ -13,7 +13,7 @@ class StaticEnergy__Vasp__LowQuality(StagedWorkflow):
     afterwards because ettings are still below MIT and Materials Project quality.
     """
 
-    accuracy_rating = 0
+    accuracy_rating = 0.5
 
     exclude_from_archives = [
         "CHG",

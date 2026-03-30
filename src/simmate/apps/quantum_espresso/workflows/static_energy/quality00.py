@@ -8,7 +8,7 @@ class StaticEnergy__QuantumEspresso__Quality00(PwscfWorkflow):
     A very a basic static energy calc for testing
     """
 
-    accuracy_rating = 0
+    accuracy_rating = 0.5
 
     control = dict(
         pseudo_dir__auto=True,

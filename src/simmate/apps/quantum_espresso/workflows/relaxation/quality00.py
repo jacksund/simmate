@@ -16,7 +16,7 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
     calculation as a first step.
     """
 
-    accuracy_rating = 0
+    accuracy_rating = 0.5
 
     description_doc_short = "barest-bones settings for randomly-created structures"
 

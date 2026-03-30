@@ -132,7 +132,7 @@ class StaticEnergy__QuantumEspresso__EvoTutorial(StagedWorkflow):
     will be VERY unreasonable.
     """
 
-    accuracy_rating = 0
+    accuracy_rating = 0.5
 
     # !!! Needs to be implemented
     exclude_from_archives = []

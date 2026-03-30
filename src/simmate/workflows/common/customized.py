@@ -51,6 +51,8 @@ class Customized__Toolkit__UserConfig(Workflow):
 
     use_database = False
 
+    is_hidden = True
+
     @staticmethod
     def run_config(
         workflow_base: Workflow,
