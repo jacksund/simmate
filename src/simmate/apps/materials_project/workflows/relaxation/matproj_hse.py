@@ -50,7 +50,7 @@ class Relaxation__Vasp__MatprojHse(VaspWorkflow):
 
     is_recommended = True
 
-    accuracy_rating = 4.5
+    accuracy_rating = 5
 
     description_doc_short = "based on pymatgen's MPHSERelaxSet"
 

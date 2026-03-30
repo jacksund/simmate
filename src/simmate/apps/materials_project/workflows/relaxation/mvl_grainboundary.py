@@ -11,6 +11,8 @@ class Relaxation__Vasp__MvlGrainboundary(Relaxation__Vasp__Matproj):
     [MVLGBSet](https://pymatgen.org/pymatgen.io.vasp.sets.html#pymatgen.io.vasp.sets.MVLGBSet).
     """
 
+    accuracy_rating = 3
+
     description_doc_short = "based on pymatgen's MVLGBSet"
 
     _incar_updates = dict(

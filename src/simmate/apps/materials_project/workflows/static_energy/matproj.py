@@ -15,6 +15,8 @@ class StaticEnergy__Vasp__Matproj(Relaxation__Vasp__Matproj):
     This is identical to relaxation/Matproj, but just a single ionic step.
     """
 
+    accuracy_rating = 3
+
     _incar_updates = dict(
         NSW=0,
         LCHARG=True,

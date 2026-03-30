@@ -18,6 +18,8 @@ class Diffusion__Vasp__NebSinglePathMit(SinglePathWorkflow):
     MIT settings.
     """
 
+    accuracy_rating = 2
+
     endpoint_relaxation_workflow = Relaxation__Vasp__MvlNebEndpoint
     endpoint_energy_workflow = StaticEnergy__Vasp__MvlNebEndpoint
     from_images_workflow = Diffusion__Vasp__NebFromImagesMit

@@ -22,6 +22,8 @@ class StaticEnergy__QuantumEspresso__Quality04(Relaxation__QuantumEspresso__Qual
     of rough relaxations are done.
     """
 
+    accuracy_rating = 1
+
     control = dict(
         pseudo_dir__auto=True,  # uses the default directory for pseudopotentials
         restart_mode="from_scratch",  # start from new calc rather than restart

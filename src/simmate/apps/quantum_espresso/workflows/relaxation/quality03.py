@@ -20,7 +20,7 @@ class Relaxation__QuantumEspresso__Quality03(Relaxation__QuantumEspresso__Qualit
     calculation as a fourth step.
     """
 
-    accuracy_rating = 1
+    accuracy_rating = 0
 
     description_doc_short = "less bare-bones settings for randomly-created structures"
 

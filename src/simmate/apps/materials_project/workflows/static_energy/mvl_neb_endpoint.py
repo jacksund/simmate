@@ -17,6 +17,8 @@ class StaticEnergy__Vasp__MvlNebEndpoint(Relaxation__Vasp__MvlNebEndpoint):
     diffusion/neb_from_endpoints), which call this workflow for you.
     """
 
+    accuracy_rating = 3
+
     _incar_updates = dict(
         IBRION=-1,  # (optional) locks everything between ionic steps
         NSW=0,

@@ -14,6 +14,8 @@ class Relaxation__Vasp__MatprojHsesol(Relaxation__Vasp__MatprojHse):
     an additional HSEsol setting.
     """
 
+    accuracy_rating = 5
+
     description_doc_short = "based on pymatgen's MPHSERelaxSet"
 
     # Tell VASP to use PBEsol instead of base PBE

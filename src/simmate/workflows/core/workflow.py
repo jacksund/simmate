@@ -1249,12 +1249,10 @@ class Workflow:
 
     accuracy_rating: float = None
     """
-    accuracy rating is based on many factors such as level of theory, convergence 
-    criteria, and % error (vs. experimental values). Read more at:
-        - ...
-    
-    Ratings are on a scale of 0-5, which allows us to render the rating as 'stars'
-    in the web ui.
+    Accuracy rating is based on many factors such as level of theory, convergence 
+    criteria, and % error (vs. experimental values). For a detailed explanation
+    of the rating system and scale (0-5), see:
+    https://jacksund.github.io/simmate/full_guides/workflows/accuracy_ratings/
     """
 
     @classmethod
