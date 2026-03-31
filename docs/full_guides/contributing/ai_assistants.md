@@ -116,7 +116,7 @@ The web interface is built with Django and HTMX.
 - **`src/simmate/workflows/common/`**:
     - `S3Workflow`: Handles file-based codes (VASP/QE) with automated I/O.
     - `StagedWorkflow`: Manages multi-stage/chained runs.
-- **`src/simmate/compute/`**: Backend for job submission and worker management.
+- **`src/simmate/compute/`**: Backend for job submission and worker management (Executor, Worker, and Scheduler).
 
 ## Coding Conventions
 

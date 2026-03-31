@@ -27,7 +27,7 @@ def start_schedules():
     This command monitors the "schedules" module of each registered app and
     triggers tasks at their defined intervals.
     """
-    from simmate.workflows.scheduler import SimmateScheduler
+    from simmate.compute.scheduler import SimmateScheduler
 
     SimmateScheduler.start()
 
@@ -66,9 +66,9 @@ def start_worker(
     and execute them.
     """
 
-    from simmate.workflows import Worker
+    from simmate.compute import SimmateWorker
 
-    worker = Worker(
+    worker = SimmateWorker(
         nitems_max=nitems_max,
         timeout=timeout,
         close_on_empty_queue=close_on_empty_queue,
@@ -88,9 +88,9 @@ def start_singleflow_worker():
     `simmate compute start-worker --nitems-max 1 --close-on-empty-queue`
     """
 
-    from simmate.workflows import Worker
+    from simmate.compute import SimmateWorker
 
-    Worker.run_singleflow_worker()
+    SimmateWorker.run_singleflow_worker()
 
 
 @compute_app.command()
