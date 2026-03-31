@@ -86,6 +86,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 - patched connection contexts and closing in the `database.external_connectors` module
 - fixed `htmx_molecule_input` for non-chemdraw sketcher
+- fixed extra `$$$$` delimiter being written on bulk sdf export
 
 --------------------------------------------------------------------------------
 
