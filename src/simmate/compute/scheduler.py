@@ -5,7 +5,9 @@ import importlib
 import logging
 import time
 from traceback import format_exc
+from typing import Literal
 
+import schedule as schedule_lib
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from rich import print
@@ -13,6 +15,8 @@ from schedule import Scheduler
 
 from simmate.config import settings
 from simmate.utils import get_app_submodule
+
+from .executor import SimmateExecutor
 
 # This string is just something fancy to display in the console when the process
 # starts up.
@@ -32,14 +36,9 @@ class SimmateScheduler(Scheduler):
     """
     Starts the main process for periodic tasks in each app's "schedules" module.
 
-    NOTE: This is a "basic" alternative to scheduler systems such as Prefect.
-    Here, only 1 task is ran at a time. So if you have a >1 hr task, this will
-    block tasks schedules to run every minute until the longer task finishes.
-    Furthermore, if you schedule a task to run at an exaction date/time, this
-    scheduler may miss the start time due to other running tasks in front of it.
-    Lastly, we "sleep" the scheduler every second, so scheduling tasks to run
-    every <1s will not work as intended. The 1s sleep also means start times
-    will have an error of up to 1s -- even when there's only one scheduled task.
+    Scheduled tasks are submitted to the queue database as WorkItems, meaning
+    the scheduler process itself never blocks. Heavy lifting is handled
+    asynchronously by Simmate Workers.
     """
 
     def __init__(self, reschedule_on_failure=True):
@@ -56,14 +55,9 @@ class SimmateScheduler(Scheduler):
         """
         Starts the main process for periodic tasks in each app's "schedules" module.
 
-        NOTE: This is a "basic" alternative to scheduler systems such as Prefect.
-        Here, only 1 task is ran at a time. So if you have a >1 hr task, this will
-        block tasks schedules to run every minute until the longer task finishes.
-        Furthermore, if you schedule a task to run at an exaction date/time, this
-        scheduler may miss the start time due to other running tasks in front of it.
-        Lastly, we "sleep" the scheduler every second, so scheduling tasks to run
-        every <1s will not work as intended. The 1s sleep also means start times
-        will have an error of up to 1s -- even when there's only one scheduled task.
+        Scheduled tasks are submitted to the queue database as WorkItems, meaning
+        the scheduler process itself never blocks. Heavy lifting is handled
+        asynchronously by Simmate Workers.
         """
 
         # TODO: consider parallel runs using threads, dask, or workers...
@@ -138,3 +132,47 @@ class SimmateScheduler(Scheduler):
                 ),  # get admin emails
             )
             email.send(fail_silently=True)
+
+
+def schedule(
+    interval: Literal["minute", "hourly", "daily", "weekly"],
+    at: str = None,
+    tags: list[str] = ["simmate"],
+    **job_kwargs,
+):
+    """
+    Registers a function to be ran periodically.
+    Rather than running the task in the main scheduler thread, this will submit
+    the task as a WorkItem to the queue database so that workers can pick it up.
+    """
+
+    def decorator(func):
+        # Determine how to submit the object
+        def submit_to_worker():
+            logging.info(
+                f"Submitting scheduled task: {getattr(func, '__name__', str(func))}"
+            )
+            SimmateExecutor.submit(func, tags=tags, **job_kwargs)
+
+        # Map our simple interval string to schedule's syntax
+        if interval == "minute":
+            job = schedule_lib.every().minute
+        elif interval == "hourly":
+            job = schedule_lib.every().hour
+        elif interval == "daily":
+            job = schedule_lib.every().day
+        elif interval == "weekly":
+            job = schedule_lib.every().week
+        else:
+            raise ValueError(f"Unknown interval: {interval}")
+
+        if at:
+            job = job.at(at)
+
+        # Register the job
+        job.do(submit_to_worker)
+
+        # Return original object so it can still be used directly
+        return func
+
+    return decorator
