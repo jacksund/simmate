@@ -96,7 +96,7 @@ class SdfAdapter:
         final_str = ""
         for molecule in track(molecules):
             mol_str = molecule.to_sdf(**kwargs)
-            final_str += f"{mol_str}$$$$\n"
+            final_str += mol_str
         return final_str
 
     @classmethod
