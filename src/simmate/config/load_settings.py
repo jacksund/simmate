@@ -272,8 +272,8 @@ class SimmateSettings:
                         "simmate.apps.ethereum.components.EthereumTransactionTable",
                     ],
                     "Compute Resources": [
-                        "simmate.workflows.execution.components.WorkItemTable",
-                        "simmate.workflows.execution.components.SimmateWorkerTable",
+                        "simmate.compute.components.WorkItemTable",
+                        "simmate.compute.components.SimmateWorkerTable",
                     ],
                     "Other": [
                         "simmate.apps.eppo_gd.components.EppoCodeTable",

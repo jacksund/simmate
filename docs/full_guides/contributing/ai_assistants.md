@@ -31,10 +31,11 @@ simmate/
 │   └── simmate/
 │       ├── apps/           # Specialized modules (VASP, Materials Project, etc.)
 │       ├── command_line/   # Typer CLI entry points
+│       ├── compute/        # Backend for job submission and worker management
 │       ├── config/         # Django/Simmate settings (Source of truth: load_settings.py)
 │       ├── database/       # Django models and ORM infrastructure
 │       ├── toolkit/        # Scientific objects (Structure, Molecule, etc.)
-│       ├── utils/      # General helper functions
+│       ├── utils/          # General helper functions
 │       ├── website/        # Django-based UI (and custom HTMX utils)
 │       ├── workflows/      # Core workflow engine and execution logic
 │       ├── conftest.py     # Shared Pytest fixtures
@@ -107,15 +108,15 @@ The web interface is built with Django and HTMX.
 - **`workflow_explorer/`**: App for submitting workflows and viewing results/analytics.
 - **`htmx/`**: Base classes and utilities for HTMX-based components.
 
-## Workflows and Execution (`src/simmate/workflows/`)
+## Workflows and Execution (`src/simmate/workflows/` & `src/simmate/compute/`)
 
-- **`core/`**:
+- **`src/simmate/workflows/core/`**:
     - `Workflow`: Base class for any automated task.
     - `ErrorHandler`: Interface for fixing simulation failures.
-- **`common/`**:
+- **`src/simmate/workflows/common/`**:
     - `S3Workflow`: Handles file-based codes (VASP/QE) with automated I/O.
     - `StagedWorkflow`: Manages multi-stage/chained runs.
-- **`execution/`**: Backend for job submission and worker management.
+- **`src/simmate/compute/`**: Backend for job submission and worker management.
 
 ## Coding Conventions
 

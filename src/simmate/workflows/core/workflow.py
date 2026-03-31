@@ -15,6 +15,7 @@ import yaml
 from django.utils import timezone
 
 import simmate
+from simmate.compute import SimmateExecutor
 from simmate.config import settings
 from simmate.database.mixins import Calculation
 from simmate.utils import (
@@ -23,8 +24,6 @@ from simmate.utils import (
     get_directory,
     make_archive,
 )
-
-from ..execution import SimmateExecutor
 
 
 class Workflow:

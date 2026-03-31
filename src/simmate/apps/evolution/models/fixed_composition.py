@@ -15,6 +15,7 @@ from rich.progress import track
 from simmate.apps.evolution import selectors as selector_module
 from simmate.apps.evolution import stop_conditions as stop_conditions_module
 from simmate.apps.evolution.models import SteadystateSource
+from simmate.compute import WorkItem
 from simmate.config.dask import get_dask_client
 from simmate.database.core import table_column
 from simmate.database.mixins import Calculation
@@ -22,7 +23,6 @@ from simmate.toolkit import Composition, Structure
 from simmate.toolkit.validators import fingerprint as validator_module
 from simmate.toolkit.visualization.plotting import PlotlyFigure
 from simmate.utils import get_directory
-from simmate.workflows.execution import WorkItem
 
 
 class FixedCompositionSearch(Calculation):
