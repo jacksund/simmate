@@ -27,7 +27,8 @@ def start_schedules():
     This command monitors the "schedules" module of each registered app and
     triggers tasks at their defined intervals.
     """
-    from simmate.compute.scheduler import SimmateScheduler
+    from simmate.database import connect  # isort:skip
+    from simmate.compute import SimmateScheduler
 
     SimmateScheduler.start()
 
@@ -66,6 +67,7 @@ def start_worker(
     and execute them.
     """
 
+    from simmate.database import connect  # isort:skip
     from simmate.compute import SimmateWorker
 
     worker = SimmateWorker(
@@ -88,6 +90,7 @@ def start_singleflow_worker():
     `simmate compute start-worker --nitems-max 1 --close-on-empty-queue`
     """
 
+    from simmate.database import connect  # isort:skip
     from simmate.compute import SimmateWorker
 
     SimmateWorker.run_singleflow_worker()
@@ -112,6 +115,7 @@ def start_cluster(
     Starts and manages a cluster of Simmate Workers.
     """
 
+    from simmate.database import connect  # isort:skip
     from simmate.compute.utils import start_cluster
 
     start_cluster(
@@ -126,6 +130,8 @@ def error_summary():
     """
     Displays a summary of error messages for all failed jobs in the database.
     """
+
+    from simmate.database import connect  # isort:skip
     from simmate.compute import SimmateExecutor
 
     SimmateExecutor.show_error_summary()
@@ -136,6 +142,8 @@ def stats():
     """
     Displays high-level statistics for all jobs (Pending, Running, Finished, etc.).
     """
+
+    from simmate.database import connect  # isort:skip
     from simmate.compute import SimmateExecutor
 
     SimmateExecutor.show_stats()
@@ -155,6 +163,8 @@ def stats_detail(
     """
     Displays detailed job statistics with optional filtering by tags and time.
     """
+
+    from simmate.database import connect  # isort:skip
     from simmate.compute import SimmateExecutor
 
     SimmateExecutor.show_stats_detail(
@@ -181,6 +191,8 @@ def workitems(
     """
     Displays a tabular list of jobs and their current status.
     """
+
+    from simmate.database import connect  # isort:skip
     from simmate.compute import SimmateExecutor
 
     SimmateExecutor.show_workitems(
@@ -201,6 +213,8 @@ def delete_finished(
     """
     Deletes all jobs with a 'Finished' status from the database.
     """
+
+    from simmate.database import connect  # isort:skip
     from simmate.compute import SimmateExecutor
 
     SimmateExecutor.delete_finished(confirm)
@@ -217,6 +231,8 @@ def delete_all(
     """
     Deletes ALL jobs from the database, regardless of status.
     """
+
+    from simmate.database import connect  # isort:skip
     from simmate.compute import SimmateExecutor
 
     SimmateExecutor.delete_all(confirm)
@@ -237,6 +253,8 @@ def delete(
     """
     Deletes jobs from the database that match the provided tags.
     """
+
+    from simmate.database import connect  # isort:skip
     from simmate.compute import SimmateExecutor
 
     SimmateExecutor.delete(tags=tag, confirm=confirm)
