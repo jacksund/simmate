@@ -27,7 +27,7 @@ def start_schedules():
     This command monitors the "schedules" module of each registered app and
     triggers tasks at their defined intervals.
     """
-    from simmate.workflows.scheduler import SimmateScheduler
+    from simmate.compute.scheduler import SimmateScheduler
 
     SimmateScheduler.start()
 
@@ -66,9 +66,9 @@ def start_worker(
     and execute them.
     """
 
-    from simmate.workflows import Worker
+    from simmate.compute import SimmateWorker
 
-    worker = Worker(
+    worker = SimmateWorker(
         nitems_max=nitems_max,
         timeout=timeout,
         close_on_empty_queue=close_on_empty_queue,
@@ -88,9 +88,9 @@ def start_singleflow_worker():
     `simmate compute start-worker --nitems-max 1 --close-on-empty-queue`
     """
 
-    from simmate.workflows import Worker
+    from simmate.compute import SimmateWorker
 
-    Worker.run_singleflow_worker()
+    SimmateWorker.run_singleflow_worker()
 
 
 @compute_app.command()
@@ -112,7 +112,7 @@ def start_cluster(
     Starts and manages a cluster of Simmate Workers.
     """
 
-    from simmate.workflows.execution.utils import start_cluster
+    from simmate.compute.utils import start_cluster
 
     start_cluster(
         nworkers=nworkers,
@@ -126,7 +126,7 @@ def error_summary():
     """
     Displays a summary of error messages for all failed jobs in the database.
     """
-    from simmate.workflows.execution import SimmateExecutor
+    from simmate.compute import SimmateExecutor
 
     SimmateExecutor.show_error_summary()
 
@@ -136,7 +136,7 @@ def stats():
     """
     Displays high-level statistics for all jobs (Pending, Running, Finished, etc.).
     """
-    from simmate.workflows.execution import SimmateExecutor
+    from simmate.compute import SimmateExecutor
 
     SimmateExecutor.show_stats()
 
@@ -155,7 +155,7 @@ def stats_detail(
     """
     Displays detailed job statistics with optional filtering by tags and time.
     """
-    from simmate.workflows.execution import SimmateExecutor
+    from simmate.compute import SimmateExecutor
 
     SimmateExecutor.show_stats_detail(
         tags=tag,
@@ -181,7 +181,7 @@ def workitems(
     """
     Displays a tabular list of jobs and their current status.
     """
-    from simmate.workflows.execution import SimmateExecutor
+    from simmate.compute import SimmateExecutor
 
     SimmateExecutor.show_workitems(
         tags=tag,
@@ -201,7 +201,7 @@ def delete_finished(
     """
     Deletes all jobs with a 'Finished' status from the database.
     """
-    from simmate.workflows.execution import SimmateExecutor
+    from simmate.compute import SimmateExecutor
 
     SimmateExecutor.delete_finished(confirm)
 
@@ -217,7 +217,7 @@ def delete_all(
     """
     Deletes ALL jobs from the database, regardless of status.
     """
-    from simmate.workflows.execution import SimmateExecutor
+    from simmate.compute import SimmateExecutor
 
     SimmateExecutor.delete_all(confirm)
 
@@ -237,6 +237,6 @@ def delete(
     """
     Deletes jobs from the database that match the provided tags.
     """
-    from simmate.workflows.execution import SimmateExecutor
+    from simmate.compute import SimmateExecutor
 
     SimmateExecutor.delete(tags=tag, confirm=confirm)

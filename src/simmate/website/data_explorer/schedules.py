@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from schedule import every, repeat
+from simmate.compute import schedule
 
 from .models import TableCount
 from .views import get_data_explorer_components
 
 
-@repeat(every().day.at("02:00"))
+@schedule(interval="daily", at="02:00")
 def run_update_table_counts():
     """
     Nightly task to update the table counts cache.

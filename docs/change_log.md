@@ -74,13 +74,16 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `StructureInput` and `htmx_structure_input` to standardize crystal structure loading across forms
 - updated the OQMD data loading method to support the latest data provided by their team
 - added draft of `accuracy_rating` to workflows to help beginners select the most appropriate settings
+- added a `@schedule` decorator for easier periodic task registration
 
 **Refactors**
 
+- moved `simmate.workflows.execution` and `simmate.workflows.scheduler` to `simmate.compute` to align with the CLI and documentation structure
 - renamed the `simmate engine` command group to `simmate compute` and updated internal modules/tests
 - refactored `website.data_explorer` to use HTMX components for all table entries, moving UI-specific features from `DatabaseTable` and `HTMLMixin` into `DynamicTableForm`
 - moved `chemspace.utils.download_raw_files` into `ChemSpaceFreedomSpaceMolecule.download_source_data`
 - switched from ChemDoodle to Ketcher as the default molecule sketcher
+- updated scheduler to submit tasks as `WorkItem`s instead of running them in-thread
 
 **Fixes**
 
