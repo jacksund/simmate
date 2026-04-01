@@ -365,7 +365,7 @@ class SimmateWorker(DatabaseTable):
         except KeyboardInterrupt:
             logging.info("Stop signal recieved. Shutting down.")
             if "workitem" in locals() and workitem and workitem.status == "R":
-                logging.danger(
+                logging.warning(
                     "Shut down worker while WorkItem was still running. "
                     "This can lead to undesired consequences. "
                 )
