@@ -137,6 +137,7 @@ class SimmateScheduler(Scheduler):
 def schedule(
     interval: Literal["minute", "hourly", "daily", "weekly"],
     at: str = None,
+    on: str = None,
     tags: list[str] = ["simmate"],
     **job_kwargs,
 ):
@@ -144,6 +145,12 @@ def schedule(
     Registers a function to be ran periodically.
     Rather than running the task in the main scheduler thread, this will submit
     the task as a WorkItem to the queue database so that workers can pick it up.
+
+    Args:
+        interval: How often to run. One of "minute", "hourly", "daily", "weekly".
+        at: Time of day to run (e.g. "10:30"). Used with "daily" or "weekly".
+        on: Day of the week to run (e.g. "saturday"). Only used with "weekly".
+        tags: Tags to attach to the submitted WorkItem.
     """
 
     def decorator(func):
@@ -162,7 +169,11 @@ def schedule(
         elif interval == "daily":
             job = schedule_lib.every().day
         elif interval == "weekly":
-            job = schedule_lib.every().week
+            if on:
+                # Use the day-of-week property (e.g. every().saturday)
+                job = getattr(schedule_lib.every(), on.lower())
+            else:
+                job = schedule_lib.every().week
         else:
             raise ValueError(f"Unknown interval: {interval}")
 
