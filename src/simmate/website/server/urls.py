@@ -99,20 +99,6 @@ urlpatterns = [
         name="workflow_explorer",
     ),
     #
-    # This app includes core functionality, such as views for crystal structures
-    # in a 3D viewport.
-    path(
-        route="core/",
-        view=include(
-            (
-                "simmate.website.core.urls",
-                "simmate.website.core",
-            ),
-            namespace="core",
-        ),
-        name="core",
-    ),
-    #
     # And extra one-page views
     path(route="extras/", view=views.extras, name="extras"),
     path(route="about/", view=views.about, name="about"),
