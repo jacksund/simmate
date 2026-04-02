@@ -84,6 +84,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - moved `chemspace.utils.download_raw_files` into `ChemSpaceFreedomSpaceMolecule.download_source_data`
 - switched from ChemDoodle to Ketcher as the default molecule sketcher
 - updated scheduler to submit tasks as `WorkItem`s instead of running them in-thread
+- removed unused web templates and static assets
 
 **Fixes**
 
