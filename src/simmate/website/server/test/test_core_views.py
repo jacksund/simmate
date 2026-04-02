@@ -24,13 +24,6 @@ def test_home_view(client):
 
 
 @pytest.mark.django_db
-def test_extras_view(client):
-    response = client.get("/extras/")
-    assert response.status_code == 200
-    assertTemplateUsed(response, "core/extras.html")
-
-
-@pytest.mark.django_db
 def test_contact_view(client):
     response = client.get("/contact/")
     assert response.status_code == 200

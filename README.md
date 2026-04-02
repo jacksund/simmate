@@ -1,7 +1,7 @@
 <!-- Simmate Logo -->
 <p align="center">
    <a href="https://simmate.org">
-      <img src="https://raw.githubusercontent.com/jacksund/simmate/refs/heads/main/src/simmate/website/core/static/images/simmate-logo-dark.svg" width="700" style="max-width: 700px;">
+      <img src="https://raw.githubusercontent.com/jacksund/simmate/refs/heads/main/src/simmate/website/core/static/images/simmate-logo.svg" width="700" style="max-width: 700px;">
    </a>
 </p>
 
