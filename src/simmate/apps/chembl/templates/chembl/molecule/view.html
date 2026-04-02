@@ -1,0 +1,11 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    <div>
+        {% include "chembl/molecule/for_view/tabs_header.html" %}
+        <div class="tab-content">
+            {% include "chembl/molecule/for_view/overview_tab.html" %}
+            {% include "chembl/molecule/for_view/docs_tab.html" %}
+            {% include "chembl/molecule/for_view/assays_tab.html" %}
+        </div>
+    </div>
+{% endblock %}

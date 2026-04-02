@@ -1,0 +1,34 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "chembl_id" "ChEMBL ID" min_width=150 %}
+    {% table_header "molecule_type" "Type" min_width=150 %}
+    {% table_header "drug_likeness" "Drug Likeness" min_width=150 %}
+    {% table_header "alog_p_chembl" "ALogP" min_width=100 %}
+    {% table_header "rule_of_3_pass" "RO3 Pass" min_width=100 %}
+    {% table_header "rule_of_5_violations" "RO5 Violations" min_width=125 %}
+    {% table_header "num_h_acceptors_lipinski" "H-Acceptors" min_width=125 %}
+    {% table_header "num_h_donors_lipinski" "H-Donors" min_width=125 %}
+    {% table_header "natural_product_likeness" "NP Likeness" min_width=150 %}
+{% endblock %}
+{% block table_rows %}
+    <td class="text-center">
+        {% draw_molecule entry width=150 height=150 %}
+        {% foreign_key_link entry "chembl_id" %}
+    </td>
+    <td>{{ entry.molecule_type|default:"--" }}</td>
+    <td>{{ entry.drug_likeness|default:"--" }}</td>
+    <td>{{ entry.alog_p_chembl|default:"--" }}</td>
+    <td>
+        {% if entry.rule_of_3_pass == True %}
+            <span class="badge bg-success">Yes</span>
+        {% elif entry.rule_of_3_pass == False %}
+            <span class="badge bg-danger">No</span>
+        {% else %}
+            --
+        {% endif %}
+    </td>
+    <td>{{ entry.rule_of_5_violations|default:"--" }}</td>
+    <td>{{ entry.num_h_acceptors_lipinski|default:"--" }}</td>
+    <td>{{ entry.num_h_donors_lipinski|default:"--" }}</td>
+    <td>{{ entry.natural_product_likeness|default:"--" }}</td>
+{% endblock %}
