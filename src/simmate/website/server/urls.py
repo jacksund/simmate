@@ -100,7 +100,6 @@ urlpatterns = [
     ),
     #
     # And extra one-page views
-    path(route="extras/", view=views.extras, name="extras"),
     path(route="about/", view=views.about, name="about"),
     path(route="contact/", view=views.contact, name="contact"),
     path(route="pricing/", view=views.pricing, name="pricing"),
