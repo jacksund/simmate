@@ -1,0 +1,16 @@
+{% extends "data_explorer/table_entries_base.html" %}
+{% block table_headers %}
+    {% table_header "id" "PDB ID" min_width=150 %}
+    {% table_header "name" "Name" min_width=300 %}
+    {% table_header "type_code" "Type" min_width=150 %}
+    {% table_header "monomer_type" "Monomer Type" min_width=150 %}
+{% endblock %}
+{% block table_rows %}
+    <td class="text-center">
+        {% draw_molecule entry width=150 height=150 %}
+        {% foreign_key_link entry "id" %}
+    </td>
+    <td>{{ entry.name|default:"--" }}</td>
+    <td>{{ entry.type_code|default:"--" }}</td>
+    <td>{{ entry.monomer_type|default:"--" }}</td>
+{% endblock %}
