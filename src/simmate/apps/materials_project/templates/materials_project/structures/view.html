@@ -1,0 +1,11 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    <div>
+        {% include "materials_project/structures/for_view/tabs_header.html" %}
+        <div class="tab-content">
+            {% include "materials_project/structures/for_view/overview_tab.html" %}
+            {% include "materials_project/structures/for_view/thermodynamics_tab.html" %}
+            {% include "materials_project/structures/for_view/electronic_tab.html" %}
+        </div>
+    </div>
+{% endblock %}

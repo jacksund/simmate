@@ -13,3 +13,9 @@ class ChemicalSystemSearchTable(DynamicTableForm):
         " a chemical system (e.g., Fe-O). This workflow explores multiple "
         "compositions simultaneously to map out the thermodynamic convex hull."
     )
+    template_names = {
+        "default": "data_explorer/table_about.html",
+        "search": "core/base_data_types/structure_form.html",
+    }
+
+    enabled_forms = ["search"]

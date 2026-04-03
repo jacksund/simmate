@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.htmx.components import DynamicTableForm, StructureInput
 
 from ..models import MatprojStructure
 
 
-class MatprojStructureTable(DynamicTableForm):
+class MatprojStructureTable(DynamicTableForm, StructureInput):
     table = MatprojStructure
     display_name = "Materials Project"
     description_short = (
@@ -16,6 +16,9 @@ class MatprojStructureTable(DynamicTableForm):
     )
     template_names = {
         "default": "data_explorer/table_about.html",
+        "search": "materials_project/structures/form.html",
         "entries": "materials_project/structures/table.html",
         "entry": "materials_project/structures/view.html",
     }
+
+    enabled_forms = ["search"]

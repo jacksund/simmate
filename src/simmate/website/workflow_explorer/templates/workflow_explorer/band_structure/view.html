@@ -1,0 +1,11 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    <div>
+        {% include "workflow_explorer/band_structure/for_view/tabs_header.html" %}
+        <div class="tab-content">
+            {% include "workflow_explorer/band_structure/for_view/overview_tab.html" %}
+            {% include "workflow_explorer/band_structure/for_view/thermodynamics_tab.html" %}
+            {% include "workflow_explorer/band_structure/for_view/forces_tab.html" %}
+        </div>
+    </div>
+{% endblock %}

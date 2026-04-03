@@ -8,6 +8,7 @@
                 <th>ID</th>
                 <th>Dashboards</th>
                 <th>Full Formula</th>
+                <th>Reduced Formula</th>
                 <th>Spacegroup</th>
                 <th>Density</th>
             </tr>
@@ -21,6 +22,7 @@
                         {% if entry.external_link %}/ <a href="{{ entry.external_link }}" target="_blank">provider</a>{% endif %}
                     </td>
                     <td>{{ entry.formula_full | chemical_formula }}</td>
+                    <td>{{ entry.formula_reduced | chemical_formula }}</td>
                     <td>{{ entry.spacegroup.number }}</td>
                     <td>{{ entry.density | floatformat:3 }}</td>
                 </tr>

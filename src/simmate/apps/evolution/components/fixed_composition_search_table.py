@@ -14,3 +14,9 @@ class FixedCompositionSearchTable(DynamicTableForm):
         "wide range of symmetries and configurations to find the global "
         "energy minimum."
     )
+    template_names = {
+        "default": "data_explorer/table_about.html",
+        "search": "core/base_data_types/structure_form.html",
+    }
+
+    enabled_forms = ["search"]

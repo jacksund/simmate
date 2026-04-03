@@ -1,0 +1,104 @@
+<div class="col-12 border border-4 border-light">
+    <div class="row text-center" style="height: 500px;">{% draw_structure table_entry %}</div>
+    <div class="row m-2">
+        {# list out structure formats to copy #}
+        <ul class="nav nav-tabs nav-bordered mb-3">
+            <li class="nav-item">
+                <a href="#threejs"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link active ">
+                    <i class="mdi mdi-cube-outline d-md-none d-block"></i>
+                    <span class="d-none d-md-block">3D View</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#cif"
+                   data-bs-toggle="tab"
+                   aria-expanded="true"
+                   class="nav-link">
+                    <i class="mdi mdi-file-document-outline d-md-none d-block"></i>
+                    <span class="d-none d-md-block">CIF</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#poscar"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="mdi mdi-file-document-outline d-md-none d-block"></i>
+                    <span class="d-none d-md-block">POSCAR</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#origstruct"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="mdi mdi-settings-outline d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Original Input</span>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane show active" id="threejs">
+                <div class="row bg-light p-2 m-0 border border-secondary-lighten">
+                    <p class="text-center">Interactive 3D view is displayed above.</p>
+                </div>
+            </div>
+            <div class="tab-pane" id="cif">
+                <div class="row bg-light p-0 m-0 border border-secondary-lighten">
+                    <div class="col-11 mt-1">
+                        <pre id="cif_text"><small>{{ table_entry|to_cif }}</small></pre>
+                    </div>
+                    <div class="col-1">
+                        <button onclick="copyTextById('cif_text')"
+                                class="btn btn-outline-secondary btn-sm border border-light"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="hover"
+                                data-bs-placement="bottom"
+                                data-bs-content="Click to copy">
+                            <i class="mdi mdi-content-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="poscar">
+                <div class="row bg-light p-0 m-0 border border-secondary-lighten">
+                    <div class="col-11 mt-1">
+                        <pre id="poscar_text"><small>{{ table_entry|to_poscar }}</small></pre>
+                    </div>
+                    <div class="col-1">
+                        <button onclick="copyTextById('poscar_text')"
+                                class="btn btn-outline-secondary btn-sm border border-light"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="hover"
+                                data-bs-placement="bottom"
+                                data-bs-content="Click to copy">
+                            <i class="mdi mdi-content-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="origstruct">
+                <div class="row bg-light p-0 m-0 border border-secondary-lighten">
+                    <div class="col-11 mt-1">
+                        <pre id="origstruct_text">
+                        <small>{{ table_entry.structure }}</small>
+                    </pre>
+                    </div>
+                    <div class="col-1">
+                        <button onclick="copyTextById('origstruct_text')"
+                                class="btn btn-outline-secondary btn-sm border border-light"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="hover"
+                                data-bs-placement="bottom"
+                                data-bs-content="Click to copy">
+                            <i class="mdi mdi-content-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -65,6 +65,11 @@ class DensityofStatesCalcTable(DynamicTableForm):
         "plots provide information on the number of electronic states per "
         "unit energy, essential for understanding metallic vs. insulating behavior."
     )
+    template_names = {
+        "default": "data_explorer/table_about.html",
+        "entries": "workflow_explorer/density_of_states/table.html",
+        "entry": "workflow_explorer/density_of_states/view.html",
+    }
 
 
 class BandStructureCalcTable(DynamicTableForm):
@@ -75,6 +80,11 @@ class BandStructureCalcTable(DynamicTableForm):
         "the relationship between electron energy and momentum (k-points), "
         "providing a detailed map of the material's electronic properties."
     )
+    template_names = {
+        "default": "data_explorer/table_about.html",
+        "entries": "workflow_explorer/band_structure/table.html",
+        "entry": "workflow_explorer/band_structure/view.html",
+    }
 
 
 class DiffusionAnalysisTable(DynamicTableForm):

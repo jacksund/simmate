@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.htmx.components import DynamicTableForm, MoleculeInput
 
 from ..models import BcpcIsoPesticide
 
 
-class BcpcIsoPesticideTable(DynamicTableForm):
+class BcpcIsoPesticideTable(DynamicTableForm, MoleculeInput):
     table = BcpcIsoPesticide
     display_name = "ISO Pesticides"
     description_short = (
@@ -16,6 +16,9 @@ class BcpcIsoPesticideTable(DynamicTableForm):
     )
     template_names = {
         "default": "data_explorer/table_about.html",
+        "search": "core/base_data_types/molecule_form.html",
         "entries": "bcpc/iso_pesticides/table.html",
         "entry": "bcpc/iso_pesticides/view.html",
     }
+
+    enabled_forms = ["search"]
