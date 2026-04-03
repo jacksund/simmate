@@ -45,10 +45,14 @@ class PdbLigand(ThirdPartyData, Molecule):
     monomer_type = table_column.TextField()
     """The type of monomer (ex: "NON-POLYMER")"""
 
-    created_at_original = table_column.DateTimeField(blank=True, null=True, db_index=True)
+    created_at_original = table_column.DateTimeField(
+        blank=True, null=True, db_index=True
+    )
     """Timestamp of when this row was first added to the PDB database"""
 
-    updated_at_original = table_column.DateTimeField(blank=True, null=True, db_index=True)
+    updated_at_original = table_column.DateTimeField(
+        blank=True, null=True, db_index=True
+    )
     """Timestamp of when this row was was lasted changed / updated by the PDB"""
 
     protein_ids_original = table_column.JSONField(blank=True, null=True)
