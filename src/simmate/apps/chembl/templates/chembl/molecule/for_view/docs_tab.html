@@ -1,0 +1,43 @@
+<div class="tab-pane" id="docs-section">
+    <div class="row py-2">
+        <div class="col-xl-12">
+            <table class="table table-sm table-centered table-striped mb-0 border">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Year</th>
+                        <th>DOI</th>
+                        <th>Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% regroup table_entry.chembl_assay_results.all|dictsort:"chembl_document.id" by chembl_document as document_list %}
+                    {% for doc_group in document_list %}
+                        {% with doc=doc_group.grouper %}
+                            {% if doc %}
+                                <tr>
+                                    <td>{{ doc.title|default:"--" }}</td>
+                                    <td>{{ doc.document_type|default:"--" }}</td>
+                                    <td>{{ doc.published_at|default:"--" }}</td>
+                                    <td>{{ doc.doi|default:"--" }}</td>
+                                    <td>
+                                        <a href="{% url 'data_explorer:table-entry' doc.table_name doc.id %}"
+                                           target="_blank"
+                                           class="btn btn-sm btn-light">
+                                            View <i class="mdi mdi-open-in-new"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endwith %}
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No linked documents found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

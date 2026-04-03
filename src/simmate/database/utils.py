@@ -416,7 +416,7 @@ def load_default_sqlite3_build():
     """
     # DEV NOTE: the prebuild filename is updated when new versions call for it.
     # Therefore, this value hardcoded specifically for each simmate version
-    archive_filename = "prebuild-2026-03-22.zip"
+    archive_filename = "prebuild-2026-04-02.zip"
 
     # Make sure the backend is using SQLite3 as this is the only allowed format
     assert settings.database.engine == "django.db.backends.sqlite3"
