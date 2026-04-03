@@ -1,0 +1,10 @@
+{% extends "data_explorer/table_entry.html" %}
+{% block entrycontent %}
+    <div>
+        {% include "oqmd/structures/for_view/tabs_header.html" %}
+        <div class="tab-content">
+            {% include "oqmd/structures/for_view/overview_tab.html" %}
+            {% include "oqmd/structures/for_view/thermodynamics_tab.html" %}
+        </div>
+    </div>
+{% endblock %}

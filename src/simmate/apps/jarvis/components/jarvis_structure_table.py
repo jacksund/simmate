@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.htmx.components import DynamicTableForm, StructureInput
 
 from ..models import JarvisStructure
 
 
-class JarvisStructureTable(DynamicTableForm):
+class JarvisStructureTable(DynamicTableForm, StructureInput):
     table = JarvisStructure
     display_name = "JARVIS"
     description_short = (
@@ -16,6 +16,9 @@ class JarvisStructureTable(DynamicTableForm):
     )
     template_names = {
         "default": "data_explorer/table_about.html",
+        "search": "jarvis/structures/form.html",
         "entries": "jarvis/structures/table.html",
         "entry": "jarvis/structures/view.html",
     }
+
+    enabled_forms = ["search"]

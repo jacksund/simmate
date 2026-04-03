@@ -1,0 +1,66 @@
+<div class="row pt-2">
+    <div class="col-xl-7">
+        <table class="table table-centered table-striped mb-0 border">
+            <thead class="table-primary">
+                <tr>
+                    <th style="width: 45%">Calculation Details</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Status</td>
+                    <td>
+                        {% if table_entry.status == "Completed" %}
+                            <span class="badge bg-success">{{ table_entry.status }}</span>
+                        {% elif table_entry.status == "Failed" %}
+                            <span class="badge bg-danger">{{ table_entry.status }}</span>
+                        {% elif table_entry.status == "Running" %}
+                            <span class="badge bg-primary">{{ table_entry.status }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ table_entry.status|default:"Pending" }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Workflow</td>
+                    <td>{{ table_entry.workflow_name }} (v{{ table_entry.workflow_version }})</td>
+                </tr>
+                <tr>
+                    <td>Run ID</td>
+                    <td>
+                        <small class="text-muted">{{ table_entry.run_id }}</small>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Started At</td>
+                    <td>{{ table_entry.started_at|default:"--" }}</td>
+                </tr>
+                <tr>
+                    <td>Finished At</td>
+                    <td>{{ table_entry.finished_at|default:"--" }}</td>
+                </tr>
+                <tr>
+                    <td>Total Time</td>
+                    <td>
+                        {% if table_entry.total_time %}
+                            {{ table_entry.total_time|floatformat:1 }} seconds
+                        {% else %}
+                            --
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Computer System</td>
+                    <td>{{ table_entry.computer_system|default:"--" }}</td>
+                </tr>
+                <tr>
+                    <td>Directory</td>
+                    <td>
+                        <small>{{ table_entry.directory|default:"--" }}</small>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

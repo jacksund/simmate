@@ -1,0 +1,54 @@
+<div class="tab-pane show active" id="overview-section">
+    <div class="row">
+        <div class="col-xl-12">{% include "core/base_data_types/structure.html" %}</div>
+    </div>
+    <div class="row py-2">
+        <div class="col-12">
+            {# base info #}
+            <div class="row pt-2">
+                <div class="col-xl-7">
+                    <table class="table table-centered table-striped mb-0 border">
+                        <thead class="table-primary">
+                            <tr>
+                                <th style="width: 45%">Base Info</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Materials Project ID</td>
+                                <td>
+                                    <a href="{{ table_entry.external_link }}" target="_blank">
+                                        {{ table_entry.id }} <i class="mdi mdi-open-in-new"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Formula (Reduced)</td>
+                                <td>{{ table_entry.formula_reduced }}</td>
+                            </tr>
+                            <tr>
+                                <td>Spacegroup</td>
+                                <td>{{ table_entry.spacegroup.symbol }} ({{ table_entry.spacegroup.number }})</td>
+                            </tr>
+                            <tr>
+                                <td>Number of Sites</td>
+                                <td>{{ table_entry.nsites }}</td>
+                            </tr>
+                            <tr>
+                                <td>Theoretical?</td>
+                                <td>
+                                    {% if table_entry.is_theoretical %}
+                                        <i class="mdi mdi-check text-primary"></i> Yes (Computed)
+                                    {% else %}
+                                        <i class="mdi mdi-flask text-success"></i> No (Experimental)
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

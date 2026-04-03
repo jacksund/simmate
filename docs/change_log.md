@@ -76,6 +76,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added draft of `accuracy_rating` to workflows to help beginners select the most appropriate settings
 - added a `@schedule` decorator for easier periodic task registration
 - added web components and templates for the pdb and chembl apps
+- added crystalline dataset views to the Data Explorer, including 3D structure views, exports, and search forms
 
 **Refactors**
 

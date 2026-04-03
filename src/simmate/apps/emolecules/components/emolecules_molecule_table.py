@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.htmx.components import DynamicTableForm, MoleculeInput
 
 from ..models import EmoleculesMolecule, EmoleculesSupplierOffer
 
 
-class EmoleculesMoleculeTable(DynamicTableForm):
+class EmoleculesMoleculeTable(DynamicTableForm, MoleculeInput):
     table = EmoleculesMolecule
     display_name = "eMolecules"
     description_short = (
@@ -14,3 +14,9 @@ class EmoleculesMoleculeTable(DynamicTableForm):
         "availability, pricing, and chemical information for procurement and "
         "research."
     )
+    template_names = {
+        "default": "data_explorer/table_about.html",
+        "search": "core/base_data_types/molecule_form.html",
+    }
+
+    enabled_forms = ["search"]

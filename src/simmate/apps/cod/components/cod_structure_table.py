@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.htmx.components import DynamicTableForm, StructureInput
 
 from ..models import CodStructure
 
 
-class CodStructureTable(DynamicTableForm):
+class CodStructureTable(DynamicTableForm, StructureInput):
     table = CodStructure
     display_name = "COD"
     description_short = (
@@ -16,6 +16,9 @@ class CodStructureTable(DynamicTableForm):
     )
     template_names = {
         "default": "data_explorer/table_about.html",
+        "search": "cod/structures/form.html",
         "entries": "cod/structures/table.html",
         "entry": "cod/structures/view.html",
     }
+
+    enabled_forms = ["search"]

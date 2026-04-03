@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.htmx.components import DynamicTableForm, StructureInput
 
 from ..models import OqmdStructure
 
 
-class OqmdStructureTable(DynamicTableForm):
+class OqmdStructureTable(DynamicTableForm, StructureInput):
     table = OqmdStructure
     display_name = "OQMD"
     description_short = (
@@ -16,6 +16,9 @@ class OqmdStructureTable(DynamicTableForm):
     )
     template_names = {
         "default": "data_explorer/table_about.html",
+        "search": "oqmd/structures/form.html",
         "entries": "oqmd/structures/table.html",
         "entry": "oqmd/structures/view.html",
     }
+
+    enabled_forms = ["search"]

@@ -14,3 +14,9 @@ class VariableNsitesCompositionSearchTable(DynamicTableForm):
         "sizes (number of sites). This workflow helps find the optimal "
         "supercell or primitive cell configuration."
     )
+    template_names = {
+        "default": "data_explorer/table_about.html",
+        "search": "core/base_data_types/structure_form.html",
+    }
+
+    enabled_forms = ["search"]

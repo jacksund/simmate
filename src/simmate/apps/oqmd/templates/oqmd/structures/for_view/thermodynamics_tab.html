@@ -1,0 +1,26 @@
+<div class="tab-pane" id="thermodynamics-section">
+    <div class="row">
+        <div class="col-xl-7">
+            <table class="table table-centered table-striped mb-0 border">
+                <thead class="table-primary">
+                    <tr>
+                        <th style="width: 45%">Stability and Energy</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Final Energy (Per Atom)</td>
+                        <td>
+                            {% if table_entry.energy_per_atom is not None %}
+                                {{ table_entry.energy_per_atom|floatformat:4 }} eV/atom
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
