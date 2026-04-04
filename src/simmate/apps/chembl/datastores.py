@@ -7,6 +7,8 @@ import polars
 
 from simmate.toolkit.datastores import MoleculeStore
 
+from .client import ChemblClient
+
 
 class ChemblMoleculeStore(MoleculeStore):
 
@@ -42,7 +44,6 @@ class ChemblMoleculeStore(MoleculeStore):
         """
         Loads data from the ChEMBL SQLite database into the MoleculeStore.
         """
-        from simmate.apps.chembl.client import ChemblClient
 
         logging.info("Pulling molecule data from ChEMBL db into MoleculeStore...")
         for df in ChemblClient.get_molecule_data(chunk_size=cls.chunk_size):

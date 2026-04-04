@@ -6,6 +6,7 @@ import subprocess
 import urllib
 import zipfile
 from datetime import datetime
+from functools import wraps
 from pathlib import Path
 
 from django.apps import apps
@@ -29,14 +30,9 @@ def batch_bulk_create(batch_size: int = 1000):
     """
 
     def decorator(func):
-        import logging
-        from functools import wraps
-
         @wraps(func)
         def wrapper(cls, *args, **kwargs):
-            logging.info(f"Generating database objects for {cls.table_name}...")
             db_objs = []
-
             for obj in func(cls, *args, **kwargs):
                 if obj is None:
                     continue
@@ -48,7 +44,6 @@ def batch_bulk_create(batch_size: int = 1000):
                         ignore_conflicts=True,
                     )
                     db_objs = []  # reset for next batch
-
             # save any remaining
             if db_objs:
                 cls.objects.bulk_create(
@@ -56,12 +51,6 @@ def batch_bulk_create(batch_size: int = 1000):
                     batch_size=batch_size,
                     ignore_conflicts=True,
                 )
-
-            # Call post-source load if implemented
-            if hasattr(cls, "_post_source_load"):
-                cls._post_source_load()
-
-            logging.info("Done!")
 
         return wrapper
 
@@ -454,17 +443,13 @@ def download_app_data(app_name: str, source: str = "direct", **kwargs):
         # Decide which one to call based on `source` and availability
         if source == "direct":
             if has_load_source:
-                logging.info(f"Loading {model.__name__} from direct source...")
                 model.load_source_data(**kwargs)
             elif has_archive:
-                logging.info(f"Loading {model.__name__} from remote archive...")
                 model.load_remote_archive(**kwargs)
         elif source == "archive":
             if has_archive:
-                logging.info(f"Loading {model.__name__} from remote archive...")
                 model.load_remote_archive(**kwargs)
             elif has_load_source:
-                logging.info(f"Loading {model.__name__} from direct source...")
                 model.load_source_data(**kwargs)
         else:
             logging.error(f"Unknown source '{source}'. Use 'direct' or 'archive'.")

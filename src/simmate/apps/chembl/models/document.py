@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from rich.progress import track
-
 from simmate.database.core import DatabaseTable, table_column
 from simmate.database.utils import batch_bulk_create
 
@@ -52,7 +50,7 @@ class ChemblDocument(DatabaseTable):
     @batch_bulk_create(batch_size=10_000)
     def load_source_data(cls, **kwargs):
         for df in ChemblClient.get_document_data(chunk_size=10_000):
-            for row in track(df.iter_rows(named=True), total=len(df)):
+            for row in df.iter_rows(named=True):
                 yield cls(
                     id=row["doc_id"],
                     published_at=row["year"],

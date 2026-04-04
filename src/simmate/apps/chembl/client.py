@@ -94,6 +94,8 @@ class ChemblClient:
             df = polars.DataFrame(
                 data=rows,
                 schema=[c[0] for c in cursor.description],
+                infer_schema_length=None,
+                orient="row",
             )
             yield df
 
@@ -130,6 +132,8 @@ class ChemblClient:
             df = polars.DataFrame(
                 data=rows,
                 schema=[c[0] for c in cursor.description],
+                infer_schema_length=None,
+                orient="row",
             )
             yield df
 
@@ -196,5 +200,7 @@ class ChemblClient:
             df = polars.DataFrame(
                 data=rows,
                 schema=[c[0] for c in cursor.description],
+                infer_schema_length=None,
+                orient="row",
             )
             yield df

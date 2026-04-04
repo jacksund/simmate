@@ -10,7 +10,7 @@ from simmate.database.mixins import ThirdPartyData
 from simmate.database.utils import batch_bulk_create
 from simmate.toolkit import Molecule as ToolkitMolecule
 
-from .client import ChemblClient
+from ..client import ChemblClient
 
 
 class ChemblMolecule(ThirdPartyData, Molecule):
