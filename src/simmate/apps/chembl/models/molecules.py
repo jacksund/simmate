@@ -62,22 +62,23 @@ class ChemblMolecule(ThirdPartyData, Molecule):
     """
     whether the molecule was loaded successfully into the simmate database
     """
-
+    
+    molecule_type_options = [
+        "Small molecule",
+        "Unknown",
+        "(NULL)",
+        "Protein",
+        "Antibody",
+        "Oligonucleotide",
+        "Enzyme",
+        "Gene",
+        "Oligiosacchride",
+        "Cell",
+    ]
     molecule_type = table_column.CharField(max_length=25, blank=True, null=True)
     """
     Whether the entry is a small molecule, protein, gene, etc.
     """
-    # TODO: change to choice field
-    # Small molecule
-    # Unknown
-    # (NULL)
-    # Protein
-    # Antibody
-    # Oligonucleotide
-    # Enzyme
-    # Gene
-    # Oligiosacchride
-    # Cell
 
     drug_likeness = table_column.FloatField(blank=True, null=True)
     """
