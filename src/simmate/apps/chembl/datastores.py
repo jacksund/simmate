@@ -38,61 +38,16 @@ class ChemblMoleculeStore(MoleculeStore):
     # -------------------------------------------------------------------------
 
     @classmethod
-    def _load_data(cls, source_directory: str | Path = None):
+    def load_source_data(cls, source_directory: str | Path = None):
         """
         Loads data from the ChEMBL SQLite database into the MoleculeStore.
         """
-        import sqlite3
-        import pandas
-        from simmate.apps.chembl.models import ChemblMolecule
+        from simmate.apps.chembl.client import ChemblClient
 
-        database_file = ChemblMolecule.download_source_data()
-        connection = sqlite3.connect(database_file)
-        cursor = connection.cursor()
-
-        logging.info("Pulling molecule data from ChEMBL db...")
-        query = """
-        SELECT
-            S1.molregno,
-            S1.canonical_smiles,
-         	D1.chembl_id,
-            D1.molecule_type,
-            P1.qed_weighted,
-            P1.alogp,
-            P1.ro3_pass,
-            P1.num_ro5_violations,
-            P1.hba,
-            P1.hbd,
-            P1.np_likeness_score
-        FROM
-         	compound_structures S1
-        LEFT JOIN 
-        	molecule_dictionary D1
-        	ON S1.molregno = D1.molregno
-        LEFT JOIN 
-        	compound_properties P1
-        	ON S1.molregno = P1.molregno
-        ORDER BY
-            S1.molregno ASC
-        """
-        cursor.execute(query)
-
-        # We load in chunks to avoid memory issues with the full ChEMBL dataset
-        while True:
-            rows = cursor.fetchmany(cls.chunk_size)
-            if not rows:
-                break
+        logging.info("Pulling molecule data from ChEMBL db into MoleculeStore...")
+        for df in ChemblClient.get_molecule_data(chunk_size=cls.chunk_size):
             
-            logging.info(f"Processing chunk of {len(rows)} molecules...")
-            
-            df = pandas.DataFrame(
-                data=rows,
-                columns=[c[0] for c in cursor.description],
-            )
-
-            # Convert to polars and rename columns to match MoleculeStore expectations
-            df_polars = polars.from_pandas(df)
-            df_polars = df_polars.rename({
+            df_polars = df.rename({
                 "molregno": "id",
                 "canonical_smiles": "smiles",
                 "qed_weighted": "drug_likeness",
@@ -103,16 +58,14 @@ class ChemblMoleculeStore(MoleculeStore):
                 "hbd": "num_h_donors_lipinski",
                 "np_likeness_score": "natural_product_likeness",
             })
-
-            # RO3 is given as Y, N, or (NULL) -- but we want a boolean
-            # We do this mapping in polars
+            
             df_polars = df_polars.with_columns(
                 polars.col("rule_of_3_pass").map_elements(
                     lambda x: True if x == "Y" else (False if x == "N" else None),
                     return_dtype=polars.Boolean,
                 )
             )
-
+            
             cls.add_dataframe(df_polars)
 
         logging.info("Done loading ChEMBL data into MoleculeStore.")
