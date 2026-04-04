@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from pathlib import Path
 
 import polars
 from rich.progress import track
 
 from simmate.database.core import DatabaseTable, table_column
+from simmate.database.utils import batch_bulk_create
 
+from ..client import ChemblClient
 from .document import ChemblDocument
 from .molecules import ChemblMolecule
 
@@ -152,96 +153,60 @@ class ChemblAssayResult(DatabaseTable):
     """
 
     @classmethod
-    def load_source_data(
-        cls,
-        update_only: bool = False,
-        limit: int = 250_000,  # very large table so we limit by default
-    ):
-        """
-        Only use this function if you are part of the Simmate dev team!
-        Users should instead access data via the load_remote_archive method.
+    @batch_bulk_create(batch_size=1_000)
+    def load_source_data(cls, update_only: bool = False, limit: int = None, **kwargs):
 
-        Loads all structures directly for the ChEMBL database into the local
-        Simmate database.
-
-        ChEMBL distributes their database as manual downloads in a variety of
-        formats, where we choose to use their SQLite download.
-
-        [See all options here](https://chembl.gitbook.io/chembl-interface-documentation/downloads)
-        """
-        from simmate.apps.chembl.client import ChemblClient
-        from simmate.apps.chembl.models import ChemblDocument, ChemblMolecule
-
-        # if we are only updating, grab the highest activity id to use as our
-        # starting point.
         if update_only and cls.objects.exists():
             logging.info("Checking last update...")
             min_activity_id = str(
-                cls.objects.order_by("-id")  # aka activity_id
-                .values_list("id")
-                .first()[0]
+                cls.objects.order_by("-id").values_list("id").first()[0]
             )
         else:
             min_activity_id = -1
 
-        logging.info("Filtering for existing IDs...")
-        doc_ids = set(ChemblDocument.objects.values_list("id", flat=True).all())
-        mol_ids = set(ChemblMolecule.objects.values_list("id", flat=True).all())
+        if not hasattr(cls, "_doc_ids"):
+            logging.info("Filtering for existing IDs...")
+            cls._doc_ids = set(
+                ChemblDocument.objects.values_list("id", flat=True).all()
+            )
+            cls._mol_ids = set(
+                ChemblMolecule.objects.values_list("id", flat=True).all()
+            )
 
-        failed_rows = []
-        
-        for df in ChemblClient.get_assay_result_data(min_activity_id=min_activity_id, chunk_size=250_000, limit=limit):
+        chunks = ChemblClient.get_assay_result_data(
+            min_activity_id=min_activity_id,
+            chunk_size=250_000,
+            limit=limit,
+        )
 
-            df = df.filter(polars.col("doc_id").is_in(doc_ids) & polars.col("molregno").is_in(mol_ids))
-
-            # autopopulate database columns for each molecule (no saving yet)
-            logging.info("Generating database objects and saving in batches...")
-            db_objs = []
-            for entry in track(df.iter_rows(named=True), total=len(df)):
-                try:
-                    # now convert the entry to a database object
-                    new_obj = cls(
-                        id=entry["activity_id"],
-                        chembl_document_id=entry["doc_id"],
-                        chembl_compound_id=entry["molregno"],
-                        value_relation=entry["standard_relation"],
-                        value=entry["standard_value"],
-                        value_units=entry["standard_units"],
-                        data_validity_check=bool(entry["standard_flag"]),
-                        value_type=entry["standard_type"],
-                        activity_comment=entry["activity_comment"],
-                        data_validity_comment=entry["data_validity_comment"],
-                        is_potential_duplicate=bool(entry["potential_duplicate"]),
-                        value_range_max=entry["standard_upper_value"],
-                        value_text=entry["standard_text_value"],
-                        mode_of_action_type=entry["action_type"],
-                        description=entry["assay_description"],
-                        target_organism=entry["assay_organism"],
-                        confidence_score=entry["confidence_score"],
-                        assay_type=entry["assay_type_description"],
-                        assay_type_standard=entry["bao_type"],
-                    )
-                    db_objs.append(new_obj)
-                except:
-                    failed_rows.append(entry)
-
-                # save every time we have 1000 structures
-                if len(db_objs) >= 1000:
-                    cls.objects.bulk_create(
-                        db_objs,
-                        batch_size=1000,
-                        ignore_conflicts=True,
-                    )
-                    db_objs = []  # reset for next batch
-
-            # one last save in case we exited the loop above with
-            # remaining structures
-            if db_objs:
-                cls.objects.bulk_create(
-                    db_objs,
-                    batch_size=1000,
-                    ignore_conflicts=True,
+        for df in chunks:
+            df = df.filter(
+                polars.col("doc_id").is_in(cls._doc_ids)
+                & polars.col("molregno").is_in(cls._mol_ids)
+            )
+            for row in track(df.iter_rows(named=True), total=len(df)):
+                yield cls(
+                    id=row["activity_id"],
+                    chembl_document_id=row["doc_id"],
+                    chembl_compound_id=row["molregno"],
+                    value_relation=row["standard_relation"],
+                    value=row["standard_value"],
+                    value_units=row["standard_units"],
+                    data_validity_check=bool(row["standard_flag"]),
+                    value_type=row["standard_type"],
+                    activity_comment=row["activity_comment"],
+                    data_validity_comment=row["data_validity_comment"],
+                    is_potential_duplicate=bool(row["potential_duplicate"]),
+                    value_range_max=row["standard_upper_value"],
+                    value_text=row["standard_text_value"],
+                    mode_of_action_type=row["action_type"],
+                    description=row["assay_description"],
+                    target_organism=row["assay_organism"],
+                    confidence_score=row["confidence_score"],
+                    assay_type=row["assay_type_description"],
+                    assay_type_standard=row["bao_type"],
                 )
 
-        logging.info("Done!")
-        return failed_rows
+        if hasattr(cls, "_doc_ids"):
+            del cls._doc_ids
+            del cls._mol_ids

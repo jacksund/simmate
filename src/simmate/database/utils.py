@@ -21,6 +21,53 @@ from simmate.utils import get_directory
 APPS_TO_MIGRATE = list(apps.app_configs.keys())
 
 
+def batch_bulk_create(batch_size: int = 1000):
+    """
+    Decorator for the `load_source_data` classmethod on DatabaseTables.
+    Expects the wrapped method to be a generator that yields database objects.
+    This handles creating the objects in batches using `bulk_create`.
+    """
+
+    def decorator(func):
+        import logging
+        from functools import wraps
+
+        @wraps(func)
+        def wrapper(cls, *args, **kwargs):
+            logging.info(f"Generating database objects for {cls.table_name}...")
+            db_objs = []
+
+            for obj in func(cls, *args, **kwargs):
+                if obj is None:
+                    continue
+                db_objs.append(obj)
+                if len(db_objs) >= batch_size:
+                    cls.objects.bulk_create(
+                        db_objs,
+                        batch_size=batch_size,
+                        ignore_conflicts=True,
+                    )
+                    db_objs = []  # reset for next batch
+
+            # save any remaining
+            if db_objs:
+                cls.objects.bulk_create(
+                    db_objs,
+                    batch_size=batch_size,
+                    ignore_conflicts=True,
+                )
+
+            # Call post-source load if implemented
+            if hasattr(cls, "_post_source_load"):
+                cls._post_source_load()
+
+            logging.info("Done!")
+
+        return wrapper
+
+    return decorator
+
+
 def check_db_conn(original_function: callable):
     """
     A decorator that catches errors such as "close connection" failures and

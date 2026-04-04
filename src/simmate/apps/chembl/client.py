@@ -90,7 +90,7 @@ class ChemblClient:
             rows = cursor.fetchmany(chunk_size)
             if not rows:
                 break
-            
+
             df = polars.DataFrame(
                 data=rows,
                 schema=[c[0] for c in cursor.description],
@@ -126,7 +126,7 @@ class ChemblClient:
             rows = cursor.fetchmany(chunk_size)
             if not rows:
                 break
-            
+
             df = polars.DataFrame(
                 data=rows,
                 schema=[c[0] for c in cursor.description],
@@ -135,10 +135,7 @@ class ChemblClient:
 
     @classmethod
     def get_assay_result_data(
-        cls, 
-        min_activity_id: int = -1, 
-        chunk_size: int = 250_000, 
-        limit: int = None
+        cls, min_activity_id: int = -1, chunk_size: int = 250_000, limit: int = None
     ):
         """
         Yields chunks of assay result data from the ChEMBL SQLite database as polars DataFrames.
@@ -195,7 +192,7 @@ class ChemblClient:
             rows = cursor.fetchmany(chunk_size)
             if not rows:
                 break
-            
+
             df = polars.DataFrame(
                 data=rows,
                 schema=[c[0] for c in cursor.description],

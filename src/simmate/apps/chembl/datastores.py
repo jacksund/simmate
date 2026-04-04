@@ -46,26 +46,28 @@ class ChemblMoleculeStore(MoleculeStore):
 
         logging.info("Pulling molecule data from ChEMBL db into MoleculeStore...")
         for df in ChemblClient.get_molecule_data(chunk_size=cls.chunk_size):
-            
-            df_polars = df.rename({
-                "molregno": "id",
-                "canonical_smiles": "smiles",
-                "qed_weighted": "drug_likeness",
-                "alogp": "alog_p_chembl",
-                "ro3_pass": "rule_of_3_pass",
-                "num_ro5_violations": "rule_of_5_violations",
-                "hba": "num_h_acceptors_lipinski",
-                "hbd": "num_h_donors_lipinski",
-                "np_likeness_score": "natural_product_likeness",
-            })
-            
+
+            df_polars = df.rename(
+                {
+                    "molregno": "id",
+                    "canonical_smiles": "smiles",
+                    "qed_weighted": "drug_likeness",
+                    "alogp": "alog_p_chembl",
+                    "ro3_pass": "rule_of_3_pass",
+                    "num_ro5_violations": "rule_of_5_violations",
+                    "hba": "num_h_acceptors_lipinski",
+                    "hbd": "num_h_donors_lipinski",
+                    "np_likeness_score": "natural_product_likeness",
+                }
+            )
+
             df_polars = df_polars.with_columns(
                 polars.col("rule_of_3_pass").map_elements(
                     lambda x: True if x == "Y" else (False if x == "N" else None),
                     return_dtype=polars.Boolean,
                 )
             )
-            
+
             cls.add_dataframe(df_polars)
 
         logging.info("Done loading ChEMBL data into MoleculeStore.")
