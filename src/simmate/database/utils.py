@@ -401,54 +401,77 @@ def get_table(table_name: str):  # returns subclass of DatabaseTable
 # -----------------------------------------------------------------------------
 
 
-def download_app_data(app_name: str, **kwargs):
+def download_app_data(app_name: str, source: str = "direct", **kwargs):
     """
     Downloads all data for a given Simmate app & loads it into the Simmate database
     """
-    # TODO: make this dynamic & iterate all app tables. For now we hardcode
-    # supported apps.
-    logging.info(f"Loading data for the '{app_name}' app")
+    # we import DatabaseTable inside the function to prevent circular imports
+    from simmate.database.core.table import DatabaseTable
 
-    if app_name == "aflow":
-        from simmate.apps.aflow.models import AflowPrototype
-
-        AflowPrototype.load_remote_archive(**kwargs)
-
-    elif app_name == "cod":
-        from simmate.apps.cod.models import CodStructure
-
-        CodStructure.load_remote_archive(**kwargs)
-
-    elif app_name == "jarvis":
-        from simmate.apps.jarvis.models import JarvisStructure
-
-        JarvisStructure.load_remote_archive(**kwargs)
-
-    elif app_name == "materials_project":
-        from simmate.apps.materials_project.models import MatprojStructure
-
-        MatprojStructure.load_remote_archive(**kwargs)
-        MatprojStructure.update_all_stabilities()
-
-    elif app_name == "oqmd":
-
-        from simmate.apps.oqmd.models import OqmdStructure
-
-        OqmdStructure.load_remote_archive(**kwargs)
-
-    elif app_name in [
-        "bader",
-        "baderkit",
-        "evolution",
-        "quantum_espresso",
-        "rdkit",
-        "vasp",
-    ]:
-        logging.info("'{app_name}' does not have any datasets to download. Exiting.")
+    # Check that the app is installed
+    try:
+        app_config = apps.get_app_config(app_name)
+    except LookupError:
+        logging.critical(f"Unknown app '{app_name}'. Failed to download data.")
         return
 
-    else:
-        logging.critical(f"Unknown app '{app_name}'. Failed to download data.")
+    logging.info(f"Loading data for the '{app_name}' app")
+
+    # Get all models for the app
+    models = list(app_config.get_models())
+
+    # If the app config defines a load_order, we sort the models accordingly
+    if hasattr(app_config, "load_order"):
+        # we want to sort the models based on their __name__ matching the load_order list
+        # Any models not in the list will be put at the end
+        order = app_config.load_order
+        models.sort(
+            key=lambda m: order.index(m.__name__) if m.__name__ in order else 9999
+        )
+
+    found_any = False
+    for model in models:
+        # Check if it's a DatabaseTable
+        if not issubclass(model, DatabaseTable):
+            continue
+
+        # check for load_source_data (is it overridden?)
+        # we check the __func__ to see if it matches the base one
+        has_load_source = (
+            model.load_source_data.__func__
+            is not DatabaseTable.load_source_data.__func__
+        )
+        # check for archive link
+        has_archive = (
+            hasattr(model, "remote_archive_link") and model.remote_archive_link
+        )
+
+        if not has_load_source and not has_archive:
+            continue
+
+        found_any = True
+
+        # Decide which one to call based on `source` and availability
+        if source == "direct":
+            if has_load_source:
+                logging.info(f"Loading {model.__name__} from direct source...")
+                model.load_source_data(**kwargs)
+            elif has_archive:
+                logging.info(f"Loading {model.__name__} from remote archive...")
+                model.load_remote_archive(**kwargs)
+        elif source == "archive":
+            if has_archive:
+                logging.info(f"Loading {model.__name__} from remote archive...")
+                model.load_remote_archive(**kwargs)
+            elif has_load_source:
+                logging.info(f"Loading {model.__name__} from direct source...")
+                model.load_source_data(**kwargs)
+        else:
+            logging.error(f"Unknown source '{source}'. Use 'direct' or 'archive'.")
+            return
+
+    if not found_any:
+        logging.info(f"'{app_name}' does not have any datasets to download. Exiting.")
         return
 
     logging.info(

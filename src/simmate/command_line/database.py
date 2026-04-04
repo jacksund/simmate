@@ -121,7 +121,11 @@ def download(
     app_name: str = typer.Argument(
         ...,
         help="The name of the app to download data for (e.g., 'cod').",
-    )
+    ),
+    source: str = typer.Option(
+        "direct",
+        help="Where to download the data from. Options are 'direct' or 'archive'.",
+    ),
 ):
     """
     Downloads and populates the database with third-party data for a specific app.
@@ -130,7 +134,7 @@ def download(
     from simmate.database import connect
     from simmate.database.utils import download_app_data
 
-    download_app_data(app_name)
+    download_app_data(app_name, source=source)
 
 
 @database_app.command()
