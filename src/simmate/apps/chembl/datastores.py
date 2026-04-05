@@ -11,8 +11,8 @@ from .client import ChemblClient
 
 
 class ChemblMoleculeStore(MoleculeStore):
-
-    directory_name = "chembl"
+    app_name = "chembl"
+    datastore_name = "molecules"
     chunk_size = 1_000_000
     smiles_stored = "original_and_cleaned"
     metadata_columns = [
@@ -36,8 +36,6 @@ class ChemblMoleculeStore(MoleculeStore):
     ]
     morgan_fingerprint_cache = False
     pattern_fingerprint_cache = True
-
-    # -------------------------------------------------------------------------
 
     @classmethod
     def load_source_data(cls, source_directory: str | Path = None):

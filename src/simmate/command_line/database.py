@@ -94,8 +94,7 @@ def reset(
             "Would you like to use a prebuilt-database with third-party data "
             "already loaded in? \n"
             "If this is the first time you using the prebuild, this will "
-            "involve a ~3GB \ndownload and will unpack to ~20GB.\n\n"
-            "We recommend answering 'yes' for beginners."
+            "involve a ~4GB \ndownload and will unpack to ~35GB."
         )
 
     from simmate.database import connect

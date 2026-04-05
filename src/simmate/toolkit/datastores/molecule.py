@@ -7,6 +7,7 @@ import polars
 
 from simmate.config import settings
 from simmate.toolkit import Molecule
+from simmate.toolkit.filters import RemoveInvalidSmiles
 from simmate.utils import chunk_list, filter_polars_df, get_directory
 
 from ..dataframes import MoleculeDataFrame
@@ -43,11 +44,19 @@ class MoleculeStore:
     pandas+dask, sqlite, or duckdb.
     """
 
-    directory_name: str
+    app_name: str = None
     """
-    Rative path to the directory where all parquet chunk files are stored.
-    These are assumed to be in the simmate base directory (~/simmate/datastores/)
-    
+    The name of the app that this datastore belongs to. This is used to
+    organize datastores into subdirectories of the simmate base directory
+    (e.g. ~/simmate/chembl/datastores/)
+    """
+
+    datastore_name: str
+    """
+    The name of the datastore. This is used to organize datastores into
+    subdirectories of the simmate base directory 
+    (e.g. ~/simmate/chembl/datastores/molecules)
+
     Use the `directory` property for the more robust Path object
     """
 
@@ -96,9 +105,19 @@ class MoleculeStore:
         """
         Path object of the directory where all parquet chunk files are stored
         """
-        return get_directory(
-            settings.config_directory / "datastores" / cls.directory_name
-        )
+        # if app_name is provided, we use the <app_name>/datastores/<datastore_name>
+        # otherwise we just use datastores/<datastore_name>
+        if cls.app_name:
+            path = (
+                settings.config_directory
+                / cls.app_name
+                / "datastores"
+                / cls.datastore_name
+            )
+        else:
+            path = settings.config_directory / "datastores" / cls.datastore_name
+
+        return get_directory(path)
 
     @classmethod
     @property
@@ -173,7 +192,7 @@ class MoleculeStore:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def add_dataframe(cls, df: polars.DataFrame):
+    def add_dataframe(cls, df: polars.DataFrame, parallel: bool = True):
         """
         Generates calculated properties+features before adding it to the disk
         store. If files are already present, the new dataframe will be appended
@@ -192,10 +211,6 @@ class MoleculeStore:
                     f"to MoleculeStore. Full list of metadata columns: {cls.metadata_columns}"
                 )
 
-        # OPTIMIZE: consider making mol objects up front, though this will
-        # pose a memory issue in some cases. The current implementation below
-        # is slower but more stable
-
         chunk_files = cls.chunk_files
         current_chunk_index = int(chunk_files[-1].stem) + 1 if chunk_files else 0
         if chunk_files:
@@ -208,7 +223,7 @@ class MoleculeStore:
         total_chunks = (len(df) // cls.chunk_size) + current_chunk_index
         for chunk in chunk_list(df, cls.chunk_size):
             logging.info(f"Building chunk {current_chunk_index} of {total_chunks}...")
-            chunk = cls._inflate_data_chunk(chunk)
+            chunk = cls._inflate_data_chunk(chunk, parallel=parallel)
             chunk_filename = (
                 cls.directory / f"{str(current_chunk_index).zfill(10)}.parquet"
             )
@@ -224,6 +239,25 @@ class MoleculeStore:
         df: polars.DataFrame,
         parallel: bool = True,
     ) -> polars.DataFrame:
+
+        logging.info("Checking for invalid molecules...")
+        is_valid = RemoveInvalidSmiles.filter(
+            molecules=df["smiles"].to_list(),
+            return_mode="booleans",
+            parallel=parallel,
+        )
+
+        num_failed = len(is_valid) - sum(is_valid)
+        if num_failed > 0:
+            logging.warning(f"Removed {num_failed} invalid molecules.")
+            df = df.filter(is_valid)
+
+        # PERFORMANCE: For the featurization steps below, we pass the `smiles`
+        # column instead of pre-initialized `Molecule` objects. Even though
+        # this forces each featurizer to re-parse the SMILES, I am seeing it
+        # is ~2x faster in parallel mode. This is because passing primitive
+        # strings across process boundaries (IPC) is much cheaper than
+        # serializing (pickling) heavy RDKit-based Molecule objects.
 
         if cls.property_columns:
             logging.info("Calculating properties...")
