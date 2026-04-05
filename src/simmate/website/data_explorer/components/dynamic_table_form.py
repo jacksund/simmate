@@ -3,9 +3,9 @@
 from django.shortcuts import redirect
 
 from simmate.database.core import DatabaseTable
+from simmate.website.htmx.components.base import HtmxComponent
 from simmate.website.utils import parse_request_get
 
-from .base import HtmxComponent
 from .dynamic_table_form_mixins import (
     CreateManyMixin,
     CreateMixin,

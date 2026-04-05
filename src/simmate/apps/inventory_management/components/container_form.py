@@ -2,7 +2,7 @@
 
 from functools import cached_property
 
-from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.data_explorer.components import DynamicTableForm
 
 from ..models import Container, StorageLocation
 
