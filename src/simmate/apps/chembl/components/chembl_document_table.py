@@ -2,8 +2,12 @@
 
 from simmate.website.htmx.components import DynamicTableForm
 
-from ..models import ChemblAssayResult, ChemblDocument, ChemblMolecule
+from ..models import ChemblDocument
 
 
 class ChemblDocumentTable(DynamicTableForm):
+    """
+    A dynamic table and search form for ChEMBL documents.
+    """
+
     table = ChemblDocument

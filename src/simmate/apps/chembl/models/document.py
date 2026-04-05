@@ -10,6 +10,8 @@ class ChemblDocument(DatabaseTable):
     """
     This table holds all information about the source documents
     that compound and SAR data was pulled from and into the ChEMBL database.
+
+    Documents include journal publications, patents, and deposited datasets.
     """
 
     class Meta:
@@ -49,6 +51,10 @@ class ChemblDocument(DatabaseTable):
     @classmethod
     @batch_bulk_create(batch_size=10_000)
     def load_source_data(cls, **kwargs):
+        """
+        Downloads the ChEMBL SQLite database and loads document data into the
+        Simmate database.
+        """
         for df in ChemblClient.get_document_data(chunk_size=10_000):
             for row in df.iter_rows(named=True):
                 yield cls(

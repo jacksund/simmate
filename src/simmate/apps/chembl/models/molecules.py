@@ -15,19 +15,21 @@ from ..client import ChemblClient
 
 class ChemblMolecule(ThirdPartyData, Molecule):
     """
-    Molecules from the
-    [ChEMBL database](https://chembl.gitbook.io/chembl-interface-documentation/downloads)
-    database.
+    A molecule entry from the ChEMBL database.
+
+    [ChEMBL](https://www.ebi.ac.uk/chembl/) is a manually curated database of
+    bioactive molecules with drug-like properties. It brings together chemical,
+    bioactivity and genomic data to aid the translation of genomic information
+    into effective new drugs.
+
+    This table stores the core chemical structures and calculated properties
+    provided by ChEMBL. We use the SQLite distribution of ChEMBL as our primary
+    source of data.
 
     Useful links:
-    - https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/
-    - https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_33_schema.png
-    - https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/schema_documentation.html
-
-    ChEMBL distributes their database as manual downloads in a variety of
-    formats, where we choose to use their SQLite download.
-
-    [See all options here](https://chembl.gitbook.io/chembl-interface-documentation/downloads)
+    - [Source Downloads](https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/)
+    - [Schema Diagram](https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_33_schema.png)
+    - [Schema Documentation](https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/schema_documentation.html)
     """
 
     class Meta:
@@ -51,19 +53,21 @@ class ChemblMolecule(ThirdPartyData, Molecule):
         "natural_product_likeness",
     ]
 
-    # id is set to the 'molregno' in the chembl db (ex: 12345)
+    # Note: 'id' is set to the 'molregno' from the ChEMBL database.
 
     chembl_id = table_column.CharField(max_length=25, blank=True, null=True)
     """
-    The id used to represent the molecule (ex: "CHEMBL3183843"). 
+    The ChEMBL ID used to represent the molecule (e.g., "CHEMBL3183843"). 
     
-    Note, this is NOT the primary key. Instead, we use 'molregno' which is 
-    chembl's internal identifer and often their own primary key too.
+    Note, this is NOT the primary key. Instead, we use 'molregno' (as 'id') 
+    which is ChEMBL's internal identifier and primary key.
     """
 
     is_invalid_molecule = table_column.BooleanField(blank=True, null=True)
     """
-    whether the molecule was loaded successfully into the simmate database
+    Whether the molecule was loaded successfully into the Simmate database. 
+    Invalid molecules may have issues with their SMILES strings or structure 
+    processing.
     """
 
     molecule_type_options = [
@@ -75,58 +79,53 @@ class ChemblMolecule(ThirdPartyData, Molecule):
         "Oligonucleotide",
         "Enzyme",
         "Gene",
-        "Oligiosacchride",
+        "Oligosaccharide",
         "Cell",
     ]
     molecule_type = table_column.CharField(max_length=25, blank=True, null=True)
     """
-    Whether the entry is a small molecule, protein, gene, etc.
+    The type of molecule (e.g., small molecule, protein, antibody).
     """
 
     drug_likeness = table_column.FloatField(blank=True, null=True)
     """
-    Weighted quantitative estimate of drug likeness (as defined by Bickerton et al., Nature Chem 2012)
+    Weighted quantitative estimate of drug likeness (QED) as defined by 
+    Bickerton et al., Nature Chem 2012.
     """
-    # QED_WEIGHTED
 
     alog_p_chembl = table_column.FloatField(blank=True, null=True)
     """
-    Calculated ALogP reported by ChEMBL
+    Calculated ALogP reported by ChEMBL.
     """
-    # ALOGP
 
     rule_of_3_pass = table_column.BooleanField(blank=True, null=True)
     """
-    Indicates whether the compound passes the rule-of-three (mw < 300, logP < 3 etc)
+    Indicates whether the compound passes the rule-of-three (MW < 300, logP < 3, 
+    etc.).
     """
-    # RO3_PASS
 
     rule_of_5_violations = table_column.IntegerField(blank=True, null=True)
     """
-    Number of violations of Lipinski's rule-of-five, using HBA and HBD definitions
+    Number of violations of Lipinski's rule-of-five.
     """
-    # NUM_RO5_VIOLATIONS
 
     num_h_acceptors_lipinski = table_column.IntegerField(blank=True, null=True)
     """
-    Number of hydrogen bond acceptors calculated according to Lipinski's original 
-    rules (i.e., N + O count))
+    Number of hydrogen bond acceptors calculated according to Lipinski's 
+    original rules (i.e., N + O count).
     """
-    # HBA_LIPINSKI
 
     num_h_donors_lipinski = table_column.IntegerField(blank=True, null=True)
     """
-    Number of hydrogen bond donors calculated according to Lipinski's original 
-    rules (i.e., NH + OH count)
+    Number of hydrogen bond donors calculated according to Lipinski's 
+    original rules (i.e., NH + OH count).
     """
-    # HBD_LIPINSKI
 
     natural_product_likeness = table_column.FloatField(blank=True, null=True)
     """
-    Natural Product-likeness Score: Peter Ertl, Silvio Roggo, and Ansgar 
-    Schuffenhauer Journal of Chemical Information and Modeling, 48, 68-74 (2008)
+    Natural Product-likeness Score as defined by Peter Ertl et al., 
+    Journal of Chemical Information and Modeling, 48, 68-74 (2008).
     """
-    # NP_LIKENESS_SCORE
 
     @property
     def external_link(self) -> str:
@@ -136,12 +135,15 @@ class ChemblMolecule(ThirdPartyData, Molecule):
         # other API endpoints are outlined here:
         # https://chembl.gitbook.io/chembl-interface-documentation/web-services/chembl-data-web-services
         # ex: https://www.ebi.ac.uk/chembl/compound_report_card/CHEMBL3183843/
-        return f"https://www.ebi.ac.uk/chembl/compound_report_card/{self.id}/"
+        return f"https://www.ebi.ac.uk/chembl/compound_report_card/{self.chembl_id}/"
 
     @classmethod
     @batch_bulk_create(batch_size=1_000)
     def load_source_data(cls, **kwargs):
-
+        """
+        Downloads the ChEMBL SQLite database and loads molecule data into the
+        Simmate database.
+        """
         if not hasattr(cls, "_max_id"):
             cls._max_id = 0
             if cls.objects.exists():

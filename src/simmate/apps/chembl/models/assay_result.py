@@ -155,7 +155,10 @@ class ChemblAssayResult(DatabaseTable):
     @classmethod
     @batch_bulk_create(batch_size=1_000)
     def load_source_data(cls, update_only: bool = False, limit: int = None, **kwargs):
-
+        """
+        Downloads the ChEMBL SQLite database and loads assay result data into
+        the Simmate database.
+        """
         if update_only and cls.objects.exists():
             logging.info("Checking last update...")
             min_activity_id = str(

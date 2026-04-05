@@ -240,6 +240,13 @@ class MoleculeStore:
         parallel: bool = True,
     ) -> polars.DataFrame:
 
+        # PERFORMANCE: For the featurization steps below, we pass the `smiles`
+        # column instead of pre-initialized `Molecule` objects. Even though
+        # this forces each featurizer to re-parse the SMILES, I am seeing it
+        # is ~2x faster in parallel mode. This is because passing primitive
+        # strings across process boundaries (IPC) is much cheaper than
+        # serializing (pickling) heavy RDKit-based Molecule objects.
+
         logging.info("Checking for invalid molecules...")
         is_valid = RemoveInvalidSmiles.filter(
             molecules=df["smiles"].to_list(),
@@ -251,13 +258,6 @@ class MoleculeStore:
         if num_failed > 0:
             logging.warning(f"Removed {num_failed} invalid molecules.")
             df = df.filter(is_valid)
-
-        # PERFORMANCE: For the featurization steps below, we pass the `smiles`
-        # column instead of pre-initialized `Molecule` objects. Even though
-        # this forces each featurizer to re-parse the SMILES, I am seeing it
-        # is ~2x faster in parallel mode. This is because passing primitive
-        # strings across process boundaries (IPC) is much cheaper than
-        # serializing (pickling) heavy RDKit-based Molecule objects.
 
         if cls.property_columns:
             logging.info("Calculating properties...")

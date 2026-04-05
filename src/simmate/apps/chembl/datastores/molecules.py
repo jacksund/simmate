@@ -7,10 +7,15 @@ import polars
 
 from simmate.toolkit.datastores import MoleculeStore
 
-from .client import ChemblClient
+from ..client import ChemblClient
 
 
 class ChemblMoleculeStore(MoleculeStore):
+    """
+    A MoleculeStore for the ChEMBL database, providing optimized search
+    and retrieval of bioactive molecules.
+    """
+
     app_name = "chembl"
     datastore_name = "molecules"
     chunk_size = 1_000_000
@@ -40,9 +45,14 @@ class ChemblMoleculeStore(MoleculeStore):
     @classmethod
     def load_source_data(cls, source_directory: str | Path = None):
         """
-        Loads data from the ChEMBL SQLite database into the MoleculeStore.
-        """
+        Downloads the ChEMBL SQLite database and loads molecule data into the
+        MoleculeStore.
 
+        Args:
+            source_directory (str | Path, optional): The directory where the
+                ChEMBL SQLite database is located. If None, it will be
+                downloaded using ChemblClient.
+        """
         logging.info("Pulling molecule data from ChEMBL db into MoleculeStore...")
         for df in ChemblClient.get_molecule_data(chunk_size=cls.chunk_size):
 
