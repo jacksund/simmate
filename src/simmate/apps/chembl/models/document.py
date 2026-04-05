@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import logging
-import sqlite3
-
-import numpy
-import pandas
-from rich.progress import track
-
 from simmate.database.core import DatabaseTable, table_column
+from simmate.database.utils import batch_bulk_create
+
+from ..client import ChemblClient
 
 
 class ChemblDocument(DatabaseTable):
     """
     This table holds all information about the source documents
     that compound and SAR data was pulled from and into the ChEMBL database.
+
+    Documents include journal publications, patents, and deposited datasets.
     """
 
     class Meta:
@@ -44,101 +42,26 @@ class ChemblDocument(DatabaseTable):
     Title of the document
     """
 
-    # BUG: holding off due to unicode issues. See below
+    # BUG: holding off due to unicode issues
     # authors = table_column.JSONField(blank=True, null=True)
     # """
     # List of authors for the document
     # """
 
-    # -------------------------------------------------------------------------
-
     @classmethod
-    def load_source_data(cls):
+    @batch_bulk_create(batch_size=10_000)
+    def load_source_data(cls, **kwargs):
         """
-        Loads all document metadata directly from the ChEMBL database into the local
+        Downloads the ChEMBL SQLite database and loads document data into the
         Simmate database.
         """
-
-        from .molecules import ChemblMolecule
-
-        database_file = ChemblMolecule.download_source_data()
-        connection = sqlite3.connect(database_file)
-        cursor = connection.cursor()
-
-        logging.info("Pulling document data from ChEMBL db...")
-        cursor = connection.cursor()
-        query = """
-            SELECT
-              doc_id,
-              year,
-              doc_type,
-              patent_id,
-              doi,
-              journal,
-              title,
-              authors
-            FROM
-              docs
-        """
-
-        cursor.execute(query)
-
-        data = pandas.DataFrame(
-            data=cursor.fetchall(),
-            columns=[c[0] for c in cursor.description],
-        )  # OPTIMIZE: consider fetchmany with for-loop
-
-        # BUG-FIX (nan-->None)
-        data = data.replace({numpy.nan: None})
-
-        # autopopulate database columns for each molecule (no saving yet)
-        logging.info("Generating database objects and saving in batches...")
-        failed_rows = []
-        db_objs = []
-        for i, entry in track(data.iterrows(), total=len(data)):
-            try:
-                # now convert the entry to a database object
-                new_obj = cls(
-                    id=entry["doc_id"],
-                    published_at=entry["year"],
-                    document_type=entry["doc_type"],
-                    patent_id=entry["patent_id"],
-                    doi=entry["doi"],
-                    title=entry["title"],
-                    # BUG: https://stackoverflow.com/questions/517923/
-                    # authors=(
-                    #     entry["authors"].split(",") if entry["authors"] else None
-                    # ),
+        for df in ChemblClient.get_document_data(chunk_size=10_000):
+            for row in df.iter_rows(named=True):
+                yield cls(
+                    id=row["doc_id"],
+                    published_at=row["year"],
+                    document_type=row["doc_type"],
+                    patent_id=row["patent_id"],
+                    doi=row["doi"],
+                    title=row["title"],
                 )
-                db_objs.append(new_obj)
-            except:
-                failed_rows.append(entry.to_dict())
-
-            # save every time we have 1000 structures
-            if len(db_objs) >= 1000:
-                cls.objects.bulk_create(
-                    db_objs,
-                    batch_size=1000,
-                    ignore_conflicts=True,
-                )
-                db_objs = []  # reset for next batch
-
-        # one last save in case we exited the loop above with
-        # remaining structures
-        if db_objs:
-            cls.objects.bulk_create(
-                db_objs,
-                batch_size=1000,
-                ignore_conflicts=True,
-            )
-
-        logging.info("Done!")
-        return failed_rows
-
-    @classmethod
-    def _download_source_data(
-        cls,
-        url: str = "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/",
-        filename: str = "chembl_36_sqlite.tar.gz",
-    ):
-        pass

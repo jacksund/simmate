@@ -41,6 +41,11 @@ class ChatbotConfig(AppConfig):
 
 class ChemblConfig(AppConfig):
     name = "simmate.apps.chembl"
+    load_order = [
+        "ChemblDocument",
+        "ChemblMolecule",
+        "ChemblAssayResult",
+    ]
 
 
 class ChemspaceConfig(AppConfig):

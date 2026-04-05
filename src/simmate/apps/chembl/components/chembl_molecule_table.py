@@ -6,6 +6,10 @@ from ..models import ChemblMolecule
 
 
 class ChemblMoleculeTable(DynamicTableForm, MoleculeInput):
+    """
+    A dynamic table and search form for ChEMBL molecules.
+    """
+
     table = ChemblMolecule
     display_name = "ChEMBL"
     description_short = (
