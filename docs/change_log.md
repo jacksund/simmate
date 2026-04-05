@@ -82,6 +82,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 **Refactors**
 
+- moved `DynamicTableForm` and its mixins from the `htmx` module to the `data_explorer` module
 - moved `simmate.workflows.execution` and `simmate.workflows.scheduler` to `simmate.compute` to align with the CLI and documentation structure
 - renamed the `simmate engine` command group to `simmate compute` and updated internal modules/tests
 - refactored `website.data_explorer` to use HTMX components for all table entries, moving UI-specific features from `DatabaseTable` and `HTMLMixin` into `DynamicTableForm`

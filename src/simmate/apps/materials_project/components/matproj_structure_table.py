@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from simmate.website.htmx.components import DynamicTableForm, StructureInput
+from simmate.website.data_explorer.components import DynamicTableForm
+from simmate.website.htmx.components import StructureInput
 
 from ..models import MatprojStructure
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.data_explorer.components import DynamicTableForm
 
 from ..work_item import WorkItem
 

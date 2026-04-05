@@ -19,7 +19,7 @@ For components that interact with the database, Simmate provides the `DynamicTab
 In `my_app/components/project_form.py`:
 
 ```python
-from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.data_explorer.components import DynamicTableForm
 from ..models import Project
 
 class ProjectForm(DynamicTableForm):
@@ -77,7 +77,8 @@ You can extend components with pre-built mixins:
 ### Example with Mixins
 
 ```python
-from simmate.website.htmx.components import DynamicTableForm, UserInput
+from simmate.website.data_explorer.components import DynamicTableForm
+from simmate.website.htmx.components import UserInput
 
 class ProjectForm(DynamicTableForm, UserInput):
     table = Project

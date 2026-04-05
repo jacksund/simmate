@@ -13,7 +13,7 @@ from simmate.database.mixins import (
     Relaxation,
     StaticEnergy,
 )
-from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.data_explorer.components import DynamicTableForm
 
 
 class StaticEnergyTable(DynamicTableForm):

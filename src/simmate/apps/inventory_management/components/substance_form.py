@@ -2,8 +2,8 @@
 
 from simmate.toolkit import Molecule as ToolkitMolecule
 from simmate.toolkit import Structure
+from simmate.website.data_explorer.components import DynamicTableForm
 from simmate.website.htmx.components import (
-    DynamicTableForm,
     MoleculeInput,
     StructureInput,
 )

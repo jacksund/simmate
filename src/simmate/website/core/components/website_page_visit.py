@@ -6,7 +6,7 @@ import plotly.express as plotly_express
 import plotly.graph_objects as plotly_go
 from plotly.subplots import make_subplots
 
-from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.data_explorer.components import DynamicTableForm
 
 from ..models import WebsitePageVisit
 
