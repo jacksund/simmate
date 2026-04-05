@@ -15,8 +15,13 @@ class CasRegistryMoleculeTable(DynamicTableForm, MoleculeInput):
         "for chemical identification."
     )
     template_names = {
-        "default": "data_explorer/table_about.html",
-        "search": "core/base_data_types/molecule_form.html",
+        "default": "cas_registry/molecule/form.html",
+        "entry": "cas_registry/molecule/view.html",
+        "entries": "cas_registry/molecule/table.html",
     }
 
     enabled_forms = ["search"]
+
+    ignore_on_search = [
+        *MoleculeInput.ignore_on_search,
+    ]

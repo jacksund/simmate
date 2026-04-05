@@ -1,0 +1,24 @@
+{% extends "data_explorer/table_entries_base.html" %}
+
+{% block table_headers %}
+    {% table_header "id" "CAS RN" min_width=150 %}
+    {% table_header "common_name" "Common Name" min_width=200 %}
+    {% table_header "molecular_weight" "Mol. Weight" min_width=125 %}
+    {% table_header "num_atoms" "Atoms" min_width=100 %}
+    {% table_header "num_rings" "Rings" min_width=100 %}
+    {% table_header "log_p_rdkit" "LogP" min_width=100 %}
+    {% table_header "tpsa_rdkit" "TPSA" min_width=100 %}
+{% endblock %}
+
+{% block table_rows %}
+    <td class="text-center">
+        {% draw_molecule entry width=150 height=150 %}
+        {% foreign_key_link entry "id" %}
+    </td>
+    <td>{{ entry.common_name|default:"--" }}</td>
+    <td>{{ entry.molecular_weight|default:"--"|floatformat:2 }}</td>
+    <td>{{ entry.num_atoms|default:"--" }}</td>
+    <td>{{ entry.num_rings|default:"--" }}</td>
+    <td>{{ entry.log_p_rdkit|default:"--"|floatformat:2 }}</td>
+    <td>{{ entry.tpsa_rdkit|default:"--"|floatformat:2 }}</td>
+{% endblock %}

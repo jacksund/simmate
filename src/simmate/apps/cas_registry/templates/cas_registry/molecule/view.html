@@ -1,0 +1,25 @@
+{% extends "data_explorer/table_entry.html" %}
+
+{% block entrycontent %}
+    <div class="container p-4">
+        <h2>{{ table_entry.common_name }}</h2>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                {% include "rdkit/molecule_entry_display.html" %}
+            </div>
+            <div class="col-md-6">
+                <div class="card border border-3 border-secondary rounded p-3">
+                    <h3>Substance Details</h3>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><b>CAS RN:</b> {{ table_entry.id }}</li>
+                        <li class="list-group-item"><b>Molecular Weight:</b> {{ table_entry.molecular_weight|floatformat:2 }}</li>
+                        <li class="list-group-item"><b>Num Atoms:</b> {{ table_entry.num_atoms }}</li>
+                        <li class="list-group-item"><b>Num Rings:</b> {{ table_entry.num_rings }}</li>
+                        <li class="list-group-item"><b>LogP (RDKit):</b> {{ table_entry.log_p_rdkit|floatformat:2 }}</li>
+                        <li class="list-group-item"><b>TPSA (RDKit):</b> {{ table_entry.tpsa_rdkit|floatformat:2 }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
