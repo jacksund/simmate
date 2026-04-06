@@ -314,7 +314,7 @@ class MoleculeDataFrame:
             - CachedTrustedSmilesMolHolder: ~0.5s per 1M
             - PatternHolder (fingerprints): ~10min per 1M
 
-        Query times (full 16M molecule ACD catalog, SMARTS query):
+        Query times (~15M molecule catalog, SMARTS query):
             -  1 core: ~20s
             -  2 cores: ~12s
             -  4 cores: ~7s
@@ -325,7 +325,7 @@ class MoleculeDataFrame:
         Memory usage:
             - SMILES (mollib):       ~1.3 GB / 10M, ~2 GB / 16M
             - Fingerprints (fpslib): ~4.4 GB / 10M, ~7.1 GB / 16M
-            - Total for 16M: ~9.1 GB
+            - Total for 15M: ~9.1 GB
 
         References:
             - https://www.rdkit.org/docs/source/rdkit.Chem.rdSubstructLibrary.html
