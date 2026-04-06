@@ -303,6 +303,34 @@ class MoleculeDataFrame:
 
     @cached_property
     def substructure_library(self):
+        """
+        Builds an RDKit SubstructLibrary for fast substructure searching.
+
+        This is the recommended approach over `_custom_substructure_filter`
+        because it handles fingerprint pre-screening and substructure matching
+        internally with multi-threaded C++ code.
+
+        Build times (per 1M molecules):
+            - CachedTrustedSmilesMolHolder: ~0.5s per 1M
+            - PatternHolder (fingerprints): ~10min per 1M
+
+        Query times (~15M molecule catalog, SMARTS query):
+            -  1 core: ~20s
+            -  2 cores: ~12s
+            -  4 cores: ~7s
+            -  8 cores: ~5s
+            - 20 cores: ~4s
+            At 1M molecules: ~3.5s on 1 core, ~0.5s on all cores (20).
+
+        Memory usage:
+            - SMILES (mollib):       ~1.3 GB / 10M, ~2 GB / 16M
+            - Fingerprints (fpslib): ~4.4 GB / 10M, ~7.1 GB / 16M
+            - Total for 15M: ~9.1 GB
+
+        References:
+            - https://www.rdkit.org/docs/source/rdkit.Chem.rdSubstructLibrary.html
+            - https://rdkit.blogspot.com/2018/02/introducing-substructlibrary.html
+        """
         logging.info("Generating substructure library...")
         if (
             "smiles" not in self.df.columns
@@ -346,8 +374,28 @@ class MoleculeDataFrame:
     # -------------------------------------------------------------------------
 
     def _custom_substructure_filter(self, query: Molecule):
-        # this is a unwrapped version of rdkit's substruc lib. I keep it here becuase
-        # it helps to know what is happening behind the scenes
+        """
+        An unwrapped version of RDKit's SubstructLibrary. Kept here to show
+        what is happening behind the scenes in the `substructure_library`
+        property + `GetMatches` call.
+
+        Two-phase approach:
+            1. Fingerprint pre-screen with AllProbeBitsMatch (fast C++ bit check)
+            2. Exact substructure match only on candidates (using sanitize=False
+               trusted SMILES trick for speed)
+
+        For production use, prefer `substructure_library` which does both phases
+        internally in multi-threaded C++ and is significantly faster.
+
+        Key speed notes:
+            - Molecule.from_smiles() is too slow for the inner loop; use
+              AllChem.MolFromSmiles(smi, sanitize=False) + UpdatePropertyCache()
+              instead. See: https://rdkit.blogspot.com/2016/09/avoiding-unnecessary-work-and.html
+            - Fingerprint generation (PatternFingerprint.featurize_many with
+              parallel=True): ~30min for 16M molecules.
+            - Property featurization (PropertyGrabber.featurize_many): ~17s
+              parallel vs ~60s serial for standard descriptors.
+        """
 
         from rdkit.Chem import AllChem, DataStructs
 
@@ -367,12 +415,9 @@ class MoleculeDataFrame:
         hit_ids = []
         q = query.rdkit_molecule
         for i in candidate_ids:
-            # a faster way to load trusted smiles based on CachedTrustedSmilesMolHolder
-            # https://rdkit.blogspot.com/2016/09/avoiding-unnecessary-work-and.html
-            # mol = Molecule.from_smiles(df[i]["smiles"][0]) # too slow
             mol = AllChem.MolFromSmiles(self.df[i]["smiles"][0], sanitize=False)
             mol.UpdatePropertyCache()
-            # Chem.FastFindRings(mol)
+            # Chem.FastFindRings(mol)  # not needed for most SMARTS
             if mol.HasSubstructMatch(q):
                 hit_ids.append(i)
 

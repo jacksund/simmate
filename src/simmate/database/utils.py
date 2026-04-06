@@ -22,12 +22,29 @@ from simmate.utils import get_directory
 APPS_TO_MIGRATE = list(apps.app_configs.keys())
 
 
-def batch_bulk_create(batch_size: int = 1000):
+def batch_bulk_create(
+    batch_size: int = 1000,
+    update_conflicts: bool = False,
+    unique_fields: list[str] = None,
+    update_fields: list[str] = None,
+):
     """
     Decorator for the `load_source_data` classmethod on DatabaseTables.
     Expects the wrapped method to be a generator that yields database objects.
     This handles creating the objects in batches using `bulk_create`.
+
+    By default, conflicts are ignored (insert-only). To enable upsert behavior,
+    set `update_conflicts=True` and provide `unique_fields` and `update_fields`.
     """
+
+    if update_conflicts:
+        bulk_create_kwargs = dict(
+            update_conflicts=True,
+            unique_fields=unique_fields,
+            update_fields=update_fields,
+        )
+    else:
+        bulk_create_kwargs = dict(ignore_conflicts=True)
 
     def decorator(func):
         @wraps(func)
@@ -41,7 +58,7 @@ def batch_bulk_create(batch_size: int = 1000):
                     cls.objects.bulk_create(
                         db_objs,
                         batch_size=batch_size,
-                        ignore_conflicts=True,
+                        **bulk_create_kwargs,
                     )
                     db_objs = []  # reset for next batch
             # save any remaining
@@ -49,7 +66,7 @@ def batch_bulk_create(batch_size: int = 1000):
                 cls.objects.bulk_create(
                     db_objs,
                     batch_size=batch_size,
-                    ignore_conflicts=True,
+                    **bulk_create_kwargs,
                 )
 
         return wrapper
