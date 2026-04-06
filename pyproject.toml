@@ -95,6 +95,7 @@ jarvis = [
     "jarvis-tools>=2026.1.10",
 ]
 lab_automation = [
+    "gpiozero>=2.0.1",
     "opencv-python>=4.13.0.92",
 ]
 materials_project = [
