@@ -76,11 +76,8 @@ def home(request):
 
 
 def table_about(request, table_name):
-    component_class = _SAFE_COMPONENTS[table_name]
-    table = component_class.table
-    # We instantiate the component so we can access its properties
-    component = component_class(context={"request": request})
-
+    component = _SAFE_COMPONENTS[table_name]
+    table = component.table
     context = {
         "table": table,
         "table_docs": table.get_table_docs(),
@@ -88,14 +85,15 @@ def table_about(request, table_name):
         "page_title": table_name,
         "breadcrumbs": ["Data", table_name, "About"],
     }
-    template = component.about_template
+    template = component.template_names.get("about", "data_explorer/about.html")
     return render(request, template, context)
 
 
 def table_entries(request, table_name):
 
-    component = _SAFE_COMPONENTS[table_name]
-    table = component.table
+    component_class = _SAFE_COMPONENTS[table_name]
+    table = component_class.table
+    component = component_class(component_type="dashboard", request=request)
 
     view_format = request.GET.get("format", "html")  # default is html
 
@@ -117,7 +115,7 @@ def table_entries(request, table_name):
             "title_json_link": True,
             **component.get_extra_table_context(request),
         }
-        template = component.table_template
+        template = component.template_name
         return render(request, template, context)
 
     elif view_format == "json":
@@ -162,7 +160,7 @@ def table_entry(request, table_name, table_entry_id):
             "title_json_link": True,
             **component.get_extra_entry_context(request, table_entry),
         }
-        template = component.entry_template
+        template = component.template_names.get("entry", "data_explorer/entry.html")
         return render(request, template, context)
 
     elif view_format == "json":

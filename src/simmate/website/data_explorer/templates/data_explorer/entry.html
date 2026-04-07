@@ -1,0 +1,6 @@
+{% extends "core/site_base.html" %}
+{% block tabtitle %}{{ table_entry.table_name }} {{ table_entry.html_tabtitle_label }} - Simmate{% endblock %}
+{% block body %}
+    {% include "data_explorer/table_entry_header.html" %}
+    {% block entrycontent %}{% endblock %}
+{% endblock %}

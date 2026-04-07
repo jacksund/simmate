@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .mixins import ProjectInput, ProjectManagementInput
-from .project_form import ProjectForm
+from .project_component import ProjectComponent, ProjectForm
 from .tag_form import TagForm
 from .token_balance_form import TokenBalanceForm
 from .transaction_form import TransactionForm

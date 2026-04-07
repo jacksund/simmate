@@ -1,22 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from simmate.website.data_explorer.components import DynamicTableForm
+from simmate.website.data_explorer.components import TableComponent
 from simmate.website.htmx.components import UserInput
 
 from ..models import Project
 
 
-class ProjectForm(DynamicTableForm, UserInput):
+class ProjectComponent(TableComponent, UserInput):
 
     table = Project
-
-    template_name = "project_management/project/form.html"
-
-    template_names = {
-        "default": "data_explorer/table_about.html",
-        "entries": "project_management/project/table.html",
-        "entry": "project_management/project/view.html",
-    }
 
     display_name = "Projects"
     description_short = (
@@ -24,14 +16,24 @@ class ProjectForm(DynamicTableForm, UserInput):
         "and results. Projects help group and manage scientific work into "
         "discrete units."
     )
+    tabtitle_label_col = "name"
 
-    enabled_forms = [
+    enabled_component_types = [
+        "dashboard",
+        "entries",
+        "entry",
         "search",
         "create",
         "update",
     ]
 
-    tabtitle_label_col = "name"
+    template_names = {
+        "entries": "project_management/project/table.html",
+        "entry": "project_management/project/view.html",
+        "search": "project_management/project/form.html",
+        "create": "project_management/project/form.html",
+        "update": "project_management/project/form.html",
+    }
 
     # -------------------------------------------------------------------------
 
@@ -110,3 +112,7 @@ class ProjectForm(DynamicTableForm, UserInput):
         self.form_data["name"] = Project.suggest_new_name()
 
     # -------------------------------------------------------------------------
+
+
+# DEPRECATED: use ProjectComponent instead
+ProjectForm = ProjectComponent

@@ -54,7 +54,7 @@ class HtmxComponent:
             getattr(context, "request", None) if context else None
         )  # updated with new request every new call
         # this part allows us to pass kwargs to the html tag and apply them to attrs
-        # ex: form_mode="example" --> apply to python obj on init
+        # ex: component_type="example" --> apply to python obj on init
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)

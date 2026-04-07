@@ -36,7 +36,7 @@ class CreateManyMixin:
     def create_child_component(self):
         child = self.__class__(
             context=self.initial_context,  # or should it be the current context?
-            form_mode="create_many_entry",
+            component_type="create_many_entry",
         )
 
         # linking them together -- for forward and reverse access
