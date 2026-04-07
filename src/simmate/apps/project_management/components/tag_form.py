@@ -3,9 +3,10 @@
 from simmate.website.data_explorer.components import DynamicTableForm
 
 from ..models import Project, Tag
+from .mixins import ProjectInput
 
 
-class TagForm(DynamicTableForm):
+class TagForm(DynamicTableForm, ProjectInput):
 
     table = Tag
 
@@ -31,9 +32,6 @@ class TagForm(DynamicTableForm):
     template_name = "project_management/tag/form.html"
 
     # -------------------------------------------------------------------------
-
-    def mount_extra(self):
-        self.project_options = Project.project_options
 
     def update_tag_type(self):
         if self.form_data.get("tag_type") == "project-specific":
