@@ -79,6 +79,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added crystalline dataset views to the Data Explorer, including 3D structure views, exports, and search forms
 - added `@batch_bulk_create` decorator to help simplify `load_source_data` methods
 - updated `simmate database download` to be dynamic across all apps, support a `--source` option, and respect custom load orders
+- added first draft of vasp dockerfile. vasp is proprietary so source files and final image cannot be shared publicly
 
 **Refactors**
 
@@ -90,6 +91,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - switched from ChemDoodle to Ketcher as the default molecule sketcher
 - updated scheduler to submit tasks as `WorkItem`s instead of running them in-thread
 - removed unused web templates and static assets
+- updated envs for helm and docker-compose, where k3s is the top candidate for public production setups
 
 **Fixes**
 

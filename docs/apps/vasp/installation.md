@@ -17,7 +17,7 @@ simmate config add vasp
         !!! danger
             VASP is a commercial software, so we cannot provide Docker images for it. This is why you must provide a private image via `image=example.com:vasp/latest`.
 
-      - (*for experts*) Install VASP using [offical guides](https://www.vasp.at/) and make sure `vasp_std` is in the path
+      - (*for experts*) Install VASP using the [official Personal Computer Installation guide](https://www.vasp.at/wiki/index.php/Personal_computer_installation). Alternatively, you can use the provided Dockerfile in `envs/docker/vasp.dockerfile` which follows these same instructions. Ensure `vasp_std` is in your path after installation.
 
 3. Configure VASP POTCAR files. You can either extract these from the VASP installation files located at `vasp/5.x.x/dist/Potentials` or request a copy of these files from a team member or your IT department. Unpack the `tar.gz` files and place them in `~/simmate/vasp/Potentials`, maintaining their original folder and file names. Once you've completed these steps, your folder should look like this:
 ```
