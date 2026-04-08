@@ -1,6 +1,31 @@
 {% extends "core/site_base.html" %}
 {% block tabtitle %}{{ table_entry.table_name }} {{ table_entry.html_tabtitle_label }} - Simmate{% endblock %}
 {% block body %}
-    {% include "data_explorer/table_entry_header.html" %}
+    <div class="row my-3">
+        <div class="col-xl-4">
+            <div class="text-center p-1 bg-primary text-light">
+                <div>
+                    <b>{{ table_entry.table_name }} ID</b>
+                </div>
+                <div>{{ table_entry.id }}</div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="text-center p-1 bg-secondary text-light">
+                <div>
+                    <b>Created at</b>
+                </div>
+                <div>{{ table_entry.created_at|date:"M. jS Y @ P T" }}</div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="text-center p-1 bg-secondary text-light">
+                <div>
+                    <b>Last updated at</b>
+                </div>
+                <div>{{ table_entry.updated_at|date:"M. jS Y @ P T" }}</div>
+            </div>
+        </div>
+    </div>
     {% block entrycontent %}{% endblock %}
 {% endblock %}

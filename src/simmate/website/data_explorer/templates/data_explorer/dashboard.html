@@ -2,7 +2,6 @@
 {% block tabtitle %}{{ table.table_name }} Data - Simmate{% endblock %}
 {% block body %}
     <div class="row">
-        {# Buttons & Sidebars #}
         <div class="col-12 py-3">
             <a href="{% url 'data_explorer:table-about' table.table_name %}"
                class="btn btn-primary my-1">
@@ -81,28 +80,9 @@
             {% include "core/basic_elements/toggle_width_button.html" %}
         </div>
     </div>
-    {# Search Results #}
     {% block search_results %}
         <div id="search-results" class="row">
-            {% if page.object_list %}
-                {% block search_results_table %}
-                    {% if "update_many" in component.enabled_component_types %}
-                        TODO
-                    {% else %}
-                        {% htmx_component component component_key="entrieslist" form_mode="entries" enable_select=False %}
-                    {% endif %}
-                {% endblock %}
-                {% include "data_explorer/pagination.html" %}
-            {% else %}
-                <div class="alert alert-danger d-flex align-items-center p-2" role="alert">
-                    <div>
-                        <i class="bi bi-exclamation-triangle"></i>&nbsp;&nbsp;<b>No entries were found that match your search criteria!</b>&nbsp;&nbsp;
-                        <a class="text-dark text-decoration-underline" href=".">
-                            Clear Filters<i class="bi bi-arrow-clockwise"></i>
-                        </a>
-                    </div>
-                </div>
-            {% endif %}
+            {% htmx_component component component_key="entrieslist" form_mode="entries" %}
         </div>
     {% endblock %}
 {% endblock %}
