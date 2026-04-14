@@ -119,6 +119,8 @@ class StatusTracking(DatabaseTable):
         """
         current_date = timezone.now()
         status_start_date = self.get_status_timestamp(self.status)
+        if status_start_date is None:
+            return None
         return int((current_date - status_start_date).total_seconds() / 60 / 60 / 24)
 
     @classmethod
