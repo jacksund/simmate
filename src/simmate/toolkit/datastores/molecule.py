@@ -71,14 +71,15 @@ class MoleculeStore:
 
     # -------------------------------------------------------------------------
 
-    smiles_stored: str = "original_and_cleaned"  # or "original_only" or "cleaned_only"
+    smiles_stored: str = "cleaned_only"
+    # or "original_only" or "original_and_cleaned"
 
     metadata_columns: list[str] = []
 
     property_columns: list[str] = [
         "molecular_weight_exact",
         "num_atoms_heavy",
-        "num_rings",
+        "num_stereocenters",
         "log_p_rdkit",
         "synthetic_accessibility",
     ]

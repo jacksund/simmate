@@ -18,8 +18,6 @@ class ChemblMoleculeStore(MoleculeStore):
 
     app_name = "chembl"
     datastore_name = "molecules"
-    chunk_size = 1_000_000
-    smiles_stored = "original_and_cleaned"
     metadata_columns = [
         "id",
         "chembl_id",
@@ -32,15 +30,6 @@ class ChemblMoleculeStore(MoleculeStore):
         "num_h_donors_lipinski",
         "natural_product_likeness",
     ]
-    property_columns = [
-        "molecular_weight_exact",
-        "num_atoms_heavy",
-        "num_rings",
-        "log_p_rdkit",
-        "synthetic_accessibility",
-    ]
-    morgan_fingerprint_cache = False
-    pattern_fingerprint_cache = True
 
     @classmethod
     def load_source_data(cls, source_directory: str | Path = None):
