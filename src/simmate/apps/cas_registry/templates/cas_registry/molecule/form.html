@@ -5,7 +5,7 @@
         <h3>
             <span class="badge bg-secondary">Molecule Search</span>
         </h3>
-        {% if component.form_mode == "search" %}
+        {% if component.component_type == "search" %}
             {% htmx_radio name="molecule_query_type" %}
             {% htmx_molecule_input %}
         {% endif %}

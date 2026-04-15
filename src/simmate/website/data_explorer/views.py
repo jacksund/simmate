@@ -92,10 +92,13 @@ def table_about(request, table_name):
 def table_entries(request, table_name):
 
     component_class = _SAFE_COMPONENTS[table_name]
-    table = component_class.table
     component = component_class(component_type="dashboard", request=request)
-
-    view_format = request.GET.get("format", "html")  # default is html
+    
+    # TODO: support datastores
+    table = component.table
+    
+    # check whether this is a web ui, API, or download request
+    view_format = request.GET.get("format", "html")
 
     if view_format == "html":
         page = table.filter_from_request(request)
@@ -142,7 +145,7 @@ def table_entries(request, table_name):
 
 def table_entry(request, table_name, table_entry_id):
 
-    component = _SAFE_COMPONENTS[table_name]
+    component_class = _SAFE_COMPONENTS[table_name]
     table_entry = get_table_entry_safe(table_name, table_entry_id)
 
     # move to proper view function based on requested format
@@ -154,13 +157,13 @@ def table_entry(request, table_name, table_entry_id):
             "page_title": "Table Entry",
             "breadcrumbs": [
                 "Data",
-                component.display_name,
+                component_class.display_name,
                 table_entry_id,
             ],
             "title_json_link": True,
-            **component.get_extra_entry_context(request, table_entry),
+            **component_class.get_extra_entry_context(request, table_entry),
         }
-        template = component.template_names.get("entry", "data_explorer/entry.html")
+        template = component_class.template_names.get("entry", "data_explorer/entry.html")
         return render(request, template, context)
 
     elif view_format == "json":
@@ -173,33 +176,17 @@ def table_entry(request, table_name, table_entry_id):
 def table_search(request, table_name):
     raise NotImplementedError("Search view still under dev.")
 
-
-# -------------------------------------------------------------------------
-# Below are HTML Form views -- typically these are POST, but we use
-# django-unicorn which contains any POSTs within a component (AJAX requests).
-#
-# TODO: in the future, I may want to allow JSON post requests so that
-# rows can be added/updated via API calls. I don't do this yet because the
-# ORM is preferred + using admin permissions.
-# -------------------------------------------------------------------------
-
-
 def table_entry_new(request, table_name):
 
-    component = _SAFE_COMPONENTS[table_name]
-    if not component.form_component:
-        raise NotImplementedError(
-            "This model does not have an 'entry-new' component yet!"
-        )
-
+    component_class = _SAFE_COMPONENTS[table_name]
     context = {
-        "component_name": component.form_component,
+        "component_name": component_class.component_name,
         "page_title": table_name,
         "page_title_icon": "mdi-database",
         "breadcrumbs": ["Data", table_name, "Form"],
     }
     template = getattr(
-        component, "entry_form_template", "htmx/full_page_component.html"
+        component_class, "entry_form_template", "htmx/full_page_component.html",
     )
     return render(request, template, context)
 
