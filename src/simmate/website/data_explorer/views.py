@@ -93,10 +93,10 @@ def table_entries(request, table_name):
 
     component_class = _SAFE_COMPONENTS[table_name]
     component = component_class(component_type="dashboard", request=request)
-    
+
     # TODO: support datastores
     table = component.table
-    
+
     # check whether this is a web ui, API, or download request
     view_format = request.GET.get("format", "html")
 
@@ -163,7 +163,9 @@ def table_entry(request, table_name, table_entry_id):
             "title_json_link": True,
             **component_class.get_extra_entry_context(request, table_entry),
         }
-        template = component_class.template_names.get("entry", "data_explorer/entry.html")
+        template = component_class.template_names.get(
+            "entry", "data_explorer/entry.html"
+        )
         return render(request, template, context)
 
     elif view_format == "json":
@@ -176,6 +178,7 @@ def table_entry(request, table_name, table_entry_id):
 def table_search(request, table_name):
     raise NotImplementedError("Search view still under dev.")
 
+
 def table_entry_new(request, table_name):
 
     component_class = _SAFE_COMPONENTS[table_name]
@@ -186,7 +189,9 @@ def table_entry_new(request, table_name):
         "breadcrumbs": ["Data", table_name, "Form"],
     }
     template = getattr(
-        component_class, "entry_form_template", "htmx/full_page_component.html",
+        component_class,
+        "entry_form_template",
+        "htmx/full_page_component.html",
     )
     return render(request, template, context)
 

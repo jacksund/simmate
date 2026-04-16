@@ -84,7 +84,6 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 **Refactors**
 
-- moved `DynamicTableForm` and its mixins from the `htmx` module to the `data_explorer` module
 - moved `simmate.workflows.execution` and `simmate.workflows.scheduler` to `simmate.compute` to align with the CLI and documentation structure
 - renamed the `simmate engine` command group to `simmate compute` and updated internal modules/tests
 - refactored `website.data_explorer` to use HTMX components for all table entries, moving UI-specific features from `DatabaseTable` and `HTMLMixin` into `DynamicTableForm`
@@ -93,6 +92,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - updated scheduler to submit tasks as `WorkItem`s instead of running them in-thread
 - removed unused web templates and static assets
 - updated envs for helm and docker-compose, where k3s is the top candidate for public production setups
+- renamed the base component from `DynamicTableForm` to `TableComponent` and moved it to `simmate.website.data_explorer.components`. Standardized all app components
 
 **Fixes**
 

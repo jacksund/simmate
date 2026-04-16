@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from .mixins import ProjectInput, ProjectManagementInput
-from .project_component import ProjectComponent, ProjectForm
-from .tag_form import TagForm
-from .token_balance_form import TokenBalanceForm
-from .transaction_form import TransactionForm
-from .wallet_form import WalletForm
+from .project import ProjectComponent
+from .tag import TagComponent
+from .token_balance import TokenBalanceComponent
+from .transaction import TransactionComponent
+from .wallet import WalletComponent
