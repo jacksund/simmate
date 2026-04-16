@@ -259,7 +259,9 @@ class MoleculeStore:
                 return
 
     @classmethod
-    def update_rows_bulk(cls, ids_to_update: list, updates: dict, id_column: str = "id"):
+    def update_rows_bulk(
+        cls, ids_to_update: list, updates: dict, id_column: str = "id"
+    ):
         """
         Iterates through all parquet files and applies updates to rows matching
         any ID in `ids_to_update`.
@@ -301,17 +303,30 @@ class MoleculeStore:
         Reorganizes existing parquet files to ensure each chunk matches
         `cls.chunk_size`. Smaller chunks are combined, and larger ones are split.
         """
-        import shutil
+        # 1. Identify all current parquet files and rename them to .old
+        # This handles both active files and those from a previous failed run.
+        # We use .parquet.old to avoid name collisions with the new numeric files.
+        for f in cls.directory.glob("*.parquet"):
+            f.rename(f.parent / (f.name + ".old"))
 
-        # create a temporary directory
-        temp_dir = cls.directory.parent / f"{cls.datastore_name}_temp"
-        temp_dir.mkdir(exist_ok=True)
+        # 2. Gather all .old files for processing (sorted to maintain order)
+        old_files = sorted(cls.directory.glob("*.parquet.old"))
+        if not old_files:
+            logging.info("No files found to reorganize.")
+            return
 
         current_chunk_index = 0
         accumulated_df = None
+        total_rows_read = 0
+        total_rows_written = 0
+        # List of (Path, end_row_index) to track when it is safe to delete .old files
+        old_files_to_delete = []
 
-        for file in cls.chunk_files:
-            df = polars.read_parquet(file)
+        for old_file in old_files:
+            df = polars.read_parquet(old_file)
+            total_rows_read += len(df)
+            old_files_to_delete.append((old_file, total_rows_read))
+
             if accumulated_df is None:
                 accumulated_df = df
             else:
@@ -324,35 +339,38 @@ class MoleculeStore:
                 )
 
                 chunk_filename = (
-                    temp_dir / f"{str(current_chunk_index).zfill(10)}.parquet"
+                    cls.directory / f"{str(current_chunk_index).zfill(10)}.parquet"
                 )
                 chunk.write_parquet(
                     chunk_filename,
                     compression=cls.compression_mode,
                 )
                 current_chunk_index += 1
+                total_rows_written += cls.chunk_size
 
-        # Write any remaining rows
+                # Delete old files where ALL their rows have been written to new chunks
+                while (
+                    old_files_to_delete
+                    and total_rows_written >= old_files_to_delete[0][1]
+                ):
+                    path, _ = old_files_to_delete.pop(0)
+                    path.unlink()
+
+        # 3. Write any remaining rows to the final chunk
         if accumulated_df is not None and len(accumulated_df) > 0:
-            chunk_filename = temp_dir / f"{str(current_chunk_index).zfill(10)}.parquet"
+            chunk_filename = (
+                cls.directory / f"{str(current_chunk_index).zfill(10)}.parquet"
+            )
             accumulated_df.write_parquet(
                 chunk_filename,
                 compression=cls.compression_mode,
             )
+            total_rows_written += len(accumulated_df)
 
-        # Replace old files with new ones
-        # We delete all parquet files in the original directory
-        # We use a local variable to avoid recreating the directory via the property
-        target_directory = cls.directory
-        for f in target_directory.glob("*.parquet"):
-            f.unlink()
-
-        # Move new files over
-        for f in temp_dir.iterdir():
-            shutil.move(str(f), str(target_directory / f.name))
-
-        # Remove temp directory
-        shutil.rmtree(temp_dir)
+        # 4. Final cleanup of any remaining .old files
+        while old_files_to_delete and total_rows_written >= old_files_to_delete[0][1]:
+            path, _ = old_files_to_delete.pop(0)
+            path.unlink()
 
     @classmethod
     def _inflate_data_chunk(

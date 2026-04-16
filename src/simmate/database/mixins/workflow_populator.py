@@ -92,7 +92,9 @@ class WorkflowPopulator:
             query_filters["is_invalid_structure"] = False
         if filters:
             query_filters.update(filters)
-        ids_to_update = cls.objects.filter(**query_filters).values_list("id", flat=True).all()
+        ids_to_update = (
+            cls.objects.filter(**query_filters).values_list("id", flat=True).all()
+        )
 
         logging.info(
             f"Updating '{column_name}' column using '{workflow_name}' "
