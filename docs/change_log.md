@@ -80,6 +80,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added `@batch_bulk_create` decorator to help simplify `load_source_data` methods
 - updated `simmate database download` to be dynamic across all apps, support a `--source` option, and respect custom load orders
 - added first draft of vasp dockerfile. vasp is proprietary so source files and final image cannot be shared publicly
+- added methods for updating rows and cleaning up chunk files to toolkit datastore class
 
 **Refactors**
 
