@@ -235,6 +235,126 @@ class MoleculeStore:
             current_chunk_index += 1
 
     @classmethod
+    def update_row(cls, row_id, updates: dict, id_column: str = "id"):
+        """
+        Searches for a specific row by its ID across all chunks, applies the
+        updates, and rewrites the corresponding parquet file.
+        """
+        for file in cls.chunk_files:
+            # scan for efficiency to check if id exists
+            lazy_df = polars.scan_parquet(file)
+            matches = lazy_df.filter(polars.col(id_column) == row_id).collect()
+
+            if len(matches) > 0:
+                df = polars.read_parquet(file)
+                # Apply updates
+                for col, val in updates.items():
+                    df = df.with_columns(
+                        polars.when(polars.col(id_column) == row_id)
+                        .then(polars.lit(val))
+                        .otherwise(polars.col(col))
+                        .alias(col)
+                    )
+                df.write_parquet(file, compression=cls.compression_mode)
+                return
+
+    @classmethod
+    def update_rows_bulk(cls, ids_to_update: list, updates: dict, id_column: str = "id"):
+        """
+        Iterates through all parquet files and applies updates to rows matching
+        any ID in `ids_to_update`.
+        """
+        ids_series = polars.Series(ids_to_update)
+        for file in cls.chunk_files:
+            lazy_df = polars.scan_parquet(file)
+            matches = lazy_df.filter(polars.col(id_column).is_in(ids_series)).collect()
+
+            if len(matches) > 0:
+                df = polars.read_parquet(file)
+                for col, val in updates.items():
+                    df = df.with_columns(
+                        polars.when(polars.col(id_column).is_in(ids_series))
+                        .then(polars.lit(val))
+                        .otherwise(polars.col(col))
+                        .alias(col)
+                    )
+                df.write_parquet(file, compression=cls.compression_mode)
+
+    @classmethod
+    def update_column(cls, column_name: str, update_method: callable):
+        """
+        Iterates through all rows (chunk by chunk) and applies a python callable
+        to add or update a column.
+
+        The `update_method` should accept a Polars DataFrame chunk and return
+        a Polars Series or list containing the new column values.
+        """
+        for file in cls.chunk_files:
+            df = polars.read_parquet(file)
+            new_values = update_method(df)
+            df = df.with_columns(polars.Series(name=column_name, values=new_values))
+            df.write_parquet(file, compression=cls.compression_mode)
+
+    @classmethod
+    def reorganize_chunks(cls):
+        """
+        Reorganizes existing parquet files to ensure each chunk matches
+        `cls.chunk_size`. Smaller chunks are combined, and larger ones are split.
+        """
+        import shutil
+
+        # create a temporary directory
+        temp_dir = cls.directory.parent / f"{cls.datastore_name}_temp"
+        temp_dir.mkdir(exist_ok=True)
+
+        current_chunk_index = 0
+        accumulated_df = None
+
+        for file in cls.chunk_files:
+            df = polars.read_parquet(file)
+            if accumulated_df is None:
+                accumulated_df = df
+            else:
+                accumulated_df = polars.concat([accumulated_df, df])
+
+            while len(accumulated_df) >= cls.chunk_size:
+                chunk = accumulated_df.head(cls.chunk_size)
+                accumulated_df = accumulated_df.tail(
+                    len(accumulated_df) - cls.chunk_size
+                )
+
+                chunk_filename = (
+                    temp_dir / f"{str(current_chunk_index).zfill(10)}.parquet"
+                )
+                chunk.write_parquet(
+                    chunk_filename,
+                    compression=cls.compression_mode,
+                )
+                current_chunk_index += 1
+
+        # Write any remaining rows
+        if accumulated_df is not None and len(accumulated_df) > 0:
+            chunk_filename = temp_dir / f"{str(current_chunk_index).zfill(10)}.parquet"
+            accumulated_df.write_parquet(
+                chunk_filename,
+                compression=cls.compression_mode,
+            )
+
+        # Replace old files with new ones
+        # We delete all parquet files in the original directory
+        # We use a local variable to avoid recreating the directory via the property
+        target_directory = cls.directory
+        for f in target_directory.glob("*.parquet"):
+            f.unlink()
+
+        # Move new files over
+        for f in temp_dir.iterdir():
+            shutil.move(str(f), str(target_directory / f.name))
+
+        # Remove temp directory
+        shutil.rmtree(temp_dir)
+
+    @classmethod
     def _inflate_data_chunk(
         cls,
         df: polars.DataFrame,
