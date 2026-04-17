@@ -71,14 +71,15 @@ class MoleculeStore:
 
     # -------------------------------------------------------------------------
 
-    smiles_stored: str = "original_and_cleaned"  # or "original_only" or "cleaned_only"
+    smiles_stored: str = "cleaned_only"
+    # or "original_only" or "original_and_cleaned"
 
     metadata_columns: list[str] = []
 
     property_columns: list[str] = [
         "molecular_weight_exact",
         "num_atoms_heavy",
-        "num_rings",
+        "num_stereocenters",
         "log_p_rdkit",
         "synthetic_accessibility",
     ]
@@ -232,6 +233,144 @@ class MoleculeStore:
                 compression=cls.compression_mode,
             )
             current_chunk_index += 1
+
+    @classmethod
+    def update_row(cls, row_id, updates: dict, id_column: str = "id"):
+        """
+        Searches for a specific row by its ID across all chunks, applies the
+        updates, and rewrites the corresponding parquet file.
+        """
+        for file in cls.chunk_files:
+            # scan for efficiency to check if id exists
+            lazy_df = polars.scan_parquet(file)
+            matches = lazy_df.filter(polars.col(id_column) == row_id).collect()
+
+            if len(matches) > 0:
+                df = polars.read_parquet(file)
+                # Apply updates
+                for col, val in updates.items():
+                    df = df.with_columns(
+                        polars.when(polars.col(id_column) == row_id)
+                        .then(polars.lit(val))
+                        .otherwise(polars.col(col))
+                        .alias(col)
+                    )
+                df.write_parquet(file, compression=cls.compression_mode)
+                return
+
+    @classmethod
+    def update_rows_bulk(
+        cls, ids_to_update: list, updates: dict, id_column: str = "id"
+    ):
+        """
+        Iterates through all parquet files and applies updates to rows matching
+        any ID in `ids_to_update`.
+        """
+        ids_series = polars.Series(ids_to_update)
+        for file in cls.chunk_files:
+            lazy_df = polars.scan_parquet(file)
+            matches = lazy_df.filter(polars.col(id_column).is_in(ids_series)).collect()
+
+            if len(matches) > 0:
+                df = polars.read_parquet(file)
+                for col, val in updates.items():
+                    df = df.with_columns(
+                        polars.when(polars.col(id_column).is_in(ids_series))
+                        .then(polars.lit(val))
+                        .otherwise(polars.col(col))
+                        .alias(col)
+                    )
+                df.write_parquet(file, compression=cls.compression_mode)
+
+    @classmethod
+    def update_column(cls, column_name: str, update_method: callable):
+        """
+        Iterates through all rows (chunk by chunk) and applies a python callable
+        to add or update a column.
+
+        The `update_method` should accept a Polars DataFrame chunk and return
+        a Polars Series or list containing the new column values.
+        """
+        for file in cls.chunk_files:
+            df = polars.read_parquet(file)
+            new_values = update_method(df)
+            df = df.with_columns(polars.Series(name=column_name, values=new_values))
+            df.write_parquet(file, compression=cls.compression_mode)
+
+    @classmethod
+    def reorganize_chunks(cls):
+        """
+        Reorganizes existing parquet files to ensure each chunk matches
+        `cls.chunk_size`. Smaller chunks are combined, and larger ones are split.
+        """
+        # 1. Identify all current parquet files and rename them to .old
+        # This handles both active files and those from a previous failed run.
+        # We use .parquet.old to avoid name collisions with the new numeric files.
+        for f in cls.directory.glob("*.parquet"):
+            f.rename(f.parent / (f.name + ".old"))
+
+        # 2. Gather all .old files for processing (sorted to maintain order)
+        old_files = sorted(cls.directory.glob("*.parquet.old"))
+        if not old_files:
+            logging.info("No files found to reorganize.")
+            return
+
+        current_chunk_index = 0
+        accumulated_df = None
+        total_rows_read = 0
+        total_rows_written = 0
+        # List of (Path, end_row_index) to track when it is safe to delete .old files
+        old_files_to_delete = []
+
+        for old_file in old_files:
+            df = polars.read_parquet(old_file)
+            total_rows_read += len(df)
+            old_files_to_delete.append((old_file, total_rows_read))
+
+            if accumulated_df is None:
+                accumulated_df = df
+            else:
+                accumulated_df = polars.concat([accumulated_df, df])
+
+            while len(accumulated_df) >= cls.chunk_size:
+                chunk = accumulated_df.head(cls.chunk_size)
+                accumulated_df = accumulated_df.tail(
+                    len(accumulated_df) - cls.chunk_size
+                )
+
+                chunk_filename = (
+                    cls.directory / f"{str(current_chunk_index).zfill(10)}.parquet"
+                )
+                chunk.write_parquet(
+                    chunk_filename,
+                    compression=cls.compression_mode,
+                )
+                current_chunk_index += 1
+                total_rows_written += cls.chunk_size
+
+                # Delete old files where ALL their rows have been written to new chunks
+                while (
+                    old_files_to_delete
+                    and total_rows_written >= old_files_to_delete[0][1]
+                ):
+                    path, _ = old_files_to_delete.pop(0)
+                    path.unlink()
+
+        # 3. Write any remaining rows to the final chunk
+        if accumulated_df is not None and len(accumulated_df) > 0:
+            chunk_filename = (
+                cls.directory / f"{str(current_chunk_index).zfill(10)}.parquet"
+            )
+            accumulated_df.write_parquet(
+                chunk_filename,
+                compression=cls.compression_mode,
+            )
+            total_rows_written += len(accumulated_df)
+
+        # 4. Final cleanup of any remaining .old files
+        while old_files_to_delete and total_rows_written >= old_files_to_delete[0][1]:
+            path, _ = old_files_to_delete.pop(0)
+            path.unlink()
 
     @classmethod
     def _inflate_data_chunk(
