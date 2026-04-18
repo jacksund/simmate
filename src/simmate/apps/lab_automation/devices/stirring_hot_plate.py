@@ -68,8 +68,8 @@ class StirringHotPlate:
         # lab heaters, but may need tuning.
         self.temp_controller = temp_controller or TimeProportional(
             setpoint=0,
-            proportional_band=10.0,
-            cycle_time=2.0,
+            proportional_band=20,
+            cycle_time=4,
         )
 
     def set_stir_speed(self, speed: float):
@@ -132,7 +132,7 @@ class StirringHotPlate:
         temperature: float,
         stir_speed: float,
         total_time: float = None,
-        update_interval: float = 1.0,
+        update_interval: float = 0.25,
     ):
         """
         Runs the hot plate at the specified temperature and stir speed for
