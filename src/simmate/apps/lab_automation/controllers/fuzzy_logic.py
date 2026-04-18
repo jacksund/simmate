@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
-class FuzzyLogic(object):
+from .base import Controller
+
+
+class FuzzyLogic(Controller):
     """
     A simple fuzzy-logic-style controller mapping input ranges to fixed output values.
 
@@ -31,7 +34,7 @@ class FuzzyLogic(object):
         self.default_output = default_output
         self._last_output = default_output
 
-    def eval(self, input_: float) -> float:
+    def eval(self, input_: float, dt: float = None) -> float:
         """
         Update the controller state and return the output based on matching rules.
 

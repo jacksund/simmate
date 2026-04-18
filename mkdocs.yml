@@ -338,6 +338,7 @@ nav:
             - Overview: apps/lab_automation/overview.md
             - Sensors: apps/lab_automation/sensors.md
             - Controllers: apps/lab_automation/controllers.md
+            - Devices: apps/lab_automation/devices.md
         - Materials Project: apps/materials_project.md
         - OQMD: apps/oqmd.md
         - PDB: apps/pdb.md

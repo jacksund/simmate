@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
-class OnOff(object):
+from .base import Controller
+
+
+class OnOff(Controller):
     """
     A simple on-off (bang-bang) controller with deadband.
 
@@ -37,7 +40,7 @@ class OnOff(object):
         self.auto_mode = auto_mode
         self._last_output = off_output
 
-    def eval(self, input_: float) -> float:
+    def eval(self, input_: float, dt: float = None) -> float:
         """
         Update the controller state and return the output.
 

@@ -10,3 +10,4 @@ The app is organized into three main categories of components:
 - **[Sensors](sensors.md)**: Interfaces for reading data from hardware (e.g., temperature probes, cameras).
 - **[Actuators](#)**: Interfaces for sending commands to hardware (e.g., pumps, stirrers, heaters).
 - **[Controllers](controllers.md)**: Algorithms that process sensor data to determine the appropriate actuator output.
+- **[Devices](devices.md)**: High-level objects that combine sensors, actuators, and controllers into a unified interface (e.g., a stirring hot plate).

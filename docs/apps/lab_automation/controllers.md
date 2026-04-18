@@ -20,7 +20,20 @@ setting and the recommended controller type for each.
 
 ## Available Controllers
 
-Simmate provides several built-in controllers in the `simmate.apps.lab_automation.controllers` module.
+Simmate provides several built-in controllers in the `simmate.apps.lab_automation.controllers` module. All controllers inherit from a base `Controller` class, which ensures a consistent interface via the `.eval()` method.
+
+### The Controller Base Class
+
+The `Controller` base class defines the standard interface for all control algorithms. When creating a custom controller, you should inherit from this class and implement the `eval` method.
+
+```python
+from simmate.apps.lab_automation.controllers import Controller
+
+class MyCustomController(Controller):
+    def eval(self, input_: float, dt: float = None) -> float:
+        # custom control logic here
+        return 1.0
+```
 
 ### PID Controller
 

@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
-class TimeProportional(object):
+from .base import Controller
+
+
+class TimeProportional(Controller):
     """
     A time-proportional controller (PWM) based on a proportional band.
 
@@ -56,7 +59,7 @@ class TimeProportional(object):
 
         self._cycle_start_time = self.time_fn()
 
-    def eval(self, input_: float) -> float:
+    def eval(self, input_: float, dt: float = None) -> float:
         """
         Update the controller state and return the output based on PWM.
 

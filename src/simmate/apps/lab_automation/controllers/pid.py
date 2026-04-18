@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+from .base import Controller
 
 
-class PID(object):
+class PID(Controller):
     """
     A simple PID controller.
 
