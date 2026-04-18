@@ -72,8 +72,6 @@ class StirringHotPlate:
             cycle_time=2.0,
         )
 
-        self._heater_is_on = False
-
     def set_stir_speed(self, speed: float):
         """
         Sets the stirrer speed.
@@ -112,14 +110,12 @@ class StirringHotPlate:
         current_temp, _ = self.temp_sensor.get_temperature()
         output = self.temp_controller.eval(current_temp)
 
-        if output > 0 and not self._heater_is_on:
+        if output > 0 and not self.heater.is_active:
             logging.info("Heater turned ON")
             self.heater.on()
-            self._heater_is_on = True
-        elif output <= 0 and self._heater_is_on:
+        elif output <= 0 and self.heater.is_active:
             logging.info("Heater turned OFF")
             self.heater.off()
-            self._heater_is_on = False
 
         return current_temp
 
