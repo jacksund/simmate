@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from .dynamic_table_form import DynamicTableForm
+from .table_component import TableComponent

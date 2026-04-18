@@ -43,6 +43,7 @@ class HtmxComponent:
     request: HttpRequest = None  # overwritten on each new ajax call
 
     def __init__(self, context: dict = None, **kwargs):
+
         # Objects are always initialized through the {% htmx_component ... %} templatetag.
         # So they are built when the html page is being rendered. On init, we
         # also add it to the cache, so that htmx ajax calls can load the object
@@ -54,7 +55,7 @@ class HtmxComponent:
             getattr(context, "request", None) if context else None
         )  # updated with new request every new call
         # this part allows us to pass kwargs to the html tag and apply them to attrs
-        # ex: form_mode="example" --> apply to python obj on init
+        # ex: component_type="example" --> apply to python obj on init
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
@@ -63,18 +64,16 @@ class HtmxComponent:
 
     # -------------------------------------------------------------------------
 
-    _direct_obj_attrs_in_context: bool = False
-
     def get_context(self):
-        obj_attrs = self.__dict__ if self._direct_obj_attrs_in_context else {}
-        return {
-            "component": self,
-            **obj_attrs,
-        }
-        # **self.initial_context.flatten(),  # include this?
+        # TODO: consider adding...
+        # **self.__dict__
+        # **self.initial_context.flatten()
+        return {"component": self}
 
     def handle_request(
-        self, request: HttpRequest, method_name: str = None
+        self,
+        request: HttpRequest,
+        method_name: str = None,
     ) -> HttpResponse:
 
         self.request = request  # for easy access elsewhere

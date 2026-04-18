@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from .enamine_real_molecule_table import EnamineRealMoleculeTable
+from .real_molecule import EnamineRealMoleculeComponent

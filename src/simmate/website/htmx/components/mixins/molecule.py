@@ -168,8 +168,8 @@ class MoleculeInput:
 
     def load_many_molecules(self, input_name: str = "molecule"):
 
-        # BUG: we assume self.form_mode="create_many" right now
-        assert self.form_mode == "create_many"
+        # BUG: we assume self.component_type="create_many" right now
+        assert self.component_type == "create_many"
 
         mol_str = self.form_data.pop(f"{input_name}__molecule_sketcher", None)
 

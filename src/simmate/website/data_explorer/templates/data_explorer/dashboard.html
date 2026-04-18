@@ -1,0 +1,88 @@
+{% extends "core/site_base.html" %}
+{% block tabtitle %}{{ table.table_name }} Data - Simmate{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12 py-3">
+            <a href="{% url 'data_explorer:table-about' table.table_name %}"
+               class="btn btn-primary my-1">
+                <i class="bi bi-info-circle"></i>&nbsp;&nbsp;Table Info</a>
+            {% block quicksearch %}
+                {% if "search" in component.enabled_component_types %}
+                    {% include "data_explorer/search.html" %}
+                {% endif %}
+            {% endblock %}
+            {% block updater %}
+                {% if "update_many" in component.enabled_component_types %}
+                    {% include "data_explorer/update_many.html" %}
+                {% endif %}
+            {% endblock %}
+            {% block addnew %}
+                {% if "create" in component.enabled_component_types %}
+                    {% include "data_explorer/create.html" %}
+                {% endif %}
+            {% endblock %}
+            <a class="btn btn-secondary my-1"
+               href="#"
+               role="button"
+               data-bs-toggle="dropdown">
+                <i class="bi bi-download"></i>&nbsp;&nbsp;Download
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                    <h6 class="dropdown-header">
+                        <i class="bi bi-stars"></i> Curated <i class="bi bi-stars"></i>
+                    </h6>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% update_url format='curated-csv' %}"><i class="bi bi-file-earmark-spreadsheet"></i> CSV</a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <h6 class="dropdown-header">
+                        REST API <small>(raw data)</small>
+                    </h6>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% update_url format='csv' %}"><i class="bi bi-file-earmark-spreadsheet"></i> CSV</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% update_url format='json' %}"><i class="bi bi-braces"></i> JSON</a>
+                </li>
+                {% comment %}
+                    <li>
+                        <a class="dropdown-item" href="#"><i class="bi bi-box"></i> CIF</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#"><i class="bi bi-flask"></i> SDF</a>
+                    </li>
+                {% endcomment %}
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <h6 class="dropdown-header">
+                        Other <small>(requires install)</small>
+                    </h6>
+                </li>
+                <li>
+                    <a class="dropdown-item"
+                       href="https://jacksund.github.io/simmate/full_guides/database/basic_use/"
+                       target="_blank"><i class="bi bi-code"></i> Python</a>
+                </li>
+                <li>
+                    <a class="dropdown-item"
+                       href="https://jacksund.github.io/simmate/getting_started/database/quickstart/"
+                       target="_blank"><i class="bi bi-database"></i> SQL</a>
+                </li>
+            </ul>
+            {% include "core/basic_elements/toggle_width_button.html" %}
+        </div>
+    </div>
+    {% block search_results %}
+        <div id="search-results" class="row">
+            {% htmx_component component component_key="entrieslist" form_mode="entries" %}
+        </div>
+    {% endblock %}
+{% endblock %}
