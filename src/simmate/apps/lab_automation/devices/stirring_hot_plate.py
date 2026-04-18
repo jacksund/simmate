@@ -1,3 +1,6 @@
+import logging
+import time
+
 from gpiozero import DigitalOutputDevice, Motor
 
 from simmate.apps.lab_automation.controllers import Controller, TimeProportional
@@ -20,8 +23,8 @@ class StirringHotPlate:
 
     # Initialize with GPIO pins
     plate = StirringHotPlate(
-        stirrer_pins=(17, 27),
-        heater_pin=22,
+        stirrer_pins=(23, 24),
+        heater_pin=16,
     )
 
     # Set targets
@@ -69,6 +72,8 @@ class StirringHotPlate:
             cycle_time=2.0,
         )
 
+        self._heater_is_on = False
+
     def set_stir_speed(self, speed: float):
         """
         Sets the stirrer speed.
@@ -77,6 +82,7 @@ class StirringHotPlate:
             speed: A value between -1.0 and 1.0. Positive values spin forward,
                 negative values spin backward. 0 stops the stirrer.
         """
+        logging.info(f"Setting stirrer speed to {speed}")
         if speed == 0:
             self.stirrer.stop()
         elif speed > 0:
@@ -91,6 +97,7 @@ class StirringHotPlate:
         Args:
             temperature: The target temperature in Celsius.
         """
+        logging.info(f"Setting target temperature to {temperature}°C")
         self.temp_controller.setpoint = temperature
 
     def update(self) -> float:
@@ -105,10 +112,14 @@ class StirringHotPlate:
         current_temp, _ = self.temp_sensor.get_temperature()
         output = self.temp_controller.eval(current_temp)
 
-        if output > 0:
+        if output > 0 and not self._heater_is_on:
+            logging.info("Heater turned ON")
             self.heater.on()
-        else:
+            self._heater_is_on = True
+        elif output <= 0 and self._heater_is_on:
+            logging.info("Heater turned OFF")
             self.heater.off()
+            self._heater_is_on = False
 
         return current_temp
 
@@ -116,5 +127,59 @@ class StirringHotPlate:
         """
         Stops both the stirrer and the heater immediately.
         """
+        logging.info("Stopping stirrer and heater")
         self.stirrer.stop()
         self.heater.off()
+
+    def run(
+        self,
+        temperature: float,
+        stir_speed: float,
+        total_time: float = None,
+        update_interval: float = 1.0,
+    ):
+        """
+        Runs the hot plate at the specified temperature and stir speed for
+        a set amount of time.
+
+        Args:
+            temperature: The target temperature in Celsius.
+            stir_speed: The stirrer speed (between -1.0 and 1.0).
+            total_time: The total time (in seconds) to run. If None, it
+                runs indefinitely until interrupted.
+            update_interval: The time (in seconds) between each update of
+                the control loop.
+        """
+        logging.info(
+            f"Starting run: target={temperature}°C, stir_speed={stir_speed}, "
+            f"duration={total_time if total_time else 'indefinite'}s"
+        )
+        self.set_temperature(temperature)
+        self.set_stir_speed(stir_speed)
+
+        start_time = time.monotonic()
+        last_log_time = 0
+        try:
+            while True:
+                current_time = time.monotonic()
+                elapsed_time = current_time - start_time
+                if total_time and elapsed_time > total_time:
+                    logging.info("Total run time reached.")
+                    break
+
+                temp = self.update()
+
+                # Log status every 10 seconds (or at every update if interval > 10)
+                if current_time - last_log_time >= 10:
+                    status_msg = f"Status: {temp:.2f}°C"
+                    if total_time:
+                        status_msg += f" ({elapsed_time:.1f}/{total_time}s)"
+                    logging.info(status_msg)
+                    last_log_time = current_time
+
+                time.sleep(update_interval)
+        except KeyboardInterrupt:
+            logging.warning("Run interrupted by user.")
+        finally:
+            self.stop()
+            logging.info("Run finished.")

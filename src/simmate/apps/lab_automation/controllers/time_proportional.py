@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-
+import time
 
 from .base import Controller
 
@@ -22,7 +21,6 @@ class TimeProportional(Controller):
         on_output: float = 1.0,
         off_output: float = 0.0,
         auto_mode: bool = True,
-        time_fn: callable = None,
     ):
         """
         Initialize a new TimeProportional controller.
@@ -36,8 +34,6 @@ class TimeProportional(Controller):
             on_output: The output value during the 'On' portion of the cycle.
             off_output: The output value during the 'Off' portion of the cycle.
             auto_mode: Whether the controller is enabled.
-            time_fn: A function that returns the current time. Defaults to
-                time.monotonic.
         """
         self.setpoint = setpoint
         self.proportional_band = proportional_band
@@ -47,17 +43,7 @@ class TimeProportional(Controller):
         self.auto_mode = auto_mode
         self._last_output = off_output
 
-        if time_fn is not None:
-            self.time_fn = time_fn
-        else:
-            import time
-
-            try:
-                self.time_fn = time.monotonic
-            except AttributeError:
-                self.time_fn = time.time
-
-        self._cycle_start_time = self.time_fn()
+        self._cycle_start_time = time.monotonic()
 
     def eval(self, input_: float, dt: float = None) -> float:
         """
@@ -65,6 +51,7 @@ class TimeProportional(Controller):
 
         Args:
             input_: The current measurement of the system being controlled.
+            dt: The time step since the last update. Optional.
 
         Returns:
             The controller output (either on_output or off_output).
@@ -83,7 +70,7 @@ class TimeProportional(Controller):
         else:
             duty_cycle = error / self.proportional_band
 
-        now = self.time_fn()
+        now = time.monotonic()
         elapsed_in_cycle = now - self._cycle_start_time
 
         if elapsed_in_cycle >= self.cycle_time:
