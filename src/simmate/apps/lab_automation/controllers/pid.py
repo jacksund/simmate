@@ -95,7 +95,7 @@ class PID(object):
         # Set initial state of the controller
         self._integral = self._clamp(starting_output, output_limits)
 
-    def __call__(self, input_, dt=None):
+    def eval(self, input_, dt=None):
         """
         Update the PID controller.
 

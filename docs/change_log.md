@@ -66,6 +66,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 **Enhancements**
 
+- added `OnOff`, `TimeProportional`, and `FuzzyLogic` controllers to `lab_automation` app, including an `.eval()` method and comprehensive documentation for sensors and controllers
 - added create_prebuild function to database.utils for creating date-stamped SQLite3 database archives
 - added the `simmate dev` command group with tools for linting, testing, and workspace management
 - improved CLI help texts and added rich markdown support across all command groups
@@ -84,6 +85,8 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 **Refactors**
 
+- refactored `lab_automation.controllers` to move each controller class into its own file and updated `__init__.py`
+- removed redundant `__call__` methods from controllers in favor of the explicit `eval` method
 - moved `simmate.workflows.execution` and `simmate.workflows.scheduler` to `simmate.compute` to align with the CLI and documentation structure
 - renamed the `simmate engine` command group to `simmate compute` and updated internal modules/tests
 - refactored `website.data_explorer` to use HTMX components for all table entries, moving UI-specific features from `DatabaseTable` and `HTMLMixin` into `DynamicTableForm`
