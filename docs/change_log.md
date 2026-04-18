@@ -66,6 +66,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 **Enhancements**
 
+- added `OnOff`, `TimeProportional`, and `FuzzyLogic` controllers, plus a `StirringHotPlate` device to `lab_automation` app, including an `.eval()` method and comprehensive documentation for sensors, controllers, and devices
 - added create_prebuild function to database.utils for creating date-stamped SQLite3 database archives
 - added the `simmate dev` command group with tools for linting, testing, and workspace management
 - improved CLI help texts and added rich markdown support across all command groups
