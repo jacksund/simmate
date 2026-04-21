@@ -61,7 +61,7 @@ class MoleculeInput:
 
             if input_type in ["sketcher", "text"]:
 
-                if self.form_mode == "search":
+                if self.component_type == "search":
                     query_type = self.form_data.pop(f"{input_name}_query_type")
                     # TODO: better loading for SMARTS
                     # if query_type == "molecule_exact":
@@ -106,7 +106,7 @@ class MoleculeInput:
             self.form_data[input_name] = False  # to display error
             return
 
-        if self.form_mode == "create" and self.molecule_match_tables:
+        if self.component_type == "create" and self.molecule_match_tables:
             matches = self.check_datasets(molecule_obj)
             # TODO: f"{input_name}__molecule_matches"
             setattr(self, "molecule_matches", matches)
