@@ -9,6 +9,10 @@ class EntriesMixin:
     total = None
     entries = None
 
+    @property
+    def enable_select(self):
+        return "update_many" in self.enabled_component_types
+
     def mount_for_entries(self):
         if self.initial_context:
             self.page = self.initial_context.get("page")
