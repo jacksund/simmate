@@ -82,7 +82,7 @@
     </div>
     {% block search_results %}
         <div id="search-results" class="row">
-            {% htmx_component component component_key="entrieslist" form_mode="entries" %}
+            {% htmx_component component component_key="entrieslist" component_type="entries" %}
         </div>
     {% endblock %}
 {% endblock %}
