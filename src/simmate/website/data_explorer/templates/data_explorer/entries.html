@@ -34,7 +34,7 @@
                   action="#"
                   method="post"
                   enctype="multipart/form-data">
-                {% if enable_select %}
+                {% if component.enable_select %}
                     <div class="row">
                         <div class="py-2">
                             <input type="checkbox"
@@ -49,7 +49,7 @@
                     <table class="table table-striped align-middle">
                         <thead class="table-primary">
                             <tr>
-                                {% if enable_select %}<th></th>{% endif %}
+                                {% if component.enable_select %}<th></th>{% endif %}
                                 {% block table_headers %}
                                     <th>ID</th>
                                     <th>Created</th>
@@ -60,7 +60,7 @@
                         <tbody>
                             {% for entry in component.entries %}
                                 <tr>
-                                    {% if enable_select %}
+                                    {% if component.enable_select %}
                                         <td>
                                             <input type="checkbox"
                                                    class="form-check-input entry_row_select"
