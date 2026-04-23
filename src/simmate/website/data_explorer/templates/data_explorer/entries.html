@@ -1,6 +1,6 @@
 {% extends "htmx/form_base.html" %}
 {% block form %}
-    {% if component.entries %}
+    {% if entries %}
         {% block search_results_table %}
             {% if component.report %}
                 <div id="search_results_report">
@@ -58,7 +58,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for entry in component.entries %}
+                            {% for entry in entries %}
                                 <tr>
                                     {% if component.enable_select %}
                                         <td>
@@ -87,7 +87,9 @@
                 </div>
             </form>
         {% endblock %}
-        {% include "data_explorer/pagination.html" with page=component.page pagination_urls=component.pagination_urls %}
+        {% if component.page %}
+            {% include "data_explorer/pagination.html" with page=component.page pagination_urls=component.pagination_urls %}
+        {% endif %}
     {% else %}
         <div class="alert alert-danger d-flex align-items-center p-2" role="alert">
             <div>

@@ -362,6 +362,12 @@ class TableComponent(
 
     # -------------------------------------------------------------------------
 
+    def get_context(self):
+        context = super().get_context()
+        if self.entries is not None:
+            context["entries"] = self.entries
+        return context
+
     @classmethod
     def get_extra_table_context(cls, request) -> dict:
         return {}  # default to nothing extra
