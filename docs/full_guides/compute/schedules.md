@@ -42,6 +42,11 @@ def run_daily_maintenance():
 @schedule(interval="hourly")
 def check_for_updates():
     print("Checking for updates...")
+
+# Run every Saturday at 1:00am
+@schedule(interval="weekly", on="saturday", at="01:00")
+def run_weekly_cleanup():
+    print("Running weekly cleanup...")
 ```
 
 As long as `my_app` is in your `settings.yaml` under `apps`, the `start-schedules` command will find and register these tasks automatically.

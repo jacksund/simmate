@@ -1011,3 +1011,20 @@ class DatabaseTable(models.Model, ArchiveMixin):
         if queryset is None:
             queryset = cls.objects
         return queryset.to_dataframe()  # default to just raw data
+
+    # -------------------------------------------------------------------------
+    # Methods for bulk-loading data from external sources
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def load_source_data(cls, **kwargs):
+        """
+        Loads all data from the source into the local Simmate database.
+
+        This method should be implemented as a generator that yields initialized
+        database objects. You should also use the `@batch_bulk_create` decorator
+        to handle saving the objects in batches.
+        """
+        raise NotImplementedError(
+            "The `load_source_data` method has not been implemented for this table."
+        )

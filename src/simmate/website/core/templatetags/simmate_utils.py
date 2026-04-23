@@ -129,6 +129,26 @@ def sdfdoodle(obj):
     return obj.replace("\n", "\\n")
 
 
+@register.filter
+def to_cif(structure):
+    """
+    Converts a toolkit Structure to a cif string.
+    """
+    if hasattr(structure, "to_toolkit"):
+        structure = structure.to_toolkit()
+    return structure.to(fmt="cif")
+
+
+@register.filter
+def to_poscar(structure):
+    """
+    Converts a toolkit Structure to a poscar string.
+    """
+    if hasattr(structure, "to_toolkit"):
+        structure = structure.to_toolkit()
+    return structure.to(fmt="poscar")
+
+
 @register.inclusion_tag(
     filename="core/chem_elements/draw_structure.html",
     takes_context=True,

@@ -1,0 +1,46 @@
+<div class="tab-pane" id="forces-section">
+    <div class="row">
+        <div class="col-xl-7">
+            <table class="table table-centered table-striped mb-0 border">
+                <thead class="table-primary">
+                    <tr>
+                        <th style="width: 45%">Forces and Stress</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Site Force (Max)</td>
+                        <td>
+                            {% if table_entry.site_force_max is not None %}
+                                {{ table_entry.site_force_max|floatformat:4 }} eV/&Aring;
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Site Forces (Norm)</td>
+                        <td>
+                            {% if table_entry.site_forces_norm is not None %}
+                                {{ table_entry.site_forces_norm|floatformat:4 }} eV/&Aring;
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Lattice Stress (Max)</td>
+                        <td>
+                            {% if table_entry.lattice_stress_max is not None %}
+                                {{ table_entry.lattice_stress_max|floatformat:4 }} eV/&Aring;<sup>3</sup>
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

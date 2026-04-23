@@ -101,6 +101,15 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
     # -------------------------------------------------------------------------
 
     @classmethod
+    def load_remote_archive(cls, **kwargs):
+        """
+        Downloads the remote archive and populates the database table.
+        This also runs `update_all_stabilities` once the data is loaded.
+        """
+        super().load_remote_archive(**kwargs)
+        cls.update_all_stabilities()
+
+    @classmethod
     def load_source_data(
         cls,
         api_key: str = None,

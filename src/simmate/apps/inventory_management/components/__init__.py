@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from .batch_form import BatchForm
-from .container_form import ContainerForm
-from .mixture_form import MixtureForm
-from .storage_location_form import StorageLocationForm
-from .substance_form import SubstanceForm
-from .usage_log_form import UsageLogForm
+from .batch import BatchComponent
+from .container import ContainerComponent
+from .mixture import MixtureComponent
+from .storage_location import StorageLocationComponent
+from .substance import SubstanceComponent
+from .usage_log import UsageLogComponent

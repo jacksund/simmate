@@ -1,5 +1,4 @@
 {{- define "simmate.env_config" }}
-# SIMMATE CHATBOT SETTINGS
 - name: CHATBOT_URL
   value: "https://{{ .Values.simmate.chatbot_url }}/"
 - name: SIMMATE__CHATBOT__ENDPOINT
@@ -14,12 +13,10 @@
   value: {{ .Values.simmate.chatbot.sql_uri | quote }}
 - name: SIMMATE__CHATBOT__VERBOSE
   value: {{ .Values.simmate.chatbot.verbose | quote }}
-# Fixed simmate settings
 - name: SIMMATE__WEBSITE__ALLOWED_HOSTS
   value: "*"
 - name: SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS
   value: "https://{{ .Values.nginx.hostname }}"
-# User provided simmate settings
 - name: SIMMATE__APPS
   value: {{ join " " .Values.simmate.apps | quote }}
 - name: SIMMATE__POSTGRES_RDKIT_EXTENSION
@@ -64,4 +61,8 @@
   value: {{ .Values.simmate.website.social_oauth.microsoft.client_id | quote }}
 - name: SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__SECRET
   value: {{ .Values.simmate.website.social_oauth.microsoft.secret | quote }}
+- name: SIMMATE__WEBSITE__CHEMDRAW_JS
+  value: {{ .Values.simmate.website.chemdraw_js | quote }}
+- name: SIMMATE__WEBSITE__USER_FORMAT
+  value: {{ .Values.simmate.website.user_format | quote }}
 {{- end }}

@@ -197,12 +197,6 @@ def apps(request):
     return render(request, template, context)
 
 
-def extras(request):
-    context = {"breadcrumbs": ["Extras"]}
-    template = "core/extras.html"
-    return render(request, template, context)
-
-
 def about(request):
     context = {"breadcrumbs": ["About"]}
     template = "core/about.html"

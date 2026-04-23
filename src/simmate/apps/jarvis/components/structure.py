@@ -1,0 +1,24 @@
+# -*- coding: utf-8 -*-
+
+from simmate.website.data_explorer.components import TableComponent
+from simmate.website.htmx.components import StructureInput
+
+from ..models import JarvisStructure
+
+
+class JarvisStructureComponent(TableComponent, StructureInput):
+    table = JarvisStructure
+    display_name = "JARVIS"
+    description_short = (
+        "A collection of materials data for high-throughput discovery from "
+        "NIST's JARVIS project. This dataset focuses on 2D and 3D materials "
+        "with high-fidelity calculations of electronic, optical, and "
+        "mechanical properties."
+    )
+    template_names = {
+        "search": "jarvis/structures/form.html",
+        "entries": "jarvis/structures/table.html",
+        "entry": "jarvis/structures/view.html",
+    }
+
+    enabled_component_types = ["dashboard", "entries", "entry", "search"]

@@ -35,6 +35,7 @@ class WorkflowPopulator:
         column_name: str,
         batch_size: int = 500,
         update_only: bool = True,
+        filters: dict = None,
     ):
         """
         Populates a specific workflow column. The column must be present in the
@@ -75,21 +76,25 @@ class WorkflowPopulator:
                 "us to add additional support."
             )
 
-        filters = {}
+        query_filters = {}
         if update_only:
             if columns_mapping:
                 # filter where ALL of the mapped columns are null
                 for db_col in columns_mapping:
-                    filters[f"{db_col}__isnull"] = True
+                    query_filters[f"{db_col}__isnull"] = True
             else:
-                filters[f"{column_name}__isnull"] = True
+                query_filters[f"{column_name}__isnull"] = True
         # some tables allow "broken" entries, which we always want to skip
         if "is_invalid_molecule" in cls.get_column_names():
-            filters["is_invalid_molecule"] = False
-            filters["is_empty_molecule"] = False
+            query_filters["is_invalid_molecule"] = False
+            query_filters["is_empty_molecule"] = False
         if "is_invalid_structure" in cls.get_column_names():
-            filters["is_invalid_structure"] = False
-        ids_to_update = cls.objects.filter(**filters).values_list("id", flat=True).all()
+            query_filters["is_invalid_structure"] = False
+        if filters:
+            query_filters.update(filters)
+        ids_to_update = (
+            cls.objects.filter(**query_filters).values_list("id", flat=True).all()
+        )
 
         logging.info(
             f"Updating '{column_name}' column using '{workflow_name}' "

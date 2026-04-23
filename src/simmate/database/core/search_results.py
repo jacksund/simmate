@@ -40,7 +40,8 @@ class SearchResults(models.QuerySet):
         exclude_columns: list[str] = (),
         limit: int = None,
         use_cache: bool = True,
-    ) -> pandas.DataFrame:
+        engine: str = "pandas",
+    ):
         """
         Returns a Pandas DataFrame of the search results
 
@@ -60,6 +61,10 @@ class SearchResults(models.QuerySet):
         - `use_cache`:
             whether to use django's result cache if the query has been executed
             already
+        - `engine`:
+            The DataFrame engine to use. Options are "pandas" (default) or
+            "polars". When "polars", a polars.DataFrame is returned instead
+            of a pandas.DataFrame.
         """
 
         # This method originally used `django_pandas` but we since decided to
@@ -141,11 +146,24 @@ class SearchResults(models.QuerySet):
             )
             values_list = list(query)
 
-        # TODO: support polars and toolkit.dataframes objs
-        df = pandas.DataFrame.from_records(
-            data=values_list,
-            columns=columns,
-        )
+        if engine == "pandas":
+            df = pandas.DataFrame.from_records(
+                data=values_list,
+                columns=columns,
+            )
+        elif engine == "polars":
+            import polars
+
+            df = polars.DataFrame(
+                data=values_list,
+                schema=columns,
+                orient="row",
+                infer_schema_length=None,
+            )
+        else:
+            raise ValueError(
+                f"Unknown engine '{engine}'. Supported: 'pandas', 'polars'"
+            )
 
         # TODO: change choice fields to verbose
         # TODO: add toolkit col

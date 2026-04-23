@@ -73,6 +73,10 @@ def get_component(component_name: str):  # -> subclass of HtmxComponent
     if isclass(component_name) and issubclass(component_name, HtmxComponent):
         return component_name
 
+    # you can also pass a component object if you want to get the class from it
+    if isinstance(component_name, HtmxComponent):
+        return component_name.__class__
+
     # "." in the name indicates an import path
     if "." in component_name:
         component_class = import_string(component_name)

@@ -106,15 +106,25 @@ class Filter:
         batch_size: int = 10000,
         use_serial_batches: bool = False,
         batch_size_serial: int = 500,
+        max_workers: int = None,
         **kwargs,
     ) -> list[bool]:
         """
         Filters a list of molecules in parallel.
         """
-        # Use this method to help. Maybe write a utility function for batch
-        # submitting and serial-batch submitting to dask too.
-        # https://github.com/jacksund/simmate/blob/17d926fe5ee8f183240a4526982b4d7fd5d7042b/src/simmate/toolkit/creators/structure/base.py#L67
-        raise NotImplementedError("This method is still being written")
+        from concurrent.futures import ProcessPoolExecutor
+
+        from simmate.utils import chunk_list
+
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            futures = [
+                executor.submit(cls._check_serial, chunk, progress_bar=False, **kwargs)
+                for chunk in chunk_list(
+                    full_list=molecules, chunk_size=batch_size_serial
+                )
+            ]
+            # flatten results before returning
+            return [item for future in track(futures) for item in future.result()]
 
     @classmethod
     def from_preset(cls, preset: str, molecules: list[Molecule], **kwargs):
