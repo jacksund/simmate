@@ -57,6 +57,19 @@ class CasRegistryMolecule(ThirdPartyData, Molecule):
         cas_number: str,
         force_update: bool = False,
     ):
+        """
+        Searches the database for a CAS Registry Number. If it's not found,
+        it queries the official CAS API, loads the data, and saves it to the
+        database for future use.
+
+        Args:
+            cas_number (str): The CAS RN to search for (e.g. "1039987-26-2").
+            force_update (bool): Whether to ignore the database and force a
+                fresh API query. Defaults to False.
+
+        Returns:
+            CasRegistryMolecule: The database entry for the CAS number.
+        """
         if not force_update:
             # check the database to see if this has been searched for
             if cls.objects.filter(id=cas_number).exists():
@@ -66,13 +79,19 @@ class CasRegistryMolecule(ThirdPartyData, Molecule):
         if not is_valid:
             raise Exception(f"{cas_number} is not a valid CAS number")
 
-        data = cls._search_cas_official(cas_number)
+        # search official api
+        data = CasRegistryClient.detail(cas_number)
+        official_data = {
+            "id": data["rn"],
+            "common_name": data.get("name"),
+            "molecule": data.get("molecule_obj"),
+        }
 
         # we use update_or_create to avoid race conditions when creating
         cas_entry, is_new = cls.objects.update_or_create(
             id=cas_number,
             defaults=cls.from_toolkit(
-                **data,
+                **official_data,
                 as_dict=True,
             ),
         )
@@ -83,20 +102,24 @@ class CasRegistryMolecule(ThirdPartyData, Molecule):
         return cas_entry
 
     @classmethod
-    def _search_cas_official(cls, cas_number: str):
-        data = CasRegistryClient.detail(cas_number)
-        return {
-            "id": data["rn"],
-            "common_name": data.get("name"),
-            "molecule": data.get("molecule_obj"),
-        }
-
-    @classmethod
     def search_molecule(
         cls,
         molecule: Molecule,
         force_update: bool = False,
     ):
+        """
+        Searches the database for a molecule. If it's not found, it queries the
+        official CAS API (via InChIKey), retrieves the first matching CAS number,
+        and then calls `search_cas` to load the full details.
+
+        Args:
+            molecule (Molecule): The molecule to search for.
+            force_update (bool): Whether to ignore the database and force a
+                fresh API query. Defaults to False.
+
+        Returns:
+            CasRegistryMolecule: The database entry for the molecule.
+        """
         inchi_key = molecule.to_inchi_key()
 
         if not force_update:
@@ -105,14 +128,8 @@ class CasRegistryMolecule(ThirdPartyData, Molecule):
                 return cls.objects.get(inchi_key=inchi_key)
 
         # Otherwise we need to search official api
-        return cls._search_molecule_official(molecule)
-
-    @classmethod
-    def _search_molecule_official(cls, molecule: Molecule):
-
         # The client's search method is robust and handles SMILES, InChI, etc.
         # We start with InChIKey as it is most specific.
-        inchi_key = molecule.to_inchi_key()
         search_results = CasRegistryClient.search(f"InChIKey={inchi_key}", size=1)
         results = search_results.get("results", [])
 

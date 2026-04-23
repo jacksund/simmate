@@ -116,3 +116,13 @@ def clean():
                     logging.warning(f"Failed to remove empty directory {path}: {e}")
 
     logging.info("Cleanup complete! :sparkles:")
+
+
+@dev_app.command()
+def prebuild():
+    """
+    Creates a date-stamped zip file of the current SQLite3 database.
+    """
+    from simmate.database.utils import create_prebuild
+
+    create_prebuild()

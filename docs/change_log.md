@@ -66,6 +66,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 
 **Enhancements**
 
+- added `OnOff`, `TimeProportional`, and `FuzzyLogic` controllers, plus a `StirringHotPlate` device to `lab_automation` app, including an `.eval()` method and comprehensive documentation for sensors, controllers, and devices
 - added create_prebuild function to database.utils for creating date-stamped SQLite3 database archives
 - added the `simmate dev` command group with tools for linting, testing, and workspace management
 - improved CLI help texts and added rich markdown support across all command groups
@@ -75,6 +76,12 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - updated the OQMD data loading method to support the latest data provided by their team
 - added draft of `accuracy_rating` to workflows to help beginners select the most appropriate settings
 - added a `@schedule` decorator for easier periodic task registration
+- added web components and templates for the pdb and chembl apps
+- added crystalline dataset views to the Data Explorer, including 3D structure views, exports, and search forms
+- added `@batch_bulk_create` decorator to help simplify `load_source_data` methods
+- updated `simmate database download` to be dynamic across all apps, support a `--source` option, and respect custom load orders
+- added first draft of vasp dockerfile. vasp is proprietary so source files and final image cannot be shared publicly
+- added methods for updating rows and cleaning up chunk files to toolkit datastore class
 
 **Refactors**
 
@@ -84,6 +91,9 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - moved `chemspace.utils.download_raw_files` into `ChemSpaceFreedomSpaceMolecule.download_source_data`
 - switched from ChemDoodle to Ketcher as the default molecule sketcher
 - updated scheduler to submit tasks as `WorkItem`s instead of running them in-thread
+- removed unused web templates and static assets
+- updated envs for helm and docker-compose, where k3s is the top candidate for public production setups
+- renamed the base component from `DynamicTableForm` to `TableComponent` and moved it to `simmate.website.data_explorer.components`. Standardized all app components
 
 **Fixes**
 

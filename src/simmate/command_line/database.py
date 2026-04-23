@@ -94,8 +94,7 @@ def reset(
             "Would you like to use a prebuilt-database with third-party data "
             "already loaded in? \n"
             "If this is the first time you using the prebuild, this will "
-            "involve a ~3GB \ndownload and will unpack to ~20GB.\n\n"
-            "We recommend answering 'yes' for beginners."
+            "involve a ~4GB \ndownload and will unpack to ~35GB."
         )
 
     from simmate.database import connect
@@ -121,7 +120,11 @@ def download(
     app_name: str = typer.Argument(
         ...,
         help="The name of the app to download data for (e.g., 'cod').",
-    )
+    ),
+    source: str = typer.Option(
+        "direct",
+        help="Where to download the data from. Options are 'direct' or 'archive'.",
+    ),
 ):
     """
     Downloads and populates the database with third-party data for a specific app.
@@ -130,7 +133,7 @@ def download(
     from simmate.database import connect
     from simmate.database.utils import download_app_data
 
-    download_app_data(app_name)
+    download_app_data(app_name, source=source)
 
 
 @database_app.command()

@@ -1,0 +1,64 @@
+<div class="tab-pane show active" id="overview-section">
+    <div class="row">
+        <div class="col-xl-12">{% include "rdkit/molecule_entry_display.html" %}</div>
+    </div>
+    <div class="row py-2">
+        <div class="col-12">
+            {# base info #}
+            <div class="row pt-2">
+                <div class="col-xl-7">
+                    <table class="table table-centered table-striped mb-0 border">
+                        <thead class="table-primary">
+                            <tr>
+                                <th style="width: 45%">Base Info</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PDB ID</td>
+                                <td>
+                                    <a href="{{ table_entry.external_link }}" target="_blank">
+                                        {{ table_entry.id }} <i class="mdi mdi-open-in-new"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Name</td>
+                                <td>{{ table_entry.name|default:"--" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Type</td>
+                                <td>{{ table_entry.type_code|default:"--" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Monomer Type</td>
+                                <td>{{ table_entry.monomer_type|default:"--" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Created At (original)</td>
+                                <td>{{ table_entry.created_at_original|date:"Y-m-d"|default:"--" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Updated At (original)</td>
+                                <td>{{ table_entry.updated_at_original|date:"Y-m-d"|default:"--" }}</td>
+                            </tr>
+                            {% if table_entry.protein_ids_original %}
+                                <tr>
+                                    <td>Found in Proteins</td>
+                                    <td>
+                                        {% for pdb_id in table_entry.protein_ids_original %}
+                                            <a href="https://www.rcsb.org/structure/{{ pdb_id }}"
+                                               target="_blank"
+                                               class="badge bg-secondary text-white">{{ pdb_id }}</a>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

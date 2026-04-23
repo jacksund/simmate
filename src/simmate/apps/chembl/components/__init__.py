@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from .chembl_assay_result_table import ChemblAssayResultTable
-from .chembl_document_table import ChemblDocumentTable
-from .chembl_molecule_table import ChemblMoleculeTable
+from .assay_result import ChemblAssayResultComponent
+from .document import ChemblDocumentComponent
+from .molecule import ChemblMoleculeComponent
