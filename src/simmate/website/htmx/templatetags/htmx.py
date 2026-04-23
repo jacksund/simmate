@@ -83,6 +83,7 @@ def htmx_component(context: dict, component_name: str, **kwargs):
     return render_to_string(
         template_name=component.template_name,
         context=component.get_context(),
+        request=getattr(context, "request", None),
     )
 
 

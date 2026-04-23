@@ -2,9 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: simmate-postgres-ext-service
+  {{- if or (eq .Values.platform "digitalocean") (eq .Values.platform "aws") }}
   annotations:
-    # service.beta.kubernetes.io/aws-load-balancer-name: custom-name-123
+    # limit access to resources on same VPC
+    {{- if eq .Values.platform "digitalocean" }}
+    service.beta.kubernetes.io/do-loadbalancer-network: "INTERNAL"
+    {{- else if eq .Values.platform "aws" }}
     service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    {{- end }}
+  {{- end }}
 spec:
   type: LoadBalancer
   selector:

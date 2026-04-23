@@ -72,16 +72,12 @@ class StatusTracking(DatabaseTable):
     def get_days_to_completed(self) -> int:
         # TODO: consider doing from "In Progress" to "Completed", instead of
         # "created_at" to "Completed"
-        return (
-            int(
-                self.get_status_timedelta(self.status_completed_name).total_seconds()
-                / 60
-                / 60
-                / 24
-            )
-            if self.status == self.status_completed_name
-            else None
-        )
+        if self.status != self.status_completed_name:
+            return None
+        timedelta = self.get_status_timedelta(self.status_completed_name)
+        if timedelta is None:
+            return None
+        return int(timedelta.total_seconds() / 60 / 60 / 24)
 
     @classmethod
     def update_days_to_completed(cls):
@@ -90,7 +86,7 @@ class StatusTracking(DatabaseTable):
             days_to_completed__isnull=True,
         ).all():
             num_days = target.get_days_to_completed()
-            if num_days:
+            if num_days is not None:
                 target.update_wo_timestamp(days_to_completed=num_days)
 
     # -------------------------------------------------------------------------
@@ -119,6 +115,8 @@ class StatusTracking(DatabaseTable):
         """
         current_date = timezone.now()
         status_start_date = self.get_status_timestamp(self.status)
+        if status_start_date is None:
+            return None
         return int((current_date - status_start_date).total_seconds() / 60 / 60 / 24)
 
     @classmethod

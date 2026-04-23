@@ -1,45 +1,41 @@
-
-# https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/
-
-# docker compose -f envs/docker/docker-compose.yml up -d
-
 services:
 
   # ---------------------------------------------------------
 
   # WEB SERVER
   simmate-gunicorn-service:
-    image: simmate-django:latest
+    image: simmate:latest
     build:
        context: ../..
-       dockerfile: envs/docker/web_server.dockerfile
+       dockerfile: envs/docker/simmate.dockerfile
     ports:
       - 8000:8000
-    # Because we installed simmate through anaconda, our static files are located within the
-    # conda env folder -- hence the long path. These static files are what we want in a volume
-    # so that our nginx service can serve them.
     volumes:
-      - staticfiles:/staticfiles
-      # - staticfiles:/root/miniforge/envs/simmate_dev/lib/python3.10/site-packages/simmate/website/static
-      # - mediafiles:/root/miniforge/envs/simmate_dev/lib/python3.10/site-packages/simmate/website/media
-    environment:
-      # The database connection URL follows the given format:
-      #   postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}
-      DATABASE_URL: postgresql://postgres:postgres@simmate-postgres-service:5432/simmate_prod
-      DJANGO_ALLOWED_HOSTS: "*"
-      DJANGO_CSRF_TRUSTED_ORIGINS: "http://localhost:1337"
-      DEBUG: "True"
-      # TODO --- need to update these to match helm chart
-      EMAIL_HOST: 123
-      EMAIL_FROM: 123
-      EMAIL_USER: 123
-      EMAIL_PASSWORD: 123
-      MICROSOFT_CLIENT_ID: 123
-      MICROSOFT_SECRET: 123
-      LOGIN_MESSAGE: 123
-      REQUIRE_LOGIN_INTERNAL: 123
-      REQUIRE_LOGIN_EXCEPTIONS: 123
-      PROFILE_VIEW: 123
+      - staticfiles:/root/simmate/staticfiles
+    environment: &simmate-env
+      # --- CORE SETTINGS ---
+      SIMMATE__DATABASE__ENGINE: django.db.backends.postgresql
+      SIMMATE__DATABASE__HOST: simmate-postgres-service
+      SIMMATE__DATABASE__PORT: 5432
+      SIMMATE__DATABASE__NAME: simmate_prod
+      SIMMATE__DATABASE__USER: example_user
+      SIMMATE__DATABASE__PASSWORD: example123
+      SIMMATE__POSTGRES_RDKIT_EXTENSION: "True"
+
+      # --- WEB UI SETTINGS ---
+      SIMMATE__WEBSITE__ALLOWED_HOSTS: "*"
+      SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS: "http://localhost:1337"
+      SIMMATE__WEBSITE__DEBUG: "True"
+      SIMMATE__WEBSITE__REQUIRE_LOGIN: "True"
+      SIMMATE__WEBSITE__REQUIRE_LOGIN_INTERNAL: "microsoft"
+      SIMMATE__WEBSITE__REQUIRE_LOGIN_EXCEPTIONS: "/apps/example(.*)$"
+      SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__CLIENT_ID: "example_user"
+      SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__SECRET: "example123"
+
+      # --- OPTIONAL / ADVANCED ---
+      # SIMMATE__APPS: "simmate.apps.configs.AflowConfig simmate.apps.configs.CodConfig"
+      # SIMMATE__CHATBOT__ENDPOINT: "https://example.azure-api.net/"
+      # SIMMATE__CHATBOT__API_KEY: "abc123"
     depends_on:
       - simmate-postgres-service
 
@@ -47,57 +43,56 @@ services:
 
   # STATIC FILE SERVER
   simmate-nginx-service:
-    # https://hub.docker.com/_/nginx
-    # image: nginx:stable 
     image: simmate-nginx:latest
     build:
        context: ../..
-       dockerfile: envs/docker/staticfiles_server.dockerfile
+       dockerfile: envs/docker/simmate-nginx.dockerfile
     volumes:
       - staticfiles:/staticfiles
-      # - mediafiles:/root/miniforge/envs/simmate_dev/lib/python3.10/site-packages/simmate/website/media
     ports:
-      # BUG: first port number here MUST be 80 for django-unicorn ajax requests to work
-      # If this is changed, then you need to set DJANGO_CSRF_TRUSTED_ORIGINS as shown
-      # above in the simmate-gunicorn-service.
       - 1337:80
     depends_on:
       - simmate-gunicorn-service
 
   # --------------------------------------------------------
 
+  # SCHEDULER (for periodic tasks)
+  simmate-scheduler-service:
+    image: simmate:latest
+    command: ["simmate", "compute", "start-schedules"]
+    environment: *simmate-env
+    depends_on:
+      - simmate-postgres-service
+
+  # --------------------------------------------------------
+
+  # WORKER (for workflow execution)
+  simmate-worker-service:
+    image: simmate:latest
+    command: ["simmate", "compute", "start-worker"]
+    environment: *simmate-env
+    volumes:
+      - worker-data:/simmate_workers
+    depends_on:
+      - simmate-postgres-service
+
+  # --------------------------------------------------------
+
   # DATABASE SERVER
   simmate-postgres-service:
-    # image: postgres:latest
     image: informaticsmatters/rdkit-cartridge-debian:latest
+    environment:
+      POSTGRES_DB: simmate_prod
+      POSTGRES_USER: example_user
+      POSTGRES_PASSWORD: example123
     volumes:
       - postgres-data:/var/lib/postgresql/data/
     ports:
       - 5433:5432
-
-  # --------------------------------------------------------
-
-  # EXTRA HELPFUL GUIs & SERVICES
-
-  # simmate-pgadmin-service:
-  #   image: dpage/pgadmin4:4.23
-  #   environment:
-  #       PGADMIN_DEFAULT_EMAIL: jacksundberg123@gmail.com
-  #       PGADMIN_DEFAULT_PASSWORD: password123
-  #       PGADMIN_LISTEN_PORT: 80
-  #   ports:
-  #       - 16543:80
-  #   volumes:
-  #       - pgadmin:/var/lib/pgadmin
-  #   depends_on:
-  #       - simmate-postgres-service
 
 # ------------
 
 volumes:
   postgres-data:
   staticfiles:
-  # mediafiles:
-  # pgadmin:
-
-# ------------
+  worker-data:

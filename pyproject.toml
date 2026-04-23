@@ -22,6 +22,7 @@ dependencies = [
     # Core dependencies
     "numpy>=2.0.0,<3.0.0",
     "pandas>=2.0.0,<3.0.0",
+    "polars>=1.39.3,<2.0.0",
     "django>=5.2.11,<6.0.0",
     "typer>=0.24.1,<0.25.0",
     "psycopg2-binary>=2.9.11,<3.0.0",
@@ -94,6 +95,7 @@ jarvis = [
     "jarvis-tools>=2026.1.10",
 ]
 lab_automation = [
+    "gpiozero>=2.0.1",
     "opencv-python>=4.13.0.92",
 ]
 materials_project = [

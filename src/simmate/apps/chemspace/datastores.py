@@ -10,8 +10,8 @@ from simmate.toolkit.datastores import MoleculeStore
 
 
 class Chemspace_Freedom_Ro5_MoleculeStore(MoleculeStore):
-
-    directory_name = "chemspace/freedom/rule_of_5"
+    app_name = "chemspace"
+    datastore_name = "freedom/rule_of_5"
     chunk_size = 1_000_000
     smiles_stored = "original_only"
     metadata_columns = [
@@ -33,8 +33,6 @@ class Chemspace_Freedom_Ro5_MoleculeStore(MoleculeStore):
     property_columns = []
     morgan_fingerprint_cache = False
     pattern_fingerprint_cache = False
-
-    # -------------------------------------------------------------------------
 
     @classmethod
     def _load_data(cls, source_directory: str | Path):

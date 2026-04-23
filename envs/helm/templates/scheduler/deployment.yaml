@@ -18,23 +18,16 @@ spec:
     spec:
       containers:
         - name: simmate-scheduler
-          image: simmate/simmate-scheduler:latest
-          # TODO: much of this env is copy/pasted from gunicorn deployment
+          image: simmate/simmate-gunicorn:latest
+          command: ["simmate", "compute", "start-schedules"]
           env:
             {{- include "simmate.env_config" . | indent 12 }}
-          volumeMounts:
-            - mountPath: /simmate_workers
-              name: simmate-worker-data
           resources:
             requests:
-              memory: "6Gi"
-              cpu: "1"
+              memory: "2Gi"
+              cpu: "0.5"
               ephemeral-storage: "1Gi"
             limits:
-              memory: "12Gi"
+              memory: "4Gi"
               cpu: "1"
               ephemeral-storage: "2Gi"
-      volumes:
-        - name: simmate-worker-data
-          persistentVolumeClaim:
-            claimName: simmate-worker-data

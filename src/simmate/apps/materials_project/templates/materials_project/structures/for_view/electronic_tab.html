@@ -1,0 +1,56 @@
+<div class="tab-pane" id="electronic-section">
+    <div class="row">
+        <div class="col-xl-7">
+            <table class="table table-centered table-striped mb-0 border">
+                <thead class="table-primary">
+                    <tr>
+                        <th style="width: 45%">Electronic and Magnetic</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Band Gap</td>
+                        <td>
+                            {% if table_entry.band_gap is not None %}
+                                {{ table_entry.band_gap|floatformat:4 }} eV
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Is Band Gap Direct?</td>
+                        <td>
+                            {% if table_entry.is_gap_direct %}
+                                <i class="mdi mdi-check text-primary"></i> Yes (Direct)
+                            {% else %}
+                                <i class="mdi mdi-close text-secondary"></i> No (Indirect)
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Is Magnetic?</td>
+                        <td>
+                            {% if table_entry.is_magnetic %}
+                                <i class="mdi mdi-check text-primary"></i> Yes
+                            {% else %}
+                                <i class="mdi mdi-close text-secondary"></i> No
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Total Magnetization</td>
+                        <td>
+                            {% if table_entry.total_magnetization is not None %}
+                                {{ table_entry.total_magnetization|floatformat:5 }} &mu;<sub>B</sub>
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from .bcpc_iso_pesticide_table import BcpcIsoPesticideTable
+from .iso_pesticide import BcpcIsoPesticideComponent

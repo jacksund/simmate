@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from .band_structure_calc_table import BandStructureCalcTable
-from .densityof_states_calc_table import DensityofStatesCalcTable
-from .diffusion_analysis_table import DiffusionAnalysisTable
-from .dynamics_table import DynamicsTable
-from .population_analysis_table import PopulationAnalysisTable
-from .spacegroup_table import SpacegroupTable
+from .band_structure_calc import BandStructureCalcComponent
+from .densityof_states_calc import DensityofStatesCalcComponent
+from .diffusion_analysis import DiffusionAnalysisComponent
+from .dynamics import DynamicsComponent
+from .population_analysis import PopulationAnalysisComponent
+from .spacegroup import SpacegroupComponent

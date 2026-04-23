@@ -10,19 +10,19 @@ Each `HtmxComponent` has several hooks you can override to control its behavior:
 
 --------------------------
 
-## Form Handling with `DynamicTableForm`
+## Form Handling with `TableComponent`
 
-For components that interact with the database, Simmate provides the `DynamicTableForm` class. This handles common CRUD operations (Create, Read, Update, Delete) automatically.
+For components that interact with the database, Simmate provides the `TableComponent` class. This handles common CRUD operations (Create, Read, Update, Delete) automatically.
 
 ### Example: Project Form
 
 In `my_app/components/project_form.py`:
 
 ```python
-from simmate.website.htmx.components import DynamicTableForm
+from simmate.website.data_explorer.components import TableComponent
 from ..models import Project
 
-class ProjectForm(DynamicTableForm):
+class ProjectComponent(TableComponent):
     table = Project
     template_name = "my_app/project_form.html"
     
@@ -37,13 +37,13 @@ class ProjectForm(DynamicTableForm):
 
 ### Form Modes
 
-`DynamicTableForm` uses the `form_mode` attribute to determine its behavior. Common modes include:
+`TableComponent` uses the `form_mode` attribute to determine its behavior. Common modes include:
 
 -   `"create"`: Creates a new row in the database.
 -   `"update"`: Updates an existing row.
 -   `"search"`: Filters data based on input values.
 
-`DynamicTableForm` uses several attributes to determine its behavior and appearance in the Simmate Data Explorer:
+`TableComponent` uses several attributes to determine its behavior and appearance in the Simmate Data Explorer:
 
 -   `display_name`: A human-readable name for the table (e.g., "My Projects").
 -   `description_short`: A brief description of the dataset.
@@ -53,7 +53,7 @@ class ProjectForm(DynamicTableForm):
 ### Example: Customizing the Form
 
 ```python
-class ProjectForm(DynamicTableForm):
+class ProjectComponent(TableComponent):
     table = Project
     display_name = "Research Projects"
     description_short = "Manage your lab's computational research projects."
@@ -77,9 +77,10 @@ You can extend components with pre-built mixins:
 ### Example with Mixins
 
 ```python
-from simmate.website.htmx.components import DynamicTableForm, UserInput
+from simmate.website.data_explorer.components import TableComponent
+from simmate.website.htmx.components import UserInput
 
-class ProjectForm(DynamicTableForm, UserInput):
+class ProjectComponent(TableComponent, UserInput):
     table = Project
     # ...
 ```

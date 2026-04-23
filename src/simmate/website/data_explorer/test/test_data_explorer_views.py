@@ -6,7 +6,7 @@ from pytest_django.asserts import assertTemplateUsed
 
 
 @pytest.mark.django_db
-def test_providers_view(client):
+def test_table_list_view(client):
     # grabs f"/data/"
     url = reverse("data_explorer:home")
 
@@ -26,7 +26,7 @@ def test_providers_view(client):
         "OqmdStructure",
     ],
 )
-def test_workflows_by_type_view(client, table_name):
+def test_table_views(client, table_name):
     # list view
 
     # grabs f"/workflows/{workflow_type}/"
@@ -37,7 +37,7 @@ def test_workflows_by_type_view(client, table_name):
 
     response = client.get(url)
     assert response.status_code == 200
-    assertTemplateUsed(response, "data_explorer/table.html")
+    assertTemplateUsed(response, "data_explorer/dashboard.html")
 
     # detail view
     url = reverse(
@@ -50,4 +50,4 @@ def test_workflows_by_type_view(client, table_name):
 
     response = client.get(url)
     assert response.status_code == 404
-    # assertTemplateUsed(response, "data_explorer/table_entry.html")
+    # assertTemplateUsed(response, "data_explorer/entry.html")

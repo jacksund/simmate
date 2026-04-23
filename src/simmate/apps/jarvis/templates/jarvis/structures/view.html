@@ -1,0 +1,10 @@
+{% extends "data_explorer/entry.html" %}
+{% block entrycontent %}
+    <div>
+        {% include "jarvis/structures/for_view/tabs_header.html" %}
+        <div class="tab-content">
+            {% include "jarvis/structures/for_view/overview_tab.html" %}
+            {% include "jarvis/structures/for_view/thermodynamics_tab.html" %}
+        </div>
+    </div>
+{% endblock %}

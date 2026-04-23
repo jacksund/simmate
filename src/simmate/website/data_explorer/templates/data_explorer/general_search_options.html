@@ -1,4 +1,4 @@
-{% if component.form_mode == "search" %}
+{% if component.component_type == "search" %}
     <div class="text-center pt-2">{% htmx_button method_name="submit_form" label="Search" icon="search" %}</div>
     <div class="container border border-3 border-secondary rounded py-2">
         <h3>
