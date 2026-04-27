@@ -116,7 +116,11 @@ class ChemspaceClient:
             source_dir = settings.config_directory / "chemspace"
         source_dir = Path(source_dir)
 
-        all_files = [p for p in source_dir.rglob("*.bz2") if p.is_file()]
+        if source_dir.is_file():
+            all_files = [source_dir]
+        else:
+            all_files = [p for p in source_dir.rglob("*.bz2") if p.is_file()]
+
         for i, file in enumerate(all_files):
             logging.info(f"Reading file {i+1} of {len(all_files)}: {file.name}")
             with bz2.open(file, "rb") as f_in:

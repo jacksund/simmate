@@ -8,16 +8,19 @@ from simmate.toolkit.datastores import MoleculeStore
 from ..client import ChemspaceClient
 
 
-class Chemspace_Freedom_Ro5_MoleculeStore(MoleculeStore):
+class FreedomRo5MoleculeStore(MoleculeStore):
+    """
+    MoleculeStore for the ChemSpace Freedom Rule-of-5 dataset.
+    """
+
     app_name = "chemspace"
     datastore_name = "freedom/rule_of_5"
     chunk_size = 1_000_000
     smiles_stored = "original_only"
+
     metadata_columns = [
         "id",
         "reaction_id",
-        # "SMILES",
-        # others from original dataset:
         "Components",  # number of elements
         "MW",
         "HAC",
@@ -29,6 +32,7 @@ class Chemspace_Freedom_Ro5_MoleculeStore(MoleculeStore):
         "TPSA",
         "InChIKey",
     ]
+
     property_columns = []
     morgan_fingerprint_cache = False
     pattern_fingerprint_cache = False
@@ -38,9 +42,64 @@ class Chemspace_Freedom_Ro5_MoleculeStore(MoleculeStore):
         cls,
         source_directory: str | Path = None,
         target_directory: str | Path = None,
+        reorganize: bool = True,
+        parallel: bool = True,
     ):
-        logging.info("Pulling ChemSpace Freedom Ro5 data into MoleculeStore...")
+        """
+        Loads molecule data from ChemSpace source files into the MoleculeStore.
+
+        Args:
+            source_directory (str | Path, optional): The directory where the
+                ChemSpace source files are located. If None, it will be
+                downloaded using ChemspaceClient.
+            target_directory (str | Path, optional): The directory where the
+                MoleculeStore is located. If None, it will use the default.
+            reorganize (bool, optional): Whether to reorganize chunks after
+                loading. Defaults to True.
+            parallel (bool, optional): Whether to submit SLURM jobs to load
+                ChemSpace data in parallel. Defaults to True.
+        """
+        if not source_directory:
+            source_directory = ChemspaceClient.download_source_data()
+
+        source_directory = Path(source_directory)
+        files = (
+            [source_directory]
+            if source_directory.is_file()
+            else list(source_directory.rglob("*.bz2"))
+        )
+
+        if parallel:
+            from simmate.compute import SimmateExecutor
+
+            logging.info(f"Submitting {len(files)} jobs to the queue...")
+            for file in files:
+                SimmateExecutor.submit(
+                    cls._load_single_source,
+                    source_directory=file,
+                    target_directory=target_directory,
+                )
+            logging.info("Jobs submitted. Run reorganize_chunks() after completion.")
+        else:
+            logging.info("Pulling ChemSpace Freedom Ro5 data sequentially...")
+            for file in files:
+                cls._load_single_source(file, target_directory)
+
+            if reorganize:
+                logging.info("Reorganizing chunks...")
+                cls.reorganize_chunks(target_directory=target_directory)
+
+            logging.info("Done loading ChemSpace data.")
+
+    @classmethod
+    def _load_single_source(
+        cls,
+        source_directory: str | Path,
+        target_directory: str | Path = None,
+    ):
+        """
+        Worker method to load a single ChemSpace file into the MoleculeStore.
+        """
         for df in ChemspaceClient.get_freedom_ro5_data(source_dir=source_directory):
             df = df.rename({"ID": "id", "SMILES": "smiles"})
             cls.add_dataframe(df, target_directory=target_directory)
-        logging.info("Done loading ChemSpace data.")

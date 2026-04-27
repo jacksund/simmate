@@ -32,7 +32,12 @@ class ChemblMoleculeStore(MoleculeStore):
     ]
 
     @classmethod
-    def load_source_data(cls, source_directory: str | Path = None):
+    def load_source_data(
+        cls,
+        source_directory: str | Path = None,
+        target_directory: str | Path = None,
+        reorganize: bool = True,
+    ):
         """
         Downloads the ChEMBL SQLite database and loads molecule data into the
         MoleculeStore.
@@ -41,10 +46,17 @@ class ChemblMoleculeStore(MoleculeStore):
             source_directory (str | Path, optional): The directory where the
                 ChEMBL SQLite database is located. If None, it will be
                 downloaded using ChemblClient.
+            target_directory (str | Path, optional): The directory where the
+                MoleculeStore is located. If None, it will use the default.
+            reorganize (bool, optional): Whether to reorganize chunks after
+                loading. Defaults to True.
         """
         logging.info("Pulling molecule data from ChEMBL db into MoleculeStore...")
-        for df in ChemblClient.get_molecule_data(chunk_size=cls.chunk_size):
 
+        for df in ChemblClient.get_molecule_data(
+            chunk_size=cls.chunk_size,
+            source_directory=source_directory,
+        ):
             df_polars = df.rename(
                 {
                     "molregno": "id",
@@ -66,6 +78,13 @@ class ChemblMoleculeStore(MoleculeStore):
                 )
             )
 
-            cls.add_dataframe(df_polars)
+            cls.add_dataframe(
+                df_polars,
+                target_directory=target_directory,
+            )
+
+        if reorganize:
+            logging.info("Reorganizing chunks...")
+            cls.reorganize_chunks(target_directory=target_directory)
 
         logging.info("Done loading ChEMBL data into MoleculeStore.")
