@@ -193,7 +193,12 @@ class MoleculeStore:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def add_dataframe(cls, df: polars.DataFrame, parallel: bool = True):
+    def add_dataframe(
+        cls,
+        df: polars.DataFrame,
+        parallel: bool = True,
+        target_directory: str | Path = None,
+    ):
         """
         Generates calculated properties+features before adding it to the disk
         store. If files are already present, the new dataframe will be appended
@@ -212,21 +217,27 @@ class MoleculeStore:
                     f"to MoleculeStore. Full list of metadata columns: {cls.metadata_columns}"
                 )
 
-        chunk_files = cls.chunk_files
+        output_dir = (
+            get_directory(target_directory) if target_directory else cls.directory
+        )
+        chunk_files = sorted(
+            [
+                f
+                for f in output_dir.iterdir()
+                if f.is_file() and f.suffix == ".parquet" and f.stem.isnumeric()
+            ],
+            key=lambda f: f.stem,
+        )
         current_chunk_index = int(chunk_files[-1].stem) + 1 if chunk_files else 0
         if chunk_files:
             logging.info(
                 f"{len(chunk_files)} chunks found. New files will be appended."
             )
 
-        # TODO: fill last file if it is not a full size chunk or combine it
-        # with list below + rebuild it by default
-        total_chunks = (len(df) // cls.chunk_size) + current_chunk_index
         for chunk in chunk_list(df, cls.chunk_size):
-            logging.info(f"Building chunk {current_chunk_index} of {total_chunks}...")
             chunk = cls._inflate_data_chunk(chunk, parallel=parallel)
             chunk_filename = (
-                cls.directory / f"{str(current_chunk_index).zfill(10)}.parquet"
+                output_dir / f"{str(current_chunk_index).zfill(10)}.parquet"
             )
             chunk.write_parquet(
                 chunk_filename,

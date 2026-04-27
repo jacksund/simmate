@@ -6,6 +6,7 @@ from pathlib import Path
 
 import polars
 
+from simmate.config import settings
 from simmate.toolkit.datastores import MoleculeStore
 
 
@@ -17,7 +18,7 @@ class Chemspace_Freedom_Ro5_MoleculeStore(MoleculeStore):
     metadata_columns = [
         "id",
         "reaction_id",
-        "SMILES",
+        # "SMILES",
         # others from original dataset:
         "Components",  # number of elements
         "MW",
@@ -35,9 +36,15 @@ class Chemspace_Freedom_Ro5_MoleculeStore(MoleculeStore):
     pattern_fingerprint_cache = False
 
     @classmethod
-    def _load_data(cls, source_directory: str | Path):
-        # should use the output dir from .utils.download_raw_files
+    def load_source_data(
+        cls,
+        source_directory: str | Path = None,
+        target_directory: str | Path = None,
+    ):
+        if source_directory is None:
+            source_directory = settings.config_directory / "chemspace"
         source_directory = Path(source_directory)
+
         all_files = [p for p in source_directory.rglob("*.bz2") if p.is_file()]
         for i, file in enumerate(all_files):
             logging.info(f"Adding file {i+1} of {len(all_files)}")
@@ -45,4 +52,4 @@ class Chemspace_Freedom_Ro5_MoleculeStore(MoleculeStore):
                 file_content = f_in.read()
                 df = polars.read_csv(file_content, separator="\t")
                 df = df.rename({"ID": "id", "SMILES": "smiles"})
-                cls.add_dataframe(df)
+                cls.add_dataframe(df, target_directory=target_directory)
