@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import bz2
 import logging
 from pathlib import Path
 
-import polars
-
-from simmate.config import settings
 from simmate.toolkit.datastores import MoleculeStore
+
+from ..client import ChemspaceClient
 
 
 class Chemspace_Freedom_Ro5_MoleculeStore(MoleculeStore):
@@ -41,15 +39,8 @@ class Chemspace_Freedom_Ro5_MoleculeStore(MoleculeStore):
         source_directory: str | Path = None,
         target_directory: str | Path = None,
     ):
-        if source_directory is None:
-            source_directory = settings.config_directory / "chemspace"
-        source_directory = Path(source_directory)
-
-        all_files = [p for p in source_directory.rglob("*.bz2") if p.is_file()]
-        for i, file in enumerate(all_files):
-            logging.info(f"Adding file {i+1} of {len(all_files)}")
-            with bz2.open(file, "rb") as f_in:
-                file_content = f_in.read()
-                df = polars.read_csv(file_content, separator="\t")
-                df = df.rename({"ID": "id", "SMILES": "smiles"})
-                cls.add_dataframe(df, target_directory=target_directory)
+        logging.info("Pulling ChemSpace Freedom Ro5 data into MoleculeStore...")
+        for df in ChemspaceClient.get_freedom_ro5_data(source_dir=source_directory):
+            df = df.rename({"ID": "id", "SMILES": "smiles"})
+            cls.add_dataframe(df, target_directory=target_directory)
+        logging.info("Done loading ChemSpace data.")

@@ -14,7 +14,7 @@
 
 ## About this App
 
-Simmate's `chemspace` app helps to download The ChEMBL Database data & load it into the Simmate database.
+Simmate's `chemspace` app helps to download ChemSpace data & load it into the Simmate database.
 
 | Module                   | CLI                      | Workflows                | Data               |
 | ------------------------ | ------------------------ | ------------------------ | ------------------ |
@@ -39,7 +39,7 @@ simmate config test chemspace
 simmate database update
 ```
 
-4. Download all ChEMBL datasets:
+4. Download all ChemSpace datasets:
 ``` shell
 simmate database download chemspace
 ```
