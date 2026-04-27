@@ -5,10 +5,7 @@ import logging
 import warnings
 from pathlib import Path
 
-import boto3
 import polars
-from botocore.config import Config
-from rich.progress import track
 
 from simmate.config import settings
 from simmate.utils import get_directory
@@ -50,6 +47,10 @@ class ChemspaceClient:
         if target_dir is None:
             target_dir = settings.config_directory / "chemspace"
         target_dir = get_directory(Path(target_dir))
+
+        import boto3
+        from botocore.config import Config
+        from rich.progress import track
 
         s3_client = boto3.client(
             "s3",
@@ -112,6 +113,7 @@ class ChemspaceClient:
         Yields:
             polars.DataFrame: A DataFrame containing a chunk of molecule data.
         """
+
         if source_dir is None:
             source_dir = settings.config_directory / "chemspace"
         source_dir = Path(source_dir)

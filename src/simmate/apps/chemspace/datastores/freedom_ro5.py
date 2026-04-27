@@ -43,7 +43,8 @@ class FreedomRo5MoleculeStore(MoleculeStore):
         source_directory: str | Path = None,
         target_directory: str | Path = None,
         reorganize: bool = True,
-        parallel: bool = True,
+        parallel_job: bool = False,
+        parallel_core: bool = False,
     ):
         """
         Loads molecule data from ChemSpace source files into the MoleculeStore.
@@ -56,7 +57,7 @@ class FreedomRo5MoleculeStore(MoleculeStore):
                 MoleculeStore is located. If None, it will use the default.
             reorganize (bool, optional): Whether to reorganize chunks after
                 loading. Defaults to True.
-            parallel (bool, optional): Whether to submit SLURM jobs to load
+            parallel (bool, optional): Whether to submit worker jobs to load
                 ChemSpace data in parallel. Defaults to True.
         """
         if not source_directory:
@@ -69,7 +70,9 @@ class FreedomRo5MoleculeStore(MoleculeStore):
             else list(source_directory.rglob("*.bz2"))
         )
 
-        if parallel:
+        if parallel_job:
+
+            from simmate.database import connect  # isort:skip
             from simmate.compute import SimmateExecutor
 
             logging.info(f"Submitting {len(files)} jobs to the queue...")
@@ -78,13 +81,18 @@ class FreedomRo5MoleculeStore(MoleculeStore):
                     cls._load_single_source,
                     source_directory=file,
                     target_directory=target_directory,
+                    parallel=parallel_core,
+                    tags=["load-chembl-datastore"],
                 )
-            logging.info("Jobs submitted. Run reorganize_chunks() after completion.")
-        else:
-            logging.info("Pulling ChemSpace Freedom Ro5 data sequentially...")
-            for file in files:
-                cls._load_single_source(file, target_directory)
+            if reorganize:
+                logging.info(
+                    "Jobs submitted. Run reorganize_chunks() after completion."
+                )
 
+        else:
+            for file in files:
+                logging.info(f"Loading {file}...")
+                cls._load_single_source(file, target_directory, parallel=parallel_core)
             if reorganize:
                 logging.info("Reorganizing chunks...")
                 cls.reorganize_chunks(target_directory=target_directory)
@@ -96,10 +104,11 @@ class FreedomRo5MoleculeStore(MoleculeStore):
         cls,
         source_directory: str | Path,
         target_directory: str | Path = None,
+        parallel: bool = False,
     ):
         """
         Worker method to load a single ChemSpace file into the MoleculeStore.
         """
         for df in ChemspaceClient.get_freedom_ro5_data(source_dir=source_directory):
             df = df.rename({"ID": "id", "SMILES": "smiles"})
-            cls.add_dataframe(df, target_directory=target_directory)
+            cls.add_dataframe(df, target_directory=target_directory, parallel=parallel)

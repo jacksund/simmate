@@ -197,7 +197,7 @@ class MoleculeStore:
     def add_dataframe(
         cls,
         df: polars.DataFrame,
-        parallel: bool = True,
+        parallel: bool = False,
         target_directory: str | Path = None,
     ):
         """
