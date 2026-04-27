@@ -62,18 +62,27 @@ class ChemblClient:
         return db_filename
 
     @classmethod
-    def get_molecule_data(cls, chunk_size: int = 1_000_000):
+    def get_molecule_data(
+        cls,
+        chunk_size: int = 1_000_000,
+        source_directory: str | Path = None,
+    ):
         """
         Yields chunks of molecule data from the ChEMBL SQLite database.
 
         Args:
             chunk_size (int, optional): The number of rows to fetch in each chunk.
                 Defaults to 1,000,000.
+            source_directory (str | Path, optional): The directory where the
+                ChEMBL SQLite database is located. If None, it will be
+                downloaded.
 
         Yields:
             polars.DataFrame: A DataFrame containing a chunk of molecule data.
         """
-        database_file = cls.download_source_data()
+        database_file = (
+            Path(source_directory) if source_directory else cls.download_source_data()
+        )
         connection = sqlite3.connect(database_file)
         cursor = connection.cursor()
 
@@ -118,18 +127,27 @@ class ChemblClient:
             yield df
 
     @classmethod
-    def get_document_data(cls, chunk_size: int = 1_000_000):
+    def get_document_data(
+        cls,
+        chunk_size: int = 1_000_000,
+        source_directory: str | Path = None,
+    ):
         """
         Yields chunks of document data from the ChEMBL SQLite database.
 
         Args:
             chunk_size (int, optional): The number of rows to fetch in each chunk.
                 Defaults to 1,000,000.
+            source_directory (str | Path, optional): The directory where the
+                ChEMBL SQLite database is located. If None, it will be
+                downloaded.
 
         Yields:
             polars.DataFrame: A DataFrame containing a chunk of document data.
         """
-        database_file = cls.download_source_data()
+        database_file = (
+            Path(source_directory) if source_directory else cls.download_source_data()
+        )
         connection = sqlite3.connect(database_file)
         cursor = connection.cursor()
 
@@ -168,6 +186,7 @@ class ChemblClient:
         min_activity_id: int = -1,
         chunk_size: int = 250_000,
         limit: int = None,
+        source_directory: str | Path = None,
     ):
         """
         Yields chunks of assay result data from the ChEMBL SQLite database.
@@ -179,11 +198,16 @@ class ChemblClient:
                 Defaults to 250,000.
             limit (int, optional): The maximum number of rows to fetch.
                 Defaults to None.
+            source_directory (str | Path, optional): The directory where the
+                ChEMBL SQLite database is located. If None, it will be
+                downloaded.
 
         Yields:
             polars.DataFrame: A DataFrame containing a chunk of assay result data.
         """
-        database_file = cls.download_source_data()
+        database_file = (
+            Path(source_directory) if source_directory else cls.download_source_data()
+        )
         connection = sqlite3.connect(database_file)
         cursor = connection.cursor()
 

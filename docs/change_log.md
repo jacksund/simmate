@@ -82,13 +82,15 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - updated `simmate database download` to be dynamic across all apps, support a `--source` option, and respect custom load orders
 - added first draft of vasp dockerfile. vasp is proprietary so source files and final image cannot be shared publicly
 - added methods for updating rows and cleaning up chunk files to toolkit datastore class
+- added parallel chunk loading to `MoleculeStore` datastores using UUID filenames, `reorganize_chunks`, and SLURM-compatible job submission via `SimmateExecutor`
 
 **Refactors**
 
 - moved `simmate.workflows.execution` and `simmate.workflows.scheduler` to `simmate.compute` to align with the CLI and documentation structure
 - renamed the `simmate engine` command group to `simmate compute` and updated internal modules/tests
 - refactored `website.data_explorer` to use HTMX components for all table entries, moving UI-specific features from `DatabaseTable` and `HTMLMixin` into `DynamicTableForm`
-- moved `chemspace.utils.download_raw_files` into `ChemSpaceFreedomSpaceMolecule.download_source_data`
+- refactored the `chemspace` app to use an independent `ChemspaceClient` for source data management and chunked yielding, aligning its architecture with the `chembl` app
+- moved `chemspace.utils.download_raw_files` into `ChemspaceClient.download_source_data`
 - switched from ChemDoodle to Ketcher as the default molecule sketcher
 - updated scheduler to submit tasks as `WorkItem`s instead of running them in-thread
 - removed unused web templates and static assets

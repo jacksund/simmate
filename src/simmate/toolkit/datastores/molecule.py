@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import uuid
 from pathlib import Path
 
 import polars
@@ -193,11 +194,16 @@ class MoleculeStore:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def add_dataframe(cls, df: polars.DataFrame, parallel: bool = True):
+    def add_dataframe(
+        cls,
+        df: polars.DataFrame,
+        parallel: bool = False,
+        target_directory: str | Path = None,
+    ):
         """
         Generates calculated properties+features before adding it to the disk
-        store. If files are already present, the new dataframe will be appended
-        to the final file + extras following the store's present chunk_size.
+        store. New chunks are saved using UUID filenames. The `reorganize_chunks`
+        method should be used to combine and number chunks sequentially.
         """
 
         if "smiles" not in df.columns:
@@ -212,27 +218,17 @@ class MoleculeStore:
                     f"to MoleculeStore. Full list of metadata columns: {cls.metadata_columns}"
                 )
 
-        chunk_files = cls.chunk_files
-        current_chunk_index = int(chunk_files[-1].stem) + 1 if chunk_files else 0
-        if chunk_files:
-            logging.info(
-                f"{len(chunk_files)} chunks found. New files will be appended."
-            )
+        output_dir = (
+            get_directory(target_directory) if target_directory else cls.directory
+        )
 
-        # TODO: fill last file if it is not a full size chunk or combine it
-        # with list below + rebuild it by default
-        total_chunks = (len(df) // cls.chunk_size) + current_chunk_index
         for chunk in chunk_list(df, cls.chunk_size):
-            logging.info(f"Building chunk {current_chunk_index} of {total_chunks}...")
             chunk = cls._inflate_data_chunk(chunk, parallel=parallel)
-            chunk_filename = (
-                cls.directory / f"{str(current_chunk_index).zfill(10)}.parquet"
-            )
+            chunk_filename = output_dir / f"{uuid.uuid4().hex}.parquet"
             chunk.write_parquet(
                 chunk_filename,
                 compression=cls.compression_mode,
             )
-            current_chunk_index += 1
 
     @classmethod
     def update_row(cls, row_id, updates: dict, id_column: str = "id"):
@@ -298,19 +294,23 @@ class MoleculeStore:
             df.write_parquet(file, compression=cls.compression_mode)
 
     @classmethod
-    def reorganize_chunks(cls):
+    def reorganize_chunks(cls, target_directory: str | Path = None):
         """
         Reorganizes existing parquet files to ensure each chunk matches
         `cls.chunk_size`. Smaller chunks are combined, and larger ones are split.
         """
+        directory = (
+            get_directory(target_directory) if target_directory else cls.directory
+        )
+
         # 1. Identify all current parquet files and rename them to .old
         # This handles both active files and those from a previous failed run.
         # We use .parquet.old to avoid name collisions with the new numeric files.
-        for f in cls.directory.glob("*.parquet"):
+        for f in directory.glob("*.parquet"):
             f.rename(f.parent / (f.name + ".old"))
 
         # 2. Gather all .old files for processing (sorted to maintain order)
-        old_files = sorted(cls.directory.glob("*.parquet.old"))
+        old_files = sorted(directory.glob("*.parquet.old"))
         if not old_files:
             logging.info("No files found to reorganize.")
             return
@@ -339,7 +339,7 @@ class MoleculeStore:
                 )
 
                 chunk_filename = (
-                    cls.directory / f"{str(current_chunk_index).zfill(10)}.parquet"
+                    directory / f"{str(current_chunk_index).zfill(10)}.parquet"
                 )
                 chunk.write_parquet(
                     chunk_filename,
@@ -358,9 +358,7 @@ class MoleculeStore:
 
         # 3. Write any remaining rows to the final chunk
         if accumulated_df is not None and len(accumulated_df) > 0:
-            chunk_filename = (
-                cls.directory / f"{str(current_chunk_index).zfill(10)}.parquet"
-            )
+            chunk_filename = directory / f"{str(current_chunk_index).zfill(10)}.parquet"
             accumulated_df.write_parquet(
                 chunk_filename,
                 compression=cls.compression_mode,
