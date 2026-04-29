@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image-name: ["simmate"] # ["bader", "simmate", "quantum_espresso", "psi4"]
+        image-name: ["simmate", "nginx"] # ["bader", "quantum_espresso", "psi4"]
 
     steps:
       - name: Check out the repo
@@ -54,5 +54,5 @@ jobs:
           file: ./envs/docker/${{ matrix.image-name }}.dockerfile
           push: true
           #tags: ${{ steps.meta.outputs.tags }}
-          tags: jacksund/simmate:dev
+          tags: jacksund/${{ matrix.image-name }}:dev
           labels: ${{ steps.meta.outputs.labels }}
