@@ -28,13 +28,13 @@ spec:
               name: simmate-gunicorn-staticfiles
           resources:
             requests:
-              memory: "6Gi"
-              cpu: "1"
-              ephemeral-storage: "1Gi"
+              memory: {{ .Values.gunicorn.resources.requests.memory }}
+              cpu: {{ .Values.gunicorn.resources.requests.cpu }}
+              ephemeral-storage: {{ .Values.gunicorn.resources.requests.ephemeral }}
             limits:
-              memory: "12Gi"
-              cpu: "1"
-              ephemeral-storage: "2Gi"
+              memory: {{ .Values.gunicorn.resources.limits.memory }}
+              cpu: {{ .Values.gunicorn.resources.limits.cpu }}
+              ephemeral-storage: {{ .Values.gunicorn.resources.limits.ephemeral }}
       volumes:
         - name: simmate-gunicorn-staticfiles
           persistentVolumeClaim:

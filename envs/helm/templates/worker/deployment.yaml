@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: simmate-worker
-  replicas: 0  # disabled for now
+  replicas: {{ .Values.simmate.workers.replicas }}
   template:
     metadata:
       labels:
@@ -27,13 +27,13 @@ spec:
               name: simmate-worker-data
           resources:
             requests:
-              memory: "2Gi"
-              cpu: "1"
-              ephemeral-storage: "1Gi"
+              memory: {{ .Values.simmate.workers.resources.requests.memory }}
+              cpu: {{ .Values.simmate.workers.resources.requests.cpu }}
+              ephemeral-storage: {{ .Values.simmate.workers.resources.requests.ephemeral }}
             limits:
-              memory: "4Gi"
-              cpu: "1"
-              ephemeral-storage: "2Gi"
+              memory: {{ .Values.simmate.workers.resources.limits.memory }}
+              cpu: {{ .Values.simmate.workers.resources.limits.cpu }}
+              ephemeral-storage: {{ .Values.simmate.workers.resources.limits.ephemeral }}
       volumes:
         - name: simmate-worker-data
           persistentVolumeClaim:

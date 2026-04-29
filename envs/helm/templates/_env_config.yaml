@@ -1,68 +1,132 @@
 {{- define "simmate.env_config" }}
+{{- if .Values.simmate.chatbot_url }}
 - name: CHATBOT_URL
   value: "https://{{ .Values.simmate.chatbot_url }}/"
+{{- end }}
+{{- if and .Values.simmate.chatbot .Values.simmate.chatbot.endpoint }}
 - name: SIMMATE__CHATBOT__ENDPOINT
   value: {{ .Values.simmate.chatbot.endpoint | quote }}
+{{- end }}
+{{- if and .Values.simmate.chatbot .Values.simmate.chatbot.model }}
 - name: SIMMATE__CHATBOT__MODEL
   value: {{ .Values.simmate.chatbot.model | quote }}
+{{- end }}
+{{- if and .Values.simmate.chatbot .Values.simmate.chatbot.version }}
 - name: SIMMATE__CHATBOT__VERSION
   value: {{ .Values.simmate.chatbot.version | quote }}
+{{- end }}
+{{- if and .Values.simmate.chatbot .Values.simmate.chatbot.api_key }}
 - name: SIMMATE__CHATBOT__API_KEY
   value: {{ .Values.simmate.chatbot.api_key | quote }}
+{{- end }}
+{{- if and .Values.simmate.chatbot .Values.simmate.chatbot.sql_uri }}
 - name: SIMMATE__CHATBOT__SQL_URI
   value: {{ .Values.simmate.chatbot.sql_uri | quote }}
+{{- end }}
+{{- if and .Values.simmate.chatbot .Values.simmate.chatbot.verbose }}
 - name: SIMMATE__CHATBOT__VERBOSE
   value: {{ .Values.simmate.chatbot.verbose | quote }}
+{{- end }}
 - name: SIMMATE__WEBSITE__ALLOWED_HOSTS
   value: "*"
+{{- if and .Values.nginx .Values.nginx.hostname }}
 - name: SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS
   value: "https://{{ .Values.nginx.hostname }}"
+{{- end }}
+{{- if .Values.simmate.apps }}
 - name: SIMMATE__APPS
   value: {{ join " " .Values.simmate.apps | quote }}
+{{- end }}
+{{- if .Values.simmate.postgres_rdkit_extension }}
 - name: SIMMATE__POSTGRES_RDKIT_EXTENSION
   value: {{ .Values.simmate.postgres_rdkit_extension | quote }}
+{{- end }}
+{{- if and .Values.simmate.database .Values.simmate.database.engine }}
 - name: SIMMATE__DATABASE__ENGINE
   value: {{ .Values.simmate.database.engine | quote }}
+{{- end }}
+{{- if and .Values.simmate.database .Values.simmate.database.host }}
 - name: SIMMATE__DATABASE__HOST
   value: {{ .Values.simmate.database.host | quote }}
+{{- end }}
+{{- if and .Values.simmate.database .Values.simmate.database.name }}
 - name: SIMMATE__DATABASE__NAME
   value: {{ .Values.simmate.database.name | quote }}
+{{- end }}
+{{- if and .Values.simmate.database .Values.simmate.database.user }}
 - name: SIMMATE__DATABASE__USER
   value: {{ .Values.simmate.database.user | quote }}
+{{- end }}
+{{- if and .Values.simmate.database .Values.simmate.database.password }}
 - name: SIMMATE__DATABASE__PASSWORD
   value: {{ .Values.simmate.database.password | quote }}
+{{- end }}
+{{- if and .Values.simmate.database .Values.simmate.database.port }}
 - name: SIMMATE__DATABASE__PORT
   value: {{ .Values.simmate.database.port | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.data }}
 - name: SIMMATE__WEBSITE__DATA
   value: '{{ .Values.simmate.website.data | toJson }}'
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.debug }}
 - name: SIMMATE__WEBSITE__DEBUG
   value: {{ .Values.simmate.website.debug | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.email .Values.simmate.website.email.from_email }}
 - name: SIMMATE__WEBSITE__EMAIL__FROM_EMAIL
   value: {{ .Values.simmate.website.email.from_email | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.email .Values.simmate.website.email.host }}
 - name: SIMMATE__WEBSITE__EMAIL__HOST
   value: {{ .Values.simmate.website.email.host | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.email .Values.simmate.website.email.port }}
 - name: SIMMATE__WEBSITE__EMAIL__PORT
   value: {{ .Values.simmate.website.email.port | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.email .Values.simmate.website.email.timeout }}
 - name: SIMMATE__WEBSITE__EMAIL__TIMEOUT
   value: {{ .Values.simmate.website.email.timeout | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.home_view }}
 - name: SIMMATE__WEBSITE__HOME_VIEW
   value: {{ .Values.simmate.website.home_view | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.login_message }}
 - name: SIMMATE__WEBSITE__LOGIN_MESSAGE
   value: {{ .Values.simmate.website.login_message | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.profile_view }}
 - name: SIMMATE__WEBSITE__PROFILE_VIEW
   value: {{ .Values.simmate.website.profile_view | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.require_login }}
 - name: SIMMATE__WEBSITE__REQUIRE_LOGIN
   value: {{ .Values.simmate.website.require_login | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.require_login_exceptions }}
 - name: SIMMATE__WEBSITE__REQUIRE_LOGIN_EXCEPTIONS
   value: {{ join " " .Values.simmate.website.require_login_exceptions | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.require_login_internal }}
 - name: SIMMATE__WEBSITE__REQUIRE_LOGIN_INTERNAL
-  value: {{ .Values.simmate.website.require_login_internal| quote }}
+  value: {{ .Values.simmate.website.require_login_internal | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.social_oauth .Values.simmate.website.social_oauth.microsoft .Values.simmate.website.social_oauth.microsoft.client_id }}
 - name: SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__CLIENT_ID
   value: {{ .Values.simmate.website.social_oauth.microsoft.client_id | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.social_oauth .Values.simmate.website.social_oauth.microsoft .Values.simmate.website.social_oauth.microsoft.secret }}
 - name: SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__SECRET
   value: {{ .Values.simmate.website.social_oauth.microsoft.secret | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.chemdraw_js }}
 - name: SIMMATE__WEBSITE__CHEMDRAW_JS
   value: {{ .Values.simmate.website.chemdraw_js | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.user_format }}
 - name: SIMMATE__WEBSITE__USER_FORMAT
   value: {{ .Values.simmate.website.user_format | quote }}
+{{- end }}
 {{- end }}

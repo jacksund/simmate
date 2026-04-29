@@ -634,6 +634,12 @@ class SimmateSettings:
         "SIMMATE__MATERIALS_PROJECT__API_KEY": str,
         "SIMMATE__POSTGRES_RDKIT_EXTENSION": bool,
         "SIMMATE__SCRATCH_DIR": str,
+        "SIMMATE__CHATBOT__ENDPOINT": str,
+        "SIMMATE__CHATBOT__MODEL": str,
+        "SIMMATE__CHATBOT__VERSION": str,
+        "SIMMATE__CHATBOT__API_KEY": str,
+        "SIMMATE__CHATBOT__SQL_URI": str,
+        "SIMMATE__CHATBOT__VERBOSE": bool,
     }
 
 

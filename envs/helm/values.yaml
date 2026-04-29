@@ -1,82 +1,74 @@
-
-# Select your deployment platform: "k3s" (default), "digitalocean", or "aws".
-# This controls routing methods and load balancer annotations.
 platform: k3s
+
+service_account:
+  enabled: false
 
 nginx:
   hostname: simmate.example.com
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 0.25
+      ephemeral: 100M
+    limits:
+      memory: 2Gi
+      cpu: 1
+      ephemeral: 500M
 
 gunicorn:
   storage: 1Gi
+  resources:
+    requests:
+      memory: 6Gi
+      cpu: 0.5
+      ephemeral: 1Gi
+    limits:
+      memory: 8Gi
+      cpu: 1
+      ephemeral: 2Gi
+
+scheduler:
+  resources:
+    requests:
+      memory: 2Gi
+      cpu: 0.5
+      ephemeral: 1Gi
+    limits:
+      memory: 4Gi
+      cpu: 1
+      ephemeral: 2Gi
 
 postgres:
-  password: example123 # UPDATE REQUIRED
-  storage: 300Gi
+  password: example_password_123
+  storage: 20Gi
   memory:
     request: 8Gi
-    limit: 16Gi
+    limit: 12Gi
   cpu:
     request: 1
-    limit: 2
+    limit: 1
   ephemeral:
     request: 1Gi
     limit: 2Gi
 
 simmate:
-  chatbot_url: simmate-chatbot.example.com
-  chatbot:
-    endpoint: https://example.azure-api.net/ # UPDATE REQUIRED
-    model: gpt-4-turbo
-    version: '2024-02-01'
-    api_key: abc123 # UPDATE REQUIRED
-    sql_uri: "postgresql://user:password@host.com:5432/simmate_prod" # UPDATE REQUIRED
-    verbose: true
-  openai:
-    base: example.openai.azure.com  # UPDATE REQUIRED
-    key: abcd1234                   # UPDATE REQUIRED
-    type: azure                     # UPDATE REQUIRED
-    version: '2023-05-15'           # UPDATE REQUIRED
-  # regular simmate settings
-  workers:
-    storage: 100Gi
-  # apps:
-  #   - simmate.apps.configs.AflowConfig
-  #   - simmate.apps.configs.CodConfig
-  #   - simmate.apps.configs.JarvisConfig
-  #   - ...
   postgres_rdkit_extension: true
   database:
     engine: django.db.backends.postgresql
     host: simmate-postgres-service
     name: simmate_prod
-    user: example_user      # UPDATE REQUIRED
-    password: example123    # UPDATE REQUIRED
+    user: example_user
+    password: example_password_123
     port: 5432
-  website:
-    # These 2 settings are fixed in the chart
-    # allowed_hosts: 
-    #   - "*"
-    # crsf_trusted_origins:
-    #  - "https://{{ .Values.nginx.hostname }}"
-    # data:
-    #     Default Datasets: []  # disable default section
-    #     # TODO
-    debug: false
-    # email:
-    #   from_email: example@gmail.com
-    #   host: mailhost.example.com
-    #   port: 0
-    #   timeout: 15
-    # home_view: simmate_custom.main_views
-    # login_message: Example custom login message.
-    # profile_view: simmate_custom.main_views
-    require_login: true
-    require_login_exceptions:
-      - /apps/example(.*)$
-    require_login_internal: microsoft
-    social_oauth:
-      microsoft:
-        client_id: example_user     # UPDATE REQUIRED
-        secret: example123          # UPDATE REQUIRED
-    chemdraw_js: false
-    user_format: username
+  workers:
+    replicas: 1
+    storage: 20Gi
+    resources:
+      requests:
+        memory: 2Gi
+        cpu: 1
+        ephemeral: 1Gi
+      limits:
+        memory: 4Gi
+        cpu: 1
+        ephemeral: 2Gi

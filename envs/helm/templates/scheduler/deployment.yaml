@@ -24,10 +24,10 @@ spec:
             {{- include "simmate.env_config" . | indent 12 }}
           resources:
             requests:
-              memory: "2Gi"
-              cpu: "0.5"
-              ephemeral-storage: "1Gi"
+              memory: {{ .Values.scheduler.resources.requests.memory }}
+              cpu: {{ .Values.scheduler.resources.requests.cpu }}
+              ephemeral-storage: {{ .Values.scheduler.resources.requests.ephemeral }}
             limits:
-              memory: "4Gi"
-              cpu: "1"
-              ephemeral-storage: "2Gi"
+              memory: {{ .Values.scheduler.resources.limits.memory }}
+              cpu: {{ .Values.scheduler.resources.limits.cpu }}
+              ephemeral-storage: {{ .Values.scheduler.resources.limits.ephemeral }}

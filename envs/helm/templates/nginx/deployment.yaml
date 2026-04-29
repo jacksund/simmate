@@ -26,13 +26,13 @@ spec:
               mountPath: /staticfiles
           resources:
             requests:
-              memory: "4Gi"
-              cpu: "0.25"
-              ephemeral-storage: "100M"
+              memory: {{ .Values.nginx.resources.requests.memory }}
+              cpu: {{ .Values.nginx.resources.requests.cpu }}
+              ephemeral-storage: {{ .Values.nginx.resources.requests.ephemeral }}
             limits:
-              memory: "2Gi"
-              cpu: "1"
-              ephemeral-storage: "500M"
+              memory: {{ .Values.nginx.resources.limits.memory }}
+              cpu: {{ .Values.nginx.resources.limits.cpu }}
+              ephemeral-storage: {{ .Values.nginx.resources.limits.ephemeral }}
       volumes:
         - name: simmate-gunicorn-staticfiles
           persistentVolumeClaim:
