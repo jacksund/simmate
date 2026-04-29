@@ -54,5 +54,5 @@ jobs:
           file: ./envs/docker/${{ matrix.image-name }}.dockerfile
           push: true
           #tags: ${{ steps.meta.outputs.tags }}
-          tags: dev
+          tags: jacksund/simmate:dev
           labels: ${{ steps.meta.outputs.labels }}

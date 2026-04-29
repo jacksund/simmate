@@ -13,29 +13,16 @@ services:
     volumes:
       - staticfiles:/root/simmate/staticfiles
     environment: &simmate-env
-      # --- CORE SETTINGS ---
       SIMMATE__DATABASE__ENGINE: django.db.backends.postgresql
       SIMMATE__DATABASE__HOST: simmate-postgres-service
       SIMMATE__DATABASE__PORT: 5432
       SIMMATE__DATABASE__NAME: simmate_prod
       SIMMATE__DATABASE__USER: example_user
-      SIMMATE__DATABASE__PASSWORD: example123
+      SIMMATE__DATABASE__PASSWORD: example_password_123
       SIMMATE__POSTGRES_RDKIT_EXTENSION: "True"
-
-      # --- WEB UI SETTINGS ---
       SIMMATE__WEBSITE__ALLOWED_HOSTS: "*"
       SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS: "http://localhost:1337"
       SIMMATE__WEBSITE__DEBUG: "True"
-      SIMMATE__WEBSITE__REQUIRE_LOGIN: "True"
-      SIMMATE__WEBSITE__REQUIRE_LOGIN_INTERNAL: "False"
-      SIMMATE__WEBSITE__REQUIRE_LOGIN_EXCEPTIONS: "/apps/example(.*)$"
-      SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__CLIENT_ID: "example_user"
-      SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__SECRET: "example123"
-
-      # --- OPTIONAL / ADVANCED ---
-      # SIMMATE__APPS: "simmate.apps.configs.AflowConfig simmate.apps.configs.CodConfig"
-      # SIMMATE__CHATBOT__ENDPOINT: "https://example.azure-api.net/"
-      # SIMMATE__CHATBOT__API_KEY: "abc123"
     depends_on:
       - simmate-postgres-service
 
@@ -56,7 +43,7 @@ services:
 
   # --------------------------------------------------------
 
-  # SCHEDULER (for periodic tasks)
+  # SCHEDULER
   simmate-scheduler-service:
     image: simmate:latest
     command: ["simmate", "compute", "start-schedules"]
@@ -66,7 +53,7 @@ services:
 
   # --------------------------------------------------------
 
-  # WORKER (for workflow execution)
+  # WORKER(s)
   simmate-worker-service:
     image: simmate:latest
     command: ["simmate", "compute", "start-worker"]
@@ -75,6 +62,8 @@ services:
       - worker-data:/simmate_workers
     depends_on:
       - simmate-postgres-service
+    deploy:
+      replicas: 1
 
   # --------------------------------------------------------
 
@@ -84,7 +73,7 @@ services:
     environment:
       POSTGRES_DB: simmate_prod
       POSTGRES_USER: example_user
-      POSTGRES_PASSWORD: example123
+      POSTGRES_PASSWORD: example_password_123
     volumes:
       - postgres-data:/var/lib/postgresql/data/
     ports:
