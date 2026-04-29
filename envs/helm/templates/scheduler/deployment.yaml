@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: simmate-scheduler
-          image: simmate/simmate-gunicorn:latest
+          image: jacksund/simmate:latest
           command: ["simmate", "compute", "start-schedules"]
           env:
             {{- include "simmate.env_config" . | indent 12 }}
