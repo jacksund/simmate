@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: simmate-scheduler
-  replicas: 1
+  replicas: 0
   template:
     metadata:
       labels:
@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: simmate-scheduler
-          image: jacksund/simmate:latest
+          image: jacksund/simmate:dev
           command: ["simmate", "compute", "start-schedules"]
           env:
             {{- include "simmate.env_config" . | indent 12 }}

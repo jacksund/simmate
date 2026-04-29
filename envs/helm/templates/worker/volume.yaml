@@ -4,8 +4,10 @@ metadata:
   name: simmate-worker-data
 spec:
   accessModes:
-    - ReadWriteMany  # bc many worker pods will access this volume
-  # storageClassName: simmate-efs-sc  # fixed for entire namespace
+    - {{ .Values.simmate.workers.access_mode }}  # bc many worker pods will access this volume
+  {{- if and (eq .Values.simmate.workers.access_mode "ReadWriteMany") .Values.simmate.workers.storage_class_name }}
+  storageClassName: {{ .Values.simmate.workers.storage_class_name }}
+  {{- end }}
   resources:
     requests:
       storage: {{ .Values.simmate.workers.storage }}

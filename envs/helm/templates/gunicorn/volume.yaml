@@ -4,8 +4,10 @@ metadata:
   name: simmate-gunicorn-staticfiles
 spec:
   accessModes:
-    - ReadWriteMany  # bc static files are shared with nginx deployment
-  # storageClassName: simmate-efs-sc  # fixed for entire namespace
+    - {{ .Values.gunicorn.access_mode }}  # bc static files are shared with nginx deployment
+  {{- if and (eq .Values.gunicorn.access_mode "ReadWriteMany") .Values.gunicorn.storage_class_name }}
+  storageClassName: {{ .Values.gunicorn.storage_class_name }}
+  {{- end }}
   resources:
     requests:
       storage: {{ .Values.gunicorn.storage }}

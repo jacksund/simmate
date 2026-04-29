@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: simmate-nginx
-  replicas: 1
+  replicas: 0
   template:
     metadata:
       labels:
@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: simmate-nginx
-          image: jacksund/nginx:latest
+          image: jacksund/nginx:dev
           ports:
             - containerPort: 80
           volumeMounts:

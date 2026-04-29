@@ -16,6 +16,8 @@ nginx:
       ephemeral: 500M
 
 gunicorn:
+  access_mode: ReadWriteOnce
+  storage_class_name: simmate-efs-sc
   storage: 1Gi
   resources:
     requests:
@@ -56,12 +58,14 @@ simmate:
   database:
     engine: django.db.backends.postgresql
     host: simmate-postgres-service
-    name: simmate_prod
-    user: example_user
+    name: simmate_dev
+    user: postgres
     password: example_password_123
     port: 5432
   workers:
-    replicas: 1
+    replicas: 0
+    access_mode: ReadWriteOnce
+    storage_class_name: simmate-efs-sc
     storage: 20Gi
     resources:
       requests:
