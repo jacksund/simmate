@@ -1,5 +1,5 @@
 
-FROM public.ecr.aws/nginx/nginx:stable-apline
+FROM nginx:stable-alpine
 
 # Replace default config with our custom one
 RUN rm /etc/nginx/conf.d/default.conf
