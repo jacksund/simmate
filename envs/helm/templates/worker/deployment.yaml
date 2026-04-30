@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: simmate-worker
-  replicas: 0  # disabled for now
+  replicas: {{ .Values.workers.replicas }}
   template:
     metadata:
       labels:
@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: simmate-worker
-          image: simmate/simmate-gunicorn:latest
+          image: jacksund/simmate:{{ .Values.version }}
           command: ["simmate", "compute", "start-worker"]
           env:
             {{- include "simmate.env_config" . | indent 12 }}
@@ -27,13 +27,13 @@ spec:
               name: simmate-worker-data
           resources:
             requests:
-              memory: "2Gi"
-              cpu: "1"
-              ephemeral-storage: "1Gi"
+              memory: {{ .Values.workers.memory.request }}
+              cpu: {{ .Values.workers.cpu.request }}
+              ephemeral-storage: {{ .Values.workers.ephemeral.request }}
             limits:
-              memory: "4Gi"
-              cpu: "1"
-              ephemeral-storage: "2Gi"
+              memory: {{ .Values.workers.memory.limit }}
+              cpu: {{ .Values.workers.cpu.limit }}
+              ephemeral-storage: {{ .Values.workers.ephemeral.limit }}
       volumes:
         - name: simmate-worker-data
           persistentVolumeClaim:

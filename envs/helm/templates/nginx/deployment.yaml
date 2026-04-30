@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: simmate-nginx
-          image: simmate/simmate-nginx:latest
+          image: jacksund/nginx:{{ .Values.version }}
           ports:
             - containerPort: 80
           volumeMounts:
@@ -26,13 +26,13 @@ spec:
               mountPath: /staticfiles
           resources:
             requests:
-              memory: "4Gi"
-              cpu: "0.25"
-              ephemeral-storage: "100M"
+              memory: {{ .Values.nginx.memory.request }}
+              cpu: {{ .Values.nginx.cpu.request }}
+              ephemeral-storage: {{ .Values.nginx.ephemeral.request }}
             limits:
-              memory: "2Gi"
-              cpu: "1"
-              ephemeral-storage: "500M"
+              memory: {{ .Values.nginx.memory.limit }}
+              cpu: {{ .Values.nginx.cpu.limit }}
+              ephemeral-storage: {{ .Values.nginx.ephemeral.limit }}
       volumes:
         - name: simmate-gunicorn-staticfiles
           persistentVolumeClaim:

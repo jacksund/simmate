@@ -139,4 +139,3 @@ The web interface is built with Django and HTMX.
 - **Tool Restrictions:** Do NOT use `python` (scripts), `git`, `pytest`, linting tools, or database migrations. The user will handle testing, linting, and migrations manually. Bulk updates via Python scripts are strictly prohibited as they have proven ineffective.
 - **Dependencies:** Verify `pyproject.toml` before assuming a library is available.
 - **Documentation:** Always refer to `docs/full_guides/` when building new apps or workflows. These guides provide essential architectural patterns, naming conventions, and best practices.
-- **Change Log:** Always document your changes in the changelog.

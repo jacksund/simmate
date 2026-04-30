@@ -53,7 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image-name: ["bader", "simmate", "quantum_espresso", "psi4"]
+        image-name: ["bader", "nginx", "psi4", "quantum_espresso", "simmate"]
     permissions:
       contents: read
       packages: write

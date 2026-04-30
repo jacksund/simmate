@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image-name: ["bader", "simmate", "quantum_espresso", "psi4"]
+        image-name: ["bader", "nginx", "psi4", "quantum_espresso", "simmate"]
 
     steps:
       - name: Check out the repo

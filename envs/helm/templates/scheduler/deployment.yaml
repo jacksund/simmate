@@ -18,16 +18,16 @@ spec:
     spec:
       containers:
         - name: simmate-scheduler
-          image: simmate/simmate-gunicorn:latest
+          image: jacksund/simmate:{{ .Values.version }}
           command: ["simmate", "compute", "start-schedules"]
           env:
             {{- include "simmate.env_config" . | indent 12 }}
           resources:
             requests:
-              memory: "2Gi"
-              cpu: "0.5"
-              ephemeral-storage: "1Gi"
+              memory: {{ .Values.scheduler.memory.request }}
+              cpu: {{ .Values.scheduler.cpu.request }}
+              ephemeral-storage: {{ .Values.scheduler.ephemeral.request }}
             limits:
-              memory: "4Gi"
-              cpu: "1"
-              ephemeral-storage: "2Gi"
+              memory: {{ .Values.scheduler.memory.limit }}
+              cpu: {{ .Values.scheduler.cpu.limit }}
+              ephemeral-storage: {{ .Values.scheduler.ephemeral.limit }}

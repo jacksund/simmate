@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: simmate-gunicorn
-          image: simmate/simmate-gunicorn:latest
+          image: jacksund/simmate:{{ .Values.version }}
           env:
             {{- include "simmate.env_config" . | indent 12 }}
           ports:
@@ -28,13 +28,13 @@ spec:
               name: simmate-gunicorn-staticfiles
           resources:
             requests:
-              memory: "6Gi"
-              cpu: "1"
-              ephemeral-storage: "1Gi"
+              memory: {{ .Values.gunicorn.memory.request }}
+              cpu: {{ .Values.gunicorn.cpu.request }}
+              ephemeral-storage: {{ .Values.gunicorn.ephemeral.request }}
             limits:
-              memory: "12Gi"
-              cpu: "1"
-              ephemeral-storage: "2Gi"
+              memory: {{ .Values.gunicorn.memory.limit }}
+              cpu: {{ .Values.gunicorn.cpu.limit }}
+              ephemeral-storage: {{ .Values.gunicorn.ephemeral.limit }}
       volumes:
         - name: simmate-gunicorn-staticfiles
           persistentVolumeClaim:

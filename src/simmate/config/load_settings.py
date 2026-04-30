@@ -300,8 +300,8 @@ class SimmateSettings:
                 "allowed_hosts": ["127.0.0.1", "localhost", "testserver"],
                 # sets STATICFILES_STORAGE to ManifestStaticFilesStorage for prod setups
                 "static_file_hashes": False,
-                # BUG-FIX: Django-unicorn ajax requests sometimes come from the server-side
-                # ingress (url for k8s) or a nginx load balancer. To get past a 403 forbidden
+                # BUG-FIX: ajax requests sometimes come from the server-side httproute
+                # (url for k8s) or a nginx load balancer. To get past a 403 forbidden
                 # result, we need to sometimes specify allowed origins for csrf.
                 "csrf_trusted_origins": ["http://localhost"],
                 # We don't use get_random_secret_key() to make local testing easier
@@ -634,6 +634,12 @@ class SimmateSettings:
         "SIMMATE__MATERIALS_PROJECT__API_KEY": str,
         "SIMMATE__POSTGRES_RDKIT_EXTENSION": bool,
         "SIMMATE__SCRATCH_DIR": str,
+        "SIMMATE__CHATBOT__ENDPOINT": str,
+        "SIMMATE__CHATBOT__MODEL": str,
+        "SIMMATE__CHATBOT__VERSION": str,
+        "SIMMATE__CHATBOT__API_KEY": str,
+        "SIMMATE__CHATBOT__SQL_URI": str,
+        "SIMMATE__CHATBOT__VERBOSE": bool,
     }
 
 

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: simmate-postgres
-          image: informaticsmatters/rdkit-cartridge-debian:latest
+          image: informaticsmatters/rdkit-cartridge-debian:Release_2025_03_3
           env:
             - name: PGDATA
               value: /var/lib/postgresql/data/simmate
