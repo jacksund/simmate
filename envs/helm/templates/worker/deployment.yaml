@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: simmate-worker
-  replicas: {{ .Values.simmate.workers.replicas }}
+  replicas: {{ .Values.workers.replicas }}
   template:
     metadata:
       labels:
@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: simmate-worker
-          image: jacksund/simmate:dev
+          image: jacksund/simmate:{{ .Values.version }}
           command: ["simmate", "compute", "start-worker"]
           env:
             {{- include "simmate.env_config" . | indent 12 }}
@@ -27,13 +27,13 @@ spec:
               name: simmate-worker-data
           resources:
             requests:
-              memory: {{ .Values.simmate.workers.resources.requests.memory }}
-              cpu: {{ .Values.simmate.workers.resources.requests.cpu }}
-              ephemeral-storage: {{ .Values.simmate.workers.resources.requests.ephemeral }}
+              memory: {{ .Values.workers.memory.request }}
+              cpu: {{ .Values.workers.cpu.request }}
+              ephemeral-storage: {{ .Values.workers.ephemeral.request }}
             limits:
-              memory: {{ .Values.simmate.workers.resources.limits.memory }}
-              cpu: {{ .Values.simmate.workers.resources.limits.cpu }}
-              ephemeral-storage: {{ .Values.simmate.workers.resources.limits.ephemeral }}
+              memory: {{ .Values.workers.memory.limit }}
+              cpu: {{ .Values.workers.cpu.limit }}
+              ephemeral-storage: {{ .Values.workers.ephemeral.limit }}
       volumes:
         - name: simmate-worker-data
           persistentVolumeClaim:

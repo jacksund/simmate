@@ -1,3 +1,4 @@
+{{- if .Values.postgres.external_service }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -19,3 +20,4 @@ spec:
     - protocol: TCP
       port: 5432
       targetPort: 5432
+{{- end }}

@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: simmate-scheduler
-  replicas: 0
+  replicas: 1
   template:
     metadata:
       labels:
@@ -18,16 +18,16 @@ spec:
     spec:
       containers:
         - name: simmate-scheduler
-          image: jacksund/simmate:dev
+          image: jacksund/simmate:{{ .Values.version }}
           command: ["simmate", "compute", "start-schedules"]
           env:
             {{- include "simmate.env_config" . | indent 12 }}
           resources:
             requests:
-              memory: {{ .Values.scheduler.resources.requests.memory }}
-              cpu: {{ .Values.scheduler.resources.requests.cpu }}
-              ephemeral-storage: {{ .Values.scheduler.resources.requests.ephemeral }}
+              memory: {{ .Values.scheduler.memory.request }}
+              cpu: {{ .Values.scheduler.cpu.request }}
+              ephemeral-storage: {{ .Values.scheduler.ephemeral.request }}
             limits:
-              memory: {{ .Values.scheduler.resources.limits.memory }}
-              cpu: {{ .Values.scheduler.resources.limits.cpu }}
-              ephemeral-storage: {{ .Values.scheduler.resources.limits.ephemeral }}
+              memory: {{ .Values.scheduler.memory.limit }}
+              cpu: {{ .Values.scheduler.cpu.limit }}
+              ephemeral-storage: {{ .Values.scheduler.ephemeral.limit }}

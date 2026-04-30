@@ -1,47 +1,74 @@
 platform: k3s
 
-service_account:
-  enabled: false
+version: dev
+
+simmate:
+  postgres_rdkit_extension: true
+  website:
+    debug: true
+  database:
+    engine: django.db.backends.postgresql
+    host: simmate-postgres-service
+    name: simmate_dev
+    user: postgres
+    password: example_password_123
+    port: 5432
 
 nginx:
-  hostname: simmate.example.com
-  resources:
-    requests:
-      memory: 1Gi
-      cpu: 0.25
-      ephemeral: 100M
-    limits:
-      memory: 2Gi
-      cpu: 1
-      ephemeral: 500M
+  hostname: ""  # ex: simmate.example.com
+  memory:
+    request: 1Gi
+    limit: 2Gi
+  cpu:
+    request: 0.25
+    limit: 1
+  ephemeral:
+    request: 100M
+    limit: 500M
 
 gunicorn:
   access_mode: ReadWriteOnce
   storage_class_name: simmate-efs-sc
   storage: 1Gi
-  resources:
-    requests:
-      memory: 6Gi
-      cpu: 0.5
-      ephemeral: 1Gi
-    limits:
-      memory: 8Gi
-      cpu: 1
-      ephemeral: 2Gi
+  memory:
+    request: 6Gi
+    limit: 8Gi
+  cpu:
+    request: 0.5
+    limit: 1
+  ephemeral:
+    request: 1Gi
+    limit: 2Gi
 
 scheduler:
-  resources:
-    requests:
-      memory: 2Gi
-      cpu: 0.5
-      ephemeral: 1Gi
-    limits:
-      memory: 4Gi
-      cpu: 1
-      ephemeral: 2Gi
+  memory:
+    request: 2Gi
+    limit: 4Gi
+  cpu:
+    request: 0.5
+    limit: 1
+  ephemeral:
+    request: 1Gi
+    limit: 2Gi
+
+workers:
+  replicas: 1
+  access_mode: ReadWriteOnce
+  storage_class_name: simmate-efs-sc
+  storage: 20Gi
+  memory:
+    request: 2Gi
+    limit: 4Gi
+  cpu:
+    request: 1
+    limit: 1
+  ephemeral:
+    request: 1Gi
+    limit: 2Gi
 
 postgres:
   password: example_password_123
+  external_service: false
   storage: 20Gi
   memory:
     request: 8Gi
@@ -53,26 +80,5 @@ postgres:
     request: 1Gi
     limit: 2Gi
 
-simmate:
-  postgres_rdkit_extension: true
-  database:
-    engine: django.db.backends.postgresql
-    host: simmate-postgres-service
-    name: simmate_dev
-    user: postgres
-    password: example_password_123
-    port: 5432
-  workers:
-    replicas: 0
-    access_mode: ReadWriteOnce
-    storage_class_name: simmate-efs-sc
-    storage: 20Gi
-    resources:
-      requests:
-        memory: 2Gi
-        cpu: 1
-        ephemeral: 1Gi
-      limits:
-        memory: 4Gi
-        cpu: 1
-        ephemeral: 2Gi
+service_account:
+  enabled: false

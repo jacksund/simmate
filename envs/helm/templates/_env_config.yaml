@@ -29,10 +29,12 @@
 {{- end }}
 - name: SIMMATE__WEBSITE__ALLOWED_HOSTS
   value: "*"
-{{- if and .Values.nginx .Values.nginx.hostname }}
 - name: SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS
+  {{- if and .Values.nginx .Values.nginx.hostname }}
   value: "https://{{ .Values.nginx.hostname }}"
-{{- end }}
+  {{- else }}
+  value: "http://127.0.0.1:8000"
+  {{- end }}
 {{- if .Values.simmate.apps }}
 - name: SIMMATE__APPS
   value: {{ join " " .Values.simmate.apps | quote }}

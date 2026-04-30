@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: simmate-nginx
-  replicas: 0
+  replicas: 1
   template:
     metadata:
       labels:
@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: simmate-nginx
-          image: jacksund/nginx:dev
+          image: jacksund/nginx:{{ .Values.version }}
           ports:
             - containerPort: 80
           volumeMounts:
@@ -26,13 +26,13 @@ spec:
               mountPath: /staticfiles
           resources:
             requests:
-              memory: {{ .Values.nginx.resources.requests.memory }}
-              cpu: {{ .Values.nginx.resources.requests.cpu }}
-              ephemeral-storage: {{ .Values.nginx.resources.requests.ephemeral }}
+              memory: {{ .Values.nginx.memory.request }}
+              cpu: {{ .Values.nginx.cpu.request }}
+              ephemeral-storage: {{ .Values.nginx.ephemeral.request }}
             limits:
-              memory: {{ .Values.nginx.resources.limits.memory }}
-              cpu: {{ .Values.nginx.resources.limits.cpu }}
-              ephemeral-storage: {{ .Values.nginx.resources.limits.ephemeral }}
+              memory: {{ .Values.nginx.memory.limit }}
+              cpu: {{ .Values.nginx.cpu.limit }}
+              ephemeral-storage: {{ .Values.nginx.ephemeral.limit }}
       volumes:
         - name: simmate-gunicorn-staticfiles
           persistentVolumeClaim:
