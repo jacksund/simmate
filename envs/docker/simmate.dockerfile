@@ -16,11 +16,14 @@ ENV PATH=/root/simmate/.venv/bin:/root/.local/bin:$PATH \
 # OS Dependencies
 # =============================================================================
 
-# Only dependencies required to install 'uv' are needed here.
+# Only dependencies required to install 'uv' and run 'rdkit' are needed here.
 RUN apt-get update && \
     apt-get install -y \
         curl \
-        ca-certificates && \
+        ca-certificates \
+        libxrender1 \
+        libxext6 \
+        libsm6 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
