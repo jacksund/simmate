@@ -23,7 +23,10 @@ RUN apt-get update && \
         ca-certificates \
         libxrender1 \
         libxext6 \
-        libsm6 && \
+        libsm6 \
+        libexpat1 \
+        libfontconfig1 \
+        libglib2.0-0 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
