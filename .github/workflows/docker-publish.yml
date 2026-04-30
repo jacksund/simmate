@@ -5,12 +5,9 @@
 
 name: Docker-Simmate
 
-# on:
-#   release:
-#     types: [published]
 on:
-  pull_request:
-    branches: [main]
+  release:
+    types: [published]
 
 jobs:
   push_to_registry:
@@ -20,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image-name: ["simmate", "nginx"] # ["bader", "quantum_espresso", "psi4"]
+        image-name: ["bader", "nginx", "psi4", "quantum_espresso", "simmate"]
 
     steps:
       - name: Check out the repo
@@ -53,6 +50,5 @@ jobs:
           context: .
           file: ./envs/docker/${{ matrix.image-name }}.dockerfile
           push: true
-          #tags: ${{ steps.meta.outputs.tags }}
-          tags: jacksund/${{ matrix.image-name }}:dev
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
