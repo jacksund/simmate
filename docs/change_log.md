@@ -83,6 +83,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added first draft of vasp dockerfile. vasp is proprietary so source files and final image cannot be shared publicly
 - added methods for updating rows and cleaning up chunk files to toolkit datastore class
 - added parallel chunk loading to `MoleculeStore` datastores using UUID filenames, `reorganize_chunks`, and SLURM-compatible job submission via `SimmateExecutor`
+- established working helm chart for k3s single-node deployment
 
 **Refactors**
 
@@ -96,6 +97,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - removed unused web templates and static assets
 - updated envs for helm and docker-compose, where k3s is the top candidate for public production setups
 - renamed the base component from `DynamicTableForm` to `TableComponent` and moved it to `simmate.website.data_explorer.components`. Standardized all app components
+- cleaned up `simmate.dockerfile` by separating blender install and minimizing deps. Image is now <500mb
 
 **Fixes**
 
