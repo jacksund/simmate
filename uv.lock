@@ -1,0 +1,8 @@
+version = 1
+revision = 3
+requires-python = ">=3.10"
+
+[[package]]
+name = "simmate"
+version = "0.18.0"
+source = { editable = "." }

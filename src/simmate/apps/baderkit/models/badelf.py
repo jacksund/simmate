@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from baderkit.core import Badelf as BadelfClass
+from baderkit.elf_analysis import Badelf as BadelfClass
 
 from simmate.apps.baderkit.models.elf_analysis import ElfAnalysis
 from simmate.database.core import table_column

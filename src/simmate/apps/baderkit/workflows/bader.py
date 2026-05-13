@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
 
-from baderkit.core import Bader, Grid
+from baderkit import Bader, Grid
 
 from simmate.apps.baderkit.models.bader import Bader as BaderModel
 from simmate.workflows.core import Workflow
@@ -32,13 +32,13 @@ class Bader__Baderkit__Bader(Workflow):
         # create CHGCAR_sum grid
         grid1 = Grid.from_vasp(directory / "AECCAR0")
         grid2 = Grid.from_vasp(directory / "AECCAR2")
-        reference_grid = grid1.linear_add(grid2)
+        total_charge_grid = grid1.linear_add(grid2)
         # load CHGCAR
         charge_grid = Grid.from_vasp(directory / "CHGCAR")
         # create Bader
-        bader = Bader(
-            charge_grid=charge_grid,
-            reference_grid=reference_grid,
+        bader = Bader.from_vasp(
+            charge_filename=charge_grid,
+            total_charge_filename=total_charge_grid,
             **kwargs,
         )
         # get the table for this workflow and update entry

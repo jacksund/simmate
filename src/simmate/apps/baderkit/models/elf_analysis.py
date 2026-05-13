@@ -13,8 +13,8 @@ use ForeignKeys to point to the corresponding ElfAnalysis table.
 from pathlib import Path
 
 import numpy as np
-from baderkit.core import ElfLabeler, SpinElfLabeler
-from baderkit.core.labelers.bifurcation_graph.enum_and_styling import FeatureType
+from baderkit.elf_analysis import ElfLabeler
+from baderkit.elf_analysis.elf_labeler.enum_and_styling import FeatureType
 
 from simmate.apps.baderkit.models.elf_features import ElfFeatures
 from simmate.apps.baderkit.models.elf_radii import ElfRadii
@@ -164,6 +164,7 @@ class ElfAnalysis(Structure):
     Which type of spin this calculation was performed on i.e. up, down, total, separate
     """
 
+
     def update_from_directory(self, directory):
         """
         The base database workflow will try and register data from the local
@@ -207,11 +208,7 @@ class ElfAnalysis(Structure):
 
         return new_row
 
-    def update_elf_features(self, labeler: ElfLabeler | SpinElfLabeler):
-        # first, check if this is a spin-separated calculation. If so, we do
-        # not store elf features
-        if isinstance(labeler, SpinElfLabeler):
-            return
+    def update_elf_features(self, labeler: ElfLabeler):
         # pull all the data together and save it to the database. We
         # are saving this to an ElfIonicRadii datatable. To access this
         # model, we need to use "elf_features.model".
@@ -240,52 +237,7 @@ class ElfAnalysis(Structure):
             new_row = feature_model(**new_row_dict)
             new_row.save()
 
-    def update_elf_radii(self, labeler: ElfLabeler | SpinElfLabeler):
-        # get radii model
-        # radii_model = self.atom_nn_elf_radii.model
-        # get radii info
-        site_indices, neigh_indices, neigh_frac_coords, neigh_dists = (
-            labeler.nearest_neighbor_data
-        )
-        site_frac_coords = labeler.structure.frac_coords[site_indices]
-        radii = labeler.atom_nn_elf_radii
-        bond_types = labeler.atom_nn_elf_radii_types
-        # create radii entries
-        for idx in range(len(site_indices)):
-            radii_dict = dict(
-                site_index=site_indices[idx],
-                neigh_index=neigh_indices[idx],
-                radius=radii[idx],
-                site_frac_coords=site_frac_coords[idx].tolist(),
-                neigh_frac_coords=neigh_frac_coords[idx].tolist(),
-                radius_type=str(bond_types[idx]),
-                spin_system=labeler.spin_system,
-                analysis=self,
-            )
-            new_radii = ElfRadii(**radii_dict)
-            new_radii.save()
 
 
-class ElfAnalysisCalculation(Calculation):
-    """
-    This table contains results from an ELF topology analysis calculation.
-    The results should be from a dedicated workflow.
-    """
 
-    class Meta:
-        app_label = "baderkit"
 
-    analysis = table_column.ForeignKey(
-        "baderkit.ElfAnalysis",
-        on_delete=table_column.CASCADE,
-        related_name="calculation",
-        blank=True,
-        null=True,
-    )
-
-    def update_from_labeler(self, labeler: ElfLabeler, directory: Path, **kwargs):
-        # create an entry in the ElfAnalysis table
-        labeler = ElfAnalysis.from_labeler(labeler, directory)
-        # link to table
-        self.analysis = labeler
-        self.save()
