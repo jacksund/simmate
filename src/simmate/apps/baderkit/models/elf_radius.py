@@ -43,18 +43,6 @@ class AllElfRadii(BaderkitLocalBase):
     """
     The type of radius, i.e. ionic, covalent, metallic, or non-bonding
     """
-    spin_system = table_column.CharField(
-        blank=True,
-        null=True,
-        max_length=75,
-    )
-    """
-    The electron spin system this radius was calculated from. Options
-    are:
-        up - spin-up
-        down - spin-down
-        not polarized - calculation not spin polarized
-    """
     
     elf_radii = table_column.ForeignKey(
         "baderkit.ElfRadii",

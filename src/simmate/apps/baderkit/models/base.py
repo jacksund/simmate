@@ -23,7 +23,7 @@ class BaderkitBase(DatabaseTable):
     class Meta:
         abstract = True
         
-    structure = table_column.ForeignKey(
+    baderkit_calculation = table_column.ForeignKey(
         "baderkit.Baderkit",
         on_delete=table_column.CASCADE,
         related_name="%(class)s",
@@ -49,7 +49,7 @@ class BaderkitBase(DatabaseTable):
         
         # create dict to store results for model columns
         data = {
-            "structure" : structure_entry,
+            "baderkit_calculation" : structure_entry,
             "method_kwargs" : results_dict.get("method_kwargs")
             }
         # try and load each column in the table
@@ -58,7 +58,7 @@ class BaderkitBase(DatabaseTable):
             # first layer are not consistent and are meant for human readability,
             # so we can just loop over them and search for our desired entry.
             for _, sub_dict in results_dict.items():
-                test_attr = results_dict.get(entry, None)
+                test_attr = sub_dict.get(entry, None)
                 # If we don't have a result, skip
                 if test_attr is None:
                     continue
@@ -132,9 +132,15 @@ class BaderkitLocalBase(DatabaseTable):
             for key in model_columns:
                 for subdict in results_dict.values():
                     test_attr = subdict.get(key, None)
-                    if test_attr is not None:
-                        results[key] = test_attr[i]
-                        break
+                    if test_attr is None:
+                        continue
+
+                    result = test_attr[i]
+
+                    if type(result) == float and np.isnan(result):
+                        continue
+                    results[key] = result
+                    break
     
             # create a new entry
             new_row = cls(**results)
@@ -221,6 +227,7 @@ class Baderkit(Structure, Calculation):
         # get results from the first object
         # Get results from this class
         results_dict = baderkit_objects[0].to_dict(serializable=True)
+        structure_dict = self._from_toolkit(structure=baderkit_objects[0].structure, as_dict=True)
         
         # create dict to store results for model columns
         data = {}
@@ -230,7 +237,7 @@ class Baderkit(Structure, Calculation):
             # first layer are not consistent and are meant for human readability,
             # so we can just loop over them and search for our desired entry.
             for _, sub_dict in results_dict.items():
-                test_attr = results_dict.get(entry, None)
+                test_attr = sub_dict.get(entry, None)
                 # If we don't have a result, skip
                 if test_attr is None:
                     continue
@@ -248,8 +255,10 @@ class Baderkit(Structure, Calculation):
             entry_name = object_name.lower()
             # get the model to save to
             model_object = getattr(self, entry_name)
+
             if model_object is None:
                 continue
+
             model = model_object.model
             # create a new entry
             entry = model.from_baderkit(
@@ -258,8 +267,8 @@ class Baderkit(Structure, Calculation):
                 directory, 
                 **kwargs)
             # setattr(self, entry_name, entry)
-            
         # save results to db
-        data.update(**all_kwargs)
+        data.update(**structure_dict)
+        data.update(**{"method_kwargs" : all_kwargs})
         self.update_from_fields(**data)
         self.save()

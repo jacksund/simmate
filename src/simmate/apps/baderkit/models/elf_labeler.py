@@ -60,12 +60,3 @@ class ElfLabeler(BaderkitBase):
     The total number of electrides that were found when searching the maxima
     found using pybader.
     """
-
-    spin_system = table_column.CharField(
-        blank=True,
-        null=True,
-        max_length=25,
-    )
-    """
-    Which type of spin this calculation was performed on i.e. up, down, total, separate
-    """

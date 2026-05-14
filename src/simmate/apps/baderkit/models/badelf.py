@@ -51,7 +51,7 @@ class Badelf(BaderkitBase):
     to the bader/plane surface.
     """
 
-    elf_maxima = table_column.JSONField(blank=True, null=True)
+    maxima_elf_values = table_column.JSONField(blank=True, null=True)
     """
     A list of ELF maxima for each atom and electride in the system.
     """
@@ -111,12 +111,4 @@ class Badelf(BaderkitBase):
     as the basis for the calculation. Use 'oxidation_states' for a more 
     consistent and accurate count of valence electrons
     """
-    
-    spin_system = table_column.CharField(
-        blank=True,
-        null=True,
-        max_length=25,
-    )
-    """
-    Which type of spin this calculation was performed on i.e. up, down, total
-    """
+

@@ -84,9 +84,9 @@ class BaderkitVaspBase(BaderkitBase):
             reference_grid = total_charge_grid
         # create Bader
         bader = cls.baderkit_class.from_vasp(
-            charge_filename=charge_grid,
-            reference_filename=reference_grid,
-            total_charge_filename=total_charge_grid,
+            charge_grid=charge_grid,
+            reference_grid=reference_grid,
+            total_charge_grid=total_charge_grid,
             pseudopotential_filename=directory / "POTCAR",
             **kwargs,
         )
