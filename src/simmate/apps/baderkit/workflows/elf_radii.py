@@ -19,5 +19,8 @@ class Baderkit__Baderkit__ElfRadii(BaderkitVaspBase):
     charge_filename = "CHGCAR"
     reference_filename = "ELFCAR"
     baderkit_class = ElfRadii
+    baderkit_kwargs = dict(
+        cnn_kwargs = {}
+        ) # Use CrystalNN instead of voronoi search
 
             

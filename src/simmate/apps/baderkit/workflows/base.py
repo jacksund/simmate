@@ -64,6 +64,7 @@ class BaderkitVaspBase(BaderkitBase):
     reference_filename = None
     baderkit_class = None
     baderkit_subclasses = []
+    baderkit_kwargs = {}
     
     @classmethod
     def get_baderkit_objects(
@@ -88,7 +89,7 @@ class BaderkitVaspBase(BaderkitBase):
             reference_grid=reference_grid,
             total_charge_grid=total_charge_grid,
             pseudopotential_filename=directory / "POTCAR",
-            **kwargs,
+            **cls.baderkit_kwargs,
         )
         
         classes = [bader]
@@ -110,6 +111,7 @@ class BaderkitVaspSpinBase(BaderkitBase):
     reference_filename = None
     baderkit_class = None
     baderkit_subclasses = []
+    baderkit_kwargs = {}
     
     @classmethod
     def get_baderkit_objects(
@@ -137,14 +139,14 @@ class BaderkitVaspSpinBase(BaderkitBase):
             reference_grid=reference_grid_up,
             total_charge_grid=total_charge_grid,
             pseudopotential_filename=directory / "POTCAR",
-            **kwargs,
+            **cls.baderkit_kwargs,
         )
         bader_down = cls.baderkit_class.from_vasp(
             charge_grid=charge_grid_down,
             reference_grid=reference_grid_down,
             total_charge_grid=total_charge_grid,
             pseudopotential_filename=directory / "POTCAR",
-            **kwargs,
+            **cls.baderkit_kwargs,
         )
         
         classes = [bader_up, bader_down]
