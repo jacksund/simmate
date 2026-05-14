@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from .badelf_hse import Badelf__VaspBaderkit__SpinBadelfHseWarren
-from .badelf_pbesol import Badelf__VaspBaderkit__SpinBadelfPbesolWarren
-from .bader import Bader__VaspBaderkit__BaderWarren
-from .elf_analysis import ElfAnalysis__VaspBaderkit__SpinElfAnalysisWarren
-from .radii import ElfAnalysis__VaspBaderkit__ElfRadiiWarren
-from .test import Badelf__Badelf__BadelfTestWarren
+from .badelf_hse import Baderkit__VaspBaderkit__BadelfHseWarren, Baderkit__VaspBaderkit__SpinBadelfHseWarren
+from .badelf_pbesol import Baderkit__VaspBaderkit__BadelfPbesolWarren, Baderkit__VaspBaderkit__SpinBadelfPbesolWarren
+from .bader import Baderkit__VaspBaderkit__BaderWarren
+from .elf_labeler import Baderkit__VaspBaderkit__ElfLabelerPbesolWarren, Baderkit__VaspBaderkit__SpinElfLabelerPbesolWarren
+from .radii import Baderkit__VaspBaderkit__RadiiPbesolWarren
+from .test import Baderkit__Baderkit__BadelfTestWarren

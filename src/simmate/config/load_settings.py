@@ -403,6 +403,13 @@ class SimmateSettings:
             },
             "vasp": {
                 "default_command": "vasp_std > vasp.out",
+                "pseudo_dir": Path.home() / "simmate" / "vasp" / "Potentials",
+                "pseudo_mapping": {
+                    "LDA": "PAW_LDA",
+                    "LDA_GW": "PAW_LDA",
+                    "PBE": "PAW_PBE",
+                    "PBE_GW": "PAW_PBE",
+                },
                 "parallelization": {
                     "ncore": None,
                     "kpar": None,

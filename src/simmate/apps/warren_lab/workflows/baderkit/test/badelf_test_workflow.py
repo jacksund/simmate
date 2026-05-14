@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warren_lab.workflows.static_energy.pbesol import (
-    StaticEnergy__Vasp__PbesolWarren,
-)
-from simmate.workflows.common import StagedWorkflow
-
+from simmate.apps.warren_lab.workflows.baderkit.base import BaderkitStagedBase
+from simmate.apps.baderkit.workflows import Baderkit__Baderkit__Badelf
+from simmate.apps.warren_lab.workflows.static_energy import StaticEnergy__Vasp__PbesolWarren
 
 class StaticEnergy__Vasp__PrebadelfTestWarren(StaticEnergy__Vasp__PbesolWarren):
     """
@@ -27,16 +25,15 @@ class StaticEnergy__Vasp__PrebadelfTestWarren(StaticEnergy__Vasp__PbesolWarren):
     )
 
 
-class Badelf__Badelf__BadelfTestWarren(StagedWorkflow):
+class Baderkit__Baderkit__BadelfTestWarren(BaderkitStagedBase):
     """
     Runs a static energy calculation using very low settings followed by a
     badelf run. This is intended for testing only and is not recommended for
     general use.
     """
 
-    subworkflow_names = [
+    workflows = [
         "static-energy.vasp.warren-lab-prebadelf-test",
-        "bad-elf.badelf.badelf",
+        Baderkit__Baderkit__Badelf,
     ]
 
-    files_to_copy = ["CHGCAR", "ELFCAR", "POTCAR"]

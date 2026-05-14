@@ -2,6 +2,7 @@
 
 from simmate.apps.warren_lab.workflows.relaxation.scan import (
     Relaxation__Vasp__ScanWarren,
+    Relaxation__Vasp__SpinScanWarren
 )
 from simmate.apps.warren_lab.workflows.static_energy.hse import HSE_STATIC_SETTINGS
 
@@ -9,6 +10,14 @@ from simmate.apps.warren_lab.workflows.static_energy.hse import HSE_STATIC_SETTI
 class StaticEnergy__Vasp__ScanWarren(Relaxation__Vasp__ScanWarren):
     """
     Performs a static energy calculation based on the settings for Warren Lab
+    SCAN functional relaxation.
+    """
+
+    _incar_updates = HSE_STATIC_SETTINGS
+
+class StaticEnergy__Vasp__SpinScanWarren(Relaxation__Vasp__SpinScanWarren):
+    """
+    Performs a spin-polarized static energy calculation based on the settings for Warren Lab
     SCAN functional relaxation.
     """
 

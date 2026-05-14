@@ -2,6 +2,7 @@
 
 from simmate.apps.warren_lab.workflows.relaxation.pbesol import (
     Relaxation__Vasp__PbesolWarren,
+    Relaxation__Vasp__SpinPbesolWarren
 )
 from simmate.apps.warren_lab.workflows.static_energy.pbe import PBE_STATIC_SETTINGS
 
@@ -9,6 +10,16 @@ from simmate.apps.warren_lab.workflows.static_energy.pbe import PBE_STATIC_SETTI
 class StaticEnergy__Vasp__PbesolWarren(Relaxation__Vasp__PbesolWarren):
     """
     Performs a static energy calculation based on the settings for Warren Lab
+    PBEsol functional relaxation. This functional is generally considered to
+    be more accurate for solids.
+    (Phys. Rev. Lett. 102, 039902 (2009))
+    """
+
+    _incar_updates = PBE_STATIC_SETTINGS
+
+class StaticEnergy__Vasp__SpinPbesolWarren(Relaxation__Vasp__SpinPbesolWarren):
+    """
+    Performs a spin-polarized static energy calculation based on the settings for Warren Lab
     PBEsol functional relaxation. This functional is generally considered to
     be more accurate for solids.
     (Phys. Rev. Lett. 102, 039902 (2009))

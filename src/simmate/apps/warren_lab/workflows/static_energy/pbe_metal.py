@@ -2,6 +2,7 @@
 
 from simmate.apps.warren_lab.workflows.relaxation.pbe_metal import (
     Relaxation__Vasp__PbeMetalWarren,
+    Relaxation__Vasp__SpinPbeMetalWarren
 )
 from simmate.apps.warren_lab.workflows.static_energy.pbe import PBE_STATIC_SETTINGS
 
@@ -9,6 +10,14 @@ from simmate.apps.warren_lab.workflows.static_energy.pbe import PBE_STATIC_SETTI
 class StaticEnergy__Vasp__PbeMetalWarren(Relaxation__Vasp__PbeMetalWarren):
     """
     Performs a static energy calculation based on the settings for Warren Lab
+    Metal relaxations using the PBE functional.
+    """
+
+    _incar_updates = PBE_STATIC_SETTINGS
+
+class StaticEnergy__Vasp__SpinPbeMetalWarren(Relaxation__Vasp__SpinPbeMetalWarren):
+    """
+    Performs a spin-polarized static energy calculation based on the settings for Warren Lab
     Metal relaxations using the PBE functional.
     """
 
