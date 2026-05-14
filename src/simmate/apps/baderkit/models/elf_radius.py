@@ -9,6 +9,8 @@ class AllElfRadii(BaderkitLocalBase):
     """
     This table contains the elf ionic radii calculated during a badelf calculation
     """
+    
+    range_attribute = "site_indices"
 
     class Meta:
         app_label = "baderkit"
@@ -64,6 +66,8 @@ class AtomElfRadii(BaderkitLocalBase):
     """
     This table contains the elf ionic radii calculated during a badelf calculation
     """
+    
+    range_attribute = "atom_radii"
 
     class Meta:
         app_label = "baderkit"

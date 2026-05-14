@@ -9,6 +9,8 @@ class ElfFeatures(BaderkitLocalBase):
     This table contains the elf features calculated during an elf analysis
     calculation
     """
+    
+    range_attribute = "basin_types"
 
     class Meta:
         app_label = "baderkit"

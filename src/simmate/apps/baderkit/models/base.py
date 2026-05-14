@@ -24,7 +24,7 @@ class BaderkitBase(DatabaseTable):
         abstract = True
         
     structure = table_column.ForeignKey(
-        "baderkit.BaderkitStructure",
+        "baderkit.Baderkit",
         on_delete=table_column.CASCADE,
         related_name="%(class)s",
         blank=True,
@@ -98,6 +98,7 @@ class BaderkitLocalBase(DatabaseTable):
     This is an abstract table for tables that hold data on local structure rather
     than the full structure (e.g. radii, elf basins, etc.)
     """
+    range_attribute = None
     
     class Meta:
         abstract = True
@@ -123,7 +124,7 @@ class BaderkitLocalBase(DatabaseTable):
         
         model_columns = cls.get_column_names()
         
-        for i in range(len(getattr(baderkit_class, model_columns[0]))):
+        for i in range(len(getattr(baderkit_class, cls.range_attribute))):
             # link to parent
             results = {
                 parent_name : parent_entry,
@@ -132,7 +133,7 @@ class BaderkitLocalBase(DatabaseTable):
                 for subdict in results_dict.values():
                     test_attr = subdict.get(key, None)
                     if test_attr is not None:
-                        results[key] = test_attr
+                        results[key] = test_attr[i]
                         break
     
             # create a new entry
@@ -249,16 +250,16 @@ class Baderkit(Structure, Calculation):
             model_object = getattr(self, entry_name)
             if model_object is None:
                 continue
-            model = model_object.__class__
+            model = model_object.model
             # create a new entry
             entry = model.from_baderkit(
                 self,
                 baderkit_object, 
                 directory, 
                 **kwargs)
-            setattr(self, entry_name, entry)
+            # setattr(self, entry_name, entry)
             
         # save results to db
         data.update(**all_kwargs)
-        self.update_from_fields(data)
+        self.update_from_fields(**data)
         self.save()

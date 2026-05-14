@@ -19,9 +19,9 @@ class BaderkitBase(Workflow, ABC):
     use_database = True
     database_table = Baderkit
     
-    @abstractmethod
     @classmethod
-    def get_baderkit_classes(
+    @abstractmethod
+    def get_baderkit_objects(
         cls,
         directory: Path = None,
         **kwargs
@@ -37,17 +37,18 @@ class BaderkitBase(Workflow, ABC):
         **kwargs,
     ):
         # get classes
-        baderkit_classes = cls.get_baderkit_classes(directory, **kwargs)
+        baderkit_objects = cls.get_baderkit_objects(directory, **kwargs)
         
         # write results to file
-        for baderkit_class in baderkit_classes:
+        for baderkit_class in baderkit_objects:
             if baderkit_class.spin_system == "not polarized":
-                baderkit_class.to_json(directory / f"{baderkit_class.__cls__.__name__.lower()}.json")
+                baderkit_class.write_json(directory / f"{baderkit_class.__class__.__name__.lower()}.json")
             else:
-                baderkit_class.to_json(directory / f"{baderkit_class.__cls__.__name__.lower()}_{baderkit_class.spin_system}.json")
+                baderkit_class.write_json(directory / f"{baderkit_class.__class__.__name__.lower()}_{baderkit_class.spin_system}.json")
         
-        # save results to database
-        cls.database_table.update_from_baderkit(baderkit_classes, directory=directory, **kwargs)
+        # Get the entry for this run
+        database_entry = cls.database_table.objects.get(run_id=run_id)
+        database_entry.update_from_baderkit(baderkit_objects=baderkit_objects, directory=directory, **kwargs)
         
         # remove copied files to save space
         for file in cls.use_previous_directory:
@@ -65,7 +66,7 @@ class BaderkitVaspBase(BaderkitBase):
     baderkit_subclasses = []
     
     @classmethod
-    def get_baderkit_classes(
+    def get_baderkit_objects(
         cls,
         directory: Path = None,
         **kwargs
@@ -77,7 +78,7 @@ class BaderkitVaspBase(BaderkitBase):
         # load CHGCAR
         charge_grid = Grid.from_vasp(directory / cls.charge_filename)
         # load reference
-        if cls.reference_filename is None:
+        if cls.reference_filename is not None:
             reference_grid = Grid.from_vasp(directory/cls.reference_filename, total_only=False)
         else:
             reference_grid = total_charge_grid
@@ -111,7 +112,7 @@ class BaderkitVaspSpinBase(BaderkitBase):
     baderkit_subclasses = []
     
     @classmethod
-    def get_baderkit_classes(
+    def get_baderkit_objects(
         cls,
         directory: Path = None,
         **kwargs
