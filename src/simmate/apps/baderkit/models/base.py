@@ -5,10 +5,12 @@ import re
 
 import numpy as np
 
-from simmate.database.base_data_types import (
-    Calculation,
-    DatabaseTable,
+from simmate.database.mixins import (
     Structure,
+    Calculation,
+)
+from simmate.database.core import (
+    DatabaseTable,
     table_column
     )
 

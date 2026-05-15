@@ -5,7 +5,7 @@ from pathlib import Path
 from pymatgen.core import Element
 
 # The location of the POTCARs is stored in our settings
-from simmate.configuration import settings
+from simmate.config import settings
 
 # These are dictionaries that tell us which POTCARs we should grab based on
 # the type of calculation
