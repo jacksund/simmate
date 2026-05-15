@@ -175,6 +175,11 @@ class Structure(DatabaseTable):
     # chemical_system=django_api_filters.CharFilter(
     #     method="filter_chemical_system",
     # )
+    is_invalid_structure = table_column.BooleanField(blank=True, null=True)
+    """
+    Whether or not the Structure is valid? Jack feel free to remove this but
+    it's in the most recent Jarvis and Materials Project archives.
+    """
 
     structure = table_column.TextField(blank=True, null=True)
     """
