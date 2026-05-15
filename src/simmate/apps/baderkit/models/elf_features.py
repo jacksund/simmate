@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.base_data_types import table_column
+from simmate.database.core import table_column
 from .base import BaderkitLocalBase
 
 

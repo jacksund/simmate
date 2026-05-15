@@ -2,7 +2,7 @@
 
 from .base import BaderkitBase
 from .elf_radius import AllElfRadii, AtomElfRadii
-from simmate.database.base_data_types import table_column
+from simmate.database.core import table_column
 
 
 class ElfRadii(BaderkitBase):

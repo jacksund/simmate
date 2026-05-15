@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .base import BaderkitBase
-from simmate.database.base_data_types import table_column
+from simmate.database.core import table_column
 
 
 class Badelf(BaderkitBase):
