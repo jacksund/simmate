@@ -78,6 +78,7 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
             system=cls.system,
             electrons=cls.electrons,
             ions=cls.ions,
+            cell=cls.cell,
             fcp=cls.fcp,
             rism=cls.rism,
         )
@@ -109,6 +110,21 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
     Configuration for generating the k-points grid for each input. This
     config is passed to `Kpoints.from_dynamic`
     """
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def get_config(cls):
+        """
+        Grabs the overall settings from the class. This is useful for printing out
+        settings for users to inspect.
+        """
+        return {
+            "pwscf_in": cls.full_settings,
+            "psuedo_mappings_set": cls.psuedo_mappings_set,
+            "k_points": cls.k_points,
+            "error_handlers": [e.name for e in cls.error_handlers],
+        }
 
     # -------------------------------------------------------------------------
 
