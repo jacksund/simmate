@@ -1,91 +1,99 @@
-<table class="table table-centered table-striped mb-4 border">
-    <thead class="table-primary">
-        <tr>
-            <th style="width: 45%">Stability and Energy</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Final Energy</td>
-            <td>{{ table_entry.energy|floatformat:4|default:"--" }} eV</td>
-        </tr>
-        <tr>
-            <td>Final Energy (Per Atom)</td>
-            <td>{{ table_entry.energy_per_atom|floatformat:4|default:"--" }} eV/atom</td>
-        </tr>
-        <tr>
-            <td>
-                Stable (E<sub>hull</sub> = 0)
-            </td>
-            <td>
-                {% if table_entry.is_stable %}
-                    <i class="bi bi-check-circle-fill text-primary"></i>
-                {% else %}
-                    --
-                {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                E<sub>hull</sub> (eV/atom)
-            </td>
-            <td>{{ table_entry.energy_above_hull|floatformat:3|default:"--" }}</td>
-        </tr>
-        <tr>
-            <td>Formation Energy (eV)</td>
-            <td>{{ table_entry.formation_energy|floatformat:3|default:"--" }}</td>
-        </tr>
-        <tr>
-            <td>Formation Energy (Per Atom)</td>
-            <td>{{ table_entry.formation_energy_per_atom|floatformat:3|default:"--" }}</td>
-        </tr>
-        <tr>
-            <td>Decomposes To</td>
-            <td>
-                {% if table_entry.decomposes_to %}
-                    {{ table_entry.decomposes_to|join:", " }}
-                {% else %}
-                    --
-                {% endif %}
-            </td>
-        </tr>
-    </tbody>
-</table>
-<table class="table table-centered table-striped mb-0 border">
-    <thead class="table-primary">
-        <tr>
-            <th style="width: 45%">Electronic Structure</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Band Gap (eV)</td>
-            <td>
-                {% if table_entry.band_gap is not None %}
-                    {{ table_entry.band_gap|floatformat:3 }}
-                    {% if table_entry.is_gap_direct %}
-                        (direct)
-                    {% else %}
-                        (indirect)
-                    {% endif %}
-                {% else %}
-                    --
-                {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <td>Fermi Energy (eV)</td>
-            <td>{{ table_entry.energy_fermi|floatformat:3|default:"--" }}</td>
-        </tr>
-        <tr>
-            <td>CBM (eV)</td>
-            <td>{{ table_entry.conduction_band_minimum|floatformat:3|default:"--" }}</td>
-        </tr>
-        <tr>
-            <td>VBM (eV)</td>
-            <td>{{ table_entry.valence_band_maximum|floatformat:3|default:"--" }}</td>
-        </tr>
-    </tbody>
-</table>
+<div class="row">
+    <!-- Energy Table -->
+    <div class="col-md-6">
+        <table class="table table-centered table-striped mb-4 border">
+            <thead class="table-primary">
+                <tr>
+                    <th style="width: 55%">Energy</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Final Energy</td>
+                    <td>{{ table_entry.energy|floatformat:4|default:"--" }} eV</td>
+                </tr>
+                <tr>
+                    <td>Final Energy (Per Atom)</td>
+                    <td>{{ table_entry.energy_per_atom|floatformat:4|default:"--" }} eV/atom</td>
+                </tr>
+                <tr>
+                    <td>Formation Energy</td>
+                    <td>{{ table_entry.formation_energy|floatformat:3|default:"--" }} eV</td>
+                </tr>
+                <tr>
+                    <td>Formation Energy (Per Atom)</td>
+                    <td>{{ table_entry.formation_energy_per_atom|floatformat:3|default:"--" }} eV/atom</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- Stability Table -->
+    <div class="col-md-6">
+        <table class="table table-centered table-striped mb-4 border">
+            <thead class="table-primary">
+                <tr>
+                    <th style="width: 55%">Stability</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        Stable (E<sub>hull</sub> = 0)
+                    </td>
+                    <td>
+                        {% if table_entry.is_stable %}
+                            <i class="bi bi-check-circle-fill text-primary"></i>
+                        {% else %}
+                            --
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        E<sub>hull</sub> (eV/atom)
+                    </td>
+                    <td>{{ table_entry.energy_above_hull|floatformat:3|default:"--" }}</td>
+                </tr>
+                <tr>
+                    <td>Decomposes To</td>
+                    <td>
+                        {% if table_entry.decomposes_to %}
+                            {{ table_entry.decomposes_to|join:", " }}
+                        {% else %}
+                            --
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Placeholder Row for Plots -->
+<div class="row mt-2">
+    <div class="col-md-6 mb-4">
+        <div class="bg-light border rounded p-5 text-center text-muted"
+             style="min-height: 300px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center">
+            <div>
+                <i class="bi bi-bar-chart-fill mb-2" style="font-size: 2rem;"></i>
+                <p class="mb-0">Energy Distribution Histogram Placeholder</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="bg-light border rounded p-5 text-center text-muted"
+             style="min-height: 300px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center">
+            <div>
+                <i class="bi bi-graph-up-arrow mb-2" style="font-size: 2rem;"></i>
+                <p class="mb-0">Hull Diagram Plot Placeholder</p>
+            </div>
+        </div>
+    </div>
+</div>
