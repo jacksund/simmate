@@ -10,7 +10,8 @@ from .baderkit import (
     Baderkit__VaspBaderkit__RadiiPbesolWarren,
     Baderkit__VaspBaderkit__SpinBadelfHseWarren,
     Baderkit__VaspBaderkit__SpinBadelfPbesolWarren,
-    Baderkit__VaspBaderkit__SpinElfLabelerPbesolWarren
+    Baderkit__VaspBaderkit__SpinElfLabelerPbesolWarren,
+    Baderkit__VaspBaderkit__ElectrideFinderWarren,
 )
 from .relaxation import (
     Relaxation__Vasp__HseWarren,

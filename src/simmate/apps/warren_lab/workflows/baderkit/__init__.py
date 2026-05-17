@@ -6,3 +6,4 @@ from .bader import Baderkit__VaspBaderkit__BaderWarren
 from .elf_labeler import Baderkit__VaspBaderkit__ElfLabelerPbesolWarren, Baderkit__VaspBaderkit__SpinElfLabelerPbesolWarren
 from .radii import Baderkit__VaspBaderkit__RadiiPbesolWarren
 from .test import Baderkit__Baderkit__BadelfTestWarren
+from .electride_finder import Baderkit__VaspBaderkit__ElectrideFinderWarren
