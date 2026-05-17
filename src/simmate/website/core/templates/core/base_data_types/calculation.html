@@ -1,7 +1,7 @@
-<table class="table table-centered table-striped mb-0 border">
+<table class="table table-centered table-striped mb-4 border">
     <thead class="table-primary">
         <tr>
-            <th style="width: 45%">Calculation Details</th>
+            <th style="width: 45%">Workflow Details</th>
             <th></th>
         </tr>
     </thead>
@@ -29,26 +29,16 @@
                 <small class="text-muted">{{ table_entry.run_id }}</small>
             </td>
         </tr>
+    </tbody>
+</table>
+<table class="table table-centered table-striped mb-4 border">
+    <thead class="table-primary">
         <tr>
-            <td>Queue Time</td>
-            <td>
-                {% if table_entry.queue_time %}
-                    {{ table_entry.queue_time|floatformat:1 }} seconds
-                {% else %}
-                    --
-                {% endif %}
-            </td>
+            <th style="width: 45%">Execution</th>
+            <th></th>
         </tr>
-        <tr>
-            <td>Total Time</td>
-            <td>
-                {% if table_entry.total_time %}
-                    {{ table_entry.total_time|floatformat:1 }} seconds
-                {% else %}
-                    --
-                {% endif %}
-            </td>
-        </tr>
+    </thead>
+    <tbody>
         <tr>
             <td>Computer System</td>
             <td>{{ table_entry.computer_system|default:"--" }}</td>
@@ -66,6 +56,36 @@
                     <span class="badge text-warning">{{ table_entry.corrections|length }}</span>
                 {% else %}
                     0
+                {% endif %}
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table class="table table-centered table-striped mb-0 border">
+    <thead class="table-primary">
+        <tr>
+            <th style="width: 45%">Timings</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Queue Time</td>
+            <td>
+                {% if table_entry.queue_time %}
+                    {{ table_entry.queue_time|floatformat:1 }} seconds
+                {% else %}
+                    --
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Total Time</td>
+            <td>
+                {% if table_entry.total_time %}
+                    {{ table_entry.total_time|floatformat:1 }} seconds
+                {% else %}
+                    --
                 {% endif %}
             </td>
         </tr>
