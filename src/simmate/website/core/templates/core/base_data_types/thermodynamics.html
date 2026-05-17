@@ -1,0 +1,81 @@
+<table class="table table-centered table-striped mb-0 border">
+    <thead class="table-primary">
+        <tr>
+            <th style="width: 45%">Stability and Energy</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Final Energy</td>
+            <td>{{ table_entry.energy|floatformat:4|default:"--" }} eV</td>
+        </tr>
+        <tr>
+            <td>Final Energy (Per Atom)</td>
+            <td>{{ table_entry.energy_per_atom|floatformat:4|default:"--" }} eV/atom</td>
+        </tr>
+        <tr>
+            <td>
+                Stable (E<sub>hull</sub> = 0)
+            </td>
+            <td>
+                {% if table_entry.is_stable %}
+                    <i class="bi bi-check-circle-fill text-primary"></i>
+                {% else %}
+                    --
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                E<sub>hull</sub> (eV/atom)
+            </td>
+            <td>{{ table_entry.energy_above_hull|floatformat:3|default:"--" }}</td>
+        </tr>
+        <tr>
+            <td>Formation Energy (eV)</td>
+            <td>{{ table_entry.formation_energy|floatformat:3|default:"--" }}</td>
+        </tr>
+        <tr>
+            <td>Formation Energy (Per Atom)</td>
+            <td>{{ table_entry.formation_energy_per_atom|floatformat:3|default:"--" }}</td>
+        </tr>
+        <tr>
+            <td>Decomposes To</td>
+            <td>
+                {% if table_entry.decomposes_to %}
+                    {{ table_entry.decomposes_to|join:", " }}
+                {% else %}
+                    --
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Band Gap (eV)</td>
+            <td>
+                {% if table_entry.band_gap is not None %}
+                    {{ table_entry.band_gap|floatformat:3 }}
+                    {% if table_entry.is_gap_direct %}
+                        (direct)
+                    {% else %}
+                        (indirect)
+                    {% endif %}
+                {% else %}
+                    --
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Fermi Energy (eV)</td>
+            <td>{{ table_entry.energy_fermi|floatformat:3|default:"--" }}</td>
+        </tr>
+        <tr>
+            <td>CBM (eV)</td>
+            <td>{{ table_entry.conduction_band_minimum|floatformat:3|default:"--" }}</td>
+        </tr>
+        <tr>
+            <td>VBM (eV)</td>
+            <td>{{ table_entry.valence_band_maximum|floatformat:3|default:"--" }}</td>
+        </tr>
+    </tbody>
+</table>

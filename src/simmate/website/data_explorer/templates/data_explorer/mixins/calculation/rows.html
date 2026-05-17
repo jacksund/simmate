@@ -1,17 +1,5 @@
 <td>{{ entry.run_id|truncatechars:10 }}</td>
-<td>
-    {% if entry.status == "Completed" %}
-        {% status_bar "Completed" "success" %}
-    {% elif entry.status == "Running" %}
-        {% status_bar "Running" "primary" %}
-    {% elif entry.status == "Failed" %}
-        {% status_bar "Failed" "danger" %}
-    {% elif entry.status == "Canceled" %}
-        {% status_bar "Canceled" "warning" %}
-    {% else %}
-        {% status_bar entry.status|default:"Pending" "secondary" %}
-    {% endif %}
-</td>
+<td>{% include "data_explorer/mixins/calculation/status.html" with status=entry.status %}</td>
 <td>
     <a href="{% url 'workflow_explorer:workflow_detail' entry.workflow_name %}">
         {{ entry.workflow_name }}
@@ -21,7 +9,10 @@
 <td>{{ entry.workflow_version }}</td>
 <td>{{ entry.queue_time|floatformat:1|default:"--" }}</td>
 <td>{{ entry.total_time|floatformat:1|default:"--" }}</td>
-<td>{{ entry.computer_system|default:"--" }}</td>
+<td>{{ entry.computer_system|default:"--"|truncatechars:20 }}</td>
+<td>
+    <small>{{ entry.directory|default:"--"|truncatechars:25 }}</small>
+</td>
 <td>
     {% if entry.corrections %}
         <span class="badge text-warning">{{ entry.corrections|length }}</span>

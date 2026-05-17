@@ -1,0 +1,113 @@
+<div class="row">
+    <!-- Forces Column -->
+    <div class="col-md-7">
+        <table class="table table-centered table-striped mb-3 border">
+            <thead class="table-primary">
+                <tr>
+                    <th style="width: 50%">Site Forces</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Max</td>
+                    <td>{{ table_entry.site_force_norm_max|floatformat:4|default:"--" }} eV/&Aring;</td>
+                </tr>
+                <tr>
+                    <td>Norm</td>
+                    <td>{{ table_entry.site_forces_norm|floatformat:4|default:"--" }} eV/&Aring;</td>
+                </tr>
+                <tr>
+                    <td>Norm per Atom</td>
+                    <td>{{ table_entry.site_forces_norm_per_atom|floatformat:4|default:"--" }} eV/&Aring;</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="border rounded mb-3"
+             style="max-height: 500px;
+                    overflow-y: auto">
+            <table class="table table-centered table-striped mb-0">
+                <thead class="table-primary sticky-top">
+                    <tr>
+                        <th colspan="4" class="text-center">Site Forces List (eV/&Aring;)</th>
+                    </tr>
+                    <tr class="text-center">
+                        <th>Site</th>
+                        <th>
+                            F<sub>x</sub>
+                        </th>
+                        <th>
+                            F<sub>y</sub>
+                        </th>
+                        <th>
+                            F<sub>z</sub>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    {% if table_entry.site_forces %}
+                        {% for force in table_entry.site_forces %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ force.0|floatformat:4 }}</td>
+                                <td>{{ force.1|floatformat:4 }}</td>
+                                <td>{{ force.2|floatformat:4 }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4">--</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Stress Column -->
+    <div class="col-md-5">
+        <table class="table table-centered table-striped mb-3 border">
+            <thead class="table-primary">
+                <tr>
+                    <th style="width: 50%">Lattice Stress</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Norm</td>
+                    <td>
+                        {{ table_entry.lattice_stress_norm|floatformat:4|default:"--" }} eV/&Aring;<sup>3</sup>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Norm per Atom</td>
+                    <td>
+                        {{ table_entry.lattice_stress_norm_per_atom|floatformat:4|default:"--" }} eV/&Aring;<sup>3</sup>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table table-centered table-striped mb-3 border">
+            <thead class="table-primary">
+                <tr>
+                    <th colspan="3">
+                        Lattice Stress Matrix (eV/&Aring;<sup>3</sup>)
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                {% if table_entry.lattice_stress %}
+                    {% for row in table_entry.lattice_stress %}
+                        <tr>
+                            {% for val in row %}<td>{{ val|floatformat:4 }}</td>{% endfor %}
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3">--</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>

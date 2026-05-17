@@ -8,21 +8,20 @@
     <tbody>
         <tr>
             <td>Status</td>
-            <td>
-                {% if table_entry.status == "Completed" %}
-                    <span class="badge bg-success">{{ table_entry.status }}</span>
-                {% elif table_entry.status == "Failed" %}
-                    <span class="badge bg-danger">{{ table_entry.status }}</span>
-                {% elif table_entry.status == "Running" %}
-                    <span class="badge bg-primary">{{ table_entry.status }}</span>
-                {% else %}
-                    <span class="badge bg-secondary">{{ table_entry.status|default:"Pending" }}</span>
-                {% endif %}
-            </td>
+            <td>{% include "data_explorer/mixins/calculation/status.html" with status=table_entry.status %}</td>
         </tr>
         <tr>
             <td>Workflow</td>
-            <td>{{ table_entry.workflow_name }} (v{{ table_entry.workflow_version }})</td>
+            <td>
+                <a href="{% url 'workflow_explorer:workflow_detail' table_entry.workflow_name %}">
+                    {{ table_entry.workflow_name }}
+                    <small><i class="bi bi-box-arrow-up-right"></i></small>
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td>Workflow Version</td>
+            <td>v{{ table_entry.workflow_version }}</td>
         </tr>
         <tr>
             <td>Run ID</td>
@@ -31,12 +30,14 @@
             </td>
         </tr>
         <tr>
-            <td>Started At</td>
-            <td>{{ table_entry.started_at|default:"--" }}</td>
-        </tr>
-        <tr>
-            <td>Finished At</td>
-            <td>{{ table_entry.finished_at|default:"--" }}</td>
+            <td>Queue Time</td>
+            <td>
+                {% if table_entry.queue_time %}
+                    {{ table_entry.queue_time|floatformat:1 }} seconds
+                {% else %}
+                    --
+                {% endif %}
+            </td>
         </tr>
         <tr>
             <td>Total Time</td>
@@ -57,6 +58,32 @@
             <td>
                 <small>{{ table_entry.directory|default:"--" }}</small>
             </td>
+        </tr>
+        <tr>
+            <td>Error Corrections</td>
+            <td>
+                {% if table_entry.corrections %}
+                    <span class="badge text-warning">{{ table_entry.corrections|length }}</span>
+                {% else %}
+                    0
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Created At</td>
+            <td>{{ table_entry.created_at|date:"M. jS Y @ P T" }}</td>
+        </tr>
+        <tr>
+            <td>Started At</td>
+            <td>{{ table_entry.started_at|date:"M. jS Y @ P T"|default:"--" }}</td>
+        </tr>
+        <tr>
+            <td>Finished At</td>
+            <td>{{ table_entry.finished_at|date:"M. jS Y @ P T"|default:"--" }}</td>
+        </tr>
+        <tr>
+            <td>Updated At</td>
+            <td>{{ table_entry.updated_at|date:"M. jS Y @ P T" }}</td>
         </tr>
     </tbody>
 </table>
