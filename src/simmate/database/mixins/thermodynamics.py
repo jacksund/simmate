@@ -13,7 +13,12 @@ from ..core import DatabaseTable, table_column
 
 # BUG: This prints a tqdm error so we silence it here.
 with warnings.catch_warnings(record=True):
-    from pymatgen.analysis.phase_diagram import PDEntry, PDPlotter, PhaseDiagram
+    from pymatgen.analysis.phase_diagram import (
+        PDEntry, 
+        PDPlotter, 
+        PhaseDiagram,
+        PatchedPhaseDiagram
+        )
 
 
 class Thermodynamics(DatabaseTable):
@@ -109,21 +114,20 @@ class Thermodynamics(DatabaseTable):
         # If as_dict is false, we build this into an Object. Otherwise, just
         # return the dictionary
         return data if as_dict else cls(**data)
-
+    
     @classmethod
-    def update_chemical_system_stabilities(
+    def _update_from_entries(
         cls,
-        chemical_system: str,
-        workflow_name: str = None,
+        phase_diagram,
+        entries,
+        entries_pmg,
     ):
-        phase_diagram, entries, entries_pmg = cls.get_phase_diagram(
-            chemical_system,
-            return_entries=True,
-            workflow_name=workflow_name,
-        )
-
         # now go through the entries and update stability values
-        for entry, entry_pmg in zip(entries, entries_pmg):
+        logging.info("Calculating energies above hull")
+        for idx in track(range(len(entries))):
+            # (idx used becaused track didn't seem to like zip(x,y))
+            entry = entries[idx]
+            entry_pmg = entries_pmg[idx]
             decomp, hull_energy = phase_diagram.get_decomp_and_e_above_hull(entry_pmg)
 
             entry.energy_above_hull = hull_energy
@@ -140,8 +144,9 @@ class Thermodynamics(DatabaseTable):
             entry.formation_energy_per_atom = phase_diagram.get_form_energy_per_atom(
                 entry_pmg
             )
-
-        # Now that we updated our objects, we want to collectively update them
+            
+            # Now that we updated our objects, we want to collectively update them
+        logging.info("Saving to Database")
         cls.objects.bulk_update(
             objs=entries,
             fields=[
@@ -157,24 +162,75 @@ class Thermodynamics(DatabaseTable):
         )
 
     @classmethod
-    def update_all_stabilities(cls, workflow_name: str = None):
-        # grab all unique chemical systems
-        chemical_systems = cls.objects.values_list(
-            "chemical_system", flat=True
-        ).distinct()
+    def update_chemical_system_stabilities(
+        cls,
+        chemical_system: str,
+        workflow_name: str = None,
+    ):
+        # get phase diagram
+        phase_diagram, entries, entries_pmg = cls.get_phase_diagram(
+            chemical_system,
+            return_entries=True,
+            workflow_name=workflow_name,
+        )
+        # update and save
+        cls._update_from_entries(
+            phase_diagram=phase_diagram,
+            entries=entries,
+            entries_pmg=entries_pmg,
+            )
 
-        # Now  go through each and run the analysis.
-        # OPTIMIZE: Some systems will be analyzed multiple times. For example,
-        # C would be repeatedly updated through C, C-O, Y-C-F, etc.
-        for chemical_system in track(chemical_systems):
-            try:
-                cls.update_chemical_system_stabilities(
-                    chemical_system,
-                    workflow_name,
-                )
-            except ValueError as exception:
-                logging.warning(f"Failed for {chemical_system} with error: {exception}")
+    @classmethod
+    def update_all_stabilities(
+            cls, 
+            workflow_name: str = None,
+            ):
+        # get all entries in this table with results
+        entries = cls.objects.filter(
+            energy__isnull=False,  # only completed calculations
+        )
+        # add an extra filter if provided
+        if workflow_name:
+            entries = entries.filter(workflow_name=workflow_name)
 
+        # now make the query
+        entries = entries.only("id", "energy", "formula_full").all()
+        
+        # generate PDEntry objects
+        entries_pmg = []
+        logging.info("Generating phase diagram entries")
+        for entry in track(entries):
+            pde = PDEntry(
+                composition=entry.formula_full,
+                energy=entry.energy,
+                # name=entry.id,  see bug below
+            )
+
+            # BUG: pymatgen grabs entry_id, when it should really be grabbing name.
+            # https://github.com/materialsproject/pymatgen/blob/de17dd84ba90dbf7a8ed709a33d894a4edb82d02/pymatgen/analysis/phase_diagram.py#L2926
+            pde.entry_id = f"id={entry.id}"
+            entries_pmg.append(pde)
+
+        # create a PatchedPhaseDiagram object from pymatgen
+        # NOTE: This is specifically designed for extremely large phase spaces
+        # and automatically breaks them down into subsets. This is ~20-30x faster
+        # than making a new PhaseDiagram object for each composition as it reuses
+        # calculations from smaller subsets of the convex hull. -Sam W.
+        logging.info("Generating phase diagram. This may take several minutes.")
+        phase_diagram = PatchedPhaseDiagram(
+            entries=entries_pmg,
+            verbose=True,
+            keep_all_spaces=True
+            )
+        
+        # update and save
+        cls._update_from_entries(
+            phase_diagram=phase_diagram,
+            entries=entries,
+            entries_pmg=entries_pmg,
+            )
+
+        
     @classmethod
     def get_phase_diagram(
         cls,
@@ -188,7 +244,7 @@ class Thermodynamics(DatabaseTable):
                 "provide a workflow_name as an input to indicate which entries "
                 "should be loaded/updated."
             )
-
+            
         # if we have a multi-element system, we need to include subsystems as
         # well. ex: Na --> Na, Cl, Na-Cl
         subsystems = get_chemical_subsystems(chemical_system)
@@ -203,7 +259,7 @@ class Thermodynamics(DatabaseTable):
         if workflow_name:
             entries = entries.filter(workflow_name=workflow_name)
 
-        # now make the queryy
+        # now make the query
         entries = entries.only("id", "energy", "formula_full").all()
 
         # convert to pymatgen PDEntries and build into PhaseDiagram object
