@@ -85,7 +85,6 @@
                     {% htmx_structure_input name="structure" label="Structure" allow_database_input=True %}
                 </div>
             {% endif %}
-
             {% if component.is_submission_confirmed %}
                 <div class="row ps-5 py-4">
                     <div class="card border-success shadow-sm">
@@ -130,9 +129,7 @@
                                     0.00 (free)
                                 </div>
                             {% endif %}
-                            <div class="text-center">
-                                {% htmx_button method_name="confirm_pricing" theme="success" icon="check-circle" %}
-                            </div>
+                            <div class="text-center">{% htmx_button method_name="confirm_pricing" theme="success" icon="check-circle" %}</div>
                         {% elif not component.is_submission_confirmed %}
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle">
