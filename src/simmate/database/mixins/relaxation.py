@@ -251,8 +251,10 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
             structure=structures[-1],
             energy=data["ionic_steps"][-1]["e_wo_entrp"],
             # calculate extra data for storing
-            volume_change=structures[-1].volume
-            - structures[0].volume / structures[0].volume,
+            volume_change=(
+                (structures[-1].volume - structures[0].volume) / structures[0].volume
+            )
+            * 100,
             # There is also extra data for the final structure that we save directly
             # in the relaxation table.  We use .get() in case the key isn't provided.
             band_gap=data.get("bandgap"),
@@ -307,8 +309,10 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
             structure=structures[-1],
             energy=energies[-1],
             # calculate extra data for storing
-            volume_change=structures[-1].volume
-            - structures[0].volume / structures[0].volume,
+            volume_change=(
+                (structures[-1].volume - structures[0].volume) / structures[0].volume
+            )
+            * 100,
             # There is also extra data for the final structure that we save directly
             # in the relaxation table.  We use .get() in case the key isn't provided.
             band_gap=pwscf_run.band_gap,
@@ -428,8 +432,8 @@ class RelaxationConvergence(PlotlyFigure):
 
         # Now let's clean up some formatting and add the axes titles
         figure.update_layout(
-            width=600,
-            height=600,
+            width=550,
+            height=350,
             showlegend=False,
             xaxis3_title="Ionic Step (#)",
             yaxis_title="Energy (eV/atom)",

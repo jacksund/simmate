@@ -52,11 +52,11 @@ def _setup_sssp_single(file_type: str, psuedo_type: str):
 
     # check if file is already present -- otherwise download it
     # TODO: I may need to switch these to a simmate CDN if I get blocked
-    base_url = "https://archive.materialscloud.org/record/file?record_id=1732&filename="
+    url = f"https://archive.materialscloud.org/api/records/rcyfm-68h65/files/{filename}/content"
     file = qe_directory / filename
     if not file.exists():
         logging.info(f"Downloading SSSP {psuedo_type} {file_type}...")
-        urllib.request.urlretrieve(base_url + filename, file)
+        urllib.request.urlretrieve(url, file)
     else:
         logging.info(f"Found existing SSSP {psuedo_type} {file_type}.")
 
@@ -96,7 +96,7 @@ def check_psuedo_setup() -> bool:
     files = [
         "../SSSP_1.3.0_PBE_precision.json",
         "../SSSP_1.3.0_PBE_precision.tar.gz",
-        "../SSSP_1.3.0_PBE_efficiency.tar.gz",
+        "../SSSP_1.3.0_PBE_efficiency.json",
         "../SSSP_1.3.0_PBE_efficiency.tar.gz",
         *[
             mapping["filename"]

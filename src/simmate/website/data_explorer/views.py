@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 
 from simmate.config import settings
@@ -170,6 +171,28 @@ def table_entry(request, table_name, table_entry_id):
 
     elif view_format == "json":
         return table_entry.to_json_response()
+
+    elif view_format == "cif":
+        content = table_entry.to_toolkit().to(fmt="cif")
+        response = HttpResponse(content, content_type="text/plain")
+        response["Content-Disposition"] = f'attachment; filename="{table_entry_id}.cif"'
+        return response
+
+    elif view_format == "poscar":
+        content = table_entry.to_toolkit().to(fmt="poscar")
+        response = HttpResponse(content, content_type="text/plain")
+        response["Content-Disposition"] = (
+            f'attachment; filename="POSCAR_{table_entry_id}"'
+        )
+        return response
+
+    elif view_format == "input":
+        content = table_entry.structure
+        response = HttpResponse(content, content_type="text/plain")
+        response["Content-Disposition"] = (
+            f'attachment; filename="{table_entry_id}_input.txt"'
+        )
+        return response
 
     else:
         raise Exception(f"Unknown 'format' GET arg given: {view_format}")
