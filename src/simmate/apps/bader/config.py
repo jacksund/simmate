@@ -28,3 +28,6 @@ def test_config(run_calcs: bool = False):
     # 4 - read out result of all tests
     passed_all = bool(is_registered and found_command)
     show_test_results("Bader", passed_all)
+
+    # 5 - return result for configs that rely on this app
+    return passed_all
