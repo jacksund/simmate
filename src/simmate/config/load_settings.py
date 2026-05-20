@@ -640,6 +640,14 @@ class SimmateSettings:
         "SIMMATE__CHATBOT__API_KEY": str,
         "SIMMATE__CHATBOT__SQL_URI": str,
         "SIMMATE__CHATBOT__VERBOSE": bool,
+        "SIMMATE__CHEMSPACE__MODE": str,
+        "SIMMATE__CHEMSPACE__S3__URL": str,
+        "SIMMATE__CHEMSPACE__S3__ACCESS_KEY": str,
+        "SIMMATE__CHEMSPACE__S3__SECRET_KEY": str,
+        "SIMMATE__CHEMSPACE__S3__BUCKETS": dict,
+        "SIMMATE__CHEMSPACE__FTP__HOST": str,
+        "SIMMATE__CHEMSPACE__FTP__USER": str,
+        "SIMMATE__CHEMSPACE__FTP__PASSWORD": str,
     }
 
 
