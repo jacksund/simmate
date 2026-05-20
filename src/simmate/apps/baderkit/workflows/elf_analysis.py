@@ -2,8 +2,8 @@
 import os
 from pathlib import Path
 
-from baderkit.core import ElfLabeler, SpinElfLabeler
-from baderkit.core.labelers.bifurcation_graph.enum_and_styling import FeatureType
+from baderkit.elf_analysis import ElfLabeler
+from baderkit.elf_analysis.elf_labeler.enum_and_styling import FeatureType
 
 from simmate.apps.baderkit.models import (
     ElfAnalysisCalculation,

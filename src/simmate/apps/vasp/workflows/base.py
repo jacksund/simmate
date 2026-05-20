@@ -36,7 +36,7 @@ class VaspWorkflow(S3Workflow, StructureWorkflow):
     required_files = ["INCAR", "POTCAR", "POSCAR"]
     exclude_from_archives = ["POTCAR"]
 
-    command: str = "vasp_std > vasp.out"
+    command: str = settings.vasp.default_command
     """
     The command to call vasp, which is typically vasp_std. To ensure error
     handlers work properly, make sure your command has "> vasp.out" at the end.

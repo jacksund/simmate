@@ -1,46 +1,17 @@
 # -*- coding: utf-8 -*-
-from pathlib import Path
 
-from baderkit.core import Bader, Grid
+from baderkit import Bader
 
-from simmate.apps.baderkit.models.bader import Bader as BaderModel
-from simmate.workflows.core import Workflow
+from simmate.apps.baderkit.workflows.base import BaderkitVaspBase
 
 
-class Bader__Baderkit__Bader(Workflow):
-    required_files = ["AECCAR0", "AECCAR2", "CHGCAR", "POTCAR"]
-    use_database = True
-    database_table = BaderModel
-    use_previous_directory = ["AECCAR0", "AECCAR2", "CHGCAR", "POTCAR"]
-    # parent_workflows = [
-    #     "population-analysis.vasp-baderkit.bader-warren-lab",
-    #     ]
+class Baderkit__Baderkit__Bader(BaderkitVaspBase):
 
     """
     Runs a Bader charge analysis on VASP outputs using the BaderKit package.
     """
+    required_files = ["AECCAR0", "AECCAR2", "CHGCAR", "POTCAR"]
+    use_previous_directory = ["AECCAR0", "AECCAR2", "CHGCAR", "POTCAR"]
+    charge_filename = "CHGCAR"
+    baderkit_class = Bader
 
-    @classmethod
-    def run_config(
-        cls,
-        previous_directory: Path,
-        source: dict = None,
-        directory: Path = None,
-        run_id=None,
-        **kwargs,
-    ):
-        # create CHGCAR_sum grid
-        grid1 = Grid.from_vasp(directory / "AECCAR0")
-        grid2 = Grid.from_vasp(directory / "AECCAR2")
-        reference_grid = grid1.linear_add(grid2)
-        # load CHGCAR
-        charge_grid = Grid.from_vasp(directory / "CHGCAR")
-        # create Bader
-        bader = Bader(
-            charge_grid=charge_grid,
-            reference_grid=reference_grid,
-            **kwargs,
-        )
-        # get the table for this workflow and update entry
-        datatable = cls.database_table.objects.get(run_id=run_id)
-        datatable.update_from_baderkit(bader, directory)

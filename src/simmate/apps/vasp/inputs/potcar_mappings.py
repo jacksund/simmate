@@ -1,26 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
-
-# grab the users set directory for all of their VASP POTCAR files
-# TODO - for now, I assume that the directory is located in...
-#   [home_directory] ~/simmate/vasp/Potentials
-potcar_dir = Path.home() / "simmate" / "vasp" / "Potentials"
-
-
-# This maps out where functional POTCARs are located. All of these
-# files should be located in the same Potentals directory and follow
-# the original folder structure provided by VASP.
-FOLDER_MAPPINGS = {
-    "LDA": potcar_dir / "LDA" / "potpaw_LDA",
-    "LDA.52": potcar_dir / "LDA" / "potpaw_LDA.52",
-    "LDA.54": potcar_dir / "LDA" / "potpaw_LDA.54",
-    "PBE": potcar_dir / "PBE" / "potpaw_PBE",
-    "PBE.52": potcar_dir / "PBE" / "potpaw_PBE.52",
-    "PBE.54": potcar_dir / "PBE" / "potpaw_PBE.54",
-    "PBE_GW": potcar_dir / "PBE" / "potpaw_PBE.54",
-}
-
 # We need to map which POTCAR to grab for each element based off of the type
 # of calculation we are doing. To see how these were selected, you should look
 # at the following:

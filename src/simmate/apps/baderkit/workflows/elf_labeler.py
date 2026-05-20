@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from baderkit.elf_analysis import Badelf
+from baderkit.elf_analysis import ElfLabeler
 from simmate.apps.baderkit.workflows.base import BaderkitVaspBase, BaderkitVaspSpinBase
 
 
-class Baderkit__Baderkit__Badelf(BaderkitVaspBase):
+class Baderkit__Baderkit__ElfLabeler(BaderkitVaspBase):
     """
-    Runs a BadELF analysis without running a static
+    Runs a ElfLabeler analysis without running a static
     energy calculation. The directory must already have an
     ELFCAR and CHGCAR with the same grid size as well as the AECCAR0 and
     AECCAR2 files.
@@ -18,13 +18,12 @@ class Baderkit__Baderkit__Badelf(BaderkitVaspBase):
     use_previous_directory = ["AECCAR0", "AECCAR2", "CHGCAR", "ELFCAR", "POTCAR"]
     charge_filename = "CHGCAR"
     reference_filename = "ELFCAR"
-    baderkit_class = Badelf
-    baderkit_subclasses = ["labeler", "elf_radii"]
+    baderkit_class = ElfLabeler
 
             
-class Baderkit__Baderkit__SpinBadelf(BaderkitVaspSpinBase):
+class Baderkit__Baderkit__SpinElfLabeler(BaderkitVaspSpinBase):
     """
-    Runs a BadELF analysis without running a static
+    Runs a ElfLabeler analysis without running a static
     energy calculation. The directory must already have an
     ELFCAR and CHGCAR with the same grid size as well as the AECCAR0 and
     AECCAR2 files.
@@ -36,7 +35,4 @@ class Baderkit__Baderkit__SpinBadelf(BaderkitVaspSpinBase):
     use_previous_directory = ["AECCAR0", "AECCAR2", "CHGCAR", "ELFCAR", "POTCAR"]
     charge_filename = "CHGCAR"
     reference_filename = "ELFCAR"
-    baderkit_class = Badelf
-    baderkit_subclasses = ["labeler", "elf_radii"]
-
-
+    baderkit_class = ElfLabeler

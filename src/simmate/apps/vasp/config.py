@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from pathlib import Path
 
-from simmate.apps.vasp.inputs.potcar_mappings import FOLDER_MAPPINGS
+from simmate.config import settings
 from simmate.config.utils import (
     check_app_reg,
     check_command_exists,
@@ -23,12 +24,15 @@ def test_config(run_calcs: bool = False):
 
     # 3 - check for vasp potcars
     has_potcars = True
-    for potential, folder in FOLDER_MAPPINGS.items():
+    pseudo_dir = Path(settings.vasp.pseudo_dir)
+    pseudo_mapping = settings.vasp.pseudo_mapping
+    for functional in pseudo_mapping.keys():
+        folder = pseudo_dir / pseudo_mapping[functional]
         if folder.exists():
-            logging.info(f"{potential} POTCARS found :heavy_check_mark:")
+            logging.info(f"{functional} POTCARS found :heavy_check_mark:")
         else:
             logging.warning(
-                f"{potential} POTCARS not found. These should be placed at... "
+                f"{functional} POTCARS not found. These should be placed at... "
                 f"'{folder}'"
             )
             has_potcars = False
@@ -40,3 +44,6 @@ def test_config(run_calcs: bool = False):
     # 5 - read out result of all tests
     passed_all = bool(is_registered and found_command and has_potcars)
     show_test_results("VASP", passed_all)
+    
+    # 6 - return result for configs that rely on this app
+    return passed_all

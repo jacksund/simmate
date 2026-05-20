@@ -38,3 +38,6 @@ def test_config(run_calcs: bool = False):
     # 5 - read out result of all tests
     passed_all = bool(is_registered and found_command and has_puedos)
     show_test_results("Quantum Espresso", passed_all)
+
+    # 5 - return result for configs that rely on this app
+    return passed_all

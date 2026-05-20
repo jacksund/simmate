@@ -4,10 +4,12 @@ from pathlib import Path
 
 from pymatgen.core import Element
 
+# The location of the POTCARs is stored in our settings
+from simmate.config import settings
+
 # These are dictionaries that tell us which POTCARs we should grab based on
-# the type of calculation as well as where to find them
+# the type of calculation
 from simmate.apps.vasp.inputs.potcar_mappings import (
-    FOLDER_MAPPINGS,
     PBE_GW_POTCAR_MAPPINGS,
     PBE_POTCAR_MAPPINGS,
 )
@@ -46,7 +48,7 @@ class Potcar:
                 potcar_mappings = PBE_GW_POTCAR_MAPPINGS
 
         # based on the functional, grab the proper folder location of all POTCARs
-        folder_loc = FOLDER_MAPPINGS[functional]
+        folder_loc = Path(settings.vasp.pseudo_dir) / settings.vasp.pseudo_mapping[functional]
 
         # we mow need to iterate through each element and find it's POTCAR location
         # we also keep a list of where these are located

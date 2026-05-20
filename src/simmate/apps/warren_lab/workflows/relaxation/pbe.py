@@ -59,7 +59,6 @@ class Relaxation__Vasp__PbeWarren(VaspWorkflow):
         IBRION=2,
         ISIF=3,
         ISMEAR=0,  # Gaussian smearing
-        ISPIN=2,
         KSPACING=0.25,  # This is probably on the edge of good quality
         LASPH=True,
         LORBIT=11,
@@ -192,3 +191,15 @@ class Relaxation__Vasp__PbeWarren(VaspWorkflow):
         LargeSigma(),
         Walltime(),
     ]
+    
+
+class Relaxation__Vasp__SpinPbeWarren(Relaxation__Vasp__PbeWarren):
+    """
+    Runs a spin-polarized VASP relaxation calculation using Warren Lab HSE settings.
+    """
+
+    description_doc_short = "Warren Lab presets for HSE geometry optimization"
+
+    # Tell vasp to use PBEsol instead of PBE
+    _incar_updates = dict(ISPIN=2)
+

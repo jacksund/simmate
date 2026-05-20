@@ -1,165 +1,92 @@
 # -*- coding: utf-8 -*-
 
-from simmate.database.core import DatabaseTable, table_column
+from simmate.database.core import table_column
+from .base import BaderkitLocalBase
 
 
-class ElfFeatures(DatabaseTable):
+class ElfFeatures(BaderkitLocalBase):
     """
     This table contains the elf features calculated during an elf analysis
     calculation
     """
+    
+    range_attribute = "basin_types"
 
     class Meta:
         app_label = "baderkit"
 
-    analysis = table_column.ForeignKey(
-        "baderkit.ElfAnalysis",
+    basin_types = table_column.JSONField(blank=True, null=True)
+    """
+    The type of chemical feature each basin is a part of.
+    """
+
+    basin_charges = table_column.JSONField(blank=True, null=True)
+    """
+    The charge in each ELF basin
+    """
+
+    basin_volumes = table_column.JSONField(blank=True, null=True)
+    """
+    The volume of each ELF basin
+    """
+    
+    maxima_frac = table_column.JSONField(blank=True, null=True)
+    """
+    The fractional coordinates of the maxima of each basin
+    """
+    
+    maxima_center_frac = table_column.JSONField(blank=True, null=True)
+    """
+    The fractional coordinates of the "center of mass" for each maximum in
+    the localization function grid. This is used when determining if a basin
+    is along a bond, and is particularly necessary for ring shaped covalent bonds.
+    """
+    
+    maxima_elf_values = table_column.JSONField(blank=True, null=True)
+    """
+    The ELF value at each basins maximum
+    """
+
+    attractor_shapes = table_column.JSONField(blank=True, null=True)
+    """
+    The shape of the attractor (maximum) in the ELF
+    """
+    
+    attractor_depths = table_column.JSONField(blank=True, null=True)
+    """
+    Difference in value from the maximum to the first value an attractor
+    connects to another.
+    """
+    
+    nearest_atoms = table_column.JSONField(blank=True, null=True)
+    """
+    The closest atom to each basin measured from the center of mass.
+    """
+    
+    nearest_atom_species = table_column.JSONField(blank=True, null=True)
+    """
+    The type of atom to each basin measured from the center of mass.
+    """
+    
+    heavily_polarized = table_column.JSONField(blank=True, null=True)
+    """
+    A boolean array representing which ELF basins are considered heavily
+    polarized towards an atom. The results depend on the 'polarization_cutoff'
+    parameter.
+    """
+    
+    basin_atom_dists = table_column.JSONField(blank=True, null=True)
+    """
+    The closest atom to each basin measured from the center of mass.
+    """
+    
+    basin_dists_beyond_atoms = table_column.JSONField(blank=True, null=True)
+    """
+    The distance from each basin's maximum to the site it is assigned to
+    """
+    
+    elf_labeler = table_column.ForeignKey(
+        "baderkit.ElfLabeler",
         on_delete=table_column.CASCADE,
-        related_name="elf_features",
+        related_name="%(class)s",
     )
-
-    ###########################################################################
-    # Columns for all irreducible domains
-    ###########################################################################
-
-    domain_subtype = table_column.CharField(
-        blank=True,
-        null=True,
-        max_length=75,
-    )
-    """
-    The type of attractor this domain is, e.g. point, ring, cage
-    """
-
-    feature_type = table_column.CharField(
-        blank=True,
-        null=True,
-        max_length=75,
-    )
-    """
-    The type of feature this domain was labeled as, e.g. core, shell, covalent bond, etc.
-    """
-
-    frac_coords = table_column.JSONField(blank=True, null=True)
-    """
-    The fractional coordinates of the local maxima in this feature. There may
-    are often more than one in features such as shells.
-    """
-
-    average_frac_coords = table_column.JSONField(blank=True, null=True)
-    """
-    The merged fractional coordinates of the local maxima in this feature.
-    """
-
-    max_value = table_column.FloatField(blank=True, null=True)
-    """
-    The maximum elf value that this feature exists at
-    """
-
-    min_value = table_column.FloatField(blank=True, null=True)
-    """
-    The minimum elf value that this feature exists at (not inclusive)
-    """
-
-    depth = table_column.FloatField(blank=True, null=True)
-    """
-    The depth of this feature defined as the difference in the maximum ELF
-    to the ELF value at which the feature bifurcated from a larger domain.
-    """
-
-    depth_to_infinite = table_column.FloatField(blank=True, null=True)
-    """
-    The depth of this feature defined as the difference between the
-    maximum ELF of the feature to the ELF at which it connects to an
-    ELF domain extending infinitely
-    """
-
-    charge = table_column.FloatField(blank=True, null=True)
-    """
-    The charge contained in this feature
-    """
-
-    volume = table_column.FloatField(blank=True, null=True)
-    """
-    The volume of this feature
-    """
-
-    nearest_atom = table_column.FloatField(blank=True, null=True)
-    """
-    The index of the nearest atom to this feature
-    """
-
-    nearest_atom_species = table_column.CharField(
-        blank=True,
-        null=True,
-        max_length=10,
-    )
-    """
-    The type of atom that is closest to this feature
-    """
-
-    atom_distance = table_column.FloatField(blank=True, null=True)
-    """
-    The distance from this feature to the nearest atom
-    """
-
-    labeled_structure_index = table_column.IntegerField(blank=True, null=True)
-    """
-    The index of the dummy atom in the labeled structure that this feature belongs
-    to
-    """
-
-    electride_structure_index = table_column.IntegerField(blank=True, null=True)
-    """
-    The index of the dummy atom in the quasi atom structure that this feature belongs
-    to
-    """
-
-    min_surface_dist = table_column.FloatField(blank=True, null=True)
-    """
-    The distance from the average maximum of this feature to the nearest point
-    on the partitioning surface.
-    """
-
-    avg_surface_dist = table_column.FloatField(blank=True, null=True)
-    """
-    The average distance from the average maximum of this feature to the each
-    point on its partitioning surface
-    """
-
-    dist_beyond_atom = table_column.FloatField(blank=True, null=True)
-    """
-    The distance from this feature to the neighboring atom minus that atoms
-    radius determined from the ELF.
-    """
-
-    coord_number = table_column.IntegerField(blank=True, null=True)
-    """
-    The coordination number of this feature
-    """
-
-    coord_indices = table_column.JSONField(blank=True, null=True)
-    """
-    The structure indices of each of the coordinated atoms
-    """
-
-    coord_species = table_column.JSONField(blank=True, null=True)
-    """
-    The symbol of each of the coordinated atoms
-    """
-
-    coord_number_e = table_column.IntegerField(blank=True, null=True)
-    """
-    The coordination number of this feature including quasi atoms (i.e. electrides)
-    """
-
-    coord_indices_e = table_column.JSONField(blank=True, null=True)
-    """
-    The labeled structure indices of each of the coordinated atoms in the
-    quasi-atom structure
-    """
-
-    coord_species_e = table_column.JSONField(blank=True, null=True)
-    """
-    The symbol of each of the coordinated atoms in the quasi-atom structure
-    """

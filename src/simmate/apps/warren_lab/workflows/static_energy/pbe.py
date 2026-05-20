@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warren_lab.workflows.relaxation.pbe import Relaxation__Vasp__PbeWarren
+from simmate.apps.warren_lab.workflows.relaxation.pbe import Relaxation__Vasp__PbeWarren, Relaxation__Vasp__SpinPbeWarren
 
 PBE_STATIC_SETTINGS = dict(
     IBRION=-1,  # (optional) locks everything between ionic steps
@@ -19,6 +19,14 @@ PBE_STATIC_SETTINGS = dict(
 class StaticEnergy__Vasp__PbeWarren(Relaxation__Vasp__PbeWarren):
     """
     Performs a static energy calculation based on the settings for Warren Lab
+    PBE.
+    """
+
+    _incar_updates = PBE_STATIC_SETTINGS
+
+class StaticEnergy__Vasp__SpinPbeWarren(Relaxation__Vasp__SpinPbeWarren):
+    """
+    Performs a spin-polarized static energy calculation based on the settings for Warren Lab
     PBE.
     """
 
