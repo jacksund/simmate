@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import bz2
+import io
 import logging
 import warnings
 from pathlib import Path
 
+import boto3
 import polars
+from botocore.config import Config
+from rich.progress import track
 
 from simmate.config import settings
 from simmate.utils import get_directory
@@ -23,12 +27,9 @@ class ChemspaceClient:
     # Private helpers
     # -------------------------------------------------------------------------
 
-    @staticmethod
-    def _get_source_client(ssl_verify: bool = False):
+    @classmethod
+    def _get_source_client(cls, ssl_verify: bool = False):
         """Returns a configured boto3 S3 client for the ChemSpace source bucket."""
-        import boto3
-        from botocore.config import Config
-
         return boto3.client(
             "s3",
             aws_access_key_id=settings.chemspace.s3.access_key,
@@ -53,21 +54,31 @@ class ChemspaceClient:
         for page in pages:
             for obj in page.get("Contents", []):
                 key = obj["Key"]
-                if not key.endswith("/") and key.endswith(suffix or key[-1:]):
+                if not key.endswith("/") and (not suffix or key.endswith(suffix)):
                     keys.append(key)
         return keys
 
-    @staticmethod
-    def _get_download_targets() -> list[tuple[str, str]]:
+    @classmethod
+    def _get_download_targets(cls) -> list[tuple[str, str]]:
         """Returns list of (bucket, prefix) pairs from settings."""
         return list(settings.chemspace.s3.buckets.items())
+
+    @classmethod
+    def _get_targets(cls, bucket_name: str = None, prefix: str = None):
+        """Helper to resolve (bucket, prefix) targets."""
+        return (
+            [(bucket_name, prefix or "")]
+            if bucket_name
+            else cls._get_download_targets()
+        )
 
     # -------------------------------------------------------------------------
     # Public methods
     # -------------------------------------------------------------------------
 
-    @staticmethod
+    @classmethod
     def download_source_data(
+        cls,
         bucket_name: str = None,
         prefix: str = None,
         target_dir: str | Path = None,
@@ -94,32 +105,24 @@ class ChemspaceClient:
             target_dir = settings.config_directory / "chemspace"
         target_dir = get_directory(Path(target_dir))
 
-        from rich.progress import track
-
-        s3_client = ChemspaceClient._get_source_client(ssl_verify)
-
-        downloads = (
-            [(bucket_name, prefix or "")]
-            if bucket_name
-            else ChemspaceClient._get_download_targets()
-        )
+        s3_client = cls._get_source_client(ssl_verify)
+        downloads = cls._get_targets(bucket_name, prefix)
 
         for bkt, pfx in downloads:
             logging.info(f"Starting downloads for '{bkt}': '{pfx}'")
-            all_keys = ChemspaceClient._list_s3_keys(s3_client, bkt, pfx)
+            all_keys = cls._list_s3_keys(s3_client, bkt, pfx)
             logging.info(f"{len(all_keys)} total files found")
 
             logging.info("Downloading...")
             for key in track(all_keys):
                 local_filename = target_dir / key
                 get_directory(local_filename.parent)
-                if local_filename.exists():
-                    continue
-                s3_client.download_file(
-                    Bucket=bkt,
-                    Key=key,
-                    Filename=str(local_filename),
-                )
+                if not local_filename.exists():
+                    s3_client.download_file(
+                        Bucket=bkt,
+                        Key=key,
+                        Filename=str(local_filename),
+                    )
 
         return target_dir
 
@@ -138,17 +141,17 @@ class ChemspaceClient:
             source_dir = settings.config_directory / "chemspace"
         source_dir = Path(source_dir)
 
-        if source_dir.is_file():
-            all_files = [source_dir]
-        else:
-            all_files = [p for p in source_dir.rglob("*.bz2") if p.is_file()]
+        all_files = (
+            [source_dir]
+            if source_dir.is_file()
+            else [p for p in source_dir.rglob("*.bz2") if p.is_file()]
+        )
 
         for i, file in enumerate(all_files):
             logging.info(f"Reading file {i+1} of {len(all_files)}: {file.name}")
             with bz2.open(file, "rb") as f_in:
                 file_content = f_in.read()
-                df = polars.read_csv(file_content, separator="\t")
-                yield df
+                yield polars.read_csv(file_content, separator="\t")
 
     # -------------------------------------------------------------------------
     # Parquet conversion (dev/ETL)
@@ -173,15 +176,8 @@ class ChemspaceClient:
 
         assert settings.chemspace.mode == "s3"
 
-        import boto3
-
         source_client = cls._get_source_client(ssl_verify)
-
-        downloads = (
-            [(bucket_name, prefix or "")]
-            if bucket_name
-            else cls._get_download_targets()
-        )
+        downloads = cls._get_targets(bucket_name, prefix)
 
         all_source_keys = []
         for bkt, pfx in downloads:
@@ -194,7 +190,9 @@ class ChemspaceClient:
         s3_dest = boto3.resource("s3")
         dest_bucket_obj = s3_dest.Bucket(destination_bucket)
         existing_keys = {
-            obj.key for obj in dest_bucket_obj.objects.all() if obj.key.endswith(".parquet")
+            obj.key
+            for obj in dest_bucket_obj.objects.all()
+            if obj.key.endswith(".parquet")
         }
         logging.info(f"  Found {len(existing_keys)} existing parquet files")
 
@@ -209,8 +207,9 @@ class ChemspaceClient:
         )
 
         if parallel_job:
+            
             from simmate.database import connect  # isort:skip
-            from simmate.compute import SimmateExecutor
+            from simmate.compute import SimmateExecutor  # isort:skip
 
             logging.info(f"Submitting {len(files_to_process)} jobs to the queue...")
             for source_bkt, source_key in files_to_process:
@@ -223,8 +222,6 @@ class ChemspaceClient:
                     tags=["chmspce"],
                 )
         else:
-            from rich.progress import track
-
             for source_bkt, source_key in track(files_to_process):
                 cls._convert_single_file(
                     source_bucket=source_bkt,
@@ -235,30 +232,15 @@ class ChemspaceClient:
 
         logging.info("Done.")
 
-    @staticmethod
+    @classmethod
     def _convert_single_file(
+        cls,
         source_bucket: str,
         source_key: str,
         destination_bucket: str,
         ssl_verify: bool = False,
     ):
-        import bz2
-        import io
-
-        import boto3
-        import polars
-        from botocore.config import Config
-
-        from simmate.config import settings
-
-        source_client = boto3.client(
-            "s3",
-            aws_access_key_id=settings.chemspace.s3.access_key,
-            aws_secret_access_key=settings.chemspace.s3.secret_key,
-            endpoint_url=settings.chemspace.s3.url,
-            config=Config(signature_version="s3v4"),
-            verify=ssl_verify,
-        )
+        source_client = cls._get_source_client(ssl_verify)
 
         response = source_client.get_object(Bucket=source_bucket, Key=source_key)
         compressed_data = response["Body"].read()
