@@ -43,69 +43,49 @@ class StagedWorkflow(Workflow):
     ):
         subworkflow_kwargs = subworkflow_kwargs or {}
         subworkflow_ids = []
-        failed_subworkflow = None
         result = None
 
         for i, current_task in enumerate(cls.subworkflows):
             new_directory = directory / current_task.name_full
-            try:
-                if i == 0:
-                    result = current_task.run(
-                        structure=structure,
-                        directory=new_directory,
-                        **subworkflow_kwargs,
-                    )
-                else:
-                    result = current_task.run(
-                        structure=result,  # this is the result of the last run
-                        directory=new_directory,
-                        previous_directory=result.directory,
-                        **subworkflow_kwargs,
-                    )
-                subworkflow_ids.append(result.id)
-            except Exception as e:
-                print(str(e))
-                failed_subworkflow = cls.subworkflow_strings[i]
-                break
+            if i == 0:
+                result = current_task.run(
+                    structure=structure,
+                    directory=new_directory,
+                    **subworkflow_kwargs,
+                )
+            else:
+                result = current_task.run(
+                    structure=result,  # this is the result of the last run
+                    directory=new_directory,
+                    previous_directory=result.directory,
+                    **subworkflow_kwargs,
+                )
+            subworkflow_ids.append(result.id)
 
         # save final result
         final_result = dict(
             structure=structure,
-            subworkflow_names=cls.subworkflow_strings,
+            subworkflow_names=cls.subworkflow_names,
             subworkflow_ids=subworkflow_ids,
             copied_files=cls.files_to_copy,
-            failed_subworkflow=failed_subworkflow,
         )
 
-        # In case we have a result (even if a later subworkflow failed) we
-        # append the result of the last successful run to the final result
-        if result is not None:
-            final_result |= result.to_api_dict()
+        # Append the result of the last successful run to the final result
+        final_result |= result.to_api_dict()
 
-            # remove results that will conflict with the base calculation.
-            # For example, we don't want to return a directory value because this
-            # will be different from the base workflow. We also don't want to send
-            # columns from the structure mixin because these are calculated directly
-            # from the structure
-            mixin_names = result.get_mixin_names()
-            mixins = result.get_mixins()
-            for name, mixin in zip(mixin_names, mixins):
-                if name == "Structure" or name == "Calculation":
-                    for calc_data in mixin.get_column_names():
-                        final_result.pop(calc_data, None)
+        # remove results that will conflict with the base calculation.
+        # For example, we don't want to return a directory value because this
+        # will be different from the base workflow. We also don't want to send
+        # columns from the structure mixin because these are calculated directly
+        # from the structure
+        mixin_names = result.get_mixin_names()
+        mixins = result.get_mixins()
+        for name, mixin in zip(mixin_names, mixins):
+            if name == "Structure" or name == "Calculation":
+                for calc_data in mixin.get_column_names():
+                    final_result.pop(calc_data, None)
 
         return final_result
-
-    @classmethod
-    @property
-    @cache
-    def subworkflow_strings(cls):
-        # The input "subworkflow_names" can be either workflows or their string
-        # names. This is a convenience property to standardize them to strings
-        return [
-            name.name_full if inspect.isclass(name) else name
-            for name in cls.subworkflow_names
-        ]
 
     @classmethod
     @property
@@ -122,22 +102,18 @@ class StagedWorkflow(Workflow):
     @classmethod
     @property
     @cache
-    def last_subworkflow(cls):
-        # This is just convenient for code clarity
-        return cls.subworkflows[-1]
-
-    @classmethod
-    @property
-    @cache
     def subworkflow_tables(cls):
-        return list(dict.fromkeys(subflow.database_table for subflow in cls.subworkflows))
+        return list(
+            dict.fromkeys(subflow.database_table for subflow in cls.subworkflows)
+        )
 
     @classmethod
     def get_series(cls, value: str, **filter_kwargs):
         # We pull the directories of all staged calculations where the final
         # result has the given filter criteria
         directories = (
-            cls.last_subworkflow.all_results.filter(**filter_kwargs)
+            cls.subworkflows[-1]
+            .all_results.filter(**filter_kwargs)
             .values_list("directory", flat=True)
             .all()
         )
@@ -147,14 +123,12 @@ class StagedWorkflow(Workflow):
 
         # Note, this method is optimized to grab ALL data up front in as few
         # queries as possible.
-        subworkflow_names = cls.subworkflow_strings
-
-        all_data = {w: {} for w in subworkflow_names}
+        all_data = {w: {} for w in cls.subworkflow_names}
         for table in cls.subworkflow_tables:
             # for each type of table, we filter for the provided kwargs. We then
             # return a query with the requested value, directory, and workflow name
             query = table.objects.filter(
-                workflow_name__in=subworkflow_names,
+                workflow_name__in=cls.subworkflow_names,
                 **filter_kwargs,
             ).values_list(value, "directory", "workflow_name")
 
@@ -175,7 +149,6 @@ class StagedWorkflow(Workflow):
             all_value_series.append(value_series)
 
         return all_value_series
-
 
 
 class StagedSeriesConvergence(PlotlyFigure):
@@ -338,7 +311,6 @@ class StagedSeriesTimes(PlotlyFigure):
         )
         figure.update_traces(opacity=0.75)
         return figure
-
 
 
 # register all plotting methods to the database table

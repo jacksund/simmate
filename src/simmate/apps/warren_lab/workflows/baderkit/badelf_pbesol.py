@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.warren_lab.workflows.static_energy.pre_bader_badelf import (
-    StaticEnergy__Vasp__PrebadelfPbesolWarren,
-)
 from simmate.workflows.common import StagedWorkflow
 
 
@@ -14,7 +11,7 @@ class Badelf__VaspBaderkit__SpinBadelfPbesolWarren(StagedWorkflow):
     """
 
     subworkflow_names = [
-        StaticEnergy__Vasp__PrebadelfPbesolWarren,
+        "static-energy.vasp.prebadelf-pbesol-warren",
         "badelf.baderkit.spin-badelf",
     ]
 

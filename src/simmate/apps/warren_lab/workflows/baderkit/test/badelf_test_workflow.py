@@ -35,7 +35,7 @@ class Badelf__Badelf__BadelfTestWarren(StagedWorkflow):
     """
 
     subworkflow_names = [
-        "static-energy.vasp.warren-lab-prebadelf-test",
+        "static-energy.vasp.prebadelf-test-warren",
         "bad-elf.badelf.badelf",
     ]
 
