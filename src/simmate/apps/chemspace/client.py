@@ -207,7 +207,7 @@ class ChemspaceClient:
         )
 
         if parallel_job:
-            
+
             from simmate.database import connect  # isort:skip
             from simmate.compute import SimmateExecutor  # isort:skip
 
@@ -240,6 +240,18 @@ class ChemspaceClient:
         destination_bucket: str,
         ssl_verify: bool = False,
     ):
+        dest_key = source_key.replace(".bz2", ".parquet")
+        s3_client = boto3.client("s3")
+
+        # check if the file already exists in the destination
+        try:
+            s3_client.head_object(Bucket=destination_bucket, Key=dest_key)
+            logging.info(f"Skipping {dest_key} as it already exists.")
+            return
+        except:
+            # 404 error means the file does not exist, so we can proceed
+            pass
+
         source_client = cls._get_source_client(ssl_verify)
 
         response = source_client.get_object(Bucket=source_bucket, Key=source_key)
@@ -256,9 +268,6 @@ class ChemspaceClient:
         df.write_parquet(buffer)
         buffer.seek(0)
 
-        dest_key = source_key.replace(".bz2", ".parquet")
-        s3_dest = boto3.resource("s3")
-        dest_bucket_obj = s3_dest.Bucket(destination_bucket)
-        dest_bucket_obj.upload_fileobj(buffer, dest_key)
+        s3_client.upload_fileobj(buffer, destination_bucket, dest_key)
 
         logging.info(f"Uploaded {dest_key}")
