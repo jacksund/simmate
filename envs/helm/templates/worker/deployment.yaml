@@ -19,8 +19,11 @@ spec:
       containers:
         - name: simmate-worker
           image: jacksund/simmate-worker:{{ .Values.version }}
+          imagePullPolicy: Always
           command: ["simmate", "compute", "start-worker"]
           env:
+            - name: OMP_NUM_THREADS
+              value: {{ .Values.workers.cpu.request | quote }}
             {{- include "simmate.env_config" . | indent 12 }}
           volumeMounts:
             - mountPath: /simmate_workers
