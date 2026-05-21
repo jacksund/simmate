@@ -19,6 +19,7 @@ spec:
       containers:
         - name: simmate-gunicorn
           image: jacksund/simmate:{{ .Values.version }}
+          imagePullPolicy: Always
           env:
             {{- include "simmate.env_config" . | indent 12 }}
           ports:

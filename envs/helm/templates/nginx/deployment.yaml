@@ -19,6 +19,7 @@ spec:
       containers:
         - name: simmate-nginx
           image: jacksund/nginx:{{ .Values.version }}
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           volumeMounts:
