@@ -150,6 +150,7 @@ uv.lock
 # AI Tools
 .aider*
 .gemini/
+.antigravitycli
 .cursor/
 .claude/
 .codex/

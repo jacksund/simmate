@@ -3,11 +3,17 @@
 # See the guide at...
 # https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
 
-name: Docker-Simmate
+name: Publish Docker Images
 
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      custom_tag:
+        description: 'Custom tag for the images (e.g., dev). If left blank, defaults to the branch name.'
+        required: false
+        type: string
 
 jobs:
   push_to_registry:
@@ -17,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image-name: ["bader", "nginx", "psi4", "quantum_espresso", "simmate"]
+        image-name: ["bader", "nginx", "psi4", "quantum_espresso", "simmate", "simmate-worker"]
 
     steps:
       - name: Check out the repo
@@ -43,6 +49,11 @@ jobs:
           images: |
             jacksund/${{ matrix.image-name }}
             ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=raw,value=${{ inputs.custom_tag }},enable=${{ inputs.custom_tag != '' }}
       
       - name: Build and push Docker images
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
