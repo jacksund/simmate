@@ -19,6 +19,7 @@ spec:
       containers:
         - name: simmate-scheduler
           image: jacksund/simmate:{{ .Values.version }}
+          imagePullPolicy: Always
           command: ["simmate", "compute", "start-schedules"]
           env:
             {{- include "simmate.env_config" . | indent 12 }}

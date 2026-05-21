@@ -73,6 +73,9 @@ RUN uv sync && \
     uv pip install gunicorn && \
     django-admin collectstatic --noinput
 
+# Download and setup SSSP pseudopotentials
+RUN simmate-qe setup sssp
+
 # =============================================================================
 # Worker Setup
 # =============================================================================

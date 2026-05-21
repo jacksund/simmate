@@ -19,6 +19,7 @@ spec:
       containers:
         - name: simmate-worker
           image: jacksund/simmate-worker:{{ .Values.version }}
+          imagePullPolicy: Always
           command: ["simmate", "compute", "start-worker"]
           env:
             {{- include "simmate.env_config" . | indent 12 }}
