@@ -3,7 +3,7 @@
 # See the guide at...
 # https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
 
-name: Docker-Simmate
+name: Publish Docker Images
 
 on:
   release:
