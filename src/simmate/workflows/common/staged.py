@@ -2,8 +2,6 @@
 
 import inspect
 import math
-import os
-import shutil
 from functools import cache
 from pathlib import Path
 
@@ -40,115 +38,54 @@ class StagedWorkflow(Workflow):
         structure: Structure,
         source: dict = None,
         directory: Path = None,
-        subworkflow_kwargs: dict = {},
+        subworkflow_kwargs: dict = None,
         **kwargs,
     ):
-
-        # This workflow must return several things for the StagedCalculation
-        # table. This includes the workflow name and workflow id
+        subworkflow_kwargs = subworkflow_kwargs or {}
         subworkflow_ids = []
-        failed_subworkflow = None
-        error = None
         result = None
 
-        # Our first calculation is directly from our inputs.
-        try:
-            # get kwargs if they exist
-
-            current_task = cls.subworkflows[0]
-            result = current_task.run(
-                structure=structure,
-                directory=directory / current_task.name_full,
-                **subworkflow_kwargs,
-            )
-            # append info to workflow lists
-            subworkflow_ids.append(result.id)
-        except Exception as e:
-            print(str(e))
-            error = str(e)
-            failed_subworkflow = cls.subworkflow_strings[0]
-            # !!! It might make more sense to just raise the error here so that
-            # the error is written to the output file. This would make troublshooting
-            # which workflow is failing easier until we incorporate a StagedCalculation
-            # mix-in.
-
-        # In some rare cases, we may want to only run one subworkflow here (such
-        # as when we are testing the evolutionary search) so if there is only
-        # one workflow we skip to the end
-        if len(cls.subworkflows) != 1 and error is None:
-            # The remaining tasks continue and use the past results as an input
-            # If the one_folder is true, we want to run in the same directory
-
-            for i, current_task in enumerate(cls.subworkflows[1:]):
-                # Now we copy the requested files from one to the next
-                # previous_directory = Path(f"{result.directory}")
-                new_directory = directory / current_task.name_full
-                # os.makedirs(new_directory, exist_ok=True)
-                # for file in cls.files_to_copy:
-                #     shutil.copyfile(previous_directory / file, new_directory / file)
-
-                try:
-                    result = current_task.run(
-                        structure=result,  # this is the result of the last run
-                        directory=new_directory,
-                        previous_directory=result.directory,
-                        **subworkflow_kwargs,
-                    )
-                    # append info to workflow lists
-                    subworkflow_ids.append(result.id)
-                except:
-                    failed_subworkflow = cls.subworkflow_strings[i]
-                    break
-        # save final result
-        if error is None:
-            final_result = (
-                dict(
+        for i, current_task in enumerate(cls.subworkflows):
+            new_directory = directory / current_task.name_full
+            if i == 0:
+                result = current_task.run(
                     structure=structure,
-                    subworkflow_names=cls.subworkflow_strings,
-                    subworkflow_ids=subworkflow_ids,
-                    copied_files=cls.files_to_copy,
-                    failed_subworkflow=failed_subworkflow,
+                    directory=new_directory,
+                    **subworkflow_kwargs,
                 )
-                | result.to_api_dict()
-            )  # combine results
-
-            # remove results that will conflict with the base calculation.
-            # For example, we don't want to return a directory value because this
-            # will be different from the base workflow. We also don't want to send
-            # columns from the structure mixin because these are calculated directly
-            # from the structure
-            mixin_names = result.get_mixin_names()
-            mixins = result.get_mixins()
-            for name, mixin in zip(mixin_names, mixins):
-                if name == "Structure" or name == "Calculation":
-                    for calc_data in mixin.get_column_names():
-                        if calc_data in final_result.keys():
-                            del final_result[calc_data]
-        else:
-            final_result = dict(
-                structure=structure,
-                subworkflow_names=cls.subworkflow_strings,
-                subworkflow_ids=subworkflow_ids,
-                copied_files=cls.files_to_copy,
-                failed_subworkflow=failed_subworkflow,
-            )
-        return final_result
-
-    @classmethod
-    @property
-    @cache
-    def subworkflow_strings(cls):
-        # The input "subworkflow_names" can be either workflows or their string
-        # names. This is a convenience property to standardize them to strings
-        workflow_strings = []
-        for name in cls.subworkflow_names:
-            if inspect.isclass(name):
-                # This object should be a workflow
-                workflow_strings.append(name.name_full)
             else:
-                # This object should already be a string
-                workflow_strings.append(name)
-        return workflow_strings
+                result = current_task.run(
+                    structure=result,  # this is the result of the last run
+                    directory=new_directory,
+                    previous_directory=result.directory,
+                    **subworkflow_kwargs,
+                )
+            subworkflow_ids.append(result.id)
+
+        # save final result
+        final_result = dict(
+            structure=structure,
+            subworkflow_names=cls.subworkflow_names,
+            subworkflow_ids=subworkflow_ids,
+            copied_files=cls.files_to_copy,
+        )
+
+        # Append the result of the last successful run to the final result
+        final_result |= result.to_api_dict()
+
+        # remove results that will conflict with the base calculation.
+        # For example, we don't want to return a directory value because this
+        # will be different from the base workflow. We also don't want to send
+        # columns from the structure mixin because these are calculated directly
+        # from the structure
+        mixin_names = result.get_mixin_names()
+        mixins = result.get_mixins()
+        for name, mixin in zip(mixin_names, mixins):
+            if name == "Structure" or name == "Calculation":
+                for calc_data in mixin.get_column_names():
+                    final_result.pop(calc_data, None)
+
+        return final_result
 
     @classmethod
     @property
@@ -157,112 +94,58 @@ class StagedWorkflow(Workflow):
         # import locally to avoid circular import
         from simmate.workflows.utils import get_workflow
 
-        workflows = []
-        for name in cls.subworkflow_names:
-            if inspect.isclass(name):
-                # This object should be a workflow
-                workflows.append(name)
-            else:
-                # This object should already be a string
-                workflows.append(get_workflow(name))
-        return workflows
-
-    @classmethod
-    @property
-    @cache
-    def last_subworkflow(cls):
-        # This is just convenient for code clarity
-        return cls.subworkflows[-1]
+        return [
+            name if inspect.isclass(name) else get_workflow(name)
+            for name in cls.subworkflow_names
+        ]
 
     @classmethod
     @property
     @cache
     def subworkflow_tables(cls):
-        tables = []
-        for subflow in cls.subworkflows:
-            if subflow.database_table not in tables:
-                tables.append(subflow.database_table)
-        return tables
+        return list(
+            dict.fromkeys(subflow.database_table for subflow in cls.subworkflows)
+        )
 
     @classmethod
     def get_series(cls, value: str, **filter_kwargs):
         # We pull the directories of all staged calculations where the final
         # result has the given filter criteria
         directories = (
-            cls.last_subworkflow.all_results.filter(**filter_kwargs).values_list(
-                "directory", flat=True
-            )
-            # .order_by("?")[:1000]
+            cls.subworkflows[-1]
+            .all_results.filter(**filter_kwargs)
+            .values_list("directory", flat=True)
             .all()
         )
         # The above filter returns the subfolder for the final calculation. We
         # just want the parent folder for this so we get it here
-        directories = [str(Path(directory).parent) for directory in directories]
-        # In case there are any duplicates (e.g. last workflow is also run earlier
-        # in the sequence) we remove them
-        directories = list(set(directories))
+        directories = list({str(Path(d).parent) for d in directories})
 
         # Note, this method is optimized to grab ALL data up front in as few
-        # queries as possible. We grab all data rather than many smaller queries.
-        # Smaller queries are clear for code. The method would simplify to...
-        #
-        # for directory in directories:
-        #     for subflow in cls.subworkflows:
-        #         query = subflow.database_table.objects.filter(
-        #             workflow_name=subflow.name_full,
-        #             directory__startswith=directory,
-        #             **filter_kwargs,
-        #         ).values_list(value)
-        #
-        # Thererfore everything below is just minimizing the number of queries
-        # and reformatting the data output of the complex query.
-        subworkflow_names = []
-        for subworkflow in cls.subworkflow_names:
-            if inspect.isclass(subworkflow):
-                subworkflow_names.append(subworkflow.name_full)
-            else:
-                subworkflow_names.append(subworkflow)
-
-        all_data = {w: {} for w in subworkflow_names}
+        # queries as possible.
+        all_data = {w: {} for w in cls.subworkflow_names}
         for table in cls.subworkflow_tables:
             # for each type of table, we filter for the provided kwargs. We then
             # return a query with the requested value, directory, and workflow name
             query = table.objects.filter(
-                workflow_name__in=subworkflow_names,
+                workflow_name__in=cls.subworkflow_names,
                 **filter_kwargs,
             ).values_list(value, "directory", "workflow_name")
 
-            # This filter crashes at large query sizes. It's actually more stable
-            # and efficient to grab ALL data and filter out results in python.
-            # from django.db.models import Q as dj_query
-            # complex_filter = dj_query(
-            #     *[("directory__startswith", d) for d in directories],
-            #     _connector=dj_query.OR,
-            # )
-            # .filter(complex_filter)
-
             # For each result in our query we get the parent directory. We then
-            # add the result to our all_data dictionary witht he parent directory
+            # add the result to our all_data dictionary with the parent directory
             # as the key and requested value as the value.
             for output, directory, workflow_name in query:
                 folder_base = str(Path(directory).parent)
-
-                # this is the replacement for the commented-out complex filter
-                # shown above
-                # if folder_base not in directories:
-                #     continue
-
                 all_data[workflow_name].update({folder_base: output})
 
         all_value_series = []
         # We iterate over each staged workflow directory matching our criteria
         for directory in directories:
-            value_series = []
-            for subflow in cls.subworkflows:
-                # Get resulting value from each subworkflow for this staged workflow
-                new_value = all_data[subflow.name_full].get(directory, numpy.nan)
-                value_series.append(new_value)
-            # add all values for this staged workflow run to our all_value_series
+            value_series = [
+                all_data[subflow.name_full].get(directory, numpy.nan)
+                for subflow in cls.subworkflows
+            ]
             all_value_series.append(value_series)
 
         return all_value_series
@@ -281,47 +164,44 @@ class StagedSeriesConvergence(PlotlyFigure):
             **filter_kwargs,
         )
 
+        num_transitions = len(workflow.subworkflows) - 1
         figure = make_subplots(
-            rows=math.ceil((len(workflow.subworkflows) - 1) / 3),
+            rows=math.ceil(num_transitions / 3),
             cols=3,
         )
 
-        for i in range(len(workflow.subworkflows) - 1):
-            xs = []
-            ys = []
-            for energy_series in all_energy_series:
-                xs.append(energy_series[i + 1])
-                ys.append(energy_series[i])
+        for i in range(num_transitions):
+            xs = [series[i + 1] for series in all_energy_series]
+            ys = [series[i] for series in all_energy_series]
 
-            scatter = plotly_go.Scatter(
-                x=xs,
-                y=ys,
-                mode="markers",
-            )
             row = math.ceil((i + 1) / 3)
             col = (i % 3) + 1
+
             figure.add_trace(
-                trace=scatter,
+                trace=plotly_go.Scatter(x=xs, y=ys, mode="markers"),
                 row=row,
                 col=col,
             )
+
             # add a line for y=x for added visualization
-            # Determine the min and max range for y=x line
-            x_min, x_max = min(xs + ys), max(xs + ys)
+            valid_vals = [v for v in xs + ys if v is not None and v == v]
+            if valid_vals:
+                x_min, x_max = min(valid_vals), max(valid_vals)
+                figure.add_trace(
+                    trace=plotly_go.Scatter(
+                        x=[x_min, x_max],
+                        y=[x_min, x_max],
+                        mode="lines",
+                        line=dict(dash="dash", color="black"),
+                        name="y=x",
+                    ),
+                    row=row,
+                    col=col,
+                )
 
-            # Plot the y=x line
-            y_equals_x_line = plotly_go.Scatter(
-                x=[x_min, x_max],
-                y=[x_min, x_max],
-                mode="lines",
-                line=dict(dash="dash", color="black"),
-                name="y=x",
-            )
-            figure.add_trace(y_equals_x_line, row=row, col=col)
-
-            # Update xaxis properties
+            # Update axes properties
             figure.update_xaxes(
-                title_text=f"{workflow.subworkflows[i + 1].name_full}",
+                title_text=workflow.subworkflows[i + 1].name_full,
                 row=row,
                 col=col,
             )
@@ -355,19 +235,20 @@ class StagedSeriesHistogram(PlotlyFigure):
 
         for i in range(len(workflow.subworkflows) - 1):
             diffs = []
-            for energy_series in all_energy_series:
-                if energy_series[i + 1] and energy_series[i]:
-                    d = energy_series[i + 1] - energy_series[i]
-                    diffs.append(d)
+            for series in all_energy_series:
+                v1, v2 = series[i], series[i + 1]
+                if v1 is not None and v2 is not None and v1 == v1 and v2 == v2:
+                    diffs.append(v2 - v1)
 
-            scatter = plotly_go.Histogram(
-                x=diffs,
-                name=(
-                    f"{workflow.subworkflows[i].name_full} "
-                    f"--> {workflow.subworkflows[i+1].name_full}"
-                ),
+            figure.add_trace(
+                trace=plotly_go.Histogram(
+                    x=diffs,
+                    name=(
+                        f"{workflow.subworkflows[i].name_full} "
+                        f"--> {workflow.subworkflows[i+1].name_full}"
+                    ),
+                )
             )
-            figure.add_trace(trace=scatter)
 
         figure.update_layout(
             barmode="overlay",
@@ -401,6 +282,7 @@ class StagedSeriesTimes(PlotlyFigure):
 
         all_time_series = numpy.transpose(all_time_series)
         all_time_series = all_time_series / 60  # convert to minutes
+
         traces = []
         for i, times in enumerate(all_time_series):
             trace = plotly_go.Histogram(

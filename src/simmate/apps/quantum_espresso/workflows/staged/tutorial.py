@@ -140,7 +140,7 @@ class StaticEnergy__QuantumEspresso__EvoTutorial(StagedWorkflow):
     description_doc_short = "runs a series of very low quality relaxations"
 
     subworkflow_names = [
-        Relaxation__QuantumEspresso__Lda00,
-        Relaxation__QuantumEspresso__Lda01,
-        StaticEnergy__QuantumEspresso__Lda02,
+        "relaxation.quantum-espresso.lda00",
+        "relaxation.quantum-espresso.lda01",
+        "relaxation.quantum-espresso.lda02",
     ]

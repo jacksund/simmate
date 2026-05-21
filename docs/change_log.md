@@ -84,6 +84,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - added methods for updating rows and cleaning up chunk files to toolkit datastore class
 - added parallel chunk loading to `MoleculeStore` datastores using UUID filenames, `reorganize_chunks`, and SLURM-compatible job submission via `SimmateExecutor`
 - established working helm chart for k3s single-node deployment
+- added web reports for static energy and relaxation calculations
 
 **Refactors**
 
@@ -104,6 +105,7 @@ There is one significant exception to the above rules -- `MAJOR=0` releases. Any
 - patched connection contexts and closing in the `database.external_connectors` module
 - fixed `htmx_molecule_input` for non-chemdraw sketcher
 - fixed extra `$$$$` delimiter being written on bulk sdf export
+- fixed typo in `volume_change` formula for relaxations
 
 --------------------------------------------------------------------------------
 

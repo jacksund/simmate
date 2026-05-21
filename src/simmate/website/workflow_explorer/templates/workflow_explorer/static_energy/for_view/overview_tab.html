@@ -1,8 +1,34 @@
 <div class="tab-pane show active" id="overview-section">
     <div class="row">
-        <div class="col-xl-12">{% include "core/base_data_types/structure.html" %}</div>
-    </div>
-    <div class="row py-2">
-        <div class="col-12">{% include "core/base_data_types/calculation.html" %}</div>
+        <div class="col-5">{% include "core/base_data_types/structure.html" %}</div>
+        <div class="col-7">
+            <table class="table table-centered table-striped mb-0 border">
+                <thead class="table-primary">
+                    <tr>
+                        <th style="width: 45%">Summary</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Workflow</td>
+                        <td>
+                            <a href="{% url 'workflow_explorer:workflow_detail' table_entry.workflow_name %}">
+                                {{ table_entry.workflow_name }}
+                                <small><i class="bi bi-box-arrow-up-right"></i></small>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td>{% include "data_explorer/mixins/calculation/status.html" with status=table_entry.status %}</td>
+                    </tr>
+                    <tr>
+                        <td>Final Energy (Per Atom)</td>
+                        <td>{{ table_entry.energy_per_atom|floatformat:4 }} eV/atom</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

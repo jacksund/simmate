@@ -64,7 +64,7 @@ def get_all_components(
 
 def get_component(component_name: str):  # -> subclass of HtmxComponent
     """
-    Given a component name (e.g. "project-form"), a full import
+    Given a component name (e.g. "project-component"), a full import
     path of a component, or the component class itself, this will
     load and return the corresponding component class.
     """

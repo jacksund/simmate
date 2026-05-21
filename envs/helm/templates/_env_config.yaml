@@ -131,4 +131,36 @@
 - name: SIMMATE__WEBSITE__USER_FORMAT
   value: {{ .Values.simmate.website.user_format | quote }}
 {{- end }}
+{{- if and .Values.simmate.chemspace .Values.simmate.chemspace.mode }}
+- name: SIMMATE__CHEMSPACE__MODE
+  value: {{ .Values.simmate.chemspace.mode | quote }}
+{{- end }}
+{{- if and .Values.simmate.chemspace .Values.simmate.chemspace.s3 .Values.simmate.chemspace.s3.url }}
+- name: SIMMATE__CHEMSPACE__S3__URL
+  value: {{ .Values.simmate.chemspace.s3.url | quote }}
+{{- end }}
+{{- if and .Values.simmate.chemspace .Values.simmate.chemspace.s3 .Values.simmate.chemspace.s3.access_key }}
+- name: SIMMATE__CHEMSPACE__S3__ACCESS_KEY
+  value: {{ .Values.simmate.chemspace.s3.access_key | quote }}
+{{- end }}
+{{- if and .Values.simmate.chemspace .Values.simmate.chemspace.s3 .Values.simmate.chemspace.s3.secret_key }}
+- name: SIMMATE__CHEMSPACE__S3__SECRET_KEY
+  value: {{ .Values.simmate.chemspace.s3.secret_key | quote }}
+{{- end }}
+{{- if and .Values.simmate.chemspace .Values.simmate.chemspace.s3 .Values.simmate.chemspace.s3.buckets }}
+- name: SIMMATE__CHEMSPACE__S3__BUCKETS
+  value: '{{ .Values.simmate.chemspace.s3.buckets | toJson }}'
+{{- end }}
+{{- if and .Values.simmate.chemspace .Values.simmate.chemspace.ftp .Values.simmate.chemspace.ftp.host }}
+- name: SIMMATE__CHEMSPACE__FTP__HOST
+  value: {{ .Values.simmate.chemspace.ftp.host | quote }}
+{{- end }}
+{{- if and .Values.simmate.chemspace .Values.simmate.chemspace.ftp .Values.simmate.chemspace.ftp.user }}
+- name: SIMMATE__CHEMSPACE__FTP__USER
+  value: {{ .Values.simmate.chemspace.ftp.user | quote }}
+{{- end }}
+{{- if and .Values.simmate.chemspace .Values.simmate.chemspace.ftp .Values.simmate.chemspace.ftp.password }}
+- name: SIMMATE__CHEMSPACE__FTP__PASSWORD
+  value: {{ .Values.simmate.chemspace.ftp.password | quote }}
+{{- end }}
 {{- end }}

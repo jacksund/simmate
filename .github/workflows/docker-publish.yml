@@ -3,11 +3,17 @@
 # See the guide at...
 # https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
 
-name: Docker-Simmate
+name: Publish Docker Images
 
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      custom_tag:
+        description: 'Custom tag for the images (e.g., dev). If left blank, defaults to the branch name.'
+        required: false
+        type: string
 
 jobs:
   push_to_registry:
@@ -17,20 +23,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image-name: ["bader", "nginx", "psi4", "quantum_espresso", "simmate"]
+        image-name: ["bader", "nginx", "psi4", "quantum_espresso", "simmate", "simmate-worker"]
 
     steps:
       - name: Check out the repo
         uses: actions/checkout@v6
       
       - name: Log in to Docker Hub
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Log in to the Container registry
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -43,6 +49,11 @@ jobs:
           images: |
             jacksund/${{ matrix.image-name }}
             ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=raw,value=${{ inputs.custom_tag }},enable=${{ inputs.custom_tag != '' }}
       
       - name: Build and push Docker images
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294

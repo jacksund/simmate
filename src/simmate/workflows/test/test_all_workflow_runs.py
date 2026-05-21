@@ -138,7 +138,7 @@ def test_all_workflow_runs(tmp_path, sample_structures):
 
         # TEST BadELF FLOWS
         structure = sample_structures["Ca2N_mp-2686_primitive"]
-        workflow_name = "bad-elf.badelf.badelf-test"
+        workflow_name = "badelf.badelf.badelf-test-warren"
         workflow = get_workflow(workflow_name)
 
         # This workflow runs a static energy and then badelf calculation. The
