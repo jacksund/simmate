@@ -8,6 +8,11 @@
         and limited compute is available.
         <i class="bi bi-cone-striped"></i>
     </div>
+    <div class="bg-danger text-white text-center py-1 small fw-bold d-md-none">
+        <i class="bi bi-exclamation-triangle"></i>
+        For the best experience, please use a larger window. We have not yet optimized the website for phone-based viewing.
+        <i class="bi bi-exclamation-triangle"></i>
+    </div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary py-1">
         <div class="container">
             {# Simmate Logo / Home button #}
@@ -26,7 +31,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         {# todo: add 'active' class to whichever section is active + highlighted #}
                         <a class="nav-link" href="{% url 'apps' %}"><i class="bi bi-speedometer2"></i> Apps</a>
@@ -107,78 +112,78 @@
                         </ul>
                     </li>
                 </ul>
-            </div>
-            <div class="d-flex">
-                {% if user.is_authenticated %}
-                    {% if SHOW_FINANCES %}
-                        {# USDC button #}
-                        <button type="button"
-                                class="btn btn-light rounded-4 py-0 px-2 me-2"
-                                data-bs-toggle="modal"
-                                data-bs-target="#usdcModal">
-                            <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
-                            <b>{{ user.wallet.usdc_balance|floatformat:2|intcomma }}</b>
-                        </button>
-                        {# Simmate Token button #}
-                        <button type="button"
-                                class="btn btn-light rounded-4 py-0 px-2 me-2"
-                                data-bs-toggle="modal"
-                                data-bs-target="#simmateModal">
-                            <img src="{% static 'images/simmate-token-icon.svg' %}" alt="" height="24">
-                            <b>{{ user.wallet.token_balance|floatformat:0|intcomma }}</b>
-                        </button>
-                    {% endif %}
-                    {# user name + profile button #}
-                    <a class="btn btn-outline-light me-2 position-relative"
-                       href="{% url 'profile' %}">
-                        <i class="bi bi-person-circle"></i>&nbsp;&nbsp;
-                        {% if user.first_name %}
-                            {{ user.first_name }} {{ user.last_name }}
-                        {% else %}
-                            {{ user.username }}
+                <div class="d-flex mt-2 mt-lg-0">
+                    {% if user.is_authenticated %}
+                        {% if SHOW_FINANCES %}
+                            {# USDC button #}
+                            <button type="button"
+                                    class="btn btn-light rounded-4 py-0 px-2 me-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#usdcModal">
+                                <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">
+                                <b>{{ user.wallet.usdc_balance|floatformat:2|intcomma }}</b>
+                            </button>
+                            {# Simmate Token button #}
+                            <button type="button"
+                                    class="btn btn-light rounded-4 py-0 px-2 me-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#simmateModal">
+                                <img src="{% static 'images/simmate-token-icon.svg' %}" alt="" height="24">
+                                <b>{{ user.wallet.token_balance|floatformat:0|intcomma }}</b>
+                            </button>
                         {% endif %}
-                        {% unread_notifications_count user as unread_count %}
-                        {% if unread_count > 0 %}
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {{ unread_count }}
-                                {% if unread_count > 99 %}+{% endif %}
-                                <span class="visually-hidden">unread notifications</span>
-                            </span>
+                        {# user name + profile button #}
+                        <a class="btn btn-outline-light me-2 position-relative"
+                           href="{% url 'profile' %}">
+                            <i class="bi bi-person-circle"></i>&nbsp;&nbsp;
+                            {% if user.first_name %}
+                                {{ user.first_name }} {{ user.last_name }}
+                            {% else %}
+                                {{ user.username }}
+                            {% endif %}
+                            {% unread_notifications_count user as unread_count %}
+                            {% if unread_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ unread_count }}
+                                    {% if unread_count > 99 %}+{% endif %}
+                                    <span class="visually-hidden">unread notifications</span>
+                                </span>
+                            {% endif %}
+                        </a>
+                        {# logout button #}
+                        <a class="btn btn-outline-light me-2"
+                           data-bs-toggle="modal"
+                           data-bs-target="#logoutModal">
+                            <i class="bi bi-door-open"></i>
+                        </a>
+                    {% else %}
+                        <a class="btn btn-outline-light me-2" href="{% url 'account_login' %}"><i class="bi bi-key-fill"></i> Login</a>
+                        {% simmate_setting "website.require_login_internal" as REQUIRE_LOGIN_INTERNAL %}
+                        {% if not REQUIRE_LOGIN_INTERNAL %}
+                            <a class="btn btn-outline-light me-2" href="{% url 'account_signup' %}"><i class="bi bi-person-plus"></i> Sign Up</a>
                         {% endif %}
-                    </a>
-                    {# logout button #}
-                    <a class="btn btn-outline-light me-2"
-                       data-bs-toggle="modal"
-                       data-bs-target="#logoutModal">
-                        <i class="bi bi-door-open"></i>
-                    </a>
-                {% else %}
-                    <a class="btn btn-outline-light me-2" href="{% url 'account_login' %}"><i class="bi bi-key-fill"></i> Login</a>
-                    {% simmate_setting "website.require_login_internal" as REQUIRE_LOGIN_INTERNAL %}
-                    {% if not REQUIRE_LOGIN_INTERNAL %}
-                        <a class="btn btn-outline-light me-2" href="{% url 'account_signup' %}"><i class="bi bi-person-plus"></i> Sign Up</a>
                     {% endif %}
-                {% endif %}
-                {# light/dark mode button. Disabled for now #}
-                {% comment %}
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary border-0" type="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-circle-half"></i>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <button class="dropdown-item" data-bs-theme-value="light">
-                                    <i class="bi bi-brightness-high"></i> Light
-                                </button>
-                            </li>
-                            <li>
-                                <button class="dropdown-item" data-bs-theme-value="dark">
-                                    <i class="bi bi-moon-stars"></i> Dark
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-                {% endcomment %}
+                    {# light/dark mode button. Disabled for now #}
+                    {% comment %}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary border-0" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-circle-half"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <button class="dropdown-item" data-bs-theme-value="light">
+                                        <i class="bi bi-brightness-high"></i> Light
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item" data-bs-theme-value="dark">
+                                        <i class="bi bi-moon-stars"></i> Dark
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    {% endcomment %}
+                </div>
             </div>
         </div>
     </nav>

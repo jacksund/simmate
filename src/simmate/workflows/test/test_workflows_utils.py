@@ -125,8 +125,8 @@ def test_list_of_all_workflows():
         # "static-energy.vasp.warren-lab-pbe",
         # "static-energy.vasp.warren-lab-pbe-metal",
         # "static-energy.vasp.warren-lab-pbesol",
-        # "static-energy.vasp.warren-lab-prebadelf-hse",
-        # "static-energy.vasp.warren-lab-prebadelf-pbesol",
+        # "static-energy.vasp.prebadelf-hse-warren",
+        # "static-energy.vasp.prebadelf-pbesol-warren",
         # "static-energy.vasp.warren-lab-scan",
         "structure-prediction.toolkit.chemical-system",
         "structure-prediction.toolkit.fixed-composition",
@@ -167,8 +167,8 @@ def test_list_of_workflows_of_given_type():
         # "static-energy.vasp.warren-lab-pbe",
         # "static-energy.vasp.warren-lab-pbe-metal",
         # "static-energy.vasp.warren-lab-pbesol",
-        # "static-energy.vasp.warren-lab-prebadelf-hse",
-        # "static-energy.vasp.warren-lab-prebadelf-pbesol",
+        # "static-energy.vasp.prebadelf-hse-warren",
+        # "static-energy.vasp.prebadelf-pbesol-warren",
         # "static-energy.vasp.warren-lab-scan",
     ]
 

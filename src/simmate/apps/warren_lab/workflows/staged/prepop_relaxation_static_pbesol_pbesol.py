@@ -12,7 +12,7 @@ class StaticEnergy__Vasp__RelaxationStaticPbePbeWarren(StagedWorkflow):
 
     subworkflow_names = [
         "relaxation.vasp.warren-lab-pbesol-with-wavecar",
-        "static-energy.vasp.warren-lab-prebadelf-pbesol",
+        "static-energy.vasp.prebadelf-pbesol-warren",
     ]
     files_to_copy = ["WAVECAR"]
     # We use pbesol as our default relaxation functional because it doesn't take

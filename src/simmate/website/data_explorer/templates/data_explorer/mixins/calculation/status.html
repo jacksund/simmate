@@ -1,0 +1,11 @@
+{% if status == "Completed" %}
+    {% status_bar "Completed" "success" %}
+{% elif status == "Running" %}
+    {% status_bar "Running" "primary" %}
+{% elif status == "Failed" %}
+    {% status_bar "Failed" "danger" %}
+{% elif status == "Canceled" %}
+    {% status_bar "Canceled" "warning" %}
+{% else %}
+    {% status_bar status|default:"Pending" "secondary" %}
+{% endif %}

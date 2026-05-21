@@ -94,6 +94,22 @@ def canvas(
 
 
 @register.inclusion_tag(
+    filename="core/basic_elements/button_link.html",
+    takes_context=True,
+)
+def button_link(
+    context: dict,
+    link: str,
+    label: str = None,
+    small: bool = False,
+    icon: str = "box-arrow-up-right",
+    theme: str = "primary",
+    open_in_new: bool = False,
+):
+    return locals()
+
+
+@register.inclusion_tag(
     filename="core/basic_elements/foreign_key_link.html",
     takes_context=True,
 )
@@ -164,20 +180,4 @@ def table_header(
         text_display = column_name.replace("_", " ").title()
 
     request = context.request  # BUG-FIX
-    return locals()
-
-
-@register.inclusion_tag(
-    filename="core/basic_elements/button_link.html",
-    takes_context=True,
-)
-def button_link(
-    context: dict,
-    link: str,
-    label: str = None,
-    small: bool = False,
-    icon: str = "open-in-new",
-    theme: str = "primary",
-    open_in_new: bool = False,
-):
     return locals()

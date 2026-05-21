@@ -1,4 +1,4 @@
-name: Test
+name: Lint and Test Code
 
 on:
   push:
@@ -53,7 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image-name: ["bader", "nginx", "psi4", "quantum_espresso", "simmate"]
+        image-name: ["bader", "nginx", "psi4", "quantum_espresso", "simmate", "simmate-worker"]
     permissions:
       contents: read
       packages: write
