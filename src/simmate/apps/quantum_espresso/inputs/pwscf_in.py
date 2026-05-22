@@ -9,8 +9,11 @@ from pathlib import Path
 
 from pymatgen.core import Lattice
 
-from simmate.apps.quantum_espresso.inputs.k_points import Kpoints
-from simmate.apps.quantum_espresso.inputs.pwscf_in_modifiers import (
+from simmate.toolkit import Structure
+from simmate.utils import str_to_datatype
+
+from .k_points import Kpoints
+from .pwscf_in_modifiers import (
     keyword_modifier_ecutrho,
     keyword_modifier_ecutwfc,
     keyword_modifier_nat,
@@ -18,8 +21,6 @@ from simmate.apps.quantum_espresso.inputs.pwscf_in_modifiers import (
     keyword_modifier_pseudo_dir,
     keyword_modifier_smart_smear,
 )
-from simmate.toolkit import Structure
-from simmate.utils import str_to_datatype
 
 
 class PwscfInput:

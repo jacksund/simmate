@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.quantum_espresso.workflows.relaxation.quality03 import (
+from .quality03 import (
     Relaxation__QuantumEspresso__Quality03,
 )
 

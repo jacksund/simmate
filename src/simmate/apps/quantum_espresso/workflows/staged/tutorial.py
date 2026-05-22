@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.quantum_espresso.workflows.relaxation import (
+from simmate.workflows.common import StagedWorkflow
+
+from ..relaxation import (
     Relaxation__QuantumEspresso__Quality00,
     Relaxation__QuantumEspresso__Quality01,
 )
-from simmate.workflows.common import StagedWorkflow
 
 
 #!!! Need to update settings and get LDA pseudopotentials

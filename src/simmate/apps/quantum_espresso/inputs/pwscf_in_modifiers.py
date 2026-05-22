@@ -2,12 +2,13 @@
 
 from pathlib import Path
 
-from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
+from simmate.config import settings
+from simmate.toolkit import Structure
+
+from .potentials_sssp import (
     SSSP_PBE_EFFICIENCY_MAPPINGS,
     SSSP_PBE_PRECISION_MAPPINGS,
 )
-from simmate.config import settings
-from simmate.toolkit import Structure
 
 
 def keyword_modifier_pseudo_dir(structure: Structure, confirm_auto: bool) -> Path:

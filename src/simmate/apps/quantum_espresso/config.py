@@ -2,13 +2,14 @@
 
 import logging
 
-from simmate.apps.quantum_espresso.inputs.potentials_sssp import check_psuedo_setup
 from simmate.config import settings
 from simmate.config.utils import (
     check_app_reg,
     check_command_exists,
     show_test_results,
 )
+
+from .inputs import check_psuedo_setup
 
 
 def test_config(run_calcs: bool = False):
