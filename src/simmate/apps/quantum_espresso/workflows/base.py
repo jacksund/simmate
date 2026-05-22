@@ -2,16 +2,17 @@
 
 from pathlib import Path
 
-from simmate.apps.quantum_espresso.inputs import PwscfInput
-from simmate.apps.quantum_espresso.inputs.k_points import Kpoints
-from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
-    SSSP_PBE_EFFICIENCY_MAPPINGS,
-    SSSP_PBE_PRECISION_MAPPINGS,
-)
 from simmate.config import settings
 from simmate.toolkit import Structure
 from simmate.utils import get_docker_command
 from simmate.workflows.common import S3Workflow, StructureWorkflow
+
+from ..inputs import (
+    SSSP_PBE_EFFICIENCY_MAPPINGS,
+    SSSP_PBE_PRECISION_MAPPINGS,
+    Kpoints,
+    PwscfInput,
+)
 
 
 # TODO: add StructureInputWorkflow mixin which can be made from VaspWorkflow class

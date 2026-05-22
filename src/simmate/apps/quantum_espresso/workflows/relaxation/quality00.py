@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.quantum_espresso.workflows.base import PwscfWorkflow
+from ..base import PwscfWorkflow
 
 
 class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):

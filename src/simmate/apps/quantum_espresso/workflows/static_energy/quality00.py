@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.quantum_espresso.workflows.base import PwscfWorkflow
+from ..base import PwscfWorkflow
 
 
 class StaticEnergy__QuantumEspresso__Quality00(PwscfWorkflow):
