@@ -523,6 +523,33 @@ class S3Workflow(Workflow):
             # when we have stderr=subprocess.PIPE, which we use above.
             output, errors = process.communicate()
 
+            # Check for errors again, because a non-monitor may be higher
+            # priority than the monitor triggered above (if there was one).
+            # Since the error_handlers are in order of priority, only the first
+            # will actually be applied and then we can retry the calc.
+            for error_handler in cls.error_handlers:
+                # check if there's an error with this error_handler and grab the
+                # error if there is one
+                error = error_handler.check(directory)
+                if error:
+                    # record the error in case it wasn't done so above
+                    has_error = True
+                    # make a copy of the directory contents and
+                    # store as an archive within the same directory
+                    make_error_archive(directory)
+                    # And apply the proper correction if there is one.
+                    # Some error_handlers will even raise an error here signaling
+                    # that the stagedtask is unrecoverable and a lost cause.
+                    correction = error_handler.correct(directory)
+                    # record what's been changed
+                    corrections.append((error_handler.name, correction))
+                    logging.info(
+                        f"Found error '{error_handler.name}'. Fixed with '{correction}'"
+                    )
+                    # break from the error_handler for-loop as we only apply the
+                    # highest priority fix and nothing else.
+                    break
+
             # check if the return code is non-zero and thus failed.
             # The 'not has_error' is because terminate() will give a nonzero
             # when a monitor is triggered. We don't want to raise that
@@ -550,32 +577,6 @@ class S3Workflow(Workflow):
                         f"The command ({command}) failed. The error output (if any) is below:\n {errors}"
                     )
 
-            # Check for errors again, because a non-monitor may be higher
-            # priority than the monitor triggered above (if there was one).
-            # Since the error_handlers are in order of priority, only the first
-            # will actually be applied and then we can retry the calc.
-            for error_handler in cls.error_handlers:
-                # check if there's an error with this error_handler and grab the
-                # error if there is one
-                error = error_handler.check(directory)
-                if error:
-                    # record the error in case it wasn't done so above
-                    has_error = True
-                    # make a copy of the directory contents and
-                    # store as an archive within the same directory
-                    make_error_archive(directory)
-                    # And apply the proper correction if there is one.
-                    # Some error_handlers will even raise an error here signaling
-                    # that the stagedtask is unrecoverable and a lost cause.
-                    correction = error_handler.correct(directory)
-                    # record what's been changed
-                    corrections.append((error_handler.name, correction))
-                    logging.info(
-                        f"Found error '{error_handler.name}'. Fixed with '{correction}'"
-                    )
-                    # break from the error_handler for-loop as we only apply the
-                    # highest priority fix and nothing else.
-                    break
 
             # write the log of corrections to file if there are any. This is written
             # as a CSV file format and done every while-loop cycle because it

@@ -65,7 +65,7 @@ class Relaxation__QuantumEspresso__Quality04(Relaxation__QuantumEspresso__Qualit
         diagonalization="david",  # equivalent to ALGO = Normal
         mixing_mode="plain",
         mixing_beta=0.7,  # mixing factor for self-consistency
-        conv_thr="7.5e-7",  # convergence threshold for SCF cycle
+        conv_thr="7.5e-9",  # convergence threshold for SCF cycle
     )
 
     k_points = dict(
