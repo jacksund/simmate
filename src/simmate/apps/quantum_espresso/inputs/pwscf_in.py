@@ -579,9 +579,16 @@ class PwscfInput:
 
         # ----------------------
 
+        # reconstruct psuedo mappings
+        atomic_species = data.get("atomic_species", [])
+        psuedo_mappings = {}
+        for specie in atomic_species:
+            psuedo_mappings[specie["element"]] = {"filename": specie["psuedo_file"]}
+
         return cls(
             structure=structure,
             kpoints=kpoints,
+            psuedo_mappings=psuedo_mappings,
             control=data.get("control", {}),  # !!! should I pop psuedo_file?
             system=data.get("system", {}),
             electrons=data.get("electrons", {}),

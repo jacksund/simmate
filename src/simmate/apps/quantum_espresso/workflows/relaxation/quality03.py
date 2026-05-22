@@ -63,5 +63,5 @@ class Relaxation__QuantumEspresso__Quality03(Relaxation__QuantumEspresso__Qualit
         diagonalization="david",  # equivalent to ALGO = Normal
         mixing_mode="plain",
         mixing_beta=0.7,  # mixing factor for self-consistency
-        conv_thr="7.5e-6",  # convergence threshold for SCF cycle
+        conv_thr="7.5e-8",  # convergence threshold for SCF cycle
     )

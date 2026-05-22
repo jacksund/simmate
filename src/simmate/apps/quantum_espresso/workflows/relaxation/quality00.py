@@ -72,7 +72,7 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
         diagonalization="david",  # equivalent to ALGO = Normal
         mixing_mode="plain",
         mixing_beta=0.7,  # mixing factor for self-consistency
-        conv_thr="1.5e-4",  # convergence threshold for SCF cycle in Ry
+        conv_thr="1.5e-6",  # convergence threshold for SCF cycle in Ry
     )
 
     ions = dict(

@@ -13,6 +13,7 @@ from ..inputs import (
     Kpoints,
     PwscfInput,
 )
+from ..error_handlers import Bfgs, MaxSteps
 
 
 # TODO: add StructureInputWorkflow mixin which can be made from VaspWorkflow class
@@ -22,6 +23,8 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
     )
 
     required_files = ["pwscf.in"]
+
+    error_handlers = [Bfgs(), MaxSteps()]
 
     command: str = settings.quantum_espresso.default_command
     """
