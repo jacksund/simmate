@@ -67,8 +67,6 @@ def test_list_of_all_workflows():
         "population-analysis.vasp-bader.badelf-matproj",
         "population-analysis.vasp-bader.bader-matproj",
         "population-analysis.vasp.elf-matproj",
-        "relaxation.quantum-espresso.lda00",
-        "relaxation.quantum-espresso.lda01",
         "relaxation.quantum-espresso.quality00",
         "relaxation.quantum-espresso.quality01",
         "relaxation.quantum-espresso.quality02",
@@ -103,8 +101,6 @@ def test_list_of_all_workflows():
         # "relaxation.vasp.staged-cluster",
         "restart.toolkit.automatic",
         # "static-energy.vasp.cluster-high-qe",
-        "static-energy.quantum-espresso.evo-tutorial",
-        "static-energy.quantum-espresso.lda02",
         "static-energy.quantum-espresso.low-quality",
         "static-energy.quantum-espresso.quality00",
         "static-energy.quantum-espresso.quality04",
@@ -145,8 +141,6 @@ def test_list_of_apps_by_type():
 def test_list_of_workflows_of_given_type():
     assert get_workflow_names_by_type("static-energy") == [
         # "static-energy.vasp.cluster-high-qe",
-        "static-energy.quantum-espresso.evo-tutorial",
-        "static-energy.quantum-espresso.lda02",
         "static-energy.quantum-espresso.low-quality",
         "static-energy.quantum-espresso.quality00",
         "static-energy.quantum-espresso.quality04",

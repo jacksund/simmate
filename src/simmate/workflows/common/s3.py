@@ -577,7 +577,6 @@ class S3Workflow(Workflow):
                         f"The command ({command}) failed. The error output (if any) is below:\n {errors}"
                     )
 
-
             # write the log of corrections to file if there are any. This is written
             # as a CSV file format and done every while-loop cycle because it
             # lets the user monitor the calculation and error handlers applied

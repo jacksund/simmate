@@ -27,46 +27,41 @@ class Relaxation__QuantumEspresso__Quality01(Relaxation__QuantumEspresso__Qualit
     # -------------------------------------------------------------------------
 
     control = dict(
-        pseudo_dir__auto=True,  # uses the default directory for pseudopotentials
-        restart_mode="from_scratch",  # start from new calc rather than restart
-        calculation="relax",  # perform geometry relaxation with fixed cell
-        tstress=True,  # calculate stress
-        tprnfor=True,  # calculate forces
-        nstep=75,  # maximum number of ionic steps
-        # Unlike in VASP, QE uses both an energy and force cutoff. They are also set in
-        # atomic units, Ry, instead of eV.
-        etot_conv_thr="7.5e-4",  # Ionic step energy convergence threshold
-        forc_conv_thr="7.5e-3",  # Ionic step force convergence threshhold
+        pseudo_dir__auto=True,
+        restart_mode="from_scratch",
+        calculation="relax",
+        tstress=True,
+        tprnfor=True,
+        nstep=75,
+        etot_conv_thr="7.5e-4",
+        forc_conv_thr="7.5e-3",
     )
 
     system = dict(
-        ibrav=0,  # indicates crystal axis is provided in input
-        nat__auto=True,  # automatically set number of atoms
-        ntyp__auto=True,  # automatically set number of types of atoms
-        # !!! should these be set to lower settings?
-        ecutwfc__auto="efficiency_0.9",  # automatically select energy cutoff for wavefunctions
-        ecutrho__auto="efficiency_0.9",  # automatically select energy cutoff for charge density/potential
-        # We don't know if we have a metal or non-metal so we make a guess here.
-        # !!! This guess could be dangerous without handlers
+        ibrav=0,
+        nat__auto=True,
+        ntyp__auto=True,
+        ecutwfc__auto="efficiency_0.9",
+        ecutrho__auto="efficiency_0.9",
         multiple_keywords__smart_smear={
             "metal": dict(
-                occupations="smearing",  # use smearing
-                smearing="methfessel-paxton",  # equivalent to ISMEAR=1
-                degauss=0.08,  # equivalent to SIGMA
+                occupations="smearing",
+                smearing="methfessel-paxton",
+                degauss=0.08,
             ),
             "non-metal": dict(
-                occupations="smearing",  # Should we still use smearing here like we would in vasp?
-                smearing="gaussian",  # equivalent to ISMEAR=0
+                occupations="smearing",
+                smearing="gaussian",
                 degauss=0.05,
             ),
         },
     )
 
     electrons = dict(
-        diagonalization="david",  # equivalent to ALGO = Normal
+        diagonalization="david",
         mixing_mode="plain",
-        mixing_beta=0.7,  # mixing factor for self-consistency
-        conv_thr="7.5e-7",  # convergence threshold for SCF cycle
+        mixing_beta=0.7,
+        conv_thr="7.5e-7",
     )
 
     k_points = dict(

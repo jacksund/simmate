@@ -9,10 +9,10 @@ from simmate.workflows.core.error_handler import ErrorHandler
 
 class Bfgs(ErrorHandler):
     """
-    Checks if a geometry relaxation failed to converge because the BFGS history 
+    Checks if a geometry relaxation failed to converge because the BFGS history
     could not find a lower energy state (i.e. 'bfgs failed' and 'convergence not achieved').
-    
-    The fix is simply to read the final coordinates from the aborted calculation 
+
+    The fix is simply to read the final coordinates from the aborted calculation
     and restart the optimization from that geometry.
     """
 
