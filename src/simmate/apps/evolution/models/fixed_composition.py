@@ -41,8 +41,10 @@ class FixedCompositionSearch(Calculation):
     # Import path for the workflow and the database table of results
     subworkflow_name = table_column.CharField(max_length=200, null=True, blank=True)
     subworkflow_kwargs = table_column.JSONField(default=dict, null=True, blank=True)
-    
-    fitness_workflow_name = table_column.CharField(max_length=200, null=True, blank=True)
+
+    fitness_workflow_name = table_column.CharField(
+        max_length=200, null=True, blank=True
+    )
     fitness_field = table_column.CharField(max_length=200, null=True, blank=True)
 
     # Other settings for the search
@@ -409,10 +411,10 @@ class FixedCompositionSearch(Calculation):
         # NOTE: this table just gives the class back and doesn't filter down
         # to the relevent individuals for this search. For that, use the
         # "individuals" property
-        
+
         # local import to prevent circular import issues
         from simmate.workflows.utils import get_workflow
-        
+
         workflow_name = self.fitness_workflow_name or self.subworkflow_name
         workflow = get_workflow(workflow_name)
         return workflow.database_table

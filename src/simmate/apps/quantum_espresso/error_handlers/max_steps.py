@@ -9,10 +9,10 @@ from simmate.workflows.core.error_handler import ErrorHandler
 
 class MaxSteps(ErrorHandler):
     """
-    Checks if a geometry relaxation failed to converge because the maximum 
+    Checks if a geometry relaxation failed to converge because the maximum
     number of ionic steps was reached.
-    
-    The fix is simply to read the final coordinates from the aborted calculation 
+
+    The fix is simply to read the final coordinates from the aborted calculation
     and restart the optimization from that geometry.
     """
 
