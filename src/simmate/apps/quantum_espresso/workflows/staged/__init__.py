@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from .low_quality import StaticEnergy__QuantumEspresso__LowQuality
+from .low_quality import StagedRelaxStatic__QuantumEspresso__LowQuality
