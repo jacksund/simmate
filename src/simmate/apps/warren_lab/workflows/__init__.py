@@ -20,9 +20,9 @@ from .relaxation import (
 from .staged import (
     Relaxation__Vasp__HseWithWavecarWarren,
     Relaxation__Vasp__PbesolWithWavecarWarren,
-    StaticEnergy__Vasp__RelaxationStaticHseHseWarren,
-    StaticEnergy__Vasp__RelaxationStaticPbeHseWarren,
-    StaticEnergy__Vasp__RelaxationStaticPbePbeWarren,
+    StagedRelaxStatic__Vasp__RelaxationStaticHseHseWarren,
+    StagedRelaxStatic__Vasp__RelaxationStaticPbesolHseWarren,
+    StagedRelaxStatic__Vasp__RelaxationStaticPbesolPbesolWarren,
 )
 from .static_energy import (
     StaticEnergy__Vasp__HsesolWarren,

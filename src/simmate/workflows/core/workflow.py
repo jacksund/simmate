@@ -408,6 +408,10 @@ class Workflow:
             from simmate.database.mixins import StaticEnergy
 
             return StaticEnergy
+        elif flow_type == "staged-relax-static":
+            from simmate.database.mixins import StagedRelaxStatic
+
+            return StagedRelaxStatic
         elif flow_type == "electronic-structure":
             if "band-structure" in flow_preset:
                 from simmate.database.mixins import BandStructureCalc

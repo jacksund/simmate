@@ -10,6 +10,8 @@ from .forces import Forces
 from .nudged_elastic_band import DiffusionAnalysis, MigrationHop, MigrationImage
 from .population_analysis import PopulationAnalysis
 from .relaxation import IonicStep, Relaxation
+from .staged import StagedWorkflow
+from .staged_relax_static import StagedRelaxStatic
 from .static_energy import StaticEnergy
 from .status_tracking import StatusTracking
 from .structure import Structure

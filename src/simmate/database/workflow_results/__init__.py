@@ -11,5 +11,7 @@ from simmate.database.mixins import (
     MigrationImage,
     PopulationAnalysis,
     Relaxation,
+    StagedRelaxStatic,
+    StagedWorkflow,
     StaticEnergy,
 )

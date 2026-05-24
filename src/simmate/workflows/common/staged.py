@@ -44,7 +44,7 @@ class StagedWorkflow(Workflow):
         **kwargs,
     ):
         subworkflow_kwargs = subworkflow_kwargs or {}
-        subworkflow_ids = []
+        subworkflow_runs = []
         result = None
 
         for i, current_task in enumerate(cls.subworkflows):
@@ -62,9 +62,25 @@ class StagedWorkflow(Workflow):
                     previous_directory=result.directory,
                     **subworkflow_kwargs,
                 )
-            subworkflow_ids.append(result.id)
+                
+            if hasattr(result, "id") and hasattr(result, "_meta"):
+                subworkflow_runs.append(
+                    {
+                        "table_name": result._meta.db_table,
+                        "id": result.id,
+                    }
+                )
 
-        return result
+        if not cls.use_database:
+            return result
+
+        return {
+            "subworkflow_runs": subworkflow_runs,
+            "structure": getattr(result, "structure", None),
+            "energy": getattr(result, "energy", None),
+            "site_forces": getattr(result, "site_forces", None),
+            "lattice_stress": getattr(result, "lattice_stress", None),
+        }
 
     @classmethod
     @property
