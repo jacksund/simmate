@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import datetime
 import inspect
 import json
 import logging
@@ -1129,6 +1130,8 @@ class Workflow:
                 elif parameter_key == "composition":
                     # convert Composition to str
                     parameter_value = str(parameter_value)
+                elif isinstance(parameter_value, datetime.datetime):
+                    parameter_value = parameter_value.isoformat()
 
                 # preferred serializiation
                 elif hasattr(parameter_value, "as_dict"):

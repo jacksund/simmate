@@ -7,5 +7,8 @@ from .relaxation import (
     Relaxation__Vasp__Quality03,
     Relaxation__Vasp__Quality04,
 )
-from .staged import StagedRelaxStatic__Vasp__EvoTutorial, StagedRelaxStatic__Vasp__LowQuality
+from .staged import (
+    StagedRelaxStatic__Vasp__EvoTutorial,
+    StagedRelaxStatic__Vasp__LowQuality,
+)
 from .static_energy import StaticEnergy__Vasp__Quality04

@@ -62,7 +62,7 @@ class StagedWorkflow(Workflow):
                     previous_directory=result.directory,
                     **subworkflow_kwargs,
                 )
-                
+
             if hasattr(result, "id") and hasattr(result, "_meta"):
                 subworkflow_runs.append(
                     {
