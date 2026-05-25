@@ -11,6 +11,7 @@ from .results import (
     MigrationImageComponent,
     PopulationAnalysisComponent,
     RelaxationComponent,
+    StagedRelaxStaticComponent,
     StaticEnergyComponent,
 )
 from .search import WorkflowSearchComponent

@@ -1,0 +1,19 @@
+{% extends "data_explorer/entries.html" %}
+{% block table_headers %}
+    {% table_header "id" "ID" min_width=150 %}
+    {% table_header "composition" "Composition" min_width=150 %}
+    {% table_header "fitness_field" "Fitness Field" min_width=200 %}
+    {% table_header "subworkflow_name" "Subworkflow Name" min_width=350 %}
+    {% table_header "nfirst_generation" "First Gen Size" min_width=200 %}
+    {% table_header "nsteadystate" "Steady State Size" min_width=200 %}
+    {% include "data_explorer/mixins/calculation/columns.html" %}
+{% endblock %}
+{% block table_rows %}
+    <td>{% foreign_key_link entry "id" %}</td>
+    <td>{{ entry.composition }}</td>
+    <td>{{ entry.fitness_field }}</td>
+    <td>{{ entry.subworkflow_name }}</td>
+    <td>{{ entry.nfirst_generation }}</td>
+    <td>{{ entry.nsteadystate }}</td>
+    {% include "data_explorer/mixins/calculation/rows.html" %}
+{% endblock %}

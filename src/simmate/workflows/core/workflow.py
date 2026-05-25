@@ -44,6 +44,12 @@ class Workflow:
     in the list-view of all different workflow presets.
     """
 
+    submission_form: str = None
+    """
+    The custom HTMX component to use for submitting this workflow in the UI.
+    If not set, a default structure submission form is used.
+    """
+
     use_database: bool = True
     """
     Whether to use Simmate database features or not.

@@ -255,6 +255,7 @@ class SimmateSettings:
                         "simmate.apps.ppdb.components.PpdbMoleculeComponent",
                     ],
                     "Workflow Results": [
+                        "simmate.website.workflow_explorer.components.StagedRelaxStaticComponent",
                         "simmate.website.workflow_explorer.components.StaticEnergyComponent",
                         "simmate.website.workflow_explorer.components.RelaxationComponent",
                         "simmate.website.workflow_explorer.components.PopulationAnalysisComponent",

@@ -4,10 +4,10 @@
     {% simmate_setting "website.show_finances" as SHOW_FINANCES %}
     <div class="row my-5">
         <div class="col-3 border-end border-secondary-subtle">
-            {% if not component.form_data.structure %}
+            {% if not component.form_data.composition %}
                 <div class="p-2 bg-secondary-subtle">
                     <h5 class="m-0">
-                        <i class="bi bi-1-circle"></i> Load Structure
+                        <i class="bi bi-1-circle"></i> Set Composition
                     </h5>
                 </div>
                 {% if SHOW_FINANCES %}
@@ -25,7 +25,7 @@
             {% elif not component.is_pricing_confirmed %}
                 <div class="p-2 text-success">
                     <h5 class="m-0">
-                        <i class="bi bi-1-circle"></i> Load Structure <i class="bi bi-check-circle-fill"></i>
+                        <i class="bi bi-1-circle"></i> Set Composition <i class="bi bi-check-circle-fill"></i>
                     </h5>
                 </div>
                 <div class="p-2 bg-secondary-subtle">
@@ -41,7 +41,7 @@
             {% elif not component.is_submission_confirmed %}
                 <div class="p-2 text-success">
                     <h5 class="m-0">
-                        <i class="bi bi-1-circle"></i> Load Structure <i class="bi bi-check-circle-fill"></i>
+                        <i class="bi bi-1-circle"></i> Set Composition <i class="bi bi-check-circle-fill"></i>
                     </h5>
                 </div>
                 {% if SHOW_FINANCES %}
@@ -59,7 +59,7 @@
             {% else %}
                 <div class="p-2 text-success">
                     <h5 class="m-0">
-                        <i class="bi bi-1-circle"></i> Load Structure <i class="bi bi-check-circle-fill"></i>
+                        <i class="bi bi-1-circle"></i> Set Composition <i class="bi bi-check-circle-fill"></i>
                     </h5>
                 </div>
                 {% if SHOW_FINANCES %}
@@ -80,9 +80,19 @@
             </div>
         </div>
         <div class="col-9 ">
-            {% if not component.is_submission_confirmed %}
+            {% if not component.form_data.composition %}
                 <div class="row ps-5 py-4">
-                    {% htmx_structure_input name="structure" label="Structure" allow_database_input=True %}
+                    <div class="col-8">
+                        <div class="pb-2">
+                            <b>Set Composition</b>
+                        </div>
+                        <div class="row">
+                            <div class="col-11">{% htmx_text_input name="composition" placeholder="e.g. Ca2N" show_label=False %}</div>
+                            <div class="col-1">
+                                {% htmx_button method_name="load_composition" label="Load" icon="download" theme="secondary" small=True show_label=False input_name="composition" %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             {% endif %}
             {% if component.is_submission_confirmed %}
@@ -114,9 +124,12 @@
                         {% alert theme="info" message="Refreshing this page will clear this form for a new submission. You will be able to find all of your past submissions on your Profile page, and you can find all results in the Data tab." %}
                     </div>
                 </div>
-            {% elif component.form_data.structure %}
+            {% elif component.form_data.composition %}
                 <div class="row ps-5 py-4">
                     <div class="col-8">
+                        <div class="pb-4 border-bottom mb-4">
+                            <b>Composition:</b> <span class="text-primary">{{ component.form_data.composition }}</span>
+                        </div>
                         {% if not component.is_pricing_confirmed %}
                             {% if SHOW_FINANCES %}
                                 <div class="text-center py-3">
@@ -140,11 +153,11 @@
                                         {% endif %}
                                         <tr>
                                             <td>Est. Real Time *</td>
-                                            <td>60 seconds</td>
+                                            <td>Varies</td>
                                         </tr>
                                         <tr>
                                             <td>Est. CPU Time</td>
-                                            <td>3 min</td>
+                                            <td>Varies</td>
                                         </tr>
                                     </tbody>
                                 </table>

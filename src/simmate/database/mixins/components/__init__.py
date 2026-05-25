@@ -6,3 +6,4 @@ from .diffusion_analysis import DiffusionAnalysisComponent
 from .dynamics import DynamicsComponent
 from .population_analysis import PopulationAnalysisComponent
 from .spacegroup import SpacegroupComponent
+from .staged_relax_static import StagedRelaxStaticComponent
