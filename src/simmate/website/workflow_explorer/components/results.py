@@ -11,6 +11,7 @@ from simmate.database.mixins import (
     MigrationImage,
     PopulationAnalysis,
     Relaxation,
+    StagedRelaxStatic,
     StaticEnergy,
 )
 from simmate.website.data_explorer.components import TableComponent
@@ -42,6 +43,21 @@ class RelaxationComponent(TableComponent):
     template_names = {
         "entries": "workflow_explorer/relaxation/table.html",
         "entry": "workflow_explorer/relaxation/view.html",
+    }
+
+
+class StagedRelaxStaticComponent(TableComponent):
+    table = StagedRelaxStatic
+    display_name = "Staged Relax & Static"
+    description_short = (
+        "Results for a staged workflow that first relaxes the structure and "
+        "then calculates the static energy. This is a common pattern for "
+        "obtaining highly accurate energies."
+    )
+    template_names = {
+        # Using the same templates as static energy or relaxation since it's a mix
+        "entries": "workflow_explorer/static_energy/table.html",
+        "entry": "workflow_explorer/static_energy/view.html",
     }
 
 

@@ -16,6 +16,8 @@ class FixedCompositionSearchComponent(TableComponent):
     )
     template_names = {
         "search": "core/base_data_types/structure_form.html",
+        "entries": "evolution/fixed_composition_search/table.html",
+        "entry": "evolution/fixed_composition_search/view.html",
     }
 
     enabled_component_types = ["dashboard", "entries", "entry", "search"]

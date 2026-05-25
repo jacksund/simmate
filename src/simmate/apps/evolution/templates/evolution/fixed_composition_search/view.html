@@ -1,0 +1,85 @@
+{% extends "data_explorer/entry.html" %}
+{% block entrycontent %}
+    <div>
+        <ul class="nav nav-tabs nav-bordered mb-3">
+            <li class="nav-item">
+                <a href="#overview-section"
+                   data-bs-toggle="tab"
+                   aria-expanded="true"
+                   class="nav-link active">
+                    <i class="mdi mdi-home-variant d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Overview</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#calculation-section"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="mdi mdi-calculator d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Calculation</span>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane show active" id="overview-section">
+                <div class="row">
+                    <div class="col-xl-9">
+                        <table class="table table-centered table-striped mb-4 border">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th style="width: 45%">Summary</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Composition</td>
+                                    <td>{{ table_entry.composition }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Subworkflow Name</td>
+                                    <td>
+                                        <a href="{% url 'workflow_explorer:workflow_detail' table_entry.subworkflow_name %}">
+                                            {{ table_entry.subworkflow_name }}
+                                            <small><i class="bi bi-box-arrow-up-right"></i></small>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Fitness Field</td>
+                                    <td>{{ table_entry.fitness_field }}</td>
+                                </tr>
+                                <tr>
+                                    <td>First Generation Size</td>
+                                    <td>{{ table_entry.nfirst_generation }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Steady State Size</td>
+                                    <td>{{ table_entry.nsteadystate }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Selector</td>
+                                    <td>{{ table_entry.selector_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Validator</td>
+                                    <td>{{ table_entry.validator_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Sleep Step</td>
+                                    <td>{{ table_entry.sleep_step }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="calculation-section">
+                <div class="row">
+                    <div class="col-xl-9">{% include "core/base_data_types/calculation.html" %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
