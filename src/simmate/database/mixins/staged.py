@@ -35,13 +35,13 @@ class StagedWorkflow(Calculation):
         results = []
         if not self.subworkflow_runs:
             return results
-        
+
         if len(self.subworkflow_runs) != len(self.database_tables):
             logging.warning(
                 "This staged workflow did not complete. Some results may be missing."
             )
             # We don't return early here because we might still want the results of the subworkflows that DID complete.
-            
+
         for run_dict, table in zip(self.subworkflow_runs, self.database_tables):
             sub_id = run_dict.get("id")
             if sub_id and table.objects.filter(id=sub_id).exists():
@@ -49,5 +49,3 @@ class StagedWorkflow(Calculation):
             else:
                 results.append(None)
         return results
-
-

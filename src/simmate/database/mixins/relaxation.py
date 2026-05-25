@@ -1,22 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-Structure Relaxations are made up of a series of ionic steps -- where each
-ionic step can be thought of as a single energy calculation. This yields
-energy, forces, and lattice stress for a given structure. In many cases,
-users won't need all of this data because they're only after the final
-structure. However, all ionic steps are useful in the case of confirming
-convergence as well as machine learning applications. We therefore store these
-here.
-
-This module helps you create tables to results from structure relaxations
-(aka geometry optimizations). This will store all ionic steps and the forces/stress
-associated with each step.
-
-Note there are two tables involved. One stores all of the ionic steps, and the
-other connects all ionic steps to a specific calculation and result.
-"""
-
 from pathlib import Path
 
 import plotly.graph_objects as plotly_go
@@ -35,6 +18,21 @@ from .thermodynamics import Thermodynamics
 
 class Relaxation(Structure, Thermodynamics, Forces, Calculation):
     """
+    Structure Relaxations are made up of a series of ionic steps -- where each
+    ionic step can be thought of as a single energy calculation. This yields
+    energy, forces, and lattice stress for a given structure. In many cases,
+    users won't need all of this data because they're only after the final
+    structure. However, all ionic steps are useful in the case of confirming
+    convergence as well as machine learning applications. We therefore store these
+    here.
+
+    This module helps you create tables to results from structure relaxations
+    (aka geometry optimizations). This will store all ionic steps and the forces/stress
+    associated with each step.
+
+    Note there are two tables involved. One stores all of the ionic steps, and the
+    other connects all ionic steps to a specific calculation and result.
+
     This table holds all data from a structure relaxation and also links to
     IonicStep table which holds all of the structure/energy/forces for each
     ionic step.
@@ -50,52 +48,9 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
         app_label = "workflow_explorer"
         db_table = "workflows_relaxation"
 
-    # -------------------------------------------------------------------------
-
     exclude_from_summary = ["structure_start", "structure_final"]
 
-    archive_fields = [
-        "band_gap",
-        "is_gap_direct",
-        "energy_fermi",
-        "conduction_band_minimum",
-        "valence_band_maximum",
-    ]
-
     # -------------------------------------------------------------------------
-
-    # OPTIMIZE: should I include this electronic data?
-    # This data here is something we only get for the final structure, so it
-    # may make sense to move this data into the IonicStepStructure table (and
-    # allow null values for non-final steps). I instead keep this here because
-    # I don't want columns above that are largely empty.
-    # Note: all entries are optional because there is no guaruntee the calculation
-    # finishes successfully
-
-    band_gap = table_column.FloatField(blank=True, null=True)
-    """
-    The band gap energy in eV.
-    """
-
-    is_gap_direct = table_column.BooleanField(blank=True, null=True)
-    """
-    Whether the band gap is direct or indirect.
-    """
-
-    energy_fermi = table_column.FloatField(blank=True, null=True)
-    """
-    The Fermi energy in eV.
-    """
-
-    conduction_band_minimum = table_column.FloatField(blank=True, null=True)
-    """
-    The conduction band minimum in eV.
-    """
-
-    valence_band_maximum = table_column.FloatField(blank=True, null=True)
-    """
-    The valence band maximum in eV.
-    """
 
     volume_change = table_column.FloatField(blank=True, null=True)
     """
@@ -106,11 +61,6 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
     (volume_final - volume_start) / volume_start
     ```
     """
-
-    """ Relationships """
-    # structure_start --> points to first (0) IonicStep
-    # structure_final --> points to final IonicStep
-    # structures --> gives list of all IonicSteps
 
     structure_start = (
         table_column.OneToOneField(
@@ -255,13 +205,6 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
                 (structures[-1].volume - structures[0].volume) / structures[0].volume
             )
             * 100,
-            # There is also extra data for the final structure that we save directly
-            # in the relaxation table.  We use .get() in case the key isn't provided.
-            band_gap=data.get("bandgap"),
-            is_gap_direct=data.get("is_gap_direct"),
-            energy_fermi=data.get("efermi"),
-            conduction_band_minimum=data.get("cbm"),
-            valence_band_maximum=data.get("vbm"),
         )
 
     def update_from_pwscf_run(self, pwscf_run: PwscfXml):
@@ -313,13 +256,6 @@ class Relaxation(Structure, Thermodynamics, Forces, Calculation):
                 (structures[-1].volume - structures[0].volume) / structures[0].volume
             )
             * 100,
-            # There is also extra data for the final structure that we save directly
-            # in the relaxation table.  We use .get() in case the key isn't provided.
-            band_gap=pwscf_run.band_gap,
-            is_gap_direct=pwscf_run.is_gap_direct,
-            energy_fermi=pwscf_run.energy_fermi,
-            conduction_band_minimum=pwscf_run.conduction_band_minimum,
-            valence_band_maximum=pwscf_run.valence_band_maximum,
         )
 
 
