@@ -271,3 +271,44 @@ class ChemspaceClient:
         s3_client.upload_fileobj(buffer, destination_bucket, dest_key)
 
         logging.info(f"Uploaded {dest_key}")
+
+    @classmethod
+    def patch_h19_part1_header_rows(
+        cls,
+        destination_bucket: str = "eks-rd-prod-simmate",
+        parquet_key: str = "Freedom_Space_4/Beyond_rule_of_5/2_comp_space/HAC_19/H19_1_PART.smi.parquet",
+    ):
+        """
+        Patches H19_1_PART.smi.parquet which was written with duplicate header
+        rows scattered throughout the data (the source bz2 contained repeated
+        column-name lines).  Removes those rows, casts numeric columns to their
+        correct types, and overwrites the file in the destination bucket.
+        """
+        s3_client = boto3.client("s3")
+
+        logging.info(f"Downloading {parquet_key} from {destination_bucket}...")
+        response = s3_client.get_object(Bucket=destination_bucket, Key=parquet_key)
+        buffer_in = io.BytesIO(response["Body"].read())
+
+        df = polars.read_parquet(buffer_in)
+        logging.info(f"Loaded shape before patch: {df.shape}")
+
+        # Rows where SMILES equals the literal string "SMILES" are header rows
+        # that were accidentally included in the data.
+        df = df.filter(polars.col("SMILES") != "SMILES")
+        logging.info(f"Shape after removing header rows: {df.shape}")
+
+        float_cols = ["MW", "LogP", "FSP3", "TPSA"]
+        int_cols = ["Components", "HAC", "HBA", "HBD", "RotBonds", "reaction_id"]
+        df = df.with_columns(
+            [polars.col(c).cast(polars.Float64) for c in float_cols]
+            + [polars.col(c).cast(polars.Int64) for c in int_cols]
+        )
+
+        buffer_out = io.BytesIO()
+        df.write_parquet(buffer_out)
+        buffer_out.seek(0)
+
+        logging.info(f"Uploading patched file to {destination_bucket}/{parquet_key}...")
+        s3_client.upload_fileobj(buffer_out, destination_bucket, parquet_key)
+        logging.info(f"Done. Final shape: {df.shape}")
