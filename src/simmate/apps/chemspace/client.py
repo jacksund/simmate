@@ -157,6 +157,8 @@ class ChemspaceClient:
     # Parquet conversion (dev/ETL)
     # -------------------------------------------------------------------------
 
+    # STEP 1
+
     @classmethod
     def convert_to_parquet(
         cls,
@@ -272,6 +274,8 @@ class ChemspaceClient:
 
         logging.info(f"Uploaded {dest_key}")
 
+    # STEP 2
+
     @classmethod
     def patch_h19_part1_header_rows(
         cls,
@@ -312,3 +316,53 @@ class ChemspaceClient:
         logging.info(f"Uploading patched file to {destination_bucket}/{parquet_key}...")
         s3_client.upload_fileobj(buffer_out, destination_bucket, parquet_key)
         logging.info(f"Done. Final shape: {df.shape}")
+
+    # STEP 3
+
+    @classmethod
+    def reorg_to_hive_partitioning(cls):
+        bucket_name = "eks-rd-prod-simmate"
+        source_prefix = "Freedom_Space_4"
+        target_prefix = f"s3://{bucket_name}/chemspace_freedom_4"
+
+        print("Scanning S3 for files...")
+        s3_client = boto3.client("s3")
+        all_keys = cls._list_s3_keys(
+            s3_client, bucket_name, source_prefix, suffix=".parquet"
+        )
+
+        for key in all_keys:
+            parts = key.split("/")
+            try:
+                base_idx = parts.index("Freedom_Space_4")
+                ro5_str = parts[base_idx + 1]
+                ro5_bool = False if "beyond" in ro5_str.lower() else True
+                comp_val = int(parts[base_idx + 2].replace("_comp_space", ""))
+                hac_val = int(parts[base_idx + 3].replace("HAC_", ""))
+            except (ValueError, IndexError):
+                print(f"Skipping {key} - structure mismatch.")
+                continue
+
+            df = polars.read_parquet(f"s3://{bucket_name}/{key}").with_columns(
+                [
+                    polars.lit(ro5_bool, dtype=polars.Boolean).alias("Ro5"),
+                    polars.lit(comp_val, dtype=polars.Int32).alias("Components"),
+                    polars.lit(hac_val, dtype=polars.Int32).alias("HAC"),
+                ]
+            )
+
+            df.write_parquet(
+                file=target_prefix,
+                use_pyarrow=True,
+                pyarrow_options={
+                    "partition_cols": ["Ro5", "Components", "HAC"],
+                    # "max_rows_per_file": 1_000_000,
+                    # "existing_data_behavior": "overwrite_or_ignore",
+                },
+            )
+
+            print(
+                f"Migrated: Ro5={ro5_bool}, Comp={comp_val}, HAC={hac_val} | Rows: {len(df):,}"
+            )
+
+        print("Migration complete!")
