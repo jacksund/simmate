@@ -3,7 +3,8 @@
 import numpy
 
 from simmate.toolkit import Molecule
-from simmate.toolkit.featurizers.base import Featurizer
+
+from .base import Featurizer
 
 
 class PropertyGrabber(Featurizer):

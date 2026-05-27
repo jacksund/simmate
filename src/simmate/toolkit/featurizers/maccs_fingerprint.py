@@ -3,8 +3,8 @@
 from rdkit.Chem import MACCSkeys
 
 from simmate.toolkit import Molecule
-from simmate.toolkit.featurizers.base import Featurizer
 
+from .base import Featurizer
 from .utils import convert_rdkit_fingerprint
 
 
