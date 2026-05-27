@@ -12,7 +12,7 @@ from botocore.config import Config
 from rich.progress import track
 
 from simmate.config import settings
-from simmate.utils import get_directory
+from simmate.utils import get_directory, get_hash_key
 
 
 class ChemspaceClient:
@@ -157,6 +157,8 @@ class ChemspaceClient:
     # Parquet conversion (dev/ETL)
     # -------------------------------------------------------------------------
 
+    # STEP 1
+
     @classmethod
     def convert_to_parquet(
         cls,
@@ -271,3 +273,115 @@ class ChemspaceClient:
         s3_client.upload_fileobj(buffer, destination_bucket, dest_key)
 
         logging.info(f"Uploaded {dest_key}")
+
+    # STEP 2
+
+    @classmethod
+    def patch_h19_part1_header_rows(
+        cls,
+        destination_bucket: str = "eks-rd-prod-simmate",
+        parquet_key: str = "Freedom_Space_4/Beyond_rule_of_5/2_comp_space/HAC_19/H19_1_PART.smi.parquet",
+    ):
+        """
+        Patches H19_1_PART.smi.parquet which was written with duplicate header
+        rows scattered throughout the data (the source bz2 contained repeated
+        column-name lines).  Removes those rows, casts numeric columns to their
+        correct types, and overwrites the file in the destination bucket.
+        """
+        s3_client = boto3.client("s3")
+
+        logging.info(f"Downloading {parquet_key} from {destination_bucket}...")
+        response = s3_client.get_object(Bucket=destination_bucket, Key=parquet_key)
+        buffer_in = io.BytesIO(response["Body"].read())
+
+        df = polars.read_parquet(buffer_in)
+        logging.info(f"Loaded shape before patch: {df.shape}")
+
+        # Rows where SMILES equals the literal string "SMILES" are header rows
+        # that were accidentally included in the data.
+        df = df.filter(polars.col("SMILES") != "SMILES")
+        logging.info(f"Shape after removing header rows: {df.shape}")
+
+        float_cols = ["MW", "LogP", "FSP3", "TPSA"]
+        int_cols = ["Components", "HAC", "HBA", "HBD", "RotBonds", "reaction_id"]
+        df = df.with_columns(
+            [polars.col(c).cast(polars.Float64) for c in float_cols]
+            + [polars.col(c).cast(polars.Int64) for c in int_cols]
+        )
+
+        buffer_out = io.BytesIO()
+        df.write_parquet(buffer_out)
+        buffer_out.seek(0)
+
+        logging.info(f"Uploading patched file to {destination_bucket}/{parquet_key}...")
+        s3_client.upload_fileobj(buffer_out, destination_bucket, parquet_key)
+        logging.info(f"Done. Final shape: {df.shape}")
+
+    # STEP 3
+
+    @classmethod
+    def reorg_to_hive_partitioning(cls):
+        bucket_name = "eks-rd-prod-simmate"
+        source_prefix = "Freedom_Space_4"
+        target_prefix = f"s3://{bucket_name}/chemspace_freedom_4"
+
+        s3_client = boto3.client("s3")
+
+        logging.info("Scanning source files...")
+        all_keys = cls._list_s3_keys(
+            s3_client, bucket_name, source_prefix, suffix=".parquet"
+        )
+
+        logging.info("Scanning existing output files...")
+        existing_keys = cls._list_s3_keys(
+            s3_client, bucket_name, "chemspace_freedom_4", suffix=".parquet"
+        )
+        processed_hashes = {Path(k).stem.split("_")[0] for k in existing_keys}
+        logging.info(f"  {len(processed_hashes)} source files already converted")
+
+        files_to_process = [
+            k for k in all_keys if get_hash_key(k) not in processed_hashes
+        ]
+        logging.info(
+            f"  {len(files_to_process)} files to convert "
+            f"({len(all_keys) - len(files_to_process)} skipped)"
+        )
+
+        for key in files_to_process:
+            parts = key.split("/")
+            try:
+                base_idx = parts.index("Freedom_Space_4")
+                ro5_str = parts[base_idx + 1]
+                ro5_bool = False if "beyond" in ro5_str.lower() else True
+                comp_val = int(parts[base_idx + 2].replace("_comp_space", ""))
+                hac_val = int(parts[base_idx + 3].replace("HAC_", ""))
+            except (ValueError, IndexError):
+                logging.info(f"Skipping {key} - structure mismatch.")
+                continue
+
+            source_hash = get_hash_key(key)
+
+            df = polars.read_parquet(f"s3://{bucket_name}/{key}").with_columns(
+                [
+                    polars.lit(ro5_bool, dtype=polars.Boolean).alias("Ro5"),
+                    polars.lit(comp_val, dtype=polars.Int32).alias("Components"),
+                    polars.lit(hac_val, dtype=polars.Int32).alias("HAC"),
+                ]
+            )
+
+            df.write_parquet(
+                file=target_prefix,
+                use_pyarrow=True,
+                pyarrow_options={
+                    "partition_cols": ["Ro5", "Components", "HAC"],
+                    "existing_data_behavior": "overwrite_or_ignore",
+                    "basename_template": f"{source_hash}_{{i}}.parquet",
+                },
+            )
+
+            logging.info(
+                f"Migrated: Ro5={ro5_bool}, Comp={comp_val}, HAC={hac_val} "
+                f"| Rows: {len(df):,} | Hash: {source_hash[:8]}..."
+            )
+
+        logging.info("Migration complete!")
