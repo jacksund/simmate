@@ -55,9 +55,8 @@ class StagedRelaxStaticComponent(TableComponent):
         "obtaining highly accurate energies."
     )
     template_names = {
-        # Using the same templates as static energy or relaxation since it's a mix
-        "entries": "workflow_explorer/static_energy/table.html",
-        "entry": "workflow_explorer/static_energy/view.html",
+        "entries": "workflow_explorer/staged_relax_static/table.html",
+        "entry": "workflow_explorer/staged_relax_static/view.html",
     }
 
 

@@ -278,7 +278,7 @@ class SimmateSettings:
                     ],
                     "Other": [
                         "simmate.apps.eppo_gd.components.EppoCodeComponent",
-                        "simmate.database.mixins.components.SpacegroupComponent",
+                        "simmate.website.core.components.SpacegroupComponent",
                     ],
                     "HIDDEN": [
                         "simmate.website.core.components.WebsitePageVisitComponent",

@@ -1,0 +1,35 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    <form class="m-0 p-0">
+        {% htmx_refresh refresh_loop="5s" %}
+        {% with status=component.current_status %}
+            {% if status == "Completed" %}
+                <div class="alert alert-success text-center fw-bold m-0 p-0">{{ status }}</div>
+            {% elif status == "Running" %}
+                <div class="alert alert-primary text-center fw-bold m-0 p-0 d-flex align-items-center justify-content-center">
+                    <div class="spinner-grow spinner-grow-sm" role="status">
+                        <span class="visually-hidden">Active...</span>
+                    </div>
+                    <span class="mx-3">{{ status }}</span>
+                    <div class="spinner-grow spinner-grow-sm" role="status">
+                        <span class="visually-hidden">Active...</span>
+                    </div>
+                </div>
+            {% elif status == "Failed" %}
+                <div class="alert alert-danger text-center fw-bold m-0 p-0">{{ status }}</div>
+            {% elif status == "Canceled" %}
+                <div class="alert alert-warning text-center fw-bold m-0 p-0">{{ status }}</div>
+            {% else %}
+                <div class="alert alert-secondary text-center fw-bold m-0 p-0 d-flex align-items-center justify-content-center">
+                    <div class="spinner-grow spinner-grow-sm" role="status">
+                        <span class="visually-hidden">Active...</span>
+                    </div>
+                    <span class="mx-3">{{ status|default:"Pending" }}</span>
+                    <div class="spinner-grow spinner-grow-sm" role="status">
+                        <span class="visually-hidden">Active...</span>
+                    </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+    </form>
+{% endblock %}

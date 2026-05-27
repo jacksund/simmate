@@ -98,6 +98,25 @@ def htmx_loading_spinner():
 
 
 @register.inclusion_tag(
+    filename="htmx/input_elements/refresh.html",
+    takes_context=True,
+)
+def htmx_refresh(
+    context: dict,
+    refresh_loop: str = "5s",
+    method_name: str = None,
+    include: str = None,
+    target: str = None,
+    indicator: str = "#loading-spinner-corner",
+    **method_kwargs,
+):
+    method_kwargs = urllib.parse.urlencode(method_kwargs)
+    component = context.get("component")
+    trigger = f"every {refresh_loop}"
+    return locals()
+
+
+@register.inclusion_tag(
     filename="htmx/post_action.html",
     takes_context=True,
 )
