@@ -12,7 +12,7 @@ from botocore.config import Config
 from rich.progress import track
 
 from simmate.config import settings
-from simmate.utils import get_directory
+from simmate.utils import get_directory, get_hash_key
 
 
 class ChemspaceClient:
@@ -325,13 +325,29 @@ class ChemspaceClient:
         source_prefix = "Freedom_Space_4"
         target_prefix = f"s3://{bucket_name}/chemspace_freedom_4"
 
-        print("Scanning S3 for files...")
         s3_client = boto3.client("s3")
+
+        logging.info("Scanning source files...")
         all_keys = cls._list_s3_keys(
             s3_client, bucket_name, source_prefix, suffix=".parquet"
         )
 
-        for key in all_keys:
+        logging.info("Scanning existing output files...")
+        existing_keys = cls._list_s3_keys(
+            s3_client, bucket_name, "chemspace_freedom_4", suffix=".parquet"
+        )
+        processed_hashes = {Path(k).stem.split("_")[0] for k in existing_keys}
+        logging.info(f"  {len(processed_hashes)} source files already converted")
+
+        files_to_process = [
+            k for k in all_keys if get_hash_key(k) not in processed_hashes
+        ]
+        logging.info(
+            f"  {len(files_to_process)} files to convert "
+            f"({len(all_keys) - len(files_to_process)} skipped)"
+        )
+
+        for key in files_to_process:
             parts = key.split("/")
             try:
                 base_idx = parts.index("Freedom_Space_4")
@@ -340,8 +356,10 @@ class ChemspaceClient:
                 comp_val = int(parts[base_idx + 2].replace("_comp_space", ""))
                 hac_val = int(parts[base_idx + 3].replace("HAC_", ""))
             except (ValueError, IndexError):
-                print(f"Skipping {key} - structure mismatch.")
+                logging.info(f"Skipping {key} - structure mismatch.")
                 continue
+
+            source_hash = get_hash_key(key)
 
             df = polars.read_parquet(f"s3://{bucket_name}/{key}").with_columns(
                 [
@@ -356,13 +374,14 @@ class ChemspaceClient:
                 use_pyarrow=True,
                 pyarrow_options={
                     "partition_cols": ["Ro5", "Components", "HAC"],
-                    # "max_rows_per_file": 1_000_000,
-                    # "existing_data_behavior": "overwrite_or_ignore",
+                    "existing_data_behavior": "overwrite_or_ignore",
+                    "basename_template": f"{source_hash}_{{i}}.parquet",
                 },
             )
 
-            print(
-                f"Migrated: Ro5={ro5_bool}, Comp={comp_val}, HAC={hac_val} | Rows: {len(df):,}"
+            logging.info(
+                f"Migrated: Ro5={ro5_bool}, Comp={comp_val}, HAC={hac_val} "
+                f"| Rows: {len(df):,} | Hash: {source_hash[:8]}..."
             )
 
-        print("Migration complete!")
+        logging.info("Migration complete!")
