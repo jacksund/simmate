@@ -15,6 +15,7 @@ from rdkit.Chem import (
     AllChem,
     Descriptors,
     Draw,
+    MACCSkeys,
     RDConfig,
     rdmolops,
     rdqueries,
@@ -1630,29 +1631,44 @@ class Molecule:
         self,
         fingerprint_type: str = "topological",
         vector_type: str = "rdkit",
+        packed: bool = False,
         **kwargs,
     ):
         """
-        Generates a molecule fingerprint from one of several options and formats
+        Generates a molecule fingerprint from one of several options and formats.
+        Set packed=True to return numpy.packbits of the bit vector.
         """
 
         if fingerprint_type == "topological":
-            return self.get_topological_fingerprint(**kwargs)
+            result = self.get_topological_fingerprint(**kwargs)
 
         elif fingerprint_type in ["circular", "morgan"]:
-            return self.get_morgan_fingerprint(**kwargs)
+            result = self.get_morgan_fingerprint(**kwargs)
+
+        elif fingerprint_type == "maccs":
+            result = self.get_maccs_fingerprint(**kwargs)
+
+        elif fingerprint_type == "ecfp4":
+            result = self.get_ecfp4_fingerprint(**kwargs)
+
+        elif fingerprint_type == "fcfp4":
+            result = self.get_fcfp4_fingerprint(**kwargs)
 
         elif fingerprint_type == "pattern":
             from ..featurizers import PatternFingerprint
 
-            return PatternFingerprint.featurize(
+            result = PatternFingerprint.featurize(
                 molecule=self,
                 vector_type=vector_type,
                 **kwargs,
             )
 
         else:
-            raise Exception(f"Unknown fingerprint type: {type}")
+            raise Exception(f"Unknown fingerprint type: {fingerprint_type}")
+
+        if packed:
+            return numpy.packbits(result)
+        return result
 
     def get_topological_fingerprint(self, **kwargs):
         """
@@ -1671,6 +1687,34 @@ class Molecule:
         """
         fpgen = AllChem.GetMorganGenerator(radius=radius, fpSize=size, **kwargs)
         return fpgen.GetCountFingerprint(self.rdkit_molecule)
+
+    def get_maccs_fingerprint(self):
+        """
+        Generates MACCS keys (166-bit structural fingerprint).
+
+        Recommend similarity scoring: Tanimoto
+        """
+        return MACCSkeys.GenMACCSKeys(self.rdkit_molecule)
+
+    def get_ecfp4_fingerprint(self, size=2048, **kwargs):
+        """
+        Generates an ECFP4 fingerprint (Morgan, radius=2, bit vector).
+
+        Recommend similarity scoring: Tanimoto
+        """
+        return AllChem.GetMorganFingerprintAsBitVect(
+            self.rdkit_molecule, radius=2, nBits=size, **kwargs
+        )
+
+    def get_fcfp4_fingerprint(self, size=2048, **kwargs):
+        """
+        Generates an FCFP4 fingerprint (Morgan with features, radius=2, bit vector).
+
+        Recommend similarity scoring: Tanimoto
+        """
+        return AllChem.GetMorganFingerprintAsBitVect(
+            self.rdkit_molecule, radius=2, nBits=size, useFeatures=True, **kwargs
+        )
 
     # -------------------------------------------------------------------------
 
