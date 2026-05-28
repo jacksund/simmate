@@ -320,7 +320,7 @@ class ChemspaceClient:
     # STEP 3
 
     @classmethod
-    def reorg_to_hive_partitioning(cls):
+    def reorg_to_hive_partitioning(cls, parallel_job: bool = False):
         bucket_name = "eks-rd-prod-simmate"
         source_prefix = "Freedom_Space_4"
         target_prefix = f"s3://{bucket_name}/chemspace_freedom_4"
@@ -347,41 +347,72 @@ class ChemspaceClient:
             f"({len(all_keys) - len(files_to_process)} skipped)"
         )
 
-        for key in files_to_process:
-            parts = key.split("/")
-            try:
-                base_idx = parts.index("Freedom_Space_4")
-                ro5_str = parts[base_idx + 1]
-                ro5_bool = False if "beyond" in ro5_str.lower() else True
-                comp_val = int(parts[base_idx + 2].replace("_comp_space", ""))
-                hac_val = int(parts[base_idx + 3].replace("HAC_", ""))
-            except (ValueError, IndexError):
-                logging.info(f"Skipping {key} - structure mismatch.")
-                continue
+        if parallel_job:
 
-            source_hash = get_hash_key(key)
+            from simmate.database import connect  # isort:skip
+            from simmate.compute import SimmateExecutor  # isort:skip
 
-            df = polars.read_parquet(f"s3://{bucket_name}/{key}").with_columns(
-                [
-                    polars.lit(ro5_bool, dtype=polars.Boolean).alias("Ro5"),
-                    polars.lit(comp_val, dtype=polars.Int32).alias("Components"),
-                    polars.lit(hac_val, dtype=polars.Int32).alias("HAC"),
-                ]
-            )
-
-            df.write_parquet(
-                file=target_prefix,
-                use_pyarrow=True,
-                pyarrow_options={
-                    "partition_cols": ["Ro5", "Components", "HAC"],
-                    "existing_data_behavior": "overwrite_or_ignore",
-                    "basename_template": f"{source_hash}_{{i}}.parquet",
-                },
-            )
-
-            logging.info(
-                f"Migrated: Ro5={ro5_bool}, Comp={comp_val}, HAC={hac_val} "
-                f"| Rows: {len(df):,} | Hash: {source_hash[:8]}..."
-            )
+            logging.info(f"Submitting {len(files_to_process)} jobs to the queue...")
+            for key in files_to_process:
+                SimmateExecutor.submit(
+                    cls._reorg_single_file,
+                    source_key=key,
+                    bucket_name=bucket_name,
+                    target_prefix=target_prefix,
+                    tags=["chmspce"],
+                )
+        else:
+            for key in track(files_to_process):
+                cls._reorg_single_file(
+                    source_key=key,
+                    bucket_name=bucket_name,
+                    target_prefix=target_prefix,
+                )
 
         logging.info("Migration complete!")
+
+    @classmethod
+    def _reorg_single_file(
+        cls,
+        source_key: str,
+        bucket_name: str = "eks-rd-prod-simmate",
+        target_prefix: str = None,
+    ):
+        if target_prefix is None:
+            target_prefix = f"s3://{bucket_name}/chemspace_freedom_4"
+
+        parts = source_key.split("/")
+        try:
+            base_idx = parts.index("Freedom_Space_4")
+            ro5_str = parts[base_idx + 1]
+            ro5_bool = False if "beyond" in ro5_str.lower() else True
+            comp_val = int(parts[base_idx + 2].replace("_comp_space", ""))
+            hac_val = int(parts[base_idx + 3].replace("HAC_", ""))
+        except (ValueError, IndexError):
+            logging.info(f"Skipping {source_key} - structure mismatch.")
+            return
+
+        source_hash = get_hash_key(source_key)
+
+        df = polars.read_parquet(f"s3://{bucket_name}/{source_key}").with_columns(
+            [
+                polars.lit(ro5_bool, dtype=polars.Boolean).alias("Ro5"),
+                polars.lit(comp_val, dtype=polars.Int32).alias("Components"),
+                polars.lit(hac_val, dtype=polars.Int32).alias("HAC"),
+            ]
+        )
+
+        df.write_parquet(
+            file=target_prefix,
+            use_pyarrow=True,
+            pyarrow_options={
+                "partition_cols": ["Ro5", "Components", "HAC"],
+                "existing_data_behavior": "overwrite_or_ignore",
+                "basename_template": f"{source_hash}_{{i}}.parquet",
+            },
+        )
+
+        logging.info(
+            f"Migrated: Ro5={ro5_bool}, Comp={comp_val}, HAC={hac_val} "
+            f"| Rows: {len(df):,} | Hash: {source_hash[:8]}..."
+        )
