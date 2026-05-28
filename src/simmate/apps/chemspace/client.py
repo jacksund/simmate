@@ -394,6 +394,15 @@ class ChemspaceClient:
 
         source_hash = get_hash_key(source_key)
 
+        s3_client = boto3.client("s3")
+        partition_prefix = (
+            f"chemspace_freedom_4/Ro5={str(ro5_bool).lower()}"
+            f"/Components={comp_val}/HAC={hac_val}/{source_hash}"
+        )
+        if cls._list_s3_keys(s3_client, bucket_name, partition_prefix):
+            logging.info(f"Skipping {source_hash[:8]} - already exists.")
+            return
+
         df = polars.read_parquet(f"s3://{bucket_name}/{source_key}").with_columns(
             [
                 polars.lit(ro5_bool, dtype=polars.Boolean).alias("Ro5"),
