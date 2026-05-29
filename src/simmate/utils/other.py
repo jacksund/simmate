@@ -441,3 +441,16 @@ def get_hash_key(text_to_hash: str) -> str:
     Generates an MD5 hash key of a string
     """
     return hashlib.md5(text_to_hash.encode("utf-8")).hexdigest()
+
+
+def get_chunk_key(string_id: str, num_chunks: int) -> int:
+    """
+    Deterministically maps a string ID to an integer chunk index.
+
+    Uses MD5 hashing to evenly distribute IDs across `num_chunks` buckets.
+    The same `string_id` always maps to the same chunk, making this suitable
+    for sharding large datasets where chunk membership must be known without
+    scanning all chunks.
+    """
+    h = hashlib.md5(string_id.encode("utf-8")).digest()
+    return int.from_bytes(h, "big") % num_chunks
