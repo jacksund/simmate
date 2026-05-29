@@ -12,7 +12,7 @@ from botocore.config import Config
 from rich.progress import track
 
 from simmate.config import settings
-from simmate.utils import get_directory, get_hash_key
+from simmate.utils import get_chunk_key, get_directory, get_hash_key
 
 
 class ChemspaceClient:
@@ -221,7 +221,7 @@ class ChemspaceClient:
                     source_key=source_key,
                     destination_bucket=destination_bucket,
                     ssl_verify=ssl_verify,
-                    tags=["chmspce"],
+                    tags=["simmate"],
                 )
         else:
             for source_bkt, source_key in track(files_to_process):
@@ -274,7 +274,9 @@ class ChemspaceClient:
 
         logging.info(f"Uploaded {dest_key}")
 
-    # STEP 2
+    # -------------------------------------------------------------------------
+
+    # STEP 1b - bugfix
 
     @classmethod
     def patch_h19_part1_header_rows(
@@ -317,7 +319,9 @@ class ChemspaceClient:
         s3_client.upload_fileobj(buffer_out, destination_bucket, parquet_key)
         logging.info(f"Done. Final shape: {df.shape}")
 
-    # STEP 3
+    # -------------------------------------------------------------------------
+
+    # STEP 2a - Ro5/Components/HAC hive partitioning
 
     @classmethod
     def reorg_to_hive_partitioning(cls, parallel_job: bool = False):
@@ -359,7 +363,7 @@ class ChemspaceClient:
                     source_key=key,
                     bucket_name=bucket_name,
                     target_prefix=target_prefix,
-                    tags=["chmspce"],
+                    tags=["simmate"],
                 )
         else:
             for key in track(files_to_process):
@@ -425,3 +429,214 @@ class ChemspaceClient:
             f"Migrated: Ro5={ro5_bool}, Comp={comp_val}, HAC={hac_val} "
             f"| Rows: {len(df):,} | Hash: {source_hash[:8]}..."
         )
+
+    # -------------------------------------------------------------------------
+
+    # STEP 2b - chunk IDs for hive partitioning
+    # 2_556_764_802 // 5_000_000 = 2556
+    num_chunks = 500
+
+    @classmethod
+    def scatter_to_chunk_partitions(
+        cls, parallel_job: bool = False, scatter_batch_size: int = 10
+    ):
+        """
+        Pass 1 of step 2b: reads batches of parquets from Freedom_Space_4/, computes
+        a chunk_key for every row via get_chunk_key on the ID column, and writes
+        hive-partitioned output to chemspace_chunks/chunk_key={N}/*.parquet.
+
+        Source files are processed in batches of scatter_batch_size to reduce the
+        total number of small S3 writes (10x fewer files vs. per-file scatter).
+        Run combine_chunk_partitions() after all scatter jobs complete.
+        """
+        bucket_name = "eks-rd-prod-simmate"
+        source_prefix = "Freedom_Space_4"
+        target_prefix = "chemspace_chunks"
+
+        s3_client = boto3.client("s3")
+
+        logging.info("Scanning source files...")
+        all_keys = cls._list_s3_keys(
+            s3_client, bucket_name, source_prefix, suffix=".parquet"
+        )
+        logging.info(f"  Found {len(all_keys)} source parquet files")
+
+        logging.info("Scanning existing scatter output files...")
+        existing_keys = cls._list_s3_keys(
+            s3_client, bucket_name, target_prefix, suffix=".parquet"
+        )
+        processed_hashes = {Path(k).stem.split("_")[0] for k in existing_keys}
+        logging.info(f"  {len(processed_hashes)} batches already scattered")
+
+        files_to_process = [
+            k for k in all_keys if get_hash_key(k) not in processed_hashes
+        ]
+        logging.info(
+            f"  {len(files_to_process)} files to scatter "
+            f"({len(all_keys) - len(files_to_process)} skipped)"
+        )
+
+        batches = [
+            files_to_process[i : i + scatter_batch_size]
+            for i in range(0, len(files_to_process), scatter_batch_size)
+        ]
+        logging.info(
+            f"  {len(batches)} batches of up to {scatter_batch_size} files each"
+        )
+
+        if parallel_job:
+            from simmate.database import connect  # isort:skip
+            from simmate.compute import SimmateExecutor  # isort:skip
+
+            logging.info(f"Submitting {len(batches)} jobs to the queue...")
+            for batch in batches:
+                SimmateExecutor.submit(
+                    cls._scatter_batch,
+                    source_keys=batch,
+                    bucket_name=bucket_name,
+                    tags=["simmate"],
+                )
+        else:
+            for batch in track(batches):
+                cls._scatter_batch(source_keys=batch, bucket_name=bucket_name)
+
+        logging.info("Scatter complete!")
+
+    @classmethod
+    def _scatter_batch(
+        cls,
+        source_keys: list[str],
+        bucket_name: str = "eks-rd-prod-simmate",
+    ):
+        batch_hash = get_hash_key(source_keys[0])
+
+        frames = [
+            polars.read_parquet(f"s3://{bucket_name}/{key}") for key in source_keys
+        ]
+        df = polars.concat(frames)
+        df = df.with_columns(
+            polars.col("ID")
+            .map_elements(
+                lambda x: get_chunk_key(x, cls.num_chunks), return_dtype=polars.Int32
+            )
+            .alias("chunk_key")
+        ).sort("chunk_key")
+
+        df.write_parquet(
+            file=f"s3://{bucket_name}/chemspace_chunks/",
+            use_pyarrow=True,
+            pyarrow_options={
+                "partition_cols": ["chunk_key"],
+                "existing_data_behavior": "overwrite_or_ignore",
+                "basename_template": f"{batch_hash}_{{i}}.parquet",
+                "max_partitions": cls.num_chunks + 1,
+            },
+        )
+
+        logging.info(
+            f"Scattered batch {batch_hash[:8]}... | Rows: {len(df):,} | Files: {len(source_keys)}"
+        )
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def combine_chunk_partitions(cls, parallel_job: bool = False):
+        """
+        Pass 2 of step 2b: for each chunk_key folder, combines all scatter
+        parquets into a single combined.parquet and adds a datastore_id column
+        where datastore_id = row_index + (1_000_000_000 * chunk_key).
+
+        Run after scatter_to_chunk_partitions() has fully completed.
+        """
+        bucket_name = "eks-rd-prod-simmate"
+        target_prefix = "chemspace_chunks"
+
+        s3_client = boto3.client("s3")
+
+        logging.info("Scanning for already-combined chunks...")
+        sentinel_keys = cls._list_s3_keys(
+            s3_client, bucket_name, target_prefix, suffix="combined.parquet"
+        )
+        done_chunks = set()
+        for k in sentinel_keys:
+            # key pattern: chemspace_chunks/chunk_key=N/combined.parquet
+            for part in k.split("/"):
+                if part.startswith("chunk_key="):
+                    done_chunks.add(int(part.split("=")[1]))
+                    break
+        logging.info(f"  {len(done_chunks)} chunks already combined")
+
+        chunks_to_process = [c for c in range(cls.num_chunks) if c not in done_chunks]
+        logging.info(f"  {len(chunks_to_process)} chunks to combine")
+
+        if parallel_job:
+            from simmate.database import connect  # isort:skip
+            from simmate.compute import SimmateExecutor  # isort:skip
+
+            logging.info(f"Submitting {len(chunks_to_process)} jobs to the queue...")
+            for chunk_key in chunks_to_process:
+                SimmateExecutor.submit(
+                    cls._combine_single_chunk,
+                    chunk_key=chunk_key,
+                    bucket_name=bucket_name,
+                    tags=["simmate"],
+                )
+        else:
+            for chunk_key in track(chunks_to_process):
+                cls._combine_single_chunk(chunk_key=chunk_key, bucket_name=bucket_name)
+
+        logging.info("Combine complete!")
+
+    @classmethod
+    def _combine_single_chunk(
+        cls,
+        chunk_key: int,
+        bucket_name: str = "eks-rd-prod-simmate",
+    ):
+        sentinel_key = f"chemspace_chunks/chunk_key={chunk_key}/combined.parquet"
+        s3_client = boto3.client("s3")
+
+        try:
+            s3_client.head_object(Bucket=bucket_name, Key=sentinel_key)
+            logging.info(f"Skipping chunk_key={chunk_key} - already combined.")
+            return
+        except:
+            pass
+
+        scatter_prefix = f"chemspace_chunks/chunk_key={chunk_key}"
+        scatter_keys = cls._list_s3_keys(
+            s3_client, bucket_name, scatter_prefix, suffix=".parquet"
+        )
+        # exclude any existing combined.parquet in case head_object check was bypassed
+        scatter_keys = [k for k in scatter_keys if not k.endswith("combined.parquet")]
+
+        if not scatter_keys:
+            logging.info(f"Skipping chunk_key={chunk_key} - no scatter files found.")
+            return
+
+        frames = []
+        for key in scatter_keys:
+            response = s3_client.get_object(Bucket=bucket_name, Key=key)
+            frames.append(polars.read_parquet(io.BytesIO(response["Body"].read())))
+
+        df = polars.concat(frames)
+        df = (
+            df.with_row_index("_row_idx")
+            .with_columns(
+                (
+                    polars.col("_row_idx").cast(polars.UInt64)
+                    + polars.lit(chunk_key * 1_000_000_000, dtype=polars.UInt64)
+                ).alias("datastore_id")
+            )
+            .drop("_row_idx")
+        )
+
+        buffer = io.BytesIO()
+        df.write_parquet(buffer)
+        buffer.seek(0)
+        s3_client.upload_fileobj(buffer, bucket_name, sentinel_key)
+
+        for key in scatter_keys:
+            s3_client.delete_object(Bucket=bucket_name, Key=key)
+
+        logging.info(f"Combined chunk_key={chunk_key} | Rows: {len(df):,}")
