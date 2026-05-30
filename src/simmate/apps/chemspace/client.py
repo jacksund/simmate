@@ -157,321 +157,54 @@ class ChemspaceClient:
     # Parquet conversion (dev/ETL)
     # -------------------------------------------------------------------------
 
-    # STEP 1
+    # STEP 2 - chunk IDs for hive partitioning
+    # 2_556_764_802 // 5_000_000 = 511
+    num_chunks = 500
 
     @classmethod
-    def convert_to_parquet(
+    def scatter_source_to_chunks(
         cls,
-        bucket_name: str = None,
-        prefix: str = None,
-        destination_bucket: str = "eks-rd-prod-simmate",
-        ssl_verify: bool = False,
         parallel_job: bool = False,
+        scatter_batch_size: int = 10,
+        ssl_verify: bool = False,
     ):
         """
-        Converts .bz2 source files to .parquet and uploads to a destination bucket.
+        Reads .bz2 source files from the ChemSpace S3 bucket, decompresses them,
+        computes a chunk_key for every row, and writes hive-partitioned output to
+        chemspace_chunks/chunk_key={N}/*.parquet.
 
-        Skips files that already have a corresponding .parquet in the destination.
+        Source files are processed in batches of scatter_batch_size to reduce the
+        total number of small S3 writes. Run combine_chunk_partitions() after all
+        scatter jobs complete.
         """
         if not ssl_verify:
             warnings.filterwarnings("ignore")
 
         assert settings.chemspace.mode == "s3"
 
-        source_client = cls._get_source_client(ssl_verify)
-        downloads = cls._get_targets(bucket_name, prefix)
-
-        all_source_keys = []
-        for bkt, pfx in downloads:
-            logging.info(f"Listing source files for '{bkt}': '{pfx}'")
-            keys = cls._list_s3_keys(source_client, bkt, pfx, suffix=".bz2")
-            all_source_keys.extend((bkt, k) for k in keys)
-            logging.info(f"  Found {len(keys)} .bz2 files")
-
-        logging.info("Listing existing parquet files in destination bucket...")
-        s3_dest = boto3.resource("s3")
-        dest_bucket_obj = s3_dest.Bucket(destination_bucket)
-        existing_keys = {
-            obj.key
-            for obj in dest_bucket_obj.objects.all()
-            if obj.key.endswith(".parquet")
-        }
-        logging.info(f"  Found {len(existing_keys)} existing parquet files")
-
-        files_to_process = [
-            (bkt, key)
-            for bkt, key in all_source_keys
-            if key.replace(".bz2", ".parquet") not in existing_keys
-        ]
-        logging.info(
-            f"{len(files_to_process)} files to convert "
-            f"({len(all_source_keys) - len(files_to_process)} skipped)"
-        )
-
-        if parallel_job:
-
-            from simmate.database import connect  # isort:skip
-            from simmate.compute import SimmateExecutor  # isort:skip
-
-            logging.info(f"Submitting {len(files_to_process)} jobs to the queue...")
-            for source_bkt, source_key in files_to_process:
-                SimmateExecutor.submit(
-                    cls._convert_single_file,
-                    source_bucket=source_bkt,
-                    source_key=source_key,
-                    destination_bucket=destination_bucket,
-                    ssl_verify=ssl_verify,
-                    tags=["simmate"],
-                )
-        else:
-            for source_bkt, source_key in track(files_to_process):
-                cls._convert_single_file(
-                    source_bucket=source_bkt,
-                    source_key=source_key,
-                    destination_bucket=destination_bucket,
-                    ssl_verify=ssl_verify,
-                )
-
-        logging.info("Done.")
-
-    @classmethod
-    def _convert_single_file(
-        cls,
-        source_bucket: str,
-        source_key: str,
-        destination_bucket: str,
-        ssl_verify: bool = False,
-    ):
-        dest_key = source_key.replace(".bz2", ".parquet")
-        s3_client = boto3.client("s3")
-
-        # check if the file already exists in the destination
-        try:
-            s3_client.head_object(Bucket=destination_bucket, Key=dest_key)
-            logging.info(f"Skipping {dest_key} as it already exists.")
-            return
-        except:
-            # 404 error means the file does not exist, so we can proceed
-            pass
-
-        source_client = cls._get_source_client(ssl_verify)
-
-        response = source_client.get_object(Bucket=source_bucket, Key=source_key)
-        compressed_data = response["Body"].read()
-
-        decompressed = bz2.decompress(compressed_data)
-        df = polars.read_csv(
-            decompressed,
-            separator="\t",
-            infer_schema_length=None,
-        )
-
-        buffer = io.BytesIO()
-        df.write_parquet(buffer)
-        buffer.seek(0)
-
-        s3_client.upload_fileobj(buffer, destination_bucket, dest_key)
-
-        logging.info(f"Uploaded {dest_key}")
-
-    # -------------------------------------------------------------------------
-
-    # STEP 1b - bugfix
-
-    @classmethod
-    def patch_h19_part1_header_rows(
-        cls,
-        destination_bucket: str = "eks-rd-prod-simmate",
-        parquet_key: str = "Freedom_Space_4/Beyond_rule_of_5/2_comp_space/HAC_19/H19_1_PART.smi.parquet",
-    ):
-        """
-        Patches H19_1_PART.smi.parquet which was written with duplicate header
-        rows scattered throughout the data (the source bz2 contained repeated
-        column-name lines).  Removes those rows, casts numeric columns to their
-        correct types, and overwrites the file in the destination bucket.
-        """
-        s3_client = boto3.client("s3")
-
-        logging.info(f"Downloading {parquet_key} from {destination_bucket}...")
-        response = s3_client.get_object(Bucket=destination_bucket, Key=parquet_key)
-        buffer_in = io.BytesIO(response["Body"].read())
-
-        df = polars.read_parquet(buffer_in)
-        logging.info(f"Loaded shape before patch: {df.shape}")
-
-        # Rows where SMILES equals the literal string "SMILES" are header rows
-        # that were accidentally included in the data.
-        df = df.filter(polars.col("SMILES") != "SMILES")
-        logging.info(f"Shape after removing header rows: {df.shape}")
-
-        float_cols = ["MW", "LogP", "FSP3", "TPSA"]
-        int_cols = ["Components", "HAC", "HBA", "HBD", "RotBonds", "reaction_id"]
-        df = df.with_columns(
-            [polars.col(c).cast(polars.Float64) for c in float_cols]
-            + [polars.col(c).cast(polars.Int64) for c in int_cols]
-        )
-
-        buffer_out = io.BytesIO()
-        df.write_parquet(buffer_out)
-        buffer_out.seek(0)
-
-        logging.info(f"Uploading patched file to {destination_bucket}/{parquet_key}...")
-        s3_client.upload_fileobj(buffer_out, destination_bucket, parquet_key)
-        logging.info(f"Done. Final shape: {df.shape}")
-
-    # -------------------------------------------------------------------------
-
-    # STEP 2a - Ro5/Components/HAC hive partitioning
-
-    @classmethod
-    def reorg_to_hive_partitioning(cls, parallel_job: bool = False):
-        bucket_name = "eks-rd-prod-simmate"
-        source_prefix = "Freedom_Space_4"
-        target_prefix = f"s3://{bucket_name}/chemspace_freedom_4"
-
-        s3_client = boto3.client("s3")
-
-        logging.info("Scanning source files...")
-        all_keys = cls._list_s3_keys(
-            s3_client, bucket_name, source_prefix, suffix=".parquet"
-        )
-
-        logging.info("Scanning existing output files...")
-        existing_keys = cls._list_s3_keys(
-            s3_client, bucket_name, "chemspace_freedom_4", suffix=".parquet"
-        )
-        processed_hashes = {Path(k).stem.split("_")[0] for k in existing_keys}
-        logging.info(f"  {len(processed_hashes)} source files already converted")
-
-        files_to_process = [
-            k for k in all_keys if get_hash_key(k) not in processed_hashes
-        ]
-        logging.info(
-            f"  {len(files_to_process)} files to convert "
-            f"({len(all_keys) - len(files_to_process)} skipped)"
-        )
-
-        if parallel_job:
-
-            from simmate.database import connect  # isort:skip
-            from simmate.compute import SimmateExecutor  # isort:skip
-
-            logging.info(f"Submitting {len(files_to_process)} jobs to the queue...")
-            for key in files_to_process:
-                SimmateExecutor.submit(
-                    cls._reorg_single_file,
-                    source_key=key,
-                    bucket_name=bucket_name,
-                    target_prefix=target_prefix,
-                    tags=["simmate"],
-                )
-        else:
-            for key in track(files_to_process):
-                cls._reorg_single_file(
-                    source_key=key,
-                    bucket_name=bucket_name,
-                    target_prefix=target_prefix,
-                )
-
-        logging.info("Migration complete!")
-
-    @classmethod
-    def _reorg_single_file(
-        cls,
-        source_key: str,
-        bucket_name: str = "eks-rd-prod-simmate",
-        target_prefix: str = None,
-    ):
-        if target_prefix is None:
-            target_prefix = f"s3://{bucket_name}/chemspace_freedom_4"
-
-        parts = source_key.split("/")
-        try:
-            base_idx = parts.index("Freedom_Space_4")
-            ro5_str = parts[base_idx + 1]
-            ro5_bool = False if "beyond" in ro5_str.lower() else True
-            comp_val = int(parts[base_idx + 2].replace("_comp_space", ""))
-            hac_val = int(parts[base_idx + 3].replace("HAC_", ""))
-        except (ValueError, IndexError):
-            logging.info(f"Skipping {source_key} - structure mismatch.")
-            return
-
-        source_hash = get_hash_key(source_key)
-
-        s3_client = boto3.client("s3")
-        partition_prefix = (
-            f"chemspace_freedom_4/Ro5={str(ro5_bool).lower()}"
-            f"/Components={comp_val}/HAC={hac_val}/{source_hash}"
-        )
-        if cls._list_s3_keys(s3_client, bucket_name, partition_prefix):
-            logging.info(f"Skipping {source_hash[:8]} - already exists.")
-            return
-
-        df = polars.read_parquet(f"s3://{bucket_name}/{source_key}").with_columns(
-            [
-                polars.lit(ro5_bool, dtype=polars.Boolean).alias("Ro5"),
-                polars.lit(comp_val, dtype=polars.Int32).alias("Components"),
-                polars.lit(hac_val, dtype=polars.Int32).alias("HAC"),
-            ]
-        )
-
-        df.write_parquet(
-            file=target_prefix,
-            use_pyarrow=True,
-            pyarrow_options={
-                "partition_cols": ["Ro5", "Components", "HAC"],
-                "existing_data_behavior": "overwrite_or_ignore",
-                "basename_template": f"{source_hash}_{{i}}.parquet",
-            },
-        )
-
-        logging.info(
-            f"Migrated: Ro5={ro5_bool}, Comp={comp_val}, HAC={hac_val} "
-            f"| Rows: {len(df):,} | Hash: {source_hash[:8]}..."
-        )
-
-    # -------------------------------------------------------------------------
-
-    # STEP 2b - chunk IDs for hive partitioning
-    # 2_556_764_802 // 5_000_000 = 511
-    num_chunks = 500
-
-    @classmethod
-    def scatter_to_chunk_partitions(
-        cls,
-        parallel_job: bool = False,
-        scatter_batch_size: int = 10,
-    ):
-        """
-        Pass 1 of step 2b: reads batches of parquets from Freedom_Space_4/, computes
-        a chunk_key for every row via get_chunk_key on the ID column, and writes
-        hive-partitioned output to chemspace_chunks/chunk_key={N}/*.parquet.
-
-        Source files are processed in batches of scatter_batch_size to reduce the
-        total number of small S3 writes (10x fewer files vs. per-file scatter).
-        Run combine_chunk_partitions() after all scatter jobs complete.
-        """
-        bucket_name = "eks-rd-prod-simmate"
-        source_prefix = "Freedom_Space_4"
+        dest_bucket = "eks-rd-prod-simmate"
         target_prefix = "chemspace_chunks"
 
-        s3_client = boto3.client("s3")
+        source_client = cls._get_source_client(ssl_verify)
+        downloads = cls._get_download_targets()
 
-        logging.info("Scanning source files...")
-        all_keys = cls._list_s3_keys(
-            s3_client, bucket_name, source_prefix, suffix=".parquet"
-        )
-        logging.info(f"  Found {len(all_keys)} source parquet files")
+        logging.info("Scanning source .bz2 files...")
+        all_keys = []
+        for bkt, pfx in downloads:
+            keys = cls._list_s3_keys(source_client, bkt, pfx, suffix=".bz2")
+            all_keys.extend((bkt, k) for k in keys)
+        logging.info(f"  Found {len(all_keys)} source .bz2 files")
 
+        s3_dest = boto3.client("s3")
         logging.info("Scanning existing scatter output files...")
         existing_keys = cls._list_s3_keys(
-            s3_client, bucket_name, target_prefix, suffix=".parquet"
+            s3_dest, dest_bucket, target_prefix, suffix=".parquet"
         )
         processed_hashes = {Path(k).stem.split("_")[0] for k in existing_keys}
         logging.info(f"  {len(processed_hashes)} batches already scattered")
 
         files_to_process = [
-            k for k in all_keys if get_hash_key(k) not in processed_hashes
+            (bkt, k) for bkt, k in all_keys if get_hash_key(k) not in processed_hashes
         ]
         logging.info(
             f"  {len(files_to_process)} files to scatter "
@@ -493,34 +226,58 @@ class ChemspaceClient:
             logging.info(f"Submitting {len(batches)} jobs to the queue...")
             for batch in batches:
                 SimmateExecutor.submit(
-                    cls._scatter_batch,
+                    cls._scatter_source_batch,
                     source_keys=batch,
-                    bucket_name=bucket_name,
+                    dest_bucket=dest_bucket,
+                    ssl_verify=ssl_verify,
                     tags=["simmate"],
                 )
         else:
             for batch in track(batches):
-                cls._scatter_batch(source_keys=batch, bucket_name=bucket_name)
+                cls._scatter_source_batch(
+                    source_keys=batch,
+                    dest_bucket=dest_bucket,
+                    ssl_verify=ssl_verify,
+                )
 
         logging.info("Scatter complete!")
 
     @classmethod
-    def _scatter_batch(
+    def _scatter_source_batch(
         cls,
-        source_keys: list[str],
-        bucket_name: str = "eks-rd-prod-simmate",
+        source_keys: list[tuple[str, str]],
+        dest_bucket: str = "eks-rd-prod-simmate",
+        ssl_verify: bool = False,
     ):
-        batch_hash = get_hash_key(source_keys[0])
+        batch_hash = get_hash_key(source_keys[0][1])
+        source_client = cls._get_source_client(ssl_verify)
+
+        float_cols = ["MW", "LogP", "FSP3", "TPSA"]
+        int_cols = ["Components", "HAC", "HBA", "HBD", "RotBonds", "reaction_id"]
 
         frames = []
-        for key in source_keys:
-            frame = polars.read_parquet(f"s3://{bucket_name}/{key}").with_columns(
+        for bkt, key in source_keys:
+            response = source_client.get_object(Bucket=bkt, Key=key)
+            compressed = response["Body"].read()
+            decompressed = bz2.decompress(compressed)
+            df = polars.read_csv(
+                decompressed,
+                separator="\t",
+                infer_schema_length=None,
+            )
+            if "H19_1_PART" in key:
+                df = df.filter(polars.col("SMILES") != "SMILES").with_columns(
+                    [polars.col(c).cast(polars.Float64) for c in float_cols]
+                    + [polars.col(c).cast(polars.Int64) for c in int_cols]
+                )
+            df = df.with_columns(
                 polars.lit(
                     False if "beyond" in key.lower() else True,
                     dtype=polars.Boolean,
                 ).alias("Ro5")
             )
-            frames.append(frame)
+            frames.append(df)
+
         df = polars.concat(frames)
         df = df.with_columns(
             polars.col("ID")
@@ -531,7 +288,7 @@ class ChemspaceClient:
         ).sort("chunk_key")
 
         df.write_parquet(
-            file=f"s3://{bucket_name}/chemspace_chunks/",
+            file=f"s3://{dest_bucket}/chemspace_chunks/",
             use_pyarrow=True,
             pyarrow_options={
                 "partition_cols": ["chunk_key"],
@@ -554,7 +311,7 @@ class ChemspaceClient:
         parquets into a single combined.parquet and adds a datastore_id column
         where datastore_id = row_index + (1_000_000_000 * chunk_key).
 
-        Run after scatter_to_chunk_partitions() has fully completed.
+        Run after scatter_source_to_chunks() has fully completed.
         """
         bucket_name = "eks-rd-prod-simmate"
         target_prefix = "chemspace_chunks"
