@@ -22,12 +22,8 @@ class ChemspaceClient:
     provides methods for yielding molecule data as polars DataFrames.
     """
 
-    # -------------------------------------------------------------------------
-    # Private helpers
-    # -------------------------------------------------------------------------
-
     @classmethod
-    def _get_source_client(cls, ssl_verify: bool = False):
+    def get_source_client(cls):
         """Returns a configured boto3 S3 client for the ChemSpace source bucket."""
         return boto3.client(
             "s3",
@@ -35,52 +31,41 @@ class ChemspaceClient:
             aws_secret_access_key=settings.chemspace.s3.secret_key,
             endpoint_url=settings.chemspace.s3.url,
             config=Config(signature_version="s3v4"),
-            verify=ssl_verify,
+            verify=False,
         )
+
+    @classmethod
+    def _list_source_keys(cls, bucket: str, prefix: str = "", client = None) -> list[str]:
+        """Returns all non-directory object keys in the given bucket/prefix."""
+        if not client:
+            client = cls.get_source_client()
+        
+        paginator = client.get_paginator("list_objects_v2")
+        return [
+            obj["Key"]
+            for page in paginator.paginate(Bucket=bucket, Prefix=prefix)
+            for obj in page.get("Contents", [])
+            if not obj["Key"].endswith("/") and obj["Key"].endswith(".bz2")
+        ]
 
     @staticmethod
-    def _list_s3_keys(
-        s3_client,
-        bucket: str,
-        prefix: str = "",
-        suffix: str = "",
-    ) -> list[str]:
-        """Paginates and returns all object keys matching the given suffix."""
-        paginator = s3_client.get_paginator("list_objects_v2")
-        pages = paginator.paginate(Bucket=bucket, Prefix=prefix)
+    def _dispatch(items, fn, parallel: bool, **kwargs):
+        """Runs fn(item, **kwargs) for each item, either serially or via SimmateExecutor."""
+        if parallel:
+            from simmate.database import connect  # isort:skip
+            from simmate.compute import SimmateExecutor  # isort:skip
 
-        keys = []
-        for page in pages:
-            for obj in page.get("Contents", []):
-                key = obj["Key"]
-                if not key.endswith("/") and (not suffix or key.endswith(suffix)):
-                    keys.append(key)
-        return keys
-
-    @classmethod
-    def _get_download_targets(cls) -> list[tuple[str, str]]:
-        """Returns list of (bucket, prefix) pairs from settings."""
-        return list(settings.chemspace.s3.buckets.items())
-
-    @classmethod
-    def _get_targets(cls, bucket_name: str = None, prefix: str = None):
-        """Helper to resolve (bucket, prefix) targets."""
-        return (
-            [(bucket_name, prefix or "")]
-            if bucket_name
-            else cls._get_download_targets()
-        )
-
-    # -------------------------------------------------------------------------
-    # Public methods
-    # -------------------------------------------------------------------------
+            for item in items:
+                SimmateExecutor.submit(fn, item, tags=["simmate"], **kwargs)
+        else:
+            for item in track(items):
+                fn(item, **kwargs)
 
     @classmethod
     def download_source_data(
         cls,
         bucket_name: str = None,
         prefix: str = None,
-        ssl_verify: bool = False,
     ) -> Path:
         """
         Downloads ChemSpace source files from S3.
@@ -88,33 +73,34 @@ class ChemspaceClient:
         Args:
             bucket_name: The name of the S3 bucket.
             prefix: The prefix for the S3 bucket.
-            target_dir: The directory to download files to.
             ssl_verify: Whether to verify SSL certificates.
 
         Returns:
             The directory where the files were downloaded.
         """
-        if not ssl_verify:
-            warnings.filterwarnings("ignore")
+        # mute ssl_verify warnings
+        warnings.filterwarnings("ignore")
 
         assert settings.chemspace.mode == "s3"
 
-        target_dir = get_directory(Path(settings.chemspace.raw_data_dir))
-
-        s3_client = cls._get_source_client(ssl_verify)
-        downloads = cls._get_targets(bucket_name, prefix)
-
+        target_dir = get_directory(Path(settings.chemspace.datastore_dir) / "raw")
+        downloads = (
+            [(bucket_name, prefix or "")]
+            if bucket_name
+            else list(settings.chemspace.s3.buckets.items())
+        )
+        
+        client = cls.get_source_client()
         for bkt, pfx in downloads:
-            logging.info(f"Starting downloads for '{bkt}': '{pfx}'")
-            all_keys = cls._list_s3_keys(s3_client, bkt, pfx)
-            logging.info(f"{len(all_keys)} total files found")
-
-            logging.info("Downloading...")
-            for key in track(all_keys):
+            logging.info("Fetching full list of S3 keys...")
+            all_keys = cls._list_source_keys(bkt, pfx, client)
+            logging.info(f"Downloading {len(all_keys)} files from '{bkt}': '{pfx}'")
+            for key in all_keys:
+                logging.info(key)
                 local_filename = target_dir / key
                 get_directory(local_filename.parent)
                 if not local_filename.exists():
-                    s3_client.download_file(
+                    client.download_file(
                         Bucket=bkt,
                         Key=key,
                         Filename=str(local_filename),
@@ -134,7 +120,7 @@ class ChemspaceClient:
             A polars DataFrame containing a chunk of molecule data.
         """
         if source_dir is None:
-            source_dir = settings.chemspace.raw_data_dir
+            source_dir = Path(settings.chemspace.datastore_dir) / "raw"
         source_dir = Path(source_dir)
 
         all_files = (
@@ -156,12 +142,7 @@ class ChemspaceClient:
     num_chunks = 500
 
     @classmethod
-    def convert_source_to_parquet(
-        cls,
-        source_dir: str | Path = None,
-        staging_dir: str | Path = None,
-        parallel_job: bool = False,
-    ) -> Path:
+    def convert_source_to_parquet(cls, parallel_job: bool = False) -> Path:
         """
         Converts each .bz2 source file to a flat parquet in staging_dir (1:1),
         adding Ro5 and chunk_key columns in this step.
@@ -169,59 +150,29 @@ class ChemspaceClient:
         Run download_source_data() first, then run repartition_by_chunk_key()
         after this completes.
         """
-        if source_dir is None:
-            source_dir = settings.chemspace.raw_data_dir
-        source_dir = Path(source_dir)
+        datastore_dir = Path(settings.chemspace.datastore_dir)
+        source_dir = datastore_dir / "raw"
+        staging_dir = get_directory(datastore_dir / "staging")
 
-        if staging_dir is None:
-            staging_dir = Path(settings.chemspace.datastore_dir) / "staging"
-        staging_dir = get_directory(Path(staging_dir))
-
-        logging.info("Scanning source .bz2 files...")
         all_files = [p for p in source_dir.rglob("*.bz2") if p.is_file()]
-        logging.info(f"  Found {len(all_files)} source .bz2 files")
-
         processed_hashes = {p.stem for p in staging_dir.glob("*.parquet")}
-        logging.info(f"  {len(processed_hashes)} files already converted")
-
         files_to_process = [
             f for f in all_files if get_hash_key(str(f)) not in processed_hashes
         ]
         logging.info(
-            f"  {len(files_to_process)} files to convert "
-            f"({len(all_files) - len(files_to_process)} skipped)"
+            f"Found {len(all_files)} source files; "
+            f"{len(processed_hashes)} already converted, "
+            f"{len(files_to_process)} to process"
         )
 
-        if parallel_job:
-            from simmate.database import connect  # isort:skip
-            from simmate.compute import SimmateExecutor  # isort:skip
-
-            logging.info(f"Submitting {len(files_to_process)} jobs to the queue...")
-            for f in files_to_process:
-                SimmateExecutor.submit(
-                    cls._convert_single_source,
-                    file_path=f,
-                    staging_dir=staging_dir,
-                    tags=["simmate"],
-                )
-        else:
-            for f in track(files_to_process):
-                cls._convert_single_source(file_path=f, staging_dir=staging_dir)
-
+        cls._dispatch(files_to_process, cls._convert_single_source, parallel_job)
         logging.info("Conversion complete!")
         return staging_dir
 
     @classmethod
-    def _convert_single_source(
-        cls, file_path: str | Path, staging_dir: str | Path = None
-    ):
+    def _convert_single_source(cls, file_path: str | Path):
         file_path = Path(file_path)
-
-        if staging_dir is None:
-            staging_dir = get_directory(
-                Path(settings.chemspace.datastore_dir) / "staging"
-            )
-        staging_dir = Path(staging_dir)
+        staging_dir = Path(settings.chemspace.datastore_dir) / "staging"
 
         output_path = staging_dir / f"{get_hash_key(str(file_path))}.parquet"
         if output_path.exists():
@@ -258,58 +209,31 @@ class ChemspaceClient:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def repartition_by_chunk_key(
-        cls,
-        staging_dir: str | Path = None,
-        output_dir: str | Path = None,
-    ):
+    def repartition_by_chunk_key(cls):
         """
         Scans all staging parquets and sinks them to output_dir partitioned by
         chunk_key. Run after convert_source_to_parquet() has fully completed.
         """
-        if staging_dir is None:
-            staging_dir = Path(settings.chemspace.datastore_dir) / "staging"
-        staging_dir = Path(staging_dir)
-
-        if output_dir is None:
-            output_dir = Path(settings.chemspace.datastore_dir)
-        output_dir = get_directory(Path(output_dir))
+        datastore_dir = Path(settings.chemspace.datastore_dir)
+        staging_dir = datastore_dir / "staging"
+        output_dir = get_directory(datastore_dir / "live")
 
         source_glob = str(staging_dir / "*.parquet")
-        logging.info(f"Scanning: {source_glob}")
-
-        lf = polars.scan_parquet(source_glob)
-
         logging.info(f"Sinking to {output_dir} partitioned by chunk_key...")
-        lf.sink_parquet(
-            polars.PartitionBy(
-                base_path=output_dir,
-                key="chunk_key",
-            ),
+        polars.scan_parquet(source_glob).sink_parquet(
+            polars.PartitionBy(base_path=output_dir, key="chunk_key"),
             mkdir=True,
         )
-
         logging.info("Repartition by chunk_key complete!")
 
     @classmethod
-    def repartition_by_chunk_key_test(
-        cls,
-        staging_dir: str | Path = None,
-        output_dir: str | Path = None,
-        parallel_job: bool = False,
-    ):
+    def repartition_by_chunk_key_test(cls, parallel_job: bool = False):
         """
         Manual alternative to repartition_by_chunk_key: iterates over each
         chunk_key, filters the staging parquets, adds a datastore_id column,
         and writes a combined.parquet per chunk.
         """
-        if staging_dir is None:
-            staging_dir = Path(settings.chemspace.datastore_dir) / "staging"
-        staging_dir = Path(staging_dir)
-
-        if output_dir is None:
-            output_dir = Path(settings.chemspace.datastore_dir)
-        output_dir = get_directory(Path(output_dir))
+        output_dir = get_directory(Path(settings.chemspace.datastore_dir) / "live")
 
         done_chunks = {
             int(p.parent.name.split("=")[1])
@@ -317,48 +241,21 @@ class ChemspaceClient:
         }
         chunks_to_process = [c for c in range(cls.num_chunks) if c not in done_chunks]
         logging.info(
-            f"  {len(done_chunks)} chunks already done, "
+            f"{len(done_chunks)} chunks already done, "
             f"{len(chunks_to_process)} to process"
         )
 
-        if parallel_job:
-            from simmate.database import connect  # isort:skip
-            from simmate.compute import SimmateExecutor  # isort:skip
-
-            logging.info(f"Submitting {len(chunks_to_process)} jobs to the queue...")
-            for chunk_key in chunks_to_process:
-                SimmateExecutor.submit(
-                    cls._repartition_single_chunk_test,
-                    chunk_key=chunk_key,
-                    staging_dir=staging_dir,
-                    output_dir=output_dir,
-                    tags=["simmate"],
-                )
-        else:
-            for chunk_key in track(chunks_to_process):
-                cls._repartition_single_chunk_test(
-                    chunk_key=chunk_key,
-                    staging_dir=staging_dir,
-                    output_dir=output_dir,
-                )
-
+        cls._dispatch(
+            chunks_to_process, cls._repartition_single_chunk_test, parallel_job
+        )
         logging.info("Repartition by chunk_key (test) complete!")
 
     @classmethod
-    def _repartition_single_chunk_test(
-        cls,
-        chunk_key: int,
-        staging_dir: str | Path = None,
-        output_dir: str | Path = None,
-    ):
-        if staging_dir is None:
-            staging_dir = Path(settings.chemspace.datastore_dir) / "staging"
-        staging_dir = Path(staging_dir)
+    def _repartition_single_chunk_test(cls, chunk_key: int):
+        datastore_dir = Path(settings.chemspace.datastore_dir)
+        staging_dir = datastore_dir / "staging"
 
-        if output_dir is None:
-            output_dir = Path(settings.chemspace.datastore_dir)
-
-        chunk_dir = get_directory(Path(output_dir) / f"chunk_key={chunk_key}")
+        chunk_dir = get_directory(datastore_dir / "live" / f"chunk_key={chunk_key}")
         output_path = chunk_dir / "combined.parquet"
 
         if output_path.exists():
@@ -392,41 +289,23 @@ class ChemspaceClient:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def repartition_by_hac(
-        cls,
-        source_dir: str | Path = None,
-        output_dir: str | Path = None,
-    ):
+    def repartition_by_hac(cls):
         """
         Rearranges the combined chunk parquets into a new hive partition tree
         keyed by HAC (Heavy Atom Count).
 
         Scans all combined.parquet files from the chunk_key partitions and
         sinks them to output_dir partitioned by HAC. Run after
-        combine_chunk_partitions() has fully completed.
+        repartition_by_chunk_key_test() has fully completed.
         """
-        if source_dir is None:
-            source_dir = settings.chemspace.datastore_dir
-        source_dir = Path(source_dir)
-
-        if output_dir is None:
-            output_dir = (
-                Path(settings.chemspace.datastore_dir).parent / "chemspace_by_hac"
-            )
-        output_dir = get_directory(Path(output_dir))
+        datastore_dir = Path(settings.chemspace.datastore_dir)
+        source_dir = datastore_dir / "live"
+        output_dir = get_directory(datastore_dir.parent / "chemspace_by_hac")
 
         source_glob = str(source_dir / "chunk_key=*" / "*.parquet")
-        logging.info(f"Scanning: {source_glob}")
-
-        lf = polars.scan_parquet(source_glob, hive_partitioning=True)
-
         logging.info(f"Sinking to {output_dir} partitioned by HAC...")
-        lf.sink_parquet(
-            polars.PartitionBy(
-                base_path=output_dir,
-                key="HAC",
-            ),
+        polars.scan_parquet(source_glob, hive_partitioning=True).sink_parquet(
+            polars.PartitionBy(base_path=output_dir, key="HAC"),
             mkdir=True,
         )
-
         logging.info("Repartition by HAC complete!")
