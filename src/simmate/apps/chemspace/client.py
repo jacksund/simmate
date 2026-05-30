@@ -433,12 +433,14 @@ class ChemspaceClient:
     # -------------------------------------------------------------------------
 
     # STEP 2b - chunk IDs for hive partitioning
-    # 2_556_764_802 // 5_000_000 = 2556
+    # 2_556_764_802 // 5_000_000 = 511
     num_chunks = 500
 
     @classmethod
     def scatter_to_chunk_partitions(
-        cls, parallel_job: bool = False, scatter_batch_size: int = 10
+        cls,
+        parallel_job: bool = False,
+        scatter_batch_size: int = 10,
     ):
         """
         Pass 1 of step 2b: reads batches of parquets from Freedom_Space_4/, computes
@@ -510,9 +512,15 @@ class ChemspaceClient:
     ):
         batch_hash = get_hash_key(source_keys[0])
 
-        frames = [
-            polars.read_parquet(f"s3://{bucket_name}/{key}") for key in source_keys
-        ]
+        frames = []
+        for key in source_keys:
+            frame = polars.read_parquet(f"s3://{bucket_name}/{key}").with_columns(
+                polars.lit(
+                    False if "beyond" in key.lower() else True,
+                    dtype=polars.Boolean,
+                ).alias("Ro5")
+            )
+            frames.append(frame)
         df = polars.concat(frames)
         df = df.with_columns(
             polars.col("ID")
