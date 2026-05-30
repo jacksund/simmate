@@ -153,161 +153,173 @@ class ChemspaceClient:
     # Parquet conversion (dev/ETL)
     # -------------------------------------------------------------------------
 
-    # STEP 2 - chunk IDs for hive partitioning
-    # 2_556_764_802 // 5_000_000 = 511
     num_chunks = 500
 
     @classmethod
-    def scatter_source_to_chunks(
+    def convert_source_to_parquet(
         cls,
         source_dir: str | Path = None,
+        staging_dir: str | Path = None,
         parallel_job: bool = False,
-        scatter_batch_size: int = 5,
-    ):
+    ) -> Path:
         """
-        Reads local .bz2 source files, computes a chunk_key for every row, and
-        writes hive-partitioned output to
-        settings.chemspace.datastore_dir/chunk_key={N}/*.parquet.
+        Converts each .bz2 source file to a flat parquet in staging_dir (1:1),
+        adding Ro5 and chunk_key columns in this step.
 
-        Source files are processed in batches of scatter_batch_size to reduce the
-        total number of small writes. Run download_source_data() first to populate
-        source_dir, then run combine_chunk_partitions() after all scatter jobs complete.
+        Run download_source_data() first, then run repartition_by_chunk_key()
+        after this completes.
         """
         if source_dir is None:
             source_dir = settings.chemspace.raw_data_dir
         source_dir = Path(source_dir)
 
-        target_dir = get_directory(Path(settings.chemspace.datastore_dir))
+        if staging_dir is None:
+            staging_dir = Path(settings.chemspace.datastore_dir) / "staging"
+        staging_dir = get_directory(Path(staging_dir))
 
         logging.info("Scanning source .bz2 files...")
         all_files = [p for p in source_dir.rglob("*.bz2") if p.is_file()]
         logging.info(f"  Found {len(all_files)} source .bz2 files")
 
-        logging.info("Scanning existing scatter output files...")
-        existing_parquets = list(target_dir.rglob("*.parquet"))
-        processed_hashes = {p.stem.split("_")[0] for p in existing_parquets}
-        logging.info(f"  {len(processed_hashes)} batches already scattered")
+        processed_hashes = {p.stem for p in staging_dir.glob("*.parquet")}
+        logging.info(f"  {len(processed_hashes)} files already converted")
 
         files_to_process = [
             f for f in all_files if get_hash_key(str(f)) not in processed_hashes
         ]
         logging.info(
-            f"  {len(files_to_process)} files to scatter "
+            f"  {len(files_to_process)} files to convert "
             f"({len(all_files) - len(files_to_process)} skipped)"
-        )
-
-        batches = [
-            files_to_process[i : i + scatter_batch_size]
-            for i in range(0, len(files_to_process), scatter_batch_size)
-        ]
-        logging.info(
-            f"  {len(batches)} batches of up to {scatter_batch_size} files each"
         )
 
         if parallel_job:
             from simmate.database import connect  # isort:skip
             from simmate.compute import SimmateExecutor  # isort:skip
 
-            logging.info(f"Submitting {len(batches)} jobs to the queue...")
-            for batch in batches:
+            logging.info(f"Submitting {len(files_to_process)} jobs to the queue...")
+            for f in files_to_process:
                 SimmateExecutor.submit(
-                    cls._scatter_source_batch,
-                    file_paths=batch,
+                    cls._convert_single_source,
+                    file_path=f,
+                    staging_dir=staging_dir,
                     tags=["simmate"],
                 )
         else:
-            for batch in batches:
-                cls._scatter_source_batch(file_paths=batch)
+            for f in track(files_to_process):
+                cls._convert_single_source(file_path=f, staging_dir=staging_dir)
 
-        logging.info("Scatter complete!")
+        logging.info("Conversion complete!")
+        return staging_dir
 
     @classmethod
-    def _scatter_source_batch(cls, file_paths: list[str | Path]):
-        file_paths = [Path(p) for p in file_paths]
-        target_dir = get_directory(Path(settings.chemspace.datastore_dir))
-        batch_hash = get_hash_key(str(file_paths[0]))
+    def _convert_single_source(
+        cls, file_path: str | Path, staging_dir: str | Path = None
+    ):
+        file_path = Path(file_path)
 
-        logging.info("Unpacking...")
-        frames = []
-        for file_path in file_paths:
-            with bz2.open(file_path, "rb") as f_in:
-                df = polars.read_csv(
-                    f_in.read(),
-                    separator="\t",
-                    infer_schema_length=None,
-                )
-
-            # BUG-FIX: Their first file has many header rows scattered through
-            if "H19_1_PART" in file_path.name:
-                float_cols = ["MW", "LogP", "FSP3", "TPSA"]
-                int_cols = [
-                    "Components",
-                    "HAC",
-                    "HBA",
-                    "HBD",
-                    "RotBonds",
-                    "reaction_id",
-                ]
-                df = df.filter(polars.col("SMILES") != "SMILES").with_columns(
-                    [polars.col(c).cast(polars.Float64) for c in float_cols]
-                    + [polars.col(c).cast(polars.Int64) for c in int_cols]
-                )
-
-            df = df.with_columns(
-                polars.lit(
-                    False if "beyond" in file_path.name.lower() else True,
-                    dtype=polars.Boolean,
-                ).alias("Ro5")
+        if staging_dir is None:
+            staging_dir = get_directory(
+                Path(settings.chemspace.datastore_dir) / "staging"
             )
-            frames.append(df)
+        staging_dir = Path(staging_dir)
 
-        df = polars.concat(frames)
+        output_path = staging_dir / f"{get_hash_key(str(file_path))}.parquet"
+        if output_path.exists():
+            logging.info(f"Skipping {file_path.name} - already converted.")
+            return
+
+        with bz2.open(file_path, "rb") as f_in:
+            df = polars.read_csv(f_in.read(), separator="\t", infer_schema_length=None)
+
+        # BUG-FIX: Their first file has many header rows scattered through
+        if "H19_1_PART" in file_path.name:
+            float_cols = ["MW", "LogP", "FSP3", "TPSA"]
+            int_cols = ["Components", "HAC", "HBA", "HBD", "RotBonds", "reaction_id"]
+            df = df.filter(polars.col("SMILES") != "SMILES").with_columns(
+                [polars.col(c).cast(polars.Float64) for c in float_cols]
+                + [polars.col(c).cast(polars.Int64) for c in int_cols]
+            )
+
         df = df.with_columns(
+            polars.lit(
+                False if "beyond" in file_path.name.lower() else True,
+                dtype=polars.Boolean,
+            ).alias("Ro5"),
             polars.col("ID")
             .map_elements(
                 lambda x: get_chunk_key(x, cls.num_chunks), return_dtype=polars.Int32
             )
-            .alias("chunk_key")
-        ).sort("chunk_key")
-
-        logging.info("Writing...")
-        df.write_parquet(
-            file=str(target_dir) + "/",
-            use_pyarrow=True,
-            pyarrow_options={
-                "partition_cols": ["chunk_key"],
-                "existing_data_behavior": "overwrite_or_ignore",
-                "basename_template": f"{batch_hash}_{{i}}.parquet",
-                "max_partitions": cls.num_chunks + 1,
-            },
+            .alias("chunk_key"),
         )
 
-        logging.info(
-            f"Scattered batch {batch_hash[:8]}... | Rows: {len(df):,} | Files: {len(file_paths)}"
-        )
+        df.write_parquet(output_path)
+        logging.info(f"Converted {file_path.name} | Rows: {len(df):,}")
 
     # -------------------------------------------------------------------------
 
     @classmethod
-    def combine_chunk_partitions(cls, parallel_job: bool = False):
+    def repartition_by_chunk_key(
+        cls,
+        staging_dir: str | Path = None,
+        output_dir: str | Path = None,
+    ):
         """
-        Pass 2 of step 2b: for each chunk_key folder, combines all scatter
-        parquets into a single combined.parquet and adds a datastore_id column
-        where datastore_id = row_index + (1_000_000_000 * chunk_key).
-
-        Run after scatter_source_to_chunks() has fully completed.
+        Scans all staging parquets and sinks them to output_dir partitioned by
+        chunk_key. Run after convert_source_to_parquet() has fully completed.
         """
-        target_dir = get_directory(Path(settings.chemspace.datastore_dir))
+        if staging_dir is None:
+            staging_dir = Path(settings.chemspace.datastore_dir) / "staging"
+        staging_dir = Path(staging_dir)
 
-        logging.info("Scanning for already-combined chunks...")
+        if output_dir is None:
+            output_dir = Path(settings.chemspace.datastore_dir)
+        output_dir = get_directory(Path(output_dir))
+
+        source_glob = str(staging_dir / "*.parquet")
+        logging.info(f"Scanning: {source_glob}")
+
+        lf = polars.scan_parquet(source_glob)
+
+        logging.info(f"Sinking to {output_dir} partitioned by chunk_key...")
+        lf.sink_parquet(
+            polars.PartitionBy(
+                base_path=output_dir,
+                key="chunk_key",
+            ),
+            mkdir=True,
+        )
+
+        logging.info("Repartition by chunk_key complete!")
+
+    @classmethod
+    def repartition_by_chunk_key_test(
+        cls,
+        staging_dir: str | Path = None,
+        output_dir: str | Path = None,
+        parallel_job: bool = False,
+    ):
+        """
+        Manual alternative to repartition_by_chunk_key: iterates over each
+        chunk_key, filters the staging parquets, adds a datastore_id column,
+        and writes a combined.parquet per chunk.
+        """
+        if staging_dir is None:
+            staging_dir = Path(settings.chemspace.datastore_dir) / "staging"
+        staging_dir = Path(staging_dir)
+
+        if output_dir is None:
+            output_dir = Path(settings.chemspace.datastore_dir)
+        output_dir = get_directory(Path(output_dir))
+
         done_chunks = {
             int(p.parent.name.split("=")[1])
-            for p in target_dir.rglob("combined.parquet")
+            for p in output_dir.rglob("combined.parquet")
         }
-        logging.info(f"  {len(done_chunks)} chunks already combined")
-
         chunks_to_process = [c for c in range(cls.num_chunks) if c not in done_chunks]
-        logging.info(f"  {len(chunks_to_process)} chunks to combine")
+        logging.info(
+            f"  {len(done_chunks)} chunks already done, "
+            f"{len(chunks_to_process)} to process"
+        )
 
         if parallel_job:
             from simmate.database import connect  # isort:skip
@@ -316,37 +328,53 @@ class ChemspaceClient:
             logging.info(f"Submitting {len(chunks_to_process)} jobs to the queue...")
             for chunk_key in chunks_to_process:
                 SimmateExecutor.submit(
-                    cls._combine_single_chunk,
+                    cls._repartition_single_chunk_test,
                     chunk_key=chunk_key,
+                    staging_dir=staging_dir,
+                    output_dir=output_dir,
                     tags=["simmate"],
                 )
         else:
             for chunk_key in track(chunks_to_process):
-                cls._combine_single_chunk(chunk_key=chunk_key)
+                cls._repartition_single_chunk_test(
+                    chunk_key=chunk_key,
+                    staging_dir=staging_dir,
+                    output_dir=output_dir,
+                )
 
-        logging.info("Combine complete!")
+        logging.info("Repartition by chunk_key (test) complete!")
 
     @classmethod
-    def _combine_single_chunk(cls, chunk_key: int):
-        target_dir = Path(settings.chemspace.datastore_dir)
-        chunk_dir = target_dir / f"chunk_key={chunk_key}"
-        sentinel_path = chunk_dir / "combined.parquet"
+    def _repartition_single_chunk_test(
+        cls,
+        chunk_key: int,
+        staging_dir: str | Path = None,
+        output_dir: str | Path = None,
+    ):
+        if staging_dir is None:
+            staging_dir = Path(settings.chemspace.datastore_dir) / "staging"
+        staging_dir = Path(staging_dir)
 
-        if sentinel_path.exists():
-            logging.info(f"Skipping chunk_key={chunk_key} - already combined.")
+        if output_dir is None:
+            output_dir = Path(settings.chemspace.datastore_dir)
+
+        chunk_dir = get_directory(Path(output_dir) / f"chunk_key={chunk_key}")
+        output_path = chunk_dir / "combined.parquet"
+
+        if output_path.exists():
+            logging.info(f"Skipping chunk_key={chunk_key} - already done.")
             return
 
-        scatter_paths = [
-            p for p in chunk_dir.glob("*.parquet") if p.name != "combined.parquet"
-        ]
+        df = (
+            polars.scan_parquet(str(staging_dir / "*.parquet"))
+            .filter(polars.col("chunk_key") == chunk_key)
+            .collect()
+        )
 
-        if not scatter_paths:
-            logging.info(f"Skipping chunk_key={chunk_key} - no scatter files found.")
+        if len(df) == 0:
+            logging.info(f"Skipping chunk_key={chunk_key} - no rows found.")
             return
 
-        frames = [polars.read_parquet(p) for p in scatter_paths]
-
-        df = polars.concat(frames)
         df = (
             df.with_row_index("_row_idx")
             .with_columns(
@@ -358,9 +386,47 @@ class ChemspaceClient:
             .drop("_row_idx")
         )
 
-        df.write_parquet(sentinel_path)
+        df.write_parquet(output_path)
+        logging.info(f"Repartitioned chunk_key={chunk_key} | Rows: {len(df):,}")
 
-        for p in scatter_paths:
-            p.unlink()
+    # -------------------------------------------------------------------------
 
-        logging.info(f"Combined chunk_key={chunk_key} | Rows: {len(df):,}")
+    @classmethod
+    def repartition_by_hac(
+        cls,
+        source_dir: str | Path = None,
+        output_dir: str | Path = None,
+    ):
+        """
+        Rearranges the combined chunk parquets into a new hive partition tree
+        keyed by HAC (Heavy Atom Count).
+
+        Scans all combined.parquet files from the chunk_key partitions and
+        sinks them to output_dir partitioned by HAC. Run after
+        combine_chunk_partitions() has fully completed.
+        """
+        if source_dir is None:
+            source_dir = settings.chemspace.datastore_dir
+        source_dir = Path(source_dir)
+
+        if output_dir is None:
+            output_dir = (
+                Path(settings.chemspace.datastore_dir).parent / "chemspace_by_hac"
+            )
+        output_dir = get_directory(Path(output_dir))
+
+        source_glob = str(source_dir / "chunk_key=*" / "*.parquet")
+        logging.info(f"Scanning: {source_glob}")
+
+        lf = polars.scan_parquet(source_glob, hive_partitioning=True)
+
+        logging.info(f"Sinking to {output_dir} partitioned by HAC...")
+        lf.sink_parquet(
+            polars.PartitionBy(
+                base_path=output_dir,
+                key="HAC",
+            ),
+            mkdir=True,
+        )
+
+        logging.info("Repartition by HAC complete!")
