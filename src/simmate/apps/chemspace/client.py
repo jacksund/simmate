@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import bz2
-import io
 import logging
 import warnings
 from pathlib import Path
@@ -81,7 +80,6 @@ class ChemspaceClient:
         cls,
         bucket_name: str = None,
         prefix: str = None,
-        target_dir: str | Path = None,
         ssl_verify: bool = False,
     ) -> Path:
         """
@@ -101,9 +99,7 @@ class ChemspaceClient:
 
         assert settings.chemspace.mode == "s3"
 
-        if target_dir is None:
-            target_dir = settings.config_directory / "chemspace"
-        target_dir = get_directory(Path(target_dir))
+        target_dir = get_directory(Path(settings.chemspace.raw_data_dir))
 
         s3_client = cls._get_source_client(ssl_verify)
         downloads = cls._get_targets(bucket_name, prefix)
@@ -138,7 +134,7 @@ class ChemspaceClient:
             A polars DataFrame containing a chunk of molecule data.
         """
         if source_dir is None:
-            source_dir = settings.config_directory / "chemspace"
+            source_dir = settings.chemspace.raw_data_dir
         source_dir = Path(source_dir)
 
         all_files = (
@@ -164,51 +160,40 @@ class ChemspaceClient:
     @classmethod
     def scatter_source_to_chunks(
         cls,
+        source_dir: str | Path = None,
         parallel_job: bool = False,
-        scatter_batch_size: int = 10,
-        ssl_verify: bool = False,
+        scatter_batch_size: int = 5,
     ):
         """
-        Reads .bz2 source files from the ChemSpace S3 bucket, decompresses them,
-        computes a chunk_key for every row, and writes hive-partitioned output to
-        chemspace_chunks/chunk_key={N}/*.parquet.
+        Reads local .bz2 source files, computes a chunk_key for every row, and
+        writes hive-partitioned output to
+        settings.chemspace.datastore_dir/chunk_key={N}/*.parquet.
 
         Source files are processed in batches of scatter_batch_size to reduce the
-        total number of small S3 writes. Run combine_chunk_partitions() after all
-        scatter jobs complete.
+        total number of small writes. Run download_source_data() first to populate
+        source_dir, then run combine_chunk_partitions() after all scatter jobs complete.
         """
-        if not ssl_verify:
-            warnings.filterwarnings("ignore")
+        if source_dir is None:
+            source_dir = settings.chemspace.raw_data_dir
+        source_dir = Path(source_dir)
 
-        assert settings.chemspace.mode == "s3"
-
-        dest_bucket = "eks-rd-prod-simmate"
-        target_prefix = "chemspace_chunks"
-
-        source_client = cls._get_source_client(ssl_verify)
-        downloads = cls._get_download_targets()
+        target_dir = get_directory(Path(settings.chemspace.datastore_dir))
 
         logging.info("Scanning source .bz2 files...")
-        all_keys = []
-        for bkt, pfx in downloads:
-            keys = cls._list_s3_keys(source_client, bkt, pfx, suffix=".bz2")
-            all_keys.extend((bkt, k) for k in keys)
-        logging.info(f"  Found {len(all_keys)} source .bz2 files")
+        all_files = [p for p in source_dir.rglob("*.bz2") if p.is_file()]
+        logging.info(f"  Found {len(all_files)} source .bz2 files")
 
-        s3_dest = boto3.client("s3")
         logging.info("Scanning existing scatter output files...")
-        existing_keys = cls._list_s3_keys(
-            s3_dest, dest_bucket, target_prefix, suffix=".parquet"
-        )
-        processed_hashes = {Path(k).stem.split("_")[0] for k in existing_keys}
+        existing_parquets = list(target_dir.rglob("*.parquet"))
+        processed_hashes = {p.stem.split("_")[0] for p in existing_parquets}
         logging.info(f"  {len(processed_hashes)} batches already scattered")
 
         files_to_process = [
-            (bkt, k) for bkt, k in all_keys if get_hash_key(k) not in processed_hashes
+            f for f in all_files if get_hash_key(str(f)) not in processed_hashes
         ]
         logging.info(
             f"  {len(files_to_process)} files to scatter "
-            f"({len(all_keys) - len(files_to_process)} skipped)"
+            f"({len(all_files) - len(files_to_process)} skipped)"
         )
 
         batches = [
@@ -227,52 +212,50 @@ class ChemspaceClient:
             for batch in batches:
                 SimmateExecutor.submit(
                     cls._scatter_source_batch,
-                    source_keys=batch,
-                    dest_bucket=dest_bucket,
-                    ssl_verify=ssl_verify,
+                    file_paths=batch,
                     tags=["simmate"],
                 )
         else:
-            for batch in track(batches):
-                cls._scatter_source_batch(
-                    source_keys=batch,
-                    dest_bucket=dest_bucket,
-                    ssl_verify=ssl_verify,
-                )
+            for batch in batches:
+                cls._scatter_source_batch(file_paths=batch)
 
         logging.info("Scatter complete!")
 
     @classmethod
-    def _scatter_source_batch(
-        cls,
-        source_keys: list[tuple[str, str]],
-        dest_bucket: str = "eks-rd-prod-simmate",
-        ssl_verify: bool = False,
-    ):
-        batch_hash = get_hash_key(source_keys[0][1])
-        source_client = cls._get_source_client(ssl_verify)
+    def _scatter_source_batch(cls, file_paths: list[str | Path]):
+        file_paths = [Path(p) for p in file_paths]
+        target_dir = get_directory(Path(settings.chemspace.datastore_dir))
+        batch_hash = get_hash_key(str(file_paths[0]))
 
-        float_cols = ["MW", "LogP", "FSP3", "TPSA"]
-        int_cols = ["Components", "HAC", "HBA", "HBD", "RotBonds", "reaction_id"]
-
+        logging.info("Unpacking...")
         frames = []
-        for bkt, key in source_keys:
-            response = source_client.get_object(Bucket=bkt, Key=key)
-            compressed = response["Body"].read()
-            decompressed = bz2.decompress(compressed)
-            df = polars.read_csv(
-                decompressed,
-                separator="\t",
-                infer_schema_length=None,
-            )
-            if "H19_1_PART" in key:
+        for file_path in file_paths:
+            with bz2.open(file_path, "rb") as f_in:
+                df = polars.read_csv(
+                    f_in.read(),
+                    separator="\t",
+                    infer_schema_length=None,
+                )
+
+            # BUG-FIX: Their first file has many header rows scattered through
+            if "H19_1_PART" in file_path.name:
+                float_cols = ["MW", "LogP", "FSP3", "TPSA"]
+                int_cols = [
+                    "Components",
+                    "HAC",
+                    "HBA",
+                    "HBD",
+                    "RotBonds",
+                    "reaction_id",
+                ]
                 df = df.filter(polars.col("SMILES") != "SMILES").with_columns(
                     [polars.col(c).cast(polars.Float64) for c in float_cols]
                     + [polars.col(c).cast(polars.Int64) for c in int_cols]
                 )
+
             df = df.with_columns(
                 polars.lit(
-                    False if "beyond" in key.lower() else True,
+                    False if "beyond" in file_path.name.lower() else True,
                     dtype=polars.Boolean,
                 ).alias("Ro5")
             )
@@ -287,8 +270,9 @@ class ChemspaceClient:
             .alias("chunk_key")
         ).sort("chunk_key")
 
+        logging.info("Writing...")
         df.write_parquet(
-            file=f"s3://{dest_bucket}/chemspace_chunks/",
+            file=str(target_dir) + "/",
             use_pyarrow=True,
             pyarrow_options={
                 "partition_cols": ["chunk_key"],
@@ -299,7 +283,7 @@ class ChemspaceClient:
         )
 
         logging.info(
-            f"Scattered batch {batch_hash[:8]}... | Rows: {len(df):,} | Files: {len(source_keys)}"
+            f"Scattered batch {batch_hash[:8]}... | Rows: {len(df):,} | Files: {len(file_paths)}"
         )
 
     # -------------------------------------------------------------------------
@@ -313,22 +297,13 @@ class ChemspaceClient:
 
         Run after scatter_source_to_chunks() has fully completed.
         """
-        bucket_name = "eks-rd-prod-simmate"
-        target_prefix = "chemspace_chunks"
-
-        s3_client = boto3.client("s3")
+        target_dir = get_directory(Path(settings.chemspace.datastore_dir))
 
         logging.info("Scanning for already-combined chunks...")
-        sentinel_keys = cls._list_s3_keys(
-            s3_client, bucket_name, target_prefix, suffix="combined.parquet"
-        )
-        done_chunks = set()
-        for k in sentinel_keys:
-            # key pattern: chemspace_chunks/chunk_key=N/combined.parquet
-            for part in k.split("/"):
-                if part.startswith("chunk_key="):
-                    done_chunks.add(int(part.split("=")[1]))
-                    break
+        done_chunks = {
+            int(p.parent.name.split("=")[1])
+            for p in target_dir.rglob("combined.parquet")
+        }
         logging.info(f"  {len(done_chunks)} chunks already combined")
 
         chunks_to_process = [c for c in range(cls.num_chunks) if c not in done_chunks]
@@ -343,46 +318,33 @@ class ChemspaceClient:
                 SimmateExecutor.submit(
                     cls._combine_single_chunk,
                     chunk_key=chunk_key,
-                    bucket_name=bucket_name,
                     tags=["simmate"],
                 )
         else:
             for chunk_key in track(chunks_to_process):
-                cls._combine_single_chunk(chunk_key=chunk_key, bucket_name=bucket_name)
+                cls._combine_single_chunk(chunk_key=chunk_key)
 
         logging.info("Combine complete!")
 
     @classmethod
-    def _combine_single_chunk(
-        cls,
-        chunk_key: int,
-        bucket_name: str = "eks-rd-prod-simmate",
-    ):
-        sentinel_key = f"chemspace_chunks/chunk_key={chunk_key}/combined.parquet"
-        s3_client = boto3.client("s3")
+    def _combine_single_chunk(cls, chunk_key: int):
+        target_dir = Path(settings.chemspace.datastore_dir)
+        chunk_dir = target_dir / f"chunk_key={chunk_key}"
+        sentinel_path = chunk_dir / "combined.parquet"
 
-        try:
-            s3_client.head_object(Bucket=bucket_name, Key=sentinel_key)
+        if sentinel_path.exists():
             logging.info(f"Skipping chunk_key={chunk_key} - already combined.")
             return
-        except:
-            pass
 
-        scatter_prefix = f"chemspace_chunks/chunk_key={chunk_key}"
-        scatter_keys = cls._list_s3_keys(
-            s3_client, bucket_name, scatter_prefix, suffix=".parquet"
-        )
-        # exclude any existing combined.parquet in case head_object check was bypassed
-        scatter_keys = [k for k in scatter_keys if not k.endswith("combined.parquet")]
+        scatter_paths = [
+            p for p in chunk_dir.glob("*.parquet") if p.name != "combined.parquet"
+        ]
 
-        if not scatter_keys:
+        if not scatter_paths:
             logging.info(f"Skipping chunk_key={chunk_key} - no scatter files found.")
             return
 
-        frames = []
-        for key in scatter_keys:
-            response = s3_client.get_object(Bucket=bucket_name, Key=key)
-            frames.append(polars.read_parquet(io.BytesIO(response["Body"].read())))
+        frames = [polars.read_parquet(p) for p in scatter_paths]
 
         df = polars.concat(frames)
         df = (
@@ -396,12 +358,9 @@ class ChemspaceClient:
             .drop("_row_idx")
         )
 
-        buffer = io.BytesIO()
-        df.write_parquet(buffer)
-        buffer.seek(0)
-        s3_client.upload_fileobj(buffer, bucket_name, sentinel_key)
+        df.write_parquet(sentinel_path)
 
-        for key in scatter_keys:
-            s3_client.delete_object(Bucket=bucket_name, Key=key)
+        for p in scatter_paths:
+            p.unlink()
 
         logging.info(f"Combined chunk_key={chunk_key} | Rows: {len(df):,}")
