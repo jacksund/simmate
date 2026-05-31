@@ -26,6 +26,7 @@ dependencies = [
     "django>=5.2.11,<6.0.0",
     "typer>=0.24.1,<0.25.0",
     "psycopg2-binary>=2.9.11,<3.0.0",
+    "usearch>=2.25.3,<3.0.0",
     # Material/Crystal-based dependencies
     "pymatgen>=2025.10.7,<2025.10.8",
     "pymatgen-analysis-diffusion>=2025.11.15,<2025.11.16",
