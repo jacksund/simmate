@@ -21,6 +21,7 @@ from .other import (
     get_app_submodule,
     get_attributes_doc,
     get_chemical_subsystems,
+    get_chunk_key,
     get_class,
     get_docker_command,
     get_hash_key,

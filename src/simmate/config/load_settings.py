@@ -369,6 +369,9 @@ class SimmateSettings:
             },
             "chemspace": {
                 "mode": "ftp",  # or s3
+                "datastore_dir": self.config_directory
+                / "datastore"
+                / "chemspace_freedom_4",
                 "s3": {
                     "url": None,
                     "access_key": None,
@@ -641,6 +644,7 @@ class SimmateSettings:
         "SIMMATE__CHATBOT__SQL_URI": str,
         "SIMMATE__CHATBOT__VERBOSE": bool,
         "SIMMATE__CHEMSPACE__MODE": str,
+        "SIMMATE__CHEMSPACE__DATASTORE_DIR": str,
         "SIMMATE__CHEMSPACE__S3__URL": str,
         "SIMMATE__CHEMSPACE__S3__ACCESS_KEY": str,
         "SIMMATE__CHEMSPACE__S3__SECRET_KEY": str,
