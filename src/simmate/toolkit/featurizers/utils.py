@@ -25,6 +25,8 @@ def convert_rdkit_fingerprint(
         return numpy.array(rdkit_fp.ToList())
     elif vector_type == "numpy_packbits":
         return numpy.packbits(numpy.array(rdkit_fp.ToList()))
+    elif vector_type == "numpy_packbits_bytes":
+        return numpy.packbits(numpy.array(rdkit_fp.ToList())).tobytes()
     elif vector_type == "base64":
         return rdkit_fp.ToBase64()
     else:

@@ -15,7 +15,7 @@ class USearchFingerprints(MultiFeaturizer):
     """
 
     featurizers = [
-        (MaccsFingerprint, {"vector_type": "numpy_packbits"}),
-        (Ecfp4Fingerprint, {"vector_type": "numpy_packbits"}),
-        (Fcfp4Fingerprint, {"vector_type": "numpy_packbits"}),
+        (MaccsFingerprint, {"vector_type": "numpy_packbits_bytes"}),
+        (Ecfp4Fingerprint, {"vector_type": "numpy_packbits_bytes"}),
+        (Fcfp4Fingerprint, {"vector_type": "numpy_packbits_bytes"}),
     ]
