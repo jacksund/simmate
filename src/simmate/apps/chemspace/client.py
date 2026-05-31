@@ -35,11 +35,11 @@ class ChemspaceClient:
         )
 
     @classmethod
-    def _list_source_keys(cls, bucket: str, prefix: str = "", client = None) -> list[str]:
+    def _list_source_keys(cls, bucket: str, prefix: str = "", client=None) -> list[str]:
         """Returns all non-directory object keys in the given bucket/prefix."""
         if not client:
             client = cls.get_source_client()
-        
+
         paginator = client.get_paginator("list_objects_v2")
         return [
             obj["Key"]
@@ -89,7 +89,7 @@ class ChemspaceClient:
             if bucket_name
             else list(settings.chemspace.s3.buckets.items())
         )
-        
+
         client = cls.get_source_client()
         for bkt, pfx in downloads:
             logging.info("Fetching full list of S3 keys...")
@@ -139,7 +139,7 @@ class ChemspaceClient:
     # Parquet conversion (dev/ETL)
     # -------------------------------------------------------------------------
 
-    num_chunks = 500
+    num_chunks = 2_500
 
     @classmethod
     def convert_source_to_parquet(cls, parallel_job: bool = False) -> Path:
@@ -165,7 +165,11 @@ class ChemspaceClient:
             f"{len(files_to_process)} to process"
         )
 
-        cls._dispatch(files_to_process, cls._convert_single_source, parallel_job)
+        cls._dispatch(
+            files_to_process,
+            cls._convert_single_source,
+            parallel_job,
+        )
         logging.info("Conversion complete!")
         return staging_dir
 
@@ -180,7 +184,11 @@ class ChemspaceClient:
             return
 
         with bz2.open(file_path, "rb") as f_in:
-            df = polars.read_csv(f_in.read(), separator="\t", infer_schema_length=None)
+            df = polars.read_csv(
+                f_in.read(),
+                separator="\t",
+                infer_schema_length=None,
+            )
 
         # BUG-FIX: Their first file has many header rows scattered through
         if "H19_1_PART" in file_path.name:
@@ -198,7 +206,8 @@ class ChemspaceClient:
             ).alias("Ro5"),
             polars.col("ID")
             .map_elements(
-                lambda x: get_chunk_key(x, cls.num_chunks), return_dtype=polars.Int32
+                lambda x: get_chunk_key(x, cls.num_chunks),
+                return_dtype=polars.Int32,
             )
             .alias("chunk_key"),
         )
@@ -209,25 +218,7 @@ class ChemspaceClient:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def repartition_by_chunk_key(cls):
-        """
-        Scans all staging parquets and sinks them to output_dir partitioned by
-        chunk_key. Run after convert_source_to_parquet() has fully completed.
-        """
-        datastore_dir = Path(settings.chemspace.datastore_dir)
-        staging_dir = datastore_dir / "staging"
-        output_dir = get_directory(datastore_dir / "live")
-
-        source_glob = str(staging_dir / "*.parquet")
-        logging.info(f"Sinking to {output_dir} partitioned by chunk_key...")
-        polars.scan_parquet(source_glob).sink_parquet(
-            polars.PartitionBy(base_path=output_dir, key="chunk_key"),
-            mkdir=True,
-        )
-        logging.info("Repartition by chunk_key complete!")
-
-    @classmethod
-    def repartition_by_chunk_key_test(cls, parallel_job: bool = False):
+    def repartition_by_chunk_key_manual(cls, parallel_job: bool = False):
         """
         Manual alternative to repartition_by_chunk_key: iterates over each
         chunk_key, filters the staging parquets, adds a datastore_id column,
@@ -246,9 +237,11 @@ class ChemspaceClient:
         )
 
         cls._dispatch(
-            chunks_to_process, cls._repartition_single_chunk_test, parallel_job
+            chunks_to_process,
+            cls._repartition_single_chunk_test,
+            parallel_job,
         )
-        logging.info("Repartition by chunk_key (test) complete!")
+        logging.info("Repartition by chunk_key complete!")
 
     @classmethod
     def _repartition_single_chunk_test(cls, chunk_key: int):
@@ -309,3 +302,25 @@ class ChemspaceClient:
             mkdir=True,
         )
         logging.info("Repartition by HAC complete!")
+
+    @classmethod
+    def repartition_by_chunk_key(cls):
+        """
+        Scans all staging parquets and sinks them to output_dir partitioned by
+        chunk_key. Run after convert_source_to_parquet() has fully completed.
+        """
+        datastore_dir = Path(settings.chemspace.datastore_dir)
+        staging_dir = datastore_dir / "staging"
+        output_dir = get_directory(datastore_dir / "live")
+
+        source_glob = str(staging_dir / "*.parquet")
+        logging.info(f"Sinking to {output_dir} partitioned by chunk_key...")
+        polars.scan_parquet(source_glob).sink_parquet(
+            polars.PartitionBy(
+                base_path=output_dir,
+                key="chunk_key",
+                # max_rows_per_file=10_000_000, # has no effect
+            ),
+            mkdir=True,
+        )
+        logging.info("Repartition by chunk_key complete!")
