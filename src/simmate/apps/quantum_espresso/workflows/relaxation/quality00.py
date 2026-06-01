@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.quantum_espresso.workflows.base import PwscfWorkflow
+from ..base import PwscfWorkflow
 
 
 class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
@@ -28,7 +28,7 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
 
     # We use the relatively low quality pseudopotentials (labeled with efficiencty
     # rather than accuracy)
-    psuedo_mappings_set = "SSSP_PBE_EFFICIENCY"
+    pseudo_mappings_set = "SSSP_PBE_EFFICIENCY"
 
     # Make the unitcell relatively cubic before relaxing
     standardize_structure = "primitive-LLL"
@@ -43,7 +43,7 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
         # Unlike in VASP, QE uses both an energy and force cutoff. They are also set in
         # atomic units, Ry, instead of eV.
         etot_conv_thr="1.5e-3",  # Ionic step energy convergence threshold
-        forc_conv_thr="1.5e-2",  # Ionic step force convergence threshhold
+        forc_conv_thr="1.5e-2",  # Ionic step force convergence threshold
     )
 
     system = dict(
@@ -53,7 +53,7 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
         ecutwfc__auto="efficiency_0.8",  # automatically select energy cutoff for wavefunctions
         ecutrho__auto="efficiency_0.8",  # automatically select energy cutoff for charge density/potential
         # We don't know if we have a metal or non-metal so we make a guess here.
-        # !!! This guess could be dangerous without handlers
+        # Note: This guess could be dangerous without handlers
         multiple_keywords__smart_smear={
             "metal": dict(
                 occupations="smearing",  # use smearing
@@ -72,7 +72,7 @@ class Relaxation__QuantumEspresso__Quality00(PwscfWorkflow):
         diagonalization="david",  # equivalent to ALGO = Normal
         mixing_mode="plain",
         mixing_beta=0.7,  # mixing factor for self-consistency
-        conv_thr="1.5e-4",  # convergence threshold for SCF cycle in Ry
+        conv_thr="1.5e-6",  # convergence threshold for SCF cycle in Ry
     )
 
     ions = dict(

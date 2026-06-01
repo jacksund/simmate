@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from simmate.apps.warren_lab.workflows.relaxation.hse import Relaxation__Vasp__HseWarren
-from simmate.workflows.common import StagedWorkflow
+from simmate.workflows.common import StagedRelaxStatic
 
 
 class Relaxation__Vasp__HseWithWavecarWarren(Relaxation__Vasp__HseWarren):
@@ -14,7 +14,7 @@ class Relaxation__Vasp__HseWithWavecarWarren(Relaxation__Vasp__HseWarren):
     _incar_updates = dict(LWAVE=True)
 
 
-class StaticEnergy__Vasp__RelaxationStaticHseHseWarren(StagedWorkflow):
+class StagedRelaxStatic__Vasp__RelaxationStaticHseHseWarren(StagedRelaxStatic):
     """
     Runs a PBEsol quality structure relaxation, an HSE quality relaxation, and
     an HSE static energy calculation. This method will also write the ELFCAR

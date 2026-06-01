@@ -255,6 +255,7 @@ class SimmateSettings:
                         "simmate.apps.ppdb.components.PpdbMoleculeComponent",
                     ],
                     "Workflow Results": [
+                        "simmate.website.workflow_explorer.components.StagedRelaxStaticComponent",
                         "simmate.website.workflow_explorer.components.StaticEnergyComponent",
                         "simmate.website.workflow_explorer.components.RelaxationComponent",
                         "simmate.website.workflow_explorer.components.PopulationAnalysisComponent",
@@ -277,7 +278,7 @@ class SimmateSettings:
                     ],
                     "Other": [
                         "simmate.apps.eppo_gd.components.EppoCodeComponent",
-                        "simmate.database.mixins.components.SpacegroupComponent",
+                        "simmate.website.core.components.SpacegroupComponent",
                     ],
                     "HIDDEN": [
                         "simmate.website.core.components.WebsitePageVisitComponent",
@@ -417,7 +418,7 @@ class SimmateSettings:
             },
             "quantum_espresso": {
                 "default_command": "pw.x < pwscf.in > pw-scf.out",
-                "psuedo_dir": self.config_directory / "quantum_espresso" / "potentials",
+                "pseudo_dir": self.config_directory / "quantum_espresso" / "potentials",
                 "docker": {
                     "enable": False,
                     "image": f"jacksund/quantum_espresso:v{simmate.__version__}",

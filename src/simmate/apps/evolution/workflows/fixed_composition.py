@@ -17,13 +17,17 @@ class StructurePrediction__Toolkit__FixedComposition(Workflow):
 
     description_doc_short = "fixed number of sites (e.g. Ca2N or Na4Cl4)"
 
+    submission_form = "fixed-composition-submission-component"
+
     database_table = FixedCompositionSearch
 
     @classmethod
     def run_config(
         cls,
         composition: str | Composition,
-        subworkflow_name: str | Workflow = "static-energy.vasp.low-quality",
+        subworkflow_name: (
+            str | Workflow
+        ) = "staged-relax-static.quantum-espresso.low-quality",
         subworkflow_kwargs: dict = {},
         fitness_field: str = "energy_per_atom",
         nfirst_generation: int = 15,

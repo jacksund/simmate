@@ -256,3 +256,8 @@ a:focus {
     background-color: var(--bs-secondary) !important;
     color: var(--bs-light) !important;
 }
+
+/* Slower spinner-grow animation for HTMX status indicators */
+.spinner-grow {
+    animation-duration: 1.0s !important;
+}

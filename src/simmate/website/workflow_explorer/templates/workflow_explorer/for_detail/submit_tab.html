@@ -1,1 +1,7 @@
-<div class="tab-pane" id="submit-section">{% htmx_component "workflow-submission-component" %}</div>
+<div class="tab-pane" id="submit-section">
+    {% if workflow.submission_form %}
+        {% htmx_component workflow.submission_form %}
+    {% else %}
+        {% htmx_component "workflow-submission-component" %}
+    {% endif %}
+</div>

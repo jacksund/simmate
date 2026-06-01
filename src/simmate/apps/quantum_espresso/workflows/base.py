@@ -2,16 +2,18 @@
 
 from pathlib import Path
 
-from simmate.apps.quantum_espresso.inputs import PwscfInput
-from simmate.apps.quantum_espresso.inputs.k_points import Kpoints
-from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
-    SSSP_PBE_EFFICIENCY_MAPPINGS,
-    SSSP_PBE_PRECISION_MAPPINGS,
-)
 from simmate.config import settings
 from simmate.toolkit import Structure
 from simmate.utils import get_docker_command
 from simmate.workflows.common import S3Workflow, StructureWorkflow
+
+from ..error_handlers import Bfgs, MaxSteps
+from ..inputs import (
+    SSSP_PBE_EFFICIENCY_MAPPINGS,
+    SSSP_PBE_PRECISION_MAPPINGS,
+    Kpoints,
+    PwscfInput,
+)
 
 
 # TODO: add StructureInputWorkflow mixin which can be made from VaspWorkflow class
@@ -21,6 +23,8 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
     )
 
     required_files = ["pwscf.in"]
+
+    error_handlers = [Bfgs(), MaxSteps()]
 
     command: str = settings.quantum_espresso.default_command
     """
@@ -85,22 +89,22 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
 
     # -------------------------------------------------------------------------
 
-    psuedo_mappings_set: str = None
+    pseudo_mappings_set: str = None
     """
-    Indicates which psuedopotentials mappings to use (in the `psuedo_mappings` attribute).
+    Indicates which pseudopotential mappings to use (in the `pseudo_mappings` attribute).
     Can be either 'SSSP_PBE_PRECISION' or 'SSSP_PBE_EFFICIENCY'
     """
 
     @classmethod
     @property
-    def psuedo_mappings(cls) -> dict:
-        if cls.psuedo_mappings_set == "SSSP_PBE_PRECISION":
+    def pseudo_mappings(cls) -> dict:
+        if cls.pseudo_mappings_set == "SSSP_PBE_PRECISION":
             return SSSP_PBE_PRECISION_MAPPINGS
-        elif cls.psuedo_mappings_set == "SSSP_PBE_EFFICIENCY":
+        elif cls.pseudo_mappings_set == "SSSP_PBE_EFFICIENCY":
             return SSSP_PBE_EFFICIENCY_MAPPINGS
         else:
             raise Exception(
-                f"Unknown psuedo_mappings_set provided: {cls.psuedo_mappings_set}"
+                f"Unknown pseudo_mappings_set provided: {cls.pseudo_mappings_set}"
             )
 
     # -------------------------------------------------------------------------
@@ -121,7 +125,7 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
         """
         return {
             "pwscf_in": cls.full_settings,
-            "psuedo_mappings_set": cls.psuedo_mappings_set,
+            "pseudo_mappings_set": cls.pseudo_mappings_set,
             "k_points": cls.k_points,
             "error_handlers": [e.name for e in cls.error_handlers],
         }
@@ -139,7 +143,7 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
                 k_points=cls.k_points,
                 structure=structure,
             ),
-            psuedo_mappings=cls.psuedo_mappings,
+            pseudo_mappings=cls.pseudo_mappings,
             control=cls.control,
             system=cls.system,
             electrons=cls.electrons,
@@ -167,7 +171,7 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
                 # "" solves the issue (but wrapping with '' doesn't)
                 volumes=[
                     f'"{str(directory)}":/qe_calc',
-                    f'"{str(settings.quantum_espresso.psuedo_dir)}":/potentials',
+                    f'"{str(settings.quantum_espresso.pseudo_dir)}":/potentials',
                 ],
             )
             return final_command

@@ -32,6 +32,8 @@ class StagedWorkflow(Workflow):
 
     files_to_copy = []  # Files that should be copied from one run to the next
 
+    use_database = False
+
     @classmethod
     def run_config(
         cls,
@@ -42,7 +44,7 @@ class StagedWorkflow(Workflow):
         **kwargs,
     ):
         subworkflow_kwargs = subworkflow_kwargs or {}
-        subworkflow_ids = []
+        subworkflow_runs = []
         result = None
 
         for i, current_task in enumerate(cls.subworkflows):
@@ -60,32 +62,25 @@ class StagedWorkflow(Workflow):
                     previous_directory=result.directory,
                     **subworkflow_kwargs,
                 )
-            subworkflow_ids.append(result.id)
 
-        # save final result
-        final_result = dict(
-            structure=structure,
-            subworkflow_names=cls.subworkflow_names,
-            subworkflow_ids=subworkflow_ids,
-            copied_files=cls.files_to_copy,
-        )
+            if hasattr(result, "id") and hasattr(result, "_meta"):
+                subworkflow_runs.append(
+                    {
+                        "table_name": result._meta.db_table,
+                        "id": result.id,
+                    }
+                )
 
-        # Append the result of the last successful run to the final result
-        final_result |= result.to_api_dict()
+        if not cls.use_database:
+            return result
 
-        # remove results that will conflict with the base calculation.
-        # For example, we don't want to return a directory value because this
-        # will be different from the base workflow. We also don't want to send
-        # columns from the structure mixin because these are calculated directly
-        # from the structure
-        mixin_names = result.get_mixin_names()
-        mixins = result.get_mixins()
-        for name, mixin in zip(mixin_names, mixins):
-            if name == "Structure" or name == "Calculation":
-                for calc_data in mixin.get_column_names():
-                    final_result.pop(calc_data, None)
-
-        return final_result
+        return {
+            "subworkflow_runs": subworkflow_runs,
+            "structure": getattr(result, "structure", None),
+            "energy": getattr(result, "energy", None),
+            "site_forces": getattr(result, "site_forces", None),
+            "lattice_stress": getattr(result, "lattice_stress", None),
+        }
 
     @classmethod
     @property

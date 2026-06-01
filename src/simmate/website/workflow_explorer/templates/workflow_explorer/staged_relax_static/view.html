@@ -1,0 +1,13 @@
+{% extends "data_explorer/entry.html" %}
+{% block entrycontent %}
+    <div>
+        {% include "workflow_explorer/staged_relax_static/for_view/tabs_header.html" %}
+        <div class="tab-content">
+            {% include "workflow_explorer/staged_relax_static/for_view/overview_tab.html" %}
+            {% include "workflow_explorer/staged_relax_static/for_view/structure_details_tab.html" %}
+            {% include "workflow_explorer/staged_relax_static/for_view/thermodynamics_tab.html" %}
+            {% include "workflow_explorer/staged_relax_static/for_view/forces_tab.html" %}
+            {% include "workflow_explorer/staged_relax_static/for_view/calculation_tab.html" %}
+        </div>
+    </div>
+{% endblock %}

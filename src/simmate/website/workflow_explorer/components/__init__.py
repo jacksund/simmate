@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from .current_time import CurrentTimeComponent
 from .results import (
     BandStructureCalcComponent,
     DensityofStatesCalcComponent,
@@ -11,7 +12,9 @@ from .results import (
     MigrationImageComponent,
     PopulationAnalysisComponent,
     RelaxationComponent,
+    StagedRelaxStaticComponent,
     StaticEnergyComponent,
 )
 from .search import WorkflowSearchComponent
+from .status import WorkflowStatusComponent
 from .submission import WorkflowSubmissionComponent

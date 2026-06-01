@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from simmate.apps.quantum_espresso.workflows.relaxation.quality04 import (
+from ..relaxation.quality04 import (
     Relaxation__QuantumEspresso__Quality04,
 )
 
@@ -25,19 +25,19 @@ class StaticEnergy__QuantumEspresso__Quality04(Relaxation__QuantumEspresso__Qual
     accuracy_rating = 1
 
     control = dict(
-        pseudo_dir__auto=True,  # uses the default directory for pseudopotentials
-        restart_mode="from_scratch",  # start from new calc rather than restart
-        calculation="scf",  # perform static energy calc
-        tstress=True,  # calculate stress
-        tprnfor=True,  # calculate forces
+        pseudo_dir__auto=True,
+        restart_mode="from_scratch",
+        calculation="scf",
+        tstress=True,
+        tprnfor=True,
     )
 
     system = dict(
-        ibrav=0,  # indicates crystal axis is provided in input
-        nat__auto=True,  # automatically set number of atoms
-        ntyp__auto=True,  # automatically set number of types of atoms
-        ecutwfc__auto="efficiency_1.2",  # automatically select energy cutoff for wavefunctions
-        ecutrho__auto="efficiency_1.2",  # automatically select energy cutoff for charge density/potential
-        occupations="tetrahedra",  # was "smearing - methfessel-paxton" for metals, "smearing - gaussian" for non-metals
-        degauss=0.05,  # Not sure this does anything with "tetrahedra". Was 0.05 for non-metals, 0.06 for metals
+        ibrav=0,
+        nat__auto=True,
+        ntyp__auto=True,
+        ecutwfc__auto="efficiency_1.2",
+        ecutrho__auto="efficiency_1.2",
+        occupations="tetrahedra",
+        degauss=0.05,
     )

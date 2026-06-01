@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import datetime
 import inspect
 import json
 import logging
@@ -41,6 +42,12 @@ class Workflow:
     """
     A quick description for this workflow. This will be shown in the website UI
     in the list-view of all different workflow presets.
+    """
+
+    submission_form: str = None
+    """
+    The custom HTMX component to use for submitting this workflow in the UI.
+    If not set, a default structure submission form is used.
     """
 
     use_database: bool = True
@@ -408,6 +415,10 @@ class Workflow:
             from simmate.database.mixins import StaticEnergy
 
             return StaticEnergy
+        elif flow_type == "staged-relax-static":
+            from simmate.database.mixins import StagedRelaxStatic
+
+            return StagedRelaxStatic
         elif flow_type == "electronic-structure":
             if "band-structure" in flow_preset:
                 from simmate.database.mixins import BandStructureCalc
@@ -1125,6 +1136,8 @@ class Workflow:
                 elif parameter_key == "composition":
                     # convert Composition to str
                     parameter_value = str(parameter_value)
+                elif isinstance(parameter_value, datetime.datetime):
+                    parameter_value = parameter_value.isoformat()
 
                 # preferred serializiation
                 elif hasattr(parameter_value, "as_dict"):
