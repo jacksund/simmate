@@ -95,6 +95,10 @@ class Datastore:
 
     compression_mode: str = "lz4"  # or "zstd" for slower but smaller files
 
+    # -------------------------------------------------------------------------
+
+    # file/dir names
+
     @classmethod
     @property
     def base_directory(cls) -> Path:
@@ -125,7 +129,7 @@ class Datastore:
     @property
     def live_directory(cls) -> Path:
         """Directory for active parquet chunk files."""
-        return get_directory(cls.base_directory / "live")
+        return cls.base_directory / "live"
 
     @classmethod
     @property
@@ -137,7 +141,65 @@ class Datastore:
     @property
     def old_directory(cls) -> Path:
         """Directory for backing up previous live parquet chunk files."""
-        return get_directory(cls.base_directory / "old")
+        return cls.base_directory / "old"
+
+    @classmethod
+    @property
+    def chunk_files(cls) -> list[Path]:
+        """
+        Returns a sorted list of existing parquet chunk files in the live directory.
+        """
+        chunk_files = [f for f in cls.live_directory.rglob("*.parquet") if f.is_file()]
+        return sorted(chunk_files, key=lambda f: f.name)
+
+    @classmethod
+    @property
+    def chunk_files_wildcard(cls) -> Path:
+        """
+        Wildcard path object for the live directory + all parquet files in it.
+        """
+        return cls.live_directory / "**" / "*.parquet"
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def promote_staging(cls):
+        """
+        Promotes the staging directory to live, moving the current live
+        directory to old.
+        """
+        # 1. Remove old_directory if it exists
+        if cls.old_directory.exists():
+            shutil.rmtree(cls.old_directory)
+
+        # 2. Rename live to old
+        if cls.live_directory.exists():
+            cls.live_directory.rename(cls.old_directory)
+
+        # 3. Rename staging to live
+        if cls.staging_directory.exists():
+            cls.staging_directory.rename(cls.live_directory)
+
+    @classmethod
+    def get_chunk_file(cls, chunk_key: int) -> Path:
+        """
+        Locates the parquet file corresponding to a given chunk_key.
+        """
+        # Try to find a hive-partitioned file
+        hive_dir = cls.live_directory / f"chunk_key={chunk_key}"
+        if hive_dir.exists() and hive_dir.is_dir():
+            files = list(hive_dir.glob("*.parquet"))
+            if files:
+                return files[0]
+
+        # Try to find sequentially numbered file
+        seq_file = cls.live_directory / f"{str(chunk_key).zfill(10)}.parquet"
+        if seq_file.exists():
+            return seq_file
+
+        raise FileNotFoundError(
+            f"Could not locate chunk parquet for chunk_key={chunk_key}"
+        )
 
     @classmethod
     def _process_chunks(cls, transform_func, parallel_job: bool = False):
@@ -162,43 +224,7 @@ class Datastore:
 
         dispatch(files_to_process, worker, parallel_job)
 
-    @classmethod
-    def promote_staging(cls):
-        """
-        Promotes the staging directory to live, moving the current live
-        directory to old.
-        """
-        # 1. Remove old_directory if it exists
-        if cls.old_directory.exists():
-            shutil.rmtree(cls.old_directory)
-
-        # 2. Rename live to old
-        if cls.live_directory.exists():
-            cls.live_directory.rename(cls.old_directory)
-
-        # 3. Rename staging to live
-        if cls.staging_directory.exists():
-            cls.staging_directory.rename(cls.base_directory / "live")
-
-        # 4. Re-create empty staging
-        get_directory(cls.staging_directory)
-
-    @classmethod
-    @property
-    def chunk_files(cls) -> list[Path]:
-        """
-        Returns a sorted list of existing parquet chunk files in the live directory.
-        """
-        chunk_files = [f for f in cls.live_directory.rglob("*.parquet") if f.is_file()]
-        return sorted(chunk_files, key=lambda f: f.name)
-
-    @classmethod
-    @property
-    def chunk_files_wildcard(cls) -> Path:
-        """
-        Wildcard path object for the live directory + all parquet files in it.
-        """
-        return cls.live_directory / "**" / "*.parquet"
+    # -------------------------------------------------------------------------
 
     @classmethod
     @property
@@ -247,41 +273,6 @@ class Datastore:
         return filter_polars_df(cls.lf, **kwargs)
 
     @classmethod
-    def _datastore_id_to_chunk_key(cls, datastore_id: int) -> int:
-        """
-        Converts a datastore_id to its corresponding chunk_key.
-        """
-        return datastore_id // cls.datastore_id_multiplier
-
-    @classmethod
-    def _id_to_chunk_key(cls, string_id: str) -> int:
-        """
-        Converts a string ID to its corresponding chunk_key.
-        """
-        return get_chunk_key(string_id, cls.num_chunks)
-
-    @classmethod
-    def get_chunk_file(cls, chunk_key: int) -> Path:
-        """
-        Locates the parquet file corresponding to a given chunk_key.
-        """
-        # Try to find a hive-partitioned file
-        hive_dir = cls.live_directory / f"chunk_key={chunk_key}"
-        if hive_dir.exists() and hive_dir.is_dir():
-            files = list(hive_dir.glob("*.parquet"))
-            if files:
-                return files[0]
-
-        # Try to find sequentially numbered file
-        seq_file = cls.live_directory / f"{str(chunk_key).zfill(10)}.parquet"
-        if seq_file.exists():
-            return seq_file
-
-        raise FileNotFoundError(
-            f"Could not locate chunk parquet for chunk_key={chunk_key}"
-        )
-
-    @classmethod
     def get_row(cls, datastore_id: int) -> polars.DataFrame:
         """
         Retrieves a single row by its datastore_id using basic polars filtering.
@@ -292,6 +283,30 @@ class Datastore:
             (polars.col("chunk_key") == chunk_key)
             & (polars.col("datastore_id") == datastore_id)
         ).collect()
+
+    @classmethod
+    def sample(cls, n: int = 1_000) -> polars.DataFrame:
+        """
+        Returns a random sample of n rows from the datastore.
+        """
+        return polars.read_parquet(cls.chunk_files[0], n_rows=n)
+
+    @classmethod
+    @property
+    def schema(cls) -> polars.Schema:
+        """
+        Returns the schema (column names and types) from the first chunk file.
+        """
+        return polars.read_parquet_schema(cls.chunk_files[0])
+
+    @classmethod
+    def count(cls) -> int:
+        """
+        Returns the total number of rows across all chunk files.
+        """
+        return cls.lf.select(polars.len()).collect().item()
+
+    # -------------------------------------------------------------------------
 
     @classmethod
     def update_row(cls, datastore_id: int, updates: dict):
@@ -338,12 +353,14 @@ class Datastore:
                 )
             df.write_parquet(file, compression=cls.compression_mode)
 
+    # -------------------------------------------------------------------------
+
     @classmethod
-    def rename_column(cls, old_name: str, new_name: str, parallel_job: bool = False):
+    def rename_columns(cls, mapping: dict, parallel_job: bool = False):
         """
         Renames a column across all chunk files.
         """
-        cls._process_chunks(lambda df: df.rename({old_name: new_name}), parallel_job)
+        cls._process_chunks(lambda df: df.rename(mapping), parallel_job)
 
     @classmethod
     def drop_column(cls, column_name: str | list[str], parallel_job: bool = False):
@@ -351,6 +368,11 @@ class Datastore:
         Drops a column (or list of columns) across all chunk files.
         """
         cls._process_chunks(lambda df: df.drop(column_name), parallel_job)
+
+    # update_column - decorator
+    # update_table - decorator
+
+    # -------------------------------------------------------------------------
 
     @classmethod
     def repartition(
@@ -410,6 +432,22 @@ class Datastore:
             logging.info(f"Repartitioned {partition_column}={val} | Rows: {len(df):,}")
 
         dispatch(partition_values, _repartition_single_value, parallel_job)
+
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def _datastore_id_to_chunk_key(cls, datastore_id: int) -> int:
+        """
+        Converts a datastore_id to its corresponding chunk_key.
+        """
+        return datastore_id // cls.datastore_id_multiplier
+
+    @classmethod
+    def _id_to_chunk_key(cls, string_id: str) -> int:
+        """
+        Converts a string ID to its corresponding chunk_key.
+        """
+        return get_chunk_key(string_id, cls.num_chunks)
 
     @update_column(column_name="chunk_key")
     def add_chunk_key_column(

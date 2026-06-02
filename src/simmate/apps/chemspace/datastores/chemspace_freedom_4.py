@@ -14,6 +14,31 @@ class ChemspaceFreedom4(Datastore):
     """
     Datastore for processing ChemSpace Freedom source data into parquets,
     building search indexes, etc.
+
+    Steps to build:
+        ``` python
+        from simmate.apps.chemspace.datastores import ChemspaceFreedom4 as cf4
+        # -----------------------------------
+        cf4.convert_source_to_parquet()
+        cf4.promote_staging()
+        # -----------------------------------
+        cf4.rename_columns({"ID": "id", "SMILES": "smiles"})
+        cf4.promote_staging()
+        # -----------------------------------
+        cf4.add_chunk_key_column()
+        cf4.promote_staging()
+        # -----------------------------------
+        cf4.repartition("chunk_key")
+        cf4.promote_staging()
+        # -----------------------------------
+        cf4.add_datastore_id_column()
+        cf4.promote_staging()
+        # -----------------------------------
+        cf4.add_fingerprints()
+        cf4.promote_staging()
+        # -----------------------------------
+        cf4.build_usearch_index()
+        ```
     """
 
     app_name = "chemspace"
@@ -32,10 +57,8 @@ class ChemspaceFreedom4(Datastore):
         after this completes.
         """
         source_dir = cls.base_directory / "raw"
-        live_dir = cls.live_directory
-
         all_files = [p for p in source_dir.rglob("*.bz2") if p.is_file()]
-        processed_hashes = {p.stem for p in live_dir.glob("*.parquet")}
+        processed_hashes = {p.stem for p in cls.staging_directory.glob("*.parquet")}
         files_to_process = [
             f for f in all_files if get_hash_key(str(f)) not in processed_hashes
         ]
@@ -51,14 +74,11 @@ class ChemspaceFreedom4(Datastore):
             parallel_job,
         )
         logging.info("Conversion complete!")
-        return live_dir
 
     @classmethod
     def _convert_single_source(cls, file_path: str | Path):
         file_path = Path(file_path)
-        live_dir = cls.live_directory
-
-        output_path = live_dir / f"{get_hash_key(str(file_path))}.parquet"
+        output_path = cls.staging_directory / f"{get_hash_key(str(file_path))}.parquet"
         if output_path.exists():
             logging.info(f"Skipping {file_path.name} - already converted.")
             return
