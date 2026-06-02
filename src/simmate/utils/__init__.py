@@ -17,6 +17,7 @@ from .other import (
     check_if_using_latest_version,
     chunk_list,
     deep_update,
+    dispatch,
     dotdict,
     get_app_submodule,
     get_attributes_doc,
