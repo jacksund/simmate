@@ -3,7 +3,6 @@
 import functools
 import logging
 import shutil
-import uuid
 from collections import defaultdict
 from pathlib import Path
 
@@ -248,40 +247,6 @@ class Datastore:
         return filter_polars_df(cls.lf, **kwargs)
 
     @classmethod
-    def _inflate_data_chunk(
-        cls,
-        df: polars.DataFrame,
-        parallel: bool = True,
-    ) -> polars.DataFrame:
-        """
-        Hook for adding derived properties, methods, and fingerprint columns
-        to a chunk before it is written to disk.
-        """
-        return df
-
-    @classmethod
-    def add_dataframe(
-        cls,
-        df: polars.DataFrame,
-        parallel: bool = False,
-        target_directory: str | Path = None,
-    ):
-        """
-        Generates calculated properties+features before adding it to the disk
-        store. New chunks are saved using UUID filenames.
-        """
-        output_dir = (
-            get_directory(target_directory) if target_directory else cls.live_directory
-        )
-
-        df = cls._inflate_data_chunk(df, parallel=parallel)
-        chunk_filename = output_dir / f"{uuid.uuid4().hex}.parquet"
-        df.write_parquet(
-            chunk_filename,
-            compression=cls.compression_mode,
-        )
-
-    @classmethod
     def _datastore_id_to_chunk_key(cls, datastore_id: int) -> int:
         """
         Converts a datastore_id to its corresponding chunk_key.
@@ -391,27 +356,14 @@ class Datastore:
     def repartition(
         cls,
         partition_columns: str | list[str],
-        source_directory: str | Path = None,
-        target_directory: str | Path = None,
     ):
         """
-        Scans all parquets in the source directory and sinks them to the target
+        Scans all parquets in the live directory and sinks them to the staging
         directory using hive partitioning based on the provided columns.
         """
-        source_dir = (
-            get_directory(source_directory) if source_directory else cls.live_directory
-        )
-        target_dir = (
-            get_directory(target_directory)
-            if target_directory
-            else cls.staging_directory
-        )
-        source_glob = str(source_dir / "**" / "*.parquet")
-
-        logging.info(f"Sinking to {target_dir} partitioned by {partition_columns}...")
-        polars.scan_parquet(source_glob).sink_parquet(
+        cls.lf.sink_parquet(
             polars.PartitionBy(
-                base_path=target_dir,
+                base_path=cls.staging_directory,
                 key=partition_columns,
             ),
             mkdir=True,
@@ -422,45 +374,42 @@ class Datastore:
     def repartition_slow(
         cls,
         partition_column: str,
-        partition_values: list,
-        source_directory: str | Path = None,
-        target_directory: str | Path = None,
+        partition_values: list = None,
+        parallel_job: bool = False,
     ):
         """
         Manual alternative to repartition: iterates over each
         partition value, filters the parquets, and writes a combined.parquet per chunk.
         """
-        source_dir = (
-            get_directory(source_directory) if source_directory else cls.live_directory
-        )
-        target_dir = (
-            get_directory(target_directory)
-            if target_directory
-            else cls.staging_directory
-        )
-        source_glob = str(source_dir / "**" / "*.parquet")
 
-        for val in partition_values:
-            output_dir = target_dir / f"{partition_column}={val}"
+        if partition_values is None:
+            logging.info(f"Looking up distinct values for {partition_column}...")
+            partition_values = (
+                cls.lf.select(partition_column)
+                .unique()
+                .collect()[partition_column]
+                .to_list()
+            )
+
+        def _repartition_single_value(val):
+            output_dir = cls.staging_directory / f"{partition_column}={val}"
             output_path = output_dir / "combined.parquet"
             if output_path.exists():
                 logging.info(f"Skipping {partition_column}={val} - already done.")
-                continue
+                return
 
             output_dir.mkdir(parents=True, exist_ok=True)
 
-            df = (
-                polars.scan_parquet(source_glob)
-                .filter(polars.col(partition_column) == val)
-                .collect()
-            )
+            df = cls.lf.filter(polars.col(partition_column) == val).collect()
 
             if len(df) == 0:
                 logging.info(f"Skipping {partition_column}={val} - no rows found.")
-                continue
+                return
 
             df.write_parquet(output_path, compression=cls.compression_mode)
             logging.info(f"Repartitioned {partition_column}={val} | Rows: {len(df):,}")
+
+        dispatch(partition_values, _repartition_single_value, parallel_job)
 
     @update_column(column_name="chunk_key")
     def add_chunk_key_column(
