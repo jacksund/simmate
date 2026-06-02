@@ -454,3 +454,19 @@ def get_chunk_key(string_id: str, num_chunks: int) -> int:
     """
     h = hashlib.md5(string_id.encode("utf-8")).digest()
     return int.from_bytes(h, "big") % num_chunks
+
+
+def dispatch(items, fn, parallel: bool, tags: list = None, **kwargs) -> None:
+    """
+    Runs fn(item, **kwargs) for each item in items, either serially or via
+    SimmateExecutor for parallel execution.
+    """
+    if parallel:
+        from simmate.database import connect  # isort:skip
+        from simmate.compute import SimmateExecutor  # isort:skip
+
+        for item in items:
+            SimmateExecutor.submit(fn, item, tags=tags or ["simmate"], **kwargs)
+    else:
+        for item in items:
+            fn(item, **kwargs)
