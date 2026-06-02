@@ -2,13 +2,15 @@
 
 import functools
 import logging
+import shutil
 import uuid
+from collections import defaultdict
 from pathlib import Path
 
 import polars
 
 from simmate.config import settings
-from simmate.utils import chunk_list, get_directory
+from simmate.utils import dispatch, filter_polars_df, get_chunk_key, get_directory
 
 
 def update_column(column_name: str):
@@ -23,12 +25,14 @@ def update_column(column_name: str):
 
     def decorator(func):
         @functools.wraps(func)
-        def wrapper(cls, *args, **kwargs):
-            for file in cls.chunk_files:
-                df = polars.read_parquet(file)
+        def wrapper(cls, parallel_job: bool = False, *args, **kwargs):
+            def transform(df: polars.DataFrame) -> polars.DataFrame:
                 new_values = func(cls, df, *args, **kwargs)
-                df = df.with_columns(polars.Series(name=column_name, values=new_values))
-                df.write_parquet(file, compression=cls.compression_mode)
+                return df.with_columns(
+                    polars.Series(name=column_name, values=new_values)
+                )
+
+            cls._process_chunks(transform, parallel_job)
 
         return classmethod(wrapper)
 
@@ -47,11 +51,11 @@ def update_table():
 
     def decorator(func):
         @functools.wraps(func)
-        def wrapper(cls, *args, **kwargs):
-            for file in cls.chunk_files:
-                df = polars.read_parquet(file)
-                df = func(cls, df, *args, **kwargs)
-                df.write_parquet(file, compression=cls.compression_mode)
+        def wrapper(cls, parallel_job: bool = False, *args, **kwargs):
+            def transform(df: polars.DataFrame) -> polars.DataFrame:
+                return func(cls, df, *args, **kwargs)
+
+            cls._process_chunks(transform, parallel_job)
 
         return classmethod(wrapper)
 
@@ -80,11 +84,6 @@ class Datastore:
     Use the `directory` property for the more robust Path object
     """
 
-    chunk_size: int = 1_000_000
-    """
-    Number of rows per chunked parquet file
-    """
-
     num_chunks: int = 1000
     """
     Number of chunks used when hashing string IDs to chunk_keys.
@@ -99,9 +98,9 @@ class Datastore:
 
     @classmethod
     @property
-    def directory(cls) -> Path:
+    def base_directory(cls) -> Path:
         """
-        Path object of the directory where all parquet chunk files are stored
+        Path object of the directory where all datastore components (live, staging, old) are stored.
         """
         if cls.app_name:
             path = (
@@ -117,20 +116,90 @@ class Datastore:
 
     @classmethod
     @property
+    def directory(cls) -> Path:
+        """
+        Alias for base_directory for backwards compatibility.
+        """
+        return cls.base_directory
+
+    @classmethod
+    @property
+    def live_directory(cls) -> Path:
+        """Directory for active parquet chunk files."""
+        return get_directory(cls.base_directory / "live")
+
+    @classmethod
+    @property
+    def staging_directory(cls) -> Path:
+        """Directory for staging new/updated parquet chunk files."""
+        return get_directory(cls.base_directory / "staging")
+
+    @classmethod
+    @property
+    def old_directory(cls) -> Path:
+        """Directory for backing up previous live parquet chunk files."""
+        return get_directory(cls.base_directory / "old")
+
+    @classmethod
+    def _process_chunks(cls, transform_func, parallel_job: bool = False):
+        """
+        Iterates through chunk files, applies a transformation to each DataFrame,
+        and saves the result to the staging directory.
+        """
+        files_to_process = []
+        output_paths = {}
+        for file in cls.chunk_files:
+            rel_path = file.relative_to(cls.live_directory)
+            output_path = cls.staging_directory / rel_path
+            output_paths[file] = output_path
+            if not output_path.exists():
+                files_to_process.append(file)
+
+        def worker(file_path: Path):
+            output_path = output_paths[file_path]
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            df = transform_func(polars.read_parquet(file_path))
+            df.write_parquet(output_path, compression=cls.compression_mode)
+
+        dispatch(files_to_process, worker, parallel_job)
+
+    @classmethod
+    def promote_staging(cls):
+        """
+        Promotes the staging directory to live, moving the current live
+        directory to old.
+        """
+        # 1. Remove old_directory if it exists
+        if cls.old_directory.exists():
+            shutil.rmtree(cls.old_directory)
+
+        # 2. Rename live to old
+        if cls.live_directory.exists():
+            cls.live_directory.rename(cls.old_directory)
+
+        # 3. Rename staging to live
+        if cls.staging_directory.exists():
+            cls.staging_directory.rename(cls.base_directory / "live")
+
+        # 4. Re-create empty staging
+        get_directory(cls.staging_directory)
+
+    @classmethod
+    @property
     def chunk_files(cls) -> list[Path]:
         """
-        Returns a sorted list of existing parquet chunk files in the store directory.
+        Returns a sorted list of existing parquet chunk files in the live directory.
         """
-        chunk_files = [f for f in cls.directory.rglob("*.parquet") if f.is_file()]
+        chunk_files = [f for f in cls.live_directory.rglob("*.parquet") if f.is_file()]
         return sorted(chunk_files, key=lambda f: f.name)
 
     @classmethod
     @property
     def chunk_files_wildcard(cls) -> Path:
         """
-        Wildcard path object for the directory + all parquet files in it.
+        Wildcard path object for the live directory + all parquet files in it.
         """
-        return cls.directory / "**" / "*.parquet"
+        return cls.live_directory / "**" / "*.parquet"
 
     @classmethod
     @property
@@ -138,8 +207,8 @@ class Datastore:
         """
         Returns a polars.LazyFrame for the datastore using scan_parquet.
         """
-        is_hive = cls.directory.exists() and any(
-            "=" in d.name for d in cls.directory.iterdir() if d.is_dir()
+        is_hive = cls.live_directory.exists() and any(
+            "=" in d.name for d in cls.live_directory.iterdir() if d.is_dir()
         )
         return polars.scan_parquet(
             str(cls.chunk_files_wildcard),
@@ -151,7 +220,6 @@ class Datastore:
         """
         Filters the Datastore using django-like ORM queries.
         """
-        from simmate.utils.dataframes import filter_polars_df
 
         keys = list(kwargs.keys())
         if len(keys) == 1 and keys[0] in [
@@ -164,17 +232,16 @@ class Datastore:
         ]:
             key = keys[0]
             val = kwargs[key]
+            vals = val if key.endswith("__in") else [val]
 
-            is_in_query = key.endswith("__in")
-            vals = val if is_in_query else [val]
-
-            chunk_keys = set()
-            for v in vals:
-                if key.startswith("datastore_id"):
-                    chunk_keys.add(cls._datastore_id_to_chunk_key(v))
-                else:
-                    chunk_keys.add(cls._id_to_chunk_key(v))
-
+            chunk_keys = {
+                (
+                    cls._datastore_id_to_chunk_key(v)
+                    if key.startswith("datastore_id")
+                    else cls._id_to_chunk_key(v)
+                )
+                for v in vals
+            }
             lf = cls.lf.filter(polars.col("chunk_key").is_in(list(chunk_keys)))
             return filter_polars_df(lf, **kwargs)
 
@@ -201,20 +268,18 @@ class Datastore:
     ):
         """
         Generates calculated properties+features before adding it to the disk
-        store. New chunks are saved using UUID filenames. The `reorganize_chunks`
-        method should be used to combine and number chunks sequentially.
+        store. New chunks are saved using UUID filenames.
         """
         output_dir = (
-            get_directory(target_directory) if target_directory else cls.directory
+            get_directory(target_directory) if target_directory else cls.live_directory
         )
 
-        for chunk in chunk_list(df, cls.chunk_size):
-            chunk = cls._inflate_data_chunk(chunk, parallel=parallel)
-            chunk_filename = output_dir / f"{uuid.uuid4().hex}.parquet"
-            chunk.write_parquet(
-                chunk_filename,
-                compression=cls.compression_mode,
-            )
+        df = cls._inflate_data_chunk(df, parallel=parallel)
+        chunk_filename = output_dir / f"{uuid.uuid4().hex}.parquet"
+        df.write_parquet(
+            chunk_filename,
+            compression=cls.compression_mode,
+        )
 
     @classmethod
     def _datastore_id_to_chunk_key(cls, datastore_id: int) -> int:
@@ -228,8 +293,6 @@ class Datastore:
         """
         Converts a string ID to its corresponding chunk_key.
         """
-        from simmate.utils import get_chunk_key
-
         return get_chunk_key(string_id, cls.num_chunks)
 
     @classmethod
@@ -238,14 +301,14 @@ class Datastore:
         Locates the parquet file corresponding to a given chunk_key.
         """
         # Try to find a hive-partitioned file
-        hive_dir = cls.directory / f"chunk_key={chunk_key}"
+        hive_dir = cls.live_directory / f"chunk_key={chunk_key}"
         if hive_dir.exists() and hive_dir.is_dir():
             files = list(hive_dir.glob("*.parquet"))
             if files:
                 return files[0]
 
         # Try to find sequentially numbered file
-        seq_file = cls.directory / f"{str(chunk_key).zfill(10)}.parquet"
+        seq_file = cls.live_directory / f"{str(chunk_key).zfill(10)}.parquet"
         if seq_file.exists():
             return seq_file
 
@@ -290,11 +353,10 @@ class Datastore:
         Evaluates the datastore_ids ahead of time to get a list of chunks,
         then iterates and updates those chunks individually.
         """
-        chunk_key_to_ids = {}
+
+        chunk_key_to_ids = defaultdict(list)
         for datastore_id in ids_to_update:
             chunk_key = cls._datastore_id_to_chunk_key(datastore_id)
-            if chunk_key not in chunk_key_to_ids:
-                chunk_key_to_ids[chunk_key] = []
             chunk_key_to_ids[chunk_key].append(datastore_id)
 
         for chunk_key, ids in chunk_key_to_ids.items():
@@ -312,93 +374,18 @@ class Datastore:
             df.write_parquet(file, compression=cls.compression_mode)
 
     @classmethod
-    def rename_column(cls, old_name: str, new_name: str):
+    def rename_column(cls, old_name: str, new_name: str, parallel_job: bool = False):
         """
         Renames a column across all chunk files.
         """
-        for file in cls.chunk_files:
-            df = polars.read_parquet(file)
-            df = df.rename({old_name: new_name})
-            df.write_parquet(file, compression=cls.compression_mode)
+        cls._process_chunks(lambda df: df.rename({old_name: new_name}), parallel_job)
 
     @classmethod
-    def drop_column(cls, column_name: str | list[str]):
+    def drop_column(cls, column_name: str | list[str], parallel_job: bool = False):
         """
         Drops a column (or list of columns) across all chunk files.
         """
-        for file in cls.chunk_files:
-            df = polars.read_parquet(file)
-            df = df.drop(column_name)
-            df.write_parquet(file, compression=cls.compression_mode)
-
-    @classmethod
-    def reorganize_chunks(cls, target_directory: str | Path = None):
-        """
-        Reorganizes existing parquet files to ensure each chunk matches
-        `cls.chunk_size`. Smaller chunks are combined, and larger ones are split.
-        """
-        directory = (
-            get_directory(target_directory) if target_directory else cls.directory
-        )
-
-        for f in directory.glob("*.parquet"):
-            f.rename(f.parent / (f.name + ".old"))
-
-        old_files = sorted(directory.glob("*.parquet.old"))
-        if not old_files:
-            logging.info("No files found to reorganize.")
-            return
-
-        current_chunk_index = 0
-        accumulated_df = None
-        total_rows_read = 0
-        total_rows_written = 0
-        old_files_to_delete = []
-
-        for old_file in old_files:
-            df = polars.read_parquet(old_file)
-            total_rows_read += len(df)
-            old_files_to_delete.append((old_file, total_rows_read))
-
-            if accumulated_df is None:
-                accumulated_df = df
-            else:
-                accumulated_df = polars.concat([accumulated_df, df])
-
-            while len(accumulated_df) >= cls.chunk_size:
-                chunk = accumulated_df.head(cls.chunk_size)
-                accumulated_df = accumulated_df.tail(
-                    len(accumulated_df) - cls.chunk_size
-                )
-
-                chunk_filename = (
-                    directory / f"{str(current_chunk_index).zfill(10)}.parquet"
-                )
-                chunk.write_parquet(
-                    chunk_filename,
-                    compression=cls.compression_mode,
-                )
-                current_chunk_index += 1
-                total_rows_written += cls.chunk_size
-
-                while (
-                    old_files_to_delete
-                    and total_rows_written >= old_files_to_delete[0][1]
-                ):
-                    path, _ = old_files_to_delete.pop(0)
-                    path.unlink()
-
-        if accumulated_df is not None and len(accumulated_df) > 0:
-            chunk_filename = directory / f"{str(current_chunk_index).zfill(10)}.parquet"
-            accumulated_df.write_parquet(
-                chunk_filename,
-                compression=cls.compression_mode,
-            )
-            total_rows_written += len(accumulated_df)
-
-        while old_files_to_delete and total_rows_written >= old_files_to_delete[0][1]:
-            path, _ = old_files_to_delete.pop(0)
-            path.unlink()
+        cls._process_chunks(lambda df: df.drop(column_name), parallel_job)
 
     @classmethod
     def repartition(
@@ -412,10 +399,12 @@ class Datastore:
         directory using hive partitioning based on the provided columns.
         """
         source_dir = (
-            get_directory(source_directory) if source_directory else cls.directory
+            get_directory(source_directory) if source_directory else cls.live_directory
         )
         target_dir = (
-            get_directory(target_directory) if target_directory else cls.directory
+            get_directory(target_directory)
+            if target_directory
+            else cls.staging_directory
         )
         source_glob = str(source_dir / "**" / "*.parquet")
 
@@ -442,10 +431,12 @@ class Datastore:
         partition value, filters the parquets, and writes a combined.parquet per chunk.
         """
         source_dir = (
-            get_directory(source_directory) if source_directory else cls.directory
+            get_directory(source_directory) if source_directory else cls.live_directory
         )
         target_dir = (
-            get_directory(target_directory) if target_directory else cls.directory
+            get_directory(target_directory)
+            if target_directory
+            else cls.staging_directory
         )
         source_glob = str(source_dir / "**" / "*.parquet")
 
@@ -481,8 +472,6 @@ class Datastore:
         """
         Helper method that uses get_chunk_key to generate a new column.
         """
-        from simmate.utils import get_chunk_key
-
         num_chunks = num_chunks or cls.num_chunks
 
         return df[source_column].map_elements(
@@ -491,11 +480,7 @@ class Datastore:
         )
 
     @update_column(column_name="datastore_id")
-    def add_datastore_id_column(
-        cls,
-        df: polars.DataFrame,
-        chunk_key_column: str = "chunk_key",
-    ):
+    def add_datastore_id_column(cls, df: polars.DataFrame):
         """
         Helper method to assign a unique sequential integer ID per row, offsetting
         the ID by a chunk_key multiplier. Uses update_column.
@@ -504,7 +489,7 @@ class Datastore:
             df.with_row_index("_row_idx").with_columns(
                 (
                     polars.col("_row_idx").cast(polars.UInt64)
-                    + polars.col(chunk_key_column).cast(polars.UInt64)
+                    + polars.col("chunk_key").cast(polars.UInt64)
                     * polars.lit(cls.datastore_id_multiplier, dtype=polars.UInt64)
                 ).alias("datastore_id")
             )
