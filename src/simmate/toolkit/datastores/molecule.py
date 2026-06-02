@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import uuid
 from pathlib import Path
 
 import polars
 
-from simmate.config import settings
 from simmate.toolkit import Molecule
 from simmate.toolkit.filters import RemoveInvalidSmiles
-from simmate.utils import chunk_list, filter_polars_df, get_directory
+from simmate.utils import filter_polars_df
 
 from ..dataframes import MoleculeDataFrame
 from ..featurizers import (
@@ -19,9 +17,10 @@ from ..featurizers import (
     PropertyGrabber,
 )
 from ..featurizers.utils import load_rdkit_fingerprint_from_base64
+from .base import Datastore
 
 
-class MoleculeStore:
+class MoleculeStore(Datastore):
     """
     This class is intended for datasets with >10 million molecules, where it
     becomes an issue to:
@@ -44,33 +43,6 @@ class MoleculeStore:
     need a rewrite using another backend, alternatives to consider are
     pandas+dask, sqlite, or duckdb.
     """
-
-    app_name: str = None
-    """
-    The name of the app that this datastore belongs to. This is used to
-    organize datastores into subdirectories of the simmate base directory
-    (e.g. ~/simmate/chembl/datastores/)
-    """
-
-    datastore_name: str
-    """
-    The name of the datastore. This is used to organize datastores into
-    subdirectories of the simmate base directory 
-    (e.g. ~/simmate/chembl/datastores/molecules)
-
-    Use the `directory` property for the more robust Path object
-    """
-
-    # -------------------------------------------------------------------------
-
-    chunk_size: int = 1_000_000
-    """
-    Number of molecule (i.e. rows) per chunked parquet file
-    """
-
-    compression_mode: str = "lz4"  # or "zstd" for slower but smaller files
-
-    # -------------------------------------------------------------------------
 
     smiles_stored: str = "cleaned_only"
     # or "original_only" or "original_and_cleaned"
@@ -98,51 +70,6 @@ class MoleculeStore:
     (with R-groups), but keep in mind that this greatly increase file size
     because SMILES strings will be much larger.
     """
-
-    # -------------------------------------------------------------------------
-
-    @classmethod
-    @property
-    def directory(cls) -> Path:
-        """
-        Path object of the directory where all parquet chunk files are stored
-        """
-        # if app_name is provided, we use the <app_name>/datastores/<datastore_name>
-        # otherwise we just use datastores/<datastore_name>
-        if cls.app_name:
-            path = (
-                settings.config_directory
-                / cls.app_name
-                / "datastores"
-                / cls.datastore_name
-            )
-        else:
-            path = settings.config_directory / "datastores" / cls.datastore_name
-
-        return get_directory(path)
-
-    @classmethod
-    @property
-    def chunk_files(cls) -> list[Path]:
-        """
-        Returns a sorted list of existing parquet chunk files in the store directory.
-        """
-        chunk_files = [
-            f
-            for f in cls.directory.iterdir()
-            if f.is_file() and f.suffix == ".parquet" and f.stem.isnumeric()
-        ]
-        return sorted(chunk_files, key=lambda f: f.stem)
-
-    @classmethod
-    @property
-    def chunk_files_wildcard(cls) -> Path:
-        """
-        Wildcard path object for the directory + all parquet files in it.
-        """
-        return cls.directory / "*.parquet"
-
-    # -------------------------------------------------------------------------
 
     @classmethod
     def filter_to_dataframe(
@@ -218,157 +145,11 @@ class MoleculeStore:
                     f"to MoleculeStore. Full list of metadata columns: {cls.metadata_columns}"
                 )
 
-        output_dir = (
-            get_directory(target_directory) if target_directory else cls.directory
+        super().add_dataframe(
+            df=df,
+            parallel=parallel,
+            target_directory=target_directory,
         )
-
-        for chunk in chunk_list(df, cls.chunk_size):
-            chunk = cls._inflate_data_chunk(chunk, parallel=parallel)
-            chunk_filename = output_dir / f"{uuid.uuid4().hex}.parquet"
-            chunk.write_parquet(
-                chunk_filename,
-                compression=cls.compression_mode,
-            )
-
-    @classmethod
-    def update_row(cls, row_id, updates: dict, id_column: str = "id"):
-        """
-        Searches for a specific row by its ID across all chunks, applies the
-        updates, and rewrites the corresponding parquet file.
-        """
-        for file in cls.chunk_files:
-            # scan for efficiency to check if id exists
-            lazy_df = polars.scan_parquet(file)
-            matches = lazy_df.filter(polars.col(id_column) == row_id).collect()
-
-            if len(matches) > 0:
-                df = polars.read_parquet(file)
-                # Apply updates
-                for col, val in updates.items():
-                    df = df.with_columns(
-                        polars.when(polars.col(id_column) == row_id)
-                        .then(polars.lit(val))
-                        .otherwise(polars.col(col))
-                        .alias(col)
-                    )
-                df.write_parquet(file, compression=cls.compression_mode)
-                return
-
-    @classmethod
-    def update_rows_bulk(
-        cls, ids_to_update: list, updates: dict, id_column: str = "id"
-    ):
-        """
-        Iterates through all parquet files and applies updates to rows matching
-        any ID in `ids_to_update`.
-        """
-        ids_series = polars.Series(ids_to_update)
-        for file in cls.chunk_files:
-            lazy_df = polars.scan_parquet(file)
-            matches = lazy_df.filter(polars.col(id_column).is_in(ids_series)).collect()
-
-            if len(matches) > 0:
-                df = polars.read_parquet(file)
-                for col, val in updates.items():
-                    df = df.with_columns(
-                        polars.when(polars.col(id_column).is_in(ids_series))
-                        .then(polars.lit(val))
-                        .otherwise(polars.col(col))
-                        .alias(col)
-                    )
-                df.write_parquet(file, compression=cls.compression_mode)
-
-    @classmethod
-    def update_column(cls, column_name: str, update_method: callable):
-        """
-        Iterates through all rows (chunk by chunk) and applies a python callable
-        to add or update a column.
-
-        The `update_method` should accept a Polars DataFrame chunk and return
-        a Polars Series or list containing the new column values.
-        """
-        for file in cls.chunk_files:
-            df = polars.read_parquet(file)
-            new_values = update_method(df)
-            df = df.with_columns(polars.Series(name=column_name, values=new_values))
-            df.write_parquet(file, compression=cls.compression_mode)
-
-    @classmethod
-    def reorganize_chunks(cls, target_directory: str | Path = None):
-        """
-        Reorganizes existing parquet files to ensure each chunk matches
-        `cls.chunk_size`. Smaller chunks are combined, and larger ones are split.
-        """
-        directory = (
-            get_directory(target_directory) if target_directory else cls.directory
-        )
-
-        # 1. Identify all current parquet files and rename them to .old
-        # This handles both active files and those from a previous failed run.
-        # We use .parquet.old to avoid name collisions with the new numeric files.
-        for f in directory.glob("*.parquet"):
-            f.rename(f.parent / (f.name + ".old"))
-
-        # 2. Gather all .old files for processing (sorted to maintain order)
-        old_files = sorted(directory.glob("*.parquet.old"))
-        if not old_files:
-            logging.info("No files found to reorganize.")
-            return
-
-        current_chunk_index = 0
-        accumulated_df = None
-        total_rows_read = 0
-        total_rows_written = 0
-        # List of (Path, end_row_index) to track when it is safe to delete .old files
-        old_files_to_delete = []
-
-        for old_file in old_files:
-            df = polars.read_parquet(old_file)
-            total_rows_read += len(df)
-            old_files_to_delete.append((old_file, total_rows_read))
-
-            if accumulated_df is None:
-                accumulated_df = df
-            else:
-                accumulated_df = polars.concat([accumulated_df, df])
-
-            while len(accumulated_df) >= cls.chunk_size:
-                chunk = accumulated_df.head(cls.chunk_size)
-                accumulated_df = accumulated_df.tail(
-                    len(accumulated_df) - cls.chunk_size
-                )
-
-                chunk_filename = (
-                    directory / f"{str(current_chunk_index).zfill(10)}.parquet"
-                )
-                chunk.write_parquet(
-                    chunk_filename,
-                    compression=cls.compression_mode,
-                )
-                current_chunk_index += 1
-                total_rows_written += cls.chunk_size
-
-                # Delete old files where ALL their rows have been written to new chunks
-                while (
-                    old_files_to_delete
-                    and total_rows_written >= old_files_to_delete[0][1]
-                ):
-                    path, _ = old_files_to_delete.pop(0)
-                    path.unlink()
-
-        # 3. Write any remaining rows to the final chunk
-        if accumulated_df is not None and len(accumulated_df) > 0:
-            chunk_filename = directory / f"{str(current_chunk_index).zfill(10)}.parquet"
-            accumulated_df.write_parquet(
-                chunk_filename,
-                compression=cls.compression_mode,
-            )
-            total_rows_written += len(accumulated_df)
-
-        # 4. Final cleanup of any remaining .old files
-        while old_files_to_delete and total_rows_written >= old_files_to_delete[0][1]:
-            path, _ = old_files_to_delete.pop(0)
-            path.unlink()
 
     @classmethod
     def _inflate_data_chunk(
