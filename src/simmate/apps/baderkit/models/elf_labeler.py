@@ -27,6 +27,12 @@ class ElfLabeler(BaderkitBase):
     The maximum distance that any NNA in the system sits from its
     neighboring atoms.
     """
+    
+    max_basin_dist = table_column.FloatField(blank=True, null=True)
+    """
+    The maximum distance that any basin in the system sits from nearby
+    atoms
+    """
 
     nna_indices = table_column.JSONField(blank=True, null=True)
     """
