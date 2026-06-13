@@ -358,34 +358,6 @@ def deep_update(default_dict: dict, override_dict: dict) -> dict:
     return final_dict
 
 
-def get_docker_command(
-    image: str,
-    inner_command: str = None,
-    volumes: list[str] = [],
-) -> str:
-    """
-    Given common input parameters, this util builds a `docker run` command
-    and returns it as a string.We then let other functionality
-    (such as S3Workflows) handle running the command.
-
-    For advanced docker cases, use the `docker-py` package instead.
-    """
-    command = "docker run "
-
-    for volume in volumes:
-        command += f"--volume {volume} "
-
-    command += image
-
-    if inner_command:
-        # This is a little hack to pass the command since "docker run" can't
-        # pass multi-part commands. We use "sh -c" to wrap the command that
-        # should be call when the image starts
-        command += f' sh -c "{inner_command}"'
-
-    return command
-
-
 def get_attributes_doc(cls: type, dedent_and_strip: bool = True) -> dict[str, str]:
     """
     Grabs a dictionary of attribute names to docstrings for the given class.

@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from pathlib import Path
 
 from ..core import table_column
 from .calculation import Calculation
-from .forces import Forces
-from .structure import Structure
-from .thermodynamics import Thermodynamics
 
 
 class StagedWorkflow(Calculation):

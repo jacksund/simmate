@@ -4,7 +4,6 @@ from pathlib import Path
 
 from simmate.config import settings
 from simmate.toolkit import Structure
-from simmate.utils import get_docker_command
 from simmate.workflows.common import S3Workflow, StructureWorkflow
 
 from ..error_handlers import Bfgs, MaxSteps
@@ -163,17 +162,20 @@ class PwscfWorkflow(S3Workflow, StructureWorkflow):
     ) -> str:
         input_command = command if command else cls.command
         if settings.quantum_espresso.docker.enable == True:
-            final_command = get_docker_command(
-                image=settings.quantum_espresso.docker.image,
-                inner_command=input_command,
-                # BUG FIX If the directory has a space (e.g. OneDrive - University...)
-                # docker will throw an error. wrapping with directory with
-                # "" solves the issue (but wrapping with '' doesn't)
-                volumes=[
-                    f'"{str(directory)}":/qe_calc',
-                    f'"{str(settings.quantum_espresso.pseudo_dir)}":/potentials',
-                ],
-            )
+            docker_command = [
+                "docker",
+                "run",
+                "--rm",
+                "--volume",
+                f'"{str(directory)}":/qe_calc',
+                "--volume",
+                f'"{str(settings.quantum_espresso.pseudo_dir)}":/potentials',
+                settings.quantum_espresso.docker.image,
+                "sh",
+                "-c",
+                f'"{input_command}"',
+            ]
+            final_command = " ".join(docker_command)
             return final_command
         else:
             return input_command
