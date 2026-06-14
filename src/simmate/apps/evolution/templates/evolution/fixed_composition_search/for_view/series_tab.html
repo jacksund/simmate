@@ -1,0 +1,14 @@
+<div class="tab-pane" id="series-section">
+    <div class="row">
+        <div class="col-12">
+            <h4>Staged Series Convergence</h4>
+            <div class="d-flex justify-content-center">{{ table_entry.get_staged_series_convergence_plot|plotly_figure }}</div>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-12">
+            <h4>Staged Series Histogram</h4>
+            <div class="d-flex justify-content-center">{{ table_entry.get_staged_series_histogram_plot|plotly_figure }}</div>
+        </div>
+    </div>
+</div>

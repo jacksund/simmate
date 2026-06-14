@@ -5,7 +5,6 @@ from pathlib import Path
 from simmate.apps.bader.toolkit import Grid
 from simmate.config import settings
 from simmate.toolkit import Structure
-from simmate.utils import get_docker_command
 from simmate.workflows.common import S3Workflow
 
 
@@ -76,11 +75,18 @@ class PopulationAnalysis__Bader__BaderDev(S3Workflow):
         # We now have the final command, and as last check, need to see if we
         # will run it directly in the shell OR via a docker container
         if settings.bader.docker.enable == True:
-            command_final = get_docker_command(
-                image=settings.bader.docker.image,
-                inner_command=command_final,  # will be wrapped
-                volumes=[f"{str(directory)}:/bader_calc"],
-            )
+            docker_command = [
+                "docker",
+                "run",
+                "--rm",
+                "--volume",
+                f"{str(directory)}:/bader_calc",
+                settings.bader.docker.image,
+                "sh",
+                "-c",
+                f'"{command_final}"',
+            ]
+            command_final = " ".join(docker_command)
 
         return command_final
 

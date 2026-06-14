@@ -361,6 +361,10 @@ class DatabaseTable(models.Model, ArchiveMixin):
                 and not column.startswith("_")
                 and column not in fields_to_exclude
             ):
+                # Special case: convert UUIDs to str
+                if type(value).__name__ == "UUID":
+                    value = str(value)
+
                 all_data[column] = value
 
         # also add the table name and entry id and website URL

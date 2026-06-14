@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from simmate.workflows.common import StagedWorkflow
+from simmate.workflows.common import StagedRelaxStatic
 
 
-class StaticEnergy__Vasp__EvoTutorial(StagedWorkflow):
+class StagedRelaxStatic__Vasp__EvoTutorial(StagedRelaxStatic):
     """
     Runs a series of increasing-quality relaxations and then finishes with a single
     static energy calculation.
