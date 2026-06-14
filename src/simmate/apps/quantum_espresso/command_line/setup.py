@@ -19,6 +19,6 @@ def sssp():
     """
     Downloads and configures the Standard Solid State Pseudopotentials (SSSP) library.
     """
-    from simmate.apps.quantum_espresso.inputs.potentials_sssp import setup_sssp
+    from ..inputs import setup_sssp
 
     setup_sssp()

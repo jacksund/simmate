@@ -4,7 +4,7 @@
     {% simmate_setting "website.show_finances" as SHOW_FINANCES %}
     <div class="row my-5">
         <div class="col-3 border-end border-secondary-subtle">
-            {% if not component.is_structure_confirmed %}
+            {% if not component.form_data.structure %}
                 <div class="p-2 bg-secondary-subtle">
                     <h5 class="m-0">
                         <i class="bi bi-1-circle"></i> Load Structure
@@ -117,12 +117,7 @@
             {% elif component.form_data.structure %}
                 <div class="row ps-5 py-4">
                     <div class="col-8">
-                        {% if not component.is_structure_confirmed %}
-                            <div class="text-center">
-                                <p>Confirm that this is your intended structure before continuing to the next step.</p>
-                                {% htmx_button method_name="confirm_structure" theme="success" icon="check-circle" %}
-                            </div>
-                        {% elif not component.is_pricing_confirmed %}
+                        {% if not component.is_pricing_confirmed %}
                             {% if SHOW_FINANCES %}
                                 <div class="text-center py-3">
                                     <img src="{% static 'images/usdc-icon.svg' %}" alt="" height="24">

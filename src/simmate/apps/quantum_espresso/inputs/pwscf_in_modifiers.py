@@ -2,22 +2,23 @@
 
 from pathlib import Path
 
-from simmate.apps.quantum_espresso.inputs.potentials_sssp import (
+from simmate.config import settings
+from simmate.toolkit import Structure
+
+from .potentials_sssp import (
     SSSP_PBE_EFFICIENCY_MAPPINGS,
     SSSP_PBE_PRECISION_MAPPINGS,
 )
-from simmate.config import settings
-from simmate.toolkit import Structure
 
 
 def keyword_modifier_pseudo_dir(structure: Structure, confirm_auto: bool) -> Path:
     """
     If `pseudo_dir__auto=True` is set, the user is requesting the default directory
-    for psuedopotentials
+    for pseudopotentials
     """
     assert confirm_auto
     if not settings.quantum_espresso.docker.enable:  # used in the majority of cases
-        return settings.quantum_espresso.psuedo_dir
+        return settings.quantum_espresso.pseudo_dir
     else:
         # the docker image will have a volume mapped to here
         return "/potentials"
@@ -43,7 +44,7 @@ def keyword_modifier_ecutwfc(structure: Structure, mode: str) -> float:
     """
     If `ecutwfc__auto=mode` is set, the user wants ecutwfc (Kinetic energy cutoff (Ry)
     for wavefunctions) set automatically. To do this, we look at all elements
-    and their mapped psuedos. The mappings indicate a suggested value and we use
+    and their mapped pseudos. The mappings indicate a suggested value and we use
     the maximum across all elements.
 
     The mode can be either efficiency or precision. Additionally, a scale can
@@ -78,7 +79,7 @@ def keyword_modifier_ecutrho(structure: Structure, mode: str) -> float:
     """
     If `ecutrho__auto=True` is set, the user wants ecutrho (Kinetic energy cutoff (Ry)
     for charge density and potential) set automatically. To do this, we look at
-    all elements and their mapped psuedos. The mappings indicate a suggested
+    all elements and their mapped pseudos. The mappings indicate a suggested
     value and we use the maximum across all elements.
     The mode can be either efficiency or precision. Additionally, a scale can
     be added to dynamically change the cutoff by a given factor, X, with the
