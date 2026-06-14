@@ -24,7 +24,6 @@ from .other import (
     get_chemical_subsystems,
     get_chunk_key,
     get_class,
-    get_docker_command,
     get_hash_key,
     get_latest_version,
     str_to_datatype,

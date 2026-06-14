@@ -79,8 +79,9 @@ class SteadystateSource(DatabaseTable):
         # method in case it's an async call to Prefect client
         still_running_ids = self._check_still_running_ids(self.workitem_ids)
 
-        # we now have our new list of IDs! Let's update it to the database
-        self.workitem_ids = still_running_ids
+        # we now have our new list of IDs! Let's update it to the database,
+        # saveing as strs instead of uuid objs
+        self.workitem_ids = [str(i) for i in still_running_ids]
         self.save()
 
         return still_running_ids

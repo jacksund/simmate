@@ -1,0 +1,13 @@
+{% extends "data_explorer/entry.html" %}
+{% block entrycontent %}
+    <div>
+        {% include "evolution/fixed_composition_search/for_view/tabs_header.html" %}
+        <div class="tab-content">
+            {% include "evolution/fixed_composition_search/for_view/overview_tab.html" %}
+            {% include "evolution/fixed_composition_search/for_view/fitness_tab.html" %}
+            {% include "evolution/fixed_composition_search/for_view/performance_tab.html" %}
+            {% include "evolution/fixed_composition_search/for_view/series_tab.html" %}
+            {% include "evolution/fixed_composition_search/for_view/calculation_tab.html" %}
+        </div>
+    </div>
+{% endblock %}
