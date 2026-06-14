@@ -1,0 +1,57 @@
+<div class="tab-pane show active" id="overview-section">
+    <div class="row">
+        <div class="col-5">{% include "core/base_data_types/structure.html" %}</div>
+        <div class="col-7">
+            <table class="table table-centered table-striped mb-0 border">
+                <thead class="table-primary">
+                    <tr>
+                        <th style="width: 45%">Summary</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Workflow</td>
+                        <td>
+                            <a href="{% url 'workflow_explorer:workflow_detail' table_entry.workflow_name %}">
+                                {{ table_entry.workflow_name }}
+                                <small><i class="bi bi-box-arrow-up-right"></i></small>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td>{% htmx_component "workflow-status-component" table_entry=table_entry %}</td>
+                    </tr>
+                    <tr>
+                        <td>Final Energy (Per Atom)</td>
+                        <td>{{ table_entry.energy_per_atom|floatformat:4 }} eV/atom</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="table table-centered table-striped mb-0 border mt-3">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Subworkflows</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subworkflow in table_entry.subworkflows %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'workflow_explorer:workflow_detail' subworkflow.name_full %}">
+                                    {{ subworkflow.name_full }}
+                                    <small><i class="bi bi-box-arrow-up-right"></i></small>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td>No subworkflows found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

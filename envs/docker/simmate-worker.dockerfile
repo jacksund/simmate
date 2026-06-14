@@ -8,7 +8,8 @@ WORKDIR /root/
 # Environment Variables
 # =============================================================================
 
-ENV PATH=/root/simmate/.venv/bin:/root/.local/bin:$PATH \
+ENV OMP_NUM_THREADS=1 \
+    PATH=/root/simmate/.venv/bin:/root/.local/bin:$PATH \
     VIRTUAL_ENV=/root/simmate/.venv \
     UV_WORKING_DIR=/root/simmate \
     DJANGO_SETTINGS_MODULE="simmate.config.django.settings" \

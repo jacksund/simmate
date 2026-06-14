@@ -523,33 +523,6 @@ class S3Workflow(Workflow):
             # when we have stderr=subprocess.PIPE, which we use above.
             output, errors = process.communicate()
 
-            # check if the return code is non-zero and thus failed.
-            # The 'not has_error' is because terminate() will give a nonzero
-            # when a monitor is triggered. We don't want to raise that
-            # exception here but instead let the monitor handle that
-            # error in the code below.
-            if process.returncode != 0 and not has_error:
-                # convert the error from bytes to a string
-                errors = errors.decode("utf-8")
-                # and report the error to the user. Mac/Linux label this as exit
-                # code 127, whereas windows doesn't so the message needs to be
-                # read.
-                if process.returncode == 127 or (
-                    platform.system() == "Windows"
-                    and "is not recognized as an internal or external command" in errors
-                ):
-                    raise CommandNotFoundError(
-                        f"The command ({command}) failed becauase it could not be found. "
-                        "This typically means that either (a) you have not installed "
-                        "the program required for this command or (b) you forgot to "
-                        "call 'module load ...' before trying to start the program. "
-                        f"The full error output (if any) is below:\n\n {errors}"
-                    )
-                else:
-                    raise NonZeroExitError(
-                        f"The command ({command}) failed. The error output (if any) is below:\n {errors}"
-                    )
-
             # Check for errors again, because a non-monitor may be higher
             # priority than the monitor triggered above (if there was one).
             # Since the error_handlers are in order of priority, only the first
@@ -576,6 +549,33 @@ class S3Workflow(Workflow):
                     # break from the error_handler for-loop as we only apply the
                     # highest priority fix and nothing else.
                     break
+
+            # check if the return code is non-zero and thus failed.
+            # The 'not has_error' is because terminate() will give a nonzero
+            # when a monitor is triggered. We don't want to raise that
+            # exception here but instead let the monitor handle that
+            # error in the code below.
+            if process.returncode != 0 and not has_error:
+                # convert the error from bytes to a string
+                errors = errors.decode("utf-8")
+                # and report the error to the user. Mac/Linux label this as exit
+                # code 127, whereas windows doesn't so the message needs to be
+                # read.
+                if process.returncode == 127 or (
+                    platform.system() == "Windows"
+                    and "is not recognized as an internal or external command" in errors
+                ):
+                    raise CommandNotFoundError(
+                        f"The command ({command}) failed becauase it could not be found. "
+                        "This typically means that either (a) you have not installed "
+                        "the program required for this command or (b) you forgot to "
+                        "call 'module load ...' before trying to start the program. "
+                        f"The full error output (if any) is below:\n\n {errors}"
+                    )
+                else:
+                    raise NonZeroExitError(
+                        f"The command ({command}) failed. The error output (if any) is below:\n {errors}"
+                    )
 
             # write the log of corrections to file if there are any. This is written
             # as a CSV file format and done every while-loop cycle because it

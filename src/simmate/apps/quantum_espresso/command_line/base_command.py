@@ -6,7 +6,7 @@ This defines the base "simmate-qe" command that all other commands stem from.
 
 import typer
 
-from simmate.apps.quantum_espresso.command_line.setup import setup_app
+from .setup import setup_app
 
 qe_app = typer.Typer(
     rich_markup_mode="markdown",

@@ -5,6 +5,9 @@ FROM ubuntu:22.04
 # Avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Note: containerized versions of QE runs are faster in serial
+ENV OMP_NUM_THREADS=1
+
 # =============================================================================
 # OS Dependencies
 # =============================================================================
