@@ -95,9 +95,7 @@ class JarvisConfig(AppConfig):
 class LabAutomationConfig(AppConfig):
     name = "simmate.apps.lab_automation"
     verbose_name = "Lab Automation"
-    description_short = (
-        "A dashboard for controling and monitoring sensors/devices"
-    )
+    description_short = "A dashboard for controling and monitoring sensors/devices"
 
 
 class MaterialsProjectConfig(AppConfig):

@@ -192,17 +192,49 @@ def draw_structure(
     }
 
 
-@register.filter
-def plotly_figure(figure: Figure):
+@register.inclusion_tag("core/plotly_figure.html", takes_context=True)
+def plotly_figure(
+    context: dict,
+    figure: Figure,
+    div_id: str = None,
+    stream_method: str = "get_new_data",
+    stream_interval: int = None,
+    max_points: int = 10000,
+):
     """
     Converts a plotly figure object to an html element for the frontend.
+    Optionally supports streaming new data dynamically.
     """
-    # if isinstance(figure, Figure):
-    hmtl = figure.to_html(
+    component = context.get("component")
+    if not div_id and component and stream_interval:
+        # Give a fallback stable ID based on the component if streaming.
+        # Otherwise, we want a random ID so Plotly natively reconstructs toolbars on full swaps
+        div_id = f"{component.component_id}-plotly"
+
+    html = figure.to_html(
         full_html=False,
         include_plotlyjs=False,
+        div_id=div_id,
     )
-    return mark_safe(hmtl)
+
+    # The htmx_post template tag expects a python dictionary for method_kwargs.
+    # It internally calls urllib.parse.urlencode() to serialize these arguments
+    # into URL query parameters for the POST request, so we must build the dictionary here
+    # rather than passing a string directly in the html template.
+    method_kwargs = {
+        "fetch_method": stream_method,
+        "div_id": div_id,
+        "max_points": max_points,
+    }
+
+    return {
+        "context": context,
+        "component": component,
+        "html": mark_safe(html),
+        "stream_interval": stream_interval,
+        "trigger": f"every {stream_interval}s" if stream_interval else None,
+        "method_kwargs": method_kwargs,
+    }
 
 
 @register.filter

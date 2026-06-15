@@ -142,6 +142,11 @@ def htmx_post(
         if component:
             component_id = component.component_id
 
+    if method_kwargs and isinstance(method_kwargs, dict):
+        import urllib.parse
+
+        method_kwargs = urllib.parse.urlencode(method_kwargs)
+
     if not target:
         target = f"#{component_id}"
     if not include:
