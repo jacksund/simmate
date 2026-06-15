@@ -1,0 +1,8 @@
+{% extends "htmx/form_base.html" %}
+{% load htmx %}
+{% block form %}
+    <form class="m-0 p-0">
+        <div class="d-none" {% htmx_post trigger="every 1s" method_name="stream_data" javascript_only=True indicator="None" %}></div>
+        {{ component.plot_html|safe }}
+    </form>
+{% endblock %}

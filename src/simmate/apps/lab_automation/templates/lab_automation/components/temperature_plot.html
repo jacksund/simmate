@@ -1,0 +1,8 @@
+{% extends "htmx/form_base.html" %}
+{% load htmx %}
+{% block form %}
+    <form class="m-0 p-0">
+        {% htmx_refresh refresh_loop="1s" indicator="None" %}
+        {{ component.plot_html|safe }}
+    </form>
+{% endblock %}
