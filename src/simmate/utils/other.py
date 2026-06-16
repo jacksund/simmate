@@ -6,12 +6,11 @@ import importlib
 import inspect
 import json
 import logging
-import os
-import sys
 import textwrap
 from functools import wraps
 
 import requests
+from rich.progress import track
 
 import simmate
 
@@ -437,8 +436,8 @@ def dispatch(items, fn, parallel: bool, tags: list = None, **kwargs) -> None:
         from simmate.database import connect  # isort:skip
         from simmate.compute import SimmateExecutor  # isort:skip
 
-        for item in items:
+        for item in track(items):
             SimmateExecutor.submit(fn, item, tags=tags or ["simmate"], **kwargs)
     else:
-        for item in items:
+        for item in track(items):
             fn(item, **kwargs)
