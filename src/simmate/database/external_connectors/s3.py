@@ -35,8 +35,7 @@ class S3Bucket:
     signature_version: str = None
 
     @classmethod
-    @property
-    def client(cls):
+    def _get_boto_kwargs(cls) -> dict:
         kwargs = {}
         if cls.access_key:
             kwargs["aws_access_key_id"] = cls.access_key
@@ -49,16 +48,29 @@ class S3Bucket:
         if cls.signature_version:
             kwargs["config"] = Config(signature_version=cls.signature_version)
         kwargs["verify"] = cls.verify
-
         if not cls.verify:
             warnings.filterwarnings("ignore")
+        return kwargs
 
-        return boto3.client("s3", **kwargs)
+    @classmethod
+    @property
+    def client(cls):
+        return boto3.client("s3", **cls._get_boto_kwargs())
+
+    @classmethod
+    @property
+    def bucket_obj(cls):
+        """
+        The boto3 resource-level Bucket object for `cls.bucket`.
+
+        Useful for object-level operations (e.g. iterating ObjectSummary,
+        copying, tagging) that are not available on the low-level client.
+        """
+        return boto3.resource("s3", **cls._get_boto_kwargs()).Bucket(cls.bucket)
 
     @classmethod
     def list_keys(
         cls,
-        bucket: str = None,
         prefix: str = "",
         suffix: str = None,
     ) -> list[str]:
@@ -67,26 +79,87 @@ class S3Bucket:
 
         #### Parameters
 
-        - `bucket`:
-            The S3 bucket to list. Defaults to `cls.bucket`.
         - `prefix`:
             Key prefix to filter by (e.g. "my/folder").
         - `suffix`:
             If provided, only keys ending with this string are returned
             (e.g. ".bz2").
         """
-        bucket = bucket or cls.bucket
         client = cls.client
         paginator = client.get_paginator("list_objects_v2")
         keys = [
             obj["Key"]
-            for page in paginator.paginate(Bucket=bucket, Prefix=prefix)
+            for page in paginator.paginate(Bucket=cls.bucket, Prefix=prefix)
             for obj in page.get("Contents", [])
             if not obj["Key"].endswith("/")
         ]
         if suffix is not None:
             keys = [k for k in keys if k.endswith(suffix)]
         return keys
+
+    @classmethod
+    def list_objects(
+        cls,
+        prefix: str = "",
+        suffix: str = None,
+    ) -> list:
+        """
+        Like `list_keys`, but returns boto3 ObjectSummary instances instead of
+        key strings.
+
+        Each ObjectSummary exposes `.key`, `.size`, `.last_modified`, and
+        `.get()` / `.download_file()` via the resource API.
+
+        #### Parameters
+
+        - `prefix`:
+            Key prefix to filter by (e.g. "my/folder").
+        - `suffix`:
+            If provided, only objects whose key ends with this string are
+            returned (e.g. ".bz2").
+        """
+        objects = [
+            obj
+            for obj in cls.bucket_obj.objects.filter(Prefix=prefix)
+            if not obj.key.endswith("/")
+        ]
+        if suffix is not None:
+            objects = [o for o in objects if o.key.endswith(suffix)]
+        return objects
+
+    @classmethod
+    def list_contents(
+        cls,
+        prefix: str = "",
+    ) -> dict:
+        """
+        Lists immediate subfolders and files at a given prefix (one level deep),
+        equivalent to running `ls` on a directory.
+
+        Uses the S3 delimiter trick so only one level of hierarchy is returned
+        at a time — subfolders are not recursed into.
+
+        #### Parameters
+
+        - `prefix`:
+            The folder prefix to inspect (e.g. "my/folder/"). A trailing slash
+            is recommended but not required.
+
+        #### Returns
+
+        A dict with two keys:
+        - `"folders"`: list of common-prefix strings (e.g. "my/folder/sub/")
+        - `"files"`: list of object key strings at this level
+        """
+        paginator = cls.client.get_paginator("list_objects_v2")
+        folders, files = [], []
+        for page in paginator.paginate(Bucket=cls.bucket, Prefix=prefix, Delimiter="/"):
+            for cp in page.get("CommonPrefixes", []):
+                folders.append(cp["Prefix"])
+            for obj in page.get("Contents", []):
+                if not obj["Key"].endswith("/"):
+                    files.append(obj["Key"])
+        return {"folders": folders, "files": files}
 
     @classmethod
     def upload_directory(
@@ -129,7 +202,6 @@ class S3Bucket:
         cls,
         local_dir: Path | str,
         s3_prefix: str = "",
-        bucket: str = None,
     ) -> Path:
         """
         Recursively downloads all files from a bucket prefix to a local directory.
@@ -144,8 +216,6 @@ class S3Bucket:
         - `s3_prefix`:
             Key prefix within the bucket to sync from (e.g. "my/folder"). No
             leading slash.
-        - `bucket`:
-            The S3 bucket to sync from. Defaults to `cls.bucket`.
 
         #### Returns
 
@@ -155,12 +225,11 @@ class S3Bucket:
         from simmate.utils.files import get_directory
 
         local_dir = get_directory(local_dir)
-        bucket = bucket or cls.bucket
         client = cls.client
 
         all_keys = []
         paginator = client.get_paginator("list_objects_v2")
-        for page in paginator.paginate(Bucket=bucket, Prefix=s3_prefix):
+        for page in paginator.paginate(Bucket=cls.bucket, Prefix=s3_prefix):
             for obj in page.get("Contents", []):
                 key = obj["Key"]
                 if not key.endswith("/"):
@@ -171,6 +240,6 @@ class S3Bucket:
             local_path = local_dir / relative
             if not local_path.exists():
                 local_path.parent.mkdir(parents=True, exist_ok=True)
-                client.download_file(bucket, s3_key, str(local_path))
+                client.download_file(cls.bucket, s3_key, str(local_path))
 
         return local_dir

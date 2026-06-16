@@ -93,7 +93,18 @@ class Datastore:
     Multiplier used to offset the row index by chunk_key when generating datastore_id.
     """
 
-    compression_mode: str = "lz4"  # or "zstd" for slower but smaller files
+    compression_mode: str = "zstd"  # or "lz4"
+    # comparison of file with 5mil rows + SMILES:
+    #
+    # zstd: 108mb
+    # %timeit df = polars.read_parquet("test-zstd.parquet")
+    # 394 ms ± 20.4 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    #
+    # lz4: 217mb
+    # %timeit df = polars.read_parquet("test-zstd.parquet")
+    # 229 ms ± 15.9 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    #
+    # so... you decide between 2x disk or 2x read speed
 
     # -------------------------------------------------------------------------
 
