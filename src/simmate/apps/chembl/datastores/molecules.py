@@ -5,12 +5,12 @@ from pathlib import Path
 
 import polars
 
-from simmate.toolkit.datastores import MoleculeStore
+from simmate.toolkit.datastores import MoleculeStoreOLD
 
 from ..client import ChemblClient
 
 
-class ChemblMoleculeStore(MoleculeStore):
+class ChemblMoleculeStore(MoleculeStoreOLD):
     """
     A MoleculeStore for the ChEMBL database, providing optimized search
     and retrieval of bioactive molecules.
