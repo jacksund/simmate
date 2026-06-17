@@ -6,14 +6,16 @@ from pathlib import Path
 
 import polars
 
-from simmate.toolkit.datastores.base import Datastore
-from simmate.utils import dispatch, get_chunk_key, get_directory, get_hash_key
+from simmate.toolkit.datastores.base import Datastore, update_column, update_table
+from simmate.utils import dispatch, get_directory, get_hash_key
 
 
 class ChemspaceFreedom4(Datastore):
     """
-    Datastore for processing ChemSpace Freedom source data into parquets,
+    Datastore for processing ChemSpace Freedom 4 source data into parquets,
     building search indexes, etc.
+
+    The full dataset is ~90 billion molecules.
 
     Steps to build:
         ``` python
@@ -23,6 +25,9 @@ class ChemspaceFreedom4(Datastore):
         cf4.promote_staging()
         # -----------------------------------
         cf4.rename_columns({"ID": "id", "SMILES": "smiles"})
+        cf4.promote_staging()
+        # -----------------------------------
+        cf4.add_ro5_column()
         cf4.promote_staging()
         # -----------------------------------
         cf4.add_chunk_key_column()
@@ -51,7 +56,7 @@ class ChemspaceFreedom4(Datastore):
     def convert_source_to_parquet(cls, parallel_job: bool = False) -> Path:
         """
         Converts each .bz2 source file to a flat parquet in live_dir (1:1),
-        adding Ro5 and chunk_key columns in this step.
+        adding a chunk_key column in this step.
 
         Run ChemspaceClient.download_source_data() first, then run repartition("chunk_key")
         after this completes.
@@ -99,92 +104,64 @@ class ChemspaceFreedom4(Datastore):
                 + [polars.col(c).cast(polars.Int64) for c in int_cols]
             )
 
-        df = df.with_columns(
-            polars.lit(
-                False if "beyond" in file_path.name.lower() else True,
-                dtype=polars.Boolean,
-            ).alias("Ro5"),
-            polars.col("ID")
-            .map_elements(
-                lambda x: get_chunk_key(x, cls.num_chunks),
-                return_dtype=polars.Int32,
-            )
-            .alias("chunk_key"),
-        )
-
         df.write_parquet(output_path)
         logging.info(f"Converted {file_path.name} | Rows: {len(df):,}")
 
     # -------------------------------------------------------------------------
-
-    @classmethod
-    def add_fingerprints(cls, parallel_job: bool = False):
+    
+    # TODO: sections below should move to MoleculeDatastore class when ready
+    
+    @update_column("Ro5")
+    def add_ro5_column(cls, df: polars.DataFrame):
         """
-        adds MACCS, ECFP4, and FCFP4 fingerprint columns to each chunk's live
-        parquet, writing the result as combined_w_fps.parquet alongside the
-        existing combined.parquet.
-
-        Run after repartition("chunk_key") (and promote_staging)
-        has fully completed.
+        Computes Ro5 from physicochemical property columns (MW, LogP, HBA, HBD).
+        Ro5 is True when: MW <= 500, LogP <= 5, HBA <= 10, HBD <= 5.
+        These are the classic Lipinski cutoffs.
+        Requires property columns to be present in the parquet.
         """
-        live_dir = cls.live_directory
-        done_chunks = {
-            int(p.parent.name.split("=")[1])
-            for p in live_dir.rglob("combined_w_fps.parquet")
-        }
-        chunks_to_process = [c for c in range(cls.num_chunks) if c not in done_chunks]
-        logging.info(
-            f"{len(done_chunks)} chunks already done, "
-            f"{len(chunks_to_process)} to process"
-        )
-        dispatch(
-            chunks_to_process,
-            cls._add_fingerprints_single_chunk,
-            parallel_job,
-        )
-        logging.info("Fingerprint addition complete!")
+        return df.select(
+            (
+                (polars.col("MW") <= 500)
+                & (polars.col("LogP") <= 5)
+                & (polars.col("HBA") <= 10)
+                & (polars.col("HBD") <= 5)
+            ).alias("Ro5")
+        )["Ro5"]
 
-    @classmethod
-    def _add_fingerprints_single_chunk(cls, chunk_key: int):
+    # -------------------------------------------------------------------------
+
+    @update_table()
+    def add_fingerprints(cls, df: polars.DataFrame):
+        """
+        Adds MACCS, ECFP4, and FCFP4 fingerprint columns to each chunk parquet.
+        Run after repartition("chunk_key") and promote_staging() have completed.
+        """
         from simmate.toolkit.featurizers import USearchFingerprints
 
-        chunk_dir = cls.live_directory / f"chunk_key={chunk_key}"
-        input_path = chunk_dir / "combined.parquet"
-        output_path = chunk_dir / "combined_w_fps.parquet"
+        if len(df) == 0:
+            return df.with_columns(
+                polars.Series("maccs", [], dtype=polars.Binary),
+                polars.Series("ecfp4", [], dtype=polars.Binary),
+                polars.Series("fcfp4", [], dtype=polars.Binary),
+            )
 
-        if output_path.exists():
-            logging.info(f"Skipping chunk_key={chunk_key} - already done.")
-            return
-
-        if not input_path.exists():
-            logging.info(f"Skipping chunk_key={chunk_key} - no combined.parquet found.")
-            return
-
-        df = polars.read_parquet(input_path)
         fingerprints = USearchFingerprints.featurize_many(
-            df["SMILES"].to_list(), parallel=True
+            df["smiles"].to_list(), parallel=True
         )
         maccs_list, ecfp4_list, fcfp4_list = zip(*fingerprints)
 
-        df = df.with_columns(
+        return df.with_columns(
             polars.Series("maccs", list(maccs_list)),
             polars.Series("ecfp4", list(ecfp4_list)),
             polars.Series("fcfp4", list(fcfp4_list)),
         )
 
-        df.write_parquet(output_path)
-        logging.info(
-            f"Fingerprints added for chunk_key={chunk_key} | Rows: {len(df):,}"
-        )
-
     # -------------------------------------------------------------------------
-
-    # TODO: should move to MoleculeDatastore class when ready
 
     @classmethod
     def build_usearch_index(cls, parallel_job: bool = False) -> None:
         """
-        Builds USearch binary indexes from the combined_w_fps.parquet files.
+        Builds USearch binary indexes from the chunk parquet files.
 
         Creates one index file per batch of chunk_keys (sized by index_batch_size)
         and writes them to datastore_dir/vectors/. Run after add_fingerprints()
@@ -229,7 +206,7 @@ class ChemspaceFreedom4(Datastore):
 
         live_dir = cls.live_directory
         vectors_dir = cls.base_directory / "vectors"
-        source_glob = str(live_dir / "chunk_key=*" / "*w_fps.parquet")
+        source_glob = str(live_dir / "chunk_key=*" / "*.parquet")
 
         # ndim is bits rounded up to uint32 boundary; stored_bytes is actual bytes
         # from packbits; padded_bytes is stored_bytes zero-padded to uint32 alignment
