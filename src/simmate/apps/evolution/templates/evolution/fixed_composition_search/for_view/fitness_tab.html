@@ -2,13 +2,13 @@
     <div class="row">
         <div class="col-12">
             <h4>Fitness Convergence</h4>
-            <div class="d-flex justify-content-center">{{ table_entry.get_fitness_convergence_plot|plotly_figure }}</div>
+            <div class="d-flex justify-content-center">{% htmx_plotly_figure table_entry.get_fitness_convergence_plot %}</div>
         </div>
     </div>
     <div class="row mt-4">
         <div class="col-12">
             <h4>Fitness Distribution</h4>
-            <div class="d-flex justify-content-center">{{ table_entry.get_fitness_distribution_plot|plotly_figure }}</div>
+            <div class="d-flex justify-content-center">{% htmx_plotly_figure table_entry.get_fitness_distribution_plot %}</div>
         </div>
     </div>
 </div>

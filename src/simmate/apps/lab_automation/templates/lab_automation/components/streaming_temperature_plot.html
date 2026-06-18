@@ -1,0 +1,6 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    <form class="m-0 p-0">
+        {% htmx_plotly_figure component.figure stream_interval=1 %}
+    </form>
+{% endblock %}

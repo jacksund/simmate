@@ -6,7 +6,6 @@ from textwrap import dedent
 import markdown as MarkdownConverter
 from django import template
 from django.utils.safestring import mark_safe
-from plotly.graph_objects import Figure
 
 from simmate.database.mixins import Structure as DatabaseStructure
 from simmate.toolkit import Structure as ToolkitStructure
@@ -117,19 +116,6 @@ def formula_to_html(formula_str):
 
 
 @register.filter
-def sdfdoodle(obj):
-    """
-    Converts an sdf string to one that can be passed to the doodle_molecule fxn
-
-    Example use:
-    ``` html
-    {{ my_object|sdfdoodle }}
-    ```
-    """
-    return obj.replace("\n", "\\n")
-
-
-@register.filter
 def to_cif(structure):
     """
     Converts a toolkit Structure to a cif string.
@@ -190,19 +176,6 @@ def draw_structure(
         },
         "dynamic": dynamic,
     }
-
-
-@register.filter
-def plotly_figure(figure: Figure):
-    """
-    Converts a plotly figure object to an html element for the frontend.
-    """
-    # if isinstance(figure, Figure):
-    hmtl = figure.to_html(
-        full_html=False,
-        include_plotlyjs=False,
-    )
-    return mark_safe(hmtl)
 
 
 @register.filter

@@ -191,6 +191,7 @@ nav:
                     - selectbox: full_guides/website/creating_components/frontend_elements/selectbox.md
                     - checkbox: full_guides/website/creating_components/frontend_elements/checkbox.md
                     - search_box: full_guides/website/creating_components/frontend_elements/search_box.md
+                    - plotly_figure: full_guides/website/creating_components/frontend_elements/plotly_figure.md
                     # TODO
                     # - alert: full_guides/website/creating_components/frontend_elements/alert.md
                     # - draw_molecule: full_guides/website/creating_components/frontend_elements/draw_molecule.md

@@ -1,0 +1,26 @@
+{% extends "core/site_base.html" %}
+{% block tabtitle %}Lab Automation - Simmate{% endblock %}
+{% block body %}
+    <section class="jumbotron text-center my-3">
+        <div class="container">
+            <h1 class="jumbotron-heading">Lab Automation</h1>
+            <p class="lead text-muted">Monitor and control your lab equipment.</p>
+        </div>
+    </section>
+    <div class="row">
+        <div class="container">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Live Temperature Monitor (Full Redraw)</h5>
+                </div>
+                <div class="card-body">{% htmx_component "temperature-plot-component" %}</div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Streaming Temperature Monitor (JS Update)</h5>
+                </div>
+                <div class="card-body">{% htmx_component "streaming-temperature-plot-component" %}</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

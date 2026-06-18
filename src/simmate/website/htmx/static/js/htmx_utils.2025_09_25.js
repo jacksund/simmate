@@ -12,7 +12,7 @@ function runJsonActions(actions) {
 
 document.addEventListener("DOMContentLoaded", function() {
     // Allows us to handle a JsonResponse, with no swap involved
-    document.body.addEventListener('htmx:afterSwap', function(evt) {
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
         var xhr = evt.detail.xhr;
         try {
             var actions = JSON.parse(xhr.responseText);
@@ -41,4 +41,13 @@ function showAlert(message) {
 }
 function highlight(selector) {
     document.querySelector(selector).style.background = "yellow";
+}
+function extendPlotlyTrace(componentId, xData, yData, maxPoints=10000) {
+    var graphDiv = document.getElementById(componentId);
+    if (graphDiv) {
+        // Plotly.extendTraces(graphDiv, update, traceIndices, maxPoints)
+        Plotly.extendTraces(graphDiv, {x: [xData], y: [yData]}, [0], maxPoints);
+    } else {
+        console.warn("Graph div not found for componentId: " + componentId);
+    }
 }
