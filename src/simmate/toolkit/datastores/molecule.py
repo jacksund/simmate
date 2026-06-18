@@ -5,240 +5,189 @@ from pathlib import Path
 
 import polars
 
-from simmate.toolkit import Molecule
-from simmate.toolkit.filters import RemoveInvalidSmiles
-from simmate.utils import filter_polars_df
-
-from ..dataframes import MoleculeDataFrame
-from ..featurizers import (
-    MethodCaller,
-    MorganFingerprint,
-    PatternFingerprint,
-    PropertyGrabber,
-)
-from ..featurizers.utils import load_rdkit_fingerprint_from_base64
-from .base import Datastore
+from simmate.toolkit.datastores.base import Datastore
+from simmate.toolkit.datastores.utils import update_column, update_table
+from simmate.utils import dispatch, get_directory
 
 
-class MoleculeStore(Datastore):
+class MoleculeDatastore(Datastore):
     """
-    This class is intended for datasets with >10 million molecules, where it
-    becomes an issue to:
-        1. have toolkit objects in memory all at once (memory/ram)
-        2. parse all molecule inputs into objs up front (cpu time)
-        3. perform substructure or similarity searches in postgres
-        4. store in postgres at all ($ or disk space)
-
-    The primary use case for this class is efficient filtering of the dataset
-    via similarity, substructure, or other common properties. Many of this
-    class's methods are alternative implementations of the `toolkit.filters`
-    module, where the key difference is pre-caching and lazy-loading of
-    molecule objects to disk.
-
-    The class is focused only on 2D molecular formats at the moment, so
-    SMILES format is required.
-
-    We selected polars as the backend for speed and easy file chunking
-    with parquet that can be used by other programs. If this class were to
-    need a rewrite using another backend, alternatives to consider are
-    pandas+dask, sqlite, or duckdb.
+    Base class for molecule-focused datastores. Extends Datastore with
+    methods for computing molecular properties, fingerprints, and building
+    similarity search indexes.
     """
 
-    smiles_stored: str = "cleaned_only"
-    # or "original_only" or "original_and_cleaned"
+    index_batch_size: int = 10
 
-    metadata_columns: list[str] = []
-
-    property_columns: list[str] = [
-        "molecular_weight_exact",
-        "num_atoms_heavy",
-        "num_stereocenters",
-        "log_p_rdkit",
-        "synthetic_accessibility",
-    ]
-
-    method_columns: dict = {}  # to_inchi_key included automatically
-
-    morgan_fingerprint_cache: bool = False
-
-    pattern_fingerprint_cache: bool = True
-
-    explicit_h_mode: bool = False
-    """
-    Whether SMILES and fingerprints should be stored with explicit hydrogens.
-    This is generally needed when you want to perform many scaffold queries 
-    (with R-groups), but keep in mind that this greatly increase file size
-    because SMILES strings will be much larger.
-    """
-
-    @classmethod
-    def filter_to_dataframe(
-        cls,
-        # note these are done *lazily* and any generated fingerprints are not
-        # kept (to keep memory use low). This is counter to the MoleculeDataFrame
-        # where fingerprints a kept once generated.
-        similarity: Molecule = None,
-        smarts: list[Molecule] = None,
-        limit: int = None,
-        # for the final df, whether to build out extra mol features into memory
-        init_toolkit_objs: bool = False,
-        init_substructure_lib: bool = False,
-        init_morgan_fp_lib: bool = False,
-        # for all stages
-        parallel: bool = False,
-        # then any django-like filters for columns (e.g. id__lte=100)
-        **kwargs,
-    ) -> MoleculeDataFrame:
-
-        data_str = str(cls.chunk_files_wildcard)
-        lazy_df = polars.scan_parquet(data_str)
-
-        if kwargs:
-            lazy_df = filter_polars_df(lazy_df, **kwargs)
-
-        if limit:
-            lazy_df = lazy_df.limit(limit)
-
-        # execute the query (not including similarity/substructure)
-        logging.info("Loading from datastore...")
-        df = lazy_df.collect()
-
-        # load_rdkit_fingerprint_from_base64
-        if similarity:
-            pass  # TODO
-        if smarts:
-            pass  # TODO
-
-        return MoleculeDataFrame.from_polars(
-            df,
-            init_toolkit_objs=init_toolkit_objs,
-            init_substructure_lib=init_substructure_lib,
-            init_morgan_fp_lib=init_morgan_fp_lib,
-            explicit_h_mode=cls.explicit_h_mode,
-            parallel=parallel,
-        )
-
-    # -------------------------------------------------------------------------
-
-    @classmethod
-    def add_dataframe(
-        cls,
-        df: polars.DataFrame,
-        parallel: bool = False,
-        target_directory: str | Path = None,
-    ):
+    @update_column("Ro5")
+    def add_ro5_column(cls, df: polars.DataFrame):
         """
-        Generates calculated properties+features before adding it to the disk
-        store. New chunks are saved using UUID filenames. The `reorganize_chunks`
-        method should be used to combine and number chunks sequentially.
+        Computes Ro5 from physicochemical property columns (MW, LogP, HBA, HBD).
+        Ro5 is True when: MW <= 500, LogP <= 5, HBA <= 10, HBD <= 5.
+        These are the classic Lipinski cutoffs.
+        Requires property columns to be present in the parquet.
         """
+        return df.select(
+            (
+                (polars.col("MW") <= 500)
+                & (polars.col("LogP") <= 5)
+                & (polars.col("HBA") <= 10)
+                & (polars.col("HBD") <= 5)
+            ).alias("Ro5")
+        )["Ro5"]
 
-        if "smiles" not in df.columns:
-            raise Exception(
-                "dataframe must have a `smiles` column to be added to MoleculeStore"
+    @update_table()
+    def add_fingerprints(cls, df: polars.DataFrame):
+        """
+        Adds MACCS, ECFP4, and FCFP4 fingerprint columns to each chunk parquet.
+        Run after repartition("chunk_key") and promote_staging() have completed.
+        """
+        from simmate.toolkit.featurizers import USearchFingerprints
+
+        if len(df) == 0:
+            return df.with_columns(
+                polars.Series("maccs", [], dtype=polars.Binary),
+                polars.Series("ecfp4", [], dtype=polars.Binary),
+                polars.Series("fcfp4", [], dtype=polars.Binary),
             )
 
-        for metadata_column in cls.metadata_columns:
-            if metadata_column not in df.columns:
-                raise Exception(
-                    f"dataframe must have a `{metadata_column}` column to be added "
-                    f"to MoleculeStore. Full list of metadata columns: {cls.metadata_columns}"
-                )
+        fingerprints = USearchFingerprints.featurize_many(
+            df["smiles"].to_list(), parallel=True
+        )
+        maccs_list, ecfp4_list, fcfp4_list = zip(*fingerprints)
 
-        super().add_dataframe(
-            df=df,
-            parallel=parallel,
-            target_directory=target_directory,
+        return df.with_columns(
+            polars.Series("maccs", list(maccs_list)),
+            polars.Series("ecfp4", list(ecfp4_list)),
+            polars.Series("fcfp4", list(fcfp4_list)),
         )
 
     @classmethod
-    def _inflate_data_chunk(
-        cls,
-        df: polars.DataFrame,
-        parallel: bool = True,
-    ) -> polars.DataFrame:
+    def build_usearch_index(cls, parallel_job: bool = False) -> None:
+        """
+        Builds USearch binary indexes from the chunk parquet files.
 
-        # PERFORMANCE: For the featurization steps below, we pass the `smiles`
-        # column instead of pre-initialized `Molecule` objects. Even though
-        # this forces each featurizer to re-parse the SMILES, I am seeing it
-        # is ~2x faster in parallel mode. This is because passing primitive
-        # strings across process boundaries (IPC) is much cheaper than
-        # serializing (pickling) heavy RDKit-based Molecule objects.
+        Creates one index file per batch of chunk_keys (sized by index_batch_size)
+        and writes them to datastore_dir/vectors/. Run after add_fingerprints()
+        has fully completed.
+        """
+        vectors_dir = get_directory(cls.base_directory / "vectors")
+        batches = [
+            list(range(i, min(i + cls.index_batch_size, cls.num_chunks)))
+            for i in range(0, cls.num_chunks, cls.index_batch_size)
+        ]
+        done_batches = {p.stem for p in vectors_dir.glob("maccs-*.usearch")}
+        batches_to_process = [
+            b for b in batches if f"maccs-{b[0]}-{b[-1]}" not in done_batches
+        ]
+        logging.info(
+            f"{len(done_batches)} batches already done, "
+            f"{len(batches_to_process)} to process"
+        )
+        dispatch(
+            batches_to_process,
+            cls._build_usearch_index_single_batch,
+            parallel_job,
+        )
+        logging.info("USearch index build complete!")
 
-        logging.info("Checking for invalid molecules...")
-        is_valid = RemoveInvalidSmiles.filter(
-            molecules=df["smiles"].to_list(),
-            return_mode="booleans",
-            parallel=parallel,
+    @classmethod
+    def _build_usearch_index_single_batch(cls, batch: list[int]):
+        import numpy
+        import pyarrow
+        from usearch.index import (
+            CompiledMetric,
+            Index,
+            MetricKind,
+            MetricSignature,
+            ScalarKind,
         )
 
-        num_failed = len(is_valid) - sum(is_valid)
-        if num_failed > 0:
-            logging.warning(f"Removed {num_failed} invalid molecules.")
-            df = df.filter(is_valid)
+        from simmate.toolkit.datastores.numba_funcs import (
+            tanimoto_ecfp4,
+            tanimoto_maccs,
+        )
 
-        if cls.property_columns:
-            logging.info("Calculating properties...")
-            properties = PropertyGrabber.featurize_many(
-                molecules=df["smiles"],
-                properties=cls.property_columns,
-                parallel=parallel,
-                dataframe_format="polars",
-            )
-            df = polars.concat([df, properties], how="horizontal")
-            del properties
+        live_dir = cls.live_directory
+        vectors_dir = cls.base_directory / "vectors"
+        source_glob = str(live_dir / "chunk_key=*" / "*.parquet")
 
-        if cls.method_columns:
-            logging.info("Calculating method-based properties...")
-            extra_method_cols = {_get_smiles_with_h: {}} if cls.explicit_h_mode else {}
-            method_features = MethodCaller.featurize_many(
-                molecules=df["smiles"],
-                method_map={
-                    # Inchi key for exact-match searches
-                    "to_inchi_key": {},
-                    **cls.method_columns,
-                    **extra_method_cols,
-                },
-                parallel=parallel,
-                dataframe_format="polars",
-            )
-            if cls.explicit_h_mode:
-                # because we have a new smiles column in method_features
-                df = df.rename({"smiles": "smiles_original"})
-                # df = df.drop("smiles")
-            df = polars.concat([df, method_features], how="horizontal")
-            del method_features
-
-        # Pattern fingerprint for substructure searches
-        if cls.pattern_fingerprint_cache:
-            logging.info("Calculating pattern fingerprints...")
-            fingerprints = PatternFingerprint.featurize_many(
-                molecules=df["smiles"],
-                parallel=parallel,
-                vector_type="base64",
-                explicit_h=cls.explicit_h_mode,
-            )
-            df = df.with_columns(polars.Series("pattern_fingerprint", fingerprints))
-            del fingerprints
-
-        if cls.morgan_fingerprint_cache:
-            raise NotImplementedError()
+        # ndim is bits rounded up to uint32 boundary; stored_bytes is actual bytes
+        # from packbits; padded_bytes is stored_bytes zero-padded to uint32 alignment
+        fp_configs = {
+            "maccs": {
+                "ndim": 192,
+                "stored_bytes": 21,
+                "padded_bytes": 24,
+                "metric_fn": tanimoto_maccs,
+            },
             # TODO:
-            # Morgan fingerprint for similirity searches
-            # logging.info("Calculating morgan fingerprints...")
-            # fingerprints = MorganFingerprint.featurize_many(
-            #     molecules=df["smiles"],
-            #     parallel=True,
-            #     vector_type="base64",
-            # )
-            # df = df.with_columns(polars.Series("morgan_fingerprint", fingerprints))
-            # del fingerprints
+            # "ecfp4": {
+            #     "ndim": 2048,
+            #     "stored_bytes": 256,
+            #     "padded_bytes": 256,
+            #     "metric_fn": tanimoto_ecfp4,
+            # },
+            # "fcfp4": {
+            #     "ndim": 2048,
+            #     "stored_bytes": 256,
+            #     "padded_bytes": 256,
+            #     "metric_fn": tanimoto_ecfp4,
+            # },
+        }
 
-        return df
+        fp_type = "maccs"  # fixed for now
+        cfg = fp_configs[fp_type]
 
-    # -------------------------------------------------------------------------
+        index_path = str(vectors_dir / f"{fp_type}-{batch[0]}-{batch[-1]}.usearch")
+        if Path(index_path).exists():
+            logging.info(f"Skipping batch {batch[0]}-{batch[-1]} - already built.")
+            return
 
+        logging.info(f"Building {fp_type} batch {batch[0]}-{batch[-1]} → {index_path}")
+        index = Index(
+            ndim=cfg["ndim"],
+            dtype=ScalarKind.B1,
+            metric=CompiledMetric(
+                pointer=cfg["metric_fn"].address,
+                kind=MetricKind.Tanimoto,
+                signature=MetricSignature.ArrayArray,
+            ),
+            path=index_path,
+        )
 
-def _get_smiles_with_h(molecule):
-    molecule.add_hydrogens()
-    return molecule.to_smiles(remove_hydrogen=False)
+        lf = polars.scan_parquet(source_glob, hive_partitioning=True)
+
+        for chunk_key in batch:
+            logging.info(f"  {fp_type} chunk_key={chunk_key}")
+            df = (
+                lf.filter(polars.col("chunk_key") == chunk_key)
+                .select("datastore_id", fp_type)
+                .collect()
+            )
+            if len(df) == 0:
+                continue
+
+            keys = df["datastore_id"].to_numpy()
+            if len(index) > 0 and keys[0] in index:
+                logging.info(f"  Skipping chunk_key={chunk_key} - already indexed.")
+                continue
+
+            df_pa = df.to_arrow()
+            fps = df_pa.column(fp_type).cast(pyarrow.binary(cfg["stored_bytes"]))
+
+            vectors = []
+            for fp in fps:
+                vec = numpy.zeros(cfg["padded_bytes"], dtype=numpy.uint8)
+                vec[: cfg["stored_bytes"]] = fp.as_buffer()
+                vectors.append(vec)
+            vectors = numpy.vstack(vectors)
+
+            index.add(
+                keys,
+                vectors,
+                log=f"Building {fp_type} chunk {chunk_key}",
+            )
+
+            index.save(index_path)
+            logging.info(f"  Saved progress | Vectors: {len(index):,}")
