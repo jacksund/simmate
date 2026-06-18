@@ -1,25 +1,155 @@
 {% extends "core/site_base.html" %}
-{% block tabtitle %}Lab Automation - Simmate{% endblock %}
+{% block tabtitle %}Homelab Dashboard - Simmate{% endblock %}
 {% block body %}
-    <section class="jumbotron text-center my-3">
-        <div class="container">
-            <h1 class="jumbotron-heading">Lab Automation</h1>
-            <p class="lead text-muted">Monitor and control your lab equipment.</p>
-        </div>
-    </section>
-    <div class="row">
-        <div class="container">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Live Temperature Monitor (Full Redraw)</h5>
-                </div>
-                <div class="card-body">{% htmx_component "temperature-plot-component" %}</div>
+    <div class="container-fluid mt-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+            <h2>
+                <i class="fas fa-flask mr-2 text-primary"></i>Homelab Dashboard
+            </h2>
+            <div>
+                <span class="badge badge-success px-3 py-2 shadow-sm"
+                      style="animation: pulse 2s infinite"><i class="fas fa-wifi mr-1"></i> System Online</span>
+                <style>
+                @keyframes pulse {
+                    0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
+                    70% { box-shadow: 0 0 0 6px rgba(40, 167, 69, 0); }
+                    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+                }
+                </style>
             </div>
-            <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Streaming Temperature Monitor (JS Update)</h5>
+        </div>
+        <!-- Project Summary (Full Row) -->
+        <div class="row mb-4">
+            <div class="col-12">{% htmx_component "project-summary-component" %}</div>
+        </div>
+        <!-- Task Manager (Full Row) -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4 class="mb-3">Ongoing Tasks</h4>
+                {% htmx_component "task-manager-component" %}
+            </div>
+        </div>
+        <!-- Lab Environment (Full Row) -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4 class="mb-3">Lab Environment</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-thermometer-half mr-2 text-danger"></i>Ambient Temp
+                                </h5>
+                            </div>
+                            <div class="card-body p-3">{% htmx_component "ambient-temp-component" %}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tint mr-2 text-info"></i>Humidity
+                                </h5>
+                            </div>
+                            <div class="card-body p-3">{% htmx_component "humidity-component" %}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-wind mr-2 text-success"></i>Air Quality
+                                </h5>
+                            </div>
+                            <div class="card-body p-3">{% htmx_component "air-quality-component" %}</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">{% htmx_component "streaming-temperature-plot-component" %}</div>
+            </div>
+        </div>
+        <!-- Equipment Monitors (Full Row) -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4 class="mb-3">Equipment Monitors</h4>
+                <!-- Hotplate 1 -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-temperature-high mr-2 text-danger"></i>Hotplate 1
+                        </h5>
+                        <span class="badge badge-primary px-2 py-1"><i class="fas fa-microscope mr-1"></i>Exp: Synthesis of YBa2Cu3O7</span>
+                    </div>
+                    <div class="card-body pb-0">
+                        <div class="row">
+                            <div class="col-md-4 border-right">
+                                <h6 class="text-center text-muted mb-3 mt-2">Experiment Details</h6>
+                                <div class="px-2">
+                                    <p class="mb-2">
+                                        <i class="fas fa-flask text-primary mr-2"></i><strong>Synthesis of YBa2Cu3O7</strong>
+                                    </p>
+                                    <p class="mb-2">
+                                        <small class="text-muted">Current Step:</small>
+                                        <br />
+                                        Ramp to 150 °C
+                                    </p>
+                                    <p class="mb-2">
+                                        <small class="text-muted">Time Remaining:</small>
+                                        <br />
+                                        2h 15m
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 border-right">
+                                <h6 class="text-center text-muted mb-0">Temperature Monitor</h6>
+                                {% htmx_component "hotplate-temp-component" %}
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-center text-muted mb-0">Stir Speed Monitor</h6>
+                                {% htmx_component "hotplate-stir-component" %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Hotplate 2 -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-temperature-high mr-2 text-warning"></i>Hotplate 2
+                        </h5>
+                        <span class="badge badge-secondary px-2 py-1"><i class="fas fa-microscope mr-1"></i>Exp: Calcination of Sample C</span>
+                    </div>
+                    <div class="card-body pb-0">
+                        <div class="row">
+                            <div class="col-md-4 border-right">
+                                <h6 class="text-center text-muted mb-3 mt-2">Experiment Details</h6>
+                                <div class="px-2">
+                                    <p class="mb-2">
+                                        <i class="fas fa-vial text-warning mr-2"></i><strong>Calcination of Sample C</strong>
+                                    </p>
+                                    <p class="mb-2">
+                                        <small class="text-muted">Current Step:</small>
+                                        <br />
+                                        Hold at 80 °C
+                                    </p>
+                                    <p class="mb-2">
+                                        <small class="text-muted">Time Remaining:</small>
+                                        <br />
+                                        45m
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 border-right">
+                                <h6 class="text-center text-muted mb-0">Temperature Monitor</h6>
+                                {% htmx_component "hotplate2-temp-component" %}
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-center text-muted mb-0">Stir Speed Monitor</h6>
+                                {% htmx_component "hotplate2-stir-component" %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

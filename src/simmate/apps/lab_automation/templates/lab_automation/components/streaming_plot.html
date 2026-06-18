@@ -1,0 +1,7 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    <div hx-post="{% url 'htmx:component' component.component_id %}"
+         hx-trigger="every 1s"
+         hx-target="#{{ component.component_id }}"
+         hx-swap="outerHTML">{% htmx_plotly_figure component.figure %}</div>
+{% endblock %}
