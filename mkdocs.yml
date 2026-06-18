@@ -362,4 +362,26 @@ nav:
             - Schrodinger: apps/schrodinger.md
             - Surflex: apps/surflex.md
     
-    - Updates: change_log.md
+    - Updates:
+        - Overview: change_log/overview.md
+        - 'Upcoming Release': change_log/upcoming.md
+        - 'v0.19.0 (2026.03.22)': change_log/v0.19.0.md
+        - 'v0.18.0 (2025.04.20)': change_log/v0.18.0.md
+        - 'v0.17.0 (2024.05.20)': change_log/v0.17.0.md
+        - 'v0.16.0 (2024.01.27)': change_log/v0.16.0.md
+        - 'v0.15.0 (2024.01.04)': change_log/v0.15.0.md
+        - 'v0.14.0 (2023.07.06)': change_log/v0.14.0.md
+        - 'v0.13.0 (2023.03.06)': change_log/v0.13.0.md
+        - 'v0.12.0 (2022.10.23)': change_log/v0.12.0.md
+        - 'v0.11.0 (2022.09.10)': change_log/v0.11.0.md
+        - 'v0.10.0 (2022.08.29)': change_log/v0.10.0.md
+        - 'v0.9.0 (2022.08.17)': change_log/v0.9.0.md
+        - 'v0.8.0 (2022.08.11)': change_log/v0.8.0.md
+        - 'v0.7.0 (2022.07.19)': change_log/v0.7.0.md
+        - 'v0.6.0 (2022.06.25)': change_log/v0.6.0.md
+        - 'v0.5.0 (2022.05.30)': change_log/v0.5.0.md
+        - 'v0.4.0 (2022.04.24)': change_log/v0.4.0.md
+        - 'v0.3.0 (2022.04.19)': change_log/v0.3.0.md
+        - 'v0.2.0 (2022.04.15)': change_log/v0.2.0.md
+        - 'v0.1.4 (2022.04.12)': change_log/v0.1.4.md
+        - 'v0.0.0 (2022.03.28)': change_log/v0.0.0.md

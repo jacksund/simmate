@@ -25,7 +25,7 @@ simmate/
 │   │   └── workflows/      # Custom workflow creation
 │   ├── apps/               # Quickstart guides for specific apps
 │   ├── getting_started/    # Tutorial series for new users
-│   └── change_log.md       # Change log for tracking updates
+│   └── change_log/         # Change log for tracking updates
 ├── envs/                   # Docker and Helm configuration
 ├── src/
 │   └── simmate/
