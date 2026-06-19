@@ -48,7 +48,8 @@ class AmbientTempComponent(HtmxComponent):
             go.Indicator(
                 mode="gauge+number",
                 value=current_val,
-                title={"text": "Ambient Temp (°C)", "font": {"size": 14}},
+                number={"suffix": "°C"},
+                title={"text": "Ambient Temp", "font": {"size": 14}},
                 gauge={
                     "axis": {
                         "range": [10, 40],
@@ -75,7 +76,7 @@ class AmbientTempComponent(HtmxComponent):
         )
 
         fig.update_layout(
-            xaxis=dict(domain=[0, 1], title="Time"),
+            xaxis=dict(domain=[0, 1]),
             yaxis=dict(domain=[0, 0.45], title="Temp (°C)", anchor="x"),
             margin=dict(l=20, r=20, t=40, b=40),
             height=250,
@@ -130,7 +131,8 @@ class HumidityComponent(HtmxComponent):
             go.Indicator(
                 mode="gauge+number",
                 value=current_val,
-                title={"text": "Humidity (%)", "font": {"size": 14}},
+                number={"suffix": "%"},
+                title={"text": "Humidity", "font": {"size": 14}},
                 gauge={
                     "axis": {
                         "range": [0, 100],
@@ -156,7 +158,7 @@ class HumidityComponent(HtmxComponent):
         )
 
         fig.update_layout(
-            xaxis=dict(domain=[0, 1], title="Time"),
+            xaxis=dict(domain=[0, 1]),
             yaxis=dict(domain=[0, 0.45], title="Humidity (%)", anchor="x"),
             margin=dict(l=20, r=20, t=40, b=40),
             height=250,
@@ -211,7 +213,8 @@ class AirQualityComponent(HtmxComponent):
             go.Indicator(
                 mode="gauge+number",
                 value=current_val,
-                title={"text": "Air Quality (ppb)", "font": {"size": 14}},
+                number={"suffix": " ppb"},
+                title={"text": "Air Quality", "font": {"size": 14}},
                 gauge={
                     "axis": {
                         "range": [0, 500],
@@ -237,7 +240,7 @@ class AirQualityComponent(HtmxComponent):
         )
 
         fig.update_layout(
-            xaxis=dict(domain=[0, 1], title="Time"),
+            xaxis=dict(domain=[0, 1]),
             yaxis=dict(domain=[0, 0.45], title="VOC (ppb)", anchor="x"),
             margin=dict(l=20, r=20, t=40, b=40),
             height=250,

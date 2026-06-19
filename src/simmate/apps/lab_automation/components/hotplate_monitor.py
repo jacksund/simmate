@@ -49,7 +49,8 @@ class HotplateTempComponent(HtmxComponent):
             go.Indicator(
                 mode="gauge+number",
                 value=current_temp,
-                title={"text": "Temperature (°C)", "font": {"size": 14}},
+                number={"suffix": "°C"},
+                title={"text": "Temperature", "font": {"size": 14}},
                 gauge={
                     "axis": {
                         "range": [None, 300],
@@ -76,7 +77,7 @@ class HotplateTempComponent(HtmxComponent):
         )
 
         fig.update_layout(
-            xaxis=dict(domain=[0, 1], title="Time"),
+            xaxis=dict(domain=[0, 1]),
             yaxis=dict(domain=[0, 0.45], title="Temp (°C)", anchor="x"),
             margin=dict(l=20, r=20, t=40, b=40),
             height=350,
@@ -133,7 +134,8 @@ class HotplateStirComponent(HtmxComponent):
             go.Indicator(
                 mode="gauge+number",
                 value=current_stir,
-                title={"text": "Stir Speed (%)", "font": {"size": 14}},
+                number={"suffix": "%"},
+                title={"text": "Stir Speed", "font": {"size": 14}},
                 gauge={
                     "axis": {
                         "range": [None, 100],
@@ -160,7 +162,7 @@ class HotplateStirComponent(HtmxComponent):
         )
 
         fig.update_layout(
-            xaxis=dict(domain=[0, 1], title="Time"),
+            xaxis=dict(domain=[0, 1]),
             yaxis=dict(domain=[0, 0.45], title="Speed (%)", range=[0, 100], anchor="x"),
             margin=dict(l=20, r=20, t=40, b=40),
             height=350,
@@ -217,7 +219,8 @@ class Hotplate2TempComponent(HtmxComponent):
             go.Indicator(
                 mode="gauge+number",
                 value=current_temp,
-                title={"text": "Temperature (°C)", "font": {"size": 14}},
+                number={"suffix": "°C"},
+                title={"text": "Temperature", "font": {"size": 14}},
                 gauge={
                     "axis": {
                         "range": [None, 300],
@@ -244,7 +247,7 @@ class Hotplate2TempComponent(HtmxComponent):
         )
 
         fig.update_layout(
-            xaxis=dict(domain=[0, 1], title="Time"),
+            xaxis=dict(domain=[0, 1]),
             yaxis=dict(domain=[0, 0.45], title="Temp (°C)", anchor="x"),
             margin=dict(l=20, r=20, t=40, b=40),
             height=350,
@@ -301,7 +304,8 @@ class Hotplate2StirComponent(HtmxComponent):
             go.Indicator(
                 mode="gauge+number",
                 value=current_stir,
-                title={"text": "Stir Speed (%)", "font": {"size": 14}},
+                number={"suffix": "%"},
+                title={"text": "Stir Speed", "font": {"size": 14}},
                 gauge={
                     "axis": {
                         "range": [None, 100],
@@ -328,7 +332,7 @@ class Hotplate2StirComponent(HtmxComponent):
         )
 
         fig.update_layout(
-            xaxis=dict(domain=[0, 1], title="Time"),
+            xaxis=dict(domain=[0, 1]),
             yaxis=dict(domain=[0, 0.45], title="Speed (%)", range=[0, 100], anchor="x"),
             margin=dict(l=20, r=20, t=40, b=40),
             height=350,
