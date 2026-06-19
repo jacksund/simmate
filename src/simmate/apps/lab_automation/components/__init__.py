@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from .agent_manager import AgentManagerComponent
 from .hotplate_monitor import (
     Hotplate2StirComponent,
     Hotplate2TempComponent,

@@ -31,6 +31,15 @@
                     <span class="d-none d-md-block">Equipment</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="#agents-section"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="fas fa-robot d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Agents</span>
+                </a>
+            </li>
         </ul>
         <div class="tab-content">
             <!-- Overview Tab -->
@@ -141,6 +150,13 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+            <!-- Agents Tab -->
+            <div class="tab-pane" id="agents-section">
+                <!-- Agent Manager (Full Row) -->
+                <div class="row mb-4">
+                    <div class="col-12">{% htmx_component "agent-manager-component" %}</div>
                 </div>
             </div>
         </div>
