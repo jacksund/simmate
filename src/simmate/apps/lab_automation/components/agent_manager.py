@@ -2,6 +2,7 @@
 
 from simmate.website.htmx.components.base import HtmxComponent
 
+
 class AgentManagerComponent(HtmxComponent):
     template_name: str = "lab_automation/components/agent_manager.html"
 
@@ -73,5 +74,5 @@ class AgentManagerComponent(HtmxComponent):
                 "icon": "fas fa-broom",
                 "status_color": "success",
                 "progress": 90,
-            }
+            },
         ]
