@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.express as px
 from ortools.sat.python import cp_model
 
-from simmate.apps.lab_automation.planners.tasks import PreemptableTask, Task
+from simmate.apps.lab_automation.planners.tasks import BaseTask
 
 
 class SchedulePlanner:
@@ -14,34 +14,33 @@ class SchedulePlanner:
 
     def __init__(self):
         self.model = cp_model.CpModel()
-        self.tasks: dict[str, Task] = {}  # All executable chunks
-        self.parent_tasks: dict[str, Task | PreemptableTask] = {}  # Top-level tasks
+        self.tasks: dict[str, BaseTask] = {}
         self.dependencies: list[dict] = []
         self.resources_usage = collections.defaultdict(list)
         self.horizon: int = 0
         self.schedule_data: list[dict] = []
 
-    def add_task(self, task: Task | PreemptableTask):
-        self.parent_tasks[task.task_id] = task
+    def add_task(self, task: BaseTask) -> BaseTask:
+        self.tasks[task.task_id] = task
+        self.horizon = task.update_horizon(self.horizon)
+        return task
 
-        if isinstance(task, PreemptableTask):
-            for i, chunk in enumerate(task.chunks):
-                self.tasks[chunk.task_id] = chunk
-                self.horizon += chunk.duration
-                # Enforce sequential chunk execution order
-                if i > 0:
-                    self.add_dependency(task.chunks[i - 1].task_id, chunk.task_id)
-        else:
-            self.tasks[task.task_id] = task
-            self.horizon += task.duration
+    def add_tasks(self, *tasks: BaseTask | list[BaseTask]):
+        if len(tasks) == 1 and isinstance(tasks[0], (list, tuple)):
+            tasks = tasks[0]
+        for task in tasks:
+            self.add_task(task)
+        return tasks
 
     def add_dependency(
         self,
-        from_id: str,
-        to_id: str,
+        from_task: str | BaseTask,
+        to_task: str | BaseTask,
         constraint_type: str = "normal",
         max_delay: int = 0,
     ):
+        from_id = from_task.task_id if isinstance(from_task, BaseTask) else from_task
+        to_id = to_task.task_id if isinstance(to_task, BaseTask) else to_task
         self.dependencies.append(
             {
                 "from": from_id,
@@ -51,28 +50,41 @@ class SchedulePlanner:
             }
         )
 
+    def add_chain(
+        self,
+        *tasks: str | BaseTask | list[str | BaseTask],
+        constraint_type: str = "normal",
+        max_delay: int = 0,
+    ):
+        """Adds a sequential chain of dependencies between tasks."""
+        if len(tasks) == 1 and isinstance(tasks[0], (list, tuple)):
+            tasks = tasks[0]
+        for i in range(len(tasks) - 1):
+            self.add_dependency(
+                tasks[i],
+                tasks[i + 1],
+                constraint_type=constraint_type,
+                max_delay=max_delay,
+            )
+
     def _get_start_end_vars(self, task_id: str) -> tuple:
         """Helper to retrieve start/end OR-Tools variables for a given task ID."""
         if task_id in self.tasks:
             task = self.tasks[task_id]
             return task.start_var, task.end_var
-        elif task_id in self.parent_tasks:
-            parent = self.parent_tasks[task_id]
-            if isinstance(parent, PreemptableTask):
-                return parent.chunks[0].start_var, parent.chunks[-1].end_var
         raise ValueError(f"Task ID '{task_id}' not found in scheduler!")
 
     def build_model(self):
         """Initializes CP variables, resource constraints, and temporal dependencies."""
         # 1. Variables and Resource Mapping
-        for task_id, task in self.tasks.items():
-            task.start_var = self.model.NewIntVar(0, self.horizon, f"start_{task_id}")
-            task.end_var = self.model.NewIntVar(0, self.horizon, f"end_{task_id}")
-            task.interval_var = self.model.NewIntervalVar(
-                task.start_var, task.duration, task.end_var, f"interval_{task_id}"
+        min_time = 0
+        for task in self.tasks.values():
+            min_time = task.update_min_time(min_time)
+
+        for task in self.tasks.values():
+            task.build_variables(
+                self.model, self.horizon, min_time, self.resources_usage
             )
-            for res in task.resources:
-                self.resources_usage[res].append(task.interval_var)
 
         # 2. Resource Constraints (No-Overlap)
         for intervals in self.resources_usage.values():
@@ -97,10 +109,25 @@ class SchedulePlanner:
                 self.model.Add(to_end - from_end <= delay)
                 self.model.Add(from_end - to_end <= delay)
 
-        # 4. Objective: Minimize Makespan
-        obj_var = self.model.NewIntVar(0, self.horizon, "makespan")
-        self.model.AddMaxEquality(obj_var, [t.end_var for t in self.tasks.values()])
-        self.model.Minimize(obj_var)
+        # 4. Objective: Minimize Makespan + Context Switch Penalty
+        self.makespan_var = self.model.NewIntVar(min_time, self.horizon, "makespan")
+        self.model.AddMaxEquality(
+            self.makespan_var, [t.end_var for t in self.tasks.values()]
+        )
+
+        # Add penalty for preemptable tasks to minimize context switching
+        # We minimize the total span (end - start) of preemptable tasks
+        # multiplied by a small weight, prioritizing makespan over fragmentation.
+        penalties = []
+        for task in self.tasks.values():
+            penalty = task.get_penalty(self.model, self.horizon)
+            if penalty is not None:
+                penalties.append(penalty)
+
+        if penalties:
+            self.model.Minimize(self.makespan_var * 100 + sum(penalties))
+        else:
+            self.model.Minimize(self.makespan_var)
 
     def solve(self):
         """Solves the model and extracts the optimal schedule."""
@@ -112,7 +139,7 @@ class SchedulePlanner:
             return
 
         print(
-            f"Optimal Schedule Found! Total Time: {solver.ObjectiveValue()} minutes\n"
+            f"Optimal Schedule Found! Total Time: {solver.Value(self.makespan_var)} minutes\n"
         )
 
         self.schedule_data = []
@@ -123,26 +150,8 @@ class SchedulePlanner:
         )
 
         for task in solved_tasks:
-            start_time = solver.Value(task.start_var)
-            end_time = solver.Value(task.end_var)
-
-            # Print to terminal
-            print(
-                f"Minute {start_time:02d} to {end_time:02d} | "
-                f"{task.name} | Uses: {', '.join(task.resources)}"
-            )
-
-            # Save exploded resource data for plotting
-            for res in task.resources:
-                self.schedule_data.append(
-                    {
-                        "Task": task.name,
-                        "Start": start_time,
-                        "End": end_time,
-                        "Duration": task.duration,
-                        "Resource": res,
-                    }
-                )
+            schedule_dicts = task.process_solution(solver)
+            self.schedule_data.extend(schedule_dicts)
 
     def plot_gantt(self, title: str = "Resource Utilization Timeline"):
         """Generates and opens a Resource Utilization chart in the browser."""
@@ -168,7 +177,7 @@ class SchedulePlanner:
         fig.update_layout(
             xaxis_title="Time (Minutes)",
             yaxis_title="Resources",
-            showlegend=True,
+            showlegend=False,
             plot_bgcolor="rgba(240, 240, 240, 0.8)",
             barmode="overlay",
         )
