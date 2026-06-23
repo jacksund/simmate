@@ -8,7 +8,13 @@ from pathlib import Path
 import polars
 
 from simmate.config import settings
-from simmate.utils import dispatch, filter_polars_df, get_chunk_key, get_directory
+from simmate.utils import (
+    chunk_list,
+    dispatch,
+    filter_polars_df,
+    get_chunk_key,
+    get_directory,
+)
 
 from .utils import update_column
 
@@ -395,6 +401,88 @@ class Datastore:
             logging.info(f"Repartitioned {partition_column}={val} | Rows: {len(df):,}")
 
         dispatch(partition_values, _repartition_single_value, parallel_job)
+
+    @classmethod
+    def repartition_batched(
+        cls,
+        partition_columns: str | list[str],
+        batch_size: int = 5,
+    ) -> None:
+        """
+        Memory-efficient repartition that processes chunk files in batches,
+        writing hive-partitioned parquet files to the staging directory with
+        deterministic names (batch_XXXXXX.parquet) so interrupted runs resume
+        without reprocessing completed batches.
+
+        After all batches finish, call consolidate_staging() then promote_staging().
+        """
+
+        batches = list(chunk_list(cls.chunk_files, batch_size))
+        logging.info(f"repartition_batched: {len(batches)} batches of ≤{batch_size}")
+
+        def _make_provider(batch_idx: int):
+            batch_name = f"batch_{batch_idx:06d}.parquet"
+
+            def provider(args) -> str:
+                hive_path = cls.staging_directory
+                for col in args.partition_keys.columns:
+                    hive_path = hive_path / f"{col}={args.partition_keys[col][0]}"
+                return str(hive_path / batch_name)
+
+            return provider
+
+        for i, batch in enumerate(batches):
+            if any(cls.staging_directory.rglob(f"batch_{i:06d}.parquet")):
+                logging.info(f"Skipping batch {i + 1}/{len(batches)} - already done")
+                continue
+
+            polars.scan_parquet([str(f) for f in batch]).sink_parquet(
+                polars.PartitionBy(
+                    base_path=cls.staging_directory,
+                    key=partition_columns,
+                    file_path_provider=_make_provider(i),
+                ),
+                mkdir=True,
+            )
+            logging.info(f"Batch {i + 1}/{len(batches)} complete")
+
+        logging.info(
+            "repartition_batched complete! Run consolidate_staging() then promote_staging()."
+        )
+
+    @classmethod
+    def consolidate_staging(cls) -> None:
+        """
+        Merges batch parquet files within each hive partition folder in the
+        staging directory into a single combined.parquet.
+
+        Intended to be called after repartition_batched() and before promote_staging().
+        """
+        partition_dirs = [
+            d
+            for d in cls.staging_directory.rglob("*")
+            if d.is_dir() and any(d.glob("*.parquet"))
+        ]
+
+        for partition_dir in partition_dirs:
+            batch_files = list(partition_dir.glob("batch_*.parquet"))
+            if not batch_files:
+                continue
+
+            combined_path = partition_dir / "combined.parquet"
+            if combined_path.exists():
+                logging.info(f"Skipping {partition_dir.name} - already consolidated")
+                continue
+
+            df = polars.read_parquet(batch_files)
+            df.write_parquet(combined_path, compression=cls.compression_mode)
+            for f in batch_files:
+                f.unlink()
+            logging.info(
+                f"Consolidated {len(batch_files)} batch files → {partition_dir.name}/combined.parquet ({len(df):,} rows)"
+            )
+
+        logging.info("consolidate_staging complete! Run promote_staging() to go live.")
 
     # -------------------------------------------------------------------------
 
