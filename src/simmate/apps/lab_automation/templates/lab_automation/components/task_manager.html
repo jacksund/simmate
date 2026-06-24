@@ -1,0 +1,181 @@
+<style>
+    .task-board {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 1rem;
+        gap: 1.25rem;
+    }
+    .task-column {
+        min-width: 300px;
+        max-width: 340px;
+        flex: 1;
+        background-color: #f4f6f8;
+        border-radius: 0.5rem;
+        padding: 1rem;
+    }
+    .task-card {
+        background-color: #ffffff;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+        border-left: 4px solid transparent;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .task-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .task-card.scheduled { border-left-color: #6c757d; }
+    .task-card.preparing { border-left-color: #17a2b8; }
+    .task-card.running { border-left-color: #007bff; }
+    .task-card.completed { border-left-color: #28a745; }
+    .task-card.failed { border-left-color: #dc3545; }
+    
+    /* Custom scrollbar for board */
+    .task-board::-webkit-scrollbar {
+        height: 8px;
+    }
+    .task-board::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+        border-radius: 4px;
+    }
+    .task-board::-webkit-scrollbar-thumb {
+        background: #c1c1c1; 
+        border-radius: 4px;
+    }
+    .task-board::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8; 
+    }
+</style>
+<div class="task-board">
+    <!-- Scheduled -->
+    <div class="task-column">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="text-uppercase font-weight-bold text-secondary mb-0">
+                <i class="fas fa-calendar-alt mr-2"></i>Scheduled
+            </h6>
+            <span class="badge badge-secondary badge-pill">{{ component.tasks.scheduled|length }}</span>
+        </div>
+        {% for task in component.tasks.scheduled %}
+            <div class="task-card scheduled">
+                <h6 class="mb-2 font-weight-bold">{{ task.name }}</h6>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <small class="text-muted"><i class="far fa-clock mr-1"></i>{{ task.duration }}</small>
+                    {% if task.priority == 'high' %}
+                        <span class="badge badge-danger badge-pill px-2">High</span>
+                    {% elif task.priority == 'medium' %}
+                        <span class="badge badge-warning badge-pill px-2">Med</span>
+                    {% else %}
+                        <span class="badge badge-light border badge-pill px-2">Low</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <small class="text-muted" title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
+                    <small class="text-muted" title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center text-muted small py-3">No scheduled tasks</div>
+        {% endfor %}
+    </div>
+    <!-- Preparing -->
+    <div class="task-column">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="text-uppercase font-weight-bold text-info mb-0">
+                <i class="fas fa-boxes mr-2"></i>Preparing
+            </h6>
+            <span class="badge badge-info badge-pill">{{ component.tasks.preparing|length }}</span>
+        </div>
+        {% for task in component.tasks.preparing %}
+            <div class="task-card preparing">
+                <h6 class="mb-2 font-weight-bold">{{ task.name }}</h6>
+                <div class="mt-2 text-info small font-weight-bold">
+                    <i class="fas fa-info-circle mr-1"></i>{{ task.status }}
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <small class="text-muted" title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
+                    <small class="text-muted" title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center text-muted small py-3">No tasks preparing</div>
+        {% endfor %}
+    </div>
+    <!-- Running -->
+    <div class="task-column">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="text-uppercase font-weight-bold text-primary mb-0">
+                <i class="fas fa-spinner fa-spin mr-2"></i>Running
+            </h6>
+            <span class="badge badge-primary badge-pill">{{ component.tasks.running|length }}</span>
+        </div>
+        {% for task in component.tasks.running %}
+            <div class="task-card running">
+                <h6 class="mb-2 font-weight-bold">{{ task.name }}</h6>
+                <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
+                    <small class="text-primary font-weight-bold">{{ task.progress }}%</small>
+                    <small class="text-muted"><i class="far fa-hourglass mr-1"></i>{{ task.eta }}</small>
+                </div>
+                <div class="progress" style="height: 6px; border-radius: 3px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                         role="progressbar"
+                         style="width: {{ task.progress }}%"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <small class="text-muted" title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
+                    <small class="text-muted" title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center text-muted small py-3">No running tasks</div>
+        {% endfor %}
+    </div>
+    <!-- Completed -->
+    <div class="task-column">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="text-uppercase font-weight-bold text-success mb-0">
+                <i class="fas fa-check-circle mr-2"></i>Completed
+            </h6>
+            <span class="badge badge-success badge-pill">{{ component.tasks.completed|length }}</span>
+        </div>
+        {% for task in component.tasks.completed %}
+            <div class="task-card completed">
+                <h6 class="mb-2 font-weight-bold text-muted"
+                    style="text-decoration: line-through">{{ task.name }}</h6>
+                <div class="mt-2 text-muted small">
+                    <i class="fas fa-history mr-1"></i>{{ task.time }}
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <small class="text-muted" title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
+                    <small class="text-muted" title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center text-muted small py-3">No completed tasks</div>
+        {% endfor %}
+    </div>
+    <!-- Failed -->
+    <div class="task-column">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="text-uppercase font-weight-bold text-danger mb-0">
+                <i class="fas fa-exclamation-circle mr-2"></i>Failed
+            </h6>
+            <span class="badge badge-danger badge-pill">{{ component.tasks.failed|length }}</span>
+        </div>
+        {% for task in component.tasks.failed %}
+            <div class="task-card failed">
+                <h6 class="mb-2 font-weight-bold">{{ task.name }}</h6>
+                <div class="mt-2 text-danger small font-weight-bold">
+                    <i class="fas fa-times-circle mr-1"></i>{{ task.reason }}
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <small class="text-muted" title="Owner"><i class="fas fa-user-circle mr-1"></i>{{ task.owner }}</small>
+                    <small class="text-muted" title="Equipment"><i class="fas fa-microchip mr-1"></i>{{ task.equipment }}</small>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center text-muted small py-3">No failed tasks</div>
+        {% endfor %}
+    </div>
+</div>

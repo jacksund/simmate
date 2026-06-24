@@ -98,6 +98,7 @@ jarvis = [
 lab_automation = [
     "gpiozero>=2.0.1",
     "opencv-python>=4.13.0.92",
+    "ortools>=9.15.6755",
 ]
 materials_project = [
     "mp-api>=0.46.0,<0.47.0",

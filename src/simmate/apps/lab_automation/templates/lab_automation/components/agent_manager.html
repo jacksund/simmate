@@ -1,0 +1,69 @@
+<style>
+    .agent-card-success { border-top: 4px solid #28a745; }
+    .agent-card-warning { border-top: 4px solid #ffc107; }
+    .agent-card-secondary { border-top: 4px solid #6c757d; }
+    .agent-icon-bg-success { background-color: rgba(40, 167, 69, 0.1); }
+    .agent-icon-bg-warning { background-color: rgba(255, 193, 7, 0.1); }
+    .agent-icon-bg-secondary { background-color: rgba(108, 117, 125, 0.1); }
+</style>
+<div class="row">
+    {% for agent in component.agents %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm h-100 agent-card-{{ agent.status_color }}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-circle agent-icon-bg-{{ agent.status_color }} text-{{ agent.status_color }} mr-3"
+                                 style="width: 48px;
+                                        height: 48px;
+                                        border-radius: 50%;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center">
+                                <i class="{{ agent.icon }} fa-lg"></i>
+                            </div>
+                            <div>
+                                <h5 class="card-title mb-0">{{ agent.name }}</h5>
+                                <small class="text-muted">{{ agent.type }}</small>
+                            </div>
+                        </div>
+                        <span class="badge badge-{{ agent.status_color }}">{{ agent.status }}</span>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <p class="mb-1">
+                            <small class="text-muted font-weight-bold text-uppercase">Current Objective</small>
+                        </p>
+                        <p class="mb-0">{{ agent.objective }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <p class="mb-1">
+                            <small class="text-muted font-weight-bold text-uppercase">Current Task</small>
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-tasks text-primary mr-2"></i>{{ agent.current_task }}
+                        </p>
+                        {% if agent.status == "Active" %}
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-{{ agent.status_color }} progress-bar-striped progress-bar-animated"
+                                     role="progressbar"
+                                     style="width: {{ agent.progress }}%"
+                                     aria-valuenow="{{ agent.progress }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100"></div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="mb-1">
+                            <small class="text-muted font-weight-bold text-uppercase">Location</small>
+                        </p>
+                        <p class="mb-0">
+                            <i class="fas fa-map-marker-alt text-danger mr-2"></i>{{ agent.location }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>

@@ -1,7 +1,0 @@
-{% extends "htmx/form_base.html" %}
-{% block form %}
-    <form class="m-0 p-0">
-        {% htmx_refresh refresh_loop="1s" indicator="None" %}
-        {% htmx_plotly_figure component.figure %}
-    </form>
-{% endblock %}

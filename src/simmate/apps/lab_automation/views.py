@@ -4,4 +4,8 @@ from django.shortcuts import render
 
 
 def home(request):
-    return render(request, "lab_automation/home.html")
+    context = {
+        "page_title": "Lab Automation",
+        "breadcrumbs": ["Apps", "Lab Automation"],
+    }
+    return render(request, "lab_automation/home.html", context)
