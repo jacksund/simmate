@@ -163,7 +163,7 @@ class MoleculeDatastore(Datastore):
         cls,
         similarity=None,
         smarts: list = None,
-        limit: int = 5_000_000,
+        limit: int = None,
         init_toolkit_objs: bool = False,
         init_substructure_lib: bool = False,
         init_morgan_fp_lib: bool = False,
