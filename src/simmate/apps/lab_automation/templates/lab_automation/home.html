@@ -1,25 +1,163 @@
 {% extends "core/site_base.html" %}
-{% block tabtitle %}Lab Automation - Simmate{% endblock %}
+{% block tabtitle %}Homelab Dashboard - Simmate{% endblock %}
 {% block body %}
-    <section class="jumbotron text-center my-3">
-        <div class="container">
-            <h1 class="jumbotron-heading">Lab Automation</h1>
-            <p class="lead text-muted">Monitor and control your lab equipment.</p>
-        </div>
-    </section>
-    <div class="row">
-        <div class="container">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Live Temperature Monitor (Full Redraw)</h5>
+    <div class="container-fluid mt-4">
+        <!-- Tabs Header -->
+        <ul class="nav nav-tabs nav-bordered mb-4">
+            <li class="nav-item">
+                <a href="#overview-section"
+                   data-bs-toggle="tab"
+                   aria-expanded="true"
+                   class="nav-link active">
+                    <i class="fas fa-chart-line d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Overview</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#tasks-section"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="fas fa-tasks d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Tasks</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#equipment-section"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="fas fa-microscope d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Equipment</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#agents-section"
+                   data-bs-toggle="tab"
+                   aria-expanded="false"
+                   class="nav-link">
+                    <i class="fas fa-robot d-md-none d-block"></i>
+                    <span class="d-none d-md-block">Agents</span>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <!-- Overview Tab -->
+            <div class="tab-pane show active" id="overview-section">
+                <!-- Lab Environment (Full Row) -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-md-4 mb-4">{% htmx_component "ambient-temp-component" %}</div>
+                            <div class="col-md-4 mb-4">{% htmx_component "humidity-component" %}</div>
+                            <div class="col-md-4 mb-4">{% htmx_component "air-quality-component" %}</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">{% htmx_component "temperature-plot-component" %}</div>
+                <!-- Project Summary (Full Row) -->
+                <div class="row mb-4">
+                    <div class="col-12">{% htmx_component "project-summary-component" %}</div>
+                </div>
             </div>
-            <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Streaming Temperature Monitor (JS Update)</h5>
+            <!-- Tasks Tab -->
+            <div class="tab-pane" id="tasks-section">
+                <!-- Task Manager (Full Row) -->
+                <div class="row mb-4">
+                    <div class="col-12">{% htmx_component "task-manager-component" %}</div>
                 </div>
-                <div class="card-body">{% htmx_component "streaming-temperature-plot-component" %}</div>
+            </div>
+            <!-- Equipment Tab -->
+            <div class="tab-pane" id="equipment-section">
+                <!-- Equipment Monitors (Full Row) -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <!-- Hotplate 1 -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-temperature-high mr-2 text-danger"></i>Hotplate 1
+                                </h5>
+                                <span class="badge badge-primary px-2 py-1"><i class="fas fa-microscope mr-1"></i>Exp: Synthesis of YBa2Cu3O7</span>
+                            </div>
+                            <div class="card-body pb-0">
+                                <div class="row">
+                                    <div class="col-md-4 border-right">
+                                        <h6 class="text-center text-muted mb-3 mt-2">Experiment Details</h6>
+                                        <div class="px-2">
+                                            <p class="mb-2">
+                                                <i class="fas fa-flask text-primary mr-2"></i><strong>Synthesis of YBa2Cu3O7</strong>
+                                            </p>
+                                            <p class="mb-2">
+                                                <small class="text-muted">Current Step:</small>
+                                                <br />
+                                                Ramp to 150 °C
+                                            </p>
+                                            <p class="mb-2">
+                                                <small class="text-muted">Time Remaining:</small>
+                                                <br />
+                                                2h 15m
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 border-right">
+                                        <h6 class="text-center text-muted mb-0">Temperature Monitor</h6>
+                                        {% htmx_component "hotplate-temp-component" %}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="text-center text-muted mb-0">Stir Speed Monitor</h6>
+                                        {% htmx_component "hotplate-stir-component" %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Hotplate 2 -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-temperature-high mr-2 text-warning"></i>Hotplate 2
+                                </h5>
+                                <span class="badge badge-secondary px-2 py-1"><i class="fas fa-microscope mr-1"></i>Exp: Calcination of Sample C</span>
+                            </div>
+                            <div class="card-body pb-0">
+                                <div class="row">
+                                    <div class="col-md-4 border-right">
+                                        <h6 class="text-center text-muted mb-3 mt-2">Experiment Details</h6>
+                                        <div class="px-2">
+                                            <p class="mb-2">
+                                                <i class="fas fa-vial text-warning mr-2"></i><strong>Calcination of Sample C</strong>
+                                            </p>
+                                            <p class="mb-2">
+                                                <small class="text-muted">Current Step:</small>
+                                                <br />
+                                                Hold at 80 °C
+                                            </p>
+                                            <p class="mb-2">
+                                                <small class="text-muted">Time Remaining:</small>
+                                                <br />
+                                                45m
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 border-right">
+                                        <h6 class="text-center text-muted mb-0">Temperature Monitor</h6>
+                                        {% htmx_component "hotplate2-temp-component" %}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="text-center text-muted mb-0">Stir Speed Monitor</h6>
+                                        {% htmx_component "hotplate2-stir-component" %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Agents Tab -->
+            <div class="tab-pane" id="agents-section">
+                <!-- Agent Manager (Full Row) -->
+                <div class="row mb-4">
+                    <div class="col-12">{% htmx_component "agent-manager-component" %}</div>
+                </div>
             </div>
         </div>
     </div>
