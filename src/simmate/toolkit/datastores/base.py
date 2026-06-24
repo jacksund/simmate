@@ -41,9 +41,11 @@ class Datastore:
     Use the `directory` property for the more robust Path object
     """
 
-    num_chunks: int = 1000
+    num_chunks: int = 1
     """
     Number of chunks used when hashing string IDs to chunk_keys.
+    
+    Chunks is set to 1 (disabled) by default
     """
 
     datastore_id_multiplier: int = 1_000_000_000

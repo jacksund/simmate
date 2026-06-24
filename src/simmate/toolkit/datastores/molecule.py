@@ -7,6 +7,11 @@ import polars
 
 from simmate.toolkit.datastores.base import Datastore
 from simmate.toolkit.datastores.utils import update_column, update_table
+from simmate.toolkit.featurizers import (
+    MethodCaller,
+    PatternFingerprint,
+    PropertyGrabber,
+)
 from simmate.utils import dispatch, get_directory
 
 
@@ -17,7 +22,7 @@ class MoleculeDatastore(Datastore):
     similarity search indexes.
     """
 
-    index_batch_size: int = 10
+    index_batch_size: int = 1  # batching disabled by default
 
     @update_column("Ro5")
     def add_ro5_column(cls, df: polars.DataFrame):
@@ -60,6 +65,143 @@ class MoleculeDatastore(Datastore):
             polars.Series("maccs", list(maccs_list)),
             polars.Series("ecfp4", list(ecfp4_list)),
             polars.Series("fcfp4", list(fcfp4_list)),
+        )
+
+    @update_table()
+    def remove_invalid_smiles(cls, df: polars.DataFrame):
+        """
+        Drops rows with invalid SMILES from each chunk.
+        Run before any featurization steps to ensure clean input.
+        """
+        from simmate.toolkit.filters import RemoveInvalidSmiles
+
+        is_valid = RemoveInvalidSmiles.filter(
+            molecules=df["smiles"].to_list(),
+            return_mode="booleans",
+            parallel=True,
+        )
+        num_failed = len(is_valid) - sum(is_valid)
+        if num_failed > 0:
+            logging.warning(f"Removed {num_failed} invalid molecules.")
+        return df.filter(is_valid)
+
+    @update_table()
+    def add_property_columns(
+        cls,
+        df: polars.DataFrame,
+        properties: list[str] = [
+            "molecular_weight_exact",
+            "num_atoms_heavy",
+            "num_stereocenters",
+            "log_p_rdkit",
+            "synthetic_accessibility",
+        ],
+    ):
+        """
+        Computes physicochemical properties and adds them as columns.
+        Defaults to the classic Lipinski-relevant set: MW, heavy atom count,
+        stereocenters, LogP, and synthetic accessibility score.
+        """
+        prop_df = PropertyGrabber.featurize_many(
+            molecules=df["smiles"].to_list(),
+            properties=properties,
+            parallel=True,
+            dataframe_format="polars",
+        )
+        return polars.concat([df, prop_df], how="horizontal")
+
+    @update_table()
+    def add_method_columns(
+        cls,
+        df: polars.DataFrame,
+        method_map: dict = None,
+    ):
+        """
+        Computes method-based properties and adds them as columns.
+        Defaults to InChI key only. Pass a custom method_map to extend,
+        e.g. {"to_inchi_key": {}, "to_smiles": {}}.
+        """
+        if method_map is None:
+            method_map = {"to_inchi_key": {}}
+        method_df = MethodCaller.featurize_many(
+            molecules=df["smiles"].to_list(),
+            method_map=method_map,
+            parallel=True,
+            dataframe_format="polars",
+        )
+        return polars.concat([df, method_df], how="horizontal")
+
+    @update_table()
+    def add_pattern_fingerprint_column(cls, df: polars.DataFrame):
+        """
+        Adds a base64-encoded PatternFingerprint column for substructure searches.
+        Run after remove_invalid_smiles() to avoid errors on bad SMILES.
+        """
+        fingerprints = PatternFingerprint.featurize_many(
+            molecules=df["smiles"].to_list(),
+            parallel=True,
+            vector_type="base64",
+        )
+        return df.with_columns(polars.Series("pattern_fingerprint", fingerprints))
+
+    @classmethod
+    def filter_to_mdf(
+        cls,
+        similarity=None,
+        smarts: list = None,
+        limit: int = 5_000_000,
+        init_toolkit_objs: bool = False,
+        init_substructure_lib: bool = False,
+        init_morgan_fp_lib: bool = False,
+        parallel: bool = False,
+        **kwargs,
+    ):
+        """
+        Filters the datastore and returns a MoleculeDataFrame.
+
+        Applies column filters (django-style kwargs), an optional row limit,
+        then returns the result as a MoleculeDataFrame. Similarity and SMARTS
+        filtering are not yet implemented.
+
+        Args:
+            similarity: Reserved for future similarity filtering.
+            smarts: Reserved for future substructure filtering.
+            limit: Maximum number of rows to return. Defaults to 5_000_000.
+            init_toolkit_objs: Pre-initialize RDKit Molecule objects in the MDF.
+            init_substructure_lib: Pre-initialize substructure library in the MDF.
+            init_morgan_fp_lib: Pre-initialize Morgan fingerprint library in the MDF.
+            parallel: Use parallel processing in MoleculeDataFrame initialization.
+            **kwargs: Django-style column filters (e.g. MW__lte=500).
+
+        Returns:
+            MoleculeDataFrame filtered to matching rows.
+        """
+        from simmate.toolkit.dataframes import MoleculeDataFrame
+        from simmate.utils import filter_polars_df
+
+        source_glob = str(cls.live_directory / "chunk_key=*" / "*.parquet")
+        lazy_df = polars.scan_parquet(source_glob, hive_partitioning=True)
+
+        if kwargs:
+            lazy_df = filter_polars_df(lazy_df, **kwargs)
+
+        if limit:
+            lazy_df = lazy_df.limit(limit)
+
+        logging.info("Loading from datastore...")
+        df = lazy_df.collect()
+
+        if similarity:
+            pass  # TODO
+        if smarts:
+            pass  # TODO
+
+        return MoleculeDataFrame.from_polars(
+            df,
+            init_toolkit_objs=init_toolkit_objs,
+            init_substructure_lib=init_substructure_lib,
+            init_morgan_fp_lib=init_morgan_fp_lib,
+            parallel=parallel,
         )
 
     @classmethod
