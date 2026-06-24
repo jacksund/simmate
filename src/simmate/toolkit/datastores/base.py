@@ -139,6 +139,10 @@ class Datastore:
         Promotes the staging directory to live, moving the current live
         directory to old.
         """
+        if not any(cls.staging_directory.iterdir()):
+            logging.warning("Staging directory is empty. Nothing to promote.")
+            return
+
         # 1. Remove old_directory if it exists
         if cls.old_directory.exists():
             shutil.rmtree(cls.old_directory)
@@ -256,19 +260,28 @@ class Datastore:
         ).collect()
 
     @classmethod
-    def sample(cls, n: int = 1_000) -> polars.DataFrame:
+    def sample(cls, source: str = "live", n: int = 1_000) -> polars.DataFrame:
         """
         Returns a random sample of n rows from the datastore.
         """
-        return polars.read_parquet(cls.chunk_files[0], n_rows=n)
+        directory = getattr(cls, f"{source}_directory")
+        files = sorted(
+            [f for f in directory.rglob("*.parquet") if f.is_file()],
+            key=lambda f: f.name,
+        )
+        return polars.read_parquet(files[0], n_rows=n)
 
     @classmethod
-    @property
-    def schema(cls) -> polars.Schema:
+    def schema(cls, source: str = "live") -> polars.Schema:
         """
         Returns the schema (column names and types) from the first chunk file.
         """
-        return polars.read_parquet_schema(cls.chunk_files[0])
+        directory = getattr(cls, f"{source}_directory")
+        files = sorted(
+            [f for f in directory.rglob("*.parquet") if f.is_file()],
+            key=lambda f: f.name,
+        )
+        return polars.read_parquet_schema(files[0])
 
     @classmethod
     def count(cls) -> int:
@@ -515,7 +528,7 @@ class Datastore:
         num_chunks = num_chunks or cls.num_chunks
 
         return df[source_column].map_elements(
-            lambda x: get_chunk_key(x, num_chunks),
+            lambda x: get_chunk_key(str(x), num_chunks),
             return_dtype=polars.Int32,
         )
 

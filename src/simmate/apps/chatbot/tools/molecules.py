@@ -16,7 +16,7 @@ def get_add_hydrogens(smiles: str) -> int:
     """add hydrogens to a SMILES string"""
     m = Molecule.from_smiles(smiles)
     m.add_hydrogens()
-    return m.to_smiles(remove_hydrogen=False)
+    return m.to_smiles()
 
 
 @tool

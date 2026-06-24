@@ -737,7 +737,6 @@ class Molecule:
 
     def to_smiles(
         self,
-        remove_hydrogen: bool = True,
         kekulize: bool = False,
     ) -> str:
         """
@@ -755,16 +754,9 @@ class Molecule:
             Defaults to False as we preferred the canonical form, though benchtop
             chemists tend to prefer the kekulized form.
         """
-        return (
-            AllChem.MolToSmiles(
-                AllChem.RemoveHs(self.rdkit_molecule),
-                kekuleSmiles=kekulize,
-            )
-            if remove_hydrogen
-            else AllChem.MolToSmiles(
-                self.rdkit_molecule,
-                kekuleSmiles=kekulize,
-            )
+        return AllChem.MolToSmiles(
+            self.rdkit_molecule,
+            kekuleSmiles=kekulize,
         )
 
     def to_cx_smiles(self) -> str:
@@ -773,25 +765,17 @@ class Molecule:
         """
         return AllChem.MolToCXSmiles(self.rdkit_molecule)
 
-    def to_inchi(self, remove_hydrogen: bool = True) -> str:
+    def to_inchi(self) -> str:
         """
         Converts the current `Molecule` object to an INCHI string
         """
-        return (
-            AllChem.MolToInchi(AllChem.RemoveHs(self.rdkit_molecule))
-            if remove_hydrogen
-            else AllChem.MolToInchi(self.rdkit_molecule)
-        )
+        return AllChem.MolToInchi(self.rdkit_molecule)
 
     def to_inchi_key(self, remove_hydrogen: bool = True) -> str:
         """
         Converts the current `Molecule` object to an INCHI key string
         """
-        return (
-            AllChem.MolToInchiKey(AllChem.RemoveHs(self.rdkit_molecule))
-            if remove_hydrogen
-            else AllChem.MolToInchiKey(self.rdkit_molecule)
-        )
+        return AllChem.MolToInchiKey(self.rdkit_molecule)
 
     # -------------------------------------------------------------------------
 

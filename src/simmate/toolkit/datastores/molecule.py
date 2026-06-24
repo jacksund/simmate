@@ -24,8 +24,8 @@ class MoleculeDatastore(Datastore):
 
     index_batch_size: int = 1  # batching disabled by default
 
-    @update_column("Ro5")
-    def add_ro5_column(cls, df: polars.DataFrame):
+    @update_column("rule_of_5")
+    def add_rule_of_5_column(cls, df: polars.DataFrame):
         """
         Computes Ro5 from physicochemical property columns (MW, LogP, HBA, HBD).
         Ro5 is True when: MW <= 500, LogP <= 5, HBA <= 10, HBD <= 5.
@@ -34,12 +34,12 @@ class MoleculeDatastore(Datastore):
         """
         return df.select(
             (
-                (polars.col("MW") <= 500)
-                & (polars.col("LogP") <= 5)
-                & (polars.col("HBA") <= 10)
-                & (polars.col("HBD") <= 5)
-            ).alias("Ro5")
-        )["Ro5"]
+                (polars.col("molecular_weight_exact") <= 500)
+                & (polars.col("log_p_rdkit") <= 5)
+                & (polars.col("num_h_acceptors") <= 10)
+                & (polars.col("num_h_donors") <= 5)
+            ).alias("rule_of_5")
+        )["rule_of_5"]
 
     @update_table()
     def add_fingerprints(cls, df: polars.DataFrame):
@@ -93,6 +93,8 @@ class MoleculeDatastore(Datastore):
             "molecular_weight_exact",
             "num_atoms_heavy",
             "num_stereocenters",
+            "num_h_acceptors",
+            "num_h_donors",
             "log_p_rdkit",
             "synthetic_accessibility",
         ],
@@ -114,15 +116,13 @@ class MoleculeDatastore(Datastore):
     def add_method_columns(
         cls,
         df: polars.DataFrame,
-        method_map: dict = None,
+        method_map: dict = {"to_inchi_key": {}},
     ):
         """
         Computes method-based properties and adds them as columns.
         Defaults to InChI key only. Pass a custom method_map to extend,
         e.g. {"to_inchi_key": {}, "to_smiles": {}}.
         """
-        if method_map is None:
-            method_map = {"to_inchi_key": {}}
         method_df = MethodCaller.featurize_many(
             molecules=df["smiles"].to_list(),
             method_map=method_map,
@@ -132,7 +132,9 @@ class MoleculeDatastore(Datastore):
         return polars.concat([df, method_df], how="horizontal")
 
     @update_table()
-    def add_pattern_fingerprint_column(cls, df: polars.DataFrame):
+    def add_pattern_fingerprint_column(
+        cls, df: polars.DataFrame, explicit_h: bool = False
+    ):
         """
         Adds a base64-encoded PatternFingerprint column for substructure searches.
         Run after remove_invalid_smiles() to avoid errors on bad SMILES.
@@ -141,8 +143,20 @@ class MoleculeDatastore(Datastore):
             molecules=df["smiles"].to_list(),
             parallel=True,
             vector_type="base64",
+            explicit_h=explicit_h,
         )
         return df.with_columns(polars.Series("pattern_fingerprint", fingerprints))
+
+    @update_table()
+    def convert_to_explicit_h_smiles(cls, df: polars.DataFrame):
+
+        method_df = MethodCaller.featurize_many(
+            molecules=df["smiles"].to_list(),
+            method_map={_get_smiles_with_h: {}},
+            parallel=True,
+            dataframe_format="polars",
+        )
+        return df.with_columns(method_df.to_series(0).alias("smiles"))
 
     @classmethod
     def filter_to_mdf(
@@ -333,3 +347,9 @@ class MoleculeDatastore(Datastore):
 
             index.save(index_path)
             logging.info(f"  Saved progress | Vectors: {len(index):,}")
+
+
+# needs to be top-level fxn to allow pickling
+def _get_smiles_with_h(molecule):
+    molecule.add_hydrogens()
+    return molecule.to_smiles()
