@@ -1,9 +1,11 @@
 from numba import carray, cfunc, njit, types
 
-# FORKED FROM USEARCH-MOLECULES:
-# https://github.com/unum-bio/USearchMolecules/blob/main/usearch_molecules/metrics_numba.py
+numba_signature_u8 = types.float32(
+    types.CPointer(types.uint8),
+    types.CPointer(types.uint8),
+)
 
-numba_signature = types.float32(
+numba_signature_u32 = types.float32(
     types.CPointer(types.uint32),
     types.CPointer(types.uint32),
 )
@@ -20,31 +22,22 @@ def word_popcount(v):
     return c
 
 
-@cfunc(numba_signature)
+@cfunc(numba_signature_u8)
 def tanimoto_maccs(a, b):
     """
-    Compute Tanimoto distance for MACCS fingerprints (166 bits = 6 uint32 words).
+    Compute Tanimoto distance for MACCS fingerprints (166 bits = 21 bytes).
     """
-    a_array = carray(a, 6)
-    b_array = carray(b, 6)
+    a_array = carray(a, 21)
+    b_array = carray(b, 21)
     ands = 0
     ors = 0
-    ands += word_popcount(a_array[0] & b_array[0])
-    ors += word_popcount(a_array[0] | b_array[0])
-    ands += word_popcount(a_array[1] & b_array[1])
-    ors += word_popcount(a_array[1] | b_array[1])
-    ands += word_popcount(a_array[2] & b_array[2])
-    ors += word_popcount(a_array[2] | b_array[2])
-    ands += word_popcount(a_array[3] & b_array[3])
-    ors += word_popcount(a_array[3] | b_array[3])
-    ands += word_popcount(a_array[4] & b_array[4])
-    ors += word_popcount(a_array[4] | b_array[4])
-    ands += word_popcount(a_array[5] & b_array[5])
-    ors += word_popcount(a_array[5] | b_array[5])
+    for i in range(21):
+        ands += word_popcount(types.uint32(a_array[i] & b_array[i]))
+        ors += word_popcount(types.uint32(a_array[i] | b_array[i]))
     return 1 - types.float32(ands) / ors
 
 
-@cfunc(numba_signature)
+@cfunc(numba_signature_u32)
 def tanimoto_ecfp4(a, b):
     """
     Compute Tanimoto distance for ECFP4 fingerprints (2048 bits = 64 uint32 words).
