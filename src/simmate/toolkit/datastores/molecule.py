@@ -3,15 +3,19 @@
 import logging
 from pathlib import Path
 
+import numpy
 import polars
 
+from simmate.toolkit import Molecule
 from simmate.toolkit.datastores.base import Datastore
 from simmate.toolkit.datastores.utils import update_column, update_table
 from simmate.toolkit.featurizers import (
+    MaccsFingerprint,
     MethodCaller,
     PatternFingerprint,
     PropertyGrabber,
 )
+from simmate.toolkit.filters import RemoveInvalidSmiles
 from simmate.utils import dispatch, get_directory
 
 
@@ -26,6 +30,7 @@ class MoleculeDatastore(Datastore):
     def filter_to_mdf(
         cls,
         similarity=None,
+        similarity_count: int = 50,
         smarts: list = None,
         limit: int = None,
         init_toolkit_objs: bool = False,
@@ -38,13 +43,15 @@ class MoleculeDatastore(Datastore):
         Filters the datastore and returns a MoleculeDataFrame.
 
         Applies column filters (django-style kwargs), an optional row limit,
-        then returns the result as a MoleculeDataFrame. Similarity and SMARTS
-        filtering are not yet implemented.
+        then returns the result as a MoleculeDataFrame. When ``similarity`` is
+        provided, runs an approximate nearest-neighbor search via the USearch
+        index and joins a ``distance`` column into the result.
 
         Args:
-            similarity: Reserved for future similarity filtering.
+            similarity: Query molecule (Molecule or SMILES) for similarity search.
+            similarity_count: Number of similar molecules to retrieve.
             smarts: Reserved for future substructure filtering.
-            limit: Maximum number of rows to return. Defaults to 5_000_000.
+            limit: Maximum number of rows to return.
             init_toolkit_objs: Pre-initialize RDKit Molecule objects in the MDF.
             init_substructure_lib: Pre-initialize substructure library in the MDF.
             init_morgan_fp_lib: Pre-initialize Morgan fingerprint library in the MDF.
@@ -58,19 +65,26 @@ class MoleculeDatastore(Datastore):
         from simmate.utils import filter_polars_df
 
         source_glob = str(cls.live_directory / "chunk_key=*" / "*.parquet")
-        lazy_df = polars.scan_parquet(source_glob, hive_partitioning=True)
-
-        if kwargs:
-            lazy_df = filter_polars_df(lazy_df, **kwargs)
-
-        if limit:
-            lazy_df = lazy_df.limit(limit)
-
-        logging.info("Loading from datastore...")
-        df = lazy_df.collect()
 
         if similarity:
-            pass  # TODO
+            sim_df = cls.search_similar(similarity, count=similarity_count)
+            sim_ids = sim_df["datastore_id"].to_list()
+            lazy_df = polars.scan_parquet(source_glob, hive_partitioning=True)
+            lazy_df = lazy_df.filter(polars.col("datastore_id").is_in(sim_ids))
+            if kwargs:
+                lazy_df = filter_polars_df(lazy_df, **kwargs)
+            logging.info("Loading from datastore...")
+            df = lazy_df.collect()
+            df = df.join(sim_df, on="datastore_id", how="left").sort("distance")
+        else:
+            lazy_df = polars.scan_parquet(source_glob, hive_partitioning=True)
+            if kwargs:
+                lazy_df = filter_polars_df(lazy_df, **kwargs)
+            if limit:
+                lazy_df = lazy_df.limit(limit)
+            logging.info("Loading from datastore...")
+            df = lazy_df.collect()
+
         if smarts:
             pass  # TODO
 
@@ -92,7 +106,6 @@ class MoleculeDatastore(Datastore):
         Drops rows with invalid SMILES from each chunk.
         Run before any featurization steps to ensure clean input.
         """
-        from simmate.toolkit.filters import RemoveInvalidSmiles
 
         is_valid = RemoveInvalidSmiles.filter(
             molecules=df["smiles"].to_list(),
@@ -201,6 +214,15 @@ class MoleculeDatastore(Datastore):
     # -------------------------------------------------------------------------
 
     # for billion-scale fingerprint similarity searches
+    
+    index_batch_size: int = 1  # batching disabled by default
+    index_load_mode: str = "scan"  # "memory" | "view" | "scan"
+    
+    _fingerprint_indexes: dict = {}  # fp_type -> list[Index], cached after first load
+
+    _FP_CONFIGS = {
+        "maccs": {"stored_bytes": 21, "padded_bytes": 24},
+    }
 
     @update_table()
     def add_fingerprints(cls, df: polars.DataFrame):
@@ -227,8 +249,6 @@ class MoleculeDatastore(Datastore):
             polars.Series("ecfp4", list(ecfp4_list)),
             polars.Series("fcfp4", list(fcfp4_list)),
         )
-
-    index_batch_size: int = 1  # batching disabled by default
 
     @classmethod
     def build_fingerprint_index(cls, parallel_job: bool = False) -> None:
@@ -359,6 +379,117 @@ class MoleculeDatastore(Datastore):
 
             index.save(index_path)
             logging.info(f"  Saved progress | Vectors: {len(index):,}")
+
+    @classmethod
+    def load_fingerprint_index(cls, fp_type: str = "maccs") -> None:
+        """
+        Loads USearch index files and caches them under ``_fingerprint_indexes``.
+
+        Behavior is controlled by ``index_load_mode``:
+
+        - ``"memory"``: Load all index files into RAM (fastest search, highest RAM).
+        - ``"view"``: Open all files as a single memory-mapped ``Indexes`` object
+          (low RAM, nearly as fast as memory mode).
+        - ``"scan"``: Store file paths only; ``search_similar`` opens each file
+          one at a time (lowest RAM, slowest search).
+
+        Args:
+            fp_type: Fingerprint type to load. Currently only "maccs" is supported.
+        """
+        from usearch.index import Index, Indexes
+
+        if fp_type in cls._fingerprint_indexes:
+            return
+
+        vectors_dir = cls.base_directory / "vectors"
+        index_files = sorted(vectors_dir.glob(f"{fp_type}-*.usearch"))
+        if not index_files:
+            raise FileNotFoundError(
+                f"No {fp_type} index files found in {vectors_dir}. "
+                "Run build_fingerprint_index() first."
+            )
+
+        mode = cls.index_load_mode
+        if mode == "memory":
+            logging.info(f"Loading {len(index_files)} {fp_type} index file(s) into RAM...")
+            payload = [Index.restore(str(p)) for p in index_files]
+            logging.info(f"Loaded {sum(len(i) for i in payload):,} vectors.")
+        elif mode == "view":
+            logging.info(
+                f"Opening {len(index_files)} {fp_type} index file(s) as memory-mapped views..."
+            )
+            payload = Indexes(paths=[str(p) for p in index_files], view=True)
+        elif mode == "scan":
+            logging.info(
+                f"Registering {len(index_files)} {fp_type} index file(s) for scan-mode search."
+            )
+            payload = index_files
+        else:
+            raise ValueError(
+                f"Unknown index_load_mode: {mode!r}. Use 'memory', 'view', or 'scan'."
+            )
+
+        cls._fingerprint_indexes[fp_type] = (mode, payload)
+
+    @classmethod
+    def search_similar(
+        cls,
+        query,
+        count: int = 50,
+        fp_type: str = "maccs",
+    ) -> "polars.DataFrame":
+        """
+        Searches USearch indexes for molecules similar to the query.
+
+        Uses the cached index loaded by ``load_fingerprint_index()``, calling it
+        automatically on first use. Search behavior depends on ``index_load_mode``.
+
+        Args:
+            query: Query molecule as a Molecule object or SMILES string.
+            count: Number of top results to return.
+            fp_type: Fingerprint type to use for the search. Currently only "maccs".
+
+        Returns:
+            polars.DataFrame with columns ``datastore_id`` (Int64) and
+            ``distance`` (Float32), sorted ascending by distance.
+        """
+        from usearch.index import Indexes
+
+        if isinstance(query, str):
+            query = Molecule.from_smiles(query)
+
+        cfg = cls._FP_CONFIGS[fp_type]
+        fp_bytes = MaccsFingerprint.featurize(query, vector_type="numpy_packbits_bytes")
+        vec = numpy.zeros(cfg["padded_bytes"], dtype=numpy.uint8)
+        vec[: cfg["stored_bytes"]] = numpy.frombuffer(fp_bytes, dtype=numpy.uint8)
+
+        if fp_type not in cls._fingerprint_indexes:
+            cls.load_fingerprint_index(fp_type)
+
+        mode, payload = cls._fingerprint_indexes[fp_type]
+
+        all_keys, all_distances = [], []
+        if mode == "memory":
+            for index in payload:
+                matches = index.search(vec, count)
+                all_keys.extend(matches.keys.tolist())
+                all_distances.extend(matches.distances.tolist())
+        elif mode == "view":
+            matches = payload.search(vec, count)
+            all_keys = matches.keys.tolist()
+            all_distances = matches.distances.tolist()
+        elif mode == "scan":
+            for path in payload:
+                index = Indexes(paths=[str(path)], view=True)
+                matches = index.search(vec, count)
+                all_keys.extend(matches.keys.tolist())
+                all_distances.extend(matches.distances.tolist())
+
+        df = polars.DataFrame(
+            {"datastore_id": all_keys, "distance": all_distances},
+            schema={"datastore_id": polars.Int64, "distance": polars.Float32},
+        )
+        return df.sort("distance").head(count)
 
 
 # needs to be top-level fxn to allow pickling
