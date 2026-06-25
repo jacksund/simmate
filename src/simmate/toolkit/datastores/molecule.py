@@ -56,23 +56,27 @@ class MoleculeDatastore(Datastore):
         **kwargs,
     ) -> MoleculeDataFrame:
         """
-        Filters the datastore and returns a MoleculeDataFrame.
+        Filter the datastore and return a MoleculeDataFrame.
 
-        Applies column filters (django-style kwargs), an optional row limit,
-        then returns the result as a MoleculeDataFrame. When ``similarity`` is
-        provided, runs an approximate nearest-neighbor search via the USearch
-        index and joins a ``distance`` column into the result.
+        Applies django-style column filters (``**kwargs``) and an optional row
+        limit, then returns the result as a ``MoleculeDataFrame``. When
+        ``similarity`` is given, runs an ANN search via the USearch index and
+        joins a ``distance`` column (ascending) into the result.
 
         Args:
-            similarity: Query molecule (Molecule or SMILES) for similarity search.
-            similarity_count: Number of similar molecules to retrieve.
-            smarts: Reserved for future substructure filtering.
-            limit: Maximum number of rows to return.
+            similarity: Query molecule (``Molecule`` or SMILES) for similarity
+                search.
+            similarity_count: Number of top similar molecules to retrieve.
+            similarity_type: Fingerprint type for similarity search.
+                One of ``"ecfp4"``, ``"maccs"``, or ``"fcfp4"``.
+            smarts: Not yet implemented — raises ``NotImplementedError``.
+            limit: Maximum number of rows to return (ignored when ``similarity``
+                is provided).
             init_toolkit_objs: Pre-initialize RDKit Molecule objects in the MDF.
             init_substructure_lib: Pre-initialize substructure library in the MDF.
             init_morgan_fp_lib: Pre-initialize Morgan fingerprint library in the MDF.
             parallel: Use parallel processing in MoleculeDataFrame initialization.
-            **kwargs: Django-style column filters (e.g. MW__lte=500).
+            **kwargs: Django-style column filters (e.g. ``MW__lte=500``).
 
         Returns:
             MoleculeDataFrame filtered to matching rows.
@@ -81,7 +85,7 @@ class MoleculeDatastore(Datastore):
         source_glob = str(cls.live_directory / "chunk_key=*" / "*.parquet")
 
         if similarity:
-            sim_df = cls.search_similar(similarity, similarity_count, "ecfp4")
+            sim_df = cls.search_similar(similarity, similarity_count, similarity_type)
             sim_ids = sim_df["datastore_id"].to_list()
             lazy_df = polars.scan_parquet(source_glob, hive_partitioning=True)
             lazy_df = lazy_df.filter(polars.col("datastore_id").is_in(sim_ids))
@@ -100,7 +104,9 @@ class MoleculeDatastore(Datastore):
             df = lazy_df.collect()
 
         if smarts:
-            pass  # TODO
+            raise NotImplementedError(
+                "SMARTS substructure filtering is not yet implemented."
+            )
 
         return MoleculeDataFrame.from_polars(
             df,
@@ -229,10 +235,18 @@ class MoleculeDatastore(Datastore):
 
     # for billion-scale fingerprint similarity searches
 
-    index_batch_size: int = 1  # batching disabled by default
-    index_load_mode: str = "memory"  # "memory" | "view" | "scan"
+    index_batch_size: int = 1
+    """
+    chunk_key batches per index file; 1 = one file per chunk
+    """
 
-    _fingerprint_indexes: dict = {}  # fp_type -> list[Index], cached after first load
+    index_load_mode: str = "memory"
+    """
+    "memory" | "view" | "scan" — see load_fingerprint_index()
+    """
+
+    _fingerprint_indexes: dict = {}
+    # fp_type -> list[Index], cached after first load
 
     _FP_CONFIGS = {
         "maccs": {
@@ -250,7 +264,7 @@ class MoleculeDatastore(Datastore):
         "fcfp4": {
             "ndim": 2048,
             "stored_bytes": 256,
-            "metric_fn": tanimoto_ecfp4,
+            "metric_fn": tanimoto_ecfp4,  # same 2048-bit packed layout as ecfp4
             "featurizer": Fcfp4Fingerprint,
         },
     }
@@ -262,17 +276,20 @@ class MoleculeDatastore(Datastore):
         fingerprint_type: str = "usearch",
     ):
         """
-        Adds fingerprint column(s) to each chunk parquet.
+        Add fingerprint column(s) to each chunk parquet.
 
-        Run after repartition("chunk_key") and promote_staging() have completed.
+        Note:
+            For bulk dataset builds, run after ``repartition("chunk_key")``
+            and ``promote_staging()`` have completed.
 
         Args:
             fingerprint_type: Controls which fingerprint column(s) are added.
+
                 - ``"usearch"`` (default): Adds three packed-bit binary columns
-                  (``maccs``, ``ecfp4``, ``fcfp4``) computed together via
-                  ``USearchFingerprints``.
-                - ``"maccs"``, ``"ecfp4"``, or ``"fcfp4"``: Adds a single binary
-                  column with that name using ``vector_type="numpy_packbits_bytes"``.
+                  (``maccs``, ``ecfp4``, ``fcfp4``) computed together in one
+                  pass via ``USearchFingerprints``.
+                - ``"maccs"``, ``"ecfp4"``, or ``"fcfp4"``: Adds a single
+                  packed-bit binary column with that name.
 
         Raises:
             ValueError: If ``fingerprint_type`` is not recognized.
@@ -397,12 +414,7 @@ class MoleculeDatastore(Datastore):
                 dtype=numpy.uint8,
             )
 
-            index.add(
-                keys,
-                vectors,
-                log=f"Building {fp_type} chunk {chunk_key}",
-            )
-
+            index.add(keys, vectors)
             index.save(index_path)
             logging.info(f"  Saved progress | Vectors: {len(index):,}")
 
@@ -420,7 +432,8 @@ class MoleculeDatastore(Datastore):
           one at a time (lowest RAM, slowest search).
 
         Args:
-            fp_type: Fingerprint type to load. Currently only "maccs" is supported.
+            fp_type: Fingerprint type to load. One of ``"ecfp4"``, ``"maccs"``,
+                or ``"fcfp4"``.
         """
         if fp_type in cls._fingerprint_indexes:
             return
@@ -471,9 +484,10 @@ class MoleculeDatastore(Datastore):
         automatically on first use. Search behavior depends on ``index_load_mode``.
 
         Args:
-            query: Query molecule as a Molecule object or SMILES string.
+            query: Query molecule as a ``Molecule`` object or SMILES string.
             count: Number of top results to return.
-            fp_type: Fingerprint type to use for the search. Currently only "maccs".
+            fp_type: Fingerprint type to use. One of ``"ecfp4"``, ``"maccs"``,
+                or ``"fcfp4"``.
 
         Returns:
             polars.DataFrame with columns ``datastore_id`` (Int64) and
@@ -517,7 +531,8 @@ class MoleculeDatastore(Datastore):
         return df.sort("distance").head(count)
 
 
-# needs to be top-level fxn to allow pickling
+# top-level (not a method) so it is picklable for multiprocessing
 def _get_smiles_with_h(molecule):
+    """Return SMILES with explicit hydrogens added."""
     molecule.add_hydrogens()
     return molecule.to_smiles()
