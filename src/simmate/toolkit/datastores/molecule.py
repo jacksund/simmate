@@ -4,19 +4,32 @@ import logging
 from pathlib import Path
 
 import numpy
+import pyarrow
 import polars
 
 from simmate.toolkit import Molecule
 from simmate.toolkit.datastores.base import Datastore
+from simmate.toolkit.datastores.numba_funcs import tanimoto_ecfp4, tanimoto_maccs
 from simmate.toolkit.datastores.utils import update_column, update_table
 from simmate.toolkit.featurizers import (
+    Ecfp4Fingerprint,
+    Fcfp4Fingerprint,
     MaccsFingerprint,
     MethodCaller,
     PatternFingerprint,
     PropertyGrabber,
+    USearchFingerprints,
 )
 from simmate.toolkit.filters import RemoveInvalidSmiles
 from simmate.utils import dispatch, get_directory
+from usearch.index import (
+    CompiledMetric,
+    Index,
+    Indexes,
+    MetricKind,
+    MetricSignature,
+    ScalarKind,
+)
 
 
 class MoleculeDatastore(Datastore):
@@ -216,12 +229,32 @@ class MoleculeDatastore(Datastore):
     # for billion-scale fingerprint similarity searches
     
     index_batch_size: int = 1  # batching disabled by default
-    index_load_mode: str = "scan"  # "memory" | "view" | "scan"
+    index_load_mode: str = "memory"  # "memory" | "view" | "scan"
     
     _fingerprint_indexes: dict = {}  # fp_type -> list[Index], cached after first load
 
     _FP_CONFIGS = {
-        "maccs": {"stored_bytes": 21, "padded_bytes": 24},
+        "maccs": {
+            "ndim": 192,
+            "stored_bytes": 21,
+            "padded_bytes": 24,
+            "metric_fn": tanimoto_maccs,
+            "featurizer": MaccsFingerprint,
+        },
+        "ecfp4": {
+            "ndim": 2048,
+            "stored_bytes": 256,
+            "padded_bytes": 256,
+            "metric_fn": tanimoto_ecfp4,
+            "featurizer": Ecfp4Fingerprint,
+        },
+        "fcfp4": {
+            "ndim": 2048,
+            "stored_bytes": 256,
+            "padded_bytes": 256,
+            "metric_fn": tanimoto_ecfp4,
+            "featurizer": Fcfp4Fingerprint,
+        },
     }
 
     @update_table()
@@ -230,8 +263,6 @@ class MoleculeDatastore(Datastore):
         Adds MACCS, ECFP4, and FCFP4 fingerprint columns to each chunk parquet.
         Run after repartition("chunk_key") and promote_staging() have completed.
         """
-        from simmate.toolkit.featurizers import USearchFingerprints
-
         if len(df) == 0:
             return df.with_columns(
                 polars.Series("maccs", [], dtype=polars.Binary),
@@ -251,7 +282,7 @@ class MoleculeDatastore(Datastore):
         )
 
     @classmethod
-    def build_fingerprint_index(cls, parallel_job: bool = False) -> None:
+    def build_fingerprint_index(cls, fp_type: str = "maccs", parallel_job: bool = False) -> None:
         """
         Builds USearch binary indexes from the chunk parquet files.
 
@@ -264,9 +295,9 @@ class MoleculeDatastore(Datastore):
             list(range(i, min(i + cls.index_batch_size, cls.num_chunks)))
             for i in range(0, cls.num_chunks, cls.index_batch_size)
         ]
-        done_batches = {p.stem for p in vectors_dir.glob("maccs-*.usearch")}
+        done_batches = {p.stem for p in vectors_dir.glob(f"{fp_type}-*.usearch")}
         batches_to_process = [
-            b for b in batches if f"maccs-{b[0]}-{b[-1]}" not in done_batches
+            b for b in batches if f"{fp_type}-{b[0]}-{b[-1]}" not in done_batches
         ]
         logging.info(
             f"{len(done_batches)} batches already done, "
@@ -276,56 +307,17 @@ class MoleculeDatastore(Datastore):
             batches_to_process,
             cls._build_fingerprint_index_single_batch,
             parallel_job,
+            fp_type=fp_type,
         )
         logging.info("USearch index build complete!")
 
     @classmethod
-    def _build_fingerprint_index_single_batch(cls, batch: list[int]):
-        import numpy
-        import pyarrow
-        from usearch.index import (
-            CompiledMetric,
-            Index,
-            MetricKind,
-            MetricSignature,
-            ScalarKind,
-        )
-
-        from simmate.toolkit.datastores.numba_funcs import (
-            tanimoto_ecfp4,
-            tanimoto_maccs,
-        )
-
+    def _build_fingerprint_index_single_batch(cls, batch: list[int], fp_type: str = "maccs"):
         live_dir = cls.live_directory
         vectors_dir = cls.base_directory / "vectors"
         source_glob = str(live_dir / "chunk_key=*" / "*.parquet")
 
-        # ndim is bits rounded up to uint32 boundary; stored_bytes is actual bytes
-        # from packbits; padded_bytes is stored_bytes zero-padded to uint32 alignment
-        fp_configs = {
-            "maccs": {
-                "ndim": 192,
-                "stored_bytes": 21,
-                "padded_bytes": 24,
-                "metric_fn": tanimoto_maccs,
-            },
-            # TODO:
-            # "ecfp4": {
-            #     "ndim": 2048,
-            #     "stored_bytes": 256,
-            #     "padded_bytes": 256,
-            #     "metric_fn": tanimoto_ecfp4,
-            # },
-            # "fcfp4": {
-            #     "ndim": 2048,
-            #     "stored_bytes": 256,
-            #     "padded_bytes": 256,
-            #     "metric_fn": tanimoto_ecfp4,
-            # },
-        }
-
-        fp_type = "maccs"  # fixed for now
-        cfg = fp_configs[fp_type]
+        cfg = cls._FP_CONFIGS[fp_type]
 
         index_path = str(vectors_dir / f"{fp_type}-{batch[0]}-{batch[-1]}.usearch")
         if Path(index_path).exists():
@@ -396,8 +388,6 @@ class MoleculeDatastore(Datastore):
         Args:
             fp_type: Fingerprint type to load. Currently only "maccs" is supported.
         """
-        from usearch.index import Index, Indexes
-
         if fp_type in cls._fingerprint_indexes:
             return
 
@@ -453,13 +443,11 @@ class MoleculeDatastore(Datastore):
             polars.DataFrame with columns ``datastore_id`` (Int64) and
             ``distance`` (Float32), sorted ascending by distance.
         """
-        from usearch.index import Indexes
-
         if isinstance(query, str):
             query = Molecule.from_smiles(query)
 
         cfg = cls._FP_CONFIGS[fp_type]
-        fp_bytes = MaccsFingerprint.featurize(query, vector_type="numpy_packbits_bytes")
+        fp_bytes = cfg["featurizer"].featurize(query, vector_type="numpy_packbits_bytes")
         vec = numpy.zeros(cfg["padded_bytes"], dtype=numpy.uint8)
         vec[: cfg["stored_bytes"]] = numpy.frombuffer(fp_bytes, dtype=numpy.uint8)
 
