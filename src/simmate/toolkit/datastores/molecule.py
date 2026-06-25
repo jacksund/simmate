@@ -22,50 +22,69 @@ class MoleculeDatastore(Datastore):
     similarity search indexes.
     """
 
-    index_batch_size: int = 1  # batching disabled by default
-
-    @update_column("rule_of_5")
-    def add_rule_of_5_column(cls, df: polars.DataFrame):
+    @classmethod
+    def filter_to_mdf(
+        cls,
+        similarity=None,
+        smarts: list = None,
+        limit: int = None,
+        init_toolkit_objs: bool = False,
+        init_substructure_lib: bool = False,
+        init_morgan_fp_lib: bool = False,
+        parallel: bool = False,
+        **kwargs,
+    ):
         """
-        Computes Ro5 from physicochemical property columns (MW, LogP, HBA, HBD).
-        Ro5 is True when: MW <= 500, LogP <= 5, HBA <= 10, HBD <= 5.
-        These are the classic Lipinski cutoffs.
-        Requires property columns to be present in the parquet.
-        """
-        return df.select(
-            (
-                (polars.col("molecular_weight_exact") <= 500)
-                & (polars.col("log_p_rdkit") <= 5)
-                & (polars.col("num_h_acceptors") <= 10)
-                & (polars.col("num_h_donors") <= 5)
-            ).alias("rule_of_5")
-        )["rule_of_5"]
+        Filters the datastore and returns a MoleculeDataFrame.
 
-    @update_table()
-    def add_fingerprints(cls, df: polars.DataFrame):
-        """
-        Adds MACCS, ECFP4, and FCFP4 fingerprint columns to each chunk parquet.
-        Run after repartition("chunk_key") and promote_staging() have completed.
-        """
-        from simmate.toolkit.featurizers import USearchFingerprints
+        Applies column filters (django-style kwargs), an optional row limit,
+        then returns the result as a MoleculeDataFrame. Similarity and SMARTS
+        filtering are not yet implemented.
 
-        if len(df) == 0:
-            return df.with_columns(
-                polars.Series("maccs", [], dtype=polars.Binary),
-                polars.Series("ecfp4", [], dtype=polars.Binary),
-                polars.Series("fcfp4", [], dtype=polars.Binary),
-            )
+        Args:
+            similarity: Reserved for future similarity filtering.
+            smarts: Reserved for future substructure filtering.
+            limit: Maximum number of rows to return. Defaults to 5_000_000.
+            init_toolkit_objs: Pre-initialize RDKit Molecule objects in the MDF.
+            init_substructure_lib: Pre-initialize substructure library in the MDF.
+            init_morgan_fp_lib: Pre-initialize Morgan fingerprint library in the MDF.
+            parallel: Use parallel processing in MoleculeDataFrame initialization.
+            **kwargs: Django-style column filters (e.g. MW__lte=500).
 
-        fingerprints = USearchFingerprints.featurize_many(
-            df["smiles"].to_list(), parallel=True
+        Returns:
+            MoleculeDataFrame filtered to matching rows.
+        """
+        from simmate.toolkit.dataframes import MoleculeDataFrame
+        from simmate.utils import filter_polars_df
+
+        source_glob = str(cls.live_directory / "chunk_key=*" / "*.parquet")
+        lazy_df = polars.scan_parquet(source_glob, hive_partitioning=True)
+
+        if kwargs:
+            lazy_df = filter_polars_df(lazy_df, **kwargs)
+
+        if limit:
+            lazy_df = lazy_df.limit(limit)
+
+        logging.info("Loading from datastore...")
+        df = lazy_df.collect()
+
+        if similarity:
+            pass  # TODO
+        if smarts:
+            pass  # TODO
+
+        return MoleculeDataFrame.from_polars(
+            df,
+            init_toolkit_objs=init_toolkit_objs,
+            init_substructure_lib=init_substructure_lib,
+            init_morgan_fp_lib=init_morgan_fp_lib,
+            parallel=parallel,
         )
-        maccs_list, ecfp4_list, fcfp4_list = zip(*fingerprints)
 
-        return df.with_columns(
-            polars.Series("maccs", list(maccs_list)),
-            polars.Series("ecfp4", list(ecfp4_list)),
-            polars.Series("fcfp4", list(fcfp4_list)),
-        )
+    # -------------------------------------------------------------------------
+
+    # helper methods for data cleaning + populating columns
 
     @update_table()
     def remove_invalid_smiles(cls, df: polars.DataFrame):
@@ -131,6 +150,38 @@ class MoleculeDatastore(Datastore):
         )
         return polars.concat([df, method_df], how="horizontal")
 
+    @update_column("rule_of_5")
+    def add_rule_of_5_column(cls, df: polars.DataFrame):
+        """
+        Computes Ro5 from physicochemical property columns (MW, LogP, HBA, HBD).
+        Ro5 is True when: MW <= 500, LogP <= 5, HBA <= 10, HBD <= 5.
+        These are the classic Lipinski cutoffs.
+        Requires property columns to be present in the parquet.
+        """
+        return df.select(
+            (
+                (polars.col("molecular_weight_exact") <= 500)
+                & (polars.col("log_p_rdkit") <= 5)
+                & (polars.col("num_h_acceptors") <= 10)
+                & (polars.col("num_h_donors") <= 5)
+            ).alias("rule_of_5")
+        )["rule_of_5"]
+
+    # -------------------------------------------------------------------------
+
+    # for datasets that require explicit-H smiles and fps
+
+    @update_table()
+    def convert_to_explicit_h_smiles(cls, df: polars.DataFrame):
+
+        method_df = MethodCaller.featurize_many(
+            molecules=df["smiles"].to_list(),
+            method_map={_get_smiles_with_h: {}},
+            parallel=True,
+            dataframe_format="polars",
+        )
+        return df.with_columns(method_df.to_series(0).alias("smiles"))
+
     @update_table()
     def add_pattern_fingerprint_column(
         cls, df: polars.DataFrame, explicit_h: bool = False
@@ -147,79 +198,40 @@ class MoleculeDatastore(Datastore):
         )
         return df.with_columns(polars.Series("pattern_fingerprint", fingerprints))
 
+    # -------------------------------------------------------------------------
+
+    # for billion-scale fingerprint similarity searches
+
     @update_table()
-    def convert_to_explicit_h_smiles(cls, df: polars.DataFrame):
+    def add_fingerprints(cls, df: polars.DataFrame):
+        """
+        Adds MACCS, ECFP4, and FCFP4 fingerprint columns to each chunk parquet.
+        Run after repartition("chunk_key") and promote_staging() have completed.
+        """
+        from simmate.toolkit.featurizers import USearchFingerprints
 
-        method_df = MethodCaller.featurize_many(
-            molecules=df["smiles"].to_list(),
-            method_map={_get_smiles_with_h: {}},
-            parallel=True,
-            dataframe_format="polars",
+        if len(df) == 0:
+            return df.with_columns(
+                polars.Series("maccs", [], dtype=polars.Binary),
+                polars.Series("ecfp4", [], dtype=polars.Binary),
+                polars.Series("fcfp4", [], dtype=polars.Binary),
+            )
+
+        fingerprints = USearchFingerprints.featurize_many(
+            df["smiles"].to_list(), parallel=True
         )
-        return df.with_columns(method_df.to_series(0).alias("smiles"))
+        maccs_list, ecfp4_list, fcfp4_list = zip(*fingerprints)
 
-    @classmethod
-    def filter_to_mdf(
-        cls,
-        similarity=None,
-        smarts: list = None,
-        limit: int = None,
-        init_toolkit_objs: bool = False,
-        init_substructure_lib: bool = False,
-        init_morgan_fp_lib: bool = False,
-        parallel: bool = False,
-        **kwargs,
-    ):
-        """
-        Filters the datastore and returns a MoleculeDataFrame.
-
-        Applies column filters (django-style kwargs), an optional row limit,
-        then returns the result as a MoleculeDataFrame. Similarity and SMARTS
-        filtering are not yet implemented.
-
-        Args:
-            similarity: Reserved for future similarity filtering.
-            smarts: Reserved for future substructure filtering.
-            limit: Maximum number of rows to return. Defaults to 5_000_000.
-            init_toolkit_objs: Pre-initialize RDKit Molecule objects in the MDF.
-            init_substructure_lib: Pre-initialize substructure library in the MDF.
-            init_morgan_fp_lib: Pre-initialize Morgan fingerprint library in the MDF.
-            parallel: Use parallel processing in MoleculeDataFrame initialization.
-            **kwargs: Django-style column filters (e.g. MW__lte=500).
-
-        Returns:
-            MoleculeDataFrame filtered to matching rows.
-        """
-        from simmate.toolkit.dataframes import MoleculeDataFrame
-        from simmate.utils import filter_polars_df
-
-        source_glob = str(cls.live_directory / "chunk_key=*" / "*.parquet")
-        lazy_df = polars.scan_parquet(source_glob, hive_partitioning=True)
-
-        if kwargs:
-            lazy_df = filter_polars_df(lazy_df, **kwargs)
-
-        if limit:
-            lazy_df = lazy_df.limit(limit)
-
-        logging.info("Loading from datastore...")
-        df = lazy_df.collect()
-
-        if similarity:
-            pass  # TODO
-        if smarts:
-            pass  # TODO
-
-        return MoleculeDataFrame.from_polars(
-            df,
-            init_toolkit_objs=init_toolkit_objs,
-            init_substructure_lib=init_substructure_lib,
-            init_morgan_fp_lib=init_morgan_fp_lib,
-            parallel=parallel,
+        return df.with_columns(
+            polars.Series("maccs", list(maccs_list)),
+            polars.Series("ecfp4", list(ecfp4_list)),
+            polars.Series("fcfp4", list(fcfp4_list)),
         )
 
+    index_batch_size: int = 1  # batching disabled by default
+
     @classmethod
-    def build_usearch_index(cls, parallel_job: bool = False) -> None:
+    def build_fingerprint_index(cls, parallel_job: bool = False) -> None:
         """
         Builds USearch binary indexes from the chunk parquet files.
 
@@ -242,13 +254,13 @@ class MoleculeDatastore(Datastore):
         )
         dispatch(
             batches_to_process,
-            cls._build_usearch_index_single_batch,
+            cls._build_fingerprint_index_single_batch,
             parallel_job,
         )
         logging.info("USearch index build complete!")
 
     @classmethod
-    def _build_usearch_index_single_batch(cls, batch: list[int]):
+    def _build_fingerprint_index_single_batch(cls, batch: list[int]):
         import numpy
         import pyarrow
         from usearch.index import (
