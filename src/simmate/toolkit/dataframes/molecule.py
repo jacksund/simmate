@@ -349,14 +349,14 @@ class MoleculeDataFrame:
         # elif self.explicit_h_mode and "molecule_obj" in self.df.columns:
         #     # if we need smiles with Hs, then its fastest to use the toolkit objs
         #     for molecule in track(self.df["molecule_obj"]):
-        #         s = molecule.to_smiles(remove_hydrogen=False)
+        #         s = molecule.to_smiles()
         #         molecule_library.AddSmiles(s)
         # else:
         #     # otherwise we need to generate the new smiles and add it.
         #     for r in track(self.df["smiles"]):
         #         molecule = Molecule.from_smiles(r)
         #         molecule.add_hydrogens()
-        #         s = molecule.to_smiles(remove_hydrogen=False)
+        #         s = molecule.to_smiles()
         #         molecule_library.AddSmiles(s)
 
         # load_rdkit_fingerprint_from_base64 if instance base64 str

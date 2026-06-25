@@ -3,11 +3,35 @@
 import logging
 from pathlib import Path
 
+import numpy
 import polars
+import pyarrow
+from usearch.index import (
+    CompiledMetric,
+    Index,
+    Indexes,
+    MetricKind,
+    MetricSignature,
+    ScalarKind,
+)
 
-from simmate.toolkit.datastores.base import Datastore
-from simmate.toolkit.datastores.utils import update_column, update_table
-from simmate.utils import dispatch, get_directory
+from simmate.toolkit import Molecule
+from simmate.utils import dispatch, filter_polars_df, get_directory
+
+from ..dataframes import MoleculeDataFrame
+from ..featurizers import (
+    Ecfp4Fingerprint,
+    Fcfp4Fingerprint,
+    MaccsFingerprint,
+    MethodCaller,
+    PatternFingerprint,
+    PropertyGrabber,
+    USearchFingerprints,
+)
+from ..filters import RemoveInvalidSmiles
+from .base import Datastore
+from .numba_funcs import tanimoto_ecfp4, tanimoto_maccs
+from .utils import update_column, update_table
 
 
 class MoleculeDatastore(Datastore):
@@ -17,10 +41,150 @@ class MoleculeDatastore(Datastore):
     similarity search indexes.
     """
 
-    index_batch_size: int = 10
+    @classmethod
+    def filter_to_mdf(
+        cls,
+        similarity=None,
+        similarity_count: int = 50,
+        similarity_type: str = "ecfp4",
+        smarts: list = None,
+        limit: int = None,
+        init_toolkit_objs: bool = False,
+        init_substructure_lib: bool = False,
+        init_morgan_fp_lib: bool = False,
+        parallel: bool = False,
+        **kwargs,
+    ) -> MoleculeDataFrame:
+        """
+        Filter the datastore and return a MoleculeDataFrame.
 
-    @update_column("Ro5")
-    def add_ro5_column(cls, df: polars.DataFrame):
+        Applies django-style column filters (``**kwargs``) and an optional row
+        limit, then returns the result as a ``MoleculeDataFrame``. When
+        ``similarity`` is given, runs an ANN search via the USearch index and
+        joins a ``distance`` column (ascending) into the result.
+
+        Args:
+            similarity: Query molecule (``Molecule`` or SMILES) for similarity
+                search.
+            similarity_count: Number of top similar molecules to retrieve.
+            similarity_type: Fingerprint type for similarity search.
+                One of ``"ecfp4"``, ``"maccs"``, or ``"fcfp4"``.
+            smarts: Not yet implemented — raises ``NotImplementedError``.
+            limit: Maximum number of rows to return (ignored when ``similarity``
+                is provided).
+            init_toolkit_objs: Pre-initialize RDKit Molecule objects in the MDF.
+            init_substructure_lib: Pre-initialize substructure library in the MDF.
+            init_morgan_fp_lib: Pre-initialize Morgan fingerprint library in the MDF.
+            parallel: Use parallel processing in MoleculeDataFrame initialization.
+            **kwargs: Django-style column filters (e.g. ``MW__lte=500``).
+
+        Returns:
+            MoleculeDataFrame filtered to matching rows.
+        """
+
+        source_glob = str(cls.live_directory / "chunk_key=*" / "*.parquet")
+
+        if similarity:
+            sim_df = cls.search_similar(similarity, similarity_count, similarity_type)
+            sim_ids = sim_df["datastore_id"].to_list()
+            lazy_df = polars.scan_parquet(source_glob, hive_partitioning=True)
+            lazy_df = lazy_df.filter(polars.col("datastore_id").is_in(sim_ids))
+            if kwargs:
+                lazy_df = filter_polars_df(lazy_df, **kwargs)
+            logging.info("Loading from datastore...")
+            df = lazy_df.collect()
+            df = df.join(sim_df, on="datastore_id", how="left").sort("distance")
+        else:
+            lazy_df = polars.scan_parquet(source_glob, hive_partitioning=True)
+            if kwargs:
+                lazy_df = filter_polars_df(lazy_df, **kwargs)
+            if limit:
+                lazy_df = lazy_df.limit(limit)
+            logging.info("Loading from datastore...")
+            df = lazy_df.collect()
+
+        if smarts:
+            raise NotImplementedError(
+                "SMARTS substructure filtering is not yet implemented."
+            )
+
+        return MoleculeDataFrame.from_polars(
+            df,
+            init_toolkit_objs=init_toolkit_objs,
+            init_substructure_lib=init_substructure_lib,
+            init_morgan_fp_lib=init_morgan_fp_lib,
+            parallel=parallel,
+        )
+
+    # -------------------------------------------------------------------------
+
+    # helper methods for data cleaning + populating columns
+
+    @update_table()
+    def remove_invalid_smiles(cls, df: polars.DataFrame):
+        """
+        Drops rows with invalid SMILES from each chunk.
+        Run before any featurization steps to ensure clean input.
+        """
+
+        is_valid = RemoveInvalidSmiles.filter(
+            molecules=df["smiles"].to_list(),
+            return_mode="booleans",
+            parallel=True,
+        )
+        num_failed = len(is_valid) - sum(is_valid)
+        if num_failed > 0:
+            logging.warning(f"Removed {num_failed} invalid molecules.")
+        return df.filter(is_valid)
+
+    @update_table()
+    def add_property_columns(
+        cls,
+        df: polars.DataFrame,
+        properties: list[str] = [
+            "molecular_weight_exact",
+            "num_atoms_heavy",
+            "num_stereocenters",
+            "num_h_acceptors",
+            "num_h_donors",
+            "log_p_rdkit",
+            "synthetic_accessibility",
+        ],
+    ):
+        """
+        Computes physicochemical properties and adds them as columns.
+        Defaults to the classic Lipinski-relevant set: MW, heavy atom count,
+        stereocenters, LogP, and synthetic accessibility score.
+        """
+        prop_df = PropertyGrabber.featurize_many(
+            molecules=df["smiles"].to_list(),
+            properties=properties,
+            parallel=True,
+            dataframe_format="polars",
+        )
+        return polars.concat([df, prop_df], how="horizontal")
+
+    @update_table()
+    def add_method_columns(
+        cls,
+        df: polars.DataFrame,
+        method_map: dict = {"to_inchi_key": {}},
+    ):
+        """
+        Computes method-based properties and adds them as columns.
+        Defaults to InChI key only. Pass a custom method_map to extend,
+        e.g. {"to_inchi_key": {}, "to_smiles": {}}.
+        """
+        method_df = MethodCaller.featurize_many(
+            molecules=df["smiles"].to_list(),
+            method_map=method_map,
+            parallel=True,
+            dataframe_format="polars",
+        )
+        return polars.concat([df, method_df], how="horizontal")
+
+    @update_column("rule_of_5")
+    def add_rule_of_5_column(cls, df: polars.DataFrame):
         """
         Computes Ro5 from physicochemical property columns (MW, LogP, HBA, HBD).
         Ro5 is True when: MW <= 500, LogP <= 5, HBA <= 10, HBD <= 5.
@@ -29,41 +193,147 @@ class MoleculeDatastore(Datastore):
         """
         return df.select(
             (
-                (polars.col("MW") <= 500)
-                & (polars.col("LogP") <= 5)
-                & (polars.col("HBA") <= 10)
-                & (polars.col("HBD") <= 5)
-            ).alias("Ro5")
-        )["Ro5"]
+                (polars.col("molecular_weight_exact") <= 500)
+                & (polars.col("log_p_rdkit") <= 5)
+                & (polars.col("num_h_acceptors") <= 10)
+                & (polars.col("num_h_donors") <= 5)
+            ).alias("rule_of_5")
+        )["rule_of_5"]
+
+    # -------------------------------------------------------------------------
+
+    # for datasets that require explicit-H smiles and fps
 
     @update_table()
-    def add_fingerprints(cls, df: polars.DataFrame):
-        """
-        Adds MACCS, ECFP4, and FCFP4 fingerprint columns to each chunk parquet.
-        Run after repartition("chunk_key") and promote_staging() have completed.
-        """
-        from simmate.toolkit.featurizers import USearchFingerprints
+    def convert_to_explicit_h_smiles(cls, df: polars.DataFrame):
 
-        if len(df) == 0:
+        method_df = MethodCaller.featurize_many(
+            molecules=df["smiles"].to_list(),
+            method_map={_get_smiles_with_h: {}},
+            parallel=True,
+            dataframe_format="polars",
+        )
+        return df.with_columns(method_df.to_series(0).alias("smiles"))
+
+    @update_table()
+    def add_pattern_fingerprint_column(
+        cls, df: polars.DataFrame, explicit_h: bool = False
+    ):
+        """
+        Adds a base64-encoded PatternFingerprint column for substructure searches.
+        Run after remove_invalid_smiles() to avoid errors on bad SMILES.
+        """
+        fingerprints = PatternFingerprint.featurize_many(
+            molecules=df["smiles"].to_list(),
+            parallel=True,
+            vector_type="base64",
+            explicit_h=explicit_h,
+        )
+        return df.with_columns(polars.Series("pattern_fingerprint", fingerprints))
+
+    # -------------------------------------------------------------------------
+
+    # for billion-scale fingerprint similarity searches
+
+    index_batch_size: int = 1
+    """
+    chunk_key batches per index file; 1 = one file per chunk
+    """
+
+    index_load_mode: str = "memory"
+    """
+    "memory" | "view" | "scan" — see load_fingerprint_index()
+    """
+
+    _fingerprint_indexes: dict = {}
+    # fp_type -> list[Index], cached after first load
+
+    _FP_CONFIGS = {
+        "maccs": {
+            "ndim": 168,
+            "stored_bytes": 21,
+            "metric_fn": tanimoto_maccs,
+            "featurizer": MaccsFingerprint,
+        },
+        "ecfp4": {
+            "ndim": 2048,
+            "stored_bytes": 256,
+            "metric_fn": tanimoto_ecfp4,
+            "featurizer": Ecfp4Fingerprint,
+        },
+        "fcfp4": {
+            "ndim": 2048,
+            "stored_bytes": 256,
+            "metric_fn": tanimoto_ecfp4,  # same 2048-bit packed layout as ecfp4
+            "featurizer": Fcfp4Fingerprint,
+        },
+    }
+
+    @update_table()
+    def add_fingerprints(
+        cls,
+        df: polars.DataFrame,
+        fingerprint_type: str = "usearch",
+    ):
+        """
+        Add fingerprint column(s) to each chunk parquet.
+
+        Note:
+            For bulk dataset builds, run after ``repartition("chunk_key")``
+            and ``promote_staging()`` have completed.
+
+        Args:
+            fingerprint_type: Controls which fingerprint column(s) are added.
+
+                - ``"usearch"`` (default): Adds three packed-bit binary columns
+                  (``maccs``, ``ecfp4``, ``fcfp4``) computed together in one
+                  pass via ``USearchFingerprints``.
+                - ``"maccs"``, ``"ecfp4"``, or ``"fcfp4"``: Adds a single
+                  packed-bit binary column with that name.
+
+        Raises:
+            ValueError: If ``fingerprint_type`` is not recognized.
+        """
+        if fingerprint_type == "usearch":
+            if len(df) == 0:
+                return df.with_columns(
+                    polars.Series("maccs", [], dtype=polars.Binary),
+                    polars.Series("ecfp4", [], dtype=polars.Binary),
+                    polars.Series("fcfp4", [], dtype=polars.Binary),
+                )
+            fingerprints = USearchFingerprints.featurize_many(
+                df["smiles"].to_list(), parallel=True
+            )
+            maccs_list, ecfp4_list, fcfp4_list = zip(*fingerprints)
             return df.with_columns(
-                polars.Series("maccs", [], dtype=polars.Binary),
-                polars.Series("ecfp4", [], dtype=polars.Binary),
-                polars.Series("fcfp4", [], dtype=polars.Binary),
+                polars.Series("maccs", list(maccs_list)),
+                polars.Series("ecfp4", list(ecfp4_list)),
+                polars.Series("fcfp4", list(fcfp4_list)),
             )
 
-        fingerprints = USearchFingerprints.featurize_many(
-            df["smiles"].to_list(), parallel=True
-        )
-        maccs_list, ecfp4_list, fcfp4_list = zip(*fingerprints)
+        elif fingerprint_type in cls._FP_CONFIGS:
+            if len(df) == 0:
+                return df.with_columns(
+                    polars.Series(fingerprint_type, [], dtype=polars.Binary)
+                )
+            cfg = cls._FP_CONFIGS[fingerprint_type]
+            fp_list = cfg["featurizer"].featurize_many(
+                df["smiles"].to_list(),
+                parallel=True,
+                vector_type="numpy_packbits_bytes",
+            )
+            return df.with_columns(polars.Series(fingerprint_type, fp_list))
 
-        return df.with_columns(
-            polars.Series("maccs", list(maccs_list)),
-            polars.Series("ecfp4", list(ecfp4_list)),
-            polars.Series("fcfp4", list(fcfp4_list)),
-        )
+        else:
+            valid = ["usearch"] + list(cls._FP_CONFIGS.keys())
+            raise ValueError(
+                f"Unknown fingerprint_type {fingerprint_type!r}. Valid options: {valid}"
+            )
 
     @classmethod
-    def build_usearch_index(cls, parallel_job: bool = False) -> None:
+    def build_fingerprint_index(
+        cls, fp_type: str = "ecfp4", parallel_job: bool = False
+    ) -> None:
         """
         Builds USearch binary indexes from the chunk parquet files.
 
@@ -76,9 +346,9 @@ class MoleculeDatastore(Datastore):
             list(range(i, min(i + cls.index_batch_size, cls.num_chunks)))
             for i in range(0, cls.num_chunks, cls.index_batch_size)
         ]
-        done_batches = {p.stem for p in vectors_dir.glob("maccs-*.usearch")}
+        done_batches = {p.stem for p in vectors_dir.glob(f"{fp_type}-*.usearch")}
         batches_to_process = [
-            b for b in batches if f"maccs-{b[0]}-{b[-1]}" not in done_batches
+            b for b in batches if f"{fp_type}-{b[0]}-{b[-1]}" not in done_batches
         ]
         logging.info(
             f"{len(done_batches)} batches already done, "
@@ -86,58 +356,21 @@ class MoleculeDatastore(Datastore):
         )
         dispatch(
             batches_to_process,
-            cls._build_usearch_index_single_batch,
+            cls._build_fingerprint_index_single_batch,
             parallel_job,
+            fp_type=fp_type,
         )
         logging.info("USearch index build complete!")
 
     @classmethod
-    def _build_usearch_index_single_batch(cls, batch: list[int]):
-        import numpy
-        import pyarrow
-        from usearch.index import (
-            CompiledMetric,
-            Index,
-            MetricKind,
-            MetricSignature,
-            ScalarKind,
-        )
-
-        from simmate.toolkit.datastores.numba_funcs import (
-            tanimoto_ecfp4,
-            tanimoto_maccs,
-        )
-
+    def _build_fingerprint_index_single_batch(
+        cls, batch: list[int], fp_type: str = "ecfp4"
+    ):
         live_dir = cls.live_directory
         vectors_dir = cls.base_directory / "vectors"
         source_glob = str(live_dir / "chunk_key=*" / "*.parquet")
 
-        # ndim is bits rounded up to uint32 boundary; stored_bytes is actual bytes
-        # from packbits; padded_bytes is stored_bytes zero-padded to uint32 alignment
-        fp_configs = {
-            "maccs": {
-                "ndim": 192,
-                "stored_bytes": 21,
-                "padded_bytes": 24,
-                "metric_fn": tanimoto_maccs,
-            },
-            # TODO:
-            # "ecfp4": {
-            #     "ndim": 2048,
-            #     "stored_bytes": 256,
-            #     "padded_bytes": 256,
-            #     "metric_fn": tanimoto_ecfp4,
-            # },
-            # "fcfp4": {
-            #     "ndim": 2048,
-            #     "stored_bytes": 256,
-            #     "padded_bytes": 256,
-            #     "metric_fn": tanimoto_ecfp4,
-            # },
-        }
-
-        fp_type = "maccs"  # fixed for now
-        cfg = fp_configs[fp_type]
+        cfg = cls._FP_CONFIGS[fp_type]
 
         index_path = str(vectors_dir / f"{fp_type}-{batch[0]}-{batch[-1]}.usearch")
         if Path(index_path).exists():
@@ -176,18 +409,130 @@ class MoleculeDatastore(Datastore):
             df_pa = df.to_arrow()
             fps = df_pa.column(fp_type).cast(pyarrow.binary(cfg["stored_bytes"]))
 
-            vectors = []
-            for fp in fps:
-                vec = numpy.zeros(cfg["padded_bytes"], dtype=numpy.uint8)
-                vec[: cfg["stored_bytes"]] = fp.as_buffer()
-                vectors.append(vec)
-            vectors = numpy.vstack(vectors)
-
-            index.add(
-                keys,
-                vectors,
-                log=f"Building {fp_type} chunk {chunk_key}",
+            vectors = numpy.array(
+                [numpy.frombuffer(fp.as_buffer(), dtype=numpy.uint8) for fp in fps],
+                dtype=numpy.uint8,
             )
 
+            index.add(keys, vectors)
             index.save(index_path)
             logging.info(f"  Saved progress | Vectors: {len(index):,}")
+
+    @classmethod
+    def load_fingerprint_index(cls, fp_type: str = "ecfp4") -> None:
+        """
+        Loads USearch index files and caches them under ``_fingerprint_indexes``.
+
+        Behavior is controlled by ``index_load_mode``:
+
+        - ``"memory"``: Load all index files into RAM (fastest search, highest RAM).
+        - ``"view"``: Open all files as a single memory-mapped ``Indexes`` object
+          (low RAM, nearly as fast as memory mode).
+        - ``"scan"``: Store file paths only; ``search_similar`` opens each file
+          one at a time (lowest RAM, slowest search).
+
+        Args:
+            fp_type: Fingerprint type to load. One of ``"ecfp4"``, ``"maccs"``,
+                or ``"fcfp4"``.
+        """
+        if fp_type in cls._fingerprint_indexes:
+            return
+
+        vectors_dir = cls.base_directory / "vectors"
+        index_files = sorted(vectors_dir.glob(f"{fp_type}-*.usearch"))
+        if not index_files:
+            raise FileNotFoundError(
+                f"No {fp_type} index files found in {vectors_dir}. "
+                "Run build_fingerprint_index() first."
+            )
+
+        mode = cls.index_load_mode
+        if mode == "memory":
+            logging.info(
+                f"Loading {len(index_files)} {fp_type} index file(s) into RAM..."
+            )
+            payload = [Index.restore(str(p)) for p in index_files]
+            logging.info(f"Loaded {sum(len(i) for i in payload):,} vectors.")
+        elif mode == "view":
+            logging.info(
+                f"Opening {len(index_files)} {fp_type} index file(s) as memory-mapped views..."
+            )
+            payload = Indexes(paths=[str(p) for p in index_files], view=True)
+        elif mode == "scan":
+            logging.info(
+                f"Registering {len(index_files)} {fp_type} index file(s) for scan-mode search."
+            )
+            payload = index_files
+        else:
+            raise ValueError(
+                f"Unknown index_load_mode: {mode!r}. Use 'memory', 'view', or 'scan'."
+            )
+
+        cls._fingerprint_indexes[fp_type] = (mode, payload)
+
+    @classmethod
+    def search_similar(
+        cls,
+        query,
+        count: int = 50,
+        fp_type: str = "ecfp4",
+    ) -> "polars.DataFrame":
+        """
+        Searches USearch indexes for molecules similar to the query.
+
+        Uses the cached index loaded by ``load_fingerprint_index()``, calling it
+        automatically on first use. Search behavior depends on ``index_load_mode``.
+
+        Args:
+            query: Query molecule as a ``Molecule`` object or SMILES string.
+            count: Number of top results to return.
+            fp_type: Fingerprint type to use. One of ``"ecfp4"``, ``"maccs"``,
+                or ``"fcfp4"``.
+
+        Returns:
+            polars.DataFrame with columns ``datastore_id`` (Int64) and
+            ``distance`` (Float32), sorted ascending by distance.
+        """
+        if isinstance(query, str):
+            query = Molecule.from_smiles(query)
+
+        cfg = cls._FP_CONFIGS[fp_type]
+        fp_bytes = cfg["featurizer"].featurize(
+            query, vector_type="numpy_packbits_bytes"
+        )
+        vec = numpy.frombuffer(fp_bytes, dtype=numpy.uint8).copy()
+
+        if fp_type not in cls._fingerprint_indexes:
+            cls.load_fingerprint_index(fp_type)
+
+        mode, payload = cls._fingerprint_indexes[fp_type]
+
+        all_keys, all_distances = [], []
+        if mode == "memory":
+            for index in payload:
+                matches = index.search(vec, count)
+                all_keys.extend(matches.keys.tolist())
+                all_distances.extend(matches.distances.tolist())
+        elif mode == "view":
+            matches = payload.search(vec, count)
+            all_keys = matches.keys.tolist()
+            all_distances = matches.distances.tolist()
+        elif mode == "scan":
+            for path in payload:
+                index = Indexes(paths=[str(path)], view=True)
+                matches = index.search(vec, count)
+                all_keys.extend(matches.keys.tolist())
+                all_distances.extend(matches.distances.tolist())
+
+        df = polars.DataFrame(
+            {"datastore_id": all_keys, "distance": all_distances},
+            schema={"datastore_id": polars.Int64, "distance": polars.Float32},
+        )
+        return df.sort("distance").head(count)
+
+
+# top-level (not a method) so it is picklable for multiprocessing
+def _get_smiles_with_h(molecule):
+    """Return SMILES with explicit hydrogens added."""
+    molecule.add_hydrogens()
+    return molecule.to_smiles()
