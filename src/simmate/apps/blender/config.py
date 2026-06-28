@@ -1,24 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Calling Blender is currently a messy business because there's no easy
-# way to install it as a python module. Instead we need to install Blender
-# separately and have it execute scripts from the command-line. To do this,
-# we need to check and see if Blender is installed, and if not, warn the user.
-# This is different for each operating system, and each is outlined here:
-#   https://docs.blender.org/manual/en/latest/advanced/command_line/launch/index.html
-
 import platform
 import subprocess
 from pathlib import Path
 
 import yaml
 
-# NOTE: You should only need to use the get_blender_command() function below.
-# All other functions are called within it.
-#
-# The exception to this is if you installed a new version of Blender when you
-# already had a older version configured. In this case, just run the
-# find_blender_installation once and you're good to go!
+from simmate.config.utils import check_app_reg, check_command_exists, show_test_results
 
 
 def get_blender_command():
@@ -146,3 +134,27 @@ class BlenderNotInstalledError(Exception):
             "from their website: https://www.blender.org/download/"
         )
         super().__init__(default_message)
+
+
+def test_config(run_calcs: bool = False):
+    """
+    Checks to see if Blender is configured correctly
+    """
+
+    # 1 - check that Simmate app is registered
+    is_registered = check_app_reg("simmate.apps.configs.BlenderConfig")
+
+    # 2 - check for command
+    try:
+        command = get_blender_command()
+        found_command = True
+    except BlenderNotInstalledError:
+        found_command = False
+
+    # 3 - run some sample workflows
+    if run_calcs:
+        raise NotImplementedError("This test has not been added yet.")
+
+    # 4 - read out result of all tests
+    passed_all = bool(is_registered and found_command)
+    show_test_results("Blender", passed_all)

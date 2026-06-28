@@ -21,10 +21,13 @@ for key in COLORING:
     COLORING[key] = numpy.array(color) / 255
 
 
-def make_structure_blend(lattice, sites_to_draw, filename):
-    # convert variable from json str to original format
-    lattice = json.loads(lattice)
-    sites_to_draw = json.loads(sites_to_draw.replace("'", '"'))
+def make_structure_blend(input_filename, output_filename):
+    # read variables from json file
+    with open(input_filename, "r") as file:
+        data = json.load(file)
+
+    lattice = json.loads(data["lattice"])
+    sites_to_draw = json.loads(data["sites"].replace("'", '"'))
 
     # import Verge3D settings
     # import addon_utils
@@ -199,12 +202,12 @@ def make_structure_blend(lattice, sites_to_draw, filename):
     # bpy.ops.export_scene.v3d_gltf(filepath=save_path)
 
     # The format we save the file as depends on the ending of the filename
-    if filename.suffix == ".blend":
+    if output_filename.endswith(".blend"):
         # save this to a blender file
-        bpy.ops.wm.save_as_mainfile(filepath=filename)
-    elif filename.suffix == ".glb":
+        bpy.ops.wm.save_as_mainfile(filepath=output_filename)
+    elif output_filename.endswith(".glb"):
         # export in the gltf 2.0 format (.glb file)
-        bpy.ops.export_scene.gltf(filepath=filename)
+        bpy.ops.export_scene.gltf(filepath=output_filename)
     else:
         raise Exception("unknown format used")
 
@@ -217,18 +220,16 @@ def main():
     # To pull out the arguments passed to the script, we need to tell the parser
     # what they will be in advance.
     parser = argparse.ArgumentParser()
-    parser.add_argument("--lattice", dest="lattice")
-    parser.add_argument("--sites", dest="sites")
-    parser.add_argument("--save", dest="filename")
+    parser.add_argument("--filename", dest="filename")
+    parser.add_argument("--save", dest="output_filename")
 
     # we can now pull out the arguments passed into the command
     parsed_arguments = parser.parse_args(arguments)
 
     # Run the function we defined above
     make_structure_blend(
-        parsed_arguments.lattice,
-        parsed_arguments.sites,
         parsed_arguments.filename,
+        parsed_arguments.output_filename,
     )
 
 
