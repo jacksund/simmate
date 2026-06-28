@@ -427,17 +427,50 @@ def get_chunk_key(string_id: str, num_chunks: int) -> int:
     return int.from_bytes(h, "big") % num_chunks
 
 
-def dispatch(items, fn, parallel: bool, tags: list = None, **kwargs) -> None:
+def dispatch(
+    items,
+    fn,
+    parallel: bool | str = False,
+    tags: list = None,
+    batch_size: int = 1000,
+    max_workers: int = None,
+    **kwargs,
+) -> list:
     """
-    Runs fn(item, **kwargs) for each item in items, either serially or via
-    SimmateExecutor for parallel execution.
+    Runs fn(item, **kwargs) for each item in items based on the requested
+    parallel mode.
     """
-    if parallel:
+    if parallel == "job":
         from simmate.database import connect  # isort:skip
         from simmate.compute import SimmateExecutor  # isort:skip
 
+        results = []
         for item in track(items):
-            SimmateExecutor.submit(fn, item, tags=tags or ["simmate"], **kwargs)
+            result = SimmateExecutor.submit(
+                fn, item, tags=tags or ["simmate"], **kwargs
+            )
+            results.append(result)
+        return results
+
+    elif parallel is True or parallel == "core":
+        from concurrent.futures import ProcessPoolExecutor
+
+        def process_chunk(chunk_items, **kwargs_inner):
+            return [fn(i, **kwargs_inner) for i in chunk_items]
+
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            futures = [
+                executor.submit(process_chunk, chunk, **kwargs)
+                for chunk in chunk_list(full_list=items, chunk_size=batch_size)
+            ]
+            # flatten results before returning
+            return [item for future in track(futures) for item in future.result()]
+
+    elif not parallel or parallel == "single":
+        results = []
+        for item in track(items):
+            results.append(fn(item, **kwargs))
+        return results
+
     else:
-        for item in track(items):
-            fn(item, **kwargs)
+        raise Exception(f"Unknown parallel mode: {parallel}")

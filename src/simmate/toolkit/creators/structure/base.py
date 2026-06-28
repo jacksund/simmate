@@ -3,7 +3,7 @@
 import logging
 from abc import ABC, abstractmethod
 
-from dask.distributed import get_client
+from simmate.utils import dispatch
 
 
 class StructureCreator(ABC):
@@ -74,28 +74,13 @@ class StructureCreator(ABC):
         lot of overhead with a single call to create_structure(), so it may
         make more sense to have the main structure creation code in this
         function. See the USPEXStructure Creator class for an example of this.
-
-        Make sure you have a Dask cluster setup as a global variable!
-        Here's how you should do that...
-            from dask.distributed import Client
-            client = Client(processes=False)
         """
-        # USING DASK FUTURES TO PARALLELIZE
-
-        # grab the dask cluster
-        #!!! Maybe give the client as an optional input? And if none is
-        #!!! given or detected, start up one automatically...?
-        try:
-            client = get_client()
-        except ValueError:
-            print("Set up a Dask cluster before trying to run this!")
-            return False
-        # launch create_structure(spacegroup) iteratively and in parallel
-        # The pure=False indicates that we will have different answers, even for the same input
-        futures = client.map(self.create_structure, [spacegroup] * n, pure=False)
-        # wait for all of the calls to finish and grab the results
-        results = client.gather(futures)  #!!! faster for dask
-        # we now have a list of structures of size n and can return them
+        # USING DISPATCH TO PARALLELIZE
+        results = dispatch(
+            [spacegroup] * n,
+            self.create_structure,
+            parallel=True,
+        )
         return results
 
     def update_data(self):
