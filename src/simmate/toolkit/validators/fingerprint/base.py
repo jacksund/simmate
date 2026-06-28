@@ -297,13 +297,6 @@ class FingerprintValidator(Validator):
             id__in=new_ids
         ).to_toolkit()
 
-        # OPTIMIZE: I attempted to calculate fingerprints with Dask, but without
-        # any luck. Ends up crashing in many scenarios.
-        # from simmate.config.dask import get_dask_client
-        # with get_dask_client() as client:
-        #     futures = [client.submit(self._get_fingerprint, s) for s in new_structures]
-        #     fingerprints = [future.result() for future in track(futures)]
-
         # calculate each fingerprint and add it to the database
         fingerprints = [
             self._get_fingerprint(structure) for structure in track(new_structures)

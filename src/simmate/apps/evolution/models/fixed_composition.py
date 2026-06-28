@@ -16,13 +16,12 @@ from simmate.apps.evolution import selectors as selector_module
 from simmate.apps.evolution import stop_conditions as stop_conditions_module
 from simmate.apps.evolution.models import SteadystateSource
 from simmate.compute import WorkItem
-from simmate.config.dask import get_dask_client
 from simmate.database.core import table_column
 from simmate.database.mixins import Calculation
 from simmate.toolkit import Composition, Structure
 from simmate.toolkit.validators import fingerprint as validator_module
 from simmate.toolkit.visualization.plotting import PlotlyFigure
-from simmate.utils import get_directory
+from simmate.utils import dispatch, get_directory
 
 
 class FixedCompositionSearch(Calculation):
@@ -776,15 +775,19 @@ class Correctness(PlotlyFigure):
             for _, s in structures_dataframe.iterrows()
         ]
 
-        # generating fingerprints is slow so we use dask to parallelize
-        client = get_dask_client()
-        logging.info("Submitting to jobs dask...")
-        futures = [
-            client.submit(featurizer.featurize, s.structure, pure=False)
-            for _, s in track(list(structures_dataframe.iterrows()))
+        # generating fingerprints is slow so we use dispatch to parallelize
+
+        logging.info("Submitting to dispatch (parallel_core)...")
+        structures_to_featurize = [
+            s.structure for _, s in structures_dataframe.iterrows()
         ]
-        logging.info("Waiting for dask jobs to finish...")
-        structures_dataframe["fingerprint"] = [numpy.array(f.result()) for f in futures]
+        fingerprints = dispatch(
+            structures_to_featurize,
+            featurizer.featurize,
+            parallel=True,
+            batch_size=100,
+        )
+        structures_dataframe["fingerprint"] = [numpy.array(f) for f in fingerprints]
         logging.info("Done.")
 
         fingerprint_known = numpy.array(featurizer.featurize(structure_known))
