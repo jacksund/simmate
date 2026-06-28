@@ -27,6 +27,10 @@ class BcpcConfig(AppConfig):
     name = "simmate.apps.bcpc"
 
 
+class BlenderConfig(AppConfig):
+    name = "simmate.apps.blender"
+
+
 class BioviaCosmoConfig(AppConfig):
     name = "simmate.apps.biovia_cosmo"
 

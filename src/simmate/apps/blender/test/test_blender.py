@@ -4,17 +4,10 @@ import platform
 
 import pytest
 
-from simmate.toolkit.visualization.structure.blender.config import (
+from simmate.apps.blender.config import (
     BlenderNotInstalledError,
     get_blender_command,
 )
-
-# Requires blender install which is not possible in CI yet.
-#
-# from simmate.toolkit.visualization.structure.blender.base import (
-#     make_blender_structure,
-#     serialize_structure_sites,
-# )
 
 
 @pytest.mark.blender  # this test requires blender to NOT be installed
