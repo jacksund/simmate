@@ -41,7 +41,7 @@ class CodStructure(ThirdPartyData, Structure):
 
     # -------------------------------------------------------------------------
 
-    remote_archive_link = "https://archives.simmate.org/CodStructure-2026-03-20.zip"
+    remote_archive_link = "https://assets.simmate.org/CodStructure-2026-03-20.zip"
     archive_fields = ["is_ordered", "has_implicit_hydrogens"]
 
     # -------------------------------------------------------------------------

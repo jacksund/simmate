@@ -35,7 +35,7 @@ RUN apt-get update && \
 # Download & unpack Bader source code + build files
 # NOTE: we are pulling the downloads directly from Simmate's CDN, but these 
 # are exactly the same as the files downloaded from the Bader website.
-RUN wget https://archives.simmate.org/bader_v1.05_Release.tar.gz -O bader.tar.xz && \
+RUN wget https://assets.simmate.org/bader_v1.05_Release.tar.gz -O bader.tar.xz && \
     tar -zxvf bader.tar.xz && \
     mkdir bader_bin && \
     cp bader bader_bin/bader && \

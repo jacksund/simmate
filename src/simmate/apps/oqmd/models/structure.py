@@ -42,7 +42,7 @@ class OqmdStructure(ThirdPartyData, Structure):
 
     # -------------------------------------------------------------------------
 
-    remote_archive_link = "https://archives.simmate.org/OqmdStructure-2026-03-29.zip"
+    remote_archive_link = "https://assets.simmate.org/OqmdStructure-2026-03-29.zip"
     archive_fields = ["formation_energy"]
 
     # -------------------------------------------------------------------------
