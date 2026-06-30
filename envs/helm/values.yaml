@@ -80,5 +80,8 @@ postgres:
     request: 1Gi
     limit: 2Gi
 
+cloudflare:
+  tunnel_token: null
+
 service_account:
   enabled: false

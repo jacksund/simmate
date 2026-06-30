@@ -39,7 +39,7 @@ class ChemblMolecule(ThirdPartyData, Molecule):
     source_doi = "https://doi.org/10.1093/nar/gky1075"
     is_redistribution_allowed = True
 
-    remote_archive_link = "https://archives.simmate.org/ChemblMolecule-2026-03-22.zip"
+    remote_archive_link = "https://assets.simmate.org/ChemblMolecule-2026-03-22.zip"
     archive_fields = [
         "chembl_id",
         "is_invalid_molecule",

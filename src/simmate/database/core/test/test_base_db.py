@@ -72,8 +72,9 @@ def test_archive():
         TestDatabaseTable.load_remote_archive()
 
     # now add the attribute and try again
-    # NOTE: This is a live CDN! If my CDN server goes down, this test will fail
-    TestDatabaseTable.remote_archive_link = (
-        "https://archives.simmate.org/TestDatabaseTable-2022-02-08.zip"
-    )
-    TestDatabaseTable.load_remote_archive()
+    # NOTE: This is a live CDN! If my CDN server goes down, this test will fail.
+    # This is also commonly blocked by CDNs when running from GitHub CI (HTTP 403)
+    # TestDatabaseTable.remote_archive_link = (
+    #     "https://assets.simmate.org/TestDatabaseTable-2022-02-08.zip"
+    # )
+    # TestDatabaseTable.load_remote_archive()

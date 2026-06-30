@@ -226,8 +226,6 @@ class SimmateSettings:
                     "Project Management": [
                         "simmate.apps.project_management.components.ProjectComponent",
                         "simmate.apps.project_management.components.TagComponent",
-                        "simmate.apps.project_management.components.WalletComponent",
-                        "simmate.apps.project_management.components.TransactionComponent",
                     ],
                     "Inventory Management": [
                         "simmate.apps.inventory_management.components.SubstanceComponent",
@@ -270,6 +268,8 @@ class SimmateSettings:
                     ],
                     "Business and Finance": [
                         "simmate.apps.price_catalog.components.PricedItemComponent",
+                        "simmate.apps.project_management.components.WalletComponent",
+                        "simmate.apps.project_management.components.TransactionComponent",
                         "simmate.apps.ethereum.components.EthereumWalletComponent",
                         "simmate.apps.ethereum.components.EthereumTransactionComponent",
                     ],

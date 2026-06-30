@@ -500,7 +500,7 @@ def load_default_sqlite3_build():
 
     # check if the archive has been downloaded before. If not, download!
     if not archive_filename_full.exists():
-        remote_archive_link = f"https://archives.simmate.org/{archive_filename}"
+        remote_archive_link = f"https://assets.simmate.org/{archive_filename}"
         # Download the archive zip file from the URL to the current working dir
         logging.info("Downloading database file...")
         urllib.request.urlretrieve(remote_archive_link, archive_filename_full)

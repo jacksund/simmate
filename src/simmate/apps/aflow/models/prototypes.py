@@ -40,7 +40,7 @@ class AflowPrototype(ThirdPartyData, Structure):
 
     # -------------------------------------------------------------------------
 
-    remote_archive_link = "https://archives.simmate.org/AflowPrototype-2023-07-06.zip"
+    remote_archive_link = "https://assets.simmate.org/AflowPrototype-2023-07-06.zip"
     archive_fields = [
         "mineral_name",
         "aflow_id",

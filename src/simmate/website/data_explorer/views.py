@@ -67,8 +67,35 @@ def home(request):
     # Uses the settings to build out Data sections + associated list of tables
     # within each section. There is also a HIDDEN section that is handled
     # the same here. The html template handles that case separately.
+    data_config = get_data_explorer_components()
+
+    # We provide default icons for the built-in sections.
+    # Any custom sections will fallback to a default table icon.
+    section_icons = {
+        "Project Management": "bi-clipboard2-data",
+        "Inventory Management": "bi-flask",
+        "Crystalline Catalogs": "bi-gem",
+        "Molecular Catalogs": "bi-nut",
+        "Workflow Results": "bi-diagram-3",
+        "Business and Finance": "bi-bank",
+        "Compute Resources": "bi-pc-display-horizontal",
+        "Other": "bi-three-dots",
+    }
+
+    sections = []
+    for name, datasets in data_config.items():
+        if name == "HIDDEN" or not datasets:
+            continue
+        sections.append(
+            {
+                "name": name,
+                "icon": section_icons.get(name, "bi-table"),
+                "datasets": datasets,
+            }
+        )
+
     context = {
-        "data_config": get_data_explorer_components(),
+        "sections": sections,
         "counts_dict": counts_dict,
         "breadcrumbs": ["Data"],
     }
