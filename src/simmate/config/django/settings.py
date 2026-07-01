@@ -424,6 +424,16 @@ if settings.website.log_sql:
         }
     )
 
+# --------------------------------------------------------------------------------------
+
+# PROXY CONFIGURATION
+# When running behind a reverse proxy (e.g. Cloudflare, Nginx, or an Ingress Controller)
+# that handles SSL/TLS termination, these settings ensure Django builds absolute URIs
+# with 'https' instead of 'http', which is required for OAuth redirects.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+
 # -----------------------------------------------------------------------------
 
 # For advanced users, we let them override Django settings directly.
