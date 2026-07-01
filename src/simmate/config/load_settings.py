@@ -212,7 +212,11 @@ class SimmateSettings:
                 "login_message": None,
                 "social_oauth": {
                     "google": {"client_id": None, "secret": None},
-                    "microsoft": {"client_id": None, "secret": None},
+                    "microsoft": {
+                        "client_id": None,
+                        "secret": None,
+                        "tenant": "organizations",
+                    },
                     "github": {"client_id": None, "secret": None},
                 },
                 # These allow server maintainers to override the homepage and profile views, which
@@ -631,6 +635,11 @@ class SimmateSettings:
         "SIMMATE__WEBSITE__SHOW_FINANCES": bool,
         "SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__CLIENT_ID": str,
         "SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__SECRET": str,
+        "SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__TENANT": str,
+        "SIMMATE__WEBSITE__SOCIAL_OAUTH__GOOGLE__CLIENT_ID": str,
+        "SIMMATE__WEBSITE__SOCIAL_OAUTH__GOOGLE__SECRET": str,
+        "SIMMATE__WEBSITE__SOCIAL_OAUTH__GITHUB__CLIENT_ID": str,
+        "SIMMATE__WEBSITE__SOCIAL_OAUTH__GITHUB__SECRET": str,
         "SIMMATE__WEBSITE__CHEMDRAW_JS": bool,
         "SIMMATE__WEBSITE__USER_FORMAT": str,
         "SIMMATE__BADER__DOCKER__ENABLE": bool,

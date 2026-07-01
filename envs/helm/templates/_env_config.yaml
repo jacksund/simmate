@@ -123,6 +123,26 @@
 - name: SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__SECRET
   value: {{ .Values.simmate.website.social_oauth.microsoft.secret | quote }}
 {{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.social_oauth .Values.simmate.website.social_oauth.microsoft .Values.simmate.website.social_oauth.microsoft.tenant }}
+- name: SIMMATE__WEBSITE__SOCIAL_OAUTH__MICROSOFT__TENANT
+  value: {{ .Values.simmate.website.social_oauth.microsoft.tenant | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.social_oauth .Values.simmate.website.social_oauth.google .Values.simmate.website.social_oauth.google.client_id }}
+- name: SIMMATE__WEBSITE__SOCIAL_OAUTH__GOOGLE__CLIENT_ID
+  value: {{ .Values.simmate.website.social_oauth.google.client_id | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.social_oauth .Values.simmate.website.social_oauth.google .Values.simmate.website.social_oauth.google.secret }}
+- name: SIMMATE__WEBSITE__SOCIAL_OAUTH__GOOGLE__SECRET
+  value: {{ .Values.simmate.website.social_oauth.google.secret | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.social_oauth .Values.simmate.website.social_oauth.github .Values.simmate.website.social_oauth.github.client_id }}
+- name: SIMMATE__WEBSITE__SOCIAL_OAUTH__GITHUB__CLIENT_ID
+  value: {{ .Values.simmate.website.social_oauth.github.client_id | quote }}
+{{- end }}
+{{- if and .Values.simmate.website .Values.simmate.website.social_oauth .Values.simmate.website.social_oauth.github .Values.simmate.website.social_oauth.github.secret }}
+- name: SIMMATE__WEBSITE__SOCIAL_OAUTH__GITHUB__SECRET
+  value: {{ .Values.simmate.website.social_oauth.github.secret | quote }}
+{{- end }}
 {{- if and .Values.simmate.website .Values.simmate.website.chemdraw_js }}
 - name: SIMMATE__WEBSITE__CHEMDRAW_JS
   value: {{ .Values.simmate.website.chemdraw_js | quote }}
