@@ -307,7 +307,7 @@ if _oauth.microsoft.client_id and _oauth.microsoft.secret:
             "secret": _oauth.microsoft.secret,
             "key": "",
         },
-        "TENANT": "organizations",  # limits to internal use
+        "TENANT": _oauth.microsoft.tenant,  # default is "organizations", allows "common"
     }
 
 # Initiate social login immediately -- rather than jumping to a separate
