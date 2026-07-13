@@ -483,7 +483,8 @@ class Datastore:
             partition_dirs = top_dirs
         else:
             partition_dirs = [
-                d for d in cls.staging_directory.rglob("*")
+                d
+                for d in cls.staging_directory.rglob("*")
                 if d.is_dir() and any(d.glob("*.parquet"))
             ]
 
