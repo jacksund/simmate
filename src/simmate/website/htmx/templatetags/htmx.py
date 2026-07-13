@@ -249,6 +249,35 @@ def htmx_number_input(
 
 
 @register.inclusion_tag(
+    filename="htmx/input_elements/date_input.html",
+    takes_context=True,
+)
+def htmx_date_input(
+    context: dict,
+    name: str,
+    label: str = None,
+    show_label: bool = True,
+    help_text: str = None,
+    placeholder: str = None,
+    maximum: str = None,  # e.g. "2026-07-13" (or "2026-07-13T14:30" if include_time)
+    minimum: str = None,
+    include_time: bool = False,  # renders a datetime-local input instead of date
+    defer: bool = True,
+    required: bool = False,
+    disabled: bool = False,
+    indicator: str = "#loading-spinner-corner",
+):
+    """
+    Display a date input widget (or a datetime input when `include_time=True`).
+    Uses the browser-native <input type="date"> so no extra JS library is needed.
+    """
+    label = _get_input_label(name, label)
+    current_value = _get_input_value(context, name)
+    component = context.get("component")
+    return locals()
+
+
+@register.inclusion_tag(
     filename="htmx/input_elements/checkbox.html",
     takes_context=True,
 )
