@@ -473,12 +473,21 @@ class Datastore:
 
         Intended to be called after repartition_batched() and before promote_staging().
         """
-        partition_dirs = [
-            d
-            for d in cls.staging_directory.rglob("*")
-            if d.is_dir() and any(d.glob("*.parquet"))
-        ]
+        # For single-level chunk_key partitioning, the partition dirs are just
+        # the immediate chunk_key=* children. A non-recursive glob avoids
+        # walking the millions of leaf parquet files that rglob("*") would
+        # enumerate -- the io bottleneck on massive datastores (20k+ chunks).
+        # Any other layout falls back to a recursive scan for leaf dirs.
+        top_dirs = [d for d in cls.staging_directory.iterdir() if d.is_dir()]
+        if top_dirs and all(d.name.startswith("chunk_key=") for d in top_dirs):
+            partition_dirs = top_dirs
+        else:
+            partition_dirs = [
+                d for d in cls.staging_directory.rglob("*")
+                if d.is_dir() and any(d.glob("*.parquet"))
+            ]
 
+        partition_dirs.sort()
         for partition_dir in partition_dirs:
             batch_files = list(partition_dir.glob("batch_*.parquet"))
             if not batch_files:
