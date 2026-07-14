@@ -123,6 +123,14 @@ class QuickSubmitComponent(HtmxComponent, StructureInput, MoleculeInput):
                 k: v for k, v in parameters.items() if k in allowed_parameters
             }
 
+            if (
+                hasattr(self, "request")
+                and self.request
+                and self.request.user.is_authenticated
+                and "submitted_by_id" in allowed_parameters
+            ):
+                cleaned_parameters["submitted_by_id"] = self.request.user.id
+
             # Run cloud submission
             status = workflow.run_cloud(**cleaned_parameters)
             # monkey-patch workflow_name for UI display

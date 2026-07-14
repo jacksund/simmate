@@ -157,6 +157,7 @@ class Workflow:
         directory: Path | str = None,
         compress_output: bool = False,
         source: dict = None,
+        submitted_by_id: int = None,
         **kwargs,
     ) -> any:
         """
