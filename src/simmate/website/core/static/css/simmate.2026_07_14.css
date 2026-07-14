@@ -13,6 +13,8 @@
   --bs-primary-darker-rgb: 0, 107, 96;
   --bs-primary-lighter: #00a695;
   --bs-primary-lighter-rgb: 0, 166, 149;
+  --bs-primary-bg-subtle: rgba(var(--bs-primary-rgb), 0.1);
+  --bs-primary-border-subtle: rgba(var(--bs-primary-rgb), 0.25);
   /* SUCCESS */
   --bs-success: #01913b;
   --bs-success-rgb: 0, 145, 59;
@@ -73,8 +75,15 @@ a:focus {
     border-color: var(--bs-dark);
 }
 
-.nav-tabs .nav-link:not(.active) {
+.nav-tabs .nav-link:not(.active),
+.nav-pills .nav-link:not(.active) {
   color: var(--bs-secondary);
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  background-color: var(--bs-primary);
+  color: #fff;
 }
 
 /* -------------------------------------------------------------------------- */
