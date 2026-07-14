@@ -23,6 +23,8 @@
                             <div class="d-flex flex-wrap justify-content-center gap-2">
                                 {% for status in component.statuses %}
                                     <a href="{{ status.results_db_entry.get_absolute_url }}"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
                                        class="btn btn-white bg-white border shadow-sm px-4 py-2 rounded-pill d-flex align-items-center text-dark text-decoration-none">
                                         <i class="bi bi-bar-chart-fill text-primary me-2"></i> <span class="fw-semibold">{{ status.workflow_name_display }}</span>
                                     </a>
