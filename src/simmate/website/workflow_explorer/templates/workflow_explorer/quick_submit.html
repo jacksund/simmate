@@ -1,0 +1,255 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    <div class="py-3">
+        {% if component.is_submission_confirmed %}
+            <div class="py-5 d-flex justify-content-center">
+                <div class="card border border-success border-opacity-25 shadow rounded-4"
+                     style="max-width: 600px;
+                            width: 100%">
+                    <div class="card-body text-center p-md-5 p-4">
+                        <div class="mb-4 mx-auto text-success d-flex align-items-center justify-content-center bg-success bg-opacity-10 rounded-circle"
+                             style="width: 100px;
+                                    height: 100px">
+                            <i class="bi bi-check-lg" style="font-size: 4rem;"></i>
+                        </div>
+                        <h2 class="h3 fw-bold text-dark mb-3">Successfully Submitted!</h2>
+                        <p class="text-muted mx-auto mb-4">
+                            Your workflows are now queued or running in the cloud. You can track their progress or view the results on your profile page.
+                        </p>
+                        <div class="bg-light rounded-4 p-4 mb-4 border">
+                            <h6 class="text-muted text-uppercase fw-bold mb-3"
+                                style="font-size: 0.75rem;
+                                       letter-spacing: 0.5px">Track Calculations</h6>
+                            <div class="d-flex flex-wrap justify-content-center gap-2">
+                                {% for status in component.statuses %}
+                                    <a href="{{ status.results_db_entry.get_absolute_url }}"
+                                       class="btn btn-white bg-white border shadow-sm px-4 py-2 rounded-pill d-flex align-items-center text-dark text-decoration-none">
+                                        <i class="bi bi-bar-chart-fill text-primary me-2"></i> <span class="fw-semibold">{{ status.workflow_name_display }}</span>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            {% htmx_button method_name="reset_form" label="Submit Another Workflow" theme="primary" icon="plus-circle" css_class="rounded-pill px-4 py-2 fw-bold shadow" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="row">
+                {% if not component.form_data.primary_input_type %}
+                    <!-- Step 1: Select Input Type Cards -->
+                    <style>
+                        .quick-submit-card {
+                            transition: all 0.2s ease-in-out;
+                        }
+                        .quick-submit-card:hover {
+                            background-color: var(--bs-primary-bg-subtle);
+                            border-color: var(--bs-primary) !important;
+                            transform: translateY(-2px);
+                        }
+                    </style>
+                    <div class="col-12 text-center pb-2">
+                        <div class="row justify-content-center g-4">
+                            <!-- Crystal Structure Card -->
+                            <div class="col-md-4 col-lg-3">
+                                <input type="radio"
+                                       name="primary_input_type"
+                                       value="structure"
+                                       id="type_structure"
+                                       class="d-none"
+                                       {% htmx_post indicator="#loading-spinner-corner" %}>
+                                <label for="type_structure"
+                                       class="card quick-submit-card p-4 h-100 border-primary border-opacity-25 shadow-sm text-decoration-none"
+                                       style="cursor: pointer">
+                                    <div class="card-body">
+                                        <i class="bi bi-boxes text-primary mb-3" style="font-size: 3.5rem;"></i>
+                                        <h5 class="card-title fw-bold">Crystal Structure</h5>
+                                        <p class="card-text text-muted small mt-2">VASP, Quantum Espresso, and Toolkit workflows</p>
+                                    </div>
+                                </label>
+                            </div>
+                            <!-- Molecule Card -->
+                            <div class="col-md-4 col-lg-3">
+                                <input type="radio"
+                                       name="primary_input_type"
+                                       value="molecule"
+                                       id="type_molecule"
+                                       class="d-none"
+                                       {% htmx_post indicator="#loading-spinner-corner" %}>
+                                <label for="type_molecule"
+                                       class="card quick-submit-card p-4 h-100 border-primary border-opacity-25 shadow-sm text-decoration-none"
+                                       style="cursor: pointer">
+                                    <div class="card-body">
+                                        <i class="bi bi-hexagon-fill text-primary mb-3"
+                                           style="font-size: 3.5rem"></i>
+                                        <h5 class="card-title fw-bold">Molecule</h5>
+                                        <p class="card-text text-muted small mt-2">Gaussian and customized molecule workflows</p>
+                                    </div>
+                                </label>
+                            </div>
+                            <!-- Composition Card -->
+                            <div class="col-md-4 col-lg-3">
+                                <input type="radio"
+                                       name="primary_input_type"
+                                       value="composition"
+                                       id="type_composition"
+                                       class="d-none"
+                                       {% htmx_post indicator="#loading-spinner-corner" %}>
+                                <label for="type_composition"
+                                       class="card quick-submit-card p-4 h-100 border-primary border-opacity-25 shadow-sm text-decoration-none"
+                                       style="cursor: pointer">
+                                    <div class="card-body">
+                                        <i class="bi bi-funnel text-primary mb-3" style="font-size: 3.5rem;"></i>
+                                        <h5 class="card-title fw-bold">Composition</h5>
+                                        <p class="card-text text-muted small mt-2">Phase diagrams and structure predictions</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Header with Reset Button -->
+                    <div class="col-12 mb-4">
+                        <div class="d-flex justify-content-between align-items-center bg-light px-4 py-3 rounded-3 border">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    {% if component.primary_input_icon %}
+                                        <i class="bi {{ component.primary_input_icon }} text-primary fs-2"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h6 class="text-muted mb-0 fw-bold text-uppercase"
+                                        style="letter-spacing: 0.5px;
+                                               font-size: 0.75rem">Selected Input Type</h6>
+                                    <h4 class="mb-0 fw-bold text-dark">{{ component.primary_input_label }}</h4>
+                                </div>
+                            </div>
+                            {% htmx_button method_name="clear_input_type" label="Change" theme="outline-secondary" icon="arrow-counterclockwise" css_class="btn-sm rounded-pill px-3" %}
+                        </div>
+                    </div>
+                    <!-- Step 2: Provide Input -->
+                    <div class="col-lg-7 mb-4 mb-lg-0 px-md-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2 shadow-sm"
+                                 style="width: 32px;
+                                        height: 32px">
+                                <span class="fw-bold">1</span>
+                            </div>
+                            <h5 class="mb-0 fw-bold {% if component.form_data.structure or component.form_data.molecule or component.form_data.composition %}text-success{% else %}text-dark{% endif %}">
+                                Provide Input
+                                {% if component.form_data.structure or component.form_data.molecule or component.form_data.composition %}
+                                    <i class="bi bi-check-circle-fill ms-2"></i>
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="bg-white p-4 rounded-4 shadow-sm border mb-4">
+                            {% if component.form_data.primary_input_type == 'structure' %}
+                                {% htmx_structure_input name="structure" label="Upload Structure" allow_database_input=True %}
+                            {% elif component.form_data.primary_input_type == 'molecule' %}
+                                {% htmx_molecule_input name="molecule" label="Draw Molecule" %}
+                            {% elif component.form_data.primary_input_type == 'composition' %}
+                                <div class="mb-2">
+                                    <label for="{{ component.component_id }}-composition"
+                                           class="form-label fw-bold">Chemical Formula or System</label>
+                                    <div class="input-group input-group-lg shadow-sm">
+                                        <input id="{{ component.component_id }}-composition"
+                                               name="composition"
+                                               class="form-control"
+                                               type="text"
+                                               {% if component.form_data.composition %}value="{{ component.form_data.composition }}"{% endif %}
+                                               placeholder="e.g. LiCoO2 or Li-Co-O"
+                                               {% htmx_post indicator="#loading-spinner-corner" %}>
+                                        <button class="btn btn-primary px-4"
+                                                type="button"
+                                                {% htmx_post indicator="#loading-spinner-corner" %}>Load</button>
+                                    </div>
+                                </div>
+                                <div class="form-text text-muted mt-3">
+                                    <ul class="mb-0 ps-3">
+                                        <li>
+                                            For <strong>Fixed-Composition Search</strong>, enter a formula like <code class="bg-light px-1 py-0 rounded">LiCoO2</code>.
+                                        </li>
+                                        <li>
+                                            For <strong>Chemical System Search</strong>, enter elements separated by dashes like <code class="bg-light px-1 py-0 rounded">Li-Co-O</code>.
+                                        </li>
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- Step 3: Select Calculation -->
+                    <div class="col-lg-5 px-md-4">
+                        {% if component.form_data.structure or component.form_data.molecule or component.form_data.composition %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2 shadow-sm"
+                                     style="width: 32px;
+                                            height: 32px">
+                                    <span class="fw-bold">2</span>
+                                </div>
+                                <h5 class="mb-0 fw-bold {% if component.form_data.calculation_types %}text-success{% else %}text-dark{% endif %}">
+                                    Select Workflows
+                                    {% if component.form_data.calculation_types %}<i class="bi bi-check-circle-fill ms-2"></i>{% endif %}
+                                </h5>
+                            </div>
+                            {% if component.form_data.primary_input_type == 'molecule' %}
+                                <div class="alert alert-info shadow-sm border-0 d-flex align-items-center">
+                                    <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                                    <div>Workflows for molecules are currently under development.</div>
+                                </div>
+                            {% else %}
+                                <div class="bg-white p-4 rounded-4 shadow-sm border mb-4">
+                                    <input type="hidden" name="calculation_types__blankmultiselect" value="true">
+                                    <div class="list-group list-group-flush gap-2">
+                                        {% for option in component.calculation_type_options %}
+                                            <label class="list-group-item d-flex gap-3 align-items-center rounded-3 border {% if option.0 in component.form_data.calculation_types %}bg-primary bg-opacity-10 border-primary shadow-sm{% else %}bg-light border-light{% endif %}"
+                                                   style="cursor: pointer;
+                                                          transition: all 0.2s ease">
+                                                <input class="form-check-input flex-shrink-0 mt-0"
+                                                       type="checkbox"
+                                                       name="calculation_types"
+                                                       value="{{ option.0 }}"
+                                                       {% if option.0 in component.form_data.calculation_types %}checked{% endif %}
+                                                       {% htmx_post indicator="#loading-spinner-corner" %}
+                                                       style="width: 1.25em;
+                                                              height: 1.25em">
+                                                <span class="fw-semibold {% if option.0 in component.form_data.calculation_types %}text-primary{% endif %}">
+                                                    {{ option.1 }}
+                                                </span>
+                                            </label>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% if component.form_data.calculation_types %}
+                                    <div class="mt-4">
+                                        {% htmx_button method_name="submit_workflow" label="Submit Workflows" theme="primary" icon="rocket-takeoff-fill" css_class="w-100 shadow rounded-pill py-3 fw-bold fs-5" %}
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            <!-- Placeholder to keep layout stable before input is provided -->
+                            <div class="d-flex align-items-center mb-3 opacity-50">
+                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2"
+                                     style="width: 32px;
+                                            height: 32px">
+                                    <span class="fw-bold">2</span>
+                                </div>
+                                <h5 class="mb-0 text-muted fw-bold">Select Workflows</h5>
+                            </div>
+                            <div class="bg-light p-4 rounded-4 border text-center opacity-50"
+                                 style="border-style: dashed !important;
+                                        min-height: 200px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center">
+                                <p class="text-muted mb-0">
+                                    <i class="bi bi-arrow-left-circle me-2"></i>Provide input first
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
