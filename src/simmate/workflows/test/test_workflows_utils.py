@@ -266,6 +266,7 @@ def test_get_unique_paramters():
         "steadystate_sources",
         "stop_conditions",
         "structure",
+        "submitted_by_id",
         "subworkflow_kwargs",
         "subworkflow_name",
         "supercell_end",
