@@ -620,6 +620,7 @@ class SimmateSettings:
         "SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS": list[str],
         "SIMMATE__WEBSITE__DATA": dict,
         "SIMMATE__WEBSITE__DEBUG": bool,
+        "SIMMATE__WEBSITE__STATIC_FILE_HASHES": bool,
         "SIMMATE__WEBSITE__EMAIL__FROM_EMAIL": str,
         "SIMMATE__WEBSITE__EMAIL__HOST": str,
         "SIMMATE__WEBSITE__EMAIL__PORT": int,

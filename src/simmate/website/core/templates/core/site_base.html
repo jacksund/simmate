@@ -32,11 +32,11 @@
         {# Simmate CSS #}
         <link rel="stylesheet"
               type="text/css"
-              href='{% static "/css/simmate.2026_07_14.css" %}'>
+              href='{% static "css/simmate.css" %}'>
         {# CodeHilite CSS #}
         <link rel="stylesheet"
               type="text/css"
-              href="{% static '/css/codehilite.css' %}">
+              href="{% static 'css/codehilite.css' %}">
         {# jQuery Javascript #}
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         {# Bootstrap Javascript #}
@@ -65,28 +65,20 @@
         </script>
         {% if chemdraw_js %}
             <script src="{% static "chemdrawweb/chemdrawweb.js" %}"></script>
-            <script>var ChemDrawLicenseURL = '{% static "/licenses/ChemDraw-JS-License.xml" %}';</script>
-            <script type="text/javascript"
-                    src="{% static 'js/chemdraw_utils.2026_01_22.js' %}"></script>
+            <script>var ChemDrawLicenseURL = '{% static "licenses/ChemDraw-JS-License.xml" %}';</script>
+            <script type="text/javascript" src="{% static 'js/chemdraw_utils.js' %}"></script>
         {% else %}
             {# Ketcher is the open-source fallback sketcher #}
-            <script type="text/javascript"
-                    src="{% static 'js/ketcher_utils.2026_03_28.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/ketcher_utils.js' %}"></script>
         {% endif %}
         {# Rest of Custom Simmate Javascript #}
-        <script type="text/javascript"
-                src="{% static 'js/rdkit_utils.2024_11_07.js' %}"></script>
-        <script type="text/javascript"
-                src="{% static 'js/form_utils.2025_06_02.js' %}"></script>
-        <script type="text/javascript"
-                src="{% static 'js/progress_bars.2024_05_27.js' %}"></script>
-        <script type="text/javascript"
-                src="{% static 'js/select2_utils.2024_11_07.js' %}"></script>
-        <script type="text/javascript"
-                src="{% static 'js/bootstrap_utils.2025_09_23.js' %}"></script>
-        <script type="text/javascript"
-                src="{% static 'js/htmx_utils.2026_07_14.js' %}"></script>
-        <script type="module" src="{% static 'js/threejs_utils.2026_01_11.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/rdkit_utils.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/form_utils.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/progress_bars.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/select2_utils.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/bootstrap_utils.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/htmx_utils.js' %}"></script>
+        <script type="module" src="{% static 'js/threejs_utils.js' %}"></script>
         {# Some pages may require extra lines in the header such as loading extra libraries #}
         {% block extraheader %}{% endblock %}
     </head>
