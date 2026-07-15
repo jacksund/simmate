@@ -336,6 +336,10 @@ if settings.website.require_login:
 
 LOGIN_REQUIRED_URLS = (r"/(.*)$",)
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (
+    r"^/$",
+    r"^/about/?$",
+    r"^/faqs/?$",
+    r"^/contact/?$",
     r"/accounts(.*)$",
     r"/admin(.*)$",
     r"/static(.*)$",

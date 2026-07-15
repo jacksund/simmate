@@ -14,7 +14,7 @@
               sizes="76x76"
               href="{% static 'images/simmate-icon.svg' %}">
         <link rel="icon"
-              type="image/png"
+              type="image/svg+xml"
               href="{% static 'images/simmate-icon.svg' %}">
         {# Set meta data for responsive viewport scaling/size (i.e. phone vs monitor) #}
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -122,6 +122,8 @@
         {# Sometimes we load extra javascript at the bottom of the page #}
         {% block extrafooter %}{% endblock %}
         {# Chat Bubble Component #}
-        {% htmx_component "chat-bubble" %}
+        {% if user.is_authenticated %}
+            {% htmx_component "chat-bubble" %}
+        {% endif %}
     </body>
 </html>

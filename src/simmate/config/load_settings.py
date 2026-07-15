@@ -300,8 +300,6 @@ class SimmateSettings:
                 },
                 # django extras
                 "log_sql": False,
-                # django extras
-                "log_sql": False,
                 "debug": False,
                 "allowed_hosts": ["127.0.0.1", "localhost", "testserver"],
                 # sets STATICFILES_STORAGE to ManifestStaticFilesStorage for prod setups
