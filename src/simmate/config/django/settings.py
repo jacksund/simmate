@@ -231,9 +231,14 @@ STATICFILES_DIRS = [
 # Note however that this requires 'collectstatic' to be ran before 'runserver'
 # when DEBUG=False -- otherwise the server will error.
 if settings.website.static_file_hashes:
-    STATICFILES_STORAGE = (
-        "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
-    )
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+        },
+    }
 
 # For the dynamically-created structure files, we need to include the static
 # directory this to work during local testing. This is NOT allowed in a
@@ -336,6 +341,10 @@ if settings.website.require_login:
 
 LOGIN_REQUIRED_URLS = (r"/(.*)$",)
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (
+    r"^/$",
+    r"^/about/?$",
+    r"^/faqs/?$",
+    r"^/contact/?$",
     r"/accounts(.*)$",
     r"/admin(.*)$",
     r"/static(.*)$",
