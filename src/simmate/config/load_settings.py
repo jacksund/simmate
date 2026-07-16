@@ -20,11 +20,6 @@ class SimmateSettings:
     Configures Simmate settings
     """
 
-    # TODO: consider using pydantic instead. I don't do this yet because of some
-    # default values are dynamic and co-dependent, but I should revisit in the
-    # future:
-    #   https://github.com/pydantic/pydantic/issues/866
-
     # -------------------------------------------------------------------------
 
     @cached_property
@@ -32,36 +27,10 @@ class SimmateSettings:
         """
         The final settings built from user-supplied settings and all defaults
         """
-        settings = deep_update(
+        return deep_update(
             default_dict=self.default_settings.copy(),
             override_dict=self.user_settings.copy(),
         )
-
-        # clean variables
-        # TODO: handle database.url input
-        # TODO: use_docker inputs
-        # CSRF_TRUSTED_ORIGINS = .split(",")
-        # ALLOWED_HOSTS = .split(",")
-
-        # REQUIRE_LOGIN = os.getenv("REQUIRE_LOGIN", "False") == "True"
-        # # when setting REQUIRE_INTERNAL_LOGIN, set it to the allauth provider type
-        # # (such as "microsoft")
-        # REQUIRE_LOGIN_INTERNAL = os.getenv("REQUIRE_LOGIN_INTERNAL", "False")
-        # if REQUIRE_LOGIN_INTERNAL == "False":
-        #     REQUIRE_LOGIN_INTERNAL = False
-        # else:
-        #     assert REQUIRE_LOGIN_INTERNAL in ["microsoft", "google"]
-        #     REQUIRE_LOGIN = True
-        # # example: r'/apps/spotfire(.*)$'
-        # REQUIRE_LOGIN_EXCEPTIONS = [
-        #     e for e in os.getenv("REQUIRE_LOGIN_EXCEPTIONS", "").split(";") if e
-        # ]
-        # LOGIN_MESSAGE = os.getenv("LOGIN_MESSAGE", "")
-
-        # Run compatibility checks (e.g. use_docker requires a 'docker run' cmd)
-        # TODO
-
-        return settings
 
     def __getattr__(self, name: str):
         """
@@ -606,8 +575,6 @@ class SimmateSettings:
 
         return final_dict
 
-    # OPTIMIZE: this is only used in the _get_env_settings method and should
-    # depreciated in favor of type-inspecting
     _input_mappings: dict = {
         "SIMMATE__APPS": list[str],
         "SIMMATE__DATABASE__ENGINE": str,
@@ -620,6 +587,7 @@ class SimmateSettings:
         "SIMMATE__WEBSITE__CSRF_TRUSTED_ORIGINS": list[str],
         "SIMMATE__WEBSITE__DATA": dict,
         "SIMMATE__WEBSITE__DEBUG": bool,
+        "SIMMATE__WEBSITE__SECRET_KEY": str,
         "SIMMATE__WEBSITE__STATIC_FILE_HASHES": bool,
         "SIMMATE__WEBSITE__EMAIL__FROM_EMAIL": str,
         "SIMMATE__WEBSITE__EMAIL__HOST": str,
@@ -641,6 +609,7 @@ class SimmateSettings:
         "SIMMATE__WEBSITE__SOCIAL_OAUTH__GITHUB__SECRET": str,
         "SIMMATE__WEBSITE__CHEMDRAW_JS": bool,
         "SIMMATE__WEBSITE__USER_FORMAT": str,
+        "SIMMATE__WEBSITE__MAX_FILTER_JOINS": int,
         "SIMMATE__BADER__DOCKER__ENABLE": bool,
         "SIMMATE__QUANTUM_ESPRESSO__DOCKER__ENABLE": bool,
         "SIMMATE__VASP__DOCKER__ENABLE": bool,
