@@ -292,6 +292,11 @@ def reset_database(
         logging.info("Loading default data...")
         Spacegroup.load_source_data()
 
+        if "simmate.apps.configs.ProjectManagementConfig" in settings.apps:
+            from simmate.apps.project_management.models import Wallet
+
+            Wallet.load_source_data()
+
     # Let the user know everything succeeded
     logging.info("Success! Your database has been reset. :sparkles:")
 
