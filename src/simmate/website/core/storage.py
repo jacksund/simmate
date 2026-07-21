@@ -25,16 +25,30 @@ class SimmateManifestStaticFilesStorage(ManifestStaticFilesStorage):
     # webpack bundles here if needed.
     excluded_prefixes = ("chemdrawweb/",)
 
+    # Don't 500 the page when a static reference isn't in the manifest; the
+    # path passes through unchanged (and 404s in the browser) instead. This
+    # matches the default (non-hashed) storage's tolerance and acts as a
+    # backstop for the excluded bundles' internal, non-manifested chunks.
+    manifest_strict = False
+
     def _is_excluded(self, name):
         return name.startswith(self.excluded_prefixes)
 
     def hashed_name(self, name, content=None, filename=None):
-        # Both the `{% static %}` lookup and the on-disk copy resolve through
-        # here, so returning the name unchanged keeps the bundle at its
-        # original path.
+        # Used during `collectstatic` post-processing. Returning the name
+        # unchanged keeps the bundle's files at their original paths on disk.
         if self._is_excluded(name):
             return name
         return super().hashed_name(name, content=content, filename=filename)
+
+    def stored_name(self, name):
+        # Used at runtime by `url()` / the `{% static %}` tag. Excluded files
+        # are never added to the manifest (see `post_process`), so resolve them
+        # to their original path directly. This keeps the bundle working even
+        # if `manifest_strict` is later turned back on.
+        if self._is_excluded(name):
+            return name
+        return super().stored_name(name)
 
     def post_process(self, paths, dry_run=False, **options):
         # Drop excluded files before delegating so Django never tries to hash
