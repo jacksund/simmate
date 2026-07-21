@@ -236,7 +236,7 @@ if settings.website.static_file_hashes:
             "BACKEND": "django.core.files.storage.FileSystemStorage",
         },
         "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+            "BACKEND": "simmate.website.core.storage.SimmateManifestStaticFilesStorage",
         },
     }
 
