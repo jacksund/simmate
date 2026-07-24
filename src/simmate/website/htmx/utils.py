@@ -27,6 +27,7 @@ def get_all_components(
     app_components = []
     for app_name in apps_to_search + [
         "simmate.website.configs.CoreConfig",
+        "simmate.website.configs.DataExplorerConfig",
         "simmate.website.configs.WorkflowExplorerConfig",
     ]:
         # check if there is a components module for this app and load it if so

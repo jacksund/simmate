@@ -1,0 +1,114 @@
+{% extends "htmx/form_base.html" %}
+{% block form %}
+    <div class="quick-search-component pt-5 pb-2">
+        <!-- Search Bar -->
+        <div class="input-group input-group-lg mb-3 shadow-sm rounded-pill overflow-hidden border border-secondary-subtle w-75 mx-auto">
+            <input type="text"
+                   class="form-control border-0 px-4"
+                   name="search_query"
+                   id="quick-search-input"
+                   placeholder="Search by description, formula, or SMILES..."
+                   value="{{ component.search_query }}"
+                   {% htmx_post indicator="#loading-spinner-corner" %}>
+            <button class="btn btn-primary px-5 fw-bold text-uppercase shadow-none"
+                    type="button"
+                    onclick="alert('Search functionality coming soon!')"
+                    style="letter-spacing: 1px">
+                <i class="bi bi-search me-1"></i> Search
+            </button>
+        </div>
+        <!-- Toggle Navigation -->
+        <div class="d-flex justify-content-center {% if component.active_panel == 'periodic_table' %}mb-2{% else %}mb-4{% endif %}">
+            <ul class="nav nav-pills p-1 rounded-pill">
+                <li class="nav-item">
+                    <button type="button"
+                            class="nav-link rounded-pill px-4 {% if component.active_panel == 'examples' %}active{% else %}text-secondary{% endif %}"
+                            hx-vals='{"panel": "examples"}'
+                            {% htmx_post method_name="toggle_panel" trigger="click" indicator="#loading-spinner-corner" %}>
+                        <i class="bi bi-lightbulb me-1"></i> Examples
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button"
+                            class="nav-link rounded-pill px-4 {% if component.active_panel == 'periodic_table' %}active{% else %}text-secondary{% endif %}"
+                            hx-vals='{"panel": "periodic_table"}'
+                            {% htmx_post method_name="toggle_panel" trigger="click" indicator="#loading-spinner-corner" %}>
+                        <i class="bi bi-grid-3x3 me-1"></i> Elements
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button"
+                            class="nav-link rounded-pill px-4 {% if component.active_panel == 'sketcher' %}active{% else %}text-secondary{% endif %}"
+                            hx-vals='{"panel": "sketcher"}'
+                            {% htmx_post method_name="toggle_panel" trigger="click" indicator="#loading-spinner-corner" %}>
+                        <i class="bi bi-hexagon me-1"></i> Sketcher
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button"
+                            class="nav-link rounded-pill px-4 {% if component.active_panel == 'upload' %}active{% else %}text-secondary{% endif %}"
+                            hx-vals='{"panel": "upload"}'
+                            {% htmx_post method_name="toggle_panel" trigger="click" indicator="#loading-spinner-corner" %}>
+                        <i class="bi bi-upload me-1"></i> Upload
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <!-- Dynamic Panel Content -->
+        <div class="panel-content {% if component.active_panel != 'periodic_table' %}col-md-10 col-lg-8 mx-auto border rounded-4 p-4 bg-white shadow-sm{% endif %}"
+             {% if not component.active_panel %}style="display: none;"{% endif %}>
+            {% if component.active_panel == 'periodic_table' %}
+                {% htmx_periodic_table_input name="search_query" %}
+            {% elif component.active_panel == 'sketcher' %}
+                {% htmx_molecule_input name="molecule" label="Draw Molecule" %}
+            {% elif component.active_panel == 'upload' %}
+                {% htmx_structure_input name="structure" label="Upload Structure" allow_database_input=False %}
+            {% elif component.active_panel == 'examples' %}
+                <div class="mb-4">
+                    <h6 class="fw-bold text-dark">
+                        <i class="bi bi-chat-text me-2 text-primary"></i>Natural Language
+                    </h6>
+                    <p class="text-muted small mb-2">
+                        Search using plain english descriptions to find materials with specific properties.
+                    </p>
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                            hx-vals='{"query": "Find all band gaps greater than 2 eV"}'
+                            {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
+                        Find all band gaps > 2 eV
+                    </button>
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                            hx-vals='{"query": "Density less than 5 g/cm3"}'
+                            {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
+                        Density less than 5 g/cm³
+                    </button>
+                </div>
+                <div class="mb-4">
+                    <h6 class="fw-bold text-dark">
+                        <i class="bi bi-funnel me-2 text-primary"></i>Formulas & Systems
+                    </h6>
+                    <p class="text-muted small mb-2">Search for specific chemical formulas or combinations of elements.</p>
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                            hx-vals='{"query": "Li-Co-O"}'
+                            {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
+                        Li-Co-O
+                    </button>
+                </div>
+                <div>
+                    <h6 class="fw-bold text-dark">
+                        <i class="bi bi-hexagon me-2 text-primary"></i>SMILES Strings
+                    </h6>
+                    <p class="text-muted small mb-2">Search for specific molecules using their SMILES representation.</p>
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                            hx-vals='{"query": "CCO"}'
+                            {% htmx_post method_name="set_example" trigger="click" indicator="#loading-spinner-corner" %}>
+                        CCO (Ethanol)
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

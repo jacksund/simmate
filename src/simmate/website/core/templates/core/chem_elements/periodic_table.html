@@ -91,7 +91,17 @@
 </style>
 <script>
     function selectElement(element) {
-        element.classList.add("selected")
+        element.classList.toggle("selected");
+        
+        let selectedNodes = document.querySelectorAll('.selected .symbol');
+        let elements = Array.from(selectedNodes).map(node => node.innerText.trim());
+        let composition = elements.join('-');
+        
+        let searchInput = document.getElementById('quick-search-input');
+        if (searchInput) {
+            searchInput.value = composition;
+            searchInput.dispatchEvent(new Event('change', { 'bubbles': true }));
+        }
     }
 </script>
 <div class="container p-4">

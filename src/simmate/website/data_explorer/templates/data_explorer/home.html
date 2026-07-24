@@ -40,7 +40,7 @@
     </ul>
     <div class="tab-content">
         <div class="tab-pane show active" id="quick-search-section">
-            <div class="container-fluid mt-3">{% include "core/chem_elements/periodic_table.html" %}</div>
+            <div class="container-fluid mt-3">{% htmx_component component_name="quick-search-component" %}</div>
         </div>
         <div class="tab-pane" id="leaderboards-section">
             <div class="container-fluid mt-5 mb-5 text-center">

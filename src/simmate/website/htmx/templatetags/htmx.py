@@ -153,7 +153,7 @@ def htmx_post(
         target = f"#{component_id}"
     if not include:
         include = f"#{component_id}"
-    swap = "outerHTML" if not javascript_only else "none"
+    swap = "outerHTML settle:0" if not javascript_only else "none"
     return locals()
 
 
@@ -649,6 +649,24 @@ def htmx_plotly_figure(
 
 
 # -----------------------------------------------------------------------------
+
+
+@register.inclusion_tag(
+    filename="htmx/input_elements/periodic_table.html",
+    takes_context=True,
+)
+def htmx_periodic_table_input(
+    context: dict,
+    name: str = "composition",
+):
+    """
+    Display an interactive periodic table to select elements.
+    """
+    current_value = _get_input_value(context, name) or ""
+    selected_elements = [e for e in current_value.split("-") if e]
+    component = context.get("component")
+    return locals()
+
 
 # TODO
 
