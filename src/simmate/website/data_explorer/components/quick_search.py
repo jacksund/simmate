@@ -37,7 +37,7 @@ class QuickSearchComponent(
 
     def on_change_hook__search_query(self):
         """Preserves the user's input across panel toggles."""
-        self.search_query = self.form_data.get("search_query", "")
+        self.search_query = self.form_data.get("search_query") or ""
 
     def on_change_hook__molecule__molecule_sketcher(self):
         self.load_molecule("molecule")

@@ -10,10 +10,9 @@
                    placeholder="Search by description, formula, or SMILES..."
                    value="{{ component.search_query }}"
                    {% htmx_post indicator="#loading-spinner-corner" %}>
-            <button class="btn btn-primary px-5 fw-bold text-uppercase shadow-none"
+            <button class="btn btn-primary px-4 fw-bold shadow-none"
                     type="button"
-                    onclick="alert('Search functionality coming soon!')"
-                    style="letter-spacing: 1px">
+                    onclick="alert('Search functionality coming soon!')">
                 <i class="bi bi-search me-1"></i> Search
             </button>
         </div>
@@ -55,7 +54,7 @@
             </ul>
         </div>
         <!-- Dynamic Panel Content -->
-        <div class="panel-content {% if component.active_panel != 'periodic_table' %}col-md-10 col-lg-8 mx-auto border rounded-4 p-4 bg-white shadow-sm{% endif %}"
+        <div class="panel-content {% if component.active_panel != 'periodic_table' %}mx-auto border rounded-4 p-4 bg-white shadow-sm {% if component.active_panel == 'sketcher' %}col-12{% else %}col-md-10 col-lg-8{% endif %}{% endif %}"
              {% if not component.active_panel %}style="display: none;"{% endif %}>
             {% if component.active_panel == 'periodic_table' %}
                 {% htmx_periodic_table_input name="search_query" %}

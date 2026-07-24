@@ -29,8 +29,8 @@
                  hx-preserve>
                 {% if show_option_labels %}<label class="form-label">{{ sketcher_input_label }}</label>{% endif %}
                 <div id="{{ name }}-{{ component.component_id }}"
-                     style="width: 600px;
-                            height: 400px"></div>
+                     style="width: 100%;
+                            height: 500px"></div>
                 <script>add_mol_sketcher("{{ name }}-{{ component.component_id }}");</script>
                 <input type="hidden"
                     id="{{ name }}-{{ component.component_id }}-hidden"
