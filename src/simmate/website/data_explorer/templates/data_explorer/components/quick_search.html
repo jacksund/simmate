@@ -12,7 +12,7 @@
                    {% htmx_post indicator="#loading-spinner-corner" %}>
             <button class="btn btn-primary px-4 fw-bold shadow-none"
                     type="button"
-                    onclick="alert('Search functionality coming soon!')">
+                    {% htmx_post method_name="run_search" trigger="click" indicator="#loading-spinner-corner" %}>
                 <i class="bi bi-search me-1"></i> Search
             </button>
         </div>
@@ -55,7 +55,7 @@
         </div>
         <!-- Dynamic Panel Content -->
         <div class="panel-content {% if component.active_panel != 'periodic_table' %}mx-auto border rounded-4 p-4 bg-white shadow-sm {% if component.active_panel == 'sketcher' %}col-12{% else %}col-md-10 col-lg-8{% endif %}{% endif %}"
-             {% if not component.active_panel %}style="display: none;"{% endif %}>
+             {% if not component.active_panel or component.active_panel == 'search_results' %}style="display: none;"{% endif %}>
             {% if component.active_panel == 'periodic_table' %}
                 {% htmx_periodic_table_input name="search_query" %}
             {% elif component.active_panel == 'sketcher' %}
@@ -109,5 +109,52 @@
                 </div>
             {% endif %}
         </div>
+        {% if component.search_results is not None %}
+            <div class="search-results-container mt-4">
+                {% if not component.search_results %}
+                    <div class="alert alert-secondary text-center">
+                        <i class="bi bi-search"></i> No results found for "{{ component.search_query }}".
+                    </div>
+                {% else %}
+                    {% for table_name, data in component.search_results.items %}
+                        <div class="card mb-4 border-0">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
+                                <h5 class="mb-0 fw-bold">
+                                    <i class="bi bi-database me-2 text-primary"></i>{{ data.display_name }}
+                                </h5>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped align-middle mb-0">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Formula</th>
+                                            <th>Spacegroup</th>
+                                            {% if data.has_ehull %}<th>E above Hull (eV/atom)</th>{% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for entry in data.entries %}
+                                            <tr>
+                                                <td>{% foreign_key_link entry %}</td>
+                                                <td>{{ entry.formula_reduced|chemical_formula }}</td>
+                                                <td>{% foreign_key_link entry.spacegroup "symbol" %}</td>
+                                                {% if data.has_ehull %}<td>{{ entry.energy_above_hull|floatformat:3 }}</td>{% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="card-footer bg-white text-center">
+                                <a href="/data/{{ data.url_name }}/?{% if '-' in component.search_query %}chemical_system{% else %}formula_reduced{% endif %}={{ data.url_query }}"
+                                   class="text-decoration-none fw-bold">
+                                    See all {{ data.total_count }} results in {{ data.display_name }} <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endif %}
     </div>
 {% endblock %}
