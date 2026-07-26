@@ -1,23 +1,22 @@
 {% extends "core/site_base.html" %}
 {% block tabtitle %}404 error - Simmate{% endblock %}
-{% block body %}
-    <!-- start page title -->
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box">
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
+{% block breadcrumbs %}
+    <div class="border-bottom py-2">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <ol class="breadcrumb m-0 ps-3">
                         <li class="breadcrumb-item">
-                            <a href="{% url 'home' %}">Home</a>
+                            <a href="/"><i class="bi bi-house"></i></a>
                         </li>
                         <li class="breadcrumb-item active">404 Error</li>
                     </ol>
                 </div>
-                <h4 class="page-title">404 Error</h4>
             </div>
         </div>
     </div>
-    <!-- end page title -->
+{% endblock %}
+{% block body %}
     <div class="row justify-content-center">
         <div class="col-lg-4">
             <div class="text-center">

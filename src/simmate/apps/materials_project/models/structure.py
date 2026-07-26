@@ -144,7 +144,9 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
         api_key = api_key or settings.materials_project.api_key
         if not api_key:
             raise ValueError(
-                "You must provide an api_key or set it in your Simmate settings."
+                "You must provide an api_key or set it in your Simmate settings.\n"
+                "To get an API key, visit: https://next-gen.materialsproject.org/api\n"
+                "Then set it by running: `simmate config add materials_project.api_key YOUR_KEY_HERE`"
             )
 
         try:
