@@ -357,7 +357,7 @@ class MoleculeDatastore(Datastore):
         dispatch(
             batches_to_process,
             cls._build_fingerprint_index_single_batch,
-            parallel_job,
+            parallel="job" if parallel_job else "single",
             fp_type=fp_type,
         )
         logging.info("USearch index build complete!")

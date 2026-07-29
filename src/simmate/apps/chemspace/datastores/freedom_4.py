@@ -76,7 +76,7 @@ class ChemspaceFreedom4(MoleculeDatastore):
         dispatch(
             files_to_process,
             cls._convert_single_source,
-            parallel_job,
+            parallel="job" if parallel_job else "single",
         )
         logging.info("Conversion complete!")
 

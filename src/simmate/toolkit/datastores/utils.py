@@ -17,7 +17,7 @@ def update_column(column_name: str):
 
     def decorator(func):
         @functools.wraps(func)
-        def wrapper(cls, parallel_job: bool = False, *args, **kwargs):
+        def wrapper(cls, *args, parallel_job: bool = False, **kwargs):
             def transform(df: polars.DataFrame) -> polars.DataFrame:
                 new_values = func(cls, df, *args, **kwargs)
                 return df.with_columns(
@@ -43,7 +43,7 @@ def update_table():
 
     def decorator(func):
         @functools.wraps(func)
-        def wrapper(cls, parallel_job: bool = False, *args, **kwargs):
+        def wrapper(cls, *args, parallel_job: bool = False, **kwargs):
             def transform(df: polars.DataFrame) -> polars.DataFrame:
                 return func(cls, df, *args, **kwargs)
 
