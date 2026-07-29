@@ -197,7 +197,11 @@ class Datastore:
             df = transform_func(polars.read_parquet(file_path))
             df.write_parquet(output_path, compression=cls.compression_mode)
 
-        dispatch(files_to_process, worker, parallel_job)
+        dispatch(
+            files_to_process,
+            worker,
+            parallel="job" if parallel_job else "single",
+        )
 
     # -------------------------------------------------------------------------
 
@@ -415,7 +419,11 @@ class Datastore:
             df.write_parquet(output_path, compression=cls.compression_mode)
             logging.info(f"Repartitioned {partition_column}={val} | Rows: {len(df):,}")
 
-        dispatch(partition_values, _repartition_single_value, parallel_job)
+        dispatch(
+            partition_values,
+            _repartition_single_value,
+            parallel="job" if parallel_job else "single",
+        )
 
     @classmethod
     def repartition_batched(
