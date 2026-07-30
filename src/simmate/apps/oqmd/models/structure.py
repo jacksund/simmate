@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import shutil
+import urllib.request
 import zipfile
 from pathlib import Path
 
@@ -63,10 +65,13 @@ class OqmdStructure(ThirdPartyData, Structure):
         only_add_new_cifs: bool = True,
     ):
         """
-        Loads OQMD data into the Simmate database.
+        Downloads and loads OQMD data into the Simmate database.
+
+        Source files are downloaded from `https://assets.simmate.org/oqmd/raw/`
+        if they are not already present in the base directory.
 
         Yichen Li was kind enough to provide all the crystal structures from
-        the OQMD as POSCAR files on 2026-03-27. This makes loading the structures
+        the OQMD as POSCAR files on 2026-03-24. This makes loading the structures
         into the Simmate database much faster as we are no longer bottlenecked by
         the REST API and internet connections. (Previously Jiahong Shen provided
         these on 2022-02-21). Chris Wolverton (the PI) directed us to these students
@@ -74,46 +79,46 @@ class OqmdStructure(ThirdPartyData, Structure):
 
         All structures are provided as CONTCARs in a compressed folder
         (`static_contcars_all_parts.tar.gz`) containing zip files of the structures.
-        There is also an excel file `oqmd_static_final_energy.xlsx` that contains
-        additional data such as the final energy.
+        There is also a csv file `static_final_energy.csv` that contains
+        additional data such as the final energy. We host these files on Cloudflare
+        R2 for easy access by others.
 
         There are currently over 1,000,000 structures and this function takes
         a few hours to run.
-
-        Note: there is a REST API and a python wrapper for that API (qmpy-rester),
-        but the API is not good for bulk downloads and the wrapper has not been
-        updated since 2021. Maybe I'll revisit their API in the future.
-            - http://oqmd.org/static/docs/restful.html
-            - https://github.com/mohanliu/qmpy_rester
         """
-        if base_directory is None:
-            base_directory = (
-                settings.config_directory / "oqmd" / "2026_03_27__yichen_li"
-            )
-        else:
-            base_directory = Path(base_directory)
+        base_directory = Path(
+            base_directory or settings.config_directory / "oqmd" / "raw"
+        )
+        base_directory.mkdir(parents=True, exist_ok=True)
 
-        # load the excel file that contains the list of ids and their energy
-        df = pandas.read_csv(base_directory / "oqmd_static_final_energy.csv")
+        # Download files if they do not exist
+        files = {
+            "static_contcars_all_parts-2026-03-24.tar.gz": None,
+            "static_final_energy-2026-03-24.csv": None,
+        }
+        for filename in files:
+            file_path = base_directory / filename
+            files[filename] = file_path
+            if not file_path.exists():
+                logging.info(f"Downloading {filename}...")
+                url = f"https://assets.simmate.org/oqmd/raw/{filename}"
+                urllib.request.urlretrieve(url, file_path)
+
+        tar_path, csv_path = files.values()
+
+        # load the csv file that contains the list of ids and their energy
+        df = pandas.read_csv(csv_path)
         energy_dict = dict(zip(df["oqmd_id"], df["final_energy"]))
 
-        # Check if there are existing objects in the table to allow continuing
-        # from a paused or interrupted load.
-        max_id = 0
-        if cls.objects.exists():
-            max_id = cls.objects.order_by("-id").values_list("id", flat=True).first()
-
-        # Handle the structure archive
-        tar_path = base_directory / "static_contcars_all_parts.tar.gz"
+        max_id = cls.objects.order_by("-id").values_list("id", flat=True).first() or 0
 
         # We check for zip files to see if the archive has already been unpacked
         zip_files = list(base_directory.glob("*.zip"))
-
         if not zip_files:
             shutil.unpack_archive(tar_path, base_directory)
             zip_files = list(base_directory.glob("*.zip"))
+
         # iterate through the list and load the structures to our database!
-        # Use rich to monitor progress.
         for zip_path in track(zip_files, description="Processing zip files..."):
             with zipfile.ZipFile(zip_path) as z:
                 for file_info in z.infolist():
