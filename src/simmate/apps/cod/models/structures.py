@@ -140,7 +140,13 @@ class CodStructure(ThirdPartyData, Structure):
             structure = cif.get_structures()[0]
 
             # Mark overly complex structures as invalid to avoid database blowup
-            if len(structure) > 500 or len(structure.composition) > 10:
+            if (
+                len(structure) > 500
+                or len(structure.composition.chemical_system) > 25
+                or len(structure.composition.formula) > 50
+                or len(structure.composition.reduced_formula) > 50
+                or len(structure.composition.anonymized_formula) > 50
+            ):
                 raise ValueError("Structure too complex")
 
             return cls.from_toolkit(
