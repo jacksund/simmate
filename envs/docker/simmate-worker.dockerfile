@@ -13,6 +13,7 @@ ENV OMP_NUM_THREADS=1 \
     VIRTUAL_ENV=/root/simmate/.venv \
     UV_WORKING_DIR=/root/simmate \
     DJANGO_SETTINGS_MODULE="simmate.config.django.settings" \
+    SIMMATE_CONFIG_DIR=/root/simmate-config \
     DEBUG=False
 
 # =============================================================================

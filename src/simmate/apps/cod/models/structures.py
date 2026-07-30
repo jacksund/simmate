@@ -91,7 +91,9 @@ class CodStructure(ThirdPartyData, Structure):
                 urllib.request.urlretrieve(url, file_path)
             except Exception as e:
                 raise Exception(
-                    f"Failed to download {filename} from {url}.\nError: {e}"
+                    f"Failed to download {filename}. Please manually download it "
+                    f"from {url} "
+                    f"to {base_directory}.\nError: {e}"
                 )
 
         existing_ids = (
