@@ -9,6 +9,7 @@ from simmate.database.mixins import (
     Thermodynamics,
     ThirdPartyData,
 )
+from simmate.database.utils import batch_bulk_create
 
 
 class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
@@ -110,10 +111,10 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
         cls.update_all_stabilities()
 
     @classmethod
+    @batch_bulk_create(batch_size=1_000)
     def load_source_data(
         cls,
         api_key: str = None,
-        update_stabilities: bool = False,
     ):
         """
         Only use this function if you are part of the Simmate dev team!
@@ -135,9 +136,6 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
             Filtering criteria for which structures to load. The default is all
             existing structures (137,885 as of 2022-01-16), which will take rouhghly
             15 min to complete (not including stabilities).
-        - `update_stabilities`:
-            Whether to run update_all_stabilities on the database table. Note this
-            will add over an hour to this process. Default is True.
         """
 
         # grab the api key from settings if it wasn't provided
@@ -252,12 +250,10 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
 
         # Let's iterate through each structure and save it to the database
         # This also takes a while, so we use a progress bar
-        failed_entries = []
-        db_objects = []
         for entry in track(data):
             try:
                 # convert the data to a Simmate database object
-                structure_db = cls.from_toolkit(
+                yield cls.from_toolkit(
                     id=str(entry.material_id),
                     structure=entry.structure,
                     energy=entry.energy_per_atom * entry.structure.num_sites,
@@ -270,19 +266,5 @@ class MatprojStructure(ThirdPartyData, Structure, Thermodynamics):
                     total_magnetization=entry.total_magnetization,
                     is_theoretical=entry.theoretical,
                 )
-                db_objects.append(structure_db)
             except:
-                failed_entries.append(entry)
-
-        # and save it to our database
-        cls.objects.bulk_create(
-            db_objects,
-            batch_size=5_000,
-            ignore_conflicts=True,
-        )
-
-        # once all structures are saved, let's update the Thermodynamic columns
-        if update_stabilities:
-            cls.update_all_stabilities()
-
-        return failed_entries
+                pass

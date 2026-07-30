@@ -47,7 +47,7 @@ def start(
 @database_app.command()
 def stop():
     """
-    Stops and removes the Postgres database Docker container.
+    Stops the Postgres database Docker container.
     """
     from simmate.database.utils import stop_postgres_docker
 

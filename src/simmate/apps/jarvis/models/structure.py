@@ -4,6 +4,7 @@ from rich.progress import track
 
 from simmate.database.core import table_column
 from simmate.database.mixins import Structure, ThirdPartyData
+from simmate.database.utils import batch_bulk_create
 from simmate.toolkit import Structure as ToolkitStructure
 
 
@@ -57,6 +58,7 @@ class JarvisStructure(ThirdPartyData, Structure):
     # -------------------------------------------------------------------------
 
     @classmethod
+    @batch_bulk_create(batch_size=1_000)
     def load_source_data(cls):
         """
         This method pulls JARVIS data into the Simmate database.
@@ -85,7 +87,6 @@ class JarvisStructure(ThirdPartyData, Structure):
         # Now iterate through all the data -- which is a list of dictionaries.
         # We convert the data into a pymatgen object and sanitize it before
         # saving to the Simmate database
-        db_objects = []
         for entry in track(data):
             # The structure is in the atoms field as a dictionary. We pull
             # this data out and convert it to a pymatgen Structure object
@@ -98,7 +99,7 @@ class JarvisStructure(ThirdPartyData, Structure):
                 )
 
                 # now convert the entry to a database object
-                structure_db = cls.from_toolkit(
+                yield cls.from_toolkit(
                     id=entry["jid"].lower(),
                     structure=structure,
                     energy_above_hull=(
@@ -106,7 +107,7 @@ class JarvisStructure(ThirdPartyData, Structure):
                     ),
                 )
             except Exception:
-                structure_db = cls.from_toolkit(
+                yield cls.from_toolkit(
                     id=entry["jid"].lower(),
                     structure=None,
                     energy_above_hull=(
@@ -114,12 +115,3 @@ class JarvisStructure(ThirdPartyData, Structure):
                     ),
                     is_invalid_structure=True,
                 )
-
-            db_objects.append(structure_db)
-
-        # and save it to our database
-        cls.objects.bulk_create(
-            db_objects,
-            batch_size=1_000,
-            ignore_conflicts=True,
-        )
