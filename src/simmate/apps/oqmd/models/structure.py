@@ -10,6 +10,7 @@ from rich.progress import track
 from simmate.config import settings
 from simmate.database.core import table_column
 from simmate.database.mixins import Structure, ThirdPartyData
+from simmate.database.utils import batch_bulk_create
 from simmate.toolkit import Structure as ToolkitStructure
 
 
@@ -55,6 +56,7 @@ class OqmdStructure(ThirdPartyData, Structure):
     # -------------------------------------------------------------------------
 
     @classmethod
+    @batch_bulk_create(batch_size=1_000)
     def load_source_data(
         cls,
         base_directory: str = None,
@@ -112,9 +114,6 @@ class OqmdStructure(ThirdPartyData, Structure):
             zip_files = list(base_directory.glob("*.zip"))
         # iterate through the list and load the structures to our database!
         # Use rich to monitor progress.
-        failed_entries = []
-        db_objects = []
-
         for zip_path in track(zip_files, description="Processing zip files..."):
             with zipfile.ZipFile(zip_path) as z:
                 for file_info in z.infolist():
@@ -144,37 +143,15 @@ class OqmdStructure(ThirdPartyData, Structure):
 
                     try:
                         structure = ToolkitStructure.from_str(contents, "poscar")
-                        structure_db = cls.from_toolkit(
+                        yield cls.from_toolkit(
                             id=entry_id,
                             structure=structure,
                             energy_per_atom=energy,
                         )
                     except Exception:
-                        structure_db = cls.from_toolkit(
+                        yield cls.from_toolkit(
                             id=entry_id,
                             structure=None,
                             energy_per_atom=energy,
                             is_invalid_structure=True,
                         )
-                        failed_entries.append(entry_id)
-
-                    db_objects.append(structure_db)
-
-                    # save every time we have 1000 structures
-                    if len(db_objects) >= 1000:
-                        cls.objects.bulk_create(
-                            db_objects,
-                            batch_size=1000,
-                            ignore_conflicts=True,
-                        )
-                        db_objects = []  # reset for next batch
-
-        # and save remaining structures to our database
-        if db_objects:
-            cls.objects.bulk_create(
-                db_objects,
-                batch_size=1000,
-                ignore_conflicts=True,
-            )
-
-        return failed_entries
