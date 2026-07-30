@@ -153,7 +153,13 @@ class OqmdStructure(ThirdPartyData, Structure):
                     try:
                         structure = ToolkitStructure.from_str(contents, "poscar")
                         # Mark overly complex structures as invalid to avoid database blowup
-                        if len(structure) > 500 or len(structure.composition) > 10:
+                        if (
+                            len(structure) > 500
+                            or len(structure.composition.chemical_system) > 25
+                            or len(structure.composition.formula) > 50
+                            or len(structure.composition.reduced_formula) > 50
+                            or len(structure.composition.anonymized_formula) > 50
+                        ):
                             raise ValueError("Structure too complex")
                         yield cls.from_toolkit(
                             id=entry_id,
