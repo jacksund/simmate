@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import shlex
 from contextlib import contextmanager
 from pathlib import Path, PurePosixPath
 from stat import S_ISDIR
 
 import paramiko
 from rich.progress import track
+
+from simmate.utils import chunk_list
 
 
 class SshServer:
@@ -107,7 +110,7 @@ class SshServer:
         with cls.client as client:
             ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(command)
             # TODO: do I want to just return stdout? Raise an error if there is one?
-            return ssh_stdout.read()
+            return ssh_stdout.read().decode("utf-8")
 
     # -------------------------------------------------------------------------
     # Remote directory helpers
@@ -209,6 +212,20 @@ class SshServer:
         remote = cls._to_remote_str(remote)
 
         with cls._sftp_session(sftp) as sftp:
+            # Fast path: use `find` command over SSH
+            try:
+                session = sftp.get_channel().get_transport().open_session()
+                session.exec_command(f"cd {shlex.quote(remote)} && find . -type f")
+                if session.recv_exit_status() == 0:
+                    lines = session.makefile("rb").read().decode("utf-8").splitlines()
+                    return [
+                        line[2:] if line.startswith("./") else line
+                        for line in (l.strip() for l in lines)
+                        if line and line != "."
+                    ]
+            except Exception:
+                pass  # Fall back to recursive SFTP
+
             contents = cls.listdir_remote(remote, sftp=sftp)
             files = contents["files"]
             for folder in contents["folders"]:
@@ -270,11 +287,26 @@ class SshServer:
                 already_copied = set(cls.walk_remote(remote_dir, sftp=sftp))
                 files = [f for f in files if f not in already_copied]
 
-            # Each folder is made once, rather than once per file inside it.
-            # `rglob` above gives every subfolder, so this covers all parents.
             # The base dir is included so it is made even when there are no files.
-            for folder in [""] + folders:
-                cls.mkdir_remote(f"{remote_dir}/{folder}", sftp=sftp)
+            cls.mkdir_remote(remote_dir, sftp=sftp)
+
+            # Fast path: Batch folder creation over SSH
+            if folders:
+                transport = sftp.get_channel().get_transport()
+                for batch in chunk_list(folders, 200):
+                    folder_paths = " ".join(
+                        shlex.quote(f"{remote_dir}/{f}") for f in batch
+                    )
+                    try:
+                        session = transport.open_session()
+                        session.exec_command(f"mkdir -p {folder_paths}")
+                        session.recv_exit_status()
+                    except Exception:
+                        for folder in batch:
+                            try:
+                                sftp.mkdir(f"{remote_dir}/{folder}")
+                            except OSError:
+                                pass
 
             for file in track(files, description="Copying to remote..."):
                 sftp.put(
