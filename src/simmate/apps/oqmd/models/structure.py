@@ -110,7 +110,11 @@ class OqmdStructure(ThirdPartyData, Structure):
         df = pandas.read_csv(csv_path)
         energy_dict = dict(zip(df["oqmd_id"], df["final_energy"]))
 
-        max_id = cls.objects.order_by("-id").values_list("id", flat=True).first() or 0
+        if only_add_new_cifs:
+            logging.info("Gathering existing IDs...")
+            existing_ids = set(cls.objects.values_list("id", flat=True))
+        else:
+            existing_ids = set()
 
         # We check for zip files to see if the archive has already been unpacked
         zip_files = list(base_directory.glob("*.zip"))
@@ -137,7 +141,7 @@ class OqmdStructure(ThirdPartyData, Structure):
                         continue
 
                     # Skip if we already loaded this structure in a previous run
-                    if entry_id <= max_id:
+                    if entry_id in existing_ids:
                         continue
 
                     # load the structure from the poscar file
